@@ -1,0 +1,77 @@
+/*
+    This file is part of DxTer.
+    DxTer is a prototype using the Design by Transformation (DxT)
+    approach to program generation.
+
+    Copyright (C) 2013, The University of Texas and Bryan Marker
+
+    DxTer is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    DxTer is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.               
+
+    You should have received a copy of the GNU General Public License
+    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+
+#pragma once
+
+#include <string>
+#include "base.h"
+
+using namespace std;
+
+#define GAMMAVAL 1
+#define BETAVAL 100 * GAMMAVAL
+#define ALPHAVAL 100000*GAMMAVAL
+#define PSIWVAL .25*GAMMAVAL
+#define PSIRVAL .25*GAMMAVAL
+#if DODM
+#define RVAL 40
+#define CVAL 40
+#else
+#define RVAL 1
+#define CVAL 1
+#endif 
+#define PVAL RVAL*CVAL
+#define ELEM_BSVAL 128
+#define BLIS_MC_BSVAL 1088
+#define BLIS_KC_BSVAL 128
+#define BLIS_NC_BSVAL 8192
+#define BLIS_OUTER_BSVAL 256
+#define CACHEMISSVAL 50 * GAMMAVAL
+
+
+extern Cost ALPHA;
+extern Cost BETA;
+extern Cost GAMMA;
+extern Cost PSIW;
+extern Cost PSIR;
+extern Cost CACHEMISS;
+extern Size P;
+extern Size R;
+extern Size C;
+extern Size ELEM_BS;
+extern Size BLIS_MC_BS;
+extern Size BLIS_KC_BS;
+extern Size BLIS_NC_BS;
+extern Size BLIS_OUTER_BS;
+extern Cost ONE;
+extern Cost ZERO;
+extern Cost TWO;
+
+Cost AllGather(Size totalSize, Size numProcs);
+Cost AllReduce(Size totalSize, Size numProcs);
+Cost ReduceScatter(Size totalSize, Size numProcs);
+Cost SendRecv(Size totalSize);
+Cost AllToAll(Size totalSize, Size numProcs);
+Cost CopyCost(Size inner, Size outer, Size readLdim, Size writeLdim, bool cacheMissOnOuterLoop = false, bool writeCacheMissOnOuterLoop = false);
+
+

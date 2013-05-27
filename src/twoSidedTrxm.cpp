@@ -1,0 +1,515 @@
+/*
+    This file is part of DxTer.
+    DxTer is a prototype using the Design by Transformation (DxT)
+    approach to program generation.
+
+    Copyright (C) 2013, The University of Texas and Bryan Marker
+
+    DxTer is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    DxTer is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.               
+
+    You should have received a copy of the GNU General Public License
+    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+
+#include "twoSidedTrxm.h"
+#include "distributions.h"
+#include "loop.h"
+#include "blas.h"
+#include <stdio.h>
+#include <string>
+#include <iomanip>
+#include <sstream>
+#include "loopSupport.h"
+#include "helperNodes.h"
+#include "distributions.h"
+
+
+void TwoSidedTrxm::Duplicate(const Node *orig, bool shallow, bool possMerging)
+{
+  DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
+  m_tri = ((TwoSidedTrxm*)orig)->m_tri;
+  m_invert = ((TwoSidedTrxm*)orig)->m_invert;
+}
+
+NodeType TwoSidedTrxm::GetType() const 
+{
+  if (m_invert)
+      return "TwoSidedTrsm" + TriToStr(m_tri) + " " + LayerNumToStr(GetLayer());
+  else 
+    return "TwoSidedTrmm" + TriToStr(m_tri) + " " + LayerNumToStr(GetLayer());
+}
+
+DistType TwoSidedTrxm::GetDistType(unsigned int num) const 
+{ 
+  if (m_layer == ABSLAYER || m_layer == DMLAYER)
+    return D_MC_MR; 
+  else if (m_layer == SMLAYER)
+    return D_STAR_STAR;
+  else if (m_layer == SQ1LAYER || m_layer == SQ2LAYER)
+    return InputDistType(1);
+  else
+    throw;
+}
+
+Phase TwoSidedTrxm::MaxPhase() const 
+{  switch(GetLayer()) {
+  case (ABSLAYER):
+#if DODPPHASE
+  case (DMLAYER):
+    return DPPHASE;
+  case (SMLAYER):
+    return NUMPHASES;
+#else
+  case (SMLAYER):
+    return SQR1PHASE;
+  case (SQ1LAYER):
+    return SQR1PHASE;
+  case (SQ2LAYER):
+    return NUMPHASES;
+#endif
+  default:
+    throw;
+  }
+}
+
+bool TwoSidedTrxm::ShouldCullDP() const 
+{
+  return m_layer == DMLAYER;
+}
+
+void TwoSidedTrxm::FlattenCore(ofstream &out) const
+{
+  DLAOp<2,1>::FlattenCore(out);
+  WRITE(m_tri);
+  WRITE(m_invert);
+}
+
+void TwoSidedTrxm::UnflattenCore(ifstream &in, SaveInfo &info)
+{
+  DLAOp<2,1>::UnflattenCore(in, info);
+  READ(m_tri);
+  READ(m_invert);
+}
+
+void TwoSidedTrxm::SanityCheck()
+{
+  DLAOp<2,1>::SanityCheck();
+  if (m_inputs.size() != 2)
+    throw;
+  if (m_layer == DMLAYER) {
+    if (InputDistType(0) != D_MC_MR)
+      throw;
+    else if (InputDistType(1) != D_MC_MR)
+      throw;
+  }
+  else if (m_layer == SMLAYER) {
+    if (InputDistType(0) != D_STAR_STAR)
+      throw;
+    else if (InputDistType(1) != D_STAR_STAR)
+      throw;
+  }
+}
+
+void TwoSidedTrxm::Prop()
+{
+  DLAOp<2,1>::Prop();
+  m_cost = ZERO;
+}
+
+void TwoSidedTrxm::PrintCode(IndStream &out)
+{
+  out.Indent();
+  if (m_layer == SQ2LAYER) {
+    *out << "libflame_Hegst( &"
+	 << GetInputName(1).str()
+      << ", &" << GetInputName(0).str() << " );\n";
+    return;
+  }
+  else if (m_layer == DMLAYER) {
+    if (m_invert)
+      *out << "TwoSidedTrsm( ";
+    else
+      *out << "TwoSidedTrmm( ";
+  }
+  else if (m_layer == SMLAYER) {
+    if (m_invert)
+      *out << "internal::TwoSidedTrsm( ";
+    else
+      *out << "internal::TwoSidedTrmm( ";
+  }
+  else
+    throw;
+
+    *out << TriToStr(m_tri) 
+	 << ",\n" << out.Tabs(1) << GetInputName(1).str()
+	 << ",\n" << out.Tabs(1) << GetInputName(0).str() << " );\n";
+}
+
+#if DODPPHASE
+bool DistTwoSidedTrxmToLocalTwoSidedTrxm::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() == TwoSidedTrxm::GetClass()) {
+    const TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
+    return hegst->GetLayer() == DMLAYER;
+  }
+  return false;
+}
+
+void DistTwoSidedTrxmToLocalTwoSidedTrxm::Apply(Poss *poss, Node *node) const
+{
+  TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
+  RedistNode *redist1 = new RedistNode(D_STAR_STAR);
+  RedistNode *redist2 = new RedistNode(D_STAR_STAR);
+  TwoSidedTrxm *node2 = new TwoSidedTrxm(SMLAYER, hegst->m_invert, hegst->m_side, hegst->m_tri);
+  RedistNode *node3 = new RedistNode(D_MC_MR);
+  redist1->AddInput(node->Input(0),node->InputConnNum(0));
+  redist2->AddInput(node->Input(1),node->InputConnNum(1));
+  node2->AddInput(redist1,0);
+  node2->AddInput(redist2,0);
+  node3->AddInput(node2,0);
+  poss->AddNodes(4, redist1, redist2, node2, node3);
+  node->RedirectChildren(node3,0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+#endif
+
+
+string TwoSidedTrxmLoopExp::GetType() const 
+{
+  std::stringstream str;
+  str << "TwoSidedTrxmLoop expansion variant "
+      << m_varNum;
+  return str.str();
+
+}
+
+bool TwoSidedTrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != TwoSidedTrxm::GetClass()) 
+    return false;
+  const TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
+  if (hegst->GetLayer() != m_fromLayer)
+    return false;
+
+  if (!hegst->m_invert) {
+    return m_varNum == 2 || m_varNum == 4;
+  }
+  else {
+    return m_varNum == 4;
+  }
+}
+
+void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
+{
+  TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
+  Loop *loop;
+  if (hegst->m_tri != LOWER)
+    throw;
+
+  if (!hegst->m_invert) {
+    if (m_varNum == 2) {
+      loop = TwoSidedTrxmLeftLowerVar2Alg(hegst->Input(0), hegst->InputConnNum(0), 
+				   hegst->Input(1), hegst->InputConnNum(1), 
+				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
+    }
+    else if (m_varNum == 4) {
+      loop = TwoSidedTrxmLeftLowerVar4Alg(hegst->Input(0), hegst->InputConnNum(0), 
+				   hegst->Input(1), hegst->InputConnNum(1), 
+				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
+    }
+    else
+      throw;
+  }
+  else {
+    if (m_varNum == 4) {
+      loop = TwoSidedTrxmRightLowerVar4Alg(hegst->Input(0), hegst->InputConnNum(0), 
+				   hegst->Input(1), hegst->InputConnNum(1), 
+				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
+    }
+    else
+      throw;
+  }
+
+  poss->AddLoop(loop);
+  
+  node->RedirectChildren(loop->OutTun(0),0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+} 
+
+
+
+Loop* TwoSidedTrxmRightLowerVar4Alg(
+			     Node *Lin, unsigned int Lnum,
+			     Node *Ain, unsigned int Anum,
+			     Layer layerBLAS, Layer layerTwoSidedTrxm)
+{
+  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  splitA->AddInput(Ain, Anum);
+  splitA->SetUpStats(PARTUP, FULLUP,
+		     PARTUP, PARTUP);
+
+  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  splitL->AddInput(Lin, Lnum);
+  splitL->SetAllStats(FULLUP);
+
+  TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
+  Yin->SetLayer(layerBLAS);
+  Yin->AddInput(splitA, 5);
+
+  Trxm *trsm = new Trxm(true, layerBLAS, LEFT, LOWER, NONUNIT, NORMAL, COEFONE,COMPLEX);
+  trsm->AddInput(splitL,4);
+  trsm->AddInput(splitA,1);
+
+  TwoSidedTrxm *hegst = new TwoSidedTrxm(layerTwoSidedTrxm, true, LOWER);
+  hegst->AddInput(splitL,4);
+  hegst->AddInput(splitA,4);
+
+  Gemm *gemm = new Gemm(layerBLAS, NORMAL, NORMAL, COEFNEGONE, COEFONE, COMPLEX);
+  gemm->AddInput(splitL,5);
+  gemm->AddInput(trsm,0);
+  gemm->AddInput(splitA,2);
+
+  Hemm *hemm = new Hemm(layerBLAS, RIGHT, LOWER, COEFONE, COEFZERO, COMPLEX);
+  hemm->AddInput(hegst,0);
+  hemm->AddInput(splitL,5);
+  hemm->AddInput(Yin,0);
+
+  Trxm *trsm2 = new Trxm(true, layerBLAS, RIGHT, LOWER, NONUNIT, CONJTRANS, COEFONE,COMPLEX);
+  trsm2->AddInput(splitL,4);
+  trsm2->AddInput(splitA,5);
+
+  Axpy *axpy1 = new Axpy(layerBLAS, COEFONEHALF);
+  axpy1->AddInput(hemm,0);
+  axpy1->AddInput(trsm2,0);
+  
+  Her2k *her2k = new Her2k(layerBLAS, LOWER, NORMAL, COEFNEGONE, COEFONE, COMPLEX);
+  her2k->AddInput(splitL,5);
+  her2k->AddInput(axpy1,0);
+  her2k->AddInput(splitA,8);
+
+  Axpy *axpy2 = new Axpy(layerBLAS, COEFONEHALF);
+  axpy2->AddInput(hemm,0);
+  axpy2->AddInput(axpy1,0);
+
+  Combine *comA = new Combine(PARTDIAG, POSSTUNOUT);
+  comA->AddInput(splitA,0);
+  comA->AddInput(trsm,0);
+  comA->AddInput(gemm,0);
+  comA->AddInput(splitA,3);
+  comA->AddInput(hegst,0);
+  comA->AddInput(axpy2,0);
+  comA->AddInput(splitA,6);
+  comA->AddInput(splitA,7);
+  comA->AddInput(her2k,0);
+  comA->AddInput(splitA,9);
+  
+  comA->CopyUpStats(splitA);
+
+  Combine *comL = new Combine(PARTDIAG, POSSTUNOUT);
+  comL->AddInput(splitL,0);
+  comL->AddInput(splitL,1);
+  comL->AddInput(splitL,2);
+  comL->AddInput(splitL,3);
+  comL->AddInput(splitL,4);
+  comL->AddInput(splitL,5);
+  comL->AddInput(splitL,6);
+  comL->AddInput(splitL,7);
+  comL->AddInput(splitL,8);
+  comL->AddInput(splitL,9);
+
+  comL->CopyUpStats(splitL);
+
+  Poss *loopPoss = new Poss(2,
+			    comA,
+			    comL);
+  Loop *loop;
+  if (layerBLAS == DMLAYER)
+    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+
+  return loop;
+}
+
+Loop* TwoSidedTrxmLeftLowerVar2Alg(
+			     Node *Lin, unsigned int Lnum,
+			     Node *Ain, unsigned int Anum,
+			    Layer layerBLAS, Layer layerTwoSidedTrxm)
+{
+  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  splitA->AddInput(Ain, Anum);
+  splitA->SetUpStats(FULLUP, NOTUP,
+		     PARTUP, NOTUP);
+
+  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  splitL->AddInput(Lin, Lnum);
+  splitL->SetAllStats(FULLUP);
+
+  TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
+  Yin->SetLayer(layerBLAS);
+  Yin->AddInput(splitA, 5);
+
+  Trxm *trmm = new Trxm(false, layerBLAS, LEFT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
+  trmm->AddInputs(4, splitL, 4, splitA, 1);
+
+  Gemm *gemm = new Gemm(layerBLAS, CONJTRANS, NORMAL, COEFONE, COEFONE, COMPLEX);
+  gemm->AddInput(splitL,5);
+  gemm->AddInput(splitA,2);
+  gemm->AddInput(trmm,0);
+
+  Hemm *hemm = new Hemm(layerBLAS, LEFT, LOWER, COEFONE, COEFZERO, COMPLEX);
+  hemm->AddInput(splitA,8);
+  hemm->AddInput(splitL,5);
+  hemm->AddInput(Yin,0);
+
+  Trxm *trmm2 = new Trxm(false, layerBLAS, RIGHT, LOWER, NONUNIT, NORMAL, COEFONE, COMPLEX);
+  trmm2->AddInput(splitL,4);
+  trmm2->AddInput(splitA,5);
+
+  Axpy *axpy1 = new Axpy(layerBLAS, COEFONEHALF);
+  axpy1->AddInput(hemm,0);
+  axpy1->AddInput(trmm2,0);
+
+
+  TwoSidedTrxm *hegst = new TwoSidedTrxm(layerTwoSidedTrxm, false, LOWER);
+  hegst->AddInput(splitL,4);
+  hegst->AddInput(splitA,4);
+
+  Her2k *her2k = new Her2k(layerBLAS, LOWER, CONJTRANS, COEFONE, COEFONE, COMPLEX);
+  her2k->AddInput(axpy1,0);
+  her2k->AddInput(splitL,5);
+  her2k->AddInput(hegst,0);
+
+  Axpy *axpy2 = new Axpy(layerBLAS, COEFONEHALF);
+  axpy2->AddInput(hemm,0);
+  axpy2->AddInput(axpy1,0);
+
+
+  Combine *comA = new Combine(PARTDIAG, POSSTUNOUT);
+  comA = splitA->CreateMatchingCombine(3, 
+				       1, gemm, 0,
+				       4, her2k, 0,
+				       5, axpy2, 0);
+
+  Combine *comL = new Combine(PARTDIAG, POSSTUNOUT);
+  comL = splitL->CreateMatchingCombine(0);
+
+  Poss *loopPoss = new Poss(2,
+			    comA,
+			    comL);
+  Loop *loop;
+  if (layerBLAS == DMLAYER)
+    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+
+  return loop;
+}
+
+Loop* TwoSidedTrxmLeftLowerVar4Alg(
+			    Node *Lin, unsigned int Lnum,
+			    Node *Ain, unsigned int Anum,
+			    Layer layerBLAS, Layer layerTwoSidedTrxm)
+{
+  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  splitA->AddInput(Ain, Anum);
+  splitA->SetUpStats(PARTUP, FULLUP,
+		     PARTUP, NOTUP);
+
+
+  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  splitL->AddInput(Lin, Lnum);
+  splitL->SetAllStats(FULLUP);
+
+  TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+  Yin->SetLayer(SQ2LAYER);
+  Yin->AddInput(splitA, 1);
+
+  //  InputNode *Yin = new InputNode("Y10 input", bigSize, BLIS_KC_BSVAL, "Y10");
+
+  Hemm *hemm = new Hemm(layerBLAS, LEFT, LOWER, COEFONE, COEFZERO, COMPLEX);
+  hemm->AddInput(splitA,4);
+  hemm->AddInput(splitL,1);
+  hemm->AddInput(Yin,0);
+
+  Axpy *axpy1 = new Axpy(layerBLAS, COEFONEHALF);
+  axpy1->AddInput(hemm,0);
+  axpy1->AddInput(splitA,1);
+
+  Her2k *her2k = new Her2k(layerBLAS, LOWER, CONJTRANS, COEFONE, COEFONE, COMPLEX);
+  her2k->AddInput(axpy1,0);
+  her2k->AddInput(splitL,1);
+  her2k->AddInput(splitA,0);
+
+  Axpy *axpy2 = new Axpy(layerBLAS, COEFONEHALF);
+  axpy2->AddInput(hemm,0);
+  axpy2->AddInput(axpy1,0);
+
+  Trxm *trmm = new Trxm(false, layerBLAS, LEFT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
+  trmm->AddInputs(4, splitL, 4, axpy2, 0);
+  
+  TwoSidedTrxm *hegst = new TwoSidedTrxm(layerTwoSidedTrxm, false, LOWER);
+  hegst->AddInput(splitL,4);
+  hegst->AddInput(splitA,4);
+
+  Gemm *gemm = new Gemm(layerBLAS, NORMAL, NORMAL, COEFONE, COEFONE, COMPLEX);
+  gemm->AddInput(splitA, 5);
+  gemm->AddInput(splitL, 1);
+  gemm->AddInput(splitA, 2);
+
+  Trxm *trmm2 = new Trxm(false, layerBLAS, RIGHT, LOWER, NONUNIT, NORMAL, COEFONE, COMPLEX);
+  trmm2->AddInput(splitL,4);
+  trmm2->AddInput(splitA,5);
+
+  Combine *comA;
+  comA = splitA->CreateMatchingCombine(5,
+				       0,her2k,0,
+				       1,trmm,0,
+				       2,gemm,0,
+				       4,hegst,0,
+				       5,trmm2,0);
+
+  Combine *comL = splitL->CreateMatchingCombine(0);
+
+  Poss *loopPoss = new Poss(2,
+			    comA,
+			    comL);
+  Loop *loop;
+  if (layerBLAS == DMLAYER)
+    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+
+  return loop;
+}
+
+
+
+bool TwoSidedTrxmLowerLayer::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() == TwoSidedTrxm::GetClass()) {
+    const TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
+    if (hegst->GetLayer() != m_fromLayer)
+      return false;
+    return true;
+  }
+  return false;
+  
+}
+
+void TwoSidedTrxmLowerLayer::Apply(Poss *poss, Node *node) const
+{
+  TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
+  hegst->SetLayer(m_toLayer);
+}
+
