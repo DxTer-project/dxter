@@ -28,15 +28,15 @@
 #include "chol.h"
 #include "TriInv.h"
 
-Loop* TwoSidedTrxmRightLowerVar4Alg(Node *in0, unsigned int num0,
+Loop* TwoSidedTrsmLowerVar4Alg(Node *in0, unsigned int num0,
 			     Node *in1, unsigned int num1,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm);
 
-Loop* TwoSidedTrxmLeftLowerVar2Alg(Node *in0, unsigned int num0,
+Loop* TwoSidedTrmmLowerVar2Alg(Node *in0, unsigned int num0,
 			     Node *in1, unsigned int num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);
 
-Loop* TwoSidedTrxmLeftLowerVar4Alg(Node *in0, unsigned int num0,
+Loop* TwoSidedTrmmLowerVar4Alg(Node *in0, unsigned int num0,
 			    Node *in1, unsigned int num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);
 

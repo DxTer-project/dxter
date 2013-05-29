@@ -218,12 +218,12 @@ void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
 
   if (!hegst->m_invert) {
     if (m_varNum == 2) {
-      loop = TwoSidedTrxmLeftLowerVar2Alg(hegst->Input(0), hegst->InputConnNum(0), 
+      loop = TwoSidedTrmmLowerVar2Alg(hegst->Input(0), hegst->InputConnNum(0), 
 				   hegst->Input(1), hegst->InputConnNum(1), 
 				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
     }
     else if (m_varNum == 4) {
-      loop = TwoSidedTrxmLeftLowerVar4Alg(hegst->Input(0), hegst->InputConnNum(0), 
+      loop = TwoSidedTrmmLowerVar4Alg(hegst->Input(0), hegst->InputConnNum(0), 
 				   hegst->Input(1), hegst->InputConnNum(1), 
 				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
     }
@@ -232,7 +232,7 @@ void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
   }
   else {
     if (m_varNum == 4) {
-      loop = TwoSidedTrxmRightLowerVar4Alg(hegst->Input(0), hegst->InputConnNum(0), 
+      loop = TwoSidedTrsmLowerVar4Alg(hegst->Input(0), hegst->InputConnNum(0), 
 				   hegst->Input(1), hegst->InputConnNum(1), 
 				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
     }
@@ -248,7 +248,7 @@ void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
 
 
 
-Loop* TwoSidedTrxmRightLowerVar4Alg(
+Loop* TwoSidedTrsmLowerVar4Alg(
 			     Node *Lin, unsigned int Lnum,
 			     Node *Ain, unsigned int Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
@@ -341,7 +341,7 @@ Loop* TwoSidedTrxmRightLowerVar4Alg(
   return loop;
 }
 
-Loop* TwoSidedTrxmLeftLowerVar2Alg(
+Loop* TwoSidedTrmmLowerVar2Alg(
 			     Node *Lin, unsigned int Lnum,
 			     Node *Ain, unsigned int Anum,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm)
@@ -416,7 +416,7 @@ Loop* TwoSidedTrxmLeftLowerVar2Alg(
   return loop;
 }
 
-Loop* TwoSidedTrxmLeftLowerVar4Alg(
+Loop* TwoSidedTrmmLowerVar4Alg(
 			    Node *Lin, unsigned int Lnum,
 			    Node *Ain, unsigned int Anum,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm)

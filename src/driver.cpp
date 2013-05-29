@@ -1041,7 +1041,7 @@ PSet* HegstR4Example()
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
 
-  Loop *loop = TwoSidedTrxmRightLowerVar4Alg(Lin, 0,
+  Loop *loop = TwoSidedTrsmLowerVar4Alg(Lin, 0,
 				      Ain, 0,
 				      TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
 
@@ -1141,7 +1141,7 @@ PSet* HegstL2Example()
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
 
-  Loop *loop = TwoSidedTrxmLeftLowerVar2Alg(Lin, 0,
+  Loop *loop = TwoSidedTrmmLowerVar2Alg(Lin, 0,
 					    Ain, 0,
 					    TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
 
@@ -1161,7 +1161,7 @@ PSet* HegstL4Example()
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
 
-  Loop *loop = TwoSidedTrxmLeftLowerVar4Alg(Lin, 0, Ain, 0,
+  Loop *loop = TwoSidedTrmmLowerVar4Alg(Lin, 0, Ain, 0,
 				     TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
 
   OutputNode *Aout = new OutputNode("A output");
