@@ -28,6 +28,18 @@
 #include "chol.h"
 #include "TriInv.h"
 
+
+#if DOSQM
+#define TWOSIDEDTRXMCOMPONENTSLAYER ABSLAYER
+#define TWOSIDEDTRXMLAYER SQ2LAYER
+#elif DODM
+#define TWOSIDEDTRXMCOMPONENTSLAYER DMLAYER
+#define TWOSIDEDTRXMLAYER DMLAYER
+#else
+laksjdflkajsdf
+#endif
+
+
 Loop* TwoSidedTrsmLowerVar2Alg(Node *in0, unsigned int num0,
 			     Node *in1, unsigned int num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);

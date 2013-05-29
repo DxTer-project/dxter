@@ -273,11 +273,21 @@ void AddTrans()
 
 #if DODPPHASE
   Universe::AddTrans(TwoSidedTrxm::GetClass(), new DistTwoSidedTrxmToLocalTwoSidedTrxm, DPPHASE);  
+  Universe::AddTrans(TwoSidedTrxm::GetClass(), new TwoSidedTrxmLoopExp(2, ABSLAYER, 
+								       TWOSIDEDTRXMCOMPONENTSLAYER, 
+								       TWOSIDEDTRXMLAYER), DPPHASE);
+  Universe::AddTrans(TwoSidedTrxm::GetClass(), new TwoSidedTrxmLoopExp(4, ABSLAYER, 
+								       TWOSIDEDTRXMCOMPONENTSLAYER, 
+								       TWOSIDEDTRXMLAYER), DPPHASE);
 #endif
 
 #if DOSQR1PHASE
-  Universe::AddTrans(TwoSidedTrxm::GetClass(), new TwoSidedTrxmLoopExp(2, ABSLAYER, ABSLAYER, SQ2LAYER), SQR1PHASE);
-  Universe::AddTrans(TwoSidedTrxm::GetClass(), new TwoSidedTrxmLoopExp(4, ABSLAYER, ABSLAYER, SQ2LAYER), SQR1PHASE);
+  Universe::AddTrans(TwoSidedTrxm::GetClass(), new TwoSidedTrxmLoopExp(2, ABSLAYER, 
+								       TWOSIDEDTRXMCOMPONENTSLAYER, 
+								       TWOSIDEDTRXMLAYER), SQR1PHASE);
+  Universe::AddTrans(TwoSidedTrxm::GetClass(), new TwoSidedTrxmLoopExp(4, ABSLAYER, 
+								       TWOSIDEDTRXMCOMPONENTSLAYER, 
+								       TWOSIDEDTRXMLAYER), SQR1PHASE);
 #endif
 
 #if DODPPHASE
@@ -1008,15 +1018,6 @@ PSet* CholTriInvExample()
   return outerSet;
 }
 
-#if DOSQM
-#define TWOSIDEDTRXMCOMPONENTSLAYER ABSLAYER
-#define TWOSIDEDTRXMLAYER SQ2LAYER
-#elif DODM
-#define TWOSIDEDTRXMCOMPONENTSLAYER DMLAYER
-#define TWOSIDEDTRXMLAYER DMLAYER
-#else
-laksjdflkajsdf
-#endif
 
 PSet* HegstRExample()
 {
