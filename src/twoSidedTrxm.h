@@ -28,6 +28,10 @@
 #include "chol.h"
 #include "TriInv.h"
 
+Loop* TwoSidedTrsmLowerVar2Alg(Node *in0, unsigned int num0,
+			     Node *in1, unsigned int num1,
+			    Layer layerBLAS, Layer layerTwoSidedTrxm);
+
 Loop* TwoSidedTrsmLowerVar4Alg(Node *in0, unsigned int num0,
 			     Node *in1, unsigned int num1,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm);

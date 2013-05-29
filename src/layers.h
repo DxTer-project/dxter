@@ -23,8 +23,8 @@
 
 #pragma once
 
-#define DODM 0
-#define DOSQM 1
+#define DODM 1
+#define DOSQM 0
 
 #if DODM
 

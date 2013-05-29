@@ -170,7 +170,7 @@ void DistTwoSidedTrxmToLocalTwoSidedTrxm::Apply(Poss *poss, Node *node) const
   TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
   RedistNode *redist1 = new RedistNode(D_STAR_STAR);
   RedistNode *redist2 = new RedistNode(D_STAR_STAR);
-  TwoSidedTrxm *node2 = new TwoSidedTrxm(SMLAYER, hegst->m_invert, hegst->m_side, hegst->m_tri);
+  TwoSidedTrxm *node2 = new TwoSidedTrxm(SMLAYER, hegst->m_invert, hegst->m_tri);
   RedistNode *node3 = new RedistNode(D_MC_MR);
   redist1->AddInput(node->Input(0),node->InputConnNum(0));
   redist2->AddInput(node->Input(1),node->InputConnNum(1));
@@ -231,7 +231,12 @@ void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
       throw;
   }
   else {
-    if (m_varNum == 4) {
+    if (m_varNum == 2) {
+      loop = TwoSidedTrsmLowerVar2Alg(hegst->Input(0), hegst->InputConnNum(0), 
+				   hegst->Input(1), hegst->InputConnNum(1), 
+				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
+    }
+    else if (m_varNum == 4) {
       loop = TwoSidedTrsmLowerVar4Alg(hegst->Input(0), hegst->InputConnNum(0), 
 				   hegst->Input(1), hegst->InputConnNum(1), 
 				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
@@ -246,6 +251,96 @@ void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 } 
 
+
+
+Loop* TwoSidedTrsmLowerVar2Alg(
+			     Node *Lin, unsigned int Lnum,
+			     Node *Ain, unsigned int Anum,
+			     Layer layerBLAS, Layer layerTwoSidedTrxm)
+{
+  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  splitA->AddInput(Ain, Anum);
+  splitA->SetUpStats(FULLUP, FULLUP,
+		     PARTUP, NOTUP);
+
+  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  splitL->AddInput(Lin, Lnum);
+  splitL->SetAllStats(FULLUP);
+
+  TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+  Yin->SetLayer(layerBLAS);
+  Yin->AddInput(splitA, 5);
+
+  // Y10 = 1/2 * L10 * A00
+  Hemm *hemm = new Hemm(layerBLAS, RIGHT, LOWER, COEFONEHALF, COEFZERO, COMPLEX);
+  hemm->AddInput(splitA,0);
+  hemm->AddInput(splitL,1);
+  hemm->AddInput(Yin,0);
+
+  // A10 = A10 - Y10; 
+  Axpy *axpy1 = new Axpy(layerBLAS, COEFNEGONE);
+  axpy1->AddInput(hemm,0);
+  axpy1->AddInput(splitA,1);
+
+  // A11 = A11 - A10 * L10' - B10 * L10';
+  Her2k *her2k = new Her2k(layerBLAS, LOWER, NORMAL, COEFNEGONE, COEFONE, COMPLEX);
+  her2k->AddInput(axpy1,0);
+  her2k->AddInput(splitL,1);
+  her2k->AddInput(splitA,4);
+
+  // A11 = inv( tril( B11 ) ) * A11 * inv( tril( B11 )' );
+  TwoSidedTrxm *hegst = new TwoSidedTrxm(layerTwoSidedTrxm, true, LOWER);
+  hegst->AddInput(splitL,4);
+  hegst->AddInput(her2k,0);
+
+  // A21 = A21 - A20 * B10'; 
+  Gemm *gemm = new Gemm(layerBLAS, NORMAL, TRANS, COEFNEGONE, COEFONE, COMPLEX);
+  gemm->AddInput(splitA,2);
+  gemm->AddInput(splitL,1);
+  gemm->AddInput(splitA,5);
+
+  // A21 = A21 * inv( tril( B11 )' );
+  Trxm *trsm = new Trxm(true, layerBLAS, RIGHT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
+  trsm->AddInput(splitL,4);
+  trsm->AddInput(gemm,0);
+
+  // A10 = A10 - Y10;
+  Axpy *axpy2 = new Axpy(layerBLAS, COEFNEGONE);
+  axpy2->AddInput(hemm,0);
+  axpy2->AddInput(axpy1,0);
+
+  // A10 = inv( tril( B11 ) ) * A10;
+  Trxm *trsm2 = new Trxm(true, layerBLAS, LEFT, LOWER, NONUNIT, NORMAL, COEFONE,COMPLEX);
+  trsm2->AddInput(splitL,4);
+  trsm2->AddInput(axpy2,0);
+
+  Combine *comA = new Combine(PARTDIAG, POSSTUNOUT);
+  comA->AddInput(splitA,0);
+  comA->AddInput(trsm2,0);
+  comA->AddInput(splitA,2);
+  comA->AddInput(splitA,3);
+  comA->AddInput(hegst,0);
+  comA->AddInput(trsm,0);
+  comA->AddInput(splitA,6);
+  comA->AddInput(splitA,7);
+  comA->AddInput(splitA,8);
+  comA->AddInput(splitA,9);
+  
+  comA->CopyUpStats(splitA);
+
+  Combine *comL = splitL->CreateMatchingCombine(0);
+
+  Poss *loopPoss = new Poss(2,
+			    comA,
+			    comL);
+  Loop *loop;
+  if (layerBLAS == DMLAYER)
+    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+
+  return loop;
+}
 
 
 Loop* TwoSidedTrsmLowerVar4Alg(

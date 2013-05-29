@@ -138,6 +138,7 @@ PSet* TrsmExample();
 PSet* TrmmExample();
 PSet* Trmm3Example();
 PSet* HegstR4Example();
+PSet* HegstR2Example();
 PSet* HegstL1Example();
 PSet* HegstL2Example();
 PSet* HegstL4Example();
@@ -271,7 +272,7 @@ void AddTrans()
 #endif //DPPHASE
 
 #if DODPPHASE
-  Universe::AddTrans(Hegst::GetClass(), new DistHegstToLocalHegst, DPPHASE);  
+  Universe::AddTrans(TwoSidedTrxm::GetClass(), new DistTwoSidedTrxmToLocalTwoSidedTrxm, DPPHASE);  
 #endif
 
 #if DOSQR1PHASE
@@ -636,11 +637,14 @@ int main(int argc, const char* argv[])
 	if (variant == 0) {
 	  algFunc = HegstRExample;
 	}
-	else {
-	  if (variant != 4)
-	    throw;
+	else if (variant == 2) {
+	  algFunc = HegstR2Example;
+	}
+	else if (variant == 4) {
 	  algFunc = HegstR4Example;
 	}
+	else
+	  throw;
       }
       else
 	switch (variant){
@@ -1044,6 +1048,25 @@ PSet* HegstR4Example()
   Loop *loop = TwoSidedTrsmLowerVar4Alg(Lin, 0,
 				      Ain, 0,
 				      TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
+
+  OutputNode *Aout = new OutputNode("A output");
+  Aout->AddInput(loop->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(Aout, true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
+}
+
+PSet* HegstR2Example()
+{
+  InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
+
+  InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
+
+  Loop *loop = TwoSidedTrsmLowerVar2Alg(Lin, 0,
+					Ain, 0,
+					TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(loop->OutTun(0),0);
