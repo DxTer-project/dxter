@@ -137,8 +137,9 @@ PSet* CholTrsmExample();
 PSet* TrsmExample();
 PSet* TrmmExample();
 PSet* Trmm3Example();
-PSet* HegstR4Example();
+PSet* HegstR1Example();
 PSet* HegstR2Example();
+PSet* HegstR4Example();
 PSet* HegstL1Example();
 PSet* HegstL2Example();
 PSet* HegstL4Example();
@@ -647,6 +648,9 @@ int main(int argc, const char* argv[])
 	if (variant == 0) {
 	  algFunc = HegstRExample;
 	}
+	else if (variant == 1) {
+	  algFunc = HegstR1Example;
+	}
 	else if (variant == 2) {
 	  algFunc = HegstR2Example;
 	}
@@ -1034,6 +1038,26 @@ PSet* HegstRExample()
   Aout->AddInput(hegst, 0);
 
   Poss *outerPoss = new Poss(Aout,true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
+}
+
+
+PSet* HegstR1Example()
+{
+  InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
+
+  InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
+
+  Loop *loop = TwoSidedTrsmLowerVar1Alg(Lin, 0,
+				      Ain, 0,
+				      TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
+
+  OutputNode *Aout = new OutputNode("A output");
+  Aout->AddInput(loop->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(Aout, true);
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
