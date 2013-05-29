@@ -200,13 +200,7 @@ bool TwoSidedTrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
   const TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
   if (hegst->GetLayer() != m_fromLayer)
     return false;
-
-  if (!hegst->m_invert) {
-    return m_varNum == 2 || m_varNum == 4;
-  }
-  else {
-    return m_varNum == 4;
-  }
+  return true;
 }
 
 void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
