@@ -2332,13 +2332,18 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
       for( ; transIter != transVec.end(); ++transIter)
         *out << "\t" << (*transIter)->GetType() << endl;
       *out << "*****************************************" << endl;
-      
-      string loopLevel = out.LoopLevel(1);
-      string idx = "idx" + loopLevel;
-      string dimLen = "dimLen" + loopLevel;
-      string bs = "bs" + loopLevel;
-      out.Indent();
-      *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
+
+
+      if (m_pset && m_pset->IsLoop() 
+	  && ((Loop*)m_pset)->GetType() == BLISLOOP) 
+	{      
+	  string loopLevel = out.LoopLevel(1);
+	  string idx = "idx" + loopLevel;
+	  string dimLen = "dimLen" + loopLevel;
+	  string bs = "bs" + loopLevel;
+	  out.Indent();
+	  *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
+	}
       
       
       //This actualy sets some stuff so it can print
