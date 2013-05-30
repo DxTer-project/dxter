@@ -518,6 +518,89 @@ Loop* TwoSidedTrsmLowerVar4Alg(
   return loop;
 }
 
+Loop* TwoSidedTrmmLowerVar1Alg(
+			     Node *Lin, unsigned int Lnum,
+			     Node *Ain, unsigned int Anum,
+			     Layer layerBLAS, Layer layerTwoSidedTrxm)
+{
+  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  splitA->AddInput(Ain, Anum);
+  splitA->SetUpStats(FULLUP, FULLUP,
+		     PARTUP, NOTUP);
+
+  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  splitL->AddInput(Lin, Lnum);
+  splitL->SetAllStats(FULLUP);
+
+  TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
+  Yin->SetLayer(layerBLAS);
+  Yin->AddInput(splitA, 7);
+
+  // Y21 = A22 * B21;
+  Hemm *hemm = new Hemm(layerBLAS, RIGHT, LOWER, COEFONE, COEFZERO, COMPLEX);
+  hemm->AddInput(splitA,8);
+  hemm->AddInput(splitL,5);
+  hemm->AddInput(Yin,0);
+
+  // A21 = A21 * tril( B11 );
+  Trxm *trmm = new Trxm(false, layerBLAS, RIGHT, LOWER, NONUNIT, NORMAL, COEFONE, COMPLEX);
+  trmm->AddInput(splitL,4);
+  trmm->AddInput(splitA,5);
+
+  // A21 = A21 + 1/2 * Y21;
+  Axpy *axpy1 = new Axpy(layerBLAS, COEFONEHALF);
+  axpy1->AddInput(hemm,0);
+  axpy1->AddInput(trmm,0);
+
+  // A11 = tril( B11 )' * A11 * tril( B11 );  
+  TwoSidedTrxm *hegst = new TwoSidedTrxm(layerTwoSidedTrxm, true, LOWER);
+  hegst->AddInput(splitL,4);
+  hegst->AddInput(splitA,4);
+
+  // A11 = A11 + A21' * B21 + B21' * A21;  
+  Her2k *her2k = new Her2k(layerBLAS, LOWER, NORMAL, COEFNEGONE, COEFONE, COMPLEX);
+  her2k->AddInput(axpy1,0);
+  her2k->AddInput(splitL,5);
+  her2k->AddInput(hegst,0);
+
+  // A21 = A21 + 1/2 * Y21;
+  Axpy *axpy2 = new Axpy(layerBLAS, COEFONEHALF);
+  axpy2->AddInput(hemm,0);
+  axpy2->AddInput(axpy1,0);
+
+  // A21 = tril( B22 )' * A21; 
+  Trxm *trmm2 = new Trxm(false, layerBLAS, LEFT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
+  trmm2->AddInput(splitL,8);
+  trmm2->AddInput(axpy2,0);
+
+  Combine *comA = new Combine(PARTDIAG, POSSTUNOUT);
+  comA->AddInput(splitA,0);
+  comA->AddInput(splitA,1);
+  comA->AddInput(splitA,2);
+  comA->AddInput(splitA,3);
+  comA->AddInput(her2k,0);
+  comA->AddInput(trmm2,0);
+  comA->AddInput(splitA,6);
+  comA->AddInput(splitA,7);
+  comA->AddInput(splitA,8);
+  comA->AddInput(splitA,9);
+  
+  comA->CopyUpStats(splitA);
+
+  Combine *comL = splitL->CreateMatchingCombine(0);
+
+  Poss *loopPoss = new Poss(2,
+			    comA,
+			    comL);
+  Loop *loop;
+  if (layerBLAS == DMLAYER)
+    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+
+  return loop;
+}
+
 Loop* TwoSidedTrmmLowerVar2Alg(
 			     Node *Lin, unsigned int Lnum,
 			     Node *Ain, unsigned int Anum,

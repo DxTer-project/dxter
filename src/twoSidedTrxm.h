@@ -52,6 +52,10 @@ Loop* TwoSidedTrsmLowerVar4Alg(Node *in0, unsigned int num0,
 			     Node *in1, unsigned int num1,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm);
 
+Loop* TwoSidedTrmmLowerVar1Alg(Node *in0, unsigned int num0,
+			     Node *in1, unsigned int num1,
+			    Layer layerBLAS, Layer layerTwoSidedTrxm);
+
 Loop* TwoSidedTrmmLowerVar2Alg(Node *in0, unsigned int num0,
 			     Node *in1, unsigned int num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);
