@@ -20,5 +20,4 @@ dxter.x: $(OBJS) $(HEADERS)
 	$(LINKER) $(CFLAGS) $(OBJS) -o $@
 
 clean:
-	rm -f obj/*.o src/*~ *.x
-
+	rm -f obj/*.o src/*~ *.x *~
