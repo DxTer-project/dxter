@@ -211,7 +211,12 @@ void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
     throw;
 
   if (!hegst->m_invert) {
-    if (m_varNum == 2) {
+    if (m_varNum == 1) {
+      loop = TwoSidedTrmmLowerVar1Alg(hegst->Input(0), hegst->InputConnNum(0), 
+				   hegst->Input(1), hegst->InputConnNum(1), 
+				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
+    }
+    else if (m_varNum == 2) {
       loop = TwoSidedTrmmLowerVar2Alg(hegst->Input(0), hegst->InputConnNum(0), 
 				   hegst->Input(1), hegst->InputConnNum(1), 
 				   m_toLayerBLAS, m_toLayerTwoSidedTrxm);
