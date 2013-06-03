@@ -1,7 +1,7 @@
 # indicate where the object files are to be created
 CC         := g++
 LINKER     := $(CC)
-CFLAGS     := -O3 -fopenmp -Wall
+CFLAGS     := -O3 -fopenmp -Wall -Isrc/ -Isrc/DLA/
 #CFLAGS     := -O3 -Wall
 #CFLAGS	   := -g -fopenmp -Wall
 #CFLAGS	   := -g -Wall
@@ -20,4 +20,7 @@ dxter.x: $(OBJS) $(HEADERS)
 	$(LINKER) $(CFLAGS) $(OBJS) -o $@
 
 clean:
-	rm -f obj/*.o src/*~ *.x *~
+	rm -f obj/*.o obj/DLA/*.o src/*~ src/DLA/*~ *.x *~
+
+open:
+	emacs src/*cpp src/*h
