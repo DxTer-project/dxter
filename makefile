@@ -23,4 +23,4 @@ clean:
 	rm -f obj/*.o obj/DLA/*.o src/*~ src/DLA/*~ *.x *~
 
 open:
-	emacs src/*cpp src/*h
+	emacs src/*cpp src/*h src/DLA/*cpp src/DLA/*h
