@@ -545,7 +545,7 @@ Cost Sizes::SumSquares() const
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = floor(numIters);
       int numPartIters = ceil(numIters)-numFullIters;
-      cost += numFullIters * Update(entry->m_valA);
+      cost += numFullIters * pow(Update(entry->m_valA),2);
       if (numPartIters)
         cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),2);
     }
@@ -585,7 +585,7 @@ Cost Sizes::SumCubes() const
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = floor(numIters);
       int numPartIters = ceil(numIters)-numFullIters;
-      cost += numFullIters * Update(entry->m_valA);
+      cost += numFullIters * pow(Update(entry->m_valA),3);
       if (numPartIters)
         cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),3);
     }
