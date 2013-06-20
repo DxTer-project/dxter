@@ -710,10 +710,12 @@ Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   Split *splitB = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
 
   Split *splitC = new Split(PARTDIAG, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
@@ -723,6 +725,7 @@ Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum,
   else
     splitC->SetUpStats(FULLUP, FULLUP,
 		       FULLUP, NOTUP);
+  splitC->SetIndepIters();
 
   Node *gemm1;
   if (trans == NORMAL)
@@ -804,10 +807,12 @@ Loop* Her2kLoopVar2(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   Split *splitB = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
 
   Split *splitC = new Split(PARTDIAG, POSSTUNIN, true);
   splitC->AddInput(scal, 0);
@@ -900,10 +905,12 @@ Loop* Her2kLoopVar3(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   Split *splitB = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
 
   Split *splitC = new Split(PARTDIAG, POSSTUNIN, true);
   splitC->AddInput(scal, 0);
@@ -998,10 +1005,12 @@ Loop* Her2kLoopVar4(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   Split *splitB = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
 
   Split *splitC = new Split(PARTDIAG, POSSTUNIN, true);
   splitC->AddInput(scal, 0);
@@ -1011,6 +1020,7 @@ Loop* Her2kLoopVar4(Node *Ain, unsigned int Anum,
   else
     splitC->SetUpStats(FULLUP, NOTUP,
 		       FULLUP, NOTUP);
+  splitC->SetIndepIters();
 
   Node *gemm1;
     if (trans == NORMAL)
@@ -1093,10 +1103,12 @@ Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(trans==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   Split *splitB = new Split(trans==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
 
   LoopTunnel *CTun = new LoopTunnel(POSSTUNIN);
   CTun->AddInput(scal, 0);

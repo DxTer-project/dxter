@@ -24,3 +24,8 @@ clean:
 
 open:
 	emacs src/*cpp src/*h src/DLA/*cpp src/DLA/*h
+
+opencpp:
+	emacs src/*cpp src/DLA/*cpp
+openh:
+	emacs src/*h src/DLA/*h

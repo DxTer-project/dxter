@@ -47,8 +47,8 @@ class LoopTunnel : public PossTunnel
   bool AllFullyUpdated() const;
   virtual void SanityCheck();  
   virtual DistType GetDistType(unsigned int num) const { return InputDistType(0); }
-  void SetIndepIters() {m_indepIters = true;}
-  inline bool IndepIters() {return m_indepIters;}
+  inline void SetIndepIters() {m_indepIters = true;}
+  inline bool IndepIters() const {return m_indepIters;}
 
   virtual unsigned int NumOutputs() const;
   static Node* BlankInst() { return new LoopTunnel(LASTTUNNEL);}

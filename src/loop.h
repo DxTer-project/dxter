@@ -107,4 +107,5 @@ class Loop : public PSet
   static void UnflattenStatic(ifstream &in);
 
   void Parallelize(unsigned int parFactor);
+  bool HasIndepIters() const;
 };

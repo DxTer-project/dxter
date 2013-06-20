@@ -346,10 +346,12 @@ Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
   LoopTunnel *Atun = new LoopTunnel(POSSTUNIN);
   Atun->AddInput(Ain, Anum);
   Atun->SetAllStats(FULLUP);
+  Atun->SetIndepIters();
   
   Split *splitB = new Split(side==LEFT ? PARTRIGHT : PARTDOWN, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
   
   Split *splitC = new Split(side==LEFT ? PARTRIGHT : PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
@@ -361,6 +363,7 @@ Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
     splitC->SetUpStats(FULLUP, FULLUP,
 		       NOTUP, NOTUP);
   }
+  splitC->SetIndepIters();
 
   Node *hemm;
   
@@ -402,10 +405,12 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   Split *splitB = new Split(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
 
   ScaleNode *scale = new ScaleNode(layer, beta);
   scale->AddInput(Cin, Cnum);
@@ -521,10 +526,12 @@ Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   Split *splitB = new Split(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
 
   ScaleNode *scale = new ScaleNode(layer, beta);
   scale->AddInput(Cin, Cnum);
@@ -1001,6 +1008,7 @@ void BLISHemmLoopExp::Apply(Poss *poss, Node *node) const
   Split *splitA = new Split(PARTDOWN, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   PackBuff *bBuff = new PackBuff(Bin->GetName(Bnum).m_name,
 				 PACKCOLPANS, PACKBPANEL, NOTTRI, NOTTRIDIAG, GEN,
@@ -1017,12 +1025,14 @@ void BLISHemmLoopExp::Apply(Poss *poss, Node *node) const
   LoopTunnel *Btun = new LoopTunnel(POSSTUNIN);
   Btun->AddInput(bPack, 0);
   Btun->SetAllStats(FULLUP);
+  Btun->SetIndepIters();
 
   
   Split *splitC = new Split(PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   splitC->SetUpStats(FULLUP, FULLUP,
-                     PARTUP, PARTUP);
+                     NOTUP, NOTUP);
+  splitC->SetIndepIters();
   
   PackBuff *aBuff = new PackBuff(splitA->GetName(1, BLISLOOP).m_name,
 				 PACKROWPANS, PACKABLOCK, hemm->m_tri, NOTTRIDIAG,

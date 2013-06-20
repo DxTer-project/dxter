@@ -858,17 +858,25 @@ void Loop::Parallelize(unsigned int parFactor)
 {
   if (parFactor <= 1)
     throw;
-
-  NodeVecIter iter = m_inTuns.begin();
-  for (; iter != m_inTuns.end(); ++iter) {
-    LoopTunnel *in = (LoopTunnel*)(*iter);
-    if (!in->IndepIters()) {
-      cout << "Non-independent iterations on input\n";
-      throw;
-    }
+  if (!HasIndepIters()) {
+    cout << "Non-independent iterations on input\n";
+    throw;
   }
 
   m_parFactor = parFactor;
+  
   ClearSizeCache();
   BuildSizeCache();
+}
+
+bool Loop::HasIndepIters() const
+{
+  NodeVecConstIter iter = m_inTuns.begin();
+  for (; iter != m_inTuns.end(); ++iter) {
+    const LoopTunnel *in = (LoopTunnel*)(*iter);
+    if (!in->IndepIters()) {
+      return false;
+    }
+  }
+  return true;
 }

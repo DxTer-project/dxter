@@ -1142,15 +1142,18 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(transA==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   LoopTunnel *Btun = new LoopTunnel(POSSTUNIN);
   Btun->AddInput(Bin, Bnum);
   Btun->SetAllStats(FULLUP);
+  Btun->SetIndepIters();
   
   Split *splitC = new Split(PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   splitC->SetUpStats(FULLUP, FULLUP,
                      PARTUP, PARTUP);
+  splitC->SetIndepIters();
   
   Node *gepp;
   
@@ -1209,6 +1212,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   splitA->AddInput(Ain, Anum);
   splitA->SetUpStats(FULLUP, FULLUP,
                      FULLUP, FULLUP);
+  splitA->SetIndepIters();
 
   PartDir bDir;
   if (transB == NORMAL) {
@@ -1231,6 +1235,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   splitB->AddInput(Bin, Bnum);
   splitB->SetUpStats(FULLUP, FULLUP,
                      FULLUP, FULLUP);
+  splitB->SetIndepIters();
   
   ScaleNode *scale = new ScaleNode(layer, beta);
   scale->AddInput(Cin, Cnum);
@@ -1277,15 +1282,18 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   LoopTunnel *Atun = new LoopTunnel(POSSTUNIN);
   Atun->AddInput(Ain, Anum);
   Atun->SetAllStats(FULLUP);
+  Atun->SetIndepIters();
   
   Split *splitB = new Split(transB==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
   
   Split *splitC = new Split(PARTRIGHT, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   splitC->SetUpStats(FULLUP, NOTUP,
                      FULLUP, NOTUP);
+  splitC->SetIndepIters();
   
   Node *gepp;
   
@@ -1348,6 +1356,7 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   Split *splitA = new Split(gemm->m_transA == NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(connA->m_n, connA->m_num);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   if (gemm->m_transB != NORMAL) {
     Bin = AddTranspose(gemm->m_transB, true, Bin, Bnum, true);
@@ -1368,11 +1377,13 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   LoopTunnel *Btun = new LoopTunnel(POSSTUNIN);
   Btun->AddInput(bPack, 0);
   Btun->SetAllStats(FULLUP);
+  Btun->SetIndepIters();
   
   Split *splitC = new Split(PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   splitC->SetUpStats(FULLUP, FULLUP,
                      PARTUP, PARTUP);
+  splitC->SetIndepIters();
 
   Node *Ain = splitA;
   unsigned int Anum = 1;

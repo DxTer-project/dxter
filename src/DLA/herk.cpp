@@ -527,6 +527,7 @@ Loop* HerkLoopVar1(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   Split *splitC = new Split(PARTDIAG, POSSTUNIN);
   splitC->AddInput(Cin, Cnum);
@@ -536,6 +537,7 @@ Loop* HerkLoopVar1(Node *Ain, unsigned int Anum,
   else
     splitC->SetUpStats(FULLUP, FULLUP,
 		       FULLUP, NOTUP);
+  splitC->SetIndepIters();
 
   Node *gemm;
   if (trans == NORMAL)
@@ -592,6 +594,7 @@ Loop* HerkLoopVar2(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   Split *splitC = new Split(PARTDIAG, POSSTUNIN);
   splitC->AddInput(Cin, Cnum);
@@ -601,6 +604,7 @@ Loop* HerkLoopVar2(Node *Ain, unsigned int Anum,
   else
     splitC->SetUpStats(FULLUP, NOTUP,
 		       FULLUP, NOTUP);
+  splitC->SetIndepIters();
 
   Node *gemm;
   if (trans == NORMAL)
@@ -659,6 +663,7 @@ Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(trans==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   LoopTunnel *Ctun = new LoopTunnel(POSSTUNIN);
   Ctun->AddInput(scal, 0);
@@ -753,6 +758,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(tri==LOWER ? PARTUPWARD : PARTDOWN, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
 
   PackBuff *bBuff = new PackBuff(Bin->GetName(Bnum).m_name,
 				 PACKCOLPANS, PACKBPANEL, NOTTRI, NOTTRIDIAG, GEN,
@@ -768,6 +774,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   LoopTunnel *Btun = new LoopTunnel(POSSTUNIN);
   Btun->AddInput(bPack, 0);
   Btun->SetAllStats(FULLUP);
+  Btun->SetIndepIters();
   
   Split *splitC = new Split(tri==LOWER ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
@@ -777,6 +784,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   else
     splitC->SetUpStats(FULLUP, FULLUP,
 		       NOTUP, NOTUP);
+  splitC->SetIndepIters();
 
   SetObjProps *props = new SetObjProps(tri, NOTTRIDIAG, type == REAL ? SYMM : HERM);
   props->AddInput(splitC, 1);

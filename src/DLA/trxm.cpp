@@ -1232,6 +1232,7 @@ Loop* TrmmLoopLeftVar1(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(rev ? PARTDIAGBACK: PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   Split *splitB = new Split(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
@@ -1307,6 +1308,7 @@ Loop* TrmmLoopLeftVar2(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   Split *splitB = new Split(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
@@ -1316,8 +1318,7 @@ Loop* TrmmLoopLeftVar2(Node *Ain, unsigned int Anum,
   else
     splitB->SetUpStats(PARTUP, PARTUP,
 		       NOTUP, NOTUP);
-  
-  
+    
   Node *gemm;
   gemm = new Gemm(layer, trans, NORMAL, coeff, COEFONE, type);
   
@@ -1391,6 +1392,7 @@ Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(rev ? PARTDIAGBACK: PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   Split *splitB = new Split(rev ? PARTRIGHT : PARTLEFT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
@@ -1469,6 +1471,7 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
     
   Split *splitB = new Split(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
@@ -1551,11 +1554,13 @@ Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
   LoopTunnel *Atun = new LoopTunnel(POSSTUNIN);
   Atun->AddInput(Ain, Anum);
   Atun->SetAllStats(FULLUP);
+  Atun->SetIndepIters();
   
   Split *splitB = new Split(PARTDOWN, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   splitB->SetUpStats(FULLUP, FULLUP,
 		     NOTUP, NOTUP);
+  splitB->SetIndepIters();
   
   Node *trxm;
   trxm = new Trxm(invert, layer, RIGHT, tri, diag, trans, coeff, type);
@@ -1594,6 +1599,7 @@ Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   ScaleNode *scale = new ScaleNode(layer, coeff);
   
@@ -1649,6 +1655,7 @@ Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   ScaleNode *scale = new ScaleNode(layer, coeff);
   scale->AddInput(Bin, Bnum);
@@ -1736,11 +1743,13 @@ Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
   LoopTunnel *Atun = new LoopTunnel(POSSTUNIN);
   Atun->AddInput(Ain, Anum);
   Atun->SetAllStats(FULLUP);
+  Atun->SetIndepIters();
   
   Split *splitB = new Split(PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   splitB->SetUpStats(FULLUP, NOTUP,
                      FULLUP, NOTUP);
+  splitB->SetIndepIters();
   
   Node *trxm;
   trxm = new Trxm(invert, layer, LEFT, tri, diag, trans, coeff, type);
@@ -1778,6 +1787,7 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   ScaleNode *scale = new ScaleNode(layer, coeff);
   
@@ -2021,11 +2031,13 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   Split *splitA = new Split(aDir, POSSTUNIN, true);
   splitA->AddInput(trxm->Input(0), trxm->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   Split *splitB = new Split(bDir, POSSTUNIN);
   splitB->AddInput(trxm->Input(1), trxm->InputConnNum(1));
   splitB->SetUpStats(FULLUP, FULLUP,
                      NOTUP, NOTUP);
+  //BAM I don't think these are independent, but I didn't really do a complete analysis
   
   Node *bSrc = node->Input(1);
   unsigned int bSrcNum = node->InputConnNum(1);
@@ -2124,10 +2136,12 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
   Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
   
   Split *splitB = new Split(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
 
   Split *splitC = new Split(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
@@ -2354,6 +2368,7 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
   Split *splitA = new Split(aDir, POSSTUNIN, true);
   splitA->AddInput(trmm3->Input(0), trmm3->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
+  //BAM IndepIters
   
   Split *splitB = new Split(bDir, POSSTUNIN);
   splitB->AddInput(trmm3->Input(1), trmm3->InputConnNum(1));
