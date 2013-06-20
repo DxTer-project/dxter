@@ -4,3 +4,5 @@ results/*
 GraphsOut*
 codeOutput*
 totalCostOutput.m
+xcode/DxTer.xcodeproj/xcuserdata/bamarker.xcuserdatad/xcdebugger/Breakpoints.xcbkptlist
+.hgignore~
