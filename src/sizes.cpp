@@ -574,6 +574,7 @@ Cost Sizes::SumSquares() const
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = floor(numIters);
+<<<<<<< local
       if (numFullIters % entry->m_parFactor == 0)
 	cost += ceil(((double)numFullIters)/entry->m_parFactor) * pow(Update(entry->m_valA),2);
       else {
@@ -582,6 +583,12 @@ Cost Sizes::SumSquares() const
 	if (numPartIters)
 	  cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),2);
       }
+=======
+      int numPartIters = ceil(numIters)-numFullIters;
+      cost += numFullIters * pow(Update(entry->m_valA),2);
+      if (numPartIters)
+        cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),2);
+>>>>>>> other
     }
     else if (entry->m_type == RANGESIZES) {
       SizesIter iter2 = entry->GetIter(m_coeff);
@@ -618,6 +625,7 @@ Cost Sizes::SumCubes() const
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = floor(numIters);
+<<<<<<< local
       if (numFullIters % entry->m_parFactor == 0)
 	cost += ceil(((double)numFullIters)/entry->m_parFactor) * pow(Update(entry->m_valA),3);
       else {
@@ -626,6 +634,12 @@ Cost Sizes::SumCubes() const
 	if (numPartIters)
 	  cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),3);
       }
+=======
+      int numPartIters = ceil(numIters)-numFullIters;
+      cost += numFullIters * pow(Update(entry->m_valA),3);
+      if (numPartIters)
+        cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),3);
+>>>>>>> other
     }
     else if (entry->m_type == RANGESIZES) {
       SizesIter iter2 = entry->GetIter(m_coeff);
