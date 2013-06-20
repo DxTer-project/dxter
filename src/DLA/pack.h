@@ -24,7 +24,7 @@
 #pragma once
 
 #include "DLANode.h"
-#include "basicClasses.h"
+#include "DLAOp.h"
 
 enum PackType { PACKROWPANS,
 		PACKCOLPANS,

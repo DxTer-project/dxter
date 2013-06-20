@@ -24,7 +24,7 @@
 #pragma once
 
 #include "DLANode.h"
-#include "basicClasses.h"
+#include "DLAOp.h"
 #include "pack.h"
 
 class Transpose : public DLAOp<1,1>

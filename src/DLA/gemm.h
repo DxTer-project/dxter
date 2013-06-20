@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "basicClasses.h"
+#include "DLAOp.h"
 #include "transform.h"
 #include "distributions.h"
 #include "MPI.h"

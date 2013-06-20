@@ -24,7 +24,7 @@
 #pragma once
 
 #include "transform.h"
-#include "basicClasses.h"
+#include "DLAOp.h"
 
 Loop* TriInvAlgVar1Lower(Node *in, unsigned int num);
 Loop* TriInvAlgVar1Upper(Node *in, unsigned int num);

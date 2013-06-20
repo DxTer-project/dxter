@@ -24,7 +24,7 @@
 #pragma once
 
 #include "base.h"
-#include "basicClasses.h"
+#include "DLAOp.h"
 #include "DLANode.h"
 
 Loop* LUVar5Loop(Node *Ain, unsigned int Anum,

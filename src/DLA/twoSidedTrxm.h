@@ -24,9 +24,7 @@
 #pragma once
 
 #include "transform.h"
-#include "basicClasses.h"
-#include "chol.h"
-#include "TriInv.h"
+#include "DLAOp.h"
 
 
 #if DOSQM

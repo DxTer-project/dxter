@@ -25,7 +25,7 @@
 
 #include "transform.h"
 #include "distributions.h"
-#include "basicClasses.h"
+#include "DLAOp.h"
 
 Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum, 
 		    Node *Bin, unsigned int Bnum, 

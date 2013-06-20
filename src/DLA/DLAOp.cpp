@@ -21,7 +21,8 @@
 
 
 
-#include "basicClasses.h"
+#include "DLAOp.h"
+
 template<unsigned int numIn, unsigned int numOut>
 const Sizes* DLAOp<numIn, numOut>::GetM(unsigned int num) const
 {

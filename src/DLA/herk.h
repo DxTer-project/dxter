@@ -24,7 +24,7 @@
 #pragma once
 
 #include "transform.h"
-#include "basicClasses.h"
+#include "DLAOp.h"
 #include "distributions.h"
 #include "MPI.h"
 
