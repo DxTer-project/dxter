@@ -29,8 +29,8 @@
 InputNode::InputNode(NodeType type, Size m, Size n, string name)
 : m_type(type), m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
 {
-  m_msize.AddRepeatedSizes(m, 1);
-  m_nsize.AddRepeatedSizes(n, 1);
+  m_msize.AddRepeatedSizes(m, 1, 1);
+  m_nsize.AddRepeatedSizes(n, 1, 1);
   m_varName.m_name = name;
   m_varName.m_type = D_MC_MR;
 }
@@ -38,8 +38,8 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name)
 InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 : m_type(type), m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
 {
-  m_msize.AddRepeatedSizes(m,1);
-  m_nsize.AddRepeatedSizes(n,1);
+  m_msize.AddRepeatedSizes(m,1,1);
+  m_nsize.AddRepeatedSizes(n,1,1);
   m_varName.m_name = name;
   m_varName.m_type = dist;
 }
@@ -144,9 +144,9 @@ void InputNode::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_type);
   Size size;
   READ(size);
-  m_msize.AddRepeatedSizes(size,1);
+  m_msize.AddRepeatedSizes(size,1,1);
   READ(size);
-  m_nsize.AddRepeatedSizes(size,1);
+  m_nsize.AddRepeatedSizes(size,1,1);
   m_varName.Unflatten(in);
 }
 

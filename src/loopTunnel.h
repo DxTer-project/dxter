@@ -33,6 +33,7 @@ class LoopTunnel : public PossTunnel
     m_statBL, m_statBR;
   Sizes *m_msizes, *m_nsizes;
   Sizes *m_mlsizes, *m_nlsizes;
+  bool m_indepIters;
 
   LoopTunnel(PossTunType type);
   ~LoopTunnel();
@@ -46,6 +47,8 @@ class LoopTunnel : public PossTunnel
   bool AllFullyUpdated() const;
   virtual void SanityCheck();  
   virtual DistType GetDistType(unsigned int num) const { return InputDistType(0); }
+  void SetIndepIters() {m_indepIters = true;}
+  inline bool IndepIters() {return m_indepIters;}
 
   virtual unsigned int NumOutputs() const;
   static Node* BlankInst() { return new LoopTunnel(LASTTUNNEL);}
@@ -71,7 +74,7 @@ class LoopTunnel : public PossTunnel
   LoopType GetLoopType() const;
 
   virtual void StartFillingSizes();
-  virtual void AppendSizes(unsigned int execNum, unsigned int numIters);
+  virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
   virtual void ClearSizeCache();
 
   virtual void FlattenCore(ofstream &out) const;

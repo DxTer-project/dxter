@@ -108,14 +108,14 @@ string PartDirToStr(PartDir dir)
 }
 
 Loop::Loop() 
-: PSet(), m_type(UNKNOWNLOOP)
+  : PSet(), m_type(UNKNOWNLOOP), m_parFactor(1)
 {
   AssignNewLabel();
   m_bsSize = BADBSSIZE;
 }
 
 Loop::Loop(LoopType type)
-: m_type(type)
+: m_type(type), m_parFactor(1)
 {
   if (m_type == ELEMLOOP)
     m_bsSize = USEELEMBS;
@@ -125,7 +125,7 @@ Loop::Loop(LoopType type)
 }
 
 Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
-: PSet(poss), m_type(type), m_bsSize(bsSize)
+: PSet(poss), m_type(type), m_bsSize(bsSize), m_parFactor(1)
 {
   unsigned int i;
   for(i = 0; i < poss->m_inTuns.size(); ++i) {
@@ -567,6 +567,7 @@ void Loop::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
   Loop *loop = (Loop*)orig;
   m_label = loop->m_label;
   m_bsSize = loop->m_bsSize;
+  m_parFactor = loop->m_parFactor;
   if (loop->m_bsSize >= BADBSSIZE) {
     cout << "duplicating a loop with zero blocksize\n";
     throw;
@@ -650,6 +651,7 @@ void Loop::FlattenCore(ofstream &out) const
 {
   WRITE(m_type);
   WRITE(m_bsSize);
+  WRITE(m_parFactor);
   unsigned int size = m_label.size();
   WRITE(size);
   IntSetConstIter iter = m_label.begin();
@@ -662,6 +664,7 @@ void Loop::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   READ(m_type);
   READ(m_bsSize);
+  READ(m_parFactor);
   unsigned int size;
   READ(size);
   for(unsigned int i = 0; i < size; ++i) {
@@ -720,7 +723,7 @@ void Loop::FillTunnelSizes()
       iter = m_inTuns.begin();
       for (; iter != m_inTuns.end(); ++iter) {
 	LoopTunnel *in = (LoopTunnel*)(*iter);
-	in->AppendSizes(i, numIters);
+	in->AppendSizes(i, numIters, m_parFactor);
       }
     }
   }
@@ -732,7 +735,8 @@ void Loop::BuildSizeCache()
   PSet::BuildSizeCache();
 }
 
-LoopTunnel* Loop::CreateNewLoopTunnels(Node *input, unsigned int num, Poss *possToCareAbout, UpStat stat)
+LoopTunnel* Loop::CreateNewLoopTunnels(Node *input, 
+				       unsigned int num, Poss *possToCareAbout, UpStat stat)
 {
   LoopTunnel *newTunIn = new LoopTunnel(SETTUNIN);
   newTunIn->SetAllStats(stat);
@@ -848,4 +852,23 @@ void Loop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
   m_inTuns.erase(m_inTuns.begin()+tunNum);
 
   setTunIn->m_poss->DeleteChildAndCleanUp(setTunIn, true);
+}
+
+void Loop::Parallelize(unsigned int parFactor)
+{
+  if (parFactor <= 1)
+    throw;
+
+  NodeVecIter iter = m_inTuns.begin();
+  for (; iter != m_inTuns.end(); ++iter) {
+    LoopTunnel *in = (LoopTunnel*)(*iter);
+    if (!in->IndepIters()) {
+      cout << "Non-independent iterations on input\n";
+      throw;
+    }
+  }
+
+  m_parFactor = parFactor;
+  ClearSizeCache();
+  BuildSizeCache();
 }

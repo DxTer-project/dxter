@@ -55,7 +55,7 @@ class Split : public LoopTunnel
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
   void GetSizes(unsigned int num, unsigned int numIters,
-		   Size bs, 
+		Size bs, unsigned int parFactor,
 		   Size m, Size n,
 		   Sizes &ms, Sizes &ns);
   virtual Name GetName(unsigned int num) const;
@@ -71,5 +71,5 @@ class Split : public LoopTunnel
   void SetAddDir() {m_addDir = true;}
   virtual void StartFillingSizes();
   virtual void ClearSizeCache();
-  virtual void AppendSizes(unsigned int execNum, unsigned int numIters);
+  virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
 };

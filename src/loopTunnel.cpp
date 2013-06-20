@@ -37,6 +37,7 @@ LoopTunnel::LoopTunnel(PossTunType type)
   m_nsizes = NULL;
   m_mlsizes = NULL;
   m_nlsizes = NULL;
+  m_indepIters = false;
 }
 
 LoopTunnel::~LoopTunnel()
@@ -478,7 +479,7 @@ void LoopTunnel::StartFillingSizes()
   m_nlsizes = new Sizes;
 }
 
-void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters)
+void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -510,10 +511,10 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters)
   const Size n = (*ns)[execNum];
   const Size lm = (*lms)[execNum];
   const Size ln = (*lns)[execNum];
-  m_msizes->AddRepeatedSizes(m, numIters);
-  m_nsizes->AddRepeatedSizes(n, numIters);
-  m_mlsizes->AddRepeatedSizes(lm, numIters);
-  m_nlsizes->AddRepeatedSizes(ln, numIters);
+  m_msizes->AddRepeatedSizes(m, numIters, parFactor);
+  m_nsizes->AddRepeatedSizes(n, numIters, parFactor);
+  m_mlsizes->AddRepeatedSizes(lm, numIters, parFactor);
+  m_nlsizes->AddRepeatedSizes(ln, numIters, parFactor);
 }
 
 void LoopTunnel::ClearSizeCache()

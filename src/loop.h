@@ -75,6 +75,7 @@ class Loop : public PSet
  public:
   IntSet m_label;
   BSSize m_bsSize;
+  unsigned int m_parFactor;
   
   Loop();
   Loop(LoopType type);
@@ -104,4 +105,6 @@ class Loop : public PSet
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   static void FlattenStatic(ofstream &out);
   static void UnflattenStatic(ifstream &in);
+
+  void Parallelize(unsigned int parFactor);
 };

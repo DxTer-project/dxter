@@ -58,8 +58,9 @@ class SizesIter
   int m_valC;
   SizesType m_type;
   double m_coeff;
+  unsigned int m_parFactor;
  SizesIter() : m_currPos(-1) {}
-  SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff);
+  SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, unsigned int parFactor);
   void operator++();
   Size operator*() const;
   void operator=(const SizesIter &rhs);
@@ -72,10 +73,11 @@ class SizeEntry
   Size m_valA, m_valB;
   int m_valC;
   SizesType m_type;
+  unsigned int m_parFactor;
   SizeEntry();
-  void SetRepeatedSizes(Size size, int repeats);
-  void SetSizeRange(Size start, int stride, Size end);
-  void SetMidSizes(Size size, Size totalSize);
+  void SetRepeatedSizes(Size size, int repeats, unsigned int parFactor);
+  void SetSizeRange(Size start, int stride, Size end, unsigned int parFactor);
+  void SetMidSizes(Size size, Size totalSize, unsigned int parFactor);
   Size operator[] (unsigned int n) const;
   void operator= (const SizeEntry &rhs);
   bool operator==(const SizeEntry &rhs) const;
@@ -110,9 +112,9 @@ class Sizes
   ~Sizes();
 
   void Print() const;
-  void AddRepeatedSizes(Size size, int repeats);
-  void AddSizesWithLimit(Size start, int stride, Size end);
-  void AddMidSizes(Size size, Size totalSize);
+  void AddRepeatedSizes(Size size, int repeats, unsigned int parFactor);
+  void AddSizesWithLimit(Size start, int stride, Size end, unsigned int parFactor);
+  void AddMidSizes(Size size, Size totalSize, unsigned int parFactor);
   void ClearSizes();
   void SetCoeff(double coeff);
   unsigned int NumSizes() const;
