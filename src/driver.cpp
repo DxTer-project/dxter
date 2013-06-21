@@ -67,11 +67,17 @@ Size smallSize = 500;
 Size medSize = 20000;
 Size bigSize = 80000;
 Size bs = ELEM_BS;
-#elif DOSQM
+#elif DOSQM || DOSM
 Size smallSize = 500;
 Size medSize = 2000;
 Size bigSize = 10000;
 //Size bs = ELEM_BS;
+#endif
+
+#if DOSM
+#define NUMCORESPERL2 2
+#define NUML2PERL3 3
+#define NUML3 4
 #endif
 
 Trans transA, transB;
@@ -573,6 +579,11 @@ void AddSimplifiers()
   Universe::AddTrans(PackBuff::GetClass(), new RenamePackBuff, SIMP);
 #endif //DOSQOPHASE
 
+#if DOSMPPHASE
+  if (NUML2PERL3 > 1)
+    Universe::AddTrans(PackBuff::GetClass(), new L3Parallelization(NUML2PERL3), SMPPHASE);
+#endif
+
 }
 
 void Usage()
@@ -877,6 +888,23 @@ int main(int argc, const char* argv[])
   }
 #endif
 
+#if DOSMPPHASE
+  if (CurrPhase == SMPPHASE) {
+    cout << "Shared-memory parallelization phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, SMPPHASE, DLACullSQR);
+    time(&end);
+    cout << "SMP phase took " << difftime(end,start2) << " seconds\n";
+    
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
 
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();

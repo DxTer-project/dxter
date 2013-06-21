@@ -321,7 +321,7 @@ void Universe::PrintAll(int algNum)
     cout << "\tOptimal graph ( " << optGraph << " ) :\n";
 #if DODM
     IndStream optOut(&cout,ELEMSTREAM);
-#elif DOSQM 
+#elif DOSQM || DOSM
     IndStream optOut(&cout,BLISSTREAM);
 #endif
     Print(optOut, optGraph);
@@ -336,7 +336,7 @@ void Universe::PrintAll(int algNum)
   out.open("codeOutput.txt");
 #if DODM
     IndStream codeOut(&out,ELEMSTREAM);
-#elif DOSQM 
+#elif DOSQM || DOSM
     IndStream codeOut(&out,BLISSTREAM);
 #endif
   optGraph = 0;

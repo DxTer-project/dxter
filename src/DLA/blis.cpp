@@ -1,30 +1,31 @@
 /*
-    This file is part of DxTer.
-    DxTer is a prototype using the Design by Transformation (DxT)
-    approach to program generation.
+ This file is part of DxTer.
+ DxTer is a prototype using the Design by Transformation (DxT)
+ approach to program generation.
+ 
+ Copyright (C) 2013, The University of Texas and Bryan Marker
+ 
+ DxTer is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ DxTer is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-    Copyright (C) 2013, The University of Texas and Bryan Marker
-
-    DxTer is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    DxTer is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
-
-    You should have received a copy of the GNU General Public License
-    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
+#define PORTIONPARALLELIZABLE .8
 
 #include "blis.h"
+#include "loopSupport.h"
 
-Transpose::Transpose(Trans trans, bool objectTrans) 
-: m_trans(trans), m_objTrans(objectTrans) 
+Transpose::Transpose(Trans trans, bool objectTrans)
+: m_trans(trans), m_objTrans(objectTrans)
 {
 }
 
@@ -98,7 +99,7 @@ void Transpose::PrintCode(IndStream &out)
     else
       throw;
     *out << inputName << " );\n";
-
+    
   }
   else {
     string name = GetNameStr(0);
@@ -117,7 +118,7 @@ void Transpose::PrintCode(IndStream &out)
     else
       throw;
     *out << ", " << inputName << ", "
-      << name << ");\n";
+    << name << ");\n";
   }
 }
 
@@ -205,7 +206,7 @@ void CombineTranspose::Apply(Poss *poss, Node *node) const
         if ((*iter2)->m_n->GetNodeClass() == Transpose::GetClass()) {
           if (((Transpose*)((*iter2)->m_n))->m_trans == trans->m_trans) {
             (*iter2)->m_n->RedirectChildren(trans, 0);
-            (*iter2)->m_n->m_poss->DeleteChildAndCleanUp((*iter2)->m_n);	    
+            (*iter2)->m_n->m_poss->DeleteChildAndCleanUp((*iter2)->m_n);
             return;
           }
         }
@@ -216,7 +217,7 @@ void CombineTranspose::Apply(Poss *poss, Node *node) const
 }
 
 
-Transpose* InsertTranspose(Trans trans, bool objTrans, 
+Transpose* InsertTranspose(Trans trans, bool objTrans,
                            Node *node, unsigned int inNum, bool addToPoss)
 {
   Node *input = node->Input(inNum);
@@ -325,15 +326,15 @@ void GetUpToDiag::PrintCode(IndStream &out)
   if (lower) {
     *out << "0;\n";
     out.Indent();
-    *out << "dim_t n" << triChar << " = bli_min( bli_obj_width_after_trans( " 
-	 << GetInputNameStr( 1 ) << " ), \n";
+    *out << "dim_t n" << triChar << " = bli_min( bli_obj_width_after_trans( "
+    << GetInputNameStr( 1 ) << " ), \n";
     out.Indent(2);
     *out << "bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 ) << " ) + "
-	 << "bs" << out.LoopLevel() << " );\n";      
+    << "bs" << out.LoopLevel() << " );\n";
   }
   else {
     *out << "bli_max( 0, bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 )
-	 << " ) );\n";
+    << " ) );\n";
     out.Indent();
     *out << "dim_t n" << triChar << " = bli_obj_width_after_trans( "
     << GetInputNameStr( 1 ) << " ) - off" << triChar << ";\n";
@@ -342,13 +343,13 @@ void GetUpToDiag::PrintCode(IndStream &out)
   out.Indent();
   *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
   out.Indent(2);
-  *out << "off" << triChar << ", n" << triChar << ", &" 
-       << GetInputNameStr(1) << ", &" << GetNameStr(0) << " );\n";
+  *out << "off" << triChar << ", n" << triChar << ", &"
+  << GetInputNameStr(1) << ", &" << GetNameStr(0) << " );\n";
   out.Indent(2);
   *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
   out.Indent(2);
-  *out << "off" << triChar << ", n" << triChar << ", &" 
-       << GetInputNameStr(2) << ", &" << GetNameStr(1) << " );\n";
+  *out << "off" << triChar << ", n" << triChar << ", &"
+  << GetInputNameStr(2) << ", &" << GetNameStr(1) << " );\n";
 }
 
 void GetUpToDiag::Flatten(ofstream &out) const
@@ -392,19 +393,19 @@ void SetObjProps::PrintCode(IndStream &out)
     out.Indent();
     *out << "bli_obj_set_struc( ";
     switch(m_struct)
-      {
+    {
       case (HERM):
-	*out << "BLIS_HERMITIAN";
-	break;
+        *out << "BLIS_HERMITIAN";
+        break;
       case (SYMM):
-	*out << "BLIS_SYMMETRIC";
-	break;
+        *out << "BLIS_SYMMETRIC";
+        break;
       case (TRI):
-	*out << "BLIS_TRIANGULAR";
-	break;
+        *out << "BLIS_TRIANGULAR";
+        break;
       default:
-	throw;
-      }
+        throw;
+    }
     *out << ", " << GetNameStr(0) << " );\n";
   }
   if (m_tri != NOTTRI) {
@@ -419,7 +420,7 @@ void SetObjProps::PrintCode(IndStream &out)
   if (m_diag == UNIT) {
     out.Indent();
     *out << "bli_obj_set_diag( BLIS_UNIT_DIAG, "
-	 << GetNameStr(0) << " );\n";
+    << GetNameStr(0) << " );\n";
   }
 }
 
@@ -457,7 +458,73 @@ void Copy::PrintCode(IndStream &out)
 {
   out.Indent();
   *out << "bli_copym( &" << GetInputNameStr(0) << ", &"
-      << GetInputNameStr(1) << " );\n";
+  << GetInputNameStr(1) << " );\n";
 }
 
+bool L3Parallelization::CanApply(const Poss *poss, const Node *node) const
+{
+  const PackBuff *buff = (PackBuff*)node;
+  if (buff->m_packMat == PACKBPANEL) {
+    if (buff->m_children.size() != 1) {
+      cout << "more than one child of B panel packbuff!\n";
+      throw;
+    }
+    if (buff->Child(0)->GetNodeClass() != Pack::GetClass()) {
+      cout << "child of B panel packbuff isn't Pack\n";
+      throw;
+    }
+    const Pack *pack = (Pack*)buff->Child(0);
+    if (pack->m_children.size() < 1)
+      throw;
+    NodeConnVecConstIter iter = pack->m_children.begin();
+    for(; iter != pack->m_children.end(); ++iter) {
+      const Node *child = (*iter)->m_n;
+      if (!child->IsLoopTunnel()) {
+        cout << "Child of pack isn't loop tunnel : " << child->GetNodeClass() << endl;
+        throw;
+      }
+      if (!child->IsPossTunnel(SETTUNIN)) {
+        cout << "Child of pack is loop tunnel but not SETTUNIN\n";
+        throw;
+      }
+      const LoopTunnel *tun = (LoopTunnel*)child;
+      const Loop *loop = (Loop*)(tun->m_pset);
+      if (!loop->HasIndepIters()) {
+        cout << "Doesn't have independent iters\n";
+        throw;
+      }
+      const Split *control = loop->GetControl();
+      const unsigned int numExecs = control->NumberOfLoopExecs();
+      int numParallelizable = 0;
+      for(unsigned int i = 0; i < numExecs; ++i) {
+        unsigned int numIters = control->NumIters(i);
+        if (numIters >= m_parFactor)
+          ++numParallelizable;
+      }
+      if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
+        return false;
+    }
+    return true;
+  }
+  return false;
+}
 
+void L3Parallelization::Apply(Poss *poss, Node *node) const
+{
+  PackBuff *buff = (PackBuff*)node;
+  Pack *pack = (Pack*)buff->Child(0);
+  pack->Parallelize(m_parFactor);
+  NodeConnVecConstIter iter = pack->m_children.begin();
+  for(; iter != pack->m_children.end(); ++iter) {
+    Node *child = (*iter)->m_n;
+    LoopTunnel *tun = (LoopTunnel*)child;
+    Loop *loop = (Loop*)(tun->m_pset);
+    if (!loop->HasIndepIters()) {
+      cout << "Doesn't have independent iters\n";
+      throw;
+    }  
+    else {
+      loop->Parallelize(m_parFactor);
+    }
+  }
+}

@@ -261,7 +261,7 @@ void DLACullLA(Poss *poss, bool &cullIfPossible, bool &doNotCull)
   doNotCull = false;
 }
 
-#if DOSQM
+#if DOSQM || DOSM
 void DLACullSQR(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 {
   doNotCull = false;

@@ -76,6 +76,6 @@ class DLANode : public Node
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 void DLACullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 void DLACullLA(Poss *poss, bool &cullIfPossible, bool &doNotCull);
-#if DOSQM
+#if DOSQM || DOSM
 void DLACullSQR(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 #endif

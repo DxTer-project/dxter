@@ -97,7 +97,7 @@ DistType Herk::GetDistType(unsigned int num) const
   default:
     throw;
   }
-#elif DOSQM
+#elif DOSQM || DOSM
   return InputDistType(1);
 #endif
   

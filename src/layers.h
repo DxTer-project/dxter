@@ -24,7 +24,8 @@
 #pragma once
 
 #define DODM 0
-#define DOSQM 1
+#define DOSQM 0
+#define DOSM 1
 
 #if DODM
 
@@ -43,6 +44,7 @@
 #define DOSQR1PHASE 0
 #define DOSQR2PHASE 0
 #define DOSQOPHASE 0
+#define DOSMPPHASE 0
 
 //Software layers
 enum Layers {
@@ -71,12 +73,41 @@ enum Layers {
 #define DOSQR1PHASE 1
 #define DOSQR2PHASE 1
 #define DOSQOPHASE 1
+#define DOSMPPHASE 0
 
 //Software layers
 enum Layers {
   ABSLAYER = 0,
   SQ1LAYER,
   SQ2LAYER,  
+  BADLAYER,
+  DMLAYER,
+  SMLAYER
+};
+#elif DOSM
+
+#define SQR1PHASE 0
+#define SQR2PHASE 1
+#define SMPPHASE 2
+
+#define FIRSTPHASE SQR1PHASE
+
+//Max phase for which to generate code
+#define MAXPHASE SMPPHASE
+#define NUMPHASES (MAXPHASE+1)
+
+#define DODPPHASE 0
+#define DOROPHASE 0
+#define DOSQR1PHASE 1
+#define DOSQR2PHASE 1
+#define DOSQOPHASE 0
+#define DOSMPPHASE 1
+
+//Software layers
+enum Layers {
+  ABSLAYER = 0,
+  SQ1LAYER,
+  SQ2LAYER,
   BADLAYER,
   DMLAYER,
   SMLAYER

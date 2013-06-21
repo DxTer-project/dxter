@@ -78,7 +78,8 @@ m_scaleAlpha(scaleAlpha),
 m_densify(densify),
 m_invertDiag(invertDiag),
 m_revUpper(revUpper),
-m_revLower(revLower)
+  m_revLower(revLower),
+  m_parFactor(1)
 {
   if (scaleAlpha) {
     cout << "need to scale by alpha but alpha is not a parameter yet!!!\n";
@@ -98,6 +99,7 @@ void Pack::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_invertDiag = pack->m_invertDiag;
   m_revUpper = pack->m_revUpper;
   m_revLower = pack->m_revLower;
+  m_parFactor = pack->m_parFactor;
 }
 
 void Pack::FlattenCore(ofstream &out) const
@@ -110,6 +112,7 @@ void Pack::FlattenCore(ofstream &out) const
   WRITE(m_invertDiag);
   WRITE(m_revUpper);
   WRITE(m_revLower);
+  WRITE(m_parFactor);
 }
 
 void Pack::UnflattenCore(ifstream &in, SaveInfo &info)
@@ -122,6 +125,7 @@ void Pack::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_invertDiag);
   READ(m_revUpper);
   READ(m_revLower);
+  READ(m_parFactor);
 }
 
 NodeType Pack::GetType() const
@@ -143,6 +147,10 @@ void Pack::PrintCode(IndStream &out)
 {
   if (m_scaleAlpha)
     throw;
+  if (m_parFactor > 1) {
+    cout << "need par Pack code\n";
+    *out << "need par Pack code\n";
+  }
   out.Indent();
   if (m_var == 2)
     *out << "bli_packm_blk_var2";
@@ -171,7 +179,7 @@ void Pack::Prop()
     Input(1)->Prop();
     const Sizes *size1 = InputLocalM(0);
     const Sizes *size2 = InputLocalN(0);
-    m_cost = size1->SumProds11(*size2) * (PSIWVAL + PSIRVAL);
+    m_cost = (size1->SumProds11(*size2) * (PSIWVAL + PSIRVAL)) / m_parFactor;
   }
 }
 
@@ -221,6 +229,11 @@ void PackBuff::PrintCode(IndStream &out)
 {
   string name = GetNameStr(0);
   string inputName = GetInputName(0).str();
+
+  if (m_parFactor > 1) {
+    cout << "need par Pack code\n";
+    *out << "need par Pack code\n";
+  }
   
   if (m_triStruct != GEN) {
     out.Indent();
@@ -325,6 +338,7 @@ PackBuff::PackBuff(string name,
                    Tri tri, Diag diag, TriStruct triStruct,
                    bool densify, bool invertDiag, bool revUpper, bool revLower,
                    PackSize mSize, PackSize nSize)
+  : m_parFactor(1)
 {
   m_name.m_type = UNKNOWN;
   if (name.find("_packed") == string::npos) {
@@ -365,6 +379,7 @@ void PackBuff::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_m = buff->m_m;
   m_n = buff->m_n;
   m_name = buff->m_name;
+  m_parFactor = buff->m_parFactor;
   DLAOp<1,1>::Duplicate(orig, shallow, possMerging);
 }
 
@@ -383,6 +398,7 @@ void PackBuff::FlattenCore(ofstream &out) const
   WRITE(m_invertDiag);
   WRITE(m_revUpper);
   WRITE(m_revLower);
+  WRITE(m_parFactor);
 }
 void PackBuff::UnflattenCore(ifstream &in, SaveInfo &info)
 {
@@ -400,6 +416,7 @@ void PackBuff::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_invertDiag);
   READ(m_revUpper);
   READ(m_revLower);
+  READ(m_parFactor);
 }
 
 bool LoopInvariantPackBuffMotion::CanApply(const Poss *poss, const Node *node) const
@@ -862,7 +879,6 @@ string RenamePackBuff::GetNewName(const PackBuff *buff) const
       throw;
   }
 }
-
 
 bool RenamePackBuff::CanApply(const Poss *poss, const Node *node) const
 {

@@ -174,7 +174,6 @@ class LocalTrmmAcc : public DLAOp<3,1>
   static Cost GetCost(Side side, bool isTrans, const Sizes *localMs, const Sizes *localNs);
 };
 
-
 class DistTrmmToLocalTrmmStatA : public  SingleTrans
 {
  public:
@@ -184,7 +183,6 @@ class DistTrmmToLocalTrmmStatA : public  SingleTrans
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
-
 
 class TrxmTrans : public TransTransformation
 {

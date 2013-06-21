@@ -145,3 +145,12 @@ class Copy : public DLAOp<2,1>
   virtual void PrintCode(IndStream &out);
 };
 
+class L3Parallelization : public SingleTrans
+{
+ public:
+  unsigned int m_parFactor;
+ L3Parallelization(unsigned int parFactor) : m_parFactor(parFactor) {}
+  virtual string GetType() const {return "L3Parallelization";}
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};

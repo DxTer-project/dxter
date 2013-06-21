@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BD4E58B21774DD2D00834079 /* DLAOp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD4E58B01774DD2D00834079 /* DLAOp.cpp */; };
 		BD9D11641772809200C097B2 /* base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11421772809200C097B2 /* base.cpp */; };
 		BD9D11651772809200C097B2 /* coef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11441772809200C097B2 /* coef.cpp */; };
 		BD9D11661772809200C097B2 /* combine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11461772809200C097B2 /* combine.cpp */; };
@@ -23,7 +24,6 @@
 		BD9D11711772809200C097B2 /* split.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D115E1772809200C097B2 /* split.cpp */; };
 		BD9D11721772809200C097B2 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11601772809200C097B2 /* transform.cpp */; };
 		BD9D11731772809200C097B2 /* universe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11621772809200C097B2 /* universe.cpp */; };
-		BD9D119C1772809F00C097B2 /* basicClasses.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11741772809F00C097B2 /* basicClasses.cpp */; };
 		BD9D119D1772809F00C097B2 /* blas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11761772809F00C097B2 /* blas.cpp */; };
 		BD9D119E1772809F00C097B2 /* blis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11781772809F00C097B2 /* blis.cpp */; };
 		BD9D119F1772809F00C097B2 /* chol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D117A1772809F00C097B2 /* chol.cpp */; };
@@ -60,6 +60,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BD4E58B01774DD2D00834079 /* DLAOp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DLAOp.cpp; path = ../../src/DLA/DLAOp.cpp; sourceTree = "<group>"; };
+		BD4E58B11774DD2D00834079 /* DLAOp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DLAOp.h; path = ../../src/DLA/DLAOp.h; sourceTree = "<group>"; };
 		BD9D11421772809200C097B2 /* base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base.cpp; path = ../../src/base.cpp; sourceTree = "<group>"; };
 		BD9D11431772809200C097B2 /* base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base.h; path = ../../src/base.h; sourceTree = "<group>"; };
 		BD9D11441772809200C097B2 /* coef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = coef.cpp; path = ../../src/coef.cpp; sourceTree = "<group>"; };
@@ -94,8 +96,6 @@
 		BD9D11611772809200C097B2 /* transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = transform.h; path = ../../src/transform.h; sourceTree = "<group>"; };
 		BD9D11621772809200C097B2 /* universe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = universe.cpp; path = ../../src/universe.cpp; sourceTree = "<group>"; };
 		BD9D11631772809200C097B2 /* universe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = universe.h; path = ../../src/universe.h; sourceTree = "<group>"; };
-		BD9D11741772809F00C097B2 /* basicClasses.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = basicClasses.cpp; path = ../../src/DLA/basicClasses.cpp; sourceTree = "<group>"; };
-		BD9D11751772809F00C097B2 /* basicClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basicClasses.h; path = ../../src/DLA/basicClasses.h; sourceTree = "<group>"; };
 		BD9D11761772809F00C097B2 /* blas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blas.cpp; path = ../../src/DLA/blas.cpp; sourceTree = "<group>"; };
 		BD9D11771772809F00C097B2 /* blas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = blas.h; path = ../../src/DLA/blas.h; sourceTree = "<group>"; };
 		BD9D11781772809F00C097B2 /* blis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blis.cpp; path = ../../src/DLA/blis.cpp; sourceTree = "<group>"; };
@@ -168,8 +168,6 @@
 		BDBB01261756776F0010EB4A /* DxTer */ = {
 			isa = PBXGroup;
 			children = (
-				BD9D11741772809F00C097B2 /* basicClasses.cpp */,
-				BD9D11751772809F00C097B2 /* basicClasses.h */,
 				BD9D11761772809F00C097B2 /* blas.cpp */,
 				BD9D11771772809F00C097B2 /* blas.h */,
 				BD9D11781772809F00C097B2 /* blis.cpp */,
@@ -180,6 +178,8 @@
 				BD9D117D1772809F00C097B2 /* distributions.h */,
 				BD9D117E1772809F00C097B2 /* DLANode.cpp */,
 				BD9D117F1772809F00C097B2 /* DLANode.h */,
+				BD4E58B01774DD2D00834079 /* DLAOp.cpp */,
+				BD4E58B11774DD2D00834079 /* DLAOp.h */,
 				BD9D11801772809F00C097B2 /* DLAReg.cpp */,
 				BD9D11811772809F00C097B2 /* DLAReg.h */,
 				BD9D11821772809F00C097B2 /* gemm.cpp */,
@@ -314,7 +314,6 @@
 				BD9D11711772809200C097B2 /* split.cpp in Sources */,
 				BD9D11721772809200C097B2 /* transform.cpp in Sources */,
 				BD9D11731772809200C097B2 /* universe.cpp in Sources */,
-				BD9D119C1772809F00C097B2 /* basicClasses.cpp in Sources */,
 				BD9D119D1772809F00C097B2 /* blas.cpp in Sources */,
 				BD9D119E1772809F00C097B2 /* blis.cpp in Sources */,
 				BD9D119F1772809F00C097B2 /* chol.cpp in Sources */,
@@ -334,6 +333,7 @@
 				BD9D11AD1772809F00C097B2 /* TrProps.cpp in Sources */,
 				BD9D11AE1772809F00C097B2 /* trxm.cpp in Sources */,
 				BD9D11AF1772809F00C097B2 /* twoSidedTrxm.cpp in Sources */,
+				BD4E58B21774DD2D00834079 /* DLAOp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
