@@ -86,9 +86,9 @@ DistType Hemm::GetDistType(unsigned int num) const
   case (ABSLAYER):
   case (DMLAYER):
     return D_MC_MR;
-    case (SMLAYER):
-    case (SQ1LAYER):
-
+  case (SMLAYER):
+  case (S1LAYER):
+  case (S2LAYER):
     return InputDistType(2); 
       
   default:
@@ -107,11 +107,11 @@ Phase Hemm::MaxPhase() const
       return NUMPHASES;
   default:
     throw;
-#elif DOSQR1PHASE
+#elif DOSR1PHASE
     case (ABSLAYER):
-      return SQR1PHASE;
-    case (SQ1LAYER):
-      return SQR2PHASE;
+      return SR1PHASE;
+    case (S1LAYER):
+      return SR2PHASE;
     default:
       throw;
 #endif
@@ -139,7 +139,7 @@ void Hemm::SanityCheck()
     if (t1 != InputDistType(2))
       m_poss->MarkInsane();
   }
-  else if (GetLayer() == SQ1LAYER) {
+  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER) {
   }
   else
     throw;
@@ -166,7 +166,7 @@ void Hemm::Prop()
       m_cost = ZERO;
     else if (GetLayer() == SMLAYER)
       m_cost = GetCost(SMLAYER, m_side,LocalM(0),LocalN(0));
-    else if (GetLayer() == SQ1LAYER)
+    else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER)
       m_cost = 0;
     else
       throw;

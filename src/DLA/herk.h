@@ -159,7 +159,7 @@ class HerkBP : public DLAOp<3,1>
   Tri m_tri;
   Coef m_alpha;
   HerkBP(Layer layer, Tri tri, Coef alpha);
-  static Node* BlankInst() { return new HerkBP(SQ2LAYER,UPPER,COEFONE); }
+  static Node* BlankInst() { return new HerkBP(S3LAYER,UPPER,COEFONE); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual ClassType GetNodeClass() const {return GetClass();}

@@ -62,7 +62,7 @@ DistType Axpy::GetDistType(unsigned int num) const
   else
     throw;
 #else
-  if (m_layer == SQ2LAYER || m_layer == ABSLAYER)
+  if (m_layer == S3LAYER || m_layer == ABSLAYER)
     return InputDistType(1);
   else
     throw;
@@ -81,8 +81,8 @@ Phase Axpy::MaxPhase() const
 #else
 
   if (m_layer == ABSLAYER)
-    return SQR1PHASE;
-  else if (m_layer == SQ2LAYER)
+    return SR1PHASE;
+  else if (m_layer == S3LAYER)
     return NUMPHASES;
   else
     throw;
@@ -141,7 +141,7 @@ void Axpy::PrintCode(IndStream &out)
 	 << "\n" << out.Tabs(2) << GetInputName(1).str()
 	 << ");\n";
     break;
-  case (SQ2LAYER):
+  case (S3LAYER):
     *out << "bli_axpym( ";
     out << m_coeff;
     *out << ", &"
@@ -162,8 +162,8 @@ void Axpy::Prop()
       m_cost = 0;
     else if (m_layer == SMLAYER)
       m_cost = GetCost(SMLAYER, LocalM(0), LocalN(0));
-    else if (m_layer == SQ2LAYER)
-      m_cost = GetCost(SQ2LAYER, LocalM(0), LocalN(0));
+    else if (m_layer == S3LAYER)
+      m_cost = GetCost(S3LAYER, LocalM(0), LocalN(0));
     else if (m_layer == ABSLAYER)
       m_cost = ZERO;
     else {
@@ -177,7 +177,7 @@ Cost Axpy::GetCost(Layer layer, const Sizes *localMs, const Sizes *localNs)
 {
   if (layer == SMLAYER)
     return TWO * GAMMA * localMs->SumProds11(*localNs);
-  else if (layer == SQ2LAYER)
+  else if (layer == S3LAYER)
     return TWO * GAMMA * localMs->SumProds11(*localNs) + (2*PSIWVAL+PSIRVAL) * localNs->Sum();
   else
     throw;
@@ -330,7 +330,7 @@ DistType Scal::GetDistType(unsigned int num) const
     return D_MC_MR; 
   else if (m_layer == SMLAYER)
     return InputDistType(1);
-  else if (m_layer == SQ2LAYER)
+  else if (m_layer == S3LAYER)
     return InputDistType(1);
   else
     throw;

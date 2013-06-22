@@ -538,8 +538,9 @@ void ScaleTrapNode::PrintCode(IndStream &out)
 	 << TriToStr(m_tri) << ", 0, "
 	 << GetNameStr(0) << " );\n";
   }
-  else if (layer == SQ1LAYER 
-	   || layer == SQ2LAYER) 
+  else if (layer == S1LAYER 
+	   || layer == S2LAYER
+	   || layer == S3LAYER) 
     {
       //      bli_obj_set_struc( BLIS_TRIANGULAR, L_10_1 );                                  
       //      bli_obj_set_uplo( BLIS_LOWER, L_10_1 );  
@@ -626,7 +627,7 @@ void ScaleNode::PrintCode(IndStream &out)
   if (GetLayer() == DMLAYER || GetLayer() == ABSLAYER) {
     *out << "Scale( ";
   }
-  else if (GetLayer() == SQ1LAYER || GetLayer() == SQ2LAYER)
+  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER)
     *out << "bli_scalm( ";
 
   out << m_val;
@@ -1087,7 +1088,7 @@ void ViewTL::SanityCheck()
 
 void ViewTL::PrintCode(IndStream &out)
 {
-  if (GetLayer() == SQ2LAYER) {
+  if (GetLayer() == S3LAYER) {
     string name = GetNameStr(0);
     out.Indent();
     *out << "obj_t " << name << ", " << name << "tmp;\n";

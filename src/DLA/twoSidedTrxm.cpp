@@ -55,7 +55,7 @@ DistType TwoSidedTrxm::GetDistType(unsigned int num) const
     return D_MC_MR; 
   else if (m_layer == SMLAYER)
     return D_STAR_STAR;
-  else if (m_layer == SQ1LAYER || m_layer == SQ2LAYER)
+  else if (m_layer == S1LAYER || m_layer == S2LAYER || m_layer == S3LAYER)
     return InputDistType(1);
   else
     throw;
@@ -71,10 +71,10 @@ Phase TwoSidedTrxm::MaxPhase() const
     return NUMPHASES;
 #else
   case (SMLAYER):
-    return SQR1PHASE;
-  case (SQ1LAYER):
-    return SQR1PHASE;
-  case (SQ2LAYER):
+    return SR1PHASE;
+  case (S1LAYER):
+    return SR1PHASE;
+  case (S2LAYER):
     return NUMPHASES;
 #endif
   default:
@@ -129,7 +129,7 @@ void TwoSidedTrxm::Prop()
 void TwoSidedTrxm::PrintCode(IndStream &out)
 {
   out.Indent();
-  if (m_layer == SQ2LAYER) {
+  if (m_layer == S2LAYER) {
     *out << "libflame_Hegst( &"
 	 << GetInputName(1).str()
       << ", &" << GetInputName(0).str() << " );\n";
@@ -697,7 +697,7 @@ Loop* TwoSidedTrmmLowerVar4Alg(
   splitL->SetAllStats(FULLUP);
 
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
-  Yin->SetLayer(SQ2LAYER);
+  Yin->SetLayer(S3LAYER);
   Yin->AddInput(splitA, 1);
 
   //  InputNode *Yin = new InputNode("Y10 input", bigSize, BLIS_KC_BSVAL, "Y10");

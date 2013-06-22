@@ -190,7 +190,7 @@ DistType Her2k::GetDistType(unsigned int num) const
     return D_MC_MR;
   else if (GetLayer() == SMLAYER)
     return InputDistType(2);
-  else if (GetLayer() == SQ1LAYER || GetLayer() == SQ2LAYER)
+  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER)
     return InputDistType(2);
   else
     throw;
@@ -219,9 +219,11 @@ Phase Her2k::MaxPhase() const
 #else
   switch (GetLayer()) {
   case (ABSLAYER):
-    return SQR1PHASE;
-  case (SQ1LAYER):
-    return SQR2PHASE;
+    return SR1PHASE;
+  case (S1LAYER):
+    return SR2PHASE;
+  case (S2LAYER):
+    return SR3PHASE;
   default:
     throw;
   }

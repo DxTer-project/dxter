@@ -194,10 +194,12 @@ Phase Herk::MaxPhase() const
 #else
   switch (GetLayer()) {
   case (ABSLAYER):
-    return SQR1PHASE;
-  case (SQ1LAYER):
-    return SQR2PHASE;
-  case (SQ2LAYER):
+    return SR1PHASE;
+  case (S1LAYER):
+    return SR2PHASE;
+  case (S2LAYER):
+    return SR3PHASE;
+  case (S3LAYER):
     return NUMPHASES;
   default:
     throw;

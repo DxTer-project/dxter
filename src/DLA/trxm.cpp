@@ -152,8 +152,9 @@ DistType Trxm::GetDistType(unsigned int num) const
     return D_MC_MR;
   case (SMLAYER):
     return InputDistType(1); 
-  case (SQ1LAYER):
-  case (SQ2LAYER):
+  case (S1LAYER):
+  case (S2LAYER):
+  case (S3LAYER):
     return InputDistType(1); 
   default:
     throw;
@@ -172,11 +173,13 @@ Phase Trxm::MaxPhase() const
     return NUMPHASES;
   default:
     throw;
-#elif DOSQR1PHASE
+#elif DOSR1PHASE
   case (ABSLAYER):
-    return SQR1PHASE;
-  case (SQ1LAYER):
-    return SQR2PHASE;
+    return SR1PHASE;
+  case (S1LAYER):
+    return SR2PHASE;
+  case (S2LAYER):
+    return SR3PHASE;
   default:
     throw;
 #endif
@@ -207,8 +210,9 @@ void Trxm::Prop()
     case (SMLAYER):
       m_cost = GetCost(SMLAYER, m_side, LocalM(0), LocalN(0));
       break;
-    case (SQ1LAYER):
-    case (SQ2LAYER):
+    case (S1LAYER):
+    case (S2LAYER):
+    case (S3LAYER):
       m_cost = ZERO;
       break;
     }
@@ -247,10 +251,13 @@ void Trxm::PrintCode(IndStream &out)
     case (SMLAYER):
       *out << "internal::LocalTrmm( ";
       break;
-    case (SQ1LAYER):
+    case (S1LAYER):
+      *out << "BLISTrmmLimitedN( ";
+      break;
+    case (S2LAYER):
       *out << "TrmmRankKUpdate( ";
       break;
-    case (SQ2LAYER):
+    case (S3LAYER):
       *out << "PackedTrmmGebp( ";
       break;
     default:
@@ -412,8 +419,8 @@ DistType Trmm3::GetDistType(unsigned int num) const
     return D_MC_MR;
   case (SMLAYER):
     return InputDistType(2); 
-  case (SQ1LAYER):
-  case (SQ2LAYER):
+  case (S1LAYER):
+  case (S2LAYER):
     return InputDistType(2); 
   default:
     throw;
@@ -433,11 +440,13 @@ Phase Trmm3::MaxPhase() const
     return NUMPHASES;
   default:
     throw;
-#elif DOSQR1PHASE
+#elif DOSR1PHASE
   case (ABSLAYER):
-    return SQR1PHASE;
-  case (SQ1LAYER):
-    return SQR2PHASE;
+    return SR1PHASE;
+  case (S1LAYER):
+    return SR2PHASE;
+  case (S2LAYER):
+    return SR3PHASE;
   default:
     throw;
 #endif
@@ -468,8 +477,9 @@ void Trmm3::Prop()
     case (SMLAYER):
       throw;
       break;
-    case (SQ1LAYER):
-    case (SQ2LAYER):
+    case (S1LAYER):
+    case (S2LAYER):
+    case (S3LAYER):
       m_cost = ZERO;
       break;
     }
@@ -489,7 +499,10 @@ void Trmm3::PrintCode(IndStream &out)
   case (SMLAYER):
     *out << "internal::LocalTrmm3( ";
     break;
-  case (SQ1LAYER):
+  case (S1LAYER):
+    *out << "BLISTrmm3LimitedN( ";
+    break;
+  case (S2LAYER):
     *out << "Trmm3RankKUpdate( ";
     break;
   default:
@@ -1892,7 +1905,7 @@ void TrxmBP::UnflattenCore(ifstream &in, SaveInfo &info)
 DistType TrxmBP::GetDistType(unsigned int num) const
 { 
   switch(GetLayer()) {
-    case (SQ2LAYER):
+    case (S3LAYER):
       return InputDistType(2); 
   default:
     throw;
@@ -1913,7 +1926,7 @@ void TrxmBP::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3,2>::Prop();
     switch (GetLayer()) {
-      case (SQ2LAYER): 
+      case (S3LAYER): 
 	{
 	  const Sizes *ms = LocalM(0);
 	  const Sizes *ns = LocalN(0);

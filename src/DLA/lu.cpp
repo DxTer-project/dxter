@@ -179,7 +179,7 @@ DistType PanelLU::GetDistType(unsigned int num) const
 
 Phase PanelLU::MaxPhase() const
 {
-  if (m_layer != SQ2LAYER)
+  if (m_layer != S3LAYER)
     throw;
   return NUMPHASES;
 }

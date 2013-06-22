@@ -271,10 +271,9 @@ void DLACullSQR(Poss *poss, bool &cullIfPossible, bool &doNotCull)
     Node *node = *iter;
     if (node->IsDLA()) {
       DLANode *ddla = (DLANode*)node;
-      if (CurrPhase == SQR1PHASE) {
-	if (ddla->GetLayer() == SQ1LAYER) {
+      if (CurrPhase == SR1PHASE) {
+	if (ddla->GetLayer() == S1LAYER) {
 	  if (ddla->m_hasRefined) {
-	    //	    cout << ddla->GetNodeClass();
 	    cullIfPossible = true;
 	  }
 	  else {
@@ -283,8 +282,19 @@ void DLACullSQR(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 	  }
 	}
       }
-      if (CurrPhase == SQR2PHASE) {
-	if (ddla->GetLayer() == SQ2LAYER) {
+      if (CurrPhase == SR2PHASE) {
+	if (ddla->GetLayer() == S2LAYER) {
+	  if (ddla->m_hasRefined) {
+	    cullIfPossible = true;
+	  }
+	  else {
+	    doNotCull = true;
+	    return;
+	  }
+	}
+      }
+      if (CurrPhase == SR3PHASE) {
+	if (ddla->GetLayer() == S3LAYER) {
 	  if (ddla->m_hasRefined) {
 	    cullIfPossible = true;
 	  }

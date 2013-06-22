@@ -196,12 +196,13 @@ void AddTrans()
   //  Universe::AddTrans(Axpy::GetClass(), axpyTrans, DPPHASE);
 #endif //DPPHASE
 
-#if DOSQR1PHASE
-  Universe::AddTrans(Axpy::GetClass(), new AxpyToBLASAxpy(ABSLAYER, SQ2LAYER), SQR1PHASE);  
+#if DOSR1PHASE
+  Universe::AddTrans(Axpy::GetClass(), new AxpyToBLASAxpy(ABSLAYER, S3LAYER), SR1PHASE);  
 #if USELOWERING
-  Universe::AddTrans(Axpy::GetClass(), new AxpyLowerLayer(SQ1LAYER, SQ2LAYER), SIMP);  
+  Universe::AddTrans(Axpy::GetClass(), new AxpyLowerLayer(S1LAYER, S3LAYER), SIMP);  
+  Universe::AddTrans(Axpy::GetClass(), new AxpyLowerLayer(S2LAYER, S3LAYER), SIMP);  
 #endif 
-#endif //DOSQR1PHASE
+#endif //DOSR1PHASE
 
 #if DODPPHASE
   Universe::AddTrans(Chol::GetClass(), new DistCholToLocalChol, DPPHASE);
@@ -248,7 +249,7 @@ void AddTrans()
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, DMLAYER, 1), DPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, DMLAYER, 2), DPPHASE);
 #endif //DPPHASE
-#if DOSQR1PHASE
+#if DOSR1PHASE
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, SQ1LAYER, 1), SQR1PHASE);
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, SQ1LAYER, -1), SQR1PHASE);
 #if USELOWERING
@@ -256,7 +257,7 @@ void AddTrans()
 #endif
 #endif //SQR1PHASE
 
-#if DOSQR2PHASE
+#if DOSR2PHASE
   Universe::AddTrans(Gemm::GetClass(), new BLISGemmLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
 #endif //SQR2PHASE
 
@@ -283,7 +284,7 @@ void AddTrans()
 								       TWOSIDEDTRXMLAYER), DPPHASE);
 #endif
 
-#if DOSQR1PHASE
+#if DOSR1PHASE
   Universe::AddTrans(TwoSidedTrxm::GetClass(), new TwoSidedTrxmLoopExp(2, ABSLAYER, 
 								       TWOSIDEDTRXMCOMPONENTSLAYER, 
 								       TWOSIDEDTRXMLAYER), SQR1PHASE);
@@ -298,14 +299,14 @@ void AddTrans()
   Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(ABSLAYER, DMLAYER, -8), DPPHASE);
 #endif //DPPHASE
 
-#if DOSQR1PHASE
+#if DOSR1PHASE
   Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(ABSLAYER, SQ1LAYER, 8), SQR1PHASE);
 #if USELOWERING
   Universe::AddTrans(Hemm::GetClass(), new HemmLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif
 #endif //SQR1PHASE
 
-#if DOSQR2PHASE
+#if DOSR2PHASE
   Universe::AddTrans(Hemm::GetClass(), new BLISHemmLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
 #endif //SQR2PHASE
 
@@ -354,7 +355,7 @@ void AddTrans()
 #endif //DPPHASE
 
 
-#if DOSQR1PHASE
+#if DOSR1PHASE
   Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, SQ1LAYER, 2), SQR1PHASE);
 #if USELOWERING
   Universe::AddTrans(Trxm::GetClass(), new TrxmLowerLayer<Trxm>(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
@@ -369,20 +370,20 @@ void AddTrans()
 #endif
 #endif //SQR1PHASE
 
-#if DOSQR2PHASE
+#if DOSR2PHASE
   Universe::AddTrans(Trxm::GetClass(), new BLISTrxmLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
   Universe::AddTrans(Trmm3::GetClass(), new BLISTrmm3LoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
 #endif //SQR1PHASE
 
 
-#if DOSQR1PHASE
+#if DOSR1PHASE
   Universe::AddTrans(Her2k::GetClass(), new Her2kLoopExp(ABSLAYER, SQ1LAYER, 9), SQR1PHASE);
 #if USELOWERING
   Universe::AddTrans(Her2k::GetClass(), new Her2kLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif 
 #endif //SQR1PHASE
 
-#if DOSQR2PHASE
+#if DOSR2PHASE
   Universe::AddTrans(Her2k::GetClass(), new Her2kToHerk(SQ1LAYER, SQ2LAYER), SQR2PHASE);
 #endif //SQR1PHASE
 
@@ -418,14 +419,14 @@ void AddTrans()
   Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, DMLAYER, 5), DPPHASE);
 #endif //DODPPHASE
 
-#if DOSQR1PHASE
+#if DOSR1PHASE
   Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, SQ1LAYER, 5), SQR1PHASE);
 #if USELOWERING
   Universe::AddTrans(Herk::GetClass(), new HerkLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif
 #endif //SQR1PHASE
 
-#if DOSQR2PHASE
+#if DOSR2PHASE
   Universe::AddTrans(Herk::GetClass(), new BLISHerkLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
 #endif //SQR2PHASE
 
@@ -479,9 +480,9 @@ void AddTrans()
   Universe::AddTrans(Gemm::GetClass(), t1, DPPHASE);
 #endif //DODPPHASE
 
-#if DOSQR1PHASE
+#if DOSR1PHASE
   Universe::AddTrans(LU::GetClass(), new LULoopExp(ABSLAYER, ABSLAYER, SQ2LAYER, 5), SQR1PHASE);
-#endif //DOSQR1PHASE
+#endif //DOSR1PHASE
 }
 
 void AddSimplifiers()
@@ -553,7 +554,7 @@ void AddSimplifiers()
   Universe::AddTrans(RedistNode::GetClass(), new FindMidDistributions(D_MC_MR, D_STAR_VR, D_MR_MC), SIMP);
   Universe::AddTrans(RedistNode::GetClass(), new FindMidDistributions(D_MC_MR, D_STAR_VC, D_MR_MC), SIMP);
 
-#if DOSQR2PHASE
+#if DOSR2PHASE
   Universe::AddTrans(PackBuff::GetClass(), new LoopInvariantPackBuffMotion, GLOBSIMP);
   Universe::AddTrans(PackBuff::GetClass(), new UnifyPackBuffParams, SIMP);
   Universe::AddTrans(Pack::GetClass(), new LoopInvariantPackMotion, GLOBSIMP);
@@ -829,14 +830,14 @@ int main(int argc, const char* argv[])
   }
 #endif
 
-#if DOSQR1PHASE
-  if (CurrPhase == SQR1PHASE) {
-    cout << "Expanding SQR1 phase\n";
+#if DOSR1PHASE
+  if (CurrPhase == SR1PHASE) {
+    cout << "Expanding SR1 phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
     time(&start2);
-    uni.Expand(numIters, SQR1PHASE, DLACullSQR);
+    uni.Expand(numIters, SR1PHASE, DLACullSR);
     time(&end);
-    cout << "SQR1 phase took " << difftime(end,start2) << " seconds\n";
+    cout << "SR1 phase took " << difftime(end,start2) << " seconds\n";
     
     cout << "Propagating\n";
     cout.flush();
@@ -847,14 +848,14 @@ int main(int argc, const char* argv[])
   }
 #endif
 
-#if DOSQR2PHASE
-  if (CurrPhase == SQR2PHASE) {
-    cout << "Expanding SQR2 phase\n";
+#if DOSR2PHASE
+  if (CurrPhase == SR2PHASE) {
+    cout << "Expanding SR2 phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
     time(&start2);
-    uni.Expand(numIters, SQR2PHASE, DLACullSQR);
+    uni.Expand(numIters, SR2PHASE, DLACullSR);
     time(&end);
-    cout << "SQR2 phase took " << difftime(end,start2) << " seconds\n";
+    cout << "SR2 phase took " << difftime(end,start2) << " seconds\n";
     
     cout << "Propagating\n";
     cout.flush();
@@ -1140,7 +1141,7 @@ PSet* HegstL1Example()
   splitL->SetAllStats(FULLUP);
 
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
-  Yin->SetLayer(SQ2LAYER);
+  Yin->SetLayer(S3LAYER);
   Yin->AddInput(splitA, 5);
 
   Hemm *hemm = new Hemm(DMLAYER, LEFT, LOWER, COEFONE, COEFZERO, COMPLEX);
@@ -1279,7 +1280,7 @@ PSet* HegstL5Example()
   splitL->SetAllStats(FULLUP);
 
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
-  Yin->SetLayer(SQ2LAYER);
+  Yin->SetLayer(S3LAYER);
   Yin->AddInput(splitA, 1);
 
   Hemm *hemm = new Hemm(DMLAYER, LEFT, LOWER, COEFONE, COEFZERO, COMPLEX);
@@ -2026,7 +2027,7 @@ PSet* CholHegstExample()
     splitL->SetAllStats(FULLUP);
 
     TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
-    Yin->SetLayer(SQ2LAYER);
+    Yin->SetLayer(S3LAYER);
     Yin->AddInput(splitA, 5);
 
     Trxm *trsm = new Trxm(true, DMLAYER, LEFT, LOWER, NONUNIT, NORMAL, COEFONE,COMPLEX);
@@ -2123,7 +2124,7 @@ PSet* CholHegstExample()
     splitL->SetAllStats(FULLUP);
 
     TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
-    Yin->SetLayer(SQ2LAYER);
+    Yin->SetLayer(S3LAYER);
     Yin->AddInput(splitA, 1);
 
     Hemm *hemm = new Hemm(DMLAYER, LEFT, LOWER, COEFONE, COEFZERO, COMPLEX);
@@ -2238,17 +2239,17 @@ PSet* AppBlkHouseExample()
   splitT->AddInput(T,0);
   splitT->SetAllStats(FULLUP);
 
-  ViewTL *view = new ViewTL(SQ2LAYER);
+  ViewTL *view = new ViewTL(S3LAYER);
   view->AddInputs(6,
 		  splitT, 1,
 		  splitT, 1,
 		  splitB, 1);
 
   TempVarNode *W = new TempVarNode(D_MC_MR, "W");
-  W->SetLayer(SQ2LAYER);
+  W->SetLayer(S3LAYER);
   W->AddInput(splitB, 1);
 
-  ViewTL *view2 = new ViewTL(SQ2LAYER);
+  ViewTL *view2 = new ViewTL(S3LAYER);
   view2->AddInputs(6,
 		   W, 0,
 		   splitB, 1,

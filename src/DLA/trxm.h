@@ -85,7 +85,7 @@ class TrxmBP : public DLAOp<3,2>, public TrProps
   Coef m_beta;
   TrxmBP(bool invert, Layer layer, Side side, Tri tri, Trans trans, 
 	 Coef coeff, Coef beta, Type type);
-  static Node* BlankInst() { return new TrxmBP(false,SQ2LAYER,LEFT,LOWER,NORMAL,COEFONE,COEFONE,REAL); }
+  static Node* BlankInst() { return new TrxmBP(false,S3LAYER,LEFT,LOWER,NORMAL,COEFONE,COEFONE,REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual ClassType GetNodeClass() const {return GetClass();}

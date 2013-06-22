@@ -85,7 +85,7 @@ m_revUpper(revUpper),
     cout << "need to scale by alpha but alpha is not a parameter yet!!!\n";
     throw;
   }
-  SetLayer(SQ2LAYER);
+  SetLayer(S3LAYER);
 }
 
 void Pack::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -499,7 +499,7 @@ void LoopInvariantPackMotion::Apply(Poss *poss, Node *node) const
     Node *node = (*iter)->m_n;
     if (node->GetNodeClass() == Trxm::GetClass()) {
       const Trxm *trxm = (Trxm*)node;
-      if (trxm->m_invert && trxm->GetLayer() == SQ2LAYER) {
+      if (trxm->m_invert && trxm->GetLayer() == S3LAYER) {
         stat = PARTUP;
         break;
       }

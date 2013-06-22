@@ -121,10 +121,12 @@ Phase Gemm::MaxPhase() const
   case (SMLAYER):
     return NUMPHASES;
 #else
-    return SQR1PHASE;
-  case (SQ1LAYER):
-    return SQR2PHASE;
-  case (SQ2LAYER):
+    return SR1PHASE;
+  case (S1LAYER):
+    return SR2PHASE;
+  case (S2LAYER):
+    return SR3PHASE;
+  case (S3LAYER):
     return NUMPHASES;
 #endif
   default:
@@ -152,7 +154,7 @@ bool Gemm::CanTransposeInputs() const
 
 Cost Gemm::GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3)
 {
-  if (layer == SMLAYER || layer == SQ1LAYER || layer == SQ2LAYER)
+  if (layer == SMLAYER || layer == S1LAYER || layer == S2LAYER || layer == S3LAYER)
     return TWO * GAMMA * localDim1->SumProds111(*localDim2, *localDim3);
   else
     throw;
@@ -189,8 +191,9 @@ void Gemm::Prop()
 	m_cost = GetCost(SMLAYER, size1, size2, size3);
 	break;
       }
-    case (SQ1LAYER):
-    case (SQ2LAYER):
+    case (S1LAYER):
+    case (S2LAYER):
+    case (S3LAYER):
       DLANode *in0 = (DLANode*)Input(0);
       unsigned int num0 = InputConnNum(0);
       DLANode *in2 = (DLANode*)Input(2);
@@ -202,7 +205,7 @@ void Gemm::Prop()
           throw;
         if (size2->NumSizes() != size3->NumSizes())
           throw;
-      m_cost = GetCost(SQ2LAYER, size1, size2, size3);
+      m_cost = GetCost(S3LAYER, size1, size2, size3);
     }
   }
 }
@@ -372,12 +375,22 @@ void Gemm::PrintCode(IndStream &out)
     out << m_beta;
     *out << ", " << GetInputName(2).str() << " );\n";
   }
-  else if (GetLayer() == SQ1LAYER ||
-	   GetLayer() == SQ2LAYER) {
+  else if (GetLayer() == S1LAYER ||
+	   GetLayer() == S2LAYER ||
+	   GetLayer() == S3LAYER) {
     string transAStr = TransToStr(m_transA);
     string transBStr = TransToStr(m_transB);
     
-    if (GetLayer() == SQ1LAYER) {
+    if (GetLayer() == S1LAYER) {
+      *out << "BLISGemmLimitedN( ";
+      *out << transAStr << ", " << transBStr << ", \n" << out.Tabs(1);
+      out << m_alpha;
+      *out << ","
+	   << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
+      out << m_beta;
+      *out << ", " << GetInputName(2).str() << " );\n";
+    }
+    else if (GetLayer() == S2LAYER) {
       *out << "GemmRankKUpdate( ";
       *out << transAStr << ", " << transBStr << ", \n" << out.Tabs(1);
       out << m_alpha;
@@ -386,7 +399,7 @@ void Gemm::PrintCode(IndStream &out)
       out << m_beta;
       *out << ", " << GetInputName(2).str() << " );\n";
     }
-    else if (GetLayer() == SQ2LAYER) {
+    else if (GetLayer() == S3LAYER) {
       *out << "bli_gemm_ker_var2( ";
       out << m_alpha;
       *out<< ", &"
