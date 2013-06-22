@@ -24,7 +24,6 @@
 #pragma once
 
 #include "loop.h"
-#include "MPI.h"
 #include "TriInv.h"
 #include "blas.h"
 #include "chol.h"

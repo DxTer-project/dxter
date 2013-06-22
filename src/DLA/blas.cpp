@@ -26,7 +26,6 @@
 #include "distributions.h"
 #include "string.h"
 #include "helperNodes.h"
-#include "MPI.h"
 
 using namespace std;
 

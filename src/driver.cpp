@@ -74,12 +74,6 @@ Size bigSize = 10000;
 //Size bs = ELEM_BS;
 #endif
 
-#if DOSM
-#define NUMCORESPERL2 2
-#define NUML2PERL3 3
-#define NUML3 4
-#endif
-
 Trans transA, transB;
 Tri tri;
 Side side;

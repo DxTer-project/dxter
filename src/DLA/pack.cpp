@@ -387,7 +387,7 @@ void PackBuff::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_m = buff->m_m;
   m_n = buff->m_n;
   m_name = buff->m_name;
-  m_comm = buff->m_comm
+  m_comm = buff->m_comm;
   DLAOp<1,1>::Duplicate(orig, shallow, possMerging);
 }
 

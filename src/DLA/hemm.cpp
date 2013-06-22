@@ -27,7 +27,6 @@
 #include "string.h"
 #include "helperNodes.h"
 #include "loopSupport.h"
-#include "MPI.h"
 #include "pack.h"
 
 using namespace std;

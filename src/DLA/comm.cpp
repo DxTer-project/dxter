@@ -21,7 +21,7 @@
 
 
 
-#include "MPI.h"
+#include "comm.h"
 #include "distributions.h"
 
 string CommToStr(Comm comm)
@@ -40,6 +40,28 @@ string CommToStr(Comm comm)
       return "ProcComm";
     case(L2COMM):
       return "L2Comm";
+#endif
+    default:
+      throw;
+    }
+}
+
+unsigned int NumCoresInComm(Comm comm)
+{
+  switch(comm)
+    {
+#if DODM
+    case(MRCOMM):
+      return CVAL;
+    case (MCCOMM):
+      return RVAL;
+#elsif DOSM
+    case(GLOBALCOMM):
+      return NUMCORESPERL2*NUML2PERL3*NUML3;
+    case(PROCCOM):
+      return NUML2PERL3*NUMCORESPERL2;
+    case(L2COMM):
+      return NUMCORESPERL2;
 #endif
     default:
       throw;

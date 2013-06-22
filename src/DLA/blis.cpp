@@ -513,9 +513,9 @@ bool L3Parallelization::CanApply(const Poss *poss, const Node *node) const
 void L3Parallelization::Apply(Poss *poss, Node *node) const
 {
   PackBuff *buff = (PackBuff*)node;
-  buff->Parallelize(m_parFactor);
+  buff->Parallelize(PROCCOMM);
   Pack *pack = (Pack*)buff->Child(0);
-  pack->Parallelize(m_parFactor);
+  pack->Parallelize(PROCCOMM);
   NodeConnVecConstIter iter = pack->m_children.begin();
   for(; iter != pack->m_children.end(); ++iter) {
     Node *child = (*iter)->m_n;

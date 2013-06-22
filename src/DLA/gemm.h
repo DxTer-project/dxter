@@ -26,7 +26,6 @@
 #include "DLAOp.h"
 #include "transform.h"
 #include "distributions.h"
-#include "MPI.h"
 
 Loop* GemmVar1Loop(Node *Ain, unsigned int Anum, 
 		Node *Bin, unsigned int Bnum, 

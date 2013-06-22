@@ -26,7 +26,6 @@
 #include "transform.h"
 #include "DLAOp.h"
 #include "distributions.h"
-#include "MPI.h"
 #include "gemm.h"
 #include "trxm.h"
 #include "herk.h"

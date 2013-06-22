@@ -26,7 +26,6 @@
 #include "transform.h"
 #include "DLAOp.h"
 #include "distributions.h"
-#include "MPI.h"
 
 Loop* HerkLoopVar1(Node *Ain, unsigned int Anum, 
 		   Node *Cin, unsigned int Cnum,

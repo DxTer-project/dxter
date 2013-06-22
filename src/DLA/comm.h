@@ -39,3 +39,4 @@ enum Comm {
 };
 
 string CommToStr(Comm comm);
+unsigned int NumCoresInComm(Comm comm);

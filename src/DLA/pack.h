@@ -25,6 +25,7 @@
 
 #include "DLANode.h"
 #include "DLAOp.h"
+#include "comm.h"
 
 enum PackType { PACKROWPANS,
 		PACKCOLPANS,
@@ -81,7 +82,7 @@ class PackBuff : public DLAOp<1,1>
   Tri m_tri;
   TriStruct m_triStruct;
   Diag m_diag;
-  unsigned int m_parFactor;
+  Comm m_comm;
   PackBuff(string name, PackType pack,
 	   PackMat mat,
 	   Tri tri, Diag diag, TriStruct triStruct,
@@ -105,7 +106,7 @@ class PackBuff : public DLAOp<1,1>
   virtual unsigned int NumOutputs() const {return 1;}
   void UpdateChildrensInnerMultiple(PackSize size);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
-  inline void Parallelize(unsigned int parFactor) {m_parFactor=parFactor;}
+  inline void Parallelize(Comm comm) {m_comm=comm;}
 };
 
 class LoopInvariantPackBuffMotion : public SingleTrans

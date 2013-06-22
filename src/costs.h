@@ -39,6 +39,9 @@ using namespace std;
 #else
 #define RVAL 1
 #define CVAL 1
+#define NUMCORESPERL2 2
+#define NUML2PERL3 3
+#define NUML3 4
 #endif 
 #define PVAL RVAL*CVAL
 #define ELEM_BSVAL 128
