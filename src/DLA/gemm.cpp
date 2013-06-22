@@ -1,23 +1,23 @@
 /*
-    This file is part of DxTer.
-    DxTer is a prototype using the Design by Transformation (DxT)
-    approach to program generation.
-
-    Copyright (C) 2013, The University of Texas and Bryan Marker
-
-    DxTer is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    DxTer is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
-
-    You should have received a copy of the GNU General Public License
-    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ This file is part of DxTer.
+ DxTer is a prototype using the Design by Transformation (DxT)
+ approach to program generation.
+ 
+ Copyright (C) 2013, The University of Texas and Bryan Marker
+ 
+ DxTer is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ DxTer is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "gemm.h"
 #include "distributions.h"
@@ -29,7 +29,7 @@
 
 using namespace std;
 
-bool IsDMGemm(const Node *node) 
+bool IsDMGemm(const Node *node)
 {
   if (node->GetNodeClass() != Gemm::GetClass())
     return false;
@@ -41,26 +41,26 @@ bool IsDMGemm(const Node *node)
 }
 
 Gemm::Gemm(Layer layer, Trans transA, Trans transB, Coef alpha, Coef beta, Type type)
-  : m_transA(transA), 
-    m_transB(transB), 
-    m_alpha(alpha), 
-    m_beta(beta), 
-    m_type(type)    
+: m_transA(transA),
+m_transB(transB),
+m_alpha(alpha),
+m_beta(beta),
+m_type(type)
 {
   SetLayer(layer);
 }
 
-Node* Gemm::BlankInst() 
-{ 
+Node* Gemm::BlankInst()
+{
   return new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, REAL);
 }
 
-NodeType Gemm::GetType() const 
-{ 
-  return "Gemm " 
-    + TransToStr(m_transA) 
-    + TransToStr(m_transB) + " " 
-    + LayerNumToStr(GetLayer()); 
+NodeType Gemm::GetType() const
+{
+  return "Gemm "
+  + TransToStr(m_transA)
+  + TransToStr(m_transB) + " "
+  + LayerNumToStr(GetLayer());
 }
 
 void Gemm::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -99,20 +99,20 @@ DistType Gemm::GetDistType(unsigned int num) const
 {
 #if DODPPHASE
   switch(GetLayer()) {
-  case (ABSLAYER):
-  case (DMLAYER):
-    return D_MC_MR;
-  case (SMLAYER):
-    return InputDistType(2);
-  default:
-    throw;
+    case (ABSLAYER):
+    case (DMLAYER):
+      return D_MC_MR;
+    case (SMLAYER):
+      return InputDistType(2);
+    default:
+      throw;
   }
 #else
   return InputDistType(2);
 #endif
 }
 
-Phase Gemm::MaxPhase() const 
+Phase Gemm::MaxPhase() const
 {  switch(GetLayer()) {
   case (ABSLAYER):
 #if DODPPHASE
@@ -131,15 +131,15 @@ Phase Gemm::MaxPhase() const
 #endif
   default:
     throw;
-  }
+}
 }
 
-bool Gemm::DoNotCullDP() const 
+bool Gemm::DoNotCullDP() const
 {
   return GetLayer() == DMLAYER;
 }
 
-bool Gemm::ShouldCullSR() const 
+bool Gemm::ShouldCullSR() const
 {
   if (GetLayer() == SMLAYER)
     return m_hasRefined;
@@ -175,37 +175,37 @@ void Gemm::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
     switch(GetLayer()) {
-    case(ABSLAYER):
-    case (DMLAYER):
-      m_cost = ZERO;
-      break;
-    case (SMLAYER): 
+      case(ABSLAYER):
+      case (DMLAYER):
+        m_cost = ZERO;
+        break;
+      case (SMLAYER):
       {
-	DLANode *in0 = (DLANode*)Input(0);
-	unsigned int num0 = InputConnNum(0);
-	DLANode *in2 = (DLANode*)Input(2);
-	unsigned int num2 = InputConnNum(2);
-	const Sizes *size1 = in0->LocalM(num0);
-	const Sizes *size2 = in0->LocalN(num0);
-	const Sizes *size3 = in2->LocalN(num2);
-	m_cost = GetCost(SMLAYER, size1, size2, size3);
-	break;
+        DLANode *in0 = (DLANode*)Input(0);
+        unsigned int num0 = InputConnNum(0);
+        DLANode *in2 = (DLANode*)Input(2);
+        unsigned int num2 = InputConnNum(2);
+        const Sizes *size1 = in0->LocalM(num0);
+        const Sizes *size2 = in0->LocalN(num0);
+        const Sizes *size3 = in2->LocalN(num2);
+        m_cost = GetCost(SMLAYER, size1, size2, size3);
+        break;
       }
-    case (S1LAYER):
-    case (S2LAYER):
-    case (S3LAYER):
-      DLANode *in0 = (DLANode*)Input(0);
-      unsigned int num0 = InputConnNum(0);
-      DLANode *in2 = (DLANode*)Input(2);
-      unsigned int num2 = InputConnNum(2);
-      const Sizes *size1 = in0->LocalM(num0);
-      const Sizes *size2 = in0->LocalN(num0);
-      const Sizes *size3 = in2->LocalN(num2);
+      case (S1LAYER):
+      case (S2LAYER):
+      case (S3LAYER):
+        DLANode *in0 = (DLANode*)Input(0);
+        unsigned int num0 = InputConnNum(0);
+        DLANode *in2 = (DLANode*)Input(2);
+        unsigned int num2 = InputConnNum(2);
+        const Sizes *size1 = in0->LocalM(num0);
+        const Sizes *size2 = in0->LocalN(num0);
+        const Sizes *size3 = in2->LocalN(num2);
         if (size1->NumSizes() != size2->NumSizes())
           throw;
         if (size2->NumSizes() != size3->NumSizes())
           throw;
-      m_cost = GetCost(S3LAYER, size1, size2, size3);
+        m_cost = GetCost(S3LAYER, size1, size2, size3);
     }
   }
 }
@@ -347,14 +347,14 @@ void Gemm::PrintCode(IndStream &out)
   if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER) {
     if (GetLayer() == ABSLAYER)
       *out << "AbsGemm( ";
-    else 
+    else
       *out << "DistGemm( ";
-    *out << TransToStr(m_transA) << ", " << TransToStr(m_transB) 
-	 << ", \n\t";
+    *out << TransToStr(m_transA) << ", " << TransToStr(m_transB)
+    << ", \n\t";
     out << m_alpha;
     *out << ", "
-	 << GetInputName(0).str() << ", " << GetInputName(1).str()
-	 << ", ";
+    << GetInputName(0).str() << ", " << GetInputName(1).str()
+    << ", ";
     out << m_beta;
     *out << ", " << GetInputName(2).str() << " );\n";
   }
@@ -371,13 +371,13 @@ void Gemm::PrintCode(IndStream &out)
     *out << "internal::LocalGemm( " << transAStr << ", " << transBStr << ", \n" << out.Tabs(1);
     out << m_alpha;
     *out << ","
-	 << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
+    << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
     out << m_beta;
     *out << ", " << GetInputName(2).str() << " );\n";
   }
   else if (GetLayer() == S1LAYER ||
-	   GetLayer() == S2LAYER ||
-	   GetLayer() == S3LAYER) {
+           GetLayer() == S2LAYER ||
+           GetLayer() == S3LAYER) {
     string transAStr = TransToStr(m_transA);
     string transBStr = TransToStr(m_transB);
     
@@ -386,7 +386,7 @@ void Gemm::PrintCode(IndStream &out)
       *out << transAStr << ", " << transBStr << ", \n" << out.Tabs(1);
       out << m_alpha;
       *out << ","
-	   << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
+      << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
       out << m_beta;
       *out << ", " << GetInputName(2).str() << " );\n";
     }
@@ -395,7 +395,7 @@ void Gemm::PrintCode(IndStream &out)
       *out << transAStr << ", " << transBStr << ", \n" << out.Tabs(1);
       out << m_alpha;
       *out << ","
-	   << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
+      << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
       out << m_beta;
       *out << ", " << GetInputName(2).str() << " );\n";
     }
@@ -403,14 +403,14 @@ void Gemm::PrintCode(IndStream &out)
       *out << "bli_gemm_ker_var2( ";
       out << m_alpha;
       *out<< ", &"
-	   << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n" 
-	  << out.Tabs(2);
+      << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n"
+      << out.Tabs(2);
       out << m_beta;
       *out << ", &" << GetInputName(2).str() << ", (gemm_t*)NULL );\n";
     }
     else
       throw;
-
+    
   }
   else {
     throw;
@@ -435,16 +435,16 @@ void Gemm::UpdateInnerPackingMultiple(PackSize size)
 string GemmLoopExp::GetType() const
 {
   switch(m_dim) {
-  case(0):
-    return "Gemm Loop Exp - m";
-  case(1):
+    case(0):
+      return "Gemm Loop Exp - m";
+    case(1):
       return "Gemm Loop Exp - k";
     case(-1):
       return "Gemm Loop Exp - k reversed";
-  case(2):
-    return "Gemm Loop Exp - n";
-  default:
-    throw;    
+    case(2):
+      return "Gemm Loop Exp - n";
+    default:
+      throw;
   }
 }
 
@@ -469,38 +469,38 @@ void GemmLoopExp::Apply(Poss *poss, Node *node) const
   connC = gemm->m_inputs[2];
   
   switch(m_dim) {
-  case(0):
-    loop = GemmVar1Loop(connA->m_n, connA->m_num,
-		     connB->m_n, connB->m_num,
-		     connC->m_n, connC->m_num,
-		     gemm->m_transA, gemm->m_transB,
-		     gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
-    break;
-  case(1):
-    loop = GemmVar3Loop(connA->m_n, connA->m_num,
-			connB->m_n, connB->m_num,
-			connC->m_n, connC->m_num,
-			gemm->m_transA, gemm->m_transB,
-			false,
-			gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
-    break;
-  case(-1):
-    loop = GemmVar3Loop(connA->m_n, connA->m_num,
-			connB->m_n, connB->m_num,
-			connC->m_n, connC->m_num,
-			gemm->m_transA, gemm->m_transB,
-			true,
-			gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
-    break;
-  case(2):
-    loop = GemmVar2Loop(connA->m_n, connA->m_num,
-		     connB->m_n, connB->m_num,
-		     connC->m_n, connC->m_num,
-		     gemm->m_transA, gemm->m_transB,
-		     gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
-    break;
-  default:
-    throw;
+    case(0):
+      loop = GemmVar1Loop(connA->m_n, connA->m_num,
+                          connB->m_n, connB->m_num,
+                          connC->m_n, connC->m_num,
+                          gemm->m_transA, gemm->m_transB,
+                          gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
+      break;
+    case(1):
+      loop = GemmVar3Loop(connA->m_n, connA->m_num,
+                          connB->m_n, connB->m_num,
+                          connC->m_n, connC->m_num,
+                          gemm->m_transA, gemm->m_transB,
+                          false,
+                          gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
+      break;
+    case(-1):
+      loop = GemmVar3Loop(connA->m_n, connA->m_num,
+                          connB->m_n, connB->m_num,
+                          connC->m_n, connC->m_num,
+                          gemm->m_transA, gemm->m_transB,
+                          true,
+                          gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
+      break;
+    case(2):
+      loop = GemmVar2Loop(connA->m_n, connA->m_num,
+                          connB->m_n, connB->m_num,
+                          connC->m_n, connC->m_num,
+                          gemm->m_transA, gemm->m_transB,
+                          gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
+      break;
+    default:
+      throw;
   }
   
   poss->AddLoop(loop);
@@ -543,9 +543,9 @@ Cost DistGemmToLocalGemmStatC::RHSCostEstimate(const Node *node) const
   
   const DLANode *input = (DLANode*)(orig->Input(0));
   unsigned int inputNum = orig->InputConnNum(0);
-
+  
   const Sizes *A1 = input->GetM(inputNum);
-  const Sizes *A2 = input->GetN(inputNum);  
+  const Sizes *A2 = input->GetN(inputNum);
   const Sizes *B1 = orig->GetInputM(1);
   const Sizes *B2 = orig->GetInputN(1);
   const Sizes *localC2 = orig->InputLocalN(2);
@@ -561,8 +561,8 @@ Cost DistGemmToLocalGemmStatC::RHSCostEstimate(const Node *node) const
 
 bool DistGemmToContribLocalGemmStatANonTrans::CanApply(const Poss *poss, const Node *node) const
 {
-    if (IsDMGemm(node) &&
-	(((Gemm*)node)->m_transA == NORMAL)) {
+  if (IsDMGemm(node) &&
+      (((Gemm*)node)->m_transA == NORMAL)) {
     return true;
   }
   return false;
@@ -661,10 +661,10 @@ void DistGemmToContribLocalGemmStatBNonTrans::Apply(Poss *poss, Node *node) cons
       poss->AddNode(redist);
     }
     node2->AddInput(tmp,0);
-  
+    
     node3->AddInput(node2,0);
     node3->AddInput(node->Input(2),node->InputConnNum(2));
-  
+    
     poss->AddNode(node1);
     poss->AddNode(node2);
     poss->AddNode(node3);
@@ -675,9 +675,9 @@ void DistGemmToContribLocalGemmStatBNonTrans::Apply(Poss *poss, Node *node) cons
   else {
     RedistNode *node1 = new RedistNode(redistType);
     Gemm *node2 = new Gemm(SMLAYER,
-			   SwitchTrans(orig->m_transB,orig->m_type), 
-			   SwitchTrans(orig->m_transA,orig->m_type), 
-			   orig->m_alpha, COEFZERO, orig->m_type);
+                           SwitchTrans(orig->m_transB,orig->m_type),
+                           SwitchTrans(orig->m_transA,orig->m_type),
+                           orig->m_alpha, COEFZERO, orig->m_type);
     SumScatterNode *node3 = new SumScatterNode(orig->m_beta);
     TempVarNode *tmp = new TempVarNode(orig->m_type==COMPLEX ? D_MR_STAR_H : D_MR_STAR_T);
     tmp->AddInput(node->Input(2),node->InputConnNum(2));
@@ -693,10 +693,10 @@ void DistGemmToContribLocalGemmStatBNonTrans::Apply(Poss *poss, Node *node) cons
     }
     node2->AddInput(node1,0);
     node2->AddInput(tmp,0);
-  
+    
     node3->AddInput(node2,0);
     node3->AddInput(node->Input(2),node->InputConnNum(2));
-  
+    
     poss->AddNode(node1);
     poss->AddNode(node2);
     poss->AddNode(node3);
@@ -783,7 +783,7 @@ void DistGemmToContribLocalGemmStatBTrans::Apply(Poss *poss, Node *node) const
   
   TempVarNode *tmp2 = new TempVarNode(D_MR_MC);
   tmp2->AddInput(node->Input(2),node->InputConnNum(2));
-
+  
   SumScatterFrom *node3 = new SumScatterFrom;
   node3->AddInput(node2,0);
   node3->AddInput(tmp2,0);
@@ -869,14 +869,14 @@ void DistGemmToContribLocalGemmStatATrans::Apply(Poss *poss, Node *node) const
   
   TempVarNode *tmp2 = new TempVarNode(D_MR_MC);
   tmp2->AddInput(node->Input(2),node->InputConnNum(2));
-
+  
   SumScatterFrom *node3 = new SumScatterFrom;
   node3->AddInput(localGemm,0);
   node3->AddInput(tmp2,0);
   
   RedistNode *redist = new RedistNode(D_MC_MR);
   redist->AddInput(node3,0);
-    
+  
   Axpy *axpy = new Axpy(SMLAYER, COEFONE);
   axpy->AddInputs(4,
                   redist, 0,
@@ -1015,12 +1015,12 @@ bool GemmInputReordering::CanApply(const Poss *poss, const Node *node) const
     else {
       //N and (C/T)
       if( ATrsm->m_side == RIGHT &&
-         BTrsm->m_side == RIGHT) 
+         BTrsm->m_side == RIGHT)
       {
         if (ATrsm->m_trans == NORMAL) {
           return BTrsm->m_trans == gemm->m_transB;
         }
-        else 
+        else
           return (ATrsm->m_trans == gemm->m_transB) && (BTrsm->m_trans == NORMAL);
       }
       else {
@@ -1033,7 +1033,7 @@ bool GemmInputReordering::CanApply(const Poss *poss, const Node *node) const
     if (gemm->m_transB == NORMAL) {
       //(C/T) and N
       if( ATrsm->m_side == LEFT &&
-         BTrsm->m_side == LEFT) 
+         BTrsm->m_side == LEFT)
       {
         if (ATrsm->m_trans == NORMAL) {
           return BTrsm->m_trans == gemm->m_transA;
@@ -1050,8 +1050,8 @@ bool GemmInputReordering::CanApply(const Poss *poss, const Node *node) const
       //(C/T) and (C/T)
       if (ATrsm->m_trans == BTrsm->m_trans) {
         if( ATrsm->m_side == LEFT &&
-           BTrsm->m_side == RIGHT) 
-        { 
+           BTrsm->m_side == RIGHT)
+        {
           if (ATrsm->m_trans == NORMAL) {
             return BTrsm->m_trans == NORMAL;
           }
@@ -1063,7 +1063,7 @@ bool GemmInputReordering::CanApply(const Poss *poss, const Node *node) const
           return false;
         }
       }
-      else { 
+      else {
         cout << "D";
         return false;
       }
@@ -1089,7 +1089,7 @@ void GemmInputReordering::Apply(Poss *poss, Node *node) const
         throw;
       B = BUser;
     }
-    else 
+    else
       throw;
   }
   else if (m_type == 1){
@@ -1142,12 +1142,12 @@ void GemmInputReordering::Apply(Poss *poss, Node *node) const
     throw;
 }
 
-Loop* GemmVar1Loop(Node *Ain, unsigned int Anum, 
-                Node *Bin, unsigned int Bnum, 
-                Node *Cin, unsigned int Cnum,
-                Trans transA, Trans transB,
-                Coef alpha, Coef beta, 
-                Layer layer, Type type)
+Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
+                   Node *Bin, unsigned int Bnum,
+                   Node *Cin, unsigned int Cnum,
+                   Trans transA, Trans transB,
+                   Coef alpha, Coef beta,
+                   Layer layer, Type type)
 {
   Split *splitA = new Split(transA==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
@@ -1193,13 +1193,13 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* GemmVar3Loop(Node *Ain, unsigned int Anum, 
-		   Node *Bin, unsigned int Bnum, 
-		   Node *Cin, unsigned int Cnum,
-		   Trans transA, Trans transB,
-		   bool reverse,
-		   Coef alpha, Coef beta, 
-		   Layer layer, Type type)
+Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
+                   Node *Bin, unsigned int Bnum,
+                   Node *Cin, unsigned int Cnum,
+                   Trans transA, Trans transB,
+                   bool reverse,
+                   Coef alpha, Coef beta,
+                   Layer layer, Type type)
 {
   PartDir aDir;
   if (transA == NORMAL) {
@@ -1223,7 +1223,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   splitA->SetUpStats(FULLUP, FULLUP,
                      FULLUP, FULLUP);
   splitA->SetIndepIters();
-
+  
   PartDir bDir;
   if (transB == NORMAL) {
     if (reverse) {
@@ -1282,12 +1282,12 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* GemmVar2Loop(Node *Ain, unsigned int Anum, 
-                Node *Bin, unsigned int Bnum, 
-                Node *Cin, unsigned int Cnum,
-                Trans transA, Trans transB,
-                Coef alpha, Coef beta, 
-                Layer layer, Type type)
+Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
+                   Node *Bin, unsigned int Bnum,
+                   Node *Cin, unsigned int Cnum,
+                   Trans transA, Trans transB,
+                   Coef alpha, Coef beta,
+                   Layer layer, Type type)
 {
   LoopTunnel *Atun = new LoopTunnel(POSSTUNIN);
   Atun->AddInput(Ain, Anum);
@@ -1328,8 +1328,7 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
-    throw;
-    //    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
   
   return loop;
 }
@@ -1352,7 +1351,7 @@ bool BLISGemmLoopExp::CanApply(const Poss *poss, const Node *node) const
 void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
-
+  
   NodeConn *connA, *connB, *connC;
   connA = gemm->m_inputs[0];
   connB = gemm->m_inputs[1];
@@ -1362,20 +1361,20 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   unsigned int Bnum = connB->m_num;
   Node *Cin = connC->m_n;
   unsigned int Cnum = connC->m_num;
-
+  
   Split *splitA = new Split(gemm->m_transA == NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(connA->m_n, connA->m_num);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
-
+  
   if (gemm->m_transB != NORMAL) {
     Bin = AddTranspose(gemm->m_transB, true, Bin, Bnum, true);
     Bnum = 0;
   }
   PackBuff *bBuff = new PackBuff(Bin->GetName(Bnum).m_name,
-				 PACKCOLPANS, PACKBPANEL, NOTTRI, NOTTRIDIAG, GEN,
-				 false, false, false, false,
-				 USEKRSIZE, USENRSIZE );
+                                 PACKCOLPANS, PACKBPANEL, NOTTRI, NOTTRIDIAG, GEN,
+                                 false, false, false, false,
+                                 USEKRSIZE, USENRSIZE );
   Pack *bPack = new Pack(PACKCOLPANS, 2, false, false, false, false, false);
   bBuff->AddInput(Bin,Bnum);
   bPack->AddInput(Bin,Bnum);
@@ -1383,7 +1382,7 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   
   poss->AddNode(bBuff);
   poss->AddNode(bPack);
-
+  
   LoopTunnel *Btun = new LoopTunnel(POSSTUNIN);
   Btun->AddInput(bPack, 0);
   Btun->SetAllStats(FULLUP);
@@ -1394,11 +1393,11 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   splitC->SetUpStats(FULLUP, FULLUP,
                      PARTUP, PARTUP);
   splitC->SetIndepIters();
-
+  
   Node *Ain = splitA;
   unsigned int Anum = 1;
   string name;
-
+  
   if (gemm->m_transA != NORMAL) {
     Ain = AddTranspose(gemm->m_transA, true, Ain, Anum, false);
     Anum = 0;
@@ -1407,19 +1406,19 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   else {
     name = splitA->GetName(1, BLISLOOP).str();
   }
-
+  
   PackBuff *aBuff = new PackBuff(name,
-				 PACKROWPANS, PACKABLOCK, NOTTRI, NOTTRIDIAG,
-				 GEN,
-				 false, false, false, false,
-				 USEMRSIZE, USEKRSIZE);
+                                 PACKROWPANS, PACKABLOCK, NOTTRI, NOTTRIDIAG,
+                                 GEN,
+                                 false, false, false, false,
+                                 USEMRSIZE, USEKRSIZE);
   Pack *aPack = new Pack(PACKROWPANS, 2, false, false, false, false, false);
   aBuff->AddInput(Ain, Anum);
   aPack->AddInput(Ain, Anum);
-  aPack->AddInput(aBuff, 0);  
-
+  aPack->AddInput(aBuff, 0);
+  
   Gemm *gebp = new Gemm(m_toLayer, NORMAL, NORMAL,
-			gemm->m_alpha, gemm->m_beta, gemm->m_type);
+                        gemm->m_alpha, gemm->m_beta, gemm->m_type);
   gebp->AddInput(aPack, 0);
   gebp->AddInput(Btun, 0);
   gebp->AddInput(splitC, 1);
@@ -1436,13 +1435,13 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
-
-
+  
+  
   
   poss->AddLoop(loop);
-
+  
   node->RedirectChildren(loop->OutTun(2), 0);
-
+  
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
@@ -1455,18 +1454,18 @@ bool GemmLowerLayer::CanApply(const Poss *poss, const Node *node) const
       return false;
     if (m_dim == DIMK) {
       if (gemm->m_transA == NORMAL) {
-	return (*(gemm->InputLocalN(0)) <= m_bs);
+        return (*(gemm->InputLocalN(0)) <= m_bs);
       }
       else {
-	return (*(gemm->InputLocalM(0)) <= m_bs);
+        return (*(gemm->InputLocalM(0)) <= m_bs);
       }
     }
     else if (m_dim == DIMN) {
       if (gemm->m_transB == NORMAL) {
-	return (*(gemm->InputLocalN(1)) <= m_bs);
+        return (*(gemm->InputLocalN(1)) <= m_bs);
       }
       else {
-	return (*(gemm->InputLocalM(1)) <= m_bs);
+        return (*(gemm->InputLocalM(1)) <= m_bs);
       }
     }
     else
@@ -1485,5 +1484,5 @@ void GemmLowerLayer::Apply(Poss *poss, Node *node) const
 string GemmLowerLayer::GetType() const
 { 
   return "Gemm lower layer " + LayerNumToStr(m_fromLayer) 
-    + " to " + LayerNumToStr(m_toLayer);
+  + " to " + LayerNumToStr(m_toLayer);
 }

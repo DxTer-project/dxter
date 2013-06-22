@@ -263,7 +263,7 @@ void AddTrans()
 #endif
 #endif //SR1PHASE
 
-#if DOSR2PHASE
+#if DOSR3PHASE
   Universe::AddTrans(Gemm::GetClass(), new BLISGemmLoopExp(S2LAYER, S3LAYER), SR3PHASE);
 #endif //SR2PHASE
 
@@ -886,6 +886,25 @@ int main(int argc, const char* argv[])
     uni.Expand(numIters, SR2PHASE, DLACullSR);
     time(&end);
     cout << "SR2 phase took " << difftime(end,start2) << " seconds\n";
+    
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
+
+#if DOSR3PHASE
+  if (CurrPhase == SR3PHASE) {
+    cout << "Expanding SR3 phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, SR3PHASE, DLACullSR);
+    time(&end);
+    cout << "SR3 phase took " << difftime(end,start2) << " seconds\n";
     
     cout << "Propagating\n";
     cout.flush();

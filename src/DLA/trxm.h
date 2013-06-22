@@ -116,9 +116,9 @@ class Trmm3LoopExp : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  unsigned int m_dim;
- Trmm3LoopExp(Layer fromLayer, Layer toLayer, unsigned int dim) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim) {}
+  unsigned int m_var;
+ Trmm3LoopExp(Layer fromLayer, Layer toLayer, unsigned int var) 
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_var(var) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;

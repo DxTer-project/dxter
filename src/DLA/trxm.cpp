@@ -100,6 +100,13 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
 			Coef coeff, Coef beta, Type type,
 		       Layer layer);
 
+Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
+			Node *Bin, unsigned int Bnum,
+			Node *Cin, unsigned int Cnum,
+			Tri tri, Diag diag, Trans trans,
+			Coef coeff, Coef beta, Type type, Layer layer);
+
+
 
 bool IsDMTrxm(const Node *node)
 {
@@ -678,7 +685,8 @@ void TrxmLoopExp::Apply(Poss *poss, Node *node) const
 
 string Trmm3LoopExp::GetType() const
 {
-  return "Trmm3 Loop Exp";
+  return "Trmm3 Loop Exp " + LayerNumToStr(m_fromLayer) 
+    + " -> " + LayerNumToStr(m_toLayer);
 }
 
 bool Trmm3LoopExp::CanApply(const Poss *poss, const Node *node) const
@@ -702,12 +710,20 @@ void Trmm3LoopExp::Apply(Poss *poss, Node *node) const
   connB = trmm3->m_inputs[1];
   connC = trmm3->m_inputs[2];
 
-  loop = Trmm3LoopLeftVar2(connA->m_n, connA->m_num,
-			  connB->m_n, connB->m_num,
-			  connC->m_n, connC->m_num,
-			  trmm3->m_tri, trmm3->m_diag, trmm3->m_trans,
-			   trmm3->m_coeff, trmm3->m_beta, trmm3->m_type,
-			  m_toLayer);
+  if (m_var == 2)
+    loop = Trmm3LoopLeftVar2(connA->m_n, connA->m_num,
+			     connB->m_n, connB->m_num,
+			     connC->m_n, connC->m_num,
+			     trmm3->m_tri, trmm3->m_diag, trmm3->m_trans,
+			     trmm3->m_coeff, trmm3->m_beta, trmm3->m_type,
+			     m_toLayer);
+  else if (m_var == 3)
+    loop = Trmm3LoopLeftVar3(connA->m_n, connA->m_num,
+			     connB->m_n, connB->m_num,
+			     connC->m_n, connC->m_num,
+			     trmm3->m_tri, trmm3->m_diag, trmm3->m_trans,
+			     trmm3->m_coeff, trmm3->m_beta, trmm3->m_type,
+			     m_toLayer);
   
   poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(2),0);
@@ -2226,6 +2242,57 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
     //    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+  
+  return loop;
+}
+
+Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
+			Node *Bin, unsigned int Bnum,
+			Node *Cin, unsigned int Cnum,
+			Tri tri, Diag diag, Trans trans,
+			Coef coeff, Coef beta, Type type, Layer layer)
+{
+  LoopTunnel *Atun = new LoopTunnel(POSSTUNIN);
+  Atun->AddInput(Ain, Anum);
+  Atun->SetAllStats(FULLUP);
+  Atun->SetIndepIters();
+  
+  Split *splitB = new Split(PARTRIGHT, POSSTUNIN, true);
+  splitB->AddInput(Bin, Bnum);
+  splitB->SetUpStats(FULLUP, FULLUP,
+                     FULLUP, FULLUP);
+  splitB->SetIndepIters();
+
+  Split *splitC = new Split(PARTRIGHT, POSSTUNIN, true);
+  splitC->AddInput(Bin, Bnum);
+  splitC->SetUpStats(FULLUP, NOTUP,
+                     FULLUP, NOTUP);
+  splitC->SetIndepIters();
+  
+  Node *trmm3;
+  trmm3 = new Trmm3(layer, LEFT, tri, diag, trans, coeff, beta, type);
+  trmm3->AddInputs(6,
+		   Atun, 0,
+		   splitB, 1,
+		   splitC, 1);
+  
+  
+  LoopTunnel *AtunOut = new LoopTunnel(POSSTUNOUT);
+  AtunOut->AddInput(Atun, 0);
+  AtunOut->AddInput(Atun, 0);
+  AtunOut->CopyTunnelInfo(Atun);
+
+  Combine *comB = splitB->CreateMatchingCombine(0);
+  
+  Combine *comC = splitC->CreateMatchingCombine(1,
+                                                1, trmm3, 0);
+  
+  Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
+  Loop *loop;
+  if (layer==DMLAYER)
+    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
   
   return loop;
 }
