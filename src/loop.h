@@ -26,6 +26,7 @@
 #include "base.h"
 #include "transform.h"
 #include "pset.h"
+#include "comm.h"
 
 enum PartDir { PARTDOWN,
 	       PARTRIGHT,
@@ -75,7 +76,7 @@ class Loop : public PSet
  public:
   IntSet m_label;
   BSSize m_bsSize;
-  unsigned int m_parFactor;
+  Comm m_comm;
   
   Loop();
   Loop(LoopType type);
@@ -106,6 +107,6 @@ class Loop : public PSet
   static void FlattenStatic(ofstream &out);
   static void UnflattenStatic(ifstream &in);
 
-  void Parallelize(unsigned int parFactor);
+  void Parallelize(Comm comm);
   bool HasIndepIters() const;
 };

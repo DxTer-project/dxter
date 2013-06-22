@@ -79,7 +79,7 @@ m_densify(densify),
 m_invertDiag(invertDiag),
 m_revUpper(revUpper),
   m_revLower(revLower),
-  m_comm(BADCOMM)
+  m_comm(CORECOMM)
 {
   if (scaleAlpha) {
     cout << "need to scale by alpha but alpha is not a parameter yet!!!\n";
@@ -147,10 +147,6 @@ void Pack::PrintCode(IndStream &out)
 {
   if (m_scaleAlpha)
     throw;
-  if (m_comm != BADCOMM) {
-    cout << "need par Pack code\n";
-    *out << "need par Pack code\n";
-  }
   out.Indent();
   if (m_var == 2)
     *out << "bli_packm_blk_var2";
@@ -158,9 +154,15 @@ void Pack::PrintCode(IndStream &out)
     *out << "bli_packm_blk_var3";
   else
     throw;
-  *out << "( &BLIS_ONE, &"
-  << GetInputName(0).str() << ", &"
-  << GetInputName(1).str() << " );\n";
+  if (m_comm == CORECOMM) {
+    *out << "( ";
+  }
+  else {
+    *out << "_par( " << CommToStr(m_comm) << ", ";
+  }
+  *out << "&BLIS_ONE, &"
+       << GetInputName(0).str() << ", &"
+       << GetInputName(1).str() << " );\n";
 }
 
 Name Pack::GetName(unsigned int num) const
@@ -269,7 +271,7 @@ void PackBuff::PrintCode(IndStream &out)
   }
   
   unsigned int indentOffset = 0;
-  if (m_comm != BADCOMM) {
+  if (m_comm != CORECOMM) {
     out.Indent();
     *out << "if (m_rankAtCurrLevel == 0) {\n";
     indentOffset = 1;
@@ -314,7 +316,7 @@ void PackBuff::PrintCode(IndStream &out)
   *out << "&" << Input(0)->GetName(InputConnNum(0)).str() << ", &"
   << name << " );\n";
 
-  if (m_comm != BADCOMM) {
+  if (m_comm != CORECOMM) {
     out.Indent();
     *out << "}\n";
     out.Indent();
@@ -346,7 +348,7 @@ PackBuff::PackBuff(string name,
                    Tri tri, Diag diag, TriStruct triStruct,
                    bool densify, bool invertDiag, bool revUpper, bool revLower,
                    PackSize mSize, PackSize nSize)
-  : m_comm(BADCOMM)
+  : m_comm(CORECOMM)
 {
   m_name.m_type = UNKNOWN;
   if (name.find("_packed") == string::npos) {

@@ -496,10 +496,11 @@ bool L3Parallelization::CanApply(const Poss *poss, const Node *node) const
       }
       const Split *control = loop->GetControl();
       const unsigned int numExecs = control->NumberOfLoopExecs();
+      unsigned int parFactor = NumGroupsInComm(m_comm);
       int numParallelizable = 0;
       for(unsigned int i = 0; i < numExecs; ++i) {
         unsigned int numIters = control->NumIters(i);
-        if (numIters >= m_parFactor)
+        if (numIters >= parFactor)
           ++numParallelizable;
       }
       if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
@@ -513,9 +514,9 @@ bool L3Parallelization::CanApply(const Poss *poss, const Node *node) const
 void L3Parallelization::Apply(Poss *poss, Node *node) const
 {
   PackBuff *buff = (PackBuff*)node;
-  buff->Parallelize(PROCCOMM);
+  buff->Parallelize(m_comm);
   Pack *pack = (Pack*)buff->Child(0);
-  pack->Parallelize(PROCCOMM);
+  pack->Parallelize(m_comm);
   NodeConnVecConstIter iter = pack->m_children.begin();
   for(; iter != pack->m_children.end(); ++iter) {
     Node *child = (*iter)->m_n;
@@ -526,7 +527,7 @@ void L3Parallelization::Apply(Poss *poss, Node *node) const
       throw;
     }  
     else {
-      loop->Parallelize(m_parFactor);
+      loop->Parallelize(m_comm);
     }
   }
 }

@@ -575,7 +575,7 @@ void AddSimplifiers()
 
 #if DOSMPPHASE
   if (NUML2PERL3 > 1)
-    Universe::AddTrans(PackBuff::GetClass(), new L3Parallelization(NUML2PERL3), SMPPHASE);
+    Universe::AddTrans(PackBuff::GetClass(), new L3Parallelization(PROCCOMM), SMPPHASE);
 #endif
 
 }

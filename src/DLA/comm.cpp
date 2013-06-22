@@ -33,10 +33,10 @@ string CommToStr(Comm comm)
       return "g.MRComm()";
     case (MCCOMM):
       return "g.MCComm()";
-#elsif DOSM
+#elif DOSM
     case(GLOBALCOMM):
       return "GlobalComm";
-    case(PROCCOM):
+    case(PROCCOMM):
       return "ProcComm";
     case(L2COMM):
       return "L2Comm";
@@ -55,13 +55,34 @@ unsigned int NumCoresInComm(Comm comm)
       return CVAL;
     case (MCCOMM):
       return RVAL;
-#elsif DOSM
+#elif DOSM
     case(GLOBALCOMM):
       return NUMCORESPERL2*NUML2PERL3*NUML3;
-    case(PROCCOM):
+    case(PROCCOMM):
       return NUML2PERL3*NUMCORESPERL2;
     case(L2COMM):
       return NUMCORESPERL2;
+    case(CORECOMM):
+      return 1;
+#endif
+    default:
+      throw;
+    }
+}
+
+unsigned int NumGroupsInComm(Comm comm)
+{
+  switch(comm)
+    {
+#if DOSM
+    case(GLOBALCOMM):
+      return NUML3;
+    case(PROCCOMM):
+      return NUML2PERL3;
+    case(L2COMM):
+      return NUMCORESPERL2;
+    case(CORECOMM):
+      return 1;
 #endif
     default:
       throw;

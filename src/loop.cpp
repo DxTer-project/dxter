@@ -108,14 +108,14 @@ string PartDirToStr(PartDir dir)
 }
 
 Loop::Loop() 
-  : PSet(), m_type(UNKNOWNLOOP), m_parFactor(1)
+  : PSet(), m_type(UNKNOWNLOOP), m_comm(CORECOMM)
 {
   AssignNewLabel();
   m_bsSize = BADBSSIZE;
 }
 
 Loop::Loop(LoopType type)
-: m_type(type), m_parFactor(1)
+: m_type(type), m_comm(CORECOMM)
 {
   if (m_type == ELEMLOOP)
     m_bsSize = USEELEMBS;
@@ -125,7 +125,7 @@ Loop::Loop(LoopType type)
 }
 
 Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
-: PSet(poss), m_type(type), m_bsSize(bsSize), m_parFactor(1)
+: PSet(poss), m_type(type), m_bsSize(bsSize), m_comm(CORECOMM)
 {
   unsigned int i;
   for(i = 0; i < poss->m_inTuns.size(); ++i) {
@@ -200,7 +200,7 @@ bool Loop::CanMerge(PSet *pset) const
   if (m_bsSize != ((Loop*)pset)->m_bsSize)
     return false;
   Loop *loop = (Loop*)pset;
-  if (loop->m_parFactor != 1 || m_parFactor != 1)
+  if (loop->m_comm != CORECOMM || m_comm != CORECOMM)
     return false;
   if (m_type != loop->m_type)
     return false;
@@ -497,8 +497,8 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     }
   }
   if (m_type == BLISLOOP) {
-    if (m_parFactor != 1)
-      *out << "***Parallelized with factor " << m_parFactor << "; need correct output code\n";
+    if (m_comm != CORECOMM)
+      *out << "***Parallelized with communicator " << CommToStr(m_comm) << "; need correct output code\n";
     string idx = "idx" + loopLevel;
     string dimLen = "dimLen" + loopLevel;
     string bs = "bs" + loopLevel;
@@ -558,7 +558,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
       *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
   }
   else {
-    if (m_parFactor != 1)
+    if (m_comm != CORECOMM)
       throw;
   }
   
@@ -575,7 +575,7 @@ void Loop::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
   Loop *loop = (Loop*)orig;
   m_label = loop->m_label;
   m_bsSize = loop->m_bsSize;
-  m_parFactor = loop->m_parFactor;
+  m_comm = loop->m_comm;
   if (loop->m_bsSize >= BADBSSIZE) {
     cout << "duplicating a loop with zero blocksize\n";
     throw;
@@ -659,7 +659,7 @@ void Loop::FlattenCore(ofstream &out) const
 {
   WRITE(m_type);
   WRITE(m_bsSize);
-  WRITE(m_parFactor);
+  WRITE(m_comm);
   unsigned int size = m_label.size();
   WRITE(size);
   IntSetConstIter iter = m_label.begin();
@@ -672,7 +672,7 @@ void Loop::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   READ(m_type);
   READ(m_bsSize);
-  READ(m_parFactor);
+  READ(m_comm);
   unsigned int size;
   READ(size);
   for(unsigned int i = 0; i < size; ++i) {
@@ -731,7 +731,7 @@ void Loop::FillTunnelSizes()
       iter = m_inTuns.begin();
       for (; iter != m_inTuns.end(); ++iter) {
 	LoopTunnel *in = (LoopTunnel*)(*iter);
-	in->AppendSizes(i, numIters, m_parFactor);
+	in->AppendSizes(i, numIters, NumGroupsInComm(m_comm));
       }
     }
   }
@@ -862,16 +862,15 @@ void Loop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
   setTunIn->m_poss->DeleteChildAndCleanUp(setTunIn, true);
 }
 
-void Loop::Parallelize(unsigned int parFactor)
+void Loop::Parallelize(Comm comm)
 {
-  if (parFactor <= 1)
+  if (NumGroupsInComm(comm) <= 1)
     throw;
+  m_comm = comm;
   if (!HasIndepIters()) {
     cout << "Non-independent iterations on input\n";
     throw;
   }
-
-  m_parFactor = parFactor;
   
   ClearSizeCache();
   BuildSizeCache();

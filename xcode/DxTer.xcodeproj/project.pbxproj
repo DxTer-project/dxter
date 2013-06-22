@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BD4E58B21774DD2D00834079 /* DLAOp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD4E58B01774DD2D00834079 /* DLAOp.cpp */; };
+		BD4E58B51776316700834079 /* comm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD4E58B31776316700834079 /* comm.cpp */; };
 		BD9D11641772809200C097B2 /* base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11421772809200C097B2 /* base.cpp */; };
 		BD9D11651772809200C097B2 /* coef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11441772809200C097B2 /* coef.cpp */; };
 		BD9D11661772809200C097B2 /* combine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11461772809200C097B2 /* combine.cpp */; };
@@ -37,7 +38,6 @@
 		BD9D11A71772809F00C097B2 /* herk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D118A1772809F00C097B2 /* herk.cpp */; };
 		BD9D11A81772809F00C097B2 /* hetrmm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D118C1772809F00C097B2 /* hetrmm.cpp */; };
 		BD9D11A91772809F00C097B2 /* lu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D118E1772809F00C097B2 /* lu.cpp */; };
-		BD9D11AA1772809F00C097B2 /* MPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11901772809F00C097B2 /* MPI.cpp */; };
 		BD9D11AB1772809F00C097B2 /* pack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11921772809F00C097B2 /* pack.cpp */; };
 		BD9D11AC1772809F00C097B2 /* TriInv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11941772809F00C097B2 /* TriInv.cpp */; };
 		BD9D11AD1772809F00C097B2 /* TrProps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11961772809F00C097B2 /* TrProps.cpp */; };
@@ -62,6 +62,8 @@
 /* Begin PBXFileReference section */
 		BD4E58B01774DD2D00834079 /* DLAOp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DLAOp.cpp; path = ../../src/DLA/DLAOp.cpp; sourceTree = "<group>"; };
 		BD4E58B11774DD2D00834079 /* DLAOp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DLAOp.h; path = ../../src/DLA/DLAOp.h; sourceTree = "<group>"; };
+		BD4E58B31776316700834079 /* comm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = comm.cpp; path = ../../src/DLA/comm.cpp; sourceTree = "<group>"; };
+		BD4E58B41776316700834079 /* comm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = comm.h; path = ../../src/DLA/comm.h; sourceTree = "<group>"; };
 		BD9D11421772809200C097B2 /* base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base.cpp; path = ../../src/base.cpp; sourceTree = "<group>"; };
 		BD9D11431772809200C097B2 /* base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base.h; path = ../../src/base.h; sourceTree = "<group>"; };
 		BD9D11441772809200C097B2 /* coef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = coef.cpp; path = ../../src/coef.cpp; sourceTree = "<group>"; };
@@ -122,8 +124,6 @@
 		BD9D118D1772809F00C097B2 /* hetrmm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hetrmm.h; path = ../../src/DLA/hetrmm.h; sourceTree = "<group>"; };
 		BD9D118E1772809F00C097B2 /* lu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lu.cpp; path = ../../src/DLA/lu.cpp; sourceTree = "<group>"; };
 		BD9D118F1772809F00C097B2 /* lu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lu.h; path = ../../src/DLA/lu.h; sourceTree = "<group>"; };
-		BD9D11901772809F00C097B2 /* MPI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MPI.cpp; path = ../../src/DLA/MPI.cpp; sourceTree = "<group>"; };
-		BD9D11911772809F00C097B2 /* MPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MPI.h; path = ../../src/DLA/MPI.h; sourceTree = "<group>"; };
 		BD9D11921772809F00C097B2 /* pack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pack.cpp; path = ../../src/DLA/pack.cpp; sourceTree = "<group>"; };
 		BD9D11931772809F00C097B2 /* pack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pack.h; path = ../../src/DLA/pack.h; sourceTree = "<group>"; };
 		BD9D11941772809F00C097B2 /* TriInv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TriInv.cpp; path = ../../src/DLA/TriInv.cpp; sourceTree = "<group>"; };
@@ -168,6 +168,8 @@
 		BDBB01261756776F0010EB4A /* DxTer */ = {
 			isa = PBXGroup;
 			children = (
+				BD4E58B31776316700834079 /* comm.cpp */,
+				BD4E58B41776316700834079 /* comm.h */,
 				BD9D11761772809F00C097B2 /* blas.cpp */,
 				BD9D11771772809F00C097B2 /* blas.h */,
 				BD9D11781772809F00C097B2 /* blis.cpp */,
@@ -196,8 +198,6 @@
 				BD9D118D1772809F00C097B2 /* hetrmm.h */,
 				BD9D118E1772809F00C097B2 /* lu.cpp */,
 				BD9D118F1772809F00C097B2 /* lu.h */,
-				BD9D11901772809F00C097B2 /* MPI.cpp */,
-				BD9D11911772809F00C097B2 /* MPI.h */,
 				BD9D11921772809F00C097B2 /* pack.cpp */,
 				BD9D11931772809F00C097B2 /* pack.h */,
 				BD9D11941772809F00C097B2 /* TriInv.cpp */,
@@ -327,13 +327,13 @@
 				BD9D11A71772809F00C097B2 /* herk.cpp in Sources */,
 				BD9D11A81772809F00C097B2 /* hetrmm.cpp in Sources */,
 				BD9D11A91772809F00C097B2 /* lu.cpp in Sources */,
-				BD9D11AA1772809F00C097B2 /* MPI.cpp in Sources */,
 				BD9D11AB1772809F00C097B2 /* pack.cpp in Sources */,
 				BD9D11AC1772809F00C097B2 /* TriInv.cpp in Sources */,
 				BD9D11AD1772809F00C097B2 /* TrProps.cpp in Sources */,
 				BD9D11AE1772809F00C097B2 /* trxm.cpp in Sources */,
 				BD9D11AF1772809F00C097B2 /* twoSidedTrxm.cpp in Sources */,
 				BD4E58B21774DD2D00834079 /* DLAOp.cpp in Sources */,
+				BD4E58B51776316700834079 /* comm.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
