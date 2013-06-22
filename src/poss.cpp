@@ -1517,7 +1517,12 @@ void Poss::FormSets(unsigned int phase)
 {
 #if DOSQOPHASE
   if (phase == SQOPHASE) {
-    InvalidateHash();
+#endif
+#if DOSMPPHASE
+    if (phase == SMPPHASE) {
+#endif
+#if DOSQOPHASE||DOSMPPHASE
+      InvalidateHash();
     
     //It's important to recurse first; otherwise,
     // we'd form sets, recurse into them, and form similar sets again
@@ -1544,7 +1549,7 @@ void Poss::FormSets(unsigned int phase)
       }
     }
   }
-#endif //DOSQOPHASE
+#endif //DOSQOPHASE||DOSMPPHASE
   /*
    else if (phase == ROPHASE || phase == SR1PHASE) {
    

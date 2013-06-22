@@ -127,6 +127,10 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
   if (phase == SQOPHASE) {
     m_pset->FormSets(phase);   
   }
+#elseif DOSMPPHASE
+  if (phase == SMPPHASE) {
+    m_pset->FormSets(phase);   
+  }
 #endif
   
   ClearFullyExpanded();
