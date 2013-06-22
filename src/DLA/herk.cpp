@@ -679,7 +679,7 @@ Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
   LoopTunnel *CtunOut = new LoopTunnel(POSSTUNOUT);
   CtunOut->AddInput(herk,0);
   CtunOut->AddInput(Ctun,0);
-  CtunOut->CopyUpStats(Ctun);
+  CtunOut->CopyTunnelInfo(Ctun);
 						
   Poss *loopPoss = new Poss(2, comA, CtunOut);
   Loop *loop;
@@ -830,7 +830,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   LoopTunnel *BtunOut = new LoopTunnel(POSSTUNOUT);
   BtunOut->AddInput(Btun, 0);
   BtunOut->AddInput(Btun, 0);
-  BtunOut->CopyUpStats(Btun);
+  BtunOut->CopyTunnelInfo(Btun);
   
   Combine *comC = splitC->CreateMatchingCombine(1,
                                                 1, herkbp, 0);

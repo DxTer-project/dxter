@@ -498,7 +498,7 @@ Loop* Chol3UpperAlg(Node *in, unsigned int num, bool dist)
     comA->AddInput(set3->OutTun(0),0);
     comA->AddInput(splitA,9);
 	
-    comA->CopyUpStats(splitA);
+    comA->CopyTunnelInfo(splitA);
     
     Poss *loopPoss = new Poss(1, comA);
     Loop *loop;

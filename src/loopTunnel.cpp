@@ -68,12 +68,13 @@ void LoopTunnel::SetAllStats(UpStat stat)
   SetUpStats(stat,stat,stat,stat);
 }
 
-void LoopTunnel::CopyUpStats(const LoopTunnel *tun)
+void LoopTunnel::CopyTunnelInfo(const LoopTunnel *tun)
 {
   m_statTL = tun->m_statTL;
   m_statTR = tun->m_statTR;
   m_statBL = tun->m_statBL;
   m_statBR = tun->m_statBR;
+  m_indepIters = tun->m_indepIters;
 }
 
 void LoopTunnel::SanityCheck()
@@ -104,7 +105,7 @@ PossTunnel* LoopTunnel::GetSetTunnel()
     tun = new LoopTunnel(SETTUNOUT);
   else
     throw;
-  tun->CopyUpStats(this);
+  tun->CopyTunnelInfo(this);
   return tun;
 }
 
@@ -324,7 +325,8 @@ Loop* LoopTunnel::GetMyLoop() const
 void LoopTunnel::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   PossTunnel::Duplicate(orig, shallow, possMerging);
-  CopyUpStats((LoopTunnel*)orig);
+  const LoopTunnel *tun = (LoopTunnel*)orig;
+  CopyTunnelInfo(tun);
 }
 
 NodeType LoopTunnel::GetType() const
@@ -456,6 +458,7 @@ void LoopTunnel::FlattenCore(ofstream &out) const
   WRITE(m_statTR);
   WRITE(m_statBL);
   WRITE(m_statBR);
+  WRITE(m_indepIters);
 }
 
 void LoopTunnel::UnflattenCore(ifstream &in, SaveInfo &info) 
@@ -465,6 +468,7 @@ void LoopTunnel::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_statTR);
   READ(m_statBL);
   READ(m_statBR);
+  READ(m_indepIters);
 }
 
 void LoopTunnel::StartFillingSizes()

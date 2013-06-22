@@ -40,7 +40,7 @@ class LoopTunnel : public PossTunnel
   void SetUpStats( UpStat statTL, UpStat statTR,
 		   UpStat statBL, UpStat statBR );
   void SetAllStats(UpStat stat);
-  void CopyUpStats(const LoopTunnel *tun);
+  void CopyTunnelInfo(const LoopTunnel *tun);
   virtual bool QuadInUse(Quad quad, bool atEnd) const;
   bool IsConst() const;
   UpStat GetUpStat(Quad quad) const;

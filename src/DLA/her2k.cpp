@@ -1128,7 +1128,7 @@ Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
   LoopTunnel *CtunOut = new LoopTunnel(POSSTUNOUT);
   CtunOut->AddInput(her2k,0);
   CtunOut->AddInput(CTun,0);
-  CtunOut->CopyUpStats(CTun);
+  CtunOut->CopyTunnelInfo(CTun);
 						
   Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
   Loop *loop;

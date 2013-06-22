@@ -1975,8 +1975,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
         LoopTunnel *inTun = (LoopTunnel*)leftSetOutput->GetMatchingInTun();
         rightSetInput->ChangeInput1Way(leftSetOutput,0,inTun->Input(0),inTun->InputConnNum(0));
         leftSetOutput->RemoveChild(rightSetInput,0);
-        leftSetOutput->CopyUpStats(rightSetInput);
-        leftSetOutput->GetMatchingInTun()->CopyUpStats(rightSetInput);
+        leftSetOutput->CopyTunnelInfo(rightSetInput);
+        leftSetOutput->GetMatchingInTun()->CopyTunnelInfo(rightSetInput);
       }
       else {
         NodeConnVecIter rightSetInputChildIter = rightSetInput->m_children.begin();

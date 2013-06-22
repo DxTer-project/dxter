@@ -148,7 +148,7 @@ PossTunnel* Combine::GetSetTunnel()
     tun = new Combine(m_dir, SETTUNOUT);
   else
     throw;
-  tun->CopyUpStats(this);
+  tun->CopyTunnelInfo(this);
   return tun;
 }
 

@@ -1572,7 +1572,7 @@ Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
   LoopTunnel *AtunOut = new LoopTunnel(POSSTUNOUT);
   AtunOut->AddInput(Atun, 0);
   AtunOut->AddInput(Atun, 0);
-  AtunOut->CopyUpStats(Atun);
+  AtunOut->CopyTunnelInfo(Atun);
   
   Combine *comB = splitB->CreateMatchingCombine(1,
                                                 1, trxm, 0);
@@ -1761,7 +1761,7 @@ Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
   LoopTunnel *AtunOut = new LoopTunnel(POSSTUNOUT);
   AtunOut->AddInput(Atun, 0);
   AtunOut->AddInput(Atun, 0);
-  AtunOut->CopyUpStats(Atun);
+  AtunOut->CopyTunnelInfo(Atun);
   
   Combine *comB = splitB->CreateMatchingCombine(1,
                                                 1, trxm, 0);
@@ -2113,7 +2113,7 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   else
     packTunOut->AddInput(packTun, 0);
   packTunOut->AddInput(packTun, 0);
-  packTunOut->CopyUpStats(packTun);
+  packTunOut->CopyTunnelInfo(packTun);
   
   Poss *loopPoss = new Poss(3, comA, comB, packTunOut);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
@@ -2445,7 +2445,7 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
   LoopTunnel *packTunOut = new LoopTunnel(POSSTUNOUT);
   packTunOut->AddInput(packTun, 0);
   packTunOut->AddInput(packTun, 0);
-  packTunOut->CopyUpStats(packTun);
+  packTunOut->CopyTunnelInfo(packTun);
   
   Poss *loopPoss = new Poss(4, comA, comB, packTunOut, comC);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);

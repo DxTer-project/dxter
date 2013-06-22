@@ -228,6 +228,8 @@ bool PSet::operator==(const PSet &rhs) const
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
           const LoopTunnel *tun1 = (LoopTunnel*)(m_inTuns[i]);
           const LoopTunnel *tun2 = (LoopTunnel*)(rhs.m_inTuns[i]);
+	  if (((Loop*)(tun1->m_pset))->m_parFactor != ((Loop*)(tun2->m_pset))->m_parFactor)
+	    return false;
           if (tun1->m_statTL != tun2->m_statTL
               || tun1->m_statBL != tun2->m_statBL
               || tun1->m_statTR != tun2->m_statTR

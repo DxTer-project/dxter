@@ -593,7 +593,7 @@ PossTunnel* Split::GetSetTunnel()
     tun = new Split(m_dir, SETTUNOUT);
   else
     throw;
-  tun->CopyUpStats(this);
+  tun->CopyTunnelInfo(this);
   return tun;
 }
 
@@ -961,7 +961,7 @@ Combine* Split::CreateMatchingCombine(int numArgs, ...)
     com->AddInput(this, j);
     ++j;
   }
-  com->CopyUpStats(this);
+  com->CopyTunnelInfo(this);
   return com;
 }
 

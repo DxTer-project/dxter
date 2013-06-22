@@ -491,6 +491,7 @@ bool L3Parallelization::CanApply(const Poss *poss, const Node *node) const
       const Loop *loop = (Loop*)(tun->m_pset);
       if (!loop->HasIndepIters()) {
         cout << "Doesn't have independent iters\n";
+        loop->m_posses[0]->ForcePrint();
         throw;
       }
       const Split *control = loop->GetControl();

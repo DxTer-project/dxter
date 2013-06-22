@@ -200,6 +200,8 @@ bool Loop::CanMerge(PSet *pset) const
   if (m_bsSize != ((Loop*)pset)->m_bsSize)
     return false;
   Loop *loop = (Loop*)pset;
+  if (loop->m_parFactor != 1 || m_parFactor != 1)
+    return false;
   if (m_type != loop->m_type)
     return false;
   const Split *split1 = GetControl();
@@ -495,6 +497,8 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     }
   }
   if (m_type == BLISLOOP) {
+    if (m_parFactor != 1)
+      *out << "***Parallelized with factor " << m_parFactor << "; need correct output code\n";
     string idx = "idx" + loopLevel;
     string dimLen = "dimLen" + loopLevel;
     string bs = "bs" + loopLevel;
@@ -552,6 +556,10 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
       bs = "bs" + loopLevel;
       out.Indent(1);
       *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
+  }
+  else {
+    if (m_parFactor != 1)
+      throw;
   }
   
   PSet::PrintCurrPoss(out, graphNum);

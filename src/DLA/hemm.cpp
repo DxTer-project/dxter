@@ -376,7 +376,7 @@ Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
   LoopTunnel *AtunOut = new LoopTunnel(POSSTUNOUT);
   AtunOut->AddInput(Atun, 0);
   AtunOut->AddInput(Atun, 0);
-  AtunOut->CopyUpStats(Atun);
+  AtunOut->CopyTunnelInfo(Atun);
   
   Combine *comB = splitB->CreateMatchingCombine(0);
   
@@ -1055,7 +1055,7 @@ void BLISHemmLoopExp::Apply(Poss *poss, Node *node) const
   LoopTunnel *BtunOut = new LoopTunnel(POSSTUNOUT);
   BtunOut->AddInput(Btun, 0);
   BtunOut->AddInput(Btun, 0);
-  BtunOut->CopyUpStats(Btun);
+  BtunOut->CopyTunnelInfo(Btun);
   
   Combine *comC = splitC->CreateMatchingCombine(1,
                                                 1, gebp, 0);

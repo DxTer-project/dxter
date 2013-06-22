@@ -2090,21 +2090,9 @@ PSet* CholHegstExample()
     comA->AddInput(set7->OutTun(0),0);
     comA->AddInput(splitA,9);
   
-    comA->CopyUpStats(splitA);
+    comA->CopyTunnelInfo(splitA);
 
-    Combine *comL = new Combine(PARTDIAG, POSSTUNOUT);
-    comL->AddInput(splitL,0);
-    comL->AddInput(splitL,1);
-    comL->AddInput(splitL,2);
-    comL->AddInput(splitL,3);
-    comL->AddInput(splitL,4);
-    comL->AddInput(splitL,5);
-    comL->AddInput(splitL,6);
-    comL->AddInput(splitL,7);
-    comL->AddInput(splitL,8);
-    comL->AddInput(splitL,9);
-
-    comL->CopyUpStats(splitL);
+    Combine *comL = splitL->CreateMatchingCombine(0);
 
     Poss *loopPoss = new Poss(2,
 			      comA,

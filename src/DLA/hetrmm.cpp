@@ -267,7 +267,7 @@ Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num)
   comA3->AddInput(split,9);
 
 
-  comA3->CopyUpStats(split);
+  comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -312,7 +312,7 @@ Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num)
   comA3->AddInput(split,8);
   comA3->AddInput(split,9);
 
-  comA3->CopyUpStats(split);
+  comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -364,7 +364,7 @@ Loop* HetrmmAlgVar2Lower(Node *in, unsigned int num)
   comA3->AddInput(split,8);
   comA3->AddInput(split,9);
 
-  comA3->CopyUpStats(split);
+  comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -413,7 +413,7 @@ Loop* HetrmmAlgVar2Upper(Node *in, unsigned int num)
   comA3->AddInput(split,8);
   comA3->AddInput(split,9);
 
-  comA3->CopyUpStats(split);
+  comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -462,7 +462,7 @@ Loop* HetrmmAlgVar3Lower(Node *in, unsigned int num)
   comA3->AddInput(split,9);
 
 
-  comA3->CopyUpStats(split);
+  comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -507,7 +507,7 @@ Loop* HetrmmAlgVar3Upper(Node *in, unsigned int num)
   comA3->AddInput(split,8);
   comA3->AddInput(split,9);
 
-  comA3->CopyUpStats(split);
+  comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);

@@ -238,7 +238,7 @@ Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
   comA2->AddInput(split,8);
   comA2->AddInput(split,9);
 
-  comA2->CopyUpStats(split);
+  comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -281,7 +281,7 @@ Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
   comA2->AddInput(split,8);
   comA2->AddInput(split,9);
 
-  comA2->CopyUpStats(split);
+  comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -324,7 +324,7 @@ Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
   comA2->AddInput(split,8);
   comA2->AddInput(split,9);
 
-  comA2->CopyUpStats(split);
+  comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -368,7 +368,7 @@ Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
   comA2->AddInput(split,8);
   comA2->AddInput(split,9);
 
-  comA2->CopyUpStats(split);
+  comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -414,7 +414,7 @@ Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
   comA2->AddInput(split,8);
   comA2->AddInput(split,9);
 
-  comA2->CopyUpStats(split);
+  comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -464,7 +464,7 @@ Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
   comA2->AddInput(split,8);
   comA2->AddInput(split,9);
 
-  comA2->CopyUpStats(split);
+  comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -512,7 +512,7 @@ Loop* TriInvAlgVar3Upper(Node *in, unsigned int num)
   comA2->AddInput(split,8);
   comA2->AddInput(split,9);
 
-  comA2->CopyUpStats(split);
+  comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);

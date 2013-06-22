@@ -324,7 +324,7 @@ Loop* TwoSidedTrsmLowerVar1Alg(
   comA->AddInput(splitA,8);
   comA->AddInput(splitA,9);
   
-  comA->CopyUpStats(splitA);
+  comA->CopyTunnelInfo(splitA);
 
   Combine *comL = splitL->CreateMatchingCombine(0);
 
@@ -413,7 +413,7 @@ Loop* TwoSidedTrsmLowerVar2Alg(
   comA->AddInput(splitA,8);
   comA->AddInput(splitA,9);
   
-  comA->CopyUpStats(splitA);
+  comA->CopyTunnelInfo(splitA);
 
   Combine *comL = splitL->CreateMatchingCombine(0);
 
@@ -495,7 +495,7 @@ Loop* TwoSidedTrsmLowerVar4Alg(
   comA->AddInput(her2k,0);
   comA->AddInput(splitA,9);
   
-  comA->CopyUpStats(splitA);
+  comA->CopyTunnelInfo(splitA);
 
   Combine *comL = new Combine(PARTDIAG, POSSTUNOUT);
   comL->AddInput(splitL,0);
@@ -509,7 +509,7 @@ Loop* TwoSidedTrsmLowerVar4Alg(
   comL->AddInput(splitL,8);
   comL->AddInput(splitL,9);
 
-  comL->CopyUpStats(splitL);
+  comL->CopyTunnelInfo(splitL);
 
   Poss *loopPoss = new Poss(2,
 			    comA,
@@ -590,7 +590,7 @@ Loop* TwoSidedTrmmLowerVar1Alg(
   comA->AddInput(splitA,8);
   comA->AddInput(splitA,9);
   
-  comA->CopyUpStats(splitA);
+  comA->CopyTunnelInfo(splitA);
 
   Combine *comL = splitL->CreateMatchingCombine(0);
 
