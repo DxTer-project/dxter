@@ -262,7 +262,7 @@ void DLACullLA(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 }
 
 #if DOSQM || DOSM
-void DLACullSQR(Poss *poss, bool &cullIfPossible, bool &doNotCull)
+void DLACullSR(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 {
   doNotCull = false;
   cullIfPossible = false;

@@ -1104,11 +1104,14 @@ bool HemmLowerLayer::CanApply(const Poss *poss, const Node *node) const
     const Hemm *hemm = (Hemm*)node;
     if (hemm->GetLayer() != m_fromLayer)
       return false;
+    if (hemm->m_side != LEFT)
+      throw;
     if (m_dim == DIMK)
       return (*(hemm->InputLocalM(0)) <= m_bs
 	      && *(hemm->InputLocalN(0)) <= m_bs);
-    else if (m_dim == DIMN)
+    else if (m_dim == DIMN) {
       return (*(hemm->InputLocalN(1)) <= m_bs);
+    }
     else
       throw;
   }

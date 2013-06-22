@@ -250,16 +250,22 @@ void AddTrans()
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, DMLAYER, 2), DPPHASE);
 #endif //DPPHASE
 #if DOSR1PHASE
-  Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, SQ1LAYER, 1), SQR1PHASE);
-  Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, SQ1LAYER, -1), SQR1PHASE);
+  Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, S1LAYER, 2), SR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Gemm::GetClass(), new GemmLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
+  Universe::AddTrans(Gemm::GetClass(), new GemmLowerLayer(ABSLAYER, S1LAYER, DIMN, BLIS_NC_BSVAL), SR1PHASE);
 #endif
-#endif //SQR1PHASE
+#endif //DOSR1PHASE
+#if DOSR2PHASE
+  Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(S1LAYER, S2LAYER, 1), SR2PHASE);
+  Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(S1LAYER, S2LAYER, -1), SR2PHASE);
+#if USELOWERING
+  Universe::AddTrans(Gemm::GetClass(), new GemmLowerLayer(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
+#endif
+#endif //SR1PHASE
 
 #if DOSR2PHASE
-  Universe::AddTrans(Gemm::GetClass(), new BLISGemmLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
-#endif //SQR2PHASE
+  Universe::AddTrans(Gemm::GetClass(), new BLISGemmLoopExp(S2LAYER, S3LAYER), SR3PHASE);
+#endif //SR2PHASE
 
 #if DODPPHASE  
   MultiTrans *gemmTrans = new MultiTrans;
@@ -287,10 +293,10 @@ void AddTrans()
 #if DOSR1PHASE
   Universe::AddTrans(TwoSidedTrxm::GetClass(), new TwoSidedTrxmLoopExp(2, ABSLAYER, 
 								       TWOSIDEDTRXMCOMPONENTSLAYER, 
-								       TWOSIDEDTRXMLAYER), SQR1PHASE);
+								       TWOSIDEDTRXMLAYER), SR1PHASE);
   Universe::AddTrans(TwoSidedTrxm::GetClass(), new TwoSidedTrxmLoopExp(4, ABSLAYER, 
 								       TWOSIDEDTRXMCOMPONENTSLAYER, 
-								       TWOSIDEDTRXMLAYER), SQR1PHASE);
+								       TWOSIDEDTRXMLAYER), SR1PHASE);
 #endif
 
 #if DODPPHASE
@@ -300,15 +306,22 @@ void AddTrans()
 #endif //DPPHASE
 
 #if DOSR1PHASE
-  Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(ABSLAYER, SQ1LAYER, 8), SQR1PHASE);
+  Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(ABSLAYER, S1LAYER, 4), SR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Hemm::GetClass(), new HemmLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
+  Universe::AddTrans(Hemm::GetClass(), new HemmLowerLayer(ABSLAYER, S1LAYER, DIMN, BLIS_NC_BSVAL), SR1PHASE);
 #endif
-#endif //SQR1PHASE
+#endif //SR1PHASE
 
-#if DOSR2PHASE
-  Universe::AddTrans(Hemm::GetClass(), new BLISHemmLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
-#endif //SQR2PHASE
+#if DOSR1PHASE
+  Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(S1LAYER, S2LAYER, 8), SR2PHASE);
+#if USELOWERING
+  Universe::AddTrans(Hemm::GetClass(), new HemmLowerLayer(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
+#endif
+#endif //SR1PHASE
+
+#if DOSR3PHASE
+  Universe::AddTrans(Hemm::GetClass(), new BLISHemmLoopExp(S2LAYER, S3LAYER), SR3PHASE);
+#endif //SR3PHASE
 
 #if DODPPHASE
   MultiTrans *hemmTrans = new MultiTrans;
@@ -356,24 +369,58 @@ void AddTrans()
 
 
 #if DOSR1PHASE
-  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, SQ1LAYER, 2), SQR1PHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrmmAxpytoTrxm3(ABSLAYER), SR1PHASE);
+  Universe::AddTrans(Trxm::GetClass(), new CopyTrmmtoTrxm3(ABSLAYER), SR1PHASE);
+#endif // DOSR1PHASE
+
+#if DOSR1PHASE
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, S1LAYER, 3), SR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Trxm::GetClass(), new TrxmLowerLayer<Trxm>(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLowerLayer<Trxm>(ABSLAYER, S1LAYER, DIMN, BLIS_NC_BSVAL), SR1PHASE);
 #endif
 
-  Universe::AddTrans(Trxm::GetClass(), new TrmmAxpytoTrxm3(ABSLAYER), SQR1PHASE);
-  Universe::AddTrans(Trxm::GetClass(), new CopyTrmmtoTrxm3(ABSLAYER), SQR1PHASE);
-
-  Universe::AddTrans(Trmm3::GetClass(), new Trmm3LoopExp(ABSLAYER, SQ1LAYER, 2), SQR1PHASE);
+  Universe::AddTrans(Trmm3::GetClass(), new Trmm3LoopExp(ABSLAYER, S1LAYER, 3), SR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Trmm3::GetClass(), new TrxmLowerLayer<Trmm3>(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
+    Universe::AddTrans(Trmm3::GetClass(), new TrxmLowerLayer<Trmm3>(ABSLAYER, S1LAYER, DIMN, BLIS_NC_BSVAL), SR1PHASE);
+#endif
+#endif //SR1PHASE
+
+#if DOSR2PHASE
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(S1LAYER, S2LAYER, 2), SR2PHASE);
+#if USELOWERING
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLowerLayer<Trxm>(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
+#endif
+
+  Universe::AddTrans(Trmm3::GetClass(), new Trmm3LoopExp(S1LAYER, S2LAYER, 2), SR2PHASE);
+#if USELOWERING
+  Universe::AddTrans(Trmm3::GetClass(), new TrxmLowerLayer<Trmm3>(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
+#endif
+#endif //SR1PHASE
+
+#if DOSR3PHASE
+  Universe::AddTrans(Trxm::GetClass(), new BLISTrxmLoopExp(S2LAYER, S3LAYER), SR3PHASE);
+  Universe::AddTrans(Trmm3::GetClass(), new BLISTrmm3LoopExp(S2LAYER, S3LAYER), SR3PHASE);
+#endif //SR2PHASE
+
+
+#if DODPPHASE
+  Universe::AddTrans(Herk::GetClass(), new DistHerkToLocalTriRK, DPPHASE);
+  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, DMLAYER, 1), DPPHASE);
+  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, DMLAYER, 2), DPPHASE);
+  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, DMLAYER, 5), DPPHASE);
+#endif //DODPPHASE
+
+  /*
+#if DOSR1PHASE
+  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, SQ1LAYER, 5), SQR1PHASE);
+#if USELOWERING
+  Universe::AddTrans(Herk::GetClass(), new HerkLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif
 #endif //SQR1PHASE
 
 #if DOSR2PHASE
-  Universe::AddTrans(Trxm::GetClass(), new BLISTrxmLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
-  Universe::AddTrans(Trmm3::GetClass(), new BLISTrmm3LoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
-#endif //SQR1PHASE
+  Universe::AddTrans(Herk::GetClass(), new BLISHerkLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
+#endif //SQR2PHASE
 
 
 #if DOSR1PHASE
@@ -386,7 +433,7 @@ void AddTrans()
 #if DOSR2PHASE
   Universe::AddTrans(Her2k::GetClass(), new Her2kToHerk(SQ1LAYER, SQ2LAYER), SQR2PHASE);
 #endif //SQR1PHASE
-
+  */
 
 
 #if DODPPHASE
@@ -412,23 +459,6 @@ void AddTrans()
 #endif
 #endif //DPPHASE
 
-#if DODPPHASE
-  Universe::AddTrans(Herk::GetClass(), new DistHerkToLocalTriRK, DPPHASE);
-  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, DMLAYER, 1), DPPHASE);
-  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, DMLAYER, 2), DPPHASE);
-  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, DMLAYER, 5), DPPHASE);
-#endif //DODPPHASE
-
-#if DOSR1PHASE
-  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, SQ1LAYER, 5), SQR1PHASE);
-#if USELOWERING
-  Universe::AddTrans(Herk::GetClass(), new HerkLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
-#endif
-#endif //SQR1PHASE
-
-#if DOSR2PHASE
-  Universe::AddTrans(Herk::GetClass(), new BLISHerkLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
-#endif //SQR2PHASE
 
 
 #if DOROPHASE
@@ -481,7 +511,7 @@ void AddTrans()
 #endif //DODPPHASE
 
 #if DOSR1PHASE
-  Universe::AddTrans(LU::GetClass(), new LULoopExp(ABSLAYER, ABSLAYER, SQ2LAYER, 5), SQR1PHASE);
+  Universe::AddTrans(LU::GetClass(), new LULoopExp(ABSLAYER, ABSLAYER, S3LAYER, 5), SR1PHASE);
 #endif //DOSR1PHASE
 }
 
@@ -559,7 +589,7 @@ void AddSimplifiers()
   Universe::AddTrans(PackBuff::GetClass(), new UnifyPackBuffParams, SIMP);
   Universe::AddTrans(Pack::GetClass(), new LoopInvariantPackMotion, GLOBSIMP);
   Universe::AddTrans(Pack::GetClass(), new CombinePacking, GLOBSIMP);
-  Universe::AddTrans(Pack::GetClass(), new ReuseTrsmPacking(SQ2LAYER), SIMP);
+  Universe::AddTrans(Pack::GetClass(), new ReuseTrsmPacking(S3LAYER), SIMP);
   Universe::AddTrans(PackBuff::GetClass(), new CombinePackBuff, SIMP);
   Universe::AddTrans(Transpose::GetClass(), new CombineTranspose, SIMP);
 #if DODPPHASE
@@ -569,7 +599,7 @@ void AddSimplifiers()
   Universe::AddTrans(Trmm3::GetClass(), new Trmm3RightToLeft(ABSLAYER), SIMP);
   Universe::AddTrans(Hemm::GetClass(), new HemmRightToLeft(ABSLAYER), SIMP);
 #endif //DODPPHASE
-#endif //SQR2PHASE
+#endif //SR2PHASE
 
 #if DOSQOPHASE
   Universe::AddTrans(PackBuff::GetClass(), new RenamePackBuff, SIMP);
@@ -889,7 +919,7 @@ int main(int argc, const char* argv[])
     cout << "Shared-memory parallelization phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
     time(&start2);
-    uni.Expand(numIters, SMPPHASE, DLACullSQR);
+    uni.Expand(numIters, SMPPHASE, DLACullSR);
     time(&end);
     cout << "SMP phase took " << difftime(end,start2) << " seconds\n";
     
