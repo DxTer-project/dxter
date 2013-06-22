@@ -2312,13 +2312,15 @@ void Trmm3RightToLeft::Apply(Poss *poss, Node *node) const
 template<>
 string TrxmLowerLayer<Trxm>::GetType() const 
 { 
-  return "Trxm lower layer"; 
+  return "Trxm lower layer"  + LayerNumToStr(m_fromLayer) 
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
 template<>
 string TrxmLowerLayer<Trmm3>::GetType() const 
 { 
-  return "Trmm3 lower layer"; 
+  return "Trmm3 lower layer"  + LayerNumToStr(m_fromLayer) 
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
 template<class TrxmType>

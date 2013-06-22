@@ -1481,3 +1481,9 @@ void GemmLowerLayer::Apply(Poss *poss, Node *node) const
   Gemm *gemm = (Gemm*)node;
   gemm->SetLayer(m_toLayer);
 }
+
+string GemmLowerLayer::GetType() const
+{ 
+  return "Gemm lower layer " + LayerNumToStr(m_fromLayer) 
+    + " to " + LayerNumToStr(m_toLayer);
+}

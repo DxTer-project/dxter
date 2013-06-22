@@ -302,6 +302,12 @@ void AxpyToBLASAxpy::Apply(Poss *poss, Node *node) const
   ((DLANode*)node)->SetLayer(m_toLayer);
 }
 
+string AxpyLowerLayer::GetType() const 
+{ 
+  return "Axpy lower layer " + LayerNumToStr(m_fromLayer) 
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
 bool AxpyLowerLayer::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() == Axpy::GetClass()) {

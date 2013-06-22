@@ -1245,3 +1245,9 @@ void Her2kLowerLayer::Apply(Poss *poss, Node *node) const
   Her2k *her2k = (Her2k*)node;
   her2k->SetLayer(m_toLayer);
 }
+
+string Her2kLowerLayer::GetType() const
+{ 
+  return "Her2k lower layer " + LayerNumToStr(m_fromLayer) 
+    + " to " + LayerNumToStr(m_toLayer);
+}

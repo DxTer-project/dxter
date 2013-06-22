@@ -178,7 +178,7 @@ class HerkLowerLayer : public LowerLayer
  public:
  HerkLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
-  virtual string GetType() const { return "Herk lower layer"; }
+  virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };

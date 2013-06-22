@@ -60,7 +60,7 @@ class AxpyLowerLayer : public SingleTrans
   Layer m_fromLayer, m_toLayer;
  AxpyLowerLayer(Layer fromLayer, Layer toLayer)
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
-  virtual string GetType() const { return "Axpy lower layer"; }
+  virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };

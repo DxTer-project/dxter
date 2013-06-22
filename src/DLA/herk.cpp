@@ -927,3 +927,10 @@ void HerkLowerLayer::Apply(Poss *poss, Node *node) const
   Herk *herk = (Herk*)node;
   herk->SetLayer(m_toLayer);
 }
+
+
+string HerkLowerLayer::GetType() const
+{ 
+  return "Herk lower layer " + LayerNumToStr(m_fromLayer) 
+    + " to " + LayerNumToStr(m_toLayer);
+}

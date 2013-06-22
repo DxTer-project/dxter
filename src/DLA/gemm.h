@@ -179,7 +179,7 @@ class GemmLowerLayer : public LowerLayer
  public:
  GemmLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
-  virtual string GetType() const { return "Gemm lower layer"; }
+  virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };

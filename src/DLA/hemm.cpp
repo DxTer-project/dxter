@@ -1123,3 +1123,9 @@ void HemmLowerLayer::Apply(Poss *poss, Node *node) const
   Hemm *hemm = (Hemm*)node;
   hemm->SetLayer(m_toLayer);
 }
+
+string HemmLowerLayer::GetType() const
+{ 
+  return "Hemm lower layer " + LayerNumToStr(m_fromLayer) 
+    + " to " + LayerNumToStr(m_toLayer);
+}

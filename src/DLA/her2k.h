@@ -217,7 +217,7 @@ class Her2kLowerLayer : public LowerLayer
  public:
  Her2kLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
-  virtual string GetType() const { return "Her2k lower layer"; }
+  virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
