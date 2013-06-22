@@ -513,6 +513,7 @@ bool L3Parallelization::CanApply(const Poss *poss, const Node *node) const
 void L3Parallelization::Apply(Poss *poss, Node *node) const
 {
   PackBuff *buff = (PackBuff*)node;
+  buff->Parallelize(m_parFactor);
   Pack *pack = (Pack*)buff->Child(0);
   pack->Parallelize(m_parFactor);
   NodeConnVecConstIter iter = pack->m_children.begin();

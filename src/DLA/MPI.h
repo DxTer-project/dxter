@@ -27,8 +27,14 @@
 #include "DLANode.h"
 
 enum Comm {
+#if DODM
   MRCOMM,
   MCCOMM,
+#elif DOSM
+  GLOBALCOMM,  //Communicate between all cores in system
+  PROCCOMM,    //Communicate between all cores on processor (e.g. all cores sharing the L3)
+  L2COMM,      //Communicate between all cores sharing my L2
+#endif
   BADCOMM
 };
 

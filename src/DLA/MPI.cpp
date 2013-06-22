@@ -28,10 +28,19 @@ string CommToStr(Comm comm)
 {
   switch(comm)
     {
+#if DODM
     case(MRCOMM):
       return "g.MRComm()";
     case (MCCOMM):
       return "g.MCComm()";
+#elsif DOSM
+    case(GLOBALCOMM):
+      return "GlobalComm";
+    case(PROCCOM):
+      return "ProcComm";
+    case(L2COMM):
+      return "L2Comm";
+#endif
     default:
       throw;
     }

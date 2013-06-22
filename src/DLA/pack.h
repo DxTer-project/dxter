@@ -46,7 +46,7 @@ class Pack : public DLAOp<2,1>
   unsigned int m_var;
   bool m_scaleAlpha, m_densify, m_invertDiag,
     m_revUpper, m_revLower;
-  unsigned int m_parFactor;
+  Comm m_comm;
  Pack(PackType pack, unsigned int var,
       bool scaleAlpha, bool densify, bool invertDiag,
       bool revUpper, bool revLower);
@@ -66,7 +66,7 @@ class Pack : public DLAOp<2,1>
   virtual Name GetName(unsigned int num) const;
   virtual void SanityCheck();
   virtual unsigned int NumOutputs() const {return 1;}
-  inline void Parallelize(unsigned int parFactor) {m_parFactor=parFactor;}
+  inline void Parallelize(Comm comm) {m_comm=comm;}
 };
 
 class PackBuff : public DLAOp<1,1>
