@@ -1223,12 +1223,16 @@ bool Her2kLowerLayer::CanApply(const Poss *poss, const Node *node) const
     const Her2k *her2k = (Her2k*)node;
     if (her2k->GetLayer() != m_fromLayer)
       return false;
-    if (her2k->m_trans == NORMAL) {
-      return (*(her2k->InputLocalN(0)) <= BLIS_KC_BSVAL);
+    if (m_dim == DIMK) {
+      if (her2k->m_trans == NORMAL) {
+	return (*(her2k->InputLocalN(0)) <= m_bs);
+      }
+      else {
+	return (*(her2k->InputLocalM(0)) <= m_bs);
+      }
     }
-    else {
-      return (*(her2k->InputLocalM(0)) <= BLIS_KC_BSVAL);
-    }
+    else
+      throw;
   }
   return false;
   

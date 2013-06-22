@@ -26,6 +26,7 @@
 #include "transform.h"
 #include "distributions.h"
 #include "DLAOp.h"
+#include "lowerLayer.h"
 
 Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum, 
 		    Node *Bin, unsigned int Bnum, 
@@ -211,12 +212,11 @@ class Her2kToHerk : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
-class Her2kLowerLayer : public SingleTrans
+class Her2kLowerLayer : public LowerLayer
 {
  public:
-  Layer m_fromLayer, m_toLayer;
- Her2kLowerLayer(Layer fromLayer, Layer toLayer)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+ Her2kLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+   : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const { return "Her2k lower layer"; }
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;

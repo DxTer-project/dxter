@@ -2315,8 +2315,13 @@ bool TrxmLowerLayer<TrxmType>::CanApply(const Poss *poss, const Node *node) cons
     const TrxmType *trxm = (TrxmType*)node;
     if (trxm->GetLayer() != m_fromLayer)
       return false;
-    return (*(trxm->InputLocalM(0)) <= BLIS_KC_BSVAL
-	    && *(trxm->InputLocalN(0)) <= BLIS_KC_BSVAL);
+    if (m_dim == DIMK)
+      return (*(trxm->InputLocalM(0)) <= m_bs
+	      && *(trxm->InputLocalN(0)) <= m_bs);
+    else if (m_dim == DIMN)
+      return (*(trxm->InputLocalN(1)) <= m_bs);
+    else
+      throw;
   }
   return false;
   

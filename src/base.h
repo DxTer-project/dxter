@@ -137,6 +137,14 @@ enum PackSize { USEMRSIZE,
 		USENRSIZE,
 		BADPACKSIZE };
 
+enum Dim {
+  DIMM,
+  DIMK,
+  DIMN,
+  BADDIM
+  
+};
+
 string BoolToStr(bool boolVal);	    
 string DistTypeToStr(DistType distType);
 DistType GetBaseDistType(DistType distType);

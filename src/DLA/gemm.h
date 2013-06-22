@@ -26,6 +26,7 @@
 #include "DLAOp.h"
 #include "transform.h"
 #include "distributions.h"
+#include "lowerLayer.h"
 
 Loop* GemmVar1Loop(Node *Ain, unsigned int Anum, 
 		Node *Bin, unsigned int Bnum, 
@@ -173,12 +174,11 @@ class BLISGemmLoopExp : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
-class GemmLowerLayer : public SingleTrans
+class GemmLowerLayer : public LowerLayer
 {
  public:
-  Layer m_fromLayer, m_toLayer;
- GemmLowerLayer(Layer fromLayer, Layer toLayer)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+ GemmLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+   : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const { return "Gemm lower layer"; }
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;

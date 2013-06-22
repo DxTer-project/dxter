@@ -26,6 +26,7 @@
 #include "transform.h"
 #include "DLAOp.h"
 #include "distributions.h"
+#include "lowerLayer.h"
 
 Loop* HerkLoopVar1(Node *Ain, unsigned int Anum, 
 		   Node *Cin, unsigned int Cnum,
@@ -172,12 +173,11 @@ class HerkBP : public DLAOp<3,1>
   virtual void PrintCode(IndStream &out);
 };
 
-class HerkLowerLayer : public SingleTrans
+class HerkLowerLayer : public LowerLayer
 {
  public:
-  Layer m_fromLayer, m_toLayer;
- HerkLowerLayer(Layer fromLayer, Layer toLayer)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+ HerkLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+   : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const { return "Herk lower layer"; }
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;

@@ -27,6 +27,7 @@
 #include "DLAOp.h"
 #include "distributions.h"
 #include "blis.h"
+#include "lowerLayer.h"
 
 Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
 		   Node *Bin, unsigned int Bnum,
@@ -165,12 +166,11 @@ class HemmRightToLeft : public SingleTrans
 };
 
 
-class HemmLowerLayer : public SingleTrans
+class HemmLowerLayer : public LowerLayer
 {
  public:
-  Layer m_fromLayer, m_toLayer;
- HemmLowerLayer(Layer fromLayer, Layer toLayer)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+ HemmLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+   : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const { return "Hemm lower layer"; }
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;

@@ -22,6 +22,7 @@
 
 
 #include "base.h"
+#include "costs.h"
 #include "omp.h"
 #include "transform.h"
 #include "distributions.h"
@@ -45,7 +46,7 @@
 #define EXPLOREREDISTS 1
 #define EXPLORETRANS 1
 #define USESPECIALTRSM 0
-#define USELOWERING 0
+#define USELOWERING 1
 
 #define REMOVESCALEBYONE 1 
 
@@ -251,7 +252,7 @@ void AddTrans()
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, SQ1LAYER, 1), SQR1PHASE);
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(ABSLAYER, SQ1LAYER, -1), SQR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Gemm::GetClass(), new GemmLowerLayer(ABSLAYER, SQ1LAYER), SQR1PHASE);
+  Universe::AddTrans(Gemm::GetClass(), new GemmLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif
 #endif //SQR1PHASE
 
@@ -300,7 +301,7 @@ void AddTrans()
 #if DOSQR1PHASE
   Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(ABSLAYER, SQ1LAYER, 8), SQR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Hemm::GetClass(), new HemmLowerLayer(ABSLAYER, SQ1LAYER), SQR1PHASE);
+  Universe::AddTrans(Hemm::GetClass(), new HemmLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif
 #endif //SQR1PHASE
 
@@ -356,7 +357,7 @@ void AddTrans()
 #if DOSQR1PHASE
   Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, SQ1LAYER, 2), SQR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Trxm::GetClass(), new TrxmLowerLayer<Trxm>(ABSLAYER, SQ1LAYER), SQR1PHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLowerLayer<Trxm>(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif
 
   Universe::AddTrans(Trxm::GetClass(), new TrmmAxpytoTrxm3(ABSLAYER), SQR1PHASE);
@@ -364,7 +365,7 @@ void AddTrans()
 
   Universe::AddTrans(Trmm3::GetClass(), new Trmm3LoopExp(ABSLAYER, SQ1LAYER, 2), SQR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Trmm3::GetClass(), new TrxmLowerLayer<Trmm3>(ABSLAYER, SQ1LAYER), SQR1PHASE);
+  Universe::AddTrans(Trmm3::GetClass(), new TrxmLowerLayer<Trmm3>(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif
 #endif //SQR1PHASE
 
@@ -377,7 +378,7 @@ void AddTrans()
 #if DOSQR1PHASE
   Universe::AddTrans(Her2k::GetClass(), new Her2kLoopExp(ABSLAYER, SQ1LAYER, 9), SQR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Her2k::GetClass(), new Her2kLowerLayer(ABSLAYER, SQ1LAYER), SQR1PHASE);
+  Universe::AddTrans(Her2k::GetClass(), new Her2kLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif 
 #endif //SQR1PHASE
 
@@ -420,7 +421,7 @@ void AddTrans()
 #if DOSQR1PHASE
   Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, SQ1LAYER, 5), SQR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Herk::GetClass(), new HerkLowerLayer(ABSLAYER, SQ1LAYER), SQR1PHASE);
+  Universe::AddTrans(Herk::GetClass(), new HerkLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif
 #endif //SQR1PHASE
 

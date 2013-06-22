@@ -19,8 +19,6 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #include "gemm.h"
 #include "distributions.h"
 #include "string.h"
@@ -1442,12 +1440,24 @@ bool GemmLowerLayer::CanApply(const Poss *poss, const Node *node) const
     const Gemm *gemm = (Gemm*)node;
     if (gemm->GetLayer() != m_fromLayer)
       return false;
-    if (gemm->m_transA == NORMAL) {
-      return (*(gemm->InputLocalN(0)) <= BLIS_KC_BSVAL);
+    if (m_dim == DIMK) {
+      if (gemm->m_transA == NORMAL) {
+	return (*(gemm->InputLocalN(0)) <= m_bs);
+      }
+      else {
+	return (*(gemm->InputLocalM(0)) <= m_bs);
+      }
     }
-    else {
-      return (*(gemm->InputLocalM(0)) <= BLIS_KC_BSVAL);
+    else if (m_dim == DIMN) {
+      if (gemm->m_transB == NORMAL) {
+	return (*(gemm->InputLocalN(1)) <= m_bs);
+      }
+      else {
+	return (*(gemm->InputLocalM(1)) <= m_bs);
+      }
     }
+    else
+      throw;
   }
   return false;
   

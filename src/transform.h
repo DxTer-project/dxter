@@ -68,3 +68,4 @@ class MultiTrans : public Transformation
   virtual bool IsRef() const {return m_isRef;}
   unsigned int NumTransformations() const {return m_trans.size();}
 };
+

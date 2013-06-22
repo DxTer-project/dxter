@@ -905,12 +905,16 @@ bool HerkLowerLayer::CanApply(const Poss *poss, const Node *node) const
     const Herk *herk = (Herk*)node;
     if (herk->GetLayer() != m_fromLayer)
       return false;
-    if (herk->m_transA == NORMAL) {
-      return (*(herk->InputLocalN(0)) <= BLIS_KC_BSVAL);
+    if (m_dim == DIMK) {
+      if (herk->m_transA == NORMAL) {
+	return (*(herk->InputLocalN(0)) <= m_bs);
+      }
+      else {
+	return (*(herk->InputLocalM(0)) <= m_bs);
+      }
     }
-    else {
-      return (*(herk->InputLocalM(0)) <= BLIS_KC_BSVAL);
-    }
+    else
+      throw;
   }
   return false;
   

@@ -30,6 +30,7 @@
 #include "herk.h"
 #include "hemm.h"
 #include "TrProps.h"
+#include "lowerLayer.h"
 
 bool IsDMTrxm(const Node *node);
 bool IsDMTrxm(const Node *node, bool invert);
@@ -258,12 +259,11 @@ class Trmm3RightToLeft : public SingleTrans
 };
 
 template<class TrxmType>
-class TrxmLowerLayer : public SingleTrans
+class TrxmLowerLayer : public LowerLayer
 {
  public:
-  Layer m_fromLayer, m_toLayer;
- TrxmLowerLayer(Layer fromLayer, Layer toLayer)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+ TrxmLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+   : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const { return "Trxm lower layer"; }
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;

@@ -27,5 +27,6 @@ open:
 
 opencpp:
 	emacs src/*cpp src/DLA/*cpp
+
 openh:
 	emacs src/*h src/DLA/*h
