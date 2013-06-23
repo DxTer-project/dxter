@@ -297,6 +297,8 @@ DistType TriRK::GetDistType(unsigned int num) const
 {
   if (GetLayer() == SMLAYER)
     return InputDistType(2);
+  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER)
+    return InputDistType(2);
   else
     throw;
 }
@@ -318,16 +320,20 @@ void TriRK::Duplicate(const Node *orig, bool shallow, bool possMerging)
 void TriRK::SanityCheck()
 {
   DLAOp<3,1>::SanityCheck();
-  if (GetLayer() != SMLAYER)
-    throw;
   if (m_inputs.size() != 3) {
     cout << "m_inputs.size() != 3 2\n";
     throw;
   }
-  if (InputDistType(2) != D_MC_MR)
-    throw;
-  if (m_type == REAL) {
-    if (m_transA == CONJTRANS || m_transB == CONJTRANS)
+  if (GetLayer() == SMLAYER) {
+    if (InputDistType(2) != D_MC_MR)
+      throw;
+    if (m_type == REAL) {
+      if (m_transA == CONJTRANS || m_transB == CONJTRANS)
+	throw;
+    }
+  }
+  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+    if (m_transA != NORMAL || m_transB != NORMAL)
       throw;
   }
 }
@@ -336,53 +342,59 @@ void TriRK::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
-    DistType t0 = InputDistType(0);
-    DistType t1 = InputDistType(1);
-  
-    if (UpdateTrans(m_transB,t1) == NORMAL)
-      m_cost = GAMMA * InputLocalM(0)->SumProds111(*InputLocalN(0),*InputLocalN(1));
-    else
-      m_cost = GAMMA * InputLocalM(0)->SumProds111(*InputLocalN(0),*InputLocalM(1));
 
-    if (t0 == D_STAR_STAR && t1 == D_STAR_STAR) {
+    if (GetLayer() == SMLAYER) {
+      DistType t0 = InputDistType(0);
+      DistType t1 = InputDistType(1);
+  
+      if (UpdateTrans(m_transB,t1) == NORMAL)
+	m_cost = GAMMA * InputLocalM(0)->SumProds111(*InputLocalN(0),*InputLocalN(1));
+      else
+	m_cost = GAMMA * InputLocalM(0)->SumProds111(*InputLocalN(0),*InputLocalM(1));
+
+      if (t0 == D_STAR_STAR && t1 == D_STAR_STAR) {
     
+      }
+      else if (m_transA == NORMAL && m_transB == CONJTRANS) {
+	if (t0 != D_MC_STAR && t0 != D_STAR_MC_T && t0 != D_STAR_MC_H) {
+	  m_poss->MarkInsane();
+	}
+	if (t1 != D_STAR_MR_H && t1 != D_MR_STAR) {
+	  m_poss->MarkInsane();
+	}
+      }
+      else if (m_transA == CONJTRANS && m_transB == NORMAL) {
+	if (t0 != D_STAR_MC && t0 != D_MC_STAR_H) {
+	  //    cout << "Marked insane - first arg : " << DistTypeToStr(t0);
+	  m_poss->MarkInsane();
+	}
+	if (t1 != D_MR_STAR_H && t1 != D_STAR_MR && t1 != D_MR_STAR_T) {
+	  //    cout << "Marked insane - second arg : " << DistTypeToStr(t1);
+	  m_poss->MarkInsane();
+	}
+      }
+      else if (m_transA == NORMAL && m_transB == TRANS) {
+	if (t0 != D_MC_STAR && t0 != D_STAR_MC_T && t0 != D_STAR_MC_H) {
+	  m_poss->MarkInsane();
+	}
+	if (t1 != D_STAR_MR_T && t1 != D_MR_STAR) {
+	  m_poss->MarkInsane();
+	}
+      }
+      else if (m_transA == TRANS && m_transB == NORMAL) {
+	if (t0 != D_STAR_MC && t0 != D_MC_STAR_T) {
+	  m_poss->MarkInsane();
+	}
+	if (t1 != D_MR_STAR_H && t1 != D_STAR_MR && t1 != D_MR_STAR_T) {
+	  m_poss->MarkInsane();
+	}
+      }
+      else
+	throw;
     }
-    else if (m_transA == NORMAL && m_transB == CONJTRANS) {
-      if (t0 != D_MC_STAR && t0 != D_STAR_MC_T && t0 != D_STAR_MC_H) {
-	m_poss->MarkInsane();
-      }
-      if (t1 != D_STAR_MR_H && t1 != D_MR_STAR) {
-	m_poss->MarkInsane();
-      }
+    else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+      m_cost = GAMMA * InputLocalM(0)->SumProds111(*InputLocalN(0),*InputLocalN(1));
     }
-    else if (m_transA == CONJTRANS && m_transB == NORMAL) {
-      if (t0 != D_STAR_MC && t0 != D_MC_STAR_H) {
-	//    cout << "Marked insane - first arg : " << DistTypeToStr(t0);
-	m_poss->MarkInsane();
-      }
-      if (t1 != D_MR_STAR_H && t1 != D_STAR_MR && t1 != D_MR_STAR_T) {
-	//    cout << "Marked insane - second arg : " << DistTypeToStr(t1);
-	m_poss->MarkInsane();
-      }
-    }
-    else if (m_transA == NORMAL && m_transB == TRANS) {
-      if (t0 != D_MC_STAR && t0 != D_STAR_MC_T && t0 != D_STAR_MC_H) {
-	m_poss->MarkInsane();
-      }
-      if (t1 != D_STAR_MR_T && t1 != D_MR_STAR) {
-	m_poss->MarkInsane();
-      }
-    }
-    else if (m_transA == TRANS && m_transB == NORMAL) {
-      if (t0 != D_STAR_MC && t0 != D_MC_STAR_T) {
-	m_poss->MarkInsane();
-      }
-      if (t1 != D_MR_STAR_H && t1 != D_STAR_MR && t1 != D_MR_STAR_T) {
-	m_poss->MarkInsane();
-      }
-    }
-    else
-      throw;
   }
 }
 
@@ -391,49 +403,66 @@ void TriRK::PrintCode(IndStream &out)
   string transAStr, transBStr;
   DistType t0 = InputDistType(0);
   DistType t1 = InputDistType(1);
-  if (m_transA == NORMAL) {
-    if (t0 == D_STAR_MC_T)
-      transAStr = TransToStr(TRANS) + ", ";
-    else if (t0 == D_STAR_MC_H)
-      transAStr = TransToStr(CONJTRANS) + ", ";
-    else if (t0 != D_MC_STAR)
-      throw;
-  }
-  else {
-    if (t0 == D_STAR_MC)
-      transAStr = TransToStr(m_transA) + ", ";
-    else if ((m_transA == CONJTRANS && t0 != D_MC_STAR_H)
-             || (m_transA == TRANS && t0 != D_MC_STAR_T))
-      throw;
-  }
-  if (m_transB == NORMAL) {
-    if (t1 == D_MR_STAR_T)
-      transBStr = TransToStr(TRANS) + ", ";
-    else if (t1 == D_MR_STAR_H)
-      transBStr = TransToStr(CONJTRANS) + ", ";
-    else if (t1 != D_STAR_MR)
-      throw;
-  }
-  else {
-    if (t1 == D_MR_STAR)
-      transBStr = TransToStr(m_transB) + ", ";
-    else if ((m_transB == CONJTRANS && t1 != D_STAR_MR_H)
-             || (m_transB == TRANS && t1 != D_STAR_MR_T))
-      throw;
-  }
+
+  if (GetLayer() == SMLAYER) {
+    if (m_transA == NORMAL) {
+      if (t0 == D_STAR_MC_T)
+	transAStr = TransToStr(TRANS) + ", ";
+      else if (t0 == D_STAR_MC_H)
+	transAStr = TransToStr(CONJTRANS) + ", ";
+      else if (t0 != D_MC_STAR)
+	throw;
+    }
+    else {
+      if (t0 == D_STAR_MC)
+	transAStr = TransToStr(m_transA) + ", ";
+      else if ((m_transA == CONJTRANS && t0 != D_MC_STAR_H)
+	       || (m_transA == TRANS && t0 != D_MC_STAR_T))
+	throw;
+    }
+    if (m_transB == NORMAL) {
+      if (t1 == D_MR_STAR_T)
+	transBStr = TransToStr(TRANS) + ", ";
+      else if (t1 == D_MR_STAR_H)
+	transBStr = TransToStr(CONJTRANS) + ", ";
+      else if (t1 != D_STAR_MR)
+	throw;
+    }
+    else {
+      if (t1 == D_MR_STAR)
+	transBStr = TransToStr(m_transB) + ", ";
+      else if ((m_transB == CONJTRANS && t1 != D_STAR_MR_H)
+	       || (m_transB == TRANS && t1 != D_STAR_MR_T))
+	throw;
+    }
   
-  out.Indent();
-  *out << "internal::LocalTrrk( " << TriToStr(m_tri) << ", "
-       << transAStr << transBStr;
-  out << m_alpha;
-  *out << ", " 
-       << "\n" << out.Tabs(1)
-       << GetInputName(0).str() << ","
-       << "\n" << out.Tabs(1) << GetInputName(1).str() << ","
-       << "\n" << out.Tabs(1);
-  out << m_beta;
-  *out << ", " << GetInputName(2).str()
-       << " );\n";
+    out.Indent();
+    *out << "internal::LocalTrrk( " << TriToStr(m_tri) << ", "
+	 << transAStr << transBStr;
+    out << m_alpha;
+    *out << ", " 
+	 << "\n" << out.Tabs(1)
+	 << GetInputName(0).str() << ","
+	 << "\n" << out.Tabs(1) << GetInputName(1).str() << ","
+	 << "\n" << out.Tabs(1);
+    out << m_beta;
+    *out << ", " << GetInputName(2).str()
+	 << " );\n";
+  }
+  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+    out.Indent();
+    *out << "BlisTrrk" << LayerNumToStr(GetLayer()) << "( ";
+    out << m_alpha;
+    *out << ", " 
+	 << "\n" << out.Tabs(1)
+	 << GetInputName(0).str() << ","
+	 << "\n" << out.Tabs(1) << GetInputName(1).str() << ","
+	 << "\n" << out.Tabs(1);
+    out << m_beta;
+    *out << ", " << GetInputName(2).str()
+	 << " );\n";
+
+  }
 }
 
 void TriRK::FlattenCore(ofstream &out) const 
@@ -453,7 +482,7 @@ bool TriRK::CanTransposeInputs() const
   if (GetLayer() == SMLAYER)
     return true;
   else
-    throw;
+    return false;
 }
 
 string TriRKTrans::GetTransType() const
@@ -901,19 +930,19 @@ void HerkBP::PrintCode(IndStream &out)
        << "&BLIS_ONE, &" << GetInputName(2).str() << ", (herk_t*)NULL );\n";
 }
 
-bool HerkLowerLayer::CanApply(const Poss *poss, const Node *node) const
+bool TriRKLowerLayer::CanApply(const Poss *poss, const Node *node) const
 {
-  if (node->GetNodeClass() == Herk::GetClass()) {
-    const Herk *herk = (Herk*)node;
-    if (herk->GetLayer() != m_fromLayer)
+  if (node->GetNodeClass() == TriRK::GetClass()) {
+    const TriRK *trirk = (TriRK*)node;
+    if (trirk->GetLayer() != m_fromLayer)
       return false;
+    if (trirk->m_transA != NORMAL || trirk->m_transB != NORMAL)
+      throw;
     if (m_dim == DIMK) {
-      if (herk->m_transA == NORMAL) {
-	return (*(herk->InputLocalN(0)) <= m_bs);
-      }
-      else {
-	return (*(herk->InputLocalM(0)) <= m_bs);
-      }
+      return (*(trirk->InputLocalN(0)) <= m_bs);
+    }
+    else if (m_dim == DIMN) {
+      return (*(trirk->InputLocalN(2)) <= m_bs);
     }
     else
       throw;
@@ -922,15 +951,56 @@ bool HerkLowerLayer::CanApply(const Poss *poss, const Node *node) const
   
 }
 
-void HerkLowerLayer::Apply(Poss *poss, Node *node) const
+void TriRKLowerLayer::Apply(Poss *poss, Node *node) const
 {
-  Herk *herk = (Herk*)node;
-  herk->SetLayer(m_toLayer);
+  TriRK *trirk = (TriRK*)node;
+  trirk->SetLayer(m_toLayer);
 }
 
 
-string HerkLowerLayer::GetType() const
+string TriRKLowerLayer::GetType() const
 { 
-  return "Herk lower layer " + LayerNumToStr(m_fromLayer) 
+  return "TriRK lower layer " + LayerNumToStr(m_fromLayer) 
     + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool HerkToTriRK::CanApply(const Poss *poss, const Node *node) const
+{
+  return (node->GetNodeClass() == Herk::GetClass() &&
+	  ((DLANode*)node)->GetLayer() == m_layer);
+}
+
+void HerkToTriRK::Apply(Poss *poss, Node *node) const
+{
+  Herk *herk = (Herk*)node;
+  Transpose *Atrans = new Transpose(herk->m_type == REAL ? 
+				    TRANS : CONJTRANS,
+				    true);
+  Node *Ain = herk->Input(0);
+  unsigned int Anum = herk->InputConnNum(0);
+  Atrans->AddInput(Ain, Anum);
+  
+  TriRK *trirk = new TriRK(m_layer,
+			   herk->m_tri,
+			   NORMAL,
+			   NORMAL,
+			   herk->m_alpha,
+			   herk->m_beta,
+			   herk->m_type);
+
+  if (herk->m_transA != NORMAL) {
+    trirk->AddInputs(4,
+		     Atrans, 0,
+		     Ain, Anum);
+  }
+  else if (herk->m_transB != NORMAL) {
+    trirk->AddInputs(4,
+		     Ain, Anum,
+		     Atrans, 0);
+  }
+  else
+    throw;
+  trirk->AddInput(herk->Input(1), herk->InputConnNum(1));
+  herk->RedirectChildren(trirk, 0);
+  poss->DeleteChildAndCleanUp(node);
 }

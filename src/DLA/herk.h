@@ -175,12 +175,22 @@ class HerkBP : public DLAOp<3,1>
   virtual void PrintCode(IndStream &out);
 };
 
-class HerkLowerLayer : public LowerLayer
+class TriRKLowerLayer : public LowerLayer
 {
  public:
- HerkLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+ TriRKLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const;
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};
+
+class HerkToTriRK : public SingleTrans
+{
+ public:
+  Layer m_layer;
+ HerkToTriRK(Layer layer) :m_layer(layer) {}
+  virtual string GetType() const {return "Herk to TriRK";}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
