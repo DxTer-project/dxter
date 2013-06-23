@@ -687,8 +687,8 @@ int main( int argc, char** argv )
 
 
 			if (trans) {
-			  bli_obj_set_trans( BLIS_TRANSPOSE, a);
-			  bli_obj_set_trans( BLIS_TRANSPOSE, b);
+			  bli_obj_set_conjtrans( BLIS_TRANSPOSE, a);
+			  bli_obj_set_conjtrans( BLIS_TRANSPOSE, b);
 			}
 			  
 			bli_obj_set_struc( BLIS_SYMMETRIC, c2 );

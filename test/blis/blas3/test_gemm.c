@@ -417,7 +417,7 @@ int main( int argc, char** argv )
 			&beta,
 			&c2 );
 
-	    bli_obj_set_trans( BLIS_TRANSPOSE, a);
+	    bli_obj_set_conjtrans( BLIS_TRANSPOSE, a);
 	    bli_gemm( &alpha,
 		      &a,
 		      &b,
@@ -432,7 +432,7 @@ int main( int argc, char** argv )
 			&beta,
 			&c2 );
 
-	    bli_obj_set_trans( BLIS_TRANSPOSE, b);
+	    bli_obj_set_conjtrans( BLIS_TRANSPOSE, b);
 	    bli_gemm( &alpha,
 		      &a,
 		      &b,
@@ -447,8 +447,8 @@ int main( int argc, char** argv )
 			&beta,
 			&c2 );
 
-	    bli_obj_set_trans( BLIS_TRANSPOSE, a);
-	    bli_obj_set_trans( BLIS_TRANSPOSE, b);
+	    bli_obj_set_conjtrans( BLIS_TRANSPOSE, a);
+	    bli_obj_set_conjtrans( BLIS_TRANSPOSE, b);
 	    bli_gemm( &alpha,
 		      &a,
 		      &b,

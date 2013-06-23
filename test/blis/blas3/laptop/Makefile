@@ -117,6 +117,8 @@ endif
 # --- BLAS and LAPACK implementations ------------------------------------------
 #
 
+INSTALL_PREFIX := /Users/bamarker/work/blisInstall
+
 # BLIS library and header path. This is simply wherever it was installed.
 BLIS_LIB_PATH  := $(INSTALL_PREFIX)/lib
 BLIS_INC_PATH  := $(INSTALL_PREFIX)/include
@@ -143,7 +145,7 @@ BLAS_LIB_PATH  := $(HOME)/flame/lib
 # --- General build definitions ------------------------------------------------
 #
 
-TEST_SRC_PATH  := .
+TEST_SRC_PATH  := ..
 TEST_OBJ_PATH  := .
 
 # Gather all local object files.
@@ -183,9 +185,8 @@ blis: test_gemm.x \
 $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-test_%.o: test_%.c
+test_%.o: ../test_%.c
 	$(CC) $(CFLAGS) -DBLIS -c $< -o $@
-
 
 # -- Executable file rules --
 
@@ -198,5 +199,5 @@ test_%.x: test_%.o $(BLIS_LIB)
 clean: cleanx
 
 cleanx:
-	- $(RM_F) *.x
+	- rm *.x
 

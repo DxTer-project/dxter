@@ -989,7 +989,7 @@ int main( int argc, char** argv )
 			dtimeFLA = bli_clock();
 
 			if (trans)
-			  bli_obj_set_trans( BLIS_TRANSPOSE, a);
+			  bli_obj_set_conjtrans( BLIS_TRANSPOSE, a);
 
 			bli_obj_set_struc( BLIS_TRIANGULAR, a );
 			if (lower) {
@@ -1005,7 +1005,7 @@ int main( int argc, char** argv )
 			          &c2 );
 
 			if (trans)
-			  bli_obj_set_trans(BLIS_NO_TRANSPOSE, a);
+			  bli_obj_set_conjtrans(BLIS_NO_TRANSPOSE, a);
 			  // bli_obj_toggle_trans( a );
 			bli_obj_set_struc( BLIS_GENERAL, a );
 			bli_obj_set_uplo( BLIS_DENSE, a );
