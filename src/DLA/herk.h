@@ -95,13 +95,15 @@ class HerkLoopExp : public SingleTrans
  public:  
   unsigned int m_var;
   Layer m_fromLayer, m_toLayer;
- HerkLoopExp(Layer fromLayer, Layer toLayer, unsigned int variant) 
+ HerkLoopExp(Layer fromLayer, Layer toLayer, unsigned int variant)
    : m_var(variant), m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+
+
 
 //This is a triangular rank-k update used in Elemental
 class TriRK : public DLAOp<3,1>, public HerkProps

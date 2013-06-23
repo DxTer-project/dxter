@@ -36,7 +36,7 @@ Phase LU::MaxPhase() const
     {
     case (ABSLAYER):
 #if DOSQM
-      return SQR1PHASE;
+      return SR1PHASE;
 #else
       throw;
 #endif

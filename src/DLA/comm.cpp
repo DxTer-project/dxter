@@ -33,7 +33,7 @@ string CommToStr(Comm comm)
       return "g.MRComm()";
     case (MCCOMM):
       return "g.MCComm()";
-#elif DOSM
+#elif DOSM||DOSQM
     case(GLOBALCOMM):
       return "GlobalComm";
     case(PROCCOMM):
@@ -55,7 +55,7 @@ unsigned int NumCoresInComm(Comm comm)
       return CVAL;
     case (MCCOMM):
       return RVAL;
-#elif DOSM
+#elif DOSM||DOSQM
     case(GLOBALCOMM):
       return NUMCORESPERL2*NUML2PERL3*NUML3;
     case(PROCCOMM):

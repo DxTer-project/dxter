@@ -920,7 +920,7 @@ int main(int argc, const char* argv[])
     cout << "Expanding SQO phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
     time(&start2);
-    uni.Expand(numIters, SQOPHASE, DLACullSQR);
+    uni.Expand(numIters, SQOPHASE, DLACullSR);
     time(&end);
     cout << "SQO phase took " << difftime(end,start2) << " seconds\n";
     
