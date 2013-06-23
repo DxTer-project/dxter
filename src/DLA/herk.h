@@ -49,6 +49,13 @@ Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
 		   Coef alpha, Coef beta, Type type,
 		   Layer layer);
 
+Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum, 
+		    Node *Bin, unsigned int Bnum, 
+		    Node *Cin, unsigned int Cnum,
+		    Tri tri,
+		    Coef alpha, Coef beta, Type type,
+		    Layer layer);
+
 Loop* BLISHerkLoop(Node *Ain, unsigned int Anum, 
 		   Node *Bin, unsigned int Bnum,
 		   Node *Cin, unsigned int Cnum,
@@ -96,6 +103,19 @@ class HerkLoopExp : public SingleTrans
   unsigned int m_var;
   Layer m_fromLayer, m_toLayer;
  HerkLoopExp(Layer fromLayer, Layer toLayer, unsigned int variant)
+   : m_var(variant), m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+class TriRKLoopExp : public SingleTrans
+{
+ public:  
+  unsigned int m_var;
+  Layer m_fromLayer, m_toLayer;
+ TriRKLoopExp(Layer fromLayer, Layer toLayer, unsigned int variant)
    : m_var(variant), m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;

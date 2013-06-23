@@ -286,6 +286,74 @@ void HerkLoopExp::Apply(Poss *poss, Node *node) const
 }
 
 
+string TriRKLoopExp::GetType() const
+{
+  switch(m_var) {
+    //  case(1):
+    //    return "Herk Loop Exp - var 1";
+    //  case(2):
+    //    return "Herk Loop Exp - var 2";
+  case(5):
+    return "TriRK Loop Exp - var 5";
+  default:
+    throw;    
+  }
+}
+
+bool TriRKLoopExp::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() == TriRK::GetClass()
+      && ((TriRK*)node)->GetLayer() == m_fromLayer)
+    return true;
+  return false;
+}
+
+void TriRKLoopExp::Apply(Poss *poss, Node *node) const
+{
+  TriRK *trirk = (TriRK*)node;
+  Loop *loop;
+  
+  NodeConn *connA, *connB, *connC;
+  connA = trirk->m_inputs[0];
+  connB = trirk->m_inputs[1];
+  connC = trirk->m_inputs[2];
+  
+  switch(m_var) {
+    /*
+    case(1):
+      loop = TriRKLoopVar1(connA->m_n, connA->m_num,
+			  connC->m_n, connC->m_num,
+			  trirk->m_tri,
+			  trirk->m_transA,
+			  trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
+      break;
+    case(2):
+      loop = TriRKLoopVar2(connA->m_n, connA->m_num,
+			  connC->m_n, connC->m_num,
+			  trirk->m_tri,
+			  trirk->m_transA,
+			  trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
+      break;
+    */
+    case(5):
+      loop = TriRKLoopVar5(connA->m_n, connA->m_num,
+			   connB->m_n, connB->m_num,
+			  connC->m_n, connC->m_num,
+			  trirk->m_tri,
+			  trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
+      break;
+    default:
+      throw;
+  }
+  
+  poss->AddLoop(loop);
+  
+  
+  node->RedirectChildren(loop->OutTun(2),0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+
 
 TriRK::TriRK(Layer layer, Tri tri, Trans transA, Trans transB, Coef alpha, Coef beta, Type type)
   : HerkProps(tri, transA, transB, alpha, beta, type)
@@ -721,6 +789,55 @@ Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
   return loop;
 }
 
+Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum, 
+		    Node *Bin, unsigned int Bnum, 
+		    Node *Cin, unsigned int Cnum,
+		    Tri tri,
+		    Coef alpha, Coef beta, Type type,
+		    Layer layer)
+{
+  ScaleTrapNode *scal = new ScaleTrapNode(layer, LEFT, tri, beta);
+  scal->AddInput(Cin, Cnum);
+
+  Split *splitA = new Split(PARTRIGHT, POSSTUNIN, true);
+  splitA->AddInput(Ain, Anum);
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+
+  Split *splitB = new Split(PARTDOWN, POSSTUNIN, false);
+  splitB->AddInput(Bin, Bnum);
+  splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
+
+  LoopTunnel *Ctun = new LoopTunnel(POSSTUNIN);
+  Ctun->AddInput(scal, 0);
+  Ctun->SetAllStats(PARTUP);
+		    
+  Node *herk;
+  herk = new TriRK(layer, tri, NORMAL, NORMAL, alpha, beta, type);
+  herk->AddInputs(6, splitA, 1,
+		  splitB, 1,
+		  Ctun, 0);
+
+  Combine *comA = splitA->CreateMatchingCombine(0);
+
+  Combine *comB = splitB->CreateMatchingCombine(0);
+  
+  LoopTunnel *CtunOut = new LoopTunnel(POSSTUNOUT);
+  CtunOut->AddInput(herk,0);
+  CtunOut->AddInput(Ctun,0);
+  CtunOut->CopyTunnelInfo(Ctun);
+						
+  Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
+  Loop *loop;
+  if (layer == DMLAYER)
+    throw;
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+  
+  return loop;
+}
+
 
 
 string BLISTriRKLoopExp::GetType() const 
@@ -1002,7 +1119,12 @@ void HerkToTriRK::Apply(Poss *poss, Node *node) const
   }
   else
     throw;
+
   trirk->AddInput(herk->Input(1), herk->InputConnNum(1));
+
+  poss->AddNode(trirk);
+  poss->AddNode(Atrans);
+
   herk->RedirectChildren(trirk, 0);
   poss->DeleteChildAndCleanUp(node);
 }

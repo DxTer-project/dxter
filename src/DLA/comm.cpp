@@ -74,7 +74,7 @@ unsigned int NumGroupsInComm(Comm comm)
 {
   switch(comm)
     {
-#if DOSM
+#if DOSM||DOSQM
     case(GLOBALCOMM):
       return NUML3;
     case(PROCCOMM):
