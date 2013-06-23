@@ -312,7 +312,7 @@ void AddTrans()
 #endif
 #endif //SR1PHASE
 
-#if DOSR1PHASE
+#if DOSR2PHASE
   Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(S1LAYER, S2LAYER, 8), SR2PHASE);
 #if USELOWERING
   Universe::AddTrans(Hemm::GetClass(), new HemmLowerLayer(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
@@ -413,6 +413,7 @@ void AddTrans()
 
 
 #if DOSR1PHASE
+  Universe::AddTrans(TriRK::GetClass(), new TriRKLoopExp(ABSLAYER, S1LAYER, 7), SR1PHASE);
   //  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, SQ1LAYER, 5), SQR1PHASE);
 #if USELOWERING
   Universe::AddTrans(TriRK::GetClass(), new TriRKLowerLayer(ABSLAYER, S1LAYER, DIMN, BLIS_NC_BSVAL), SR1PHASE);

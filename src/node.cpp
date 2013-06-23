@@ -326,7 +326,7 @@ bool Node::CanPrintCode() const
         unsigned int childNum = childConn->m_num;
         if (childNum == num && child != this && !child->IsPossTunnel(POSSTUNOUT)) {
           if (child->Overwrites(input, num)) {
-            cout << "two children of " << input->GetNodeClass() << " overwrite output\n";
+            cout << "two children of " << input->GetNodeClass() << " overwrite output " << childNum << "\n";
             cout << GetNodeClass() << endl;
             cout << child->GetNodeClass() << endl;
             throw;

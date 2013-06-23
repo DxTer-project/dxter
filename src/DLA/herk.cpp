@@ -294,7 +294,9 @@ string TriRKLoopExp::GetType() const
     //  case(2):
     //    return "Herk Loop Exp - var 2";
   case(5):
-    return "TriRK Loop Exp - var 5";
+    return "TriRK Loop Exp - var 5 (dim K)";
+  case(7):
+      return "TriRK Loop Exp - var 7 (dim N)";
   default:
     throw;    
   }
@@ -335,19 +337,25 @@ void TriRKLoopExp::Apply(Poss *poss, Node *node) const
 			  trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
       break;
     */
-    case(5):
-      loop = TriRKLoopVar5(connA->m_n, connA->m_num,
-			   connB->m_n, connB->m_num,
-			  connC->m_n, connC->m_num,
-			  trirk->m_tri,
-			  trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
+  case(5):
+    loop = TriRKLoopVar5(connA->m_n, connA->m_num,
+			 connB->m_n, connB->m_num,
+			 connC->m_n, connC->m_num,
+			 trirk->m_tri,
+			 trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
       break;
-    default:
-      throw;
+  case(7):
+    loop = TriRKLoopVar7(connA->m_n, connA->m_num,
+			 connB->m_n, connB->m_num,
+			 connC->m_n, connC->m_num,
+			 trirk->m_tri,
+			 trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
+    break;
+  default:
+    throw;
   }
   
   poss->AddLoop(loop);
-  
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -603,8 +611,8 @@ void DistHerkToLocalTriRK::Apply(Poss *poss, Node *node) const
   else
     node2 = new RedistNode(D_MR_STAR);
   TriRK *node3 = new TriRK(SMLAYER, orig->m_tri, orig->m_transA, 
-                                     orig->m_transB, orig->m_alpha, orig->m_beta,
-				     orig->m_type);
+			   orig->m_transB, orig->m_alpha, orig->m_beta,
+			   orig->m_type);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node->Input(0),node->InputConnNum(0));
   node3->AddInput(node1,0);
@@ -814,8 +822,9 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
   Ctun->SetAllStats(PARTUP);
 		    
   Node *herk;
-  herk = new TriRK(layer, tri, NORMAL, NORMAL, alpha, beta, type);
-  herk->AddInputs(6, splitA, 1,
+  herk = new TriRK(layer, tri, NORMAL, NORMAL, alpha, COEFONE, type);
+  herk->AddInputs(6, 
+		  splitA, 1,
 		  splitB, 1,
 		  Ctun, 0);
 
@@ -834,6 +843,72 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
     throw;
   else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+
+  return loop;
+}
+
+Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum, 
+		    Node *Bin, unsigned int Bnum, 
+		    Node *Cin, unsigned int Cnum,
+		    Tri tri,
+		    Coef alpha, Coef beta, Type type,
+		    Layer layer)
+{
+  LoopTunnel *Atun = new LoopTunnel(POSSTUNIN);
+  Atun->AddInput(Ain, Anum);
+  Atun->SetAllStats(FULLUP);
+  Atun->SetIndepIters();
+
+  Split *splitB = new Split(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, false);
+  splitB->AddInput(Bin, Bnum);
+  splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
+
+  Split *splitC = new Split(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, true);
+  splitC->AddInput(Cin, Cnum);
+  if (tri==LOWER)
+    splitC->SetUpStats(FULLUP, NOTUP,
+		       FULLUP, NOTUP);
+  else
+    splitC->SetUpStats(NOTUP, FULLUP,
+		       NOTUP, FULLUP);
+  splitC->SetIndepIters();
+
+  GetUpToDiag *diag = new GetUpToDiag(tri, PARTRIGHT);
+  if (tri == LOWER)
+    diag->AddInputs(6, 
+		    splitC, 0,
+		    splitC, 1,
+		    Atun, 0);
+  else
+    diag->AddInputs(6, 
+		    splitC, 2,
+		    splitC, 1,
+		    Atun, 0);
+
+  Node *trirk;
+  trirk = new TriRK(layer, tri, NORMAL, NORMAL, alpha, beta, type);
+  trirk->AddInputs(6, 
+		   diag, 1,
+		   splitB, 1,
+		   diag, 0);
+  
+  LoopTunnel *AtunOut = new LoopTunnel(POSSTUNOUT);
+  AtunOut->AddInput(Atun,0);
+  AtunOut->AddInput(Atun,0);
+  AtunOut->CopyTunnelInfo(Atun);
+
+  Combine *comB = splitB->CreateMatchingCombine(0);
+
+  Combine *comC = splitC->CreateMatchingCombine(1,
+						1, trirk, 0);
+  						
+  Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
+  Loop *loop;
+  if (layer == DMLAYER)
+    throw;
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
   
   return loop;
 }

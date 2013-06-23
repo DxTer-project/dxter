@@ -414,7 +414,8 @@ void GetUpToDiag::PrintCode(IndStream &out)
   *out << "off" << triChar << ", " 
        << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
        << GetInputNameStr(1) << ", &" << GetNameStr(0) << " );\n";
-  out.Indent(2);
+  //  out.Indent(2);
+  out.Indent();
   *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
   out.Indent(2);
   *out << "off" << triChar << ", "

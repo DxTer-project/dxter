@@ -56,6 +56,13 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
+Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum, 
+		    Node *Bin, unsigned int Bnum, 
+		    Node *Cin, unsigned int Cnum,
+		    Tri tri,
+		    Coef alpha, Coef beta, Type type,
+		    Layer layer);
+
 Loop* BLISHerkLoop(Node *Ain, unsigned int Anum, 
 		   Node *Bin, unsigned int Bnum,
 		   Node *Cin, unsigned int Cnum,
