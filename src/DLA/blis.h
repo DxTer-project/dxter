@@ -27,6 +27,7 @@
 #include "DLAOp.h"
 #include "pack.h"
 #include "comm.h"
+#include "loopSupport.h"
 
 class Transpose : public DLAOp<1,1>
 {
@@ -73,9 +74,10 @@ Transpose* InsertTranspose(Trans trans, bool objTrans, Node *node, unsigned int 
 class GetUpToDiag : public DLANode
 {
  public:
+  PartDir m_dir;
   Tri m_tri;
   Sizes *m_sizes, *m_lsizes;
-  GetUpToDiag(Tri tri);
+  GetUpToDiag(Tri tri, PartDir dir);
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
@@ -89,7 +91,7 @@ class GetUpToDiag : public DLANode
   virtual void UpdateInnerPackingMultiple(PackSize size) {}
 
   virtual void PrintCode(IndStream &out);
-  static Node* BlankInst() {return new GetUpToDiag(NOTTRI); }
+  static Node* BlankInst() {return new GetUpToDiag(NOTTRI,PARTDOWN); }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual ClassType GetNodeClass() const {return GetClass();}

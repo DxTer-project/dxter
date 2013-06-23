@@ -410,6 +410,7 @@ void AddTrans()
   Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, DMLAYER, 5), DPPHASE);
 #endif //DODPPHASE
 
+
   /*
 #if DOSR1PHASE
   Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, SQ1LAYER, 5), SQR1PHASE);
@@ -600,6 +601,10 @@ void AddSimplifiers()
   Universe::AddTrans(Hemm::GetClass(), new HemmRightToLeft(ABSLAYER), SIMP);
 #endif //DODPPHASE
 #endif //SR2PHASE
+
+#if DOSR1PHASE
+  Universe::AddTrans(Herk::GetClass(), new HerkToTriRK(ABSLAYER), SIMP);
+#endif //DOSR1PHASE
 
 #if DOSQOPHASE
   Universe::AddTrans(PackBuff::GetClass(), new RenamePackBuff, SIMP);

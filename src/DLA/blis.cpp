@@ -227,31 +227,46 @@ Transpose* InsertTranspose(Trans trans, bool objTrans,
   return newTrans;
 }
 
-GetUpToDiag::GetUpToDiag(Tri tri)
+GetUpToDiag::GetUpToDiag(Tri tri, PartDir dir)
 {
   m_tri = tri;
   m_sizes = NULL;
   m_lsizes = NULL;
+  if (dir != PARTRIGHT && dir != PARTDOWN)
+    throw;
+  m_dir = dir;
 }
 
 const Sizes* GetUpToDiag::GetM(unsigned int num) const
 {
-  return GetInputM(num+1);
+  if (m_dir == PARTDOWN)
+    return GetInputM(num+1);
+  else
+    return m_sizes;
 }
 
 const Sizes* GetUpToDiag::GetN(unsigned int num) const
 {
-  return m_sizes;
+  if (m_dir == PARTDOWN)
+    return m_sizes;
+  else
+    return GetInputN(num+1);
 }
 
 const Sizes* GetUpToDiag::LocalM(unsigned int num) const
 {
-  return InputLocalM(num+1);
+  if (m_dir == PARTDOWN)
+    return InputLocalM(num+1);
+  else
+    return m_lsizes;
 }
 
 const Sizes* GetUpToDiag::LocalN(unsigned int num) const
 {
-  return m_lsizes;
+  if (m_dir == PARTDOWN)
+    return m_lsizes;
+  else
+    return InputLocalN(num+1);
 }
 
 void GetUpToDiag::ClearSizeCache()
@@ -269,21 +284,45 @@ void GetUpToDiag::BuildSizeCache()
   if (m_sizes)
     return;
   else {
-    m_sizes = new Sizes;
-    m_sizes->PairwiseSum(*GetInputM(0), *GetInputM(1));
-    m_lsizes = new Sizes;
-    m_lsizes->PairwiseSum(*InputLocalM(0), *InputLocalM(1));
+    if (m_dir == PARTDOWN) {
+      m_sizes = new Sizes;
+      m_sizes->PairwiseSum(*GetInputM(0), *GetInputM(1));
+      m_lsizes = new Sizes;
+      m_lsizes->PairwiseSum(*InputLocalM(0), *InputLocalM(1));
+    }
+    else if (m_dir == PARTRIGHT) {
+      m_sizes = new Sizes;
+      m_sizes->PairwiseSum(*GetInputN(0), *GetInputN(1));
+      m_lsizes = new Sizes;
+      m_lsizes->PairwiseSum(*InputLocalN(0), *InputLocalN(1));
+    }
+    else
+      throw;
   }
 }
 
 Name GetUpToDiag::GetName(unsigned int num) const
 {
   Name name = GetInputName(num+1);
-  if (m_tri == LOWER) {
-    name.m_name += "L";
+  if (m_dir == PARTDOWN) {
+    if (m_tri == LOWER) {
+      name.m_name += "L";
+    }
+    else if (m_tri == UPPER) {
+      name.m_name += "R";
+    }
+    else
+      throw;
   }
-  else if (m_tri == UPPER) {
-    name.m_name += "R";
+  else if (m_dir == PARTRIGHT) {
+    if (m_tri == LOWER) {
+      name.m_name += "B";
+    }
+    else if (m_tri == UPPER) {
+      name.m_name += "T";
+    }
+    else
+      throw;
   }
   else
     throw;
@@ -308,60 +347,93 @@ void GetUpToDiag::Duplicate(const Node *orig, bool shallow, bool possMerging)
   DLANode::Duplicate(orig, shallow, possMerging);
   GetUpToDiag *diag = (GetUpToDiag*)orig;
   m_tri = diag->m_tri;
+  m_dir = diag->m_dir;
 }
 
 void GetUpToDiag::PrintCode(IndStream &out)
 {
   char triChar;
   bool lower = m_tri == LOWER;
-  if (lower)
-    triChar = 'L';
-  else
-    triChar = 'R';
+  if (m_dir == PARTDOWN) {
+    if (lower)
+      triChar = 'L';
+    else
+      triChar = 'R';
+  }
+  else {
+    if (lower)
+      triChar = 'B';
+    else
+      triChar = 'T';
+  }
   
   out.Indent();
   *out << "obj_t " << GetNameStr(0) << ", " << GetNameStr(1) << ";\n";
   out.Indent();
   *out << "dim_t off" << triChar << " = ";
-  if (lower) {
-    *out << "0;\n";
-    out.Indent();
-    *out << "dim_t n" << triChar << " = bli_min( bli_obj_width_after_trans( "
-    << GetInputNameStr( 1 ) << " ), \n";
-    out.Indent(2);
-    *out << "bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 ) << " ) + "
-    << "bs" << out.LoopLevel() << " );\n";
+  if (m_dir == PARTDOWN) {
+    if (lower) {
+      *out << "0;\n";
+      out.Indent();
+      *out << "dim_t n" << triChar << " = bli_min( bli_obj_width_after_trans( "
+	   << GetInputNameStr( 1 ) << " ), \n";
+      out.Indent(2);
+      *out << "bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 ) << " ) + "
+	   << "bs" << out.LoopLevel() << " );\n";
+    }
+    else {
+      *out << "bli_max( 0, bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 )
+	   << " ) );\n";
+      out.Indent();
+      *out << "dim_t n" << triChar << " = bli_obj_width_after_trans( "
+	   << GetInputNameStr( 1 ) << " ) - off" << triChar << ";\n";
+    }
   }
-  else {
-    *out << "bli_max( 0, bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 )
-    << " ) );\n";
-    out.Indent();
-    *out << "dim_t n" << triChar << " = bli_obj_width_after_trans( "
-    << GetInputNameStr( 1 ) << " ) - off" << triChar << ";\n";
+  else if (m_dir == PARTRIGHT) {
+    if (lower) {
+      *out << "bli_max( 0, -bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 )
+	   << " ) );\n";
+      out.Indent();
+      *out << "dim_t m" << triChar << " = bli_obj_length_after_trans( "
+	   << GetInputNameStr( 1 ) << " ) - off" << triChar << ";\n";
+    }
+    else {
+      *out << "0;\n";
+      out.Indent();
+      *out << "dim_t m" << triChar << " = bli_min( bli_obj_length_after_trans( "
+	   << GetInputNameStr( 1 ) << " ), \n";
+      out.Indent(2);
+      *out << "-bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 ) << " ) + "
+	   << "bs" << out.LoopLevel() << " );\n";
+    }
   }
   
   out.Indent();
   *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
   out.Indent(2);
-  *out << "off" << triChar << ", n" << triChar << ", &"
-  << GetInputNameStr(1) << ", &" << GetNameStr(0) << " );\n";
+  *out << "off" << triChar << ", " 
+       << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
+       << GetInputNameStr(1) << ", &" << GetNameStr(0) << " );\n";
   out.Indent(2);
   *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
   out.Indent(2);
-  *out << "off" << triChar << ", n" << triChar << ", &"
-  << GetInputNameStr(2) << ", &" << GetNameStr(1) << " );\n";
+  *out << "off" << triChar 
+       << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
+       << GetInputNameStr(2) << ", &" << GetNameStr(1) << " );\n";
 }
 
 void GetUpToDiag::Flatten(ofstream &out) const
 {
   DLANode::Flatten(out);
   WRITE(m_tri);
+  WRITE(m_dir);
 }
 
 void GetUpToDiag::Unflatten(ifstream &in, SaveInfo &info)
 {
   DLANode::Unflatten(in, info);
   READ(m_tri);
+  READ(m_dir);
 }
 
 void CombineDiag::Prop()

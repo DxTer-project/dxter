@@ -820,7 +820,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   props->AddInput(splitC, 1);
     
   
-  GetUpToDiag *diag = new GetUpToDiag(tri);
+  GetUpToDiag *diag = new GetUpToDiag(tri, PARTDOWN);
   if (tri == LOWER)
     diag->AddInputs(6, 
 		    splitC, 0,
