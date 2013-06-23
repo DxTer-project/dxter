@@ -411,19 +411,26 @@ void AddTrans()
 #endif //DODPPHASE
 
 
-  /*
+
 #if DOSR1PHASE
-  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, SQ1LAYER, 5), SQR1PHASE);
+  //  Universe::AddTrans(Herk::GetClass(), new HerkLoopExp(ABSLAYER, SQ1LAYER, 5), SQR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Herk::GetClass(), new HerkLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
+  Universe::AddTrans(TriRK::GetClass(), new TriRKLowerLayer(ABSLAYER, S1LAYER, DIMN, BLIS_NC_BSVAL), SR1PHASE);
 #endif
 #endif //SQR1PHASE
 
 #if DOSR2PHASE
-  Universe::AddTrans(Herk::GetClass(), new BLISHerkLoopExp(SQ1LAYER, SQ2LAYER), SQR2PHASE);
-#endif //SQR2PHASE
+  Universe::AddTrans(TriRK::GetClass(), new TriRKLoopExp(S1LAYER, S2LAYER, 5), SR2PHASE);
+#if USELOWERING
+  Universe::AddTrans(TriRK::GetClass(), new TriRKLowerLayer(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
+#endif
+#endif //SR2PHASE
 
+#if DOSR3PHASE
+  Universe::AddTrans(TriRK::GetClass(), new BLISTriRKLoopExp(S2LAYER, S3LAYER), SR3PHASE);
+#endif //SR2PHASE
 
+  /*
 #if DOSR1PHASE
   Universe::AddTrans(Her2k::GetClass(), new Her2kLoopExp(ABSLAYER, SQ1LAYER, 9), SQR1PHASE);
 #if USELOWERING

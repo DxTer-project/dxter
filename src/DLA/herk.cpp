@@ -723,46 +723,48 @@ Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
 
 
 
-string BLISHerkLoopExp::GetType() const 
+string BLISTriRKLoopExp::GetType() const 
 { 
-  return "BLISHerkLoopExp " + LayerNumToStr(m_fromLayer) 
+  return "BLISTriRKLoopExp " + LayerNumToStr(m_fromLayer) 
     + " " + LayerNumToStr(m_toLayer);
 }
 
 
-bool BLISHerkLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool BLISTriRKLoopExp::CanApply(const Poss *poss, const Node *node) const
 {
-  if (node->GetNodeClass() != Herk::GetClass())
+  if (node->GetNodeClass() != TriRK::GetClass())
     return false;
-  const Herk *herk = (Herk*)node;
-  if (herk->m_layer != m_fromLayer)
+  const TriRK *trirk = (TriRK*)node;
+  if (trirk->m_layer != m_fromLayer)
     return false;
   else
     return true;
 
 }
 
-void BLISHerkLoopExp::Apply(Poss *poss, Node *node) const
+void BLISTriRKLoopExp::Apply(Poss *poss, Node *node) const
 {
-  Herk *orig = (Herk*)node;
+  TriRK *orig = (TriRK*)node;
 
   
   Node *aSrc = node->Input(0);
   unsigned int aSrcNum = node->InputConnNum(0);
   if (orig->m_transA != NORMAL) {
-    aSrc = AddTranspose(orig->m_transA, true, aSrc, aSrcNum, true);
-    aSrcNum = 0;
+    throw;
+    //    aSrc = AddTranspose(orig->m_transA, true, aSrc, aSrcNum, true);
+    //    aSrcNum = 0;
   }
 
-  Node *bSrc = node->Input(0);
-  unsigned int bSrcNum = node->InputConnNum(0);
+  Node *bSrc = node->Input(1);
+  unsigned int bSrcNum = node->InputConnNum(1);
   if (orig->m_transB != NORMAL) {
-    bSrc = AddTranspose(orig->m_transB, true, bSrc, bSrcNum, true);
-    bSrcNum = 0;
+    throw;
+    //    bSrc = AddTranspose(orig->m_transB, true, bSrc, bSrcNum, true);
+    //    bSrcNum = 0;
   }
   
-  Node *cSrc = node->Input(1);
-  unsigned int cSrcNum = node->InputConnNum(1);
+  Node *cSrc = node->Input(2);
+  unsigned int cSrcNum = node->InputConnNum(2);
 
   Loop *loop = BLISHerkLoop(aSrc, aSrcNum,
 			bSrc, bSrcNum,

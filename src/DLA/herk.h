@@ -142,11 +142,11 @@ class DistHerkToLocalTriRK : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
-class BLISHerkLoopExp : public SingleTrans
+class BLISTriRKLoopExp : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  BLISHerkLoopExp(Layer from, Layer to)
+  BLISTriRKLoopExp(Layer from, Layer to)
     : m_fromLayer(from), m_toLayer(to) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
