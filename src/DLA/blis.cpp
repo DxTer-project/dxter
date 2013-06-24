@@ -306,20 +306,20 @@ Name GetUpToDiag::GetName(unsigned int num) const
   Name name = GetInputName(num+1);
   if (m_dir == PARTDOWN) {
     if (m_tri == LOWER) {
-      name.m_name += "L";
+      name.m_name += "_L";
     }
     else if (m_tri == UPPER) {
-      name.m_name += "R";
+      name.m_name += "_R";
     }
     else
       throw;
   }
   else if (m_dir == PARTRIGHT) {
     if (m_tri == LOWER) {
-      name.m_name += "B";
+      name.m_name += "_B";
     }
     else if (m_tri == UPPER) {
-      name.m_name += "T";
+      name.m_name += "_T";
     }
     else
       throw;
