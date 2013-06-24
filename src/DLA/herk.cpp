@@ -411,6 +411,15 @@ void TriRK::SanityCheck()
   else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
     if (m_transA != NORMAL || m_transB != NORMAL)
       throw;
+
+    if (*InputLocalM(0) != *InputLocalM(2))
+      throw;
+
+    if (*InputLocalN(0) != *InputLocalM(1))
+      throw;
+
+    if (*InputLocalN(1) != *InputLocalN(2))
+      throw;
   }
 }
 
