@@ -624,9 +624,9 @@ void AddSimplifiers()
   Universe::AddTrans(Her2k::GetClass(), new Her2kToTri2K(ABSLAYER), SIMP);
 #endif //DOSR1PHASE
 
-#if DOSQOPHASE
+#if DOSOPHASE
   Universe::AddTrans(PackBuff::GetClass(), new RenamePackBuff, SIMP);
-#endif //DOSQOPHASE
+#endif //DOSOPHASE
 
 #if DOSMPPHASE
   if (NUML2PERL3 > 1)
@@ -938,14 +938,14 @@ int main(int argc, const char* argv[])
   }
 #endif
 
-#if DOSQOPHASE
-  if (CurrPhase == SQOPHASE) {
-    cout << "Expanding SQO phase\n";
+#if DOSOPHASE
+  if (CurrPhase == SOPHASE) {
+    cout << "Expanding SO phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
     time(&start2);
-    uni.Expand(numIters, SQOPHASE, DLACullSR);
+    uni.Expand(numIters, SOPHASE, DLACullSR);
     time(&end);
-    cout << "SQO phase took " << difftime(end,start2) << " seconds\n";
+    cout << "SO phase took " << difftime(end,start2) << " seconds\n";
     
     cout << "Propagating\n";
     cout.flush();

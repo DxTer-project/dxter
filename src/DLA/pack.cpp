@@ -875,7 +875,7 @@ bool FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignore)
   return false;
 }
 
-#if DOSQOPHASE
+#if DOSOPHASE
 string RenamePackBuff::GetNewName(const PackBuff *buff) const
 {
   switch (buff->m_packMat)
@@ -892,7 +892,7 @@ string RenamePackBuff::GetNewName(const PackBuff *buff) const
 
 bool RenamePackBuff::CanApply(const Poss *poss, const Node *node) const
 {
-  if (CurrPhase != SQOPHASE)
+  if (CurrPhase != SOPHASE)
     return false;
   if (node->GetNodeClass() != PackBuff::GetClass())
     throw;
@@ -910,4 +910,4 @@ void RenamePackBuff::Apply(Poss *poss, Node *node) const
   PackBuff *buff = (PackBuff*)node;
   buff->m_name.m_name = GetNewName(buff);
 }
-#endif //DOSQOPHASE
+#endif //DOSOPHASE

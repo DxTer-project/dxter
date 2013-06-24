@@ -1515,14 +1515,9 @@ PSet* Poss::FormSetForClique(NodeSet &set)
 
 void Poss::FormSets(unsigned int phase)
 {
-#if DOSQOPHASE
-  if (phase == SQOPHASE) {
-#endif
-#if DOSMPPHASE
-    if (phase == SMPPHASE) {
-#endif
-#if DOSQOPHASE||DOSMPPHASE
-      InvalidateHash();
+#if DOSOPHASE
+  if (phase == SOPHASE) {
+    InvalidateHash();
     
     //It's important to recurse first; otherwise,
     // we'd form sets, recurse into them, and form similar sets again
@@ -1549,7 +1544,7 @@ void Poss::FormSets(unsigned int phase)
       }
     }
   }
-#endif //DOSQOPHASE||DOSMPPHASE
+#endif //DOSOPHASE
   /*
    else if (phase == ROPHASE || phase == SR1PHASE) {
    

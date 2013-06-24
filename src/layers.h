@@ -43,7 +43,7 @@
 #define DOROPHASE 1
 #define DOSR1PHASE 0
 #define DOSR2PHASE 0
-#define DOSQOPHASE 0
+#define DOSOPHASE 0
 #define DOSMPPHASE 0
 
 //Software layers
@@ -61,12 +61,12 @@ enum Layers {
 #define SR1PHASE 0
 #define SR2PHASE 1
 #define SR3PHASE 2
-#define SQOPHASE 3
+#define SOPHASE 3
 
 #define FIRSTPHASE SR1PHASE
 
 //Max phase for which to generate code
-#define MAXPHASE SQOPHASE
+#define MAXPHASE SOPHASE
 #define NUMPHASES (MAXPHASE+1)
 
 #define DODPPHASE 0
@@ -74,7 +74,7 @@ enum Layers {
 #define DOSR1PHASE 1
 #define DOSR2PHASE 1
 #define DOSR3PHASE 1
-#define DOSQOPHASE 1
+#define DOSOPHASE 1
 #define DOSMPPHASE 0
 
 //Software layers
@@ -93,11 +93,12 @@ enum Layers {
 #define SR2PHASE 1
 #define SR3PHASE 2
 #define SMPPHASE 3
+#define SOPHASE 4
 
 #define FIRSTPHASE SR1PHASE
 
 //Max phase for which to generate code
-#define MAXPHASE SMPPHASE
+#define MAXPHASE SOPHASE
 #define NUMPHASES (MAXPHASE+1)
 
 #define DODPPHASE 0
@@ -105,8 +106,8 @@ enum Layers {
 #define DOSR1PHASE 1
 #define DOSR2PHASE 1
 #define DOSR3PHASE 1
-#define DOSQOPHASE 0
 #define DOSMPPHASE 1
+#define DOSOPHASE 1
 
 //Software layers
 enum Layers {

@@ -123,12 +123,8 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
     cout << "Formed sets\n";
   }
   */
-#if DOSQOPHASE
-  if (phase == SQOPHASE) {
-    m_pset->FormSets(phase);   
-  }
-#elif DOSMPPHASE
-  if (phase == SMPPHASE) {
+#if DOSOPHASE
+  if (phase == SOPHASE) {
     m_pset->FormSets(phase);   
   }
 #endif
@@ -165,13 +161,13 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
     if (!foundNew) {
       time(&start);
       Prop();
-#if DOSQOPHASE
-      //In SQOPHASE, we intentionally form sets
+#if DOSOPHASE
+      //In SOPHASE, we intentionally form sets
       // to separate pack operations so the
       // same pack buffer can be used for
       // different pieces of data, sequentially.
       //We don't want to now get rid of those sets
-      if (phase != SQOPHASE)
+      if (phase != SOPHASE)
 #endif
 	foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
       time(&end);

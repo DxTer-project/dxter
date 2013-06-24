@@ -160,7 +160,7 @@ class ReuseTrsmPacking : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
-#if DOSQOPHASE
+#if DOSOPHASE
 class RenamePackBuff : public SingleTrans
 {
  public:
@@ -169,6 +169,6 @@ class RenamePackBuff : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
   string GetNewName(const PackBuff *buff) const;
 };
-#endif //DOSQOPHASE
+#endif //DOSOPHASE
 
 bool FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignore);
