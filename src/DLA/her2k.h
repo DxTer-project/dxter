@@ -71,6 +71,15 @@ Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
+Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
+                     Node *Bin, unsigned int Bnum,
+                     Node *Cin, unsigned int Cnum,
+                     Node *Din, unsigned int Dnum,
+                     Node *Ein, unsigned int Enum,
+                     Tri tri,
+                     Coef alpha, Coef beta, Type type,
+		    Layer layer);
+
 Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum, 
 		     Node *Bin, unsigned int Bnum, 
 		     Node *Cin, unsigned int Cnum,

@@ -1268,6 +1268,73 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
   return loop;
 }
 
+Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
+                     Node *Bin, unsigned int Bnum,
+                     Node *Cin, unsigned int Cnum,
+                     Node *Din, unsigned int Dnum,
+                     Node *Ein, unsigned int Enum,
+                     Tri tri,
+                     Coef alpha, Coef beta, Type type,
+                     Layer layer)
+{
+  ScaleTrapNode *scal = new ScaleTrapNode(layer, LEFT, tri, beta);
+  scal->AddInput(Ein, Enum);
+  
+  Split *splitA = new Split(PARTRIGHT, POSSTUNIN, true);
+  splitA->AddInput(Ain, Anum);
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+  
+  Split *splitB = new Split(PARTDOWN, POSSTUNIN);
+  splitB->AddInput(Bin, Bnum);
+  splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
+
+  Split *splitC = new Split(PARTRIGHT, POSSTUNIN);
+  splitC->AddInput(Cin, Cnum);
+  splitC->SetAllStats(FULLUP);
+  splitC->SetIndepIters();
+  
+  Split *splitD = new Split(PARTDOWN, POSSTUNIN);
+  splitD->AddInput(Din, Dnum);
+  splitD->SetAllStats(FULLUP);
+  splitD->SetIndepIters();
+  
+  LoopTunnel *ETun = new LoopTunnel(POSSTUNIN);
+  ETun->AddInput(scal, 0);
+  ETun->SetAllStats(PARTUP);
+  
+  Node *tri2k = new Tri2k(layer, tri, NORMAL, alpha, COEFONE, type);
+  
+  tri2k->AddInputs(10, splitA, 1,
+                   splitB, 1,
+		   splitC, 1,
+		   splitD, 1,
+                   ETun, 0);
+  
+  Combine *comA = splitA->CreateMatchingCombine(0);
+  
+  Combine *comB = splitB->CreateMatchingCombine(0);
+
+  Combine *comC = splitC->CreateMatchingCombine(0);
+  
+  Combine *comD = splitD->CreateMatchingCombine(0);
+  
+  LoopTunnel *EtunOut = new LoopTunnel(POSSTUNOUT);
+  EtunOut->AddInput(tri2k,0);
+  EtunOut->AddInput(ETun,0);
+  EtunOut->CopyTunnelInfo(ETun);
+  
+  Poss *loopPoss = new Poss(5, comA, comB, comC, comD, EtunOut);
+  Loop *loop;
+  if (layer == DMLAYER)
+    throw;
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+  
+  return loop;
+}
+
 
 string Tri2kToTriRK::GetType() const
 {
@@ -1415,12 +1482,12 @@ string Tri2kLoopExp::GetType() const
       //    return "Herk Loop Exp - var 1";
       //  case(2):
       //    return "Herk Loop Exp - var 2";
-      //  case(5):
-      //    return "Tri2k Loop Exp - var 5 (dim K)";
+  case(9):
+    return "Tri2k Loop Exp - var 9 (dim K)";
     case(10):
       return "Tri2k Loop Exp - var 10 (dim N)";
-    default:
-      throw;    
+  default:
+    throw;    
   }
 }
 
@@ -1445,33 +1512,31 @@ void Tri2kLoopExp::Apply(Poss *poss, Node *node) const
   connE = trirk->m_inputs[4];
   
   switch(m_var) {
-      /*
-       case(1):
-       loop = Tri2kLoopVar1(connA->m_n, connA->m_num,
-       connC->m_n, connC->m_num,
-       trirk->m_tri,
-       trirk->m_transA,
-       trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
-       break;
-       case(2):
-       loop = Tri2kLoopVar2(connA->m_n, connA->m_num,
-       connC->m_n, connC->m_num,
-       trirk->m_tri,
-       trirk->m_transA,
-       trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
-       break;
-       */
-      /*
-       case(5):
-       loop = Tri2kLoopVar5(connA->m_n, connA->m_num,
+    /*
+      case(1):
+      loop = Tri2kLoopVar1(connA->m_n, connA->m_num,
+      connC->m_n, connC->m_num,
+      trirk->m_tri,
+      trirk->m_transA,
+      trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
+      break;
+      case(2):
+      loop = Tri2kLoopVar2(connA->m_n, connA->m_num,
+      connC->m_n, connC->m_num,
+      trirk->m_tri,
+      trirk->m_transA,
+      trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
+      break;
+    */
+  case(9):
+    loop = Tri2kLoopVar9(connA->m_n, connA->m_num,
 			 connB->m_n, connB->m_num,
 			 connC->m_n, connC->m_num,
 			 connD->m_n, connD->m_num,
 			 connE->m_n, connE->m_num,
 			 trirk->m_tri,
 			 trirk->m_alpha, trirk->m_beta, trirk->m_type, m_toLayer);
-       break;
-       */
+    break;
     case(10):
       loop = Tri2kLoopVar10(connA->m_n, connA->m_num,
                             connB->m_n, connB->m_num,

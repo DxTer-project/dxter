@@ -439,14 +439,14 @@ void AddTrans()
 #endif 
 #endif //SR1PHASE
 
-  /*
-#if DOSR1PHASE
-  Universe::AddTrans(Her2k::GetClass(), new Her2kLoopExp(ABSLAYER, SQ1LAYER, 9), SQR1PHASE);
+
+#if DOSR2PHASE
+  Universe::AddTrans(Tri2k::GetClass(), new Tri2kLoopExp(S1LAYER, S2LAYER, 9), SR1PHASE);
 #if USELOWERING
-  Universe::AddTrans(Her2k::GetClass(), new Her2kLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
+  Universe::AddTrans(Tri2k::GetClass(), new Tri2kLowerLayer(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
 #endif 
-#endif //SQR1PHASE
-  */
+#endif //SR2PHASE
+
 
 #if DOSR3PHASE
   Universe::AddTrans(Tri2k::GetClass(), new Tri2kToTriRK(S2LAYER, S2LAYER), SR3PHASE);
