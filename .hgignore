@@ -8,4 +8,6 @@ xcode/DxTer.xcodeproj/xcuserdata/bamarker.xcuserdatad/xcdebugger/Breakpoints.xcb
 .hgignore~
 glob:*~
 glob:*.orig
+glob:*.x
+glob:*.o
 glob:tmp*
