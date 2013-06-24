@@ -438,11 +438,12 @@ void AddTrans()
   Universe::AddTrans(Her2k::GetClass(), new Her2kLowerLayer(ABSLAYER, SQ1LAYER, DIMK, BLIS_KC_BSVAL), SQR1PHASE);
 #endif 
 #endif //SQR1PHASE
-
-#if DOSR2PHASE
-  Universe::AddTrans(Her2k::GetClass(), new Her2kToHerk(SQ1LAYER, SQ2LAYER), SQR2PHASE);
-#endif //SQR1PHASE
   */
+
+#if DOSR3PHASE
+  Universe::AddTrans(Tri2k::GetClass(), new Tri2kToTriRK(S2LAYER, S2LAYER), SR3PHASE);
+#endif //SQR1PHASE
+
 
 
 #if DODPPHASE

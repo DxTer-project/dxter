@@ -44,6 +44,7 @@ class Coef
   Coef operator/(const Coef &coef) const;
   void operator=(const Coef &coef);
   bool operator==(const Coef &coef) const {return m_val == coef.m_val;}
+  bool operator!=(const Coef &coef) const {return !(m_val == coef.m_val);}
 };
 
 

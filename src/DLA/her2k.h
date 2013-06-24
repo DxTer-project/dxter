@@ -172,46 +172,6 @@ class Tri2kTrans : public TransTransformation
   virtual bool CanApply(const Poss *poss, const Node *node) const;
 };
 
-/*
-class LocalHer2k : public Her2k
-{
- public:
-  LocalHer2k(Tri tri, Trans trans, Coef alpha, Coef beta) : Her2k(tri,trans,alpha,beta) {}
-  virtual NodeType GetType() const { return "Local Her2k"; }
-  virtual Node* GetNewInst() { return new LocalHer2k(LOWER, NORMAL, COEFONE, COEFONE); }
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(2); }
-  virtual void Prop();
-  virtual void PrintCode(IndStream &out);
-  virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "localHer2k";}
-  virtual MatMeta OutputMeta(unsigned int num) const;
-};
-*/
-
-
-/*
-class DistHer2kToContribLocalHer2k : public SingleTrans
-{
- public:
-  virtual string GetType() const {return "Distributed Her2k to Contrib Local Her2k";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-*/
-
-class Her2kToHerk : public SingleTrans
-{
- public:
-  Layer m_fromLayer, m_toLayer;
- Her2kToHerk(Layer fromLayer, Layer toLayer) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
-  virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-
 class Her2kLowerLayer : public LowerLayer
 {
  public:
@@ -231,3 +191,16 @@ class Her2kToTri2K : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+
+class Tri2kToTriRK : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+ Tri2kToTriRK(Layer fromLayer, Layer toLayer) 
+   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+

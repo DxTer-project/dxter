@@ -1165,14 +1165,14 @@ Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
 }
 
 
-string Her2kToHerk::GetType() const 
+string Tri2kToTriRK::GetType() const 
 {
-  return "Her2k to 2 Herks " + LayerNumToStr(m_fromLayer);
+  return "Tri2K to 2 TriRKs " + LayerNumToStr(m_fromLayer);
 }
 
-bool Her2kToHerk::CanApply(const Poss *poss, const Node *node) const
+bool Tri2kToTriRK::CanApply(const Poss *poss, const Node *node) const
 {
-  if (node->GetNodeClass() == Her2k::GetClass()
+  if (node->GetNodeClass() == Tri2k::GetClass()
       && ((Her2k*)node)->GetLayer() == m_fromLayer) 
     {
       return true;
@@ -1181,63 +1181,36 @@ bool Her2kToHerk::CanApply(const Poss *poss, const Node *node) const
     return false;
 }
 
-void Her2kToHerk::Apply(Poss *poss, Node *node) const
+void Tri2kToTriRK::Apply(Poss *poss, Node *node) const
 {
-  Her2k *orig = (Her2k*)node;
+  Tri2k *orig = (Tri2k*)node;
 
-  Node *aSrc1 = node->Input(0);
-  unsigned int aSrcNum1 = node->InputConnNum(0);
-  Node *aSrc2 = aSrc1;
-  unsigned int aSrcNum2 = aSrcNum1;
-  if (orig->m_trans != NORMAL) {
-    aSrc1 = AddTranspose(orig->m_trans, true, aSrc1, aSrcNum1, true);
-    aSrcNum1 = 0;
-  }
-  else {
-    aSrc2 = AddTranspose(orig->m_type == REAL ? TRANS : CONJTRANS, true, aSrc2, aSrcNum2, true);
-    aSrcNum2 = 0;
-  }
+  if (orig->m_beta != COEFONE)
+    throw;
 
-  Node *bSrc1 = node->Input(1);
-  unsigned int bSrcNum1 = node->InputConnNum(1);
-  Node *bSrc2 = bSrc1;
-  unsigned int bSrcNum2 = bSrcNum1;
-  if (orig->m_trans == NORMAL) {
-    bSrc1 = AddTranspose(orig->m_type == REAL ? TRANS : CONJTRANS, true, bSrc1, bSrcNum1, true);
-    bSrcNum1 = 0;
-  }
-  else {
-    bSrc2 = AddTranspose(orig->m_trans, true, bSrc2, bSrcNum2, true);
-    bSrcNum2 = 0;
-  }
-  
-  Node *cSrc = node->Input(2);
-  unsigned int cSrcNum = node->InputConnNum(2);
+  TriRK *one = new TriRK(m_toLayer, orig->m_tri, 
+			 NORMAL, NORMAL, orig->m_alpha, COEFONE,
+			 orig->m_type);
 
-  Loop *loop = BLISHerkLoop(aSrc1, aSrcNum1,
-			    bSrc1, bSrcNum1,
-			    cSrc, cSrcNum,
-			    orig->m_tri,
-			    orig->m_alpha,
-			    orig->m_type,
-			    m_toLayer);
 
-  poss->AddLoop(loop);
+  TriRK *two = new TriRK(m_toLayer, orig->m_tri, 
+			 NORMAL, NORMAL, orig->m_alpha, COEFONE,
+			 orig->m_type);
 
-  cSrc = loop->OutTun(2);
-  cSrcNum = 0;
+  one->AddInputs(6,
+		 orig->Input(0), orig->InputConnNum(0),
+		 orig->Input(1), orig->InputConnNum(1),
+		 orig->Input(4), orig->InputConnNum(4));
 
-  Loop *loop2 = BLISHerkLoop(bSrc2, bSrcNum2,
-			    aSrc2, aSrcNum2,
-			    cSrc, cSrcNum,
-			    orig->m_tri,
-			    orig->m_alpha,
-			    orig->m_type,
-			    m_toLayer);
+  two->AddInputs(6,
+		 orig->Input(2), orig->InputConnNum(2),
+		 orig->Input(3), orig->InputConnNum(3),
+		 one, 0);
 
-  poss->AddLoop(loop2);
+  poss->AddNode(one);
+  poss->AddNode(two);
 
-  node->RedirectChildren(loop2->OutTun(2),0);
+  node->RedirectChildren(two,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
