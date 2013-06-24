@@ -372,6 +372,36 @@ Tri2k::Tri2k(Layer layer, Tri tri, Trans trans, Coef alpha, Coef beta, Type type
   SetLayer(layer);
 }
 
+NodeType Tri2k::GetType() const
+{
+  string str = "Tri2k " + LayerNumToStr(GetLayer()) + TriToStr(m_tri);
+  return str;
+}
+
+Phase Tri2k::MaxPhase() const
+{
+#if DODPPHASE
+  if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
+    return DPPHASE;
+  else if (GetLayer() == SMLAYER)
+    return NUMPHASES;
+  else
+    throw;
+#else
+  switch (GetLayer()) {
+    case (ABSLAYER):
+      return SR1PHASE;
+    case (S1LAYER):
+      return SR2PHASE;
+    case (S2LAYER):
+      return SR3PHASE;
+    default:
+      throw;
+  }
+  throw;
+#endif
+}
+
 void Tri2k::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   const Tri2k *tri2k = (Tri2k*)orig;
@@ -1399,8 +1429,7 @@ bool Tri2kLowerLayer::CanApply(const Poss *poss, const Node *node) const
     else
       throw;
   }
-  return false;
-  
+  return false;  
 }
 
 void Tri2kLowerLayer::Apply(Poss *poss, Node *node) const

@@ -369,6 +369,31 @@ TriRK::TriRK(Layer layer, Tri tri, Trans transA, Trans transB, Coef alpha, Coef 
   SetLayer(layer);
 }
 
+
+Phase TriRK::MaxPhase() const
+{
+#if DODPPHASE
+  if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
+    return DPPHASE;
+  else if (GetLayer() == SMLAYER)
+    return NUMPHASES;
+  else
+    throw;
+#else
+  switch (GetLayer()) {
+    case (ABSLAYER):
+      return SR1PHASE;
+    case (S1LAYER):
+      return SR2PHASE;
+    case (S2LAYER):
+      return SR3PHASE;
+    default:
+      throw;
+  }
+  throw;
+#endif
+}
+
 DistType TriRK::GetDistType(unsigned int num) const 
 {
   if (GetLayer() == SMLAYER)
@@ -381,7 +406,7 @@ DistType TriRK::GetDistType(unsigned int num) const
 
 NodeType TriRK::GetType() const
 {
-  string str = "TriRK " + TransToStr(m_transA) + TransToStr(m_transB) + TriToStr(m_tri) + LayerNumToStr(GetLayer());
+  string str = "TriRK " + TriToStr(m_tri) + LayerNumToStr(GetLayer());
   return str;
 }
 

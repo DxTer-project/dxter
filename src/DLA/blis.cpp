@@ -378,7 +378,10 @@ void GetUpToDiag::PrintCode(IndStream &out)
   }
   
   out.Indent();
-  *out << "obj_t " << GetNameStr(0) << ", " << GetNameStr(1) << ";\n";
+  if (m_inputs.size() == 3)
+    *out << "obj_t " << GetNameStr(0) << ", " << GetNameStr(1) << ";\n";
+  else
+    *out << "obj_t " << GetNameStr(0) << ", " << GetNameStr(1) << ", " << GetNameStr(2) << ";\n";
   out.Indent();
   *out << "dim_t off" << triChar << " = ";
   if (m_dir == PARTDOWN) {

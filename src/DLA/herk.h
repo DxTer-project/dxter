@@ -137,6 +137,7 @@ class TriRK : public DLAOp<3,1>, public HerkProps
 {
  public:
   TriRK(Layer layer, Tri tri, Trans transA, Trans transB, Coef alpha, Coef beta, Type type);
+  virtual Phase MaxPhase() const;
   virtual NodeType GetType() const;
   static Node* BlankInst() { return new TriRK(SMLAYER, LOWER, NORMAL, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }

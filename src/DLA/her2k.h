@@ -144,7 +144,8 @@ class Tri2k : public DLAOp<5,1>, public Her2kProps
 {
  public:
   Tri2k(Layer layer, Tri tri, Trans trans, Coef alpha, Coef beta, Type type);
-  virtual NodeType GetType() const { return "Local Tri2k"; }
+  virtual Phase MaxPhase() const;
+  virtual NodeType GetType() const;
   static Node* BlankInst() { return  new Tri2k(SMLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual DistType GetDistType(unsigned int num) const { return InputDistType(4); }
