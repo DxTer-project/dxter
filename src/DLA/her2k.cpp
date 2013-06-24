@@ -1273,3 +1273,61 @@ string Her2kLowerLayer::GetType() const
   return "Her2k lower layer " + LayerNumToStr(m_fromLayer) 
     + " to " + LayerNumToStr(m_toLayer);
 }
+
+bool Her2kToTri2K::CanApply(const Poss *poss, const Node *node) const
+{
+  return (node->GetNodeClass() == Her2k::GetClass() &&
+	  ((DLANode*)node)->GetLayer() == m_layer);
+}
+
+void Her2kToTri2K::Apply(Poss *poss, Node *node) const
+{
+  Her2k *her2k = (Her2k*)node;
+
+  Node *Ain = her2k->Input(0);
+  unsigned int Anum = her2k->InputConnNum(0);
+  
+  Node *Bin = her2k->Input(1);
+  unsigned int Bnum = her2k->InputConnNum(1);
+
+  Transpose *Atrans = new Transpose(her2k->m_type == REAL ? 
+				    TRANS : CONJTRANS,
+				    true);
+  Atrans->AddInput(Ain, Anum);
+
+  Transpose *Btrans = new Transpose(her2k->m_type == REAL ? 
+				    TRANS : CONJTRANS,
+				    true);
+  Btrans->AddInput(Bin, Bnum);
+
+  Tri2k *tri2k = new Tri2k(m_layer,
+			   her2k->m_tri,
+			   NORMAL,
+			   her2k->m_alpha,
+			   her2k->m_beta,
+			   her2k->m_type);
+
+  if (her2k->m_trans == NORMAL) {
+    tri2k->AddInputs(8,
+		     Ain, Anum,
+		     Btrans, 0,
+		     Bin, Bnum,
+		     Atrans, 0);
+  }
+  else {
+    tri2k->AddInputs(8,
+		     Btrans, 0,
+		     Ain, Anum,
+		     Atrans, 0,
+		     Bin, Bnum);
+  }
+
+  tri2k->AddInput(her2k->Input(2), her2k->InputConnNum(2));
+
+  poss->AddNode(tri2k);
+  poss->AddNode(Atrans);
+  poss->AddNode(Btrans);
+
+  her2k->RedirectChildren(tri2k, 0);
+  poss->DeleteChildAndCleanUp(node);
+}

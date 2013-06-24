@@ -612,6 +612,7 @@ void AddSimplifiers()
 
 #if DOSR1PHASE
   Universe::AddTrans(Herk::GetClass(), new HerkToTriRK(ABSLAYER), SIMP);
+  Universe::AddTrans(Her2k::GetClass(), new Her2kToTri2K(ABSLAYER), SIMP);
 #endif //DOSR1PHASE
 
 #if DOSQOPHASE

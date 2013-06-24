@@ -221,3 +221,13 @@ class Her2kLowerLayer : public LowerLayer
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+
+class Her2kToTri2K : public SingleTrans
+{
+ public:
+  Layer m_layer;
+ Her2kToTri2K(Layer layer) : m_layer(layer) {}
+  virtual string GetType() const {return "Her2k to Tri2K";}
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};
