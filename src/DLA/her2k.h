@@ -71,6 +71,16 @@ Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
+Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum, 
+		     Node *Bin, unsigned int Bnum, 
+		     Node *Cin, unsigned int Cnum,
+		     Node *Din, unsigned int Dnum,
+		     Node *Ein, unsigned int Enum,
+		     Tri tri,
+		     Coef alpha, Coef beta, Type type,
+		     Layer layer);
+
+
 class Her2kProps
 {
  public:
@@ -172,10 +182,10 @@ class Tri2kTrans : public TransTransformation
   virtual bool CanApply(const Poss *poss, const Node *node) const;
 };
 
-class Her2kLowerLayer : public LowerLayer
+class Tri2kLowerLayer : public LowerLayer
 {
  public:
- Her2kLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+ Tri2kLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
@@ -204,3 +214,15 @@ class Tri2kToTriRK : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+class Tri2kLoopExp : public SingleTrans
+{
+ public:  
+  unsigned int m_var;
+  Layer m_fromLayer, m_toLayer;
+ Tri2kLoopExp(Layer fromLayer, Layer toLayer, unsigned int variant)
+   : m_var(variant), m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};

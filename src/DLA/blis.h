@@ -84,7 +84,7 @@ class GetUpToDiag : public DLANode
   virtual const Sizes* LocalN(unsigned int num) const;
   virtual Name GetName(unsigned int num) const;
   virtual void Prop();
-  virtual unsigned int NumOutputs() const {return 2;}
+  virtual unsigned int NumOutputs() const;
   virtual void ClearSizeCache();
   virtual void BuildSizeCache();
 

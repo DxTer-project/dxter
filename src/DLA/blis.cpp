@@ -237,6 +237,16 @@ GetUpToDiag::GetUpToDiag(Tri tri, PartDir dir)
   m_dir = dir;
 }
 
+unsigned int GetUpToDiag::NumOutputs() const
+{
+  if (m_inputs.size() == 3)
+    return 2;
+  else if (m_inputs.size() == 4)
+    return 3;
+  else
+    throw;
+}
+
 const Sizes* GetUpToDiag::GetM(unsigned int num) const
 {
   if (m_dir == PARTDOWN)
@@ -332,11 +342,11 @@ Name GetUpToDiag::GetName(unsigned int num) const
 void GetUpToDiag::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    if (m_inputs.size() != 3)
+    const unsigned int numIn = m_inputs.size();
+    if (numIn != 3 && numIn != 4)
       throw;
-    Input(0)->Prop();
-    Input(1)->Prop();
-    Input(2)->Prop();
+    for (unsigned int i = 0; i < numIn; ++i)
+      Input(i)->Prop();
     
     m_cost = ZERO;
   }
@@ -427,6 +437,17 @@ void GetUpToDiag::PrintCode(IndStream &out)
   *out << "off" << triChar << ", "
        << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
        << GetInputNameStr(2) << ", &" << GetNameStr(1) << " );\n";
+  if (m_inputs.size() == 4) {
+    out.Indent();
+    if (m_dir == PARTDOWN) 
+      *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
+    else if (m_dir == PARTRIGHT)
+      *out << "bli_acquire_mpart_t2b( BLIS_SUBPART1,\n";
+    out.Indent(2);
+    *out << "off" << triChar << ", "
+	 << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
+	 << GetInputNameStr(3) << ", &" << GetNameStr(2) << " );\n";
+  }
 }
 
 void GetUpToDiag::Flatten(ofstream &out) const

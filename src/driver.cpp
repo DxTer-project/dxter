@@ -431,6 +431,14 @@ void AddTrans()
   Universe::AddTrans(TriRK::GetClass(), new BLISTriRKLoopExp(S2LAYER, S3LAYER), SR3PHASE);
 #endif //SR2PHASE
 
+  
+#if DOSR1PHASE
+  Universe::AddTrans(Tri2k::GetClass(), new Tri2kLoopExp(ABSLAYER, S1LAYER, 10), SR1PHASE);
+#if USELOWERING
+  Universe::AddTrans(Tri2k::GetClass(), new Tri2kLowerLayer(ABSLAYER, S1LAYER, DIMN, BLIS_NC_BSVAL), SR1PHASE);
+#endif 
+#endif //SR1PHASE
+
   /*
 #if DOSR1PHASE
   Universe::AddTrans(Her2k::GetClass(), new Her2kLoopExp(ABSLAYER, SQ1LAYER, 9), SQR1PHASE);
