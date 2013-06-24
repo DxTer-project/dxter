@@ -128,7 +128,7 @@ class Tri2k : public DLAOp<5,1>, public Her2kProps
   virtual NodeType GetType() const { return "Local Tri2k"; }
   static Node* BlankInst() { return  new Tri2k(SMLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
-  virtual DistType GetDistType(unsigned int num) const { return D_MC_MR; }
+  virtual DistType GetDistType(unsigned int num) const { return InputDistType(4); }
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);

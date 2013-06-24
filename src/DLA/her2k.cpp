@@ -383,85 +383,91 @@ void Tri2k::Duplicate(const Node *orig, bool shallow, bool possMerging)
 void Tri2k::SanityCheck()
 {
   DLAOp<5,1>::SanityCheck();
-  if (GetLayer() != SMLAYER)
-    throw;
+  if (GetLayer() == SMLAYER) {
 
-  if (m_type == REAL) {
-    if (m_trans != NORMAL && m_trans != TRANS)
+    if (m_type == REAL) {
+      if (m_trans != NORMAL && m_trans != TRANS)
+	throw;
+    }
+    else {
+      if (m_trans != NORMAL && m_trans != CONJTRANS)
+	throw;
+    }
+
+    if(m_type == REAL && m_trans == CONJTRANS)
       throw;
-  }
-  else {
-    if (m_trans != NORMAL && m_trans != CONJTRANS)
+    else if (m_type == COMPLEX && m_trans == TRANS)
       throw;
-  }
 
-  if(m_type == REAL && m_trans == CONJTRANS)
-    throw;
-  else if (m_type == COMPLEX && m_trans == TRANS)
-    throw;
-
-  DistType t;
+    DistType t;
   
-  if (m_trans == NORMAL) {
-    t = InputDistType(0);
-    if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
-      throw;
+    if (m_trans == NORMAL) {
+      t = InputDistType(0);
+      if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
+	throw;
 
-    t = InputDistType(1);
-    if ((t != D_MR_STAR) 
-	&& (m_type == REAL && t != D_STAR_MR_T)
-	&& (m_type == COMPLEX && t != D_STAR_MR_H))
-      throw;
+      t = InputDistType(1);
+      if ((t != D_MR_STAR) 
+	  && (m_type == REAL && t != D_STAR_MR_T)
+	  && (m_type == COMPLEX && t != D_STAR_MR_H))
+	throw;
 
-    t = InputDistType(2);
-    if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
-      throw;
+      t = InputDistType(2);
+      if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
+	throw;
 
-    t = InputDistType(3);
-    if ((t != D_MR_STAR) 
-	&& (m_type == REAL && t != D_STAR_MR_T)
-	&& (m_type == COMPLEX && t != D_STAR_MR_H))
-      throw;
-  }
-  else {
-    t = InputDistType(0);
-    if ((t != D_STAR_MC) 
-	&& (m_type == REAL && t != D_MC_STAR_T)
-	&& (m_type == COMPLEX && t != D_MC_STAR_H))
-      throw;
+      t = InputDistType(3);
+      if ((t != D_MR_STAR) 
+	  && (m_type == REAL && t != D_STAR_MR_T)
+	  && (m_type == COMPLEX && t != D_STAR_MR_H))
+	throw;
+    }
+    else {
+      t = InputDistType(0);
+      if ((t != D_STAR_MC) 
+	  && (m_type == REAL && t != D_MC_STAR_T)
+	  && (m_type == COMPLEX && t != D_MC_STAR_H))
+	throw;
 
-    t = InputDistType(1);
-    if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
-      throw;
+      t = InputDistType(1);
+      if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
+	throw;
 
-    t = InputDistType(2);
-    if ((t != D_STAR_MC) 
-	&& (m_type == REAL && t != D_MC_STAR_T)
-	&& (m_type == COMPLEX && t != D_MC_STAR_H))
-      throw;
+      t = InputDistType(2);
+      if ((t != D_STAR_MC) 
+	  && (m_type == REAL && t != D_MC_STAR_T)
+	  && (m_type == COMPLEX && t != D_MC_STAR_H))
+	throw;
 
-    t = InputDistType(3);
-    if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
-      throw;
-  }
+      t = InputDistType(3);
+      if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
+	throw;
+    }
   
-  if (InputDistType(4) != D_MC_MR)
-    throw;
+    if (InputDistType(4) != D_MC_MR)
+      throw;
+  }
 }
 
 void Tri2k::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<5,1>::Prop();
-    if (GetLayer() != SMLAYER)
-      throw;
-
-    const Sizes *localM = InputLocalM(4);
-    const Sizes *localN = InputLocalN(4);
-    const Sizes *others = (UpdateTrans(m_trans, InputDistType(0)) == NORMAL ? 
-			   InputLocalN(0) : InputLocalM(0));
-
-    m_cost = GetCost(SMLAYER, localM, localN, others);
+    if (GetLayer() == SMLAYER) {
+      const Sizes *localM = InputLocalM(4);
+      const Sizes *localN = InputLocalN(4);
+      const Sizes *others = (UpdateTrans(m_trans, InputDistType(0)) == NORMAL ? 
+			     InputLocalN(0) : InputLocalM(0));
+      
+      m_cost = GetCost(SMLAYER, localM, localN, others);
+    }
+    else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+      const Sizes *localM = InputLocalM(4);
+      const Sizes *localN = InputLocalN(4);
+      const Sizes *others = (InputLocalN(0));
+      
+      m_cost = GetCost(SMLAYER, localM, localN, others);
+    }
   }
 }
 
@@ -475,47 +481,63 @@ Cost Tri2k::GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2,
 
 void Tri2k::PrintCode(IndStream &out)
 {
+  if (GetLayer() == SMLAYER) {
+    out.Indent();
+    *out << "LocalTrr2k"
+	 << "( " << TriToStr(m_tri) << ", \n" << out.Tabs(1) << "";
 
-  out.Indent();
-  *out << "LocalTrr2k"
-      << "( " << TriToStr(m_tri) << ", \n" << out.Tabs(1) << "";
-
-  Trans otherExpected;
-  if (m_trans == NORMAL) {
-    if (m_type == REAL)
-      otherExpected = TRANS;
+    Trans otherExpected;
+    if (m_trans == NORMAL) {
+      if (m_type == REAL)
+	otherExpected = TRANS;
+      else
+	otherExpected = CONJTRANS;
+    }
     else
-      otherExpected = CONJTRANS;
+      otherExpected = NORMAL;
+
+    Trans upTrans;
+    upTrans = UpdateTrans(m_trans, InputDistType(0));
+    if (upTrans != NORMAL)
+      *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
+
+    upTrans = UpdateTrans(otherExpected, InputDistType(1));
+    if (upTrans != NORMAL)
+      *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
+
+    upTrans = UpdateTrans(m_trans, InputDistType(2));
+    if (upTrans != NORMAL)
+      *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
+
+    upTrans = UpdateTrans(otherExpected, InputDistType(3));
+    if (upTrans != NORMAL)
+      *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
+
+    out << m_alpha;
+    *out << ", "
+	 << GetInputName(0).str() << ", "
+	 << GetInputName(1).str() << ", \n" << out.Tabs(1) << ""
+	 << GetInputName(2).str() << ", "
+	 << GetInputName(3).str() << ", \n" << out.Tabs(1) << "";
+    out << m_beta;
+    *out << ", "
+	 << GetInputName(4).str() << ");\n";
   }
-  else
-    otherExpected = NORMAL;
-
-  Trans upTrans;
-  upTrans = UpdateTrans(m_trans, InputDistType(0));
-  if (upTrans != NORMAL)
-    *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
-
-  upTrans = UpdateTrans(otherExpected, InputDistType(1));
-  if (upTrans != NORMAL)
-    *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
-
-  upTrans = UpdateTrans(m_trans, InputDistType(2));
-  if (upTrans != NORMAL)
-    *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
-
-  upTrans = UpdateTrans(otherExpected, InputDistType(3));
-  if (upTrans != NORMAL)
-    *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
-
-  out << m_alpha;
-  *out << ", "
-      << GetInputName(0).str() << ", "
-      << GetInputName(1).str() << ", \n" << out.Tabs(1) << ""
-      << GetInputName(2).str() << ", "
-       << GetInputName(3).str() << ", \n" << out.Tabs(1) << "";
-  out << m_beta;
-  *out << ", "
-      << GetInputName(4).str() << ");\n";
+  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+    out.Indent();
+    *out << "BLISTrr2k" << LayerNumToStr(GetLayer())
+	 << "( " << TriToStr(m_tri) << ", \n" << out.Tabs(1) << "";
+    out << m_alpha;
+    *out << ", "
+	 << GetInputName(0).str() << ", "
+	 << GetInputName(1).str() << ", \n" << out.Tabs(1) << ""
+	 << GetInputName(2).str() << ", "
+	 << GetInputName(3).str() << ", \n" << out.Tabs(1) << "";
+    out << m_beta;
+    *out << ", "
+	 << GetInputName(4).str() << ");\n";
+    
+  }
 }
 
 void Tri2k::FlattenCore(ofstream &out) const 
