@@ -148,12 +148,12 @@ class Copy : public DLAOp<2,1>
   virtual void PrintCode(IndStream &out);
 };
 
-class L3Parallelization : public SingleTrans
+class ParallelizeMDim : public SingleTrans
 {
  public:
   Comm m_comm;
- L3Parallelization(Comm comm) : m_comm(comm) {}
-  virtual string GetType() const {return "L3Parallelization";}
+ ParallelizeMDim(Comm comm) : m_comm(comm) {}
+  virtual string GetType() const {return "ParallelizeMDim";}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };

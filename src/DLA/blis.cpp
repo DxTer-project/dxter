@@ -564,7 +564,7 @@ void Copy::PrintCode(IndStream &out)
   << GetInputNameStr(1) << " );\n";
 }
 
-bool L3Parallelization::CanApply(const Poss *poss, const Node *node) const
+bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
 {
   const PackBuff *buff = (PackBuff*)node;
   if (buff->m_packMat == PACKBPANEL) {
@@ -614,7 +614,7 @@ bool L3Parallelization::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void L3Parallelization::Apply(Poss *poss, Node *node) const
+void ParallelizeMDim::Apply(Poss *poss, Node *node) const
 {
   PackBuff *buff = (PackBuff*)node;
   buff->Parallelize(m_comm);
