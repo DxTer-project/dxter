@@ -38,6 +38,8 @@ string CommToStr(Comm comm)
       return "ProcComm";
     case(L2COMM):
       return "L2Comm";
+    case(CORECOMM):
+      return "Seq";
 #endif
     default:
       throw;

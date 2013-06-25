@@ -1950,7 +1950,8 @@ NodeType TrxmBP::GetType() const
   return "TrxmBP " + LayerNumToStr(GetLayer()) + " "
     + SideToStr(m_side) + " " 
     + TriToStr(m_tri) + " " 
-    + TransToStr(m_trans);
+    + TransToStr(m_trans)
+    + " " + CommToStr(m_comm);
 }
 
 

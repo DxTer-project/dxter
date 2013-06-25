@@ -422,7 +422,10 @@ DistType TriRK::GetDistType(unsigned int num) const
 
 NodeType TriRK::GetType() const
 {
-  string str = "TriRK " + TriToStr(m_tri) + LayerNumToStr(GetLayer());
+  string str = "TriRK " 
+    + TriToStr(m_tri) 
+    + LayerNumToStr(GetLayer())
+    + " " + CommToStr(m_comm);
   return str;
 }
 

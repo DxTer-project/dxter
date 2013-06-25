@@ -75,7 +75,8 @@ NodeType Gemm::GetType() const
   return "Gemm "
   + TransToStr(m_transA)
   + TransToStr(m_transB) + " "
-  + LayerNumToStr(GetLayer());
+  + LayerNumToStr(GetLayer())
+    + " " + CommToStr(m_comm);
 }
 
 void Gemm::Duplicate(const Node *orig, bool shallow, bool possMerging)
