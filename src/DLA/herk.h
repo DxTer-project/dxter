@@ -136,6 +136,7 @@ class TriRKLoopExp : public SingleTrans
 class TriRK : public DLAOp<3,1>, public HerkProps
 {
  public:
+  Comm m_comm;
   TriRK(Layer layer, Tri tri, Trans transA, Trans transB, Coef alpha, Coef beta, Type type);
   virtual Phase MaxPhase() const;
   virtual NodeType GetType() const;
@@ -151,8 +152,8 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   virtual bool CanTransposeInputs() const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  //  virtual bool IsBLISParallelizable() const;
-  //  virtual void Parallelize(Comm comm);
+  virtual bool IsBLISParallelizable() const;
+  virtual void Parallelize(Comm comm);
 };
 
 class TriRKTrans : public TransTransformation

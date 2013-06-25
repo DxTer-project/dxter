@@ -364,7 +364,8 @@ void TriRKLoopExp::Apply(Poss *poss, Node *node) const
 
 
 TriRK::TriRK(Layer layer, Tri tri, Trans transA, Trans transB, Coef alpha, Coef beta, Type type)
-  : HerkProps(tri, transA, transB, alpha, beta, type)
+  : HerkProps(tri, transA, transB, alpha, beta, type),
+    m_comm(CORECOMM)
 {
   SetLayer(layer);
 }
@@ -396,6 +397,19 @@ Phase TriRK::MaxPhase() const
 #endif
 }
 
+bool TriRK::IsBLISParallelizable() const
+{
+  return GetLayer() == S3LAYER;
+}
+
+void TriRK::Parallelize(Comm comm)
+{
+  if (GetLayer() == S3LAYER)
+    m_comm = comm;
+  else
+    throw;
+}
+
 DistType TriRK::GetDistType(unsigned int num) const 
 {
   if (GetLayer() == SMLAYER)
@@ -417,6 +431,7 @@ void TriRK::Duplicate(const Node *orig, bool shallow, bool possMerging)
   const TriRK *triRK = (TriRK*)orig;
   HerkProps::Duplicate(triRK);
   DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
+  m_comm = triRK->m_comm;
 }
 
 
@@ -595,12 +610,14 @@ void TriRK::FlattenCore(ofstream &out) const
 {
   DLAOp<3,1>::FlattenCore(out);
   HerkProps::FlattenCore(out);
+  WRITE(m_comm);
 }
   
 void TriRK::UnflattenCore(ifstream &in, SaveInfo &info) 
 {
   DLAOp<3,1>::UnflattenCore(in, info);
   TriRK::UnflattenCore(in,info);
+  READ(m_comm);
 }
 
 bool TriRK::CanTransposeInputs() const 

@@ -70,5 +70,4 @@ void RegAllDLANodes()
   Reg(PanelLU);
   Reg(ViewTL);
   Reg(ViewTLCombine);
-
 }

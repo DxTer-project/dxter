@@ -634,3 +634,44 @@ void ParallelizeMDim::Apply(Poss *poss, Node *node) const
     }
   }
 }
+
+
+bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
+{
+  const PackBuff *buff = (PackBuff*)node;
+  if (buff->m_packMat == PACKABLOCK) {
+    if (buff->m_children.size() != 1) {
+      cout << "more than one child of A block packbuff!\n";
+      throw;
+    }
+    if (buff->Child(0)->GetNodeClass() != Pack::GetClass()) {
+      cout << "child of A block packbuff isn't Pack\n";
+      throw;
+    }
+    const Pack *pack = (Pack*)buff->Child(0);
+    if (pack->m_children.size() < 1)
+      throw;
+    NodeConnVecConstIter iter = pack->m_children.begin();
+    for(; iter != pack->m_children.end(); ++iter) {
+      const Node *child = (*iter)->m_n;
+      if (!child->IsDLA())
+	throw;
+    }
+    return true;
+  }
+  return false;
+}
+
+void ParallelizeInnerNDim::Apply(Poss *poss, Node *node) const
+{
+  PackBuff *buff = (PackBuff*)node;
+  buff->Parallelize(m_comm);
+  Pack *pack = (Pack*)buff->Child(0);
+  pack->Parallelize(m_comm);
+  NodeConnVecConstIter iter = pack->m_children.begin();
+  for(; iter != pack->m_children.end(); ++iter) {
+    DLANode *child = (DLANode*)((*iter)->m_n);
+    if (child->IsBLISParallelizable())
+      child->Parallelize(m_comm);
+  }
+}

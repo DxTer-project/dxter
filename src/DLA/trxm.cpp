@@ -1891,9 +1891,23 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
 TrxmBP::TrxmBP(bool invert, Layer layer, Side side, Tri tri, Trans trans, 
 	       Coef coeff, Coef beta, Type type)
   : TrProps(invert, side, tri, NOTTRIDIAG, trans, coeff, type),
-    m_beta(beta)
+    m_beta(beta),
+    m_comm(CORECOMM)
 {
   SetLayer(layer);
+}
+
+bool TrxmBP::IsBLISParallelizable() const
+{
+  return GetLayer() == S3LAYER;
+}
+
+void TrxmBP::Parallelize(Comm comm)
+{
+  if (GetLayer() == S3LAYER)
+    m_comm = comm;
+  else
+    throw;
 }
 
 void TrxmBP::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -1902,6 +1916,7 @@ void TrxmBP::Duplicate(const Node *orig, bool shallow, bool possMerging)
   TrProps::Duplicate((TrxmBP*)orig);
   TrxmBP *bp = (TrxmBP*)orig;
   m_beta = bp->m_beta;
+  m_comm = bp->m_comm;
 }
 
 void TrxmBP::FlattenCore(ofstream &out) const
@@ -1909,6 +1924,7 @@ void TrxmBP::FlattenCore(ofstream &out) const
   DLAOp<3,2>::FlattenCore(out);
   TrProps::FlattenCore(out);
   WRITE(m_beta);
+  WRITE(m_comm);
 }
 
 void TrxmBP::UnflattenCore(ifstream &in, SaveInfo &info) 
@@ -1916,6 +1932,7 @@ void TrxmBP::UnflattenCore(ifstream &in, SaveInfo &info)
   DLAOp<3,2>::UnflattenCore(in,info);
   TrProps::UnflattenCore(in,info);
   READ(m_beta);
+  READ(m_comm);
 }
 
 DistType TrxmBP::GetDistType(unsigned int num) const

@@ -45,10 +45,25 @@ Gemm::Gemm(Layer layer, Trans transA, Trans transB, Coef alpha, Coef beta, Type 
 m_transB(transB),
 m_alpha(alpha),
 m_beta(beta),
-m_type(type)
+  m_type(type),
+  m_comm(CORECOMM)
 {
   SetLayer(layer);
 }
+
+bool Gemm::IsBLISParallelizable() const
+{
+  return GetLayer() == S3LAYER;
+}
+
+void Gemm::Parallelize(Comm comm)
+{
+  if (GetLayer() == S3LAYER)
+    m_comm = comm;
+  else
+    throw;
+}
+
 
 Node* Gemm::BlankInst()
 {
@@ -72,8 +87,8 @@ void Gemm::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_alpha = gemm->m_alpha;
   m_beta = gemm->m_beta;
   m_type = gemm->m_type;
+  m_comm = gemm->m_comm;
 }
-
 
 void Gemm::FlattenCore(ofstream &out) const
 {
@@ -83,6 +98,7 @@ void Gemm::FlattenCore(ofstream &out) const
   WRITE(m_alpha);
   WRITE(m_beta);
   WRITE(m_type);
+  WRITE(m_comm);
 }
 
 void Gemm::UnflattenCore(ifstream &in, SaveInfo &info)
@@ -93,6 +109,7 @@ void Gemm::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_alpha);
   READ(m_beta);
   READ(m_type);
+  READ(m_comm);
 }
 
 DistType Gemm::GetDistType(unsigned int num) const

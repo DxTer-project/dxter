@@ -56,6 +56,7 @@ class Gemm : public DLAOp<3,1>
   Trans m_transA, m_transB;
   Coef m_alpha, m_beta;
   Type m_type;
+  Comm m_comm;
   Gemm(Layer layer, Trans transA, Trans transB, Coef alpha, Coef beta, Type type);
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -75,6 +76,8 @@ class Gemm : public DLAOp<3,1>
   virtual bool CanTransposeInputs() const;
   static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);
   virtual void UpdateInnerPackingMultiple(PackSize size);
+  virtual bool IsBLISParallelizable() const;
+  virtual void Parallelize(Comm comm);
 };
 
 class GemmLoopExp : public SingleTrans

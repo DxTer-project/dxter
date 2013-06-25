@@ -157,3 +157,14 @@ class ParallelizeMDim : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+
+
+class ParallelizeInnerNDim : public SingleTrans
+{
+ public:
+  Comm m_comm;
+ ParallelizeInnerNDim(Comm comm) : m_comm(comm) {}
+  virtual string GetType() const {return "ParallelizeInnerNDim";}
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};

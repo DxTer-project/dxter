@@ -631,6 +631,8 @@ void AddSimplifiers()
 #if DOSMPPHASE
   if (NUML2PERL3 > 1)
     Universe::AddTrans(PackBuff::GetClass(), new ParallelizeMDim(PROCCOMM), SMPPHASE);
+  if (NUMCORESPERL2 > 1)
+    Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMM), SMPPHASE);
 #endif
 
 }

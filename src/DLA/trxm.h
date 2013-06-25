@@ -83,6 +83,7 @@ class TrxmBP : public DLAOp<3,2>, public TrProps
 {
  public:
   Coef m_beta;
+  Comm m_comm;
   TrxmBP(bool invert, Layer layer, Side side, Tri tri, Trans trans, 
 	 Coef coeff, Coef beta, Type type);
   static Node* BlankInst() { return new TrxmBP(false,S3LAYER,LEFT,LOWER,NORMAL,COEFONE,COEFONE,REAL); }
@@ -97,6 +98,8 @@ class TrxmBP : public DLAOp<3,2>, public TrProps
   virtual NodeType GetType() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
+  virtual bool IsBLISParallelizable() const;
+  virtual void Parallelize(Comm comm);
 };
 
 class TrxmLoopExp : public SingleTrans

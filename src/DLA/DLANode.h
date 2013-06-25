@@ -23,6 +23,7 @@
 
 #pragma once
 #include "node.h"
+#include "comm.h"
 
 //Ancestor class for all DLA nodes
 class DLANode : public Node
@@ -71,6 +72,8 @@ class DLANode : public Node
   virtual bool DoNotCullSR() const {return false;}
   virtual bool CanTransposeInputs() const {return false;} 
   virtual void UpdateInnerPackingMultiple(PackSize size);
+  virtual bool IsBLISParallelizable() const {return false;}
+  virtual void Parallelize(Comm comm) {throw;}
 };
 
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull);
