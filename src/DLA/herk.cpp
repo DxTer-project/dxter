@@ -381,14 +381,16 @@ Phase TriRK::MaxPhase() const
     throw;
 #else
   switch (GetLayer()) {
-    case (ABSLAYER):
-      return SR1PHASE;
-    case (S1LAYER):
-      return SR2PHASE;
-    case (S2LAYER):
-      return SR3PHASE;
-    default:
-      throw;
+  case (ABSLAYER):
+    return SR1PHASE;
+  case (S1LAYER):
+    return SR2PHASE;
+  case (S2LAYER):
+    return SR3PHASE;
+  case (S3LAYER):
+    return NUMPHASES;
+  default:
+    throw;
   }
   throw;
 #endif
@@ -559,7 +561,7 @@ void TriRK::PrintCode(IndStream &out)
     *out << ", " << GetInputName(2).str()
 	 << " );\n";
   }
-  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER) {
     out.Indent();
     *out << "BlisTrrk" << LayerNumToStr(GetLayer()) << "( ";
     out << m_alpha;
@@ -572,6 +574,20 @@ void TriRK::PrintCode(IndStream &out)
     *out << ", " << GetInputName(2).str()
 	 << " );\n";
 
+  }
+  else if (GetLayer() == S3LAYER) {
+    out.Indent();
+    *out << "bli_herk_";
+    if (m_tri == UPPER)
+      *out << "u";
+    else
+      *out << "l";
+    *out << "_ker_var2( ";
+    out << m_alpha;
+    *out << ", &"
+	 << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n" 
+	 << out.Tabs(2)
+	 << "&BLIS_ONE, &" << GetInputName(2).str() << ", (herk_t*)NULL );\n";
   }
 }
 
@@ -1071,7 +1087,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   aPack->AddInput(splitA, 1);
   aPack->AddInput(aBuff, 0);
 
-  HerkBP *herkbp = new HerkBP(layer, tri, alpha);
+  TriRK *herkbp = new TriRK(layer, tri, NORMAL, NORMAL, alpha, COEFONE, type);
   herkbp->AddInputs(6,
 		  aPack, 0,
 		  diag, 1,
@@ -1101,61 +1117,6 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
     loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
   
   return loop;
-}
-
-
-HerkBP::HerkBP(Layer layer, Tri tri, Coef alpha)
- : m_alpha(alpha)
-{
-  SetLayer(layer);
-  m_tri = tri;
-  m_alpha = alpha;
-}
-
-void HerkBP::Duplicate(const Node *orig, bool shallow, bool possMerging)
-{
-  DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
-  const HerkBP *herk = (HerkBP*)orig;
-  m_tri = herk->m_tri;
-  m_alpha = herk->m_alpha;
-}
-
-void HerkBP::FlattenCore(ofstream &out) const
-{
-  DLAOp<3,1>::FlattenCore(out);
-  WRITE(m_tri);
-  WRITE(m_alpha);
-}
-
-void HerkBP::UnflattenCore(ifstream &in, SaveInfo &info)
-{
-  DLAOp<3,1>::UnflattenCore(in, info);
-  READ(m_tri);
-  READ(m_alpha);
-}
-
-void HerkBP::Prop()
-{
-  if (!IsValidCost(m_cost)) {
-    DLAOp<3,1>::Prop();
-    m_cost = ZERO;
-  }
-}
-
-void HerkBP::PrintCode(IndStream &out)
-{
-  out.Indent();
-  *out << "bli_herk_";
-  if (m_tri == UPPER)
-    *out << "u";
-  else
-    *out << "l";
-  *out << "_ker_var2( ";
-  out << m_alpha;
-  *out << ", &"
-       << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n" 
-       << out.Tabs(2)
-       << "&BLIS_ONE, &" << GetInputName(2).str() << ", (herk_t*)NULL );\n";
 }
 
 bool TriRKLowerLayer::CanApply(const Poss *poss, const Node *node) const

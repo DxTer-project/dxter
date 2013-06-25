@@ -151,6 +151,8 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   virtual bool CanTransposeInputs() const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
+  //  virtual bool IsBLISParallelizable() const;
+  //  virtual void Parallelize(Comm comm);
 };
 
 class TriRKTrans : public TransTransformation
@@ -181,26 +183,6 @@ class BLISTriRKLoopExp : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const {throw;}
-};
-
-class HerkBP : public DLAOp<3,1>
-{
- public:
-  Tri m_tri;
-  Coef m_alpha;
-  HerkBP(Layer layer, Tri tri, Coef alpha);
-  static Node* BlankInst() { return new HerkBP(S3LAYER,UPPER,COEFONE); }
-  virtual Node* GetNewInst() { return BlankInst(); }
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "HerkBP";}
-  virtual void FlattenCore(ofstream &out) const;
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(2);}
-  virtual Phase MaxPhase() const {return NUMPHASES;}
-  virtual NodeType GetType() const {return "HerkBP";}
-  virtual void Prop();
-  virtual void PrintCode(IndStream &out);
 };
 
 class TriRKLowerLayer : public LowerLayer
