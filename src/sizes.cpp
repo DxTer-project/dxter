@@ -375,6 +375,14 @@ Sizes::Sizes(double constVal)
   m_coeff = 0;
 }
 
+Sizes::Sizes(const Sizes &rhs)
+{
+  m_constVal = NAN;
+  m_coeff = 0;
+  *this = rhs;
+}
+
+
 Sizes::~Sizes()
 {
   EntryVecIter iter = m_entries.begin();
@@ -717,7 +725,10 @@ Cost Sizes::SumProds111(const Sizes &sizes1, const Sizes &sizes2) const
     SizesIter iter2 = sizes1.GetIter(i);
     SizesIter iter3 = sizes2.GetIter(i);
     while (!iter1.AtEnd()) {
-      cost += *iter1 * *iter2 * *iter3;
+      Size size1 = *iter1;
+      Size size2 = *iter2;
+      Size size3 = *iter3;
+      cost += size1 + size2 + size3;
       ++iter1;
       ++iter2;
       ++iter3;
@@ -820,4 +831,12 @@ bool Sizes::operator<= (const Size &rhs) const
       return false;
   }
   return true;
+}
+
+void Sizes::AddParFactor(unsigned int parFactor)
+{
+  EntryVecIter iter = m_entries.begin();
+  for(; iter != m_entries.end(); ++iter) {
+    (*iter)->m_parFactor *= parFactor;
+  }
 }

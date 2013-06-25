@@ -1981,20 +1981,24 @@ void TrxmBP::PrintCode(IndStream &out)
   out.Indent();
   if(m_invert) {
     if (m_tri == LOWER)
-      *out << "bli_trsm_l_ker_var2( ";
+      *out << "bli_trsm_l_ker_var2";
     else if (m_tri == UPPER)
-      *out << "bli_trsm_u_ker_var2( ";
+      *out << "bli_trsm_u_ker_var2";
     else
       throw;
   }
   else {
     if (m_tri == LOWER)
-      *out << "bli_trmm_l_ker_var2( ";
+      *out << "bli_trmm_l_ker_var2";
     else if (m_tri == UPPER)
-      *out << "bli_trmm_u_ker_var2( ";
+      *out << "bli_trmm_u_ker_var2";
     else
       throw;
   }
+  if (m_comm == CORECOMM)
+    *out << "( ";
+  else
+    *out << "_par( " << CommToStr(m_comm) << ", ";
   out << m_coeff ;
   *out << ", &"
        << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n" 

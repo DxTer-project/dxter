@@ -417,7 +417,10 @@ void Gemm::PrintCode(IndStream &out)
       *out << ", " << GetInputName(2).str() << " );\n";
     }
     else if (GetLayer() == S3LAYER) {
-      *out << "bli_gemm_ker_var2( ";
+      if (m_comm == CORECOMM) 
+	*out << "bli_gemm_ker_var2( ";
+      else
+	*out << "bli_gemm_ker_var2_par( " << CommToStr(m_comm) << ", ";
       out << m_alpha;
       *out<< ", &"
       << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n"

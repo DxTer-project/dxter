@@ -389,67 +389,67 @@ void GetUpToDiag::PrintCode(IndStream &out)
       *out << "0;\n";
       out.Indent();
       *out << "dim_t n" << triChar << " = bli_min( bli_obj_width_after_trans( "
-	   << GetInputNameStr( 1 ) << " ), \n";
+      << GetInputNameStr( 1 ) << " ), \n";
       out.Indent(2);
       *out << "bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 ) << " ) + "
-	   << "bs" << out.LoopLevel() << " );\n";
+      << "bs" << out.LoopLevel() << " );\n";
     }
     else {
       *out << "bli_max( 0, bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 )
-	   << " ) );\n";
+      << " ) );\n";
       out.Indent();
       *out << "dim_t n" << triChar << " = bli_obj_width_after_trans( "
-	   << GetInputNameStr( 1 ) << " ) - off" << triChar << ";\n";
+      << GetInputNameStr( 1 ) << " ) - off" << triChar << ";\n";
     }
   }
   else if (m_dir == PARTRIGHT) {
     if (lower) {
       *out << "bli_max( 0, -bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 )
-	   << " ) );\n";
+      << " ) );\n";
       out.Indent();
       *out << "dim_t m" << triChar << " = bli_obj_length_after_trans( "
-	   << GetInputNameStr( 1 ) << " ) - off" << triChar << ";\n";
+      << GetInputNameStr( 1 ) << " ) - off" << triChar << ";\n";
     }
     else {
       *out << "0;\n";
       out.Indent();
       *out << "dim_t m" << triChar << " = bli_min( bli_obj_length_after_trans( "
-	   << GetInputNameStr( 1 ) << " ), \n";
+      << GetInputNameStr( 1 ) << " ), \n";
       out.Indent(2);
       *out << "-bli_obj_diag_offset_after_trans( " << GetInputNameStr( 1 ) << " ) + "
-	   << "bs" << out.LoopLevel() << " );\n";
+      << "bs" << out.LoopLevel() << " );\n";
     }
   }
   
   out.Indent();
-  if (m_dir == PARTDOWN) 
-    *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
-  else if (m_dir == PARTRIGHT)
-    *out << "bli_acquire_mpart_t2b( BLIS_SUBPART1,\n";
-  out.Indent(2);
-  *out << "off" << triChar << ", " 
-       << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
-       << GetInputNameStr(1) << ", &" << GetNameStr(0) << " );\n";
-  //  out.Indent(2);
-  out.Indent();
-  if (m_dir == PARTDOWN) 
+  if (m_dir == PARTDOWN)
     *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
   else if (m_dir == PARTRIGHT)
     *out << "bli_acquire_mpart_t2b( BLIS_SUBPART1,\n";
   out.Indent(2);
   *out << "off" << triChar << ", "
-       << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
-       << GetInputNameStr(2) << ", &" << GetNameStr(1) << " );\n";
+  << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
+  << GetInputNameStr(1) << ", &" << GetNameStr(0) << " );\n";
+  //  out.Indent(2);
+  out.Indent();
+  if (m_dir == PARTDOWN)
+    *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
+  else if (m_dir == PARTRIGHT)
+    *out << "bli_acquire_mpart_t2b( BLIS_SUBPART1,\n";
+  out.Indent(2);
+  *out << "off" << triChar << ", "
+  << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
+  << GetInputNameStr(2) << ", &" << GetNameStr(1) << " );\n";
   if (m_inputs.size() == 4) {
     out.Indent();
-    if (m_dir == PARTDOWN) 
+    if (m_dir == PARTDOWN)
       *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1,\n";
     else if (m_dir == PARTRIGHT)
       *out << "bli_acquire_mpart_t2b( BLIS_SUBPART1,\n";
     out.Indent(2);
     *out << "off" << triChar << ", "
-	 << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
-	 << GetInputNameStr(3) << ", &" << GetNameStr(2) << " );\n";
+    << (m_dir == PARTDOWN ? "n" : "m") << triChar << ", &"
+    << GetInputNameStr(3) << ", &" << GetNameStr(2) << " );\n";
   }
 }
 
@@ -628,7 +628,7 @@ void ParallelizeMDim::Apply(Poss *poss, Node *node) const
     if (!loop->HasIndepIters()) {
       cout << "Doesn't have independent iters\n";
       throw;
-    }  
+    }
     else {
       loop->Parallelize(m_comm);
     }
@@ -649,15 +649,19 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
       throw;
     }
     const Pack *pack = (Pack*)buff->Child(0);
-    if (pack->m_children.size() < 1)
+    if (!pack->m_children.size())
       throw;
+    bool found = false;
     NodeConnVecConstIter iter = pack->m_children.begin();
     for(; iter != pack->m_children.end(); ++iter) {
       const Node *child = (*iter)->m_n;
       if (!child->IsDLA())
-	throw;
+        throw;
+      const DLANode *dla = (DLANode*)child;
+      if (dla->IsBLISParallelizable())
+        found = true;
     }
-    return true;
+    return found;
   }
   return false;
 }

@@ -109,6 +109,7 @@ class Sizes
   EntryVec m_entries;
   Sizes();
   Sizes(double constVal);
+  Sizes(const Sizes &rhs);
   ~Sizes();
 
   void Print() const;
@@ -133,6 +134,7 @@ class Sizes
   bool AllOnes() const;
   SizesIter GetIter(unsigned int sizeNum) const;
   bool IsZero(unsigned int n) const;
+  void AddParFactor(unsigned int parFactor);
 };
 
 
