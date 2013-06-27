@@ -867,8 +867,38 @@ void Loop::Parallelize(Comm comm)
     throw;
   m_comm = comm;
   if (!HasIndepIters()) {
-    cout << "Non-independent iterations on input\n";
-    throw;
+    bool found = false;
+    NodeVecIter iter = m_inTuns.begin();
+    for(; iter != m_inTuns.end(); ++iter) {
+      LoopTunnel *tun = (LoopTunnel*)(*iter);	
+      if (!tun->IndepIters()) {
+	if (found)
+	  throw;
+	found = true;
+	unsigned int numOut = tun->NumOutputs();
+	if (tun->GetNodeClass() == Split::GetClass())
+	  --numOut;
+	NodeConnVecIter connIter = tun->m_children.begin();
+	for( ; connIter != tun->m_children.end(); ++ connIter) {
+	  Node *possTun = (*connIter)->m_n;
+	  Poss *poss = possTun->m_poss;
+	  NodeSet nodeSet;
+	  NodeConnVecIter childIter = possTun->m_children.begin();
+	  for( ; childIter != possTun->m_children.end(); ++childIter) {
+	    NodeConn *conn = *childIter;
+	    //check that this child is an actual output, not
+	    // an output going straight to the matching POSSTUNOUT
+	    if (conn->m_num < numOut) {
+	      AddUsersOfLiveOutput(conn->m_n, conn->m_num, nodeSet);
+	    }
+	  }
+	  if (!nodeSet.size())
+	    throw;
+	  poss->FillClique(nodeSet);
+	  poss->FormSetForClique(nodeSet, true);
+	}	
+      }
+    }
   }
   
   ClearSizeCache();

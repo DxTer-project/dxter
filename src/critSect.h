@@ -3,6 +3,8 @@
 class CritSect : public PSet
 {
  public:
+ CritSect() : PSet() {}
+ CritSect(Poss *poss) : PSet(poss) {}
   virtual PSet* GetNewInst() {return new CritSect;}
   virtual void SanityCheck();
   virtual void PrintCurrPoss(IndStream &out, unsigned int &graphNum);

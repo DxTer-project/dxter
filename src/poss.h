@@ -111,9 +111,9 @@ class Poss
   void RemoveFromGraphNodes(Node *node);
   void RemoveFromSets(PSet *set);
   void PrintNodeAddresses() const;
-  PSet* FormSubPSet(NodeVec &outputTuns);
+  PSet* FormSubPSet(NodeVec &outputTuns, bool isCritSect);
   void FillClique(NodeSet &set);
-  PSet* FormSetForClique(NodeSet &set);
+  PSet* FormSetForClique(NodeSet &set, bool isCritSect);
 
   void ClearCurrPoss();
   bool IncrementCurrPoss();
@@ -131,3 +131,5 @@ class Poss
 
   void PrintSetConnections();
 };
+
+void AddUsersOfLiveOutput(Node *node, unsigned int connNum, NodeSet &set);

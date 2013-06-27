@@ -30,6 +30,7 @@
 #include <iomanip>
 #include "twoSidedTrxm.h"
 #include "pack.h"
+#include "critSect.h"
 
 //#define CHECKFORLOOPS
 
@@ -1303,10 +1304,14 @@ bool FoundLoop(Node *node, NodeVec &queue)
   return false;
 }
 
-PSet* Poss::FormSubPSet(NodeVec &outputTuns)
+PSet* Poss::FormSubPSet(NodeVec &outputTuns, bool isCritSect)
 {
   Poss *newPoss = new Poss(outputTuns, true, true);
-  PSet *set = new PSet(newPoss);
+  PSet *set;
+  if (isCritSect)
+    set = new CritSect(newPoss);
+  else
+    set = new PSet(newPoss);
   
   AddPSet(set, true);
   
@@ -1435,7 +1440,7 @@ void Poss::FillClique(NodeSet &set)
   }
 }
 
-PSet* Poss::FormSetForClique(NodeSet &set)
+PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
 {
   NodeVec outputTuns;
   NodeSetIter iter = set.begin();
@@ -1495,7 +1500,7 @@ PSet* Poss::FormSetForClique(NodeSet &set)
   //   for(; iter3 != outputTuns.end(); ++iter3) {
   //     cout << "output node " << *iter3 << " " << (*iter3)->GetNodeClass() << endl;
   //   }
-  PSet *pset = FormSubPSet(outputTuns);
+  PSet *pset = FormSubPSet(outputTuns, isCritSect);
   //   NodeVecIter iter2 = m_possNodes.begin();
   //   for(; iter2 != m_possNodes.end(); ++iter2) {
   //     if (set.find(*iter2) != set.end()) {
@@ -1538,7 +1543,7 @@ void Poss::FormSets(unsigned int phase)
           nodeSet.insert(node);
           AddUsersOfLiveOutput(node, 0, nodeSet);
           FillClique(nodeSet);
-          FormSetForClique(nodeSet);
+          FormSetForClique(nodeSet, false);
           i = 0;
         }
       }
