@@ -56,6 +56,11 @@ bool Gemm::IsBLISParallelizable() const
   return GetLayer() == S3LAYER;
 }
 
+bool Gemm::IsParallel() const
+{
+  return m_comm != CORECOMM;
+}
+
 void Gemm::Parallelize(Comm comm)
 {
   if (GetLayer() == S3LAYER)

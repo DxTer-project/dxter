@@ -840,3 +840,11 @@ void Sizes::AddParFactor(unsigned int parFactor)
     (*iter)->m_parFactor *= parFactor;
   }
 }
+
+void Sizes::SetParFactor(unsigned int parFactor)
+{
+  EntryVecIter iter = m_entries.begin();
+  for(; iter != m_entries.end(); ++iter) {
+    (*iter)->m_parFactor = parFactor;
+  }
+}

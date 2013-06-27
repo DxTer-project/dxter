@@ -154,6 +154,7 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool IsBLISParallelizable() const;
   virtual void Parallelize(Comm comm);
+  virtual bool IsParallel() const;
 };
 
 class TriRKTrans : public TransTransformation

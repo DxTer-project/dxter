@@ -30,9 +30,31 @@ class CritSect : public PSet
  CritSect() : PSet() {}
  CritSect(Poss *poss) : PSet(poss) {}
   virtual PSet* GetNewInst() {return new CritSect;}
-  virtual void SanityCheck();
   virtual void PrintCurrPoss(IndStream &out, unsigned int &graphNum);
   virtual bool IsCritSect() const {return true;}
   virtual bool IsTransparent() const {return false;}
   virtual bool CanMerge(PSet *pset) const {return false;}
+  virtual void SanityCheck();
+};
+
+class CritSectTunnel : public PossTunnel
+{
+ public:
+  Sizes *m_msizes, *m_nsizes;
+  Sizes *m_mlsizes, *m_nlsizes;
+  CritSectTunnel();
+  ~CritSectTunnel();
+  static Node* BlankInst() { return new CritSectTunnel;}
+  virtual Node* GetNewInst() {return BlankInst(); }
+  virtual NodeType GetType() const {return "CritSectTunnel";}
+  virtual void SanityCheck();
+  virtual unsigned int NumOutputs() const {return 1;}
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "CritSectTunnel";}
+  virtual const Sizes* GetM(unsigned int num) const;
+  virtual const Sizes* GetN(unsigned int num) const;
+  virtual const Sizes* LocalM(unsigned int num) const;
+  virtual const Sizes* LocalN(unsigned int num) const;
+  virtual void BuildSizeCache();
+  virtual void ClearSizeCache();
 };

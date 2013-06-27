@@ -141,6 +141,7 @@ class Node
   virtual bool IsPossTunnel() const {return false;}
   virtual bool IsPossTunnel(PossTunType type) const;
   virtual bool IsLoopTunnel() const {return false;}
+  virtual bool IsParallel() const {return false;}
 
   void PrintChildren();
   void PrintInputs();

@@ -111,4 +111,5 @@ class Loop : public PSet
 
   void Parallelize(Comm comm);
   bool HasIndepIters() const;
+  bool IsParallel() const {return m_comm!=CORECOMM;}
 };

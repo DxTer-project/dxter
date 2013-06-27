@@ -135,6 +135,7 @@ class Sizes
   SizesIter GetIter(unsigned int sizeNum) const;
   bool IsZero(unsigned int n) const;
   void AddParFactor(unsigned int parFactor);
+  void SetParFactor(unsigned int parFactor);
 };
 
 

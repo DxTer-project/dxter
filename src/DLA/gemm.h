@@ -78,6 +78,7 @@ class Gemm : public DLAOp<3,1>
   virtual void UpdateInnerPackingMultiple(PackSize size);
   virtual bool IsBLISParallelizable() const;
   virtual void Parallelize(Comm comm);
+  virtual bool IsParallel() const;
 };
 
 class GemmLoopExp : public SingleTrans

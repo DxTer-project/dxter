@@ -402,6 +402,12 @@ bool TriRK::IsBLISParallelizable() const
   return GetLayer() == S3LAYER;
 }
 
+bool TriRK::IsParallel() const
+{
+  return m_comm != CORECOMM;
+}
+
+
 void TriRK::Parallelize(Comm comm)
 {
   if (GetLayer() == S3LAYER)

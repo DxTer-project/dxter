@@ -1908,6 +1908,11 @@ bool TrxmBP::IsBLISParallelizable() const
   return GetLayer() == S3LAYER;
 }
 
+bool TrxmBP::IsParallel() const
+{
+  return m_comm != CORECOMM;
+}
+
 void TrxmBP::Parallelize(Comm comm)
 {
   if (GetLayer() == S3LAYER)

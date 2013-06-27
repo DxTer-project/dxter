@@ -100,6 +100,7 @@ class TrxmBP : public DLAOp<3,2>, public TrProps
   virtual void PrintCode(IndStream &out);
   virtual bool IsBLISParallelizable() const;
   virtual void Parallelize(Comm comm);
+  virtual bool IsParallel() const;
 };
 
 class TrxmLoopExp : public SingleTrans

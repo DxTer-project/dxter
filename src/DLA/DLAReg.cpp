@@ -24,6 +24,7 @@
 #include "DLAReg.h"
 #include "universe.h"
 #include "loopSupport.h"
+#include "critSect.h"
 
 #define Reg(NODE) Universe::RegCons(NODE::GetClass(), &(NODE::BlankInst))
 
@@ -61,6 +62,7 @@ void RegAllDLANodes()
   Reg(Combine);
   Reg(Split);
   Reg(LoopTunnel);
+  Reg(CritSectTunnel);
   Reg(PossTunnel);
   Reg(LocalTrmmAcc);
   Reg(Trxm);
