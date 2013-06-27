@@ -708,7 +708,7 @@ bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
   if (!loop->HasIndepIters())
     throw;
 
-  const Split *control = loop->GetControl();
+  /*  const Split *control = loop->GetControl();
   const unsigned int numExecs = control->NumberOfLoopExecs();
   unsigned int parFactor = NumGroupsInComm(m_comm);
   int numParallelizable = 0;
@@ -719,7 +719,7 @@ bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
   }
   if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
     return false;
-  
+  */
   return true;
 }
 
