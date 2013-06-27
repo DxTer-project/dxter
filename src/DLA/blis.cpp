@@ -598,6 +598,8 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
         throw;
       }
       const LoopTunnel *tun = (LoopTunnel*)child;
+      if (tun->InCriticalSection())
+	return false;
       const Loop *loop = (Loop*)(tun->m_pset);
       if (!loop->HasIndepIters()) {
         cout << "Doesn't have independent iters\n";
@@ -662,13 +664,16 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
       throw;
     bool found = false;
     NodeConnVecConstIter iter = pack->m_children.begin();
-    for(; iter != pack->m_children.end(); ++iter) {
+    for(; !found && iter != pack->m_children.end(); ++iter) {
       const Node *child = (*iter)->m_n;
       if (!child->IsDLA())
         throw;
       const DLANode *dla = (DLANode*)child;
-      if (dla->IsBLISParallelizable())
-        found = true;
+      if (dla->IsBLISParallelizable()) {
+	if (dla->InCriticalSection())
+	  return false;
+	found = true;
+      }
     }
     return found;
   }
@@ -720,7 +725,7 @@ bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
   if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
     return false;
   */
-  return true;
+  return !tun->InCriticalSection();
 }
 
 void ParallelizeOuterNDim::Apply(Poss *poss, Node *node) const

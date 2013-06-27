@@ -5,6 +5,7 @@ GraphsOut*
 codeOutput*
 totalCostOutput.m
 xcode/DxTer.xcodeproj/xcuserdata/bamarker.xcuserdatad/xcdebugger/Breakpoints.xcbkptlist
+xcode/DxTer.xcodeproj/project.xcworkspace/xcuserdata/bamarker.xcuserdatad/UserInterfaceState.xcuserstate
 .hgignore~
 glob:*~
 glob:*.orig
