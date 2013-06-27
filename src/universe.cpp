@@ -26,6 +26,7 @@
 #include <time.h>
 #include "helperNodes.h"
 #include "loop.h"
+#include "critSect.h"
 
 //Print out code for all generated implementations
 // This takes a while for large search spaces
@@ -477,6 +478,8 @@ void Universe::Flatten(ofstream &out) const
   WRITE(m_pset);
   bool isLoop = m_pset->IsLoop();
   WRITE(isLoop);
+  bool isCrit = m_pset->IsCritSect();
+  WRITE(isCrit);
   m_pset->Flatten(out);
   WRITE(END);
 }
@@ -522,8 +525,12 @@ void Universe::Unflatten(ifstream &in)
   READ(oldPset);
   bool isLoop;
   READ(isLoop);  
+  bool isCrit;
+  READ(isCrit);
   if (isLoop)
     m_pset = new Loop;
+  else if (isCrit)
+    m_pset = new CritSect;
   else
     m_pset = new PSet;
   psetMap[oldPset] = m_pset;

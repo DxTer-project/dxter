@@ -70,6 +70,7 @@ class PSet
   void InlinePoss(unsigned int possNum, PossVec &newPosses);
   virtual void ClearPrinted();
   virtual bool IsLoop() const {return false;}
+  virtual bool IsCritSect() const {return false;}
   void RemoveInTun(Node *tun);
   void RemoveOutTun(Node *tun);
   void Cull(CullFunction cullFunc);

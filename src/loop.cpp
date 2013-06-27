@@ -872,6 +872,7 @@ void Loop::Parallelize(Comm comm)
   }
   
   ClearSizeCache();
+
   //If we're parallelizing a loop that is on a poss
   // that just got duplicated as part of a transformation,
   // then that duplicated poss doesn't have its size cache.
