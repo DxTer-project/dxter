@@ -868,6 +868,7 @@ void Loop::Parallelize(Comm comm)
   m_comm = comm;
   if (!HasIndepIters()) {
     bool found = false;
+    //If this code changes, reflace in ParallelizedOnNonIndependentData
     NodeVecIter iter = m_inTuns.begin();
     for(; iter != m_inTuns.end(); ++iter) {
       LoopTunnel *tun = (LoopTunnel*)(*iter);
@@ -883,18 +884,12 @@ void Loop::Parallelize(Comm comm)
           Node *possTun = (*connIter)->m_n;
           Poss *poss = possTun->m_poss;
           NodeSet nodeSet;
-	  for (unsigned int i = 0; i < numOut; ++i) {
-              AddUsersOfLiveOutput(possTun, i, nodeSet);
+          for (unsigned int i = 0; i < numOut; ++i) {
+            AddUsersOfLiveOutput(possTun, i, nodeSet);
           }
           if (!nodeSet.size())
             throw;
-          NodeSetIter blah = nodeSet.begin();
-          for(; blah != nodeSet.end(); ++blah)
-            cout << (*blah)->GetNodeClass() << endl;
           poss->FillClique(nodeSet);
-          blah = nodeSet.begin();
-          for(; blah != nodeSet.end(); ++blah)
-            cout << (*blah)->GetNodeClass() << endl;
           poss->FormSetForClique(nodeSet, true);
         }
       }
@@ -910,6 +905,81 @@ void Loop::Parallelize(Comm comm)
   // different thanks to paralellization.
   if (m_ownerPoss)
     m_ownerPoss->BuildSizeCache();
+}
+
+bool ContainsParallelization(PSet *set)
+{
+  if (set->IsLoop()) {
+    Loop *loop = (Loop*)set;
+    if (loop->IsParallel())
+      return true;
+  }
+  
+  PossVecIter iter = set->m_posses.begin();
+  for(; iter != set->m_posses.end(); ++iter) {
+    Poss *poss = *iter;
+    PSetVecIter setIter = poss->m_sets.begin();
+    for(; setIter != poss->m_sets.end(); ++setIter) {
+      PSet *set = *setIter;
+      if (ContainsParallelization(set))
+        return true;
+    }
+    NodeVecIter nodeIter = poss->m_possNodes.begin();
+    for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
+      if ((*nodeIter)->IsParallel())
+        return true;
+    }
+  }
+  return false;
+}
+
+bool ContainsParallelization(const NodeSet &set)
+{
+  PSetSet setSet;
+  NodeSetIter iter = set.begin();
+  for(; iter != set.end(); ++iter) {
+    Node *node = *iter;
+    if (node->IsParallel())
+      return true;
+    if (node->IsPossTunnel(SETTUNIN)) {
+      PossTunnel *tun = (PossTunnel*)node;
+      if (setSet.find(tun->m_pset) != setSet.end()) {
+        setSet.insert(tun->m_pset);
+        if (ContainsParallelization(tun->m_pset))
+          return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool Loop::ParallelizedOnNonIndependentData() const
+{
+  NodeVecConstIter iter = m_inTuns.begin();
+  for(; iter != m_inTuns.end(); ++iter) {
+    //If this code changes, reflect in Parallelize
+    const LoopTunnel *tun = (LoopTunnel*)(*iter);
+    if (!tun->IndepIters()) {
+      unsigned int numOut = tun->NumOutputs();
+      if (tun->GetNodeClass() == Split::GetClass())
+        --numOut;
+      NodeConnVecConstIter connIter = tun->m_children.begin();
+      for( ; connIter != tun->m_children.end(); ++ connIter) {
+        Node *possTun = (*connIter)->m_n;
+        Poss *poss = possTun->m_poss;
+        NodeSet nodeSet;
+        for (unsigned int i = 0; i < numOut; ++i) {
+          AddUsersOfLiveOutput(possTun, i, nodeSet);
+        }
+        if (!nodeSet.size())
+          throw;
+        poss->FillClique(nodeSet);
+        if (ContainsParallelization(nodeSet))
+          return true;
+      }
+    }
+  }
+  return false;
 }
 
 bool Loop::HasIndepIters() const

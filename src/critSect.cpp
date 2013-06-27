@@ -1,23 +1,23 @@
 /*
-    This file is part of DxTer.
-    DxTer is a prototype using the Design by Transformation (DxT)
-    approach to program generation.
-
-    Copyright (C) 2013, The University of Texas and Bryan Marker
-
-    DxTer is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    DxTer is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
-
-    You should have received a copy of the GNU General Public License
-    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ This file is part of DxTer.
+ DxTer is a prototype using the Design by Transformation (DxT)
+ approach to program generation.
+ 
+ Copyright (C) 2013, The University of Texas and Bryan Marker
+ 
+ DxTer is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ DxTer is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "critSect.h"
 #include "loopSupport.h"
@@ -33,7 +33,7 @@ void CritSect::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   *out << "Critical section with communicator " << CommToStr(comm) << "; need correct output code\n";
   out.Indent();
   *out << "GetMutex(" << CommToStr(comm) << ");\n";
-
+  
   PSet::PrintCurrPoss(out, graphNum);
   
   out.Indent();
@@ -48,22 +48,22 @@ bool HasParallelCode(Poss *poss)
     if (set->IsLoop()) {
       Loop *loop = (Loop*)set;
       if (loop->IsParallel())
-	return true;
+        return true;
     }
     PossVecIter possIter = set->m_posses.begin();
     for(; possIter != set->m_posses.end(); ++possIter) {
       if (HasParallelCode(*possIter))
-	return true;
+        return true;
     }
   }
-
+  
   NodeVecIter nodeIter = poss->m_possNodes.begin();
   for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
     Node *node = *nodeIter;
     if (node->IsParallel())
       return true;
   }
-
+  
   return false;
 }
 
@@ -75,8 +75,10 @@ void CritSect::SanityCheck()
   PossVecIter iter = m_posses.begin();
   for( ; iter != m_posses.end(); ++iter) {
     Poss *poss = *iter;
-    if (HasParallelCode(poss))
+    if (HasParallelCode(poss)) {
+      poss->ForcePrint();
       throw;
+    }
   }
 }
 
@@ -106,8 +108,8 @@ const Sizes* CritSectTunnel::GetM(unsigned int num) const
 {
   if (num > 0)
     throw;
-  switch(m_tunType) 
-    {
+  switch(m_tunType)
+  {
     case (POSSTUNOUT):
       return GetInputM(0);
     case (SETTUNOUT):
@@ -126,8 +128,8 @@ const Sizes* CritSectTunnel::GetN(unsigned int num) const
 {
   if (num > 0)
     throw;
-  switch(m_tunType) 
-    {
+  switch(m_tunType)
+  {
     case (POSSTUNOUT):
       return GetInputN(0);
     case (SETTUNOUT):
@@ -145,8 +147,8 @@ const Sizes* CritSectTunnel::LocalM(unsigned int num) const
 {
   if (num > 0)
     throw;
-  switch(m_tunType) 
-    {
+  switch(m_tunType)
+  {
     case (POSSTUNOUT):
       return InputLocalM(0);
     case (SETTUNOUT):
@@ -164,8 +166,8 @@ const Sizes* CritSectTunnel::LocalN(unsigned int num) const
 {
   if (num > 0)
     throw;
-  switch(m_tunType) 
-    {
+  switch(m_tunType)
+  {
     case (POSSTUNOUT):
       return InputLocalN(0);
     case (SETTUNOUT):
@@ -228,7 +230,7 @@ void CritSectTunnel::SanityCheck()
     if (!m_pset->IsCritSect())
       throw;
   }
-  else { 
+  else {
     if (!m_poss->m_pset->IsCritSect())
       throw;
   }

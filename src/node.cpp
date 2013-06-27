@@ -839,7 +839,7 @@ void Node::BuildSizeCacheRecursive()
 bool Node::InCriticalSection() const
 {
   Poss *poss = m_poss;
-  while (poss->m_pset) {
+  while (poss && poss->m_pset) {
     PSet *set = poss->m_pset;
     if (set->IsCritSect())
       return true;

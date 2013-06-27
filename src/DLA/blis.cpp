@@ -579,6 +579,8 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
     const Pack *pack = (Pack*)buff->Child(0);
     if (pack->m_children.size() < 1)
       throw;
+    if (buff->InCriticalSection())
+      return false;
     NodeConnVecConstIter iter = pack->m_children.begin();
     for(; iter != pack->m_children.end(); ++iter) {
       const Node *child = (*iter)->m_n;
@@ -598,8 +600,7 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
         throw;
       }
       const LoopTunnel *tun = (LoopTunnel*)child;
-      if (tun->InCriticalSection())
-	return false;
+
       const Loop *loop = (Loop*)(tun->m_pset);
       if (!loop->HasIndepIters()) {
         cout << "Doesn't have independent iters\n";
@@ -662,9 +663,8 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
     const Pack *pack = (Pack*)buff->Child(0);
     if (!pack->m_children.size())
       throw;
-    bool found = false;
     NodeConnVecConstIter iter = pack->m_children.begin();
-    for(; !found && iter != pack->m_children.end(); ++iter) {
+    for(; iter != pack->m_children.end(); ++iter) {
       const Node *child = (*iter)->m_n;
       if (!child->IsDLA())
         throw;
@@ -672,10 +672,10 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
       if (dla->IsBLISParallelizable()) {
 	if (dla->InCriticalSection())
 	  return false;
-	found = true;
+	else
+	  return true;
       }
     }
-    return found;
   }
   return false;
 }
@@ -754,7 +754,11 @@ bool ParallelizeK::CanApply(const Poss *poss, const Node *node) const
   }
   if (loop->HasIndepIters())
     throw;
-  return true;
+  if (loop->ParallelizedOnNonIndependentData())
+    return false;
+  else {
+    return true;
+  }
 }
 
 void ParallelizeK::Apply(Poss *poss, Node *node) const
