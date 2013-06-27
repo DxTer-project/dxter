@@ -1291,7 +1291,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   
   LoopTunnel *CtunOut = new LoopTunnel(POSSTUNOUT);
   CtunOut->AddInput(gepp, 0);
-  CtunOut->AddInput(Ctun, 0);
+  CtunOut->AddInput(Ctun, 1);
   CtunOut->CopyTunnelInfo(Ctun);
   
   Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
@@ -1340,7 +1340,7 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   
   LoopTunnel *AtunOut = new LoopTunnel(POSSTUNOUT);
   AtunOut->AddInput(Atun, 0);
-  AtunOut->AddInput(Atun, 0);
+  AtunOut->AddInput(Atun, 1);
   AtunOut->CopyTunnelInfo(Atun);
   
   Combine *comB = splitB->CreateMatchingCombine(0);

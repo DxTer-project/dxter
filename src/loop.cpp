@@ -1,23 +1,23 @@
 /*
-    This file is part of DxTer.
-    DxTer is a prototype using the Design by Transformation (DxT)
-    approach to program generation.
-
-    Copyright (C) 2013, The University of Texas and Bryan Marker
-
-    DxTer is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    DxTer is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
-
-    You should have received a copy of the GNU General Public License
-    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ This file is part of DxTer.
+ DxTer is a prototype using the Design by Transformation (DxT)
+ approach to program generation.
+ 
+ Copyright (C) 2013, The University of Texas and Bryan Marker
+ 
+ DxTer is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ DxTer is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 
 
@@ -32,7 +32,7 @@ int Loop::M_currLabel = 0;
 Size BSSizeToSize(BSSize size)
 {
   switch(size)
-    {
+  {
     case (USEELEMBS):
       return ELEM_BS;
     case (USEBLISMC):
@@ -45,13 +45,13 @@ Size BSSizeToSize(BSSize size)
       return BLIS_OUTER_BS;
     default:
       throw;
-    }
+  }
 }
 
 string BSSizeToStr(BSSize size)
 {
   switch(size)
-    {
+  {
     case (USEELEMBS):
       throw;
     case (USEBLISMC):
@@ -64,7 +64,7 @@ string BSSizeToStr(BSSize size)
       return "bs_obj";
     default:
       throw;
-    }
+  }
 }
 
 unsigned int GetNumElems(PartDir dir)
@@ -107,15 +107,15 @@ string PartDirToStr(PartDir dir)
   }
 }
 
-Loop::Loop() 
-  : PSet(), m_type(UNKNOWNLOOP), m_comm(CORECOMM), m_dim(BADDIM)
+Loop::Loop()
+: PSet(), m_type(UNKNOWNLOOP), m_comm(CORECOMM), m_dim(BADDIM)
 {
   AssignNewLabel();
   m_bsSize = BADBSSIZE;
 }
 
 Loop::Loop(LoopType type)
-  : m_type(type), m_comm(CORECOMM), m_dim(BADDIM)
+: m_type(type), m_comm(CORECOMM), m_dim(BADDIM)
 {
   if (m_type == ELEMLOOP)
     m_bsSize = USEELEMBS;
@@ -144,17 +144,17 @@ Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
       cout << "non loop tunnel on loop!\n";
       throw;
     }
-      if (in->GetNodeClass() == Split::GetClass()) 
-      {
-        Split *split = (Split*)in;
-        
-        if (split->m_isControlTun) {
-          if (foundControl)
-            throw;
-          else
-            foundControl = true;
-        }
+    if (in->GetNodeClass() == Split::GetClass())
+    {
+      Split *split = (Split*)in;
+      
+      if (split->m_isControlTun) {
+        if (foundControl)
+          throw;
+        else
+          foundControl = true;
       }
+    }
   }
   if (!foundControl)
     throw;
@@ -217,7 +217,7 @@ bool Loop::CanMerge(PSet *pset) const
   //If there's a PACKABLOCK in both sets, then we don't
   // want to fuse those loops.  We don't merge the packing
   // yet and they're likely using other packed B panels for the
-  // computation.  That will make it impossible to separate the 
+  // computation.  That will make it impossible to separate the
   // different uses of the single packed B panel buffer
   bool found1 = false;
   bool found2 = false;
@@ -226,16 +226,16 @@ bool Loop::CanMerge(PSet *pset) const
     if (node->GetNodeClass() == PackBuff::GetClass()) {
       PackBuff *buff = (PackBuff*)node;
       if (buff->m_packMat == PACKABLOCK)
-	found1 = true;
+        found1 = true;
     }
   }
   if (found1) {
     for(unsigned int i = 0; !found2 && i < loop->m_posses[0]->m_possNodes.size(); ++i) {
       Node *node = loop->m_posses[0]->m_possNodes[i];
       if (node->GetNodeClass() == PackBuff::GetClass()) {
-	PackBuff *buff = (PackBuff*)node;
-	if (buff->m_packMat == PACKABLOCK)
-	  found2 = true;
+        PackBuff *buff = (PackBuff*)node;
+        if (buff->m_packMat == PACKABLOCK)
+          found2 = true;
       }
     }
     if (found1 && found2)
@@ -245,7 +245,7 @@ bool Loop::CanMerge(PSet *pset) const
   
   if (!PSet::CanMerge(pset))
     return false;
-
+  
   const Loop *left=NULL, *right=NULL;
   //this is true if the left loop is actually on the left
   //otherwise, the order doesn't matter
@@ -253,7 +253,7 @@ bool Loop::CanMerge(PSet *pset) const
   for(; iter != pset->m_inTuns.end() && !left; ++iter) {
     const Node *inTun = *iter;
     for (unsigned int i = 0; i < inTun->m_inputs.size() && !left; ++i) {
-      if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) && 
+      if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) &&
           ((PossTunnel*)inTun->Input(i))->m_pset == this) {
         right = (Loop*)pset;
         left = this;
@@ -265,7 +265,7 @@ bool Loop::CanMerge(PSet *pset) const
     for(; iter != m_inTuns.end() && !left; ++iter) {
       const Node *inTun = *iter;
       for (unsigned int i = 0; i < inTun->m_inputs.size() && !left; ++i) {
-        if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) && 
+        if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) &&
             ((PossTunnel*)inTun->Input(i))->m_pset == pset) {
           left = (Loop*)pset;
           right = this;
@@ -332,7 +332,7 @@ bool Loop::CanMerge(PSet *pset) const
     for(; iter != right->m_outTuns.end(); ++iter) {
       const Node *outTun = *iter;
       for (unsigned int i = 0; i < outTun->m_children.size(); ++i) {
-        if (outTun->Child(0)->IsPossTunnel(SETTUNIN) && 
+        if (outTun->Child(0)->IsPossTunnel(SETTUNIN) &&
             ((PossTunnel*)outTun->Child(0))->m_pset == left) {
           cout << "found cycle\n";
           throw;
@@ -343,7 +343,7 @@ bool Loop::CanMerge(PSet *pset) const
     
     //If the right loop uses a quadrant of a particular input
     // that is output by the left loop, make sure the left loop has
-    // completely computed that quadrant	
+    // completely computed that quadrant
     iter = right->m_inTuns.begin();
     for(; iter != right->m_inTuns.end(); ++iter) {
       if (!(*iter)->IsLoopTunnel()) {
@@ -476,7 +476,7 @@ bool Loop::CanMerge(PSet *pset) const
           }
         }
       }
-    }    
+    }
     
     if (!foundConnection) {
       throw;
@@ -502,60 +502,60 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     string idx = "idx" + loopLevel;
     string dimLen = "dimLen" + loopLevel;
     string bs = "bs" + loopLevel;
-
+    
     Split *split = GetControl();
-
+    
     string inputName = split->Input(0)->GetName(split->InputConnNum(0)).str();
-
+    
     switch(split->m_dir) {
-    case(PARTDIAGBACK):
-    case(PARTDIAG):
-      out.Indent();
-      *out << dimLen << " = min( bli_obj_length_after_trans( " << inputName << " ), "
-	   << "bli_obj_width_after_trans( " << inputName << " ) );\n";
-      break;
-    case(PARTDOWN):
-    case(PARTUPWARD):
-      out.Indent();
-      *out << dimLen << " = bli_obj_length_after_trans( " << inputName << " );\n";
-      break;
-    case (PARTRIGHT):
-    case (PARTLEFT):
-      out.Indent();
-      *out << dimLen << " = bli_obj_width_after_trans( " << inputName << " );\n";
-      break;
-    default:
-      throw;
+      case(PARTDIAGBACK):
+      case(PARTDIAG):
+        out.Indent();
+        *out << dimLen << " = min( bli_obj_length_after_trans( " << inputName << " ), "
+        << "bli_obj_width_after_trans( " << inputName << " ) );\n";
+        break;
+      case(PARTDOWN):
+      case(PARTUPWARD):
+        out.Indent();
+        *out << dimLen << " = bli_obj_length_after_trans( " << inputName << " );\n";
+        break;
+      case (PARTRIGHT):
+      case (PARTLEFT):
+        out.Indent();
+        *out << dimLen << " = bli_obj_width_after_trans( " << inputName << " );\n";
+        break;
+      default:
+        throw;
     }
     out.Indent();
-    *out << "for ( " << idx << " = 0; " << idx << " < " << dimLen << "; " 
-	 << idx << " += " << bs <<" ) {\n";
+    *out << "for ( " << idx << " = 0; " << idx << " < " << dimLen << "; "
+    << idx << " += " << bs <<" ) {\n";
     out.Indent(1);
     *out << bs;
     switch(split->m_dir) {
-    case(PARTDOWN):
-    case(PARTDIAG):
-    case (PARTRIGHT):
-      *out << " = bli_determine_blocksize_f( " ;
-      break;
-    case (PARTLEFT):
-    case(PARTUPWARD):
-    case(PARTDIAGBACK):
-      *out << " = bli_determine_blocksize_b( " ;
-      break;
-    default:
-      throw;
+      case(PARTDOWN):
+      case(PARTDIAG):
+      case (PARTRIGHT):
+        *out << " = bli_determine_blocksize_f( " ;
+        break;
+      case (PARTLEFT):
+      case(PARTUPWARD):
+      case(PARTDIAGBACK):
+        *out << " = bli_determine_blocksize_b( " ;
+        break;
+      default:
+        throw;
     }
-
-      *out << idx << ", " << dimLen 
-	 << ", &" << inputName << ", " << BSSizeToStr(m_bsSize) << " );\n";
-
-      loopLevel = out.LoopLevel(2);
-      idx = "idx" + loopLevel;
-      dimLen = "dimLen" + loopLevel;
-      bs = "bs" + loopLevel;
-      out.Indent(1);
-      *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
+    
+    *out << idx << ", " << dimLen
+    << ", &" << inputName << ", " << BSSizeToStr(m_bsSize) << " );\n";
+    
+    loopLevel = out.LoopLevel(2);
+    idx = "idx" + loopLevel;
+    dimLen = "dimLen" + loopLevel;
+    bs = "bs" + loopLevel;
+    out.Indent(1);
+    *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
   }
   else {
     if (m_comm != CORECOMM)
@@ -588,7 +588,7 @@ void Loop::AssignNewLabel()
   m_label.insert(M_currLabel++);
 }
 
-bool Loop::WorthFusing(Loop *loop) 
+bool Loop::WorthFusing(Loop *loop)
 {
   NodeVecIter iter = m_outTuns.begin();
   for(; iter != m_outTuns.end(); ++iter) {
@@ -685,7 +685,7 @@ void Loop::UnflattenCore(ifstream &in, SaveInfo &info)
   }
 }
 
-void Loop::FlattenStatic(ofstream &out) 
+void Loop::FlattenStatic(ofstream &out)
 {
   WRITE(M_currLabel);
 }
@@ -729,8 +729,8 @@ void Loop::FillTunnelSizes()
     if (numIters) {
       iter = m_inTuns.begin();
       for (; iter != m_inTuns.end(); ++iter) {
-	LoopTunnel *in = (LoopTunnel*)(*iter);
-	in->AppendSizes(i, numIters, NumGroupsInComm(m_comm));
+        LoopTunnel *in = (LoopTunnel*)(*iter);
+        in->AppendSizes(i, numIters, NumGroupsInComm(m_comm));
       }
     }
   }
@@ -742,23 +742,23 @@ void Loop::BuildSizeCache()
   PSet::BuildSizeCache();
 }
 
-LoopTunnel* Loop::CreateNewLoopTunnels(Node *input, 
-				       unsigned int num, Poss *possToCareAbout, UpStat stat)
+LoopTunnel* Loop::CreateNewLoopTunnels(Node *input,
+                                       unsigned int num, Poss *possToCareAbout, UpStat stat)
 {
   LoopTunnel *newTunIn = new LoopTunnel(SETTUNIN);
   newTunIn->SetAllStats(stat);
   newTunIn->SetPSet(this);
   m_ownerPoss->AddNode(newTunIn);
   m_inTuns.push_back(newTunIn);
-
+  
   LoopTunnel *newTunOut = new LoopTunnel(SETTUNOUT);
   newTunOut->SetAllStats(stat);
   newTunOut->SetPSet(this);
   m_ownerPoss->AddNode(newTunOut);
   m_outTuns.push_back(newTunOut);
-
+  
   newTunIn->AddInput(input,num);
-
+  
   Node *ret = NULL;
   PossVecIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter) {
@@ -804,9 +804,9 @@ void Loop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
   }
   if (tun->m_tunType != POSSTUNIN)
     throw;
-
+  
   LoopTunnel *setTunIn = (LoopTunnel*)(tun->Input(0));
-
+  
   //If there is an poss that uses the LoopTunnel's input,
   // then we shouldn't remove it from all
   //Check all children of the set input (poss inputs)
@@ -819,10 +819,10 @@ void Loop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
     for(; childIter2 != child->m_children.end(); ++childIter2) {
       Node *childChild = (*childIter2)->m_n;
       if (!childChild->IsPossTunnel(POSSTUNOUT))
-	return;
+        return;
     }
   }
-
+  
   //At this point, we've checked, and there is no reason
   // to keep this set of loop tunnels around
   unsigned int tunNum = UINT_MAX;
@@ -834,20 +834,20 @@ void Loop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
   }
   if (tunNum == UINT_MAX)
     throw;
-
+  
   Node *setTunOut = m_outTuns[tunNum];
-
+  
   if (setTunOut->m_children.size() > 0)
     throw;
-
+  
   NodeConnVecIter outIter = setTunOut->m_inputs.begin();
   for(; outIter != setTunOut->m_inputs.end(); ++outIter) {
     HardDeleteNode((*outIter)->m_n);
   }
-
+  
   m_outTuns.erase(m_outTuns.begin()+tunNum);
   HardDeleteNode(setTunOut);
-
+  
   childIter = setTunIn->m_children.begin();
   for(; childIter != setTunIn->m_children.end(); ++childIter) {
     Node *child = (*childIter)->m_n;
@@ -857,7 +857,7 @@ void Loop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
   setTunIn->m_children.clear();
   
   m_inTuns.erase(m_inTuns.begin()+tunNum);
-
+  
   setTunIn->m_poss->DeleteChildAndCleanUp(setTunIn, true);
 }
 
@@ -870,39 +870,39 @@ void Loop::Parallelize(Comm comm)
     bool found = false;
     NodeVecIter iter = m_inTuns.begin();
     for(; iter != m_inTuns.end(); ++iter) {
-      LoopTunnel *tun = (LoopTunnel*)(*iter);	
+      LoopTunnel *tun = (LoopTunnel*)(*iter);
       if (!tun->IndepIters()) {
-	if (found)
-	  throw;
-	found = true;
-	unsigned int numOut = tun->NumOutputs();
-	if (tun->GetNodeClass() == Split::GetClass())
-	  --numOut;
-	NodeConnVecIter connIter = tun->m_children.begin();
-	for( ; connIter != tun->m_children.end(); ++ connIter) {
-	  Node *possTun = (*connIter)->m_n;
-	  Poss *poss = possTun->m_poss;
-	  NodeSet nodeSet;
-	  NodeConnVecIter childIter = possTun->m_children.begin();
-	  for( ; childIter != possTun->m_children.end(); ++childIter) {
-	    NodeConn *conn = *childIter;
-	    //check that this child is an actual output, not
-	    // an output going straight to the matching POSSTUNOUT
-	    if (conn->m_num < numOut) {
-	      AddUsersOfLiveOutput(conn->m_n, conn->m_num, nodeSet);
-	    }
-	  }
-	  if (!nodeSet.size())
-	    throw;
-	  poss->FillClique(nodeSet);
-	  poss->FormSetForClique(nodeSet, true);
-	}	
+        if (found)
+          throw;
+        found = true;
+        unsigned int numOut = tun->NumOutputs();
+        if (tun->GetNodeClass() == Split::GetClass())
+          --numOut;
+        NodeConnVecIter connIter = tun->m_children.begin();
+        for( ; connIter != tun->m_children.end(); ++ connIter) {
+          Node *possTun = (*connIter)->m_n;
+          Poss *poss = possTun->m_poss;
+          NodeSet nodeSet;
+	  for (unsigned int i = 0; i < numOut; ++i) {
+              AddUsersOfLiveOutput(possTun, i, nodeSet);
+          }
+          if (!nodeSet.size())
+            throw;
+          NodeSetIter blah = nodeSet.begin();
+          for(; blah != nodeSet.end(); ++blah)
+            cout << (*blah)->GetNodeClass() << endl;
+          poss->FillClique(nodeSet);
+          blah = nodeSet.begin();
+          for(; blah != nodeSet.end(); ++blah)
+            cout << (*blah)->GetNodeClass() << endl;
+          poss->FormSetForClique(nodeSet, true);
+        }
       }
     }
   }
   
   ClearSizeCache();
-
+  
   //If we're parallelizing a loop that is on a poss
   // that just got duplicated as part of a transformation,
   // then that duplicated poss doesn't have its size cache.

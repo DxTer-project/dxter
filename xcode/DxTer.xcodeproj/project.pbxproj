@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BD437F22177CC3F90022B518 /* critSect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD437F20177CC3F90022B518 /* critSect.cpp */; };
 		BD4E58B21774DD2D00834079 /* DLAOp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD4E58B01774DD2D00834079 /* DLAOp.cpp */; };
 		BD9D11641772809200C097B2 /* base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11421772809200C097B2 /* base.cpp */; };
 		BD9D11651772809200C097B2 /* coef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11441772809200C097B2 /* coef.cpp */; };
@@ -60,6 +61,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BD437F20177CC3F90022B518 /* critSect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = critSect.cpp; path = ../../src/critSect.cpp; sourceTree = "<group>"; };
+		BD437F21177CC3F90022B518 /* critSect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = critSect.h; path = ../../src/critSect.h; sourceTree = "<group>"; };
 		BD4E58B01774DD2D00834079 /* DLAOp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DLAOp.cpp; path = ../../src/DLA/DLAOp.cpp; sourceTree = "<group>"; };
 		BD4E58B11774DD2D00834079 /* DLAOp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DLAOp.h; path = ../../src/DLA/DLAOp.h; sourceTree = "<group>"; };
 		BD9D11421772809200C097B2 /* base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base.cpp; path = ../../src/base.cpp; sourceTree = "<group>"; };
@@ -168,6 +171,8 @@
 		BDBB01261756776F0010EB4A /* DxTer */ = {
 			isa = PBXGroup;
 			children = (
+				BD437F20177CC3F90022B518 /* critSect.cpp */,
+				BD437F21177CC3F90022B518 /* critSect.h */,
 				BDE4DB08177A174B00B464C8 /* comm.cpp */,
 				BDE4DB09177A174B00B464C8 /* comm.h */,
 				BD9D11761772809F00C097B2 /* blas.cpp */,
@@ -334,6 +339,7 @@
 				BD9D11AF1772809F00C097B2 /* twoSidedTrxm.cpp in Sources */,
 				BD4E58B21774DD2D00834079 /* DLAOp.cpp in Sources */,
 				BDE4DB0A177A174B00B464C8 /* comm.cpp in Sources */,
+				BD437F22177CC3F90022B518 /* critSect.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

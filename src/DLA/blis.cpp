@@ -583,8 +583,15 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
     for(; iter != pack->m_children.end(); ++iter) {
       const Node *child = (*iter)->m_n;
       if (!child->IsLoopTunnel()) {
-        cout << "Child of pack isn't loop tunnel : " << child->GetNodeClass() << endl;
-        throw;
+        if (child->IsPossTunnel()) {
+          PossTunnel *tun = (PossTunnel*)child;
+          if (!tun->m_pset->IsCritSect())
+            throw;
+          else
+            return false;
+        }
+        else
+          throw;
       }
       if (!child->IsPossTunnel(SETTUNIN)) {
         cout << "Child of pack is loop tunnel but not SETTUNIN\n";
@@ -700,10 +707,52 @@ bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
   }
   if (!loop->HasIndepIters())
     throw;
+
+  const Split *control = loop->GetControl();
+  const unsigned int numExecs = control->NumberOfLoopExecs();
+  unsigned int parFactor = NumGroupsInComm(m_comm);
+  int numParallelizable = 0;
+  for(unsigned int i = 0; i < numExecs; ++i) {
+    unsigned int numIters = control->NumIters(i);
+    if (numIters >= parFactor)
+      ++numParallelizable;
+  }
+  if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
+    return false;
+  
   return true;
 }
 
 void ParallelizeOuterNDim::Apply(Poss *poss, Node *node) const
+{
+  LoopTunnel *tun = (LoopTunnel*)node;
+  Loop *loop = (Loop*)(tun->m_pset);
+  loop->Parallelize(m_comm);
+}
+
+
+bool ParallelizeK::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != LoopTunnel::GetClass())
+    throw;
+  const LoopTunnel *tun = (LoopTunnel*)node;
+  if (tun->m_tunType != SETTUNIN)
+    return false;
+  const Loop *loop = (Loop*)(tun->m_pset);
+  if (loop->m_comm == m_comm)
+    return false;
+  if (loop->m_dim != DIMK)
+    return false;
+  if (loop->m_comm != CORECOMM) {
+    //Need to handle multiple par factors on loop
+    throw;
+  }
+  if (loop->HasIndepIters())
+    throw;
+  return true;
+}
+
+void ParallelizeK::Apply(Poss *poss, Node *node) const
 {
   LoopTunnel *tun = (LoopTunnel*)node;
   Loop *loop = (Loop*)(tun->m_pset);

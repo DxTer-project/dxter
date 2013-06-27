@@ -1490,11 +1490,11 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
       }
     }
   }
-  //   iter = set.begin();
-  //   for(; iter != set.end(); ++iter) {
-  //     cout << "node " << *iter << " " << (*iter)->GetNodeClass() << endl;
-  //     cout << "  first owned by " << (*iter)->m_poss << endl;
-  //   }
+    iter = set.begin();
+    for(; iter != set.end(); ++iter) {
+      cout << "node " << *iter << " " << (*iter)->GetNodeClass() << endl;
+      cout << "  first owned by " << (*iter)->m_poss << endl;
+    }
   //   cout << outputTuns.size() << " outputs\n";
   //   NodeVecIter iter3 = outputTuns.begin();
   //   for(; iter3 != outputTuns.end(); ++iter3) {
