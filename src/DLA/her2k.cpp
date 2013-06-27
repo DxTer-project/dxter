@@ -1294,6 +1294,8 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
     throw;
   else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+
+  loop->SetDim(DIMN);
   
   return loop;
 }
@@ -1361,6 +1363,8 @@ Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
     throw;
   else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+
+  loop->SetDim(DIMK);
   
   return loop;
 }

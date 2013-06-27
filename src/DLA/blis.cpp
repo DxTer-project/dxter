@@ -597,6 +597,8 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
         loop->m_posses[0]->ForcePrint();
         throw;
       }
+      if (loop->m_dim != DIMM)
+	throw;
       const Split *control = loop->GetControl();
       const unsigned int numExecs = control->NumberOfLoopExecs();
       unsigned int parFactor = NumGroupsInComm(m_comm);
@@ -678,4 +680,13 @@ void ParallelizeInnerNDim::Apply(Poss *poss, Node *node) const
     if (child->IsBLISParallelizable())
       child->Parallelize(m_comm);
   }
+}
+
+bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
+{
+  return false;
+}
+
+void ParallelizeOuterNDim::Apply(Poss *poss, Node *node) const
+{
 }

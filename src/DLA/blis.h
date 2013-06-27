@@ -168,3 +168,13 @@ class ParallelizeInnerNDim : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+
+class ParallelizeOuterNDim : public SingleTrans
+{
+ public:
+  Comm m_comm;
+ ParallelizeOuterNDim(Comm comm) : m_comm(comm) {}
+  virtual string GetType() const {return "ParallelizeOuterNDim";}
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};

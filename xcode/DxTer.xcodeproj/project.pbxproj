@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		BD4E58B21774DD2D00834079 /* DLAOp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD4E58B01774DD2D00834079 /* DLAOp.cpp */; };
-		BD4E58B51776316700834079 /* comm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD4E58B31776316700834079 /* comm.cpp */; };
 		BD9D11641772809200C097B2 /* base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11421772809200C097B2 /* base.cpp */; };
 		BD9D11651772809200C097B2 /* coef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11441772809200C097B2 /* coef.cpp */; };
 		BD9D11661772809200C097B2 /* combine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11461772809200C097B2 /* combine.cpp */; };
@@ -44,6 +43,7 @@
 		BD9D11AE1772809F00C097B2 /* trxm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D11981772809F00C097B2 /* trxm.cpp */; };
 		BD9D11AF1772809F00C097B2 /* twoSidedTrxm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9D119A1772809F00C097B2 /* twoSidedTrxm.cpp */; };
 		BDBB012A1756776F0010EB4A /* DxTer.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = BDBB01291756776F0010EB4A /* DxTer.1 */; };
+		BDE4DB0A177A174B00B464C8 /* comm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDE4DB08177A174B00B464C8 /* comm.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -62,8 +62,6 @@
 /* Begin PBXFileReference section */
 		BD4E58B01774DD2D00834079 /* DLAOp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DLAOp.cpp; path = ../../src/DLA/DLAOp.cpp; sourceTree = "<group>"; };
 		BD4E58B11774DD2D00834079 /* DLAOp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DLAOp.h; path = ../../src/DLA/DLAOp.h; sourceTree = "<group>"; };
-		BD4E58B31776316700834079 /* comm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = comm.cpp; path = ../../src/DLA/comm.cpp; sourceTree = "<group>"; };
-		BD4E58B41776316700834079 /* comm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = comm.h; path = ../../src/DLA/comm.h; sourceTree = "<group>"; };
 		BD9D11421772809200C097B2 /* base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base.cpp; path = ../../src/base.cpp; sourceTree = "<group>"; };
 		BD9D11431772809200C097B2 /* base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = base.h; path = ../../src/base.h; sourceTree = "<group>"; };
 		BD9D11441772809200C097B2 /* coef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = coef.cpp; path = ../../src/coef.cpp; sourceTree = "<group>"; };
@@ -136,6 +134,8 @@
 		BD9D119B1772809F00C097B2 /* twoSidedTrxm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = twoSidedTrxm.h; path = ../../src/DLA/twoSidedTrxm.h; sourceTree = "<group>"; };
 		BDBB01241756776F0010EB4A /* DxTer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DxTer; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDBB01291756776F0010EB4A /* DxTer.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = DxTer.1; sourceTree = "<group>"; };
+		BDE4DB08177A174B00B464C8 /* comm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = comm.cpp; path = ../../src/comm.cpp; sourceTree = "<group>"; };
+		BDE4DB09177A174B00B464C8 /* comm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = comm.h; path = ../../src/comm.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,8 +168,8 @@
 		BDBB01261756776F0010EB4A /* DxTer */ = {
 			isa = PBXGroup;
 			children = (
-				BD4E58B31776316700834079 /* comm.cpp */,
-				BD4E58B41776316700834079 /* comm.h */,
+				BDE4DB08177A174B00B464C8 /* comm.cpp */,
+				BDE4DB09177A174B00B464C8 /* comm.h */,
 				BD9D11761772809F00C097B2 /* blas.cpp */,
 				BD9D11771772809F00C097B2 /* blas.h */,
 				BD9D11781772809F00C097B2 /* blis.cpp */,
@@ -333,7 +333,7 @@
 				BD9D11AE1772809F00C097B2 /* trxm.cpp in Sources */,
 				BD9D11AF1772809F00C097B2 /* twoSidedTrxm.cpp in Sources */,
 				BD4E58B21774DD2D00834079 /* DLAOp.cpp in Sources */,
-				BD4E58B51776316700834079 /* comm.cpp in Sources */,
+				BDE4DB0A177A174B00B464C8 /* comm.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

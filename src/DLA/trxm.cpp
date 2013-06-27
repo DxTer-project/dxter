@@ -1610,7 +1610,8 @@ Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    throw;
+    //    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
   
   return loop;
 }
@@ -1758,6 +1759,8 @@ Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+
+  loop->SetDim(DIMK);
   
   return loop;
 }
@@ -1799,7 +1802,9 @@ Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
   if (layer==DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+  
+  loop->SetDim(DIMN);
   
   return loop;
 }
@@ -1881,7 +1886,8 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
   if (layer==DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    throw;
+    //    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
   
   return loop;
 }
@@ -2167,6 +2173,8 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   
   Poss *loopPoss = new Poss(3, comA, comB, packTunOut);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+
+  loop->SetDim(DIMM);
 
   poss->AddLoop(loop);
 
@@ -2557,6 +2565,8 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
   
   Poss *loopPoss = new Poss(4, comA, comB, packTunOut, comC);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+
+  loop->SetDim(DIMM);
 
   poss->AddLoop(loop);
 

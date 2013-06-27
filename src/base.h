@@ -142,7 +142,6 @@ enum Dim {
   DIMK,
   DIMN,
   BADDIM
-  
 };
 
 string BoolToStr(bool boolVal);	    

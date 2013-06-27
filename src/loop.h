@@ -77,6 +77,7 @@ class Loop : public PSet
   IntSet m_label;
   BSSize m_bsSize;
   Comm m_comm;
+  Dim m_dim;
   
   Loop();
   Loop(LoopType type);
@@ -98,6 +99,7 @@ class Loop : public PSet
   bool ValidIter() const;
   LoopTunnel* CreateNewLoopTunnels(Node *input, unsigned int num, Poss *possToCareAbout, UpStat stat);
   void TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun);
+  inline void SetDim(Dim dim) {m_dim = dim;}
 
   void FillTunnelSizes();
   virtual void BuildSizeCache();

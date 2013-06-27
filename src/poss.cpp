@@ -1766,6 +1766,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   
   NodeMap tunMap;
   Loop *newSet = (Loop*)leftSet->GetNewInst();
+  if (leftSet->m_dim == rightSet->m_dim)
+    newSet->SetDim(leftSet->m_dim);
   newSet->m_bsSize = (((Loop*)leftSet)->m_bsSize);
   newSet->m_label.clear();
   newSet->m_label.insert(leftSet->m_label.begin(),leftSet->m_label.end());

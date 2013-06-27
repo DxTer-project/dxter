@@ -108,14 +108,14 @@ string PartDirToStr(PartDir dir)
 }
 
 Loop::Loop() 
-  : PSet(), m_type(UNKNOWNLOOP), m_comm(CORECOMM)
+  : PSet(), m_type(UNKNOWNLOOP), m_comm(CORECOMM), m_dim(BADDIM)
 {
   AssignNewLabel();
   m_bsSize = BADBSSIZE;
 }
 
 Loop::Loop(LoopType type)
-: m_type(type), m_comm(CORECOMM)
+  : m_type(type), m_comm(CORECOMM), m_dim(BADDIM)
 {
   if (m_type == ELEMLOOP)
     m_bsSize = USEELEMBS;
@@ -125,7 +125,7 @@ Loop::Loop(LoopType type)
 }
 
 Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
-: PSet(poss), m_type(type), m_bsSize(bsSize), m_comm(CORECOMM)
+: PSet(poss), m_type(type), m_bsSize(bsSize), m_comm(CORECOMM), m_dim(BADDIM)
 {
   unsigned int i;
   for(i = 0; i < poss->m_inTuns.size(); ++i) {
@@ -576,6 +576,7 @@ void Loop::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
   m_label = loop->m_label;
   m_bsSize = loop->m_bsSize;
   m_comm = loop->m_comm;
+  m_dim = loop->m_dim;
   if (loop->m_bsSize >= BADBSSIZE) {
     cout << "duplicating a loop with zero blocksize\n";
     throw;
@@ -660,6 +661,7 @@ void Loop::FlattenCore(ofstream &out) const
   WRITE(m_type);
   WRITE(m_bsSize);
   WRITE(m_comm);
+  WRITE(m_dim);
   unsigned int size = m_label.size();
   WRITE(size);
   IntSetConstIter iter = m_label.begin();
@@ -673,6 +675,7 @@ void Loop::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_type);
   READ(m_bsSize);
   READ(m_comm);
+  READ(m_dim);
   unsigned int size;
   READ(size);
   for(unsigned int i = 0; i < size; ++i) {
