@@ -313,104 +313,6 @@ const Sizes* Split::LocalN(unsigned int num) const
 }
 
 
-#ifndef DOLOOPSIM
-void Split::GetSizes(unsigned int num, unsigned int numIters,
-		     Size bs, 
-		     Size m, Size n,
-		     Sizes &ms, Sizes &ns)
-{
-  if (m_tunType != SETTUNIN)
-    throw;
-  if (GetLoopType() != ELEMLOOP) {
-    cout << "check that the m and n values are actually local sizes\n";
-    cout << "also use currlm = currm...\n";
-    throw;
-  }
-  switch(m_dir)
-    {
-    case (PARTDOWN):
-    case (PARTUPWARD):
-      if (num == 0) {
-	ms.AddRepeatedSizes((m - bs)/2, 1);
-	ns.AddRepeatedSizes(n,1);
-      }
-      else if (num ==1) {
-        ms.AddRepeatedSizes(bs,1);
-	ns.AddRepeatedSizes(n,1);
-      }
-      else if (num == 2) {
-	ms.AddRepeatedSizes((m - bs)/2,1);
-	ns.AddRepeatedSizes(n,1);
-      }
-      else 
-        throw;
-      break;
-    case (PARTRIGHT):
-    case (PARTLEFT):
-      if (num == 0) {
-	ms.AddRepeatedSizes(m,1);
-	ns.AddRepeatedSizes((n - bs)/2,1);
-      }
-      else if (num == 1) {
-	ms.AddRepeatedSizes(m,1);
-	ns.AddRepeatedSizes(bs,1);
-      }
-      else if (num == 2) {
-	ms.AddRepeatedSizes(m,1);
-	ns.AddRepeatedSizes((n-bs)/2,1);
-      }
-      else
-        throw;
-      break;
-    case (PARTDIAG):
-    case (PARTDIAGBACK):
-      //First column
-      if (num == 0) {
-	ms.AddRepeatedSizes((m - bs)/2,1);
-	ns.AddRepeatedSizes((n - bs)/2,1);
-      }
-      else if (num == 1) {
-	ms.AddRepeatedSizes(bs,1);
-	ns.AddRepeatedSizes((n - bs)/2,1);
-      }
-      else if (num == 2) {
-	ms.AddRepeatedSizes((m - bs)/2,1);
-	ns.AddRepeatedSizes((n - bs)/2,1);
-      }
-      //Second column
-      else if (num == 3) {
-	ms.AddRepeatedSizes((m - bs)/2,1);
-	ns.AddRepeatedSizes(bs,1);
-      }
-      else if (num == 4) {
-	ms.AddRepeatedSizes(bs,1);
-	ns.AddRepeatedSizes(bs,1);
-      }
-      else if (num == 5) {
-	ms.AddRepeatedSizes((m - bs)/2,1);
-	ns.AddRepeatedSizes(bs,1);
-      }
-      //Third column
-      else if (num == 6) {
-	ms.AddRepeatedSizes((m - bs)/2,1);
-	ns.AddRepeatedSizes((n - bs)/2,1);
-      }
-      else if (num == 7) {
-	ms.AddRepeatedSizes(bs,1);
-	ns.AddRepeatedSizes((n - bs)/2,1);
-      }
-      else if (num == 8) {
-	ms.AddRepeatedSizes((m - bs)/2,1);
-	ns.AddRepeatedSizes((n - bs)/2,1);
-      }
-      else
-        throw;
-      break;
-    default:
-      throw;
-    }
-}
-#else
 void Split::GetSizes(unsigned int num, unsigned int numIters,
 		     Size bs, unsigned int parFactor,
 		     Size m, Size n,
@@ -582,7 +484,6 @@ void Split::GetSizes(unsigned int num, unsigned int numIters,
       break;
     }
 }
-#endif
 
 PossTunnel* Split::GetSetTunnel()
 {
@@ -1091,7 +992,6 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
   const DistType t = InputDistType(0);
   const unsigned int numElems = GetNumElems(m_dir);
 
-#ifdef DOLOOPSIM
   if (NumIters(bs, m, n) != numIters) {
     InputLocalN(0)->Print();
     cout << endl;
@@ -1103,7 +1003,6 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
     }
     throw;
   }
-#endif
   for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
     GetSizes(subMat, numIters,
 	     bs, parFactor,

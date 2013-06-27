@@ -725,11 +725,7 @@ void Loop::FillTunnelSizes()
   }
   unsigned int numExecs = control->NumberOfLoopExecs();
   for(unsigned int i = 0; i < numExecs; ++i) {
-#ifdef DOLOOPSIM
     unsigned int numIters = control->NumIters(i);
-#else
-    unsigned int numIters = 1;
-#endif
     if (numIters) {
       iter = m_inTuns.begin();
       for (; iter != m_inTuns.end(); ++iter) {

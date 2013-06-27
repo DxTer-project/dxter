@@ -2084,13 +2084,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
       }
     }
   }
-#ifndef DOLOOPSIM
-  if(newSet->GetType() == FLAMELOOP)
-#endif
-  {
-    if (!foundControl)
-      throw;
-  }
+  if (!foundControl)
+    throw;
   
   tunIter = newSet->m_outTuns.begin();
   for(; tunIter != newSet->m_outTuns.end(); ++tunIter) {

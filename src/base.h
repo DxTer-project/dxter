@@ -34,11 +34,6 @@
 //Output cost code for Matlab vs. R
 #define MATLAB
 
-//"Simulate" loops to calculate the sum of costs
-// of all loop iterations vs. just the middle 
-// iteration
-#define DOLOOPSIM
-
 extern char END;
 extern char START;
 
