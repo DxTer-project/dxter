@@ -876,7 +876,13 @@ void Loop::Parallelize(Comm comm)
   }
   
   ClearSizeCache();
-  BuildSizeCache();
+  //If we're parallelizing a loop that is on a poss
+  // that just got duplicated as part of a transformation,
+  // then that duplicated poss doesn't have its size cache.
+  //We need to form it and this loop's size cache (which will be
+  // different thanks to paralellization.
+  if (m_ownerPoss)
+    m_ownerPoss->BuildSizeCache();
 }
 
 bool Loop::HasIndepIters() const

@@ -684,9 +684,28 @@ void ParallelizeInnerNDim::Apply(Poss *poss, Node *node) const
 
 bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
 {
-  return false;
+  if (node->GetNodeClass() != LoopTunnel::GetClass())
+    throw;
+  const LoopTunnel *tun = (LoopTunnel*)node;
+  if (tun->m_tunType != SETTUNIN)
+    return false;
+  const Loop *loop = (Loop*)(tun->m_pset);
+  if (loop->m_comm == m_comm)
+    return false;
+  if (loop->m_dim != DIMN)
+    return false;
+  if (loop->m_comm != CORECOMM) {
+    //Need to handle multiple par factors on loop
+    throw;
+  }
+  if (!loop->HasIndepIters())
+    throw;
+  return true;
 }
 
 void ParallelizeOuterNDim::Apply(Poss *poss, Node *node) const
 {
+  LoopTunnel *tun = (LoopTunnel*)node;
+  Loop *loop = (Loop*)(tun->m_pset);
+  loop->Parallelize(m_comm);
 }
