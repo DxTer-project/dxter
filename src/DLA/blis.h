@@ -148,42 +148,49 @@ class Copy : public DLAOp<2,1>
   virtual void PrintCode(IndStream &out);
 };
 
-class ParallelizeMDim : public SingleTrans
+class ParallelizeTrans : public SingleTrans
 {
  public:
   Comm m_comm;
- ParallelizeMDim(Comm comm) : m_comm(comm) {}
+ ParallelizeTrans(Comm comm) : m_comm(comm) {}
+};
+
+class ParallelizeMDim : public ParallelizeTrans
+{
+ public:
+  ParallelizeMDim(Comm comm)
+    : ParallelizeTrans(comm) {}
   virtual string GetType() const {return "ParallelizeMDim";}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
 
-class ParallelizeInnerNDim : public SingleTrans
+class ParallelizeInnerNDim : public ParallelizeTrans
 {
  public:
-  Comm m_comm;
- ParallelizeInnerNDim(Comm comm) : m_comm(comm) {}
+  ParallelizeInnerNDim(Comm comm)
+    : ParallelizeTrans(comm) {}
   virtual string GetType() const {return "ParallelizeInnerNDim";}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
-class ParallelizeOuterNDim : public SingleTrans
+class ParallelizeOuterNDim : public ParallelizeTrans
 {
  public:
-  Comm m_comm;
- ParallelizeOuterNDim(Comm comm) : m_comm(comm) {}
+  ParallelizeOuterNDim(Comm comm)
+    : ParallelizeTrans(comm) {}
   virtual string GetType() const {return "ParallelizeOuterNDim";}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
-class ParallelizeK : public SingleTrans
+class ParallelizeK : public ParallelizeTrans
 {
  public:
-  Comm m_comm;
- ParallelizeK(Comm comm) : m_comm(comm) {}
+  ParallelizeK(Comm comm)
+    : ParallelizeTrans(comm) {}
   virtual string GetType() const {return "ParallelizeK";}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
