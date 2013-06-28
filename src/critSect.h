@@ -35,7 +35,7 @@ class CritSect : public PSet
   virtual bool IsTransparent() const {return false;}
   virtual bool CanMerge(PSet *pset) const {return false;}
   virtual void SanityCheck();
-  void RemoveParallelPosses();
+  bool RemoveParallelPosses();
 };
 
 class CritSectTunnel : public PossTunnel

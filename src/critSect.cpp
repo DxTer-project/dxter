@@ -117,7 +117,7 @@ bool RemoveParallelization(PSet *set)
     if (found) {
       if (set->m_posses.size() <= 1)
         return true;
-      set->RemoveAndDeletePoss(poss);
+      set->RemoveAndDeletePoss(poss, true);
       --i;
     }
   }
@@ -125,17 +125,9 @@ bool RemoveParallelization(PSet *set)
 }
 
 
-void CritSect::RemoveParallelPosses()
+bool CritSect::RemoveParallelPosses()
 {
-  if (RemoveParallelization(this)) {
-    //This critical section is around some hierarchy of PSets
-    // from which parallel code cannot be removed without getting
-    // rid of all code
-    //If this ever happens (e.g. if parallelization is turned
-    // into a simplifier), then the logic to decide when to
-    // parallelize in ::CanApply should predict this error
-    throw;
-  }
+  return RemoveParallelization(this);
 }
 
 CritSectTunnel::CritSectTunnel()

@@ -880,19 +880,25 @@ void Loop::Parallelize(Comm comm)
         unsigned int numOut = tun->NumOutputs();
         if (tun->GetNodeClass() == Split::GetClass())
           --numOut;
-        NodeConnVecIter connIter = tun->m_children.begin();
-        for( ; connIter != tun->m_children.end(); ++ connIter) {
-          Node *possTun = (*connIter)->m_n;
+        int i;
+        for(i = 0; i < (int)(tun->m_children.size()); ++i) {
+          Node *possTun = (tun->m_children[i])->m_n;
           Poss *poss = possTun->m_poss;
           NodeSet nodeSet;
-          for (unsigned int i = 0; i < numOut; ++i) {
-            AddUsersOfLiveOutput(possTun, i, nodeSet);
+          for (unsigned int j = 0; j < numOut; ++j) {
+            AddUsersOfLiveOutput(possTun, j, nodeSet);
           }
           if (!nodeSet.size())
             throw;
           poss->FillClique(nodeSet);
           CritSect *crit = (CritSect*)(poss->FormSetForClique(nodeSet, true));
-	  crit->RemoveParallelPosses();
+          if (crit->RemoveParallelPosses()) {
+            //This critical section is around some hierarchy of PSets
+            // from which parallel code cannot be removed without getting
+            // rid of all code
+            RemoveAndDeletePoss(poss, true);
+            --i;
+          }
         }
       }
     }
@@ -917,7 +923,7 @@ bool ContainsOnlyParallelization(PSet *set)
       return true;
     }
   }
-
+  
   PossVecIter iter = set->m_posses.begin();
   for(; iter != set->m_posses.end(); ++iter) {
     Poss *poss = *iter;
@@ -932,12 +938,12 @@ bool ContainsOnlyParallelization(PSet *set)
       bool foundParNode = false;
       NodeVecIter nodeIter = poss->m_possNodes.begin();
       for(; !foundParNode && nodeIter != poss->m_possNodes.end(); ++nodeIter) {
-	if ((*nodeIter)->IsParallel()) {
-	  foundParNode = true;
-	}
+        if ((*nodeIter)->IsParallel()) {
+          foundParNode = true;
+        }
       }
       if (!foundParNode)
-	return false;
+        return false;
     }
   }
   return true;
@@ -990,7 +996,7 @@ bool Loop::OnlyParallelizedOnNonIndependentData() const
         }
       }
       if (!foundNonPar)
-	return true;
+        return true;
     }
   }
   return false;

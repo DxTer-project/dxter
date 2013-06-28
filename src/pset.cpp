@@ -287,7 +287,7 @@ void PSet::Prop()
   PossVecIter iter = m_posses.begin();
   while (iter != m_posses.end()) {
     if (!(*iter)->IsSane()) {
-      RemoveAndDeletePoss(*iter);
+      RemoveAndDeletePoss(*iter, false);
       m_posses.erase(iter);
       iter = m_posses.begin();
       if (!m_posses.size()) {
@@ -324,7 +324,7 @@ void PSet::Cull(Phase phase)
   PossVecIter iter = m_posses.begin();
   while (iter != m_posses.end()) {
     if (!(*iter)->IsSane()) {
-      RemoveAndDeletePoss(*iter);
+      RemoveAndDeletePoss(*iter, false);
       m_posses.erase(iter);
       iter = m_posses.begin();
       if (!m_posses.size()) {
@@ -352,12 +352,24 @@ Node* PSet::OutTun(unsigned int num) const
   return m_outTuns[num];
 }
 
-void PSet::RemoveAndDeletePoss(Poss *poss)
+void PSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
 {
   if (m_posses.size() <= 1) {
-    poss->ForcePrint();
     throw;
   }
+  if (removeFromMyList) {
+    PossVecIter possIter = m_posses.begin();
+    bool found = false;
+    for(; !found && possIter != m_posses.end(); ++possIter) {
+      if (*possIter == poss) {
+	m_posses.erase(possIter);
+	found = true;
+      }
+    }
+    if (!found)
+      throw;
+  }
+
   if (poss->m_inTuns.size() != m_inTuns.size()) {
     cout << "(poss->m_inTuns.size() != m_inTuns.size())\n";
     throw;
@@ -720,7 +732,7 @@ void PSet::RemoveDups()
     unsigned int count = 0;
     std::set<unsigned int>::iterator iter = dups.begin();
     for(; iter != dups.end(); ++iter, ++count) {
-      RemoveAndDeletePoss(m_posses[*iter - count]);
+      RemoveAndDeletePoss(m_posses[*iter - count], false);
       m_posses.erase(m_posses.begin() + *iter - count);
     }
   }
@@ -1258,7 +1270,7 @@ void PSet::Cull(CullFunction cullFunc)
     bool cullIfPossible, doNotCull;
     cullFunc(poss, cullIfPossible, doNotCull);
     if (cullIfPossible && !doNotCull) {
-      RemoveAndDeletePoss(poss);
+      RemoveAndDeletePoss(poss, false);
       m_posses.erase(m_posses.begin() + i);
       --i;
     }
