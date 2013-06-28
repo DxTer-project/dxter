@@ -47,8 +47,10 @@ bool HasParallelCode(Poss *poss)
     PSet *set = *setIter;
     if (set->IsLoop()) {
       Loop *loop = (Loop*)set;
-      if (loop->IsParallel())
+      if (loop->IsParallel()) {
+        cout << "loop " << loop << endl;
         return true;
+      }
     }
     PossVecIter possIter = set->m_posses.begin();
     for(; possIter != set->m_posses.end(); ++possIter) {
@@ -60,8 +62,10 @@ bool HasParallelCode(Poss *poss)
   NodeVecIter nodeIter = poss->m_possNodes.begin();
   for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
     Node *node = *nodeIter;
-    if (node->IsParallel())
+    if (node->IsParallel()){
+      cout << "Parallel node " << node->GetNodeClass() << endl;
       return true;
+    }
   }
   
   return false;

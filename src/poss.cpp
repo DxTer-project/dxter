@@ -1,23 +1,23 @@
 /*
-    This file is part of DxTer.
-    DxTer is a prototype using the Design by Transformation (DxT)
-    approach to program generation.
-
-    Copyright (C) 2013, The University of Texas and Bryan Marker
-
-    DxTer is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    DxTer is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
-
-    You should have received a copy of the GNU General Public License
-    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ This file is part of DxTer.
+ DxTer is a prototype using the Design by Transformation (DxT)
+ approach to program generation.
+ 
+ Copyright (C) 2013, The University of Texas and Bryan Marker
+ 
+ DxTer is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ DxTer is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 
 
@@ -1453,12 +1453,12 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
           PossTunnel *tun = new PossTunnel(POSSTUNOUT);
           outputTuns.push_back(tun);
           set.insert(tun);
-	  for(int j = i; j < (int)(node->m_children.size()); ++j) {
-	    if (set.find(node->Child(j)) == set.end()) {
-	      node->RedirectChild(j, tun, 0);
-	      --j;
-	    }
-	  }
+          for(int j = i; j < (int)(node->m_children.size()); ++j) {
+            if (set.find(node->Child(j)) == set.end()) {
+              node->RedirectChild(j, tun, 0);
+              --j;
+            }
+          }
           tun->AddInput(node, connNum);
           i=-1;
         }
@@ -1490,12 +1490,12 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
       }
     }
   }
-/*
-    iter = set.begin();
-    for(; iter != set.end(); ++iter) {
-      cout << "node " << *iter << " " << (*iter)->GetNodeClass() << endl;
-      cout << "  first owned by " << (*iter)->m_poss << endl;
-    }
+  /*
+   iter = set.begin();
+   for(; iter != set.end(); ++iter) {
+   cout << "node " << *iter << " " << (*iter)->GetNodeClass() << endl;
+   cout << "  first owned by " << (*iter)->m_poss << endl;
+   }
    */
   //   cout << outputTuns.size() << " outputs\n";
   //   NodeVecIter iter3 = outputTuns.begin();
@@ -2336,18 +2336,18 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
       for( ; transIter != transVec.end(); ++transIter)
         *out << "\t" << (*transIter)->GetType() << endl;
       *out << "*****************************************" << endl;
-
-
-      if (m_pset && m_pset->IsLoop() 
-	  && ((Loop*)m_pset)->GetType() == BLISLOOP) 
-	{      
-	  string loopLevel = out.LoopLevel(1);
-	  string idx = "idx" + loopLevel;
-	  string dimLen = "dimLen" + loopLevel;
-	  string bs = "bs" + loopLevel;
-	  out.Indent();
-	  *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
-	}
+      
+      
+      if (m_pset && m_pset->IsLoop()
+          && ((Loop*)m_pset)->GetType() == BLISLOOP)
+      {
+        string loopLevel = out.LoopLevel(1);
+        string idx = "idx" + loopLevel;
+        string dimLen = "dimLen" + loopLevel;
+        string bs = "bs" + loopLevel;
+        out.Indent();
+        *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
+      }
       
       
       //This actualy sets some stuff so it can print
@@ -2847,10 +2847,10 @@ void Poss::PrintSetConnections()
                 throw;
               psetSet.insert(set);
               cout << "Set " << set << endl;
-	      if (set->IsLoop())
-		cout << "\tIs Loop\n";
-	      else
-		cout << "\tIs not Loop\n";
+              if (set->IsLoop())
+                cout << "\tIs Loop\n";
+              else
+                cout << "\tIs not Loop\n";
               NodeVecIter iter = set->m_inTuns.begin();
               for(; iter != set->m_inTuns.end(); ++iter) {
                 nodeSet.insert(*iter);

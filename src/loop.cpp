@@ -911,8 +911,9 @@ bool ContainsParallelization(PSet *set)
 {
   if (set->IsLoop()) {
     Loop *loop = (Loop*)set;
-    if (loop->IsParallel())
+    if (loop->IsParallel()) {
       return true;
+    }
   }
   
   PossVecIter iter = set->m_posses.begin();
@@ -926,8 +927,9 @@ bool ContainsParallelization(PSet *set)
     }
     NodeVecIter nodeIter = poss->m_possNodes.begin();
     for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
-      if ((*nodeIter)->IsParallel())
+      if ((*nodeIter)->IsParallel()) {
         return true;
+      }
     }
   }
   return false;
@@ -943,7 +945,7 @@ bool ContainsParallelization(const NodeSet &set)
       return true;
     if (node->IsPossTunnel(SETTUNIN)) {
       PossTunnel *tun = (PossTunnel*)node;
-      if (setSet.find(tun->m_pset) != setSet.end()) {
+      if (setSet.find(tun->m_pset) == setSet.end()) {
         setSet.insert(tun->m_pset);
         if (ContainsParallelization(tun->m_pset))
           return true;
@@ -974,8 +976,9 @@ bool Loop::ParallelizedOnNonIndependentData() const
         if (!nodeSet.size())
           throw;
         poss->FillClique(nodeSet);
-        if (ContainsParallelization(nodeSet))
+        if (ContainsParallelization(nodeSet)) {
           return true;
+        }
       }
     }
   }
