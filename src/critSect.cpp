@@ -48,7 +48,6 @@ bool HasParallelCode(Poss *poss)
     if (set->IsLoop()) {
       Loop *loop = (Loop*)set;
       if (loop->IsParallel()) {
-        cout << "loop " << loop << endl;
         return true;
       }
     }
@@ -63,7 +62,6 @@ bool HasParallelCode(Poss *poss)
   for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
     Node *node = *nodeIter;
     if (node->IsParallel()){
-      cout << "Parallel node " << node->GetNodeClass() << endl;
       return true;
     }
   }
