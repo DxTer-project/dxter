@@ -754,7 +754,7 @@ bool ParallelizeK::CanApply(const Poss *poss, const Node *node) const
   }
   if (loop->HasIndepIters())
     throw;
-  if (loop->ParallelizedOnNonIndependentData())
+  if (loop->OnlyParallelizedOnNonIndependentData())
     return false;
   else {
     return true;

@@ -26,6 +26,7 @@
 #include <cmath>
 #include <climits>
 #include "pack.h"
+#include "critSect.h"
 
 int Loop::M_currLabel = 0;
 
@@ -868,7 +869,7 @@ void Loop::Parallelize(Comm comm)
   m_comm = comm;
   if (!HasIndepIters()) {
     bool found = false;
-    //If this code changes, reflace in ParallelizedOnNonIndependentData
+    //If this code changes, reflace in OnlyParallelizedOnNonIndependentData
     NodeVecIter iter = m_inTuns.begin();
     for(; iter != m_inTuns.end(); ++iter) {
       LoopTunnel *tun = (LoopTunnel*)(*iter);
@@ -890,7 +891,8 @@ void Loop::Parallelize(Comm comm)
           if (!nodeSet.size())
             throw;
           poss->FillClique(nodeSet);
-          poss->FormSetForClique(nodeSet, true);
+          CritSect *crit = (CritSect*)(poss->FormSetForClique(nodeSet, true));
+	  crit->RemoveParallelPosses();
         }
       }
     }
@@ -907,7 +909,7 @@ void Loop::Parallelize(Comm comm)
     m_ownerPoss->BuildSizeCache();
 }
 
-bool ContainsParallelization(PSet *set)
+bool ContainsOnlyParallelization(PSet *set)
 {
   if (set->IsLoop()) {
     Loop *loop = (Loop*)set;
@@ -915,27 +917,33 @@ bool ContainsParallelization(PSet *set)
       return true;
     }
   }
-  
+
   PossVecIter iter = set->m_posses.begin();
   for(; iter != set->m_posses.end(); ++iter) {
     Poss *poss = *iter;
+    bool foundParSet = false;
     PSetVecIter setIter = poss->m_sets.begin();
-    for(; setIter != poss->m_sets.end(); ++setIter) {
+    for(; !foundParSet && setIter != poss->m_sets.end(); ++setIter) {
       PSet *set = *setIter;
-      if (ContainsParallelization(set))
-        return true;
+      if (ContainsOnlyParallelization(set))
+        foundParSet = true;
     }
-    NodeVecIter nodeIter = poss->m_possNodes.begin();
-    for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
-      if ((*nodeIter)->IsParallel()) {
-        return true;
+    if (!foundParSet) {
+      bool foundParNode = false;
+      NodeVecIter nodeIter = poss->m_possNodes.begin();
+      for(; !foundParNode && nodeIter != poss->m_possNodes.end(); ++nodeIter) {
+	if ((*nodeIter)->IsParallel()) {
+	  foundParNode = true;
+	}
       }
+      if (!foundParNode)
+	return false;
     }
   }
-  return false;
+  return true;
 }
 
-bool ContainsParallelization(const NodeSet &set)
+bool ContainsOnlyParallelization(const NodeSet &set)
 {
   PSetSet setSet;
   NodeSetIter iter = set.begin();
@@ -947,7 +955,7 @@ bool ContainsParallelization(const NodeSet &set)
       PossTunnel *tun = (PossTunnel*)node;
       if (setSet.find(tun->m_pset) == setSet.end()) {
         setSet.insert(tun->m_pset);
-        if (ContainsParallelization(tun->m_pset))
+        if (ContainsOnlyParallelization(tun->m_pset))
           return true;
       }
     }
@@ -955,7 +963,7 @@ bool ContainsParallelization(const NodeSet &set)
   return false;
 }
 
-bool Loop::ParallelizedOnNonIndependentData() const
+bool Loop::OnlyParallelizedOnNonIndependentData() const
 {
   NodeVecConstIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
@@ -965,8 +973,9 @@ bool Loop::ParallelizedOnNonIndependentData() const
       unsigned int numOut = tun->NumOutputs();
       if (tun->GetNodeClass() == Split::GetClass())
         --numOut;
+      bool foundNonPar = false;
       NodeConnVecConstIter connIter = tun->m_children.begin();
-      for( ; connIter != tun->m_children.end(); ++ connIter) {
+      for( ; !foundNonPar && connIter != tun->m_children.end(); ++ connIter) {
         Node *possTun = (*connIter)->m_n;
         Poss *poss = possTun->m_poss;
         NodeSet nodeSet;
@@ -976,10 +985,12 @@ bool Loop::ParallelizedOnNonIndependentData() const
         if (!nodeSet.size())
           throw;
         poss->FillClique(nodeSet);
-        if (ContainsParallelization(nodeSet)) {
-          return true;
+        if (!ContainsOnlyParallelization(nodeSet)) {
+          foundNonPar = true;
         }
       }
+      if (!foundNonPar)
+	return true;
     }
   }
   return false;

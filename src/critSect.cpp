@@ -86,6 +86,58 @@ void CritSect::SanityCheck()
   }
 }
 
+bool RemoveParallelization(PSet *set)
+{
+  if (set->IsLoop()) {
+    Loop *loop = (Loop*)set;
+    if (loop->IsParallel()) {
+      return true;
+    }
+  }
+  
+  int i;
+  for(i = 0; i < (int)(set->m_posses.size()); ++i) {
+    bool found = false;
+    Poss *poss = set->m_posses[i];
+    PSetVecIter setIter = poss->m_sets.begin();
+    for(; !found && setIter != poss->m_sets.end(); ++setIter) {
+      PSet *set = *setIter;
+      if (RemoveParallelization(set)) {
+        found = true;
+      }
+    }
+    if (!found) {
+      NodeVecIter nodeIter = poss->m_possNodes.begin();
+      for(; !found && nodeIter != poss->m_possNodes.end(); ++nodeIter) {
+        if ((*nodeIter)->IsParallel()) {
+          found = true;
+        }
+      }
+    }
+    if (found) {
+      if (set->m_posses.size() <= 1)
+        return true;
+      set->RemoveAndDeletePoss(poss);
+      --i;
+    }
+  }
+  return false;
+}
+
+
+void CritSect::RemoveParallelPosses()
+{
+  if (RemoveParallelization(this)) {
+    //This critical section is around some hierarchy of PSets
+    // from which parallel code cannot be removed without getting
+    // rid of all code
+    //If this ever happens (e.g. if parallelization is turned
+    // into a simplifier), then the logic to decide when to
+    // parallelize in ::CanApply should predict this error
+    throw;
+  }
+}
+
 CritSectTunnel::CritSectTunnel()
 {
   m_msizes = NULL;
