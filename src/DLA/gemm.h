@@ -188,3 +188,13 @@ class GemmLowerLayer : public LowerLayer
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+
+class SplitGemm : public SingleTrans
+{
+ public:
+  Layer m_layer;
+ SplitGemm(Layer layer) : m_layer(layer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};

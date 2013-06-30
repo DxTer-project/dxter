@@ -1495,10 +1495,12 @@ bool PSet::RemoveParallelization(Comm comm)
   if (IsLoop()) {
     Loop *loop = (Loop*)this;
     if (loop->IsParallel()) {
-      if (comm == CORECOMM)
+      if (comm == CORECOMM) {
         return true;
-      else if ((comm == loop->m_comm) || CommGroupGreaterThan(loop->m_comm, comm))
+      }
+      else if ((comm == loop->m_comm) || CommGroupGreaterThan(loop->m_comm, comm)) {
         return true;
+      }
     }
   }
   
@@ -1525,8 +1527,9 @@ bool PSet::RemoveParallelization(Comm comm)
       }
     }
     if (found) {
-      if (m_posses.size() <= 1)
+      if (m_posses.size() <= 1) {
         return true;
+      }
       RemoveAndDeletePoss(poss, true);
       --i;
     }

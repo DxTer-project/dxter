@@ -259,6 +259,7 @@ void AddTrans()
 #if DOSR2PHASE
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(S1LAYER, S2LAYER, 1), SR2PHASE);
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(S1LAYER, S2LAYER, -1), SR2PHASE);
+  Universe::AddTrans(Gemm::GetClass(), new SplitGemm(S2LAYER), SR2PHASE);
 #if USELOWERING
   Universe::AddTrans(Gemm::GetClass(), new GemmLowerLayer(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
 #endif
@@ -633,8 +634,8 @@ void AddSimplifiers()
   if (NUML3 > 1)
     Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeOuterNDim(GLOBALCOMM), SMPPHASE);
 
-  if (NUML3 > 1)
-    Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeK(GLOBALCOMM), SMPPHASE);
+  //  if (NUML3 > 1)
+    //Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeK(GLOBALCOMM), SMPPHASE);
 
   if (NUML2PERL3 > 1)
     Universe::AddTrans(PackBuff::GetClass(), new ParallelizeMDim(PROCCOMM), SMPPHASE);

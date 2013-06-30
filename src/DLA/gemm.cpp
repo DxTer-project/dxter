@@ -1520,3 +1520,44 @@ string GemmLowerLayer::GetType() const
   return "Gemm lower layer " + LayerNumToStr(m_fromLayer) 
   + " to " + LayerNumToStr(m_toLayer);
 }
+
+
+string SplitGemm::GetType() const
+{ 
+  return "Split Gemm " + LayerNumToStr(m_layer);
+}
+
+bool SplitGemm::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() == Gemm::GetClass()) {
+    const Gemm *gemm = (Gemm*)node;
+    if (gemm->GetLayer() != m_layer)
+      return false;
+    return gemm->m_beta == COEFONE;
+  }
+  return false;
+}
+
+void SplitGemm::Apply(Poss *poss, Node *node) const
+{
+  Gemm *gemm = (Gemm*)node;
+  Node *Cin = gemm->Input(2);
+  unsigned int Cnum = gemm->InputConnNum(2);
+
+  TempVarNode *CTmp = new TempVarNode(D_MC_MR, "CTemp");
+  CTmp->AddInput(Cin, Cnum);
+
+  Axpy *axpy = new Axpy(m_layer, COEFONE);
+  gemm->RedirectChildren(axpy, 0);
+
+  gemm->ChangeInput2Way(gemm->Input(2), gemm->InputConnNum(2),
+			CTmp, 0);
+  gemm->m_beta = COEFZERO;
+
+  axpy->AddInputs(4,
+		  gemm, 0,
+		  Cin, Cnum);
+
+  poss->AddNode(CTmp);
+  poss->AddNode(axpy);
+}
