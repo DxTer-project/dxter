@@ -892,7 +892,7 @@ void Loop::Parallelize(Comm comm)
             throw;
           poss->FillClique(nodeSet);
           CritSect *crit = (CritSect*)(poss->FormSetForClique(nodeSet, true));
-          if (crit->RemoveParallelPosses()) {
+          if (crit->RemoveParallelization()) {
             //This critical section is around some hierarchy of PSets
             // from which parallel code cannot be removed without getting
             // rid of all code
