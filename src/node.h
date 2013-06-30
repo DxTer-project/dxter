@@ -25,6 +25,7 @@
 
 #include "base.h"
 #include <stdarg.h>
+#include "comm.h"
 
 #define NODIST
 #define NOALGS
@@ -142,6 +143,7 @@ class Node
   virtual bool IsPossTunnel(PossTunType type) const;
   virtual bool IsLoopTunnel() const {return false;}
   virtual bool IsParallel() const {return false;}
+  virtual Comm ParallelComm() const {throw;}
   bool InCriticalSection() const;
 
   void PrintChildren();

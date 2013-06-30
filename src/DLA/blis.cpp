@@ -577,10 +577,10 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
       throw;
     }
     const Pack *pack = (Pack*)buff->Child(0);
+    if (!LegalParallelizationNestingUp(pack, m_comm))
+      return false;
     if (pack->m_children.size() < 1)
       throw;
-    if (buff->InCriticalSection())
-      return false;
     NodeConnVecConstIter iter = pack->m_children.begin();
     for(; iter != pack->m_children.end(); ++iter) {
       const Node *child = (*iter)->m_n;
@@ -609,6 +609,12 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
       }
       if (loop->m_dim != DIMM)
 	throw;
+      if (loop->m_comm == m_comm)
+	return false;
+      else if (loop->m_comm != CORECOMM)
+	throw;
+      if (!LegalParallelizationNestingDown(loop, m_comm))
+	return false;
       const Split *control = loop->GetControl();
       const unsigned int numExecs = control->NumberOfLoopExecs();
       unsigned int parFactor = NumGroupsInComm(m_comm);
@@ -663,6 +669,8 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
     const Pack *pack = (Pack*)buff->Child(0);
     if (!pack->m_children.size())
       throw;
+    if (!LegalParallelizationNestingUp(pack, m_comm))
+	return false;
     NodeConnVecConstIter iter = pack->m_children.begin();
     for(; iter != pack->m_children.end(); ++iter) {
       const Node *child = (*iter)->m_n;
@@ -670,10 +678,7 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
         throw;
       const DLANode *dla = (DLANode*)child;
       if (dla->IsBLISParallelizable()) {
-	if (dla->InCriticalSection())
-	  return false;
-	else
-	  return true;
+	return true;
       }
     }
   }
@@ -701,10 +706,16 @@ bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
   const LoopTunnel *tun = (LoopTunnel*)node;
   if (tun->m_tunType != SETTUNIN)
     return false;
+  if (!LegalParallelizationNestingUp(tun, m_comm))
+    return false;
   const Loop *loop = (Loop*)(tun->m_pset);
   if (loop->m_comm == m_comm)
     return false;
   if (loop->m_dim != DIMN)
+    return false;
+  if (loop->m_comm == m_comm)
+    return false;
+  if (!LegalParallelizationNestingDown(loop, m_comm))
     return false;
   if (loop->m_comm != CORECOMM) {
     //Need to handle multiple par factors on loop
@@ -725,7 +736,7 @@ bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
   if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
     return false;
   */
-  return !tun->InCriticalSection();
+  return true;
 }
 
 void ParallelizeOuterNDim::Apply(Poss *poss, Node *node) const
@@ -743,10 +754,14 @@ bool ParallelizeK::CanApply(const Poss *poss, const Node *node) const
   const LoopTunnel *tun = (LoopTunnel*)node;
   if (tun->m_tunType != SETTUNIN)
     return false;
+  if (!LegalParallelizationNestingUp(tun, m_comm))
+    return false;
   const Loop *loop = (Loop*)(tun->m_pset);
   if (loop->m_comm == m_comm)
     return false;
   if (loop->m_dim != DIMK)
+    return false;
+  if (!LegalParallelizationNestingDown(loop, m_comm))
     return false;
   if (loop->m_comm != CORECOMM) {
     //Need to handle multiple par factors on loop
@@ -766,4 +781,49 @@ void ParallelizeK::Apply(Poss *poss, Node *node) const
   LoopTunnel *tun = (LoopTunnel*)node;
   Loop *loop = (Loop*)(tun->m_pset);
   loop->Parallelize(m_comm);
+}
+
+bool LegalParallelizationNestingUp(const Node *node, Comm comm)
+{
+  Poss *poss = node->m_poss;
+  while(poss) {
+    PSet *pset = poss->m_pset;
+    if (!pset)
+      break;
+    if (pset->IsLoop()) {
+      if (((Loop*)pset)->m_comm != CORECOMM) {
+	return CommGroupGreaterThan(((Loop*)pset)->m_comm, comm);
+      }
+    }
+    else if (pset->IsCritSect()) {
+      return false;
+    }
+    poss = pset->m_ownerPoss;
+  }
+  return true;
+}
+
+bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
+{
+  PossVecConstIter iter = pset->m_posses.begin();
+  bool foundGood = false;
+  for(; !foundGood && iter != pset->m_posses.end(); ++iter) {
+    const Poss *poss = *iter;
+    bool foundBad = false;
+    PSetVecConstIter iter2 = poss->m_sets.begin();
+    for(; !foundBad && iter2 != poss->m_sets.end(); ++iter2) {
+      const PSet *pset = *iter2;
+      if (pset->IsLoop() && ((Loop*)pset)->m_comm != CORECOMM) {
+	if (!CommGroupGreaterThan(comm,((Loop*)pset)->m_comm))
+	  foundBad = true;
+      }
+      else if (!pset->IsCritSect()) {
+	if (!LegalParallelizationNestingDown(pset, comm))
+	  foundBad = true;
+      }
+    }
+    if (!foundBad)
+      foundGood = true;
+  }
+  return foundGood;
 }

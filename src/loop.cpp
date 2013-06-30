@@ -866,6 +866,8 @@ void Loop::Parallelize(Comm comm)
 {
   if (NumGroupsInComm(comm) <= 1)
     throw;
+  if (RemoveParallelization(comm))
+    throw;
   m_comm = comm;
   if (!HasIndepIters()) {
     bool found = false;
@@ -892,7 +894,7 @@ void Loop::Parallelize(Comm comm)
             throw;
           poss->FillClique(nodeSet);
           CritSect *crit = (CritSect*)(poss->FormSetForClique(nodeSet, true));
-          if (crit->RemoveParallelization()) {
+          if (crit->RemoveParallelization(CORECOMM)) {
             //This critical section is around some hierarchy of PSets
             // from which parallel code cannot be removed without getting
             // rid of all code
@@ -903,6 +905,8 @@ void Loop::Parallelize(Comm comm)
       }
     }
   }
+
+  
   
   ClearSizeCache();
   

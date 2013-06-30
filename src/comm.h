@@ -42,3 +42,5 @@ enum Comm {
 string CommToStr(Comm comm);
 unsigned int NumCoresInComm(Comm comm);
 unsigned int NumGroupsInComm(Comm comm);
+
+bool CommGroupGreaterThan(Comm comm1, Comm comm2);

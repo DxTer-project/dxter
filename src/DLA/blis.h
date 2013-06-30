@@ -165,7 +165,6 @@ class ParallelizeMDim : public ParallelizeTrans
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
-
 class ParallelizeInnerNDim : public ParallelizeTrans
 {
  public:
@@ -195,3 +194,6 @@ class ParallelizeK : public ParallelizeTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+
+bool LegalParallelizationNestingUp(const Node *node, Comm comm);
+bool LegalParallelizationNestingDown(const PSet *pset, Comm comm);

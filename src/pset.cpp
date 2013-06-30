@@ -1,23 +1,23 @@
 /*
-    This file is part of DxTer.
-    DxTer is a prototype using the Design by Transformation (DxT)
-    approach to program generation.
-
-    Copyright (C) 2013, The University of Texas and Bryan Marker
-
-    DxTer is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    DxTer is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
-
-    You should have received a copy of the GNU General Public License
-    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ This file is part of DxTer.
+ DxTer is a prototype using the Design by Transformation (DxT)
+ approach to program generation.
+ 
+ Copyright (C) 2013, The University of Texas and Bryan Marker
+ 
+ DxTer is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ DxTer is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 
 
@@ -163,7 +163,7 @@ void PSet::SanityCheck()
   int size = m_posses.size();
 #pragma omp parallel
   {
-#pragma omp for 
+#pragma omp for
     for (int i = 0; i < size; ++i) {
       m_posses[i]->SanityCheck();
     }
@@ -214,7 +214,7 @@ bool PSet::operator==(const Poss &rhs) const
   return false;
 }
 
-bool PSet::operator==(const PSet &rhs) const 
+bool PSet::operator==(const PSet &rhs) const
 {
   if (m_inTuns.size() != rhs.m_inTuns.size()
       || m_outTuns.size() != rhs.m_outTuns.size()
@@ -228,8 +228,8 @@ bool PSet::operator==(const PSet &rhs) const
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
           const LoopTunnel *tun1 = (LoopTunnel*)(m_inTuns[i]);
           const LoopTunnel *tun2 = (LoopTunnel*)(rhs.m_inTuns[i]);
-	  if (((Loop*)(tun1->m_pset))->m_comm != ((Loop*)(tun2->m_pset))->m_comm)
-	    return false;
+          if (((Loop*)(tun1->m_pset))->m_comm != ((Loop*)(tun2->m_pset))->m_comm)
+            return false;
           if (tun1->m_statTL != tun2->m_statTL
               || tun1->m_statBL != tun2->m_statBL
               || tun1->m_statTR != tun2->m_statTR
@@ -238,7 +238,7 @@ bool PSet::operator==(const PSet &rhs) const
           if (tun1->GetNodeClass() == Split::GetClass()) {
             if (tun2->GetNodeClass() == Split::GetClass()) {
               if (((Split*)tun1)->m_dir != ((Split*)tun2)->m_dir)
-                return false;	    
+                return false;
             }
             else
               return false;
@@ -338,14 +338,14 @@ void PSet::Cull(Phase phase)
   }
 }
 
-Node* PSet::InTun(unsigned int num) const 
+Node* PSet::InTun(unsigned int num) const
 {
   if (num >= m_inTuns.size())
     throw;
   return m_inTuns[num];
 }
 
-Node* PSet::OutTun(unsigned int num) const 
+Node* PSet::OutTun(unsigned int num) const
 {
   if (num >= m_outTuns.size())
     throw;
@@ -362,14 +362,14 @@ void PSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
     bool found = false;
     for(; !found && possIter != m_posses.end(); ++possIter) {
       if (*possIter == poss) {
-	m_posses.erase(possIter);
-	found = true;
+        m_posses.erase(possIter);
+        found = true;
       }
     }
     if (!found)
       throw;
   }
-
+  
   if (poss->m_inTuns.size() != m_inTuns.size()) {
     cout << "(poss->m_inTuns.size() != m_inTuns.size())\n";
     throw;
@@ -401,7 +401,7 @@ void PSet::ClearBeforeProp()
 }
 
 
-bool PSet::TakeIter(const TransMap &transMap, 
+bool PSet::TakeIter(const TransMap &transMap,
                     const TransMap &simplifiers)
 {
   bool newOne = false;
@@ -446,7 +446,7 @@ bool PSet::TakeIter(const TransMap &transMap,
         }
       }
     }
-    //have to add these at the end or we'd be adding posses while iterating 
+    //have to add these at the end or we'd be adding posses while iterating
     // over the posses
     // BAM: Or do I?
     if (vec.size()) {
@@ -544,7 +544,7 @@ void PSet::CombineAndRemoveTunnels()
         cout << setInput2->m_inputs.size() << endl;
         throw;
       }
-      if (setInput1->m_inputs.size() 
+      if (setInput1->m_inputs.size()
           && setInput2->m_inputs.size()
           && setInput1->Input(0) == setInput2->Input(0)
           && setInput1->InputConnNum(0) == setInput2->InputConnNum(0))
@@ -552,7 +552,7 @@ void PSet::CombineAndRemoveTunnels()
         if (setInput1->IsLoopTunnel() && setInput2->IsLoopTunnel()) {
           ClassType type1 = setInput1->GetNodeClass();
           ClassType type2 = setInput2->GetNodeClass();
-          if ((type1 == Split::GetClass() && type2 != Split::GetClass()) 
+          if ((type1 == Split::GetClass() && type2 != Split::GetClass())
               || (type1 != Split::GetClass() && type2 == Split::GetClass()))
           {
             continue;
@@ -789,7 +789,7 @@ bool FoundPossUp(Node *node, const PSet *set, NodeVec &queue)
   return false;
 }
 
-bool NothingBetween(const PSet *left, const PSet *right) 
+bool NothingBetween(const PSet *left, const PSet *right)
 {
   NodeVecConstIter iter = right->m_inTuns.begin();
   for(; iter != right->m_inTuns.end(); ++iter) {
@@ -831,7 +831,7 @@ bool ShouldMerge(const PSet *set1, const PSet *set2)
       const Node *inInput = in->Input(j);
       if (inInput->IsPossTunnel()) {
         if (((PossTunnel*)inInput)->m_pset == set2)
-          return true;	
+          return true;
       }
       for(k = 0; k < inInput->m_children.size(); ++k) {
         const Node *child = inInput->Child(k);
@@ -850,7 +850,7 @@ bool ShouldMerge(const PSet *set1, const PSet *set2)
         if (((PossTunnel*)child)->m_pset == set2)
           return true;
       }
-    }    
+    }
   }
   return false;
 }
@@ -860,7 +860,7 @@ bool PSet::CanMerge(PSet *pset) const
   bool nothingBetween = NothingBetween(this, pset) && NothingBetween(pset, this);
   if (!nothingBetween)
     return false;
-  return ShouldMerge(this, pset);  
+  return ShouldMerge(this, pset);
 }
 
 bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
@@ -926,7 +926,7 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
     }
   }
   //  if (!m_isTopLevel && !didMerge) {
-  if (!didMerge) { 
+  if (!didMerge) {
     unsigned int size = m_posses.size();
     for (unsigned int i = 0; i < size; ++i) {
       PossVec newPosses;
@@ -937,7 +937,7 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
       if (poss->m_sets.size() == 1) {
         if (poss->m_sets[0]->IsTransparent()
             && m_ownerPoss
-            && m_ownerPoss->m_sets.size() > 1) 
+            && m_ownerPoss->m_sets.size() > 1)
         {
           InlinePoss(i, newPosses);
           --size;
@@ -1215,7 +1215,7 @@ void PSet::ClearCurrPoss()
   }
 }
 
-bool PSet::IncrementCurrPoss() 
+bool PSet::IncrementCurrPoss()
 {
   if (m_currPoss >= m_posses.size())
     throw;
@@ -1375,7 +1375,7 @@ void PSet::Flatten(ofstream &out) const
     size = m_inTuns.size();
     WRITE(size);
     NodeVecConstIter iter = m_inTuns.begin();
-    for(; iter != m_inTuns.end(); ++iter) 
+    for(; iter != m_inTuns.end(); ++iter)
       WRITE(*iter);
     WRITE(END);
     size = m_outTuns.size();
@@ -1490,12 +1490,15 @@ bool PSet::CanPrint() const
   return true;
 }
 
-bool PSet::RemoveParallelization()
+bool PSet::RemoveParallelization(Comm comm)
 {
   if (IsLoop()) {
     Loop *loop = (Loop*)this;
     if (loop->IsParallel()) {
-      return true;
+      if (comm == CORECOMM)
+        return true;
+      else if ((comm == loop->m_comm) || CommGroupGreaterThan(loop->m_comm, comm))
+        return true;
     }
   }
   
@@ -1506,7 +1509,7 @@ bool PSet::RemoveParallelization()
     PSetVecIter setIter = poss->m_sets.begin();
     for(; !found && setIter != poss->m_sets.end(); ++setIter) {
       PSet *set = *setIter;
-      if (set->RemoveParallelization()) {
+      if (set->RemoveParallelization(comm)) {
         found = true;
       }
     }
@@ -1514,7 +1517,10 @@ bool PSet::RemoveParallelization()
       NodeVecIter nodeIter = poss->m_possNodes.begin();
       for(; !found && nodeIter != poss->m_possNodes.end(); ++nodeIter) {
         if ((*nodeIter)->IsParallel()) {
-          found = true;
+          Comm parComm = (*nodeIter)->ParallelComm();
+          if ((comm == CORECOMM) || (parComm == comm) || CommGroupGreaterThan(parComm, comm)) {
+            found = true;
+          }
         }
       }
     }

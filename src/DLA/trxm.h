@@ -99,6 +99,7 @@ class TrxmBP : public DLAOp<3,2>, public TrProps
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual bool IsBLISParallelizable() const;
+  virtual Comm ParallelComm() const {return m_comm;}
   virtual void Parallelize(Comm comm);
   virtual bool IsParallel() const;
 };

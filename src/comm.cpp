@@ -88,3 +88,34 @@ unsigned int NumGroupsInComm(Comm comm)
       throw;
     }
 }
+
+
+// Partial ordering of comm's
+// Used to make sure nested parallelization
+//  doesn't include an insane setup with
+//  L2 parallelization outside of cross-processor
+//  parallelization
+bool CommGroupGreaterThan(Comm comm1, Comm comm2)
+{
+#if DOSM
+  if (comm2 == CORECOMM)
+    throw;
+  switch(comm1)
+    {
+    case(GLOBALCOMM):
+      return comm2 == PROCCOMM || comm2==L2COMM;
+
+    case(PROCCOMM):
+      return comm2==L2COMM;
+
+    case(L2COMM):
+      return false;
+
+    case(CORECOMM):
+    default:
+      throw;
+    }
+#else
+      throw;
+#endif
+}
