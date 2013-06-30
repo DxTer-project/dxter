@@ -1489,3 +1489,41 @@ bool PSet::CanPrint() const
   }
   return true;
 }
+
+bool PSet::RemoveParallelization()
+{
+  if (IsLoop()) {
+    Loop *loop = (Loop*)this;
+    if (loop->IsParallel()) {
+      return true;
+    }
+  }
+  
+  int i;
+  for(i = 0; i < (int)(m_posses.size()); ++i) {
+    bool found = false;
+    Poss *poss = m_posses[i];
+    PSetVecIter setIter = poss->m_sets.begin();
+    for(; !found && setIter != poss->m_sets.end(); ++setIter) {
+      PSet *set = *setIter;
+      if (set->RemoveParallelization()) {
+        found = true;
+      }
+    }
+    if (!found) {
+      NodeVecIter nodeIter = poss->m_possNodes.begin();
+      for(; !found && nodeIter != poss->m_possNodes.end(); ++nodeIter) {
+        if ((*nodeIter)->IsParallel()) {
+          found = true;
+        }
+      }
+    }
+    if (found) {
+      if (m_posses.size() <= 1)
+        return true;
+      RemoveAndDeletePoss(poss, true);
+      --i;
+    }
+  }
+  return false;
+}
