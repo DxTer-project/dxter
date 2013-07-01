@@ -121,6 +121,7 @@ class TempVarNode : public DLANode
   virtual void BuildSizeCache();
   virtual bool IsReadOnly() const {return true;}
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+  virtual bool IsDataDependencyOfInput() const {return false;}
 };
 
 class OutputNode : public DLANode

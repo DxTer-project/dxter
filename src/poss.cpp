@@ -1351,7 +1351,7 @@ void AddUsersOfLiveOutput(Node *node, unsigned int connNum, NodeSet &set)
             set.insert(*iter2);
           }
         }
-        if (child->GetNodeClass() == LoopTunnel::GetClass()) {
+        if (child->IsLoopTunnel()) {
           AddUsersOfLiveOutput(((LoopTunnel*)child)->GetMatchingOutTun(), 0, set);
         }
         else {
@@ -1393,10 +1393,12 @@ void AddUsersOfLiveOutput(Node *node, unsigned int connNum, NodeSet &set)
         }
       }
       else {
-        set.insert(child);
-        unsigned int num;
-        if (conn->m_n->KeepsInputVarLive(node, connNum, num))
-          AddUsersOfLiveOutput(conn->m_n, num, set);
+        if (child->IsDataDependencyOfInput() && !child->IsPossTunnel(POSSTUNOUT)) {
+          set.insert(child);
+          unsigned int num;
+          if (conn->m_n->KeepsInputVarLive(node, connNum, num))
+            AddUsersOfLiveOutput(conn->m_n, num, set);
+        }
       }
     }
   }
@@ -2751,11 +2753,15 @@ void Poss::UnflattenStatic(ifstream &in)
 void Poss::BuildSizeCache()
 {
   NodeVecIter iter1 = m_possNodes.begin();
-  for(; iter1 != m_possNodes.end(); ++iter1)
-    (*iter1)->m_flags &= ~BUILDFLAG;
+  for(; iter1 != m_possNodes.end(); ++iter1) {
+    Node *node = *iter1;
+    node->m_flags &= ~BUILDFLAG;
+  }
   iter1 = m_possNodes.begin();
-  for(; iter1 != m_possNodes.end(); ++iter1)
-    (*iter1)->BuildSizeCacheRecursive();
+  for(; iter1 != m_possNodes.end(); ++iter1) {
+    Node *node = *iter1;
+    node->BuildSizeCacheRecursive();
+  }
   PSetVecIter iter2 = m_sets.begin();
   for(; iter2 != m_sets.end(); ++iter2)
     (*iter2)->BuildSizeCache();

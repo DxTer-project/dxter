@@ -252,12 +252,18 @@ string TunTypeToStr(PossTunType type)
 
 const Sizes* PossTunnel::LocalM(unsigned int num) const
 {
-  return ((DLANode*)Input(0))->LocalM(InputConnNum(0));
+  const NodeConn *conn = m_inputs[0];
+  const DLANode *input = (DLANode*)(conn->m_n);
+  
+  return input->LocalM(conn->m_num);
 }
 
 const Sizes* PossTunnel::LocalN(unsigned int num) const
 {
-  return ((DLANode*)Input(0))->LocalN(InputConnNum(0));
+  const NodeConn *conn = m_inputs[0];
+  const DLANode *input = (DLANode*)(conn->m_n);
+  
+  return input->LocalN(conn->m_num);
 }
 
 void PossTunnel::FlattenCore(ofstream &out) const

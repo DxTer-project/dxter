@@ -145,6 +145,7 @@ class Node
   virtual bool IsParallel() const {return false;}
   virtual Comm ParallelComm() const {throw;}
   bool InCriticalSection() const;
+  virtual bool IsDataDependencyOfInput() const {return true;}
 
   void PrintChildren();
   void PrintInputs();
