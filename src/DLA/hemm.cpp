@@ -112,6 +112,8 @@ Phase Hemm::MaxPhase() const
       return SR1PHASE;
     case (S1LAYER):
       return SR2PHASE;
+    case (S2LAYER):
+      return SR3PHASE;
     default:
       throw;
 #endif
