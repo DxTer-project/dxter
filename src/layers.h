@@ -23,9 +23,9 @@
 
 #pragma once
 
-#define DODM 0
+#define DODM 1
 #define DOSQM 0
-#define DOSM 1
+#define DOSM 0
 
 #if DODM
 
@@ -54,6 +54,7 @@ enum Layers {
   BADLAYER,
   S1LAYER,
   S2LAYER,
+  S3LAYER,
   SOLAYER,
 };
 #elif DOSQM
