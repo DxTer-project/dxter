@@ -38,9 +38,9 @@ string CommToStr(Comm comm)
       return "ProcComm";
     case(L2COMM):
       return "L2Comm";
+#endif
     case(CORECOMM):
       return "Seq";
-#endif
     default:
       throw;
     }
@@ -62,9 +62,9 @@ unsigned int NumCoresInComm(Comm comm)
       return NUML2PERL3*NUMCORESPERL2;
     case(L2COMM):
       return NUMCORESPERL2;
+#endif
     case(CORECOMM):
       return 1;
-#endif
     default:
       throw;
     }
@@ -81,9 +81,9 @@ unsigned int NumGroupsInComm(Comm comm)
       return NUML2PERL3;
     case(L2COMM):
       return NUMCORESPERL2;
-    case(CORECOMM):
-      return 1;
 #endif
+      case(CORECOMM):
+        return 1;
     default:
       throw;
     }
