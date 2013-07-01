@@ -951,6 +951,24 @@ int main(int argc, const char* argv[])
 #endif
 
 
+#if DOSOPHASE
+  if (CurrPhase == SOPHASE) {
+    cout << "Expanding SO phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, SOPHASE, DLACullSR);
+    time(&end);
+    cout << "SO phase took " << difftime(end,start2) << " seconds\n";
+    
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
 #if DOSMPPHASE
   if (CurrPhase == SMPPHASE) {
     cout << "Shared-memory parallelization phase\n";
@@ -969,23 +987,7 @@ int main(int argc, const char* argv[])
   }
 #endif
 
-#if DOSOPHASE
-  if (CurrPhase == SOPHASE) {
-    cout << "Expanding SO phase\n";
-    cout << "Starting with " << uni.TotalCount() << endl;
-    time(&start2);
-    uni.Expand(numIters, SOPHASE, DLACullSR);
-    time(&end);
-    cout << "SO phase took " << difftime(end,start2) << " seconds\n";
-    
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-#endif
+
 
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();

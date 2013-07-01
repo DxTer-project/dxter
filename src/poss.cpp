@@ -1355,6 +1355,9 @@ void AddUsersOfLiveOutput(Node *node, unsigned int connNum, NodeSet &set)
           AddUsersOfLiveOutput(((LoopTunnel*)child)->GetMatchingOutTun(), 0, set);
         }
         else {
+          //For normal PSets, we can't just find the matching output tunnel
+          // to know along which edge the variable stays live
+          //Here, we're trying to figure that out
           Node *currNode = child->Child(0);
           unsigned int numIn = 0;
           unsigned int numOut = 0;
@@ -1368,8 +1371,10 @@ void AddUsersOfLiveOutput(Node *node, unsigned int connNum, NodeSet &set)
                 unsigned int tempOut;
                 if (childConn->m_n->KeepsInputVarLive(currNode, numIn, tempOut)) {
                   if (found) {
-                    if (!childConn->m_n->IsPossTunnel(POSSTUNOUT))
+                    if (!childConn->m_n->IsPossTunnel(POSSTUNOUT)) {
+                      childConn->m_n->m_poss->PrintSetConnections();
                       throw;
+                    }
                   }
                   else {
                     found = true;
@@ -1380,10 +1385,28 @@ void AddUsersOfLiveOutput(Node *node, unsigned int connNum, NodeSet &set)
               }
             }
             if (found) {
+              if (!nextNode)
+                throw;
               currNode = nextNode;
               numIn = numOut;
               if (currNode->IsPossTunnel(POSSTUNOUT))
                 found = false;
+              if (currNode->IsPossTunnel(SETTUNIN)) {
+                if (currNode->IsLoopTunnel()) {
+                  nextNode = ((LoopTunnel*)currNode)->GetMatchingOutTun();
+                  if (!nextNode)
+                    throw;
+                  currNode = nextNode;
+                  numIn = 0;
+                }
+                else if (currNode->GetNodeClass() == PossTunnel::GetClass()) {
+                  nextNode = currNode->Child(0);
+                  if (!nextNode)
+                    throw;
+                  currNode = nextNode;
+                  numIn = 0;
+                }
+              }
             }
           }
           if (currNode->IsPossTunnel(POSSTUNOUT)) {

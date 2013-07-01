@@ -30,7 +30,7 @@
 
 //Print out code for all generated implementations
 // This takes a while for large search spaces
-#define PRINTCODE
+//#define PRINTCODE
 
 //Save generated implementations to disk
 // so they can be loaded on a separate run
@@ -168,7 +168,7 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
       // same pack buffer can be used for
       // different pieces of data, sequentially.
       //We don't want to now get rid of those sets
-      if (phase != SOPHASE)
+      if (phase < SOPHASE)
 #endif
 	foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
       time(&end);

@@ -23,9 +23,9 @@
 
 #pragma once
 
-#define DODM 1
+#define DODM 0
 #define DOSQM 0
-#define DOSM 0
+#define DOSM 1
 
 #if DODM
 
@@ -93,13 +93,13 @@ enum Layers {
 #define SR1PHASE 0
 #define SR2PHASE 1
 #define SR3PHASE 2
-#define SMPPHASE 3
-#define SOPHASE 4
+#define SOPHASE 3
+#define SMPPHASE 4
 
 #define FIRSTPHASE SR1PHASE
 
 //Max phase for which to generate code
-#define MAXPHASE SOPHASE
+#define MAXPHASE SMPPHASE
 #define NUMPHASES (MAXPHASE+1)
 
 #define DODPPHASE 0
