@@ -581,6 +581,7 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
       return false;
     if (pack->m_children.size() < 1)
       throw;
+    bool found = false;
     NodeConnVecConstIter iter = pack->m_children.begin();
     for(; iter != pack->m_children.end(); ++iter) {
       const Node *child = (*iter)->m_n;
@@ -603,10 +604,10 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
       
       const Loop *loop = (Loop*)(tun->m_pset);
       if (!loop->HasIndepIters()) {
-        cout << "Doesn't have independent iters\n";
-        loop->m_posses[0]->ForcePrint();
-        throw;
+	continue;
       }
+      else
+	found = true;
       if (loop->m_dim != DIMM)
         throw;
       if (loop->m_comm == m_comm)
@@ -646,8 +647,7 @@ void ParallelizeMDim::Apply(Poss *poss, Node *node) const
     LoopTunnel *tun = (LoopTunnel*)child;
     Loop *loop = (Loop*)(tun->m_pset);
     if (!loop->HasIndepIters()) {
-      cout << "Doesn't have independent iters\n";
-      throw;
+      continue;
     }
     else {
       loop->Parallelize(m_comm);
