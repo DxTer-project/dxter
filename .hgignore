@@ -12,3 +12,5 @@ glob:*.orig
 glob:*.x
 glob:*.o
 glob:tmp*
+xcode/DxTer.xcodeproj/project.xcworkspace/xcuserdata/bamarker.xcuserdatad/UserInterfaceState.xcuserstate
+xcode/DxTer.xcodeproj/xcuserdata/bamarker.xcuserdatad/xcschemes/DxTer.xcscheme
