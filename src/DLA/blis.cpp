@@ -600,7 +600,7 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
         throw;
       }
       const LoopTunnel *tun = (LoopTunnel*)child;
-
+      
       const Loop *loop = (Loop*)(tun->m_pset);
       if (!loop->HasIndepIters()) {
         cout << "Doesn't have independent iters\n";
@@ -608,13 +608,14 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
         throw;
       }
       if (loop->m_dim != DIMM)
-	throw;
+        throw;
       if (loop->m_comm == m_comm)
-	return false;
+        return false;
       else if (loop->m_comm != CORECOMM)
-	throw;
+        throw;
       if (!LegalParallelizationNestingDown(loop, m_comm))
-	return false;
+        return false;
+      /*
       const Split *control = loop->GetControl();
       const unsigned int numExecs = control->NumberOfLoopExecs();
       unsigned int parFactor = NumGroupsInComm(m_comm);
@@ -626,6 +627,7 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
       }
       if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
         return false;
+      */
     }
     return true;
   }
@@ -670,7 +672,7 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
     if (!pack->m_children.size())
       throw;
     if (!LegalParallelizationNestingUp(pack, m_comm))
-	return false;
+      return false;
     NodeConnVecConstIter iter = pack->m_children.begin();
     for(; iter != pack->m_children.end(); ++iter) {
       const Node *child = (*iter)->m_n;
@@ -678,7 +680,7 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
         throw;
       const DLANode *dla = (DLANode*)child;
       if (dla->IsBLISParallelizable()) {
-	return true;
+        return true;
       }
     }
   }
@@ -723,19 +725,19 @@ bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
   }
   if (!loop->HasIndepIters())
     throw;
-
+  
   /*  const Split *control = loop->GetControl();
-  const unsigned int numExecs = control->NumberOfLoopExecs();
-  unsigned int parFactor = NumGroupsInComm(m_comm);
-  int numParallelizable = 0;
-  for(unsigned int i = 0; i < numExecs; ++i) {
-    unsigned int numIters = control->NumIters(i);
-    if (numIters >= parFactor)
-      ++numParallelizable;
-  }
-  if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
-    return false;
-  */
+   const unsigned int numExecs = control->NumberOfLoopExecs();
+   unsigned int parFactor = NumGroupsInComm(m_comm);
+   int numParallelizable = 0;
+   for(unsigned int i = 0; i < numExecs; ++i) {
+   unsigned int numIters = control->NumIters(i);
+   if (numIters >= parFactor)
+   ++numParallelizable;
+   }
+   if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
+   return false;
+   */
   return true;
 }
 
@@ -792,7 +794,7 @@ bool LegalParallelizationNestingUp(const Node *node, Comm comm)
       break;
     if (pset->IsLoop()) {
       if (((Loop*)pset)->m_comm != CORECOMM) {
-	return CommGroupGreaterThan(((Loop*)pset)->m_comm, comm);
+        return CommGroupGreaterThan(((Loop*)pset)->m_comm, comm);
       }
     }
     else if (pset->IsCritSect()) {
@@ -814,12 +816,12 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
     for(; !foundBad && iter2 != poss->m_sets.end(); ++iter2) {
       const PSet *pset = *iter2;
       if (pset->IsLoop() && ((Loop*)pset)->m_comm != CORECOMM) {
-	if (!CommGroupGreaterThan(comm,((Loop*)pset)->m_comm))
-	  foundBad = true;
+        if (!CommGroupGreaterThan(comm,((Loop*)pset)->m_comm))
+          foundBad = true;
       }
       else if (!pset->IsCritSect()) {
-	if (!LegalParallelizationNestingDown(pset, comm))
-	  foundBad = true;
+        if (!LegalParallelizationNestingDown(pset, comm))
+          foundBad = true;
       }
     }
     if (!foundBad)
