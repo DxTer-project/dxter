@@ -20,7 +20,7 @@ dxter.x: $(OBJS) $(HEADERS)
 	$(LINKER) $(CFLAGS) $(OBJS) -o $@
 
 clean:
-	rm -f obj/*.o obj/DLA/*.o src/*~ src/DLA/*~ *.x *~
+	rm -f obj/*.o obj/DLA/*.o src/*~ src/DLA/*~ *.x *~ src/*.orig src/DLA/*.orig
 
 open:
 	emacs makefile src/*cpp src/*h src/DLA/*cpp src/DLA/*h
