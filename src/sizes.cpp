@@ -137,14 +137,16 @@ bool SizesIter::AtEnd() const
     if (m_parFactor < 0) {
       Size val = m_valA + m_valC * m_currPos;
       if (m_valC < 0) {
-	return val < m_valB;
+        return val < m_valB;
       }
       else
-	return val > m_valB;
+        return val > m_valB;
     }
     else {
+      //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
+      //the corner case of it being 0:B:n*B-1 is unlikely, so this is faster
       double sizeDiff = abs((double)m_valB - m_valA);
-      double eachPortion = ceil(sizeDiff / (double)m_parFactor);
+      double eachPortion = ceil(sizeDiff / (double)m_parFactor)+1;
       double iters = ceil(eachPortion / abs((double)m_valC));
       return m_currPos >= iters;
     }
@@ -307,14 +309,17 @@ unsigned int SizeEntry::NumSizes() const
   }
   else if (m_type == RANGESIZES) {
     if (m_parFactor < 0) {
-      double diff = abs(m_valA - m_valB);
-      double num = ceil(diff / abs(m_valC))+1;
+      //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
+      double diff = abs(m_valA - m_valB)+1;
+      double num = ceil(diff / abs(m_valC));
       return ceil(num / (double)m_parFactor);
     }
     else {
+      //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
       double sizeDiff = abs((double)m_valB - m_valA);
-      double eachPortion = ceil(sizeDiff / (double)m_parFactor);
-      return ceil(eachPortion / abs((double)m_valC));
+      double eachPortion = ceil(sizeDiff / (double)m_parFactor)+1;
+      double num = ceil(eachPortion / abs((double)m_valC));
+      return num;
     }
   }
   else
