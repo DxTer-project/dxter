@@ -793,9 +793,7 @@ bool LegalParallelizationNestingUp(const Node *node, Comm comm)
     if (!pset)
       break;
     if (pset->IsLoop()) {
-      if (((Loop*)pset)->m_comm != CORECOMM) {
-        return CommGroupGreaterThan(((Loop*)pset)->m_comm, comm);
-      }
+      return CommAllowedWithin(((Loop*)pset)->m_comm, comm);
     }
     else if (pset->IsCritSect()) {
       return false;
@@ -815,8 +813,8 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
     PSetVecConstIter iter2 = poss->m_sets.begin();
     for(; !foundBad && iter2 != poss->m_sets.end(); ++iter2) {
       const PSet *pset = *iter2;
-      if (pset->IsLoop() && ((Loop*)pset)->m_comm != CORECOMM) {
-        if (!CommGroupGreaterThan(comm,((Loop*)pset)->m_comm))
+      if (pset->IsLoop()) {
+        if (!CommAllowedWithin(comm,((Loop*)pset)->m_comm))
           foundBad = true;
       }
       else if (!pset->IsCritSect()) {

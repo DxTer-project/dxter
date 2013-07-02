@@ -95,23 +95,23 @@ unsigned int NumGroupsInComm(Comm comm)
 //  doesn't include an insane setup with
 //  L2 parallelization outside of cross-processor
 //  parallelization
-bool CommGroupGreaterThan(Comm comm1, Comm comm2)
+bool CommAllowedWithin(Comm comm1, Comm comm2)
 {
 #if DOSM
-  if (comm2 == CORECOMM)
-    throw;
   switch(comm1)
     {
     case(GLOBALCOMM):
-      return comm2 == PROCCOMM || comm2==L2COMM;
+      return comm2 == PROCCOMM || comm2==L2COMM || comm2==CORECOMM;
 
     case(PROCCOMM):
-      return comm2==L2COMM;
+      return comm2==L2COMM || comm2==CORECOMM;
 
     case(L2COMM):
-      return false;
+      return comm2==CORECOMM;
 
     case(CORECOMM):
+      return true;
+
     default:
       throw;
     }

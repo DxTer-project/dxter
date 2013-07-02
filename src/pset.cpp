@@ -1498,7 +1498,7 @@ bool PSet::RemoveParallelization(Comm comm)
       if (comm == CORECOMM) {
         return true;
       }
-      else if ((comm == loop->m_comm) || CommGroupGreaterThan(loop->m_comm, comm)) {
+      else if (!CommAllowedWithin(loop->m_comm, comm)) {
         return true;
       }
     }
@@ -1520,7 +1520,8 @@ bool PSet::RemoveParallelization(Comm comm)
       for(; !found && nodeIter != poss->m_possNodes.end(); ++nodeIter) {
         if ((*nodeIter)->IsParallel()) {
           Comm parComm = (*nodeIter)->ParallelComm();
-          if ((comm == CORECOMM) || (parComm == comm) || CommGroupGreaterThan(parComm, comm)) {
+	    //          if ((comm == CORECOMM) || (parComm == comm) || CommGroupGreaterThan(parComm, comm)) {
+	  if (comm==CORECOMM || !CommAllowedWithin(parComm, comm)) {
             found = true;
           }
         }
