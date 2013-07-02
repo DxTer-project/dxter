@@ -2201,6 +2201,14 @@ void Poss::Print(IndStream &out, unsigned int &graphNum)
   NodeVecConstIter nodeIter = m_inTuns.begin();
   for(; nodeIter != m_inTuns.end(); ++nodeIter) {
     (*nodeIter)->Print(out, graphNum);
+    /*
+    if ((*nodeIter)->GetNodeClass() == Split::GetClass()) {
+      const Sizes *m = ((DLANode*)(*nodeIter))->GetM(1);
+      const Sizes *n = ((DLANode*)(*nodeIter))->GetN(1);
+      m->Print();
+      n->Print();
+    }
+     */
     if (!(*nodeIter)->HasPrinted()) {
       cout << "tunnel input " << (*nodeIter)->GetType()
       << "hasn't printed even though he should have\n";

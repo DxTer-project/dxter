@@ -241,16 +241,30 @@ Size SizeEntry::operator[] (unsigned int n) const
   if (m_parFactor < 0)
     iter *= m_parFactor;
   if (m_type == REPEATEDSIZES) {
-    if ((int)iter >= m_valC)
-      throw;
-    return m_valA;
+    if (m_parFactor < 0) {
+      if ((int)iter >= m_valC)
+        throw;
+      return m_valA;
+    }
+    else {
+      if ((int)iter >= ceil((double)m_valC / abs(m_parFactor)))
+	throw;
+      return m_valA;
+    }
   }
   else if (m_type == MIDSIZES) {
-    unsigned int numFullIters = floor(m_valB / m_valA);
+    double adjustedValB;
+    
+    if (m_parFactor < 0)
+      adjustedValB = m_valB;
+    else
+      adjustedValB = ceil((double)m_valB / m_parFactor);
+    
+    unsigned int numFullIters = floor(adjustedValB / m_valA);
     if (numFullIters > iter)
       return m_valA;
     else if (numFullIters+1 > iter)
-      return m_valB - numFullIters*m_valA;
+      return adjustedValB - numFullIters*m_valA;
     else
       throw;
   }

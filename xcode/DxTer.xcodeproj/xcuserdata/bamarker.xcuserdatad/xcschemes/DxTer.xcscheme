@@ -59,15 +59,15 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "15"
+            argument = "5"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "R"
+            argument = "C"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "L"
+            argument = "N"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
