@@ -58,9 +58,11 @@ class SizesIter
   int m_valC;
   SizesType m_type;
   double m_coeff;
-  unsigned int m_parFactor;
+  //negative for round-robin
+  //positive for blocks
+  int m_parFactor;
  SizesIter() : m_currPos(-1) {}
-  SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, unsigned int parFactor);
+  SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int parFactor);
   void operator++();
   Size operator*() const;
   void operator=(const SizesIter &rhs);
@@ -73,11 +75,13 @@ class SizeEntry
   Size m_valA, m_valB;
   int m_valC;
   SizesType m_type;
-  unsigned int m_parFactor;
+  //negative for round-robin
+  //positive for blocks
+  int m_parFactor;
   SizeEntry();
-  void SetRepeatedSizes(Size size, int repeats, unsigned int parFactor);
-  void SetSizeRange(Size start, int stride, Size end, unsigned int parFactor);
-  void SetMidSizes(Size size, Size totalSize, unsigned int parFactor);
+  void SetRepeatedSizes(Size size, int repeats, int parFactor);
+  void SetSizeRange(Size start, int stride, Size end, int parFactor);
+  void SetMidSizes(Size size, Size totalSize, int parFactor);
   Size operator[] (unsigned int n) const;
   void operator= (const SizeEntry &rhs);
   bool operator==(const SizeEntry &rhs) const;
@@ -113,9 +117,9 @@ class Sizes
   ~Sizes();
 
   void Print() const;
-  void AddRepeatedSizes(Size size, int repeats, unsigned int parFactor);
-  void AddSizesWithLimit(Size start, int stride, Size end, unsigned int parFactor);
-  void AddMidSizes(Size size, Size totalSize, unsigned int parFactor);
+  void AddRepeatedSizes(Size size, int repeats, int parFactor);
+  void AddSizesWithLimit(Size start, int stride, Size end, int parFactor);
+  void AddMidSizes(Size size, Size totalSize, int parFactor);
   void ClearSizes();
   void SetCoeff(double coeff);
   unsigned int NumSizes() const;
@@ -134,8 +138,8 @@ class Sizes
   bool AllOnes() const;
   SizesIter GetIter(unsigned int sizeNum) const;
   bool IsZero(unsigned int n) const;
-  void AddParFactor(unsigned int parFactor);
-  void SetParFactor(unsigned int parFactor);
+  void AddParFactor(int parFactor);
+  void SetParFactor(int parFactor);
 };
 
 

@@ -42,7 +42,7 @@ using namespace std;
 Sizes ONEVAL(1);
 Sizes *ONES = &ONEVAL;
 
-SizesIter::SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, unsigned int parFactor)
+SizesIter::SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int parFactor)
 :m_currPos(0),
 m_valA(valA),
 m_valB(valB),
@@ -51,7 +51,7 @@ m_type(type),
  m_coeff(coeff),
  m_parFactor(parFactor)
 {
-  if (m_parFactor < 1)
+  if (m_parFactor == 0)
     throw;
 }
 
@@ -59,16 +59,21 @@ void SizesIter::operator++()
 {
   if (m_currPos < 0)
     throw;
-  m_currPos+=m_parFactor;
+  if (m_parFactor < 0) {
+    m_currPos += m_parFactor;
+  }
+  else {
+    ++m_currPos;
+  }
 }
 
 Size SizesIter::operator*() const
 {
   if (m_currPos < 0)
     throw;
+  if (AtEnd())
+    throw;
   if (m_type == REPEATEDSIZES) {
-    if (m_currPos >= m_valC)
-      throw;
     return Update(m_valA);
   }
   else if (m_type == MIDSIZES) {
@@ -81,8 +86,6 @@ Size SizesIter::operator*() const
       throw;
   }
   else if (m_type == RANGESIZES) {
-    if (m_currPos >= ceil((double)abs(m_valA-m_valB)))
-      throw;
     return Update(m_valA + m_currPos * m_valC);
   }
   else
@@ -114,19 +117,37 @@ bool SizesIter::AtEnd() const
       throw;
     if (m_currPos == 0)
       return false;
-    double done = m_currPos * m_valA;
-    return done >= m_valB;
+    if (m_parFactor < 0) {
+      double done = m_currPos * m_valA;
+      return done >= m_valB;
+    }
+    else {
+      double size = ceil((double)m_valB / (double)m_parFactor);
+      double iters = ceil(size / (double)m_valA);
+      return m_currPos >= iters;
+    }
   }
   else if (m_type == REPEATEDSIZES) {
-    return (m_currPos >= m_valC);
+    if (m_parFactor < 0)
+      return (m_currPos >= m_valC);
+    else
+      return m_currPos >= ceil(((double)m_valC) / m_parFactor);
   }
   else if (m_type == RANGESIZES) {
-    Size val = m_valA + m_valC * m_currPos;
-    if (m_valC < 0) {
-      return val < m_valB;
+    if (m_parFactor < 0) {
+      Size val = m_valA + m_valC * m_currPos;
+      if (m_valC < 0) {
+	return val < m_valB;
+      }
+      else
+	return val > m_valB;
     }
-    else
-      return val > m_valB;
+    else {
+      double sizeDiff = abs((double)m_valB - m_valA);
+      double eachPortion = ceil(sizeDiff / (double)m_parFactor);
+      double iters = ceil(eachPortion / abs((double)m_valC));
+      return m_currPos >= iters;
+    }
   }
   else
     throw;
@@ -137,17 +158,17 @@ SizeEntry::SizeEntry()
 {
 }
 
-void SizeEntry::SetRepeatedSizes(Size size, int repeats, unsigned int parFactor)
+void SizeEntry::SetRepeatedSizes(Size size, int repeats, int parFactor)
 {
   m_valA = size;
   m_valC = repeats;
   m_type = REPEATEDSIZES;
   m_parFactor = parFactor;
-  if (m_parFactor < 1)
+  if (m_parFactor == 0)
     throw;
 }
 
-void SizeEntry::SetSizeRange(Size start, int stride, Size end, unsigned int parFactor)
+void SizeEntry::SetSizeRange(Size start, int stride, Size end, int parFactor)
 {
   if (start == 0 && end == 0)
     throw;
@@ -156,17 +177,17 @@ void SizeEntry::SetSizeRange(Size start, int stride, Size end, unsigned int parF
   m_valC = stride;
   m_type = RANGESIZES;
   m_parFactor = parFactor;
-  if (m_parFactor < 1)
+  if (m_parFactor == 0)
     throw;
 }
 
-void SizeEntry::SetMidSizes(Size size, Size totalSize, unsigned int parFactor)
+void SizeEntry::SetMidSizes(Size size, Size totalSize, int parFactor)
 {
   m_valA = size;
   m_valB = totalSize;
   m_type = MIDSIZES;
   m_parFactor = parFactor;
-  if (m_parFactor < 1)
+  if (m_parFactor == 0)
     throw;
 }
 
@@ -214,7 +235,9 @@ bool SizeEntry::operator==(const SizeEntry &rhs) const
 
 Size SizeEntry::operator[] (unsigned int n) const
 {
-  unsigned int iter = n * m_parFactor;
+  unsigned int iter = n;
+  if (m_parFactor < 0)
+    iter *= m_parFactor;
   if (m_type == REPEATEDSIZES) {
     if ((int)iter >= m_valC)
       throw;
@@ -273,20 +296,29 @@ bool SizeEntry::operator<= (const Size &rhs) const
 
 unsigned int SizeEntry::NumSizes() const
 {
-  unsigned int num;
   if (m_type == MIDSIZES) {
-    num = ceil(((double)m_valB) / m_valA);
+    if (m_parFactor < 0)
+      return ceil(((double)m_valB) / m_valA);
+    else
+      return ceil(ceil(m_valB / ((double)m_parFactor)) / (double)m_valA);
   }
   else if (m_type == REPEATEDSIZES) {
-    num = m_valC;
+    return ceil((double)m_valC / abs(m_parFactor));
   }
   else if (m_type == RANGESIZES) {
-    double diff = abs(m_valA - m_valB);
-    num = ceil(diff / abs(m_valC))+1;
+    if (m_parFactor < 0) {
+      double diff = abs(m_valA - m_valB);
+      double num = ceil(diff / abs(m_valC))+1;
+      return ceil(num / (double)m_parFactor);
+    }
+    else {
+      double sizeDiff = abs((double)m_valB - m_valA);
+      double eachPortion = ceil(sizeDiff / (double)m_parFactor);
+      return ceil(eachPortion / abs((double)m_valC));
+    }
   }
   else
     throw;
-  return (ceil(((double)num) / m_parFactor));
 }
 
 bool SizeEntry::IsZero() const
@@ -402,21 +434,21 @@ void Sizes::Print() const
   }
 }
 
-void Sizes::AddRepeatedSizes(Size size, int repeats, unsigned int parFactor)
+void Sizes::AddRepeatedSizes(Size size, int repeats, int parFactor)
 {
   SizeEntry *entry = new SizeEntry;
   entry->SetRepeatedSizes(size, repeats, parFactor);
   m_entries.push_back(entry);
 }
 
-void Sizes::AddMidSizes(Size size, Size totalSize, unsigned int parFactor)
+void Sizes::AddMidSizes(Size size, Size totalSize, int parFactor)
 {
   SizeEntry *entry = new SizeEntry;
   entry->SetMidSizes(size, totalSize, parFactor);
   m_entries.push_back(entry);
 }
 
-void Sizes::AddSizesWithLimit(Size start, int stride, Size end, unsigned int parFactor)
+void Sizes::AddSizesWithLimit(Size start, int stride, Size end, int parFactor)
 {
   if (stride == 0)
     throw;
@@ -535,16 +567,16 @@ Cost Sizes::Sum() const
   for(; iter != m_entries.end(); ++iter) {
     const SizeEntry *entry = *iter;
     if (entry->m_type == REPEATEDSIZES) {
-      cost += ceil(((double)(entry->m_valC))/entry->m_parFactor)
+      cost += ceil(((double)(entry->m_valC))/abs(entry->m_parFactor))
 		   * Update(entry->m_valA);
     }
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = floor(numIters);
       if (numFullIters % entry->m_parFactor == 0)
-	cost += ceil(((double)numFullIters)/entry->m_parFactor) * Update(entry->m_valA);
+	cost += ceil(((double)numFullIters)/abs(entry->m_parFactor)) * Update(entry->m_valA);
       else {
-	cost += ((double)numFullIters)/entry->m_parFactor * Update(entry->m_valA);
+	cost += ((double)numFullIters)/abs(entry->m_parFactor) * Update(entry->m_valA);
 	int numPartIters = ceil(numIters)-numFullIters;
 	if (numPartIters)
 	  cost += Update(entry->m_valB - numFullIters * entry->m_valA);
@@ -577,15 +609,15 @@ Cost Sizes::SumSquares() const
   for(; iter != m_entries.end(); ++iter) {
     const SizeEntry *entry = *iter;
     if (entry->m_type == REPEATEDSIZES) {
-      cost += ceil(((double)entry->m_valC) / entry->m_parFactor) * pow(Update(entry->m_valA),2);
+      cost += ceil(((double)entry->m_valC) / abs(entry->m_parFactor)) * pow(Update(entry->m_valA),2);
     }
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = floor(numIters);
-      if (numFullIters % entry->m_parFactor == 0)
-	cost += ceil(((double)numFullIters)/entry->m_parFactor) * pow(Update(entry->m_valA),2);
+      if (numFullIters % abs(entry->m_parFactor) == 0)
+	cost += ceil(((double)numFullIters)/abs(entry->m_parFactor)) * pow(Update(entry->m_valA),2);
       else {
-	cost += ((double)numFullIters)/entry->m_parFactor * pow(Update(entry->m_valA),2);
+	cost += ((double)numFullIters)/abs(entry->m_parFactor) * pow(Update(entry->m_valA),2);
 	int numPartIters = ceil(numIters)-numFullIters;
 	if (numPartIters)
 	  cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),2);
@@ -621,15 +653,15 @@ Cost Sizes::SumCubes() const
   for(; iter != m_entries.end(); ++iter) {
     const SizeEntry *entry = *iter;
     if (entry->m_type == REPEATEDSIZES) {
-      cost += ceil(((double)entry->m_valC) / entry->m_parFactor) * pow(Update(entry->m_valA),3);
+      cost += ceil(((double)entry->m_valC) / abs(entry->m_parFactor)) * pow(Update(entry->m_valA),3);
     }
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = floor(numIters);
-      if (numFullIters % entry->m_parFactor == 0)
-	cost += ceil(((double)numFullIters)/entry->m_parFactor) * pow(Update(entry->m_valA),3);
+      if (numFullIters % abs(entry->m_parFactor) == 0)
+	cost += ceil(((double)numFullIters)/abs(entry->m_parFactor)) * pow(Update(entry->m_valA),3);
       else {
-	cost += ((double)numFullIters)/entry->m_parFactor * pow(Update(entry->m_valA),3);
+	cost += ((double)numFullIters)/abs(entry->m_parFactor) * pow(Update(entry->m_valA),3);
 	int numPartIters = ceil(numIters)-numFullIters;
 	if (numPartIters)
 	  cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),3);
@@ -833,16 +865,24 @@ bool Sizes::operator<= (const Size &rhs) const
   return true;
 }
 
-void Sizes::AddParFactor(unsigned int parFactor)
+void Sizes::AddParFactor(int parFactor)
 {
+  if (parFactor == 0)
+    throw;
   EntryVecIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
-    (*iter)->m_parFactor *= parFactor;
+    if ((*iter)->m_parFactor < 0 && parFactor > 0)
+      throw;
+    if ((*iter)->m_parFactor > 0 && parFactor < 0)
+      throw;
+    (*iter)->m_parFactor *= abs(parFactor);
   }
 }
 
-void Sizes::SetParFactor(unsigned int parFactor)
+void Sizes::SetParFactor(int parFactor)
 {
+  if (parFactor == 0)
+    throw;
   EntryVecIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
     (*iter)->m_parFactor = parFactor;
