@@ -31,9 +31,9 @@ enum Comm {
   MRCOMM,
   MCCOMM,
 #elif DOSM||DOSQM
-  GLOBALCOMM,  //Communicate between all cores in system
-  PROCCOMM,    //Communicate between all cores on processor (e.g. all cores sharing the L3)
-  L2COMM,      //Communicate between all cores sharing my L2
+  GLOBALCOMM,  //Communicate between all cores in system, PROCCOM is subgroup
+  PROCCOMM,    //Communicate between all cores on processor (e.g. all cores sharing the L3), L2COMM is subgroup
+  L2COMM,      //Communicate between all cores sharing my L2, each core is a subgroup
 #endif
   CORECOMM,
   BADCOMM
