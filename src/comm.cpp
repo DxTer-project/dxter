@@ -32,7 +32,7 @@ string CommToStr(Comm comm)
     case (MCCOMM):
       return "g.MCComm()";
 #elif DOSM||DOSQM
-    case(GLOBALCOMM):
+    case(ALLPROCCOMM):
       return "GlobalComm";
     case(PROCCOMM):
       return "ProcComm";
@@ -58,8 +58,12 @@ bool CommAllowedWithin(Comm comm1, Comm comm2)
   switch(comm1)
     {
 #if NUMPROCS>1
-    case(GLOBALCOMM):
+    case(ALLPROCCOMM):
       return comm2 == PROCCOMM || comm2==L2COMM || comm2==CORECOMM;
+#if NUML2PERPROC>1
+    case(ALLL2COMM):
+      return comm2==L2COMM || comm2==CORECOMM;
+#endif //NUML2PERPROC>1
 #endif //NUMPROCS>1
 
     case(PROCCOMM):
