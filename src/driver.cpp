@@ -631,17 +631,21 @@ void AddSimplifiers()
 #endif //DOSOPHASE
 
 #if DOSMPPHASE
-  if (NUML3 > 1)
+#if NUMPROCS>1
     Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeOuterNDim(GLOBALCOMM), SMPPHASE);
+#endif //NUMPROCS>1
 
-  if (NUML3 > 1)
+#if NUMPROCS>1
     Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeK(GLOBALCOMM), SMPPHASE);
+#endif //NUMPROCS>1
 
-  if (NUML2PERL3 > 1)
+#if NUML2PERPROC>1
     Universe::AddTrans(PackBuff::GetClass(), new ParallelizeMDim(PROCCOMM), SMPPHASE);
+#endif //NUML2PERPROC>1
 
-  if (NUMCORESPERL2 > 1)
+#if NUMCORESPERL2>1
     Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMM), SMPPHASE);
+#endif //NUMCORESPERL2>1
 
 #endif
 

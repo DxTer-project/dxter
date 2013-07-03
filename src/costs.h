@@ -40,8 +40,8 @@ using namespace std;
 #define RVAL 1
 #define CVAL 1
 #define NUMCORESPERL2 2
-#define NUML2PERL3 3
-#define NUML3 4
+#define NUML2PERPROC 3
+#define NUMPROCS 4
 #endif 
 #define PVAL RVAL*CVAL
 #define ELEM_BSVAL 128

@@ -46,49 +46,6 @@ string CommToStr(Comm comm)
     }
 }
 
-unsigned int NumCoresInComm(Comm comm)
-{
-  switch(comm)
-    {
-#if DODM
-    case(MRCOMM):
-      return CVAL;
-    case (MCCOMM):
-      return RVAL;
-#elif DOSM||DOSQM
-    case(GLOBALCOMM):
-      return NUMCORESPERL2*NUML2PERL3*NUML3;
-    case(PROCCOMM):
-      return NUML2PERL3*NUMCORESPERL2;
-    case(L2COMM):
-      return NUMCORESPERL2;
-#endif
-    case(CORECOMM):
-      return 1;
-    default:
-      throw;
-    }
-}
-
-unsigned int NumGroupsInComm(Comm comm)
-{
-  switch(comm)
-    {
-#if DOSM||DOSQM
-    case(GLOBALCOMM):
-      return NUML3;
-    case(PROCCOMM):
-      return NUML2PERL3;
-    case(L2COMM):
-      return NUMCORESPERL2;
-#endif
-      case(CORECOMM):
-        return 1;
-    default:
-      throw;
-    }
-}
-
 
 // Partial ordering of comm's
 // Used to make sure nested parallelization
@@ -100,8 +57,10 @@ bool CommAllowedWithin(Comm comm1, Comm comm2)
 #if DOSM
   switch(comm1)
     {
+#if NUMPROCS>1
     case(GLOBALCOMM):
       return comm2 == PROCCOMM || comm2==L2COMM || comm2==CORECOMM;
+#endif //NUMPROCS>1
 
     case(PROCCOMM):
       return comm2==L2COMM || comm2==CORECOMM;

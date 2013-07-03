@@ -31,7 +31,9 @@ enum Comm {
   MRCOMM,
   MCCOMM,
 #elif DOSM||DOSQM
+#if NUMPROCS>1
   GLOBALCOMM,  //Communicate between all cores in system, PROCCOM is subgroup
+#endif //NUMPROCS>1
   PROCCOMM,    //Communicate between all cores on processor (e.g. all cores sharing the L3), L2COMM is subgroup
   L2COMM,      //Communicate between all cores sharing my L2, each core is a subgroup
 #endif
@@ -40,7 +42,53 @@ enum Comm {
 };
 
 string CommToStr(Comm comm);
-unsigned int NumCoresInComm(Comm comm);
-unsigned int NumGroupsInComm(Comm comm);
-
 bool CommAllowedWithin(Comm comm1, Comm comm2);
+
+inline unsigned int NumCoresInComm(Comm comm)
+{
+  switch(comm)
+    {
+#if DODM
+    case(MRCOMM):
+      return CVAL;
+    case (MCCOMM):
+      return RVAL;
+#elif DOSM||DOSQM
+#if NUMPROCS>1
+    case(GLOBALCOMM):
+      return NUMCORESPERL2*NUML2PERPROC*NUMPROCS;
+#endif //NUMPROCS>1
+    case(PROCCOMM):
+      return NUML2PERPROC*NUMCORESPERL2;
+    case(L2COMM):
+      return NUMCORESPERL2;
+#endif
+    case(CORECOMM):
+      return 1;
+    default:
+      throw;
+    }
+}
+
+inline unsigned int NumGroupsInComm(Comm comm)
+{
+  switch(comm)
+    {
+#if DOSM||DOSQM
+#if NUMPROCS>1
+    case(GLOBALCOMM):
+      return NUMPROCS;
+#endif //NUMPROCS>1
+    case(PROCCOMM):
+      return NUML2PERPROC;
+    case(L2COMM):
+      return NUMCORESPERL2;
+#endif
+      case(CORECOMM):
+        return 1;
+    default:
+      throw;
+    }
+}
+
+
