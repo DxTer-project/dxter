@@ -21,22 +21,23 @@ intersections(i) = mat2cell(transpose(intersection),[length(intersection)],[1]);
 end
 
 [means,I] = sort(means);
+I = flip(I);
 means = flip(means);
-intersections = flip(intersections(I));
+intersections = intersections(I);
 
 for i=max(k-ShowBestN,1):k
 disp(['Group ' num2str(i)]);
-disp(['         Contains ' num2str(length(find(ids==i)))]);
-%origNums(find(ids==i)) %original graph numbers in this group
+disp(['         Contains ' num2str(length(find(ids==I(i))))]);
+%origNums(find(ids==I(i))) %original graph numbers in this group
 if (i > 1)
   disp(['Improvement of the following group over previous = ' num2str(1-means(i)/means(i-1))]);
 end
 cellstr(values(transMap,num2cell(cell2mat(intersections(i)))))
 end
 
-maxGroupID = 1:k
-maxGroupID = flip(maxGroupID(I))
-maxGroupID = maxGroupID(k)
+maxGroupID = 1:k;
+maxGroupID = maxGroupID(I);
+maxGroupID = maxGroupID(k);
 lastGroup = find(ids == maxGroupID);
 id=fopen('transformations.txt','w');
 fprintf(id,'printing %d groups of transformations for last group\n',length(lastGroup));
