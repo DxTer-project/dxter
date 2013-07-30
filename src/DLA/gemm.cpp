@@ -228,7 +228,7 @@ void Gemm::Prop()
           throw;
         if (size2->NumSizes() != size3->NumSizes())
           throw;
-        m_cost = GetCost(S3LAYER, size1, size2, size3);
+        m_cost = GetCost(S3LAYER, size1, size2, size3) / NumCoresInComm(m_comm);
     }
   }
 }

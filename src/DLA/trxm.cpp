@@ -1975,7 +1975,7 @@ void TrxmBP::Prop()
 	{
 	  const Sizes *ms = LocalM(0);
 	  const Sizes *ns = LocalN(0);
-	  m_cost = GAMMA * ms->SumProds21(*ns);
+	  m_cost = GAMMA * ms->SumProds21(*ns) / NumCoresInComm(m_comm);
 	  break;
 	}
     default:
