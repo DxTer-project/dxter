@@ -29,27 +29,37 @@
 
 using namespace std;
 
+Axpy::Axpy(Layer layer, Coef coeff) 
+: m_coeff(coeff), m_comm(CORECOMM) 
+{ 
+  SetLayer(layer); 
+}
+
 NodeType Axpy::GetType() const
 {
-  return "Axpy " + LayerNumToStr(GetLayer());
+  return "Axpy " + LayerNumToStr(GetLayer()) + CommToStr(m_comm);
 }
 
 void Axpy::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
-  m_coeff = ((Axpy*)orig)->m_coeff;
+  const Axpy *axpy = (Axpy*)orig;
+  m_coeff = axpy->m_coeff;
+  m_comm = axpy->m_comm;
 }
 
 void Axpy::FlattenCore(ofstream &out) const
 {
   DLAOp<2,1>::FlattenCore(out);
   WRITE(m_coeff);
+  WRITE(m_comm);
 }
 
 void Axpy::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLAOp<2,1>::UnflattenCore(in, info);
   READ(m_coeff);
+  READ(m_comm);
 }
 
 DistType Axpy::GetDistType(unsigned int num) const 
@@ -124,6 +134,8 @@ void Axpy::SanityCheck()
     if (InputDistType(0) != InputDistType(1))
       m_poss->MarkInsane();
   }
+  if (m_comm != CORECOMM)
+    throw;
 #else
 
 #endif
@@ -142,7 +154,12 @@ void Axpy::PrintCode(IndStream &out)
 	 << ");\n";
     break;
   case (S3LAYER):
-    *out << "bli_axpym( ";
+    if (m_comm == CORECOMM) {
+      *out << "bli_axpym( ";
+    }
+    else {
+      *out << "reduce( " << CommToStr(m_comm) << ", ";
+    }
     out << m_coeff;
     *out << ", &"
 	 << GetInputName(0).str() << ","
@@ -162,8 +179,12 @@ void Axpy::Prop()
       m_cost = 0;
     else if (m_layer == SMLAYER)
       m_cost = GetCost(SMLAYER, LocalM(0), LocalN(0));
-    else if (m_layer == S3LAYER)
+    else if (m_layer == S3LAYER) {
       m_cost = GetCost(S3LAYER, LocalM(0), LocalN(0));
+      if (m_comm != CORECOMM) {
+	m_cost /= NumCoresInComm(m_comm);
+      }
+    }
     else if (m_layer == ABSLAYER)
       m_cost = ZERO;
     else {
@@ -225,6 +246,36 @@ bool CheckInput(const Node *node, unsigned int inNum, DistType type, bool skipFi
   }
   return false;
 }
+
+string ParallelizeAxpy::GetType() const
+{
+  return "parallelize axpy " + LayerNumToStr(m_layer)
+    + " comm " + CommToStr(m_comm);
+}
+
+bool ParallelizeAxpy::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != Axpy::GetClass())
+    throw;
+  const Axpy *axpy = (Axpy*)node;
+  if (axpy->GetLayer() != m_layer)
+    return false;
+  cout << "Axpy comm = " << CommToStr(axpy->m_comm) << endl;
+  if (axpy->m_comm != CORECOMM)
+    return false;
+  if (!LegalParallelizationNestingUp(axpy, m_comm)) {
+    return false;
+  }
+  return true;
+}
+
+void ParallelizeAxpy::Apply(Poss *poss, Node *node) const
+{
+  Axpy *axpy = (Axpy*)node;
+  axpy->SetComm(m_comm);
+}
+
+
 
 #if DODPPHASE
 bool DistAxpyToLocalAxpy::WorthApplying(const Node *node) const

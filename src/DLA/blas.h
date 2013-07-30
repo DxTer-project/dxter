@@ -35,7 +35,8 @@ class Axpy : public DLAOp<2,1>
 {
  public:
   Coef m_coeff;
- Axpy(Layer layer, Coef coeff) : m_coeff(coeff) { SetLayer(layer); }
+  Comm m_comm;
+  Axpy(Layer layer, Coef coeff);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
@@ -52,6 +53,7 @@ class Axpy : public DLAOp<2,1>
   virtual bool ShouldCullDP() const;
   virtual bool DoNotCullDP() const;
   static Cost GetCost(Layer layer, const Sizes *localMs, const Sizes *localNs);
+  void SetComm(Comm comm) {m_comm = comm;}
 };
 
 class AxpyLowerLayer : public SingleTrans
@@ -60,6 +62,18 @@ class AxpyLowerLayer : public SingleTrans
   Layer m_fromLayer, m_toLayer;
  AxpyLowerLayer(Layer fromLayer, Layer toLayer)
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};
+
+class ParallelizeAxpy : public SingleTrans
+{
+ public:
+  Layer m_layer;
+  Comm m_comm;
+ ParallelizeAxpy(Layer layer, Comm comm)
+   : m_layer(layer), m_comm(comm) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;

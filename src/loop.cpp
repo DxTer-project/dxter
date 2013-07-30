@@ -875,7 +875,7 @@ void Loop::Parallelize(Comm comm)
     NodeVecIter iter = m_inTuns.begin();
     for(; iter != m_inTuns.end(); ++iter) {
       LoopTunnel *tun = (LoopTunnel*)(*iter);
-      if (!tun->IndepIters()) {
+      if (!tun->IndepIters() && !tun->InputIsTemp()) {
         if (found)
           throw;
         found = true;
@@ -979,7 +979,7 @@ bool Loop::OnlyParallelizedOnNonIndependentData() const
   for(; iter != m_inTuns.end(); ++iter) {
     //If this code changes, reflect in Parallelize
     const LoopTunnel *tun = (LoopTunnel*)(*iter);
-    if (!tun->IndepIters()) {
+    if (!tun->IndepIters() && !tun->InputIsTemp()) {
       unsigned int numOut = tun->NumOutputs();
       if (tun->GetNodeClass() == Split::GetClass())
         --numOut;

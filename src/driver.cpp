@@ -257,9 +257,9 @@ void AddTrans()
 #endif
 #endif //DOSR1PHASE
 #if DOSR2PHASE
+  Universe::AddTrans(Gemm::GetClass(), new SplitGemm(S1LAYER), SR2PHASE);
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(S1LAYER, S2LAYER, 1), SR2PHASE);
   Universe::AddTrans(Gemm::GetClass(), new GemmLoopExp(S1LAYER, S2LAYER, -1), SR2PHASE);
-  Universe::AddTrans(Gemm::GetClass(), new SplitGemm(S2LAYER), SR2PHASE);
 #if USELOWERING
   Universe::AddTrans(Gemm::GetClass(), new GemmLowerLayer(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
 #endif
@@ -533,6 +533,28 @@ void AddTrans()
 #if DOSR1PHASE
   Universe::AddTrans(LU::GetClass(), new LULoopExp(ABSLAYER, ABSLAYER, S3LAYER, 5), SR1PHASE);
 #endif //DOSR1PHASE
+
+#if DOSMPPHASE
+#if NUMPROCS>1
+  //    Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeOuterNDim(ALLPROCCOMM), SMPPHASE);
+#endif //NUMPROCS>1
+
+#if NUMPROCS>1
+    Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeK(ALLPROCCOMM), SMPPHASE);
+    Universe::AddTrans(Axpy::GetClass(), new ParallelizeAxpy(S3LAYER, ALLPROCCOMM), SMPPHASE);
+#endif //NUMPROCS>1
+
+#if NUML2PERPROC>1
+    //    Universe::AddTrans(PackBuff::GetClass(), new ParallelizeMDim(PROCCOMM), SMPPHASE);
+#endif //NUML2PERPROC>1
+
+#if NUMCORESPERL2>1
+    Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMM), SMPPHASE);
+#endif //NUMCORESPERL2>1
+
+#endif
+
+
 }
 
 void AddSimplifiers()
@@ -629,25 +651,6 @@ void AddSimplifiers()
 #if DOSOPHASE
   Universe::AddTrans(PackBuff::GetClass(), new RenamePackBuff, SIMP);
 #endif //DOSOPHASE
-
-#if DOSMPPHASE
-#if NUMPROCS>1
-    Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeOuterNDim(ALLPROCCOMM), SMPPHASE);
-#endif //NUMPROCS>1
-
-#if NUMPROCS>1
-    Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeK(ALLPROCCOMM), SMPPHASE);
-#endif //NUMPROCS>1
-
-#if NUML2PERPROC>1
-    Universe::AddTrans(PackBuff::GetClass(), new ParallelizeMDim(PROCCOMM), SMPPHASE);
-#endif //NUML2PERPROC>1
-
-#if NUMCORESPERL2>1
-    Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMM), SMPPHASE);
-#endif //NUMCORESPERL2>1
-
-#endif
 
 }
 

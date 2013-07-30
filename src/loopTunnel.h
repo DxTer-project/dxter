@@ -49,6 +49,7 @@ class LoopTunnel : public PossTunnel
   virtual DistType GetDistType(unsigned int num) const { return InputDistType(0); }
   inline void SetIndepIters() {m_indepIters = true;}
   inline bool IndepIters() const {return m_indepIters;}
+  bool InputIsTemp() const;
 
   virtual unsigned int NumOutputs() const;
   static Node* BlankInst() { return new LoopTunnel(LASTTUNNEL);}

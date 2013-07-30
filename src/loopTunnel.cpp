@@ -24,6 +24,7 @@
 #include "loopTunnel.h"
 #include "distributions.h"
 #include <cmath>
+#include "helperNodes.h"
 
 
 LoopTunnel::LoopTunnel(PossTunType type)
@@ -429,6 +430,26 @@ LoopTunnel* LoopTunnel::GetMatchingInTun() const
 bool LoopTunnel::IsConst() const
 {
   return AllFullyUpdated();
+}
+
+bool LoopTunnel::InputIsTemp() const
+{
+  if (m_tunType == POSSTUNIN) {
+    return ((LoopTunnel*)(Input(0)))->InputIsTemp();
+  }
+  else if (m_tunType == SETTUNIN) {
+    const ClassType type = Input(0)->GetNodeClass();
+    if (type == TempVarNode::GetClass())
+      return true;
+    else if (type == ScaleNode::GetClass()) {
+      const ScaleNode *scale = (ScaleNode*)Input(0);
+      return scale->Input(0)->GetNodeClass() == TempVarNode::GetClass();
+    }
+    else
+      return false;
+  }
+  else
+    throw;
 }
 
 LoopType LoopTunnel::GetLoopType() const
