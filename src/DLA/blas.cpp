@@ -260,7 +260,6 @@ bool ParallelizeAxpy::CanApply(const Poss *poss, const Node *node) const
   const Axpy *axpy = (Axpy*)node;
   if (axpy->GetLayer() != m_layer)
     return false;
-  cout << "Axpy comm = " << CommToStr(axpy->m_comm) << endl;
   if (axpy->m_comm != CORECOMM)
     return false;
   if (!LegalParallelizationNestingUp(axpy, m_comm)) {
