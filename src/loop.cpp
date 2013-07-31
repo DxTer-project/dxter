@@ -869,6 +869,8 @@ void Loop::Parallelize(Comm comm)
   if (RemoveParallelization(comm))
     throw;
   m_comm = comm;
+  if (m_ownerPoss)
+    m_ownerPoss->m_hasChecked = false;
   if (!HasIndepIters()) {
     bool found = false;
     //If this code changes, reflace in OnlyParallelizedOnNonIndependentData
@@ -893,6 +895,7 @@ void Loop::Parallelize(Comm comm)
           if (!nodeSet.size())
             throw;
           poss->FillClique(nodeSet);
+	  poss->m_hasChecked = false;
           CritSect *crit = (CritSect*)(poss->FormSetForClique(nodeSet, true));
           if (crit->RemoveParallelization(CORECOMM)) {
             //This critical section is around some hierarchy of PSets

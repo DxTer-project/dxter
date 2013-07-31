@@ -35,6 +35,7 @@ class CritSect : public PSet
   virtual bool IsTransparent() const {return false;}
   virtual bool CanMerge(PSet *pset) const {return false;}
   virtual void SanityCheck();
+  virtual void BuildSizeCache();
 };
 
 class CritSectTunnel : public PossTunnel
@@ -43,6 +44,7 @@ class CritSectTunnel : public PossTunnel
   Sizes *m_msizes, *m_nsizes;
   Sizes *m_mlsizes, *m_nlsizes;
   CritSectTunnel();
+ CritSectTunnel(PossTunType type) : PossTunnel(type) {}
   ~CritSectTunnel();
   static Node* BlankInst() { return new CritSectTunnel;}
   virtual Node* GetNewInst() {return BlankInst(); }
@@ -57,4 +59,5 @@ class CritSectTunnel : public PossTunnel
   virtual const Sizes* LocalN(unsigned int num) const;
   virtual void BuildSizeCache();
   virtual void ClearSizeCache();
+  //  virtual PossTunnel* GetSetTunnel();
 };

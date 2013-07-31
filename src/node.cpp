@@ -829,7 +829,9 @@ void Node::BuildSizeCacheRecursive()
     for(; iter != m_inputs.end(); ++iter) {
       Node *node = (*iter)->m_n;
       if (node->m_poss == m_poss)
-        node->BuildSizeCacheRecursive();
+	{
+	  node->BuildSizeCacheRecursive();
+	}
     }
     m_flags |= BUILDFLAG;
     BuildSizeCache();

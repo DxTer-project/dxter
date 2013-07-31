@@ -1520,7 +1520,6 @@ bool PSet::RemoveParallelization(Comm comm)
       for(; !found && nodeIter != poss->m_possNodes.end(); ++nodeIter) {
         if ((*nodeIter)->IsParallel()) {
           Comm parComm = (*nodeIter)->ParallelComm();
-	    //          if ((comm == CORECOMM) || (parComm == comm) || CommGroupGreaterThan(parComm, comm)) {
 	  if (comm==CORECOMM || !CommAllowedWithin(comm, parComm)) {
             found = true;
           }

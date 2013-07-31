@@ -1475,7 +1475,11 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
       for(int i = 0; i < (int)(node->m_children.size()); ++i) {
         if (set.find(node->Child(i)) == set.end()) {
           unsigned int connNum = node->ChildConnNum(i);
-          PossTunnel *tun = new PossTunnel(POSSTUNOUT);
+          PossTunnel *tun;
+	  if (isCritSect)
+	    tun = new CritSectTunnel(POSSTUNOUT);
+	  else
+	    tun = new PossTunnel(POSSTUNOUT);
           outputTuns.push_back(tun);
           set.insert(tun);
           for(int j = i; j < (int)(node->m_children.size()); ++j) {
@@ -1495,7 +1499,10 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
         unsigned int connNum = node->InputConnNum(i);
         PossTunnel *tun = NULL;
         if (set.find(input) == set.end()) {
-          tun = new PossTunnel(POSSTUNIN);
+	  if (isCritSect)
+	    tun = new CritSectTunnel(POSSTUNIN);
+	  else
+	    tun = new PossTunnel(POSSTUNIN);
           //          cout << "creating input for child " << node->GetNodeClass() << endl;
           set.insert(tun);
           node->ChangeInput2Way(input, connNum, tun, 0);
@@ -2780,9 +2787,13 @@ void Poss::UnflattenStatic(ifstream &in)
   }
 }
 
-
 void Poss::BuildSizeCache()
 {
+  PSetVecIter setIter = m_sets.begin();
+  for(; setIter != m_sets.end(); ++setIter) {
+    if ((*setIter)->IsCritSect())
+      (*setIter)->BuildSizeCache();
+  }
   NodeVecIter iter1 = m_possNodes.begin();
   for(; iter1 != m_possNodes.end(); ++iter1) {
     Node *node = *iter1;
@@ -2793,9 +2804,11 @@ void Poss::BuildSizeCache()
     Node *node = *iter1;
     node->BuildSizeCacheRecursive();
   }
-  PSetVecIter iter2 = m_sets.begin();
-  for(; iter2 != m_sets.end(); ++iter2)
-    (*iter2)->BuildSizeCache();
+  setIter = m_sets.begin();
+  for(; setIter != m_sets.end(); ++setIter) {
+    if (!(*setIter)->IsCritSect())
+      (*setIter)->BuildSizeCache();
+  }
 }
 
 void Poss::ClearSizeCache()

@@ -69,8 +69,18 @@ bool HasParallelCode(Poss *poss)
   return false;
 }
 
+void CritSect::BuildSizeCache()
+{
+  NodeVecIter iter = m_inTuns.begin();
+  for(; iter != m_inTuns.end(); ++iter) {  
+    (*iter)->BuildSizeCacheRecursive();
+  }
+  PSet::BuildSizeCache();
+}
+
 void CritSect::SanityCheck()
 {
+  //  throw;
   PSet::SanityCheck();
   if (!m_ownerPoss->m_pset->IsLoop())
     throw;
@@ -81,6 +91,20 @@ void CritSect::SanityCheck()
       poss->ForcePrint();
       throw;
     }
+  }
+  NodeVecIter iter2 = m_inTuns.begin();
+  for(; iter2 != m_inTuns.end(); ++iter2) {
+    if ((*iter2)->GetNodeClass() != 
+        CritSectTunnel::GetClass()) {
+      cout << (*iter2)->GetNodeClass() << endl;
+      throw;
+    }
+  }
+  iter2 = m_outTuns.begin();
+  for(; iter2 != m_outTuns.end(); ++iter2) {
+    if ((*iter2)->GetNodeClass() != 
+	CritSectTunnel::GetClass())
+      throw;
   }
 }
 
