@@ -164,6 +164,10 @@ Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
 void Loop::SanityCheck()
 {
   PSet::SanityCheck();
+
+  if (m_type == ELEMLOOP && m_comm != CORECOMM)
+    throw;
+
   bool foundControl = false;
   NodeVecIter iter = m_inTuns.begin();
   //  cout << "****\n";
@@ -903,6 +907,9 @@ void Loop::Parallelize(Comm comm)
             // rid of all code
             RemoveAndDeletePoss(poss, true);
             --i;
+          }
+          if (HasParallelCode(crit->m_posses[0])) {
+            throw;
           }
         }
       }

@@ -408,6 +408,14 @@ bool TriRK::IsParallel() const
 }
 
 
+bool TriRK::RemoveParallelization()
+{
+  m_comm = CORECOMM;
+  return false;
+}
+
+
+
 void TriRK::Parallelize(Comm comm)
 {
   if (GetLayer() == S3LAYER)

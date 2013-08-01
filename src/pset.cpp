@@ -249,6 +249,10 @@ bool PSet::operator==(const PSet &rhs) const
         }
       }
     }
+    else if (IsCritSect()) {
+      if (!rhs.IsCritSect())
+	return false;
+    }
     if (m_posses[0]->GetHash() != rhs.m_posses[0]->GetHash())
       return false;
     //BAM Really, instead of doing all of this comparison,
@@ -1520,8 +1524,9 @@ bool PSet::RemoveParallelization(Comm comm)
       for(; !found && nodeIter != poss->m_possNodes.end(); ++nodeIter) {
         if ((*nodeIter)->IsParallel()) {
           Comm parComm = (*nodeIter)->ParallelComm();
-	  if (comm==CORECOMM || !CommAllowedWithin(comm, parComm)) {
-            found = true;
+          if ((comm == CORECOMM) || !CommAllowedWithin(comm, parComm)) {
+            if ((*nodeIter)->RemoveParallelization())
+              found = true;
           }
         }
       }

@@ -79,6 +79,7 @@ class Gemm : public DLAOp<3,1>
   virtual bool IsBLISParallelizable() const;
   virtual void Parallelize(Comm comm);
   virtual bool IsParallel() const;
+  virtual bool RemoveParallelization();
   virtual Comm ParallelComm() const {return m_comm;}
 };
 

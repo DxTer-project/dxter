@@ -669,6 +669,8 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
       throw;
     }
     const Pack *pack = (Pack*)buff->Child(0);
+    if (pack->InCriticalSection())
+      return false;
     if (!pack->m_children.size())
       throw;
     if (!LegalParallelizationNestingUp(pack, m_comm))
@@ -679,7 +681,7 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
       if (!child->IsDLA())
         throw;
       const DLANode *dla = (DLANode*)child;
-      if (dla->IsBLISParallelizable()) {
+      if (dla->IsBLISParallelizable() && !dla->IsParallel()) {
         return true;
       }
     }

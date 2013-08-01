@@ -61,6 +61,12 @@ bool Gemm::IsParallel() const
   return m_comm != CORECOMM;
 }
 
+bool Gemm::RemoveParallelization()
+{
+  m_comm = CORECOMM;
+  return false;
+}
+
 void Gemm::Parallelize(Comm comm)
 {
   if (GetLayer() == S3LAYER)

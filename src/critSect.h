@@ -24,6 +24,8 @@
 
 #include "pset.h"
 
+bool HasParallelCode(Poss *poss);
+
 class CritSect : public PSet
 {
  public:
@@ -44,7 +46,7 @@ class CritSectTunnel : public PossTunnel
   Sizes *m_msizes, *m_nsizes;
   Sizes *m_mlsizes, *m_nlsizes;
   CritSectTunnel();
- CritSectTunnel(PossTunType type) : PossTunnel(type) {}
+  CritSectTunnel(PossTunType type);
   ~CritSectTunnel();
   static Node* BlankInst() { return new CritSectTunnel;}
   virtual Node* GetNewInst() {return BlankInst(); }

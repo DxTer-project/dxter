@@ -1913,6 +1913,12 @@ bool TrxmBP::IsParallel() const
   return m_comm != CORECOMM;
 }
 
+bool TrxmBP::RemoveParallelization()
+{
+  m_comm = CORECOMM;
+  return false;
+}
+
 void TrxmBP::Parallelize(Comm comm)
 {
   if (GetLayer() == S3LAYER)

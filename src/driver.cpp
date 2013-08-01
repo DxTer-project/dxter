@@ -540,8 +540,8 @@ void AddTrans()
 #endif //NUMPROCS>1
 
 #if NUMPROCS>1
-    Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeK(ALLPROCCOMM), SMPPHASE);
-    Universe::AddTrans(Axpy::GetClass(), new ParallelizeAxpy(S3LAYER, ALLPROCCOMM), SMPPHASE);
+  Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeK(ALLPROCCOMM), SMPPHASE);
+  Universe::AddTrans(Axpy::GetClass(), new ParallelizeAxpy(S3LAYER, ALLPROCCOMM), SMPPHASE);
 #endif //NUMPROCS>1
 
 #if NUML2PERPROC>1
@@ -549,7 +549,7 @@ void AddTrans()
 #endif //NUML2PERPROC>1
 
 #if NUMCORESPERL2>1
-    Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMM), SMPPHASE);
+  Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMM), SMPPHASE);
 #endif //NUMCORESPERL2>1
 
 #endif

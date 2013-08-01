@@ -843,8 +843,9 @@ bool Node::InCriticalSection() const
   Poss *poss = m_poss;
   while (poss && poss->m_pset) {
     PSet *set = poss->m_pset;
-    if (set->IsCritSect())
+    if (set->IsCritSect()) {
       return true;
+    }
     poss = set->m_ownerPoss;
   }
   return false;

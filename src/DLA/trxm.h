@@ -102,6 +102,7 @@ class TrxmBP : public DLAOp<3,2>, public TrProps
   virtual Comm ParallelComm() const {return m_comm;}
   virtual void Parallelize(Comm comm);
   virtual bool IsParallel() const;
+  virtual bool RemoveParallelization();
 };
 
 class TrxmLoopExp : public SingleTrans

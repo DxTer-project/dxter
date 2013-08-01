@@ -72,7 +72,7 @@ bool HasParallelCode(Poss *poss)
 void CritSect::BuildSizeCache()
 {
   NodeVecIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {  
+  for(; iter != m_inTuns.end(); ++iter) {
     (*iter)->BuildSizeCacheRecursive();
   }
   PSet::BuildSizeCache();
@@ -88,13 +88,19 @@ void CritSect::SanityCheck()
   for( ; iter != m_posses.end(); ++iter) {
     Poss *poss = *iter;
     if (HasParallelCode(poss)) {
+      PSet *set = m_ownerPoss->m_pset;
+      if (set->IsLoop()) {
+        Loop *loop = (Loop*)set;
+        cout << "parallelism: " << CommToStr(loop->m_comm);
+      }
+      cout.flush();
       poss->ForcePrint();
       throw;
     }
   }
   NodeVecIter iter2 = m_inTuns.begin();
   for(; iter2 != m_inTuns.end(); ++iter2) {
-    if ((*iter2)->GetNodeClass() != 
+    if ((*iter2)->GetNodeClass() !=
         CritSectTunnel::GetClass()) {
       cout << (*iter2)->GetNodeClass() << endl;
       throw;
@@ -102,13 +108,22 @@ void CritSect::SanityCheck()
   }
   iter2 = m_outTuns.begin();
   for(; iter2 != m_outTuns.end(); ++iter2) {
-    if ((*iter2)->GetNodeClass() != 
-	CritSectTunnel::GetClass())
+    if ((*iter2)->GetNodeClass() !=
+        CritSectTunnel::GetClass())
       throw;
   }
 }
 
 CritSectTunnel::CritSectTunnel()
+{
+  m_msizes = NULL;
+  m_nsizes = NULL;
+  m_mlsizes = NULL;
+  m_nlsizes = NULL;
+}
+
+CritSectTunnel::CritSectTunnel(PossTunType type) 
+ : PossTunnel(type) 
 {
   m_msizes = NULL;
   m_nsizes = NULL;
