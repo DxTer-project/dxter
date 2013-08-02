@@ -536,16 +536,16 @@ void AddTrans()
 
 #if DOSMPPHASE
 #if NUMPROCS>1
-  //    Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeOuterNDim(ALLPROCCOMM), SMPPHASE);
+  Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeOuterNDim(ALLPROCCOMM), SMPPHASE);
 #endif //NUMPROCS>1
 
 #if NUMPROCS>1
-  Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeK(ALLPROCCOMM), SMPPHASE);
-  Universe::AddTrans(Axpy::GetClass(), new ParallelizeAxpy(S3LAYER, ALLPROCCOMM), SMPPHASE);
+  //  Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeK(ALLPROCCOMM), SMPPHASE);
+  //  Universe::AddTrans(Axpy::GetClass(), new ParallelizeAxpy(S3LAYER, ALLPROCCOMM), SMPPHASE);
 #endif //NUMPROCS>1
 
 #if NUML2PERPROC>1
-    //    Universe::AddTrans(PackBuff::GetClass(), new ParallelizeMDim(PROCCOMM), SMPPHASE);
+  Universe::AddTrans(PackBuff::GetClass(), new ParallelizeMDim(PROCCOMM), SMPPHASE);
 #endif //NUML2PERPROC>1
 
 #if NUMCORESPERL2>1

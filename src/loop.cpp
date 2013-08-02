@@ -503,7 +503,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   }
   if (m_type == BLISLOOP) {
     if (m_comm != CORECOMM)
-      *out << "***Parallelized with communicator " << CommToStr(m_comm) << "; need correct output code\n";
+      *out << "//// ***Parallelized with communicator " << CommToStr(m_comm) << "; need correct output code\n";
     string idx = "idx" + loopLevel;
     string dimLen = "dimLen" + loopLevel;
     string bs = "bs" + loopLevel;
@@ -533,8 +533,19 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
         throw;
     }
     out.Indent();
-    *out << "for ( " << idx << " = 0; " << idx << " < " << dimLen << "; "
-    << idx << " += " << bs <<" ) {\n";
+    if (m_comm != CORECOMM) {
+      *out << "idx = 0;\n";
+      out.Indent();
+      *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", " 
+	   << CommToStr(m_comm) << ");\n";
+      out.Indent();
+      *out << "for ( ; " << idx << " < " << dimLen << "; "
+	   << idx << " += " << bs <<" ) {\n";
+    }
+    else {
+      *out << "for ( " << idx << " = 0; " << idx << " < " << dimLen << "; "
+	   << idx << " += " << bs <<" ) {\n";
+    }
     out.Indent(1);
     *out << bs;
     switch(split->m_dir) {

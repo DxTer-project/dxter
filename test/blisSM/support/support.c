@@ -38,14 +38,15 @@ void th_setup_communicator( thread_comm_t *comm, dim_t num_threads)
     comm->barrier_threads_arrived = 0;
 }
 
-void* th_broadcast_structure( thread_comm_t *comm, void *to_send )
+void   th_broadcast( thread_comm_t *comm, Rank root, void *to_sendRecv, unsigned int size );
 {   
     if( comm == NULL ) return to_send;
-
-    if( th_am_root( comm ) )
-        comm->sent_object = to_send;
+    bool_t isRoot = th_thread_id( comm ) == root;
+    if( isRoot )
+        comm->sent_object = to_sendRecv;
     th_barrier( comm );
-    void  *object = comm->sent_object;
+    if (!isRoot)
+      memcpy( to_sendRecv, comm->sent_object, size );
     th_barrier( comm );
     return object;
 }
@@ -92,10 +93,10 @@ void th_barrier( thread_comm_t *comm )
 
 void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm)
 {
-  rank_t rank = th_thread_id( comm );
+  rank_t rank = th_group_id( comm );
   dim_t len = *end - *start;
-  dim_t n_pt = len / comm->num_threads;
-  n_pt = (n_pt * comm->num_threads < len) ? n_pt + 1 : n_pt;
+  dim_t n_pt = len / comm->num_groups;
+  n_pt = (n_pt * comm->num_groups < len) ? n_pt + 1 : n_pt;
   n_pt = (n_pt % 4 == 0) ? n_pt : n_pt + 4 - (n_pt % 4);
   *start = *start + rank * n_pt;
   *end   = bli_min( *start + n_pt, *start + len );

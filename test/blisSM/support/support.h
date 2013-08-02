@@ -13,7 +13,7 @@ typedef struct
 {
   void*   sent_object;
   thread_count_t num_threads;
-  thread_count_t num_groups_below;
+  thread_count_t num_groups;
   
   bool_t  barrier_sense;
   lock_t  barrier_lock;
@@ -22,7 +22,7 @@ typedef struct
 
 void    th_setup_comm( thread_comm_t *comm, 
 				thread_count_t groups_this_level, thread_count_t groups_below );
-void*   th_broadcast_structure( thread_comm_t *comm, void *to_send );
+void   th_broadcast( thread_comm_t *comm, Rank root, void *to_sendRecv, unsigned int size );
 void    th_barrier( thread_comm_t *comm );
 void    th_set_lock( lock_t *lock );
 void    th_unset_lock( lock_t *lock );

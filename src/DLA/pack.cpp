@@ -273,7 +273,7 @@ void PackBuff::PrintCode(IndStream &out)
   unsigned int indentOffset = 0;
   if (m_comm != CORECOMM) {
     out.Indent();
-    *out << "if (m_rankAtCurrLevel == 0) {\n";
+    *out << "if (th_am_root(" << CommToStr(m_comm) << ")) {\n";
     indentOffset = 1;
   }
   
@@ -320,7 +320,8 @@ void PackBuff::PrintCode(IndStream &out)
     out.Indent();
     *out << "}\n";
     out.Indent();
-    *out << "Broadcast(" << CommToStr(m_comm)<< ", 0, (void*)(&" << name << "), sizeof(" << name << ");\n";
+    *out << "Broadcast(" << CommToStr(m_comm)
+	 << ", 0, (void*)(&" << name << "), sizeof(" << name << ");\n";
   }
 }
 
