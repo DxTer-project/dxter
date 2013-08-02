@@ -1,5 +1,6 @@
 #include "support.h"
 #include "math.h"
+#include "string.h"
 
 rank_t th_group_id( thread_comm_t *comm )
 {
@@ -33,22 +34,22 @@ void    th_setup_comm( thread_comm_t *comm,
 {
     if( comm == NULL ) return;
     comm->sent_object = NULL;
-    comm->num_thread_in_group = threads_in_group;
-    comm->num_groups_below = groups_below
+    comm->num_threads_in_group = threads_in_group;
+    comm->num_groups_below = groups_below;
     comm->barrier_sense = 0;
     th_init_lock( &comm->barrier_lock );
     comm->barrier_threads_arrived = 0;
 }
 
-void   th_broadcast( thread_comm_t *comm, Rank root, void *to_sendRecv, unsigned int size )
+void   th_broadcast( thread_comm_t *comm, rank_t root, void *to_sendRecv, unsigned int size )
 {
-  th_broadcast_without_second_barrier(comm, roo, to_sendRecv, size);
+  th_broadcast_without_second_barrier(comm, root, to_sendRecv, size);
   th_barrier( comm );
 }
 
-void th_broadcast_without_second_barrier( thread_comm_t *comm, Rank root, void *to_sendRecv, unsigned int size )
+void th_broadcast_without_second_barrier( thread_comm_t *comm, rank_t root, void *to_sendRecv, unsigned int size )
 {   
-    if( comm == NULL ) return to_send;
+  if( comm == NULL ) return;
     bool_t isRoot = th_thread_id( comm ) == root;
     if( isRoot )
         comm->sent_object = to_sendRecv;
