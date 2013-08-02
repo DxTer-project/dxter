@@ -98,5 +98,5 @@ void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm)
   n_pt = (n_pt * comm->num_threads < len) ? n_pt + 1 : n_pt;
   n_pt = (n_pt % 4 == 0) ? n_pt : n_pt + 4 - (n_pt % 4);
   *start = *start + rank * n_pt;
-  *end   = bli_min( *start + n_pt, start + len );
+  *end   = bli_min( *start + n_pt, *start + len );
 }

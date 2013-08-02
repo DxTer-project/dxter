@@ -2,7 +2,7 @@
 
 #include <unistd.h>
 #include "blis.h"
-#include <pthread.h>
+#include <omp.h>
 
 typedef unsigned int rank_t;
 typedef unsigned int thread_count_t;
