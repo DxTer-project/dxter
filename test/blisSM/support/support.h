@@ -12,8 +12,8 @@ typedef omp_lock_t lock_t;
 typedef struct
 {
   void*   sent_object;
-  thread_count_t num_threads;
-  thread_count_t num_groups;
+  thread_count_t num_threads_in_group;
+  thread_count_t num_groups_below;
   
   bool_t  barrier_sense;
   lock_t  barrier_lock;
@@ -21,8 +21,10 @@ typedef struct
 } thread_comm_t;
 
 void    th_setup_comm( thread_comm_t *comm, 
-				thread_count_t groups_this_level, thread_count_t groups_below );
-void   th_broadcast( thread_comm_t *comm, Rank root, void *to_sendRecv, unsigned int size );
+				thread_count_t threads_in_group, thread_count_t groups_below );
+void    th_broadcast( thread_comm_t *comm, Rank root, void *to_sendRecv, unsigned int size );
+void    th_broadcast_without_second_barrier( thread_comm_t *comm, Rank root, 
+					     void *to_sendRecv, unsigned int size );
 void    th_barrier( thread_comm_t *comm );
 void    th_set_lock( lock_t *lock );
 void    th_unset_lock( lock_t *lock );

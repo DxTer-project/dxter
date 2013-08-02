@@ -273,6 +273,8 @@ void PackBuff::PrintCode(IndStream &out)
   unsigned int indentOffset = 0;
   if (m_comm != CORECOMM) {
     out.Indent();
+    *out << "bli_barrier( " << CommToStr(m_comm) << " );\n";
+    out.Indent();
     *out << "if (th_am_root(" << CommToStr(m_comm) << ")) {\n";
     indentOffset = 1;
   }
@@ -320,7 +322,7 @@ void PackBuff::PrintCode(IndStream &out)
     out.Indent();
     *out << "}\n";
     out.Indent();
-    *out << "Broadcast(" << CommToStr(m_comm)
+    *out << "th_broadcast_without_second_barrier(" << CommToStr(m_comm)
 	 << ", 0, (void*)(&" << name << "), sizeof(" << name << ");\n";
   }
 }

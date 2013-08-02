@@ -534,7 +534,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     }
     out.Indent();
     if (m_comm != CORECOMM) {
-      *out << "idx = 0;\n";
+      *out << idx << " = 0;\n";
       out.Indent();
       *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", " 
 	   << CommToStr(m_comm) << ");\n";
