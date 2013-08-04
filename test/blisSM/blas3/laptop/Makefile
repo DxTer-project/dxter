@@ -185,7 +185,10 @@ blis: test_gemm.x \
 support.o: ../../support/support.c ../../support/support.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c ../../support/support.h
+bli_packm_blk_var2_par.o: ../../support/bli_packm_blk_var2_par.c ../../support/bli_packm_blk_var2_par.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c ../../support/support.h ../../support/bli_packm_blk_var2_par.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test_%.o: ../test_%.c
@@ -193,8 +196,8 @@ test_%.o: ../test_%.c
 
 # -- Executable file rules --
 
-test_%.x: test_%.o support.o $(BLIS_LIB)
-	$(LINKER) $<    support.o         $(BLIS_LIB)             $(LDFLAGS) -o $@
+test_%.x: test_%.o support.o bli_packm_blk_var2_par.o $(BLIS_LIB)
+	$(LINKER) $<    support.o bli_packm_blk_var2_par.o        $(BLIS_LIB)             $(LDFLAGS) -o $@
 
 
 # -- Clean rules --

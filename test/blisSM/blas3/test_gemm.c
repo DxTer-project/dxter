@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include "blis.h"
 #include "support.h"
+#include "bli_packm_blk_var2_par.h"
 
 extern blksz_t *gemm_mc;
 extern blksz_t *gemm_kc;
@@ -94,7 +95,7 @@ void DxT_GemmNN( obj_t *alpha,
 			     &B_1_1, &packed_B_pan );
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var2_par( ProcComm, &BLIS_ONE, &B_1_1, &packed_B_pan );
+      bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_B_pan, ProcComm );
       //// ***Parallelized with communicator ProcComm; need correct output code
       dimLen3 = bli_obj_length_after_trans( C_1 );
       idx3 = 0;
@@ -118,7 +119,7 @@ void DxT_GemmNN( obj_t *alpha,
 			       &A_1_1, &packed_A_blk );
 	}
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( L2Comm, &BLIS_ONE, &A_1_1, &packed_A_blk );
+	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_A_blk, L2Comm );
 	bli_gemm_ker_var2_par( L2Comm, &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL );
 

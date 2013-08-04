@@ -158,11 +158,15 @@ void Pack::PrintCode(IndStream &out)
     *out << "( ";
   }
   else {
-    *out << "_par( " << CommToStr(m_comm) << ", ";
+    *out << "_par( ";
   }
   *out << "&BLIS_ONE, &"
        << GetInputName(0).str() << ", &"
-       << GetInputName(1).str() << " );\n";
+       << GetInputName(1).str();
+  if (m_comm != CORECOMM) {
+    *out << ", " << CommToStr(m_comm);
+  }
+  *out << " );\n";
 }
 
 Name Pack::GetName(unsigned int num) const
