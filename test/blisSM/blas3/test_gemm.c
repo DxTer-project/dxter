@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include "blis.h"
+#include "support.h"
 
 extern blksz_t *gemm_mc;
 extern blksz_t *gemm_kc;
@@ -11,43 +12,80 @@ extern blksz_t *gemm_extmr;
 extern blksz_t *gemm_extkr;
 extern blksz_t *gemm_extnr;
 
+#define NUMTHREADSPERL2 2
+#define NUML2PERPROC 3
+#define NUMPROCS 4
+
+#define NUML2 NUMPROCS*NUML2PERPROC
+#define NUMTHREADS NUML2*NUMTHREADSPERL2
+#define NUMTHREADSPERPROC NUML2PERPROC*NUMTHREADSPERL2
+
+thread_comm_t global_comm[1];
+thread_comm_t proc_comms[NUMPROCS];
+thread_comm_t l2_comms[NUML2];
+
+
 void DxT_GemmNN( obj_t *alpha,
 	  obj_t *A,
 	  obj_t *B,
 	  obj_t *beta,
 	  obj_t *C )
 {
-  obj_t A_1_1_packed;
-  obj_t B_1_packed;
-  bli_obj_init_pack( &A_1_1_packed );
-  bli_obj_init_pack( &B_1_packed );
+  obj_t packed_A_blk;
+  obj_t packed_B_pan;
+  bli_obj_init_pack( &packed_A_blk );
+  bli_obj_init_pack( &packed_B_pan );
 
+  rank_t rank = omp_get_thread_num();
+  thread_comm_t *GlobalComm = &global_comm[0];
+  thread_comm_t *ProcComm = &proc_comms[rank / NUMPROCS];
+  thread_comm_t *L2Comm = &l2_comms[rank / NUML2];
+
+  if (rank == 0) {
+    if (NUMTHREADS != omp_get_num_threads()) {
+      printf("not expecting this number of threads\n");
+      fflush(stdout);
+      return;
+    }
+    th_setup_comm(GlobalComm, NUMTHREADS, NUMPROCS);
+  }
+  if ((rank % NUMTHREADSPERPROC) == 0) {
+    th_setup_comm(ProcComm, NUMTHREADSPERPROC, NUML2PERPROC);
+  }
+  if ((rank % NUMTHREADSPERL2) == 0) {
+    th_setup_comm(L2Comm, NUMTHREADSPERL2, 1);
+  }
+
+  th_barrier(GlobalComm);
+  
   bli_scalm(beta, C);
 
-  dimLen1 = bli_obj_width_after_trans( C );
-  idx = 0;
+  dim_t idx1, dimLen1, bs1;
+  dimLen1 = bli_obj_width_after_trans( *C );
+  idx1 = 0;
   th_shift_start_end(&idx1, &dimLen1, GlobalComm);
   for ( ; idx1 < dimLen1; idx1 += bs1 ) {
-    bs1 = bli_determine_blocksize_f( idx1, dimLen1, &C, gemm_nc );
+    bs1 = bli_determine_blocksize_f( idx1, dimLen1, C, gemm_nc );
     dim_t idx2, dimLen2, bs2;
     //****
     obj_t B_1;
-    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, &B, &B_1 );
+    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, B, &B_1 );
     obj_t C_1;
-    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, &C, &C_1 );
+    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, C, &C_1 );
     //------------------------------------//
 
-    dimLen2 = bli_obj_width_after_trans( A );
+    dimLen2 = bli_obj_width_after_trans( *A );
     for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-      bs2 = bli_determine_blocksize_f( idx2, dimLen2, &A, gemm_kc );
+      bs2 = bli_determine_blocksize_f( idx2, dimLen2, A, gemm_kc );
       dim_t idx3, dimLen3, bs3;
       //****
       obj_t A_1;
-      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &A, &A_1 );
+      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, A, &A_1 );
       obj_t B_1_1;
       bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &B_1, &B_1_1 );
       //------------------------------------//
 
+      th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
@@ -55,51 +93,60 @@ void DxT_GemmNN( obj_t *alpha,
 			     gemm_kr, gemm_nr, 
 			     &B_1_1, &packed_B_pan );
       }
-      Broadcast(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan);
-		bli_packm_blk_var2_par( ProcComm, &BLIS_ONE, &B_1_1, &packed_B_pan );
-		//// ***Parallelized with communicator ProcComm; need correct output code
-		dimLen3 = bli_obj_length_after_trans( C_1 );
-		idx = 0;
-		th_shift_start_end(&idx3, &dimLen3, ProcComm);
-		for ( ; idx3 < dimLen3; idx3 += bs3 ) {
-		  bs3 = bli_determine_blocksize_f( idx3, dimLen3, &C_1, gemm_mc );
-		  dim_t idx4, dimLen4, bs4;
-		  //****
-		  obj_t A_1_1;
-		  bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &A_1, &A_1_1 );
-		  obj_t C_1_1;
-		  bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &C_1, &C_1_1 );
-		  //------------------------------------//
+      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( ProcComm, &BLIS_ONE, &B_1_1, &packed_B_pan );
+      //// ***Parallelized with communicator ProcComm; need correct output code
+      dimLen3 = bli_obj_length_after_trans( C_1 );
+      idx3 = 0;
+      th_shift_start_end(&idx3, &dimLen3, ProcComm);
+      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &C_1, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t A_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &A_1, &A_1_1 );
+	obj_t C_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &C_1, &C_1_1 );
+	//------------------------------------//
 
-		  if (th_am_root(L2Comm)) {
-		    bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-					 BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-					 BLIS_BUFFER_FOR_A_BLOCK,
-					 gemm_mr, gemm_kr, 
-					 &A_1_1, &packed_A_blk );
-		  }
-		  Broadcast(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk);
-			    bli_packm_blk_var2_par( L2Comm, &BLIS_ONE, &A_1_1, &packed_A_blk );
-			    bli_gemm_ker_var2_par( L2Comm, &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-						   &BLIS_ONE, &C_1_1, (gemm_t*)NULL );
+	th_barrier( L2Comm );
+	if (th_am_root(L2Comm)) {
+	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_kr, 
+			       &A_1_1, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( L2Comm, &BLIS_ONE, &A_1_1, &packed_A_blk );
+	bli_gemm_ker_var2_par( L2Comm, &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL );
 
-			    //------------------------------------//
+	//------------------------------------//
 
-			    //****
-			    }
+	//****
+      }
 
-		    //------------------------------------//
+      //------------------------------------//
 
-		    //****
-		}
+      //****
+    }
 
-		//------------------------------------//
+    //------------------------------------//
 
-		//****
-		}
-
-  bli_obj_release_pack( &A_1_1_packed );
-  bli_obj_release_pack( &B_1_packed );
+    //****
+  }
+  if (th_am_root(L2Comm)) {
+    bli_obj_release_pack( &packed_A_blk );
+    th_release_comm(L2Comm);
+  }
+  if (th_am_root(ProcComm)) {
+    bli_obj_release_pack( &packed_B_pan );
+    th_release_comm(ProcComm);
+  }
+  if (th_am_root(GlobalComm)) {
+    th_release_comm(GlobalComm);
+  }
 }
 
 void DxT_GemmTN( obj_t *alpha,
@@ -343,21 +390,21 @@ int main( int argc, char** argv )
 			
   if (argc != 3) {
     printf("test T/N T/N\n");
-    return;
+    return 0;
   }
 
   if (*(argv[1]) == 'T')
     transA = 1;
   else if (*(argv[1]) != 'N') {
     printf("transA not correct\n");
-    return;
+    return 0;
   }
 
   if (*(argv[2]) == 'T')
     transB = 1;
   else if (*(argv[2]) != 'N') {
     printf("transB not correct\n");
-    return;
+    return 0;
   }
 
   bli_init();

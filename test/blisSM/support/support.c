@@ -41,6 +41,11 @@ void    th_setup_comm( thread_comm_t *comm,
     comm->barrier_threads_arrived = 0;
 }
 
+void    th_release_comm( thread_comm_t *comm )
+{
+  th_destroy_lock( &comm->barrier_lock );
+}
+
 void   th_broadcast( thread_comm_t *comm, rank_t root, void *to_sendRecv, unsigned int size )
 {
   th_broadcast_without_second_barrier(comm, root, to_sendRecv, size);

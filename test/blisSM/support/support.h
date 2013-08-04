@@ -22,6 +22,7 @@ typedef struct
 
 void    th_setup_comm( thread_comm_t *comm, 
 				thread_count_t threads_in_group, thread_count_t groups_below );
+void    th_release_comm( thread_comm_t *comm );
 void    th_broadcast( thread_comm_t *comm, rank_t root, void *to_sendRecv, unsigned int size );
 void    th_broadcast_without_second_barrier( thread_comm_t *comm, rank_t root, 
 					     void *to_sendRecv, unsigned int size );
