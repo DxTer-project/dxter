@@ -432,13 +432,16 @@ void Gemm::PrintCode(IndStream &out)
       if (m_comm == CORECOMM) 
 	*out << "bli_gemm_ker_var2( ";
       else
-	*out << "bli_gemm_ker_var2_par( " << CommToStr(m_comm) << ", ";
+	*out << "bli_gemm_ker_var2_par( ";
       out << m_alpha;
       *out<< ", &"
       << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n"
       << out.Tabs(2);
       out << m_beta;
-      *out << ", &" << GetInputName(2).str() << ", (gemm_t*)NULL );\n";
+      *out << ", &" << GetInputName(2).str() << ", (gemm_t*)NULL";
+      if (m_comm != CORECOMM)
+	*out << ", " << CommToStr(m_comm) << ", NULL";
+      *out << " );\n";
     }
     else
       throw;

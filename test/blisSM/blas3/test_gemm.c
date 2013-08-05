@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <omp.h>
 #include "blis.h"
 #include "support.h"
 #include "bli_packm_blk_var2_par.h"
@@ -471,11 +472,15 @@ int main( int argc, char** argv )
 
 	  //bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 	  if (!transA && !transB) {
-	    DxT_GemmNN( &alpha,
-			&a,
-			&b,
-			&beta,
-			&c2 );
+	    //	    _Pragma( "omp parallel num_threads(gemm_num_threads_default)" ) 
+	    _Pragma( "omp parallel num_threads(24)" ) 
+	      {
+		DxT_GemmNN( &alpha,
+			    &a,
+			    &b,
+			    &beta,
+			    &c2 );
+	      }
 			
 	    bli_gemm( &alpha,
 		      &a,
