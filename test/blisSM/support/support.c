@@ -32,7 +32,7 @@ void th_cleanup_communicator( thread_comm_t *comm )
 
 void    th_setup_comm( thread_comm_t *comm, 
 		       thread_count_t threads_in_group, 
-		       thread_count_t groups_below, thread_count_t multiplicative_factor_above )
+		       thread_count_t multiplicative_factor_above )
 {
     if( comm == NULL ) return;
     comm->sent_object = NULL;

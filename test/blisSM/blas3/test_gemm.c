@@ -55,11 +55,11 @@ void DxT_GemmNN( obj_t *alpha,
     //    printf("setup for %u\n",th_global_thread_id());
     //    printf("%u\n",rank % NUMTHREADSPERPROC);
     //    printf("%u, %u\n",NUMTHREADSPERPROC, NUML2PERPROC);
-    th_setup_comm(ProcComm, NUMTHREADSPERPROC, NUML2PERPROC, NUMPROCS);
+    th_setup_comm(ProcComm, NUMTHREADSPERPROC, NUMPROCS);
   }
 
   if ((rank % NUMTHREADSPERL2) == 0) {
-    th_setup_comm(L2Comm, NUMTHREADSPERL2, 1, NUML2PERPROC);
+    th_setup_comm(L2Comm, NUMTHREADSPERL2, NUML2PERPROC);
   }
 
   th_barrier(GlobalComm);
@@ -531,7 +531,7 @@ int main( int argc, char** argv )
 
 	  //bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 	  if (!transA && !transB) {
-	    th_setup_comm(&global_comm[0], NUMTHREADS, NUMPROCS, 1);
+	    th_setup_comm(&global_comm[0], NUMTHREADS, 1);
 	    //	    _Pragma( "omp parallel num_threads(gemm_num_threads_default)" ) 
 	    _Pragma( "omp parallel num_threads(NUMTHREADS)" ) 
 	      {
