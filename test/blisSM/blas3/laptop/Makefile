@@ -160,7 +160,7 @@ CFLAGS         := -g -std=c99 -fopenmp #-O2 -march=native
 CFLAGS         += -I$(BLIS_INC_PATH) -I$(TEST_SRC_PATH) -I../../support/
 
 LINKER         := $(CC)
-LDFLAGS  := -lm -ldl -fopenmp# -fno-underscoring -fno-second-underscore
+LDFLAGS  := -g -lm -ldl -fopenmp# -fno-underscoring -fno-second-underscore
 #LDFLAGS        := -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2 -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -lgfortranbegin -lgfortran -lm
 #LDFLAGS        += -lpthread
 #LDFLAGS        := -L/usr/lib/gcc/i486-linux-gnu/4.4.3 -L/usr/lib/gcc/i486-linux-gnu/4.4.3/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/i486-linux-gnu/4.4.3/../../.. -L/usr/lib/i486-linux-gnu -lgfortranbegin -lgfortran -lm
