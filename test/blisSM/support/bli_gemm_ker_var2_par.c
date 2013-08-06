@@ -104,7 +104,13 @@ void bli_gemm_ker_var2_par( obj_t*  alpha,
 	  l1_num_threads = 1;
 	  l1_thread_id = 0;
 	}
-
+	/*
+#pragma omp critical
+	{
+	  printf("id: %u, num threads %u\n", l2_thread_id, l2_num_threads);
+	  fflush(stdout);
+	}
+	*/
 
 	FUNCPTR_T f;
 

@@ -15,13 +15,13 @@ extern blksz_t *gemm_extmr;
 extern blksz_t *gemm_extkr;
 extern blksz_t *gemm_extnr;
 
-#define NUMTHREADSPERL2 1
+#define NUMTHREADSPERL2 2
 #define NUML2PERPROC 3
 #define NUMPROCS 4
 
-#define NUML2 NUMPROCS*NUML2PERPROC
-#define NUMTHREADS NUML2*NUMTHREADSPERL2
-#define NUMTHREADSPERPROC NUML2PERPROC*NUMTHREADSPERL2
+#define NUML2 (NUMPROCS*NUML2PERPROC)
+#define NUMTHREADS (NUML2*NUMTHREADSPERL2)
+#define NUMTHREADSPERPROC (NUML2PERPROC*NUMTHREADSPERL2)
 
 thread_comm_t global_comm[1];
 thread_comm_t proc_comms[NUMPROCS];
@@ -51,8 +51,9 @@ void DxT_GemmNN( obj_t *alpha,
     return;
   }
   */
-  if ((rank % NUMTHREADSPERPROC) == 0) {
+  if ((rank % (NUMTHREADSPERPROC)) == 0) {
     //    printf("setup for %u\n",th_global_thread_id());
+    //    printf("%u\n",rank % NUMTHREADSPERPROC);
     //    printf("%u, %u\n",NUMTHREADSPERPROC, NUML2PERPROC);
     th_setup_comm(ProcComm, NUMTHREADSPERPROC, NUML2PERPROC, NUMPROCS);
   }
@@ -103,6 +104,7 @@ void DxT_GemmNN( obj_t *alpha,
     bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, C, &C_1 );
     //------------------------------------//
 
+
     dimLen2 = bli_obj_width_after_trans( *A );
     for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
       bs2 = bli_determine_blocksize_f( idx2, dimLen2, A, gemm_kc );
@@ -116,6 +118,7 @@ void DxT_GemmNN( obj_t *alpha,
 
       th_barrier( ProcComm );
 
+
       if (th_am_root(ProcComm)) {
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
@@ -126,6 +129,8 @@ void DxT_GemmNN( obj_t *alpha,
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
 
       bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_B_pan, ProcComm );
+
+
 
       //// ***Parallelized with communicator ProcComm; need correct output code
       dimLen3 = bli_obj_length_after_trans( C_1 );
@@ -172,6 +177,7 @@ void DxT_GemmNN( obj_t *alpha,
 	  fflush(stdout);
 	}
 	*/
+
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L2Comm, NULL );
 
@@ -468,7 +474,7 @@ int main( int argc, char** argv )
   n_repeats = 1;
 
   p_begin = 40;
-  p_end   = 1200;
+  p_end   = 1000;
   p_inc   = 40;
 
   m_input = -1;
