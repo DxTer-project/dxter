@@ -109,6 +109,7 @@ void bli_packm_blk_var2_par( obj_t*   beta,
 	   buf_p, rs_p, cs_p,
 	          pd_p, ps_p,
        comm );
+	th_barrier(comm);
 }
 
 
@@ -186,7 +187,7 @@ void PASTEMAC(ch,varname )( \
 \
 	/* If C needs a transposition, induce it so that we can more simply
 	   express the remaining parameters and code. */ \
-    th_set_lock( &comm->barrier_lock ); \
+/*    th_set_lock( &comm->barrier_lock );	*/	 \
 	if ( bli_does_trans( transc ) ) \
 	{ \
 		bli_swap_incs( rs_c, cs_c ); \
@@ -194,7 +195,7 @@ void PASTEMAC(ch,varname )( \
 		bli_toggle_uplo( uploc ); \
 		bli_toggle_trans( transc ); \
 	} \
-    th_unset_lock( &comm->barrier_lock ); \
+/*    th_unset_lock( &comm->barrier_lock ); */	\
 \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,

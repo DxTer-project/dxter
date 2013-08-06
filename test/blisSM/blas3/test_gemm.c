@@ -16,8 +16,8 @@ extern blksz_t *gemm_extkr;
 extern blksz_t *gemm_extnr;
 
 #define NUMTHREADSPERL2 1
-#define NUML2PERPROC 2
-#define NUMPROCS 3
+#define NUML2PERPROC 3
+#define NUMPROCS 4
 
 #define NUML2 NUMPROCS*NUML2PERPROC
 #define NUMTHREADS NUML2*NUMTHREADSPERL2
@@ -53,16 +53,16 @@ void DxT_GemmNN( obj_t *alpha,
   */
   if ((rank % NUMTHREADSPERPROC) == 0) {
     //    printf("setup for %u\n",th_global_thread_id());
-    printf("%u, %u\n",NUMTHREADSPERPROC, NUML2PERPROC);
-    th_setup_comm(ProcComm, NUMTHREADSPERPROC, NUML2PERPROC);
+    //    printf("%u, %u\n",NUMTHREADSPERPROC, NUML2PERPROC);
+    th_setup_comm(ProcComm, NUMTHREADSPERPROC, NUML2PERPROC, NUMPROCS);
   }
 
   if ((rank % NUMTHREADSPERL2) == 0) {
-    th_setup_comm(L2Comm, NUMTHREADSPERL2, 1);
+    th_setup_comm(L2Comm, NUMTHREADSPERL2, 1, NUML2PERPROC);
   }
 
   th_barrier(GlobalComm);
-
+  /*
 #pragma omp critical (BLISOutput)
   {
     printf("%u: \nGlobalComm:%u in group, group %u\nProcComm:%u in group, group %u\nL2Comm:%u in group, group %u\n", 
@@ -72,25 +72,26 @@ void DxT_GemmNN( obj_t *alpha,
 	   th_thread_id(L2Comm), th_group_id(L2Comm)
 	   );
   }
-
+*/
   bli_scalm(beta, C);
 
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *C );
   idx1 = 0;
-  th_shift_start_end(&idx1, &dimLen1, GlobalComm);
+  th_shift_start_end(&idx1, &dimLen1, ProcComm);
 
   /*
 #pragma omp critical (BLISOutput)
   {
     printf("%u: %u in group, group %u\n", th_global_thread_id(), 
-	   th_thread_id(GlobalComm), th_group_id(GlobalComm));
+	   th_thread_id(ProcComm), th_group_id(ProcComm));
 //    printf("%u shifted from %u-%u",th_thread_id(GlobalComm), idx1, dimLen1);
 
-    printf("%u shifted to %u-%u\n", th_thread_id(GlobalComm), idx1, dimLen1);	   
+    printf("%u shifted to %u-%u\n", th_thread_id(ProcComm), idx1, dimLen1);	   
     fflush(stdout);
   }
   */
+
 
   for ( ; idx1 < dimLen1; idx1 += bs1 ) {
     bs1 = bli_determine_blocksize_f( idx1, dimLen1, C, gemm_nc );
@@ -116,9 +117,6 @@ void DxT_GemmNN( obj_t *alpha,
       th_barrier( ProcComm );
 
       if (th_am_root(ProcComm)) {
-	//	printf("initing %u: %u in group, group %u\n", th_global_thread_id(), 
-	//	   th_thread_id(ProcComm), th_group_id(ProcComm));
-	//	fflush(stdout);
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -126,20 +124,20 @@ void DxT_GemmNN( obj_t *alpha,
 			     &B_1_1, &packed_B_pan );
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+
       bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_B_pan, ProcComm );
+
       //// ***Parallelized with communicator ProcComm; need correct output code
       dimLen3 = bli_obj_length_after_trans( C_1 );
       idx3 = 0;
-      th_shift_start_end(&idx3, &dimLen3, ProcComm);      
+      th_shift_start_end(&idx3, &dimLen3, L2Comm);      
 
       /*
 #pragma omp critical (BLISOutput)
   {
     printf("%u: %u in group, group %u\n", th_global_thread_id(), 
-	   th_thread_id(ProcComm), th_group_id(ProcComm));
-    printf("%u shifted from %u-%u",th_thread_id(ProcComm), idx3, dimLen3);
-
-    printf(" to %u-%u\n", idx3, dimLen3);	   
+	   th_thread_id(L2Comm), th_group_id(L2Comm));
+    printf("%u shifted to %u-%u\n",th_thread_id(L2Comm), idx3, dimLen3);
     fflush(stdout);
   }
       */
@@ -190,6 +188,9 @@ void DxT_GemmNN( obj_t *alpha,
 
     //****
   }
+
+  th_barrier(GlobalComm);
+
   if (th_am_root(L2Comm)) {
     bli_obj_release_pack( &packed_A_blk );
     th_release_comm(L2Comm);
@@ -465,8 +466,8 @@ int main( int argc, char** argv )
 
   n_repeats = 1;
 
-  p_begin = 600;
-  p_end   = 600;
+  p_begin = 40;
+  p_end   = 1200;
   p_inc   = 40;
 
   m_input = -1;
@@ -523,7 +524,7 @@ int main( int argc, char** argv )
 
 	  //bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 	  if (!transA && !transB) {
-	    th_setup_comm(&global_comm[0], NUMTHREADS, NUMPROCS);
+	    th_setup_comm(&global_comm[0], NUMTHREADS, NUMPROCS, 1);
 	    //	    _Pragma( "omp parallel num_threads(gemm_num_threads_default)" ) 
 	    _Pragma( "omp parallel num_threads(NUMTHREADS)" ) 
 	      {

@@ -200,7 +200,7 @@ test_%.o: ../test_%.c
 # -- Executable file rules --
 
 test_%.x: test_%.o support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o $(BLIS_LIB)
-	$(LINKER) $<    support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o      $(BLIS_LIB)             $(LDFLAGS) -o $@
+	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o support.o      $(BLIS_LIB)             $(LDFLAGS) -o $@
 
 
 # -- Clean rules --

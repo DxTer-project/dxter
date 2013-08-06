@@ -13,7 +13,9 @@ typedef struct
 {
   void*   sent_object;
   thread_count_t num_threads_in_group;
-  thread_count_t num_groups_below;
+
+  //The communicator above has X sub-communicators.  That is the multiplicative_factor_above;
+  thread_count_t multiplicative_factor_above;
   
   bool_t  barrier_sense;
   lock_t  barrier_lock;
@@ -21,7 +23,8 @@ typedef struct
 } thread_comm_t;
 
 void    th_setup_comm( thread_comm_t *comm, 
-				thread_count_t threads_in_group, thread_count_t groups_below );
+		       thread_count_t threads_in_group, 
+		       thread_count_t groups_below, thread_count_t multiplicative_factor_above );
 void    th_release_comm( thread_comm_t *comm );
 void    th_broadcast( thread_comm_t *comm, rank_t root, void *to_sendRecv, unsigned int size );
 void    th_broadcast_without_second_barrier( thread_comm_t *comm, rank_t root, 

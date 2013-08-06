@@ -4,7 +4,8 @@
 
 rank_t th_group_id( thread_comm_t *comm )
 {
-  return floor( (double)th_global_thread_id() / comm->num_threads_in_group );
+  return ( th_global_thread_id() / comm->num_threads_in_group )
+    % comm->multiplicative_factor_above;
 }
 
 rank_t th_thread_id( thread_comm_t *comm )
@@ -30,12 +31,13 @@ void th_cleanup_communicator( thread_comm_t *comm )
 }
 
 void    th_setup_comm( thread_comm_t *comm, 
-		       thread_count_t threads_in_group, thread_count_t groups_below )
+		       thread_count_t threads_in_group, 
+		       thread_count_t groups_below, thread_count_t multiplicative_factor_above )
 {
     if( comm == NULL ) return;
     comm->sent_object = NULL;
     comm->num_threads_in_group = threads_in_group;
-    comm->num_groups_below = groups_below;
+    comm->multiplicative_factor_above = multiplicative_factor_above;
     comm->barrier_sense = 0;
     th_init_lock( &comm->barrier_lock );
     comm->barrier_threads_arrived = 0;
@@ -105,11 +107,11 @@ void th_barrier( thread_comm_t *comm )
 
 void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm)
 {
-  if (comm->num_groups_below > 1) {
-    rank_t group = th_thread_id( comm ) / ( comm->num_threads_in_group / comm->num_groups_below);
+  if (comm->multiplicative_factor_above > 1) {
+    rank_t group = th_group_id(comm);
     dim_t len = *end - *start;
-    dim_t n_pt = len / comm->num_groups_below;
-    n_pt = (n_pt * comm->num_groups_below < len) ? n_pt + 1 : n_pt;
+    dim_t n_pt = len / comm->multiplicative_factor_above;
+    n_pt = (n_pt * comm->multiplicative_factor_above < len) ? n_pt + 1 : n_pt;
     n_pt = (n_pt % 4 == 0) ? n_pt : n_pt + 4 - (n_pt % 4);
     *start = *start + group * n_pt;
     *end   = bli_min( *start + n_pt, *end );
