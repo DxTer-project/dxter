@@ -153,6 +153,7 @@ void DxT_GemmNN( obj_t *alpha,
 	//------------------------------------//
 
 	th_barrier( L2Comm );
+
 	if (th_am_root(L2Comm)) {
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
