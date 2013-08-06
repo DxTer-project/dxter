@@ -537,7 +537,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
       *out << idx << " = 0;\n";
       out.Indent();
       *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", " 
-	   << CommToStr(m_comm) << ");\n";
+	   << CommToStr(GetSubComm(m_comm)) << ");\n";
       out.Indent();
       *out << "for ( ; " << idx << " < " << dimLen << "; "
 	   << idx << " += " << bs <<" ) {\n";

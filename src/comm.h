@@ -34,11 +34,12 @@ enum Comm {
 #if NUMPROCS>1
   ALLPROCCOMM,  //Communicate between all cores in system, PROCCOM is subgroup
 #if NUML2PERPROC>1
-  ALLL2COMM,    //Communicate between all cores in system, L2COMM is subgroup
+  ALLL2COMM,    //Communicate between all cores in system, L2COMMSUBALLL2 is subgroup
 #endif //NUML2PERPROC>1
 #endif //NUMPROCS>1
   PROCCOMM,    //Communicate between all cores on processor (e.g. all cores sharing the L3), L2COMM is subgroup
   L2COMM,      //Communicate between all cores sharing my L2, each core is a subgroup
+  L2COMMSUBALLL2,    //Communicate between all cores sharing my L2, each core is a subgroup
 #endif
   CORECOMM,
   BADCOMM
@@ -46,6 +47,29 @@ enum Comm {
 
 string CommToStr(Comm comm);
 bool CommAllowedWithin(Comm comm1, Comm comm2);
+inline Comm GetSubComm(Comm comm)
+{
+  switch(comm)
+    {
+#if DODM
+      throw;
+#elif DOSM||DOSQM
+    case(ALLPROCCOMM):
+      return PROCCOMM;
+    case (ALLL2COMM):
+      return L2COMMSUBALLL2;
+    case(PROCCOMM):
+      return L2COMM;
+    case(L2COMM):
+      throw;
+#endif
+    case(CORECOMM):
+      throw;
+    default:
+      throw;
+    }
+}
+
 
 inline unsigned int NumCoresInComm(Comm comm)
 {
