@@ -626,12 +626,16 @@ void TriRK::PrintCode(IndStream &out)
     if (m_comm == CORECOMM)
       *out << "_ker_var2( ";
     else
-      *out << "_ker_var2_par( " << CommToStr(m_comm) << ", ";
+      *out << "_ker_var2_par( ";
     out << m_alpha;
     *out << ", &"
     << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n"
     << out.Tabs(2)
-    << "&BLIS_ONE, &" << GetInputName(2).str() << ", (herk_t*)NULL );\n";
+	 << "&BLIS_ONE, &" << GetInputName(2).str() << ", (herk_t*)NULL ";
+    if (m_comm != CORECOMM)
+      *out << ", L1Comm ";
+    *out << ");\n";
+
   }
 }
 

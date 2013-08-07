@@ -208,8 +208,12 @@ test_%.o: ../test_%.c
 test_gemm.x: test_gemm.o support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o $(BLIS_LIB)
 	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o support.o      $(BLIS_LIB)             $(LDFLAGS) -o $@
 
-test_trmm.x: test_trmm.o support.o bli_packm_blk_var2_par.o bli_trmm_u_ker_var2_par.o bli_trmm_l_ker_var2_par.o $(BLIS_LIB)
-	$(LINKER) $<    bli_packm_blk_var2_par.o bli_trmm_l_ker_var2_par.o bli_trmm_u_ker_var2_par.o support.o      $(BLIS_LIB)             $(LDFLAGS) -o $@
+test_trmm.x: test_trmm.o support.o bli_packm_blk_var2_par.o \
+             bli_trmm_u_ker_var2_par.o bli_trmm_l_ker_var2_par.o \
+             bli_gemm_ker_var2_par.o $(BLIS_LIB)
+	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o \
+	    bli_trmm_l_ker_var2_par.o bli_trmm_u_ker_var2_par.o support.o \
+	    $(BLIS_LIB)             $(LDFLAGS) -o $@
 
 test_%.x: test_%.o support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o $(BLIS_LIB)
 	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o support.o      $(BLIS_LIB)             $(LDFLAGS) -o $@

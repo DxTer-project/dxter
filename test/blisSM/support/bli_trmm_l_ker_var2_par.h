@@ -32,6 +32,7 @@
 
 */
 
+#pragma once
 #include "blis.h"
 #include "support.h"
 

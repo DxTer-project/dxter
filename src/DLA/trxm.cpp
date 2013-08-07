@@ -2016,14 +2016,17 @@ void TrxmBP::PrintCode(IndStream &out)
   if (m_comm == CORECOMM)
     *out << "( ";
   else
-    *out << "_par( " << CommToStr(m_comm) << ", ";
+    *out << "_par( ";
   out << m_coeff ;
   *out << ", &"
        << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n" 
       << out.Tabs(2);
   out << m_beta;
   *out << ", &" << GetInputName(2).str() << ", (tr"
-       << (m_invert ? "s" : "m") << "m_t*)NULL );\n";
+       << (m_invert ? "s" : "m") << "m_t*)NULL";
+  if (m_comm != CORECOMM)
+    *out << ", L1Comm";
+  *out <<  ");\n";
 }
 
 bool BLISTrxmLoopExp::CanApply(const Poss *poss, const Node *node) const

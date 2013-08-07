@@ -2,8 +2,6 @@
 #include <omp.h>
 #include "blis.h"
 #include "support.h"
-#include "bli_packm_blk_var2_par.h"
-#include "bli_gemm_ker_var2_par.h"
 
 extern blksz_t *gemm_mc;
 extern blksz_t *gemm_kc;

@@ -4,6 +4,8 @@
 #include "blis.h"
 #include <omp.h>
 
+
+
 typedef unsigned int rank_t;
 typedef unsigned int thread_count_t;
 typedef omp_lock_t lock_t;
@@ -42,3 +44,9 @@ rank_t   th_group_id( thread_comm_t *comm );
 rank_t   th_global_thread_id();
 
 void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm);
+
+
+#include "bli_trmm_l_ker_var2_par.h"
+#include "bli_trmm_u_ker_var2_par.h"
+#include "bli_packm_blk_var2_par.h"
+#include "bli_gemm_ker_var2_par.h"
