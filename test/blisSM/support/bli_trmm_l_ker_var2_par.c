@@ -105,14 +105,14 @@ void bli_trmm_l_ker_var2_par( obj_t*  alpha,
 	  l1_num_threads = 1;
 	  l1_thread_id = 0;
 	}
-	/*
+
 	#pragma omp critical
 	{
-	  printf("%u : l2 thread %u of %u\n", th_global_thread_id(),
-		 l2_thread_id, l2_num_threads);
+	  printf("%u : l1 thread %u of %u\n", th_global_thread_id(),
+		 l1_thread_id, l1_num_threads);
 	  fflush(stdout);
 	}
-	*/
+
 
 /*
 	// Handle the special case where c and a are complex and b is real.
@@ -308,9 +308,9 @@ void PASTEMAC(ch,varname)( \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = l2_thread_id; j < n_iter; j+=l2_num_threads ) \
 	{ \
-	        a1  = a_cast+k*PACKMR*l1_thread_id;	  \
-		c11 = c1; \
-\
+	  a1  = a_cast+MR*PACKMR*((l1_thread_id * (l1_thread_id + 1)) / 2); \
+	  c11 = c1;							\
+									\
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
 		/* If duplication is needed, copy the current iteration's NR
@@ -339,14 +339,16 @@ void PASTEMAC(ch,varname)( \
 				   in bp. Then compute the length of that panel. */ \
 				off_a1011 = 0; \
 				k_a1011   = bli_min( k, diagoffa_i + MR ); \
+				/*PASTEMAC(ch,fprintm)( stdout, "trmm_ker_var2_par: a1", PACKMR, k_a1011, a1, 1, PACKMR, "%4.1f", "" );*/ \
 \
 				bp_i = bp + off_a1011 * NR * NDUP; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-				a2 = a1 + k_a1011 * PACKMR * l1_num_threads; \
+				  a2 = a_cast +  \
+				    ((i+l1_num_threads)*(i+l1_num_threads+1)) / 2 * PACKMR * MR; \
 				if ( i+l1_num_threads >= m_iter) \
 				{ \
-					a2 = a_cast+k*PACKMR*l1_thread_id; \
+					a2 = a_cast+MR*PACKMR*l1_thread_id; \
 					b2 = b1 + cstep_b; \
 					if ( j + l2_num_threads >= n_iter ) \
 					  b2 = b_cast + ps_b*l2_thread_id; \
@@ -386,7 +388,9 @@ void PASTEMAC(ch,varname)( \
 					                        c11, rs_c,  cs_c ); \
 				} \
 \
-				a1 += k_a1011 * PACKMR * l1_num_threads; \
+				/*a1 += k_a1011 * PACKMR * l1_num_threads;*/ \
+				a1 = a_cast +				\
+				  (((i+l1_num_threads)*(i+l1_num_threads+1)) / 2) * PACKMR * MR; \
 			} \
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
@@ -394,7 +398,7 @@ void PASTEMAC(ch,varname)( \
 				a2 = a1 + rstep_a; \
 				if ( i+l1_num_threads >= m_iter ) \
 				{ \
-					a2 = a_cast+k*PACKMR*l1_thread_id; \
+				  a2 = a_cast+MR*PACKMR*((l1_thread_id * (l1_thread_id + 1)) / 2); \
 					b2 = b1 + cstep_b; \
 					if ( j + l2_num_threads >= n_iter ) \
 						b2 = b_cast + ps_b*l2_thread_id; \

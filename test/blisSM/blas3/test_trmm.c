@@ -995,9 +995,9 @@ int main( int argc, char** argv )
 
   n_repeats = 1;
 
-  p_begin = 12;
-  p_end   = 12;
-  p_inc   = 40;
+  p_begin = 50;
+  p_end   = 50;
+  p_inc   = 4;
 
   m_input = -1;
   n_input = -1;
@@ -1016,7 +1016,6 @@ int main( int argc, char** argv )
       else               m =     ( dim_t )    m_input;
       if ( n_input < 0 ) n = p * ( dim_t )abs(n_input);
       else               n =     ( dim_t )    n_input;
-
 
       bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
       bli_obj_create( dt_beta,  1, 1, 0, 0, &beta );
@@ -1056,6 +1055,7 @@ int main( int argc, char** argv )
 			    &c1 );
 	      }
 	      else { //normal
+	  	  bli_printm( "a_input", &a, "%4.1f", "" );
 		th_setup_comm(&global_comm[0], NUMTHREADS, 1);
 		_Pragma( "omp parallel num_threads(NUMTHREADS)" ) 
 		  {
@@ -1127,9 +1127,9 @@ int main( int argc, char** argv )
 	  bli_obj_set_struc( BLIS_GENERAL, a );
 	  bli_obj_set_uplo( BLIS_DENSE, a );
 
-	  bli_printm( "c1", &c1, "%4.1f", "" );
-	  bli_printm( "c2", &c2, "%4.1f", "" );
-	  bli_printm( "c_save", &c_save, "%4.1f", "" );
+	  	  bli_printm( "c1", &c1, "%4.1f", "" );
+	  	  bli_printm( "c2", &c2, "%4.1f", "" );
+	  	  bli_printm( "c_save", &c_save, "%4.1f", "" );
 
 	  bli_axpym( &negOne, &c1, &c2 );
 			
