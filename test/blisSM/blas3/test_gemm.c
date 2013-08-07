@@ -82,7 +82,7 @@ void DxT_GemmNN( obj_t *alpha,
   SetupComms(&GlobalComm, &ProcComm, &L2Comm, &L1Comm);
 
   bli_scalm(beta, C);
-
+  
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *C );
   idx1 = 0;

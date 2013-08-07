@@ -33,12 +33,11 @@
 */
 
 #include "blis.h"
-#include "bli_gemm_ker_var2_par.h"
-#include "support.h"
 
 #define FUNCPTR_T gemm_fp
 
 typedef void (*FUNCPTR_T)(
+                           doff_t  diagoffa,
                            dim_t   m,
                            dim_t   n,
                            dim_t   k,
@@ -46,26 +45,25 @@ typedef void (*FUNCPTR_T)(
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a,
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b,
                            void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c,
-                           dim_t   l2_num_threads,
-                           dim_t   l2_thread_id,
-                           dim_t   l1_num_threads,
-                           dim_t   l1_thread_id
+                           void*   c, inc_t rs_c, inc_t cs_c
+                           dim_t   l2_num_threads, dim_t l2_thread_id, 
+                           dim_t   l1_num_threads, dim_t l1_thread_id 
                          );
-			   //                           dim_t   l0_thread_id
 
-static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2_par);
+static FUNCPTR_T GENARRAY(ftypes,trmm_l_ker_var2);
 
 
-void bli_gemm_ker_var2_par( obj_t*  alpha,
-			    obj_t*  a,
-			    obj_t*  b,
-			    obj_t*  beta,
-			    obj_t*  c,
-			    gemm_t* cntl,
-			    thread_comm_t* l1_comm)
+void bli_trmm_l_ker_var2( obj_t*  alpha,
+                          obj_t*  a,
+                          obj_t*  b,
+                          obj_t*  beta,
+                          obj_t*  c,
+                          trmm_t* cntl,
+			  thread_comm_t* l1_comm );
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
+
+	doff_t    diagoffa  = bli_obj_diag_offset( *a );
 
 	dim_t     m         = bli_obj_length( *c );
 	dim_t     n         = bli_obj_width( *c );
@@ -91,6 +89,9 @@ void bli_gemm_ker_var2_par( obj_t*  alpha,
 	num_t     dt_beta;
 	void*     buf_beta;
 
+	FUNCPTR_T f;
+
+
 	dim_t l2_num_threads = l1_comm->multiplicative_factor_above;
 	dim_t l2_thread_id   = th_group_id(l1_comm);
 	dim_t l1_num_threads;
@@ -103,20 +104,7 @@ void bli_gemm_ker_var2_par( obj_t*  alpha,
 	  l1_num_threads = 1;
 	  l1_thread_id = 0;
 	}
-
-	/*
-#pragma omp critical
-	{
-	  printf("%u\n", th_global_thread_id());
-	  printf("l1 id: %u, num threads %u\n", l1_thread_id, l1_num_threads);
-	  printf("l2 id: %u, num threads %u\n", l2_thread_id, l2_num_threads);
-	  fflush(stdout);
-	}
-	*/
-
-
-
-	FUNCPTR_T f;
+	
 
 /*
 	// Handle the special case where c and a are complex and b is real.
@@ -138,7 +126,7 @@ void bli_gemm_ker_var2_par( obj_t*  alpha,
 
 	// If alpha is a scalar constant, use dt_exec to extract the address of the
 	// corresponding constant value; otherwise, use the datatype encoded
-	// within the alpha object and extract the buffer at the alpha offset.
+	// within the alpha object and extract the buffer at the beta offset.
 	bli_set_scalar_dt_buffer( alpha, dt_exec, dt_alpha, buf_alpha );
 
 	// If beta is a scalar constant, use dt_exec to extract the address of the
@@ -149,9 +137,10 @@ void bli_gemm_ker_var2_par( obj_t*  alpha,
 	// Index into the type combination array to extract the correct
 	// function pointer.
 	f = ftypes[dt_exec];
-	
-    // Invoke the function.
-	f( m,
+
+	// Invoke the function.
+	f( diagoffa,
+	   m,
 	   n,
 	   k,
 	   buf_alpha,
@@ -170,6 +159,7 @@ void bli_gemm_ker_var2_par( obj_t*  alpha,
 #define GENTFUNC( ctype, ch, varname, ukrname ) \
 \
 void PASTEMAC(ch,varname)( \
+                           doff_t  diagoffa, \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \
@@ -201,9 +191,11 @@ void PASTEMAC(ch,varname)( \
 	/* Alias some constants to shorter names. */ \
 	const dim_t     MR         = PASTEMAC(ch,mr); \
 	const dim_t     NR         = PASTEMAC(ch,nr); \
+	const dim_t     PACKMR     = PASTEMAC(ch,packmr); \
 	const dim_t     NDUP       = PASTEMAC(ch,ndup); \
 	const bool_t    DUPB       = NDUP != 1; \
 \
+	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict a_cast     = a; \
 	ctype* restrict b_cast     = b; \
@@ -214,12 +206,18 @@ void PASTEMAC(ch,varname)( \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
 	ctype* restrict c11; \
+	ctype* restrict bp_i; \
 	ctype* restrict a2; \
 	ctype* restrict b2; \
 \
-	dim_t           k_nr; \
+	doff_t          diagoffa_i; \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
+	dim_t           m_cur; \
+	dim_t           n_cur; \
+	dim_t           k_nr; \
+	dim_t           k_a1011; \
+	dim_t           off_a1011; \
 	dim_t           i, j; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
@@ -227,18 +225,41 @@ void PASTEMAC(ch,varname)( \
 \
 	/*
 	   Assumptions/assertions:
-	     rs_a == 1
+         rs_a == 1
 	     cs_a == GEMM_MR
 	     ps_a == stride to next row panel of A
-	     rs_b == GEMM_NR
+         rs_b == GEMM_NR
 	     cs_b == 1
 	     ps_b == stride to next column panel of B
-	     rs_c == (no assumptions)
+         rs_c == (no assumptions)
 	     cs_c == (no assumptions)
 	*/ \
 \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
+\
+	/* Safeguard: If matrix A is above the diagonal, it is implicitly zero.
+	   So we do nothing. */ \
+	if ( bli_is_strictly_above_diag_n( diagoffa, m, k ) ) return; \
+\
+	/* For consistency with the trsm macro-kernels, we inflate k to be a
+	   multiple of MR, if necessary. This is needed because we typically
+	   use the same packm variant for trmm as for trsm, and trsm has this
+	   constraint that k must be a multiple of MR so that it can safely
+	   handle bottom-right corner edges of the triangle. */ \
+	if ( k % MR != 0 ) k += MR - ( k % MR ); \
+\
+	/* If the diagonal offset is negative, adjust the pointer to C and
+	   treat this case as if the diagonal offset were zero. Note that
+	   we don't need to adjust the pointer to A since packm would have
+	   simply skipped over the region that was not stored. */ \
+	if ( diagoffa < 0 ) \
+	{ \
+		i        = -diagoffa; \
+		m        = m - i; \
+		diagoffa = 0; \
+		c_cast   = c_cast + (i  )*rs_c; \
+	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
@@ -252,16 +273,23 @@ void PASTEMAC(ch,varname)( \
 	m_iter = m / MR; \
 	m_left = m % MR; \
 \
+	if ( n_left ) ++n_iter; \
+	if ( m_left ) ++m_iter; \
+\
 	/* Compute the number of elements in B to duplicate per iteration. */ \
-	k_nr = k * NR; \
+	k_a1011 = bli_min( k, diagoffa + m ); \
+	k_nr    = k_a1011 * NR; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
-	rstep_a = ps_a; \
+	rstep_a = k * PACKMR; \
 \
 	cstep_b = ps_b; \
 \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
+\
+	b1 = b_cast; \
+	c1 = c_cast; \
 \
 	/* If the micro-kernel needs elements of B duplicated, set bp to
 	   point to the duplication buffer. If no duplication is called for,
@@ -269,12 +297,13 @@ void PASTEMAC(ch,varname)( \
 	   of the outer loop below. */ \
 	if ( DUPB ) bp = bd; \
 \
-\
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = l2_thread_id; j < n_iter; j += l2_num_threads  ) \
+	for ( j = 0; j < n_iter; ++j ) \
 	{ \
-        b1 = b_cast + j * cstep_b; \
-        c1 = c_cast + j * cstep_c; \
+		a1  = a_cast; \
+		c11 = c1; \
+\
+		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
 		/* If duplication is needed, copy the current iteration's NR
 		   columns of B to a local buffer with each value duplicated. */ \
@@ -284,142 +313,124 @@ void PASTEMAC(ch,varname)( \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
 \
-		/* Interior loop over the m dimension (MR rows at a time). */ \
-		for ( i = l1_thread_id; i < m_iter; i += l1_num_threads ) \
+		/* Loop over the m dimension (MR rows at a time). */ \
+		for ( i = 0; i < m_iter; i++ ) \
 		{ \
-		  a1  = a_cast + i * rstep_a;			\
-			c11 = c1 + i * rstep_c; \
+			diagoffa_i = diagoffa + ( doff_t )i*MR; \
 \
-			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = a1 + rstep_a; \
-			if ( i == m_iter - 1 && m_left == 0 ) \
+			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
+\
+			/* If the current panel of A intersects the diagonal, scale C
+			   by beta. If it is strictly below the diagonal, scale by one.
+			   This allows the current macro-kernel to work for both trmm
+			   and trmm3. */ \
+			if ( bli_intersects_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
-				a2 = a_cast; \
-				b2 = b1 + cstep_b; \
-				if ( j == n_iter - 1 && n_left == 0 ) \
-					b2 = b_cast; \
+				/* Determine the offset to the beginning of the panel that
+				   was packed so we can index into the corresponding location
+				   in bp. Then compute the length of that panel. */ \
+				off_a1011 = 0; \
+				k_a1011   = bli_min( k, diagoffa_i + MR ); \
+\
+				bp_i = bp + off_a1011 * NR * NDUP; \
+\
+				/* Compute the addresses of the next panels of A and B. */ \
+				a2 = a1 + k_a1011 * PACKMR; \
+				if ( i == m_iter - 1 ) \
+				{ \
+					a2 = a_cast; \
+					b2 = b1 + cstep_b; \
+					if ( j == n_iter - 1 ) \
+						b2 = b_cast; \
+				} \
+\
+				/* Handle interior and edge cases separately. */ \
+				if ( m_cur == MR && n_cur == NR ) \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					PASTEMAC(ch,ukrname)( k_a1011, \
+					                      alpha_cast, \
+					                      a1, \
+					                      bp_i, \
+					                      beta_cast, \
+					                      c11, rs_c, cs_c, \
+					                      a2, b2 ); \
+				} \
+				else \
+				{ \
+					/* Copy edge elements of C to the temporary buffer. */ \
+					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+					                        c11, rs_c,  cs_c, \
+					                        ct,  rs_ct, cs_ct ); \
+\
+					/* Invoke the gemm micro-kernel. */ \
+					PASTEMAC(ch,ukrname)( k_a1011, \
+					                      alpha_cast, \
+					                      a1, \
+					                      bp_i, \
+					                      beta_cast, \
+					                      ct, rs_ct, cs_ct, \
+					                      a2, b2 ); \
+\
+					/* Copy the result to the edge of C. */ \
+					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+					                        ct,  rs_ct, cs_ct, \
+					                        c11, rs_c,  cs_c ); \
+				} \
+\
+				a1 += k_a1011 * PACKMR; \
+			} \
+			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
+			{ \
+				/* Compute the addresses of the next panels of A and B. */ \
+				a2 = a1 + rstep_a; \
+				if ( i == m_iter - 1 ) \
+				{ \
+					a2 = a_cast; \
+					b2 = b1 + cstep_b; \
+					if ( j == n_iter - 1 ) \
+						b2 = b_cast; \
+				} \
+\
+				/* Handle interior and edge cases separately. */ \
+				if ( m_cur == MR && n_cur == NR ) \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					PASTEMAC(ch,ukrname)( k, \
+					                      alpha_cast, \
+					                      a1, \
+					                      bp, \
+					                      one, \
+					                      c11, rs_c, cs_c, \
+					                      a2, b2 ); \
+				} \
+				else \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					PASTEMAC(ch,ukrname)( k, \
+					                      alpha_cast, \
+					                      a1, \
+					                      bp, \
+					                      zero, \
+					                      ct, rs_ct, cs_ct, \
+					                      a2, b2 ); \
+\
+					/* Add the result to the edge of C. */ \
+					PASTEMAC(ch,adds_mxn)( m_cur, n_cur, \
+					                       ct,  rs_ct, cs_ct, \
+					                       c11, rs_c,  cs_c ); \
+				} \
+\
+				a1 += rstep_a; \
 			} \
 \
-			/* Invoke the gemm micro-kernel. */ \
-			PASTEMAC(ch,ukrname)( k, \
-			                      alpha_cast, \
-			                      a1, \
-			                      bp, \
-			                      beta_cast, \
-			                      c11, rs_c, cs_c, \
-			                      a2, b2); \
-\
-            /*if( ++n_ukernels == 4 ){ \
-                bli_barrier( comm ); \
-                n_ukernels = 0; \
-            }\*/\
+			c11 += rstep_c; \
 		} \
 \
-		/* Bottom edge handling. */ \
-		if ( m_left && !l1_thread_id ) \
-		{ \
-			a1  = a_cast + m_iter * rstep_a; \
-			c11 = c1 + m_iter * rstep_c; \
-			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = a_cast; \
-			b2 = b1 + cstep_b; \
-			if ( j == n_iter - 1 && n_left == 0 ) \
-				b2 = b_cast; \
-\
-\
-			/* Invoke the gemm micro-kernel. */ \
-			PASTEMAC(ch,ukrname)( k, \
-			                      alpha_cast, \
-			                      a1, \
-			                      bp, \
-			                      zero, \
-			                      ct, rs_ct, cs_ct, \
-			                      a2, b2); \
-\
-			/* Scale the bottom edge of C and add the result from above. */ \
-			PASTEMAC(ch,xpbys_mxn)( m_left, NR, \
-			                        ct,  rs_ct, cs_ct, \
-			                        beta_cast, \
-			                        c11, rs_c,  cs_c ); \
-\
-		} \
-\
+		b1 += cstep_b; \
+		c1 += cstep_c; \
 	} \
-\
-	if ( n_left && !l2_thread_id ) \
-	{ \
-		b1 = b_cast + n_iter * cstep_b; \
-		c1 = c_cast + n_iter * cstep_c; \
-\
-		/* If duplication is needed, copy the n_left (+ padding) columns
-		   of B to a local buffer with each value duplicated. */ \
-		if ( DUPB ) PASTEMAC(ch,dupl)( k_nr, b1, bp ); \
-		else        bp = b1; \
-\
-		/* Initialize our next panel of B to be the current panel of B. */ \
-		b2 = b1; \
-\
-		/* Right edge loop over the m dimension (MR rows at a time). */ \
-		for ( i = l1_thread_id; i < m_iter; i += l1_num_threads ) \
-		{ \
-			a1  = a_cast + i * rstep_a; \
-			c11 = c1 + i * rstep_c; \
-\
-			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = a1 + rstep_a; \
-			if ( i == m_iter - 1 && m_left == 0 ) \
-			{ \
-				a2 = a_cast; \
-				b2 = b_cast; \
-			} \
-\
-			/* Invoke the gemm micro-kernel. */ \
-			PASTEMAC(ch,ukrname)( k, \
-			                      alpha_cast, \
-			                      a1, \
-			                      bp, \
-			                      zero, \
-			                      ct, rs_ct, cs_ct, \
-			                      a2, b2 ); \
-\
-			/* Scale the right edge of C and add the result from above. */ \
-			PASTEMAC(ch,xpbys_mxn)( MR, n_left, \
-			                        ct,  rs_ct, cs_ct, \
-			                        beta_cast, \
-			                        c11, rs_c,  cs_c ); \
-\
-		} \
-\
-		/* Bottom-right corner handling. */ \
-		if ( m_left && !l1_thread_id ) \
-		{ \
-			a1  = a_cast + m_iter * rstep_a; \
-			c11 = c1 + m_iter * rstep_c; \
-			/* Compute the address of the next panel of A. */ \
-			a2 = a_cast; \
-			b2 = b_cast; \
-\
-			/* Invoke the gemm micro-kernel. */ \
-			PASTEMAC(ch,ukrname)( k, \
-			                      alpha_cast, \
-			                      a1, \
-			                      bp, \
-			                      zero, \
-			                      ct, rs_ct, cs_ct, \
-			                      a2, b2 ); \
-\
-			/* Scale the bottom-right corner of C and add the result from above. */ \
-			PASTEMAC(ch,xpbys_mxn)( m_left, n_left, \
-			                        ct,  rs_ct, cs_ct, \
-			                        beta_cast, \
-			                        c11, rs_c,  cs_c ); \
-		} \
-	} \
-\
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2_par: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2_par: bd", k, NR*NDUP, bp, NR*NDUP, 1, "%4.1f", "" );*/ \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2_par: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
 }
 
-INSERT_GENTFUNC_BASIC( gemm_ker_var2_par, GEMM_UKERNEL )
+INSERT_GENTFUNC_BASIC( trmm_l_ker_var2, GEMM_UKERNEL )
 
