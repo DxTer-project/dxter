@@ -105,14 +105,14 @@ void bli_trmm_l_ker_var2_par( obj_t*  alpha,
 	  l1_num_threads = 1;
 	  l1_thread_id = 0;
 	}
-
+	/*
 	#pragma omp critical
 	{
 	  printf("%u : l2 thread %u of %u\n", th_global_thread_id(),
 		 l2_thread_id, l2_num_threads);
 	  fflush(stdout);
 	}
-	
+	*/
 
 /*
 	// Handle the special case where c and a are complex and b is real.
@@ -296,8 +296,8 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR * l2_num_threads; \
 \
-	b1 = b_cast; \
-	c1 = c_cast; \
+	b1 = b_cast + ps_b*l2_thread_id; \
+	c1 = c_cast + cs_c*NR*l2_thread_id; \
 \
 	/* If the micro-kernel needs elements of B duplicated, set bp to
 	   point to the duplication buffer. If no duplication is called for,

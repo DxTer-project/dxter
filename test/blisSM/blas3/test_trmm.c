@@ -14,8 +14,8 @@ extern blksz_t *gemm_extkr;
 extern blksz_t *gemm_extnr;
 extern blksz_t *trmm_mr;
 
-#define NUMTHREADSPERL1 1
-#define NUML1PERL2 2
+#define NUMTHREADSPERL1 2
+#define NUML1PERL2 1
 #define NUML2PERPROC 1
 #define NUMPROCS 1
 
@@ -995,8 +995,8 @@ int main( int argc, char** argv )
 
   n_repeats = 1;
 
-  p_begin = 8;
-  p_end   = 8;
+  p_begin = 40;
+  p_end   = 1000;
   p_inc   = 40;
 
   m_input = -1;
@@ -1126,11 +1126,11 @@ int main( int argc, char** argv )
 	    bli_obj_toggle_trans( a );
 	  bli_obj_set_struc( BLIS_GENERAL, a );
 	  bli_obj_set_uplo( BLIS_DENSE, a );
-	  
+	  /*
 	  bli_printm( "c1", &c1, "%4.1f", "" );
 	  bli_printm( "c2", &c2, "%4.1f", "" );
 	  bli_printm( "c_save", &c_save, "%4.1f", "" );
-	  
+	  */
 	  bli_axpym( &negOne, &c1, &c2 );
 			
 	  bli_fnormm( &c2, &normVal );
