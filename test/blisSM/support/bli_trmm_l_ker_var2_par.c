@@ -105,6 +105,13 @@ void bli_trmm_l_ker_var2_par( obj_t*  alpha,
 	  l1_num_threads = 1;
 	  l1_thread_id = 0;
 	}
+
+	#pragma omp critical
+	{
+	  printf("%u : l2 thread %u of %u\n", th_global_thread_id(),
+		 l2_thread_id, l2_num_threads);
+	  fflush(stdout);
+	}
 	
 
 /*
@@ -284,10 +291,10 @@ void PASTEMAC(ch,varname)( \
 	/* Determine some increments used to step through A, B, and C. */ \
 	rstep_a = k * PACKMR; \
 \
-	cstep_b = ps_b; \
+	cstep_b = ps_b * l2_num_threads; \
 \
 	rstep_c = rs_c * MR; \
-	cstep_c = cs_c * NR; \
+	cstep_c = cs_c * NR * l2_num_threads; \
 \
 	b1 = b_cast; \
 	c1 = c_cast; \
@@ -299,7 +306,7 @@ void PASTEMAC(ch,varname)( \
 	if ( DUPB ) bp = bd; \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = 0; j < n_iter; ++j ) \
+	for ( j = l2_thread_id; j < n_iter; j+=l2_num_threads ) \
 	{ \
 		a1  = a_cast; \
 		c11 = c1; \
@@ -341,8 +348,8 @@ void PASTEMAC(ch,varname)( \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + cstep_b; \
-					if ( j == n_iter - 1 ) \
-						b2 = b_cast; \
+					if ( j + l2_num_threads >= n_iter ) \
+						b2 = b_cast + l2_thread_id; \
 				} \
 \
 				/* Handle interior and edge cases separately. */ \
@@ -389,8 +396,8 @@ void PASTEMAC(ch,varname)( \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + cstep_b; \
-					if ( j == n_iter - 1 ) \
-						b2 = b_cast; \
+					if ( j + l2_num_threads >= n_iter ) \
+						b2 = b_cast + l2_thread_id; \
 				} \
 \
 				/* Handle interior and edge cases separately. */ \

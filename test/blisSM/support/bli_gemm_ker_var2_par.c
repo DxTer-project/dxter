@@ -273,8 +273,8 @@ void PASTEMAC(ch,varname)( \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = l2_thread_id; j < n_iter; j += l2_num_threads  ) \
 	{ \
-        b1 = b_cast + j * cstep_b; \
-        c1 = c_cast + j * cstep_c; \
+	  b1 = b_cast + j * cstep_b;		\
+	  c1 = c_cast + j * cstep_c;		\
 \
 		/* If duplication is needed, copy the current iteration's NR
 		   columns of B to a local buffer with each value duplicated. */ \
