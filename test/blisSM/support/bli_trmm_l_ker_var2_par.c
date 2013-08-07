@@ -289,15 +289,15 @@ void PASTEMAC(ch,varname)( \
 	k_nr    = k_a1011 * NR; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
-	rstep_a = k * PACKMR; \
+	rstep_a = k * PACKMR * l1_num_threads; \
 \
 	cstep_b = ps_b * l2_num_threads; \
 \
-	rstep_c = rs_c * MR; \
+	rstep_c = rs_c * MR * l1_num_threads; \
 	cstep_c = cs_c * NR * l2_num_threads; \
 \
 	b1 = b_cast + ps_b*l2_thread_id; \
-	c1 = c_cast + cs_c*NR*l2_thread_id; \
+	c1 = c_cast + cs_c*NR*l2_thread_id + rs_c*MR*l1_thread_id; \
 \
 	/* If the micro-kernel needs elements of B duplicated, set bp to
 	   point to the duplication buffer. If no duplication is called for,
@@ -308,7 +308,7 @@ void PASTEMAC(ch,varname)( \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = l2_thread_id; j < n_iter; j+=l2_num_threads ) \
 	{ \
-		a1  = a_cast; \
+	        a1  = a_cast+k*PACKMR*l1_thread_id;	  \
 		c11 = c1; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
@@ -322,7 +322,7 @@ void PASTEMAC(ch,varname)( \
 		b2 = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
-		for ( i = 0; i < m_iter; i++ ) \
+		for ( i = l1_thread_id; i < m_iter; i+=l1_num_threads ) \
 		{ \
 			diagoffa_i = diagoffa + ( doff_t )i*MR; \
 \
@@ -343,10 +343,10 @@ void PASTEMAC(ch,varname)( \
 				bp_i = bp + off_a1011 * NR * NDUP; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-				a2 = a1 + k_a1011 * PACKMR; \
-				if ( i == m_iter - 1 ) \
+				a2 = a1 + k_a1011 * PACKMR * l1_num_threads; \
+				if ( i+l1_num_threads >= m_iter) \
 				{ \
-					a2 = a_cast; \
+					a2 = a_cast+k*PACKMR*l1_thread_id; \
 					b2 = b1 + cstep_b; \
 					if ( j + l2_num_threads >= n_iter ) \
 					  b2 = b_cast + ps_b*l2_thread_id; \
@@ -386,15 +386,15 @@ void PASTEMAC(ch,varname)( \
 					                        c11, rs_c,  cs_c ); \
 				} \
 \
-				a1 += k_a1011 * PACKMR; \
+				a1 += k_a1011 * PACKMR * l1_num_threads; \
 			} \
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + rstep_a; \
-				if ( i == m_iter - 1 ) \
+				if ( i+l1_num_threads >= m_iter ) \
 				{ \
-					a2 = a_cast; \
+					a2 = a_cast+k*PACKMR*l1_thread_id; \
 					b2 = b1 + cstep_b; \
 					if ( j + l2_num_threads >= n_iter ) \
 						b2 = b_cast + ps_b*l2_thread_id; \
