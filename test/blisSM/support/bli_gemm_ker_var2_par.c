@@ -92,8 +92,10 @@ void bli_gemm_ker_var2_par( obj_t*  alpha,
 	num_t     dt_beta;
 	void*     buf_beta;
 
-	dim_t l2_num_threads = l2_comm->num_threads_in_group;
-	dim_t l2_thread_id   = th_thread_id(l2_comm);
+	dim_t l2_num_threads = l1_comm->multiplicative_factor_above;
+	//l2_comm->multiplicative_factor_above;
+	dim_t l2_thread_id   = th_group_id(l1_comm);
+	    //th_group_id(l2_comm);
 	dim_t l1_num_threads;
 	dim_t l1_thread_id;
 	if (l1_comm) {
@@ -104,13 +106,18 @@ void bli_gemm_ker_var2_par( obj_t*  alpha,
 	  l1_num_threads = 1;
 	  l1_thread_id = 0;
 	}
+
 	/*
 #pragma omp critical
 	{
-	  printf("id: %u, num threads %u\n", l2_thread_id, l2_num_threads);
+	  printf("%u\n", th_global_thread_id());
+	  printf("l1 id: %u, num threads %u\n", l1_thread_id, l1_num_threads);
+	  printf("l2 id: %u, num threads %u\n", l2_thread_id, l2_num_threads);
 	  fflush(stdout);
 	}
 	*/
+
+
 
 	FUNCPTR_T f;
 
@@ -283,7 +290,7 @@ void PASTEMAC(ch,varname)( \
 		/* Interior loop over the m dimension (MR rows at a time). */ \
 		for ( i = l1_thread_id; i < m_iter; i += l1_num_threads ) \
 		{ \
-			a1  = a_cast + i * rstep_a; \
+		  a1  = a_cast + i * rstep_a;			\
 			c11 = c1 + i * rstep_c; \
 \
 			/* Compute the addresses of the next panels of A and B. */ \

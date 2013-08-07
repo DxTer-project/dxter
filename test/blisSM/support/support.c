@@ -45,11 +45,13 @@ void    th_setup_comm( thread_comm_t *comm,
 
 void    th_release_comm( thread_comm_t *comm )
 {
-  th_destroy_lock( &comm->barrier_lock );
+  if (comm)
+    th_destroy_lock( &comm->barrier_lock );
 }
 
 void   th_broadcast( thread_comm_t *comm, rank_t root, void *to_sendRecv, unsigned int size )
 {
+  if (comm == NULL) return;
   th_broadcast_without_second_barrier(comm, root, to_sendRecv, size);
   th_barrier( comm );
 }
@@ -107,6 +109,7 @@ void th_barrier( thread_comm_t *comm )
 
 void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm)
 {
+  if (comm == NULL) return;
   if (comm->multiplicative_factor_above > 1) {
     rank_t group = th_group_id(comm);
     dim_t len = *end - *start;

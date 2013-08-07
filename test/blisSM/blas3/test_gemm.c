@@ -15,17 +15,52 @@ extern blksz_t *gemm_extmr;
 extern blksz_t *gemm_extkr;
 extern blksz_t *gemm_extnr;
 
-#define NUMTHREADSPERL2 2
-#define NUML2PERPROC 3
-#define NUMPROCS 4
+#define NUMTHREADSPERL1 2
+#define NUML1PERL2 2
+#define NUML2PERPROC 2
+#define NUMPROCS 3
 
+#define NUML1 (NUMPROCS*NUML2PERPROC*NUML1PERL2)
 #define NUML2 (NUMPROCS*NUML2PERPROC)
-#define NUMTHREADS (NUML2*NUMTHREADSPERL2)
-#define NUMTHREADSPERPROC (NUML2PERPROC*NUMTHREADSPERL2)
+#define NUMTHREADS (NUML1*NUMTHREADSPERL1)
+#define NUMTHREADSPERL2 (NUML1PERL2*NUMTHREADSPERL1)
+#define NUMTHREADSPERPROC (NUMTHREADSPERL2*NUML2PERPROC)
 
 thread_comm_t global_comm[1];
 thread_comm_t proc_comms[NUMPROCS];
 thread_comm_t l2_comms[NUML2];
+thread_comm_t l1_comms[NUML1];
+
+void SetupComms(thread_comm_t **GlobalComm, thread_comm_t **ProcComm,
+		thread_comm_t **L2Comm, thread_comm_t **L1Comm)
+{
+  rank_t rank = omp_get_thread_num();
+  *GlobalComm = &global_comm[0];
+  *ProcComm = &proc_comms[rank / NUMTHREADSPERPROC];
+  *L2Comm = &l2_comms[rank / NUMTHREADSPERL2];
+  *L1Comm = &l1_comms[rank / NUMTHREADSPERL1];
+
+  /*
+#pragma omp critical
+  {
+    printf("%u\n%p\n%p\n%p\n",rank,*ProcComm,*L2Comm,*L1Comm);
+    fflush(stdout);
+  }
+  */
+  if ((rank % (NUMTHREADSPERPROC)) == 0) {
+    th_setup_comm(*ProcComm, NUMTHREADSPERPROC, NUMPROCS);
+  }
+
+  if ((rank % NUMTHREADSPERL2) == 0) {
+    th_setup_comm(*L2Comm, NUMTHREADSPERL2, NUML2PERPROC);
+  }
+
+  if ((rank % NUMTHREADSPERL1) == 0) {
+    th_setup_comm(*L1Comm, NUMTHREADSPERL1, NUML1PERL2);
+  }
+
+  th_barrier(*GlobalComm);
+}
 
 
 void DxT_GemmNN( obj_t *alpha,
@@ -39,41 +74,13 @@ void DxT_GemmNN( obj_t *alpha,
   bli_obj_init_pack( &packed_A_blk );
   bli_obj_init_pack( &packed_B_pan );
 
-  rank_t rank = omp_get_thread_num();
-  thread_comm_t *GlobalComm = &global_comm[0];
-  thread_comm_t *ProcComm = &proc_comms[rank / NUMTHREADSPERPROC];
-  thread_comm_t *L2Comm = &l2_comms[rank / NUMTHREADSPERL2];
+  thread_comm_t *GlobalComm;
+  thread_comm_t *ProcComm;
+  thread_comm_t *L2Comm;
+  thread_comm_t *L1Comm;
 
-  /*
-  if (NUMTHREADS != omp_get_num_threads()) {
-    printf("not expecting this number of threads\n");
-    fflush(stdout);
-    return;
-  }
-  */
-  if ((rank % (NUMTHREADSPERPROC)) == 0) {
-    //    printf("setup for %u\n",th_global_thread_id());
-    //    printf("%u\n",rank % NUMTHREADSPERPROC);
-    //    printf("%u, %u\n",NUMTHREADSPERPROC, NUML2PERPROC);
-    th_setup_comm(ProcComm, NUMTHREADSPERPROC, NUMPROCS);
-  }
+  SetupComms(&GlobalComm, &ProcComm, &L2Comm, &L1Comm);
 
-  if ((rank % NUMTHREADSPERL2) == 0) {
-    th_setup_comm(L2Comm, NUMTHREADSPERL2, NUML2PERPROC);
-  }
-
-  th_barrier(GlobalComm);
-  /*
-#pragma omp critical (BLISOutput)
-  {
-    printf("%u: \nGlobalComm:%u in group, group %u\nProcComm:%u in group, group %u\nL2Comm:%u in group, group %u\n", 
-	   th_global_thread_id(), 
-	   th_thread_id(GlobalComm), th_group_id(GlobalComm),
-	   th_thread_id(ProcComm), th_group_id(ProcComm),
-	   th_thread_id(L2Comm), th_group_id(L2Comm)
-	   );
-  }
-*/
   bli_scalm(beta, C);
 
   dim_t idx1, dimLen1, bs1;
@@ -145,7 +152,7 @@ void DxT_GemmNN( obj_t *alpha,
     printf("%u shifted to %u-%u\n",th_thread_id(L2Comm), idx3, dimLen3);
     fflush(stdout);
   }
-      */
+*/
 
       for ( ; idx3 < dimLen3; idx3 += bs3 ) {
 	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &C_1, gemm_mc );
@@ -168,18 +175,23 @@ void DxT_GemmNN( obj_t *alpha,
 	}
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_A_blk, L2Comm );
+	
 	/*
 #pragma omp critical (BLISOutput)
 	{
-	  bli_obj_print("packed_A_blk", &packed_A_blk);
-	  bli_obj_print("packed_B_pan", &packed_B_pan);
-	  bli_obj_print("C_1_1", &C_1_1);
+	  printf("%u: thread id %u, group id %u, num threads %u\n",
+		 th_global_thread_id(),
+		 th_thread_id(L1Comm),
+		 th_group_id(L1Comm),
+		 L1Comm->num_threads_in_group);
 	  fflush(stdout);
 	}
 	*/
 
+	
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L2Comm, NULL );
+			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, 
+			       L2Comm, L1Comm);//NULL );
 
 	//------------------------------------//
 
@@ -473,8 +485,8 @@ int main( int argc, char** argv )
 
   n_repeats = 1;
 
-  p_begin = 40;
-  p_end   = 1000;
+  p_begin = 400;
+  p_end   = 400;
   p_inc   = 40;
 
   m_input = -1;
@@ -596,6 +608,8 @@ int main( int argc, char** argv )
 	    bli_obj_toggle_trans( b );
 	  }
 
+	  //	  bli_printm( "c1", &c1, "%4.1f", "" );
+	  //	  bli_printm( "c2", &c2, "%4.1f", "" );
 
 	  bli_axpym( &negOne, &c1, &c2 );
 
