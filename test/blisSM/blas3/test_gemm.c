@@ -191,7 +191,7 @@ void DxT_GemmNN( obj_t *alpha,
 	
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, 
-			       L2Comm, L1Comm);//NULL );
+			       L1Comm);
 
 	//------------------------------------//
 
