@@ -349,7 +349,7 @@ void PASTEMAC(ch,varname)( \
 					a2 = a_cast; \
 					b2 = b1 + cstep_b; \
 					if ( j + l2_num_threads >= n_iter ) \
-						b2 = b_cast + l2_thread_id; \
+					  b2 = b_cast + ps_b*l2_thread_id; \
 				} \
 \
 				/* Handle interior and edge cases separately. */ \
@@ -397,7 +397,7 @@ void PASTEMAC(ch,varname)( \
 					a2 = a_cast; \
 					b2 = b1 + cstep_b; \
 					if ( j + l2_num_threads >= n_iter ) \
-						b2 = b_cast + l2_thread_id; \
+						b2 = b_cast + ps_b*l2_thread_id; \
 				} \
 \
 				/* Handle interior and edge cases separately. */ \
