@@ -33,7 +33,7 @@
 */
 
 #include "blis.h"
-#include "bli_trmm_l_ker_var2_par.h"
+#include "bli_trmm_u_ker_var2_par.h"
 
 #define FUNCPTR_T gemm_fp
 
@@ -46,21 +46,18 @@ typedef void (*FUNCPTR_T)(
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a,
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b,
                            void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c,
-                           dim_t   l2_num_threads, dim_t l2_thread_id, 
-                           dim_t   l1_num_threads, dim_t l1_thread_id 
+                           void*   c, inc_t rs_c, inc_t cs_c
                          );
 
-static FUNCPTR_T GENARRAY(ftypes,trmm_l_ker_var2_par);
+static FUNCPTR_T GENARRAY(ftypes,trmm_u_ker_var2_par);
 
 
-void bli_trmm_l_ker_var2_par( obj_t*  alpha,
+void bli_trmm_u_ker_var2_par( obj_t*  alpha,
                           obj_t*  a,
                           obj_t*  b,
                           obj_t*  beta,
                           obj_t*  c,
-                          trmm_t* cntl,
-			  thread_comm_t* l1_comm )
+                          trmm_t* cntl )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -91,21 +88,6 @@ void bli_trmm_l_ker_var2_par( obj_t*  alpha,
 	void*     buf_beta;
 
 	FUNCPTR_T f;
-
-
-	dim_t l2_num_threads = l1_comm->multiplicative_factor_above;
-	dim_t l2_thread_id   = th_group_id(l1_comm);
-	dim_t l1_num_threads;
-	dim_t l1_thread_id;
-	if (l1_comm) {
-	  l1_num_threads = l1_comm->num_threads_in_group;
-	  l1_thread_id = th_thread_id(l1_comm);
-	}
-	else {
-	  l1_num_threads = 1;
-	  l1_thread_id = 0;
-	}
-	
 
 /*
 	// Handle the special case where c and a are complex and b is real.
@@ -148,11 +130,7 @@ void bli_trmm_l_ker_var2_par( obj_t*  alpha,
 	   buf_a, rs_a, cs_a, ps_a,
 	   buf_b, rs_b, cs_b, ps_b,
 	   buf_beta,
-	   buf_c, rs_c, cs_c,
-	   l2_num_threads,
-	   l2_thread_id,
-	   l1_num_threads,
-	   l1_thread_id );
+	   buf_c, rs_c, cs_c );
 }
 
 
@@ -168,11 +146,7 @@ void PASTEMAC(ch,varname)( \
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
                            void*   beta, \
-                           void*   c, inc_t rs_c, inc_t cs_c, \
-                           dim_t   l2_num_threads, \
-                           dim_t   l2_thread_id, \
-                           dim_t   l1_num_threads, \
-                           dim_t   l1_thread_id \
+                           void*   c, inc_t rs_c, inc_t cs_c \
                          ) \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
@@ -217,8 +191,8 @@ void PASTEMAC(ch,varname)( \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
 	dim_t           k_nr; \
-	dim_t           k_a1011; \
-	dim_t           off_a1011; \
+	dim_t           k_a1112; \
+	dim_t           off_a1112; \
 	dim_t           i, j; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
@@ -239,9 +213,9 @@ void PASTEMAC(ch,varname)( \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
 \
-	/* Safeguard: If matrix A is above the diagonal, it is implicitly zero.
+	/* Safeguard: If matrix A is below the diagonal, it is implicitly zero.
 	   So we do nothing. */ \
-	if ( bli_is_strictly_above_diag_n( diagoffa, m, k ) ) return; \
+	if ( bli_is_strictly_below_diag_n( diagoffa, m, k ) ) return; \
 \
 	/* For consistency with the trsm macro-kernels, we inflate k to be a
 	   multiple of MR, if necessary. This is needed because we typically
@@ -250,16 +224,16 @@ void PASTEMAC(ch,varname)( \
 	   handle bottom-right corner edges of the triangle. */ \
 	if ( k % MR != 0 ) k += MR - ( k % MR ); \
 \
-	/* If the diagonal offset is negative, adjust the pointer to C and
+	/* If the diagonal offset is positive, adjust the pointer to B and
 	   treat this case as if the diagonal offset were zero. Note that
 	   we don't need to adjust the pointer to A since packm would have
 	   simply skipped over the region that was not stored. */ \
-	if ( diagoffa < 0 ) \
+	if ( diagoffa > 0 ) \
 	{ \
-		i        = -diagoffa; \
-		m        = m - i; \
+		j        = diagoffa; \
+		k        = k - j; \
 		diagoffa = 0; \
-		c_cast   = c_cast + (i  )*rs_c; \
+		b_cast   = b_cast + (j  )*rs_b; \
 	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
@@ -278,8 +252,8 @@ void PASTEMAC(ch,varname)( \
 	if ( m_left ) ++m_iter; \
 \
 	/* Compute the number of elements in B to duplicate per iteration. */ \
-	k_a1011 = bli_min( k, diagoffa + m ); \
-	k_nr    = k_a1011 * NR; \
+	k_a1112 = k; \
+	k_nr    = k_a1112 * NR; \
 \
 	/* Determine some increments used to step through A, B, and C. */ \
 	rstep_a = k * PACKMR; \
@@ -315,14 +289,14 @@ void PASTEMAC(ch,varname)( \
 		b2 = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
-		for ( i = 0; i < m_iter; i++ ) \
+		for ( i = 0; i < m_iter; ++i ) \
 		{ \
 			diagoffa_i = diagoffa + ( doff_t )i*MR; \
 \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* If the current panel of A intersects the diagonal, scale C
-			   by beta. If it is strictly below the diagonal, scale by one.
+			   by beta. If it is strictly above the diagonal, scale by one.
 			   This allows the current macro-kernel to work for both trmm
 			   and trmm3. */ \
 			if ( bli_intersects_diag_n( diagoffa_i, MR, k ) ) \
@@ -330,13 +304,13 @@ void PASTEMAC(ch,varname)( \
 				/* Determine the offset to the beginning of the panel that
 				   was packed so we can index into the corresponding location
 				   in bp. Then compute the length of that panel. */ \
-				off_a1011 = 0; \
-				k_a1011   = bli_min( k, diagoffa_i + MR ); \
+				off_a1112 = bli_max( diagoffa_i, 0 ); \
+				k_a1112   = k - off_a1112; \
 \
-				bp_i = bp + off_a1011 * NR * NDUP; \
+				bp_i = bp + off_a1112 * NR * NDUP; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-				a2 = a1 + k_a1011 * PACKMR; \
+				a2 = a1 + k_a1112 * PACKMR; \
 				if ( i == m_iter - 1 ) \
 				{ \
 					a2 = a_cast; \
@@ -349,7 +323,7 @@ void PASTEMAC(ch,varname)( \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
 					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,ukrname)( k_a1011, \
+					PASTEMAC(ch,ukrname)( k_a1112, \
 					                      alpha_cast, \
 					                      a1, \
 					                      bp_i, \
@@ -365,7 +339,7 @@ void PASTEMAC(ch,varname)( \
 					                        ct,  rs_ct, cs_ct ); \
 \
 					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,ukrname)( k_a1011, \
+					PASTEMAC(ch,ukrname)( k_a1112, \
 					                      alpha_cast, \
 					                      a1, \
 					                      bp_i, \
@@ -379,9 +353,9 @@ void PASTEMAC(ch,varname)( \
 					                        c11, rs_c,  cs_c ); \
 				} \
 \
-				a1 += k_a1011 * PACKMR; \
+				a1 += k_a1112 * PACKMR; \
 			} \
-			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
+			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1 + rstep_a; \
@@ -431,7 +405,10 @@ void PASTEMAC(ch,varname)( \
 		b1 += cstep_b; \
 		c1 += cstep_c; \
 	} \
+\
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_u_ker_var2_par: a1", MR, k_a1112, a1, 1, MR, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_u_ker_var2_par: b1", k_a1112, NR, bp_i, NR, 1, "%4.1f", "" );*/ \
 }
 
-INSERT_GENTFUNC_BASIC( trmm_l_ker_var2_par, GEMM_UKERNEL )
+INSERT_GENTFUNC_BASIC( trmm_u_ker_var2_par, GEMM_UKERNEL )
 

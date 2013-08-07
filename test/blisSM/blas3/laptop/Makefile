@@ -174,10 +174,10 @@ LDFLAGS  := -g -lm -ldl -fopenmp# -fno-underscoring -fno-second-underscore
 all: blis
 
 blis: test_gemm.x \
+      test_trmm.x \
       test_hemm.x \
       test_herk.x \
       test_her2k.x \
-      test_trmm.x \
       test_trsm.x
 
 # --Object file rules --
@@ -191,6 +191,12 @@ bli_packm_blk_var2_par.o: ../../support/bli_packm_blk_var2_par.c ../../support/b
 bli_gemm_ker_var2_par.o: ../../support/bli_gemm_ker_var2_par.c ../../support/bli_gemm_ker_var2_par.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+bli_trmm_l_ker_var2_par.o: ../../support/bli_trmm_l_ker_var2_par.c ../../support/bli_trmm_l_ker_var2_par.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+bli_trmm_u_ker_var2_par.o: ../../support/bli_trmm_u_ker_var2_par.c ../../support/bli_trmm_u_ker_var2_par.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c ../../support/support.h ../../support/bli_packm_blk_var2_par.h ../../support/bli_gemm_ker_var2_par.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -199,8 +205,16 @@ test_%.o: ../test_%.c
 
 # -- Executable file rules --
 
+test_gemm.x: test_gemm.o support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o $(BLIS_LIB)
+	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o support.o      $(BLIS_LIB)             $(LDFLAGS) -o $@
+
+test_trmm.x: test_trmm.o support.o bli_packm_blk_var2_par.o bli_trmm_u_ker_var2_par.o bli_trmm_l_ker_var2_par.o $(BLIS_LIB)
+	$(LINKER) $<    bli_packm_blk_var2_par.o bli_trmm_l_ker_var2_par.o bli_trmm_u_ker_var2_par.o support.o      $(BLIS_LIB)             $(LDFLAGS) -o $@
+
 test_%.x: test_%.o support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o $(BLIS_LIB)
 	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o support.o      $(BLIS_LIB)             $(LDFLAGS) -o $@
+
+
 
 
 # -- Clean rules --
