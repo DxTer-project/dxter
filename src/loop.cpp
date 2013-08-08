@@ -511,6 +511,12 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     Split *split = GetControl();
     
     string inputName = split->Input(0)->GetName(split->InputConnNum(0)).str();
+
+    if (loopLevel == "1") {
+      out.Indent();
+      *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";      
+    }
+      
     
     switch(split->m_dir) {
       case(PARTDIAGBACK):
