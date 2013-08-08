@@ -185,16 +185,13 @@ blis: test_gemm.x \
 support.o: ../../support/support.c ../../support/support.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-bli_packm_blk_var2_par.o: ../../support/bli_packm_blk_var2_par.c ../../support/bli_packm_blk_var2_par.h
+bli_packm_blk_var%_par.o: ../../support/bli_packm_blk_var%_par.c ../../support/bli_packm_blk_var%_par.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 bli_gemm_ker_var2_par.o: ../../support/bli_gemm_ker_var2_par.c ../../support/bli_gemm_ker_var2_par.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-bli_trmm_l_ker_var2_par.o: ../../support/bli_trmm_l_ker_var2_par.c ../../support/bli_trmm_l_ker_var2_par.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-bli_trmm_u_ker_var2_par.o: ../../support/bli_trmm_u_ker_var2_par.c ../../support/bli_trmm_u_ker_var2_par.h
+bli_trmm_%_ker_var2_par.o: ../../support/bli_trmm_%_ker_var2_par.c ../../support/bli_trmm_%_ker_var2_par.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c ../../support/support.h ../../support/bli_packm_blk_var2_par.h ../../support/bli_gemm_ker_var2_par.h
@@ -205,12 +202,13 @@ test_%.o: ../test_%.c
 
 # -- Executable file rules --
 
-test_gemm.x: test_gemm.o support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o $(BLIS_LIB)
+test_gemm.x: test_gemm.o support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o \
+    ../../support/SMBLAS3.h $(BLIS_LIB)
 	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o support.o      $(BLIS_LIB)             $(LDFLAGS) -o $@
 
-test_trmm.x: test_trmm.o support.o bli_packm_blk_var2_par.o \
+test_trmm.x: test_trmm.o support.o bli_packm_blk_var2_par.o bli_packm_blk_var3_par.o \
              bli_trmm_u_ker_var2_par.o bli_trmm_l_ker_var2_par.o \
-             bli_gemm_ker_var2_par.o $(BLIS_LIB)
+             bli_gemm_ker_var2_par.o ../../support/SMBLAS3.h $(BLIS_LIB)
 	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o \
 	    bli_trmm_l_ker_var2_par.o bli_trmm_u_ker_var2_par.o support.o \
 	    $(BLIS_LIB)             $(LDFLAGS) -o $@

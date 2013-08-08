@@ -46,7 +46,4 @@ rank_t   th_global_thread_id();
 void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm);
 
 
-#include "bli_trmm_l_ker_var2_par.h"
-#include "bli_trmm_u_ker_var2_par.h"
-#include "bli_packm_blk_var2_par.h"
-#include "bli_gemm_ker_var2_par.h"
+

@@ -1,64 +1,12 @@
 #include <unistd.h>
 #include <omp.h>
 #include "blis.h"
-#include "support.h"
-
-extern blksz_t *gemm_mc;
-extern blksz_t *gemm_kc;
-extern blksz_t *gemm_nc;
-extern blksz_t *gemm_mr;
-extern blksz_t *gemm_kr;
-extern blksz_t *gemm_nr;
-extern blksz_t *gemm_extmr;
-extern blksz_t *gemm_extkr;
-extern blksz_t *gemm_extnr;
-
-#define NUMTHREADSPERL1 2
-#define NUML1PERL2 2
-#define NUML2PERPROC 2
-#define NUMPROCS 3
-
-#define NUML1 (NUMPROCS*NUML2PERPROC*NUML1PERL2)
-#define NUML2 (NUMPROCS*NUML2PERPROC)
-#define NUMTHREADS (NUML1*NUMTHREADSPERL1)
-#define NUMTHREADSPERL2 (NUML1PERL2*NUMTHREADSPERL1)
-#define NUMTHREADSPERPROC (NUMTHREADSPERL2*NUML2PERPROC)
+#include "SMBLAS3.h"
 
 thread_comm_t global_comm[1];
 thread_comm_t proc_comms[NUMPROCS];
 thread_comm_t l2_comms[NUML2];
 thread_comm_t l1_comms[NUML1];
-
-void SetupComms(thread_comm_t **GlobalComm, thread_comm_t **ProcComm,
-		thread_comm_t **L2Comm, thread_comm_t **L1Comm)
-{
-  rank_t rank = omp_get_thread_num();
-  *GlobalComm = &global_comm[0];
-  *ProcComm = &proc_comms[rank / NUMTHREADSPERPROC];
-  *L2Comm = &l2_comms[rank / NUMTHREADSPERL2];
-  *L1Comm = &l1_comms[rank / NUMTHREADSPERL1];
-
-  /*
-#pragma omp critical
-  {
-    printf("%u\n%p\n%p\n%p\n",rank,*ProcComm,*L2Comm,*L1Comm);
-    fflush(stdout);
-  }
-  */
-  if ((rank % (NUMTHREADSPERPROC)) == 0) {
-    th_setup_comm(*ProcComm, NUMTHREADSPERPROC, NUMPROCS);
-  }
-
-  if ((rank % NUMTHREADSPERL2) == 0) {
-    th_setup_comm(*L2Comm, NUMTHREADSPERL2, NUML2PERPROC);
-  }
-
-  if ((rank % NUMTHREADSPERL1) == 0) {
-    th_setup_comm(*L1Comm, NUMTHREADSPERL1, NUML1PERL2);
-  }
-
-  th_barrier(*GlobalComm);
-}
 
 
 void DxT_GemmNN( obj_t *alpha,
@@ -67,17 +15,7 @@ void DxT_GemmNN( obj_t *alpha,
 	  obj_t *beta,
 	  obj_t *C )
 {
-  obj_t packed_A_blk;
-  obj_t packed_B_pan;
-  bli_obj_init_pack( &packed_A_blk );
-  bli_obj_init_pack( &packed_B_pan );
-
-  thread_comm_t *GlobalComm;
-  thread_comm_t *ProcComm;
-  thread_comm_t *L2Comm;
-  thread_comm_t *L1Comm;
-
-  SetupComms(&GlobalComm, &ProcComm, &L2Comm, &L1Comm);
+  FUNCTIONSTART
 
   bli_scalm(beta, C);
   
@@ -206,19 +144,7 @@ void DxT_GemmNN( obj_t *alpha,
     //****
   }
 
-  th_barrier(GlobalComm);
-
-  if (th_am_root(L2Comm)) {
-    bli_obj_release_pack( &packed_A_blk );
-    th_release_comm(L2Comm);
-  }
-  if (th_am_root(ProcComm)) {
-    bli_obj_release_pack( &packed_B_pan );
-    th_release_comm(ProcComm);
-  }
-  if (th_am_root(GlobalComm)) {
-    th_release_comm(GlobalComm);
-  }
+  FUNCTIONEND
 }
 
 void DxT_GemmTN( obj_t *alpha,
@@ -227,68 +153,11 @@ void DxT_GemmTN( obj_t *alpha,
 	  obj_t *beta,
 	  obj_t *C )
 {
-  obj_t A_1_1T_packed;
-  obj_t B_1_packed;
-  bli_obj_init_pack( &A_1_1T_packed );
-  bli_obj_init_pack( &B_1_packed );
+  FUNCTIONSTART
 
   bli_scalm(beta, C);
-
-dim_t idx1, dimLen1, bs1;
-///// Blocksize = 256
-dimLen1 = bli_obj_length_after_trans( *A );
-for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
-	bs1 = bli_determine_blocksize_f( idx1, dimLen1, A, gemm_kc );
-	dim_t idx2, dimLen2, bs2;
-//****
-	obj_t A_1;
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx1, bs1, A, &A_1 );
-	obj_t B_1;
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx1, bs1, B, &B_1 );
-	//------------------------------------//
-
-	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
-			BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			BLIS_BUFFER_FOR_B_PANEL,
-			gemm_kr,  gemm_nr,  
-			&B_1, &B_1_packed );
-	bli_packm_blk_var2( &BLIS_ONE, &B_1, &B_1_packed );
-	///// Blocksize = 128
-	dimLen2 = bli_obj_length_after_trans( *C );
-	for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-		bs2 = bli_determine_blocksize_f( idx2, dimLen2, C, gemm_mc );
-		dim_t idx3, dimLen3, bs3;
-	//****
-		obj_t A_1_1;
-		bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &A_1, &A_1_1 );
-		obj_t C_1;
-		bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, C, &C_1 );
-		//------------------------------------//
-
-		obj_t A_1_1T;
-		bli_obj_alias_with_trans( BLIS_TRANSPOSE, A_1_1, A_1_1T);
-		bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-				BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-				BLIS_BUFFER_FOR_A_BLOCK,
-				gemm_mr,  gemm_kr,  
-				&A_1_1T, &A_1_1T_packed );
-		bli_packm_blk_var2( &BLIS_ONE, &A_1_1T, &A_1_1T_packed );
-		bli_gemm_ker_var2( &BLIS_ONE, &A_1_1T_packed, &B_1_packed, 
-				&BLIS_ONE, &C_1, (gemm_t*)NULL );
-
-		//------------------------------------//
-
-	//****
-	}
-
-	//------------------------------------//
-
-//****
-}
-
-
-  bli_obj_release_pack( &A_1_1T_packed );
-  bli_obj_release_pack( &B_1_packed );
+  
+  FUNCTIONEND
 }
 
 void DxT_GemmNT( obj_t *alpha,
@@ -297,70 +166,11 @@ void DxT_GemmNT( obj_t *alpha,
 	  obj_t *beta,
 	  obj_t *C )
 {
-  obj_t A_1_1_packed;
-  obj_t B_1T_packed;
-  bli_obj_init_pack( &A_1_1_packed );
-  bli_obj_init_pack( &B_1T_packed );
+  FUNCTIONSTART
 
   bli_scalm(beta, C);
 
-dim_t idx1, dimLen1, bs1;
-///// Blocksize = 256
-dimLen1 = bli_obj_width_after_trans( *A );
-for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
-	bs1 = bli_determine_blocksize_f( idx1, dimLen1, A, gemm_kc );
-	dim_t idx2, dimLen2, bs2;
-//****
-	obj_t A_1;
-	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, A, &A_1 );
-	obj_t B_1;
-	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, B, &B_1 );
-	//------------------------------------//
-
-	obj_t B_1T;
-	bli_obj_alias_with_trans( BLIS_TRANSPOSE, B_1, B_1T);
-	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
-			BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			BLIS_BUFFER_FOR_B_PANEL,
-			gemm_kr,  gemm_nr,  
-			&B_1T, &B_1T_packed );
-	bli_packm_blk_var2( &BLIS_ONE, &B_1T, &B_1T_packed );
-	///// Blocksize = 128
-	dimLen2 = bli_obj_length_after_trans( *C );
-	for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-		bs2 = bli_determine_blocksize_f( idx2, dimLen2, C, gemm_mc );
-		dim_t idx3, dimLen3, bs3;
-	//****
-		obj_t A_1_1;
-		bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &A_1, &A_1_1 );
-		obj_t C_1;
-		bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, C, &C_1 );
-		//------------------------------------//
-
-		bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-				BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-				BLIS_BUFFER_FOR_A_BLOCK,
-				gemm_mr,  gemm_kr,  
-				&A_1_1, &A_1_1_packed );
-		bli_packm_blk_var2( &BLIS_ONE, &A_1_1, &A_1_1_packed );
-		bli_gemm_ker_var2( &BLIS_ONE, &A_1_1_packed, &B_1T_packed, 
-				&BLIS_ONE, &C_1, (gemm_t*)NULL );
-
-		//------------------------------------//
-
-	//****
-	}
-
-	//------------------------------------//
-
-//****
-}
-
-
-
-
-  bli_obj_release_pack( &A_1_1_packed );
-  bli_obj_release_pack( &B_1T_packed );
+  FUNCTIONEND
 }
 
 void DxT_GemmTT( obj_t *alpha,
@@ -369,70 +179,11 @@ void DxT_GemmTT( obj_t *alpha,
 	  obj_t *beta,
 	  obj_t *C )
 {
-  obj_t A_1_1T_packed;
-  obj_t B_1T_packed;
-  bli_obj_init_pack( &A_1_1T_packed );
-  bli_obj_init_pack( &B_1T_packed );
+  FUNCTIONSTART
 
   bli_scalm(beta, C);
 
-dim_t idx1, dimLen1, bs1;
-///// Blocksize = 256
-dimLen1 = bli_obj_length_after_trans( *A );
-for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
-	bs1 = bli_determine_blocksize_f( idx1, dimLen1, A, gemm_kc );
-	dim_t idx2, dimLen2, bs2;
-//****
-	obj_t A_1;
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx1, bs1, A, &A_1 );
-	obj_t B_1;
-	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, B, &B_1 );
-	//------------------------------------//
-
-	obj_t B_1T;
-	bli_obj_alias_with_trans( BLIS_TRANSPOSE, B_1, B_1T);
-	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
-			BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			BLIS_BUFFER_FOR_B_PANEL,
-			gemm_kr,  gemm_nr,  
-			&B_1T, &B_1T_packed );
-	bli_packm_blk_var2( &BLIS_ONE, &B_1T, &B_1T_packed );
-	///// Blocksize = 128
-	dimLen2 = bli_obj_length_after_trans( *C );
-	for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-		bs2 = bli_determine_blocksize_f( idx2, dimLen2, C, gemm_mc );
-		dim_t idx3, dimLen3, bs3;
-	//****
-		obj_t A_1_1;
-		bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &A_1, &A_1_1 );
-		obj_t C_1;
-		bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, C, &C_1 );
-		//------------------------------------//
-
-		obj_t A_1_1T;
-		bli_obj_alias_with_trans( BLIS_TRANSPOSE, A_1_1, A_1_1T);
-		bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-				BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-				BLIS_BUFFER_FOR_A_BLOCK,
-				gemm_mr,  gemm_kr,  
-				&A_1_1T, &A_1_1T_packed );
-		bli_packm_blk_var2( &BLIS_ONE, &A_1_1T, &A_1_1T_packed );
-		bli_gemm_ker_var2( &BLIS_ONE, &A_1_1T_packed, &B_1T_packed, 
-				&BLIS_ONE, &C_1, (gemm_t*)NULL );
-
-		//------------------------------------//
-
-	//****
-	}
-
-	//------------------------------------//
-
-//****
-}
-
-
- bli_obj_release_pack( &A_1_1T_packed );
-  bli_obj_release_pack( &B_1T_packed );
+FUNCTIONEND
 }
 
 int main( int argc, char** argv )
