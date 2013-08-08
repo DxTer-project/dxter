@@ -15,9 +15,9 @@ extern blksz_t *gemm_extnr;
 extern blksz_t *trmm_mr;
 
 #define NUMTHREADSPERL1 2
-#define NUML1PERL2 1
-#define NUML2PERPROC 1
-#define NUMPROCS 1
+#define NUML1PERL2 2
+#define NUML2PERPROC 2
+#define NUMPROCS 2
 
 #define NUML1 (NUMPROCS*NUML2PERPROC*NUML1PERL2)
 #define NUML2 (NUMPROCS*NUML2PERPROC)
@@ -121,6 +121,7 @@ void DxT_TrmmLLN( obj_t *alpha,
       //// ***Parallelized with communicator ProcComm; need correct output code
       dimLen3 = bli_obj_length_after_trans( X_1_2 );
       idx3 = 0;
+      
       th_shift_start_end(&idx3, &dimLen3, L2Comm);
       for ( ; idx3 < dimLen3; idx3 += bs3 ) {
 	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1_2, gemm_mc );
@@ -149,7 +150,26 @@ void DxT_TrmmLLN( obj_t *alpha,
 
 	//****
       }
-      dimLen3 = bli_obj_length_after_trans( L_11 );
+      /*
+	bli_obj_set_struc( BLIS_TRIANGULAR, L_11 );
+	bli_obj_set_uplo( BLIS_LOWER, L_11 );
+	bli_trmm(BLIS_LEFT, &BLIS_ONE, &L_11, &X_1_1);
+	bli_obj_set_struc( BLIS_GENERAL, L_11 );
+	bli_obj_set_uplo( BLIS_DENSE, L_11 );
+*/
+      /*
+      obj_t tmp;
+      bli_obj_create(BLIS_DOUBLE, bli_obj_length(X_1_1),bli_obj_width(X_1_1), 0, 0, &tmp);
+      bli_copym(&X_1_1,&tmp);
+      bli_obj_set_struc( BLIS_TRIANGULAR, L_11 );
+      bli_obj_set_uplo( BLIS_LOWER, L_11 );
+      //      bli_trmm(BLIS_LEFT, &BLIS_ONE, &L_11, &tmp);
+      bli_trmm(BLIS_LEFT, &BLIS_ONE, &L_11, &X_1_1);
+      bli_obj_set_struc( BLIS_GENERAL, L_11 );
+      bli_obj_set_uplo( BLIS_DENSE, L_11 );
+*/
+
+            dimLen3 = bli_obj_length_after_trans( L_11 );
       for ( idx3 = 0; idx3 < dimLen3; idx3 += bs3 ) {
 	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &L_11, gemm_mc );
 	dim_t idx4, dimLen4, bs4;
@@ -164,6 +184,7 @@ void DxT_TrmmLLN( obj_t *alpha,
 	bli_obj_set_uplo( BLIS_LOWER, L_11_1 );
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  //	  printf("size = %u x %u\n", bli_obj_length(L_11_1), bli_obj_width(L_11_1));
 	  bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -175,11 +196,18 @@ void DxT_TrmmLLN( obj_t *alpha,
 	bli_packm_blk_var3( &BLIS_ONE, &L_11_1, &packed_A_blk );
 	bli_trmm_l_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 				 &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm );
+	//	bli_trmm_l_ker_var2( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			     //&BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL);
 
 	//------------------------------------//
 
 	//****
       }
+
+      /*
+      bli_printm( "X_1_1", &X_1_1, "%4.1f", "" );
+      bli_printm( "tmp", &tmp, "%4.1f", "" );
+      */
 
       //------------------------------------//
 
@@ -190,6 +218,7 @@ void DxT_TrmmLLN( obj_t *alpha,
 
     //****
   }
+
 
   th_barrier(GlobalComm);
 
@@ -995,9 +1024,9 @@ int main( int argc, char** argv )
 
   n_repeats = 1;
 
-  p_begin = 50;
-  p_end   = 50;
-  p_inc   = 4;
+  p_begin = 40;
+  p_end   = 1000;
+  p_inc   = 40;
 
   m_input = -1;
   n_input = -1;
@@ -1016,6 +1045,8 @@ int main( int argc, char** argv )
       else               m =     ( dim_t )    m_input;
       if ( n_input < 0 ) n = p * ( dim_t )abs(n_input);
       else               n =     ( dim_t )    n_input;
+
+      n=4;
 
       bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
       bli_obj_create( dt_beta,  1, 1, 0, 0, &beta );
@@ -1055,7 +1086,7 @@ int main( int argc, char** argv )
 			    &c1 );
 	      }
 	      else { //normal
-	  	  bli_printm( "a_input", &a, "%4.1f", "" );
+		//	  	  bli_printm( "a_input", &a, "%4.1f", "" );
 		th_setup_comm(&global_comm[0], NUMTHREADS, 1);
 		_Pragma( "omp parallel num_threads(NUMTHREADS)" ) 
 		  {
@@ -1127,9 +1158,11 @@ int main( int argc, char** argv )
 	  bli_obj_set_struc( BLIS_GENERAL, a );
 	  bli_obj_set_uplo( BLIS_DENSE, a );
 
-	  	  bli_printm( "c1", &c1, "%4.1f", "" );
-	  	  bli_printm( "c2", &c2, "%4.1f", "" );
-	  	  bli_printm( "c_save", &c_save, "%4.1f", "" );
+#if 1
+	  //	  	  bli_printm( "c1", &c1, "%4.1f", "" );
+	  //	  	  bli_printm( "c2", &c2, "%4.1f", "" );
+	  //		  bli_printm( "c_save", &c_save, "%4.1f", "" );
+#endif
 
 	  bli_axpym( &negOne, &c1, &c2 );
 			
