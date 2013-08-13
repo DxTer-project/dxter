@@ -23,6 +23,7 @@
 
 #include "blis.h"
 #include "loopSupport.h"
+#include "helperNodes.h"
 
 Transpose::Transpose(Trans trans, bool objectTrans)
 : m_trans(trans), m_objTrans(objectTrans)
@@ -89,6 +90,41 @@ void Transpose::PrintCode(IndStream &out)
   string inputName = GetInputName(0).str();
   out.Indent();
   if (!m_objTrans) {
+#if DOSMPPHASE
+    bool barrierBack = false;
+    Node *in = this->Input(0);
+    unsigned int num = this->InputConnNum(0);
+    while (true) {
+      if (in->GetNodeClass() == InputNode::GetClass()) {
+	barrierBack = true;
+	break;
+      }
+      else if (in->IsPossTunnel(POSSTUNIN)) {
+	num = in->InputConnNum(0);
+	in = in->Input(0);
+      }
+      else if (in->IsPossTunnel(SETTUNIN)) {
+	num = in->InputConnNum(0);
+	in = in->Input(0);
+      }
+      else {
+	break;
+      }
+    }
+    if (!barrierBack) {
+      if (Child(0)->GetNodeClass() == OutputNode::GetClass()) {
+	*out << "th_barrier( GlobalComm );\n"; 
+	out.Indent();
+	*out << "if (th_am_root(GlobalComm))\n";
+	out.Indent(1);
+      }
+    }
+    if (barrierBack) {
+      *out << "if (th_am_root(GlobalComm))\n";
+      out.Indent(1);
+    }
+
+#endif //DOSMPPHASE
     if (m_trans == TRANS) {
       *out << "bli_obj_induce_trans( ";
     }
@@ -99,7 +135,12 @@ void Transpose::PrintCode(IndStream &out)
     else
       throw;
     *out << inputName << " );\n";
-    
+#if DOSMPPHASE
+    if (barrierBack) {
+      out.Indent();
+      *out << "th_barrier( GlobalComm );\n";
+    }
+#endif //DOSMPPHASE
   }
   else {
     string name = GetNameStr(0);

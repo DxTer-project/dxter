@@ -17,9 +17,9 @@ extern blksz_t *gemm_extkr;
 extern blksz_t *gemm_extnr;
 extern blksz_t *trmm_mr;
 
-#define NUMTHREADSPERL1 2
-#define NUML1PERL2 2
-#define NUML2PERPROC 2
+#define NUMTHREADSPERL1 1
+#define NUML1PERL2 1
+#define NUML2PERPROC 1
 #define NUMPROCS 2
 
 #define NUML1 (NUMPROCS*NUML2PERPROC*NUML1PERL2)

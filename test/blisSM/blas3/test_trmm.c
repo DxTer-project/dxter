@@ -176,19 +176,15 @@ void DxT_TrmmRLT( obj_t *alpha,
 {
   FUNCTIONSTART
   bli_scalm(alpha, X);
-  
-  bli_obj_induce_trans( *X );
 
+  if (th_am_root(GlobalComm))
+    bli_obj_induce_trans( *X );
+  th_barrier( GlobalComm );
   //// ***Parallelized with communicator GlobalComm; need correct output code
   dim_t idx1, dimLen1, bs1;
-
   dimLen1 = bli_obj_width_after_trans( *X );
   idx1 = 0;
   th_shift_start_end(&idx1, &dimLen1, ProcComm);
-#pragma omp critical 
-  {
-    printf("for %u, idx1: %u, dimLen1 %u\n", th_global_thread_id(), idx1, dimLen1);
-  }
   for ( ; idx1 < dimLen1; idx1 += bs1 ) {
     bs1 = bli_determine_blocksize_f( idx1, dimLen1, X, gemm_nc );
     dim_t idx2, dimLen2, bs2;
@@ -222,37 +218,6 @@ void DxT_TrmmRLT( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1, &packed_B_pan, ProcComm );
-      dimLen3 = bli_obj_length_after_trans( L_11 );
-      for ( idx3 = 0; idx3 < dimLen3; idx3 += bs3 ) {
-	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &L_11, gemm_mc );
-	dim_t idx4, dimLen4, bs4;
-	//****
-	obj_t L_11_1;
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &L_11, &L_11_1 );
-	obj_t X_1_1_1;
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_1, &X_1_1_1 );
-	//------------------------------------//
-
-	bli_obj_set_struc( BLIS_TRIANGULAR, L_11_1 );
-	bli_obj_set_uplo( BLIS_LOWER, L_11_1 );
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
-	  bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			       BLIS_BUFFER_FOR_A_BLOCK,
-			       gemm_mr, gemm_mr, 
-			       &L_11_1, &packed_A_blk );
-	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	//	bli_packm_blk_var3_par( &BLIS_ONE, &L_11_1, &packed_A_blk, L2Comm );
-	bli_packm_blk_var3( &BLIS_ONE, &L_11_1, &packed_A_blk );
-	bli_trmm_l_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				 &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
-
-	//------------------------------------//
-
-	//****
-      }
       //// ***Parallelized with communicator ProcComm; need correct output code
       dimLen3 = bli_obj_length_after_trans( X_1_2 );
       idx3 = 0;
@@ -284,6 +249,37 @@ void DxT_TrmmRLT( obj_t *alpha,
 
 	//****
       }
+      dimLen3 = bli_obj_length_after_trans( L_11 );
+      for ( idx3 = 0; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &L_11, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t L_11_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &L_11, &L_11_1 );
+	obj_t X_1_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_1, &X_1_1_1 );
+	//------------------------------------//
+
+	bli_obj_set_struc( BLIS_TRIANGULAR, L_11_1 );
+	bli_obj_set_uplo( BLIS_LOWER, L_11_1 );
+	th_barrier( L2Comm );
+	if (th_am_root(L2Comm)) {
+	  bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_mr, 
+			       &L_11_1, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	//bli_packm_blk_var3_par( &BLIS_ONE, &L_11_1, &packed_A_blk, L2Comm );
+	bli_packm_blk_var3( &BLIS_ONE, &L_11_1, &packed_A_blk );
+	bli_trmm_l_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+				 &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
+
+	//------------------------------------//
+
+	//****
+      }
 
       //------------------------------------//
 
@@ -294,7 +290,12 @@ void DxT_TrmmRLT( obj_t *alpha,
 
     //****
   }
-  bli_obj_induce_trans( *X );
+  th_barrier( GlobalComm );
+  if (th_am_root(GlobalComm))
+    bli_obj_induce_trans( *X );
+
+
+
 
   FUNCTIONEND
 }
@@ -386,9 +387,9 @@ int main( int argc, char** argv )
 
   n_repeats = 1;
 
-  p_begin = 8;
-  p_end   = 8;
-  p_inc   = 4;
+  p_begin = 40;
+  p_end   = 1000;
+  p_inc   = 40;
 
   m_input = -1;
   n_input = -1;
@@ -518,7 +519,7 @@ int main( int argc, char** argv )
 	  bli_obj_set_struc( BLIS_GENERAL, a );
 	  bli_obj_set_uplo( BLIS_DENSE, a );
 
-#if 1
+#if 0
 	  	  	  bli_printm( "c1", &c1, "%4.1f", "" );
 	  	  	  bli_printm( "c2", &c2, "%4.1f", "" );
 	  		  bli_printm( "c_save", &c_save, "%4.1f", "" );
