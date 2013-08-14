@@ -110,7 +110,7 @@ void DxT_TrmmLLN( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	//bli_packm_blk_var3_par( &BLIS_ONE, &L_11_1, &packed_A_blk, L2Comm );
 	bli_packm_blk_var3( &BLIS_ONE, &L_11_1, &packed_A_blk );
-	bli_trmm_l_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+	bli_trmm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 				 &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm );
 
 	//------------------------------------//
@@ -222,7 +222,7 @@ void DxT_TrmmLUT( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	//	bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1T, &packed_A_blk, L2Comm );
 	bli_packm_blk_var3( &BLIS_ONE, &U_11_1T, &packed_A_blk );
-	bli_trmm_l_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+	bli_trmm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 				 &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
 
 	//------------------------------------//
@@ -388,7 +388,7 @@ void DxT_TrmmRLT( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	//bli_packm_blk_var3_par( &BLIS_ONE, &L_11_1, &packed_A_blk, L2Comm );
 	bli_packm_blk_var3( &BLIS_ONE, &L_11_1, &packed_A_blk );
-	bli_trmm_l_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+	bli_trmm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 				 &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
 
 	//------------------------------------//
@@ -522,7 +522,7 @@ void DxT_TrmmRUN( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	//bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1T, &packed_A_blk, L2Comm );
 	bli_packm_blk_var3( &BLIS_ONE, &U_11_1T, &packed_A_blk  );
-	bli_trmm_l_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+	bli_trmm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 				 &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
 
 	//------------------------------------//

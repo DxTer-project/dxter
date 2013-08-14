@@ -39,7 +39,7 @@
 //
 // Prototype object-based interface.
 //
-void bli_trmm_l_ker_var2_par( obj_t*  alpha,
+void bli_trmm_ll_ker_var2_par( obj_t*  alpha,
                           obj_t*  a,
                           obj_t*  b,
                           obj_t*  beta,
@@ -68,5 +68,5 @@ void PASTEMAC(ch,varname)( \
                            dim_t   l1_num_threads, dim_t l1_thread_id \
                          );
 
-INSERT_GENTPROT_BASIC( trmm_l_ker_var2_par )
+INSERT_GENTPROT_BASIC( trmm_ll_ker_var2_par )
 

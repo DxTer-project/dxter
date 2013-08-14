@@ -1,7 +1,7 @@
 #include "support.h"
 
-#include "bli_trmm_l_ker_var2_par.h"
-#include "bli_trmm_u_ker_var2_par.h"
+#include "bli_trmm_ll_ker_var2_par.h"
+#include "bli_trmm_lu_ker_var2_par.h"
 #include "bli_packm_blk_var2_par.h"
 #include "bli_gemm_ker_var2_par.h"
 

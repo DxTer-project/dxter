@@ -33,7 +33,7 @@
 */
 
 #include "blis.h"
-#include "bli_trmm_l_ker_var2_par.h"
+#include "bli_trmm_ll_ker_var2_par.h"
 
 #define FUNCPTR_T gemm_fp
 
@@ -51,10 +51,10 @@ typedef void (*FUNCPTR_T)(
                            dim_t   l1_num_threads, dim_t l1_thread_id 
                          );
 
-static FUNCPTR_T GENARRAY(ftypes,trmm_l_ker_var2_par);
+static FUNCPTR_T GENARRAY(ftypes,trmm_ll_ker_var2_par);
 
 
-void bli_trmm_l_ker_var2_par( obj_t*  alpha,
+void bli_trmm_ll_ker_var2_par( obj_t*  alpha,
                           obj_t*  a,
                           obj_t*  b,
                           obj_t*  beta,
@@ -461,5 +461,5 @@ void PASTEMAC(ch,varname)( \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( trmm_l_ker_var2_par, GEMM_UKERNEL )
+INSERT_GENTFUNC_BASIC( trmm_ll_ker_var2_par, GEMM_UKERNEL )
 

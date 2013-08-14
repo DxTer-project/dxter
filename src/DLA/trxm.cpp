@@ -1999,17 +1999,17 @@ void TrxmBP::PrintCode(IndStream &out)
   out.Indent();
   if(m_invert) {
     if (m_tri == LOWER)
-      *out << "bli_trsm_l_ker_var2";
+      *out << "bli_trsm_ll_ker_var2";
     else if (m_tri == UPPER)
-      *out << "bli_trsm_u_ker_var2";
+      *out << "bli_trsm_lu_ker_var2";
     else
       throw;
   }
   else {
     if (m_tri == LOWER)
-      *out << "bli_trmm_l_ker_var2";
+      *out << "bli_trmm_ll_ker_var2";
     else if (m_tri == UPPER)
-      *out << "bli_trmm_u_ker_var2";
+      *out << "bli_trmm_lu_ker_var2";
     else
       throw;
   }

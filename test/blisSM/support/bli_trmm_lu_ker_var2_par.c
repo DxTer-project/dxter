@@ -33,7 +33,7 @@
 */
 
 #include "blis.h"
-#include "bli_trmm_u_ker_var2_par.h"
+#include "bli_trmm_lu_ker_var2_par.h"
 
 #define FUNCPTR_T gemm_fp
 
@@ -49,10 +49,10 @@ typedef void (*FUNCPTR_T)(
                            void*   c, inc_t rs_c, inc_t cs_c
                          );
 
-static FUNCPTR_T GENARRAY(ftypes,trmm_u_ker_var2_par);
+static FUNCPTR_T GENARRAY(ftypes,trmm_lu_ker_var2_par);
 
 
-void bli_trmm_u_ker_var2_par( obj_t*  alpha,
+void bli_trmm_lu_ker_var2_par( obj_t*  alpha,
                           obj_t*  a,
                           obj_t*  b,
                           obj_t*  beta,
@@ -406,9 +406,9 @@ void PASTEMAC(ch,varname)( \
 		c1 += cstep_c; \
 	} \
 \
-/*PASTEMAC(ch,fprintm)( stdout, "trmm_u_ker_var2_par: a1", MR, k_a1112, a1, 1, MR, "%4.1f", "" );*/ \
-/*PASTEMAC(ch,fprintm)( stdout, "trmm_u_ker_var2_par: b1", k_a1112, NR, bp_i, NR, 1, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_lu_ker_var2_par: a1", MR, k_a1112, a1, 1, MR, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_lu_ker_var2_par: b1", k_a1112, NR, bp_i, NR, 1, "%4.1f", "" );*/ \
 }
 
-INSERT_GENTFUNC_BASIC( trmm_u_ker_var2_par, GEMM_UKERNEL )
+INSERT_GENTFUNC_BASIC( trmm_lu_ker_var2_par, GEMM_UKERNEL )
 
