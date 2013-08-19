@@ -194,6 +194,9 @@ bli_gemm_ker_var2_par.o: ../../support/bli_gemm_ker_var2_par.c ../../support/bli
 bli_trmm_%_ker_var2_par.o: ../../support/bli_trmm_%_ker_var2_par.c ../../support/bli_trmm_%_ker_var2_par.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+bli_herk_%_ker_var2_par.o: ../../support/bli_herk_%_ker_var2_par.c ../../support/bli_herk_%_ker_var2_par.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c ../../support/support.h ../../support/bli_packm_blk_var2_par.h ../../support/bli_gemm_ker_var2_par.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -211,6 +214,13 @@ test_trmm.x: test_trmm.o support.o bli_packm_blk_var2_par.o bli_packm_blk_var3_p
              bli_gemm_ker_var2_par.o ../../support/SMBLAS3.h $(BLIS_LIB)
 	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o \
 	    bli_trmm_ll_ker_var2_par.o bli_trmm_lu_ker_var2_par.o support.o \
+	    $(BLIS_LIB)             $(LDFLAGS) -o $@
+
+test_herk.x: test_herk.o support.o bli_packm_blk_var2_par.o bli_packm_blk_var3_par.o \
+             bli_herk_l_ker_var2_par.o bli_herk_u_ker_var2_par.o \
+             bli_gemm_ker_var2_par.o ../../support/SMBLAS3.h $(BLIS_LIB)
+	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o \
+	    bli_herk_l_ker_var2_par.o bli_herk_u_ker_var2_par.o support.o \
 	    $(BLIS_LIB)             $(LDFLAGS) -o $@
 
 test_%.x: test_%.o support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o $(BLIS_LIB)
