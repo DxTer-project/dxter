@@ -33,6 +33,9 @@
 */
 
 #include "blis.h"
+#include "bli_herk_l_ker_var2_par.h"
+#include "support.h"
+
 
 #define FUNCPTR_T herk_fp
 
@@ -45,7 +48,11 @@ typedef void (*FUNCPTR_T)(
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a,
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b,
                            void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c
+                           void*   c, inc_t rs_c, inc_t cs_c,
+                           dim_t   l2_num_threads,
+                           dim_t   l2_thread_id,
+                           dim_t   l1_num_threads,
+                           dim_t   l1_thread_id
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,herk_l_ker_var2_par);
@@ -56,7 +63,8 @@ void bli_herk_l_ker_var2_par( obj_t*  alpha,
                           obj_t*  b,
                           obj_t*  beta,
                           obj_t*  c,
-                          herk_t* cntl )
+                          herk_t* cntl,
+			    thread_comm_t* l1_comm)
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -85,6 +93,19 @@ void bli_herk_l_ker_var2_par( obj_t*  alpha,
 
 	num_t     dt_beta;
 	void*     buf_beta;
+
+	dim_t l2_num_threads = l1_comm->multiplicative_factor_above;
+	dim_t l2_thread_id   = th_group_id(l1_comm);
+	dim_t l1_num_threads;
+	dim_t l1_thread_id;
+	if (l1_comm) {
+	  l1_num_threads = l1_comm->num_threads_in_group;
+	  l1_thread_id = th_thread_id(l1_comm);
+	}
+	else {
+	  l1_num_threads = 1;
+	  l1_thread_id = 0;
+	}
 
 	FUNCPTR_T f;
 
@@ -128,7 +149,11 @@ void bli_herk_l_ker_var2_par( obj_t*  alpha,
 	   buf_a, rs_a, cs_a, ps_a,
 	   buf_b, rs_b, cs_b, ps_b,
 	   buf_beta,
-	   buf_c, rs_c, cs_c );
+	   buf_c, rs_c, cs_c,
+	   l2_num_threads,
+	   l2_thread_id,
+	   l1_num_threads,
+	   l1_thread_id );
 }
 
 
@@ -144,7 +169,11 @@ void PASTEMAC(ch,varname)( \
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
                            void*   beta, \
-                           void*   c, inc_t rs_c, inc_t cs_c \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           dim_t   l2_num_threads, \
+                           dim_t   l2_thread_id, \
+                           dim_t   l1_num_threads, \
+                           dim_t   l1_thread_id \
                          ) \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
