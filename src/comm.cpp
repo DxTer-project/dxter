@@ -32,8 +32,10 @@ string CommToStr(Comm comm)
     case (MCCOMM):
       return "g.MCComm()";
 #elif DOSM||DOSQM
+#if NUMPROCS>1
     case(ALLPROCCOMM):
       return "GlobalComm";
+#endif //NUML2PERPROC > 1
     case(PROCCOMM):
       return "ProcComm";
     case(L2COMM):

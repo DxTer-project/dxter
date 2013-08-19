@@ -54,10 +54,14 @@ inline Comm GetSubComm(Comm comm)
 #if DODM
       throw;
 #elif DOSM||DOSQM
+#if NUMPROCS>1
     case(ALLPROCCOMM):
       return PROCCOMM;
+#endif //NUMPROCS>1
+#if NUML2PERPROC>1
     case (ALLL2COMM):
       return L2COMMSUBALLL2;
+#endif //NUML2PERPROC > 1
     case(PROCCOMM):
       return L2COMM;
     case(L2COMM):
