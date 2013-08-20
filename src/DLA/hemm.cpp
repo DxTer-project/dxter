@@ -1091,16 +1091,25 @@ bool HemmRightToLeft::CanApply(const Poss *poss, const Node *node) const
 void HemmRightToLeft::Apply(Poss *poss, Node *node) const
 {
   Hemm *hemm = (Hemm*)node;
-  hemm->m_side = LEFT;
 
-  InsertTranspose(CONJ, true, hemm, 0, true);
-  InsertTranspose(TRANS, true, hemm, 1, true);
-  InsertTranspose(TRANS, false, hemm, 2, true);
+  SetObjProps *props = new SetObjProps(hemm->m_tri,
+				       NONUNIT,
+				       hemm->m_type == REAL ? SYMM : HERM);
+  props->AddInput(hemm->m_inputs[0]->m_n, hemm->m_inputs[0]->m_num);
+  
+  Gemm *gemm = new Gemm(hemm->GetLayer(), NORMAL, NORMAL,
+			hemm->m_alpha, hemm->m_beta,
+			hemm->m_type);
 
-  Transpose *newTrans = new Transpose(TRANS, false);
-  poss->AddNode(newTrans);
-  hemm->RedirectAllChildren(newTrans);
-  newTrans->AddInput(hemm, 0);
+  gemm->AddInputs(6, 
+		  hemm->m_inputs[1]->m_n, hemm->m_inputs[1]->m_num,
+		  props, 0,
+		  hemm->m_inputs[2]->m_n, hemm->m_inputs[2]->m_num);
+
+  poss->AddNode(gemm);
+  poss->AddNode(props);
+  hemm->RedirectAllChildren(gemm);
+  node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 
