@@ -736,14 +736,14 @@ int main( int argc, char** argv )
 	if (argc != 3) {
 	  printf("test L/U N/T\n");
 	  fflush(stdout);
-	  return;
+	  return 0;
 	}
 
 	if (*(argv[1]) == 'L')
 	  lower = 1;
 	else if (*(argv[1]) != 'U') {
 	  printf("lower/upper not correct\n");
-	  return;
+	  return 0;
 	}
 	else
 	  lower = 0;
@@ -752,7 +752,7 @@ int main( int argc, char** argv )
 	  trans = 1;
 	else if (*(argv[2]) != 'N') {
 	  printf("trans/normal not correct\n");
-	  return;
+	  return 0;
 	}
 	else
 	  trans = 0;

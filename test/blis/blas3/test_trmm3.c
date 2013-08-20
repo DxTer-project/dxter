@@ -174,14 +174,14 @@ int main( int argc, char** argv )
   if (argc != 4) {
     printf("test L/R L/U N/T\n");
     fflush(stdout);
-    return;
+    return 0;
   }
 
   if (*(argv[1]) == 'L')
     left = 1;
   else if (*(argv[1]) != 'R') {
     printf("left/right not correct\n");
-    return;
+    return 0;
   }
   else
     left = 0;
@@ -190,7 +190,7 @@ int main( int argc, char** argv )
     lower = 1;
   else if (*(argv[2]) != 'U') {
     printf("lower/upper not correct\n");
-    return;
+    return 0;
   }
   else
     lower = 0;
@@ -199,7 +199,7 @@ int main( int argc, char** argv )
     trans = 1;
   else if (*(argv[3]) != 'N') {
     printf("trans/normal not correct\n");
-    return;
+    return 0;
   }
   else
     trans = 0;

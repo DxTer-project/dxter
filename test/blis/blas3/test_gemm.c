@@ -319,21 +319,21 @@ int main( int argc, char** argv )
 			
   if (argc != 3) {
     printf("test T/N T/N\n");
-    return;
+    return 0;
   }
 
   if (*(argv[1]) == 'T')
     transA = 1;
   else if (*(argv[1]) != 'N') {
     printf("transA not correct\n");
-    return;
+    return 0;
   }
 
   if (*(argv[2]) == 'T')
     transB = 1;
   else if (*(argv[2]) != 'N') {
     printf("transB not correct\n");
-    return;
+    return 0;
   }
 
   bli_init();
