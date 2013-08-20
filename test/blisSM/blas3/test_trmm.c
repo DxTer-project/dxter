@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <omp.h>
 #include "blis.h"
 #include "SMBLAS3.h"
 
@@ -111,7 +112,7 @@ void DxT_TrmmLLN( obj_t *alpha,
 	//bli_packm_blk_var3_par( &BLIS_ONE, &L_11_1, &packed_A_blk, L2Comm );
 	bli_packm_blk_var3( &BLIS_ONE, &L_11_1, &packed_A_blk );
 	bli_trmm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				 &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm );
+				  &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm );
 
 	//------------------------------------//
 
@@ -131,24 +132,136 @@ void DxT_TrmmLLN( obj_t *alpha,
 
 
   FUNCTIONEND
-}
+    }
 
 void DxT_TrmmLLT( obj_t *alpha,
 		  obj_t *L,
 		  obj_t *X )
 {
   FUNCTIONSTART
-  bli_scalm(alpha, X);
+    bli_scalm(alpha, X);
   FUNCTIONEND
-}
+    }
 
 
 void DxT_TrmmLUN( obj_t *alpha,
 		  obj_t *U,
 		  obj_t *X )
 {
-  FUNCTIONSTART
+  FUNCTIONSTART;
   bli_scalm(alpha, X);
+  
+  dim_t idx1, dimLen1, bs1;
+  dimLen1 = bli_obj_width_after_trans( *X );
+  idx1 = 0;
+  th_shift_start_end(&idx1, &dimLen1, ProcComm);
+  for ( ; idx1 < dimLen1; idx1 += bs1 ) {
+    bs1 = bli_determine_blocksize_f( idx1, dimLen1, X, gemm_nc );
+    dim_t idx2, dimLen2, bs2;
+    //****
+    obj_t X_1;
+    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, X, &X_1 );
+    //------------------------------------//
+
+    dimLen2 = bli_obj_length_after_trans( X_1 );
+    for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
+      bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_1, gemm_kc );
+      dim_t idx3, dimLen3, bs3;
+      //****
+      obj_t U_01;
+      bli_acquire_mpart_tl2br( BLIS_SUBPART01, idx2, bs2, U, &U_01 );
+      obj_t U_11;
+      bli_acquire_mpart_tl2br( BLIS_SUBPART11, idx2, bs2, U, &U_11 );
+      obj_t X_1_0;
+      bli_acquire_mpart_t2b( BLIS_SUBPART0, idx2, bs2, &X_1, &X_1_0 );
+      obj_t X_1_1;
+      bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &X_1, &X_1_1 );
+      //------------------------------------//
+
+      th_barrier( ProcComm );
+      if (th_am_root(ProcComm)) {
+	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
+			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			     BLIS_BUFFER_FOR_B_PANEL,
+			     gemm_mr, gemm_nr, 
+			     &X_1_1, &packed_B_pan );
+      }
+      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1, &packed_B_pan, ProcComm );
+      dimLen3 = bli_obj_length_after_trans( U_11 );
+      for ( idx3 = 0; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &U_11, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t U_11_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &U_11, &U_11_1 );
+	obj_t X_1_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_1, &X_1_1_1 );
+	//------------------------------------//
+
+	bli_obj_set_struc( BLIS_TRIANGULAR, U_11_1 );
+	bli_obj_set_uplo( BLIS_UPPER, U_11_1 );
+	th_barrier( L2Comm );
+	if (th_am_root(L2Comm)) {
+	  bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_mr, 
+			       &U_11_1, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	//	bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1, &packed_A_blk, L2Comm );
+	bli_packm_blk_var3( &BLIS_ONE, &U_11_1, &packed_A_blk );
+	bli_trmm_lu_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+				  &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
+
+	//------------------------------------//
+
+	//****
+      }
+      //// ***Parallelized with communicator ProcComm; need correct output code
+      dimLen3 = bli_obj_length_after_trans( X_1_0 );
+      idx3 = 0;
+      th_shift_start_end(&idx3, &dimLen3, L2Comm);
+      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1_0, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t U_01_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &U_01, &U_01_1 );
+	obj_t X_1_0_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_0, &X_1_0_1 );
+	//------------------------------------//
+
+	th_barrier( L2Comm );
+	if (th_am_root(L2Comm)) {
+	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_mr, 
+			       &U_01_1, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &U_01_1, &packed_A_blk, L2Comm );
+	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			       &BLIS_ONE, &X_1_0_1, (gemm_t*)NULL, L1Comm );
+
+	//------------------------------------//
+
+	//****
+      }
+
+      //------------------------------------//
+
+      //****
+    }
+
+    //------------------------------------//
+
+    //****
+  }
+
+
   FUNCTIONEND
 }
 
@@ -157,7 +270,7 @@ void DxT_TrmmLUT( obj_t *alpha,
 		  obj_t *X )
 {
   FUNCTIONSTART
-  bli_scalm(alpha, X);
+    bli_scalm(alpha, X);
 
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *X );
@@ -223,7 +336,7 @@ void DxT_TrmmLUT( obj_t *alpha,
 	//	bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1T, &packed_A_blk, L2Comm );
 	bli_packm_blk_var3( &BLIS_ONE, &U_11_1T, &packed_A_blk );
 	bli_trmm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				 &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
+				  &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
 
 	//------------------------------------//
 
@@ -274,7 +387,7 @@ void DxT_TrmmLUT( obj_t *alpha,
   }
 
   FUNCTIONEND
-}
+    }
 
 void DxT_TrmmRLN( obj_t *alpha,
 		  obj_t *L,
@@ -282,6 +395,7 @@ void DxT_TrmmRLN( obj_t *alpha,
 {
   FUNCTIONSTART
   bli_scalm(alpha, X);
+
   FUNCTIONEND
 }
 
