@@ -49,6 +49,8 @@ Size BSSizeToSize(BSSize size)
   }
 }
 
+
+
 string BSSizeToStr(BSSize size)
 {
   switch(size)
@@ -63,6 +65,25 @@ string BSSizeToStr(BSSize size)
       return "gemm_nc";
     case (USEBLISOUTERBS):
       return "bs_obj";
+    default:
+      throw;
+  }
+}
+
+string BSSizeToSubSizeStr(BSSize size)
+{
+  switch(size)
+  {
+    case (USEELEMBS):
+      throw;
+    case (USEBLISMC):
+      return "gemm_mr";
+    case (USEBLISKC):
+      return "gemm_kr";
+    case (USEBLISNC):
+      return "gemm_nr";
+    case (USEBLISOUTERBS):
+      throw;
     default:
       throw;
   }
@@ -543,7 +564,9 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
       *out << idx << " = 0;\n";
       out.Indent();
       *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", " 
-	   << CommToStr(GetSubComm(m_comm)) << ");\n";
+	   << CommToStr(GetSubComm(m_comm)) << ", "
+	   << "bli_blksz_for_obj( &" << split->GetInputNameStr(0)
+	   << ", " << BSSizeToSubSizeStr(m_bsSize) << "));\n";
       out.Indent();
       *out << "for ( ; " << idx << " < " << dimLen << "; "
 	   << idx << " += " << bs <<" ) {\n";

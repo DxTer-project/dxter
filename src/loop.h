@@ -61,6 +61,7 @@ enum BSSize { USEELEMBS,
 	      BADBSSIZE };
 
 Size BSSizeToSize(BSSize size);	      
+string BSSizeToSubSizeStr(BSSize size);
 
 unsigned int GetNumElems(PartDir dir);
 string PartDirToStr(PartDir dir);
