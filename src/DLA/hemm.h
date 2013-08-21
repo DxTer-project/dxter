@@ -154,13 +154,13 @@ class BLISHemmLoopExp : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
-class HemmRightToLeft : public SingleTrans
+class BLISHemmToGemm: public SingleTrans
 {
  public:
   Layer m_layer;
-  HemmRightToLeft(Layer layer)
+  BLISHemmToGemm(Layer layer)
     : m_layer(layer) {}
-  virtual string GetType() const { return "Hemm right to left"; }
+  virtual string GetType() const { return "Hemm to Gemm"; }
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };

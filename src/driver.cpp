@@ -307,23 +307,6 @@ void AddTrans()
   Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(ABSLAYER, DMLAYER, -8), DPPHASE);
 #endif //DPPHASE
 
-#if DOSR1PHASE
-  Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(ABSLAYER, S1LAYER, 4), SR1PHASE);
-#if USELOWERING
-  Universe::AddTrans(Hemm::GetClass(), new HemmLowerLayer(ABSLAYER, S1LAYER, DIMN, BLIS_NC_BSVAL), SR1PHASE);
-#endif
-#endif //SR1PHASE
-
-#if DOSR2PHASE
-  Universe::AddTrans(Hemm::GetClass(), new HemmLoopExp(S1LAYER, S2LAYER, 8), SR2PHASE);
-#if USELOWERING
-  Universe::AddTrans(Hemm::GetClass(), new HemmLowerLayer(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
-#endif
-#endif //SR1PHASE
-
-#if DOSR3PHASE
-  Universe::AddTrans(Hemm::GetClass(), new BLISHemmLoopExp(S2LAYER, S3LAYER), SR3PHASE);
-#endif //SR3PHASE
 
 #if DODPPHASE
   MultiTrans *hemmTrans = new MultiTrans;
@@ -626,6 +609,10 @@ void AddSimplifiers()
   Universe::AddTrans(RedistNode::GetClass(), new FindMidDistributions(D_MC_MR, D_STAR_VR, D_MR_MC), SIMP);
   Universe::AddTrans(RedistNode::GetClass(), new FindMidDistributions(D_MC_MR, D_STAR_VC, D_MR_MC), SIMP);
 
+#if DOSR1PHASE
+  Universe::AddTrans(Hemm::GetClass(), new BLISHemmToGemm(ABSLAYER), SIMP);
+#endif
+
 #if DOSR2PHASE
   Universe::AddTrans(PackBuff::GetClass(), new LoopInvariantPackBuffMotion, GLOBSIMP);
   Universe::AddTrans(PackBuff::GetClass(), new UnifyPackBuffParams, SIMP);
@@ -639,7 +626,6 @@ void AddSimplifiers()
 #else
   Universe::AddTrans(Trxm::GetClass(), new TrxmRightToLeft<Trxm>(ABSLAYER), SIMP);
   Universe::AddTrans(Trmm3::GetClass(), new Trmm3RightToLeft(ABSLAYER), SIMP);
-  Universe::AddTrans(Hemm::GetClass(), new HemmRightToLeft(ABSLAYER), SIMP);
 #endif //DODPPHASE
 #endif //SR2PHASE
 

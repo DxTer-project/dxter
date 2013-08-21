@@ -1077,18 +1077,18 @@ void BLISHemmLoopExp::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-bool HemmRightToLeft::CanApply(const Poss *poss, const Node *node) const
+bool BLISHemmToGemm::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() == Hemm::GetClass()) {
     const Hemm *hemm = (Hemm*)node;
     if (hemm->GetLayer() != m_layer)
       return false;
-    return hemm->m_side == RIGHT;
+    return true;
   }
   return false;
 }
 
-void HemmRightToLeft::Apply(Poss *poss, Node *node) const
+void BLISHemmToGemm::Apply(Poss *poss, Node *node) const
 {
   Hemm *hemm = (Hemm*)node;
 
@@ -1101,10 +1101,16 @@ void HemmRightToLeft::Apply(Poss *poss, Node *node) const
 			hemm->m_alpha, hemm->m_beta,
 			hemm->m_type);
 
-  gemm->AddInputs(6, 
-		  hemm->m_inputs[1]->m_n, hemm->m_inputs[1]->m_num,
-		  props, 0,
-		  hemm->m_inputs[2]->m_n, hemm->m_inputs[2]->m_num);
+  if (hemm->m_side == LEFT)
+    gemm->AddInputs(6, 
+		    props, 0,
+		    hemm->m_inputs[1]->m_n, hemm->m_inputs[1]->m_num,
+		    hemm->m_inputs[2]->m_n, hemm->m_inputs[2]->m_num);
+  else
+    gemm->AddInputs(6, 
+		    hemm->m_inputs[1]->m_n, hemm->m_inputs[1]->m_num,
+		    props, 0,
+		    hemm->m_inputs[2]->m_n, hemm->m_inputs[2]->m_num);
 
   poss->AddNode(gemm);
   poss->AddNode(props);
