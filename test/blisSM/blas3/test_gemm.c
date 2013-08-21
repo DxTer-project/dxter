@@ -10,139 +10,16 @@ thread_comm_t l1_comms[NUML1];
 
 
 void DxT_GemmNN( obj_t *alpha,
-	  obj_t *A,
-	  obj_t *B,
-	  obj_t *beta,
-	  obj_t *C )
+		 obj_t *A,
+		 obj_t *B,
+		 obj_t *beta,
+		 obj_t *C )
 {
   FUNCTIONSTART
 
   bli_scalm(beta, C);
-  
-  dim_t idx1, dimLen1, bs1;
-  dimLen1 = bli_obj_width_after_trans( *C );
-  idx1 = 0;
-  th_shift_start_end(&idx1, &dimLen1, ProcComm);
-
-  /*
-#pragma omp critical (BLISOutput)
-  {
-    printf("%u: %u in group, group %u\n", th_global_thread_id(), 
-	   th_thread_id(ProcComm), th_group_id(ProcComm));
-//    printf("%u shifted from %u-%u",th_thread_id(GlobalComm), idx1, dimLen1);
-
-    printf("%u shifted to %u-%u\n", th_thread_id(ProcComm), idx1, dimLen1);	   
-    fflush(stdout);
-  }
-  */
 
 
-  for ( ; idx1 < dimLen1; idx1 += bs1 ) {
-    bs1 = bli_determine_blocksize_f( idx1, dimLen1, C, gemm_nc );
-    dim_t idx2, dimLen2, bs2;
-    //****
-    obj_t B_1;
-    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, B, &B_1 );
-    obj_t C_1;
-    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, C, &C_1 );
-    //------------------------------------//
-
-
-    dimLen2 = bli_obj_width_after_trans( *A );
-    for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-      bs2 = bli_determine_blocksize_f( idx2, dimLen2, A, gemm_kc );
-      dim_t idx3, dimLen3, bs3;
-      //****
-      obj_t A_1;
-      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, A, &A_1 );
-      obj_t B_1_1;
-      bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &B_1, &B_1_1 );
-      //------------------------------------//
-
-      th_barrier( ProcComm );
-
-
-      if (th_am_root(ProcComm)) {
-	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
-			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			     BLIS_BUFFER_FOR_B_PANEL,
-			     gemm_kr, gemm_nr, 
-			     &B_1_1, &packed_B_pan );
-      }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-
-      bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_B_pan, ProcComm );
-
-
-
-      //// ***Parallelized with communicator ProcComm; need correct output code
-      dimLen3 = bli_obj_length_after_trans( C_1 );
-      idx3 = 0;
-      th_shift_start_end(&idx3, &dimLen3, L2Comm);      
-
-      /*
-#pragma omp critical (BLISOutput)
-  {
-    printf("%u: %u in group, group %u\n", th_global_thread_id(), 
-	   th_thread_id(L2Comm), th_group_id(L2Comm));
-    printf("%u shifted to %u-%u\n",th_thread_id(L2Comm), idx3, dimLen3);
-    fflush(stdout);
-  }
-*/
-
-      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
-	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &C_1, gemm_mc );
-	dim_t idx4, dimLen4, bs4;
-	//****
-	obj_t A_1_1;
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &A_1, &A_1_1 );
-	obj_t C_1_1;
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &C_1, &C_1_1 );
-	//------------------------------------//
-
-	th_barrier( L2Comm );
-
-	if (th_am_root(L2Comm)) {
-	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			       BLIS_BUFFER_FOR_A_BLOCK,
-			       gemm_mr, gemm_kr, 
-			       &A_1_1, &packed_A_blk );
-	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_A_blk, L2Comm );
-	
-	/*
-#pragma omp critical (BLISOutput)
-	{
-	  printf("%u: thread id %u, group id %u, num threads %u\n",
-		 th_global_thread_id(),
-		 th_thread_id(L1Comm),
-		 th_group_id(L1Comm),
-		 L1Comm->num_threads_in_group);
-	  fflush(stdout);
-	}
-	*/
-
-	
-	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, 
-			       L1Comm);
-
-	//------------------------------------//
-
-	//****
-      }
-
-      //------------------------------------//
-
-      //****
-    }
-
-    //------------------------------------//
-
-    //****
-  }
 
   FUNCTIONEND
 }
@@ -234,9 +111,9 @@ int main( int argc, char** argv )
 
   n_repeats = 1;
 
-  p_begin = 400;
-  p_end   = 400;
-  p_inc   = 40;
+  p_begin = 4;
+  p_end   = 12;
+  p_inc   = 4;
 
   m_input = -1;
   //m_input = 384;
@@ -356,9 +233,10 @@ int main( int argc, char** argv )
 	    bli_obj_toggle_trans( a );
 	    bli_obj_toggle_trans( b );
 	  }
-
-	  //	  bli_printm( "c1", &c1, "%4.1f", "" );
-	  //	  bli_printm( "c2", &c2, "%4.1f", "" );
+	  
+	  bli_printm( "c_save", &c_save, "%4.1f", "" );
+	  bli_printm( "c1", &c1, "%4.1f", "" );
+	  bli_printm( "c2", &c2, "%4.1f", "" );
 
 	  bli_axpym( &negOne, &c1, &c2 );
 
