@@ -107,7 +107,7 @@ void th_barrier( thread_comm_t *comm )
     }
 }
 
-void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm)
+void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm, dim_t round_factor)
 {
   if (comm == NULL) return;
   if (comm->multiplicative_factor_above > 1) {
@@ -115,7 +115,7 @@ void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm)
     dim_t len = *end - *start;
     dim_t n_pt = len / comm->multiplicative_factor_above;
     n_pt = (n_pt * comm->multiplicative_factor_above < len) ? n_pt + 1 : n_pt;
-    n_pt = (n_pt % 4 == 0) ? n_pt : n_pt + 4 - (n_pt % 4);
+    n_pt = (n_pt % round_factor == 0) ? n_pt : n_pt + round_factor - (n_pt % round_factor);
     *start = *start + group * n_pt;
     *end   = bli_min( *start + n_pt, *end );
   }
