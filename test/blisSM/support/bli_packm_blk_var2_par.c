@@ -107,8 +107,8 @@ void bli_packm_blk_var2_par( obj_t*   beta,
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   buf_p, rs_p, cs_p,
-	          pd_p, ps_p,
-       comm );
+	   pd_p, ps_p,
+	   comm );
 	th_barrier(comm);
 }
 
@@ -130,7 +130,7 @@ void PASTEMAC(ch,varname )( \
                             void*   c, inc_t rs_c, inc_t cs_c, \
                             void*   p, inc_t rs_p, inc_t cs_p, \
                                        dim_t pd_p, inc_t ps_p, \
-                            thread_comm_t* comm \
+                            thread_comm_t* comm		       \
                           ) \
 { \
 	ctype* restrict beta_cast = beta; \
@@ -150,6 +150,7 @@ void PASTEMAC(ch,varname )( \
 	dim_t           panel_len; \
 	doff_t          diagoffc_i; \
 	doff_t          diagoffc_inc; \
+	doff_t          diagoffc_i_abs; \
 	dim_t           panel_dim_i; \
 	inc_t           vs_c; \
 	inc_t           incc, ldc; \
@@ -178,31 +179,32 @@ void PASTEMAC(ch,varname )( \
 	ctype* restrict p11; \
 	dim_t           p11_m; \
 	dim_t           p11_n; \
+	inc_t           rs_p11, cs_p11; \
 \
     dim_t           t_id = th_thread_id( comm ); \
     dim_t           num_threads = comm->num_threads_in_group; \
+\
 \
 	/* Extract the conjugation bit from the transposition argument. */ \
 	conjc = bli_extract_conj( transc ); \
 \
 	/* If C needs a transposition, induce it so that we can more simply
 	   express the remaining parameters and code. */ \
-/*    th_set_lock( &comm->barrier_lock );	*/	 \
-	if ( bli_does_trans( transc ) ) \
+        if ( bli_does_trans( transc ) && th_am_root(comm))	 \
 	{ \
 		bli_swap_incs( rs_c, cs_c ); \
 		bli_negate_diag_offset( diagoffc ); \
 		bli_toggle_uplo( uploc ); \
 		bli_toggle_trans( transc ); \
 	} \
-/*    th_unset_lock( &comm->barrier_lock ); */	\
+        th_barrier(comm); \
 \
 	/* If the strides of p indicate row storage, then we are packing to
 	   column panels; otherwise, if the strides indicate column storage,
 	   we are packing to row panels. */ \
 	if ( bli_is_row_stored( rs_p, cs_p ) ) \
 	{ \
-		/* Prepare to pack to column panels. */ \
+		/* Prepare to pack to row-stored column panels. */ \
 		iter_dim     = n; \
 		panel_len    = m; \
 		panel_dim    = pd_p; \
@@ -215,10 +217,12 @@ void PASTEMAC(ch,varname )( \
 		n_panel      = &panel_dim_i; \
 		m_panel_max  = m_max; \
 		n_panel_max  = panel_dim; \
+		rs_p11       = rs_p; \
+		cs_p11       = 1; \
 	} \
 	else /* if ( bli_is_col_stored( rs_p, cs_p ) ) */ \
 	{ \
-		/* Prepare to pack to row panels. */ \
+		/* Prepare to pack to column-stored row panels. */ \
 		iter_dim     = m; \
 		panel_len    = n; \
 		panel_dim    = pd_p; \
@@ -231,6 +235,8 @@ void PASTEMAC(ch,varname )( \
 		n_panel      = &n; \
 		m_panel_max  = panel_dim; \
 		n_panel_max  = n_max; \
+		rs_p11       = 1; \
+		cs_p11       = cs_p; \
 	} \
 \
 	/* Compute the total number of iterations we'll need. */ \
@@ -248,11 +254,11 @@ void PASTEMAC(ch,varname )( \
 	for ( ic  = ic0 + t_id * ic_inc, ip  = ip0 + t_id * ip_inc, it  = t_id; it < num_iter; \
 	      ic += num_threads * ic_inc, ip += num_threads * ip_inc, it += num_threads ) \
 	{ \
-		panel_dim_i = bli_min( panel_dim, iter_dim - ic ); \
+		panel_dim_i    = bli_min( panel_dim, iter_dim - ic ); \
 \
-		diagoffc_i  = diagoffc + (ip  )*diagoffc_inc; \
-		c_begin     = c_cast   + (ic  )*vs_c; \
-		p_begin     = p_cast   + (ip  )*ps_p; \
+		diagoffc_i     = diagoffc + (ip  )*diagoffc_inc; \
+		c_begin        = c_cast   + (ic  )*vs_c; \
+		p_begin        = p_cast   + (ip  )*ps_p; \
 \
 		/* If the current panel intersects the diagonal and C is either
 		   upper- or lower-stored, then we assume C is symmetric or
@@ -263,20 +269,51 @@ void PASTEMAC(ch,varname )( \
 		if ( bli_intersects_diag_n( diagoffc_i, *m_panel, *n_panel ) && \
 		     bli_is_upper_or_lower( uploc ) ) \
 		{ \
-			/* Only two of four cases implemented, since BLIS2 currently does
-			   not support triangular packing of matrix B (which is row-stored). */ \
-			/*if      ( bli_is_row_stored( rs_p, cs_p ) && bli_is_upper( uploc ) )  \
-			{ \
+			diagoffc_i_abs = bli_abs( diagoffc_i ); \
+\
+			if ( ( bli_is_col_stored( rs_p, cs_p ) && diagoffc_i < 0 ) || \
+			     ( bli_is_row_stored( rs_p, cs_p ) && diagoffc_i > 0 ) ){ \
+			  printf("diagoffc_i %d\n", diagoffc_i);\
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
-			} \
-			else if ( bli_is_row_stored( rs_p, cs_p ) && bli_is_lower( uploc ) ) \
-			{ \
-				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
-			} \
-			else*/ if ( bli_is_col_stored( rs_p, cs_p ) && bli_is_upper( uploc ) ) \
+			}			\
+\
+			if      ( ( bli_is_row_stored( rs_p, cs_p ) && bli_is_upper( uploc ) ) || \
+			          ( bli_is_col_stored( rs_p, cs_p ) && bli_is_lower( uploc ) ) ) \
 			{ \
 				p10_dim    = panel_dim_i; \
-				p10_len    = diagoffc_i + panel_dim_i; \
+				p10_len    = diagoffc_i_abs; \
+				p10        = p_begin; \
+				c10        = c_begin; \
+				incc10     = incc; \
+				ldc10      = ldc; \
+				conjc10    = conjc; \
+\
+				p12_dim    = panel_dim_i; \
+				p12_len    = panel_len - p10_len; \
+				j          = p10_len; \
+				diagoffc12 = diagoffc_i_abs - j; \
+				p12        = p_begin + (j  )*ldp; \
+				c12        = c_begin + (j  )*ldc; \
+				c12        = c12 + diagoffc12 * ( doff_t )cs_c + \
+				                  -diagoffc12 * ( doff_t )rs_c;  \
+				incc12     = ldc; \
+				ldc12      = incc; \
+				conjc12    = conjc; \
+\
+				p11_m      = panel_dim_i; \
+				p11_n      = panel_dim_i; \
+				j          = diagoffc_i_abs; \
+				p11        = p_begin + (j  )*ldp; \
+				c11        = c_begin + (j  )*ldc; \
+\
+				if ( bli_is_hermitian( strucc ) ) \
+					bli_toggle_conj( conjc12 ); \
+			} \
+			else /* if ( ( bli_is_row_stored( rs_p, cs_p ) && bli_is_lower( uploc ) ) || \
+			             ( bli_is_col_stored( rs_p, cs_p ) && bli_is_upper( uploc ) ) ) */ \
+			{ \
+				p10_dim    = panel_dim_i; \
+				p10_len    = diagoffc_i_abs + panel_dim_i; \
 				diagoffc10 = diagoffc_i; \
 				p10        = p_begin; \
 				c10        = c_begin; \
@@ -290,50 +327,19 @@ void PASTEMAC(ch,varname )( \
 				p12_len    = panel_len - p10_len; \
 				j          = p10_len; \
 				p12        = p_begin + (j  )*ldp; \
-				c12        = c_begin + (j  )*cs_c; \
+				c12        = c_begin + (j  )*ldc; \
 				incc12     = incc; \
 				ldc12      = ldc; \
 				conjc12    = conjc; \
 \
 				p11_m      = panel_dim_i; \
 				p11_n      = panel_dim_i; \
-				j          = diagoffc_i; \
+				j          = diagoffc_i_abs; \
 				p11        = p_begin + (j  )*ldp; \
-				c11        = c_begin + (j  )*cs_c; \
+				c11        = c_begin + (j  )*ldc; \
 \
 				if ( bli_is_hermitian( strucc ) ) \
 					bli_toggle_conj( conjc10 ); \
-			} \
-			else /* if ( bli_is_col_stored( rs_p, cs_p ) && bli_is_lower( uploc ) ) */ \
-			{ \
-				p10_dim    = panel_dim_i; \
-				p10_len    = diagoffc_i; \
-				p10        = p_begin; \
-				c10        = c_begin; \
-				incc10     = incc; \
-				ldc10      = ldc; \
-				conjc10    = conjc; \
-\
-				p12_dim    = panel_dim_i; \
-				p12_len    = panel_len - p10_len; \
-				j          = p10_len; \
-				diagoffc12 = diagoffc_i - j; \
-				p12        = p_begin + (j  )*ldp; \
-				c12        = c_begin + (j  )*cs_c; \
-				c12        = c12 + diagoffc12 * ( doff_t )cs_c + \
-				                  -diagoffc12 * ( doff_t )rs_c;  \
-				incc12     = ldc; \
-				ldc12      = incc; \
-				conjc12    = conjc; \
-\
-				p11_m      = panel_dim_i; \
-				p11_n      = panel_dim_i; \
-				j          = diagoffc_i; \
-				p11        = p_begin + (j  )*ldp; \
-				c11        = c_begin + (j  )*cs_c; \
-\
-				if ( bli_is_hermitian( strucc ) ) \
-					bli_toggle_conj( conjc12 ); \
 			} \
 \
 			/* Pack to P10. For upper storage, this includes the unstored
@@ -362,11 +368,16 @@ void PASTEMAC(ch,varname )( \
 			                            p11_m, \
 			                            p11_n, \
 			                            beta_cast, \
-			                            c11, rs_c, cs_c, \
-			                            p11, 1,    ldp ); \
+			                            c11, rs_c,   cs_c, \
+			                            p11, rs_p11, cs_p11 ); \
 		} \
 		else \
 		{ \
+			/* Note that the following code executes if the current panel either:
+			   - does not intersect the diagonal, or
+			   - does intersect the diagonal, BUT the matrix is general
+			   which means the entire current panel can be copied at once. */ \
+\
 			/* We use some c10-specific variables here because we might need
 			   to change them if the current panel is unstored. (The values
 			   below are used if the current panel is stored.) */ \
@@ -379,8 +390,9 @@ void PASTEMAC(ch,varname )( \
 			   adjustments so we refer to the data where it is actually
 			   stored, and so we take conjugation into account. (Note
 			   this implicitly assumes we are operating on a symmetric or
-			   Hermitian matrix.) */ \
-			if ( bli_is_unstored_subpart_n( diagoffc_i, uploc, panel_dim_i, panel_len ) ) \
+			   Hermitian matrix, since a general matrix would not contain
+			   any unstored region.) */ \
+			if ( bli_is_unstored_subpart_n( diagoffc_i, uploc, *m_panel, *n_panel ) ) \
 			{ \
 				c10 = c10 + diagoffc_i * ( doff_t )cs_c + \
 				           -diagoffc_i * ( doff_t )rs_c;  \
@@ -399,9 +411,9 @@ void PASTEMAC(ch,varname )( \
 			                        p_begin,         ldp ); \
 \
 /*
-		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2_par: c", panel_len, panel_dim_i, \
+		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: c", panel_len, panel_dim_i, \
 		                      c_begin, ldc, incc, "%5.2f", "" ); \
-		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2_par: p copied", panel_len, panel_dim_i, \
+		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: p copied", panel_len, panel_dim_i, \
 		                      p_begin, ldp, 1, "%5.2f", "" ); \
 */ \
 		} \
@@ -447,11 +459,11 @@ void PASTEMAC(ch,varname )( \
 \
 /*
 		if ( rs_p == 1 ) \
-		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2_par: a copied", m_panel_max, n_panel_max, \
+		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: a copied", m_panel_max, n_panel_max, \
 		                      p_begin, 1, cs_p, "%4.1f", "" ); \
 		if ( cs_p == 1 ) \
-		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2_par: b copied", m_panel_max, n_panel_max, \
-		                      p_begin, panel_dim, 1, "%6.3f", "" ); \
+		PASTEMAC(ch,fprintm)( stdout, "packm_blk_var2: b copied", m_panel_max, n_panel_max, \
+		                      p_begin, panel_dim, 1, "%8.5f", "" ); \
 */ \
 	} \
 }

@@ -239,14 +239,8 @@ void DxT_HemmRL( obj_t *alpha,
 			     &A_1_1, &packed_B_pan );
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      #pragma omp critical 
-      {
-	printf("%u packing B\n", th_global_thread_id());
-	printf("%u x %u\n", bli_obj_length(A_1_1), bli_obj_width(A_1_1));
-	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_B_pan, ProcComm );
-	printf("done\n");
-      }
-      //bli_packm_blk_var2( &BLIS_ONE, &A_1_1, &packed_B_pan );
+      bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_B_pan, ProcComm );
+
       //// ***Parallelized with communicator ProcComm; need correct output code
       dimLen3 = bli_obj_length_after_trans( C_1 );
       idx3 = 0;
@@ -270,8 +264,7 @@ void DxT_HemmRL( obj_t *alpha,
 			       &B_1_1, &packed_A_blk );
 	}
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	//	bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_A_blk, L2Comm );
-		bli_packm_blk_var2( &BLIS_ONE, &B_1_1, &packed_A_blk );
+	bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_A_blk, L2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L1Comm );
 
