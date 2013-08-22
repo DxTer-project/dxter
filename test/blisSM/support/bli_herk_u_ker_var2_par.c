@@ -286,8 +286,8 @@ void PASTEMAC(ch,varname)( \
 	rstep_c = rs_c * MR; \
 	cstep_c = cs_c * NR; \
 \
-	b1 = b_cast; \
-	c1 = c_cast; \
+        b1 = b_cast + cstep_b * l2_thread_id;	\
+	c1 = c_cast + cstep_c * l2_thread_id; \
 \
 	/* If the micro-kernel needs elements of B duplicated, set bp to
 	   point to the duplication buffer. If no duplication is called for,
@@ -296,10 +296,10 @@ void PASTEMAC(ch,varname)( \
 	if ( DUPB ) bp = bd; \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = 0; j < n_iter; ++j ) \
+	for ( j = l2_thread_id; j < n_iter; j+=l2_num_threads ) \
 	{ \
-		a1  = a_cast; \
-		c11 = c1; \
+		a1  = a_cast + rstep_a * l1_thread_id; \
+		c11 = c1 + rstep_c * l1_thread_id; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
@@ -312,7 +312,7 @@ void PASTEMAC(ch,varname)( \
 		b2 = b1; \
 \
 		/* Interior loop over the m dimension (MR rows at a time). */ \
-		for ( i = 0; i < m_iter; ++i ) \
+		for ( i = l1_thread_id; i < m_iter; i += l1_num_threads ) \
 		{ \
 			/* Compute the diagonal offset for the submatrix at (i,j). */ \
 			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
@@ -320,13 +320,13 @@ void PASTEMAC(ch,varname)( \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = a1 + rstep_a; \
-			if ( i == m_iter - 1 ) \
+			a2 = a1 + rstep_a * l1_num_threads; \
+			if ( i + l1_num_threads >= m_iter ) \
 			{ \
-				a2 = a_cast; \
-				b2 = b1 + cstep_b; \
-				if ( j == n_iter - 1 ) \
-					b2 = b_cast; \
+				a2 = a_cast + rstep_a * l1_thread_id; \
+				b2 = b1 + cstep_b * l2_thread_id; \
+				if ( j + l2_num_threads >= n_iter ) \
+					b2 = b_cast + cstep_b * l2_thread_id; \
 			} \
 \
 			/* If the diagonal intersects the current MR x NR submatrix, we
@@ -387,12 +387,12 @@ void PASTEMAC(ch,varname)( \
 				} \
 			} \
 \
-			a1  += rstep_a; \
-			c11 += rstep_c; \
+			a1  += rstep_a * l1_num_threads; \
+			c11 += rstep_c * l1_num_threads; \
 		} \
 \
-		b1 += cstep_b; \
-		c1 += cstep_c; \
+		b1 += cstep_b * l2_num_threads; \
+		c1 += cstep_c * l2_num_threads; \
 	} \
 }
 
