@@ -41,12 +41,18 @@ void DxT_HerkNL( obj_t *alpha,
     //------------------------------------//
 
     obj_t C_1B, AB;
+    printf("off %u\n", bli_obj_diag_offset_after_trans(C_1));
     dim_t offB = bli_max( 0, -bli_obj_diag_offset_after_trans( C_1 ) );
     dim_t mB = bli_obj_length_after_trans( C_1 ) - offB;
+    printf("offB %u, mB %u\n",offB, mB);
+    printf("A %u x %u\n", bli_obj_length(*A),bli_obj_width(*A));
+    printf("C_1 %u x %u\n", bli_obj_length(C_1),bli_obj_width(C_1));
     bli_acquire_mpart_t2b( BLIS_SUBPART1,
 			   offB, mB, &C_1, &C_1B );
     bli_acquire_mpart_t2b( BLIS_SUBPART1,
 			   offB, mB, A, &AB );
+    printf("C_1B %u x %u\n", bli_obj_length(C_1B),bli_obj_width(C_1B));
+    printf("AB %u x %u\n", bli_obj_length(AB),bli_obj_width(AB));
     bli_obj_set_struc( BLIS_TRIANGULAR, C_1B );
     bli_obj_set_uplo( BLIS_LOWER, C_1B );
     bli_scalm( &BLIS_ONE, &C_1B );
@@ -493,9 +499,9 @@ int main( int argc, char** argv )
 
 	n_repeats = 3;
 
-	p_begin = 100;
-	p_end   = 800;
-	p_inc   = 100;
+	p_begin = 20;
+	p_end   = 20;
+	p_inc   = 20;
 
 	m_input = -1;
 	k_input = -1;
