@@ -225,7 +225,9 @@ test_herk.x: test_herk.o support.o bli_packm_blk_var2_par.o bli_packm_blk_var3_p
 
 test_%.x: test_%.o support.o bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o \
              ../../support/SMBLAS3.h $(BLIS_LIB)
-	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o support.o      $(BLIS_LIB)             $(LDFLAGS) -o $@
+	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o support.o \
+             bli_herk_l_ker_var2_par.o bli_herk_u_ker_var2_par.o \
+	    $(BLIS_LIB)             $(LDFLAGS) -o $@
 
 
 
