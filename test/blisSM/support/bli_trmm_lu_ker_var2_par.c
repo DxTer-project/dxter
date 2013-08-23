@@ -176,7 +176,7 @@ void PASTEMAC(ch,varname)( \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
 	ctype           bd[ PASTEMAC(ch,maxkc) * \
-	                    PASTEMAC(ch,nr) * \
+	                    PASTEMAC(ch,packnr) * \
 	                    PASTEMAC(ch,ndup) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	ctype* restrict bp; \
@@ -238,9 +238,30 @@ void PASTEMAC(ch,varname)( \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
 \
-	/* Safeguard: If matrix A is below the diagonal, it is implicitly zero.
-	   So we do nothing. */ \
+	/* Safeguard: If the current block of A is entirely below the diagonal,
+	   it is implicitly zero. So we do nothing. */ \
 	if ( bli_is_strictly_below_diag_n( diagoffa, m, k ) ) return; \
+\
+	/* If there is a zero region to the left of where the diagonal of A
+	   intersects the top edge of the block, adjust the pointer to B and
+	   treat this case as if the diagonal offset were zero. Note that we
+	   don't need to adjust the pointer to A since packm would have simply
+	   skipped over the region that was not stored. */ \
+	if ( diagoffa > 0 ) \
+	{ \
+		i        = diagoffa; \
+		k        = k - i; \
+		diagoffa = 0; \
+		b_cast   = b_cast + (i  )*rs_b; \
+	} \
+\
+	/* If there is a zero region below where the diagonal of A intersects the
+	   right side of the block, shrink it to prevent "no-op" iterations from
+	   executing. */ \
+    if ( -diagoffa + k < m ) \
+    { \
+        m = -diagoffa + k; \
+    } \
 \
 	/* For consistency with the trsm macro-kernels, we inflate k to be a
 	   multiple of MR, if necessary. This is needed because we typically
@@ -248,18 +269,6 @@ void PASTEMAC(ch,varname)( \
 	   constraint that k must be a multiple of MR so that it can safely
 	   handle bottom-right corner edges of the triangle. */ \
 	if ( k % MR != 0 ) k += MR - ( k % MR ); \
-\
-	/* If the diagonal offset is positive, adjust the pointer to B and
-	   treat this case as if the diagonal offset were zero. Note that
-	   we don't need to adjust the pointer to A since packm would have
-	   simply skipped over the region that was not stored. */ \
-	if ( diagoffa > 0 ) \
-	{ \
-		j        = diagoffa; \
-		k        = k - j; \
-		diagoffa = 0; \
-		b_cast   = b_cast + (j  )*rs_b; \
-	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
@@ -326,9 +335,9 @@ void PASTEMAC(ch,varname)( \
 			   and trmm3. */ \
 			if ( bli_intersects_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
-				/* Determine the offset to the beginning of the panel that
-				   was packed so we can index into the corresponding location
-				   in bp. Then compute the length of that panel. */ \
+				/* Determine the offset to and length of the panel that was
+				   packed so we can index into the corresponding location in
+				   bp. */ \
 				off_a1112 = bli_max( diagoffa_i, 0 ); \
 				k_a1112   = k - off_a1112; \
 \
@@ -344,38 +353,40 @@ void PASTEMAC(ch,varname)( \
 						b2 = b_cast; \
 				} \
 \
-				/* Handle interior and edge cases separately. */ \
-				if ( m_cur == MR && n_cur == NR ) \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,ukrname)( k_a1112, \
-					                      alpha_cast, \
-					                      a1, \
-					                      bp_i, \
-					                      beta_cast, \
+				if (((i%l1_num_threads) == l1_thread_id) && (((j%l2_num_threads == l2_thread_id)))) {\
+				  /* Handle interior and edge cases separately. */ \
+				  if ( m_cur == MR && n_cur == NR )	\
+				    {					\
+				      /* Invoke the gemm micro-kernel. */ \
+				      PASTEMAC(ch,ukrname)( k_a1112,	\
+							    alpha_cast, \
+							    a1,		\
+							    bp_i,	\
+							    beta_cast,	\
 					                      c11, rs_c, cs_c, \
-					                      a2, b2 ); \
-				} \
-				else \
-				{ \
-					/* Copy edge elements of C to the temporary buffer. */ \
-					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
-					                        c11, rs_c,  cs_c, \
-					                        ct,  rs_ct, cs_ct ); \
-\
-					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,ukrname)( k_a1112, \
-					                      alpha_cast, \
-					                      a1, \
-					                      bp_i, \
-					                      beta_cast, \
-					                      ct, rs_ct, cs_ct, \
-					                      a2, b2 ); \
-\
-					/* Copy the result to the edge of C. */ \
-					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
-					                        ct,  rs_ct, cs_ct, \
-					                        c11, rs_c,  cs_c ); \
+							    a2, b2 );	\
+				    }					\
+				  else					\
+				    {					\
+				      /* Copy edge elements of C to the temporary buffer. */ \
+				      PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+							      c11, rs_c,  cs_c, \
+							      ct,  rs_ct, cs_ct ); \
+									\
+				      /* Invoke the gemm micro-kernel. */ \
+				      PASTEMAC(ch,ukrname)( k_a1112,	\
+							    alpha_cast, \
+							    a1,		\
+							    bp_i,	\
+							    beta_cast,	\
+							    ct, rs_ct, cs_ct, \
+							    a2, b2 );	\
+									\
+				      /* Copy the result to the edge of C. */ \
+				      PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+							      ct,  rs_ct, cs_ct, \
+							      c11, rs_c,  cs_c ); \
+				    }\
 				} \
 \
 				a1 += k_a1112 * PACKMR; \
@@ -392,34 +403,36 @@ void PASTEMAC(ch,varname)( \
 						b2 = b_cast; \
 				} \
 \
-				/* Handle interior and edge cases separately. */ \
-				if ( m_cur == MR && n_cur == NR ) \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,ukrname)( k, \
-					                      alpha_cast, \
-					                      a1, \
-					                      bp, \
-					                      one, \
-					                      c11, rs_c, cs_c, \
-					                      a2, b2 ); \
-				} \
-				else \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					PASTEMAC(ch,ukrname)( k, \
-					                      alpha_cast, \
-					                      a1, \
-					                      bp, \
-					                      zero, \
-					                      ct, rs_ct, cs_ct, \
-					                      a2, b2 ); \
-\
-					/* Add the result to the edge of C. */ \
-					PASTEMAC(ch,adds_mxn)( m_cur, n_cur, \
-					                       ct,  rs_ct, cs_ct, \
-					                       c11, rs_c,  cs_c ); \
-				} \
+				if (((i%l1_num_threads) == l1_thread_id) && (((j%l2_num_threads == l2_thread_id)))) {\
+				  /* Handle interior and edge cases separately. */ \
+				  if ( m_cur == MR && n_cur == NR )	\
+				    {					\
+				      /* Invoke the gemm micro-kernel. */ \
+				      PASTEMAC(ch,ukrname)( k,		\
+							    alpha_cast, \
+							    a1,		\
+							    bp,		\
+							    one,	\
+							    c11, rs_c, cs_c, \
+							    a2, b2 );	\
+				    }					\
+				  else					\
+				    {					\
+				      /* Invoke the gemm micro-kernel. */ \
+				      PASTEMAC(ch,ukrname)( k,		\
+							    alpha_cast, \
+							    a1,		\
+							    bp,		\
+							    zero,	\
+							    ct, rs_ct, cs_ct, \
+							    a2, b2 );	\
+									\
+				      /* Add the result to the edge of C. */ \
+				      PASTEMAC(ch,adds_mxn)( m_cur, n_cur, \
+							     ct,  rs_ct, cs_ct, \
+							     c11, rs_c,  cs_c ); \
+				    }					\
+				}\
 \
 				a1 += rstep_a; \
 			} \
@@ -431,8 +444,8 @@ void PASTEMAC(ch,varname)( \
 		c1 += cstep_c; \
 	} \
 \
-/*PASTEMAC(ch,fprintm)( stdout, "trmm_lu_ker_var2_par: a1", MR, k_a1112, a1, 1, MR, "%4.1f", "" );*/ \
-/*PASTEMAC(ch,fprintm)( stdout, "trmm_lu_ker_var2_par: b1", k_a1112, NR, bp_i, NR, 1, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_lu_ker_var2: a1", MR, k_a1112, a1, 1, MR, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_lu_ker_var2: b1", k_a1112, NR, bp_i, NR, 1, "%4.1f", "" );*/ \
 }
 
 INSERT_GENTFUNC_BASIC( trmm_lu_ker_var2_par, GEMM_UKERNEL )
