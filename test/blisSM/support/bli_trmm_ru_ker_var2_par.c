@@ -33,6 +33,7 @@
 */
 
 #include "blis.h"
+#include "bli_trmm_ru_ker_var2_par.h"
 
 #define FUNCPTR_T gemm_fp
 
@@ -45,18 +46,21 @@ typedef void (*FUNCPTR_T)(
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a,
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b,
                            void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c
+                           void*   c, inc_t rs_c, inc_t cs_c,
+                           dim_t   l2_num_threads, dim_t l2_thread_id, 
+                           dim_t   l1_num_threads, dim_t l1_thread_id 
                          );
 
-static FUNCPTR_T GENARRAY(ftypes,trmm_ru_ker_var2);
+static FUNCPTR_T GENARRAY(ftypes,trmm_ru_ker_var2_par);
 
 
-void bli_trmm_ru_ker_var2( obj_t*  alpha,
+void bli_trmm_ru_ker_var2_par( obj_t*  alpha,
                            obj_t*  a,
                            obj_t*  b,
                            obj_t*  beta,
                            obj_t*  c,
-                           trmm_t* cntl )
+                           trmm_t* cntl,
+			   thread_comm_t* l1_comm )
 {
 	num_t     dt_exec   = bli_obj_execution_datatype( *c );
 
@@ -88,6 +92,19 @@ void bli_trmm_ru_ker_var2( obj_t*  alpha,
 
 	FUNCPTR_T f;
 
+	dim_t l2_num_threads = l1_comm->multiplicative_factor_above;
+	dim_t l2_thread_id   = th_group_id(l1_comm);
+	dim_t l1_num_threads;
+	dim_t l1_thread_id;
+	if (l1_comm) {
+	  l1_num_threads = l1_comm->num_threads_in_group;
+	  l1_thread_id = th_thread_id(l1_comm);
+	}
+	else {
+	  l1_num_threads = 1;
+	  l1_thread_id = 0;
+	}
+
 	// If alpha is a scalar constant, use dt_exec to extract the address of the
 	// corresponding constant value; otherwise, use the datatype encoded
 	// within the alpha object and extract the buffer at the beta offset.
@@ -111,7 +128,11 @@ void bli_trmm_ru_ker_var2( obj_t*  alpha,
 	   buf_a, rs_a, cs_a, ps_a,
 	   buf_b, rs_b, cs_b, ps_b,
 	   buf_beta,
-	   buf_c, rs_c, cs_c );
+	   buf_c, rs_c, cs_c,
+	   l2_num_threads,
+	   l2_thread_id,
+	   l1_num_threads,
+	   l1_thread_id );
 }
 
 
@@ -127,7 +148,11 @@ void PASTEMAC(ch,varname)( \
                            void*   a, inc_t rs_a, inc_t cs_a, inc_t ps_a, \
                            void*   b, inc_t rs_b, inc_t cs_b, inc_t ps_b, \
                            void*   beta, \
-                           void*   c, inc_t rs_c, inc_t cs_c \
+                           void*   c, inc_t rs_c, inc_t cs_c, \
+                           dim_t   l2_num_threads, \
+                           dim_t   l2_thread_id, \
+                           dim_t   l1_num_threads, \
+                           dim_t   l1_thread_id \
                          ) \
 { \
 	/* Temporary buffer for duplicating elements of B. */ \
@@ -306,6 +331,7 @@ void PASTEMAC(ch,varname)( \
 						b2 = b_cast; \
 				} \
 \
+				if (((i%l1_num_threads) == l1_thread_id) && (((j%l2_num_threads == l2_thread_id)))) {\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
@@ -339,6 +365,7 @@ void PASTEMAC(ch,varname)( \
 					                        ct,  rs_ct, cs_ct, \
 					                        c11, rs_c,  cs_c ); \
 				} \
+				}\
 \
 				a1  += rstep_a; \
 				c11 += rstep_c; \
@@ -361,6 +388,7 @@ void PASTEMAC(ch,varname)( \
 						b2 = b_cast; \
 				} \
 \
+				if (((i%l1_num_threads) == l1_thread_id) && (((j%l2_num_threads == l2_thread_id)))) {\
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
@@ -389,6 +417,7 @@ void PASTEMAC(ch,varname)( \
 					                       ct,  rs_ct, cs_ct, \
 					                       c11, rs_c,  cs_c ); \
 				} \
+				}\
 \
 				a1  += rstep_a; \
 				c11 += rstep_c; \
@@ -403,5 +432,5 @@ void PASTEMAC(ch,varname)( \
 /*PASTEMAC(ch,fprintm)( stdout, "trmm_ru_ker_var2: b1", k_b0111, NR, bp_i, NR, 1, "%4.1f", "" );*/ \
 }
 
-INSERT_GENTFUNC_BASIC( trmm_ru_ker_var2, GEMM_UKERNEL )
+INSERT_GENTFUNC_BASIC( trmm_ru_ker_var2_par, GEMM_UKERNEL )
 

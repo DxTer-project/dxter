@@ -105,14 +105,6 @@ void bli_trmm_ll_ker_var2_par( obj_t*  alpha,
 	  l1_num_threads = 1;
 	  l1_thread_id = 0;
 	}
-	/*
-	#pragma omp critical
-	{
-	  printf("%u : l1 thread %u of %u\n", th_global_thread_id(),
-		 l1_thread_id, l1_num_threads);
-	  fflush(stdout);
-	}
-	*/
 
 
 
