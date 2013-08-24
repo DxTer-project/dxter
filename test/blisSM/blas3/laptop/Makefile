@@ -214,6 +214,7 @@ test_trmm.x: test_trmm.o support.o bli_packm_blk_var2_par.o bli_packm_blk_var3_p
              bli_gemm_ker_var2_par.o ../../support/SMBLAS3.h $(BLIS_LIB)
 	$(LINKER) $<    bli_packm_blk_var2_par.o bli_gemm_ker_var2_par.o \
 	    bli_trmm_ll_ker_var2_par.o bli_trmm_lu_ker_var2_par.o support.o \
+	    bli_packm_blk_var3_par.o \
 	    $(BLIS_LIB)             $(LDFLAGS) -o $@
 
 # test_herk.x: test_herk.o support.o bli_packm_blk_var2_par.o bli_packm_blk_var3_par.o \

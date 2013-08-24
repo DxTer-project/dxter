@@ -243,7 +243,7 @@ void DxT_TrmmLUN( obj_t *alpha,
 			       &U_11_1, &packed_A_blk );
 	}
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	//	bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1, &packed_A_blk, L2Comm );
+	//bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1, &packed_A_blk, L2Comm );
 	bli_packm_blk_var3( &BLIS_ONE, &U_11_1, &packed_A_blk );
 	th_barrier(L2Comm);
 	bli_trmm_lu_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
