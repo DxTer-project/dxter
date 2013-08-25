@@ -2046,22 +2046,11 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
 
   Tri tri = trxm->m_tri;
 
-  Trans transA, transB;
-  if (trxm->m_side == LEFT) {
-    transA = trxm->m_trans;
-    transB = NORMAL;
-  }
-  else if (trxm->m_side == RIGHT) {
-    throw;
-  }
-  else
-    throw;
-
   PartDir lhsDir;
-  PartDir rhsDir;
+  PartDir outputDir;
   if (isTrsm) {
     bool reverse = false;
-    if (transA != NORMAL && transA != CONJ) {
+    if (trxm->m_trans != NORMAL && trxm->m_trans != CONJ) {
       if (tri == UPPER)
 	lhsDir = PARTRIGHT;
       else {
@@ -2078,16 +2067,16 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
       }
     }
     if (reverse)
-      rhsDir = PARTUPWARD;
+      outputDir = PARTUPWARD;
     else
-      rhsDir = PARTDOWN;
+      outputDir = PARTDOWN;
   }
   else {
-    if (transA != NORMAL && transA != CONJ)
+    if (trxm->m_trans != NORMAL && trxm->m_trans != CONJ)
       lhsDir = PARTRIGHT;
     else
       lhsDir = PARTDOWN;
-    rhsDir = PARTDOWN;
+    outputDir = PARTDOWN;
   }
 
   Split *splitLHS = new Split(lhsDir, POSSTUNIN, true);
@@ -2095,7 +2084,7 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   splitLHS->SetAllStats(FULLUP);
   splitLHS->SetIndepIters();
   
-  Split *splitOutput = new Split(rhsDir, POSSTUNIN);
+  Split *splitOutput = new Split(outputDir, POSSTUNIN);
   splitOutput->AddInput(trxm->Input(1), trxm->InputConnNum(1));
   splitOutput->SetUpStats(FULLUP, FULLUP,
                      NOTUP, NOTUP);
@@ -2105,10 +2094,11 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   Node *rhsSrc = node->Input(1);
   unsigned int rhsSrcNum = node->InputConnNum(1);
 
-  if (transB != NORMAL) {
+  /*  if (transB != NORMAL) {
     rhsSrc = AddTranspose(transB, false, rhsSrc, rhsSrcNum, true);
     rhsSrcNum = 0;
-  }    
+  } 
+  */   
 
   PackBuff *rhsBuff = new PackBuff(node->Input(1)->GetName(node->InputConnNum(1)).m_name,
 				 PACKCOLPANS, PACKBPANEL, NOTTRI, NOTTRIDIAG, GEN,
@@ -2129,8 +2119,8 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   Node *lhsSrc = splitLHS;
   unsigned int lhsSrcNum = 1;
 
-  if (transA != NORMAL) {
-    lhsSrc = AddTranspose(transA, true, lhsSrc, lhsSrcNum, false);
+  if (trxm->m_trans != NORMAL) {
+    lhsSrc = AddTranspose(trxm->m_trans, true, lhsSrc, lhsSrcNum, false);
     lhsSrcNum = 0;
   }
   
@@ -2155,7 +2145,7 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   lhsPack->AddInput(lhsSrc, lhsSrcNum);
   lhsPack->AddInput(lhsBuff, 0);  
 
-  if (transA != NORMAL && transA != CONJ)
+  if (trxm->m_trans != NORMAL && trxm->m_trans != CONJ)
     tri = SwapTri(tri);
       
   TrxmBP *trbp = new TrxmBP(isTrsm, m_toLayer, trxm->m_side, tri,
