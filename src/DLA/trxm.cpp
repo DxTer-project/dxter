@@ -538,16 +538,21 @@ bool Trmm3::ShouldCullSR() const
 
 string TrxmLoopExp::GetType() const
 {
+  string str;
   switch(m_dim) {
   case(1):
-    return "Trxm Loop Exp var 1";
+    str = "Trxm Loop Exp var 1";
+      break;
   case(2):
-    return "Trxm Loop Exp var 2";
+    str = "Trxm Loop Exp var 2";
+      break;
   case(3):
-    return "Trxm Loop Exp var 3";
+      str = "Trxm Loop Exp var 3";
+      break;
   default:
     throw;    
   }
+  return str  + (m_side == LEFT ? " left" : " right");
 }
 
 bool TrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
@@ -555,6 +560,8 @@ bool TrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
   if (node->GetNodeClass() == Trxm::GetClass()) {
     const Trxm *trxm = (Trxm*)node;
     if (trxm->GetLayer() != m_fromLayer)
+      return false;
+    if (trxm->m_side != m_side)
       return false;
     if (m_dim == 1 && trxm->m_invert)
       return false;
@@ -1431,11 +1438,7 @@ Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
     splitB->SetUpStats(NOTUP, FULLUP,
 		       NOTUP, FULLUP);
 
-  Node *trmm;
-  if (layer == DMLAYER)
-    trmm = new Trxm(false, DMLAYER, RIGHT, tri, diag, trans, coeff, type);
-  else 
-    throw;
+  Node *trmm = new Trxm(false, layer, RIGHT, tri, diag, trans, coeff, type);
   trmm->AddInputs(4, 
 		  splitA, 4,
 		  splitB, 1);
@@ -1482,7 +1485,7 @@ Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
   
   return loop;
 }
@@ -1501,7 +1504,7 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
     
-  Split *splitB = new Split(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
+  Split *splitB = new Split(rev ? PARTRIGHT : PARTLEFT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   if (rev)
     splitB->SetUpStats(NOTUP, PARTUP,
@@ -2054,113 +2057,103 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   else
     throw;
 
-  PartDir aDir;
-  PartDir bDir;
+  PartDir lhsDir;
+  PartDir rhsDir;
   if (isTrsm) {
     bool reverse = false;
     if (transA != NORMAL && transA != CONJ) {
       if (tri == UPPER)
-	aDir = PARTRIGHT;
+	lhsDir = PARTRIGHT;
       else {
-	aDir = PARTLEFT;
+	lhsDir = PARTLEFT;
 	reverse = true;
       }
     }
     else {
       if (tri == LOWER)
-	aDir = PARTDOWN;
+	lhsDir = PARTDOWN;
       else {
-	aDir = PARTUPWARD;
+	lhsDir = PARTUPWARD;
 	reverse = true;
       }
     }
-    if (transB != NORMAL) {
-      if (reverse)
-	bDir = PARTLEFT;
-      else
-	bDir = PARTRIGHT;
-    }
-    else {
-      if (reverse)
-	bDir = PARTUPWARD;
-      else
-	bDir = PARTDOWN;
-    }
+    if (reverse)
+      rhsDir = PARTUPWARD;
+    else
+      rhsDir = PARTDOWN;
   }
   else {
     if (transA != NORMAL && transA != CONJ)
-      aDir = PARTRIGHT;
+      lhsDir = PARTRIGHT;
     else
-      aDir = PARTDOWN;
-    if (transB != NORMAL)
-      bDir = PARTRIGHT;
-    else
-      bDir = PARTDOWN;
+      lhsDir = PARTDOWN;
+    rhsDir = PARTDOWN;
   }
 
-  Split *splitA = new Split(aDir, POSSTUNIN, true);
-  splitA->AddInput(trxm->Input(0), trxm->InputConnNum(0));
-  splitA->SetAllStats(FULLUP);
-  splitA->SetIndepIters();
+  Split *splitLHS = new Split(lhsDir, POSSTUNIN, true);
+  splitLHS->AddInput(node->Input(0), node->InputConnNum(0));
+  splitLHS->SetAllStats(FULLUP);
+  splitLHS->SetIndepIters();
   
-  Split *splitB = new Split(bDir, POSSTUNIN);
-  splitB->AddInput(trxm->Input(1), trxm->InputConnNum(1));
-  splitB->SetUpStats(FULLUP, FULLUP,
+  Split *splitOutput = new Split(rhsDir, POSSTUNIN);
+  splitOutput->AddInput(trxm->Input(1), trxm->InputConnNum(1));
+  splitOutput->SetUpStats(FULLUP, FULLUP,
                      NOTUP, NOTUP);
-  //BAM I don't think these are independent, but I didn't really do a complete analysis
+  //BAM I don't think these are independent, 
+  // but I didn't really do a complete analysis
   
-  Node *bSrc = node->Input(1);
-  unsigned int bSrcNum = node->InputConnNum(1);
+  Node *rhsSrc = node->Input(1);
+  unsigned int rhsSrcNum = node->InputConnNum(1);
 
   if (transB != NORMAL) {
-    bSrc = AddTranspose(transB, false, bSrc, bSrcNum, true);
-    bSrcNum = 0;
+    rhsSrc = AddTranspose(transB, false, rhsSrc, rhsSrcNum, true);
+    rhsSrcNum = 0;
   }    
 
-  PackBuff *bBuff = new PackBuff(node->Input(1)->GetName(node->InputConnNum(1)).m_name,
+  PackBuff *rhsBuff = new PackBuff(node->Input(1)->GetName(node->InputConnNum(1)).m_name,
 				 PACKCOLPANS, PACKBPANEL, NOTTRI, NOTTRIDIAG, GEN,
 				 false, false, false, false,
 				 USEMRSIZE, USENRSIZE);
-  Pack *bPack = new Pack(PACKCOLPANS, 2, false, false, false, false, false);
-  bBuff->AddInput(bSrc, bSrcNum);
-  bPack->AddInput(bSrc, bSrcNum);
-  bPack->AddInput(bBuff, 0);
+  Pack *rhsPack = new Pack(PACKCOLPANS, 2, false, false, false, false, false);
+  rhsBuff->AddInput(rhsSrc, rhsSrcNum);
+  rhsPack->AddInput(rhsSrc, rhsSrcNum);
+  rhsPack->AddInput(rhsBuff, 0);
 
-  poss->AddNode(bBuff);
-  poss->AddNode(bPack);
+  poss->AddNode(rhsBuff);
+  poss->AddNode(rhsPack);
 
   LoopTunnel *packTun = new LoopTunnel(POSSTUNIN);
-  packTun->AddInput(bPack);
+  packTun->AddInput(rhsPack);
   packTun->SetAllStats(isTrsm ? PARTUP : FULLUP);
 
-  Node *aSrc = splitA;
-  unsigned int aSrcNum = 1;
+  Node *lhsSrc = splitLHS;
+  unsigned int lhsSrcNum = 1;
 
   if (transA != NORMAL) {
-    aSrc = AddTranspose(transA, true, aSrc, aSrcNum, false);
-    aSrcNum = 0;
+    lhsSrc = AddTranspose(transA, true, lhsSrc, lhsSrcNum, false);
+    lhsSrcNum = 0;
   }
   
-  PackBuff *aBuff;
-  Pack *aPack;
+  PackBuff *lhsBuff;
+  Pack *lhsPack;
 
   if (isTrsm) {
-    aBuff = new PackBuff(node->Input(0)->GetName(node->InputConnNum(0)).m_name,
+    lhsBuff = new PackBuff(node->Input(0)->GetName(node->InputConnNum(0)).m_name,
 				 PACKROWPANS, PACKABLOCK, tri, trxm->m_diag, TRI,
 				 true, true, true, false,
 				 USEMRSIZE, USEMRSIZE);
-    aPack = new Pack(PACKROWPANS, 3, false, true, true, true, false);
+    lhsPack = new Pack(PACKROWPANS, 3, false, true, true, true, false);
   }
   else {
-    aBuff = new PackBuff(node->Input(0)->GetName(node->InputConnNum(0)).m_name,
+    lhsBuff = new PackBuff(node->Input(0)->GetName(node->InputConnNum(0)).m_name,
 				 PACKROWPANS, PACKABLOCK, tri, trxm->m_diag, TRI,
 				 true, false, false, false,
 				 USEMRSIZE, USEMRSIZE);
-    aPack = new Pack(PACKROWPANS, 3, false, true, false, false, false);
+    lhsPack = new Pack(PACKROWPANS, 3, false, true, false, false, false);
   }
-  aBuff->AddInput(aSrc, aSrcNum);
-  aPack->AddInput(aSrc, aSrcNum);
-  aPack->AddInput(aBuff, 0);  
+  lhsBuff->AddInput(lhsSrc, lhsSrcNum);
+  lhsPack->AddInput(lhsSrc, lhsSrcNum);
+  lhsPack->AddInput(lhsBuff, 0);  
 
   if (transA != NORMAL && transA != CONJ)
     tri = SwapTri(tri);
@@ -2168,13 +2161,13 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   TrxmBP *trbp = new TrxmBP(isTrsm, m_toLayer, trxm->m_side, tri,
 			    trxm->m_trans != CONJ ? trxm->m_trans : NORMAL,
 			    trxm->m_coeff, COEFZERO, trxm->m_type);
-  trbp->AddInput(aPack, 0);
+  trbp->AddInput(lhsPack, 0);
   trbp->AddInput(packTun, 0);
-  trbp->AddInput(splitB, 1);
+  trbp->AddInput(splitOutput, 1);
 
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  Combine *comA = splitLHS->CreateMatchingCombine(0);
 
-  Combine *comB = splitB->CreateMatchingCombine(1,
+  Combine *comB = splitOutput->CreateMatchingCombine(1,
 						1, trbp, isTrsm ? 1 : 0);
   
   LoopTunnel *packTunOut = new LoopTunnel(POSSTUNOUT);
@@ -2441,13 +2434,28 @@ bool TrxmLowerLayer<TrxmType>::CanApply(const Poss *poss, const Node *node) cons
     const TrxmType *trxm = (TrxmType*)node;
     if (trxm->GetLayer() != m_fromLayer)
       return false;
-    if (m_dim == DIMK)
-      return (*(trxm->InputLocalM(0)) <= m_bs
-	      && *(trxm->InputLocalN(0)) <= m_bs);
-    else if (m_dim == DIMN)
-      return (*(trxm->InputLocalN(1)) <= m_bs);
-    else
-      throw;
+    if (trxm->m_side == LEFT) {
+      if (m_dim == DIMK)
+	return (*(trxm->InputLocalM(0)) <= m_bs
+		&& *(trxm->InputLocalN(0)) <= m_bs);
+      else if (m_dim == DIMN)
+	return (*(trxm->InputLocalN(1)) <= m_bs);
+      else
+	throw;
+    }
+    else {
+      if (m_dim == DIMK)
+	return (*(trxm->InputLocalN(1)) <= m_bs);
+      else if (m_dim == DIMN) {
+	if (trxm->m_trans == NORMAL)
+	  return (*(trxm->InputLocalN(0)) <= m_bs);
+	else
+	  return (*(trxm->InputLocalM(0)) <= m_bs);
+      }
+      else
+	throw;
+    }
+      
   }
   return false;
   

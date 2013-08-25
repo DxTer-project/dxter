@@ -352,6 +352,11 @@ void AddTrans()
   Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 3), DPPHASE);
 #endif //DPPHASE
 
+#if DOSR1PHASE
+  Universe::AddTrans(Trxm::GetClass(), new TrxmRightToLeft<Trxm>(ABSLAYER), DOSR1PHASE);
+  Universe::AddTrans(Trmm3::GetClass(), new Trmm3RightToLeft(ABSLAYER), DOSR1PHASE);
+#endif //DOSR1PHASE
+
 
 #if DOSR1PHASE
   Universe::AddTrans(Trxm::GetClass(), new TrmmAxpytoTrxm3(ABSLAYER), SR1PHASE);
@@ -359,7 +364,8 @@ void AddTrans()
 #endif // DOSR1PHASE
 
 #if DOSR1PHASE
-  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, S1LAYER, 3), SR1PHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, S1LAYER, 3, LEFT), SR1PHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, S1LAYER, 1, RIGHT), SR1PHASE);
 #if USELOWERING
   Universe::AddTrans(Trxm::GetClass(), new TrxmLowerLayer<Trxm>(ABSLAYER, S1LAYER, DIMN, BLIS_NC_BSVAL), SR1PHASE);
 #endif
@@ -371,7 +377,8 @@ void AddTrans()
 #endif //SR1PHASE
 
 #if DOSR2PHASE
-  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(S1LAYER, S2LAYER, 2), SR2PHASE);
+    Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(S1LAYER, S2LAYER, 2, LEFT), SR2PHASE);
+    Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(S1LAYER, S2LAYER, 2, RIGHT), SR2PHASE);
 #if USELOWERING
   Universe::AddTrans(Trxm::GetClass(), new TrxmLowerLayer<Trxm>(S1LAYER, S2LAYER, DIMK, BLIS_KC_BSVAL), SR2PHASE);
 #endif
@@ -621,12 +628,6 @@ void AddSimplifiers()
   Universe::AddTrans(Pack::GetClass(), new ReuseTrsmPacking(S3LAYER), SIMP);
   Universe::AddTrans(PackBuff::GetClass(), new CombinePackBuff, SIMP);
   Universe::AddTrans(Transpose::GetClass(), new CombineTranspose, SIMP);
-#if DODPPHASE
-  throw;
-#else
-  Universe::AddTrans(Trxm::GetClass(), new TrxmRightToLeft<Trxm>(ABSLAYER), SIMP);
-  Universe::AddTrans(Trmm3::GetClass(), new Trmm3RightToLeft(ABSLAYER), SIMP);
-#endif //DODPPHASE
 #endif //SR2PHASE
 
 #if DOSR1PHASE

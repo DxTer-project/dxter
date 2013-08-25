@@ -110,8 +110,9 @@ class TrxmLoopExp : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   unsigned int m_dim;
- TrxmLoopExp(Layer fromLayer, Layer toLayer, unsigned int dim) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim) {}
+  Side m_side;
+ TrxmLoopExp(Layer fromLayer, Layer toLayer, unsigned int dim, Side side) 
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_side(side) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
