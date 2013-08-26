@@ -345,6 +345,10 @@ bool Node::CanPrintCode() const
             else if (child->IsPossTunnel(SETTUNIN)) {
               const PossTunnel *tun2 = (PossTunnel*)child;
               const PSet *set = tun2->m_pset;
+              if (this->IsPossTunnel(SETTUNIN)) {
+                if (set == ((PossTunnel*)this)->m_pset)
+                  continue;
+              }
               if (!set->GetCurrPoss()->m_hasPrinted)
                 return false;
             }
