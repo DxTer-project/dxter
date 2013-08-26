@@ -336,6 +336,23 @@ void PackBuff::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<1,1>::Prop();
     m_cost = 0;
+
+    const Sizes *size1 = InputLocalM(0);
+    const Sizes *size2 = InputLocalN(0);
+    if (m_packMat == PACKABLOCK) {
+      if (!(*size1 <= BLIS_MC_BS))
+	throw;
+      if (!(*size2 <= BLIS_KC_BS))
+	throw;
+    }
+    else if (m_packMat == PACKBPANEL) {
+      if (!(*size1 <= BLIS_KC_BS))
+	throw;
+      if (!(*size2 <= BLIS_NC_BS))
+	throw;
+    }
+    else
+      throw;
   }
 }
 
