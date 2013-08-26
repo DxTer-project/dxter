@@ -552,7 +552,7 @@ bool CombinePacking::CanApply(const Poss *poss, const Node *node) const
 {
   const Pack *pack = (Pack*)node;
   if (node->GetNodeClass() != Pack::GetClass())
-    return false;
+    throw;
   const Node *par = node->Input(0);
   unsigned int num = node->InputConnNum(0);
   NodeConnVecConstIter iter = par->m_children.begin();
@@ -876,7 +876,7 @@ void ReuseTrsmPacking::Apply(Poss *poss, Node *node) const
   throw;
 }
 
-bool FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignore)
+const Node* FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignore)
 {
   NodeVecConstIter iter = poss->m_possNodes.begin();
   for(; iter != poss->m_possNodes.end(); ++iter) {
@@ -884,7 +884,7 @@ bool FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignore)
     if (node != ignore && node->GetNodeClass() == PackBuff::GetClass()) {
       const PackBuff *buff = (PackBuff*)node;
       if (buff->m_packMat == pack)
-        return true;
+        return buff;
     }
   }
   PSetVecConstIter iter2 = poss->m_sets.begin();
@@ -892,11 +892,12 @@ bool FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignore)
     const PSet *set = *iter2;
     PossVecConstIter iter3 = set->m_posses.begin();
     for(; iter3 != set->m_posses.end(); ++iter3) {
-      if (FindOtherPackBuffs(*iter3, pack, ignore))
-        return true;
+      const Node *node = FindOtherPackBuffs(*iter3, pack, ignore);
+      if (node != NULL)
+        return node;
     }
   }
-  return false;
+  return NULL;
 }
 
 #if DOSOPHASE
@@ -923,8 +924,10 @@ bool RenamePackBuff::CanApply(const Poss *poss, const Node *node) const
   const PackBuff *buff = (PackBuff*)node;
   if (buff->m_name.m_name == GetNewName(buff))
     return false;
-  if (FindOtherPackBuffs(poss, buff->m_packMat, node))
+  const PackBuff *buff2 = (PackBuff*)FindOtherPackBuffs(poss, buff->m_packMat, node);
+  if (buff2 != NULL) {
     throw;
+  }
   else
     return true;
 }
@@ -934,4 +937,5 @@ void RenamePackBuff::Apply(Poss *poss, Node *node) const
   PackBuff *buff = (PackBuff*)node;
   buff->m_name.m_name = GetNewName(buff);
 }
+
 #endif //DOSOPHASE

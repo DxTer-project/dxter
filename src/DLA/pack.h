@@ -171,4 +171,4 @@ class RenamePackBuff : public SingleTrans
 };
 #endif //DOSOPHASE
 
-bool FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignore);
+const Node* FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignore);
