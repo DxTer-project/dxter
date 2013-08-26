@@ -1995,27 +1995,22 @@ void TrxmBP::Prop()
 
 void TrxmBP::PrintCode(IndStream &out)
 {
-  if (m_side == RIGHT) {
-    out.Indent();
-    *out << "SetTransposeBits( " << GetInputName(2).str() << " );\n";
-  }
   out.Indent();
-  if(m_invert) {
-    if (m_tri == LOWER)
-      *out << "bli_trsm_ll_ker_var2";
-    else if (m_tri == UPPER)
-      *out << "bli_trsm_lu_ker_var2";
-    else
-      throw;
-  }
-  else {
-    if (m_tri == LOWER)
-      *out << "bli_trmm_ll_ker_var2";
-    else if (m_tri == UPPER)
-      *out << "bli_trmm_lu_ker_var2";
-    else
-      throw;
-  }
+  if (m_invert) 
+    *out << "bli_trsm_";
+  else
+    *out << "bli_trmm_";
+  if (m_side == RIGHT)
+    *out << "r";
+  else
+    *out << "l";
+  if (m_tri == LOWER)
+    *out << "l";
+  else if (m_tri == UPPER)
+    *out << "u";
+  else
+    throw;
+  *out << "_ker_var2";
   if (m_comm == CORECOMM)
     *out << "( ";
   else
