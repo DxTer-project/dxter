@@ -635,6 +635,15 @@ void Loop::AssignNewLabel()
 
 bool Loop::WorthFusing(Loop *loop)
 {
+  //If we fuse two inner-most BLIS loops, there 
+  // could be two packed BPANEL buffers input into the same
+  // loop, which means the buffers cannot be named the same.
+  //Therefore, prohibit such fusion to allow for the same
+  // buffer to be reused.
+  if (FindOtherPackBuffs(m_posses[0], PACKABLOCK, NULL)) {
+    return false;
+  }
+  
   NodeVecIter iter = m_outTuns.begin();
   for(; iter != m_outTuns.end(); ++iter) {
     Node *out = *iter;
