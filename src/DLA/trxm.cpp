@@ -1504,7 +1504,7 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(rev ? PARTRIGHT : PARTLEFT, POSSTUNIN, true);
+  Split *splitB = new Split(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   if (rev)
     splitB->SetUpStats(NOTUP, PARTUP,
@@ -1982,9 +1982,19 @@ void TrxmBP::Prop()
     switch (GetLayer()) {
       case (S3LAYER):
       {
-        const Sizes *ms = LocalM(0);
-        const Sizes *ns = LocalN(0);
-        m_cost = GAMMA * ms->SumProds21(*ns) / NumCoresInComm(m_comm);
+        const Sizes *ms0 = InputLocalM(0);
+        const Sizes *ns0 = InputLocalN(0);
+        const Sizes *ms1 = InputLocalM(1);
+        const Sizes *ns1 = InputLocalN(1);
+	//	const Sizes *ms2 = InputLocalM(2);
+	//	const Sizes *ns2 = InputLocalN(2);
+	if (m_side == LEFT) {
+	  m_cost = GAMMA * ms0->SumProds111(*ns0,*ns1) / NumCoresInComm(m_comm);
+	}
+	else {
+	  m_cost = GAMMA * ms0->SumProds111(*ms1,*ns0) / NumCoresInComm(m_comm);
+	}
+
         break;
       }
       default:
