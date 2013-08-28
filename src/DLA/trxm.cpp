@@ -1429,7 +1429,7 @@ Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(rev ? PARTRIGHT : PARTLEFT, POSSTUNIN, true);
+  Split *splitB = new Split(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   if (!rev)
     splitB->SetUpStats(FULLUP, NOTUP,
