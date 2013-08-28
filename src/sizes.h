@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <math.h>
+#include "IndStream.h"
 
 using namespace std;
 
@@ -88,6 +89,7 @@ class SizeEntry
   bool operator!=(const SizeEntry &rhs) const;
   bool operator<= (const Size &rhs) const;
   void Print() const;
+  void Print(IndStream &out) const;
   unsigned int NumSizes() const;
   bool IsZero() const;
   SizesIter GetIter(double coeff) const;
@@ -117,6 +119,7 @@ class Sizes
   ~Sizes();
 
   void Print() const;
+  void Print(IndStream &out) const;
   void AddRepeatedSizes(Size size, int repeats, int parFactor);
   void AddSizesWithLimit(Size start, int stride, Size end, int parFactor);
   void AddMidSizes(Size size, Size totalSize, int parFactor);

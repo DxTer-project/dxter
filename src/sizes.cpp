@@ -211,6 +211,25 @@ void SizeEntry::Print() const
   cout << "\tParallelization factor: " << m_parFactor << endl;
 }
 
+void SizeEntry::Print(IndStream &out) const
+{
+  if (m_type == REPEATEDSIZES)
+    *out << "RepeatedSize " << m_valA
+	 << ", " << m_valC << " times\n";
+  else if (m_type == MIDSIZES)
+    *out << "MidSize " << m_valA
+    << ", total of " << m_valB
+    << endl;
+  else if (m_type == RANGESIZES)
+    *out << "RangeSize " << m_valA << ":"
+    << m_valC << ":"
+    << m_valB << endl;
+  else
+    throw;
+  *out << "\tParallelization factor: " << m_parFactor << endl;
+}
+  
+
 bool SizeEntry::operator==(const SizeEntry &rhs) const
 {
   if (m_parFactor != rhs.m_parFactor)
@@ -450,6 +469,16 @@ void Sizes::Print() const
   EntryVecConstIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
     (*iter)->Print();
+  }
+}
+
+void Sizes::Print(IndStream &out) const
+{
+  *out << m_entries.size() << " size entries\n";
+  *out << NumSizes() << " sizes\n";
+  EntryVecConstIter iter = m_entries.begin();
+  for(; iter != m_entries.end(); ++iter) {
+    (*iter)->Print(out);
   }
 }
 
