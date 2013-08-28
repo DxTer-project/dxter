@@ -45,9 +45,9 @@ using namespace std;
 #endif 
 #define PVAL RVAL*CVAL
 #define ELEM_BSVAL 128
-#define BLIS_MC_BSVAL 1088
+#define BLIS_MC_BSVAL 256
 #define BLIS_KC_BSVAL 128
-#define BLIS_NC_BSVAL 8192
+#define BLIS_NC_BSVAL 4096
 #define BLIS_OUTER_BSVAL 256
 #define CACHEMISSVAL 50 * GAMMAVAL
 
