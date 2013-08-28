@@ -1515,7 +1515,7 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
   
   
   Node *gemm;
-  gemm = new Gemm(layer, trans, NORMAL, coeff, COEFONE, type);
+  gemm = new Gemm(layer, NORMAL, trans, coeff, COEFONE, type);
   
   if (tri == LOWER) {
     if (trans == NORMAL) {
@@ -2093,10 +2093,12 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   }
   
   Split *splitLHS = new Split(lhsDir, POSSTUNIN, true);
-  if (isLeft)
+  if (isLeft) {
     splitLHS->AddInput(node->Input(0), node->InputConnNum(0));
-  else
+  }
+  else {
     splitLHS->AddInput(node->Input(1), node->InputConnNum(1));
+  }
   splitLHS->SetAllStats(FULLUP);
   splitLHS->SetIndepIters();
   
