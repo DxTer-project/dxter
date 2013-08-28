@@ -1990,12 +1990,12 @@ PSet* TrmmExample()
     switch(charIn)
       {
       case('A'):
-	Lin = new InputNode("L input", medSize, medSize, tri==LOWER?"L":"U");
-	Xin = new InputNode("X input", medSize, smallSize, "X");
+	Lin = new InputNode("L input", bigSize, bigSize, tri==LOWER?"L":"U");
+	Xin = new InputNode("X input", bigSize, medSize, "X");
 	break;
       case('C'):
-	Lin = new InputNode("L input", medSize, medSize, tri==LOWER?"L":"U");
-	Xin = new InputNode("X input", medSize, bigSize, "X");
+	Lin = new InputNode("L input", bigSize, bigSize, tri==LOWER?"L":"U");
+	Xin = new InputNode("X input", bigSize, bigSize, "X");
 	break;
       default:
 	throw;
@@ -2005,12 +2005,12 @@ PSet* TrmmExample()
     switch(charIn)
       {
       case('A'):
-	Lin = new InputNode("L input", medSize, medSize, tri==LOWER?"L":"U");
-	Xin = new InputNode("X input", smallSize, medSize, "X");
+	Lin = new InputNode("L input", bigSize, bigSize, tri==LOWER?"L":"U");
+	Xin = new InputNode("X input", medSize, bigSize, "X");
 	break;
       case('C'):
-	Lin = new InputNode("L input", medSize, medSize, tri==LOWER?"L":"U");
-	Xin = new InputNode("X input", bigSize, medSize, "X");
+	Lin = new InputNode("L input", bigSize, bigSize, tri==LOWER?"L":"U");
+	Xin = new InputNode("X input", bigSize, bigSize, "X");
 	break;
       default:
 	throw;
