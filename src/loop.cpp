@@ -524,7 +524,8 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   }
   if (m_type == BLISLOOP) {
     if (m_comm != CORECOMM)
-      *out << "//// ***Parallelized with communicator " << CommToStr(m_comm) << "; need correct output code\n";
+      *out << "//// ***Parallelized with communicator " 
+	   << CommToStr(m_comm) << "; need correct output code\n";
     string idx = "idx" + loopLevel;
     string dimLen = "dimLen" + loopLevel;
     string bs = "bs" + loopLevel;
@@ -572,6 +573,27 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
 	   << idx << " += " << bs <<" ) {\n";
     }
     else {
+#if DOSM
+      Comm outerComm = split->WithinParallelism();
+      Comm innerComm = ParallelismWithinCurrentPosses();
+      if (outerComm == CORECOMM || innerComm != GetSubComm(outerComm)) {
+	if (innerComm == CORECOMM) {
+	  if (outerComm == CORECOMM)
+	    *out << "if (th_global_thread_id() != 0)\n";
+	  else
+	    *out << "if (th_thread_id( " << CommToStr(outerComm) << " ) != 0)\n";
+	}
+	else if (outerComm != CORECOMM && innerComm != GetSubComm(GetSubComm(outerComm))) {
+	  throw;
+	}
+	else {
+	  *out << "if (th_group_id( " << CommToStr(innerComm) << " ) != 0)\n";
+	}
+	out.Indent(1);
+	*out << dimLen << " = 0;\n";
+	out.Indent();
+      }
+#endif // DOSM
       *out << "for ( " << idx << " = 0; " << idx << " < " << dimLen << "; "
 	   << idx << " += " << bs <<" ) {\n";
     }
@@ -1076,3 +1098,4 @@ bool Loop::HasIndepIters() const
   }
   return true;
 }
+

@@ -854,3 +854,21 @@ bool Node::InCriticalSection() const
   }
   return false;
 }
+
+Comm Node::WithinParallelism() const
+{
+  const Poss *poss = m_poss;
+  while (poss && poss->m_pset) {
+    const PSet *set = poss->m_pset;
+    if (set->IsCritSect()) {
+      return CORECOMM;
+    }
+    else if (set->IsLoop()) {
+      const Loop *loop = (Loop*)set;
+      if (loop->IsParallel())
+	return loop->m_comm;
+    }
+    poss = set->m_ownerPoss;
+  }
+  return CORECOMM;
+}

@@ -45,6 +45,8 @@ enum Comm {
   BADCOMM
 };
 
+Comm MaxComm(Comm comm1, Comm comm2);
+
 string CommToStr(Comm comm);
 bool CommAllowedWithin(Comm comm1, Comm comm2);
 inline Comm GetSubComm(Comm comm)

@@ -8,6 +8,11 @@ rank_t th_group_id( thread_comm_t *comm )
     % comm->multiplicative_factor_above;
 }
 
+rank_t th_global_group_id( thread_comm_t *comm )
+{
+  return ( th_global_thread_id() / comm->num_threads_in_group );
+}
+
 rank_t th_thread_id( thread_comm_t *comm )
 {
   return th_global_thread_id() % comm->num_threads_in_group;

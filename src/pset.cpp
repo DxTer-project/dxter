@@ -1541,3 +1541,27 @@ bool PSet::RemoveParallelization(Comm comm)
   }
   return false;
 }
+
+Comm PSet::ParallelismWithinCurrentPosses() const
+{
+  Comm comm = CORECOMM;
+  if (IsLoop()) {
+    const Loop *loop = (Loop*)this;
+    if (loop->m_comm != CORECOMM) {
+      return loop->m_comm;
+    }
+  }
+  const Poss *currPoss = GetCurrPoss();
+  PSetVecConstIter iter = currPoss->m_sets.begin();
+  for(; iter != currPoss->m_sets.end(); ++iter) {
+    const PSet *set = *iter;
+    comm = MaxComm(comm,set->ParallelismWithinCurrentPosses());
+  }
+  NodeVecConstIter iter2 = currPoss->m_possNodes.begin();
+  for(; iter2 != currPoss->m_possNodes.end(); ++iter2) {
+    const Node *node = *iter2;
+    if (node->IsParallel())
+      comm = MaxComm(comm, node->ParallelComm());
+  }
+  return comm;
+}

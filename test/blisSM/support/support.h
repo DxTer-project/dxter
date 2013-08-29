@@ -41,6 +41,7 @@ bool_t  th_am_root( thread_comm_t *comm );
 
 rank_t   th_thread_id( thread_comm_t *comm );
 rank_t   th_group_id( thread_comm_t *comm );
+rank_t   th_globa_group_id( thread_comm_t *comm );
 rank_t   th_global_thread_id();
 
 void th_shift_start_end(dim_t *start, dim_t *end, thread_comm_t *comm, dim_t round_factor);

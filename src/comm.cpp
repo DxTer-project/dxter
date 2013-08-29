@@ -84,3 +84,46 @@ bool CommAllowedWithin(Comm comm1, Comm comm2)
       throw;
 #endif
 }
+
+
+Comm MaxComm(Comm comm1, Comm comm2)
+{
+  switch(comm1)
+    {
+#if DODM
+      throw;
+#elif DOSM||DOSQM
+#if NUMPROCS>1
+    case(ALLPROCCOMM):
+      if (comm1 == ALLL2COMM)
+	throw;
+      else
+	return ALLPROCCOMM;	
+#endif //NUMPROCS>1
+#if NUML2PERPROC>1
+    case (ALLL2COMM):
+      if (comm1 == ALLPROCCOMM)
+	throw;
+      else
+	return ALLL2COMM;
+#endif //NUML2PERPROC > 1
+    case(PROCCOMM):
+      if (comm2 == ALLL2COMM 
+	  || comm2 == ALLPROCCOMM)
+	return comm2;
+      else
+	return PROCCOMM;
+    case(L2COMM):
+      if (comm2 == ALLL2COMM
+	  || comm2 == ALLPROCCOMM
+	  || comm2 == PROCCOMM)
+	return comm2;
+      else
+	return L2COMM;
+#endif
+    case(CORECOMM):
+      return comm2;
+    default:
+      throw;
+    }
+}

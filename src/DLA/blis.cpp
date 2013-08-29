@@ -99,6 +99,8 @@ void Transpose::PrintCode(IndStream &out)
 	barrierBack = true;
 	break;
       }
+      else if (in->IsLoopTunnel())
+	break;
       else if (in->IsPossTunnel(POSSTUNIN)) {
 	num = in->InputConnNum(0);
 	in = in->Input(0);

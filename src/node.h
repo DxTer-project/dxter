@@ -144,6 +144,7 @@ class Node
   virtual bool IsLoopTunnel() const {return false;}
   virtual bool IsParallel() const {return false;}
   virtual Comm ParallelComm() const {throw;}
+  virtual Comm WithinParallelism() const;
   virtual bool RemoveParallelization() {throw;}
   bool InCriticalSection() const;
   virtual bool IsDataDependencyOfInput() const {return true;}

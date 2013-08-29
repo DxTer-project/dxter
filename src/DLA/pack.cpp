@@ -147,7 +147,22 @@ void Pack::PrintCode(IndStream &out)
 {
   if (m_scaleAlpha)
     throw;
-  out.Indent();
+  Comm comm = CORECOMM;
+  unsigned int indentOffset = 0;
+  if (m_comm == CORECOMM) {
+    if (InCriticalSection())
+      throw;
+    else {
+      comm = WithinParallelism();
+      if (comm != CORECOMM) {
+	out.Indent();
+	*out << "if (th_am_root(" << CommToStr(comm) << ")) {\n";
+	indentOffset = 1;
+      }
+    }
+  }
+
+  out.Indent(indentOffset);
   if (m_var == 2)
     *out << "bli_packm_blk_var2";
   else if (m_var == 3)
@@ -167,7 +182,13 @@ void Pack::PrintCode(IndStream &out)
     *out << ", " << CommToStr(m_comm);
   }
   *out << " );\n";
-}
+  if (comm != CORECOMM) {
+    out.Indent(indentOffset);
+    *out << "th_barrier( " << CommToStr(comm) << " );\n";
+    out.Indent();
+    *out << "};\n";
+  }
+  }
 
 Name Pack::GetName(unsigned int num) const
 {
@@ -275,11 +296,28 @@ void PackBuff::PrintCode(IndStream &out)
   }
   
   unsigned int indentOffset = 0;
-  if (m_comm != CORECOMM) {
+  Comm comm = m_comm;
+  if (comm == CORECOMM) {
+    if (InCriticalSection())
+      throw;
+    else {
+      //      Comm outerComm = WithinParallelism();
+      Comm innerComm;
+      PSet *set = m_poss->m_pset;
+      while (set && !set->IsLoop()) {
+	set = set->m_ownerPoss->m_pset;
+      }
+      if (!set)
+	throw;
+      innerComm = ((Loop*)set)->ParallelismWithinCurrentPosses();
+      comm = innerComm;
+    }
+  }
+  if (comm != CORECOMM) {
     out.Indent();
-    *out << "th_barrier( " << CommToStr(m_comm) << " );\n";
+    *out << "th_barrier( " << CommToStr(comm) << " );\n";
     out.Indent();
-    *out << "if (th_am_root(" << CommToStr(m_comm) << ")) {\n";
+    *out << "if (th_am_root(" << CommToStr(comm) << ")) {\n";
     indentOffset = 1;
   }
   
@@ -322,11 +360,11 @@ void PackBuff::PrintCode(IndStream &out)
   *out << "&" << Input(0)->GetName(InputConnNum(0)).str() << ", &"
   << name << " );\n";
 
-  if (m_comm != CORECOMM) {
+  if (comm != CORECOMM) {
     out.Indent();
     *out << "}\n";
     out.Indent();
-    *out << "th_broadcast_without_second_barrier(" << CommToStr(m_comm)
+    *out << "th_broadcast_without_second_barrier(" << CommToStr(comm)
 	 << ", 0, (void*)(&" << name << "), sizeof(" << name << "));\n";
   }
 }

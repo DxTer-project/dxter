@@ -1555,7 +1555,7 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
   Combine *comA = splitA->CreateMatchingCombine(0);
   
   Combine *comB;
-  if (rev)
+  if (tri == LOWER && trans != NORMAL || tri == UPPER && trans == NORMAL)
     comB = splitB->CreateMatchingCombine(2,
                                          1, trmm, 0,
                                          2, gemm, 0);
@@ -2119,7 +2119,7 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
     rhsSrc = node->Input(0);
     rhsSrcNum = node->InputConnNum(0);
     if (trxm->m_trans != NORMAL) {
-      rhsSrc = AddTranspose(trxm->m_trans, false, rhsSrc, rhsSrcNum, true);
+      rhsSrc = AddTranspose(trxm->m_trans, true, rhsSrc, rhsSrcNum, true);
       rhsSrcNum = 0;
     }
   }

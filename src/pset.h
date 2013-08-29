@@ -82,6 +82,7 @@ class PSet
   bool CanPrint() const;
   Poss* GetCurrPoss() const;
   void GetCurrTransVec(TransVec &transVec) const;
+  Comm ParallelismWithinCurrentPosses() const;
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}

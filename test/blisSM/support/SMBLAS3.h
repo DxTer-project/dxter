@@ -5,6 +5,7 @@
 #include "bli_trmm_rl_ker_var2_par.h"
 #include "bli_trmm_ru_ker_var2_par.h"
 #include "bli_packm_blk_var2_par.h"
+#include "bli_packm_blk_var3_par.h"
 #include "bli_gemm_ker_var2_par.h"
 #include "bli_herk_l_ker_var2_par.h"
 #include "bli_herk_u_ker_var2_par.h"
