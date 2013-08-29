@@ -65,7 +65,6 @@ void bli_packm_blk_var3_par( obj_t*   beta,
 			     obj_t*   p,
 			     thread_comm_t* comm )
 {
-  printf("no parallelism in packm_blk_var3\n");
 	num_t     dt_cp     = bli_obj_datatype( *c );
 
 	struc_t   strucc    = bli_obj_struc( *c );
@@ -177,6 +176,9 @@ void PASTEMAC(ch,varname )( \
 	dim_t           m_panel_use; \
 	dim_t           n_panel_use; \
 	conj_t          conjc; \
+\
+    dim_t           t_id = th_thread_id( comm ); \
+    dim_t           num_threads = comm->num_threads_in_group; \
 \
 	/* This variant only supports packing for A (ie: column-stored panels). */ \
 	if ( bli_is_row_stored( rs_p, cs_p ) )  \
@@ -311,6 +313,7 @@ void PASTEMAC(ch,varname )( \
 			c_use = c_begin + (panel_off_i  )*ldc; \
 			p_use = p_begin; \
 \
+			if (it % num_threads == t_id) { \
 			/* Pack the panel. */ \
 			PASTEMAC(ch,packm_cxk)( conjc, \
 			                        panel_dim_i, \
@@ -364,6 +367,7 @@ void PASTEMAC(ch,varname )( \
 				                                zero, \
 				                                p_use, rs_p, cs_p ); \
 			} \
+			}\
 \
 			p_inc = ldp * panel_len_max_i; \
 		} \
@@ -377,6 +381,7 @@ void PASTEMAC(ch,varname )( \
 			panel_len_i     = panel_len; \
 			panel_len_max_i = panel_len_max; \
 \
+						if (it % num_threads == t_id) { \
 			/* Pack the panel. */ \
 			PASTEMAC(ch,packm_cxk)( conjc, \
 			                        panel_dim_i, \
@@ -385,6 +390,7 @@ void PASTEMAC(ch,varname )( \
 			                        c_use, incc, ldc, \
 			                        p_use,       ldp ); \
 \
+						}\
 			p_inc = ldp * panel_len_max_i; \
 		} \
 \
@@ -399,6 +405,7 @@ void PASTEMAC(ch,varname )( \
 			inc_t  cs_pe  = ldp; \
 			ctype* p_edge = p_begin + (i  )*rs_pe; \
 \
+			if (it % num_threads == t_id) {	   \
 			PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
 			                                BLIS_NONUNIT_DIAG, \
 			                                BLIS_DENSE, \
@@ -406,6 +413,7 @@ void PASTEMAC(ch,varname )( \
 			                                n_edge, \
 			                                zero, \
 			                                p_edge, rs_pe, cs_pe ); \
+			}\
 		} \
 \
 		/* If necessary, zero-pad at the far end of the panel (ie: at the
@@ -419,6 +427,7 @@ void PASTEMAC(ch,varname )( \
 			inc_t  cs_pe  = ldp; \
 			ctype* p_edge = p_begin + (j  )*cs_pe; \
 \
+			if (it % num_threads == t_id) { \
 			PASTEMAC2(ch,ch,setm_unb_var1)( 0, \
 			                                BLIS_NONUNIT_DIAG, \
 			                                BLIS_DENSE, \
@@ -426,6 +435,7 @@ void PASTEMAC(ch,varname )( \
 			                                n_edge, \
 			                                zero, \
 			                                p_edge, rs_pe, cs_pe ); \
+			}\
 		} \
 \
 		/* If this panel is an edge case in both panel dimension and length,
@@ -444,12 +454,14 @@ void PASTEMAC(ch,varname )( \
 			inc_t  cs_pe    = ldp; \
 			ctype* p_edge   = p_begin + (i  )*rs_pe + (j  )*cs_pe; \
 \
+			if (it % num_threads == t_id) { \
 			PASTEMAC2(ch,ch,setd_unb_var1)( 0, \
 			                                m_br, \
 			                                n_br, \
 			                                one, \
 			                                p_edge, rs_pe, cs_pe ); \
 \
+			}\
 /*
 			PASTEMAC(ch,fprintm)( stdout, "packm_var3_par: setting br unit diag", m_br, n_br, \
 			                      p_edge, rs_pe, cs_pe, "%5.2f", "" ); \

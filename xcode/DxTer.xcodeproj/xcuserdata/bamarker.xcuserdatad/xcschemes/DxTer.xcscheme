@@ -75,7 +75,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "N"
+            argument = "T"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
