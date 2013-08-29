@@ -16,3 +16,4 @@ xcode/DxTer.xcodeproj/project.xcworkspace/xcuserdata/bamarker.xcuserdatad/UserIn
 xcode/DxTer.xcodeproj/xcuserdata/bamarker.xcuserdatad/xcschemes/DxTer.xcscheme
 clustering/clusterInitResults.mat
 clustering/transformations.txt
+BLASResults/*
