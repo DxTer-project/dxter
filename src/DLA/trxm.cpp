@@ -86,7 +86,8 @@ Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
 Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
                         Node *Bin, unsigned int Bnum,
                         Tri tri, Diag diag, Trans trans,
-                        Coef coeff, Layer layer, Type type);
+                        Coef coeff, Type type,
+                        Layer layer);
 
 Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
                         Node *Bin, unsigned int Bnum,
@@ -563,8 +564,6 @@ bool TrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
       return false;
     if (trxm->m_side != m_side)
       return false;
-    if (m_dim == 1 && trxm->m_invert)
-      return false;
     return true;
   }
   return false;
@@ -590,13 +589,10 @@ void TrxmLoopExp::Apply(Poss *poss, Node *node) const
                                   trxm->m_coeff, m_toLayer,
                                   trxm->m_type);
         else {
-          throw;
-          /*
            loop = TrsmLoopRightVar1(connA->m_n, connA->m_num,
-           connB->m_n, connB->m_num,
-           trxm->m_tri, trxm->m_trans,
-           trxm->m_coeff, m_toLayer);
-           */
+				    connB->m_n, connB->m_num,
+				    trxm->m_tri, trxm->m_diag, trxm->m_trans,
+				    trxm->m_coeff, trxm->m_type, m_toLayer);
         }
         break;
       case(2):
@@ -1676,6 +1672,83 @@ Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,
 }
 
 
+Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
+                        Node *Bin, unsigned int Bnum,
+                        Tri tri, Diag diag, Trans trans,
+                        Coef coeff, Type type,
+                        Layer layer)
+{
+  bool rev = (tri == LOWER && trans == NORMAL) || (tri == UPPER && trans != NORMAL);
+  
+  Split *splitA = new Split(rev ? PARTDIAGBACK: PARTDIAG, POSSTUNIN);
+  splitA->AddInput(Ain, Anum);
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+  
+  Split *splitB = new Split(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
+  splitB->AddInput(Bin, Bnum);
+  if (!rev)
+    splitB->SetUpStats(FULLUP, NOTUP,
+                       FULLUP, NOTUP);
+  else
+    splitB->SetUpStats(NOTUP, FULLUP,
+                       NOTUP, FULLUP);
+  
+  Node *gemm;
+  gemm = new Gemm(layer, NORMAL, trans, coeff, COEFONE, type);
+  
+  if (tri == LOWER) {
+    if (trans == NORMAL) {
+      gemm->AddInputs(6,
+                      splitB, 2,
+                      splitA, 5,
+                      splitB, 1);
+    }
+    else {
+      gemm->AddInputs(6,
+                      splitB, 0,
+                      splitA, 1,
+                      splitB, 1);
+    }
+  }
+  else {
+    if (trans == NORMAL) {
+      gemm->AddInputs(6,
+                      splitB, 0,
+                      splitA, 3,
+                      splitB, 1);
+    }
+    else {
+      gemm->AddInputs(6,
+                      splitB, 2,
+                      splitA, 7,
+                      splitB, 1);
+    }
+  }
+
+
+  Node *trmm = new Trxm(true, layer, RIGHT, tri, diag, trans, coeff, type);
+  trmm->AddInputs(4,
+                  splitA, 4,
+                  gemm, 0);
+  
+  
+  Combine *comA = splitA->CreateMatchingCombine(0);
+  
+  Combine *comB = splitB->CreateMatchingCombine(1,
+                                                1, trmm, 0);
+  
+  Poss *loopPoss = new Poss(2, comA, comB);
+  Loop *loop;
+  if (layer == DMLAYER)
+    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  else
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+  
+  return loop;
+}
+
+
 Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
                        Node *Bin, unsigned int Bnum,
                        Tri tri, Diag diag, Trans trans,
@@ -1889,8 +1962,7 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
   if (layer==DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
-    throw;
-  //    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+        loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
   
   return loop;
 }

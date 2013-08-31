@@ -353,7 +353,7 @@ void AddTrans()
 #endif //DPPHASE
 
 #if DOSR1PHASE
-  Universe::AddTrans(Trxm::GetClass(), new TrxmRightToLeft<Trxm>(ABSLAYER), DOSR1PHASE);
+  //  Universe::AddTrans(Trxm::GetClass(), new TrxmRightToLeft<Trxm>(ABSLAYER), DOSR1PHASE);
   Universe::AddTrans(Trmm3::GetClass(), new Trmm3RightToLeft(ABSLAYER), DOSR1PHASE);
 #endif //DOSR1PHASE
 
