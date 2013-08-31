@@ -153,7 +153,13 @@ void Pack::PrintCode(IndStream &out)
     if (InCriticalSection())
       throw;
     else {
-      comm = WithinParallelism();
+      PSet *set = m_poss->m_pset;
+      while (set && !set->IsLoop()) {
+	set = set->m_ownerPoss->m_pset;
+      }
+      if (!set)
+	throw;
+      comm = ((Loop*)set)->ParallelismWithinCurrentPosses();
       if (comm != CORECOMM) {
 	out.Indent();
 	*out << "if (th_am_root(" << CommToStr(comm) << ")) {\n";
@@ -183,12 +189,13 @@ void Pack::PrintCode(IndStream &out)
   }
   *out << " );\n";
   if (comm != CORECOMM) {
-    out.Indent(indentOffset);
-    *out << "th_barrier( " << CommToStr(comm) << " );\n";
     out.Indent();
-    *out << "};\n";
+    *out << "}\n";
+    out.Indent();
+    *out << "th_barrier( " << CommToStr(comm) << " );\n";
   }
-  }
+  
+}
 
 Name Pack::GetName(unsigned int num) const
 {

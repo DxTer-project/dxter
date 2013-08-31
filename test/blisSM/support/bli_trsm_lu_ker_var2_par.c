@@ -359,6 +359,7 @@ void PASTEMAC(ch,varname)( \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
+				  if (((i%l1_num_threads) == l1_thread_id) && (((j%l2_num_threads == l2_thread_id)))) {	\
 					/* Invoke the fused gemm/trsm micro-kernel. */ \
 					PASTEMAC(ch,gemmtrsmukr)( k_a12, \
 					                          alpha_cast, \
@@ -369,9 +370,11 @@ void PASTEMAC(ch,varname)( \
 					                          b11, \
 					                          c11, rs_c, cs_c, \
 					                          a2, b2 ); \
+				  }\
 				} \
 				else \
 				{ \
+				  if (((i%l1_num_threads) == l1_thread_id) && (((j%l2_num_threads == l2_thread_id)))) {	\
 					/* Invoke the fused gemm/trsm micro-kernel. */ \
 					PASTEMAC(ch,gemmtrsmukr)( k_a12, \
 					                          alpha_cast, \
@@ -387,6 +390,7 @@ void PASTEMAC(ch,varname)( \
 					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
 					                        ct,  rs_ct, cs_ct, \
 					                        c11, rs_c,  cs_c ); \
+				  }\
 				} \
 \
 				a1 += k_a1112 * PACKMR; \
@@ -406,6 +410,7 @@ void PASTEMAC(ch,varname)( \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
+				  if (((i%l1_num_threads) == l1_thread_id) && (((j%l2_num_threads == l2_thread_id)))) {	\
 					/* Invoke the gemm micro-kernel. */ \
 					PASTEMAC(ch,gemmukr)( k, \
 					                      minus_one, \
@@ -414,9 +419,11 @@ void PASTEMAC(ch,varname)( \
 					                      alpha_cast, \
 					                      c11, rs_c, cs_c, \
 					                      a2, b2 ); \
+				  }\
 				} \
 				else \
 				{ \
+				  if (((i%l1_num_threads) == l1_thread_id) && (((j%l2_num_threads == l2_thread_id)))) {	\
 					/* Invoke the gemm micro-kernel. */ \
 					PASTEMAC(ch,gemmukr)( k, \
 					                      minus_one, \
@@ -431,6 +438,7 @@ void PASTEMAC(ch,varname)( \
 					                        ct,  rs_ct, cs_ct, \
 					                        alpha_cast, \
 					                        c11, rs_c,  cs_c ); \
+				  }\
 				} \
 \
 				a1 += rstep_a; \

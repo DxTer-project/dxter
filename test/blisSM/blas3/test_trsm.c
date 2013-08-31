@@ -2,6 +2,8 @@
 #include "blis.h"
 #include "SMBLAS3.h"
 
+#define TESTLIB 
+
 thread_comm_t global_comm[1];			
 thread_comm_t proc_comms[NUMPROCS];		
 thread_comm_t l2_comms[NUML2];
@@ -51,10 +53,10 @@ void DxT_TrsmLLN( obj_t *alpha,
 			     &X_1_1, &packed_B_pan );
       }
       th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      if (th_am_root(GlobalComm)) {
+      if (th_am_root(L2Comm)) {
 	bli_packm_blk_var2( &BLIS_ONE, &X_1_1, &packed_B_pan );
-	th_barrier( GlobalComm );
-      };
+      }
+      th_barrier( L2Comm );
       dimLen3 = bli_obj_length_after_trans( L_11 );
       if (th_group_id( L2Comm ) != 0)
 	dimLen3 = 0;
@@ -363,7 +365,7 @@ int main( int argc, char** argv )
 			          &alpha,
 			          &a,
 			          &c2 );
-
+			
 			if (trans)
 			  bli_obj_set_conjtrans(BLIS_NO_TRANSPOSE, a);
 			  // bli_obj_toggle_trans( a );

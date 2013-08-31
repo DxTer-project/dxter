@@ -4,10 +4,10 @@
 #include "bli_trmm_lu_ker_var2_par.h"
 #include "bli_trmm_rl_ker_var2_par.h"
 #include "bli_trmm_ru_ker_var2_par.h"
-#include "bli_trsm_ll_ker_var2_par.h"
-#include "bli_trsm_lu_ker_var2_par.h"
-#include "bli_trsm_rl_ker_var2_par.h"
-#include "bli_trsm_ru_ker_var2_par.h"
+//#include "bli_trsm_rl_ker_var2_par.h"
+//#include "bli_trsm_ru_ker_var2_par.h"
+//#include "bli_trsm_ll_ker_var2_par.h"
+//#include "bli_trsm_lu_ker_var2_par.h"
 #include "bli_packm_blk_var2_par.h"
 #include "bli_packm_blk_var3_par.h"
 #include "bli_gemm_ker_var2_par.h"
@@ -26,8 +26,8 @@ extern blksz_t *gemm_extkr;
 extern blksz_t *gemm_extnr;
 extern blksz_t *trmm_mr;
 
-#define NUMTHREADSPERL1 2
-#define NUML1PERL2 2
+#define NUMTHREADSPERL1 1
+#define NUML1PERL2 1
 #define NUML2PERPROC 2
 #define NUMPROCS 2
 

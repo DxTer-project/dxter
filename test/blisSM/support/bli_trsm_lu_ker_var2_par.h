@@ -41,7 +41,7 @@
 //
 // Prototype object-based interface.
 //
-void bli_trsm_lu_ker_var2( obj_t*  alpha,
+void bli_trsm_lu_ker_var2_par( obj_t*  alpha,
                            obj_t*  a,
                            obj_t*  b,
                            obj_t*  beta,
