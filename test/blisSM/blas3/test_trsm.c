@@ -83,7 +83,7 @@ void DxT_TrsmLLN( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var3_par( &BLIS_ONE, &L_11_1, &packed_A_blk, L2Comm );
 	bli_trsm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L1Comm);
+				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L2Comm);
 
 	//------------------------------------//
 
@@ -212,7 +212,7 @@ void DxT_TrsmLLT( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var3_par( &BLIS_ONE, &L_11_1T, &packed_A_blk, L2Comm );
 	bli_trsm_lu_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L1Comm);
+				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L2Comm);
 
 	//------------------------------------//
 
@@ -341,7 +341,7 @@ void DxT_TrsmLUN( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1, &packed_A_blk, L2Comm );
 	bli_trsm_lu_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L1Comm);
+				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L2Comm);
 
 	//------------------------------------//
 
@@ -469,7 +469,7 @@ void DxT_TrsmLUT( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1T, &packed_A_blk, L2Comm );
 	bli_trsm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L1Comm);
+				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L2Comm);
 
 	//------------------------------------//
 
@@ -654,7 +654,7 @@ void DxT_TrsmRLN( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
 	bli_trsm_rl_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L1Comm);
+				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L2Comm);
 
 	//------------------------------------//
 
@@ -866,7 +866,7 @@ void DxT_TrsmRLT( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
 	bli_trsm_ru_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L1Comm);
+				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L2Comm);
 
 	//------------------------------------//
 
@@ -1072,7 +1072,7 @@ dimLen4 = bli_obj_length_after_trans( X_1_1 );
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
 	bli_trsm_ru_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L1Comm);
+				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L2Comm);
 
 	//------------------------------------//
 
@@ -1284,7 +1284,7 @@ void DxT_TrsmRUT( obj_t *alpha,
 	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
 	bli_trsm_rl_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L1Comm);
+				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L2Comm);
 
 	//------------------------------------//
 
