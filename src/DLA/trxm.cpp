@@ -2127,26 +2127,48 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   PartDir lhsDir;
   PartDir outputDir;
   if (isTrsm) {
-    if (!isLeft)
-      throw;
-    if (trxm->m_trans != NORMAL && trxm->m_trans != CONJ) {
-      if (tri == UPPER) {
-        lhsDir = PARTRIGHT;
-        outputDir = PARTDOWN;
+    if (isLeft) {
+      if (trxm->m_trans != NORMAL && trxm->m_trans != CONJ) {
+	if (tri == UPPER) {
+	  lhsDir = PARTRIGHT;
+	  outputDir = PARTDOWN;
+	}
+	else {
+	  lhsDir = PARTLEFT;
+	  outputDir = PARTUPWARD;
+	}
       }
       else {
-        lhsDir = PARTLEFT;
-        outputDir = PARTUPWARD;
+	if (tri == LOWER) {
+	  lhsDir = PARTDOWN;
+	  outputDir = PARTDOWN;
+	}
+	else {
+	  lhsDir = PARTUPWARD;
+	  outputDir = PARTUPWARD;
+	}
       }
     }
     else {
-      if (tri == LOWER) {
-        lhsDir = PARTDOWN;
-        outputDir = PARTDOWN;
+      if (trxm->m_trans != NORMAL && trxm->m_trans != CONJ) {
+	if (tri == UPPER) {
+	  lhsDir = PARTUPWARD;
+	  outputDir = PARTUPWARD;
+	}
+	else {
+	  lhsDir = PARTDOWN;
+	  outputDir = PARTDOWN;
+	}
       }
       else {
-        lhsDir = PARTUPWARD;
-        outputDir = PARTUPWARD;
+	if (tri == LOWER) {
+	  lhsDir = PARTUPWARD;
+	  outputDir = PARTUPWARD;
+	}
+	else {
+	  lhsDir = PARTDOWN;
+	  outputDir = PARTDOWN;
+	}
       }
     }
   }
