@@ -2104,8 +2104,12 @@ void TrxmBP::PrintCode(IndStream &out)
   out << m_beta;
   *out << ", &" << GetInputName(2).str() << ", (tr"
   << (m_invert ? "s" : "m") << "m_t*)NULL";
-  if (m_comm != CORECOMM)
-    *out << ", L1Comm";
+  if (m_comm != CORECOMM) {
+    if (m_invert)
+      *out << ", L2Comm";
+    else
+      *out << ", L1Comm";
+  }
   *out <<  ");\n";
 }
 
