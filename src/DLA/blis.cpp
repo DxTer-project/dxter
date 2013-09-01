@@ -622,57 +622,10 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
     const Pack *pack = (Pack*)buff->Child(0);
     if (!LegalParallelizationNestingUp(pack, m_comm))
       return false;
+    if (buff->m_comm != CORECOMM || pack->m_comm != CORECOMM)
+      return false;
     if (pack->m_children.size() < 1)
       throw;
-    bool found = false;
-    NodeConnVecConstIter iter = pack->m_children.begin();
-    for(; iter != pack->m_children.end(); ++iter) {
-      const Node *child = (*iter)->m_n;
-      if (!child->IsLoopTunnel()) {
-        if (child->IsPossTunnel()) {
-          PossTunnel *tun = (PossTunnel*)child;
-          if (!tun->m_pset->IsCritSect())
-            throw;
-          else
-            return false;
-        }
-        else
-          throw;
-      }
-      if (!child->IsPossTunnel(SETTUNIN)) {
-        cout << "Child of pack is loop tunnel but not SETTUNIN\n";
-        throw;
-      }
-      const LoopTunnel *tun = (LoopTunnel*)child;
-      
-      const Loop *loop = (Loop*)(tun->m_pset);
-      if (!loop->HasIndepIters()) {
-	continue;
-      }
-      else
-	found = true;
-      if (loop->m_dim != DIMM)
-        throw;
-      if (loop->m_comm == m_comm)
-        return false;
-      else if (loop->m_comm != CORECOMM)
-        throw;
-      if (!LegalParallelizationNestingDown(loop, m_comm))
-        return false;
-      /*
-      const Split *control = loop->GetControl();
-      const unsigned int numExecs = control->NumberOfLoopExecs();
-      unsigned int parFactor = NumGroupsInComm(m_comm);
-      int numParallelizable = 0;
-      for(unsigned int i = 0; i < numExecs; ++i) {
-        unsigned int numIters = control->NumIters(i);
-        if (numIters >= parFactor)
-          ++numParallelizable;
-      }
-      if ((((double)numParallelizable) / numExecs) < PORTIONPARALLELIZABLE)
-        return false;
-      */
-    }
     return true;
   }
   return false;
@@ -684,16 +637,43 @@ void ParallelizeMDim::Apply(Poss *poss, Node *node) const
   buff->Parallelize(m_comm);
   Pack *pack = (Pack*)buff->Child(0);
   pack->Parallelize(m_comm);
-  NodeConnVecConstIter iter = pack->m_children.begin();
+  NodeConnVecIter iter = pack->m_children.begin();
   for(; iter != pack->m_children.end(); ++iter) {
     Node *child = (*iter)->m_n;
     LoopTunnel *tun = (LoopTunnel*)child;
     Loop *loop = (Loop*)(tun->m_pset);
-    if (!loop->HasIndepIters()) {
-      continue;
-    }
-    else {
-      loop->Parallelize(m_comm);
+    if (loop->HasIndepIters() 
+	&& LegalParallelizationNestingDown(loop, m_comm)
+	&& loop->m_comm == CORECOMM) 
+      {
+	loop->Parallelize(m_comm);
+      }
+    //For Trsm, the packed B panel goes into the 
+    // Trsm loop, which doesn't have indep iters
+    //That panel is updated in the loop and then
+    // input to the Gemm loop, which does have
+    // indep iters
+    tun = tun->GetMatchingOutTun();
+    NodeConnVecIter iter2 = tun->m_children.begin();
+    for(; iter2 != tun->m_children.end(); ++iter2) {
+      Node *child2 = (*iter2)->m_n;
+      bool skip = false;
+      while (!skip && !child2->IsLoopTunnel()) {
+	if (child2->IsPossTunnel(SETTUNIN) ||
+	    child2->IsPossTunnel(POSSTUNIN))
+	  child2 = child2->m_children[0]->m_n;
+	else
+	  skip = true;
+      }
+      if (child2->IsLoopTunnel()) {
+	loop = (Loop*)(((LoopTunnel*)child2)->m_pset);
+	if (loop->HasIndepIters() 
+	    && LegalParallelizationNestingDown(loop, m_comm)
+	    && loop->m_comm == CORECOMM) 
+	  {
+	    loop->Parallelize(m_comm);
+	  }	
+      }
     }
   }
 }

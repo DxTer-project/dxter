@@ -96,7 +96,7 @@ class PackBuff : public DLAOp<1,1>
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "PackBuff";}
-  virtual NodeType GetType() const { return "packBuff"; }
+  virtual NodeType GetType() const { return "packBuff"+CommToStr(m_comm); }
   virtual DistType GetDistType(unsigned int num) const {return InputDistType(0);}
   virtual Phase MaxPhase() const { return NUMPHASES;}
   virtual void PrintCode(IndStream &out);

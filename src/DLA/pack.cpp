@@ -130,7 +130,7 @@ void Pack::UnflattenCore(ifstream &in, SaveInfo &info)
 
 NodeType Pack::GetType() const
 {
-  return "Pack " + PackTypeToStr(m_pack);
+  return "Pack " + PackTypeToStr(m_pack) + CommToStr(m_comm);
 }
 
 DistType Pack::GetDistType(unsigned int num) const
