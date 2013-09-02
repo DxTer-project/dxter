@@ -2204,8 +2204,10 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   splitOutput->AddInput(trxm->Input(1), trxm->InputConnNum(1));
   splitOutput->SetUpStats(FULLUP, FULLUP,
                           NOTUP, NOTUP);
-  //BAM I don't think these are independent,
-  // but I didn't really do a complete analysis
+  if (!isTrsm)
+    splitOutput->SetIndepIters();
+  //else
+  //Not independent
   
   Node *rhsSrc;
   unsigned int rhsSrcNum;
@@ -2256,6 +2258,8 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   }
   else
     packTun->SetAllStats(FULLUP);
+  if (!isTrsm)
+    packTun->SetIndepIters();
   
   Node *lhsSrc = splitLHS;
   unsigned int lhsSrcNum = 1;
