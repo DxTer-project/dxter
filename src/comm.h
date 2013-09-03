@@ -103,6 +103,7 @@ inline unsigned int NumCoresInComm(Comm comm)
     case(PROCCOMM):
       return NUML2PERPROC*NUMCORESPERL2;
     case(L2COMM):
+      case(L2COMMSUBALLL2):
       return NUMCORESPERL2;
 #endif
     case(CORECOMM):
