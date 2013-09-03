@@ -160,7 +160,7 @@ class ParallelizeMDim : public ParallelizeTrans
  public:
   ParallelizeMDim(Comm comm)
     : ParallelizeTrans(comm) {}
-  virtual string GetType() const {return "ParallelizeMDim";}
+  virtual string GetType() const {return "ParallelizeMDim"+CommToStr(m_comm);}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
@@ -170,7 +170,7 @@ class ParallelizeInnerNDim : public ParallelizeTrans
  public:
   ParallelizeInnerNDim(Comm comm)
     : ParallelizeTrans(comm) {}
-  virtual string GetType() const {return "ParallelizeInnerNDim";}
+  virtual string GetType() const {return "ParallelizeInnerNDim"+CommToStr(m_comm);}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
@@ -180,7 +180,7 @@ class ParallelizeOuterNDim : public ParallelizeTrans
  public:
   ParallelizeOuterNDim(Comm comm)
     : ParallelizeTrans(comm) {}
-  virtual string GetType() const {return "ParallelizeOuterNDim";}
+  virtual string GetType() const {return "ParallelizeOuterNDim"+CommToStr(m_comm);}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
@@ -190,7 +190,7 @@ class ParallelizeK : public ParallelizeTrans
  public:
   ParallelizeK(Comm comm)
     : ParallelizeTrans(comm) {}
-  virtual string GetType() const {return "ParallelizeK";}
+  virtual string GetType() const {return "ParallelizeK"+CommToStr(m_comm);}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
