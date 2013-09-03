@@ -185,10 +185,10 @@ Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
 void Loop::SanityCheck()
 {
   PSet::SanityCheck();
-
+  
   if (m_type == ELEMLOOP && m_comm != CORECOMM)
     throw;
-
+  
   bool foundControl = false;
   NodeVecIter iter = m_inTuns.begin();
   //  cout << "****\n";
@@ -524,8 +524,8 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   }
   if (m_type == BLISLOOP) {
     if (m_comm != CORECOMM)
-      *out << "//// ***Parallelized with communicator " 
-	   << CommToStr(m_comm) << "; need correct output code\n";
+      *out << "//// ***Parallelized with communicator "
+      << CommToStr(m_comm) << "; need correct output code\n";
     string idx = "idx" + loopLevel;
     string dimLen = "dimLen" + loopLevel;
     string bs = "bs" + loopLevel;
@@ -533,12 +533,12 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     Split *split = GetControl();
     
     string inputName = split->Input(0)->GetName(split->InputConnNum(0)).str();
-
+    
     if (loopLevel == "1") {
       out.Indent();
-      *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";      
+      *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
     }
-      
+    
     
     switch(split->m_dir) {
       case(PARTDIAGBACK):
@@ -564,38 +564,40 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     if (m_comm != CORECOMM) {
       *out << idx << " = 0;\n";
       out.Indent();
-      *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", " 
-	   << CommToStr(GetSubComm(m_comm)) << ", "
-	   << "bli_blksz_for_obj( &" << split->GetInputNameStr(0)
-	   << ", " << BSSizeToSubSizeStr(m_bsSize) << "));\n";
+      *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", "
+      << CommToStr(GetSubComm(m_comm)) << ", "
+      << "bli_blksz_for_obj( &" << split->GetInputNameStr(0)
+      << ", " << BSSizeToSubSizeStr(m_bsSize) << "));\n";
       out.Indent();
       *out << "for ( ; " << idx << " < " << dimLen << "; "
-	   << idx << " += " << bs <<" ) {\n";
+      << idx << " += " << bs <<" ) {\n";
     }
     else {
 #if DOSM
       Comm outerComm = split->WithinParallelism();
       Comm innerComm = ParallelismWithinCurrentPosses();
       if (outerComm == CORECOMM || innerComm != GetSubComm(outerComm)) {
-	if (innerComm == CORECOMM) {
-	  if (outerComm == CORECOMM)
-	    *out << "if (th_global_thread_id() != 0)\n";
-	  else
-	    *out << "if (th_thread_id( " << CommToStr(outerComm) << " ) != 0)\n";
-	}
-	else if (outerComm != CORECOMM && innerComm != GetSubComm(GetSubComm(outerComm))) {
-	  throw;
-	}
-	else {
-	  *out << "if (th_group_id( " << CommToStr(innerComm) << " ) != 0)\n";
-	}
-	out.Indent(1);
-	*out << dimLen << " = 0;\n";
-	out.Indent();
+        if (innerComm == CORECOMM) {
+          if (outerComm == CORECOMM)
+            *out << "if (th_global_thread_id() != 0)\n";
+          else
+            *out << "if (th_thread_id( " << CommToStr(outerComm) << " ) != 0)\n";
+        }
+        else if (outerComm != CORECOMM && innerComm != GetSubComm(GetSubComm(outerComm))) {
+          outerComm = split->WithinParallelism();
+          innerComm = ParallelismWithinCurrentPosses();
+          throw;
+        }
+        else {
+          *out << "if (th_group_id( " << CommToStr(innerComm) << " ) != 0)\n";
+        }
+        out.Indent(1);
+        *out << dimLen << " = 0;\n";
+        out.Indent();
       }
 #endif // DOSM
       *out << "for ( " << idx << " = 0; " << idx << " < " << dimLen << "; "
-	   << idx << " += " << bs <<" ) {\n";
+      << idx << " += " << bs <<" ) {\n";
     }
     out.Indent(1);
     *out << bs;
@@ -657,7 +659,7 @@ void Loop::AssignNewLabel()
 
 bool Loop::WorthFusing(Loop *loop)
 {
-  //If we fuse two inner-most BLIS loops, there 
+  //If we fuse two inner-most BLIS loops, there
   // could be two packed BPANEL buffers input into the same
   // loop, which means the buffers cannot be named the same.
   //Therefore, prohibit such fusion to allow for the same
@@ -970,7 +972,7 @@ void Loop::Parallelize(Comm comm)
           if (!nodeSet.size())
             throw;
           poss->FillClique(nodeSet);
-	  poss->m_hasChecked = false;
+          poss->m_hasChecked = false;
           CritSect *crit = (CritSect*)(poss->FormSetForClique(nodeSet, true));
           if (crit->RemoveParallelization(CORECOMM)) {
             //This critical section is around some hierarchy of PSets
@@ -986,7 +988,7 @@ void Loop::Parallelize(Comm comm)
       }
     }
   }
-
+  
   
   
   ClearSizeCache();

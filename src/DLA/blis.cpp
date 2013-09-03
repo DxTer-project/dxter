@@ -621,7 +621,6 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
     }
     const Pack *pack = (Pack*)(buff->Child(0));
     if (!LegalParallelizationNestingUp(pack, m_comm)) {
-      LegalParallelizationNestingUp(pack, m_comm);
       return false;
     }
     if (buff->m_comm != CORECOMM || pack->m_comm != CORECOMM)
@@ -820,7 +819,8 @@ bool LegalParallelizationNestingUp(const Node *node, Comm comm)
     if (!pset)
       break;
     if (pset->IsLoop()) {
-      return CommAllowedWithin(((Loop*)pset)->m_comm, comm);
+      if (!CommAllowedWithin(((Loop*)pset)->m_comm, comm))
+        return false;
     }
     else if (pset->IsCritSect()) {
       return false;

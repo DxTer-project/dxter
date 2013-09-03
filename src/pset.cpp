@@ -1502,7 +1502,7 @@ bool PSet::RemoveParallelization(Comm comm)
       if (comm == CORECOMM) {
         return true;
       }
-      else if (!CommAllowedWithin(loop->m_comm, comm)) {
+      else if (!CommAllowedWithin(comm, loop->m_comm)) {
         return true;
       }
     }
