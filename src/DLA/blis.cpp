@@ -96,36 +96,36 @@ void Transpose::PrintCode(IndStream &out)
     unsigned int num = this->InputConnNum(0);
     while (true) {
       if (in->GetNodeClass() == InputNode::GetClass()) {
-	barrierBack = true;
-	break;
+        barrierBack = true;
+        break;
       }
       else if (in->IsLoopTunnel())
-	break;
+        break;
       else if (in->IsPossTunnel(POSSTUNIN)) {
-	num = in->InputConnNum(0);
-	in = in->Input(0);
+        num = in->InputConnNum(0);
+        in = in->Input(0);
       }
       else if (in->IsPossTunnel(SETTUNIN)) {
-	num = in->InputConnNum(0);
-	in = in->Input(0);
+        num = in->InputConnNum(0);
+        in = in->Input(0);
       }
       else {
-	break;
+        break;
       }
     }
     if (!barrierBack) {
       if (Child(0)->GetNodeClass() == OutputNode::GetClass()) {
-	*out << "th_barrier( GlobalComm );\n"; 
-	out.Indent();
-	*out << "if (th_am_root(GlobalComm))\n";
-	out.Indent(1);
+        *out << "th_barrier( GlobalComm );\n";
+        out.Indent();
+        *out << "if (th_am_root(GlobalComm))\n";
+        out.Indent(1);
       }
     }
     if (barrierBack) {
       *out << "if (th_am_root(GlobalComm))\n";
       out.Indent(1);
     }
-
+    
 #endif //DOSMPPHASE
     if (m_trans == TRANS) {
       *out << "bli_obj_induce_trans( ";
@@ -619,9 +619,11 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
       cout << "child of B panel packbuff isn't Pack\n";
       throw;
     }
-    const Pack *pack = (Pack*)buff->Child(0);
-    if (!LegalParallelizationNestingUp(pack, m_comm))
+    const Pack *pack = (Pack*)(buff->Child(0));
+    if (!LegalParallelizationNestingUp(pack, m_comm)) {
+      LegalParallelizationNestingUp(pack, m_comm);
       return false;
+    }
     if (buff->m_comm != CORECOMM || pack->m_comm != CORECOMM)
       return false;
     if (pack->m_children.size() < 1)
@@ -642,13 +644,13 @@ void ParallelizeMDim::Apply(Poss *poss, Node *node) const
     Node *child = (*iter)->m_n;
     LoopTunnel *tun = (LoopTunnel*)child;
     Loop *loop = (Loop*)(tun->m_pset);
-    if (loop->HasIndepIters() 
-	&& LegalParallelizationNestingDown(loop, m_comm)
-	&& loop->m_comm == CORECOMM) 
-      {
-	loop->Parallelize(m_comm);
-      }
-    //For Trsm, the packed B panel goes into the 
+    if (loop->HasIndepIters()
+        && LegalParallelizationNestingDown(loop, m_comm)
+        && loop->m_comm == CORECOMM)
+    {
+      loop->Parallelize(m_comm);
+    }
+    //For Trsm, the packed B panel goes into the
     // Trsm loop, which doesn't have indep iters
     //That panel is updated in the loop and then
     // input to the Gemm loop, which does have
@@ -659,20 +661,20 @@ void ParallelizeMDim::Apply(Poss *poss, Node *node) const
       Node *child2 = (*iter2)->m_n;
       bool skip = false;
       while (!skip && !child2->IsLoopTunnel()) {
-	if (child2->IsPossTunnel(SETTUNIN) ||
-	    child2->IsPossTunnel(POSSTUNIN))
-	  child2 = child2->m_children[0]->m_n;
-	else
-	  skip = true;
+        if (child2->IsPossTunnel(SETTUNIN) ||
+            child2->IsPossTunnel(POSSTUNIN))
+          child2 = child2->m_children[0]->m_n;
+        else
+          skip = true;
       }
       if (child2->IsLoopTunnel()) {
-	loop = (Loop*)(((LoopTunnel*)child2)->m_pset);
-	if (loop->HasIndepIters() 
-	    && LegalParallelizationNestingDown(loop, m_comm)
-	    && loop->m_comm == CORECOMM) 
-	  {
-	    loop->Parallelize(m_comm);
-	  }	
+        loop = (Loop*)(((LoopTunnel*)child2)->m_pset);
+        if (loop->HasIndepIters()
+            && LegalParallelizationNestingDown(loop, m_comm)
+            && loop->m_comm == CORECOMM)
+        {
+          loop->Parallelize(m_comm);
+        }
       }
     }
   }
@@ -852,3 +854,44 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
   }
   return foundGood;
 }
+/*
+bool IncreaseParallelizedLoop::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != Split::GetClass())
+    throw;
+  const Split *split = (Split*)node;
+  if (!split->IsPossTunnel(SETTUNIN))
+    return false;
+  const Loop *loop = split->GetMyLoop();
+  if (loop->m_comm == CORECOMM)
+    return false;
+  Comm comm = node->WithinParallelism();
+  if (comm == CORECOMM)
+#if NUMPROCS > 1
+    return loop->m_comm != ALLPROCCOMM;
+#elif NUML2PERPROC > 1
+  return loop->m_comm != PROCCOMM;
+#else
+  throw;
+#endif
+  return !IsImmediateSubComm(comm, loop->m_comm);
+}
+
+void IncreaseParallelizedLoop::Apply(Poss *poss, Node *node) const
+{
+  Split *split = (Split*)node;
+  Loop *loop = split->GetMyLoop();
+  Comm comm = node->WithinParallelism();
+  if (comm == CORECOMM)
+#if NUMPROCS > 1
+    {
+      loop->m_comm = ALLL2COMM;
+      loop->ReplaceAllComms(L2COMM,L2COMMSUBALLL2);
+    }
+#else
+  throw;
+#endif
+  else
+    loop->m_comm = GetSubComm(comm);
+}
+*/

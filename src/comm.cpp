@@ -35,11 +35,15 @@ string CommToStr(Comm comm)
 #if NUMPROCS>1
     case(ALLPROCCOMM):
       return "GlobalComm";
+    case(ALLL2COMM):
+      return "AllL2Comm";
 #endif //NUML2PERPROC > 1
     case(PROCCOMM):
       return "ProcComm";
     case(L2COMM):
       return "L2Comm";
+    case(L2COMMSUBALLL2):
+      return "L2SubAllL2Comm";
 #endif
     case(CORECOMM):
       return "Seq";
@@ -47,7 +51,6 @@ string CommToStr(Comm comm)
       throw;
     }
 }
-
 
 // Partial ordering of comm's
 // Used to make sure nested parallelization
@@ -64,7 +67,7 @@ bool CommAllowedWithin(Comm comm1, Comm comm2)
       return comm2 == PROCCOMM || comm2==L2COMM || comm2==CORECOMM;
 #if NUML2PERPROC>1
     case(ALLL2COMM):
-      return comm2==L2COMM || comm2==CORECOMM;
+      return comm2==L2COMMSUBALLL2 || comm2==CORECOMM;
 #endif //NUML2PERPROC>1
 #endif //NUMPROCS>1
 

@@ -49,6 +49,7 @@ Comm MaxComm(Comm comm1, Comm comm2);
 
 string CommToStr(Comm comm);
 bool CommAllowedWithin(Comm comm1, Comm comm2);
+
 inline Comm GetSubComm(Comm comm)
 {
   switch(comm)
@@ -76,6 +77,10 @@ inline Comm GetSubComm(Comm comm)
     }
 }
 
+inline bool IsImmediateSubComm(Comm commTop, Comm commBott) 
+{
+  return commBott == GetSubComm(commTop);
+}
 
 inline unsigned int NumCoresInComm(Comm comm)
 {

@@ -194,6 +194,13 @@ class ParallelizeK : public ParallelizeTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
-
+/*
+class IncreaseParallelizedLoop : public SingleTrans
+{
+  virtual string GetType() const {return "IncreaseParallelizedLoop";}
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};
+*/
 bool LegalParallelizationNestingUp(const Node *node, Comm comm);
 bool LegalParallelizationNestingDown(const PSet *pset, Comm comm);

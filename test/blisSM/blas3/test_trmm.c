@@ -54,9 +54,9 @@ for ( ; idx1 < dimLen1; idx1 += bs1 ) {
 		th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
 		bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1, &packed_B_pan, ProcComm );
 		dimLen3 = bli_obj_length_after_trans( L_11 );
-		if (th_group_id( L2Comm ) != 0)
-			dimLen3 = 0;
-		for ( idx3 = 0; idx3 < dimLen3; idx3 += bs3 ) {
+		idx3 = 0;
+		th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1_2, gemm_mr));
+		for ( ; idx3 < dimLen3; idx3 += bs3 ) {
 			bs3 = bli_determine_blocksize_f( idx3, dimLen3, &L_11, gemm_mc );
 			dim_t idx4, dimLen4, bs4;
 		//****
@@ -614,9 +614,9 @@ for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
 			th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
 			bli_packm_blk_var3( &BLIS_ONE, &L_11_11, &packed_B_pan );
 			dimLen4 = bli_obj_length_after_trans( X_1_1 );
-			if (th_group_id( L2Comm ) != 0)
-				dimLen4 = 0;
-			for ( idx4 = 0; idx4 < dimLen4; idx4 += bs4 ) {
+			idx4 = 0;
+			th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &X_1_0, gemm_mr));
+			for ( ; idx4 < dimLen4; idx4 += bs4 ) {
 				bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_1, gemm_mc );
 				dim_t idx5, dimLen5, bs5;
 			//****

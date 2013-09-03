@@ -92,5 +92,6 @@ class PSet
   virtual void BuildSizeCache();
   virtual void ClearSizeCache();
   bool RemoveParallelization(Comm comm);
+  void ReplaceAllComms(Comm comm1, Comm comm2);
 };
 
