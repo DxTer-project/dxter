@@ -70,7 +70,7 @@ Size bigSize = 80000;
 Size bs = ELEM_BS;
 #elif DOSQM || DOSM
 Size smallSize = 500;
-Size medSize = 2000;
+Size medSize = 8000;
 Size bigSize = 10000;
 //Size bs = ELEM_BS;
 #endif
@@ -525,6 +525,8 @@ void AddTrans()
 #endif //DOSR1PHASE
 
 #if DOSMPPHASE
+  //  Universe::AddTrans(Split::GetClass(), new IncreaseParallelizedLoop, SMPPHASE);
+
 #if NUMPROCS>1
   Universe::AddTrans(LoopTunnel::GetClass(), new ParallelizeOuterNDim(ALLPROCCOMM), SMPPHASE);
 #endif //NUMPROCS>1
