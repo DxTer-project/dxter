@@ -147,7 +147,7 @@ void TriInvLoopExp::Apply(Poss *poss, Node *node) const
 {
   TriInv *triInv = (TriInv*)node;
   Tri tri = triInv->m_tri;
-  Loop *loop;
+  Loop *loop = NULL;
   switch(m_var) {
   case(1):
     if (tri == LOWER)

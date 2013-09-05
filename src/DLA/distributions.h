@@ -166,7 +166,7 @@ class RedistNode : public DLANode
   Sizes *m_mSizes, *m_nSizes;
  RedistNode() : m_destType(UNKNOWN), m_mSizes(NULL), m_nSizes(NULL) {}
   RedistNode(DistType destType);
-  ~RedistNode();
+  virtual ~RedistNode();
   virtual DistType GetDistType(unsigned int num) const { return m_destType; }
   static Node* BlankInst() { return  new RedistNode; }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}

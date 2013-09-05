@@ -713,7 +713,7 @@ void Loop::SetBS(BSSize size)
 
 int Loop::GetBS() const
 {
-  return BSSizeToSize(m_bsSize);
+  return (int)(BSSizeToSize(m_bsSize));
 }
 
 Split* Loop::GetControl() const

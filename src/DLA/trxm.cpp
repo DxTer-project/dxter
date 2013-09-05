@@ -706,7 +706,7 @@ bool Trmm3LoopExp::CanApply(const Poss *poss, const Node *node) const
 void Trmm3LoopExp::Apply(Poss *poss, Node *node) const
 {
   Trmm3 *trmm3 = (Trmm3*)node;
-  Loop *loop;
+  Loop *loop = NULL;
   
   NodeConn *connA, *connB, *connC;
   connA = trmm3->m_inputs[0];

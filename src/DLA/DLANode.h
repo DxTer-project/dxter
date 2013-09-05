@@ -41,6 +41,7 @@ class DLANode : public Node
   
   DLANode();
   DLANode(Layer layer);
+  virtual ~DLANode() {}
   inline void SetLayer(Layer layer) {m_layer = layer;}
   inline Layer GetLayer() const {return m_layer;}
   virtual bool IsReadOnly() const {return false;}
