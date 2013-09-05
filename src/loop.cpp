@@ -576,7 +576,8 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
 #if DOSM
       Comm outerComm = split->WithinParallelism();
       Comm innerComm = ParallelismWithinCurrentPosses();
-      if (outerComm == CORECOMM || innerComm != GetSubComm(outerComm)) {
+      if ((innerComm != ALLPROCCOMM && innerComm != ALLL2COMM) &&
+	  (outerComm == CORECOMM || innerComm != GetSubComm(outerComm))) {
         if (innerComm == CORECOMM) {
           if (outerComm == CORECOMM)
             *out << "if (th_global_thread_id() != 0)\n";
@@ -588,7 +589,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
           innerComm = ParallelismWithinCurrentPosses();
           throw;
         }
-        else {
+        else {  
           *out << "if (th_group_id( " << CommToStr(innerComm) << " ) != 0)\n";
         }
         out.Indent(1);
