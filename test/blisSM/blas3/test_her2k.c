@@ -2,11 +2,12 @@
 #include "blis.h"
 #include "SMBLAS3.h"
 
-thread_comm_t global_comm[1];			
-thread_comm_t proc_comms[NUMPROCS];		
+thread_comm_t global_comm[1];
+thread_comm_t all_l2_comms[1];
+thread_comm_t proc_comms[NUMPROCS];
 thread_comm_t l2_comms[NUML2];
+thread_comm_t l2_comms_sub[NUML2];
 thread_comm_t l1_comms[NUML1];
-
 
 void DxT_Her2kNL( obj_t *alpha,
 		  obj_t *A,

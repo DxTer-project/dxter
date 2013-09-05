@@ -39,14 +39,22 @@ extern blksz_t *trmm_mr;
 
 void SetupComms(thread_comm_t *global_comm, thread_comm_t *proc_comms,
 		thread_comm_t *l2_comms, thread_comm_t *l1_comms,
+		thread_comm_t *all_l2_comms, thread_comm_t *l2_comms_sub,
 		thread_comm_t **GlobalComm, thread_comm_t **ProcComm,
-		thread_comm_t **L2Comm, thread_comm_t **L1Comm)
+		thread_comm_t **L2Comm, thread_comm_t **L1Comm,
+		thread_comm_t **AllL2Comm, thread_comm_t **L2SubAllL2Comm)
 {
   rank_t rank = omp_get_thread_num();
   *GlobalComm = global_comm;
   *ProcComm = proc_comms + (rank / NUMTHREADSPERPROC);
+  *AllL2Comm = all_l2_comms;
+  *L2SubAllL2Comm = l2_comms_sub + (rank / NUMTHREADSPERL2);
   *L2Comm = l2_comms + (rank / NUMTHREADSPERL2);
   *L1Comm = l1_comms + (rank / NUMTHREADSPERL1);
+
+  if (!rank) {
+    th_setup_comm(*AllL2Comm, NUMTHREADS, 1);
+  }
 
   if ((rank % (NUMTHREADSPERPROC)) == 0) {
     th_setup_comm(*ProcComm, NUMTHREADSPERPROC, NUMPROCS);
@@ -54,6 +62,10 @@ void SetupComms(thread_comm_t *global_comm, thread_comm_t *proc_comms,
 
   if ((rank % NUMTHREADSPERL2) == 0) {
     th_setup_comm(*L2Comm, NUMTHREADSPERL2, NUML2PERPROC);
+  }
+
+  if ((rank % NUMTHREADSPERL2) == 0) {
+    th_setup_comm(*L2SubAllL2Comm, NUMTHREADSPERL2, NUML2);
   }
 
   if ((rank % NUMTHREADSPERL1) == 0) {
@@ -76,10 +88,14 @@ void SetupComms(thread_comm_t *global_comm, thread_comm_t *proc_comms,
   thread_comm_t *ProcComm;\
   thread_comm_t *L2Comm;\
   thread_comm_t *L1Comm;\
+  thread_comm_t *AllL2Comm;\
+  thread_comm_t *L2SubAllL2Comm;\
   SetupComms(global_comm, proc_comms,\
 	     l2_comms, l1_comms, \
+	     all_l2_comms, l2_comms_sub, \
 	     &GlobalComm, &ProcComm, \
-	     &L2Comm, &L1Comm);
+	     &L2Comm, &L1Comm,\
+	     &AllL2Comm, &L2SubAllL2Comm);
 
 #define FUNCTIONEND \
   th_barrier(GlobalComm);\
@@ -89,6 +105,13 @@ void SetupComms(thread_comm_t *global_comm, thread_comm_t *proc_comms,
   if (th_am_root(L2Comm)) {\
     bli_obj_release_pack( &packed_A_blk );\
     th_release_comm(L2Comm);\
+  }\
+  if (th_am_root(L2SubAllL2Comm)) {\
+    th_release_comm(L2SubAllL2Comm);\
+  }\
+  if (th_am_root(AllL2Comm)) {\
+    bli_obj_release_pack( &packed_B_pan );\
+    th_release_comm(AllL2Comm);\
   }\
   if (th_am_root(ProcComm)) {\
     bli_obj_release_pack( &packed_B_pan );\
