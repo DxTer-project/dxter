@@ -327,7 +327,13 @@ void PackBuff::PrintCode(IndStream &out)
     *out << "if (th_am_root(" << CommToStr(comm) << ")) {\n";
     indentOffset = 1;
   }
-  
+  out.Indent(indentOffset);
+  if (m_packMat == PACKABLOCK)
+    *out << "alloced_A = TRUE;\n";
+  else if (m_packMat == PACKBPANEL)
+    *out << "alloced_B = TRUE;\n";
+  else 
+    throw;
   out.Indent(indentOffset);
   *out << "bli_packm_init_pack( ";
   if (m_densify)
