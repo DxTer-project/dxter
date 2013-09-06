@@ -347,9 +347,12 @@ void AddTrans()
 #endif
 
 #if DODPPHASE
-  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 1), DPPHASE);
-  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 2), DPPHASE);
-  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 3), DPPHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 1, LEFT), DPPHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 2, LEFT), DPPHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 3, LEFT), DPPHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 1, RIGHT), DPPHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 2, RIGHT), DPPHASE);
+  Universe::AddTrans(Trxm::GetClass(), new TrxmLoopExp(ABSLAYER, DMLAYER, 3, RIGHT), DPPHASE);
 #endif //DPPHASE
 
 #if DOSR1PHASE
@@ -543,7 +546,7 @@ void AddTrans()
 
 #if NUMCORESPERL2>1
   Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMM), SMPPHASE);
-  //Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMMSUBALLL2), SMPPHASE);
+  //  Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMMSUBALLL2), SMPPHASE);
 #endif //NUMCORESPERL2>1
 
 #endif
