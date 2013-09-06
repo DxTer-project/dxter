@@ -559,6 +559,7 @@ void DxT_TrsmRLN( obj_t *alpha,
 
       th_barrier( AllL2Comm );
       if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -583,6 +584,7 @@ void DxT_TrsmRLN( obj_t *alpha,
 
 	th_barrier( L2SubAllL2Comm );
 	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -625,19 +627,18 @@ void DxT_TrsmRLN( obj_t *alpha,
       bli_obj_set_uplo( BLIS_LOWER, L_11_11 );
       th_barrier( AllL2Comm );
       if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( TRUE, BLIS_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_REV_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_mr, gemm_mr, 
 			     &L_11_11, &packed_B_pan );
-	bli_packm_blk_var3( &BLIS_ONE, &L_11_11, &packed_B_pan );
       }
       th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-
-      //      bli_packm_blk_var3_par( &BLIS_ONE, &L_11_11, &packed_B_pan, AllL2Comm );
-      dim_t idx4, dimLen4, bs4;
+      bli_packm_blk_var3_par( &BLIS_ONE, &L_11_11, &packed_B_pan, AllL2Comm );
+	dim_t idx4, dimLen4, bs4;
       dimLen4 = bli_obj_length_after_trans( X_1_1 );
-      if (th_group_id( L2SubAllL2Comm ) != 0)
+      if (th_global_thread_id() != 0)
 	dimLen4 = 0;
       for ( idx4 = 0; idx4 < dimLen4; idx4 += bs4 ) {
 	bs4 = bli_determine_blocksize_b( idx4, dimLen4, &X_1_1, gemm_mc );
@@ -647,18 +648,15 @@ void DxT_TrsmRLN( obj_t *alpha,
 	bli_acquire_mpart_b2t( BLIS_SUBPART1, idx4, bs4, &X_1_1, &X_1_1_1 );
 	//------------------------------------//
 
-	th_barrier( L2SubAllL2Comm );
-	if (th_am_root(L2SubAllL2Comm)) {
-	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			       BLIS_BUFFER_FOR_A_BLOCK,
-			       gemm_nr, gemm_mr, 
-			       &X_1_1_1, &packed_A_blk );
-	}
-	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2SubAllL2Comm );
-	bli_trsm_rl_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL, L2SubAllL2Comm);
+	alloced_A = TRUE;
+	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			     BLIS_BUFFER_FOR_A_BLOCK,
+			     gemm_nr, gemm_mr, 
+			     &X_1_1_1, &packed_A_blk );
+	bli_packm_blk_var2( &BLIS_ONE, &X_1_1_1, &packed_A_blk );
+	bli_trsm_rl_ker_var2( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			      &BLIS_ZERO, &X_1_1_1, (trsm_t*)NULL);
 
 	//------------------------------------//
 
@@ -673,6 +671,7 @@ void DxT_TrsmRLN( obj_t *alpha,
 
       th_barrier( AllL2Comm );
       if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -697,6 +696,7 @@ void DxT_TrsmRLN( obj_t *alpha,
 
 	th_barrier( L2SubAllL2Comm );
 	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -726,7 +726,6 @@ void DxT_TrsmRLN( obj_t *alpha,
 
     //****
   }
-
 
   FUNCTIONEND
 }
