@@ -84,6 +84,8 @@ void SetupComms(thread_comm_t *global_comm, thread_comm_t *proc_comms,
   obj_t packed_B_pan;\
   bli_obj_init_pack( &packed_A_blk );\
   bli_obj_init_pack( &packed_B_pan );\
+  bool_t alloced_A = FALSE;\
+  bool_t alloced_B = FALSE;\
   thread_comm_t *GlobalComm;\
   thread_comm_t *ProcComm;\
   thread_comm_t *L2Comm;\
@@ -99,22 +101,23 @@ void SetupComms(thread_comm_t *global_comm, thread_comm_t *proc_comms,
 
 #define FUNCTIONEND \
   th_barrier(GlobalComm);\
+  if  (alloced_A)\
+    bli_obj_release_pack( &packed_A_blk );\
+  if (alloced_B)\
+    bli_obj_release_pack( &packed_B_pan );\
   if (th_am_root(L1Comm)) {\
     th_release_comm(L1Comm);\
   }\
   if (th_am_root(L2Comm)) {\
-    bli_obj_release_pack( &packed_A_blk );\
     th_release_comm(L2Comm);\
   }\
   if (th_am_root(L2SubAllL2Comm)) {\
     th_release_comm(L2SubAllL2Comm);\
   }\
   if (th_am_root(AllL2Comm)) {\
-    bli_obj_release_pack( &packed_B_pan );\
     th_release_comm(AllL2Comm);\
   }\
   if (th_am_root(ProcComm)) {\
-    bli_obj_release_pack( &packed_B_pan );\
     th_release_comm(ProcComm);\
   }\
   if (th_am_root(GlobalComm)) {\
