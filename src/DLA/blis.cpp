@@ -814,11 +814,6 @@ void ParallelizeK::Apply(Poss *poss, Node *node) const
 bool LegalParallelizationNestingUp(const Node *node, Comm comm)
 {
   Poss *poss = node->m_poss;
-  bool foundNecessaryWrapperComm = false;
-#if DOSM
-  if (comm == CORECOMM || comm == ALLPROCCOMM || comm == ALLL2COMM)
-    foundNecessaryWrapperComm = true;
-#endif
   while(poss) {
     PSet *pset = poss->m_pset;
     if (!pset)
@@ -828,9 +823,6 @@ bool LegalParallelizationNestingUp(const Node *node, Comm comm)
       if (loop->IsParallel()) {
 	if (!CommAllowedWithin(loop->m_comm, comm))
 	  return false;
-	if (!foundNecessaryWrapperComm) {
-	  foundNecessaryWrapperComm = IsNecessaryWrapperComm(loop->m_comm, comm);
-	}
       }
     }
     else if (pset->IsCritSect()) {
@@ -838,7 +830,7 @@ bool LegalParallelizationNestingUp(const Node *node, Comm comm)
     }
     poss = pset->m_ownerPoss;
   }
-  return foundNecessaryWrapperComm;
+  return true;
 }
 
 bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
