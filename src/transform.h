@@ -64,7 +64,7 @@ class MultiTrans : public Transformation
  public:
   TransConstVec m_trans;
   bool m_isRef;
-  ~MultiTrans();
+  ~MultiTrans() {}
   void AddTrans(SingleTrans *trans);
   virtual string GetType() const {return "MultiTrans";}
   virtual TransConstVec GetApplicableTrans(const Poss *poss, const Node *node) const;
