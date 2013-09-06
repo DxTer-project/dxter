@@ -79,6 +79,7 @@ class HerkProps
   Coef m_beta;
   Type m_type;
   HerkProps(Tri tri, Trans transA, Trans transB, Coef alpha, Coef beta, Type type);
+  virtual ~HerkProps() {}
   void Duplicate(const HerkProps *orig);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);

@@ -36,6 +36,7 @@ class TrProps
   Coef m_coeff;
   Type m_type;
   TrProps(bool invert, Side side, Tri tri, Diag diag, Trans trans, Coef coeff, Type type);
+  virtual ~TrProps() {}
   void Duplicate(const TrProps *orig);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);

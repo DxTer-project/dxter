@@ -51,7 +51,7 @@ class Universe
   Universe();
   void Init(PSet *seed);
   void Init(string fileName);
-  ~Universe();
+  virtual ~Universe();
   unsigned int Expand(unsigned int numIters, unsigned int phase, CullFunction Cull);
   void EvalCosts(IndStream &out, unsigned int &graphNum);
   void Print(IndStream &out, unsigned int &graphNum);

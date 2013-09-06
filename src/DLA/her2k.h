@@ -98,6 +98,7 @@ class Her2kProps
   Coef m_alpha, m_beta;
   Type m_type;
   Her2kProps(Tri tri, Trans trans, Coef alpha, Coef beta, Type type);
+  virtual ~Her2kProps() {}
   virtual void Duplicate(const Her2kProps *orig);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);

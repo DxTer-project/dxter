@@ -47,7 +47,7 @@ class CritSectTunnel : public PossTunnel
   Sizes *m_mlsizes, *m_nlsizes;
   CritSectTunnel();
   CritSectTunnel(PossTunType type);
-  ~CritSectTunnel();
+  virtual ~CritSectTunnel();
   static Node* BlankInst() { return new CritSectTunnel;}
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual NodeType GetType() const {return "CritSectTunnel";}

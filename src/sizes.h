@@ -116,7 +116,7 @@ class Sizes
   Sizes();
   Sizes(double constVal);
   Sizes(const Sizes &rhs);
-  ~Sizes();
+  virtual ~Sizes();
 
   void Print() const;
   void Print(IndStream &out) const;

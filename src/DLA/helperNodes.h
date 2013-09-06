@@ -241,7 +241,7 @@ class ViewPan : public DLANode
   Sizes *m_sizes,*m_lsizes;
  ViewPan(bool isVert, string name) 
    : m_isVert(isVert), m_name(name), m_sizes(NULL), m_lsizes(NULL) {}
-  ~ViewPan();
+  virtual ~ViewPan();
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual unsigned int NumOutputs() const {return 1;}
@@ -277,7 +277,7 @@ class ViewAroundDiag : public DLANode
    : m_isVert(isVert), m_name(name), 
     m_sizes0(NULL), m_lsizes0(NULL),
     m_sizes1(NULL), m_lsizes1(NULL) {}
-  ~ViewAroundDiag();
+  virtual ~ViewAroundDiag();
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual unsigned int NumOutputs() const {return 2;}

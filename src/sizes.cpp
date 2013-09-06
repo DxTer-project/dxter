@@ -77,7 +77,7 @@ Size SizesIter::operator*() const
     return Update(m_valA);
   }
   else if (m_type == MIDSIZES) {
-    int numFullIters = floor(m_valB / m_valA);
+    int numFullIters = (int)floor(m_valB / m_valA);
     if (numFullIters > m_currPos)
       return Update(m_valA);
     else if (numFullIters+1 > m_currPos)
@@ -279,7 +279,7 @@ Size SizeEntry::operator[] (unsigned int n) const
     else
       adjustedValB = ceil((double)m_valB / m_parFactor);
     
-    unsigned int numFullIters = floor(adjustedValB / m_valA);
+    unsigned int numFullIters = (int)floor(adjustedValB / m_valA);
     if (numFullIters > iter)
       return m_valA;
     else if (numFullIters+1 > iter)
@@ -333,26 +333,26 @@ unsigned int SizeEntry::NumSizes() const
 {
   if (m_type == MIDSIZES) {
     if (m_parFactor < 0)
-      return ceil(((double)m_valB) / m_valA);
+      return (unsigned int)ceil(((double)m_valB) / m_valA);
     else
-      return ceil(ceil(m_valB / ((double)m_parFactor)) / (double)m_valA);
+      return (unsigned int)ceil(ceil(m_valB / ((double)m_parFactor)) / (double)m_valA);
   }
   else if (m_type == REPEATEDSIZES) {
-    return ceil((double)m_valC / abs(m_parFactor));
+    return (unsigned int)ceil((double)m_valC / abs(m_parFactor));
   }
   else if (m_type == RANGESIZES) {
     if (m_parFactor < 0) {
       //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
       double diff = abs(m_valA - m_valB)+1;
       double num = ceil(diff / abs(m_valC));
-      return ceil(num / (double)m_parFactor);
+      return (unsigned int)ceil(num / (double)m_parFactor);
     }
     else {
       //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
       double sizeDiff = abs((double)m_valB - m_valA);
       double eachPortion = ceil(sizeDiff / (double)m_parFactor)+1;
       double num = ceil(eachPortion / abs((double)m_valC));
-      return num;
+      return (unsigned int)num;
     }
   }
   else
@@ -620,12 +620,12 @@ Cost Sizes::Sum() const
     }
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
-      int numFullIters = floor(numIters);
+      int numFullIters = (int)floor(numIters);
       if (numFullIters % entry->m_parFactor == 0)
 	cost += ceil(((double)numFullIters)/abs(entry->m_parFactor)) * Update(entry->m_valA);
       else {
 	cost += ((double)numFullIters)/abs(entry->m_parFactor) * Update(entry->m_valA);
-	int numPartIters = ceil(numIters)-numFullIters;
+	int numPartIters = (int)ceil(numIters)-numFullIters;
 	if (numPartIters)
 	  cost += Update(entry->m_valB - numFullIters * entry->m_valA);
       }
@@ -661,12 +661,12 @@ Cost Sizes::SumSquares() const
     }
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
-      int numFullIters = floor(numIters);
+      int numFullIters = (int)floor(numIters);
       if (numFullIters % abs(entry->m_parFactor) == 0)
 	cost += ceil(((double)numFullIters)/abs(entry->m_parFactor)) * pow(Update(entry->m_valA),2);
       else {
 	cost += ((double)numFullIters)/abs(entry->m_parFactor) * pow(Update(entry->m_valA),2);
-	int numPartIters = ceil(numIters)-numFullIters;
+	int numPartIters = (int)ceil(numIters)-numFullIters;
 	if (numPartIters)
 	  cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),2);
       }
@@ -705,12 +705,12 @@ Cost Sizes::SumCubes() const
     }
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
-      int numFullIters = floor(numIters);
+      int numFullIters = (int)floor(numIters);
       if (numFullIters % abs(entry->m_parFactor) == 0)
 	cost += ceil(((double)numFullIters)/abs(entry->m_parFactor)) * pow(Update(entry->m_valA),3);
       else {
 	cost += ((double)numFullIters)/abs(entry->m_parFactor) * pow(Update(entry->m_valA),3);
-	int numPartIters = ceil(numIters)-numFullIters;
+	int numPartIters = (int)ceil(numIters)-numFullIters;
 	if (numPartIters)
 	  cost += pow(Update(entry->m_valB - numFullIters * entry->m_valA),3);
       }
@@ -869,7 +869,7 @@ void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
         SizeEntry *newEntry = new SizeEntry;
         double constVal = sizes1.m_constVal;
         if (entry->m_type == MIDSIZES) {
-          int numIters = ceil(entry->m_valB/((double)(entry->m_valA)));
+          int numIters = (int)ceil(entry->m_valB/((double)(entry->m_valA)));
           newEntry->SetMidSizes(entry->m_valA+constVal,entry->m_valB+constVal*numIters,
 				entry->m_parFactor);
         }

@@ -35,6 +35,7 @@
 class Transformation
 {
  public:
+  virtual ~Transformation() {}
   virtual string GetType() const {return "Transformation";}
   virtual TransConstVec GetApplicableTrans(const Poss *poss, const Node *node) const = 0;
   virtual bool IsSingle() const {return false;}
@@ -46,6 +47,7 @@ class SingleTrans : public Transformation
 {
  public:
   SingleTrans() {}
+  ~SingleTrans() {}
   virtual string GetType() const {return "SingleTrans";}
   virtual bool IsSingle() const {return true;}
   virtual bool CanApply(const Poss *poss, const Node *node) const = 0;
@@ -62,6 +64,7 @@ class MultiTrans : public Transformation
  public:
   TransConstVec m_trans;
   bool m_isRef;
+  ~MultiTrans();
   void AddTrans(SingleTrans *trans);
   virtual string GetType() const {return "MultiTrans";}
   virtual TransConstVec GetApplicableTrans(const Poss *poss, const Node *node) const;

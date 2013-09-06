@@ -37,7 +37,7 @@ class Split : public LoopTunnel
   bool m_addDir;
   Split();
   Split(PartDir dir, PossTunType type, bool isControl = false);
-  ~Split();
+  virtual ~Split();
   static Node* BlankInst() { return  new Split(LASTPARTDIR,LASTTUNNEL,false);}
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual PossTunnel* GetSetTunnel();

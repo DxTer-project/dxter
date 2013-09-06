@@ -36,7 +36,7 @@ class LoopTunnel : public PossTunnel
   bool m_indepIters;
 
   LoopTunnel(PossTunType type);
-  ~LoopTunnel();
+  virtual ~LoopTunnel();
   void SetUpStats( UpStat statTL, UpStat statTR,
 		   UpStat statBL, UpStat statBR );
   void SetAllStats(UpStat stat);
