@@ -204,3 +204,5 @@ class IncreaseParallelizedLoop : public SingleTrans
 */
 bool LegalParallelizationNestingUp(const Node *node, Comm comm);
 bool LegalParallelizationNestingDown(const PSet *pset, Comm comm);
+
+bool FoundBarrier(const Node *node, unsigned int input, Comm comm);

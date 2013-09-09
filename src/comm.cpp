@@ -117,12 +117,20 @@ Comm MaxComm(Comm comm1, Comm comm2)
       else
 	return PROCCOMM;
     case(L2COMM):
-      if (comm2 == ALLL2COMM
-	  || comm2 == ALLPROCCOMM
+      if (comm2 == ALLL2COMM)
+	throw;
+      else if (comm2 == ALLPROCCOMM
 	  || comm2 == PROCCOMM)
 	return comm2;
       else
 	return L2COMM;
+    case (L2COMMSUBALLL2):
+      if (comm2 == ALLL2COMM)
+	return comm2;
+      else if (comm2 == CORECOMM)
+	return comm1;
+      else
+	throw;	
 #endif
     case(CORECOMM):
       return comm2;

@@ -2105,10 +2105,20 @@ void TrxmBP::PrintCode(IndStream &out)
   *out << ", &" << GetInputName(2).str() << ", (tr"
   << (m_invert ? "s" : "m") << "m_t*)NULL";
   if (m_comm != CORECOMM) {
-    if (m_invert)
-      *out << ", L2Comm";
+    if (m_comm == L2COMM) {
+      if (m_invert)
+	*out << ", L2Comm";
+      else
+	*out << ", L1Comm";
+    }
+    else if (m_comm == L2COMMSUBALLL2) {
+      if (m_invert)
+	*out << ", L2SubAllL2Comm";
+      else
+	*out << ", L1Comm";
+    }
     else
-      *out << ", L1Comm";
+      throw;
   }
   *out <<  ");\n";
 }

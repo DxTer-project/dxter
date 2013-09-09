@@ -814,6 +814,7 @@ void ParallelizeK::Apply(Poss *poss, Node *node) const
 bool LegalParallelizationNestingUp(const Node *node, Comm comm)
 {
   Poss *poss = node->m_poss;
+  bool foundProcComm = comm != L2COMM;
   while(poss) {
     PSet *pset = poss->m_pset;
     if (!pset)
@@ -823,6 +824,8 @@ bool LegalParallelizationNestingUp(const Node *node, Comm comm)
       if (loop->IsParallel()) {
 	if (!CommAllowedWithin(loop->m_comm, comm))
 	  return false;
+	else if (!foundProcComm)
+	  foundProcComm = loop->m_comm == PROCCOMM;
       }
     }
     else if (pset->IsCritSect()) {
@@ -830,7 +833,7 @@ bool LegalParallelizationNestingUp(const Node *node, Comm comm)
     }
     poss = pset->m_ownerPoss;
   }
-  return true;
+  return foundProcComm;
 }
 
 bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
@@ -898,3 +901,25 @@ void IncreaseParallelizedLoop::Apply(Poss *poss, Node *node) const
     loop->m_comm = GetSubComm(comm);
 }
 */
+
+bool FoundBarrier(const Node *node, unsigned int input, Comm comm)
+{
+  NodeConnVecConstIter iter = node->m_inputs.begin();
+  for(; iter != node->m_inputs.end(); ++iter) {
+    const NodeConn *conn = *iter;
+    const Node *in = conn->m_n;
+    //Assume this was handles outside of the pset
+    if (in->IsPossTunnel(POSSTUNIN))
+      continue;
+    else if (in->IsPossTunnel(SETTUNOUT)) {
+      return false;
+    }
+    else {
+      Comm bar = node->HasBarrier();
+      if (bar != CORECOMM &&
+	  !CommAllowedWithin(bar, comm))
+	return false;
+    }
+  }
+  return true;
+}

@@ -68,6 +68,7 @@ class Pack : public DLAOp<2,1>
   virtual void SanityCheck();
   virtual unsigned int NumOutputs() const {return 1;}
   inline void Parallelize(Comm comm) {m_comm=comm;}
+  virtual Comm HasBarrier() const {return m_comm;}
 };
 
 class PackBuff : public DLAOp<1,1>

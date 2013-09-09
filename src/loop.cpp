@@ -27,6 +27,7 @@
 #include <climits>
 #include "pack.h"
 #include "critSect.h"
+#include "blis.h"
 
 int Loop::M_currLabel = 0;
 
@@ -523,9 +524,23 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     }
   }
   if (m_type == BLISLOOP) {
-    if (m_comm != CORECOMM)
+    if (m_comm != CORECOMM) {
+      bool barrier = false;
+      iter = m_inTuns.begin();
+      for(; iter != m_inTuns.end() && !barrier; ++iter) {
+	if (!FoundBarrier(*iter, 0, m_comm))
+	  barrier = true;
+      }
+      if (barrier) {
+	out.Indent();
+	*out << "th_barrier( " << CommToStr(m_comm) << " );"
+	     << "\t //barrier for dependency\n";
+
+      }
+      out.Indent();
       *out << "//// ***Parallelized with communicator "
-      << CommToStr(m_comm) << "; need correct output code\n";
+	   << CommToStr(m_comm) << endl;
+    }
     string idx = "idx" + loopLevel;
     string dimLen = "dimLen" + loopLevel;
     string bs = "bs" + loopLevel;

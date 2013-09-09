@@ -145,6 +145,7 @@ class Node
   virtual bool IsParallel() const {return false;}
   virtual Comm ParallelComm() const {throw;}
   virtual Comm WithinParallelism() const;
+  virtual Comm HasBarrier() const {return CORECOMM;}
   virtual bool RemoveParallelization() {throw;}
   bool InCriticalSection() const;
   virtual bool IsDataDependencyOfInput() const {return true;}
