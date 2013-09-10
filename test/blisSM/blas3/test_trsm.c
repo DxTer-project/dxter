@@ -1285,7 +1285,7 @@ void DxT_TrsmRUT( obj_t *alpha,
       th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var3_par( &BLIS_ONE, &U_11_11T, &packed_B_pan, AllL2Comm );
       	dim_t idx4, dimLen4, bs4;
-dimLen4 = bli_obj_length_after_trans( X_1_1 );
+	dimLen4 = bli_obj_length_after_trans( X_1_1 );
       if (th_group_id( L2SubAllL2Comm ) != 0)
 	dimLen4 = 0;
       for ( idx4 = 0; idx4 < dimLen4; idx4 += bs4 ) {
