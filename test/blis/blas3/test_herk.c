@@ -24,9 +24,9 @@ void DxT_HerkNL( obj_t *alpha,
   bli_obj_init_pack( &packed_B_pan );
 
 
-  dim_t idx1, dimLen1, bs1;
   obj_t AT;
   bli_obj_alias_with_trans( BLIS_TRANSPOSE, *A, AT);
+  dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *C );
   for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
     bs1 = bli_determine_blocksize_f( idx1, dimLen1, C, gemm_nc );
@@ -40,31 +40,25 @@ void DxT_HerkNL( obj_t *alpha,
     bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, C, &C_1 );
     //------------------------------------//
 
-    obj_t C_1B, AB;
-    printf("off %u\n", bli_obj_diag_offset_after_trans(C_1));
+    obj_t C_1_B, A_B;
     dim_t offB = bli_max( 0, -bli_obj_diag_offset_after_trans( C_1 ) );
     dim_t mB = bli_obj_length_after_trans( C_1 ) - offB;
-    printf("offB %u, mB %u\n",offB, mB);
-    printf("A %u x %u\n", bli_obj_length(*A),bli_obj_width(*A));
-    printf("C_1 %u x %u\n", bli_obj_length(C_1),bli_obj_width(C_1));
     bli_acquire_mpart_t2b( BLIS_SUBPART1,
-			   offB, mB, &C_1, &C_1B );
+			   offB, mB, &C_1, &C_1_B );
     bli_acquire_mpart_t2b( BLIS_SUBPART1,
-			   offB, mB, A, &AB );
-    printf("C_1B %u x %u\n", bli_obj_length(C_1B),bli_obj_width(C_1B));
-    printf("AB %u x %u\n", bli_obj_length(AB),bli_obj_width(AB));
-    bli_obj_set_struc( BLIS_TRIANGULAR, C_1B );
-    bli_obj_set_uplo( BLIS_LOWER, C_1B );
-    bli_scalm( &BLIS_ONE, &C_1B );
-    bli_obj_set_struc( BLIS_GENERAL, C_1B );
-    bli_obj_set_uplo( BLIS_DENSE, C_1B );
-    dimLen2 = bli_obj_width_after_trans( AB );
+			   offB, mB, A, &A_B );
+    bli_obj_set_struc( BLIS_TRIANGULAR, C_1_B );
+    bli_obj_set_uplo( BLIS_LOWER, C_1_B );
+    bli_scalm( &BLIS_ONE, &C_1_B );
+    bli_obj_set_struc( BLIS_GENERAL, C_1_B );
+    bli_obj_set_uplo( BLIS_DENSE, C_1_B );
+    dimLen2 = bli_obj_width_after_trans( A_B );
     for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-      bs2 = bli_determine_blocksize_f( idx2, dimLen2, &AB, gemm_kc );
+      bs2 = bli_determine_blocksize_f( idx2, dimLen2, &A_B, gemm_kc );
       dim_t idx3, dimLen3, bs3;
       //****
-      obj_t AB_1;
-      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &AB, &AB_1 );
+      obj_t A_B_1;
+      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &A_B, &A_B_1 );
       obj_t AT_1_1;
       bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &AT_1, &AT_1_1 );
       //------------------------------------//
@@ -75,37 +69,37 @@ void DxT_HerkNL( obj_t *alpha,
 			   gemm_kr, gemm_nr, 
 			   &AT_1_1, &packed_B_pan );
       bli_packm_blk_var2( &BLIS_ONE, &AT_1_1, &packed_B_pan );
-      dimLen3 = bli_obj_length_after_trans( C_1B );
+      dimLen3 = bli_obj_length_after_trans( C_1_B );
       for ( idx3 = 0; idx3 < dimLen3; idx3 += bs3 ) {
-	bs3 = bli_determine_blocksize_b( idx3, dimLen3, &C_1B, gemm_mc );
+	bs3 = bli_determine_blocksize_b( idx3, dimLen3, &C_1_B, gemm_mc );
 	dim_t idx4, dimLen4, bs4;
 	//****
-	obj_t AB_1_1;
-	bli_acquire_mpart_b2t( BLIS_SUBPART1, idx3, bs3, &AB_1, &AB_1_1 );
-	obj_t C_1B_0;
-	bli_acquire_mpart_b2t( BLIS_SUBPART0, idx3, bs3, &C_1B, &C_1B_0 );
-	obj_t C_1B_1;
-	bli_acquire_mpart_b2t( BLIS_SUBPART1, idx3, bs3, &C_1B, &C_1B_1 );
+	obj_t A_B_1_1;
+	bli_acquire_mpart_b2t( BLIS_SUBPART1, idx3, bs3, &A_B_1, &A_B_1_1 );
+	obj_t C_1_B_0;
+	bli_acquire_mpart_b2t( BLIS_SUBPART0, idx3, bs3, &C_1_B, &C_1_B_0 );
+	obj_t C_1_B_1;
+	bli_acquire_mpart_b2t( BLIS_SUBPART1, idx3, bs3, &C_1_B, &C_1_B_1 );
 	//------------------------------------//
 
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_A_BLOCK,
 			     gemm_mr, gemm_kr, 
-			     &AB_1_1, &packed_A_blk );
-	bli_obj_set_struc( BLIS_SYMMETRIC, C_1B_1 );
-	bli_obj_set_uplo( BLIS_LOWER, C_1B_1 );
-	obj_t C_1B_1L, packed_B_panL;
+			     &A_B_1_1, &packed_A_blk );
+	bli_obj_set_struc( BLIS_SYMMETRIC, C_1_B_1 );
+	bli_obj_set_uplo( BLIS_LOWER, C_1_B_1 );
+	obj_t C_1_B_1_L, packed_B_pan_L;
 	dim_t offL = 0;
-	dim_t nL = bli_min( bli_obj_width_after_trans( C_1B_1 ), 
-			    bli_obj_diag_offset_after_trans( C_1B_1 ) + bs3 );
+	dim_t nL = bli_min( bli_obj_width_after_trans( C_1_B_1 ), 
+			    bli_obj_diag_offset_after_trans( C_1_B_1 ) + bs3 );
 	bli_acquire_mpart_l2r( BLIS_SUBPART1,
-			       offL, nL, &C_1B_1, &C_1B_1L );
+			       offL, nL, &C_1_B_1, &C_1_B_1_L );
 	bli_acquire_mpart_l2r( BLIS_SUBPART1,
-			       offL, nL, &packed_B_pan, &packed_B_panL );
-	bli_packm_blk_var2( &BLIS_ONE, &AB_1_1, &packed_A_blk );
-	bli_herk_l_ker_var2( &BLIS_ONE, &packed_A_blk, &packed_B_panL, 
-			     &BLIS_ONE, &C_1B_1L, (herk_t*)NULL );
+			       offL, nL, &packed_B_pan, &packed_B_pan_L );
+	bli_packm_blk_var2( &BLIS_ONE, &A_B_1_1, &packed_A_blk );
+	bli_herk_l_ker_var2( &BLIS_ONE, &packed_A_blk, &packed_B_pan_L, 
+			     &BLIS_ONE, &C_1_B_1_L, (herk_t*)NULL );
 
 	//------------------------------------//
 
@@ -121,6 +115,7 @@ void DxT_HerkNL( obj_t *alpha,
 
     //****
   }
+
 
 
 
@@ -499,9 +494,9 @@ int main( int argc, char** argv )
 
 	n_repeats = 3;
 
-	p_begin = 20;
-	p_end   = 20;
-	p_inc   = 20;
+	p_begin = 40;
+	p_end   = 600;
+	p_inc   = 40;
 
 	m_input = -1;
 	k_input = -1;
