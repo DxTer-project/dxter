@@ -1404,9 +1404,9 @@ int main( int argc, char** argv )
   double dtime_saveDxT;
   double gflopsDxT;
 
-  double dtimeFLA;
-  double dtime_saveFLA;
-  double gflopsFLA;
+  double dtimeBLI;
+  double dtime_saveBLI;
+  double gflopsBLI;
 
   int left=0, lower=0, trans=0;
 
@@ -1476,6 +1476,12 @@ int main( int argc, char** argv )
   dt_alpha = BLIS_DOUBLE;
 	dt_beta = BLIS_DOUBLE;
 
+  printf("%% %d Procs, %d L2 Per Proc, %d L1 Per L2, %d Per L1\n",
+	 NUMPROCS, NUML2PERPROC, NUML1PERL2, NUMTHREADSPERL1);
+
+  bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+
+
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	  {
 	    if ( m_input < 0 ) m = p * ( dim_t )abs(m_input);
@@ -1519,14 +1525,14 @@ int main( int argc, char** argv )
 		bli_copym( &c1, &c_save );
 	
 		dtime_saveDxT = 1.0e9;
-		dtime_saveFLA = 1.0e9;
+		dtime_saveBLI = 1.0e9;
 
 		for ( r = 0; r < n_repeats; ++r )
 		{
 			bli_copym( &c_save, &c1 );
 			bli_copym( &c_save, &c2 );
 
-			dtimeFLA = bli_clock();
+			dtimeBLI = bli_clock();
 
 			if (trans)
 			  bli_obj_set_conjtrans( BLIS_TRANSPOSE, a);
@@ -1550,7 +1556,7 @@ int main( int argc, char** argv )
 			bli_obj_set_struc( BLIS_GENERAL, a );
 			bli_obj_set_uplo( BLIS_DENSE, a );
 			
-			dtime_saveFLA = bli_clock_min_diff( dtime_saveFLA, dtimeFLA );
+			dtime_saveBLI = bli_clock_min_diff( dtime_saveBLI, dtimeBLI );
 
 
 			dtimeDxT = bli_clock();
@@ -1630,22 +1636,24 @@ int main( int argc, char** argv )
 
 		if ( left ) {
 		  gflopsDxT = ( 1.0 * m * m * n ) / ( dtime_saveDxT * 1.0e9 );
-		  gflopsFLA = ( 1.0 * m * m * n ) / ( dtime_saveFLA * 1.0e9 );
+		  gflopsBLI = ( 1.0 * m * m * n ) / ( dtime_saveBLI * 1.0e9 );
 		}
 		else {
 		  gflopsDxT = ( 1.0 * m * n * n ) / ( dtime_saveDxT * 1.0e9 );
-		  gflopsFLA = ( 1.0 * m * n * n ) / ( dtime_saveFLA * 1.0e9 );
+		  gflopsBLI = ( 1.0 * m * n * n ) / ( dtime_saveBLI * 1.0e9 );
 		}
 
 		printf( "data_trsm_DxT" );
-		printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
-		        (p - p_begin + 1)/p_inc + 1, m, n, dtime_saveDxT, gflopsDxT );
-		printf( "data_trsm_FLA" );
+		printf( "( %2ld, 1:5 ) = [ %4lu %4lu  %10.3e  %6.3f %2.4f ];\n",
+			(p - p_begin + 1)/p_inc + 1, m, n, dtime_saveDxT, gflopsDxT, 
+			gflopsDxT/gflopsBLI );
+		
+		printf( "data_trsm_BLIS" );
 		printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n\n",
-		        (p - p_begin + 1)/p_inc + 1, m, n, dtime_saveFLA, gflopsFLA );
+		        (p - p_begin + 1)/p_inc + 1, m, n, dtime_saveBLI, gflopsBLI );
 
 #ifdef TESTLIB
-		bli_printm( "NORM", &normVal, "%4.1f", "" );
+		bli_printm( "% NORM", &normVal, "%4.1f", "" );
 #endif
       
 

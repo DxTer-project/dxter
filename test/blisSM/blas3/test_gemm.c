@@ -112,6 +112,88 @@ void DxT_GemmTN( obj_t *alpha,
   FUNCTIONSTART
 
   bli_scalm(beta, C);
+
+  dim_t idx1, dimLen1, bs1;
+  dimLen1 = bli_obj_width_after_trans( *C );
+  idx1 = 0;
+  th_shift_start_end(&idx1, &dimLen1, ProcComm, bli_blksz_for_obj( C, gemm_nr));
+  for ( ; idx1 < dimLen1; idx1 += bs1 ) {
+    bs1 = bli_determine_blocksize_f( idx1, dimLen1, C, gemm_nc );
+    dim_t idx2, dimLen2, bs2;
+    //****
+    obj_t B_1;
+    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, B, &B_1 );
+    obj_t C_1;
+    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, C, &C_1 );
+    //------------------------------------//
+
+    dimLen2 = bli_obj_length_after_trans( *A );
+    for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
+      bs2 = bli_determine_blocksize_f( idx2, dimLen2, A, gemm_kc );
+      dim_t idx3, dimLen3, bs3;
+      //****
+      obj_t A_1;
+      bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, A, &A_1 );
+      obj_t B_1_1;
+      bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &B_1, &B_1_1 );
+      //------------------------------------//
+
+      th_barrier( ProcComm );
+      if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
+	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
+			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			     BLIS_BUFFER_FOR_B_PANEL,
+			     gemm_kr, gemm_nr, 
+			     &B_1_1, &packed_B_pan );
+      }
+      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_B_pan, ProcComm );
+      //// ***Parallelized with communicator ProcComm
+      dimLen3 = bli_obj_length_after_trans( C_1 );
+      idx3 = 0;
+      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &C_1, gemm_mr));
+      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &C_1, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t A_1_1;
+	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &A_1, &A_1_1 );
+	obj_t C_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &C_1, &C_1_1 );
+	//------------------------------------//
+
+	obj_t A_1_1T;
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, A_1_1, A_1_1T);
+	th_barrier( L2Comm );
+	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
+	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_kr, 
+			       &A_1_1T, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1T, &packed_A_blk, L2Comm );
+	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L1Comm );
+
+	//------------------------------------//
+
+	//****
+      }
+
+      //------------------------------------//
+
+      //****
+    }
+
+    //------------------------------------//
+
+    //****
+  }
+
   
   FUNCTIONEND
 }
@@ -125,6 +207,87 @@ void DxT_GemmNT( obj_t *alpha,
   FUNCTIONSTART
 
   bli_scalm(beta, C);
+  dim_t idx1, dimLen1, bs1;
+  dimLen1 = bli_obj_width_after_trans( *C );
+  idx1 = 0;
+  th_shift_start_end(&idx1, &dimLen1, ProcComm, bli_blksz_for_obj( C, gemm_nr));
+  for ( ; idx1 < dimLen1; idx1 += bs1 ) {
+    bs1 = bli_determine_blocksize_f( idx1, dimLen1, C, gemm_nc );
+    dim_t idx2, dimLen2, bs2;
+    //****
+    obj_t B_1;
+    bli_acquire_mpart_t2b( BLIS_SUBPART1, idx1, bs1, B, &B_1 );
+    obj_t C_1;
+    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, C, &C_1 );
+    //------------------------------------//
+
+    dimLen2 = bli_obj_width_after_trans( *A );
+    for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
+      bs2 = bli_determine_blocksize_f( idx2, dimLen2, A, gemm_kc );
+      dim_t idx3, dimLen3, bs3;
+      //****
+      obj_t A_1;
+      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, A, &A_1 );
+      obj_t B_1_1;
+      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &B_1, &B_1_1 );
+      //------------------------------------//
+
+      obj_t B_1_1T;
+      bli_obj_alias_with_trans( BLIS_TRANSPOSE, B_1_1, B_1_1T);
+      th_barrier( ProcComm );
+      if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
+	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
+			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			     BLIS_BUFFER_FOR_B_PANEL,
+			     gemm_kr, gemm_nr, 
+			     &B_1_1T, &packed_B_pan );
+      }
+      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1T, &packed_B_pan, ProcComm );
+      //// ***Parallelized with communicator ProcComm
+      dimLen3 = bli_obj_length_after_trans( C_1 );
+      idx3 = 0;
+      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &C_1, gemm_mr));
+      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &C_1, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t A_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &A_1, &A_1_1 );
+	obj_t C_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &C_1, &C_1_1 );
+	//------------------------------------//
+
+	th_barrier( L2Comm );
+	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
+	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_kr, 
+			       &A_1_1, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_A_blk, L2Comm );
+	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L1Comm );
+
+	//------------------------------------//
+
+	//****
+      }
+
+      //------------------------------------//
+
+      //****
+    }
+
+    //------------------------------------//
+
+    //****
+  }
+
 
   FUNCTIONEND
 }
@@ -139,7 +302,91 @@ void DxT_GemmTT( obj_t *alpha,
 
   bli_scalm(beta, C);
 
-FUNCTIONEND
+  dim_t idx1, dimLen1, bs1;
+  dimLen1 = bli_obj_width_after_trans( *C );
+  idx1 = 0;
+  th_shift_start_end(&idx1, &dimLen1, ProcComm, bli_blksz_for_obj( C, gemm_nr));
+  for ( ; idx1 < dimLen1; idx1 += bs1 ) {
+    bs1 = bli_determine_blocksize_f( idx1, dimLen1, C, gemm_nc );
+    dim_t idx2, dimLen2, bs2;
+    //****
+    obj_t B_1;
+    bli_acquire_mpart_t2b( BLIS_SUBPART1, idx1, bs1, B, &B_1 );
+    obj_t C_1;
+    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, C, &C_1 );
+    //------------------------------------//
+
+    dimLen2 = bli_obj_length_after_trans( *A );
+    for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
+      bs2 = bli_determine_blocksize_f( idx2, dimLen2, A, gemm_kc );
+      dim_t idx3, dimLen3, bs3;
+      //****
+      obj_t A_1;
+      bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, A, &A_1 );
+      obj_t B_1_1;
+      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &B_1, &B_1_1 );
+      //------------------------------------//
+
+      obj_t B_1_1T;
+      bli_obj_alias_with_trans( BLIS_TRANSPOSE, B_1_1, B_1_1T);
+      th_barrier( ProcComm );
+      if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
+	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
+			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			     BLIS_BUFFER_FOR_B_PANEL,
+			     gemm_kr, gemm_nr, 
+			     &B_1_1T, &packed_B_pan );
+      }
+      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1T, &packed_B_pan, ProcComm );
+      //// ***Parallelized with communicator ProcComm
+      dimLen3 = bli_obj_length_after_trans( C_1 );
+      idx3 = 0;
+      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &C_1, gemm_mr));
+      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &C_1, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t A_1_1;
+	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &A_1, &A_1_1 );
+	obj_t C_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &C_1, &C_1_1 );
+	//------------------------------------//
+
+	obj_t A_1_1T;
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, A_1_1, A_1_1T);
+	th_barrier( L2Comm );
+	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
+	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_kr, 
+			       &A_1_1T, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1T, &packed_A_blk, L2Comm );
+	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L1Comm );
+
+	//------------------------------------//
+
+	//****
+      }
+
+      //------------------------------------//
+
+      //****
+    }
+
+    //------------------------------------//
+
+    //****
+  }
+
+  
+  FUNCTIONEND
 }
 
 int main( int argc, char** argv )
@@ -155,9 +402,12 @@ int main( int argc, char** argv )
   num_t dt_alpha, dt_beta;
   int   r, n_repeats;
 
-  double dtime;
-  double dtime_save;
-  double gflops;
+  double dtimeDxT;
+  double dtime_saveDxT;
+  double gflopsDxT;
+  double dtimeBLI;
+  double dtime_saveBLI;
+  double gflopsBLI;
 
   int transA=0, transB=0;
 
@@ -206,6 +456,11 @@ int main( int argc, char** argv )
   dt_alpha = BLIS_DOUBLE;
   dt_beta = BLIS_DOUBLE;
 
+  printf("%% %d Procs, %d L2 Per Proc, %d L1 Per L2, %d Per L1\n",
+	 NUMPROCS, NUML2PERPROC, NUML1PERL2, NUMTHREADSPERL1);
+
+	  bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+
   for ( p = p_begin; p <= p_end; p += p_inc )
     {
 
@@ -236,7 +491,8 @@ int main( int argc, char** argv )
 
       bli_copym( &c1, &c_save );
 	
-      dtime_save = 1.0e9;
+      dtime_saveDxT = 1.0e9;
+      dtime_saveBLI = 1.0e9;
 
       for ( r = 0; r < n_repeats; ++r )
 	{
@@ -244,74 +500,68 @@ int main( int argc, char** argv )
 	  bli_copym( &c_save, &c2 );
 
 
-	  dtime = bli_clock();
 
-	  //bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
-	  if (!transA && !transB) {
-	    th_setup_comm(&global_comm[0], NUMTHREADS, 1);
-	    //	    _Pragma( "omp parallel num_threads(gemm_num_threads_default)" ) 
-	    _Pragma( "omp parallel num_threads(NUMTHREADS)" ) 
-	      {
-		DxT_GemmNN( &alpha,
+
+	  dtimeDxT = bli_clock();
+
+	  th_setup_comm(&global_comm[0], NUMTHREADS, 1);
+
+	  _Pragma( "omp parallel num_threads(NUMTHREADS)" ) 
+	    {
+	      if (!transA && !transB) {
+
+		{
+		  DxT_GemmNN( &alpha,
+			      &a,
+			      &b,
+			      &beta,
+			      &c2 );
+		}
+			
+	      }
+	      else if (transA && !transB) {
+		DxT_GemmTN( &alpha,
+			    &a,
+			    &b,
+			    &beta,
+			    &c2 );
+
+	      }
+	      else if (!transA) {// &&transB 
+		DxT_GemmNT( &alpha,
 			    &a,
 			    &b,
 			    &beta,
 			    &c2 );
 	      }
-			
-	    bli_gemm( &alpha,
-		      &a,
-		      &b,
-		      &beta,
-		      &c1);
-	  }
-	  else if (transA && !transB) {
-	    DxT_GemmTN( &alpha,
-			&a,
-			&b,
-			&beta,
-			&c2 );
+	      else {//transA && transB
+		DxT_GemmTT( &alpha,
+			    &a,
+			    &b,
+			    &beta,
+			    &c2 );
+	      }
+	    }
 
+	  dtime_saveDxT = bli_clock_min_diff( dtime_saveDxT, dtimeDxT );
+
+
+	  dtimeBLI = bli_clock();
+	  if (transA)
 	    bli_obj_set_conjtrans( BLIS_TRANSPOSE, a);
-	    bli_gemm( &alpha,
-		      &a,
-		      &b,
-		      &beta,
-		      &c1);
-	    bli_obj_toggle_trans( a );
-	  }
-	  else if (!transA) {// &&transB 
-	    DxT_GemmNT( &alpha,
-			&a,
-			&b,
-			&beta,
-			&c2 );
-
+	  if (transB)
 	    bli_obj_set_conjtrans( BLIS_TRANSPOSE, b);
-	    bli_gemm( &alpha,
-		      &a,
-		      &b,
-		      &beta,
-		      &c1);
-	    bli_obj_toggle_trans( b );
-	  }
-	  else {//transA && transB
-	    DxT_GemmTT( &alpha,
-			&a,
-			&b,
-			&beta,
-			&c2 );
-
-	    bli_obj_set_conjtrans( BLIS_TRANSPOSE, a);
-	    bli_obj_set_conjtrans( BLIS_TRANSPOSE, b);
-	    bli_gemm( &alpha,
-		      &a,
-		      &b,
-		      &beta,
-		      &c1);
+	  bli_gemm( &alpha,
+		    &a,
+		    &b,
+		    &beta,
+		    &c1);
+	  if (transA)
 	    bli_obj_toggle_trans( a );
+	  if (transB)
 	    bli_obj_toggle_trans( b );
-	  }
+
+	  dtime_saveBLI = bli_clock_min_diff( dtime_saveBLI, dtimeBLI );
 	  
 	  //	  bli_printm( "c_save", &c_save, "%4.1f", "" );
 	  //	  bli_printm( "c1", &c1, "%4.1f", "" );
@@ -323,16 +573,20 @@ int main( int argc, char** argv )
 
 	  bli_fnormm( &c2, &normVal );
 
-	  dtime_save = bli_clock_min_diff( dtime_save, dtime );
 	}
 
-      gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
+      gflopsDxT = ( 2.0 * m * k * n ) / ( dtime_saveDxT * 1.0e9 );
+      gflopsBLI = ( 2.0 * m * k * n ) / ( dtime_saveBLI * 1.0e9 );
+
+      printf( "data_gemm_DxT" );
+      printf( "( %2ld, 1:5 ) = [ %4lu %4lu  %10.3e  %6.3f %2.4f ];\n",
+	      (p - p_begin + 1)/p_inc + 1, m, n, dtime_saveDxT, gflopsDxT, gflopsDxT/gflopsBLI );
 
       printf( "data_gemm_blis" );
       printf( "( %2ld, 1:5 ) = [ %4lu %4lu %4lu  %10.3e  %6.3f ];\n",
-	      (p - p_begin + 1)/p_inc + 1, m, k, n, dtime_save, gflops );
+	      (p - p_begin + 1)/p_inc + 1, m, k, n, dtime_saveBLI, gflopsBLI );
 
-      bli_printm( "NORM", &normVal, "%4.1f", "" );
+      bli_printm( "%NORM", &normVal, "%4.1f", "" );
 
       bli_obj_free( &alpha );
       bli_obj_free( &beta );

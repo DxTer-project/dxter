@@ -1419,9 +1419,13 @@ int main( int argc, char** argv )
   num_t dt_alpha, dt_beta;
   int   r, n_repeats;
 
-  double dtime;
-  double dtime_save;
-  double gflops;
+  double dtimeDxT;
+  double dtime_saveDxT;
+  double gflopsDxT;
+
+  double dtimeBLI;
+  double dtime_saveBLI;
+  double gflopsBLI;
 
   int left=0, lower=0, trans=0;
 
@@ -1485,6 +1489,10 @@ int main( int argc, char** argv )
   dt_alpha = BLIS_DOUBLE;
   dt_beta = BLIS_DOUBLE;
 
+  printf("%% %d Procs, %d L2 Per Proc, %d L1 Per L2, %d Per L1\n",
+	 NUMPROCS, NUML2PERPROC, NUML1PERL2, NUMTHREADSPERL1);
+
+  bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
   for ( p = p_begin; p <= p_end; p += p_inc )
     {
@@ -1515,14 +1523,15 @@ int main( int argc, char** argv )
       bli_setsc(  (1.0/1.0), 0.0, &normVal );
       bli_copym( &c1, &c_save );
 	
-      dtime_save = 1.0e9;
+      dtime_saveDxT = 1.0e9;
+      dtime_saveBLI = 1.0e9;
 
       for ( r = 0; r < n_repeats; ++r )
 	{
 	  bli_copym( &c_save, &c1 );
 	  bli_copym( &c_save, &c2 );
 
-	  dtime = bli_clock();
+	  dtimeDxT = bli_clock();
 
 	  th_setup_comm(&global_comm[0], NUMTHREADS, 1);
 	  _Pragma( "omp parallel num_threads(NUMTHREADS)" ) 
@@ -1582,6 +1591,11 @@ int main( int argc, char** argv )
 	      }
 	    }
 
+	  dtime_saveDxT = bli_clock_min_diff( dtime_saveDxT, dtimeDxT );
+
+
+
+	  dtimeBLI = bli_clock();
 
 	  if (trans)
 	    bli_obj_set_conjtrans( BLIS_TRANSPOSE, a);
@@ -1604,29 +1618,39 @@ int main( int argc, char** argv )
 	  bli_obj_set_struc( BLIS_GENERAL, a );
 	  bli_obj_set_uplo( BLIS_DENSE, a );
 
+	  dtime_saveBLI = bli_clock_min_diff( dtime_saveBLI, dtimeBLI );
+
+
 #if 0
-	  	  	  bli_printm( "c1", &c1, "%4.1f", "" );
-	  	  	  bli_printm( "c2", &c2, "%4.1f", "" );
-	  		  bli_printm( "c_save", &c_save, "%4.1f", "" );
+	  bli_printm( "c1", &c1, "%4.1f", "" );
+	  bli_printm( "c2", &c2, "%4.1f", "" );
+	  bli_printm( "c_save", &c_save, "%4.1f", "" );
 #endif
 
 	  bli_axpym( &negOne, &c1, &c2 );
 			
 	  bli_fnormm( &c2, &normVal );
 
-	  dtime_save = bli_clock_min_diff( dtime_save, dtime );
 	}
 
-      if ( left )
-	gflops = ( 1.0 * m * m * n ) / ( dtime_save * 1.0e9 );
-      else
-	gflops = ( 1.0 * m * n * n ) / ( dtime_save * 1.0e9 );
+      if ( left ) {
+	gflopsDxT = ( 1.0 * m * m * n ) / ( dtime_saveDxT * 1.0e9 );
+	gflopsBLI = ( 1.0 * m * m * n ) / ( dtime_saveBLI * 1.0e9 );
+      }
+      else {
+	gflopsDxT = ( 1.0 * m * n * n ) / ( dtime_saveDxT * 1.0e9 );
+	gflopsBLI = ( 1.0 * m * n * n ) / ( dtime_saveBLI * 1.0e9 );
+      }
 
-      printf( "data_trmm_blis" );
+      printf( "data_trmm_DxT" );
+      printf( "( %2ld, 1:5 ) = [ %4lu %4lu  %10.3e  %6.3f %2.4f ];\n",
+	      (p - p_begin + 1)/p_inc + 1, m, n, dtime_saveDxT, gflopsDxT, gflopsDxT/gflopsBLI );
+
+      printf( "data_trmm_BLIS" );
       printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
-	      (p - p_begin + 1)/p_inc + 1, m, n, dtime_save, gflops );
+	      (p - p_begin + 1)/p_inc + 1, m, n, dtime_saveBLI, gflopsBLI );
 
-      bli_printm( "NORM", &normVal, "%4.1f", "" );
+      bli_printm( "%%NORM", &normVal, "%4.1f", "" );
       
 
       bli_obj_free( &alpha );
