@@ -2105,6 +2105,7 @@ void TrxmBP::PrintCode(IndStream &out)
   *out << ", &" << GetInputName(2).str() << ", (tr"
   << (m_invert ? "s" : "m") << "m_t*)NULL";
   if (m_comm != CORECOMM) {
+#if DOSM||DOSQM
     if (m_comm == L2COMM) {
       if (m_invert)
 	*out << ", L2Comm";
@@ -2119,6 +2120,7 @@ void TrxmBP::PrintCode(IndStream &out)
     }
     else
       throw;
+#endif
   }
   *out <<  ");\n";
 }
