@@ -23,7 +23,7 @@ clean:
 	rm -f obj/*.o obj/DLA/*.o src/*~ src/DLA/*~ *.x *~
 
 open:
-	emacs makefile src/*cpp src/*h src/DLA/*cpp src/DLA/*h
+	emacs src/*cpp src/*h src/DLA/*cpp src/DLA/*h makefile
 
 opencpp:
 	emacs src/*cpp src/DLA/*cpp
