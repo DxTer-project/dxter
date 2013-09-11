@@ -16,11 +16,12 @@ void DxT_Her2kNL( obj_t *alpha,
 		  obj_t *C )
 {
   FUNCTIONSTART
+
     obj_t AT;
   bli_obj_alias_with_trans( BLIS_TRANSPOSE, *A, AT);
   obj_t BT;
   bli_obj_alias_with_trans( BLIS_TRANSPOSE, *B, BT);
-  //// ***Parallelized with communicator GlobalComm; need correct output code
+  //// ***Parallelized with communicator GlobalComm
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *C );
   idx1 = 0;
@@ -73,6 +74,7 @@ void DxT_Her2kNL( obj_t *alpha,
 
       th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -81,9 +83,9 @@ void DxT_Her2kNL( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &BT_1_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
-      dim_t idx4, dimLen4, bs4;
-      dimLen4 = bli_obj_length_after_trans( C_1_B );
+      //// ***Parallelized with communicator ProcComm
+      			dim_t idx4, dimLen4, bs4;
+			dimLen4 = bli_obj_length_after_trans( C_1_B );
       idx4 = 0;
       th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &C_1_B, gemm_mr));
       for ( ; idx4 < dimLen4; idx4 += bs4 ) {
@@ -100,6 +102,7 @@ void DxT_Her2kNL( obj_t *alpha,
 
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -134,6 +137,7 @@ void DxT_Her2kNL( obj_t *alpha,
 
       th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -142,7 +146,7 @@ void DxT_Her2kNL( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &AT_1_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      //// ***Parallelized with communicator ProcComm
       dimLen4 = bli_obj_length_after_trans( C_1_B );
       idx4 = 0;
       th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &C_1_B, gemm_mr));
@@ -160,6 +164,7 @@ void DxT_Her2kNL( obj_t *alpha,
 
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -211,11 +216,12 @@ void DxT_Her2kNU( obj_t *alpha,
 		  obj_t *C )
 {
   FUNCTIONSTART
+
     obj_t AT;
   bli_obj_alias_with_trans( BLIS_TRANSPOSE, *A, AT);
   obj_t BT;
   bli_obj_alias_with_trans( BLIS_TRANSPOSE, *B, BT);
-  //// ***Parallelized with communicator GlobalComm; need correct output code
+  //// ***Parallelized with communicator GlobalComm
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *C );
   idx1 = 0;
@@ -269,6 +275,7 @@ void DxT_Her2kNU( obj_t *alpha,
 
       th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -277,9 +284,9 @@ void DxT_Her2kNU( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &BT_1_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
-      dim_t idx4, dimLen4, bs4;
-      dimLen4 = bli_obj_length_after_trans( C_1_T );
+      //// ***Parallelized with communicator ProcComm
+      			dim_t idx4, dimLen4, bs4;
+dimLen4 = bli_obj_length_after_trans( C_1_T );
       idx4 = 0;
       th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &C_1_T, gemm_mr));
       for ( ; idx4 < dimLen4; idx4 += bs4 ) {
@@ -296,6 +303,7 @@ void DxT_Her2kNU( obj_t *alpha,
 
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -329,6 +337,7 @@ void DxT_Her2kNU( obj_t *alpha,
 
       th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -337,7 +346,7 @@ void DxT_Her2kNU( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &AT_1_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      //// ***Parallelized with communicator ProcComm
       dimLen4 = bli_obj_length_after_trans( C_1_T );
       idx4 = 0;
       th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &C_1_T, gemm_mr));
@@ -355,6 +364,7 @@ void DxT_Her2kNU( obj_t *alpha,
 
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -393,6 +403,8 @@ void DxT_Her2kNU( obj_t *alpha,
 
     //****
   }
+
+
   FUNCTIONEND
 }
 
@@ -403,11 +415,12 @@ void DxT_Her2kTL( obj_t *alpha,
 		  obj_t *C )
 {
   FUNCTIONSTART
+
     obj_t AT;
   bli_obj_alias_with_trans( BLIS_TRANSPOSE, *A, AT);
   obj_t BT;
   bli_obj_alias_with_trans( BLIS_TRANSPOSE, *B, BT);
-  //// ***Parallelized with communicator GlobalComm; need correct output code
+  //// ***Parallelized with communicator GlobalComm
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *C );
   idx1 = 0;
@@ -460,6 +473,7 @@ void DxT_Her2kTL( obj_t *alpha,
 
       th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -468,7 +482,7 @@ void DxT_Her2kTL( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      //// ***Parallelized with communicator ProcComm
       dim_t idx4, dimLen4, bs4;
       dimLen4 = bli_obj_length_after_trans( C_1_B );
       idx4 = 0;
@@ -487,6 +501,7 @@ void DxT_Her2kTL( obj_t *alpha,
 
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -521,6 +536,7 @@ void DxT_Her2kTL( obj_t *alpha,
 
       th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -529,7 +545,7 @@ void DxT_Her2kTL( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      //// ***Parallelized with communicator ProcComm
       dimLen4 = bli_obj_length_after_trans( C_1_B );
       idx4 = 0;
       th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &C_1_B, gemm_mr));
@@ -547,6 +563,7 @@ void DxT_Her2kTL( obj_t *alpha,
 
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -587,6 +604,7 @@ void DxT_Her2kTL( obj_t *alpha,
     //****
   }
 
+
   FUNCTIONEND
 }
 
@@ -597,11 +615,12 @@ void DxT_Her2kTU( obj_t *alpha,
 		  obj_t *C )
 {
   FUNCTIONSTART
+
     obj_t AT;
   bli_obj_alias_with_trans( BLIS_TRANSPOSE, *A, AT);
   obj_t BT;
   bli_obj_alias_with_trans( BLIS_TRANSPOSE, *B, BT);
-  //// ***Parallelized with communicator GlobalComm; need correct output code
+  //// ***Parallelized with communicator GlobalComm
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *C );
   idx1 = 0;
@@ -655,6 +674,7 @@ void DxT_Her2kTU( obj_t *alpha,
 
       th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -663,9 +683,9 @@ void DxT_Her2kTU( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
-      dim_t idx4, dimLen4, bs4;
-      dimLen4 = bli_obj_length_after_trans( C_1_T );
+      //// ***Parallelized with communicator ProcComm
+      			dim_t idx4, dimLen4, bs4;
+dimLen4 = bli_obj_length_after_trans( C_1_T );
       idx4 = 0;
       th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &C_1_T, gemm_mr));
       for ( ; idx4 < dimLen4; idx4 += bs4 ) {
@@ -682,6 +702,7 @@ void DxT_Her2kTU( obj_t *alpha,
 
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -715,6 +736,7 @@ void DxT_Her2kTU( obj_t *alpha,
 
       th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -723,7 +745,7 @@ void DxT_Her2kTU( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      //// ***Parallelized with communicator ProcComm
       dimLen4 = bli_obj_length_after_trans( C_1_T );
       idx4 = 0;
       th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &C_1_T, gemm_mr));
@@ -741,6 +763,7 @@ void DxT_Her2kTU( obj_t *alpha,
 
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -779,6 +802,8 @@ void DxT_Her2kTU( obj_t *alpha,
 
     //****
   }
+
+
   FUNCTIONEND
 }
 
@@ -829,9 +854,9 @@ int main( int argc, char** argv )
 
 	n_repeats = 3;
 
-	p_begin = 100;
-	p_end   = 1000;
-	p_inc   = 100;
+	p_begin = 40;
+	p_end   = 400;
+	p_inc   = 40;
 
 	m_input = -1;
 	k_input = -1;

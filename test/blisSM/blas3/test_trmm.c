@@ -17,7 +17,6 @@ void DxT_TrmmLLN( obj_t *alpha,
 		  obj_t *X )
 {
   FUNCTIONSTART
-
   bli_scalm(alpha, X);
 
 dim_t idx1, dimLen1, bs1;
@@ -49,6 +48,7 @@ for ( ; idx1 < dimLen1; idx1 += bs1 ) {
 
 		th_barrier( ProcComm );
 		if (th_am_root(ProcComm)) {
+			alloced_B = TRUE;
 			bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 					BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 					BLIS_BUFFER_FOR_B_PANEL,
@@ -57,9 +57,10 @@ for ( ; idx1 < dimLen1; idx1 += bs1 ) {
 		}
 		th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
 		bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1, &packed_B_pan, ProcComm );
+		//// ***Parallelized with communicator ProcComm
 		dimLen3 = bli_obj_length_after_trans( L_11 );
 		idx3 = 0;
-		th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1_2, gemm_mr));
+		th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &L_11, gemm_mr));
 		for ( ; idx3 < dimLen3; idx3 += bs3 ) {
 			bs3 = bli_determine_blocksize_f( idx3, dimLen3, &L_11, gemm_mc );
 			dim_t idx4, dimLen4, bs4;
@@ -74,6 +75,7 @@ for ( ; idx1 < dimLen1; idx1 += bs1 ) {
 			bli_obj_set_uplo( BLIS_LOWER, L_11_1 );
 			th_barrier( L2Comm );
 			if (th_am_root(L2Comm)) {
+				alloced_A = TRUE;
 				bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 						BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 						BLIS_BUFFER_FOR_A_BLOCK,
@@ -89,7 +91,7 @@ for ( ; idx1 < dimLen1; idx1 += bs1 ) {
 
 		//****
 		}
-//// ***Parallelized with communicator ProcComm; need correct output code
+		//// ***Parallelized with communicator ProcComm
 		dimLen3 = bli_obj_length_after_trans( X_1_2 );
 		idx3 = 0;
 		th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1_2, gemm_mr));
@@ -105,6 +107,7 @@ for ( ; idx1 < dimLen1; idx1 += bs1 ) {
 
 			th_barrier( L2Comm );
 			if (th_am_root(L2Comm)) {
+				alloced_A = TRUE;
 				bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 						BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 						BLIS_BUFFER_FOR_A_BLOCK,
@@ -132,6 +135,7 @@ for ( ; idx1 < dimLen1; idx1 += bs1 ) {
 }
 
 
+
   FUNCTIONEND
     }
 
@@ -141,120 +145,126 @@ void DxT_TrmmLLT( obj_t *alpha,
 {
   FUNCTIONSTART
     bli_scalm(alpha, X);
-  dim_t idx1, dimLen1, bs1;
-  dimLen1 = bli_obj_width_after_trans( *X );
-  idx1 = 0;
-  th_shift_start_end(&idx1, &dimLen1, ProcComm, bli_blksz_for_obj( X, gemm_nr));
-  for ( ; idx1 < dimLen1; idx1 += bs1 ) {
-    bs1 = bli_determine_blocksize_f( idx1, dimLen1, X, gemm_nc );
-    dim_t idx2, dimLen2, bs2;
-    //****
-    obj_t X_1;
-    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, X, &X_1 );
-    //------------------------------------//
 
-    dimLen2 = bli_obj_length_after_trans( X_1 );
-    for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-      bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_1, gemm_kc );
-      dim_t idx3, dimLen3, bs3;
-      //****
-      obj_t L_10;
-      bli_acquire_mpart_tl2br( BLIS_SUBPART10, idx2, bs2, L, &L_10 );
-      obj_t L_11;
-      bli_acquire_mpart_tl2br( BLIS_SUBPART11, idx2, bs2, L, &L_11 );
-      obj_t X_1_0;
-      bli_acquire_mpart_t2b( BLIS_SUBPART0, idx2, bs2, &X_1, &X_1_0 );
-      obj_t X_1_1;
-      bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &X_1, &X_1_1 );
-      //------------------------------------//
-
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
-	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
-			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			     BLIS_BUFFER_FOR_B_PANEL,
-			     gemm_mr, gemm_nr, 
-			     &X_1_1, &packed_B_pan );
-      }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1, &packed_B_pan, ProcComm );
-      dimLen3 = bli_obj_width_after_trans( L_11 );
-      if (th_group_id( L2Comm ) != 0)
-	dimLen3 = 0;
-      for ( idx3 = 0; idx3 < dimLen3; idx3 += bs3 ) {
-	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &L_11, gemm_mc );
-	dim_t idx4, dimLen4, bs4;
-	//****
-	obj_t L_11_1;
-	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &L_11, &L_11_1 );
-	obj_t X_1_1_1;
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_1, &X_1_1_1 );
+//// ***Parallelized with communicator GlobalComm
+dim_t idx1, dimLen1, bs1;
+dimLen1 = bli_obj_width_after_trans( *X );
+idx1 = 0;
+th_shift_start_end(&idx1, &dimLen1, ProcComm, bli_blksz_for_obj( X, gemm_nr));
+for ( ; idx1 < dimLen1; idx1 += bs1 ) {
+	bs1 = bli_determine_blocksize_f( idx1, dimLen1, X, gemm_nc );
+	dim_t idx2, dimLen2, bs2;
+//****
+	obj_t X_1;
+	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, X, &X_1 );
 	//------------------------------------//
 
-	obj_t L_11_1T;
-	bli_obj_alias_with_trans( BLIS_TRANSPOSE, L_11_1, L_11_1T);
-	bli_obj_set_struc( BLIS_TRIANGULAR, L_11_1T );
-	bli_obj_set_uplo( BLIS_LOWER, L_11_1T );
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
-	  bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			       BLIS_BUFFER_FOR_A_BLOCK,
-			       gemm_mr, gemm_mr, 
-			       &L_11_1T, &packed_A_blk );
+	dimLen2 = bli_obj_length_after_trans( X_1 );
+	for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
+		bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_1, gemm_kc );
+		dim_t idx3, dimLen3, bs3;
+	//****
+		obj_t L_10;
+		bli_acquire_mpart_tl2br( BLIS_SUBPART10, idx2, bs2, L, &L_10 );
+		obj_t L_11;
+		bli_acquire_mpart_tl2br( BLIS_SUBPART11, idx2, bs2, L, &L_11 );
+		obj_t X_1_0;
+		bli_acquire_mpart_t2b( BLIS_SUBPART0, idx2, bs2, &X_1, &X_1_0 );
+		obj_t X_1_1;
+		bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &X_1, &X_1_1 );
+		//------------------------------------//
+
+		th_barrier( ProcComm );
+		if (th_am_root(ProcComm)) {
+			alloced_B = TRUE;
+			bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
+					BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+					BLIS_BUFFER_FOR_B_PANEL,
+					gemm_mr, gemm_nr, 
+					&X_1_1, &packed_B_pan );
+		}
+		th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+		bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1, &packed_B_pan, ProcComm );
+		//// ***Parallelized with communicator ProcComm
+		dimLen3 = bli_obj_width_after_trans( L_11 );
+		idx3 = 0;
+		th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &L_11, gemm_mr));
+		for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+			bs3 = bli_determine_blocksize_f( idx3, dimLen3, &L_11, gemm_mc );
+			dim_t idx4, dimLen4, bs4;
+		//****
+			obj_t L_11_1;
+			bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &L_11, &L_11_1 );
+			obj_t X_1_1_1;
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_1, &X_1_1_1 );
+			//------------------------------------//
+
+			obj_t L_11_1T;
+			bli_obj_alias_with_trans( BLIS_TRANSPOSE, L_11_1, L_11_1T);
+			bli_obj_set_struc( BLIS_TRIANGULAR, L_11_1T );
+			bli_obj_set_uplo( BLIS_LOWER, L_11_1T );
+			th_barrier( L2Comm );
+			if (th_am_root(L2Comm)) {
+				alloced_A = TRUE;
+				bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+						BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+						BLIS_BUFFER_FOR_A_BLOCK,
+						gemm_mr, gemm_mr, 
+						&L_11_1T, &packed_A_blk );
+			}
+			th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+			bli_packm_blk_var3_par( &BLIS_ONE, &L_11_1T, &packed_A_blk, L2Comm );
+			bli_trmm_lu_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+					&BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
+
+			//------------------------------------//
+
+		//****
+		}
+		//// ***Parallelized with communicator ProcComm
+		dimLen3 = bli_obj_length_after_trans( X_1_0 );
+		idx3 = 0;
+		th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1_0, gemm_mr));
+		for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+			bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1_0, gemm_mc );
+			dim_t idx4, dimLen4, bs4;
+		//****
+			obj_t L_10_1;
+			bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &L_10, &L_10_1 );
+			obj_t X_1_0_1;
+			bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_0, &X_1_0_1 );
+			//------------------------------------//
+
+			obj_t L_10_1T;
+			bli_obj_alias_with_trans( BLIS_TRANSPOSE, L_10_1, L_10_1T);
+			th_barrier( L2Comm );
+			if (th_am_root(L2Comm)) {
+				alloced_A = TRUE;
+				bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+						BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+						BLIS_BUFFER_FOR_A_BLOCK,
+						gemm_mr, gemm_mr, 
+						&L_10_1T, &packed_A_blk );
+			}
+			th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+			bli_packm_blk_var2_par( &BLIS_ONE, &L_10_1T, &packed_A_blk, L2Comm );
+			bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+					&BLIS_ONE, &X_1_0_1, (gemm_t*)NULL, L1Comm );
+
+			//------------------------------------//
+
+		//****
+		}
+
+		//------------------------------------//
+
+	//****
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var3_par( &BLIS_ONE, &L_11_1T, &packed_A_blk, L2Comm );
-	bli_trmm_lu_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-				  &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
 
 	//------------------------------------//
 
-	//****
-      }
-      //// ***Parallelized with communicator ProcComm; need correct output code
-      dimLen3 = bli_obj_length_after_trans( X_1_0 );
-      idx3 = 0;
-      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1_0, gemm_mr));
-      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
-	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1_0, gemm_mc );
-	dim_t idx4, dimLen4, bs4;
-	//****
-	obj_t L_10_1;
-	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &L_10, &L_10_1 );
-	obj_t X_1_0_1;
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_0, &X_1_0_1 );
-	//------------------------------------//
-
-	obj_t L_10_1T;
-	bli_obj_alias_with_trans( BLIS_TRANSPOSE, L_10_1, L_10_1T);
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
-	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-			       BLIS_BUFFER_FOR_A_BLOCK,
-			       gemm_mr, gemm_mr, 
-			       &L_10_1T, &packed_A_blk );
-	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &L_10_1T, &packed_A_blk, L2Comm );
-	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-			       &BLIS_ONE, &X_1_0_1, (gemm_t*)NULL, L1Comm );
-
-	//------------------------------------//
-
-	//****
-      }
-
-      //------------------------------------//
-
-      //****
-    }
-
-    //------------------------------------//
-
-    //****
-  }
+//****
+}
 
 
 
@@ -269,6 +279,7 @@ void DxT_TrmmLUN( obj_t *alpha,
   FUNCTIONSTART;
   bli_scalm(alpha, X);
 
+  //// ***Parallelized with communicator GlobalComm
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *X );
   idx1 = 0;
@@ -298,6 +309,7 @@ void DxT_TrmmLUN( obj_t *alpha,
 
       th_barrier( ProcComm );
       if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
@@ -306,10 +318,11 @@ void DxT_TrmmLUN( obj_t *alpha,
       }
       th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
       bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1, &packed_B_pan, ProcComm );
+      //// ***Parallelized with communicator ProcComm
       dimLen3 = bli_obj_length_after_trans( U_11 );
-      if (th_group_id( L2Comm ) != 0)
-	dimLen3 = 0;
-      for ( idx3 = 0; idx3 < dimLen3; idx3 += bs3 ) {
+      idx3 = 0;
+      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &U_11, gemm_mr));
+      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
 	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &U_11, gemm_mc );
 	dim_t idx4, dimLen4, bs4;
 	//****
@@ -323,6 +336,7 @@ void DxT_TrmmLUN( obj_t *alpha,
 	bli_obj_set_uplo( BLIS_UPPER, U_11_1 );
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -338,7 +352,7 @@ void DxT_TrmmLUN( obj_t *alpha,
 
 	//****
       }
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      //// ***Parallelized with communicator ProcComm
       dimLen3 = bli_obj_length_after_trans( X_1_0 );
       idx3 = 0;
       th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1_0, gemm_mr));
@@ -354,6 +368,7 @@ void DxT_TrmmLUN( obj_t *alpha,
 
 	th_barrier( L2Comm );
 	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
@@ -380,6 +395,7 @@ void DxT_TrmmLUN( obj_t *alpha,
     //****
   }
 
+
   FUNCTIONEND
     }
 
@@ -390,120 +406,126 @@ void DxT_TrmmLUT( obj_t *alpha,
   FUNCTIONSTART
     bli_scalm(alpha, X);
 
-dim_t idx1, dimLen1, bs1;
-dimLen1 = bli_obj_width_after_trans( *X );
-idx1 = 0;
-th_shift_start_end(&idx1, &dimLen1, ProcComm, bli_blksz_for_obj( X, gemm_nr));
-for ( ; idx1 < dimLen1; idx1 += bs1 ) {
-	bs1 = bli_determine_blocksize_f( idx1, dimLen1, X, gemm_nc );
-	dim_t idx2, dimLen2, bs2;
-//****
-	obj_t X_1;
-	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, X, &X_1 );
+  //// ***Parallelized with communicator GlobalComm
+  dim_t idx1, dimLen1, bs1;
+  dimLen1 = bli_obj_width_after_trans( *X );
+  idx1 = 0;
+  th_shift_start_end(&idx1, &dimLen1, ProcComm, bli_blksz_for_obj( X, gemm_nr));
+  for ( ; idx1 < dimLen1; idx1 += bs1 ) {
+    bs1 = bli_determine_blocksize_f( idx1, dimLen1, X, gemm_nc );
+    dim_t idx2, dimLen2, bs2;
+    //****
+    obj_t X_1;
+    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, X, &X_1 );
+    //------------------------------------//
+
+    dimLen2 = bli_obj_length_after_trans( X_1 );
+    for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
+      bs2 = bli_determine_blocksize_b( idx2, dimLen2, &X_1, gemm_kc );
+      dim_t idx3, dimLen3, bs3;
+      //****
+      obj_t U_11;
+      bli_acquire_mpart_br2tl( BLIS_SUBPART11, idx2, bs2, U, &U_11 );
+      obj_t U_12;
+      bli_acquire_mpart_br2tl( BLIS_SUBPART12, idx2, bs2, U, &U_12 );
+      obj_t X_1_1;
+      bli_acquire_mpart_b2t( BLIS_SUBPART1, idx2, bs2, &X_1, &X_1_1 );
+      obj_t X_1_2;
+      bli_acquire_mpart_b2t( BLIS_SUBPART2, idx2, bs2, &X_1, &X_1_2 );
+      //------------------------------------//
+
+      th_barrier( ProcComm );
+      if (th_am_root(ProcComm)) {
+	alloced_B = TRUE;
+	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
+			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			     BLIS_BUFFER_FOR_B_PANEL,
+			     gemm_mr, gemm_nr, 
+			     &X_1_1, &packed_B_pan );
+      }
+      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1, &packed_B_pan, ProcComm );
+      //// ***Parallelized with communicator ProcComm
+      dimLen3 = bli_obj_width_after_trans( U_11 );
+      idx3 = 0;
+      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &U_11, gemm_mr));
+      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &U_11, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t U_11_1;
+	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &U_11, &U_11_1 );
+	obj_t X_1_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_1, &X_1_1_1 );
 	//------------------------------------//
 
-	dimLen2 = bli_obj_length_after_trans( X_1 );
-	for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-		bs2 = bli_determine_blocksize_b( idx2, dimLen2, &X_1, gemm_kc );
-		dim_t idx3, dimLen3, bs3;
-	//****
-		obj_t U_11;
-		bli_acquire_mpart_br2tl( BLIS_SUBPART11, idx2, bs2, U, &U_11 );
-		obj_t U_12;
-		bli_acquire_mpart_br2tl( BLIS_SUBPART12, idx2, bs2, U, &U_12 );
-		obj_t X_1_1;
-		bli_acquire_mpart_b2t( BLIS_SUBPART1, idx2, bs2, &X_1, &X_1_1 );
-		obj_t X_1_2;
-		bli_acquire_mpart_b2t( BLIS_SUBPART2, idx2, bs2, &X_1, &X_1_2 );
-		//------------------------------------//
-
-		th_barrier( ProcComm );
-		if (th_am_root(ProcComm)) {
-			bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
-					BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-					BLIS_BUFFER_FOR_B_PANEL,
-					gemm_mr, gemm_nr, 
-					&X_1_1, &packed_B_pan );
-		}
-		th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-		bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1, &packed_B_pan, ProcComm );
-		dimLen3 = bli_obj_width_after_trans( U_11 );
-		if (th_group_id( L2Comm ) != 0)
-			dimLen3 = 0;
-		for ( idx3 = 0; idx3 < dimLen3; idx3 += bs3 ) {
-			bs3 = bli_determine_blocksize_f( idx3, dimLen3, &U_11, gemm_mc );
-			dim_t idx4, dimLen4, bs4;
-		//****
-			obj_t U_11_1;
-			bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &U_11, &U_11_1 );
-			obj_t X_1_1_1;
-			bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_1, &X_1_1_1 );
-			//------------------------------------//
-
-			obj_t U_11_1T;
-			bli_obj_alias_with_trans( BLIS_TRANSPOSE, U_11_1, U_11_1T);
-			bli_obj_set_struc( BLIS_TRIANGULAR, U_11_1T );
-			bli_obj_set_uplo( BLIS_UPPER, U_11_1T );
-			th_barrier( L2Comm );
-			if (th_am_root(L2Comm)) {
-				bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-						BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-						BLIS_BUFFER_FOR_A_BLOCK,
-						gemm_mr, gemm_mr, 
-						&U_11_1T, &packed_A_blk );
-			}
-			th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-			bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1T, &packed_A_blk, L2Comm );
-			bli_trmm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-					&BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
-
-			//------------------------------------//
-
-		//****
-		}
-//// ***Parallelized with communicator ProcComm; need correct output code
-		dimLen3 = bli_obj_length_after_trans( X_1_2 );
-		idx3 = 0;
-		th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1_2, gemm_mr));
-		for ( ; idx3 < dimLen3; idx3 += bs3 ) {
-			bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1_2, gemm_mc );
-			dim_t idx4, dimLen4, bs4;
-		//****
-			obj_t U_12_1;
-			bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &U_12, &U_12_1 );
-			obj_t X_1_2_1;
-			bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_2, &X_1_2_1 );
-			//------------------------------------//
-
-			obj_t U_12_1T;
-			bli_obj_alias_with_trans( BLIS_TRANSPOSE, U_12_1, U_12_1T);
-			th_barrier( L2Comm );
-			if (th_am_root(L2Comm)) {
-				bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-						BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-						BLIS_BUFFER_FOR_A_BLOCK,
-						gemm_mr, gemm_mr, 
-						&U_12_1T, &packed_A_blk );
-			}
-			th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-			bli_packm_blk_var2_par( &BLIS_ONE, &U_12_1T, &packed_A_blk, L2Comm );
-			bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-					&BLIS_ONE, &X_1_2_1, (gemm_t*)NULL, L1Comm );
-
-			//------------------------------------//
-
-		//****
-		}
-
-		//------------------------------------//
-
-	//****
+	obj_t U_11_1T;
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, U_11_1, U_11_1T);
+	bli_obj_set_struc( BLIS_TRIANGULAR, U_11_1T );
+	bli_obj_set_uplo( BLIS_UPPER, U_11_1T );
+	th_barrier( L2Comm );
+	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
+	  bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_mr, 
+			       &U_11_1T, &packed_A_blk );
 	}
+	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var3_par( &BLIS_ONE, &U_11_1T, &packed_A_blk, L2Comm );
+	bli_trmm_ll_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+				  &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
 
 	//------------------------------------//
 
-//****
-}
+	//****
+      }
+      //// ***Parallelized with communicator ProcComm
+      dimLen3 = bli_obj_length_after_trans( X_1_2 );
+      idx3 = 0;
+      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1_2, gemm_mr));
+      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1_2, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t U_12_1;
+	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx3, bs3, &U_12, &U_12_1 );
+	obj_t X_1_2_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1_2, &X_1_2_1 );
+	//------------------------------------//
+
+	obj_t U_12_1T;
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, U_12_1, U_12_1T);
+	th_barrier( L2Comm );
+	if (th_am_root(L2Comm)) {
+	  alloced_A = TRUE;
+	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_mr, 
+			       &U_12_1T, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &U_12_1T, &packed_A_blk, L2Comm );
+	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			       &BLIS_ONE, &X_1_2_1, (gemm_t*)NULL, L1Comm );
+
+	//------------------------------------//
+
+	//****
+      }
+
+      //------------------------------------//
+
+      //****
+    }
+
+    //------------------------------------//
+
+    //****
+  }
+
 
 
   FUNCTIONEND
@@ -519,206 +541,208 @@ void DxT_TrmmRLN( obj_t *alpha,
     bli_scalm(alpha, X);
 
   dim_t idx1, dimLen1, bs1;
-dimLen1 = bli_obj_width_after_trans( *X );
-if (th_group_id( ProcComm ) != 0)
-	dimLen1 = 0;
-for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
-	bs1 = bli_determine_blocksize_f( idx1, dimLen1, X, gemm_nc );
-	dim_t idx2, dimLen2, bs2;
-//****
-	obj_t L_11;
-	bli_acquire_mpart_tl2br( BLIS_SUBPART11, idx1, bs1, L, &L_11 );
-	obj_t L_21;
-	bli_acquire_mpart_tl2br( BLIS_SUBPART21, idx1, bs1, L, &L_21 );
-	obj_t X_1;
-	bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, X, &X_1 );
-	obj_t X_2;
-	bli_acquire_mpart_l2r( BLIS_SUBPART2, idx1, bs1, X, &X_2 );
+  dimLen1 = bli_obj_width_after_trans( *X );
+  for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
+    bs1 = bli_determine_blocksize_f( idx1, dimLen1, X, gemm_nc );
+    dim_t idx2, dimLen2, bs2;
+    //****
+    obj_t L_11;
+    bli_acquire_mpart_tl2br( BLIS_SUBPART11, idx1, bs1, L, &L_11 );
+    obj_t L_21;
+    bli_acquire_mpart_tl2br( BLIS_SUBPART21, idx1, bs1, L, &L_21 );
+    obj_t X_1;
+    bli_acquire_mpart_l2r( BLIS_SUBPART1, idx1, bs1, X, &X_1 );
+    obj_t X_2;
+    bli_acquire_mpart_l2r( BLIS_SUBPART2, idx1, bs1, X, &X_2 );
+    //------------------------------------//
+
+    dimLen2 = bli_obj_width_after_trans( X_1 );
+    for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
+      bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_1, gemm_kc );
+      dim_t idx3, dimLen3, bs3;
+      //****
+      obj_t L_11_10;
+      bli_acquire_mpart_tl2br( BLIS_SUBPART10, idx2, bs2, &L_11, &L_11_10 );
+      obj_t L_11_11;
+      bli_acquire_mpart_tl2br( BLIS_SUBPART11, idx2, bs2, &L_11, &L_11_11 );
+      obj_t X_1_0;
+      bli_acquire_mpart_l2r( BLIS_SUBPART0, idx2, bs2, &X_1, &X_1_0 );
+      obj_t X_1_1;
+      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &X_1, &X_1_1 );
+      //------------------------------------//
+
+      //****
+      //------------------------------------//
+
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
+	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
+			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			     BLIS_BUFFER_FOR_B_PANEL,
+			     gemm_kr, gemm_nr, 
+			     &L_11_10, &packed_B_pan );
+      }
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &L_11_10, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
+      	dim_t idx4, dimLen4, bs4;
+dimLen4 = bli_obj_length_after_trans( X_1_0 );
+      idx4 = 0;
+      th_shift_start_end(&idx4, &dimLen4, L2SubAllL2Comm, bli_blksz_for_obj( &X_1_0, gemm_mr));
+      for ( ; idx4 < dimLen4; idx4 += bs4 ) {
+	bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_0, gemm_mc );
+	dim_t idx5, dimLen5, bs5;
+	//****
+	obj_t X_1_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_1, &X_1_1_1 );
+	obj_t X_1_0_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_0, &X_1_0_1 );
 	//------------------------------------//
 
-	dimLen2 = bli_obj_width_after_trans( X_1 );
-	if (th_group_id( ProcComm ) != 0)
-		dimLen2 = 0;
-	for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-		bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_1, gemm_kc );
-		dim_t idx3, dimLen3, bs3;
-	//****
-		obj_t L_11_10;
-		bli_acquire_mpart_tl2br( BLIS_SUBPART10, idx2, bs2, &L_11, &L_11_10 );
-		obj_t L_11_11;
-		bli_acquire_mpart_tl2br( BLIS_SUBPART11, idx2, bs2, &L_11, &L_11_11 );
-		obj_t X_1_0;
-		bli_acquire_mpart_l2r( BLIS_SUBPART0, idx2, bs2, &X_1, &X_1_0 );
-		obj_t X_1_1;
-		bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &X_1, &X_1_1 );
-		//------------------------------------//
-
-		//****
-			//------------------------------------//
-
-			th_barrier( ProcComm );
-			if (th_am_root(ProcComm)) {
-				bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
-						BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-						BLIS_BUFFER_FOR_B_PANEL,
-						gemm_kr, gemm_nr, 
-						&L_11_10, &packed_B_pan );
-			}
-			th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-			bli_packm_blk_var2_par( &BLIS_ONE, &L_11_10, &packed_B_pan, ProcComm );
-//// ***Parallelized with communicator ProcComm; need correct output code
-			dim_t idx4, dimLen4, bs4;
-			dimLen4 = bli_obj_length_after_trans( X_1_0 );
-			idx4 = 0;
-			th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &X_1_0, gemm_mr));
-			for ( ; idx4 < dimLen4; idx4 += bs4 ) {
-				bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_0, gemm_mc );
-				dim_t idx5, dimLen5, bs5;
-			//****
-				obj_t X_1_1_1;
-				bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_1, &X_1_1_1 );
-				obj_t X_1_0_1;
-				bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_0, &X_1_0_1 );
-				//------------------------------------//
-
-				th_barrier( L2Comm );
-				if (th_am_root(L2Comm)) {
-					bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-							BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-							BLIS_BUFFER_FOR_A_BLOCK,
-							gemm_mr, gemm_kr, 
-							&X_1_1_1, &packed_A_blk );
-				}
-				th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-				bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
-				bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-						&BLIS_ONE, &X_1_0_1, (gemm_t*)NULL, L1Comm );
-
-				//------------------------------------//
-
-			//****
-			}
-
-			//------------------------------------//
-
-		//****
-		//****
-			//------------------------------------//
-
-			bli_obj_set_struc( BLIS_TRIANGULAR, L_11_11 );
-			bli_obj_set_uplo( BLIS_LOWER, L_11_11 );
-			th_barrier( ProcComm );
-			if (th_am_root(ProcComm)) {
-				bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
-						BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-						BLIS_BUFFER_FOR_B_PANEL,
-						gemm_nr, gemm_nr, 
-						&L_11_11, &packed_B_pan );
-			}
-			th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-			bli_packm_blk_var3( &BLIS_ONE, &L_11_11, &packed_B_pan );
-			dimLen4 = bli_obj_length_after_trans( X_1_1 );
-			idx4 = 0;
-			th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &X_1_0, gemm_mr));
-			for ( ; idx4 < dimLen4; idx4 += bs4 ) {
-				bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_1, gemm_mc );
-				dim_t idx5, dimLen5, bs5;
-			//****
-				obj_t X_1_1_1;
-				bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_1, &X_1_1_1 );
-
-				//------------------------------------//
-
-				th_barrier( L2Comm );
-				if (th_am_root(L2Comm)) {
-					bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-							BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-							BLIS_BUFFER_FOR_A_BLOCK,
-							gemm_mr, gemm_nr, 
-							&X_1_1_1, &packed_A_blk );
-				}
-				th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-				bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
-				bli_trmm_rl_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-						&BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
-
-				//------------------------------------//
-
-			//****
-			}
-
-			//------------------------------------//
-
-		//****
-
-		//------------------------------------//
-
-	//****
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
+	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_kr, 
+			       &X_1_1_1, &packed_A_blk );
 	}
-	dimLen2 = bli_obj_width_after_trans( X_2 );
-	if (th_group_id( ProcComm ) != 0)
-		dimLen2 = 0;
-	for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
-		bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_2, gemm_kc );
-		dim_t idx3, dimLen3, bs3;
-	//****
-		obj_t X_2_1;
-		bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &X_2, &X_2_1 );
-		obj_t L_21_1;
-		bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &L_21, &L_21_1 );
-		//------------------------------------//
-
-		th_barrier( ProcComm );
-		if (th_am_root(ProcComm)) {
-			bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
-					BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-					BLIS_BUFFER_FOR_B_PANEL,
-					gemm_kr, gemm_nr, 
-					&L_21_1, &packed_B_pan );
-		}
-		th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-		bli_packm_blk_var2_par( &BLIS_ONE, &L_21_1, &packed_B_pan, ProcComm );
-//// ***Parallelized with communicator ProcComm; need correct output code
-		dimLen3 = bli_obj_length_after_trans( X_1 );
-		idx3 = 0;
-		th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1, gemm_mr));
-		for ( ; idx3 < dimLen3; idx3 += bs3 ) {
-			bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1, gemm_mc );
-			dim_t idx4, dimLen4, bs4;
-		//****
-			obj_t X_2_1_1;
-			bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_2_1, &X_2_1_1 );
-			obj_t X_1_1;
-			bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1, &X_1_1 );
-			//------------------------------------//
-
-			th_barrier( L2Comm );
-			if (th_am_root(L2Comm)) {
-				bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
-						BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
-						BLIS_BUFFER_FOR_A_BLOCK,
-						gemm_mr, gemm_kr, 
-						&X_2_1_1, &packed_A_blk );
-			}
-			th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-			bli_packm_blk_var2_par( &BLIS_ONE, &X_2_1_1, &packed_A_blk, L2Comm );
-			bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
-					&BLIS_ONE, &X_1_1, (gemm_t*)NULL, L1Comm );
-
-			//------------------------------------//
-
-		//****
-		}
-
-		//------------------------------------//
-
-	//****
-	}
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2SubAllL2Comm );
+	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			       &BLIS_ONE, &X_1_0_1, (gemm_t*)NULL, L1Comm );
 
 	//------------------------------------//
 
-//****
-}
+	//****
+      }
+
+      //------------------------------------//
+
+      //****
+      //****
+      //------------------------------------//
+
+      bli_obj_set_struc( BLIS_TRIANGULAR, L_11_11 );
+      bli_obj_set_uplo( BLIS_LOWER, L_11_11 );
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
+	bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
+			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			     BLIS_BUFFER_FOR_B_PANEL,
+			     gemm_nr, gemm_nr, 
+			     &L_11_11, &packed_B_pan );
+      }
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var3_par( &BLIS_ONE, &L_11_11, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
+      dimLen4 = bli_obj_length_after_trans( X_1_1 );
+      idx4 = 0;
+      th_shift_start_end(&idx4, &dimLen4, L2SubAllL2Comm, bli_blksz_for_obj( &X_1_1, gemm_mr));
+      for ( ; idx4 < dimLen4; idx4 += bs4 ) {
+	bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_1, gemm_mc );
+	dim_t idx5, dimLen5, bs5;
+	//****
+	obj_t X_1_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_1, &X_1_1_1 );
+
+	//------------------------------------//
+
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
+	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_nr, 
+			       &X_1_1_1, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2SubAllL2Comm );
+	bli_trmm_rl_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+				  &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
+
+	//------------------------------------//
+
+	//****
+      }
+
+      //------------------------------------//
+
+      //****
+
+      //------------------------------------//
+
+      //****
+    }
+    dimLen2 = bli_obj_width_after_trans( X_2 );
+    for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
+      bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_2, gemm_kc );
+      dim_t idx3, dimLen3, bs3;
+      //****
+      obj_t X_2_1;
+      bli_acquire_mpart_l2r( BLIS_SUBPART1, idx2, bs2, &X_2, &X_2_1 );
+      obj_t L_21_1;
+      bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &L_21, &L_21_1 );
+      //------------------------------------//
+
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
+	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
+			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			     BLIS_BUFFER_FOR_B_PANEL,
+			     gemm_kr, gemm_nr, 
+			     &L_21_1, &packed_B_pan );
+      }
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &L_21_1, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
+      dimLen3 = bli_obj_length_after_trans( X_1 );
+      idx3 = 0;
+      th_shift_start_end(&idx3, &dimLen3, L2SubAllL2Comm, bli_blksz_for_obj( &X_1, gemm_mr));
+      for ( ; idx3 < dimLen3; idx3 += bs3 ) {
+	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1, gemm_mc );
+	dim_t idx4, dimLen4, bs4;
+	//****
+	obj_t X_2_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_2_1, &X_2_1_1 );
+	obj_t X_1_1;
+	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1, &X_1_1 );
+	//------------------------------------//
+
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
+	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
+			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
+			       BLIS_BUFFER_FOR_A_BLOCK,
+			       gemm_mr, gemm_kr, 
+			       &X_2_1_1, &packed_A_blk );
+	}
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_2_1_1, &packed_A_blk, L2SubAllL2Comm );
+	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+			       &BLIS_ONE, &X_1_1, (gemm_t*)NULL, L1Comm );
+
+	//------------------------------------//
+
+	//****
+      }
+
+      //------------------------------------//
+
+      //****
+    }
+
+    //------------------------------------//
+
+    //****
+  }
+
 
 
   FUNCTIONEND
@@ -731,10 +755,9 @@ void DxT_TrmmRLT( obj_t *alpha,
   FUNCTIONSTART
   bli_scalm(alpha, X);
   
+
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *X );
-  if (th_group_id( ProcComm ) != 0)
-    dimLen1 = 0;
   for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
     bs1 = bli_determine_blocksize_b( idx1, dimLen1, X, gemm_nc );
     dim_t idx2, dimLen2, bs2;
@@ -750,8 +773,6 @@ void DxT_TrmmRLT( obj_t *alpha,
     //------------------------------------//
 
     dimLen2 = bli_obj_width_after_trans( X_1 );
-    if (th_group_id( ProcComm ) != 0)
-      dimLen2 = 0;
     for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
       bs2 = bli_determine_blocksize_b( idx2, dimLen2, &X_1, gemm_kc );
       dim_t idx3, dimLen3, bs3;
@@ -773,21 +794,22 @@ void DxT_TrmmRLT( obj_t *alpha,
       //****
       //------------------------------------//
 
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
 			     &L_11_21T, &packed_B_pan );
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var2_par( &BLIS_ONE, &L_11_21T, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
-      dim_t idx4, dimLen4, bs4;
-      dimLen4 = bli_obj_length_after_trans( X_1_2 );
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &L_11_21T, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
+      	dim_t idx4, dimLen4, bs4;
+dimLen4 = bli_obj_length_after_trans( X_1_2 );
       idx4 = 0;
-      th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &X_1_2, gemm_mr));
+      th_shift_start_end(&idx4, &dimLen4, L2SubAllL2Comm, bli_blksz_for_obj( &X_1_2, gemm_mr));
       for ( ; idx4 < dimLen4; idx4 += bs4 ) {
 	bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_2, gemm_mc );
 	dim_t idx5, dimLen5, bs5;
@@ -798,16 +820,17 @@ void DxT_TrmmRLT( obj_t *alpha,
 	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_2, &X_1_2_1 );
 	//------------------------------------//
 
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
 			       &X_1_1_1, &packed_A_blk );
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2SubAllL2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_2_1, (gemm_t*)NULL, L1Comm );
 
@@ -824,37 +847,41 @@ void DxT_TrmmRLT( obj_t *alpha,
 
       bli_obj_set_struc( BLIS_TRIANGULAR, L_11_11T );
       bli_obj_set_uplo( BLIS_LOWER, L_11_11T );
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_nr, gemm_nr, 
 			     &L_11_11T, &packed_B_pan );
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var3( &BLIS_ONE, &L_11_11T, &packed_B_pan );
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var3_par( &BLIS_ONE, &L_11_11T, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
       dimLen4 = bli_obj_length_after_trans( X_1_1 );
-      if (th_group_id( L2Comm ) != 0)
-	dimLen4 = 0;
-      for ( idx4 = 0; idx4 < dimLen4; idx4 += bs4 ) {
+      idx4 = 0;
+      th_shift_start_end(&idx4, &dimLen4, L2SubAllL2Comm, bli_blksz_for_obj( &X_1_1, gemm_mr));
+      for ( ; idx4 < dimLen4; idx4 += bs4 ) {
 	bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_1, gemm_mc );
 	dim_t idx5, dimLen5, bs5;
 	//****
 	obj_t X_1_1_1;
 	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_1, &X_1_1_1 );
+	
 	//------------------------------------//
 
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_nr, 
 			       &X_1_1_1, &packed_A_blk );
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2SubAllL2Comm );
 	bli_trmm_ru_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 				  &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
 
@@ -872,8 +899,6 @@ void DxT_TrmmRLT( obj_t *alpha,
       //****
     }
     dimLen2 = bli_obj_width_after_trans( X_0 );
-    if (th_group_id( ProcComm ) != 0)
-      dimLen2 = 0;
     for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
       bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_0, gemm_kc );
       dim_t idx3, dimLen3, bs3;
@@ -886,20 +911,21 @@ void DxT_TrmmRLT( obj_t *alpha,
 
       obj_t L_10_1T;
       bli_obj_alias_with_trans( BLIS_TRANSPOSE, L_10_1, L_10_1T);
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
 			     &L_10_1T, &packed_B_pan );
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var2_par( &BLIS_ONE, &L_10_1T, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &L_10_1T, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
       dimLen3 = bli_obj_length_after_trans( X_1 );
       idx3 = 0;
-      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1, gemm_mr));
+      th_shift_start_end(&idx3, &dimLen3, L2SubAllL2Comm, bli_blksz_for_obj( &X_1, gemm_mr));
       for ( ; idx3 < dimLen3; idx3 += bs3 ) {
 	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1, gemm_mc );
 	dim_t idx4, dimLen4, bs4;
@@ -910,16 +936,17 @@ void DxT_TrmmRLT( obj_t *alpha,
 	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1, &X_1_1 );
 	//------------------------------------//
 
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
 			       &X_0_1_1, &packed_A_blk );
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_0_1_1, &packed_A_blk, L2Comm );
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_0_1_1, &packed_A_blk, L2SubAllL2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_1, (gemm_t*)NULL, L1Comm );
 
@@ -951,8 +978,6 @@ void DxT_TrmmRUN( obj_t *alpha,
 
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *X );
-  if (th_group_id( ProcComm ) != 0)
-    dimLen1 = 0;
   for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
     bs1 = bli_determine_blocksize_b( idx1, dimLen1, X, gemm_nc );
     dim_t idx2, dimLen2, bs2;
@@ -968,8 +993,6 @@ void DxT_TrmmRUN( obj_t *alpha,
     //------------------------------------//
 
     dimLen2 = bli_obj_width_after_trans( X_1 );
-    if (th_group_id( ProcComm ) != 0)
-      dimLen2 = 0;
     for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
       bs2 = bli_determine_blocksize_b( idx2, dimLen2, &X_1, gemm_kc );
       dim_t idx3, dimLen3, bs3;
@@ -987,21 +1010,22 @@ void DxT_TrmmRUN( obj_t *alpha,
       //****
       //------------------------------------//
 
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
 			     &U_11_12, &packed_B_pan );
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var2_par( &BLIS_ONE, &U_11_12, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
-      			dim_t idx4, dimLen4, bs4;
-			dimLen4 = bli_obj_length_after_trans( X_1_2 );
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &U_11_12, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
+      	dim_t idx4, dimLen4, bs4;
+dimLen4 = bli_obj_length_after_trans( X_1_2 );
       idx4 = 0;
-      th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &X_1_2, gemm_mr));
+      th_shift_start_end(&idx4, &dimLen4, L2SubAllL2Comm, bli_blksz_for_obj( &X_1_2, gemm_mr));
       for ( ; idx4 < dimLen4; idx4 += bs4 ) {
 	bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_2, gemm_mc );
 	dim_t idx5, dimLen5, bs5;
@@ -1012,16 +1036,17 @@ void DxT_TrmmRUN( obj_t *alpha,
 	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_2, &X_1_2_1 );
 	//------------------------------------//
 
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
 			       &X_1_1_1, &packed_A_blk );
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2SubAllL2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_2_1, (gemm_t*)NULL, L1Comm );
 
@@ -1038,38 +1063,41 @@ void DxT_TrmmRUN( obj_t *alpha,
 
       bli_obj_set_struc( BLIS_TRIANGULAR, U_11_11 );
       bli_obj_set_uplo( BLIS_UPPER, U_11_11 );
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_nr, gemm_nr, 
 			     &U_11_11, &packed_B_pan );
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var3( &BLIS_ONE, &U_11_11, &packed_B_pan );
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var3_par( &BLIS_ONE, &U_11_11, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
       dimLen4 = bli_obj_length_after_trans( X_1_1 );
-      if (th_group_id( L2Comm ) != 0)
-	dimLen4 = 0;
-      for ( idx4 = 0; idx4 < dimLen4; idx4 += bs4 ) {
+      idx4 = 0;
+      th_shift_start_end(&idx4, &dimLen4, L2SubAllL2Comm, bli_blksz_for_obj( &X_1_1, gemm_mr));
+      for ( ; idx4 < dimLen4; idx4 += bs4 ) {
 	bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_1, gemm_mc );
 	dim_t idx5, dimLen5, bs5;
 	//****
 	obj_t X_1_1_1;
 	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_1, &X_1_1_1 );
-
+	
 	//------------------------------------//
 
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_nr, 
 			       &X_1_1_1, &packed_A_blk );
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2SubAllL2Comm );
 	bli_trmm_ru_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 				  &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
 
@@ -1087,8 +1115,6 @@ void DxT_TrmmRUN( obj_t *alpha,
       //****
     }
     dimLen2 = bli_obj_width_after_trans( X_0 );
-    if (th_group_id( ProcComm ) != 0)
-      dimLen2 = 0;
     for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
       bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_0, gemm_kc );
       dim_t idx3, dimLen3, bs3;
@@ -1099,20 +1125,21 @@ void DxT_TrmmRUN( obj_t *alpha,
       bli_acquire_mpart_t2b( BLIS_SUBPART1, idx2, bs2, &U_01, &U_01_1 );
       //------------------------------------//
 
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
 			     &U_01_1, &packed_B_pan );
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var2_par( &BLIS_ONE, &U_01_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &U_01_1, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
       dimLen3 = bli_obj_length_after_trans( X_1 );
       idx3 = 0;
-      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1, gemm_mr));
+      th_shift_start_end(&idx3, &dimLen3, L2SubAllL2Comm, bli_blksz_for_obj( &X_1, gemm_mr));
       for ( ; idx3 < dimLen3; idx3 += bs3 ) {
 	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1, gemm_mc );
 	dim_t idx4, dimLen4, bs4;
@@ -1123,16 +1150,17 @@ void DxT_TrmmRUN( obj_t *alpha,
 	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1, &X_1_1 );
 	//------------------------------------//
 
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
 			       &X_0_1_1, &packed_A_blk );
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_0_1_1, &packed_A_blk, L2Comm );
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_0_1_1, &packed_A_blk, L2SubAllL2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_1, (gemm_t*)NULL, L1Comm );
 
@@ -1152,6 +1180,7 @@ void DxT_TrmmRUN( obj_t *alpha,
   }
 
 
+
   FUNCTIONEND
 }
 
@@ -1165,8 +1194,6 @@ void DxT_TrmmRUT( obj_t *alpha,
 
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *X );
-  if (th_group_id( ProcComm ) != 0)
-    dimLen1 = 0;
   for ( idx1 = 0; idx1 < dimLen1; idx1 += bs1 ) {
     bs1 = bli_determine_blocksize_f( idx1, dimLen1, X, gemm_nc );
     dim_t idx2, dimLen2, bs2;
@@ -1182,8 +1209,6 @@ void DxT_TrmmRUT( obj_t *alpha,
     //------------------------------------//
 
     dimLen2 = bli_obj_width_after_trans( X_1 );
-    if (th_group_id( ProcComm ) != 0)
-      dimLen2 = 0;
     for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
       bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_1, gemm_kc );
       dim_t idx3, dimLen3, bs3;
@@ -1205,21 +1230,22 @@ void DxT_TrmmRUT( obj_t *alpha,
       //****
       //------------------------------------//
 
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
 			     &U_11_01T, &packed_B_pan );
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var2_par( &BLIS_ONE, &U_11_01T, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
-      			dim_t idx4, dimLen4, bs4;
-dimLen4 = bli_obj_length_after_trans( X_1_0 );
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &U_11_01T, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
+	dim_t idx4, dimLen4, bs4;
+      dimLen4 = bli_obj_length_after_trans( X_1_0 );
       idx4 = 0;
-      th_shift_start_end(&idx4, &dimLen4, L2Comm, bli_blksz_for_obj( &X_1_0, gemm_mr));
+      th_shift_start_end(&idx4, &dimLen4, L2SubAllL2Comm, bli_blksz_for_obj( &X_1_0, gemm_mr));
       for ( ; idx4 < dimLen4; idx4 += bs4 ) {
 	bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_0, gemm_mc );
 	dim_t idx5, dimLen5, bs5;
@@ -1230,16 +1256,17 @@ dimLen4 = bli_obj_length_after_trans( X_1_0 );
 	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_0, &X_1_0_1 );
 	//------------------------------------//
 
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
 			       &X_1_1_1, &packed_A_blk );
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2SubAllL2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_0_1, (gemm_t*)NULL, L1Comm );
 
@@ -1256,38 +1283,40 @@ dimLen4 = bli_obj_length_after_trans( X_1_0 );
 
       bli_obj_set_struc( BLIS_TRIANGULAR, U_11_11T );
       bli_obj_set_uplo( BLIS_UPPER, U_11_11T );
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( TRUE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_nr, gemm_nr, 
 			     &U_11_11T, &packed_B_pan );
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var3( &BLIS_ONE, &U_11_11T, &packed_B_pan );
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var3_par( &BLIS_ONE, &U_11_11T, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
       dimLen4 = bli_obj_length_after_trans( X_1_1 );
-      if (th_group_id( L2Comm ) != 0)
-	dimLen4 = 0;
-      for ( idx4 = 0; idx4 < dimLen4; idx4 += bs4 ) {
+      idx4 = 0;
+      th_shift_start_end(&idx4, &dimLen4, L2SubAllL2Comm, bli_blksz_for_obj( &X_1_1, gemm_mr));
+      for ( ; idx4 < dimLen4; idx4 += bs4 ) {
 	bs4 = bli_determine_blocksize_f( idx4, dimLen4, &X_1_1, gemm_mc );
 	dim_t idx5, dimLen5, bs5;
 	//****
 	obj_t X_1_1_1;
 	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx4, bs4, &X_1_1, &X_1_1_1 );
-
 	//------------------------------------//
 
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_nr, 
 			       &X_1_1_1, &packed_A_blk );
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2Comm );
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_1_1_1, &packed_A_blk, L2SubAllL2Comm );
 	bli_trmm_rl_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 				  &BLIS_ZERO, &X_1_1_1, (trmm_t*)NULL, L1Comm);
 
@@ -1305,8 +1334,6 @@ dimLen4 = bli_obj_length_after_trans( X_1_0 );
       //****
     }
     dimLen2 = bli_obj_width_after_trans( X_2 );
-    if (th_group_id( ProcComm ) != 0)
-      dimLen2 = 0;
     for ( idx2 = 0; idx2 < dimLen2; idx2 += bs2 ) {
       bs2 = bli_determine_blocksize_f( idx2, dimLen2, &X_2, gemm_kc );
       dim_t idx3, dimLen3, bs3;
@@ -1319,20 +1346,21 @@ dimLen4 = bli_obj_length_after_trans( X_1_0 );
 
       obj_t U_12_1T;
       bli_obj_alias_with_trans( BLIS_TRANSPOSE, U_12_1, U_12_1T);
-      th_barrier( ProcComm );
-      if (th_am_root(ProcComm)) {
+      th_barrier( AllL2Comm );
+      if (th_am_root(AllL2Comm)) {
+	alloced_B = TRUE;
 	bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS, 
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
 			     &U_12_1T, &packed_B_pan );
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
-      bli_packm_blk_var2_par( &BLIS_ONE, &U_12_1T, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      th_broadcast_without_second_barrier(AllL2Comm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      bli_packm_blk_var2_par( &BLIS_ONE, &U_12_1T, &packed_B_pan, AllL2Comm );
+      //// ***Parallelized with communicator AllL2Comm
       dimLen3 = bli_obj_length_after_trans( X_1 );
       idx3 = 0;
-      th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &X_1, gemm_mr));
+      th_shift_start_end(&idx3, &dimLen3, L2SubAllL2Comm, bli_blksz_for_obj( &X_1, gemm_mr));
       for ( ; idx3 < dimLen3; idx3 += bs3 ) {
 	bs3 = bli_determine_blocksize_f( idx3, dimLen3, &X_1, gemm_mc );
 	dim_t idx4, dimLen4, bs4;
@@ -1343,16 +1371,17 @@ dimLen4 = bli_obj_length_after_trans( X_1_0 );
 	bli_acquire_mpart_t2b( BLIS_SUBPART1, idx3, bs3, &X_1, &X_1_1 );
 	//------------------------------------//
 
-	th_barrier( L2Comm );
-	if (th_am_root(L2Comm)) {
+	th_barrier( L2SubAllL2Comm );
+	if (th_am_root(L2SubAllL2Comm)) {
+	  alloced_A = TRUE;
 	  bli_packm_init_pack( FALSE, BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS, 
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
 			       &X_2_1_1, &packed_A_blk );
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
-	bli_packm_blk_var2_par( &BLIS_ONE, &X_2_1_1, &packed_A_blk, L2Comm );
+	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	bli_packm_blk_var2_par( &BLIS_ONE, &X_2_1_1, &packed_A_blk, L2SubAllL2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_1, (gemm_t*)NULL, L1Comm );
 
@@ -1443,9 +1472,9 @@ int main( int argc, char** argv )
 
   n_repeats = 1;
 
-  p_begin = 40;
-  p_end   = 1000;
-  p_inc   = 40;
+  p_begin = 400;
+  p_end   = 600;
+  p_inc   = 100;
 
   m_input = -1;
   n_input = -1;
