@@ -1695,7 +1695,7 @@ Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
                        NOTUP, FULLUP);
   
   Node *gemm;
-  gemm = new Gemm(layer, NORMAL, trans, COEF, COEFNEGONE, FONE, type);
+  gemm = new Gemm(layer, NORMAL, trans, COEFNEGONE, COEFONE, type);
   
   if (tri == LOWER) {
     if (trans == NORMAL) {
