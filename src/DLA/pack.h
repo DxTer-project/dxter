@@ -69,6 +69,9 @@ class Pack : public DLAOp<2,1>
   virtual unsigned int NumOutputs() const {return 1;}
   inline void Parallelize(Comm comm) {m_comm=comm;}
   virtual Comm HasBarrier() const {return m_comm;}
+  virtual bool IsParallel() const {return true;}
+  virtual Comm ParallelComm() const {return m_comm;}
+  virtual bool RemoveParallelization();
 };
 
 class PackBuff : public DLAOp<1,1>
@@ -108,6 +111,9 @@ class PackBuff : public DLAOp<1,1>
   void UpdateChildrensInnerMultiple(PackSize size);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
   inline void Parallelize(Comm comm) {m_comm=comm;}
+  virtual bool IsParallel() const {return true;}
+  virtual Comm ParallelComm() const {return m_comm;}
+  virtual bool RemoveParallelization();
 };
 
 class LoopInvariantPackBuffMotion : public SingleTrans

@@ -133,6 +133,12 @@ NodeType Pack::GetType() const
   return "Pack " + PackTypeToStr(m_pack) + CommToStr(m_comm);
 }
 
+bool Pack::RemoveParallelization()
+{
+  m_comm = CORECOMM;
+  return false;
+}
+
 DistType Pack::GetDistType(unsigned int num) const
 {
   return InputDistType(1);
@@ -257,6 +263,12 @@ void PackBuff::UpdateChildrensInnerMultiple(PackSize size)
         packChild->UpdateInnerPackingMultiple(size);
     }
   }
+}
+
+bool PackBuff::RemoveParallelization()
+{
+  m_comm = CORECOMM;
+  return false;
 }
 
 void PackBuff::PrintCode(IndStream &out)
