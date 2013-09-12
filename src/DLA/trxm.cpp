@@ -589,10 +589,10 @@ void TrxmLoopExp::Apply(Poss *poss, Node *node) const
                                   trxm->m_coeff, m_toLayer,
                                   trxm->m_type);
         else {
-           loop = TrsmLoopRightVar1(connA->m_n, connA->m_num,
-				    connB->m_n, connB->m_num,
-				    trxm->m_tri, trxm->m_diag, trxm->m_trans,
-				    trxm->m_coeff, trxm->m_type, m_toLayer);
+          loop = TrsmLoopRightVar1(connA->m_n, connA->m_num,
+                                   connB->m_n, connB->m_num,
+                                   trxm->m_tri, trxm->m_diag, trxm->m_trans,
+                                   trxm->m_coeff, trxm->m_type, m_toLayer);
         }
         break;
       case(2):
@@ -1725,8 +1725,8 @@ Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
                       splitB, 1);
     }
   }
-
-
+  
+  
   Node *trmm = new Trxm(true, layer, RIGHT, tri, diag, trans, coeff, type);
   trmm->AddInputs(4,
                   splitA, 4,
@@ -1962,7 +1962,7 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
   if (layer==DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
-        loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
   
   return loop;
 }
@@ -2058,15 +2058,15 @@ void TrxmBP::Prop()
         const Sizes *ns0 = InputLocalN(0);
         const Sizes *ms1 = InputLocalM(1);
         const Sizes *ns1 = InputLocalN(1);
-	//	const Sizes *ms2 = InputLocalM(2);
-	//	const Sizes *ns2 = InputLocalN(2);
-	if (m_side == LEFT) {
-	  m_cost = GAMMA * ms0->SumProds111(*ns0,*ns1) / NumCoresInComm(m_comm);
-	}
-	else {
-	  m_cost = GAMMA * ms0->SumProds111(*ms1,*ns0) / NumCoresInComm(m_comm);
-	}
-
+        //	const Sizes *ms2 = InputLocalM(2);
+        //	const Sizes *ns2 = InputLocalN(2);
+        if (m_side == LEFT) {
+          m_cost = GAMMA * ms0->SumProds111(*ns0,*ns1) / NumCoresInComm(m_comm);
+        }
+        else {
+          m_cost = GAMMA * ms0->SumProds111(*ms1,*ns0) / NumCoresInComm(m_comm);
+        }
+        
         break;
       }
       default:
@@ -2078,7 +2078,7 @@ void TrxmBP::Prop()
 void TrxmBP::PrintCode(IndStream &out)
 {
   out.Indent();
-  if (m_invert) 
+  if (m_invert)
     *out << "bli_trsm_";
   else
     *out << "bli_trmm_";
@@ -2099,27 +2099,17 @@ void TrxmBP::PrintCode(IndStream &out)
     *out << "_par( ";
   out << m_coeff ;
   *out << ", &"
-  << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n"
-  << out.Tabs(2);
+       << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n"
+       << out.Tabs(2);
   out << m_beta;
   *out << ", &" << GetInputName(2).str() << ", (tr"
-  << (m_invert ? "s" : "m") << "m_t*)NULL";
+       << (m_invert ? "s" : "m") << "m_t*)NULL";
   if (m_comm != CORECOMM) {
 #if DOSM||DOSQM
-    if (m_comm == L2COMM) {
-      if (m_invert)
-	*out << ", L2Comm";
-      else
-	*out << ", L1Comm";
-    }
-    else if (m_comm == L2COMMSUBALLL2) {
-      if (m_invert)
-	*out << ", L2SubAllL2Comm";
-      else
-	*out << ", L1Comm";
-    }
+    if (m_invert)
+      *out << CommToStr(m_comm);
     else
-      throw;
+      *out << CommToStr(GetSubComm(m_comm));
 #endif
   }
   *out <<  ");\n";
@@ -2145,46 +2135,46 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   if (isTrsm) {
     if (isLeft) {
       if (trxm->m_trans != NORMAL && trxm->m_trans != CONJ) {
-	if (tri == UPPER) {
-	  lhsDir = PARTRIGHT;
-	  outputDir = PARTDOWN;
-	}
-	else {
-	  lhsDir = PARTLEFT;
-	  outputDir = PARTUPWARD;
-	}
+        if (tri == UPPER) {
+          lhsDir = PARTRIGHT;
+          outputDir = PARTDOWN;
+        }
+        else {
+          lhsDir = PARTLEFT;
+          outputDir = PARTUPWARD;
+        }
       }
       else {
-	if (tri == LOWER) {
-	  lhsDir = PARTDOWN;
-	  outputDir = PARTDOWN;
-	}
-	else {
-	  lhsDir = PARTUPWARD;
-	  outputDir = PARTUPWARD;
-	}
+        if (tri == LOWER) {
+          lhsDir = PARTDOWN;
+          outputDir = PARTDOWN;
+        }
+        else {
+          lhsDir = PARTUPWARD;
+          outputDir = PARTUPWARD;
+        }
       }
     }
     else {
       if (trxm->m_trans != NORMAL && trxm->m_trans != CONJ) {
-	if (tri == UPPER) {
-	  lhsDir = PARTUPWARD;
-	  outputDir = PARTUPWARD;
-	}
-	else {
-	  lhsDir = PARTDOWN;
-	  outputDir = PARTDOWN;
-	}
+        if (tri == UPPER) {
+          lhsDir = PARTUPWARD;
+          outputDir = PARTUPWARD;
+        }
+        else {
+          lhsDir = PARTDOWN;
+          outputDir = PARTDOWN;
+        }
       }
       else {
-	if (tri == LOWER) {
-	  lhsDir = PARTUPWARD;
-	  outputDir = PARTUPWARD;
-	}
-	else {
-	  lhsDir = PARTDOWN;
-	  outputDir = PARTDOWN;
-	}
+        if (tri == LOWER) {
+          lhsDir = PARTUPWARD;
+          outputDir = PARTUPWARD;
+        }
+        else {
+          lhsDir = PARTDOWN;
+          outputDir = PARTDOWN;
+        }
       }
     }
   }
@@ -2671,7 +2661,7 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
   if (transB != NORMAL) {
     bSrc = AddTranspose(transB, false, bSrc, bSrcNum, true);
     bSrcNum = 0;
-  }    
+  }
   
   PackBuff *bBuff = new PackBuff(node->Input(1)->GetName(node->InputConnNum(1)).m_name,
                                  PACKCOLPANS, PACKBPANEL, NOTTRI, NOTTRIDIAG, GEN,
@@ -2708,12 +2698,12 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
   
   aBuff->AddInput(aSrc, aSrcNum);
   aPack->AddInput(aSrc, aSrcNum);
-  aPack->AddInput(aBuff, 0);  
+  aPack->AddInput(aBuff, 0);
   
   if (transA != NORMAL)
     tri = SwapTri(tri);
   
-  TrxmBP *trbp = new TrxmBP(false, 
+  TrxmBP *trbp = new TrxmBP(false,
                             m_toLayer, trmm3->m_side, tri,
                             trmm3->m_trans != CONJ ? trmm3->m_trans : NORMAL,
                             trmm3->m_coeff, trmm3->m_beta, trmm3->m_type);
@@ -2764,7 +2754,7 @@ void TrmmAxpytoTrxm3::Apply(Poss *poss, Node *node) const
 {
   Trxm *trmm = (Trxm*)node;
   Axpy *axpy = (Axpy*)(trmm->Child(0));
-  Trmm3 *trmm3 = new Trmm3(trmm->m_layer, 
+  Trmm3 *trmm3 = new Trmm3(trmm->m_layer,
                            trmm->m_side, trmm->m_tri, trmm->m_diag,
                            trmm->m_trans, trmm->m_coeff*axpy->m_coeff, COEFONE,
                            trmm->m_type);
@@ -2799,7 +2789,7 @@ void CopyTrmmtoTrxm3::Apply(Poss *poss, Node *node) const
 {
   Trxm *trmm = (Trxm*)node;
   Copy *copy = (Copy*)(trmm->Input(1));
-  Trmm3 *trmm3 = new Trmm3(trmm->m_layer, 
+  Trmm3 *trmm3 = new Trmm3(trmm->m_layer,
                            trmm->m_side, trmm->m_tri, trmm->m_diag,
                            trmm->m_trans, trmm->m_coeff, COEFZERO,
                            trmm->m_type);

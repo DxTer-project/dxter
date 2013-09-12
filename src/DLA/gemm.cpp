@@ -440,7 +440,7 @@ void Gemm::PrintCode(IndStream &out)
       out << m_beta;
       *out << ", &" << GetInputName(2).str() << ", (gemm_t*)NULL";
       if (m_comm != CORECOMM)
-	*out << ", L1Comm";
+	*out << ", " << CommToStr(GetSubComm(m_comm));
       *out << " );\n";
     }
     else

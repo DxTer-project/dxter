@@ -633,7 +633,7 @@ void TriRK::PrintCode(IndStream &out)
     << out.Tabs(2)
 	 << "&BLIS_ONE, &" << GetInputName(2).str() << ", (herk_t*)NULL ";
     if (m_comm != CORECOMM)
-      *out << ", L1Comm ";
+      *out << ", " << CommToStr(GetSubComm(m_comm));
     *out << ");\n";
 
   }

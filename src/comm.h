@@ -40,6 +40,7 @@ enum Comm {
   PROCCOMM,    //Communicate between all cores on processor (e.g. all cores sharing the L3), L2COMM is subgroup
   L2COMM,      //Communicate between all cores sharing my L2, each core is a subgroup
   L2COMMSUBALLL2,    //Communicate between all cores sharing my L2, each core is a subgroup
+  L1COMM,
 #endif
   CORECOMM,
   BADCOMM
@@ -68,7 +69,8 @@ inline Comm GetSubComm(Comm comm)
     case(PROCCOMM):
       return L2COMM;
     case(L2COMM):
-      throw;
+      case (L2COMMSUBALLL2):
+      return L1COMM;
 #endif
     case(CORECOMM):
       throw;
