@@ -1510,7 +1510,7 @@ int main( int argc, char** argv )
 		dim_t rstride = bli_obj_row_stride( a );
 		dim_t cstride = bli_obj_col_stride( a );
 		for(unsigned int i=0;i<m;++i) {
-		  buff[i*rstride+i*cstride] = 1;
+		  buff[i*rstride+i*cstride] += m;
 		}
 		bli_randm( &c1 );
 
