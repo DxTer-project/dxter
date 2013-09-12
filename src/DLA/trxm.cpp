@@ -2106,6 +2106,7 @@ void TrxmBP::PrintCode(IndStream &out)
        << (m_invert ? "s" : "m") << "m_t*)NULL";
   if (m_comm != CORECOMM) {
 #if DOSM||DOSQM
+    *out << ", ";
     if (m_invert)
       *out << CommToStr(m_comm);
     else
