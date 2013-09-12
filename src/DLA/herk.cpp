@@ -547,6 +547,9 @@ void TriRK::Prop()
         sizes3.AddParFactor(parFactor);
       }
       m_cost = GAMMA * sizes1.SumProds111(sizes2,sizes3);
+      if (GetLayer() == S3LAYER) {
+	m_cost += AdditionalCostForBringingIntoL2(this, 0, sizes1.SumProds11(sizes2), m_comm);
+      }
     }
   }
 }

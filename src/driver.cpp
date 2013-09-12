@@ -546,7 +546,7 @@ void AddTrans()
 #endif //NUML2PERPROC>1
 
 #if NUMCORESPERL2>1
-  //Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(PROCCOMM), SMPPHASE);
+  Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(PROCCOMM), SMPPHASE);
   Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMM), SMPPHASE);
   Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(L2COMMSUBALLL2), SMPPHASE);
   Universe::AddTrans(PackBuff::GetClass(), new ParallelizeInnerNDim(ALLL2COMM), SMPPHASE);

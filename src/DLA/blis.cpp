@@ -939,3 +939,41 @@ bool FoundBarrier(const Node *node, unsigned int input, Comm comm)
   }
   return true;
 }
+
+Cost AdditionalCostForBringingIntoL2(Node *node, unsigned int num, Size numAElems, Comm comm)
+{
+#if DOSM
+  DLANode *input = (DLANode*)(node->Input(num));
+  if (input->GetNodeClass() != Pack::GetClass())
+    throw;
+  Pack *pack = (Pack*)input;
+  if (pack->m_comm != comm)
+    throw;
+#if 1
+  switch (comm) 
+    {
+    case (ALLPROCCOMM):
+    case (ALLL2COMM):
+#if NUMPROCS>1
+      return numAElems * PSIRVAL;
+#elif NUML2PERPROC>1
+      return numAElems * PSIRVAL;
+#else
+      break;
+#endif
+    case (PROCCOMM):
+#if NUML2PERPROC>1
+      return numAElems * PSIRVAL;
+#else
+      return 0;
+#endif	    
+	  case (L2COMM):
+	  case (L2COMMSUBALLL2):
+	  case (CORECOMM):
+	    return 0;
+	  default:
+	    throw;
+	  }
+#endif
+#endif
+}
