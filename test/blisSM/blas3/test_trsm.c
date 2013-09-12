@@ -595,7 +595,7 @@ void DxT_TrsmRLN( obj_t *alpha,
 	}
 	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var2_par( &BLIS_ONE, &X_2_1_1, &packed_A_blk, L2SubAllL2Comm );
-	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+	bli_gemm_ker_var2_par( &BLIS_MINUS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_1, (gemm_t*)NULL, L1Comm );
 
 	//------------------------------------//
@@ -808,7 +808,7 @@ void DxT_TrsmRLT( obj_t *alpha,
 	}
 	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var2_par( &BLIS_ONE, &X_0_1_1, &packed_A_blk, L2SubAllL2Comm );
-	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+	bli_gemm_ker_var2_par( &BLIS_MINUS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_1, (gemm_t*)NULL, L1Comm );
 
 	//------------------------------------//
@@ -1023,7 +1023,7 @@ void DxT_TrsmRUN( obj_t *alpha,
 	}
 	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var2_par( &BLIS_ONE, &X_0_1_1, &packed_A_blk, L2SubAllL2Comm );
-	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+	bli_gemm_ker_var2_par( &BLIS_MINUS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_1, (gemm_t*)NULL, L1Comm );
 
 	//------------------------------------//
@@ -1237,7 +1237,7 @@ void DxT_TrsmRUT( obj_t *alpha,
 	}
 	th_broadcast_without_second_barrier(L2SubAllL2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	bli_packm_blk_var2_par( &BLIS_ONE, &X_2_1_1, &packed_A_blk, L2SubAllL2Comm );
-	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
+	bli_gemm_ker_var2_par( &BLIS_MINUS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &X_1_1, (gemm_t*)NULL, L1Comm );
 
 	//------------------------------------//
@@ -1458,9 +1458,9 @@ int main( int argc, char** argv )
   n_repeats = 3;
 
 #if 1
-  p_begin = 400;
-  p_end   = 600;
-  p_inc   = 100;
+  p_begin = 1000;
+  p_end   = 10000;
+  p_inc   = 1000;
 #else
   p_begin = 512;
   p_end   = 6144;
