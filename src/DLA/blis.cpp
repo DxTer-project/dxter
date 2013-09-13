@@ -722,8 +722,9 @@ void ParallelizeInnerNDim::Apply(Poss *poss, Node *node) const
   NodeConnVecConstIter iter = pack->m_children.begin();
   for(; iter != pack->m_children.end(); ++iter) {
     DLANode *child = (DLANode*)((*iter)->m_n);
-    if (child->IsBLISParallelizable())
+    if (child->IsBLISParallelizable()) {
       child->Parallelize(m_comm);
+    }
   }
 }
 
@@ -824,11 +825,11 @@ bool LegalParallelizationNestingUp(const Node *node, Comm comm)
     if (pset->IsLoop()) {
       Loop *loop = (Loop*)pset;
       if (loop->IsParallel()) {
-	if (!CommAllowedWithin(loop->m_comm, comm))
-	  return false;
+        if (!CommAllowedWithin(loop->m_comm, comm))
+          return false;
 #if DOSM
-	else if (!foundProcComm)
-	  foundProcComm = loop->m_comm == PROCCOMM;
+        else if (!foundProcComm)
+          foundProcComm = loop->m_comm == PROCCOMM;
 #endif
       }
     }
@@ -858,10 +859,17 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
         if (!CommAllowedWithin(comm,((Loop*)pset)->m_comm))
           foundBad = true;
       }
-      else if (!pset->IsCritSect()) {
+      if (!pset->IsCritSect()) {
         if (!LegalParallelizationNestingDown(pset, comm))
           foundBad = true;
       }
+    }
+    NodeVecConstIter iter3 = poss->m_possNodes.begin();
+    for (; !foundBad && iter3 != poss->m_possNodes.end(); ++iter3) {
+      const Node *node = *iter3;
+      if (node->IsParallel())
+        if (!CommAllowedWithin(comm, node->ParallelComm()))
+          foundBad = true;
     }
     if (!foundBad)
       foundGood = true;
@@ -869,46 +877,46 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
   return foundGood;
 }
 /*
-bool IncreaseParallelizedLoop::CanApply(const Poss *poss, const Node *node) const
-{
-  if (node->GetNodeClass() != Split::GetClass())
-    throw;
-  const Split *split = (Split*)node;
-  if (!split->IsPossTunnel(SETTUNIN))
-    return false;
-  const Loop *loop = split->GetMyLoop();
-  if (loop->m_comm == CORECOMM)
-    return false;
-  Comm comm = node->WithinParallelism();
-  if (comm == CORECOMM)
-#if NUMPROCS > 1
-    return loop->m_comm != ALLPROCCOMM;
-#elif NUML2PERPROC > 1
-  return loop->m_comm != PROCCOMM;
-#else
-  throw;
-#endif
-  return !IsImmediateSubComm(comm, loop->m_comm);
-}
-
-void IncreaseParallelizedLoop::Apply(Poss *poss, Node *node) const
-{
-  Split *split = (Split*)node;
-  Loop *loop = split->GetMyLoop();
-  Comm comm = node->WithinParallelism();
-  if (comm == CORECOMM)
-#if NUMPROCS > 1
-    {
-      loop->m_comm = ALLL2COMM;
-      loop->ReplaceAllComms(L2COMM,L2COMMSUBALLL2);
-    }
-#else
-  throw;
-#endif
-  else
-    loop->m_comm = GetSubComm(comm);
-}
-*/
+ bool IncreaseParallelizedLoop::CanApply(const Poss *poss, const Node *node) const
+ {
+ if (node->GetNodeClass() != Split::GetClass())
+ throw;
+ const Split *split = (Split*)node;
+ if (!split->IsPossTunnel(SETTUNIN))
+ return false;
+ const Loop *loop = split->GetMyLoop();
+ if (loop->m_comm == CORECOMM)
+ return false;
+ Comm comm = node->WithinParallelism();
+ if (comm == CORECOMM)
+ #if NUMPROCS > 1
+ return loop->m_comm != ALLPROCCOMM;
+ #elif NUML2PERPROC > 1
+ return loop->m_comm != PROCCOMM;
+ #else
+ throw;
+ #endif
+ return !IsImmediateSubComm(comm, loop->m_comm);
+ }
+ 
+ void IncreaseParallelizedLoop::Apply(Poss *poss, Node *node) const
+ {
+ Split *split = (Split*)node;
+ Loop *loop = split->GetMyLoop();
+ Comm comm = node->WithinParallelism();
+ if (comm == CORECOMM)
+ #if NUMPROCS > 1
+ {
+ loop->m_comm = ALLL2COMM;
+ loop->ReplaceAllComms(L2COMM,L2COMMSUBALLL2);
+ }
+ #else
+ throw;
+ #endif
+ else
+ loop->m_comm = GetSubComm(comm);
+ }
+ */
 
 bool FoundBarrier(const Node *node, unsigned int input, Comm comm)
 {
@@ -925,9 +933,47 @@ bool FoundBarrier(const Node *node, unsigned int input, Comm comm)
     else {
       Comm bar = node->HasBarrier();
       if (bar != CORECOMM &&
-	  !CommAllowedWithin(bar, comm))
-	return false;
+          !CommAllowedWithin(bar, comm))
+        return false;
     }
   }
   return true;
+}
+
+Cost AdditionalCostForBringingIntoL2(Node *node, unsigned int num, Size numAElems, Comm comm)
+{
+#if DOSM
+  DLANode *input = (DLANode*)(node->Input(num));
+  if (input->GetNodeClass() != Pack::GetClass())
+    throw;
+  Pack *pack = (Pack*)input;
+  if (pack->m_comm != comm)
+    throw;
+#if 1
+  switch (comm) 
+    {
+    case (ALLPROCCOMM):
+    case (ALLL2COMM):
+#if NUMPROCS>1
+      return numAElems * PSIRVAL;
+#elif NUML2PERPROC>1
+      return numAElems * PSIRVAL;
+#else
+      break;
+#endif
+    case (PROCCOMM):
+#if NUML2PERPROC>1
+      return numAElems * PSIRVAL;
+#else
+      return 0;
+#endif	    
+	  case (L2COMM):
+	  case (L2COMMSUBALLL2):
+	  case (CORECOMM):
+	    return 0;
+	  default:
+	    throw;
+	  }
+#endif
+#endif
 }

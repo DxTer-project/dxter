@@ -597,7 +597,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
           if (outerComm == CORECOMM)
             *out << "if (th_global_thread_id() != 0)\n";
           else
-            *out << "if (th_thread_id( " << CommToStr(outerComm) << " ) != 0)\n";
+            *out << "if (th_thread_id( " << CommToStr(GetSubComm(outerComm)) << " ) != 0)\n";
         }
         else if (outerComm != CORECOMM && innerComm != GetSubComm(GetSubComm(outerComm))) {
           outerComm = split->WithinParallelism();

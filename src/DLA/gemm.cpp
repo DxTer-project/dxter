@@ -235,6 +235,15 @@ void Gemm::Prop()
         if (size2->NumSizes() != size3->NumSizes())
           throw;
         m_cost = GetCost(S3LAYER, size1, size2, size3) / NumCoresInComm(m_comm);
+	if (GetLayer() == S3LAYER && NumCoresInComm(m_comm) > 1) {
+	  //BAM Should add cost for B panel, too.
+	  Sizes a1 = *size1;
+	  Sizes a2 = *size2;
+	  a1.AddParFactor(NumCoresInComm(m_comm));
+	  a2.AddParFactor(NumCoresInComm(m_comm));
+	  Size numAElems = a1.SumProds11(a2);
+	  m_cost += AdditionalCostForBringingIntoL2(this, 0, numAElems, m_comm);
+	}
     }
   }
 }
@@ -440,7 +449,7 @@ void Gemm::PrintCode(IndStream &out)
       out << m_beta;
       *out << ", &" << GetInputName(2).str() << ", (gemm_t*)NULL";
       if (m_comm != CORECOMM)
-	*out << ", L1Comm";
+	*out << ", " << CommToStr(GetSubComm(m_comm));
       *out << " );\n";
     }
     else

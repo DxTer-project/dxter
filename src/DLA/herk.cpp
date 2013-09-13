@@ -547,6 +547,9 @@ void TriRK::Prop()
         sizes3.AddParFactor(parFactor);
       }
       m_cost = GAMMA * sizes1.SumProds111(sizes2,sizes3);
+      if (GetLayer() == S3LAYER) {
+	m_cost += AdditionalCostForBringingIntoL2(this, 0, sizes1.SumProds11(sizes2), m_comm);
+      }
     }
   }
 }
@@ -633,7 +636,7 @@ void TriRK::PrintCode(IndStream &out)
     << out.Tabs(2)
 	 << "&BLIS_ONE, &" << GetInputName(2).str() << ", (herk_t*)NULL ";
     if (m_comm != CORECOMM)
-      *out << ", L1Comm ";
+      *out << ", " << CommToStr(GetSubComm(m_comm));
     *out << ");\n";
 
   }
