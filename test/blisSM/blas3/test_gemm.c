@@ -18,7 +18,6 @@ void DxT_GemmNN( obj_t *alpha,
 		 obj_t *C )
 {
   FUNCTIONSTART
-
   bli_scalm(beta, C);
 
   dim_t idx1, dimLen1, bs1;
@@ -53,11 +52,17 @@ void DxT_GemmNN( obj_t *alpha,
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
-			     &B_1_1, &packed_B_pan );
+			     &B_1_1, &packed_B_pan_local_alloc );
+	th_broadcast_without_second_barrier(ProcComm, 0,
+					    (void*)(&packed_B_pan_local_alloc),
+					    (void*)(&packed_B_pan), sizeof(packed_B_pan));
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      else {
+	th_broadcast_without_second_barrier(ProcComm, 0, (void*)NULL,
+					    (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      }
       bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_B_pan, ProcComm );
-      //// ***Parallelized with communicator ProcComm; need correct output code
+      //// ***Parallelized with communicator ProcComm
       dimLen3 = bli_obj_length_after_trans( C_1 );
       idx3 = 0;
       th_shift_start_end(&idx3, &dimLen3, L2Comm, bli_blksz_for_obj( &C_1, gemm_mr));
@@ -78,9 +83,15 @@ void DxT_GemmNN( obj_t *alpha,
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
-			       &A_1_1, &packed_A_blk );
+			       &A_1_1, &packed_A_blk_local_alloc );
+	  th_broadcast_without_second_barrier(L2Comm, 0,
+					      (void*)(&packed_A_blk_local_alloc),
+					      (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	else {
+	  th_broadcast_without_second_barrier(L2Comm, 0, (void*)NULL,
+					      (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	}
 	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_A_blk, L2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L1Comm );
@@ -100,6 +111,7 @@ void DxT_GemmNN( obj_t *alpha,
     //****
   }
 
+
   FUNCTIONEND
 }
 
@@ -110,7 +122,6 @@ void DxT_GemmTN( obj_t *alpha,
 	  obj_t *C )
 {
   FUNCTIONSTART
-
   bli_scalm(beta, C);
 
   dim_t idx1, dimLen1, bs1;
@@ -145,9 +156,15 @@ void DxT_GemmTN( obj_t *alpha,
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
-			     &B_1_1, &packed_B_pan );
+			     &B_1_1, &packed_B_pan_local_alloc );
+	th_broadcast_without_second_barrier(ProcComm, 0,
+					    (void*)(&packed_B_pan_local_alloc),
+					    (void*)(&packed_B_pan), sizeof(packed_B_pan));
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      else {
+	th_broadcast_without_second_barrier(ProcComm, 0, (void*)NULL,
+					    (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      }
       bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1, &packed_B_pan, ProcComm );
       //// ***Parallelized with communicator ProcComm
       dimLen3 = bli_obj_length_after_trans( C_1 );
@@ -172,9 +189,15 @@ void DxT_GemmTN( obj_t *alpha,
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
-			       &A_1_1T, &packed_A_blk );
+			       &A_1_1T, &packed_A_blk_local_alloc );
+	  th_broadcast_without_second_barrier(L2Comm, 0,
+					      (void*)(&packed_A_blk_local_alloc),
+					      (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	else {
+	  th_broadcast_without_second_barrier(L2Comm, 0, (void*)NULL,
+					      (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	}
 	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1T, &packed_A_blk, L2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L1Comm );
@@ -194,7 +217,6 @@ void DxT_GemmTN( obj_t *alpha,
     //****
   }
 
-  
   FUNCTIONEND
 }
 
@@ -205,8 +227,8 @@ void DxT_GemmNT( obj_t *alpha,
 	  obj_t *C )
 {
   FUNCTIONSTART
-
   bli_scalm(beta, C);
+
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *C );
   idx1 = 0;
@@ -241,9 +263,15 @@ void DxT_GemmNT( obj_t *alpha,
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
-			     &B_1_1T, &packed_B_pan );
+			     &B_1_1T, &packed_B_pan_local_alloc );
+	th_broadcast_without_second_barrier(ProcComm, 0,
+					    (void*)(&packed_B_pan_local_alloc),
+					    (void*)(&packed_B_pan), sizeof(packed_B_pan));
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      else {
+	th_broadcast_without_second_barrier(ProcComm, 0, (void*)NULL,
+					    (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      }
       bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1T, &packed_B_pan, ProcComm );
       //// ***Parallelized with communicator ProcComm
       dimLen3 = bli_obj_length_after_trans( C_1 );
@@ -266,9 +294,15 @@ void DxT_GemmNT( obj_t *alpha,
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
-			       &A_1_1, &packed_A_blk );
+			       &A_1_1, &packed_A_blk_local_alloc );
+	  th_broadcast_without_second_barrier(L2Comm, 0,
+					      (void*)(&packed_A_blk_local_alloc),
+					      (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	else {
+	  th_broadcast_without_second_barrier(L2Comm, 0, (void*)NULL,
+					      (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	}
 	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1, &packed_A_blk, L2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L1Comm );
@@ -299,7 +333,6 @@ void DxT_GemmTT( obj_t *alpha,
 	  obj_t *C )
 {
   FUNCTIONSTART
-
   bli_scalm(beta, C);
 
   dim_t idx1, dimLen1, bs1;
@@ -336,9 +369,15 @@ void DxT_GemmTT( obj_t *alpha,
 			     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			     BLIS_BUFFER_FOR_B_PANEL,
 			     gemm_kr, gemm_nr, 
-			     &B_1_1T, &packed_B_pan );
+			     &B_1_1T, &packed_B_pan_local_alloc );
+	th_broadcast_without_second_barrier(ProcComm, 0,
+					    (void*)(&packed_B_pan_local_alloc),
+					    (void*)(&packed_B_pan), sizeof(packed_B_pan));
       }
-      th_broadcast_without_second_barrier(ProcComm, 0, (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      else {
+	th_broadcast_without_second_barrier(ProcComm, 0, (void*)NULL,
+					    (void*)(&packed_B_pan), sizeof(packed_B_pan));
+      }
       bli_packm_blk_var2_par( &BLIS_ONE, &B_1_1T, &packed_B_pan, ProcComm );
       //// ***Parallelized with communicator ProcComm
       dimLen3 = bli_obj_length_after_trans( C_1 );
@@ -363,9 +402,15 @@ void DxT_GemmTT( obj_t *alpha,
 			       BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER, 
 			       BLIS_BUFFER_FOR_A_BLOCK,
 			       gemm_mr, gemm_kr, 
-			       &A_1_1T, &packed_A_blk );
+			       &A_1_1T, &packed_A_blk_local_alloc );
+	  th_broadcast_without_second_barrier(L2Comm, 0,
+					      (void*)(&packed_A_blk_local_alloc),
+					      (void*)(&packed_A_blk), sizeof(packed_A_blk));
 	}
-	th_broadcast_without_second_barrier(L2Comm, 0, (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	else {
+	  th_broadcast_without_second_barrier(L2Comm, 0, (void*)NULL,
+					      (void*)(&packed_A_blk), sizeof(packed_A_blk));
+	}
 	bli_packm_blk_var2_par( &BLIS_ONE, &A_1_1T, &packed_A_blk, L2Comm );
 	bli_gemm_ker_var2_par( &BLIS_ONE, &packed_A_blk, &packed_B_pan, 
 			       &BLIS_ONE, &C_1_1, (gemm_t*)NULL, L1Comm );

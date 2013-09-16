@@ -80,10 +80,12 @@ void SetupComms(thread_comm_t *global_comm, thread_comm_t *proc_comms,
 
 
 #define FUNCTIONSTART \
+  obj_t packed_A_blk_local_alloc;\
+  obj_t packed_B_pan_local_alloc;\
   obj_t packed_A_blk;\
   obj_t packed_B_pan;\
-  bli_obj_init_pack( &packed_A_blk );\
-  bli_obj_init_pack( &packed_B_pan );\
+  bli_obj_init_pack( &packed_A_blk_local_alloc );\
+  bli_obj_init_pack( &packed_B_pan_local_alloc );\
   bool_t alloced_A = FALSE;\
   bool_t alloced_B = FALSE;\
   thread_comm_t *GlobalComm;\
@@ -102,9 +104,9 @@ void SetupComms(thread_comm_t *global_comm, thread_comm_t *proc_comms,
 #define FUNCTIONEND \
   th_barrier(GlobalComm);\
   if  (alloced_A)\
-    bli_obj_release_pack( &packed_A_blk );\
+    bli_obj_release_pack( &packed_A_blk_local_alloc );\
   if (alloced_B)\
-    bli_obj_release_pack( &packed_B_pan );\
+    bli_obj_release_pack( &packed_B_pan_local_alloc );\
   if (th_am_root(L1Comm)) {\
     th_release_comm(L1Comm);\
   }\

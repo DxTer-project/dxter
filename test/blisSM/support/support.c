@@ -23,7 +23,6 @@ rank_t th_global_thread_id()
     return omp_get_thread_num();
 }
 
-//I have armies of threads and need officers to organize them
 bool_t th_am_root( thread_comm_t *comm )
 {
     return th_thread_id( comm ) == 0;
@@ -54,22 +53,23 @@ void    th_release_comm( thread_comm_t *comm )
     th_destroy_lock( &comm->barrier_lock );
 }
 
-void   th_broadcast( thread_comm_t *comm, rank_t root, void *to_sendRecv, unsigned int size )
+void   th_broadcast( thread_comm_t *comm, rank_t root, void *send, void *recv, unsigned int size )
 {
   if (comm == NULL) return;
-  th_broadcast_without_second_barrier(comm, root, to_sendRecv, size);
+  th_broadcast_without_second_barrier(comm, root, send, recv, size);
   th_barrier( comm );
 }
 
-void th_broadcast_without_second_barrier( thread_comm_t *comm, rank_t root, void *to_sendRecv, unsigned int size )
+void th_broadcast_without_second_barrier( thread_comm_t *comm, rank_t root, 
+					  void *send, void *recv, unsigned int size )
 {   
   if( comm == NULL ) return;
     bool_t isRoot = th_thread_id( comm ) == root;
-    if( isRoot )
-        comm->sent_object = to_sendRecv;
+    if( isRoot ) {
+        comm->sent_object = send;
+    }
     th_barrier( comm );
-    if (!isRoot)
-      memcpy( to_sendRecv, comm->sent_object, size );
+    memcpy( recv, comm->sent_object, size );
 }
 
 void th_init_lock( lock_t *lock )

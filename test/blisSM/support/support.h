@@ -28,9 +28,9 @@ void    th_setup_comm( thread_comm_t *comm,
 		       thread_count_t threads_in_group, 
 		       thread_count_t multiplicative_factor_above );
 void    th_release_comm( thread_comm_t *comm );
-void    th_broadcast( thread_comm_t *comm, rank_t root, void *to_sendRecv, unsigned int size );
+void    th_broadcast( thread_comm_t *comm, rank_t root, void *send, void *recv, unsigned int size );
 void    th_broadcast_without_second_barrier( thread_comm_t *comm, rank_t root, 
-					     void *to_sendRecv, unsigned int size );
+					     void *send, void *recv, unsigned int size );
 void    th_barrier( thread_comm_t *comm );
 void    th_set_lock( lock_t *lock );
 void    th_unset_lock( lock_t *lock );
