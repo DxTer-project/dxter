@@ -385,14 +385,31 @@ void PackBuff::PrintCode(IndStream &out)
   *out << endl;
   out.Indent(indentOffset+2);
   *out << "&" << Input(0)->GetName(InputConnNum(0)).str() << ", &"
-  << name << " );\n";
-
-  if (comm != CORECOMM) {
+       << name;
+  if (comm == CORECOMM) {
+    *out << " );\n";
+  }
+  else {
+    *out << "_local_alloc );\n";
+    out.Indent(indentOffset);
+    *out << "th_broadcast_without_second_barrier(" << CommToStr(comm)
+	 << ", 0,\n";
+    out.Indent(indentOffset+2);
+    *out << "(void*)(&" << name << "_local_alloc),\n";
+    out.Indent(indentOffset+2);
+    *out << "(void*)(&" 
+	 << name << "), sizeof(" << name << "));\n";
     out.Indent();
     *out << "}\n";
     out.Indent();
+    *out << "else {\n";
+    out.Indent(indentOffset);
     *out << "th_broadcast_without_second_barrier(" << CommToStr(comm)
-	 << ", 0, (void*)(&" << name << "), sizeof(" << name << "));\n";
+	 << ", 0, (void*)NULL,\n";
+    out.Indent(indentOffset+2);
+    *out << "(void*)(&" << name << "), sizeof(" << name << "));\n";
+    out.Indent();
+    *out << "}\n";
   }
 }
 
