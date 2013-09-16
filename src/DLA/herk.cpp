@@ -537,18 +537,16 @@ void TriRK::Prop()
         throw;
     }
     else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
-      Sizes sizes1 = *InputLocalM(0);
-      Sizes sizes2 = *InputLocalN(0);
-      Sizes sizes3 = *InputLocalN(1);
+      const Sizes *sizes1 = InputLocalM(0);
+      const Sizes *sizes2 = InputLocalN(0);
+      const Sizes *sizes3 = InputLocalN(1);
       unsigned int parFactor = NumCoresInComm(m_comm);
-      if (parFactor != 1) {
-        sizes1.AddParFactor(parFactor);
-        sizes2.AddParFactor(parFactor);
-        sizes3.AddParFactor(parFactor);
-      }
-      m_cost = GAMMA * sizes1.SumProds111(sizes2,sizes3);
+      m_cost = GAMMA * sizes1->SumProds111(*sizes2,*sizes3) / parFactor;
       if (GetLayer() == S3LAYER) {
-	m_cost += AdditionalCostForBringingIntoL2(this, 0, sizes1.SumProds11(sizes2), m_comm);
+	//BAM, really, only a portion of A might be brough into the L2 since the computation
+	// kernel is parallelized in some way.  It's not just by the number of cores in the
+	// comm since, they're split over the m and n dimensions
+	m_cost += AdditionalCostForBringingIntoL2(this, 0, sizes1->SumProds11(*sizes2), m_comm);
       }
     }
   }

@@ -2056,34 +2056,15 @@ void TrxmBP::Prop()
       {
         const Sizes *ms0 = InputLocalM(0);
         const Sizes *ns0 = InputLocalN(0);
-        const Sizes *ms1 = InputLocalM(1);
+	//        const Sizes *ms1 = InputLocalM(1);
         const Sizes *ns1 = InputLocalN(1);
         //	const Sizes *ms2 = InputLocalM(2);
         //	const Sizes *ns2 = InputLocalN(2);
-        if (m_side == LEFT) {
-          m_cost = GAMMA * ms0->SumProds111(*ns0,*ns1) / NumCoresInComm(m_comm);
-	  if (NumCoresInComm(m_comm) > 1) {
-	    Sizes a1 = *ms0;
-	    Sizes a2 = *ns0;
-	    a1.AddParFactor(NumCoresInComm(m_comm));
-	    a2.AddParFactor(NumCoresInComm(m_comm));
-	    Size numAElems = a1.SumProds11(a2);
+	m_cost = GAMMA * ms0->SumProds111(*ns0,*ns1) / NumCoresInComm(m_comm);
+	if (NumCoresInComm(m_comm) > 1) {
+	    Size numAElems = ms0->SumProds11(*ns0);
 	    m_cost += AdditionalCostForBringingIntoL2(this, 0, numAElems, m_comm);
-	  }
         }
-        else {
-          m_cost = GAMMA * ms0->SumProds111(*ms1,*ns0) / NumCoresInComm(m_comm);
-          if (NumCoresInComm(m_comm) > 1) {
-            Sizes a1 = *ms1;
-	    Sizes a2 = *ns1;
-            a1.AddParFactor(NumCoresInComm(m_comm));
-            a2.AddParFactor(NumCoresInComm(m_comm));
-            Size numAElems = a1.SumProds11(a2);
-            m_cost += AdditionalCostForBringingIntoL2(this, 1, numAElems, m_comm);
-          }
-        }
-	
-        
         break;
       }
       default:
