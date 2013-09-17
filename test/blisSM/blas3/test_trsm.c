@@ -1665,8 +1665,8 @@ int main( int argc, char** argv )
 
 #if 1
   p_begin = 1000;
-  p_end   = 1000;
-  p_inc   = 40;
+  p_end   = 10000;
+  p_inc   = 1000;;
 #else
   p_begin = 512;
   p_end   = 6144;

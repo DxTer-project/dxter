@@ -1696,9 +1696,9 @@ int main( int argc, char** argv )
 
   n_repeats = 1;
 
-  p_begin = 400;
-  p_end   = 600;
-  p_inc   = 100;
+  p_begin = 1000;
+  p_end   = 10000;
+  p_inc   = 1000;
 
   m_input = -1;
   n_input = -1;
