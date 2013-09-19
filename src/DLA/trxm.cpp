@@ -2205,8 +2205,8 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   splitOutput->AddInput(trxm->Input(1), trxm->InputConnNum(1));
   splitOutput->SetUpStats(FULLUP, FULLUP,
                           NOTUP, NOTUP);
-  if (!isTrsm)
-    splitOutput->SetIndepIters();
+  if (!isTrsm || !isLeft)
+  splitOutput->SetIndepIters();
   //else
   //Not independent
   
@@ -2259,7 +2259,7 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   }
   else
     packTun->SetAllStats(FULLUP);
-  if (!isTrsm)
+  if (!isTrsm || !isLeft)
     packTun->SetIndepIters();
   
   Node *lhsSrc = splitLHS;
