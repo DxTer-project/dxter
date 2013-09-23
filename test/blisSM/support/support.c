@@ -135,6 +135,7 @@ void th_shift_start_end_non_linear(dim_t *start, dim_t *end, bool_t forward, thr
       rank_t currGroup = comm->multiplicative_factor_above - 1;
       dim_t len = *end - *start;
       dim_t num = len * len / comm->multiplicative_factor_above;
+      len = 0;
       while (TRUE) {
 	dim_t width = sqrt(*start * *start + num) - *start;
 	//	dim_t n_pt = len / comm->multiplicative_factor_above;
@@ -156,6 +157,7 @@ void th_shift_start_end_non_linear(dim_t *start, dim_t *end, bool_t forward, thr
 	}
 	else {
 	  *end -= n_pt;
+	  len += n_pt;
 	  //	  *start = *start + n_pt;
 	  --currGroup;
 	}
