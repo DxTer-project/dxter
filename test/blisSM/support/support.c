@@ -132,34 +132,19 @@ void th_shift_start_end_non_linear(dim_t *start, dim_t *end, bool_t forward, thr
   if (comm->multiplicative_factor_above > 1) {
     if (forward) { // more work in the later iterations
       rank_t group = th_group_id(comm);
-      rank_t currGroup = comm->multiplicative_factor_above - 1;
+      rank_t currGroup = 0;//comm->multiplicative_factor_above - 1;
       dim_t len = *end - *start;
       dim_t num = len * len / comm->multiplicative_factor_above;
-      //      len = 0;
       while (TRUE) {
 	dim_t width = sqrt(*start * *start + num) - *start;
-	//	dim_t n_pt = len / comm->multiplicative_factor_above;
-	//      n_pt = (n_pt * comm->multiplicative_factor_above < len) ? n_pt + 1 : n_pt;
 	dim_t n_pt = (width % round_factor == 0) ? width : width + round_factor - (width % round_factor);
-	#pragma omp critical
-	{
-	  printf("%u : start %u, end %u, n_pt %u, width %u\n", th_global_thread_id(),
-		 *start, *end, n_pt, width);
-	}
 	if (currGroup == group) {
-	  *start = (n_pt > *end) ? *start : *end - n_pt;
-	#pragma omp critical
-	{
-	  printf("%u : returning %u - %u\n", th_global_thread_id(),
-		 *start, *end);
-	}
+	  *end   = bli_min( *start + n_pt, *end );
 	  return;
 	}
 	else {
-	  *end -= n_pt;
-	  //	  len += n_pt;
-	  //	  *start = *start + n_pt;
-	  --currGroup;
+	  *start += n_pt;
+	  ++currGroup;
 	}
       }
     }
@@ -169,8 +154,6 @@ void th_shift_start_end_non_linear(dim_t *start, dim_t *end, bool_t forward, thr
       dim_t num = len * len / comm->multiplicative_factor_above;
       while (TRUE) {
 	dim_t width = sqrt(*start * *start + num) - *start;
-	//dim_t n_pt = len / comm->multiplicative_factor_above;
-	//      n_pt = (n_pt * comm->multiplicative_factor_above < len) ? n_pt + 1 : n_pt;
 	dim_t n_pt = (width % round_factor == 0) ? width : width + round_factor - (width % round_factor);
 	if (!group) {
 	  *end   = bli_min( *start + n_pt, *end );
