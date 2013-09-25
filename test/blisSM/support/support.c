@@ -132,19 +132,26 @@ void th_shift_start_end_non_linear(dim_t *start, dim_t *end, bool_t forward, thr
   if (comm->multiplicative_factor_above > 1) {
     if (forward) { // more work in the later iterations
       rank_t group = th_group_id(comm);
-      rank_t currGroup = 0;//comm->multiplicative_factor_above - 1;
+      rank_t currGroup = comm->multiplicative_factor_above - 1;
       dim_t len = *end - *start;
       dim_t num = len * len / comm->multiplicative_factor_above;
+      len = 0;
       while (TRUE) {
-	dim_t width = sqrt(*start * *start + num) - *start;
+	//	dim_t width = sqrt(*start * *start + num) - *start;
+	dim_t width = sqrt(len * len + num) - len;
 	dim_t n_pt = (width % round_factor == 0) ? width : width + round_factor - (width % round_factor);
 	if (currGroup == group) {
-	  *end   = bli_min( *start + n_pt, *end );
+	  //*end   = bli_min( *start + n_pt, *end );
+	  if ( *end > n_pt )
+	    *start = *end - n_pt;
+
 	  return;
 	}
 	else {
-	  *start += n_pt;
-	  ++currGroup;
+	  //	  *start += n_pt;
+	  *end -= n_pt;
+	  len += n_pt;
+	  --currGroup;
 	}
       }
     }
