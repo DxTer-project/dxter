@@ -33,7 +33,7 @@
 #include "split.h"
 #include "twoSidedTrxm.h"
 
-//#define PRINTCOSTS
+#define PRINTCOSTS
 
 static unsigned int currNum = 0;
 
@@ -263,9 +263,10 @@ void Node::Print(IndStream &out, unsigned int graphNum)
       SetPrinted();
       PrintCode(out);
 #ifdef PRINTCOSTS
-      (*out).precision(5);
-      *out << scientific << "cost: " << ((DLANode*)this)->m_cost << endl;
-      //*out << "tot: " << ((DLANode*)this)->m_tot << endl;
+      if (((DLANode*)this)->m_cost) {
+	(*out).precision(5);
+	*out << scientific << "cost of previous node: " << ((DLANode*)this)->m_cost << endl;
+      }
 #endif
       
       if (!IsPossTunnel()) {
