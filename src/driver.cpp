@@ -1890,9 +1890,9 @@ PSet* HerkExample()
 {
   InputNode *Ain;
   if (transA == NORMAL)
-    Ain = new InputNode("A input", bigSize, smallSize, "A", D_MC_MR);
+    Ain = new InputNode("A input", bigSize, medSize, "A", D_MC_MR);
   else
-    Ain = new InputNode("A input", smallSize, bigSize, "A", D_MC_MR);
+    Ain = new InputNode("A input", medSize, bigSize, "A", D_MC_MR);
 
   InputNode *Cin = new InputNode("C input", bigSize, bigSize, "C", D_MC_MR);
 
@@ -1914,12 +1914,12 @@ PSet* Her2kExample()
 {
   InputNode *Ain, *Bin;
   if (transA == NORMAL) {
-    Ain = new InputNode("A input", bigSize, smallSize, "A", D_MC_MR);
-    Bin = new InputNode("B input", bigSize, smallSize, "B", D_MC_MR);
+    Ain = new InputNode("A input", bigSize, medSize, "A", D_MC_MR);
+    Bin = new InputNode("B input", bigSize, medSize, "B", D_MC_MR);
   }
   else {
-    Ain = new InputNode("A input", smallSize, bigSize, "A", D_MC_MR);
-    Bin = new InputNode("B input", smallSize, bigSize, "B", D_MC_MR);
+    Ain = new InputNode("A input", medSize, bigSize, "A", D_MC_MR);
+    Bin = new InputNode("B input", medSize, bigSize, "B", D_MC_MR);
   }
 
   InputNode *Cin = new InputNode("C input", bigSize, bigSize, "C", D_MC_MR);
