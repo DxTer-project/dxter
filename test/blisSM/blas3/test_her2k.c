@@ -25,7 +25,7 @@ void DxT_Her2kNL( obj_t *alpha,
   dim_t idx1, dimLen1, bs1;
   dimLen1 = bli_obj_width_after_trans( *C );
   idx1 = 0;
-  th_shift_start_end_non_linear(&idx1, &dimLen1, FALSE, ProcComm, bli_blksz_for_obj( C, gemm_nr));
+  th_shift_start_end_non_linear(&idx1, &dimLen1, TRUE, ProcComm, bli_blksz_for_obj( C, gemm_nr));
   for ( ; idx1 < dimLen1; idx1 += bs1 ) {
     bs1 = bli_determine_blocksize_f( idx1, dimLen1, C, gemm_nc );
     dim_t idx2, dimLen2, bs2;
