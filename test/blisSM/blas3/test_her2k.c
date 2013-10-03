@@ -1092,7 +1092,7 @@ int main( int argc, char** argv )
 		gflopsBLI = ( 2.0 * m * k * m ) / ( dtime_saveBLI * 1.0e9 );
 
 		printf( "data_her2k_DxT" );
-		printf( "( %2ld, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f %2.4f ];\n",
+		printf( "( %2ld, 1:5 ) = [ %4lu %4lu  %10.3e  %6.3f %2.4f ];\n",
 		        (p - p_begin + 1)/p_inc + 1, m, k, dtime_saveDxT, gflopsDxT, gflopsDxT/gflopsBLI );
 
 		printf( "data_her2k_blis" );
