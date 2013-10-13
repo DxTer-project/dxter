@@ -427,10 +427,11 @@ void Universe::ClearFullyExpanded()
 
 void Universe::PrintStats()
 {
-  cout << "The universe has " << M_transCount[0] << " primary transformations, "
-       << M_transCount[1] << " secondary transformations, and "
-       << M_transCount[NUMPHASES] << " simplifiers, and"
-       << M_transCount[NUMPHASES+1] << " global simplifiers\n";
+  cout << "The universe has\n";
+  for (unsigned int i = 0; i < NUMPHASES; ++i)
+    cout << "\t" << M_transCount[i] << " in phase " << i << endl;
+  cout << "\t" << M_transCount[NUMPHASES] << " simplifiers\n";
+  cout << "\t" << M_transCount[NUMPHASES+1] << " global simplifiers\n";
 }
 
 void Universe::RegCons(ClassType type, ConstructorFunc func)
