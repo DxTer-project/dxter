@@ -207,6 +207,7 @@ void Universe::AddToMaps(Transformation *trans)
   M_transNames.insert(pair<Transformation*,string>(trans,trans->GetType()));
   if (M_transPtrs.find(trans->GetType()) != M_transPtrs.end()) {
     cout << "duplicate trans name " << trans->GetType() << endl;
+    cout.flush();
     throw;
   }
   M_transPtrs.insert(pair<string,Transformation*>(trans->GetType(),trans));

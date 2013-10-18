@@ -220,6 +220,7 @@ void Pack::Prop()
     const Sizes *size1 = InputLocalM(0);
     const Sizes *size2 = InputLocalN(0);
     m_cost = (size1->SumProds11(*size2) * (PSIWVAL + PSIRVAL)) / NumCoresInComm(m_comm);
+    m_cost += AdditionalCostOfBarrier(m_comm, size1->NumSizes());
   }
 }
 
@@ -421,6 +422,8 @@ void PackBuff::Prop()
 
     const Sizes *size1 = InputLocalM(0);
     const Sizes *size2 = InputLocalN(0);
+
+    m_cost += AdditionalCostOfBarrier(m_comm, size1->NumSizes());
     if (m_packMat == PACKABLOCK) {
       if (!(*size1 <= BLIS_MC_BS))
 	throw;

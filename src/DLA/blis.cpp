@@ -975,5 +975,15 @@ Cost AdditionalCostForBringingIntoL2(Node *node, unsigned int num, Size numAElem
 	    throw;
 	  }
 #endif
+#else
+  throw;
 #endif
+}
+
+Cost AdditionalCostOfBarrier(Comm comm, unsigned int numHits)
+{
+  if (comm != CORECOMM)
+    return 20 * numHits * NumCoresInComm(comm);
+  else
+    return 0;
 }

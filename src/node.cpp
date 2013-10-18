@@ -33,7 +33,7 @@
 #include "split.h"
 #include "twoSidedTrxm.h"
 
-#define PRINTCOSTS
+//#define PRINTCOSTS
 
 static unsigned int currNum = 0;
 

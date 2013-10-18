@@ -208,3 +208,4 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm);
 bool FoundBarrier(const Node *node, unsigned int input, Comm comm);
 
 Cost AdditionalCostForBringingIntoL2(Node *node, unsigned int num, Size numAElems, Comm comm);
+Cost AdditionalCostOfBarrier(Comm comm, unsigned int numHits);
