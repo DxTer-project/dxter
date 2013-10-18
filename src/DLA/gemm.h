@@ -163,7 +163,7 @@ class GemmInputReordering : public SingleTrans
   int m_type;
   const SingleTrans *m_inverse;
   GemmInputReordering(int type) :m_type(type) {}
-  virtual string GetType() const {return "Gemm Reordering " + (char)(m_type+48);}
+  virtual string GetType() const {return ((string)"Gemm Reordering ") + (char)(m_type+48);}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
