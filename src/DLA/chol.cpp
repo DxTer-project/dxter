@@ -224,8 +224,8 @@ Loop* Chol1LowerAlg(Node *in, unsigned int num, bool dist)
   
   Node *tri;
   if (dist) {
-    tri = new Gemm(DMLAYER, NORMAL, CONJTRANS, COEFONE, COEFNEGONE, COMPLEX);
-    tri->AddInputs(6,set4->OutTun(0),0,set4->OutTun(0),0,splitA,4);
+    tri = new Herk(DMLAYER, LOWER, NORMAL, COEFNEGONE, COEFONE, COMPLEX);
+    tri->AddInputs(4,set4->OutTun(0),0,splitA,4);
   }
   else {
     throw;
