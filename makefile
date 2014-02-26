@@ -23,10 +23,10 @@ clean:
 	rm -f obj/*.o obj/DLA/*.o src/*~ src/DLA/*~ *.x *~
 
 open:
-	emacs src/*cpp src/*h src/DLA/*cpp src/DLA/*h makefile
+	emacs -nw src/*cpp src/*h src/DLA/*cpp src/DLA/*h makefile
 
 opencpp:
-	emacs src/*cpp src/DLA/*cpp
+	emacs -nw src/*cpp src/DLA/*cpp
 
 openh:
-	emacs src/*h src/DLA/*h
+	emacs -nw src/*h src/DLA/*h
