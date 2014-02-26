@@ -149,7 +149,7 @@ Phase Gemm::MaxPhase() const
     return DPPHASE;
   case (SMLAYER):
     return NUMPHASES;
-#else
+#elif DOBLIS
     return SR1PHASE;
   case (S1LAYER):
     return SR2PHASE;

@@ -19,8 +19,6 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #include "base.h"
 #include "costs.h"
 #include "omp.h"
@@ -30,12 +28,16 @@
 #include "blas.h"
 #include "loopSupport.h"
 #include "helperNodes.h"
-#include "debug.h"
 #include <time.h>
 #include "DLAReg.h"
 #include "pack.h"
 #include <omp.h>
 #include "lu.h"
+
+#if DODM||DOBLIS
+
+#include "debug.h"
+
 
 //These control which transformations are included
 #define USEVR 1
@@ -2403,3 +2405,5 @@ PSet* AppBlkHouseExample()
   
   return outerSet;
 }
+
+#endif //DODM || DOBLIS

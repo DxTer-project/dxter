@@ -96,8 +96,10 @@ DistType Herk::GetDistType(unsigned int num) const
     default:
       throw;
   }
-#elif DOSQM || DOSM
+#elif DOBLIS
   return InputDistType(1);
+#else
+  throw;
 #endif
   
 }
@@ -191,7 +193,7 @@ Phase Herk::MaxPhase() const
     default:
       throw;
   }
-#else
+#elif DOBLIS
   switch (GetLayer()) {
     case (ABSLAYER):
       return SR1PHASE;
@@ -204,6 +206,8 @@ Phase Herk::MaxPhase() const
     default:
       throw;
   }
+  throw;
+#else 
   throw;
 #endif
 }
@@ -380,7 +384,7 @@ Phase TriRK::MaxPhase() const
     return NUMPHASES;
   else
     throw;
-#else
+#elif DOBLIS
   switch (GetLayer()) {
     case (ABSLAYER):
       return SR1PHASE;
@@ -393,6 +397,7 @@ Phase TriRK::MaxPhase() const
     default:
       throw;
   }
+#else
   throw;
 #endif
 }

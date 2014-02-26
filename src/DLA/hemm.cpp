@@ -116,6 +116,9 @@ Phase Hemm::MaxPhase() const
       return SR3PHASE;
     default:
       throw;
+#else
+  default:
+      throw;
 #endif
   }
 }

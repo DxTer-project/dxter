@@ -179,8 +179,6 @@ Phase Trxm::MaxPhase() const
       return DPPHASE;
     case (SMLAYER):
       return NUMPHASES;
-    default:
-      throw;
 #elif DOSR1PHASE
     case (ABSLAYER):
       return SR1PHASE;
@@ -188,9 +186,10 @@ Phase Trxm::MaxPhase() const
       return SR2PHASE;
     case (S2LAYER):
       return SR3PHASE;
+#endif
     default:
       throw;
-#endif
+
   }
 }
 
@@ -446,8 +445,6 @@ Phase Trmm3::MaxPhase() const
       return DPPHASE;
     case (SMLAYER):
       return NUMPHASES;
-    default:
-      throw;
 #elif DOSR1PHASE
     case (ABSLAYER):
       return SR1PHASE;
@@ -455,9 +452,9 @@ Phase Trmm3::MaxPhase() const
       return SR2PHASE;
     case (S2LAYER):
       return SR3PHASE;
+#endif
     default:
       throw;
-#endif
   }
 }
 

@@ -28,7 +28,12 @@
 
 #define Reg(NODE) Universe::RegCons(NODE::GetClass(), &(NODE::BlankInst))
 
-
+#if DOTENSORS
+void RegAllTensorNodes()
+{
+  cout << "no registration!\n";
+}
+#elif DOBLIS||DODM
 void RegAllDLANodes()
 {
   Reg(TriInv);
@@ -58,7 +63,9 @@ void RegAllDLANodes()
   Reg(Herk);
   Reg(TriRK);
   Reg(Hetrmm);
+#ifndef SKIPTWOSIDED
   Reg(TwoSidedTrxm);
+#endif
   Reg(Combine);
   Reg(Split);
   Reg(LoopTunnel);
@@ -73,3 +80,6 @@ void RegAllDLANodes()
   Reg(ViewTL);
   Reg(ViewTLCombine);
 }
+#else
+asdklfja
+#endif

@@ -216,7 +216,7 @@ Phase Her2k::MaxPhase() const
     return NUMPHASES;
   else
     throw;
-#else
+#elif DOBLIS
   switch (GetLayer()) {
     case (ABSLAYER):
       return SR1PHASE;
@@ -227,6 +227,7 @@ Phase Her2k::MaxPhase() const
     default:
       throw;
   }
+#else
   throw;
 #endif
 }
@@ -387,7 +388,7 @@ Phase Tri2k::MaxPhase() const
     return NUMPHASES;
   else
     throw;
-#else
+#elif DOBLIS
   switch (GetLayer()) {
     case (ABSLAYER):
       return SR1PHASE;
@@ -398,6 +399,7 @@ Phase Tri2k::MaxPhase() const
     default:
       throw;
   }
+#else
   throw;
 #endif
 }

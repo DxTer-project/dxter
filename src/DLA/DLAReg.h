@@ -39,3 +39,4 @@
 #include "lu.h"
 
 void RegAllDLANodes();
+void RegAllTensorNodes();

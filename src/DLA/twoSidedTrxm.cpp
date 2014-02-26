@@ -20,8 +20,8 @@
 */
 
 
-
 #include "twoSidedTrxm.h"
+#ifndef SKIPTWOSIDED
 #include "distributions.h"
 #include "loop.h"
 #include "blas.h"
@@ -778,3 +778,4 @@ void TwoSidedTrxmLowerLayer::Apply(Poss *poss, Node *node) const
   hegst->SetLayer(m_toLayer);
 }
 
+#endif //!SKIPTWOSIDED

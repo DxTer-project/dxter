@@ -816,7 +816,7 @@ void Split::PrintVarDeclarations(IndStream &out) const
   if (type == ELEMLOOP) {
     
   }
-    else if (type == BLISLOOP) {
+  else if (type == BLISLOOP) {
     string var = GetName(0).str();
     out.Indent();
     if (m_dir == PARTDOWN || m_dir == PARTUPWARD) 

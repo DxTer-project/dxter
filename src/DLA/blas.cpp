@@ -88,14 +88,15 @@ Phase Axpy::MaxPhase() const
     return NUMPHASES;
   else
     throw;
-#else
-
+#elif DOSM||DOSQM
   if (m_layer == ABSLAYER)
     return SR1PHASE;
   else if (m_layer == S3LAYER)
     return NUMPHASES;
   else
     throw;
+#else
+  throw;
 #endif
 }
 

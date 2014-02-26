@@ -33,11 +33,14 @@
 #elif DODM
 #define TWOSIDEDTRXMCOMPONENTSLAYER DMLAYER
 #define TWOSIDEDTRXMLAYER DMLAYER
+#elif DOTENSORS
+#define SKIPTWOSIDED 
 #else
 laksjdflkajsdf
 #endif
 
 
+#ifndef SKIPTWOSIDED
 Loop* TwoSidedTrsmLowerVar1Alg(Node *in0, unsigned int num0,
 			     Node *in1, unsigned int num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);
@@ -126,3 +129,5 @@ class TwoSidedTrxmLowerLayer : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+
+#endif // !SKIPTWOSIDED

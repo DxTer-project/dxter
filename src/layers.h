@@ -23,9 +23,12 @@
 
 #pragma once
 
-#define DODM 1
+#define DODM 0
 #define DOSQM 0
 #define DOSM 0
+#define DOTENSORS 1
+
+#define DOBLIS DOSM||DOSQM
 
 #if DODM
 
@@ -120,6 +123,41 @@ enum Layers {
   DMLAYER,
   SMLAYER
 };
+#elif DOTENSORS
+
+//Phases of generation
+#define DPTENSORPHASE 0
+#define ROTENSORPHASE 1
+
+#define FIRSTPHASE DPTENSORPHASE
+
+//Max phase for which to generate code
+#define MAXPHASE ROTENSORPHASE
+#define NUMPHASES (MAXPHASE+1)
+
+#define DODPPHASE 0
+#define DOROPHASE 0
+#define DOSR1PHASE 0
+#define DOSR2PHASE 0
+#define DOSOPHASE 0
+#define DOSMPPHASE 0
+#define DODPTENSORPHASE 1
+#define DOROTENSORPHASE 1
+
+//Software layers
+enum Layers {
+  ABSLAYER = 0,
+  DMTENSORLAYER,
+  SMTENSORLAYER,
+  BADLAYER,
+  DMLAYER,
+  SMLAYER,
+  S1LAYER,
+  S2LAYER,
+  S3LAYER,
+  SOLAYER,
+};
+
 #else
 bad selection of layering
 #endif

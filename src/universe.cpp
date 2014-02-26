@@ -325,6 +325,8 @@ void Universe::PrintAll(int algNum)
     IndStream optOut(&cout,ELEMSTREAM);
 #elif DOSQM || DOSM
     IndStream optOut(&cout,BLISSTREAM);
+#elif DOTENSORS
+    IndStream optOut(&cout,TENSORSTREAM);
 #endif
     Print(optOut, optGraph);
   }

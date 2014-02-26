@@ -25,9 +25,11 @@
 
 #include "transform.h"
 
+
 void PrintNodes(const NodeVec &nodes)
 {
   NodeVecConstIter iter = nodes.begin();
   for(; iter!=nodes.end(); ++iter)
     cout << *iter << " " << (*iter)->GetType() << endl;
 }
+

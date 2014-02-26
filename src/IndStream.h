@@ -33,6 +33,7 @@ class Coef;
 enum IndStreamType
   { BLISSTREAM,
     ELEMSTREAM,
+    TENSORSTREAM,
     OTHERSTREAM };
 
 // Class to output code with indentations
