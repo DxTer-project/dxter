@@ -38,6 +38,18 @@ DLANode::DLANode(Layer layer)
   m_layer = layer;
 }
 
+#if DOELEM
+DistType DLANode::GetDistType(unsigned int num) const
+{ 
+  return D_MC_MR; 
+}
+#elif DOTENSORS
+DistType DLANode::GetDistType(unsigned int num) const
+{ 
+  return D_MC_MR; 
+}
+#endif
+
 void DLANode::ClearBeforeProp()
 {
   m_cost = -1;
@@ -64,12 +76,14 @@ void DLANode::SanityCheck()
   }
 }
 
+#if DODM
 DistType DLANode::InputDistType(unsigned int num) const
 {
   DLANode *in = (DLANode*)Input(num);
   unsigned int inNum = InputConnNum(num);
   return in->GetDistType(inNum);
 }
+#endif
 
 string DLANode::GetCostStr()
 {
@@ -149,6 +163,7 @@ const Sizes* DLANode::InputLocalN(unsigned int num) const
   return in->LocalN(inNum);
 }
 
+#if DOELEM
 DLANode* DLANode::FindNonRedistParent(unsigned int num)
 {
   unsigned int trash;
@@ -170,6 +185,7 @@ DLANode* DLANode::FindNonRedistParent(unsigned int num, unsigned int &parentNum)
   }
   return NULL;
 }
+#endif
 
 DLANode* DLANode::FindSideEffectingUser(unsigned int num)
 {
@@ -177,10 +193,15 @@ DLANode* DLANode::FindSideEffectingUser(unsigned int num)
   for(; iter != m_children.end(); ++iter) {
     if ((*iter)->m_num == num) {
       DLANode *child = (DLANode*)(*iter)->m_n;
+#if DOELEM
       if (child->GetNodeClass() == RedistNode::GetClass()) {
         return child->FindSideEffectingUser(0);
       }
-      else {
+      else 
+#elif DOTENSORS
+	check this.
+#endif
+	{
         if (child->Overwrites(this, num))
           return child;
       }
@@ -200,28 +221,6 @@ void DLANode::UpdateInnerPackingMultiple(PackSize size)
     cout << i << " " << Child(i)->GetNodeClass() << endl;
 
   throw;
-}
-
-bool DLANode::IsRowVec(unsigned int num) const
-{
-  if (IsTransType(GetDistType(num)))
-    return GetN(num)->AllOnes();
-  else
-    return GetM(num)->AllOnes();
-} 
-
-bool DLANode::IsColVec(unsigned int num) const
-{
-  if (IsTransType(GetDistType(num)))
-    return GetM(num)->AllOnes();
-  else
-    return GetN(num)->AllOnes();
-  
-}
-
-bool DLANode::IsVec(unsigned int num) const
-{
-  return GetM(num)->AllOnes() || GetN(num)->AllOnes();
 }
 
 bool DLANode::IsScalar(unsigned int num) const

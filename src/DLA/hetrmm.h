@@ -55,7 +55,9 @@ class Hetrmm : public DLAOp<1,1>
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual bool ShouldCullDP() const;
 };
 

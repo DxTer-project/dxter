@@ -34,7 +34,7 @@
 #include <omp.h>
 #include "lu.h"
 
-#if DODM||DOBLIS
+#if DOELEM||DOBLIS
 
 #include "debug.h"
 
@@ -65,7 +65,7 @@
 //scalapack
 #define TriInv8 0
 
-#if DODM
+#if DOELEM
 Size smallSize = 500;
 Size medSize = 20000;
 Size bigSize = 80000;
@@ -515,10 +515,12 @@ void AddTrans()
 #endif
 #endif
 
+#if DOELEM
   GemmInputReordering *t0 = new GemmInputReordering(0);
   GemmInputReordering *t1 = new GemmInputReordering(1);
   t0->m_inverse = t1;
   t1->m_inverse = t0;
+#endif
 
 #if DODPPHASE
   Universe::AddTrans(Gemm::GetClass(), t0, DPPHASE);
@@ -565,6 +567,7 @@ void AddSimplifiers()
   Universe::AddTrans(ScaleNode::GetClass(), new RemoveScaleByOne, SIMP);
 #endif //REMOVESCALEBYONE
 
+#if DOELEM
   Universe::AddTrans(RedistNode::GetClass(), 
 		     new UseTransposedRedist(D_MC_MR,D_STAR_MC_T,D_STAR_MC_H), SIMP);
 
@@ -627,6 +630,8 @@ void AddSimplifiers()
   Universe::AddTrans(RedistNode::GetClass(), new FindMidDistributions(D_MC_MR, D_STAR_VC, D_STAR_MC), SIMP);
   Universe::AddTrans(RedistNode::GetClass(), new FindMidDistributions(D_MC_MR, D_STAR_VR, D_MR_MC), SIMP);
   Universe::AddTrans(RedistNode::GetClass(), new FindMidDistributions(D_MC_MR, D_STAR_VC, D_MR_MC), SIMP);
+
+#endif
 
 #if DOSR1PHASE
   Universe::AddTrans(Hemm::GetClass(), new BLISHemmToGemm(ABSLAYER), SIMP);
@@ -1233,7 +1238,11 @@ PSet* HegstL1Example()
   splitL->AddInput(Lin,0);
   splitL->SetAllStats(FULLUP);
 
+#if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
+#else
+  TempVarNode *Yin = new TempVarNode("Y21");
+#endif
   Yin->SetLayer(S3LAYER);
   Yin->AddInput(splitA, 5);
 
@@ -1372,7 +1381,11 @@ PSet* HegstL5Example()
   splitL->AddInput(Lin,0);
   splitL->SetAllStats(FULLUP);
 
+#if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+#else
+  TempVarNode *Yin = new TempVarNode("Y10");
+#endif
   Yin->SetLayer(S3LAYER);
   Yin->AddInput(splitA, 1);
 
@@ -1891,12 +1904,21 @@ PSet* Test()
 PSet* HerkExample()
 {
   InputNode *Ain;
+#if DODM
   if (transA == NORMAL)
     Ain = new InputNode("A input", bigSize, medSize, "A", D_MC_MR);
   else
     Ain = new InputNode("A input", medSize, bigSize, "A", D_MC_MR);
 
   InputNode *Cin = new InputNode("C input", bigSize, bigSize, "C", D_MC_MR);
+#else
+  if (transA == NORMAL)
+    Ain = new InputNode("A input", bigSize, medSize, "A");
+  else
+    Ain = new InputNode("A input", medSize, bigSize, "A");
+
+  InputNode *Cin = new InputNode("C input", bigSize, bigSize, "C");
+#endif
 
   Herk *loop = new Herk(ABSLAYER, tri, transA, COEFONE, COEFONE, type);
   loop->AddInputs(4,
@@ -1915,6 +1937,7 @@ PSet* HerkExample()
 PSet* Her2kExample()
 {
   InputNode *Ain, *Bin;
+#if DOELEM
   if (transA == NORMAL) {
     Ain = new InputNode("A input", bigSize, medSize, "A", D_MC_MR);
     Bin = new InputNode("B input", bigSize, medSize, "B", D_MC_MR);
@@ -1925,6 +1948,18 @@ PSet* Her2kExample()
   }
 
   InputNode *Cin = new InputNode("C input", bigSize, bigSize, "C", D_MC_MR);
+#else
+  if (transA == NORMAL) {
+    Ain = new InputNode("A input", bigSize, medSize, "A");
+    Bin = new InputNode("B input", bigSize, medSize, "B");
+  }
+  else {
+    Ain = new InputNode("A input", medSize, bigSize, "A");
+    Bin = new InputNode("B input", medSize, bigSize, "B");
+  }
+
+  InputNode *Cin = new InputNode("C input", bigSize, bigSize, "C");
+#endif
 
   Her2k *loop = new Her2k(ABSLAYER, tri, transA, COEFONE, COEFONE, type);
   loop->AddInputs(6,
@@ -2119,7 +2154,11 @@ PSet* CholHegstExample()
     splitL->AddInput(cholloop,0);
     splitL->SetAllStats(FULLUP);
 
+#if DOELEM
     TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
+#else
+    TempVarNode *Yin = new TempVarNode("Y21");
+#endif
     Yin->SetLayer(S3LAYER);
     Yin->AddInput(splitA, 5);
 
@@ -2216,7 +2255,11 @@ PSet* CholHegstExample()
     splitL->AddInput(cholloop,0);
     splitL->SetAllStats(FULLUP);
 
+#if DOELEM
     TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+#else
+    TempVarNode *Yin = new TempVarNode("Y10");
+#endif
     Yin->SetLayer(S3LAYER);
     Yin->AddInput(splitA, 1);
 
@@ -2338,7 +2381,11 @@ PSet* AppBlkHouseExample()
 		  splitT, 1,
 		  splitB, 1);
 
+#if DOELEM
   TempVarNode *W = new TempVarNode(D_MC_MR, "W");
+#else
+  TempVarNode *W = new TempVarNode("W");
+#endif
   W->SetLayer(S3LAYER);
   W->AddInput(splitB, 1);
 
@@ -2406,4 +2453,4 @@ PSet* AppBlkHouseExample()
   return outerSet;
 }
 
-#endif //DODM || DOBLIS
+#endif //DOELEM || DOBLIS

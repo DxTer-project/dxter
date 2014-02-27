@@ -152,6 +152,7 @@ void Trxm::UnflattenCore(ifstream &in, SaveInfo &info)
   TrProps::UnflattenCore(in,info);
 }
 
+#if DOELEM
 DistType Trxm::GetDistType(unsigned int num) const
 {
   switch(GetLayer()) {
@@ -168,6 +169,7 @@ DistType Trxm::GetDistType(unsigned int num) const
       throw;
   }
 }
+#endif
 
 
 Phase Trxm::MaxPhase() const
@@ -201,7 +203,12 @@ bool Trxm::DoNotCullDP() const
 NodeType Trxm::GetType() const
 {
   return (m_invert ? "Trsm" : "Trmm") + LayerNumToStr(GetLayer()) + " " +
-  SideToStr(m_side) + " " + TriToStr(m_tri) + " " + TransToStr(m_trans) + " " + DistTypeToStr(InputDistType(1));
+  SideToStr(m_side) + " " + TriToStr(m_tri) + " " + TransToStr(m_trans) 
+#if DOELEM
+    + " " + DistTypeToStr(InputDistType(1));
+#else
+  ;
+#endif  
 }
 
 
@@ -234,6 +241,7 @@ void Trxm::PrintCode(IndStream &out)
       case (ABSLAYER):
         *out << "AbsTrsm( ";
         break;
+#if DOELEM
       case (DMLAYER):
         *out << "DistTrsm( ";
         break;
@@ -243,6 +251,7 @@ void Trxm::PrintCode(IndStream &out)
         else
           *out << "internal::LocalTrsm( ";
         break;
+#endif
       default:
         throw;
     }
@@ -303,11 +312,14 @@ void Trxm::SanityCheck()
     }
     
     if (GetLayer() == ABSLAYER) {
+#if DOELEM
       if (InputDistType(1) != D_MC_MR) {
         cout << "input not D_MC_MR 7";
         throw;
       }
+#endif
     }
+#if DOELEM
     else if (GetLayer() == DMLAYER) {
       if (m_inputs.size() != 2)
         cout << "1 m_inputs.size() != 2\n";
@@ -334,8 +346,9 @@ void Trxm::SanityCheck()
         }
       }
     }
-    
+#endif
   }
+#if DOELEM
   else {
     if (GetLayer() == DMLAYER) {
       if (m_inputs.size() != 2)
@@ -363,6 +376,7 @@ void Trxm::SanityCheck()
       }
     }
   }
+#endif
 }
 
 bool Trxm::ShouldCullSR() const
@@ -418,6 +432,7 @@ void Trmm3::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_beta);
 }
 
+#if DOELEM
 DistType Trmm3::GetDistType(unsigned int num) const
 {
   switch(GetLayer()) {
@@ -433,19 +448,20 @@ DistType Trmm3::GetDistType(unsigned int num) const
       throw;
   }
 }
+#endif
 
 
 Phase Trmm3::MaxPhase() const
 {
   switch(GetLayer()) {
-#if DODPPHASE
+#if DOELEM
       throw;
     case (ABSLAYER):
     case (DMLAYER):
       return DPPHASE;
     case (SMLAYER):
       return NUMPHASES;
-#elif DOSR1PHASE
+#elif DOBLIS
     case (ABSLAYER):
       return SR1PHASE;
     case (S1LAYER):
@@ -466,7 +482,12 @@ bool Trmm3::DoNotCullDP() const
 NodeType Trmm3::GetType() const
 {
   return "Trmm3" + LayerNumToStr(GetLayer()) + " " +
-  SideToStr(m_side) + " " + TriToStr(m_tri) + " " + TransToStr(m_trans) + " " + DistTypeToStr(InputDistType(1));
+  SideToStr(m_side) + " " + TriToStr(m_tri) + " " + TransToStr(m_trans) 
+#if DOELEM
+    + " " + DistTypeToStr(InputDistType(1));
+#elif DOBLIS
+  ;
+#endif
 }
 
 
@@ -730,10 +751,7 @@ void Trmm3LoopExp::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-
-
-
-
+#if DOELEM
 string DistTrxmToLocalTrxm::GetType() const
 {
   return "Distributed Trxm to Local Trxm " + DistTypeToStr(m_leftType) + ", " + DistTypeToStr(m_rightType);
@@ -809,6 +827,7 @@ void DistTrsmToSpecialLocalTrsm::Apply(Poss *poss, Node *node) const
   node->RedirectChildren(node4,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+
 
 
 LocalTrmmAcc::LocalTrmmAcc(Side side, Tri tri, Diag diag, Trans trans, Coef coeff, Type type)
@@ -1121,6 +1140,7 @@ Cost DistTrmmToLocalTrmmStatA::RHSCostEstimate(const Node *node) const
     throw;
 }
 
+
 string TrxmTrans::GetTransType() const
 {
   return "Trxm";
@@ -1248,6 +1268,9 @@ void LTrmmToTrsm::Apply(Poss *poss, Node *node) const
   trmm->RedirectChildren(trsm);
   trmm->m_poss->DeleteChildAndCleanUp(trmm);
 }
+
+#endif
+
 
 Loop* TrmmLoopLeftVar1(Node *Ain, unsigned int Anum,
                        Node *Bin, unsigned int Bnum,
@@ -2024,15 +2047,7 @@ void TrxmBP::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_comm);
 }
 
-DistType TrxmBP::GetDistType(unsigned int num) const
-{
-  switch(GetLayer()) {
-    case (S3LAYER):
-      return InputDistType(2);
-    default:
-      throw;
-  }
-}
+
 
 NodeType TrxmBP::GetType() const
 {

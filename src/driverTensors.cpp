@@ -25,16 +25,10 @@
 #include "costs.h"
 #include "omp.h"
 #include "transform.h"
-#include "distributions.h"
-#include "twoSidedTrxm.h"
-#include "blas.h"
 #include "loopSupport.h"
-#include "helperNodes.h"
 #include <time.h>
 #include "DLAReg.h"
-#include "pack.h"
 #include <omp.h>
-#include "lu.h"
 
 #if DOTENSORS
 
@@ -67,7 +61,7 @@
 //scalapack
 #define TriInv8 0
 
-#if DODM
+#if DOELEM
 Size smallSize = 500;
 Size medSize = 20000;
 Size bigSize = 80000;

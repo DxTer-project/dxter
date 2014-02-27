@@ -49,6 +49,7 @@ NodeType TwoSidedTrxm::GetType() const
     return "TwoSidedTrmm" + TriToStr(m_tri) + " " + LayerNumToStr(GetLayer());
 }
 
+#if DOELEM
 DistType TwoSidedTrxm::GetDistType(unsigned int num) const 
 { 
   if (m_layer == ABSLAYER || m_layer == DMLAYER)
@@ -60,6 +61,7 @@ DistType TwoSidedTrxm::GetDistType(unsigned int num) const
   else
     throw;
 }
+#endif
 
 Phase TwoSidedTrxm::MaxPhase() const 
 {  switch(GetLayer()) {
@@ -106,6 +108,7 @@ void TwoSidedTrxm::SanityCheck()
   DLAOp<2,1>::SanityCheck();
   if (m_inputs.size() != 2)
     throw;
+#if DOELEM
   if (m_layer == DMLAYER) {
     if (InputDistType(0) != D_MC_MR)
       throw;
@@ -118,6 +121,7 @@ void TwoSidedTrxm::SanityCheck()
     else if (InputDistType(1) != D_STAR_STAR)
       throw;
   }
+#endif
 }
 
 void TwoSidedTrxm::Prop()
@@ -271,7 +275,11 @@ Loop* TwoSidedTrsmLowerVar1Alg(
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
+#if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+#else
+  TempVarNode *Yin = new TempVarNode("Y10");
+#endif
   Yin->SetLayer(layerBLAS);
   Yin->AddInput(splitA, 5);
 
@@ -354,7 +362,11 @@ Loop* TwoSidedTrsmLowerVar2Alg(
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
+#if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+#else
+  TempVarNode *Yin = new TempVarNode("Y10");
+#endif
   Yin->SetLayer(layerBLAS);
   Yin->AddInput(splitA, 5);
 
@@ -444,7 +456,11 @@ Loop* TwoSidedTrsmLowerVar4Alg(
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
+#if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
+#else
+  TempVarNode *Yin = new TempVarNode("Y21");
+#endif
   Yin->SetLayer(layerBLAS);
   Yin->AddInput(splitA, 5);
 
@@ -537,7 +553,11 @@ Loop* TwoSidedTrmmLowerVar1Alg(
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
+#if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
+#else
+  TempVarNode *Yin = new TempVarNode("Y21");
+#endif
   Yin->SetLayer(layerBLAS);
   Yin->AddInput(splitA, 7);
 
@@ -620,7 +640,11 @@ Loop* TwoSidedTrmmLowerVar2Alg(
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
+#if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
+#else
+  TempVarNode *Yin = new TempVarNode("Y21");
+#endif
   Yin->SetLayer(layerBLAS);
   Yin->AddInput(splitA, 5);
 
@@ -696,7 +720,11 @@ Loop* TwoSidedTrmmLowerVar4Alg(
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
+#if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+#else
+  TempVarNode *Yin = new TempVarNode("Y10");
+#endif
   Yin->SetLayer(S3LAYER);
   Yin->AddInput(splitA, 1);
 

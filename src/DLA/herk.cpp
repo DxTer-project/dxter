@@ -86,23 +86,18 @@ Herk::Herk(Layer layer, Tri tri, Trans trans, Coef alpha, Coef beta, Type type)
   }
 }
 
+#if DOELEM
 DistType Herk::GetDistType(unsigned int num) const
 {
-#if DODM
   switch (GetLayer()) {
     case (ABSLAYER):
     case (DMLAYER):
       return D_MC_MR;
     default:
       throw;
-  }
-#elif DOBLIS
-  return InputDistType(1);
-#else
-  throw;
-#endif
-  
+  }  
 }
+#endif
 
 void Herk::SanityCheck()
 {
@@ -115,7 +110,7 @@ void Herk::SanityCheck()
       throw;
   }
   
-#if DODM
+#if DOELEM
   if (GetLayer() != ABSLAYER && GetLayer() != DMLAYER)
     throw;
   if (InputDistType(0) != D_MC_MR)
@@ -429,6 +424,7 @@ void TriRK::Parallelize(Comm comm)
     throw;
 }
 
+#if DOELEM
 DistType TriRK::GetDistType(unsigned int num) const
 {
   if (GetLayer() == SMLAYER)
@@ -438,6 +434,7 @@ DistType TriRK::GetDistType(unsigned int num) const
   else
     throw;
 }
+#endif
 
 NodeType TriRK::GetType() const
 {
@@ -464,6 +461,7 @@ void TriRK::SanityCheck()
     cout << "m_inputs.size() != 3 2\n";
     throw;
   }
+#if DOELEM
   if (GetLayer() == SMLAYER) {
     if (InputDistType(2) != D_MC_MR)
       throw;
@@ -472,7 +470,8 @@ void TriRK::SanityCheck()
         throw;
     }
   }
-  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+#elif DOBLIS
+  if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
     if (m_transA != NORMAL || m_transB != NORMAL)
       throw;
     
@@ -485,6 +484,7 @@ void TriRK::SanityCheck()
     if (*InputLocalN(1) != *InputLocalN(2))
       throw;
   }
+#endif
 }
 
 void TriRK::Prop()
@@ -492,6 +492,7 @@ void TriRK::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
     
+#if DOELEM
     if (GetLayer() == SMLAYER) {
       DistType t0 = InputDistType(0);
       DistType t1 = InputDistType(1);
@@ -541,7 +542,8 @@ void TriRK::Prop()
       else
         throw;
     }
-    else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+#elif DOBLIS
+     if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
       const Sizes *sizes1 = InputLocalM(0);
       const Sizes *sizes2 = InputLocalN(0);
       const Sizes *sizes3 = InputLocalN(1);
@@ -554,12 +556,15 @@ void TriRK::Prop()
 	m_cost += AdditionalCostForBringingIntoL2(this, 0, sizes1->SumProds11(*sizes2), m_comm);
       }
     }
+#endif
   }
 }
 
 void TriRK::PrintCode(IndStream &out)
 {
   string transAStr, transBStr;
+
+#if DODM
   DistType t0 = InputDistType(0);
   DistType t1 = InputDistType(1);
   
@@ -608,7 +613,8 @@ void TriRK::PrintCode(IndStream &out)
     *out << ", " << GetInputName(2).str()
     << " );\n";
   }
-  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER) {
+#elif DOBLIS  
+  if (GetLayer() == S1LAYER || GetLayer() == S2LAYER) {
     out.Indent();
     *out << "BlisTrrk" << LayerNumToStr(GetLayer()) << "( ";
     out << m_alpha;
@@ -643,6 +649,7 @@ void TriRK::PrintCode(IndStream &out)
     *out << ");\n";
 
   }
+#endif
 }
 
 void TriRK::FlattenCore(ofstream &out) const
@@ -667,6 +674,7 @@ bool TriRK::CanTransposeInputs() const
     return false;
 }
 
+#if DOELEM
 string TriRKTrans::GetTransType() const
 {
   return "TriRK";
@@ -694,7 +702,9 @@ bool TriRKTrans::CanApply(const Poss *poss, const Node *node) const
   else
     return false;
 }
+#endif
 
+#if DOELEM
 bool DistHerkToLocalTriRK::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() == Herk::GetClass()
@@ -702,6 +712,7 @@ bool DistHerkToLocalTriRK::CanApply(const Poss *poss, const Node *node) const
     return true;
   return false;
 }
+
 
 void DistHerkToLocalTriRK::Apply(Poss *poss, Node *node) const
 {
@@ -728,6 +739,7 @@ void DistHerkToLocalTriRK::Apply(Poss *poss, Node *node) const
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+#endif
 
 Loop* HerkLoopVar1(Node *Ain, unsigned int Anum,
                    Node *Cin, unsigned int Cnum,

@@ -94,6 +94,7 @@ string DiagToStr(Diag diag)
     throw;
 }
 
+#if DOELEM
 string DistTypeToStr(DistType distType)
 {
   switch(distType) {
@@ -178,6 +179,7 @@ string DistTypeToStr(DistType distType)
   }
 }
 
+
 DistType GetBaseDistType(DistType distType)
 {
   switch(distType) {
@@ -197,6 +199,7 @@ DistType GetBaseDistType(DistType distType)
       return distType;
   }
 }
+#endif //DOELEM
 
 
 string TransToStr(Trans trans)
@@ -297,6 +300,7 @@ bool IsTrans(Trans trans)
 
 string Name::str() const
 {
+#if DODM
   string name = m_name;
   if (m_type == D_MC_MR)
     return name;
@@ -304,24 +308,34 @@ string Name::str() const
     return name;
   else
     return name + "_" + DistTypeToStr(m_type);
+#else
+  return m_name;
+#endif
 }
 
 Name& Name::operator= (const Name &rhs)
 {
+#if DODM
+bl
   m_type = rhs.m_type;
+#endif
   m_name = rhs.m_name;
   return *this;
 }
 
 void Name::Flatten(ofstream &out) const
 {
+#if DODM
   WRITE(m_type);
+#endif
   out << m_name << endl;
 }
 
 void Name::Unflatten(ifstream &in)
 {
+#if DODM
   READ(m_type);
+#endif
   getline(in, m_name);
 }
 

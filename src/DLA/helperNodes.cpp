@@ -27,14 +27,21 @@
 
 
 InputNode::InputNode(NodeType type, Size m, Size n, string name)
-: m_type(type), m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
+: 
+#if DODM
+m_type(type),
+#endif
+m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
 {
   m_msize.AddRepeatedSizes(m, 1, 1);
   m_nsize.AddRepeatedSizes(n, 1, 1);
   m_varName.m_name = name;
+#if DODM
   m_varName.m_type = D_MC_MR;
+#endif
 }
 
+#if DODM
 InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 : m_type(type), m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
 {
@@ -43,6 +50,7 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
   m_varName.m_name = name;
   m_varName.m_type = dist;
 }
+#endif
 
 void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
@@ -122,7 +130,14 @@ void InputNode::BuildSizeCache()
     return;
   m_mlsize = new Sizes;
   m_nlsize = new Sizes;
+#if DODM
   GetLocalSizes(m_varName.m_type, &m_msize, &m_nsize, *m_mlsize, *m_nlsize);
+#elif DOBLIS
+  *m_mlsize = m_msize;
+  *m_nlsize = m_nsize;
+#else
+  lkjsdf
+#endif
 }
 
 
@@ -155,7 +170,9 @@ ConstVal::ConstVal(string name, Coef val)
 {
   m_val = val;
   m_varName.m_name = name;
+#if DODM
   m_varName.m_type = D_STAR_STAR;
+#endif
 }
 
 void ConstVal::PrintCode(IndStream &out)
@@ -225,7 +242,9 @@ NodeType TempVarNode::GetType() const
 void TempVarNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig,shallow, possMerging);
+#if DODM
   m_distType = ((TempVarNode*)orig)->m_distType;
+#endif
   m_name = ((TempVarNode*)orig)->m_name;
 }
 
@@ -305,21 +324,27 @@ Name TempVarNode::GetName(unsigned int num) const
   else {
     tmp.m_name = m_name;
   }
+#if DODM
   tmp.m_type = m_distType;
+#endif
   return tmp;
 }
 
 void TempVarNode::FlattenCore(ofstream &out) const
 {
   DLANode::FlattenCore(out);
+#if DODM
   WRITE(m_distType);
+#endif
   out << m_name << endl;
 }
 
 void TempVarNode::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLANode::UnflattenCore(in, info);
+#if DODM
   READ(m_distType);
+#endif
   getline(in,m_name);
 }
 
@@ -339,7 +364,14 @@ void TempVarNode::BuildSizeCache()
     return;
   m_mlsize = new Sizes;
   m_nlsize = new Sizes;
+#if DODM
   GetLocalSizes(m_distType, GetM(0), GetN(0), *m_mlsize, *m_nlsize);
+#elif DOBLIS
+  *m_mlsize = *GetM(0);
+  *m_nlsize = *GetN(0);
+#else
+sdlkfj
+#endif
 }
 
 void OutputNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
@@ -414,6 +446,7 @@ void OutputNode::UnflattenCore(ifstream &in, SaveInfo &info)
   getline(in, m_type);
 }
 
+#if DOELEM
 void MakeTrapNode::SanityCheck()
 {
   DLAOp<1,1>::SanityCheck();
@@ -501,6 +534,8 @@ void MoveMakeTrap::Apply(Poss *poss, Node *node) const
     throw;
 }
 
+#endif
+
 bool RemoveScaleByOne::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() != ScaleNode::GetClass())
@@ -568,12 +603,14 @@ void ScaleTrapNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_tri = scal->m_tri;
 }
 
+#if DODM
 DistType ScaleTrapNode::GetDistType(unsigned int num) const
 {
   if (num > 0)
     throw;
   return ((DLANode*)Input(0))->GetDistType(InputConnNum(0));
 }
+#endif
 
 
 void ScaleTrapNode::Prop()
@@ -643,12 +680,14 @@ void ScaleNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_val = scal->m_val;
 }
 
+#if DODM
 DistType ScaleNode::GetDistType(unsigned int num) const
 {
   if (num > 0)
     throw;
   return ((DLANode*)Input(0))->GetDistType(InputConnNum(0));
 }
+#endif
 
 void ScaleNode::FlattenCore(ofstream &out) const
 {
@@ -664,6 +703,7 @@ void ScaleNode::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 
+#if DOELEM
 ViewPan::~ViewPan()
 {
   if (m_sizes) {
@@ -1062,6 +1102,7 @@ void ViewAroundDiagCombine::UnflattenCore(ifstream &in, SaveInfo &info)
   DLAOp<5,3>::UnflattenCore(in, info);
   READ(m_isVert);
 }
+#endif
 
 Name ViewTL::GetName(unsigned int num) const
 {

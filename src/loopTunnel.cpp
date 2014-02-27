@@ -97,6 +97,13 @@ void LoopTunnel::SanityCheck()
   }
 }
 
+#if DODM
+DistType LootTunnel::GetDistType(unsigned int num) const 
+{ 
+  return InputDistType(0); 
+}
+#endif
+
 PossTunnel* LoopTunnel::GetSetTunnel()
 {
   LoopTunnel *tun;

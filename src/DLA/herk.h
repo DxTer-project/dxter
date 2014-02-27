@@ -93,7 +93,9 @@ class Herk : public DLAOp<2,1>, public HerkProps
   virtual NodeType GetType() const;
   static Node* BlankInst() { return new Herk(ABSLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual void SanityCheck();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void PrintCode(IndStream &out);
@@ -143,7 +145,9 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   virtual NodeType GetType() const;
   static Node* BlankInst() { return new TriRK(SMLAYER, LOWER, NORMAL, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -160,6 +164,7 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   virtual Comm ParallelComm() const {return m_comm;}
 };
 
+#if DOELEM
 class TriRKTrans : public TransTransformation
 {
  public:
@@ -167,6 +172,7 @@ class TriRKTrans : public TransTransformation
   virtual string GetTransType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
 };
+#endif
 
 class DistHerkToLocalTriRK : public SingleTrans
 {

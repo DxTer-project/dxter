@@ -58,7 +58,7 @@ void Hetrmm::SanityCheck()
   DLAOp<1,1>::SanityCheck();
   if (m_inputs.size() != 1)
     cout << "m_inputs.size() != 1\n";
-#if DODPPHASE
+#if DOELEM
   if (m_layer == ABSLAYER || m_layer == DMLAYER) {
     if (InputDistType(0) != D_MC_MR)
       throw;
@@ -76,7 +76,7 @@ void Hetrmm::SanityCheck()
 
 void Hetrmm::Prop()
 {
-#if DODPPHASE
+#if DOELEM
   if (!IsValidCost(m_cost)) {
     DLAOp<1,1>::Prop();
     if (m_layer == SMLAYER)
@@ -104,19 +104,17 @@ Phase Hetrmm::MaxPhase() const
 #endif
 }
 
+#if DOELEM
 DistType Hetrmm::GetDistType(unsigned int num) const 
 { 
-#if DODPPHASE
   if (m_layer == DMLAYER || m_layer == ABSLAYER)
     return D_MC_MR; 
   else if (m_layer == SMLAYER)
     return D_STAR_STAR;
   else
     throw;
-#else
-  throw;
-#endif
 }
+#endif
 
 bool Hetrmm::ShouldCullDP() const 
 {
@@ -201,7 +199,7 @@ void HetrmmLoopExp::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-#if DODPPHASE
+#if DOELEM
 bool DistHetrmmToLocalHetrmm::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() == Hetrmm::GetClass()) {

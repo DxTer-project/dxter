@@ -46,7 +46,9 @@ class Trxm : public DLAOp<2,1>, public TrProps
   static ClassType GetClass() {return "Trxm";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual Phase MaxPhase() const;
   virtual bool DoNotCullDP() const;
   virtual NodeType GetType() const;
@@ -70,7 +72,9 @@ class Trmm3 : public DLAOp<3,1>, public TrProps
   static ClassType GetClass() {return "Trmm3";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual Phase MaxPhase() const;
   virtual bool DoNotCullDP() const;
   virtual NodeType GetType() const;
@@ -93,7 +97,7 @@ class TrxmBP : public DLAOp<3,2>, public TrProps
   static ClassType GetClass() {return "TrxmBP";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual DistType GetDistType(unsigned int num) const;
+  //  virtual DistType GetDistType(unsigned int num) const;
   virtual Phase MaxPhase() const {return NUMPHASES;}
   virtual NodeType GetType() const;
   virtual void Prop();
@@ -132,6 +136,7 @@ class Trmm3LoopExp : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+#if DOELEM
 class DistTrxmToLocalTrxm : public SingleTrans
 {
   DistType m_leftType, m_rightType;
@@ -143,6 +148,7 @@ class DistTrxmToLocalTrxm : public SingleTrans
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
+#endif
 
 
 //Uses special Trsm not in Elemental but something Jack built on top of Elemental
@@ -156,7 +162,7 @@ class DistTrsmToSpecialLocalTrsm : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
-
+#if DOELEM
 class LocalTrmmAcc : public DLAOp<3,1>
 {
  public:
@@ -180,6 +186,7 @@ class LocalTrmmAcc : public DLAOp<3,1>
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   static Cost GetCost(Side side, bool isTrans, const Sizes *localMs, const Sizes *localNs);
 };
+#endif
 
 class DistTrmmToLocalTrmmStatA : public  SingleTrans
 {
@@ -191,6 +198,7 @@ class DistTrmmToLocalTrmmStatA : public  SingleTrans
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
 
+#if DOELEM
 class TrxmTrans : public TransTransformation
 {
  public:
@@ -217,6 +225,7 @@ class LTrmmToTrsm : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;  
 };
+#endif
 
 class BLISTrxmLoopExp : public SingleTrans
 {

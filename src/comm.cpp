@@ -26,7 +26,7 @@ string CommToStr(Comm comm)
 {
   switch(comm)
   {
-#if DODM
+#if DOELEM
     case(MRCOMM):
       return "g.MRComm()";
     case (MCCOMM):
@@ -95,7 +95,7 @@ Comm MaxComm(Comm comm1, Comm comm2)
 {
   switch(comm1)
   {
-#if DODM
+#if DOELEM
       throw;
 #elif DOSM||DOSQM
 #if NUMPROCS>1

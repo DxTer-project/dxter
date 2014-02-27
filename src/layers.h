@@ -23,14 +23,14 @@
 
 #pragma once
 
-#define DODM 0
+#define DOELEM 0
 #define DOSQM 0
-#define DOSM 0
-#define DOTENSORS 1
+#define DOSM 1
+#define DOTENSORS 0
 
 #define DOBLIS DOSM||DOSQM
 
-#if DODM
+#if DOELEM
 
 //Phases of generation
 #define DPPHASE 0

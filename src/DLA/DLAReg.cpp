@@ -33,7 +33,7 @@ void RegAllTensorNodes()
 {
   cout << "no registration!\n";
 }
-#elif DOBLIS||DODM
+#elif DOBLIS||DOELEM
 void RegAllDLANodes()
 {
   Reg(TriInv);
@@ -41,23 +41,26 @@ void RegAllDLANodes()
   Reg(Scal);
   Reg(ConstScal);
   Reg(Chol);
+#if DOELEM
   Reg(RedistNode);
   Reg(SumScatterNode);
   Reg(SumScatterFrom);
   Reg(SumOverCommNode);
+  Reg(LocalSymmAcc);
+  Reg(MakeTrapNode);
+  Reg(LocalTrmmAcc);
+  Reg(ViewAroundDiag);
+  Reg(ViewAroundDiagCombine);
+  Reg(ViewPan);
+#endif
   Reg(Gemm);
   Reg(InputNode);
   Reg(ConstVal);
   Reg(TempVarNode);
   Reg(OutputNode);
-  Reg(MakeTrapNode);
   Reg(ScaleNode);
   Reg(ScaleTrapNode);
-  Reg(ViewPan);
-  Reg(ViewAroundDiag);
-  Reg(ViewAroundDiagCombine);
   Reg(Hemm);
-  Reg(LocalSymmAcc);
   Reg(Her2k);
   Reg(Tri2k);
   Reg(Herk);
@@ -71,7 +74,6 @@ void RegAllDLANodes()
   Reg(LoopTunnel);
   Reg(CritSectTunnel);
   Reg(PossTunnel);
-  Reg(LocalTrmmAcc);
   Reg(Trxm);
   Reg(Transpose);
   Reg(TrxmBP);

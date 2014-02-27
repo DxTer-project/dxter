@@ -45,6 +45,7 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
 		   Type type,
 		   Layer layer);
 
+#if DOELEM
 //This has an optimization found in Elemental hardcoded
 // into the algorithm.  Think about it as a simplifier
 // I manually applied.
@@ -55,6 +56,7 @@ Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
 			  Coef alpha, Coef beta,
 			  Type type,
 			  Layer layer);
+#endif
 
 
 
@@ -74,7 +76,9 @@ class Hemm : public DLAOp<3,1>
   virtual NodeType GetType() const;
   static Node* BlankInst() { return new Hemm(ABSLAYER, LEFT, LOWER, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -96,6 +100,7 @@ class HemmLoopExp : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+#if DOELEM
 class DistHemmToLocalHemm : public SingleTrans
 {
   DistType m_leftType, m_rightType;
@@ -107,7 +112,9 @@ class DistHemmToLocalHemm : public SingleTrans
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
+#endif
 
+#if DOELEM
 //Special computation kernel in Elemental
 class LocalSymmAcc : public DLAOp<5,2>
 {
@@ -132,6 +139,7 @@ class LocalSymmAcc : public DLAOp<5,2>
   static Cost GetCost(Side side, const Sizes *localMs, const Sizes *localNs);
 };
 
+
 class DistHemmToLocalHemmStatA : public SingleTrans
 {
  public:
@@ -141,6 +149,7 @@ class DistHemmToLocalHemmStatA : public SingleTrans
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
+#endif
 
 class BLISHemmLoopExp : public SingleTrans
 {

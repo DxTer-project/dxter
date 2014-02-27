@@ -124,6 +124,7 @@ void Gemm::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_comm);
 }
 
+#if DOELEM
 DistType Gemm::GetDistType(unsigned int num) const
 {
 #if DODPPHASE
@@ -140,6 +141,7 @@ DistType Gemm::GetDistType(unsigned int num) const
   return InputDistType(2);
 #endif
 }
+#endif
 
 Phase Gemm::MaxPhase() const
 {  switch(GetLayer()) {
@@ -191,12 +193,14 @@ Cost Gemm::GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, 
 
 void Gemm::SanityCheck()
 {
+#if DOELEM
   if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER) {
     if (InputDistType(2) != D_MC_MR) {
       cout << "input not D_MC_MR 7";
       throw;
     }
   }
+#endif
 }
 
 void Gemm::Prop()
@@ -244,7 +248,7 @@ void Gemm::Prop()
   }
 }
 
-
+#if DOELEM
 void LocalGemmTransUpdate(DistType t0, DistType t1, Trans &transA, Trans &transB)
 {
   if (transA == NORMAL) {
@@ -374,6 +378,7 @@ void LocalGemmTransUpdate(DistType t0, DistType t1, Trans &transA, Trans &transB
     cout << "BAD 12!!!!!!\n";
   
 }
+#endif
 
 void Gemm::PrintCode(IndStream &out)
 {
@@ -392,6 +397,7 @@ void Gemm::PrintCode(IndStream &out)
     out << m_beta;
     *out << ", " << GetInputName(2).str() << " );\n";
   }
+#if DOELEM
   else if (GetLayer() == SMLAYER) {
     string transAStr, transBStr;
     DistType t0 = InputDistType(0);
@@ -409,6 +415,7 @@ void Gemm::PrintCode(IndStream &out)
     out << m_beta;
     *out << ", " << GetInputName(2).str() << " );\n";
   }
+#endif
   else if (GetLayer() == S1LAYER ||
            GetLayer() == S2LAYER ||
            GetLayer() == S3LAYER) {
@@ -551,11 +558,12 @@ void GemmLoopExp::Apply(Poss *poss, Node *node) const
 
 
 
-
+#if DOELEM
 bool DistGemmToLocalGemmStatC::CanApply(const Poss *poss, const Node *node) const
 {
   return IsDMGemm(node);
 }
+
 
 void DistGemmToLocalGemmStatC::Apply(Poss *poss, Node *node) const
 {
@@ -963,7 +971,6 @@ Cost DistGemmToContribLocalGemmStatATrans::RHSCostEstimate(const Node *node) con
 }
 
 
-
 string GemmTrans::GetTransType() const
 {
   return "Gemm";
@@ -992,6 +999,7 @@ bool GemmTrans::CanApply(const Poss *poss, const Node *node) const
   else
     return false;
 }
+
 
 bool GemmInputReordering::CanApply(const Poss *poss, const Node *node) const
 {
@@ -1181,6 +1189,7 @@ void GemmInputReordering::Apply(Poss *poss, Node *node) const
   else
     throw;
 }
+#endif
 
 Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
                    Node *Bin, unsigned int Bnum,
@@ -1558,7 +1567,11 @@ void SplitGemm::Apply(Poss *poss, Node *node) const
   Node *Cin = gemm->Input(2);
   unsigned int Cnum = gemm->InputConnNum(2);
 
+#if DOELEM
   TempVarNode *CTmp = new TempVarNode(D_MC_MR, "CTemp");
+#else
+  TempVarNode *CTmp = new TempVarNode("CTemp");
+#endif
   CTmp->AddInput(Cin, Cnum);
 
   Axpy *axpy = new Axpy(m_layer, COEFONE);

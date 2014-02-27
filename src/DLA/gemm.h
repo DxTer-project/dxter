@@ -66,7 +66,9 @@ class Gemm : public DLAOp<3,1>
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual Phase MaxPhase() const;
   virtual void SanityCheck();
   virtual void Prop();
@@ -96,6 +98,7 @@ class GemmLoopExp : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+#if DOELEM
 class DistGemmToLocalGemmStatC : public SingleTrans
 {
  public:
@@ -149,6 +152,7 @@ class DistGemmToContribLocalGemmStatATrans : public SingleTrans
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
 
+
 class GemmTrans : public TransTransformation
 {
  public:
@@ -156,6 +160,7 @@ class GemmTrans : public TransTransformation
   virtual string GetTransType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
 };
+
 
 class GemmInputReordering : public SingleTrans
 {
@@ -167,6 +172,7 @@ class GemmInputReordering : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+#endif
 
 class BLISGemmLoopExp : public SingleTrans
 {

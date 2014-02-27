@@ -68,6 +68,7 @@ void Chol::PrintCode(IndStream &out)
     throw;
 }
 
+#if DOELEM
 DistType Chol::GetDistType(unsigned int num) const
 {
   if (m_layer == ABSLAYER || m_layer == DMLAYER)
@@ -77,6 +78,7 @@ DistType Chol::GetDistType(unsigned int num) const
   else
     throw;
 }
+#endif
 
 
 void Chol::FlattenCore(ofstream &out) const
@@ -121,6 +123,7 @@ void Chol::SanityCheck()
   DLAOp<1,1>::SanityCheck();
   if (m_inputs.size() != 1)
     cout << "m_inputs.size() != 1\n";
+#if DOELEM
   if (m_layer == DMLAYER) {
     if (InputDistType(0) != D_MC_MR)
       cout << "input not D_MC_MR";
@@ -133,6 +136,7 @@ void Chol::SanityCheck()
     if (!(*InputLocalM(0) == *InputLocalN(0)))
       throw;
   }
+#endif
 }
 
 string CholLoopExp::GetType() const 
@@ -181,6 +185,8 @@ void CholLoopExp::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 } 
 
+#if DOELEM
+
 bool DistCholToLocalChol::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() != Chol::GetClass())
@@ -202,6 +208,7 @@ void DistCholToLocalChol::Apply(Poss *poss, Node *node) const
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+#endif
 
 
 Loop* Chol1LowerAlg(Node *in, unsigned int num, bool dist)

@@ -40,7 +40,9 @@ class LU : public DLAOp<2,2>
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "LU";}
   virtual NodeType GetType() const {return "LU";}
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual Phase MaxPhase() const;
   virtual void SanityCheck();
   virtual void Prop();
@@ -57,7 +59,9 @@ class PanelLU : public DLAOp<7,7>
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "PanelLU";}
   virtual NodeType GetType() const {return "PanelLU";}
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual Phase MaxPhase() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);

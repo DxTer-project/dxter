@@ -46,7 +46,9 @@ class LoopTunnel : public PossTunnel
   UpStat GetUpStat(Quad quad) const;
   bool AllFullyUpdated() const;
   virtual void SanityCheck();  
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(0); }
+#if DODM
+  virtual DistType GetDistType(unsigned int num) const;
+#endif
   inline void SetIndepIters() {m_indepIters = true;}
   inline bool IndepIters() const {return m_indepIters;}
   bool InputIsTemp() const;

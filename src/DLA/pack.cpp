@@ -139,10 +139,7 @@ bool Pack::RemoveParallelization()
   return false;
 }
 
-DistType Pack::GetDistType(unsigned int num) const
-{
-  return InputDistType(1);
-}
+
 
 Phase Pack::MaxPhase() const
 {
@@ -459,7 +456,6 @@ PackBuff::PackBuff(string name,
                    PackSize mSize, PackSize nSize)
   : m_comm(CORECOMM)
 {
-  m_name.m_type = UNKNOWN;
   if (name.find("_packed") == string::npos) {
     m_name.m_name = name + "_packed";
   }
@@ -523,7 +519,6 @@ void PackBuff::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLAOp<1,1>::UnflattenCore(in, info);
   getline(in, m_name.m_name);
-  m_name.m_type = UNKNOWN;
   READ(m_pack);
   READ(m_packMat);
   READ(m_tri);

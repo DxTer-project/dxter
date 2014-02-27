@@ -53,6 +53,7 @@ void Combine::Prop()
     }
     
     m_cost = ZERO;
+#if DODM
     DistType type = InputDistType(0);
     for(unsigned int i = 0; i < m_inputs.size(); ++i) {
       if (type != InputDistType(i)) {
@@ -63,6 +64,7 @@ void Combine::Prop()
         m_poss->MarkInsane();
       }
     }
+#endif
   }
 }
 

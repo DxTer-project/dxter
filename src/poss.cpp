@@ -205,7 +205,7 @@ void Poss::ForcePrint()
     NodeVecConstIter nodeIter = m_possNodes.begin();
     for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
       if (!(*nodeIter)->HasPrinted()) {
-#ifdef DODM
+#ifdef DOELEM
         IndStream out(&cout,ELEMSTREAM);
 #elif DOSQM
         IndStream out(&cout,BLISSTREAM);
@@ -1184,7 +1184,11 @@ bool AddNodesDown(Node *edgeStart, unsigned int childNum, NodeVec &outputTuns, N
   Node *child = conn->m_n;
   if (possNodes.find(child) != possNodes.end())
     return false;
-  if ((child->GetNodeClass() == RedistNode::GetClass()) || child->IsPossTunnel()) {
+  if (
+#if DOELEM
+      (child->GetNodeClass() == RedistNode::GetClass()) || 
+#endif
+      child->IsPossTunnel()) {
     if (child->IsPossTunnel(POSSTUNIN)) {
       cout << "Whoa!\n";
       throw;
@@ -1239,10 +1243,13 @@ void AddPossTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &poss
   for(; iter != node->m_inputs.end(); ++iter) {
     NodeConn *conn = *iter;
     if (conn->m_n != ignore) {
+#if DOELEM
       if (conn->m_n->GetNodeClass() == RedistNode::GetClass()) {
         AddPossTunnels(conn->m_n, node, outputTuns, possNodes);
       }
-      else {
+      else 
+#endif
+	{
         PossTunnel *tun = new PossTunnel(POSSTUNIN);
         possNodes.insert(tun);
         conn->m_n->RemoveChild(node, conn->m_num);
@@ -1253,6 +1260,7 @@ void AddPossTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &poss
       }
     }
   }
+#if DOELEM
   unsigned int i = 0;
   for (; i < node->m_children.size(); ++i) {
     NodeConn *conn = node->m_children[i];
@@ -1262,6 +1270,7 @@ void AddPossTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &poss
       }
     }
   }
+#endif
 }
 
 bool FoundLoop(Node *node, NodeVec &queue)

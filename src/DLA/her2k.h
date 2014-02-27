@@ -111,7 +111,9 @@ class Her2k : public DLAOp<3,1>, public Her2kProps
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new Her2k(ABSLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual void Prop();
   virtual void SanityCheck();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -149,7 +151,9 @@ class Tri2k : public DLAOp<5,1>, public Her2kProps
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new Tri2k(SMLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
+#if DOELEM
   virtual DistType GetDistType(unsigned int num) const { return InputDistType(4); }
+#endif
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -162,6 +166,7 @@ class Tri2k : public DLAOp<5,1>, public Her2kProps
   static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);
 };
 
+#if DOELEM
 class DistHer2kToLocalTri2k : public SingleTrans
 {
  public:
@@ -192,6 +197,7 @@ class Tri2kTrans : public TransTransformation
   virtual string GetTransType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
 };
+#endif DOELEM
 
 class Tri2kLowerLayer : public LowerLayer
 {

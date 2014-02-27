@@ -88,6 +88,7 @@ Her2k::Her2k(Layer layer, Tri tri, Trans trans, Coef alpha, Coef beta, Type type
 void Her2k::SanityCheck()
 {
   DLAOp<3,1>::SanityCheck();
+#if DOELEM
   if (GetLayer() == ABSLAYER) {
     if (InputDistType(0) != D_MC_MR)
       throw;
@@ -130,6 +131,7 @@ void Her2k::SanityCheck()
     if (InputDistType(2) != D_STAR_STAR)
       throw;
   }
+#endif
   
   
   if (m_type == REAL) {
@@ -184,6 +186,7 @@ Cost Her2k::GetCost(Layer layer, const Sizes *m, const Sizes *k)
     throw;
 }
 
+#if DOELEM
 DistType Her2k::GetDistType(unsigned int num) const
 {
   if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
@@ -195,6 +198,7 @@ DistType Her2k::GetDistType(unsigned int num) const
   else
     throw;
 }
+#endif
 
 void Her2k::FlattenCore(ofstream &out) const
 {
@@ -415,6 +419,7 @@ void Tri2k::Duplicate(const Node *orig, bool shallow, bool possMerging)
 void Tri2k::SanityCheck()
 {
   DLAOp<5,1>::SanityCheck();
+#if DOELEM
   if (GetLayer() == SMLAYER) {
     
     if (m_type == REAL) {
@@ -479,7 +484,8 @@ void Tri2k::SanityCheck()
     if (InputDistType(4) != D_MC_MR)
       throw;
   }
-  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+#elif DOBLIS
+  if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
     if (*InputLocalM(0) != *InputLocalM(2))
       throw;
     if (*InputLocalM(0) != *InputLocalM(4))
@@ -495,12 +501,14 @@ void Tri2k::SanityCheck()
     if (*InputLocalN(1) != *InputLocalN(4))
       throw;
   }
+#endif
 }
 
 void Tri2k::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<5,1>::Prop();
+#if DOELEM
     if (GetLayer() == SMLAYER) {
       const Sizes *localM = InputLocalM(4);
       const Sizes *localN = InputLocalN(4);
@@ -509,13 +517,15 @@ void Tri2k::Prop()
       
       m_cost = GetCost(SMLAYER, localM, localN, others);
     }
-    else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+#elif DOBLIS
+    if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
       const Sizes *localM = InputLocalM(4);
       const Sizes *localN = InputLocalN(4);
       const Sizes *others = (InputLocalN(0));
       
       m_cost = GetCost(SMLAYER, localM, localN, others);
     }
+#endif
   }
 }
 
@@ -529,6 +539,7 @@ Cost Tri2k::GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2,
 
 void Tri2k::PrintCode(IndStream &out)
 {
+#if DODM
   if (GetLayer() == SMLAYER) {
     out.Indent();
     *out << "LocalTrr2k"
@@ -571,7 +582,8 @@ void Tri2k::PrintCode(IndStream &out)
     *out << ", "
     << GetInputName(4).str() << ");\n";
   }
-  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+#elif DOBLIS
+  if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
     out.Indent();
     *out << "BLISTrr2k" << LayerNumToStr(GetLayer())
     << "( " << TriToStr(m_tri) << ", \n" << out.Tabs(1) << "";
@@ -586,6 +598,7 @@ void Tri2k::PrintCode(IndStream &out)
     << GetInputName(4).str() << ");\n";
     
   }
+#endif
 }
 
 void Tri2k::FlattenCore(ofstream &out) const
@@ -600,6 +613,7 @@ void Tri2k::UnflattenCore(ifstream &in, SaveInfo &info)
   Tri2k::UnflattenCore(in,info);
 }
 
+#if DODM
 bool DistHer2kToLocalTri2k::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() == Her2k::GetClass()
@@ -770,6 +784,7 @@ bool Tri2kTrans::CanApply(const Poss *poss, const Node *node) const
   else
     throw;
 }
+#endif
 
 Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum,
                     Node *Bin, unsigned int Bnum,

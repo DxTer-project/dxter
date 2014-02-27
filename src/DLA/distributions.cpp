@@ -25,8 +25,9 @@
 #include "math.h"
 #include "helperNodes.h"
 
-void GetLocalSize(DistType dist, Size m, Size n, Size &localM, Size &localN);
+#if DOELEM
 
+void GetLocalSize(DistType dist, Size m, Size n, Size &localM, Size &localN);
 
 bool CanTrans(DistType src, DistType dest, bool tryOpposite)
 {
@@ -87,6 +88,7 @@ DistType TransType(DistType dist, Trans trans)
     throw;
   }
 }
+
 
 Trans UpdateTrans(Trans trans, DistType dist)
 {
@@ -2222,3 +2224,5 @@ template class ExpandRedistribution<D_MC_MR, D_STAR_MR>;
 template class ExpandRedistribution<D_MC_MR, D_MR_STAR>;
 template class ExpandRedistribution<D_MC_MR, D_STAR_MC>;
 template class ExpandRedistribution<D_VC_STAR,D_MR_STAR>;
+
+#endif

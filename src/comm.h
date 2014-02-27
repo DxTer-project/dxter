@@ -27,7 +27,7 @@
 //#include "DLANode.h"
 
 enum Comm {
-#if DODM
+#if DOELEM
   MRCOMM,
   MCCOMM,
 #elif DOSM||DOSQM
@@ -55,7 +55,7 @@ inline Comm GetSubComm(Comm comm)
 {
   switch(comm)
     {
-#if DODM
+#if DOELEM
       throw;
 #elif DOSM||DOSQM
 #if NUMPROCS>1
@@ -88,7 +88,7 @@ inline unsigned int NumCoresInComm(Comm comm)
 {
   switch(comm)
     {
-#if DODM
+#if DOELEM
     case(MRCOMM):
       return CVAL;
     case (MCCOMM):

@@ -25,10 +25,12 @@
 #include "loopSupport.h"
 #include "blas.h"
 
+#if DOELEM
 DistType LU::GetDistType(unsigned int num) const
 {
   return InputDistType(num);
 }
+#endif
  
 Phase LU::MaxPhase() const
 {
@@ -171,11 +173,12 @@ Loop* LUVar5Loop(Node *Ain, unsigned int Anum,
   return loop;  
 }
 
-
+#if DOELEM
 DistType PanelLU::GetDistType(unsigned int num) const
 {
   return InputDistType(num);
 }
+#endif
 
 Phase PanelLU::MaxPhase() const
 {

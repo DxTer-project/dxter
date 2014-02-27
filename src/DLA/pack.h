@@ -60,7 +60,7 @@ class Pack : public DLAOp<2,1>
   virtual bool IsReadOnly() const {return false;}
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
-  virtual DistType GetDistType(unsigned int num) const;
+  //virtual DistType GetDistType(unsigned int num) const;
   virtual Phase MaxPhase() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -101,7 +101,7 @@ class PackBuff : public DLAOp<1,1>
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "PackBuff";}
   virtual NodeType GetType() const { return "packBuff"+CommToStr(m_comm); }
-  virtual DistType GetDistType(unsigned int num) const {return InputDistType(0);}
+  //virtual DistType GetDistType(unsigned int num) const {return InputDistType(0);}
   virtual Phase MaxPhase() const { return NUMPHASES;}
   virtual void PrintCode(IndStream &out);
   virtual void Prop();

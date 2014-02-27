@@ -33,7 +33,7 @@ using namespace std;
 #define ALPHAVAL 100000*GAMMAVAL
 #define PSIWVAL .25*GAMMAVAL
 #define PSIRVAL .25*GAMMAVAL
-#if DODM
+#if DOELEM
 #define RVAL 40
 #define CVAL 40
 #else

@@ -33,7 +33,9 @@ class DLANode : public Node
   Layer m_layer;
 
   //Implement in sub-classes
-  virtual DistType GetDistType(unsigned int num) const { return D_MC_MR; }
+#if DODM
+  virtual DistType GetDistType(unsigned int num) const;
+#endif
   virtual void SanityCheck();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
@@ -55,17 +57,18 @@ class DLANode : public Node
   const Sizes* InputLocalM(unsigned int num) const;
   const Sizes* InputLocalN(unsigned int num) const;
   virtual void ClearBeforeProp();
+#if DODM
   DistType InputDistType(unsigned int num) const;
+#endif
   virtual string GetCostStr();
   virtual bool HasProped() const;
   virtual bool IsDLA() const {return true;}
   virtual Cost GetCost() {return m_cost;}
+#if DOELEM
   DLANode* FindNonRedistParent(unsigned int num);
   DLANode* FindNonRedistParent(unsigned int num, unsigned int &parentNum);
+#endif
   DLANode* FindSideEffectingUser(unsigned int num);
-  bool IsRowVec(unsigned int num) const;
-  bool IsColVec(unsigned int num) const;
-  bool IsVec(unsigned int num) const;
   bool IsScalar(unsigned int num) const;
   virtual bool ShouldCullDP() const {return false;}
   virtual bool DoNotCullDP() const {return false;}

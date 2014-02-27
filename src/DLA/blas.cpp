@@ -62,22 +62,17 @@ void Axpy::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_comm);
 }
 
+#if DOELEM
 DistType Axpy::GetDistType(unsigned int num) const 
 { 
-#if DODPPHASE
   if (m_layer == DMLAYER || m_layer == ABSLAYER)
     return D_MC_MR; 
   else if (m_layer == SMLAYER)
     return InputDistType(1);
   else
     throw;
-#else
-  if (m_layer == S3LAYER || m_layer == ABSLAYER)
-    return InputDistType(1);
-  else
-    throw;
-#endif
 }
+#endif
 
 Phase Axpy::MaxPhase() const 
 {
@@ -205,6 +200,7 @@ Cost Axpy::GetCost(Layer layer, const Sizes *localMs, const Sizes *localNs)
     throw;
 }
 
+#if DOELEM
 bool FindDistUp(const RedistNode *node, DistType type)
 {
   if (node->m_destType == type)
@@ -233,6 +229,7 @@ bool FindDistDown(const Node *node, DistType type)
   return false;
 }
 
+
 bool CheckInput(const Node *node, unsigned int inNum, DistType type, bool skipFirstRedist) 
 {
   const Node *in = node->Input(inNum);
@@ -247,6 +244,7 @@ bool CheckInput(const Node *node, unsigned int inNum, DistType type, bool skipFi
   }
   return false;
 }
+#endif
 
 string ParallelizeAxpy::GetType() const
 {
@@ -277,7 +275,7 @@ void ParallelizeAxpy::Apply(Poss *poss, Node *node) const
 
 
 
-#if DODPPHASE
+#if DOELEM
 bool DistAxpyToLocalAxpy::WorthApplying(const Node *node) const
 {
   if (node->GetNodeClass() != Axpy::GetClass())
@@ -381,6 +379,7 @@ NodeType Scal::GetType() const
   return "Scal" + LayerNumToStr(GetLayer());
 }
 
+#if DOELEM
 DistType Scal::GetDistType(unsigned int num) const
 { 
   if (m_layer == DMLAYER)
@@ -392,6 +391,7 @@ DistType Scal::GetDistType(unsigned int num) const
   else
     throw;
 }
+#endif
 
 Phase Scal::MaxPhase() const 
 {
@@ -507,6 +507,7 @@ Phase ConstScal::MaxPhase() const
 #endif
 }
 
+#if DOELEM
 DistType ConstScal::GetDistType(unsigned int num) const
 { 
   if (m_layer == DMLAYER)
@@ -516,6 +517,7 @@ DistType ConstScal::GetDistType(unsigned int num) const
   else
     throw;
 }
+#endif
 
 bool ConstScal::ShouldCullDP() const 
 {
@@ -559,10 +561,12 @@ void ConstScal::SanityCheck()
     cout << "1 m_inputs.size() != 1\n";
     throw;
   }
+#if DOELEM
   else if (m_layer == DMLAYER) {
     if (InputDistType(1) != D_MC_MR)
       throw;
   }
+#endif
 }
 
 void ConstScal::PrintCode(IndStream &out)

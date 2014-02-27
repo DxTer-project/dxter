@@ -80,6 +80,7 @@ NodeType Hemm::GetType() const
   return str;
 }
 
+#if DOELEM
 DistType Hemm::GetDistType(unsigned int num) const
 { 
   switch(GetLayer()) {
@@ -95,6 +96,7 @@ DistType Hemm::GetDistType(unsigned int num) const
     throw;
   } 
 }
+#endif
 
 Phase Hemm::MaxPhase() const 
 {  
@@ -126,6 +128,7 @@ Phase Hemm::MaxPhase() const
 void Hemm::SanityCheck()
 {
   DLAOp<3,1>::SanityCheck();
+#if DOELEM
   if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER) {
     if (InputDistType(2) != D_MC_MR) {
       cout << "input not D_MC_MR 7";
@@ -144,10 +147,9 @@ void Hemm::SanityCheck()
     if (t1 != InputDistType(2))
       m_poss->MarkInsane();
   }
-  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER) {
-  }
   else
     throw;
+#endif
 }
 
 bool Hemm::ShouldCullDP() const 
@@ -246,6 +248,7 @@ void HemmLoopExp::Apply(Poss *poss, Node *node) const
   connC = hemm->m_inputs[2];
   
   switch(m_var) {
+#if DOELEM
     case(-8):
       loop = HemmLoopVar8Altered(connA->m_n, connA->m_num,
 				 connB->m_n, connB->m_num,
@@ -255,6 +258,7 @@ void HemmLoopExp::Apply(Poss *poss, Node *node) const
 				 hemm->m_type,
 				 m_toLayer);
       break;
+#endif
     case(4):
       loop = HemmLoopVar4(connA->m_n, connA->m_num,
 			  connB->m_n, connB->m_num,
@@ -283,6 +287,7 @@ void HemmLoopExp::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+#if DOELEM
 bool DistHemmToLocalHemm::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() == Hemm::GetClass()
@@ -336,6 +341,7 @@ Cost DistHemmToLocalHemm::RHSCostEstimate(const Node *node) const
   cost += RedistNode::GetCost(type, D_MC_MR, C1, C2);
   return cost;
 }
+#endif
 
 
 Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
@@ -522,7 +528,7 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
 }
 
 
-
+#if DOELEM
 Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
 		   Node *Bin, unsigned int Bnum,
 		   Node *Cin, unsigned int Cnum,
@@ -681,6 +687,7 @@ Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
   
   return loop;
 }
+
 
 
 LocalSymmAcc::LocalSymmAcc(Side side, Tri tri, Type type, Coef alpha)
@@ -970,6 +977,8 @@ Cost DistHemmToLocalHemmStatA::RHSCostEstimate(const Node *node) const
     return cost;
   }
 }
+
+#endif
 
 
 string BLISHemmLoopExp::GetType() const

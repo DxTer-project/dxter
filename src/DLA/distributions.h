@@ -25,6 +25,7 @@
 
 #include "transform.h"
 
+#if DOELEM
 enum OneDDistType {
   STAR,
   MC,
@@ -298,3 +299,4 @@ Cost GetRedistCost(DistType srcType, const Sizes *m, const Sizes *n)
 }
 
 
+#endif //DOELEM

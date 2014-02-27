@@ -88,11 +88,18 @@ void Node::Cull(Phase phase)
       cout << MaxPhase() << " is MaxPhase\n";
       for (unsigned int i = 0; i < m_inputs.size(); ++i) {
         DLANode *in = (DLANode*)Input(i);
-        cout << "Input " << i << " " << DistTypeToStr(((DLANode*)this)->InputDistType(i)) << endl;
+        cout << "Input " << i 
+#if DOELEM
+	     << " " << DistTypeToStr(((DLANode*)this)->InputDistType(i)) << endl;
+#else
+	<<endl;
+#endif
         ClassType type = in->GetNodeClass();
+#if DOELEM
         if (type == RedistNode::GetClass()) {
           cout << DistTypeToStr(in->InputDistType(0)) << endl;
         }
+#endif
       }
       m_poss->PrintTransVec();
       throw;
@@ -284,12 +291,15 @@ void Node::Print(IndStream &out, unsigned int graphNum)
         // of ops and the 2nd and 4th are, where the
         // 4th should be the final update of A10
         //I think this will work often, but not always
-        NodeConnVecConstIter childIter = m_children.begin();
+        NodeConnVecConstIter childIter;
+#if DOELEM
+	childIter = m_children.begin();
         for( ; childIter != m_children.end(); ++childIter) {
           Node *child = (*childIter)->m_n;
           if (child->GetNodeClass() == RedistNode::GetClass())
             child->Print(out, graphNum);
         }
+#endif
         //Try to print the read-only users of this first
         childIter = m_children.begin();
         for( ; childIter != m_children.end(); ++childIter) {

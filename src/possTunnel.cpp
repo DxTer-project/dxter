@@ -76,6 +76,7 @@ bool PossTunnel::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int
     throw;
 }
 
+#if DODM
 DistType PossTunnel::GetDistType(unsigned int num) const 
 {
   DistType type;
@@ -102,6 +103,7 @@ DistType PossTunnel::GetDistType(unsigned int num) const
   //  cout << "leaving\n";
   return type;
 }
+#endif
 
 PossTunnel* PossTunnel::GetSetTunnel()
 {

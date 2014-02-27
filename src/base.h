@@ -64,6 +64,7 @@ inline bool IsValidCost(Cost cost)
 
 using namespace std;
 
+#if DOELEM
 enum DistType { UNKNOWN, 
 		D_STAR_STAR, 
 		D_MC_MR, 
@@ -91,6 +92,9 @@ enum DistType { UNKNOWN,
 		D_VR_STAR, 
 		D_STAR_VR,
 		D_LASTDIST };
+#elif DOTENSORS
+
+#endif
 
 enum Trans { NORMAL,
 	     TRANS,
@@ -140,8 +144,10 @@ enum Dim {
 };
 
 string BoolToStr(bool boolVal);	    
+#if DOELEM
 string DistTypeToStr(DistType distType);
 DistType GetBaseDistType(DistType distType);
+#endif
 string TransToStr(Trans trans);
 char TransToChar(Trans trans);
 string SideToStr(Side side);
@@ -232,9 +238,15 @@ bool FoundInNodeVec(const NodeVec &vec, const Node *node);
 class Name
 {
  public:
+#if DOELEM
   DistType m_type;
+#endif
   string m_name;
- Name() : m_type(UNKNOWN), m_name("noname") {}
+ Name() :
+#if DOELEM
+  m_type(UNKNOWN), 
+#endif
+    m_name("noname") {}
   string str() const;
   Name& operator=(const Name &rhs);
   void Flatten(ofstream &out) const;

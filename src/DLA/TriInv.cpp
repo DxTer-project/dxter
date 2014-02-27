@@ -48,6 +48,7 @@ void TriInv::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_tri);
 }
 
+#if DOELEM
 DistType TriInv::GetDistType(unsigned int num) const
 {
   if (m_layer == ABSLAYER || m_layer == DMLAYER)
@@ -57,6 +58,7 @@ DistType TriInv::GetDistType(unsigned int num) const
   else
     throw;
 }
+#endif
 
 Phase TriInv::MaxPhase() const
 {
@@ -75,6 +77,7 @@ void TriInv::SanityCheck()
   DLAOp<1,1>::SanityCheck();
   if (m_inputs.size() != 1)
     cout << "m_inputs.size() != 1\n";
+#if DOELEM
   if (m_layer == ABSLAYER || m_layer == DMLAYER) {
     if (InputDistType(0) != D_MC_MR) {
       cout << "input not D_MC_MR";
@@ -87,8 +90,9 @@ void TriInv::SanityCheck()
       throw;
     }
   }
-  else
-    throw;
+#else
+  throw;
+#endif
 }
 
 void TriInv::PrintCode(IndStream &out)
@@ -181,6 +185,7 @@ void TriInvLoopExp::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+#if DOELEM
 bool DistTriInvToLocalTriInv::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() != TriInv::GetClass())
@@ -202,6 +207,7 @@ void DistTriInvToLocalTriInv::Apply(Poss *poss, Node *node) const
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+#endif
 
 Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
 {

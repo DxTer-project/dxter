@@ -989,7 +989,6 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
   const Size m = (*ms)[execNum];
   const Size n = (*ns)[execNum];
   const Size bs = GetMyLoop()->GetBS();
-  const DistType t = InputDistType(0);
   const unsigned int numElems = GetNumElems(m_dir);
 
   if (NumIters(bs, m, n) != numIters) {
@@ -1016,9 +1015,13 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
     }*/
   }
   if (loopType == ELEMLOOP) {
+#if DOELEM
+    const DistType t = InputDistType(0);
+
     for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
       GetLocalSizes(t, m_msizes+subMat, m_nsizes+subMat, m_mlsizes[subMat], m_nlsizes[subMat]);
     }
+#endif
   }
   else {
     for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
