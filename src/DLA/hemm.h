@@ -153,6 +153,7 @@ class DistHemmToLocalHemmStatA : public SingleTrans
 };
 #endif
 
+#if DOBLIS
 class BLISHemmLoopExp : public SingleTrans
 {
  public:
@@ -175,7 +176,7 @@ class BLISHemmToGemm: public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
-
+#endif
 
 class HemmLowerLayer : public LowerLayer
 {

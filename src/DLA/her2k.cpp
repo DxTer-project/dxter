@@ -1237,6 +1237,7 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
                      Tri tri,
                      Coef alpha, Coef beta, Type type,
                      Layer layer)
+#if DOBLIS
 {
   LoopTunnel *Atun = new LoopTunnel(POSSTUNIN);
   Atun->AddInput(Ain, Anum);
@@ -1267,7 +1268,7 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
     splitE->SetUpStats(NOTUP, FULLUP,
                        NOTUP, FULLUP);
   splitE->SetIndepIters();
-  
+
   GetUpToDiag *diag = new GetUpToDiag(tri, PARTRIGHT);
   if (tri == LOWER)
     diag->AddInputs(8,
@@ -1281,6 +1282,7 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
                     splitE, 1,
                     Atun, 0,
                     Ctun, 0);
+
   
   Node *tri2k = new Tri2k(layer, tri, NORMAL, alpha, beta, type);
   tri2k->AddInputs(10,
@@ -1318,6 +1320,11 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
   
   return loop;
 }
+#else
+{
+  throw;
+}
+#endif
 
 Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
                      Node *Bin, unsigned int Bnum,
@@ -1467,6 +1474,7 @@ string Tri2kLowerLayer::GetType() const
   + " to " + LayerNumToStr(m_toLayer);
 }
 
+#if DOBLIS
 bool Her2kToTri2K::CanApply(const Poss *poss, const Node *node) const
 {
   return (node->GetNodeClass() == Her2k::GetClass() &&
@@ -1524,7 +1532,7 @@ void Her2kToTri2K::Apply(Poss *poss, Node *node) const
   her2k->RedirectChildren(tri2k, 0);
   poss->DeleteChildAndCleanUp(node);
 }
-
+#endif
 
 
 string Tri2kLoopExp::GetType() const

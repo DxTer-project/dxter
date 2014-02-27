@@ -969,12 +969,15 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
   return loop;
 }
 
+
+
 Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum,
                     Node *Bin, unsigned int Bnum,
                     Node *Cin, unsigned int Cnum,
                     Tri tri,
                     Coef alpha, Coef beta, Type type,
                     Layer layer)
+#if DOBLIS
 {
   LoopTunnel *Atun = new LoopTunnel(POSSTUNIN);
   Atun->AddInput(Ain, Anum);
@@ -1036,9 +1039,14 @@ Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum,
   
   return loop;
 }
+#else
+{
+  throw;
+}
+#endif
 
 
-
+#if DOBLIS
 string BLISTriRKLoopExp::GetType() const
 {
   return "BLISTriRKLoopExp " + LayerNumToStr(m_fromLayer)
@@ -1194,6 +1202,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   
   return loop;
 }
+#endif
 
 bool TriRKLowerLayer::CanApply(const Poss *poss, const Node *node) const
 {
@@ -1229,6 +1238,7 @@ string TriRKLowerLayer::GetType() const
   + " to " + LayerNumToStr(m_toLayer);
 }
 
+#if DOBLIS
 bool HerkToTriRK::CanApply(const Poss *poss, const Node *node) const
 {
   return (node->GetNodeClass() == Herk::GetClass() &&
@@ -1274,4 +1284,5 @@ void HerkToTriRK::Apply(Poss *poss, Node *node) const
   herk->RedirectChildren(trirk, 0);
   poss->DeleteChildAndCleanUp(node);
 }
+#endif
 #endif

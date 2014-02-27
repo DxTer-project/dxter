@@ -214,6 +214,7 @@ void Gemm::Prop()
       case (DMLAYER):
         m_cost = ZERO;
         break;
+#if DOELEM
       case (SMLAYER):
       {
         DLANode *in0 = (DLANode*)Input(0);
@@ -226,6 +227,7 @@ void Gemm::Prop()
         m_cost = GetCost(SMLAYER, size1, size2, size3);
         break;
       }
+#elif DOBLIS
       case (S1LAYER):
       case (S2LAYER):
       case (S3LAYER):
@@ -246,6 +248,8 @@ void Gemm::Prop()
 	  Size numAElems = size1->SumProds11(*size2);
 	  m_cost += AdditionalCostForBringingIntoL2(this, 0, numAElems, m_comm);
 	}
+	break;
+#endif
     }
   }
 }
@@ -466,6 +470,7 @@ void Gemm::PrintCode(IndStream &out)
   }
 }
 
+#if DOBLIS
 void Gemm::UpdateInnerPackingMultiple(PackSize size)
 {
   Node *input = Input(0);
@@ -479,6 +484,7 @@ void Gemm::UpdateInnerPackingMultiple(PackSize size)
     throw;
   buff->m_n = size;
 }
+#endif
 
 
 string GemmLoopExp::GetType() const
@@ -1390,6 +1396,7 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   return loop;
 }
 
+#if DOBLIS
 string BLISGemmLoopExp::GetType() const
 {
   return "BLISGemmLoopExp";
@@ -1503,7 +1510,7 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   
   node->m_poss->DeleteChildAndCleanUp(node);
 }
-
+#endif
 
 bool GemmLowerLayer::CanApply(const Poss *poss, const Node *node) const
 {

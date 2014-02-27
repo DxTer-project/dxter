@@ -95,7 +95,7 @@ string DiagToStr(Diag diag)
 }
 
 #if DOELEM
-string DistTypeToStr(DistType distType)
+string DistTypeToStr(const DistType &distType)
 {
   switch(distType) {
     case D_STAR_STAR:

@@ -982,6 +982,7 @@ Cost DistHemmToLocalHemmStatA::RHSCostEstimate(const Node *node) const
 #endif
 
 
+#if DOBLIS
 string BLISHemmLoopExp::GetType() const
 {
   return "BLIS Hemm Loop Exp";
@@ -1130,6 +1131,8 @@ void BLISHemmToGemm::Apply(Poss *poss, Node *node) const
   hemm->RedirectAllChildren(gemm);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+
+#endif
 
 
 bool HemmLowerLayer::CanApply(const Poss *poss, const Node *node) const

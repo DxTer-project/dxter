@@ -1989,7 +1989,7 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
 }
 
 
-
+#if DOBLIS
 TrxmBP::TrxmBP(bool invert, Layer layer, Side side, Tri tri, Trans trans,
                Coef coeff, Coef beta, Type type)
 : TrProps(invert, side, tri, NOTTRIDIAG, trans, coeff, type),
@@ -2338,6 +2338,7 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+#endif DOBLIS
 
 Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
                         Node *Bin, unsigned int Bnum,
@@ -2484,6 +2485,7 @@ Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
   return loop;
 }
 
+#if DOBLIS
 template<>
 string TrxmRightToLeft<Trxm>::GetType() const
 {
@@ -2562,6 +2564,7 @@ void Trmm3RightToLeft::Apply(Poss *poss, Node *node) const
   trmm3->RedirectAllChildren(newTrans);
   newTrans->AddInput(trmm3, 0);
 }
+#endif
 
 template<>
 string TrxmLowerLayer<Trxm>::GetType() const
@@ -2619,6 +2622,7 @@ void TrxmLowerLayer<TrxmType>::Apply(Poss *poss, Node *node) const
 }
 
 
+#if DOBLIS
 bool BLISTrmm3LoopExp::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() == Trmm3::GetClass())
@@ -2745,7 +2749,9 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
   node->RedirectChildren(loop->OutTun(3), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+#endif
 
+#if DOBLIS
 bool TrmmAxpytoTrxm3::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() != Trxm::GetClass())
@@ -2816,8 +2822,10 @@ void CopyTrmmtoTrxm3::Apply(Poss *poss, Node *node) const
   poss->DeleteChildAndCleanUp(trmm);
 }
 
-
 template class TrxmRightToLeft<Trxm>;
+#endif
+
+
 template class TrxmLowerLayer<Trxm>;
 
 template class TrxmLowerLayer<Trmm3>;

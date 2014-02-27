@@ -101,12 +101,23 @@ class DistType
   DistType(const DistType &blah);
 };
 #endif
-bool DistTypeNotEqual(const DistType &one, const DistType &two);
+
+#if DOELEM
+inline bool DistTypeNotEqual(const DistType &one, const DistType &two) 
+{
+  return one != two;
+}
+#elif DOTENSORS
+  bool DistTypeNotEqual(const DistType &one, const DistType &two);
+#endif
+
+#if DODM
 string DistTypeToStr(const DistType &type);
 extern DistType DEFAULTDISTTYPE;
 void SetToDefaultDistType(DistType *type);
 void CheckThisSpot();
 void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
+#endif
 
 enum Trans { NORMAL,
 	     TRANS,
@@ -157,7 +168,6 @@ enum Dim {
 
 string BoolToStr(bool boolVal);	    
 #if DOELEM
-string DistTypeToStr(DistType distType);
 DistType GetBaseDistType(DistType distType);
 #endif
 string TransToStr(Trans trans);

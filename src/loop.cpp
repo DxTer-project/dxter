@@ -523,6 +523,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
       ((Split*)(*iter))->PrintVarDeclarations(out);
     }
   }
+#if DOBLIS
   if (m_type == BLISLOOP) {
     if (m_comm != CORECOMM) {
       bool barrier = false;
@@ -642,10 +643,13 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     out.Indent(1);
     *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
   }
-  else {
+  else 
+#else
+    {
     if (m_comm != CORECOMM)
       throw;
   }
+#endif
   
   PSet::PrintCurrPoss(out, graphNum);
   if (m_type == BLISLOOP) {
@@ -680,9 +684,11 @@ bool Loop::WorthFusing(Loop *loop)
   // loop, which means the buffers cannot be named the same.
   //Therefore, prohibit such fusion to allow for the same
   // buffer to be reused.
+#if DOBLIS
   if (FindOtherPackBuffs(m_posses[0], PACKABLOCK, NULL)) {
     return false;
   }
+#endif
   
   NodeVecIter iter = m_outTuns.begin();
   for(; iter != m_outTuns.end(); ++iter) {

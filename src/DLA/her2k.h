@@ -209,6 +209,7 @@ class Tri2kLowerLayer : public LowerLayer
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
+#if DOBLIS
 class Her2kToTri2K : public SingleTrans
 {
  public:
@@ -218,6 +219,7 @@ class Her2kToTri2K : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+#endif
 
 class Tri2kToTriRK : public SingleTrans
 {

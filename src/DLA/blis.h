@@ -23,6 +23,9 @@
 
 #pragma once
 
+#include "layers.h"
+#if DOBLIS
+
 #include "DLANode.h"
 #include "DLAOp.h"
 #include "pack.h"
@@ -209,3 +212,4 @@ bool FoundBarrier(const Node *node, unsigned int input, Comm comm);
 
 Cost AdditionalCostForBringingIntoL2(Node *node, unsigned int num, Size numAElems, Comm comm);
 Cost AdditionalCostOfBarrier(Comm comm, unsigned int numHits);
+#endif

@@ -2357,6 +2357,7 @@ PSet* LUExample()
 }
 
 PSet* AppBlkHouseExample()
+#if DOBLIS
 {
   InputNode *U = new InputNode("U input", BLIS_KC_BSVAL*10, BLIS_KC_BSVAL*10, "U");
   InputNode *T = new InputNode("T input", BLIS_KC_BSVAL, BLIS_KC_BSVAL*10, "T");
@@ -2381,11 +2382,9 @@ PSet* AppBlkHouseExample()
 		  splitT, 1,
 		  splitB, 1);
 
-#if DOELEM
-  TempVarNode *W = new TempVarNode(D_MC_MR, "W");
-#else
+
   TempVarNode *W = new TempVarNode("W");
-#endif
+
   W->SetLayer(S3LAYER);
   W->AddInput(splitB, 1);
 
@@ -2452,5 +2451,10 @@ PSet* AppBlkHouseExample()
   
   return outerSet;
 }
+#else
+{
+  throw;
+}
+#endif
 
 #endif //DOELEM || DOBLIS

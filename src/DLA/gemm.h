@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include "layers.h"
 #ifdef DOBLIS||DOELEM
 
 #include "DLAOp.h"
@@ -79,7 +80,9 @@ class Gemm : public DLAOp<3,1>
   virtual bool ShouldCullSR() const;
   virtual bool CanTransposeInputs() const;
   static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);
+#if DOBLIS
   virtual void UpdateInnerPackingMultiple(PackSize size);
+#endif
   virtual bool IsBLISParallelizable() const;
   virtual void Parallelize(Comm comm);
   virtual bool IsParallel() const;
@@ -176,6 +179,7 @@ class GemmInputReordering : public SingleTrans
 };
 #endif
 
+#if DOBLIS
 class BLISGemmLoopExp : public SingleTrans
 {
  public:
@@ -187,6 +191,7 @@ class BLISGemmLoopExp : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+#endif
 
 class GemmLowerLayer : public LowerLayer
 {

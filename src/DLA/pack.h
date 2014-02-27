@@ -23,6 +23,9 @@
 
 #pragma once
 
+#include "layers.h"
+#if DOBLIS
+
 #include "DLANode.h"
 #include "DLAOp.h"
 #include "comm.h"
@@ -179,3 +182,5 @@ class RenamePackBuff : public SingleTrans
 #endif //DOSOPHASE
 
 const Node* FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignore);
+
+#endif

@@ -19,6 +19,9 @@
  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "layers.h"
+#if DOBLIS
+
 #define PORTIONPARALLELIZABLE .8
 
 #include "blis.h"
@@ -987,3 +990,4 @@ Cost AdditionalCostOfBarrier(Comm comm, unsigned int numHits)
   else
     return 0;
 }
+#endif

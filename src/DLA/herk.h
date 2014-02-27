@@ -65,12 +65,14 @@ Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
+#if DOBLIS
 Loop* BLISHerkLoop(Node *Ain, unsigned int Anum, 
 		   Node *Bin, unsigned int Bnum,
 		   Node *Cin, unsigned int Cnum,
 		   Tri tri,
 		   Coef alpha, Type type,
 		   Layer layer);
+#endif
 
 class HerkProps
 {
@@ -185,6 +187,7 @@ class DistHerkToLocalTriRK : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+#if DOBLIS
 class BLISTriRKLoopExp : public SingleTrans
 {
  public:
@@ -197,6 +200,7 @@ class BLISTriRKLoopExp : public SingleTrans
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const {throw;}
 };
+#endif
 
 class TriRKLowerLayer : public LowerLayer
 {
@@ -208,6 +212,7 @@ class TriRKLowerLayer : public LowerLayer
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
+#if DOBLIS
 class HerkToTriRK : public SingleTrans
 {
  public:
@@ -217,4 +222,5 @@ class HerkToTriRK : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+#endif
 #endif

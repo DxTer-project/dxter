@@ -75,8 +75,10 @@ void RegAllDLANodes()
   Reg(CritSectTunnel);
   Reg(PossTunnel);
   Reg(Trxm);
+#if DOBLIS
   Reg(Transpose);
   Reg(TrxmBP);
+#endif
   Reg(LU);
   Reg(PanelLU);
   Reg(ViewTL);

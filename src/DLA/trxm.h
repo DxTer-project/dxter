@@ -86,6 +86,7 @@ class Trmm3 : public DLAOp<3,1>, public TrProps
   virtual bool ShouldCullSR() const;
 };
 
+#if DOBLIS
 class TrxmBP : public DLAOp<3,2>, public TrProps
 {
  public:
@@ -111,6 +112,7 @@ class TrxmBP : public DLAOp<3,2>, public TrProps
   virtual bool IsParallel() const;
   virtual bool RemoveParallelization();
 };
+#endif
 
 class TrxmLoopExp : public SingleTrans
 {
@@ -230,6 +232,7 @@ class LTrmmToTrsm : public SingleTrans
 };
 #endif
 
+#if DOBLIS
 class BLISTrxmLoopExp : public SingleTrans
 {
  public:
@@ -254,6 +257,10 @@ class BLISTrmm3LoopExp : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+#endif
+
+#if DOBLIS
+
 template<class TrxmType>
 class TrxmRightToLeft : public SingleTrans
 {
@@ -276,6 +283,7 @@ class Trmm3RightToLeft : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+#endif
 
 template<class TrxmType>
 class TrxmLowerLayer : public LowerLayer
@@ -289,6 +297,7 @@ class TrxmLowerLayer : public LowerLayer
 };
 
 
+#if DOBLIS
 class TrmmAxpytoTrxm3 : public SingleTrans
 {
  public:
@@ -311,5 +320,5 @@ class CopyTrmmtoTrxm3 : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
-
+#endif
 #endif
