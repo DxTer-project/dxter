@@ -462,7 +462,7 @@ void Scal::Prop()
   }
 }
 
-#if DODPPHASE
+#if DOELEM
 string DistScalToLocalScal::GetType() const
 {
   return "Distributed Scal to Local Scal " + DistTypeToStr(m_type);

@@ -316,7 +316,6 @@ string Name::str() const
 Name& Name::operator= (const Name &rhs)
 {
 #if DODM
-bl
   m_type = rhs.m_type;
 #endif
   m_name = rhs.m_name;

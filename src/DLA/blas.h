@@ -129,7 +129,7 @@ class Scal : public DLAOp<2,1>
   virtual bool ShouldCullDP() const;
 };
 
-#if ELEM
+#if DOELEM
 class DistScalToLocalScal : public SingleTrans
 {
   DistType m_type;

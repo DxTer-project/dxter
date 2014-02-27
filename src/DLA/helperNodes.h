@@ -117,8 +117,8 @@ m_distType(D_LASTDIST),
 
 #if DODM
  TempVarNode(DistType dist) 
-   : m_distType(D_LASTDIST), m_mlsize(NULL), m_nlsize(NULL) {}
- TempVarNode(DistType dist, string name) :  m_distType(D_LASTDIST), m_name(name), m_mlsize(NULL), m_nlsize(NULL) {}
+   : m_distType(dist), m_mlsize(NULL), m_nlsize(NULL) {}
+ TempVarNode(DistType dist, string name) :  m_distType(dist), m_name(name), m_mlsize(NULL), m_nlsize(NULL) {}
 #endif
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new TempVarNode; }
@@ -357,8 +357,8 @@ class ViewAroundDiagCombine : public DLAOp<5,3>
   virtual void Prop();
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-}
-#endif;
+};
+#endif
 
 
 class ViewTL : public DLANode

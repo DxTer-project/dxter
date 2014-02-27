@@ -23,12 +23,13 @@
 
 #pragma once
 
-#define DOELEM 0
+#define DOELEM 1
 #define DOSQM 0
-#define DOSM 1
+#define DOSM 0
 #define DOTENSORS 0
 
 #define DOBLIS DOSM||DOSQM
+#define DODM DOELEM|DOTENSORS
 
 #if DOELEM
 
