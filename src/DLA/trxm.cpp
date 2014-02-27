@@ -19,7 +19,8 @@
  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+#include "layers.h"
+#if DOBLIS||DOELEM
 
 #include "trxm.h"
 #include "blas.h"
@@ -2820,3 +2821,5 @@ template class TrxmRightToLeft<Trxm>;
 template class TrxmLowerLayer<Trxm>;
 
 template class TrxmLowerLayer<Trmm3>;
+
+#endif

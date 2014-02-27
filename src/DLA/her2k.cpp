@@ -19,7 +19,9 @@
  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "layers.h"
 
+#if DOBLIS||DOELEM
 
 #include "blas.h"
 #include "her2k.h"
@@ -539,7 +541,7 @@ Cost Tri2k::GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2,
 
 void Tri2k::PrintCode(IndStream &out)
 {
-#if DODM
+#if DOELEM
   if (GetLayer() == SMLAYER) {
     out.Indent();
     *out << "LocalTrr2k"
@@ -613,7 +615,7 @@ void Tri2k::UnflattenCore(ifstream &in, SaveInfo &info)
   Tri2k::UnflattenCore(in,info);
 }
 
-#if DODM
+#if DOELEM
 bool DistHer2kToLocalTri2k::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() == Her2k::GetClass()
@@ -1605,3 +1607,4 @@ void Tri2kLoopExp::Apply(Poss *poss, Node *node) const
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+#endif

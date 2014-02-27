@@ -19,7 +19,8 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+#include "layers.h"
+#if DOELEM||DOBLIS
 
 #include "blas.h"
 #include "hetrmm.h"
@@ -510,3 +511,4 @@ Loop* HetrmmAlgVar3Upper(Node *in, unsigned int num)
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
 }
+#endif

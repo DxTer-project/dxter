@@ -19,6 +19,8 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "layers.h"
+#if DOBLIS||DOELEM
 
 
 #include "lu.h"
@@ -207,3 +209,4 @@ void PanelLU::PrintCode(IndStream &out)
   out.Indent(1);
   *out << "&" << GetInputNameStr(6) << " );\n";
 }
+#endif

@@ -20,6 +20,8 @@
  */
 
 #include "gemm.h"
+
+#if DOBLIS||DOELEM
 #include "distributions.h"
 #include "string.h"
 #include "helperNodes.h"
@@ -1588,3 +1590,5 @@ void SplitGemm::Apply(Poss *poss, Node *node) const
   poss->AddNode(CTmp);
   poss->AddNode(axpy);
 }
+
+#endif

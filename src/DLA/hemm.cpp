@@ -20,7 +20,8 @@
 */
 
 
-
+#include "layers.h"
+#if DOELEM||DOBLIS
 #include "hemm.h"
 #include "blas.h"
 #include "distributions.h"
@@ -1162,3 +1163,4 @@ string HemmLowerLayer::GetType() const
   return "Hemm lower layer " + LayerNumToStr(m_fromLayer) 
     + " to " + LayerNumToStr(m_toLayer);
 }
+#endif

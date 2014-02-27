@@ -27,7 +27,7 @@
 
 #if DOELEM
 
-void GetLocalSize(DistType dist, Size m, Size n, Size &localM, Size &localN);
+//void GetLocalSize(DistType dist, Size m, Size n, Size &localM, Size &localN);
 
 bool CanTrans(DistType src, DistType dest, bool tryOpposite)
 {
@@ -1973,104 +1973,7 @@ const Sizes* RedistNode::LocalN(unsigned int num) const
   }
 }
 
-void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN)
-{
-  switch(dist) {
-  case D_STAR_STAR:
-    localM = *m;
-    localN = *n;
-    break;
-  case D_MC_MR:
-    localM = *m;
-    localM.SetCoeff(1.0 / R);
-    localN = *n;
-    localN.SetCoeff(1.0 / C);
-    break;
-  case D_MR_MC:
-    localM = *m;
-    localM.SetCoeff(1.0/C);
-    localN = *n;
-    localN.SetCoeff(1.0/R);
-      break;
-    case D_MC_STAR:
-      localM = *m;
-      localM.SetCoeff(1.0/R);
-      localN = *n;
-      break;
-    case D_MC_STAR_T:
-    case D_MC_STAR_H:
-      localM = *n;
-      localM.SetCoeff(1.0/R);
-      localN = *m;
-      break;
-    case D_STAR_MC:
-      localM = *m;
-      localN = *n;
-      localN.SetCoeff(1.0/R);
-      break;
-    case D_STAR_MC_T:
-    case D_STAR_MC_H:
-      localM = *n;
-      localN = *m;
-      localN.SetCoeff(1.0/ R);
-      break;
-    case D_MR_STAR:
-      localM = *m;
-      localM.SetCoeff(1.0 / C);
-      localN = *n;
-      break;
-    case D_MR_STAR_T:
-    case D_MR_STAR_H:
-      localM = *n;
-      localM.SetCoeff(1.0 / C);
-      localN = *m;
-      break;
-    case D_STAR_MR:
-      localM = *m;
-      localN = *n;
-      localN.SetCoeff(1.0 / C);
-      break;
-    case D_STAR_MR_T:
-    case D_STAR_MR_H:
-      localM = *n;
-      localN = *m;
-      localN.SetCoeff(1.0 / C);
-      break;
-    case D_VC_STAR:
-    case D_VR_STAR:
-      localM = *m;
-      localM.SetCoeff(1.0 / P);
-      localN = *n;
-      break;
-    case D_STAR_VC:
-    case D_STAR_VR:
-      localM = *m;
-      localN = *n;
-      localN.SetCoeff(1.0 / P);
-      break;
-    case D_MC_MR_H:
-    case D_MC_MR_T:
-      localM = *n;
-      localM.SetCoeff(1.0 / R);
-      localN = *m;
-      localN.SetCoeff(1.0 / C);
-      break;
-    case D_MR_MC_T:
-    case D_MR_MC_H:
-      localM = *n;
-      localM.SetCoeff(1.0 / C);
-      localN = *m;
-      localN.SetCoeff(1.0 / R);
-    case D_VC_STAR_T:
-    case D_VC_STAR_H:
-      localM = *n;
-      localM.SetCoeff(1.0 / P);
-      localN = *m;
-      break;
-    default:
-      throw;
-  }
-}
+
 
 
 bool CanUseUp(const Node *root)

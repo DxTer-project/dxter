@@ -69,19 +69,6 @@ class AxpyLowerLayer : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
-class ParallelizeAxpy : public SingleTrans
-{
- public:
-  Layer m_layer;
-  Comm m_comm;
- ParallelizeAxpy(Layer layer, Comm comm)
-   : m_layer(layer), m_comm(comm) {}
-  virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
-};
-
-
 #if DOELEM
 class DistAxpyToLocalAxpy : public SingleTrans
 {

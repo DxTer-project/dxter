@@ -19,9 +19,10 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #pragma once
+
+#include "layers.h"
+#if DOBLIS||DOELEM
 
 #include "transform.h"
 #include "DLAOp.h"
@@ -81,3 +82,4 @@ class DistTriInvToLocalTriInv : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+#endif

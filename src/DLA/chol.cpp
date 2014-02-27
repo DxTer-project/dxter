@@ -20,6 +20,8 @@
 */
 
 
+#include "layers.h"
+#if DOELEM||DOBLIS
 
 #include "chol.h"
 #include "distributions.h"
@@ -518,3 +520,4 @@ Loop* Chol3UpperAlg(Node *in, unsigned int num, bool dist)
     return loop;
 }
 
+#endif

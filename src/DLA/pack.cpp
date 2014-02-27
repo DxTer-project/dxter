@@ -19,8 +19,8 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
+#include "layers.h"
+#if DOBLIS
 #include "pack.h"
 #include "loopSupport.h"
 #include "trxm.h"
@@ -1019,3 +1019,4 @@ void RenamePackBuff::Apply(Poss *poss, Node *node) const
 }
 
 #endif //DOSOPHASE
+#endif //DOBLIS

@@ -103,15 +103,19 @@ class TempVarNode : public DLANode
  public:
  TempVarNode() 
    : 
-#if DODM
+#if DOELEM
 m_distType(D_LASTDIST),
+#elif DOTENSORS
+  m_distType(DEFAULTDISTTYPE),
 #endif
  m_mlsize(NULL), m_nlsize(NULL) {}
 
  TempVarNode(string name) 
    :  
-#if DODM
+#if DOELEM
 m_distType(D_LASTDIST),
+#elif DOTENSORS
+  m_distType(DEFAULTDISTTYPE),
 #endif
   m_name(name), m_mlsize(NULL), m_nlsize(NULL) {}
 
@@ -159,7 +163,7 @@ class OutputNode : public DLANode
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 #if DODM
-  virtual DistType GetDistType(unsigned int num) const { return D_MC_MR; }
+  virtual DistType GetDistType(unsigned int num) const;
 #endif
   virtual void SanityCheck();
   virtual void Prop();
@@ -208,6 +212,7 @@ class MoveMakeTrap : public SingleTrans
 };
 #endif
 
+#if DOELEM||DOBLIS
 class ScaleNode : public DLAOp<1,1>
 {
  public:
@@ -261,6 +266,7 @@ class ScaleTrapNode : public DLAOp<1,1>
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
 };
+#endif
 
 #if DOELEM
 //View a panel from two inputs

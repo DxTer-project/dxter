@@ -23,6 +23,8 @@
 
 #pragma once
 
+#ifdef DOBLIS||DOELEM
+
 #include "DLAOp.h"
 #include "transform.h"
 #include "distributions.h"
@@ -205,3 +207,5 @@ class SplitGemm : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+
+#endif

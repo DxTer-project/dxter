@@ -19,7 +19,9 @@
  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "layers.h"
 
+#if DOBLIS||DOELEM
 
 #include "herk.h"
 #include "blas.h"
@@ -564,7 +566,7 @@ void TriRK::PrintCode(IndStream &out)
 {
   string transAStr, transBStr;
 
-#if DODM
+#if DOELEM
   DistType t0 = InputDistType(0);
   DistType t1 = InputDistType(1);
   
@@ -1272,3 +1274,4 @@ void HerkToTriRK::Apply(Poss *poss, Node *node) const
   herk->RedirectChildren(trirk, 0);
   poss->DeleteChildAndCleanUp(node);
 }
+#endif

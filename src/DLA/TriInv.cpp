@@ -19,6 +19,8 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "layers.h"
+#if DOBLIS||DOELEM
 
 
 #include "distributions.h"
@@ -525,3 +527,4 @@ Loop* TriInvAlgVar3Upper(Node *in, unsigned int num)
 
   return loop;
 }
+#endif

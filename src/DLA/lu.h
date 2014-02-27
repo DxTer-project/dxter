@@ -23,6 +23,9 @@
 
 #pragma once
 
+#include "layers.h"
+#if DOBLIS||DOELEM
+
 #include "base.h"
 #include "DLAOp.h"
 #include "DLANode.h"
@@ -80,3 +83,4 @@ class LULoopExp : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+#endif

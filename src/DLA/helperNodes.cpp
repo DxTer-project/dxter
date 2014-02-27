@@ -36,8 +36,10 @@ m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
   m_msize.AddRepeatedSizes(m, 1, 1);
   m_nsize.AddRepeatedSizes(n, 1, 1);
   m_varName.m_name = name;
-#if DODM
+#if DOELEM
   m_varName.m_type = D_MC_MR;
+#elif DOTENSORS
+  SetToDefaultDistType(&(m_varName.m_type));
 #endif
 }
 
@@ -170,8 +172,10 @@ ConstVal::ConstVal(string name, Coef val)
 {
   m_val = val;
   m_varName.m_name = name;
-#if DODM
+#if DOELEM
   m_varName.m_type = D_STAR_STAR;
+#elif DOTENSORS
+  m_varName.m_type = DEFAULTDISTTYPE;
 #endif
 }
 
@@ -380,6 +384,19 @@ void OutputNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
   m_type = ((OutputNode*)orig)->m_type;
 }
 
+#if DODM
+DistType OutputNode::GetDistType(unsigned int num) const 
+{ 
+#if DOELEM
+  return D_MC_MR; 
+#elif DOTENSORS
+  return DEFAULTDISTTYPE;
+#else
+  throw;
+#endif
+}
+#endif
+
 void OutputNode::SanityCheck()
 {
   DLANode::SanityCheck();
@@ -536,6 +553,7 @@ void MoveMakeTrap::Apply(Poss *poss, Node *node) const
 
 #endif
 
+#if DOBLIS||DOELEM
 bool RemoveScaleByOne::CanApply(const Poss *poss, const Node *node) const
 {
   if (node->GetNodeClass() != ScaleNode::GetClass())
@@ -603,7 +621,7 @@ void ScaleTrapNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_tri = scal->m_tri;
 }
 
-#if DODM
+#if DOELEM
 DistType ScaleTrapNode::GetDistType(unsigned int num) const
 {
   if (num > 0)
@@ -701,6 +719,7 @@ void ScaleNode::UnflattenCore(ifstream &in, SaveInfo &info)
   DLAOp<1,1>::UnflattenCore(in, info);
   READ(m_val);
 }
+#endif
 
 
 #if DOELEM

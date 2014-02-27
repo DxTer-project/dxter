@@ -246,35 +246,6 @@ bool CheckInput(const Node *node, unsigned int inNum, DistType type, bool skipFi
 }
 #endif
 
-string ParallelizeAxpy::GetType() const
-{
-  return "parallelize axpy " + LayerNumToStr(m_layer)
-    + " comm " + CommToStr(m_comm);
-}
-
-bool ParallelizeAxpy::CanApply(const Poss *poss, const Node *node) const
-{
-  if (node->GetNodeClass() != Axpy::GetClass())
-    throw;
-  const Axpy *axpy = (Axpy*)node;
-  if (axpy->GetLayer() != m_layer)
-    return false;
-  if (axpy->m_comm != CORECOMM)
-    return false;
-  if (!LegalParallelizationNestingUp(axpy, m_comm)) {
-    return false;
-  }
-  return true;
-}
-
-void ParallelizeAxpy::Apply(Poss *poss, Node *node) const
-{
-  Axpy *axpy = (Axpy*)node;
-  axpy->SetComm(m_comm);
-}
-
-
-
 #if DOELEM
 bool DistAxpyToLocalAxpy::WorthApplying(const Node *node) const
 {

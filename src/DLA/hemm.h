@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include "layers.h"
+#if DOELEM||DOBLIS
 #include "transform.h"
 #include "DLAOp.h"
 #include "distributions.h"
@@ -184,3 +186,4 @@ class HemmLowerLayer : public LowerLayer
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+#endif

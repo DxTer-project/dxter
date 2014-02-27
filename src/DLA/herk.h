@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include "layers.h"
+#if DOBLIS||DOELEM
 #include "transform.h"
 #include "DLAOp.h"
 #include "distributions.h"
@@ -215,3 +217,4 @@ class HerkToTriRK : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+#endif

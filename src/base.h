@@ -93,8 +93,20 @@ enum DistType { UNKNOWN,
 		D_STAR_VR,
 		D_LASTDIST };
 #elif DOTENSORS
-
+class DistType
+{
+ public:
+  bool tmp;
+ DistType() :tmp(false) {}
+  DistType(const DistType &blah);
+};
 #endif
+bool DistTypeNotEqual(const DistType &one, const DistType &two);
+string DistTypeToStr(const DistType &type);
+extern DistType DEFAULTDISTTYPE;
+void SetToDefaultDistType(DistType *type);
+void CheckThisSpot();
+void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
 
 enum Trans { NORMAL,
 	     TRANS,
@@ -239,6 +251,8 @@ class Name
 {
  public:
 #if DOELEM
+  DistType m_type;
+#elif DOTENSORS
   DistType m_type;
 #endif
   string m_name;

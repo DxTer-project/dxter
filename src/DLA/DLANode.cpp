@@ -46,7 +46,7 @@ DistType DLANode::GetDistType(unsigned int num) const
 #elif DOTENSORS
 DistType DLANode::GetDistType(unsigned int num) const
 { 
-  return D_MC_MR; 
+  return DEFAULTDISTTYPE;
 }
 #endif
 
@@ -199,7 +199,7 @@ DLANode* DLANode::FindSideEffectingUser(unsigned int num)
       }
       else 
 #elif DOTENSORS
-	check this.
+	CheckThisSpot();
 #endif
 	{
         if (child->Overwrites(this, num))

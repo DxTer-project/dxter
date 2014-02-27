@@ -23,6 +23,9 @@
 
 #pragma once
 
+#include "layers.h"
+#if DOBLIS|DOELEM
+
 #include "transform.h"
 #include "DLAOp.h"
 
@@ -76,3 +79,4 @@ class DistCholToLocalChol : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+#endif

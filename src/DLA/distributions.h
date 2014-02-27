@@ -48,7 +48,7 @@ bool IsTransType(DistType dist);
 OneDDistType GetColDist( DistType dist);
 OneDDistType GetRowDist( DistType dist);
 
-void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
+//void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
 //void GetLocalSize(DistType dist, Size m, Size n, Size &localM, Size &localN);
 
 class RemoveWastedRedist : public SingleTrans

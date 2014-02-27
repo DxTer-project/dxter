@@ -68,6 +68,7 @@ void Node::Cull(Phase phase)
 {
   if (MaxPhase() < phase) {
     if (!m_hasRefined) {
+#if DOELEM||DOBLIS
       if (GetNodeClass() == Gemm::GetClass()) {
         if (((Gemm*)this)->GetLayer() == SMLAYER)
           return;
@@ -84,6 +85,7 @@ void Node::Cull(Phase phase)
         if (((Chol*)this)->GetLayer() == SMLAYER)
           return;
       }
+#endif
       cout << "skipping culling for invalid node type " << GetType() << endl;
       cout << MaxPhase() << " is MaxPhase\n";
       for (unsigned int i = 0; i < m_inputs.size(); ++i) {
