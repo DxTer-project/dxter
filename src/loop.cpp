@@ -994,6 +994,8 @@ void Loop::Parallelize(Comm comm)
             throw;
           poss->FillClique(nodeSet);
           poss->m_hasChecked = false;
+	  throw;
+#if 0
           CritSect *crit = (CritSect*)(poss->FormSetForClique(nodeSet, true));
           if (crit->RemoveParallelization(CORECOMM)) {
             //This critical section is around some hierarchy of PSets
@@ -1005,6 +1007,7 @@ void Loop::Parallelize(Comm comm)
           if (HasParallelCode(crit->m_posses[0])) {
             throw;
           }
+#endif
         }
       }
     }

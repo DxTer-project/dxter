@@ -1318,8 +1318,12 @@ PSet* Poss::FormSubPSet(NodeVec &outputTuns, bool isCritSect)
   Poss *newPoss = new Poss(outputTuns, true, true);
   PSet *set;
   if (isCritSect)
+    throw;
+#if 0
+  if (isCritSect)
     set = new CritSect(newPoss);
   else
+#endif
     set = new PSet(newPoss);
   
   AddPSet(set, true);
@@ -1486,7 +1490,10 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
           unsigned int connNum = node->ChildConnNum(i);
           PossTunnel *tun;
 	  if (isCritSect)
+	    throw;
+#if 0
 	    tun = new CritSectTunnel(POSSTUNOUT);
+#endif
 	  else
 	    tun = new PossTunnel(POSSTUNOUT);
           outputTuns.push_back(tun);
@@ -1509,7 +1516,10 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
         PossTunnel *tun = NULL;
         if (set.find(input) == set.end()) {
 	  if (isCritSect)
+	    throw;
+#if 0
 	    tun = new CritSectTunnel(POSSTUNIN);
+#endif
 	  else
 	    tun = new PossTunnel(POSSTUNIN);
           //          cout << "creating input for child " << node->GetNodeClass() << endl;

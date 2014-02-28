@@ -533,8 +533,12 @@ void Universe::Unflatten(ifstream &in)
   READ(isCrit);
   if (isLoop)
     m_pset = new Loop;
+
   else if (isCrit)
+    throw;
+#if 0
     m_pset = new CritSect;
+#endif
   else
     m_pset = new PSet;
   psetMap[oldPset] = m_pset;

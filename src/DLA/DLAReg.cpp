@@ -72,7 +72,9 @@ void RegAllDLANodes()
   Reg(Combine);
   Reg(Split);
   Reg(LoopTunnel);
+#if 0
   Reg(CritSectTunnel);
+#endif
   Reg(PossTunnel);
   Reg(Trxm);
 #if DOBLIS

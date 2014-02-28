@@ -19,7 +19,7 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+#if 0
 #pragma once
 
 #include "pset.h"
@@ -63,3 +63,4 @@ class CritSectTunnel : public PossTunnel
   virtual void ClearSizeCache();
   //  virtual PossTunnel* GetSetTunnel();
 };
+#endif
