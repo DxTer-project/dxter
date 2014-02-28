@@ -23,6 +23,7 @@
 
 #include "DLAOp.h"
 
+#if TWOD
 template<unsigned int numIn, unsigned int numOut>
 const Sizes* DLAOp<numIn, numOut>::GetM(unsigned int num) const
 {
@@ -54,6 +55,32 @@ template<unsigned int numIn, unsigned int numOut>
     throw;
   return InputLocalN(numIn - numOut + num);  
 }
+#else
+template<unsigned int numIn, unsigned int numOut>
+const Sizes* DLAOp<numIn, numOut>::Len(unsigned int num, unsigned int dim) const
+{
+  if (num >= numOut)
+    throw;
+  return InputLen(numIn - numOut + num,dim);  
+}
+
+template<unsigned int numIn, unsigned int numOut>
+   const unsigned int DLAOp<numIn, numOut>::NumDims(unsigned int num) const
+{
+  if (num >= numOut)
+    throw;
+  return InputNumDims(numIn - numOut + num);  
+}
+
+template<unsigned int numIn, unsigned int numOut>
+const Sizes* DLAOp<numIn, numOut>::LocalLen(unsigned int num, unsigned int dim) const
+{
+  if (num >= numOut)
+    throw;
+  return InputLocalLen(numIn - numOut + num,dim);  
+}
+
+#endif
 
 template<unsigned int numIn, unsigned int numOut>
    Name DLAOp<numIn, numOut>::GetName(unsigned int num) const

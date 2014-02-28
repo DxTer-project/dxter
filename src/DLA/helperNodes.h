@@ -29,15 +29,27 @@
 class InputNode : public DLANode
 {
   NodeType m_type;
+#if TWOD
   Sizes m_msize, m_nsize;
   Sizes *m_mlsize, *m_nlsize;
+#else
+  unsigned int m_numDims;
+  SizesArray m_sizes;
+  SizesArray m_lsizes;
+#endif
   Name m_varName;
  public:
- InputNode() : m_type("InputNode"), m_mlsize(NULL), m_nlsize(NULL) {}
+  InputNode();
+#if TWOD
   InputNode(NodeType type, Size m, Size n, string name);
 #if DODM
   InputNode(NodeType type, Size m, Size n, string name, DistType dist);
 #endif
+#else
+  InputNode(NodeType type, unsigned int numDims, const SizesArray sizes, string name);
+  InputNode(NodeType type, unsigned int numDims, const SizesArray sizes, DistType dist, string name);
+#endif
+  virtual ~InputNode();
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new InputNode; }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
@@ -51,10 +63,16 @@ class InputNode : public DLANode
   virtual void PrintCode(IndStream &out) {}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "inputNode";}
+#if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#else
+  virtual const unsigned int NumDims(unsigned int num) const;
+  virtual const Sizes* Len(unsigned int num, unsigned int dim) const;
+  virtual const Sizes* LocalLen(unsigned int num, unsigned int dim) const;
+#endif
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
@@ -62,6 +80,44 @@ class InputNode : public DLANode
   virtual void BuildSizeCache();
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
+
+class OutputNode : public DLANode
+{
+  NodeType m_type;
+ public:
+  OutputNode() : m_type("OutputNode") {}
+  OutputNode(NodeType type) : m_type(type) {}
+  virtual NodeType GetType() const {return m_type;}
+  static Node* BlankInst() { return  new OutputNode; }
+  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
+  virtual Node* GetNewInst() { return BlankInst(); }
+  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+#if DODM
+  virtual DistType GetDistType(unsigned int num) const;
+#endif
+  virtual void SanityCheck();
+  virtual void Prop();
+  virtual void PrintCode(IndStream &out) {}
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "outputNode";}
+#if TWOD
+  virtual const Sizes* GetM(unsigned int num) const;
+  virtual const Sizes* GetN(unsigned int num) const;
+  virtual const Sizes* LocalM(unsigned int num) const;
+  virtual const Sizes* LocalN(unsigned int num) const;
+#else
+  virtual const unsigned int NumDims(unsigned int num) const;
+  virtual const Sizes* Len(unsigned int num, unsigned int dim) const;
+  virtual const Sizes* LocalLen(unsigned int num, unsigned int dim) const;
+#endif
+  virtual Name GetName(unsigned int num) const;
+  virtual void FlattenCore(ofstream &out) const;
+  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
+  virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+};
+
+#if TWOD
+
 
 //Constant value (e.g. used for Axpy)
 class ConstVal : public DLANode
@@ -83,10 +139,14 @@ class ConstVal : public DLANode
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "const val";}
+#if TWOD
   virtual const Sizes* GetM(unsigned int num) const {return ONES;}
   virtual const Sizes* GetN(unsigned int num) const {return ONES;}
   virtual const Sizes* LocalM(unsigned int num) const {return ONES;}
   virtual const Sizes* LocalN(unsigned int num) const {return ONES;}
+#else
+blah
+#endif
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
@@ -137,10 +197,14 @@ m_distType(D_LASTDIST),
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "tempVar";}
+#if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#else
+basfd
+#endif
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
@@ -151,34 +215,6 @@ m_distType(D_LASTDIST),
   virtual bool IsDataDependencyOfInput() const {return false;}
 };
 
-class OutputNode : public DLANode
-{
-  NodeType m_type;
- public:
-  OutputNode() : m_type("OutputNode") {}
-  OutputNode(NodeType type) : m_type(type) {}
-  virtual NodeType GetType() const {return m_type;}
-  static Node* BlankInst() { return  new OutputNode; }
-  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
-  virtual Node* GetNewInst() { return BlankInst(); }
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-#if DODM
-  virtual DistType GetDistType(unsigned int num) const;
-#endif
-  virtual void SanityCheck();
-  virtual void Prop();
-  virtual void PrintCode(IndStream &out) {}
-  virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "outputNode";}
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
-  virtual Name GetName(unsigned int num) const;
-  virtual void FlattenCore(ofstream &out) const;
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
-};
 
 #if DOELEM
 class MakeTrapNode : public DLAOp<1,1>
@@ -284,10 +320,14 @@ class ViewPan : public DLANode
   virtual unsigned int NumOutputs() const {return 1;}
   virtual void ClearSizeCache();
   virtual void BuildSizeCache();
+#if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#else
+sdlkfj
+#endif
   virtual Name GetName(unsigned int num) const;
   virtual NodeType GetType() const {return "ViewPan";}
   static Node* BlankInst() { return new ViewPan(false,""); }
@@ -323,10 +363,14 @@ class ViewAroundDiag : public DLANode
   virtual unsigned int NumOutputs() const {return 2;}
   virtual void ClearSizeCache();
   virtual void BuildSizeCache();
+#if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#else
+sdlkjf
+#endif
   virtual Name GetName(unsigned int num) const;
   virtual NodeType GetType() const {return "ViewAround";}
   static Node* BlankInst() { return  new ViewAroundDiag(false,""); }
@@ -371,6 +415,7 @@ class ViewTL : public DLANode
 {
  public:
   ViewTL(Layer layer) {SetLayer(layer);}
+#if TWOD
   virtual const Sizes* GetM(unsigned int num) const
   { return GetInputM(2); }
   virtual const Sizes* GetN(unsigned int num) const
@@ -379,6 +424,9 @@ class ViewTL : public DLANode
   { return InputLocalM(2); }
   virtual const Sizes* LocalN(unsigned int num) const
   { return InputLocalN(1); }
+#else
+bljsdf
+#endif
   virtual Name GetName(unsigned int num) const;
   virtual void Prop();
   virtual void SanityCheck();
@@ -396,10 +444,12 @@ class ViewTL : public DLANode
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
 
+
 class ViewTLCombine : public DLANode
 {
  public:
   ViewTLCombine(Layer layer) {SetLayer(layer);}
+
   virtual const Sizes* GetM(unsigned int num) const
   { return GetInputM(1); }
   virtual const Sizes* GetN(unsigned int num) const
@@ -424,3 +474,4 @@ class ViewTLCombine : public DLANode
   virtual NodeType GetType() const {return "ViewTLCombine";}
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
+#endif

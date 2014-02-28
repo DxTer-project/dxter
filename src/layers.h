@@ -30,6 +30,7 @@
 
 #define DOBLIS DOSM||DOSQM
 #define DODM DOELEM|DOTENSORS
+#define TWOD DOBLIS||DOELEM
 
 #if DOELEM
 

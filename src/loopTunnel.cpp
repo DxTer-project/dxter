@@ -34,15 +34,20 @@ LoopTunnel::LoopTunnel(PossTunType type)
   m_statTR = BADUP;
   m_statBL = BADUP;
   m_statBR = BADUP;
+#if TWOD
   m_msizes = NULL;
   m_nsizes = NULL;
   m_mlsizes = NULL;
   m_nlsizes = NULL;
+#else
+  blah;
+#endif
   m_indepIters = false;
 }
 
 LoopTunnel::~LoopTunnel()
 {
+#if TWOD
   if (m_msizes) {
     delete m_msizes;
     m_msizes = NULL;
@@ -53,6 +58,9 @@ LoopTunnel::~LoopTunnel()
     delete m_nlsizes;
     m_nlsizes = NULL;
   }
+#else
+  blah;
+#endif
 }
 
 void LoopTunnel::SetUpStats( UpStat statTL, UpStat statTR,
@@ -148,6 +156,7 @@ void LoopTunnel::Prop()
   }
 }
 
+#if TWOD
 const Sizes* LoopTunnel::GetM(unsigned int num) const
 {
   switch(m_tunType) 
@@ -259,6 +268,66 @@ const Sizes* LoopTunnel::LocalN(unsigned int num) const
       throw;
   }
 }
+#else
+const Sizes* LoopTunnel::Len(unsigned int num,unsigned int dim) const
+{
+  switch(m_tunType) 
+  {
+    case (SETTUNIN):
+    case (POSSTUNOUT):
+      if (num > 0)
+        throw;
+      return ((DLANode*)(Input(1)->Input(0)))->InputLen(0,dim);
+    case (SETTUNOUT):
+      if (num > 0)
+        throw;
+      return InputLen(0,dim);
+    case (POSSTUNIN):
+      if (num == 0) {
+        const LoopTunnel *input = (LoopTunnel*)Input(0);
+	throw;
+        return input->m_nsizes;
+      }
+      else if (num == 1) {
+        return InputLen(0,dim);
+      }
+      else
+        throw;
+    default:
+      throw;
+  }
+}
+
+const Sizes* LoopTunnel::LocalLen(unsigned int num,unsigned int dim) const
+{
+  switch(m_tunType) 
+  {
+    case (SETTUNIN):
+    case (POSSTUNOUT):
+      if (num > 0)
+        throw;
+      return ((DLANode*)(Input(1)->Input(0)))->InputLocalM(0,dim);
+    case (SETTUNOUT):
+      if (num > 0)
+        throw;
+      return InputLocalLen(0,dim);
+    case (POSSTUNIN):
+      if (num == 0) {
+        const LoopTunnel *input = (LoopTunnel*)Input(0);
+	throw;
+        //return input->m_mlsizes;
+      }
+      else if (num == 1) {
+        return InputLocalLen(0,dim);
+      }
+      else
+        throw;
+    default:
+      throw;
+  }
+}
+
+#endif
 
 unsigned int LoopTunnel::NumOutputs() const
 {

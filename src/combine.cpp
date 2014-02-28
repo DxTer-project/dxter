@@ -68,6 +68,7 @@ void Combine::Prop()
   }
 }
 
+#if TWOD
 const Sizes* Combine::GetM(unsigned int num) const
 {
   if (num > 0)
@@ -130,6 +131,57 @@ const Sizes* Combine::LocalN(unsigned int num) const
     return InputLocalN(0);
   }
 }
+#else
+const unsigned int Combine::NumDims(unsigned int num) const
+{
+  if (num > 0)
+    throw;
+  if (m_tunType == SETTUNOUT) {
+    return ((DLANode*)(Input(0)->Input(GetNumElems(m_dir))->Input(0)))->NumDims(0);
+  }
+  else if (m_tunType == POSSTUNOUT) {
+    return InputNumDims(m_inputs.size()-1);
+  }
+  else {
+    return InputNumDims(0);
+  }
+}
+
+const Sizes* Combine::Len(unsigned int num, unsigned int dim) const
+{
+  if (num > 0)
+    throw;
+  if (m_tunType == SETTUNOUT) {
+    return ((DLANode*)(Input(0)->Input(GetNumElems(m_dir))->Input(0)))->Len(0,dim);
+  }
+  else if (m_tunType == POSSTUNOUT) {
+    return InputLen(m_inputs.size()-1,dim);
+  }
+  else {
+    return InputLen(0,dim);
+  }
+}
+
+const Sizes* Combine::LocalLen(unsigned int num, unsigned int dim) const
+{
+  if (num > 0)
+    throw;
+  if (m_tunType == SETTUNOUT) {
+    DLANode *possTunOut = (DLANode*)Input(0);
+    DLANode *possTunIn = (DLANode*)(possTunOut->Input(GetNumElems(m_dir)));
+    DLANode *setTunIn = (DLANode*)(possTunIn->Input(0));
+    return setTunIn->InputLocalLen(0,dim);
+  }
+  else if (m_tunType == POSSTUNOUT) {
+    return InputLocalLen(m_inputs.size()-1,dim);
+  }
+  else {
+    return InputLocalLen(0,dim);
+  }
+}
+
+
+#endif
 
 Name Combine::GetName(unsigned int num) const
 {

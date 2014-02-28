@@ -24,15 +24,25 @@
 #include "distributions.h"
 #include <cmath>
 
-Split::Split() : LoopTunnel(LASTTUNNEL), m_dir(LASTPARTDIR)
+Split::Split() : LoopTunnel(LASTTUNNEL), 
+#if TWOD
+m_dir(LASTPARTDIR)
+#else
+m_partDim(99)
+#endif
 {
+#if TWOD
   m_msizes = NULL;
   m_nsizes = NULL;
   m_mlsizes = NULL;
   m_nlsizes = NULL;
+#else
+  init;
+#endif
   m_addDir = false;
 }
 
+#if TWOD
 Split::Split(PartDir dir, PossTunType type, bool isControl) 
   : LoopTunnel(type), m_dir(dir), m_isControlTun(isControl)
 {
@@ -42,9 +52,18 @@ Split::Split(PartDir dir, PossTunType type, bool isControl)
   m_nlsizes = NULL;
   m_addDir = false;
 }
+#else
+Split::Split(unsigned int partDir, PossTunType type, bool isControl) 
+  : LoopTunnel(type), m_partDir(partDir), m_isControlTun(isControl)
+{
+  init;
+  m_addDir = false;
+}
+#endif
 
 Split::~Split()
 {
+#if TWOD
   if (m_msizes) {
     delete [] m_msizes;
     m_msizes = NULL;
@@ -55,6 +74,18 @@ Split::~Split()
     delete [] m_nlsizes;
     m_nlsizes = NULL;
   }
+#else
+cleanup
+#endif
+}
+
+static Node* Split::BlankInst() 
+{ 
+#if TWOD
+  return new Split(LASTPARTDIR,LASTTUNNEL,false);
+#else
+  return new Split(99,LASTTUNNEL,false);
+#endif
 }
 
 Name Split::GetName(unsigned int num) const 
@@ -724,6 +755,16 @@ void Split::SanityCheck()
   }
 }
 
+
+unsigned int Split::NumOutputs() const 
+{
+#if TWOD
+  return GetNumElems(m_dir)+1;
+#else
+  return 4;
+#endif
+}
+
 bool Split::QuadInUse(Quad quad, bool atEnd) const
 {
   if (m_tunType == SETTUNIN) {
@@ -944,6 +985,7 @@ void Split::StartFillingSizes()
 
 void Split::ClearSizeCache()
 {
+#if TWOD
   if (!m_msizes)
     return;
   delete [] m_msizes;
@@ -954,6 +996,9 @@ void Split::ClearSizeCache()
   m_nsizes = NULL;
   delete [] m_nlsizes;
   m_nlsizes = NULL;
+#else
+  blah;
+#endif
 }
 
 void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)

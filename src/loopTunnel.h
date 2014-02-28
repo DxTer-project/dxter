@@ -31,8 +31,12 @@ class LoopTunnel : public PossTunnel
   UpStat 
     m_statTL, m_statTR,
     m_statBL, m_statBR;
+#if TWO
   Sizes *m_msizes, *m_nsizes;
   Sizes *m_mlsizes, *m_nlsizes;
+#else
+
+#endif
   bool m_indepIters;
 
   LoopTunnel(PossTunType type);
@@ -63,12 +67,18 @@ class LoopTunnel : public PossTunnel
   virtual bool IsLoopTunnel() const {return true;}
   virtual LoopTunnel* GetMatchingOutTun() const;
   virtual LoopTunnel* GetMatchingInTun() const;
+#if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#else
+  virtual const unsigned int NumDims(unsigned int num) const;
+  virtual const Sizes* Len(unsigned int num, unsigned int dim) const;
+  virtual const Sizes* LocalLen(unsigned int num, unsigned int dim) const;
+#endif
   virtual Name GetName(unsigned int num) const;
-  Name GetOrigName() const;
+ Name GetOrigName() const;
   Loop* GetMyLoop() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "LoopTunnel";}

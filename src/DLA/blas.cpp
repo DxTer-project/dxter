@@ -20,7 +20,8 @@
 */
 
 
-
+#include "layers.h"
+#if TWOD
 #include "base.h"
 #include "blas.h"
 #include "distributions.h"
@@ -596,4 +597,5 @@ void DistConstScalToLocalConstScal::Apply(Poss *poss, Node *node) const
   node->RedirectChildren(node4,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+#endif
 #endif

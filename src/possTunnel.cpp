@@ -149,6 +149,7 @@ void PossTunnel::Prop()
   }
 }
 
+#if TWOD
 const Sizes* PossTunnel::GetM(unsigned int num) const
 {
   if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
@@ -168,6 +169,52 @@ const Sizes* PossTunnel::GetN(unsigned int num) const
     return ((DLANode*)Input(0))->GetN(num);
   }
 }
+
+const Sizes* PossTunnel::LocalM(unsigned int num) const
+{
+  const NodeConn *conn = m_inputs[0];
+  const DLANode *input = (DLANode*)(conn->m_n);
+  
+  return input->LocalM(conn->m_num);
+}
+
+const Sizes* PossTunnel::LocalN(unsigned int num) const
+{
+  const NodeConn *conn = m_inputs[0];
+  const DLANode *input = (DLANode*)(conn->m_n);
+  
+  return input->LocalN(conn->m_num);
+}
+#else
+const unsigned int PossTunnel::NumDims(unsigned int num) const
+{
+  if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
+    return InputNumDims(num);
+  }
+  else {
+    return ((DLANode*)Input(0))->NumDims(num);
+  }
+}
+
+const Sizes* PossTunnel::Len(unsigned int num,unsigned int dim) const
+{
+  if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
+    return InputLen(num,dim);
+  }
+  else {
+    return ((DLANode*)Input(0))->Len(num,dim);
+  }
+}
+
+const Sizes* PossTunnel::LocalLen(unsigned int num,unsigned int dim) const
+{
+  const NodeConn *conn = m_inputs[0];
+  const DLANode *input = (DLANode*)(conn->m_n);
+  
+  return input->LocalLen(conn->m_num,dim);
+}
+
+#endif
 
 Name PossTunnel::GetName(unsigned int num) const 
 {
@@ -252,21 +299,7 @@ string TunTypeToStr(PossTunType type)
     }
 }
 
-const Sizes* PossTunnel::LocalM(unsigned int num) const
-{
-  const NodeConn *conn = m_inputs[0];
-  const DLANode *input = (DLANode*)(conn->m_n);
-  
-  return input->LocalM(conn->m_num);
-}
 
-const Sizes* PossTunnel::LocalN(unsigned int num) const
-{
-  const NodeConn *conn = m_inputs[0];
-  const DLANode *input = (DLANode*)(conn->m_n);
-  
-  return input->LocalN(conn->m_num);
-}
 
 void PossTunnel::FlattenCore(ofstream &out) const
 {

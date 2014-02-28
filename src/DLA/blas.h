@@ -21,6 +21,10 @@
 
 #pragma once
 
+#include "layers.h"
+
+#if TWOD
+
 #include "transform.h"
 #include "DLAOp.h"
 #include "distributions.h"
@@ -163,4 +167,5 @@ class DistConstScalToLocalConstScal : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+#endif
 #endif

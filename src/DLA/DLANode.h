@@ -24,6 +24,7 @@
 #pragma once
 #include "node.h"
 #include "comm.h"
+#include "layers.h"
 
 //Ancestor class for all DLA nodes
 class DLANode : public Node
@@ -48,6 +49,8 @@ class DLANode : public Node
   inline Layer GetLayer() const {return m_layer;}
   virtual bool IsReadOnly() const {return false;}
   virtual bool CanTrans() const {return false;}
+
+#if TWOD
   virtual const Sizes* GetM(unsigned int num) const = 0;
   virtual const Sizes* GetN(unsigned int num) const = 0;
   virtual const Sizes* LocalM(unsigned int num) const = 0;
@@ -56,6 +59,14 @@ class DLANode : public Node
   const Sizes* GetInputN(unsigned int num) const;
   const Sizes* InputLocalM(unsigned int num) const;
   const Sizes* InputLocalN(unsigned int num) const;
+#else
+  virtual const unsigned int NumDims(unsigned int num) const = 0;
+  virtual const Sizes* Len(unsigned int num, unsigned int dim) const = 0;
+  virtual const Sizes* LocalLen(unsigned int num, unsigned int dim) const = 0;  
+  virtual const unsigned int InputNumDims(unsigned int num) const;
+  const Sizes* InputLen(unsigned int num, unsigned int dim) const;
+  const Sizes* InputLocalLen(unsigned int num, unsigned int dim) const;
+#endif
   virtual void ClearBeforeProp();
 #if DODM
   DistType InputDistType(unsigned int num) const;
@@ -69,7 +80,9 @@ class DLANode : public Node
   DLANode* FindNonRedistParent(unsigned int num, unsigned int &parentNum);
 #endif
   DLANode* FindSideEffectingUser(unsigned int num);
+#if TWOD
   bool IsScalar(unsigned int num) const;
+#endif
   virtual bool ShouldCullDP() const {return false;}
   virtual bool DoNotCullDP() const {return false;}
   virtual bool ShouldCullSR() const {return false;}

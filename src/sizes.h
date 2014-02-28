@@ -147,3 +147,5 @@ class Sizes
 
 
 extern Sizes *ONES;
+
+typedef Sizes *SizesArray;

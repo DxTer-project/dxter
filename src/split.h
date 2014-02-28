@@ -32,13 +32,21 @@ class Combine;
 class Split : public LoopTunnel
 {
  public:
+#if TWOD
   PartDir m_dir;
+#else
+  unsigned int m_partDim;
+#endif
   bool m_isControlTun;
   bool m_addDir;
   Split();
+#if TWOD
   Split(PartDir dir, PossTunType type, bool isControl = false);
+#else
+  Split(unsigned int partDim, PossTunType type, bool isControl = false);
+#endif
   virtual ~Split();
-  static Node* BlankInst() { return  new Split(LASTPARTDIR,LASTTUNNEL,false);}
+  static Node* BlankInst();
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual PossTunnel* GetSetTunnel();
   virtual void Prop();
@@ -46,10 +54,11 @@ class Split : public LoopTunnel
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
   virtual void SanityCheck();
-  virtual unsigned int NumOutputs() const {return GetNumElems(m_dir)+1;}
+  virtual unsigned int NumOutputs() const;
   virtual bool QuadInUse(Quad quad, bool atEnd) const;
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "split";}
+#if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
@@ -58,6 +67,9 @@ class Split : public LoopTunnel
 		Size bs, unsigned int parFactor,
 		   Size m, Size n,
 		   Sizes &ms, Sizes &ns);
+#else
+
+#endif
   virtual Name GetName(unsigned int num) const;
   virtual Name GetName(unsigned int num, LoopType type) const;
   virtual void PrintVarDeclarations(IndStream &out) const;

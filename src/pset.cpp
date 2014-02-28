@@ -237,8 +237,13 @@ bool PSet::operator==(const PSet &rhs) const
             return false;
           if (tun1->GetNodeClass() == Split::GetClass()) {
             if (tun2->GetNodeClass() == Split::GetClass()) {
+#if TWOD
               if (((Split*)tun1)->m_dir != ((Split*)tun2)->m_dir)
                 return false;
+#else
+	      if (((Split*)tun1)->m_partDim != ((Split*)tun2)->m_partDim)
+                return false;
+#endif
             }
             else
               return false;
@@ -562,8 +567,13 @@ void PSet::CombineAndRemoveTunnels()
             continue;
           }
           if (type1 == Split::GetClass()) {
+#if TWOD
             if (((Split*)setInput1)->m_dir != ((Split*)setInput2)->m_dir)
               continue;
+#else
+            if (((Split*)setInput1)->m_partDim != ((Split*)setInput2)->m_partDim)
+              continue;
+#endif
           }
         }
         NodeConnVecIter connIter1 = setInput1->m_children.begin();
@@ -667,9 +677,15 @@ void PSet::CombineAndRemoveTunnels()
           }
           Split *split1 = (Split*)tun;
           Split *split2 = (Split*)tun2;
+#if TWOD
           if (split1->m_dir != split2->m_dir) {
             continue;
           }
+#else
+          if (split1->m_partDim != split2->m_partDim) {
+            continue;
+          }
+#endif
           split2->RedirectAllChildren(split1);
           NodeConnVecIter iter = split2->m_inputs.begin();
           for( ; iter != split2->m_inputs.end(); ++iter) {

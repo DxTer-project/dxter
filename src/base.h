@@ -116,7 +116,11 @@ string DistTypeToStr(const DistType &type);
 extern DistType DEFAULTDISTTYPE;
 void SetToDefaultDistType(DistType *type);
 void CheckThisSpot();
+#if TWOD
 void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
+#else
+void GetLocalSizes(DistType dist, unsigned int numDims, const SizesArray sizes, SizesArray localSizes);
+#endif
 #endif
 
 enum Trans { NORMAL,

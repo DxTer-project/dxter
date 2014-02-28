@@ -26,6 +26,17 @@
 #include <cmath>
 
 
+InputNode::InputNode() 
+  : 
+  m_type("InputNode"), 
+#if TWOD
+    m_mlsize(NULL), m_nlsize(NULL) 
+#else
+  m_numDims(0)
+#endif
+    {}
+
+#if TWOD
 InputNode::InputNode(NodeType type, Size m, Size n, string name)
 : 
 #if DODM
@@ -38,14 +49,14 @@ m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
   m_varName.m_name = name;
 #if DOELEM
   m_varName.m_type = D_MC_MR;
-#elif DOTENSORS
-  SetToDefaultDistType(&(m_varName.m_type));
 #endif
 }
+#endif
 
-#if DODM
+#if DODM&&TWOD
 InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
-: m_type(type), m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
+: m_type(type),
+ m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
 {
   m_msize.AddRepeatedSizes(m,1,1);
   m_nsize.AddRepeatedSizes(n,1,1);
@@ -54,13 +65,64 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 }
 #endif
 
+
+#if DOTENSORS
+InputNode::InputNode(NodeType type, unsigned int numDims, const SizesArray sizes, string name)
+: 
+  m_type(type), m_numDims(numDims), m_lsizes(NULL)
+{
+  m_sizes = new Sizes[numDims];
+  for(unsigned int i = 0; i < numDims; ++i)
+    m_sizes[i] = sizes[i];
+  m_varName.m_name = name;
+  m_varName.m_type = DEFAULTDISTTYPE;
+}
+
+InputNode::InputNode(NodeType type, unsigned int numDims, const SizesArray sizes, DistType dist, string name)
+:
+  m_type(type), m_numDims(numDims), m_lsizes(NULL)
+{
+  m_sizes = new Sizes[numDims];
+  for(unsigned int i = 0; i < numDims; ++i)
+    m_sizes[i] = sizes[i];
+  m_varName.m_name = name;
+  m_varName.m_type = dist;
+}
+#endif
+
+InputNode::~InputNode()
+{
+#if TWOD
+  if (m_mlsize) {
+    delete m_mlsize;
+    delete m_nlsize;
+  }
+#else
+  delete [] m_sizes;
+  if (m_lsizes)
+    delete [] m_lsizes;
+#endif
+}
+
 void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig, shallow, possMerging);
   const InputNode *node = (InputNode*)orig;
   m_type = node->m_type;
+#if TWOD
   m_msize = node->m_msize;
   m_nsize = node->m_nsize;
+#else
+  m_numDims = node->m_numDims;
+  m_sizes = new Sizes[m_numDims];
+  for (unsigned int i = 0; i < m_numDims; ++i)
+    m_sizes[i] = node->m_sizes[i];
+  if(node->m_lsizes) {
+    m_lsizes = new Sizes[m_numDims];
+    for (unsigned int i = 0; i < m_numDims; ++i)
+      m_lsizes[i] = node->m_lsizes[i];
+  }
+#endif
   m_varName = node->m_varName;
 }
 
@@ -80,6 +142,7 @@ void InputNode::Prop()
   }
 }
 
+#if TWOD
 const Sizes* InputNode::GetM(unsigned int num) const
 {
   if (num > 0)
@@ -108,6 +171,37 @@ const Sizes* InputNode::LocalN(unsigned int num) const
     throw;
   return m_nlsize;
 }
+#else
+
+const unsigned int InputNode::NumDims(unsigned int num) const
+{
+  if (num > 0)
+    throw;
+  return m_numDims;
+}
+
+
+const Sizes* InputNode::Len(unsigned int num,unsigned int dim) const
+{
+  if (num > 0)
+    throw;
+  if (dim >= m_numDims)
+    throw;
+  return m_sizes+dim;
+}
+
+
+const Sizes* InputNode::LocalLen(unsigned int num,unsigned int dim) const
+{
+  if (num > 0)
+    throw;
+  if (dim >= m_numDims)
+    throw;
+  if (!m_lsizes)
+    throw;
+  return m_lsizes+dim;
+}
+#endif
 
 Name InputNode::GetName(unsigned int num) const
 {
@@ -115,6 +209,8 @@ Name InputNode::GetName(unsigned int num) const
     throw;
   return m_varName;
 }
+
+#if TWOD
 
 void InputNode::ClearSizeCache()
 {
@@ -125,7 +221,17 @@ void InputNode::ClearSizeCache()
   delete m_nlsize;
   m_nlsize = NULL;
 }
+#else
 
+void InputNode::ClearSizeCache()
+{
+  if (m_lsizes)
+    delete [] m_lsizes;
+  m_lsizes = NULL;
+}
+#endif
+
+#if TWOD
 void InputNode::BuildSizeCache()
 {
   if (m_mlsize)
@@ -141,23 +247,36 @@ void InputNode::BuildSizeCache()
   lkjsdf
 #endif
 }
-
+#else
+void InputNode::BuildSizeCache()
+{
+  if (m_lsizes)
+    return;
+  m_lsizes = new Sizes[m_numDims];
+  GetLocalSizes(m_varName.m_type, m_numDims, m_sizes, m_lsizes);
+}
+#endif
 
 void InputNode::FlattenCore(ofstream &out) const
 {
   DLANode::FlattenCore(out);
   WRITE(m_type);
+#if TWOD
   Size size = m_msize[0];
   WRITE(size);
   size = m_nsize[0];
   WRITE(size);
   m_varName.Flatten(out);
+#else
+  throw;
+#endif
 }
 
 
 void InputNode::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLANode::UnflattenCore(in, info);
+#if TWOD
   READ(m_type);
   Size size;
   READ(size);
@@ -165,7 +284,122 @@ void InputNode::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(size);
   m_nsize.AddRepeatedSizes(size,1,1);
   m_varName.Unflatten(in);
+#else
+  throw;
+#endif
 }
+
+void OutputNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  m_type = ((OutputNode*)orig)->m_type;
+}
+
+#if DODM
+DistType OutputNode::GetDistType(unsigned int num) const 
+{ 
+#if DOELEM
+  return D_MC_MR; 
+#elif DOTENSORS
+  return DEFAULTDISTTYPE;
+#else
+  throw;
+#endif
+}
+#endif
+
+void OutputNode::SanityCheck()
+{
+  DLANode::SanityCheck();
+  if (m_inputs.size() != 1) {
+    cout << "m_inputs.size() != 1\n";
+    throw;
+  }
+}
+
+void OutputNode::Prop()
+{
+  if (!IsValidCost(m_cost)) {
+    Node *input = Input(0);
+    input->Prop();
+    m_cost = ZERO;
+  }
+}
+
+#if TWOD
+const Sizes* OutputNode::GetM(unsigned int num) const
+{
+  if (num > 0)
+    throw;
+  return GetInputM(0);
+}
+
+const Sizes* OutputNode::GetN(unsigned int num) const
+{
+  if (num > 0)
+    throw;
+  return GetInputN(0);
+}
+
+
+const Sizes* OutputNode::LocalM(unsigned int num) const
+{
+  if (num > 0)
+    throw;
+  return InputLocalM(0);
+}
+
+const Sizes* OutputNode::LocalN(unsigned int num) const
+{
+  if (num > 0)
+    throw;
+  return InputLocalN(0);
+}
+
+#else
+
+const unsigned int OutputNode::NumDims(unsigned int num) const
+{
+  if (num > 0)
+    throw;
+  return InputNumDims(0);
+}
+const Sizes* OutputNode::Len(unsigned int num, unsigned int dim) const
+{
+  if (num > 0)
+    throw;
+  return InputLen(0,dim);
+}
+
+
+const Sizes* OutputNode::LocalLen(unsigned int num, unsigned int dim) const
+{
+  if (num > 0)
+    throw;
+  return InputLocalLen(0, dim);
+}
+#endif
+
+Name OutputNode::GetName(unsigned int num) const
+{
+  if (num > 0)
+    throw;
+  return GetInputName(0);
+}
+
+void OutputNode::FlattenCore(ofstream &out) const
+{
+  DLANode::FlattenCore(out);
+  out << m_type << endl;
+}
+
+void OutputNode::UnflattenCore(ifstream &in, SaveInfo &info)
+{
+  DLANode::UnflattenCore(in, info);
+  getline(in, m_type);
+}
+
+#if TWOD
 
 ConstVal::ConstVal(string name, Coef val)
   :m_val(val)
@@ -376,91 +610,6 @@ void TempVarNode::BuildSizeCache()
 #else
 sdlkfj
 #endif
-}
-
-void OutputNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
-{
-  DLANode::Duplicate(orig, shallow, possMerging);
-  m_type = ((OutputNode*)orig)->m_type;
-}
-
-#if DODM
-DistType OutputNode::GetDistType(unsigned int num) const 
-{ 
-#if DOELEM
-  return D_MC_MR; 
-#elif DOTENSORS
-  return DEFAULTDISTTYPE;
-#else
-  throw;
-#endif
-}
-#endif
-
-void OutputNode::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (m_inputs.size() != 1) {
-    cout << "m_inputs.size() != 1\n";
-    throw;
-  }
-}
-
-void OutputNode::Prop()
-{
-  if (!IsValidCost(m_cost)) {
-    Node *input = Input(0);
-    input->Prop();
-    m_cost = ZERO;
-  }
-}
-
-const Sizes* OutputNode::GetM(unsigned int num) const
-{
-  if (num > 0)
-    throw;
-  return GetInputM(0);
-}
-
-const Sizes* OutputNode::GetN(unsigned int num) const
-{
-  if (num > 0)
-    throw;
-  return GetInputN(0);
-}
-
-
-const Sizes* OutputNode::LocalM(unsigned int num) const
-{
-  if (num > 0)
-    throw;
-  return InputLocalM(0);
-}
-
-const Sizes* OutputNode::LocalN(unsigned int num) const
-{
-  if (num > 0)
-    throw;
-  return InputLocalN(0);
-}
-
-Name OutputNode::GetName(unsigned int num) const
-{
-  if (num > 0)
-    throw;
-  return GetInputName(0);
-}
-
-void OutputNode::FlattenCore(ofstream &out) const
-{
-  DLANode::FlattenCore(out);
-  out << m_type << endl;
-}
-
-void OutputNode::UnflattenCore(ifstream &in, SaveInfo &info)
-{
-  DLANode::UnflattenCore(in, info);
-  getline(in, m_type);
 }
 
 #if DOELEM
@@ -1174,3 +1323,4 @@ void ViewTLCombine::Prop()
     Input(1)->Prop();
   }
 }
+#endif

@@ -116,6 +116,7 @@ void DLANode::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_layer);
 }
 
+#if TWOD
 const Sizes* DLANode::GetInputM(unsigned int num) const
 {
   if (num >= m_inputs.size()) {
@@ -162,6 +163,48 @@ const Sizes* DLANode::InputLocalN(unsigned int num) const
   unsigned int inNum = InputConnNum(num);
   return in->LocalN(inNum);
 }
+
+#else
+const Sizes* DLANode::InputLen(unsigned int num, unsigned int dim) const
+{
+  if (num >= m_inputs.size()) {
+    cout << "bad size 2\n";
+    cout << num << " >= " << m_inputs.size() << endl;
+    throw;
+  }
+  const DLANode *in = (DLANode*)Input(num);
+  unsigned int inNum = InputConnNum(num);
+  return in->Len(inNum, dim);
+}
+
+
+const Sizes* DLANode::InputLocalLen(unsigned int num, unsigned int dim) const
+{
+  if (num >= m_inputs.size()) {
+    cout << "bad size 2\n";
+    cout << num << " >= " << m_inputs.size() << endl;
+    throw;
+  }
+  DLANode *in = (DLANode*)Input(num);
+  unsigned int inNum = InputConnNum(num);
+  return in->LocalLen(inNum, dim);
+}
+
+
+const unsigned int DLANode::InputNumDims(unsigned int num) const
+{
+  if (num >= m_inputs.size()) {
+    cout << "bad size 2\n";
+    cout << num << " >= " << m_inputs.size() << endl;
+    throw;
+  }
+  DLANode *in = (DLANode*)Input(num);
+  unsigned int inNum = InputConnNum(num);
+  return in->NumDims(inNum);
+}
+
+
+#endif
 
 #if DOELEM
 DLANode* DLANode::FindNonRedistParent(unsigned int num)
@@ -223,10 +266,12 @@ void DLANode::UpdateInnerPackingMultiple(PackSize size)
   throw;
 }
 
+#if TWOD
 bool DLANode::IsScalar(unsigned int num) const
 {
   return GetM(num)->AllOnes() && GetN(num)->AllOnes();
 }
+#endif
 
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 {
