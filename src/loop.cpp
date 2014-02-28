@@ -643,7 +643,6 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     out.Indent(1);
     *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
   }
-  else 
 #else
     {
     if (m_comm != CORECOMM)
