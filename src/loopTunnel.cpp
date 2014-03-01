@@ -40,7 +40,8 @@ LoopTunnel::LoopTunnel(PossTunType type)
   m_mlsizes = NULL;
   m_nlsizes = NULL;
 #else
-  blah;
+  m_sizes = NULL;
+  m_lsizes = NULL;
 #endif
   m_indepIters = false;
 }
@@ -59,7 +60,12 @@ LoopTunnel::~LoopTunnel()
     m_nlsizes = NULL;
   }
 #else
-  blah;
+  if (m_sizes) {
+    delete [] m_sizes;
+    m_sizes = NULL;
+    delete [] m_lsizes;
+    m_lsizes = NULL;
+  }
 #endif
 }
 
@@ -189,7 +195,7 @@ const Sizes* LoopTunnel::GetN(unsigned int num) const
 {
   switch(m_tunType) 
   {
-    case (SETTUNIN):
+    //    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
         throw;
@@ -217,7 +223,7 @@ const Sizes* LoopTunnel::LocalM(unsigned int num) const
 {
   switch(m_tunType) 
   {
-    case (SETTUNIN):
+    //    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
         throw;
@@ -245,7 +251,7 @@ const Sizes* LoopTunnel::LocalN(unsigned int num) const
 {
   switch(m_tunType) 
   {
-    case (SETTUNIN):
+    //    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
         throw;
@@ -273,7 +279,7 @@ const Sizes* LoopTunnel::Len(unsigned int num,unsigned int dim) const
 {
   switch(m_tunType) 
   {
-    case (SETTUNIN):
+    //    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
         throw;
@@ -285,11 +291,38 @@ const Sizes* LoopTunnel::Len(unsigned int num,unsigned int dim) const
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-	throw;
-        return input->m_nsizes;
+        return input->m_sizes+dim;
       }
       else if (num == 1) {
         return InputLen(0,dim);
+      }
+      else
+        throw;
+    default:
+      throw;
+  }
+}
+
+const unsigned int LoopTunnel::NumDims(unsigned int num) const
+{
+  switch(m_tunType) 
+  {
+    case (SETTUNIN):
+      if (num > 0)
+	throw;
+      return InputNumDims(0);
+    case (POSSTUNOUT):
+      if (num > 0)
+        throw;
+      return ((DLANode*)(Input(1)->Input(0)))->InputNumDims(0);
+    case (SETTUNOUT):
+      if (num > 0)
+        throw;
+      return InputNumDims(0);
+    case (POSSTUNIN):
+      if (num == 0) {
+        const LoopTunnel *input = (LoopTunnel*)Input(0);
+	return input->InputNumDims(0);
       }
       else
         throw;
@@ -302,11 +335,10 @@ const Sizes* LoopTunnel::LocalLen(unsigned int num,unsigned int dim) const
 {
   switch(m_tunType) 
   {
-    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
         throw;
-      return ((DLANode*)(Input(1)->Input(0)))->InputLocalM(0,dim);
+      return ((DLANode*)(Input(1)->Input(0)))->InputLocalLen(0,dim);
     case (SETTUNOUT):
       if (num > 0)
         throw;
@@ -314,11 +346,7 @@ const Sizes* LoopTunnel::LocalLen(unsigned int num,unsigned int dim) const
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-	throw;
-        //return input->m_mlsizes;
-      }
-      else if (num == 1) {
-        return InputLocalLen(0,dim);
+        return input->m_lsizes+dim;
       }
       else
         throw;
@@ -326,7 +354,6 @@ const Sizes* LoopTunnel::LocalLen(unsigned int num,unsigned int dim) const
       throw;
   }
 }
-
 #endif
 
 unsigned int LoopTunnel::NumOutputs() const
@@ -515,9 +542,9 @@ bool LoopTunnel::InputIsTemp() const
   }
   else if (m_tunType == SETTUNIN) {
     const ClassType type = Input(0)->GetNodeClass();
+#if DOELEM||DOBLIS
     if (type == TempVarNode::GetClass())
       return true;
-#if DOELEM||DOBLIS
     else if (type == ScaleNode::GetClass()) {
       const ScaleNode *scale = (ScaleNode*)Input(0);
       return scale->Input(0)->GetNodeClass() == TempVarNode::GetClass();

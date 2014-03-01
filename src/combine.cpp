@@ -30,14 +30,22 @@ void Combine::Prop()
 {
   if (!IsValidCost(m_cost)) {
     if (m_tunType==POSSTUNOUT) {
+#if TWOD
       if (m_inputs.size() != GetNumElems(m_dir)+1) {
+#else
+      if (m_inputs.size() != 4) {
+#endif
         cout << "wrong number of inputs " << this << endl;
-        cout << m_inputs.size() << " inputs instead of " << GetNumElems(m_dir)+1 << endl;
+	//        cout << m_inputs.size() << " inputs instead of " << GetNumElems(m_dir)+1 << endl;
         throw;
       }
       else {
         NodeConn *conn = m_inputs[m_inputs.size()-1];
+#if TWOD
         if (conn->m_num != GetNumElems(m_dir))
+#else
+        if (conn->m_num != 3)
+#endif
           throw;
         else if (conn->m_n->GetNodeClass() != Split::GetClass())
           throw;
@@ -137,7 +145,7 @@ const unsigned int Combine::NumDims(unsigned int num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(GetNumElems(m_dir))->Input(0)))->NumDims(0);
+    return ((DLANode*)(Input(0)->Input(3)->Input(0)))->NumDims(0);
   }
   else if (m_tunType == POSSTUNOUT) {
     return InputNumDims(m_inputs.size()-1);
@@ -152,7 +160,7 @@ const Sizes* Combine::Len(unsigned int num, unsigned int dim) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(GetNumElems(m_dir))->Input(0)))->Len(0,dim);
+    return ((DLANode*)(Input(0)->Input(3)->Input(0)))->Len(0,dim);
   }
   else if (m_tunType == POSSTUNOUT) {
     return InputLen(m_inputs.size()-1,dim);
@@ -168,7 +176,11 @@ const Sizes* Combine::LocalLen(unsigned int num, unsigned int dim) const
     throw;
   if (m_tunType == SETTUNOUT) {
     DLANode *possTunOut = (DLANode*)Input(0);
+#if TWOD
     DLANode *possTunIn = (DLANode*)(possTunOut->Input(GetNumElems(m_dir)));
+#else
+    DLANode *possTunIn = (DLANode*)(possTunOut->Input(3));
+#endif
     DLANode *setTunIn = (DLANode*)(possTunIn->Input(0));
     return setTunIn->InputLocalLen(0,dim);
   }
@@ -197,9 +209,17 @@ PossTunnel* Combine::GetSetTunnel()
 {
   Combine *tun;
   if (m_tunType == POSSTUNIN)
+#if TWOD
     tun = new Combine(m_dir, SETTUNIN);
+#else
+    tun = new Combine(m_partDim, SETTUNIN);
+#endif
   else if (m_tunType == POSSTUNOUT)
+#if TWOD
     tun = new Combine(m_dir, SETTUNOUT);
+#else
+    tun = new Combine(m_partDim, SETTUNOUT);
+#endif
   else
     throw;
   tun->CopyTunnelInfo(this);
@@ -212,6 +232,7 @@ void Combine::PrintCode(IndStream &out)
     //    cout << "returning from " << GetNameStr(0) << endl;
     return;
   }
+#if TWOD
   LoopType loopType = GetLoopType();
   if (loopType == ELEMLOOP) {
     switch(m_dir) {
@@ -290,24 +311,38 @@ void Combine::PrintCode(IndStream &out)
       break;
     }
   }
+#else
+  throw;
+#endif
 }
 
 void Combine::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   LoopTunnel::Duplicate(orig, shallow, possMerging);
   const Combine *com = (Combine*)orig;
+#if TWOD
   m_dir = com->m_dir;
+#else
+  m_partDim = com->m_partDim;
+#endif
 }
 
 NodeType Combine::GetType() const
 {
+#if TWOD
   return "Combine " + PartDirToStr(m_dir) + "( " + PossTunnel::GetType() + " )";
+#else
+  string str = "Combine ";
+  str += m_partDim;
+  return str + " ( " + PossTunnel::GetType() + " )";
+#endif
 }
 
 void Combine::SanityCheck()
 {
   LoopTunnel::SanityCheck();
   
+#if TWOD
   if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
       && (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR))) 
   {
@@ -320,6 +355,9 @@ void Combine::SanityCheck()
     cout << "bad statuses\n";
     throw;
   }
+#else
+  throw;
+#endif
   
   if (m_tunType == SETTUNOUT) {
     if (!m_pset->IsLoop())
@@ -332,7 +370,11 @@ void Combine::SanityCheck()
     }
   }
   else if (m_tunType == POSSTUNOUT) {
+#if TWOD
     if (m_inputs.size() != GetNumElems(m_dir)+1) {
+#else
+    if (m_inputs.size() != 4) {
+#endif
       int num = m_inputs.size();
       cout << "combine has wrong number of inputs\n";
       cout << num <<endl;
@@ -355,11 +397,19 @@ void Combine::SanityCheck()
 void Combine::FlattenCore(ofstream &out) const
 {
   LoopTunnel::FlattenCore(out);
+#if TWOD
   WRITE(m_dir);
+#else
+  WRITE(m_partDim);
+#endif
 }
 
 void Combine::UnflattenCore(ifstream &in, SaveInfo &info) 
 {
   LoopTunnel::UnflattenCore(in,info);
+#if TWOD
   READ(m_dir);
+#else
+  READ(m_partDim);
+#endif
 }

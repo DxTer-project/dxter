@@ -35,7 +35,7 @@ class LoopTunnel : public PossTunnel
   Sizes *m_msizes, *m_nsizes;
   Sizes *m_mlsizes, *m_nlsizes;
 #else
-
+  SizesArray m_sizes, m_lsizes;
 #endif
   bool m_indepIters;
 

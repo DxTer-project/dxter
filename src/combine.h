@@ -29,9 +29,18 @@
 class Combine : public LoopTunnel
 {
  public:
+#if TWOD
   PartDir m_dir;
+#else
+  unsigned int m_partDim;
+#endif
+#if TWOD
  Combine() :LoopTunnel(LASTTUNNEL),m_dir(LASTPARTDIR) {}
  Combine(PartDir dir, PossTunType type) : LoopTunnel(type), m_dir(dir) {}
+#else
+ Combine() :LoopTunnel(LASTTUNNEL),m_partDim(99) {}
+   Combine(unsigned int partDim, PossTunType type) : LoopTunnel(type), m_partDim(partDim) {}
+#endif
   virtual void PrintCode(IndStream &out);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   static Node* BlankInst() { return new Combine(LASTPARTDIR,LASTTUNNEL);}

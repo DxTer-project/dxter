@@ -2161,7 +2161,11 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
           if (conn1->m_n == conn2->m_n && conn1->m_num == conn2->m_num) {
             Split *split1 = (Split*)tun;
             Split *split2 = (Split*)tun2;
+#if TWOD
             if (split1->m_dir == split2->m_dir)
+#else
+            if (split1->m_partDim == split2->m_partDim)
+#endif
               throw;
             else {
               split1->SetAddDir();

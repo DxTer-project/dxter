@@ -324,7 +324,11 @@ bool Loop::CanMerge(PSet *pset) const
           // for fusion
           if (leftOutTun->GetNodeClass() == Combine::GetClass()) {
             if (rightInTun->GetNodeClass() == Split::GetClass()) {
+#if TWOD
               if (((Combine*)leftOutTun)->m_dir != ((Split*)rightInTun)->m_dir) {
+#else
+              if (((Combine*)leftOutTun)->m_partDim != ((Split*)rightInTun)->m_partDim) {
+#endif
                 if (!leftOutTun->IsConst() || !rightInTun->IsConst())
                   return false;
                 return false;
@@ -803,7 +807,11 @@ void Loop::FillTunnelSizes()
   NodeVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
     LoopTunnel *tun = (LoopTunnel*)(*iter);
+#if TWOD
     if (!tun->m_msizes) {
+#else
+    if (!tun->m_sizes) {
+#endif
       upToDate = false;
       break;
     }

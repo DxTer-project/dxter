@@ -35,6 +35,7 @@ class Split : public LoopTunnel
 #if TWOD
   PartDir m_dir;
 #else
+  //no m_lsizes - in loop tunnel
   unsigned int m_partDim;
 #endif
   bool m_isControlTun;
