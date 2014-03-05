@@ -119,7 +119,7 @@ void CheckThisSpot();
 #if TWOD
 void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
 #else
-void GetLocalSizes(DistType dist, unsigned int numDims, const SizesArray sizes, SizesArray localSizes);
+void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes);
 #endif
 #endif
 

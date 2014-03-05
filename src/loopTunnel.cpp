@@ -549,8 +549,8 @@ bool LoopTunnel::InputIsTemp() const
       const ScaleNode *scale = (ScaleNode*)Input(0);
       return scale->Input(0)->GetNodeClass() == TempVarNode::GetClass();
     }
-#endif
     else
+#endif
       return false;
   }
   else
@@ -599,16 +599,25 @@ void LoopTunnel::UnflattenCore(ifstream &in, SaveInfo &info)
 
 void LoopTunnel::StartFillingSizes()
 {
-  if (m_msizes)
-    throw;
   if (m_tunType != SETTUNIN)
     return;
+#if TWOD
+  if (m_msizes)
+    throw;
   m_msizes = new Sizes;
   m_mlsizes = new Sizes;
   m_nsizes = new Sizes;
   m_nlsizes = new Sizes;
+#else
+  if (m_sizes)
+    throw;
+  unsigned int numDims = InputNumDims(0);
+  m_sizes = new Sizes[numDims];
+  m_lsizes = new Sizes[numDims];
+#endif
 }
 
+#if TWOD
 void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
 {
   if (m_tunType != SETTUNIN)
@@ -646,7 +655,45 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
   m_mlsizes->AddRepeatedSizes(lm, numIters, parFactor);
   m_nlsizes->AddRepeatedSizes(ln, numIters, parFactor);
 }
+#else
+void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
+{
+  if (m_tunType != SETTUNIN)
+    return;
+  if (!m_sizes)
+    throw;
+  const DLANode *input = (DLANode*)Input(0);
+  unsigned int num = InputConnNum(0);
+  unsigned int numDims = input->NumDims(num);
+  for (unsigned int i = 0; i < numDims; ++i) {
+    const Sizes *sizes = input->Len(num,i);
+    if (!sizes) {
+      cout << "!sizes\n";
+      throw;
+    }
+    const Sizes *lsizes = input->LocalLen(num,i);
+    unsigned int length = sizes->NumSizes();
+    if (length != lsizes->NumSizes() 
+	|| length <= execNum) 
+      {
+	cout << sizes->NumSizes() << endl;
+	cout << lsizes->NumSizes() << endl;
+	throw;
+      }
+    const Size size = (*sizes)[execNum];
+    const Size lsize = (*lsizes)[execNum];
+    m_sizes[i].AddRepeatedSizes(size, numIters, parFactor);
+    m_lsizes[i].AddRepeatedSizes(lsize, numIters, parFactor);
+  }
+}
+#endif
 
+void LoopTunnel::UpdateLocalSizes()
+{
+  //already calculated in AppendSizes
+}
+
+#if TWOD
 void LoopTunnel::ClearSizeCache()
 {
   if (!m_msizes) 
@@ -660,6 +707,17 @@ void LoopTunnel::ClearSizeCache()
   delete m_nlsizes;
   m_nlsizes = NULL;
 }
+#else
+void LoopTunnel::ClearSizeCache()
+{
+  if (!m_sizes) 
+    return;
+  delete [] m_sizes;
+  m_sizes = NULL;
+  delete [] m_lsizes;
+  m_lsizes = NULL;
+}
+#endif
 
 bool LoopTunnel::Overwrites(const Node *input, unsigned int num) const
 {

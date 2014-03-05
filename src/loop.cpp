@@ -841,6 +841,10 @@ void Loop::FillTunnelSizes()
       }
     }
   }
+  for (; iter != m_inTuns.end(); ++iter) {
+    LoopTunnel *in = (LoopTunnel*)(*iter);
+    in->UpdateLocalSizes();
+  }
 }
 
 void Loop::BuildSizeCache()

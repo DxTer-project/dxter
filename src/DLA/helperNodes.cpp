@@ -253,7 +253,7 @@ void InputNode::BuildSizeCache()
   if (m_lsizes)
     return;
   m_lsizes = new Sizes[m_numDims];
-  GetLocalSizes(m_varName.m_type, m_numDims, m_sizes, m_lsizes);
+  GetLocalSizes(m_varName.m_type, m_sizes, m_lsizes);
 }
 #endif
 

@@ -31,14 +31,6 @@ m_dir(LASTPARTDIR)
 m_partDim(99)
 #endif
 {
-#if TWOD
-  m_msizes = NULL;
-  m_nsizes = NULL;
-  m_mlsizes = NULL;
-  m_nlsizes = NULL;
-#else
-  init;
-#endif
   m_addDir = false;
 }
 
@@ -46,17 +38,12 @@ m_partDim(99)
 Split::Split(PartDir dir, PossTunType type, bool isControl) 
   : LoopTunnel(type), m_dir(dir), m_isControlTun(isControl)
 {
-  m_msizes = NULL;
-  m_nsizes = NULL;
-  m_mlsizes = NULL;
-  m_nlsizes = NULL;
   m_addDir = false;
 }
 #else
-Split::Split(unsigned int partDir, PossTunType type, bool isControl) 
-  : LoopTunnel(type), m_partDir(partDir), m_isControlTun(isControl)
+Split::Split(unsigned int partDim, PossTunType type, bool isControl) 
+  : LoopTunnel(type), m_partDim(partDim), m_isControlTun(isControl)
 {
-  init;
   m_addDir = false;
 }
 #endif
@@ -75,11 +62,16 @@ Split::~Split()
     m_nlsizes = NULL;
   }
 #else
-cleanup
+  if (m_sizes) {
+    delete [] m_sizes;
+    m_sizes = NULL;
+    delete [] m_lsizes;
+    m_lsizes = NULL;
+  }
 #endif
 }
 
-static Node* Split::BlankInst() 
+Node* Split::BlankInst() 
 { 
 #if TWOD
   return new Split(LASTPARTDIR,LASTTUNNEL,false);
@@ -105,6 +97,7 @@ Name Split::GetName(unsigned int num, LoopType type) const
       name.m_name = GetInputName(0).str();
       if (name.m_name[name.m_name.length()-1] != '_')
         name.m_name = name.m_name + "_";
+#if TWOD
   if (m_addDir) {
     switch(m_dir)
       {
@@ -130,6 +123,10 @@ Name Split::GetName(unsigned int num, LoopType type) const
 	throw;
       }
   }
+#else
+  if (m_addDir)
+    throw;
+#endif
       return name;
     }
   }
@@ -145,6 +142,7 @@ Name Split::GetName(unsigned int num, LoopType type) const
 	  
 
   if (m_tunType == POSSTUNIN) {
+#if TWOD
     switch(m_dir)
       {
       case (PARTDOWN):
@@ -192,6 +190,14 @@ Name Split::GetName(unsigned int num, LoopType type) const
         throw;
         break;
       }
+#else
+    if (m_partDim >= InputNumDims(0))
+      throw;
+    if (num > 2) 
+      throw;
+    else
+      name.m_name += num;      
+#endif
     return name;
   }
   else
@@ -212,7 +218,11 @@ void Split::Prop()
       Node *child = NULL;
       unsigned int size = m_children.size();  
       for (unsigned int i = 0; i < size; ++i) {
+#if TWOD
         if (m_children[i]->m_num == GetNumElems(m_dir)) {
+#else
+        if (m_children[i]->m_num == 3) {
+#endif
           if (child)
             throw;
           else
@@ -228,13 +238,18 @@ void Split::Prop()
         throw;
       else {
         Combine* com = (Combine*)child;
+#if TWOD
         if (com->m_dir != m_dir)
+#else
+	if (com->m_partDim != m_partDim)
+#endif
           throw;
       }
     }
   }
 }
 
+#if TWOD
 const Sizes* Split::GetM(unsigned int num) const
 {
   switch(m_tunType) 
@@ -515,7 +530,92 @@ void Split::GetSizes(unsigned int num, unsigned int numIters,
       break;
     }
 }
+#else
+ const unsigned int Split::NumDims(unsigned int num) const
+{
+  switch(m_tunType) 
+    {
+    case (SETTUNIN):
+    case (POSSTUNOUT):
+    case (SETTUNOUT):
+      if (num > 0)
+        throw;
+      return InputNumDims(0);
+    case (POSSTUNIN):
+      if (num > 3)
+	throw;
+      return InputNumDims(0);
+    default:
+      throw;
+    }
+}
 
+const Sizes* Split::Len(unsigned int num, unsigned int dim) const
+{
+  switch(m_tunType) 
+    {
+    case (SETTUNIN):
+    case (POSSTUNOUT):
+    case (SETTUNOUT):
+      if (num > 0)
+        throw;
+      return InputLen(0,dim);
+    case (POSSTUNIN):
+      if (num < 3) {
+        const LoopTunnel *input = (LoopTunnel*)Input(0);
+        if (!input->m_sizes)
+          throw;
+	if (dim < m_partDim)
+	  return &(input->m_sizes[dim]);
+	else if (dim == m_partDim)
+	  return &(input->m_sizes[dim+num]);
+	else
+	  return &(input->m_sizes[dim+2]);
+      }
+      else if (num == 3) {
+        return InputLen(0,dim);
+      }
+      else
+        throw;
+    default:
+      throw;
+    }
+}
+
+   const Sizes* Split::LocalLen(unsigned int num, unsigned int dim) const
+{
+  switch(m_tunType) 
+    {
+    case (SETTUNIN):
+    case (POSSTUNOUT):
+    case (SETTUNOUT):
+      if (num > 0)
+        throw;
+      return InputLocalLen(0,dim);
+    case (POSSTUNIN):
+      if (num < 3) {
+        const LoopTunnel *input = (LoopTunnel*)Input(0);
+        if (!input->m_lsizes)
+          throw;
+	if (dim < m_partDim)
+	  return &(input->m_lsizes[dim]);
+	else if (dim == m_partDim)
+	  return &(input->m_lsizes[dim+num]);
+	else
+	  return &(input->m_lsizes[dim+2]);
+      }
+      else if (num == 3) {
+        return InputLocalLen(0,dim);
+      }
+      else
+        throw;
+    default:
+      throw;
+    }
+}
+#endif
+
+#if TWOD
 PossTunnel* Split::GetSetTunnel()
 {
   Split *tun;
@@ -528,11 +628,26 @@ PossTunnel* Split::GetSetTunnel()
   tun->CopyTunnelInfo(this);
   return tun;
 }
+#else
+PossTunnel* Split::GetSetTunnel()
+{
+  Split *tun;
+  if (m_tunType == POSSTUNIN)
+    tun = new Split(m_partDim, SETTUNIN);
+  else if (m_tunType == POSSTUNOUT)
+    tun = new Split(m_partDim, SETTUNOUT);
+  else
+    throw;
+  tun->CopyTunnelInfo(this);
+  return tun;
+}
+#endif
 
 void Split::PrintCode(IndStream &out)
 {
   if (m_tunType != POSSTUNIN)
     return;
+#if TWOD
   LoopType loopType = GetLoopType();
   if (loopType == ELEMLOOP) {
     switch(m_dir) {
@@ -696,26 +811,41 @@ void Split::PrintCode(IndStream &out)
       }
     }
   }
+#else
+  *out << "need split print code\n";
+  throw;
+#endif
 }
 
 void Split::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   LoopTunnel::Duplicate(orig, shallow, possMerging);
   const Split *split = (Split*)orig;
+#if TWOD
   m_dir = split->m_dir;
+#else
+  m_partDim = split->m_partDim;
+#endif
   m_isControlTun = split->m_isControlTun;
   m_addDir = split->m_addDir;
 }
 
 NodeType Split::GetType() const
 {
+#if TWOD
   return "Split " + PartDirToStr(m_dir)  + "( " + PossTunnel::GetType() + " )";
+#else
+  string tmp = "Split";
+  tmp += m_partDim;
+  return tmp  + "( " + PossTunnel::GetType() + " )";
+#endif
 }
 
 void Split::SanityCheck()
 {
   LoopTunnel::SanityCheck();
   
+#if TWOD
   if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
       && (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR))) 
     {
@@ -728,7 +858,9 @@ void Split::SanityCheck()
       cout << "bad statuses\n";
       throw;
     }
-  
+#else
+  throw;
+#endif  
   if (m_tunType == POSSTUNIN) {
     for(unsigned int i = 0; i < m_inputs.size(); ++i) {
       if (Input(i)->GetNodeClass() != Split::GetClass()) {
@@ -765,6 +897,7 @@ unsigned int Split::NumOutputs() const
 #endif
 }
 
+#if TWOD
 bool Split::QuadInUse(Quad quad, bool atEnd) const
 {
   if (m_tunType == SETTUNIN) {
@@ -846,6 +979,12 @@ bool Split::QuadInUse(Quad quad, bool atEnd) const
   else
     throw;
 }
+#else
+bool Split::QuadInUse(Quad quad, bool atEnd) const
+{
+  throw;
+}
+#endif
 
 void Split::PrintVarDeclarations(IndStream &out) const
 {
@@ -853,6 +992,7 @@ void Split::PrintVarDeclarations(IndStream &out) const
     return;
   //BAMTODO: eventually predefine each obj_t matrix to be used ahead of the loop
   return;
+#if TWOD
   LoopType type = GetLoopType();
   if (type == ELEMLOOP) {
     
@@ -876,13 +1016,21 @@ void Split::PrintVarDeclarations(IndStream &out) const
   }
   else
     throw;
+#else
+  cout << "need print var code\n";
+  throw;
+#endif
 }
 
 Combine* Split::CreateMatchingCombine(int numArgs, ...)
 {
   int numComIns = NumOutputs();
   int j = 0;
+#if TWOD
   Combine *com = new Combine(m_dir, POSSTUNOUT);
+#else
+  Combine *com = new Combine(m_partDim, POSSTUNOUT);
+#endif
   
   va_list listPointer;
   va_start (listPointer, numArgs);
@@ -907,6 +1055,7 @@ Combine* Split::CreateMatchingCombine(int numArgs, ...)
   return com;
 }
 
+#if TWOD
 unsigned int Split::NumIters(Size bs, Size m, Size n) const
 {
   if (!bs)
@@ -925,7 +1074,16 @@ unsigned int Split::NumIters(Size bs, Size m, Size n) const
   }
   throw;
 }
+#else
+unsigned int Split::NumIters(Size bs, Size size) const
+{
+  if (!bs)
+    throw;
+  return ceil(((double)size)/bs);
+}
+#endif
 
+#if TWOD
 unsigned int Split::NumIters(unsigned int iterNum) const
 {
   Size bs = GetMyLoop()->GetBS();
@@ -945,11 +1103,33 @@ unsigned int Split::NumIters(unsigned int iterNum) const
   const Size n = (*ns)[iterNum];
   return NumIters(bs, m, n);
 }
+#else
+unsigned int Split::NumIters(unsigned int iterNum) const
+{
+  Size bs = GetMyLoop()->GetBS();
+  const Sizes *sizes = InputLen(0,m_partDim);
+  if (!sizes) {
+    if (Input(0)->m_flags & BUILDFLAG)
+      cout << "has built\n";
+    else
+      cout << "hasn't built\n";
+    cout << Input(0)->GetNodeClass() << endl;
+    cout << Input(0) << endl;
+    throw;
+  }
+  const Size m = (*sizes)[iterNum];
+  return NumIters(bs,m);
+}
+#endif
 
 void Split::FlattenCore(ofstream &out) const
 {
   LoopTunnel::FlattenCore(out);
+#if TWOD
   WRITE(m_dir);
+#else
+  WRITE(m_partDim);
+#endif
   WRITE(m_isControlTun);
   WRITE(m_addDir);
 }
@@ -958,7 +1138,11 @@ void Split::FlattenCore(ofstream &out) const
 void Split::UnflattenCore(ifstream &in, SaveInfo &info) 
 {
   LoopTunnel::UnflattenCore(in,info);
+#if TWOD
   READ(m_dir);
+#else
+  READ(m_partDim);
+#endif
   READ(m_isControlTun);
   READ(m_addDir);
 }
@@ -967,9 +1151,22 @@ unsigned int Split::NumberOfLoopExecs() const
 {
   if (!m_isControlTun)
     throw;
-  return min(GetInputM(0)->NumSizes(), GetInputN(0)->NumSizes());
+#if TWOD
+  //  return min(GetInputM(0)->NumSizes(), GetInputN(0)->NumSizes());
+  unsigned int one = GetInputM(0)->NumSizes();
+  unsigned int two = GetInputN(0)->NumSizes();
+  if (one != two) {
+    cout << one << " vs. " << two << endl;
+    cout.flush();
+    throw;
+  }
+  return min(one,two);
+#else
+  return InputLen(0,0)->NumSizes();
+#endif
 }
 
+#if TWOD
 void Split::StartFillingSizes()
 {
   if (m_msizes)
@@ -982,6 +1179,20 @@ void Split::StartFillingSizes()
   m_mlsizes = new Sizes[numElems];
   m_nlsizes = new Sizes[numElems];
 }
+#else
+void Split::StartFillingSizes()
+{
+  if (m_sizes)
+    throw;
+  if (m_tunType != SETTUNIN)
+    return;
+  unsigned int numDims = InputNumDims(0);
+  //Num dims of sizes, but the m_partDim dimension has
+  // 3 outputs
+  m_sizes = new Sizes[numDims+2];
+  m_lsizes = new Sizes[numDims+2];
+}
+#endif
 
 void Split::ClearSizeCache()
 {
@@ -997,10 +1208,16 @@ void Split::ClearSizeCache()
   delete [] m_nlsizes;
   m_nlsizes = NULL;
 #else
-  blah;
+  if (!m_sizes)
+    return;
+  delete  [] m_sizes;
+  m_sizes = NULL;
+  delete [] m_lsizes;
+  m_lsizes = NULL;
 #endif
 }
 
+#if TWOD
 void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
 {
   if (m_tunType != SETTUNIN)
@@ -1028,9 +1245,9 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
 
 
   if (length <= execNum || length2 <= execNum)
-  {
-    throw;
-  }
+    {
+      throw;
+    }
   const Size m = (*ms)[execNum];
   const Size n = (*ns)[execNum];
   const Size bs = GetMyLoop()->GetBS();
@@ -1049,16 +1266,60 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
   }
   for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
     GetSizes(subMat, numIters,
-	     bs, parFactor,
-	     m, n,
-	     m_msizes[subMat], m_nsizes[subMat]);
+             bs, parFactor,
+             m, n,
+             m_msizes[subMat], m_nsizes[subMat]);
     /*
     if (m_msizes[subMat].NumSizes() != m_nsizes[subMat].NumSizes()) {
-      cout << m_msizes[subMat].NumSizes() << endl;
-      cout << m_nsizes[subMat].NumSizes() << endl;
+    cout << m_msizes[subMat].NumSizes() << endl;
+    cout << m_nsizes[subMat].NumSizes() << endl;
       throw;
-    }*/
+      }*/
   }
+}
+#else
+void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
+{
+  if (m_tunType != SETTUNIN)
+    return;
+  if (!m_sizes)
+    throw;
+  const Size bs = GetMyLoop()->GetBS();
+  unsigned int numDims = InputNumDims(0);
+  for (unsigned int dim; dim < numDims; ++dim) {
+    const Sizes *sizes = InputLen(0,dim);
+    unsigned int length = sizes->NumSizes();
+    if (length <= execNum) {
+      throw;
+    }
+    const Size len = (*sizes)[execNum];
+
+    if (dim < m_partDim) {
+      m_sizes[dim].AddRepeatedSizes(len, numIters, parFactor);
+    }
+    else if (dim == m_partDim) {
+      if (NumIters(bs, len) != numIters)  {
+	sizes->Print();
+	cout << endl;
+	cout << NumIters(bs, len) << " vs. " << numIters << endl;
+	
+      }
+      m_sizes[dim].AddSizesWithLimit(0,bs,len, parFactor);
+      m_sizes[dim+1].AddMidSizes(bs, len, parFactor);
+      m_sizes[dim+2].AddSizesWithLimit(len,-1*bs,0, parFactor);
+    }
+    else {
+      m_sizes[dim+2].AddRepeatedSizes(len, numIters, parFactor);
+    }
+  }
+}
+#endif
+
+#if TWOD
+void Split::UpdateLocalSizes()
+{
+  const unsigned int numElems = GetNumElems(m_dir);
+
   if (loopType == ELEMLOOP) {
 #if DOELEM
     const DistType t = InputDistType(0);
@@ -1075,3 +1336,13 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
     }    
   }
 }
+#else
+void Split::UpdateLocalSizes()
+{
+  unsigned int numDims = InputNumDims(0);
+  const DistType t = InputDistType(0);
+  for (unsigned int dim = 0; dim < numDims; ++ dim) {
+    GetLocalSizes(t, m_sizes+dim, m_lsizes+dim);
+  }
+}
+#endif

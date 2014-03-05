@@ -69,14 +69,20 @@ class Split : public LoopTunnel
 		   Size m, Size n,
 		   Sizes &ms, Sizes &ns);
 #else
-
+  virtual const unsigned int NumDims(unsigned int num) const;
+  virtual const Sizes* Len(unsigned int num, unsigned int dim) const;
+  virtual const Sizes* LocalLen(unsigned int num, unsigned int dim) const;
 #endif
   virtual Name GetName(unsigned int num) const;
   virtual Name GetName(unsigned int num, LoopType type) const;
   virtual void PrintVarDeclarations(IndStream &out) const;
   Combine* CreateMatchingCombine(int numArgs, ...);
   bool ValidIter() const;
+#if TWOD
   unsigned int NumIters(Size bs, Size m, Size n) const;
+#else
+  unsigned int NumIters(Size bs, Size size) const;
+#endif
   unsigned int NumIters(unsigned int iterNum) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
@@ -85,4 +91,5 @@ class Split : public LoopTunnel
   virtual void StartFillingSizes();
   virtual void ClearSizeCache();
   virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
+  virtual void UpdateLocalSizes();
 };
