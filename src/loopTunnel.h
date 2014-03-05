@@ -31,7 +31,7 @@ class LoopTunnel : public PossTunnel
   UpStat 
     m_statTL, m_statTR,
     m_statBL, m_statBR;
-#if TWO
+#if TWOD
   Sizes *m_msizes, *m_nsizes;
   Sizes *m_mlsizes, *m_nlsizes;
 #else

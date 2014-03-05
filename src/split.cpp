@@ -1319,7 +1319,7 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
 void Split::UpdateLocalSizes()
 {
   const unsigned int numElems = GetNumElems(m_dir);
-
+  const LoopType loopType = GetMyLoop()->GetType();
   if (loopType == ELEMLOOP) {
 #if DOELEM
     const DistType t = InputDistType(0);
