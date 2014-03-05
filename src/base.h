@@ -96,9 +96,11 @@ enum DistType { UNKNOWN,
 class DistType
 {
  public:
-  bool tmp;
- DistType() :tmp(false) {}
-  DistType(const DistType &blah);
+  unsigned int m_numDims;
+  unsigned int *m_dists;
+ DistType() : m_numDims(99), m_dists(NULL) {}
+  DistType(const DistType &rhs);
+  void SetToDefault(unsigned int numDims);
 };
 #endif
 
@@ -108,13 +110,16 @@ inline bool DistTypeNotEqual(const DistType &one, const DistType &two)
   return one != two;
 }
 #elif DOTENSORS
-  bool DistTypeNotEqual(const DistType &one, const DistType &two);
+inline bool DistTypeNotEqual(const DistType &one, const DistType &two)
+{
+  if (one.m_numDims != two.m_numDims)
+    return true;
+  return memcmp(one.m_dists,two.m_dists,one.m_numDims*sizeof(unsigned int )) != 0;
+}
 #endif
 
 #if DODM
 string DistTypeToStr(const DistType &type);
-extern DistType DEFAULTDISTTYPE;
-void SetToDefaultDistType(DistType *type);
 void CheckThisSpot();
 #if TWOD
 void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);

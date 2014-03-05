@@ -94,6 +94,21 @@ string DiagToStr(Diag diag)
     throw;
 }
 
+#if DOTENSORS
+DistType::DistType(const DistType &rhs)
+{
+  if (m_dists)
+    delete [] m_dists;
+  m_numDims = rhs.m_numDims;
+  if (m_numDims) {
+    m_dists = new unsigned int[m_numDims];
+    memcpy(m_dists, rhs.m_dists, m_numDims*sizeof(unsigned int));
+  }
+  else
+    m_dists = NULL;
+}
+#endif
+
 #if DOELEM
 string DistTypeToStr(const DistType &distType)
 {

@@ -46,7 +46,8 @@ DistType DLANode::GetDistType(unsigned int num) const
 #elif DOTENSORS
 DistType DLANode::GetDistType(unsigned int num) const
 { 
-  return DEFAULTDISTTYPE;
+  throw;
+  //  return DEFAULTDISTTYPE;
 }
 #endif
 

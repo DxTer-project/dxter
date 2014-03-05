@@ -75,7 +75,7 @@ InputNode::InputNode(NodeType type, unsigned int numDims, const SizesArray sizes
   for(unsigned int i = 0; i < numDims; ++i)
     m_sizes[i] = sizes[i];
   m_varName.m_name = name;
-  m_varName.m_type = DEFAULTDISTTYPE;
+  m_varName.m_type.SetToDefault(numDims);
 }
 
 InputNode::InputNode(NodeType type, unsigned int numDims, const SizesArray sizes, DistType dist, string name)
@@ -301,7 +301,8 @@ DistType OutputNode::GetDistType(unsigned int num) const
 #if DOELEM
   return D_MC_MR; 
 #elif DOTENSORS
-  return DEFAULTDISTTYPE;
+  throw;
+  //  return DEFAULTDISTTYPE;
 #else
   throw;
 #endif
