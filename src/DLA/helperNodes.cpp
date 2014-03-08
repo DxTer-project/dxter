@@ -67,7 +67,7 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 
 
 #if DOTENSORS
-InputNode::InputNode(NodeType type, unsigned int numDims, const SizesArray sizes, string name)
+InputNode::InputNode(NodeType type, unsigned int numDims, const SizesArray sizes, string name, string indices)
 : 
   m_type(type), m_numDims(numDims), m_lsizes(NULL)
 {
@@ -75,18 +75,24 @@ InputNode::InputNode(NodeType type, unsigned int numDims, const SizesArray sizes
   for(unsigned int i = 0; i < numDims; ++i)
     m_sizes[i] = sizes[i];
   m_varName.m_name = name;
+  m_varName.m_indices = indices;
   m_varName.m_type.SetToDefault(numDims);
+  if (m_varName.m_indices.size() != numDims)
+    throw;
 }
 
-InputNode::InputNode(NodeType type, unsigned int numDims, const SizesArray sizes, DistType dist, string name)
+InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, string indices)
 :
-  m_type(type), m_numDims(numDims), m_lsizes(NULL)
+  m_type(type), m_numDims(dist.m_numDims), m_lsizes(NULL)
 {
-  m_sizes = new Sizes[numDims];
-  for(unsigned int i = 0; i < numDims; ++i)
+  m_sizes = new Sizes[dist.m_numDims];
+  for(unsigned int i = 0; i < m_numDims; ++i)
     m_sizes[i] = sizes[i];
   m_varName.m_name = name;
   m_varName.m_type = dist;
+  m_varName.m_indices = indices;
+  if (m_varName.m_indices.size() != m_numDims)
+    throw;
 }
 #endif
 

@@ -426,6 +426,9 @@ Name& Name::operator= (const Name &rhs)
   m_type = rhs.m_type;
 #endif
   m_name = rhs.m_name;
+#if DOTENSORS
+  m_indices = rhs.m_indices;
+#endif
   return *this;
 }
 
@@ -434,13 +437,20 @@ void Name::Flatten(ofstream &out) const
 #if DODM
   WRITE(m_type);
 #endif
+#if DOTENSORS
+  out << m_indices << endl;
+#endif
   out << m_name << endl;
+
 }
 
 void Name::Unflatten(ifstream &in)
 {
 #if DODM
   READ(m_type);
+#endif
+#if DOTENSORS
+  getline(in, m_indices);
 #endif
   getline(in, m_name);
 }
