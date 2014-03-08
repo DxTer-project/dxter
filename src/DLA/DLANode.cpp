@@ -243,7 +243,9 @@ DLANode* DLANode::FindSideEffectingUser(unsigned int num)
       }
       else 
 #elif DOTENSORS
-	CheckThisSpot();
+	cout << "CheckThisSpot\n";
+      throw;
+      //	CheckThisSpot();
 #endif
 	{
         if (child->Overwrites(this, num))

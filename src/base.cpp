@@ -27,6 +27,7 @@
 #include <cstring>
 #include <cmath>
 #include <math.h>
+#include "costs.h"
 
 char END = '#';
 char START = '+';
@@ -100,6 +101,34 @@ string DistTypeToStr(const DistType &type)
   }
   out += "]";
   return out;
+}
+
+void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes)
+{
+  const unsigned int numDims = dist.m_numDims;
+  for (unsigned int dim = 0; dim < numDims; ++ dim) {
+    unsigned int distVal = dist.m_dists[dim];
+    localSizes[dim] = sizes[dim];
+    if (distVal != 0) {
+      distVal--;
+      unsigned int currStage = MAX_NUM_DIMS;
+      unsigned int numDists = 0;
+      unsigned int coef = 1;
+      while (distVal >= currStage) {
+	distVal -= currStage;
+	numDists++;
+	currStage *= MAX_NUM_DIMS;
+      }
+      string out;
+      while (distVal > 0) {
+	unsigned int distDim = distVal % MAX_NUM_DIMS;
+	coef *= GridLens[distDim];
+	distVal = distVal / MAX_NUM_DIMS;
+	--numDists;
+      }    
+      localSizes[dim].SetCoeff(1.0 / coef);
+    }
+  }
 }
 #endif
 

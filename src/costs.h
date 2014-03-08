@@ -67,8 +67,8 @@ extern Cost CACHEMISS;
 extern Size P;
 extern Size R;
 extern Size C;
-#elfi DOTENSORS
-extern Size GridLens[MAX_NUM_DIMS]
+#elif DOTENSORS
+extern Size GridLens[MAX_NUM_DIMS];
 #endif
 #if DOELEM
 extern Size ELEM_BS;
