@@ -36,19 +36,24 @@ using namespace std;
 #if DOELEM
 #define RVAL 40
 #define CVAL 40
-#else
+#define ELEM_BSVAL 128
+#elif DOBLIS
 #define RVAL 1
 #define CVAL 1
 #define NUMCORESPERL2 2
 #define NUML2PERPROC 3
 #define NUMPROCS 4
-#endif 
-#define PVAL RVAL*CVAL
-#define ELEM_BSVAL 128
 #define BLIS_MC_BSVAL 368
 #define BLIS_KC_BSVAL 256
 #define BLIS_NC_BSVAL 4096
 #define BLIS_OUTER_BSVAL 256
+#elif DOTENSORS
+#define TENSOR_BSVAL 128
+#define MAX_NUM_DIMS 4
+#endif 
+#if TWOD
+#define PVAL RVAL*CVAL
+#endif
 #define CACHEMISSVAL 50 * GAMMAVAL
 
 
@@ -58,14 +63,23 @@ extern Cost GAMMA;
 extern Cost PSIW;
 extern Cost PSIR;
 extern Cost CACHEMISS;
+#if TWOD
 extern Size P;
 extern Size R;
 extern Size C;
+#elfi DOTENSORS
+extern Size GridLens[MAX_NUM_DIMS]
+#endif
+#if DOELEM
 extern Size ELEM_BS;
+#elif DOBLIS
 extern Size BLIS_MC_BS;
 extern Size BLIS_KC_BS;
 extern Size BLIS_NC_BS;
 extern Size BLIS_OUTER_BS;
+#elif DOTENSORS
+extern Size TENSOR_BS;
+#endif
 extern Cost ONE;
 extern Cost ZERO;
 extern Cost TWO;

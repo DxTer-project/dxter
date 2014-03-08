@@ -64,69 +64,6 @@ inline bool IsValidCost(Cost cost)
 
 using namespace std;
 
-#if DOELEM
-enum DistType { UNKNOWN, 
-		D_STAR_STAR, 
-		D_MC_MR, 
-		D_MC_MR_T,
-		D_MC_MR_H,
-		D_MR_MC, 
-		D_MR_MC_T,
-		D_MR_MC_H,
-		D_MC_STAR, 
-		D_MC_STAR_T,
-		D_MC_STAR_H,
-		D_STAR_MC,
-		D_STAR_MC_T,
-		D_STAR_MC_H,
-		D_MR_STAR, 
-		D_MR_STAR_T,
-		D_MR_STAR_H,
-		D_STAR_MR, 
-		D_STAR_MR_T,
-		D_STAR_MR_H,
-		D_VC_STAR, 
-		D_VC_STAR_H,
-		D_VC_STAR_T,
-		D_STAR_VC, 
-		D_VR_STAR, 
-		D_STAR_VR,
-		D_LASTDIST };
-#elif DOTENSORS
-class DistType
-{
- public:
-  unsigned int m_numDims;
-  unsigned int *m_dists;
- DistType() : m_numDims(99), m_dists(NULL) {}
-  DistType(const DistType &rhs);
-  void SetToDefault(unsigned int numDims);
-};
-#endif
-
-#if DOELEM
-inline bool DistTypeNotEqual(const DistType &one, const DistType &two) 
-{
-  return one != two;
-}
-#elif DOTENSORS
-inline bool DistTypeNotEqual(const DistType &one, const DistType &two)
-{
-  if (one.m_numDims != two.m_numDims)
-    return true;
-  return memcmp(one.m_dists,two.m_dists,one.m_numDims*sizeof(unsigned int )) != 0;
-}
-#endif
-
-#if DODM
-string DistTypeToStr(const DistType &type);
-void CheckThisSpot();
-#if TWOD
-void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
-#else
-void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes);
-#endif
-#endif
 
 enum Trans { NORMAL,
 	     TRANS,
@@ -176,9 +113,7 @@ enum Dim {
 };
 
 string BoolToStr(bool boolVal);	    
-#if DOELEM
-DistType GetBaseDistType(DistType distType);
-#endif
+
 string TransToStr(Trans trans);
 char TransToChar(Trans trans);
 string SideToStr(Side side);
@@ -189,6 +124,77 @@ Tri SwapTri(Tri tri);
 string DiagToStr(Diag diag);
 
 bool IsTrans(Trans trans);
+
+
+#if DOELEM
+enum DistType { UNKNOWN, 
+		D_STAR_STAR, 
+		D_MC_MR, 
+		D_MC_MR_T,
+		D_MC_MR_H,
+		D_MR_MC, 
+		D_MR_MC_T,
+		D_MR_MC_H,
+		D_MC_STAR, 
+		D_MC_STAR_T,
+		D_MC_STAR_H,
+		D_STAR_MC,
+		D_STAR_MC_T,
+		D_STAR_MC_H,
+		D_MR_STAR, 
+		D_MR_STAR_T,
+		D_MR_STAR_H,
+		D_STAR_MR, 
+		D_STAR_MR_T,
+		D_STAR_MR_H,
+		D_VC_STAR, 
+		D_VC_STAR_H,
+		D_VC_STAR_T,
+		D_STAR_VC, 
+		D_VR_STAR, 
+		D_STAR_VR,
+		D_LASTDIST };
+#elif DOTENSORS
+class DistType
+{
+ public:
+  unsigned int m_numDims;
+  unsigned int *m_dists;
+ DistType() : m_numDims(99), m_dists(NULL) {}
+  DistType(const DistType &rhs);
+  ~DistType();
+  void SetToDefault(unsigned int numDims);
+  static string DistEntryToStr(unsigned int dist);
+};
+#endif
+#if DOELEM
+inline bool DistTypeNotEqual(const DistType &one, const DistType &two) 
+{
+  return one != two;
+}
+#elif DOTENSORS
+inline bool DistTypeNotEqual(const DistType &one, const DistType &two)
+{
+  if (one.m_numDims != two.m_numDims)
+    return true;
+  return memcmp(one.m_dists,two.m_dists,one.m_numDims*sizeof(unsigned int )) != 0;
+}
+#endif
+
+#if DODM
+string DistTypeToStr(const DistType &type);
+void CheckThisSpot();
+#if TWOD
+void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
+#else
+void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes);
+#endif
+#endif
+
+#if DOELEM
+DistType GetBaseDistType(DistType distType);
+#endif
+
 
 class Node;
 class Name;
@@ -263,8 +269,6 @@ typedef vector<Cost> CostVec;
 typedef CostVec::iterator CostVecIter;
 
 
-bool FoundInNodeVec(const NodeVec &vec, const Node *node);
-
 //Variable name
 class Name
 {
@@ -285,6 +289,9 @@ class Name
   void Flatten(ofstream &out) const;
   void Unflatten(ifstream &in);
 };
+
+
+bool FoundInNodeVec(const NodeVec &vec, const Node *node);
 
 
 

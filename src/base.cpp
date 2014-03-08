@@ -21,6 +21,7 @@
 
 
 
+#include "base.h"
 #include "transform.h"
 #include "poss.h"
 #include <cstring>
@@ -30,69 +31,6 @@
 char END = '#';
 char START = '+';
 
-
-template<>
-bool AddElemToVec(std::vector<Poss*> &vec, Poss *elem, bool deep)
-{
-  std::vector<Poss*>::iterator iter = vec.begin();
-  for( ; iter != vec.end(); ++iter) {
-    if ((deep && **iter == *elem) || (!deep && *iter == elem)) {
-      return false;
-    }
-  }
-  vec.push_back(elem);
-  return true;
-}
-
-template<>
-bool AddElemToVec(std::vector<PSet*> &vec, PSet *elem, bool deep)
-{
-  if (deep)
-    throw;
-  std::vector<PSet*>::iterator iter = vec.begin();
-  for( ; iter != vec.end(); ++iter) {
-    if (*iter == elem) {
-      return false;
-    }
-  }
-  vec.push_back(elem);
-  return true;
-}
-
-template<class T>
-bool AddElemToVec(std::vector<T*> &vec, T *elem, bool deep)
-{
-  typename std::vector<T*>::iterator iter = vec.begin();
-  for( ; iter != vec.end(); ++iter) {
-    if ((deep && **iter == *elem) || (!deep && *iter == elem)) {
-      return false;
-    }
-  }
-  vec.push_back(elem);
-  return true;
-}
-
-template bool AddElemToVec<Node>(std::vector<Node*> &vec, Node *elem, bool deep);
-template bool AddElemToVec<Poss>(std::vector<Poss*> &vec, Poss *elem, bool deep);
-
-
-string BoolToStr(bool boolVal)
-{
-  if (boolVal)
-    return "TRUE";
-  else
-    return "FALSE";
-}
-
-string DiagToStr(Diag diag)
-{
-  if (diag == UNIT)
-    return "UNIT";
-  else if (diag == NONUNIT)
-    return "NONUNIT";
-  else
-    throw;
-}
 
 #if DOTENSORS
 DistType::DistType(const DistType &rhs)
@@ -106,6 +44,62 @@ DistType::DistType(const DistType &rhs)
   }
   else
     m_dists = NULL;
+}
+
+DistType::~DistType()
+{
+  if (m_dists) {
+    delete [] m_dists;
+    m_dists = NULL;
+    m_numDims = 0;
+  }
+}
+
+void DistType::SetToDefault(unsigned int numDims)
+{
+  m_numDims = numDims;
+  m_dists = new unsigned int[numDims];
+  for (unsigned int i = 0; i < numDims; ++i)
+    m_dists[i] = i+1;
+}
+
+string DistType::DistEntryToStr(unsigned int dist)
+{
+  if (dist == 0)
+    return "*";
+  unsigned int currStage = MAX_NUM_DIMS;
+  unsigned int distVal = dist-1;
+  unsigned int numDists = 0;
+  while (dist >= currStage) {
+    distVal -= currStage;
+    numDists++;
+    currStage *= MAX_NUM_DIMS;
+  }
+  string out;
+  while (distVal > 0) {
+    out += distVal % MAX_NUM_DIMS;
+    distVal = distVal / MAX_NUM_DIMS;
+    --numDists;
+  }
+  if (numDists != 0)
+    throw;
+  string reversed = "m_";
+  reversed.reserve(2+out.size());
+  reversed.append(out.rbegin(),out.rend());  
+  return reversed;
+}
+
+
+string DistTypeToStr(const DistType &type)
+{
+  string out = "[";
+  for (unsigned int i = 0; i < type.m_numDims; ++i) {
+    out += DistType::DistEntryToStr(type.m_dists[i]);
+    if (i+1 < type.m_numDims)
+      out += ",";
+  }
+  out += "]";
+  return out;
 }
 #endif
 
@@ -214,7 +208,74 @@ DistType GetBaseDistType(DistType distType)
       return distType;
   }
 }
+
+
 #endif //DOELEM
+
+
+
+template<>
+bool AddElemToVec(std::vector<Poss*> &vec, Poss *elem, bool deep)
+{
+  std::vector<Poss*>::iterator iter = vec.begin();
+  for( ; iter != vec.end(); ++iter) {
+    if ((deep && **iter == *elem) || (!deep && *iter == elem)) {
+      return false;
+    }
+  }
+  vec.push_back(elem);
+  return true;
+}
+
+template<>
+bool AddElemToVec(std::vector<PSet*> &vec, PSet *elem, bool deep)
+{
+  if (deep)
+    throw;
+  std::vector<PSet*>::iterator iter = vec.begin();
+  for( ; iter != vec.end(); ++iter) {
+    if (*iter == elem) {
+      return false;
+    }
+  }
+  vec.push_back(elem);
+  return true;
+}
+
+template<class T>
+bool AddElemToVec(std::vector<T*> &vec, T *elem, bool deep)
+{
+  typename std::vector<T*>::iterator iter = vec.begin();
+  for( ; iter != vec.end(); ++iter) {
+    if ((deep && **iter == *elem) || (!deep && *iter == elem)) {
+      return false;
+    }
+  }
+  vec.push_back(elem);
+  return true;
+}
+
+template bool AddElemToVec<Node>(std::vector<Node*> &vec, Node *elem, bool deep);
+template bool AddElemToVec<Poss>(std::vector<Poss*> &vec, Poss *elem, bool deep);
+
+
+string BoolToStr(bool boolVal)
+{
+  if (boolVal)
+    return "TRUE";
+  else
+    return "FALSE";
+}
+
+string DiagToStr(Diag diag)
+{
+  if (diag == UNIT)
+    return "UNIT";
+  else if (diag == NONUNIT)
+    return "NONUNIT";
+  else
+    throw;
+}
 
 
 string TransToStr(Trans trans)

@@ -35,8 +35,10 @@ Size BSSizeToSize(BSSize size)
 {
   switch(size)
   {
+#if DOELEM
     case (USEELEMBS):
       return ELEM_BS;
+#elif DOBLIS
     case (USEBLISMC):
       return BLIS_MC_BS;
     case (USEBLISKC):
@@ -45,6 +47,10 @@ Size BSSizeToSize(BSSize size)
       return BLIS_NC_BS;
     case (USEBLISOUTERBS):
       return BLIS_OUTER_BS;
+#elif DOTENSORS
+  case (USETENSORBS):
+    return TENSOR_BS;
+#endif
     default:
       throw;
   }
@@ -56,8 +62,10 @@ string BSSizeToStr(BSSize size)
 {
   switch(size)
   {
+#if DOELEM
     case (USEELEMBS):
       throw;
+#elif DOBLIS
     case (USEBLISMC):
       return "gemm_mc";
     case (USEBLISKC):
@@ -66,6 +74,7 @@ string BSSizeToStr(BSSize size)
       return "gemm_nc";
     case (USEBLISOUTERBS):
       return "bs_obj";
+#endif
     default:
       throw;
   }
@@ -75,8 +84,10 @@ string BSSizeToSubSizeStr(BSSize size)
 {
   switch(size)
   {
+#if DOELEM
     case (USEELEMBS):
       throw;
+#elif DOBLIS
     case (USEBLISMC):
       return "gemm_mr";
     case (USEBLISKC):
@@ -85,6 +96,7 @@ string BSSizeToSubSizeStr(BSSize size)
       return "gemm_nr";
     case (USEBLISOUTERBS):
       throw;
+#endif
     default:
       throw;
   }
@@ -140,9 +152,11 @@ Loop::Loop()
 Loop::Loop(LoopType type)
 : m_type(type), m_comm(CORECOMM), m_dim(BADDIM)
 {
+#if DOELEM
   if (m_type == ELEMLOOP)
     m_bsSize = USEELEMBS;
   else
+#endif
     m_bsSize = BADBSSIZE;
   AssignNewLabel();
 }

@@ -53,11 +53,17 @@ enum Quad { TL, TR,
 	     BL, BR,
 	     LASTQUAD };
 
-enum BSSize { USEELEMBS,
+enum BSSize { 
+#if DOELEM
+              USEELEMBS,
+#elif DOBLIS
 	      USEBLISMC,
 	      USEBLISKC,
 	      USEBLISNC,
 	      USEBLISOUTERBS,
+#elif DOTENSORS
+              USETENSORBS,
+#endif
 	      BADBSSIZE };
 
 Size BSSizeToSize(BSSize size);	      
