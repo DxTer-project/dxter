@@ -82,12 +82,12 @@ NodeType Hemm::GetType() const
 }
 
 #if DOELEM
-DistType Hemm::GetDistType(unsigned int num) const
+const DistType& Hemm::GetDistType(unsigned int num) const
 { 
   switch(GetLayer()) {
   case (ABSLAYER):
   case (DMLAYER):
-    return D_MC_MR;
+    return MC_MR;
   case (SMLAYER):
   case (S1LAYER):
   case (S2LAYER):
@@ -396,10 +396,14 @@ Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+#endif
 
   loop->SetDim(DIMN);
   
@@ -518,10 +522,14 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
 
   loop->SetDim(DIMK);
   
@@ -681,10 +689,14 @@ Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }

@@ -106,12 +106,12 @@ Phase Hetrmm::MaxPhase() const
 }
 
 #if DOELEM
-DistType Hetrmm::GetDistType(unsigned int num) const 
+const DistType& Hetrmm::GetDistType(unsigned int num) const 
 { 
   if (m_layer == DMLAYER || m_layer == ABSLAYER)
-    return D_MC_MR; 
+    return MC_MR; 
   else if (m_layer == SMLAYER)
-    return D_STAR_STAR;
+    return STAR_STAR;
   else
     throw;
 }
@@ -268,8 +268,12 @@ Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num)
   comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
+#else
+  throw;
+#endif
 }
 
 
@@ -313,8 +317,12 @@ Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num)
   comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
+#else
+  throw;
+#endif
 }
 
 Loop* HetrmmAlgVar2Lower(Node *in, unsigned int num)
@@ -365,8 +373,12 @@ Loop* HetrmmAlgVar2Lower(Node *in, unsigned int num)
   comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
+#else
+  throw;
+#endif
 }
 
 Loop* HetrmmAlgVar2Upper(Node *in, unsigned int num)
@@ -414,8 +426,12 @@ Loop* HetrmmAlgVar2Upper(Node *in, unsigned int num)
   comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
+#else
+  throw;
+#endif
 }
 
 Loop* HetrmmAlgVar3Lower(Node *in, unsigned int num)
@@ -463,8 +479,12 @@ Loop* HetrmmAlgVar3Lower(Node *in, unsigned int num)
   comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
+#else
+  throw;
+#endif
 }
 
 
@@ -508,7 +528,11 @@ Loop* HetrmmAlgVar3Upper(Node *in, unsigned int num)
   comA3->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA3);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
+#else
+  throw;
+#endif
 }
 #endif

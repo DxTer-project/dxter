@@ -112,7 +112,7 @@ class Her2k : public DLAOp<3,1>, public Her2kProps
   static Node* BlankInst() { return  new Her2k(ABSLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual void Prop();
   virtual void SanityCheck();
@@ -152,7 +152,7 @@ class Tri2k : public DLAOp<5,1>, public Her2kProps
   static Node* BlankInst() { return  new Tri2k(SMLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(4); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(4); }
 #endif
   virtual void SanityCheck();
   virtual void Prop();

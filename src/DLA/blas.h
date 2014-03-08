@@ -50,7 +50,7 @@ class Axpy : public DLAOp<2,1>
   static Node* BlankInst() { return new Axpy(ABSLAYER, COEFZERO); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual void SanityCheck();
   virtual void Prop();
@@ -114,7 +114,7 @@ class Scal : public DLAOp<2,1>
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual Phase MaxPhase() const;
   virtual bool ShouldCullDP() const;
@@ -149,7 +149,7 @@ class ConstScal : public DLAOp<1,1>
   static Node* BlankInst() { return new ConstScal(ABSLAYER, COEFZERO); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual void SanityCheck();
   virtual void PrintCode(IndStream &out);

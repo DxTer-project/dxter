@@ -55,7 +55,7 @@ class TriInv : public DLAOp<1,1>
   static Node* BlankInst() { return  new TriInv(ABSLAYER, LOWER); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual Phase MaxPhase() const;
   virtual bool ShouldCullDP() const {return m_layer==ABSLAYER;}

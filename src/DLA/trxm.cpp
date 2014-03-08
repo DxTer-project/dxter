@@ -154,12 +154,12 @@ void Trxm::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 #if DOELEM
-DistType Trxm::GetDistType(unsigned int num) const
+const DistType& Trxm::GetDistType(unsigned int num) const
 {
   switch(GetLayer()) {
     case (ABSLAYER):
     case (DMLAYER):
-      return D_MC_MR;
+      return MC_MR;
     case (SMLAYER):
       return InputDistType(1);
     case (S1LAYER):
@@ -434,12 +434,12 @@ void Trmm3::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 #if DOELEM
-DistType Trmm3::GetDistType(unsigned int num) const
+const DistType& Trmm3::GetDistType(unsigned int num) const
 {
   switch(GetLayer()) {
     case (ABSLAYER):
     case (DMLAYER):
-      return D_MC_MR;
+      return MC_MR;
     case (SMLAYER):
       return InputDistType(2);
     case (S1LAYER):
@@ -1341,10 +1341,14 @@ Loop* TrmmLoopLeftVar1(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comB);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -1424,10 +1428,14 @@ Loop* TrmmLoopLeftVar2(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comB);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -1499,10 +1507,14 @@ Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comB);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+#endif
   
   return loop;
 }
@@ -1583,10 +1595,14 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comB);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -1627,10 +1643,14 @@ Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, AtunOut, comB);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
+#else
+  throw;
+#endif
   //    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
   
   return loop;
@@ -1684,10 +1704,14 @@ Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comB);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -1761,10 +1785,11 @@ Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comB);
   Loop *loop;
-  if (layer == DMLAYER)
+#if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+#endif
   
   return loop;
 }
@@ -1852,10 +1877,11 @@ Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comB);
   Loop *loop;
-  if (layer==DMLAYER)
+#if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   loop->SetDim(DIMK);
   
@@ -1896,10 +1922,11 @@ Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, AtunOut, comB);
   Loop *loop;
-  if (layer==DMLAYER)
+#if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+#endif
   
   loop->SetDim(DIMN);
   
@@ -1980,10 +2007,14 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comB);
   Loop *loop;
+#if DOELEM
   if (layer==DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -2409,6 +2440,10 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
                    splitB, 1,
                    splitC, 1);
   
+#if DOELEM
+    throw;
+    return NULL;
+#else
   Combine *comA = splitA->CreateMatchingCombine(0);
   
   Combine *comB = splitB->CreateMatchingCombine(0);
@@ -2423,15 +2458,15 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
                                          0, gemm, 0,
                                          1, trmm3, 0);
   
-  Poss *loopPoss = new Poss(3, comA, comB, comC);
+
   Loop *loop;
-  if (layer == DMLAYER)
-    throw;
-  //    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+
+  Poss *loopPoss = new Poss(3, comA, comB, comC);
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
   
   return loop;
+#endif
+
 }
 
 Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
@@ -2477,10 +2512,11 @@ Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
   Loop *loop;
-  if (layer==DMLAYER)
+#if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+#endif
   
   return loop;
 }

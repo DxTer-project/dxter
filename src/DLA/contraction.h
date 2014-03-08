@@ -1,7 +1,7 @@
 #pragma once
 
 #include "layers.h"
-#ifdef DOTENSORS
+#if DOTENSORS
 
 #include "DLAOp.h"
 #include "transform.h"
@@ -20,7 +20,7 @@ class Contraction : public DLAOp<3,1>
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
   virtual Phase MaxPhase() const;
   virtual void SanityCheck();
   virtual void Prop();

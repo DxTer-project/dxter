@@ -112,7 +112,7 @@ void LoopTunnel::SanityCheck()
 }
 
 #if DODM
-DistType LoopTunnel::GetDistType(unsigned int num) const 
+const DistType& LoopTunnel::GetDistType(unsigned int num) const 
 { 
   return InputDistType(0); 
 }

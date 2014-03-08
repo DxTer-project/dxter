@@ -168,7 +168,7 @@ class RedistNode : public DLANode
  RedistNode() : m_destType(UNKNOWN), m_mSizes(NULL), m_nSizes(NULL) {}
   RedistNode(DistType destType);
   virtual ~RedistNode();
-  virtual DistType GetDistType(unsigned int num) const { return m_destType; }
+  virtual const DistType& GetDistType(unsigned int num) const { return m_destType; }
   static Node* BlankInst() { return  new RedistNode; }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -201,7 +201,7 @@ class SumScatterNode : public DLANode
   Coef m_coeff;
  SumScatterNode() : m_coeff(COEFZERO) {}
  SumScatterNode(Coef coeff) : m_coeff(coeff) {}
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(1); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
   static Node* BlankInst() { return  new SumScatterNode; }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -227,7 +227,7 @@ class SumScatterFrom : public DLANode
 {
  public:
   SumScatterFrom() {}
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(1); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
   static Node* BlankInst() { return  new SumScatterFrom; }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -251,7 +251,7 @@ class SumOverCommNode : public DLANode
 {
  public:
   SumOverCommNode() {} 
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(0); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
   static Node* BlankInst() { return  new SumOverCommNode; }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }

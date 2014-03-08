@@ -47,7 +47,7 @@ void Contraction::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_type);
 }
 
-DistType Contraction::GetDistType(unsigned int num) const
+const DistType& Contraction::GetDistType(unsigned int num) const
 {
   return InputDistType(2);
 }

@@ -51,12 +51,12 @@ void TriInv::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 #if DOELEM
-DistType TriInv::GetDistType(unsigned int num) const
+const DistType& TriInv::GetDistType(unsigned int num) const
 {
   if (m_layer == ABSLAYER || m_layer == DMLAYER)
-    return D_MC_MR;
+    return MC_MR;
   else if (m_layer == SMLAYER)
-    return D_STAR_STAR;
+    return STAR_STAR;
   else
     throw;
 }
@@ -249,9 +249,13 @@ Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
+#else
+  throw;
+#endif
 }
 
 Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
@@ -292,9 +296,13 @@ Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
+#else
+  throw;
+#endif
 }
 
 Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
@@ -335,9 +343,14 @@ Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
+
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
+#else
+  throw;
+#endif
 }
 
 
@@ -379,9 +392,14 @@ Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
+
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
+#else
+  throw;
+#endif
 }
 
 Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
@@ -425,9 +443,13 @@ Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
+#else
+  throw;
+#endif
 }
 
 
@@ -475,9 +497,13 @@ Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
+#else
+  throw;
+#endif
 }
 
 
@@ -523,8 +549,12 @@ Loop* TriInvAlgVar3Upper(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
+#else
+  throw;
+#endif
 }
 #endif

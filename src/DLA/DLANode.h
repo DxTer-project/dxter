@@ -35,7 +35,7 @@ class DLANode : public Node
 
   //Implement in sub-classes
 #if DODM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual void SanityCheck();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -69,7 +69,7 @@ class DLANode : public Node
 #endif
   virtual void ClearBeforeProp();
 #if DODM
-  DistType InputDistType(unsigned int num) const;
+  const DistType& InputDistType(unsigned int num) const;
 #endif
   virtual string GetCostStr();
   virtual bool HasProped() const;

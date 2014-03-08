@@ -50,12 +50,12 @@ NodeType TwoSidedTrxm::GetType() const
 }
 
 #if DOELEM
-DistType TwoSidedTrxm::GetDistType(unsigned int num) const 
+const DistType& TwoSidedTrxm::GetDistType(unsigned int num) const 
 { 
   if (m_layer == ABSLAYER || m_layer == DMLAYER)
-    return D_MC_MR; 
+    return MC_MR; 
   else if (m_layer == SMLAYER)
-    return D_STAR_STAR;
+    return STAR_STAR;
   else if (m_layer == S1LAYER || m_layer == S2LAYER || m_layer == S3LAYER)
     return InputDistType(1);
   else
@@ -340,10 +340,11 @@ Loop* TwoSidedTrsmLowerVar1Alg(
 			    comA,
 			    comL);
   Loop *loop;
-  if (layerBLAS == DMLAYER)
+#if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+#endif
 
   return loop;
 }
@@ -433,10 +434,11 @@ Loop* TwoSidedTrsmLowerVar2Alg(
 			    comA,
 			    comL);
   Loop *loop;
-  if (layerBLAS == DMLAYER)
+#if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+#endif
 
   return loop;
 }
@@ -531,10 +533,11 @@ Loop* TwoSidedTrsmLowerVar4Alg(
 			    comA,
 			    comL);
   Loop *loop;
-  if (layerBLAS == DMLAYER)
+  #if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+#endif
 
   return loop;
 }
@@ -618,10 +621,11 @@ Loop* TwoSidedTrmmLowerVar1Alg(
 			    comA,
 			    comL);
   Loop *loop;
-  if (layerBLAS == DMLAYER)
+#if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+#endif
 
   return loop;
 }
@@ -697,10 +701,11 @@ Loop* TwoSidedTrmmLowerVar2Alg(
 			    comA,
 			    comL);
   Loop *loop;
-  if (layerBLAS == DMLAYER)
+  #if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+#endif
 
   return loop;
 }
@@ -778,11 +783,11 @@ Loop* TwoSidedTrmmLowerVar4Alg(
 			    comA,
 			    comL);
   Loop *loop;
-  if (layerBLAS == DMLAYER)
+  #if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
-
+#endif
   return loop;
 }
 

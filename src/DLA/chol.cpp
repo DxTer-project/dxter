@@ -71,12 +71,12 @@ void Chol::PrintCode(IndStream &out)
 }
 
 #if DOELEM
-DistType Chol::GetDistType(unsigned int num) const
+const DistType& Chol::GetDistType(unsigned int num) const
 {
   if (m_layer == ABSLAYER || m_layer == DMLAYER)
-    return D_MC_MR;
+    return MC_MR;
   else if (m_layer == SMLAYER)
-    return D_STAR_STAR;
+    return STAR_STAR;
   else
     throw;
 }
@@ -255,15 +255,22 @@ Loop* Chol1LowerAlg(Node *in, unsigned int num, bool dist)
 						1, set4->OutTun(0), 0,
 						4, set2->OutTun(0), 0);
   
+#if DOELEM
   Poss *loopPoss = new Poss(1, comA);
   Loop *loop;
+
   if (dist)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  else 
     throw;
-    //loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
 
   return loop;
+#else
+    throw;
+#endif
+    //loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
+
+
 }
 
 Loop* Chol2LowerAlg(Node *in, unsigned int num, bool dist)
@@ -320,10 +327,14 @@ Loop* Chol2LowerAlg(Node *in, unsigned int num, bool dist)
   
   Poss *loopPoss = new Poss(1, comA);
   Loop *loop;
-  if (dist)
+#if DOELEM
+   if (dist)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
+#else
+   throw;
+#endif
   //    loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
 
   return loop;
@@ -384,10 +395,14 @@ Loop* Chol2UpperAlg(Node *in, unsigned int num, bool dist)
   
   Poss *loopPoss = new Poss(1, comA);
   Loop *loop;
+#if DOELEM
   if (dist)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
+#else
+  throw;
+#endif
     //loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
 
   return loop;
@@ -443,10 +458,14 @@ Loop* Chol3LowerAlg(Node *in, unsigned int num, bool dist)
 
   Poss *loopPoss = new Poss(1, comA);
   Loop *loop;
+#if DOELEM
   if (dist)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
+#else
+  throw;
+#endif
   //    loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
 
   return loop;
@@ -511,10 +530,14 @@ Loop* Chol3UpperAlg(Node *in, unsigned int num, bool dist)
     
     Poss *loopPoss = new Poss(1, comA);
     Loop *loop;
+#if DOELEM
     if (dist)
       loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
     else
       throw;
+#else
+    throw;
+#endif
       //loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
     
     return loop;

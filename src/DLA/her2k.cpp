@@ -189,10 +189,10 @@ Cost Her2k::GetCost(Layer layer, const Sizes *m, const Sizes *k)
 }
 
 #if DOELEM
-DistType Her2k::GetDistType(unsigned int num) const
+const DistType& Her2k::GetDistType(unsigned int num) const
 {
   if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
-    return D_MC_MR;
+    return MC_MR;
   else if (GetLayer() == SMLAYER)
     return InputDistType(2);
   else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER)
@@ -873,10 +873,14 @@ Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -972,10 +976,14 @@ Loop* Her2kLoopVar2(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -1070,10 +1078,14 @@ Loop* Her2kLoopVar3(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
   Loop *loop;
+#if DOELEM
   if (layer==DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -1169,10 +1181,14 @@ Loop* Her2kLoopVar4(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -1221,10 +1237,14 @@ Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -1383,12 +1403,13 @@ Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
   EtunOut->AddInput(ETun,0);
   EtunOut->CopyTunnelInfo(ETun);
   
-  Poss *loopPoss = new Poss(5, comA, comB, comC, comD, EtunOut);
   Loop *loop;
-  if (layer == DMLAYER)
+#if DOELEM
     throw;
-  else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#elif DOBLIS
+  Poss *loopPoss = new Poss(5, comA, comB, comC, comD, EtunOut);
+  loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
 
   loop->SetDim(DIMK);
   

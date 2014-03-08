@@ -50,7 +50,7 @@ class Trxm : public DLAOp<2,1>, public TrProps
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual Phase MaxPhase() const;
   virtual bool DoNotCullDP() const;
@@ -76,7 +76,7 @@ class Trmm3 : public DLAOp<3,1>, public TrProps
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual Phase MaxPhase() const;
   virtual bool DoNotCullDP() const;
@@ -101,7 +101,7 @@ class TrxmBP : public DLAOp<3,2>, public TrProps
   static ClassType GetClass() {return "TrxmBP";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  //  virtual DistType GetDistType(unsigned int num) const;
+  //  virtual const DistType& GetDistType(unsigned int num) const;
   virtual Phase MaxPhase() const {return NUMPHASES;}
   virtual NodeType GetType() const;
   virtual void Prop();
@@ -182,7 +182,7 @@ class LocalTrmmAcc : public DLAOp<3,1>
   virtual NodeType GetType() const { return "LocalTrmmAcc"; }
   static Node* BlankInst() { return  new LocalTrmmAcc(LEFT, UPPER, UNIT, TRANS, COEFONE, REAL);} 
   virtual Node* GetNewInst() { return BlankInst(); }
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(2+num); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(2+num); }
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}

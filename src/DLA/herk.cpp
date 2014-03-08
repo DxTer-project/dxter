@@ -89,12 +89,12 @@ Herk::Herk(Layer layer, Tri tri, Trans trans, Coef alpha, Coef beta, Type type)
 }
 
 #if DOELEM
-DistType Herk::GetDistType(unsigned int num) const
+const DistType& Herk::GetDistType(unsigned int num) const
 {
   switch (GetLayer()) {
     case (ABSLAYER):
     case (DMLAYER):
-      return D_MC_MR;
+      return MC_MR;
     default:
       throw;
   }  
@@ -427,7 +427,7 @@ void TriRK::Parallelize(Comm comm)
 }
 
 #if DOELEM
-DistType TriRK::GetDistType(unsigned int num) const
+const DistType& TriRK::GetDistType(unsigned int num) const
 {
   if (GetLayer() == SMLAYER)
     return InputDistType(2);
@@ -802,10 +802,14 @@ Loop* HerkLoopVar1(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+#endif
   
   return loop;
 }
@@ -868,11 +872,14 @@ Loop* HerkLoopVar2(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
-  
+#endif
   return loop;
 }
 
@@ -909,10 +916,11 @@ Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, CtunOut);
   Loop *loop;
-  if (layer == DMLAYER)
+#if DOELEM
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
-  else
+  #else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
   
   return loop;
 }
@@ -947,7 +955,10 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
                   splitA, 1,
                   splitB, 1,
                   Ctun, 0);
-  
+
+#if DOELEM
+    throw;
+#else  
   Combine *comA = splitA->CreateMatchingCombine(0);
   
   Combine *comB = splitB->CreateMatchingCombine(0);
@@ -957,16 +968,15 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
   CtunOut->AddInput(Ctun,0);
   CtunOut->CopyTunnelInfo(Ctun);
   
-  Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
   Loop *loop;
-  if (layer == DMLAYER)
-    throw;
-  else
+
+    Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
   
   loop->SetDim(DIMK);
   
   return loop;
+#endif
 }
 
 

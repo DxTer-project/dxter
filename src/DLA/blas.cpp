@@ -64,10 +64,10 @@ void Axpy::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 #if DOELEM
-DistType Axpy::GetDistType(unsigned int num) const 
+const DistType& Axpy::GetDistType(unsigned int num) const 
 { 
   if (m_layer == DMLAYER || m_layer == ABSLAYER)
-    return D_MC_MR; 
+    return MC_MR; 
   else if (m_layer == SMLAYER)
     return InputDistType(1);
   else
@@ -352,10 +352,10 @@ NodeType Scal::GetType() const
 }
 
 #if DOELEM
-DistType Scal::GetDistType(unsigned int num) const
+const DistType& Scal::GetDistType(unsigned int num) const
 { 
   if (m_layer == DMLAYER)
-    return D_MC_MR; 
+    return MC_MR; 
   else if (m_layer == SMLAYER)
     return InputDistType(1);
   else if (m_layer == S3LAYER)
@@ -480,10 +480,10 @@ Phase ConstScal::MaxPhase() const
 }
 
 #if DOELEM
-DistType ConstScal::GetDistType(unsigned int num) const
+const DistType& ConstScal::GetDistType(unsigned int num) const
 { 
   if (m_layer == DMLAYER)
-    return D_MC_MR; 
+    return MC_MR; 
   else if (m_layer == SMLAYER)
     return InputDistType(0);
   else

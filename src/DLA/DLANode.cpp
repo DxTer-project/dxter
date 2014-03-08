@@ -39,12 +39,12 @@ DLANode::DLANode(Layer layer)
 }
 
 #if DOELEM
-DistType DLANode::GetDistType(unsigned int num) const
+const DistType& DLANode::GetDistType(unsigned int num) const
 { 
-  return D_MC_MR; 
+  return MC_MR;
 }
 #elif DOTENSORS
-DistType DLANode::GetDistType(unsigned int num) const
+const DistType& DLANode::GetDistType(unsigned int num) const
 { 
   throw;
   //  return DEFAULTDISTTYPE;
@@ -78,7 +78,7 @@ void DLANode::SanityCheck()
 }
 
 #if DODM
-DistType DLANode::InputDistType(unsigned int num) const
+const DistType& DLANode::InputDistType(unsigned int num) const
 {
   DLANode *in = (DLANode*)Input(num);
   unsigned int inNum = InputConnNum(num);

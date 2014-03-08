@@ -77,9 +77,8 @@ bool PossTunnel::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int
 }
 
 #if DODM
-DistType PossTunnel::GetDistType(unsigned int num) const 
+const DistType& PossTunnel::GetDistType(unsigned int num) const 
 {
-  DistType type;
 
   if (m_tunType == SETTUNIN || m_tunType == POSSTUNOUT) {
     if (num >= m_inputs.size()) {
@@ -91,17 +90,15 @@ DistType PossTunnel::GetDistType(unsigned int num) const
       cout << "num = " << num << " and m_inputs.size() = " << m_inputs.size() << endl;
       throw;
     }
-    type = InputDistType(num); 
+    return InputDistType(num); 
   }
   else if (m_tunType == POSSTUNIN || m_tunType == SETTUNOUT) {
-    type =  ((DLANode*)Input(0))->GetDistType(num);
+    return ((DLANode*)Input(0))->GetDistType(num);
   }
   else {
     cout << "bad tun type\n";
     throw;
   }
-  //  cout << "leaving\n";
-  return type;
 }
 #endif
 

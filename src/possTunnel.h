@@ -37,7 +37,7 @@ class PossTunnel : public DLANode
   PossTunnel(PossTunType type);
   void SetPSet(PSet *set);
 #if DODM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   static Node* BlankInst() { return new PossTunnel;}
   virtual Node* GetNewInst() {return BlankInst(); }

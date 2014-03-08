@@ -28,7 +28,7 @@
 #include "blas.h"
 
 #if DOELEM
-DistType LU::GetDistType(unsigned int num) const
+const DistType& LU::GetDistType(unsigned int num) const
 {
   return InputDistType(num);
 }
@@ -167,16 +167,20 @@ Loop* LUVar5Loop(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(2, comA, comP);
   Loop *loop;
+#if DOELEM
   if (BLASLayer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+#endif
   
   return loop;  
 }
 
 #if DOELEM
-DistType PanelLU::GetDistType(unsigned int num) const
+const DistType& PanelLU::GetDistType(unsigned int num) const
 {
   return InputDistType(num);
 }

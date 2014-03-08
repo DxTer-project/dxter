@@ -98,7 +98,7 @@ class Herk : public DLAOp<2,1>, public HerkProps
   static Node* BlankInst() { return new Herk(ABSLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual void SanityCheck();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -150,7 +150,7 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   static Node* BlankInst() { return new TriRK(SMLAYER, LOWER, NORMAL, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual void SanityCheck();
   virtual void Prop();

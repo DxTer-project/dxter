@@ -154,6 +154,32 @@ enum DistType { UNKNOWN,
 		D_VR_STAR, 
 		D_STAR_VR,
 		D_LASTDIST };
+
+extern DistType STAR_STAR; 
+extern DistType MC_MR; 
+extern DistType MC_MR_T;
+extern DistType MC_MR_H;
+extern DistType MR_MC; 
+extern DistType MR_MC_T;
+extern DistType MR_MC_H;
+extern DistType MC_STAR; 
+extern DistType MC_STAR_T;
+extern DistType MC_STAR_H;
+extern DistType STAR_MC;
+extern DistType STAR_MC_T;
+extern DistType STAR_MC_H;
+extern DistType MR_STAR; 
+extern DistType MR_STAR_T;
+extern DistType MR_STAR_H;
+extern DistType STAR_MR; 
+extern DistType STAR_MR_T;
+extern DistType STAR_MR_H;
+extern DistType VC_STAR; 
+extern DistType VC_STAR_H;
+extern DistType VC_STAR_T;
+extern DistType STAR_VC; 
+extern DistType VR_STAR; 
+extern DistType STAR_VR;
 #elif DOTENSORS
 class DistType
 {

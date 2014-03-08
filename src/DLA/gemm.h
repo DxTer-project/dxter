@@ -70,7 +70,7 @@ class Gemm : public DLAOp<3,1>
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual Phase MaxPhase() const;
   virtual void SanityCheck();

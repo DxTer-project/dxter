@@ -56,7 +56,7 @@ class InputNode : public DLANode
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 #if DODM
-  virtual DistType GetDistType(unsigned int num) const { return m_varName.m_type; }
+  virtual const DistType& GetDistType(unsigned int num) const { return m_varName.m_type; }
 #endif
   virtual void SanityCheck();
   virtual void Prop();
@@ -93,7 +93,7 @@ class OutputNode : public DLANode
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 #if DODM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual void SanityCheck();
   virtual void Prop();
@@ -132,7 +132,7 @@ class ConstVal : public DLANode
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const { return D_STAR_STAR; }
+  virtual const DistType& GetDistType(unsigned int num) const { return STAR_STAR; }
 #endif
   virtual void SanityCheck();
   virtual void Prop();
@@ -190,7 +190,7 @@ m_distType(D_LASTDIST),
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 #if DODM
-  virtual DistType GetDistType(unsigned int num) const { return m_distType; }
+  virtual const DistType& GetDistType(unsigned int num) const { return m_distType; }
 #endif
   virtual void SanityCheck();
   virtual void Prop();
@@ -224,7 +224,7 @@ class MakeTrapNode : public DLAOp<1,1>
   int m_offset;
  public:
  MakeTrapNode(Side side, Tri tri, int offset) : m_side(side), m_tri(tri), m_offset(offset) {}
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(0); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
   static Node* BlankInst() { return  new MakeTrapNode(LEFT,LOWER,0); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -255,7 +255,7 @@ class ScaleNode : public DLAOp<1,1>
   Coef m_val;
   ScaleNode(Layer layer, Coef val);
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   static Node* BlankInst() { return  new ScaleNode(ABSLAYER, COEFZERO); }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -288,7 +288,7 @@ class ScaleTrapNode : public DLAOp<1,1>
  public:
  ScaleTrapNode(Layer layer, Side side, Tri tri, Coef val) : m_side(side), m_tri(tri), m_val(val) {SetLayer(layer);}
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   static Node* BlankInst() { return  new ScaleTrapNode(ABSLAYER,LEFT,LOWER,COEFONE); }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -334,7 +334,7 @@ sdlkfj
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(0); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
 #endif
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -377,7 +377,7 @@ sdlkjf
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(0); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
 #endif
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -398,7 +398,7 @@ class ViewAroundDiagCombine : public DLAOp<5,3>
   static Node* BlankInst() { return  new ViewAroundDiagCombine(false); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(2+num); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(2+num); }
 #endif
   virtual void PrintCode(IndStream &out) {}
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -435,7 +435,7 @@ bljsdf
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(0); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
 #endif
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -466,7 +466,7 @@ class ViewTLCombine : public DLANode
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(1); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
 #endif
   virtual void PrintCode(IndStream &out) {}
   virtual ClassType GetNodeClass() const {return GetClass();}

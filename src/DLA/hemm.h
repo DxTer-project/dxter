@@ -79,7 +79,7 @@ class Hemm : public DLAOp<3,1>
   static Node* BlankInst() { return new Hemm(ABSLAYER, LEFT, LOWER, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual void SanityCheck();
   virtual void Prop();
@@ -129,7 +129,7 @@ class LocalSymmAcc : public DLAOp<5,2>
   virtual NodeType GetType() const { return "LocalSymmAcc"; }
   static Node* BlankInst() { return  new LocalSymmAcc(LEFT, UPPER, COMPLEX, COEFONE); }
   virtual Node* GetNewInst() { return BlankInst(); }
-  virtual DistType GetDistType(unsigned int num) const { return InputDistType(3+num); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(3+num); }
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);

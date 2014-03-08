@@ -127,13 +127,13 @@ void Gemm::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 #if DOELEM
-DistType Gemm::GetDistType(unsigned int num) const
+const DistType& Gemm::GetDistType(unsigned int num) const
 {
 #if DODPPHASE
   switch(GetLayer()) {
     case (ABSLAYER):
     case (DMLAYER):
-      return D_MC_MR;
+      return MC_MR;
     case (SMLAYER):
       return InputDistType(2);
     default:
@@ -1241,10 +1241,14 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+#endif
 
   loop->SetDim(DIMM);
   
@@ -1332,10 +1336,14 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#endif
 
   loop->SetDim(DIMK);
   
@@ -1386,10 +1394,14 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
+    throw;
+#elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+#endif
 
   loop->SetDim(DIMN);
   

@@ -51,7 +51,7 @@ class LoopTunnel : public PossTunnel
   bool AllFullyUpdated() const;
   virtual void SanityCheck();  
 #if DODM
-  virtual DistType GetDistType(unsigned int num) const;
+  virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   inline void SetIndepIters() {m_indepIters = true;}
   inline bool IndepIters() const {return m_indepIters;}

@@ -29,6 +29,34 @@
 #include <math.h>
 #include "costs.h"
 
+#if DOELEM
+DistType STAR_STAR = D_STAR_STAR;
+DistType MC_MR = D_MC_MR;
+DistType MC_MR_T = D_MC_MR_T;
+DistType MC_MR_H = D_MC_MR_H;
+DistType MR_MC = D_MR_MC;
+DistType MR_MC_T = D_MR_MC_T;
+DistType MR_MC_H = D_MR_MC_H;
+DistType MC_STAR = D_MC_STAR;
+DistType MC_STAR_T = D_MC_STAR_T;
+DistType MC_STAR_H = D_MC_STAR_H;
+DistType STAR_MC = D_STAR_MC;
+DistType STAR_MC_T = D_STAR_MC_T;
+DistType STAR_MC_H = D_STAR_MC_H;
+DistType MR_STAR = D_MR_STAR;
+DistType MR_STAR_T = D_MR_STAR_T;
+DistType MR_STAR_H = D_MR_STAR_H;
+DistType STAR_MR = D_STAR_MR;
+DistType STAR_MR_T = D_STAR_MR_T;
+DistType STAR_MR_H = D_STAR_MR_H;
+DistType VC_STAR = D_VC_STAR;
+DistType VC_STAR_H = D_VC_STAR_H;
+DistType VC_STAR_T = D_VC_STAR_T;
+DistType STAR_VC = D_STAR_VC;
+DistType VR_STAR = D_VR_STAR;
+DistType STAR_VR = D_STAR_VR;
+#endif
+
 char END = '#';
 char START = '+';
 

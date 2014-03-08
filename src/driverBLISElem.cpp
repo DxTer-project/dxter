@@ -1256,7 +1256,6 @@ PSet* HegstL1Example()
   trmm->AddInputs(4, splitL, 4, splitA, 5);
   Poss *poss2 = new Poss(trmm,false);
   PSet *set2 = new PSet(poss2);
-
   Axpy *axpy1 = new Axpy(DMLAYER, COEFONEHALF);
   axpy1->AddInput(set1->OutTun(0),0);
   axpy1->AddInput(set2->OutTun(0),0);
@@ -1297,6 +1296,7 @@ PSet* HegstL1Example()
   Poss *loopPoss = new Poss(2,
 			    comA,
 			    comL);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   OutputNode *Aout = new OutputNode("A output");
@@ -1306,6 +1306,9 @@ PSet* HegstL1Example()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+#else
+  throw;
+#endif
 }
 
 
@@ -1439,6 +1442,7 @@ PSet* HegstL5Example()
   Poss *loopPoss = new Poss(2,
 			    comA,
 			    comL);
+#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   OutputNode *Aout = new OutputNode("A output");
@@ -1448,6 +1452,9 @@ PSet* HegstL5Example()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+#else
+  throw;
+#endif
 }
 
 PSet* GemmExample()
@@ -2225,6 +2232,7 @@ PSet* CholHegstExample()
     Poss *loopPoss = new Poss(2,
 			      comA,
 			      comL);
+#if DOELEM
     Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
     OutputNode *Aout = new OutputNode("A output");
@@ -2238,6 +2246,9 @@ PSet* CholHegstExample()
     PSet *outerSet = new PSet(outerPoss);
   
     return outerSet;
+#else
+    throw;
+#endif
   }
   else {
     InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
@@ -2319,6 +2330,7 @@ PSet* CholHegstExample()
     Poss *loopPoss = new Poss(2,
 			      comA,
 			      comL);
+#if DOELEM
     Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
     OutputNode *Aout = new OutputNode("A output");
@@ -2331,6 +2343,9 @@ PSet* CholHegstExample()
     PSet *outerSet = new PSet(outerPoss);
   
     return outerSet;
+#else
+    throw;
+#endif
   }
 }
 

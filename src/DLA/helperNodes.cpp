@@ -302,10 +302,10 @@ void OutputNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
 }
 
 #if DODM
-DistType OutputNode::GetDistType(unsigned int num) const 
+const DistType& OutputNode::GetDistType(unsigned int num) const 
 { 
 #if DOELEM
-  return D_MC_MR; 
+  return MC_MR; 
 #elif DOTENSORS
   throw;
   //  return DEFAULTDISTTYPE;
@@ -778,7 +778,7 @@ void ScaleTrapNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 }
 
 #if DOELEM
-DistType ScaleTrapNode::GetDistType(unsigned int num) const
+const DistType& ScaleTrapNode::GetDistType(unsigned int num) const
 {
   if (num > 0)
     throw;
@@ -855,7 +855,7 @@ void ScaleNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 }
 
 #if DODM
-DistType ScaleNode::GetDistType(unsigned int num) const
+const DistType& ScaleNode::GetDistType(unsigned int num) const
 {
   if (num > 0)
     throw;
