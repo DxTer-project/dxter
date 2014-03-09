@@ -11,7 +11,8 @@ class Contraction : public DLAOp<3,1>
  public:
   Coef m_alpha, m_beta;
   Type m_type;
-  Contraction(Layer layer, Coef alpha, Coef beta, Type type);
+  string m_indices;
+  Contraction(Layer layer, Coef alpha, Coef beta, Type type, string indices);
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

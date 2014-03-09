@@ -2,23 +2,24 @@
 
 #if DOTENSORS
 
-Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type)
+Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type, string indiced)
 :
   m_alpha(alpha),
   m_beta (beta),
-  m_type (type)
+  m_type (type),
+  m_indices(indices)
 {
   SetLayer(layer);
 }
 
 Node* Contraction::BlankInst()
 {
-  return new Contraction(ABSLAYER, COEFONE, COEFONE, REAL);
+  return new Contraction(ABSLAYER, COEFONE, COEFONE, REAL, "");
 }
 
 NodeType Contraction::GetType() const
 {
-  return "Contraction "
+  return "Contraction " + m_indices +
     + LayerNumToStr(GetLayer());
 }
 
@@ -29,6 +30,7 @@ void Contraction::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_alpha = cont->m_alpha;
   m_beta = cont->m_beta;
   m_type = cont->m_type;
+  m_indices = cont->m_indices;
 }
 
 void Contraction::FlattenCore(ofstream &out) const
@@ -37,6 +39,7 @@ void Contraction::FlattenCore(ofstream &out) const
   WRITE(m_alpha);
   WRITE(m_beta);
   WRITE(m_type);
+  out << m_indices << endl;
 }
 
 void Contraction::UnflattenCore(ifstream &in, SaveInfo &info)
@@ -45,6 +48,7 @@ void Contraction::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_alpha);
   READ(m_beta);
   READ(m_type);
+  getline(in, m_indices);
 }
 
 const DistType& Contraction::GetDistType(unsigned int num) const
