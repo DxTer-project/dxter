@@ -57,7 +57,7 @@ template<unsigned int numIn, unsigned int numOut>
 }
 #else
 template<unsigned int numIn, unsigned int numOut>
-const Sizes* DLAOp<numIn, numOut>::Len(unsigned int num, unsigned int dim) const
+const Sizes* DLAOp<numIn, numOut>::Len(unsigned int num, Dim dim) const
 {
   if (num >= numOut)
     throw;
@@ -65,7 +65,7 @@ const Sizes* DLAOp<numIn, numOut>::Len(unsigned int num, unsigned int dim) const
 }
 
 template<unsigned int numIn, unsigned int numOut>
-   const unsigned int DLAOp<numIn, numOut>::NumDims(unsigned int num) const
+   const Dim DLAOp<numIn, numOut>::NumDims(unsigned int num) const
 {
   if (num >= numOut)
     throw;
@@ -73,7 +73,7 @@ template<unsigned int numIn, unsigned int numOut>
 }
 
 template<unsigned int numIn, unsigned int numOut>
-const Sizes* DLAOp<numIn, numOut>::LocalLen(unsigned int num, unsigned int dim) const
+const Sizes* DLAOp<numIn, numOut>::LocalLen(unsigned int num, Dim dim) const
 {
   if (num >= numOut)
     throw;

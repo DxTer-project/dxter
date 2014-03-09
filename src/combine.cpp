@@ -140,7 +140,7 @@ const Sizes* Combine::LocalN(unsigned int num) const
   }
 }
 #else
-const unsigned int Combine::NumDims(unsigned int num) const
+const Dim Combine::NumDims(unsigned int num) const
 {
   if (num > 0)
     throw;
@@ -155,7 +155,7 @@ const unsigned int Combine::NumDims(unsigned int num) const
   }
 }
 
-const Sizes* Combine::Len(unsigned int num, unsigned int dim) const
+const Sizes* Combine::Len(unsigned int num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -170,7 +170,7 @@ const Sizes* Combine::Len(unsigned int num, unsigned int dim) const
   }
 }
 
-const Sizes* Combine::LocalLen(unsigned int num, unsigned int dim) const
+const Sizes* Combine::LocalLen(unsigned int num, Dim dim) const
 {
   if (num > 0)
     throw;

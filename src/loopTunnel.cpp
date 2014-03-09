@@ -275,7 +275,7 @@ const Sizes* LoopTunnel::LocalN(unsigned int num) const
   }
 }
 #else
-const Sizes* LoopTunnel::Len(unsigned int num,unsigned int dim) const
+const Sizes* LoopTunnel::Len(unsigned int num,Dim dim) const
 {
   switch(m_tunType) 
   {
@@ -303,7 +303,7 @@ const Sizes* LoopTunnel::Len(unsigned int num,unsigned int dim) const
   }
 }
 
-const unsigned int LoopTunnel::NumDims(unsigned int num) const
+const Dim LoopTunnel::NumDims(unsigned int num) const
 {
   switch(m_tunType) 
   {
@@ -331,7 +331,7 @@ const unsigned int LoopTunnel::NumDims(unsigned int num) const
   }
 }
 
-const Sizes* LoopTunnel::LocalLen(unsigned int num,unsigned int dim) const
+const Sizes* LoopTunnel::LocalLen(unsigned int num,Dim dim) const
 {
   switch(m_tunType) 
   {
@@ -611,7 +611,7 @@ void LoopTunnel::StartFillingSizes()
 #else
   if (m_sizes)
     throw;
-  unsigned int numDims = InputNumDims(0);
+  Dim numDims = InputNumDims(0);
   m_sizes = new Sizes[numDims];
   m_lsizes = new Sizes[numDims];
 #endif

@@ -105,12 +105,14 @@ enum PackSize { USEMRSIZE,
 		USENRSIZE,
 		BADPACKSIZE };
 
+#if TWOD
 enum Dim {
   DIMM,
   DIMK,
   DIMN,
   BADDIM
 };
+#endif
 
 string BoolToStr(bool boolVal);	    
 
@@ -181,15 +183,17 @@ extern DistType STAR_VC;
 extern DistType VR_STAR; 
 extern DistType STAR_VR;
 #elif DOTENSORS
+typedef unsigned int Dim;
+
 class DistType
 {
  public:
-  unsigned int m_numDims;
+  Dim m_numDims;
   unsigned int *m_dists;
  DistType() : m_numDims(99), m_dists(NULL) {}
   DistType(const DistType &rhs);
   ~DistType();
-  void SetToDefault(unsigned int numDims);
+  void SetToDefault(Dim numDims);
   static string DistEntryToStr(unsigned int dist);
 };
 #endif
@@ -293,6 +297,15 @@ typedef PtrMap::const_iterator PtrMapConstIter;
 //typedef vector<Size> Sizes;
 typedef vector<Cost> CostVec;
 typedef CostVec::iterator CostVecIter;
+
+#if DOTENSORS
+typedef vector<Dim> IndexDimMap;
+typedef IndexDimMap::iterator IndexDimMapIter;
+typedef IndexDimMap::const_iterator IndexDimMapConstIter;
+
+IndexDimMap MapIndicesToDims(const string &indices, const string &dimIndices);
+#endif
+
 
 
 //Variable name

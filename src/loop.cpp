@@ -143,14 +143,26 @@ string PartDirToStr(PartDir dir)
 }
 
 Loop::Loop()
-: PSet(), m_type(UNKNOWNLOOP), m_comm(CORECOMM), m_dim(BADDIM)
+: PSet(), m_type(UNKNOWNLOOP)
+#if DOBLIS
+, m_comm(CORECOMM)
+#endif
+#if TWOD
+, m_dim(BADDIM)
+#endif
 {
   AssignNewLabel();
   m_bsSize = BADBSSIZE;
 }
 
 Loop::Loop(LoopType type)
-: m_type(type), m_comm(CORECOMM), m_dim(BADDIM)
+: m_type(type)
+#if DOBLIS
+, m_comm(CORECOMM)
+#endif
+#if TWOD
+, m_dim(BADDIM)
+#endif
 {
 #if DOELEM
   if (m_type == ELEMLOOP)
@@ -162,7 +174,13 @@ Loop::Loop(LoopType type)
 }
 
 Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
-: PSet(poss), m_type(type), m_bsSize(bsSize), m_comm(CORECOMM), m_dim(BADDIM)
+: PSet(poss), m_type(type), m_bsSize(bsSize)
+#if DOBLIS
+, m_comm(CORECOMM)
+#endif
+#if TWOD
+, m_dim(BADDIM)
+#endif
 {
   unsigned int i;
   for(i = 0; i < poss->m_inTuns.size(); ++i) {
@@ -200,9 +218,7 @@ Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
 void Loop::SanityCheck()
 {
   PSet::SanityCheck();
-  
-  if (m_type == ELEMLOOP && m_comm != CORECOMM)
-    throw;
+
   
   bool foundControl = false;
   NodeVecIter iter = m_inTuns.begin();
@@ -241,8 +257,10 @@ bool Loop::CanMerge(PSet *pset) const
   if (m_bsSize != ((Loop*)pset)->m_bsSize)
     return false;
   Loop *loop = (Loop*)pset;
+#if DOBLIS
   if (loop->m_comm != CORECOMM || m_comm != CORECOMM)
     return false;
+#endif
   if (m_type != loop->m_type)
     return false;
   const Split *split1 = GetControl();
@@ -661,11 +679,6 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     out.Indent(1);
     *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
   }
-#else
-    {
-    if (m_comm != CORECOMM)
-      throw;
-  }
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);
@@ -681,8 +694,12 @@ void Loop::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
   Loop *loop = (Loop*)orig;
   m_label = loop->m_label;
   m_bsSize = loop->m_bsSize;
+#if DOBLIS
   m_comm = loop->m_comm;
+#endif
+#if TWOD
   m_dim = loop->m_dim;
+#endif
   if (loop->m_bsSize >= BADBSSIZE) {
     cout << "duplicating a loop with zero blocksize\n";
     throw;
@@ -777,8 +794,12 @@ void Loop::FlattenCore(ofstream &out) const
 {
   WRITE(m_type);
   WRITE(m_bsSize);
+#if DOBLIS
   WRITE(m_comm);
+#endif
+#if TWOD
   WRITE(m_dim);
+#endif
   unsigned int size = m_label.size();
   WRITE(size);
   IntSetConstIter iter = m_label.begin();
@@ -791,8 +812,12 @@ void Loop::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   READ(m_type);
   READ(m_bsSize);
+#if DOBLIS
   READ(m_comm);
+#endif
+#if TWOD
   READ(m_dim);
+#endif
   unsigned int size;
   READ(size);
   for(unsigned int i = 0; i < size; ++i) {
@@ -851,7 +876,11 @@ void Loop::FillTunnelSizes()
       iter = m_inTuns.begin();
       for (; iter != m_inTuns.end(); ++iter) {
         LoopTunnel *in = (LoopTunnel*)(*iter);
+#if DOBLIS
         in->AppendSizes(i, numIters, NumGroupsInComm(m_comm));
+#else
+        in->AppendSizes(i, numIters, 1);
+#endif
       }
     }
   }
@@ -987,6 +1016,7 @@ void Loop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
   setTunIn->m_poss->DeleteChildAndCleanUp(setTunIn, true);
 }
 
+#if DOBLIS
 void Loop::Parallelize(Comm comm)
 {
   if (NumGroupsInComm(comm) <= 1)
@@ -1151,4 +1181,5 @@ bool Loop::HasIndepIters() const
   }
   return true;
 }
+#endif
 

@@ -179,7 +179,7 @@ const Sizes* InputNode::LocalN(unsigned int num) const
 }
 #else
 
-const unsigned int InputNode::NumDims(unsigned int num) const
+const Dim InputNode::NumDims(unsigned int num) const
 {
   if (num > 0)
     throw;
@@ -187,7 +187,7 @@ const unsigned int InputNode::NumDims(unsigned int num) const
 }
 
 
-const Sizes* InputNode::Len(unsigned int num,unsigned int dim) const
+const Sizes* InputNode::Len(unsigned int num,Dim dim) const
 {
   if (num > 0)
     throw;
@@ -197,7 +197,7 @@ const Sizes* InputNode::Len(unsigned int num,unsigned int dim) const
 }
 
 
-const Sizes* InputNode::LocalLen(unsigned int num,unsigned int dim) const
+const Sizes* InputNode::LocalLen(unsigned int num,Dim dim) const
 {
   if (num > 0)
     throw;
@@ -365,13 +365,13 @@ const Sizes* OutputNode::LocalN(unsigned int num) const
 
 #else
 
-const unsigned int OutputNode::NumDims(unsigned int num) const
+const Dim OutputNode::NumDims(unsigned int num) const
 {
   if (num > 0)
     throw;
   return InputNumDims(0);
 }
-const Sizes* OutputNode::Len(unsigned int num, unsigned int dim) const
+const Sizes* OutputNode::Len(unsigned int num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -379,7 +379,7 @@ const Sizes* OutputNode::Len(unsigned int num, unsigned int dim) const
 }
 
 
-const Sizes* OutputNode::LocalLen(unsigned int num, unsigned int dim) const
+const Sizes* OutputNode::LocalLen(unsigned int num, Dim dim) const
 {
   if (num > 0)
     throw;

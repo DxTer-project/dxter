@@ -26,6 +26,6 @@ class Contraction : public DLAOp<3,1>
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);
+  //  static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);
 };
 #endif

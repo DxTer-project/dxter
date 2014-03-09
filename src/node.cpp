@@ -876,11 +876,13 @@ Comm Node::WithinParallelism() const
     if (set->IsCritSect()) {
       return CORECOMM;
     }
+#if DOBLIS
     else if (set->IsLoop()) {
       const Loop *loop = (Loop*)set;
       if (loop->IsParallel())
 	return loop->m_comm;
     }
+#endif
     poss = set->m_ownerPoss;
   }
   return CORECOMM;

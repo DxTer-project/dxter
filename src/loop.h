@@ -83,8 +83,12 @@ class Loop : public PSet
  public:
   IntSet m_label;
   BSSize m_bsSize;
+#if DOBLIS
   Comm m_comm;
+#endif
+#if TWOD
   Dim m_dim;
+#endif
   
   Loop();
   Loop(LoopType type);
@@ -106,7 +110,9 @@ class Loop : public PSet
   bool ValidIter() const;
   LoopTunnel* CreateNewLoopTunnels(Node *input, unsigned int num, Poss *possToCareAbout, UpStat stat);
   void TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun);
+#if TWOD
   inline void SetDim(Dim dim) {m_dim = dim;}
+#endif
 
   void FillTunnelSizes();
   virtual void BuildSizeCache();
@@ -116,8 +122,10 @@ class Loop : public PSet
   static void FlattenStatic(ofstream &out);
   static void UnflattenStatic(ifstream &in);
 
+#if TWOD
   void Parallelize(Comm comm);
   bool HasIndepIters() const;
   bool IsParallel() const {return m_comm!=CORECOMM;}
   bool OnlyParallelizedOnNonIndependentData() const;
+#endif
 };

@@ -2,7 +2,7 @@
 
 #if DOTENSORS
 
-Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type, string indiced)
+Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type, string indices)
 :
   m_alpha(alpha),
   m_beta (beta),
@@ -19,7 +19,7 @@ Node* Contraction::BlankInst()
 
 NodeType Contraction::GetType() const
 {
-  return "Contraction " + m_indices +
+  return "Contraction " + m_indices
     + LayerNumToStr(GetLayer());
 }
 
@@ -61,13 +61,13 @@ void Contraction::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
     throw;
-    Sizes sizes = InputLocalLen(2,0);
-    unsigned int numDims = InputNumDims(2);
-    for (unsigned int dim = 1; dim < numDims; ++dim) {
+    Sizes sizes = *InputLocalLen(2,0);
+    Dim numDims = InputNumDims(2);
+    for (Dim dim = 1; dim < numDims; ++dim) {
       sizes.MultBy(InputLocalLen(2,dim));
     }
-    vector<unsigned int> dims = MapIndicesToDims(m_indices,GetInputName(0).m_indices);
-    vector<unsigned int>::const_iterator iter = dims.begin();
+    IndexDimMap dims = MapIndicesToDims(m_indices,GetInputName(0).m_indices);
+    IndexDimMapConstIter iter = dims.begin();
     for(; iter != dims.end(); ++iter) {
       sizes.MultBy(InputLocalLen(0,*iter));
     }

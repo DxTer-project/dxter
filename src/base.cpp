@@ -69,7 +69,7 @@ DistType::DistType(const DistType &rhs)
   m_numDims = rhs.m_numDims;
   if (m_numDims) {
     m_dists = new unsigned int[m_numDims];
-    memcpy(m_dists, rhs.m_dists, m_numDims*sizeof(unsigned int));
+    memcpy(m_dists, rhs.m_dists, m_numDims*sizeof(Dim));
   }
   else
     m_dists = NULL;
@@ -84,11 +84,11 @@ DistType::~DistType()
   }
 }
 
-void DistType::SetToDefault(unsigned int numDims)
+void DistType::SetToDefault(Dim numDims)
 {
   m_numDims = numDims;
-  m_dists = new unsigned int[numDims];
-  for (unsigned int i = 0; i < numDims; ++i)
+  m_dists = new Dim[numDims];
+  for (Dim i = 0; i < numDims; ++i)
     m_dists[i] = i+1;
 }
 
@@ -131,10 +131,23 @@ string DistTypeToStr(const DistType &type)
   return out;
 }
 
+#if DOTENSORS
+IndexDimMap MapIndicesToDims(const string &indices, const string &dimIndices)
+{
+  IndexDimMap map;
+  map.reserve(indices.length());
+  string::const_iterator iter = indices.begin();
+  for(; iter != indices.end(); ++iter) {
+    map.push_back(dimIndices.find(*iter));
+  }
+  return map;
+}
+#endif
+
 void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes)
 {
-  const unsigned int numDims = dist.m_numDims;
-  for (unsigned int dim = 0; dim < numDims; ++ dim) {
+  const Dim  numDims = dist.m_numDims;
+  for (Dim dim = 0; dim < numDims; ++ dim) {
     unsigned int distVal = dist.m_dists[dim];
     localSizes[dim] = sizes[dim];
     if (distVal != 0) {
@@ -149,7 +162,7 @@ void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes)
       }
       string out;
       while (distVal > 0) {
-	unsigned int distDim = distVal % MAX_NUM_DIMS;
+	Dim distDim = distVal % MAX_NUM_DIMS;
 	coef *= GridLens[distDim];
 	distVal = distVal / MAX_NUM_DIMS;
 	--numDists;

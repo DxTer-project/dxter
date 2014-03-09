@@ -228,8 +228,10 @@ bool PSet::operator==(const PSet &rhs) const
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
           const LoopTunnel *tun1 = (LoopTunnel*)(m_inTuns[i]);
           const LoopTunnel *tun2 = (LoopTunnel*)(rhs.m_inTuns[i]);
+#if DOBLIS
           if (((Loop*)(tun1->m_pset))->m_comm != ((Loop*)(tun2->m_pset))->m_comm)
             return false;
+#endif
           if (tun1->m_statTL != tun2->m_statTL
               || tun1->m_statBL != tun2->m_statBL
               || tun1->m_statTR != tun2->m_statTR
@@ -1512,6 +1514,7 @@ bool PSet::CanPrint() const
 
 bool PSet::RemoveParallelization(Comm comm)
 {
+#if DOBLIS
   if (IsLoop()) {
     Loop *loop = (Loop*)this;
     if (loop->IsParallel()) {
@@ -1523,6 +1526,7 @@ bool PSet::RemoveParallelization(Comm comm)
       }
     }
   }
+#endif
   
   int i;
   for(i = 0; i < (int)(m_posses.size()); ++i) {
@@ -1560,6 +1564,7 @@ bool PSet::RemoveParallelization(Comm comm)
 
 Comm PSet::ParallelismWithinCurrentPosses() const
 {
+#if DOBLIS
   Comm comm = CORECOMM;
   if (IsLoop()) {
     const Loop *loop = (Loop*)this;
@@ -1580,4 +1585,7 @@ Comm PSet::ParallelismWithinCurrentPosses() const
       comm = MaxComm(comm, node->ParallelComm());
   }
   return comm;
+#else
+  return CORECOMM;
+#endif
 }

@@ -32,14 +32,14 @@ class Combine : public LoopTunnel
 #if TWOD
   PartDir m_dir;
 #else
-  unsigned int m_partDim;
+  Dim m_partDim;
 #endif
 #if TWOD
  Combine() :LoopTunnel(LASTTUNNEL),m_dir(LASTPARTDIR) {}
  Combine(PartDir dir, PossTunType type) : LoopTunnel(type), m_dir(dir) {}
 #else
  Combine() :LoopTunnel(LASTTUNNEL),m_partDim(99) {}
-   Combine(unsigned int partDim, PossTunType type) : LoopTunnel(type), m_partDim(partDim) {}
+   Combine(Dim partDim, PossTunType type) : LoopTunnel(type), m_partDim(partDim) {}
 #endif
   virtual void PrintCode(IndStream &out);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -58,9 +58,9 @@ class Combine : public LoopTunnel
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
 #else
-  virtual const unsigned int NumDims(unsigned int num) const;
-  virtual const Sizes* Len(unsigned int num, unsigned int dim) const;
-  virtual const Sizes* LocalLen(unsigned int num, unsigned int dim) const;
+  virtual const Dim NumDims(unsigned int num) const;
+  virtual const Sizes* Len(unsigned int num, Dim dim) const;
+  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
 #endif
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;

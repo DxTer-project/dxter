@@ -166,7 +166,7 @@ const Sizes* DLANode::InputLocalN(unsigned int num) const
 }
 
 #else
-const Sizes* DLANode::InputLen(unsigned int num, unsigned int dim) const
+const Sizes* DLANode::InputLen(unsigned int num, Dim dim) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -179,7 +179,7 @@ const Sizes* DLANode::InputLen(unsigned int num, unsigned int dim) const
 }
 
 
-const Sizes* DLANode::InputLocalLen(unsigned int num, unsigned int dim) const
+const Sizes* DLANode::InputLocalLen(unsigned int num, Dim dim) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -192,7 +192,7 @@ const Sizes* DLANode::InputLocalLen(unsigned int num, unsigned int dim) const
 }
 
 
-const unsigned int DLANode::InputNumDims(unsigned int num) const
+const Dim DLANode::InputNumDims(unsigned int num) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";

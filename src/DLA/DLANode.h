@@ -60,12 +60,12 @@ class DLANode : public Node
   const Sizes* InputLocalM(unsigned int num) const;
   const Sizes* InputLocalN(unsigned int num) const;
 #else
-  virtual const unsigned int NumDims(unsigned int num) const = 0;
-  virtual const Sizes* Len(unsigned int num, unsigned int dim) const = 0;
-  virtual const Sizes* LocalLen(unsigned int num, unsigned int dim) const = 0;  
-  virtual const unsigned int InputNumDims(unsigned int num) const;
-  const Sizes* InputLen(unsigned int num, unsigned int dim) const;
-  const Sizes* InputLocalLen(unsigned int num, unsigned int dim) const;
+  virtual const Dim NumDims(unsigned int num) const = 0;
+  virtual const Sizes* Len(unsigned int num, Dim dim) const = 0;
+  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const = 0;  
+  virtual const Dim InputNumDims(unsigned int num) const;
+  const Sizes* InputLen(unsigned int num, Dim dim) const;
+  const Sizes* InputLocalLen(unsigned int num, Dim dim) const;
 #endif
   virtual void ClearBeforeProp();
 #if DODM

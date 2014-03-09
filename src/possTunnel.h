@@ -58,9 +58,9 @@ class PossTunnel : public DLANode
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
 #else
-  virtual const unsigned int NumDims(unsigned int num) const;
-  virtual const Sizes* Len(unsigned int num, unsigned int dim) const;
-  virtual const Sizes* LocalLen(unsigned int num, unsigned int dim) const;
+  virtual const Dim NumDims(unsigned int num) const;
+  virtual const Sizes* Len(unsigned int num, Dim dim) const;
+  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
 #endif
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;

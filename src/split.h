@@ -69,9 +69,9 @@ class Split : public LoopTunnel
 		   Size m, Size n,
 		   Sizes &ms, Sizes &ns);
 #else
-  virtual const unsigned int NumDims(unsigned int num) const;
-  virtual const Sizes* Len(unsigned int num, unsigned int dim) const;
-  virtual const Sizes* LocalLen(unsigned int num, unsigned int dim) const;
+  virtual const Dim NumDims(unsigned int num) const;
+  virtual const Sizes* Len(unsigned int num, Dim dim) const;
+  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
 #endif
   virtual Name GetName(unsigned int num) const;
   virtual Name GetName(unsigned int num, LoopType type) const;

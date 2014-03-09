@@ -531,7 +531,7 @@ void Split::GetSizes(unsigned int num, unsigned int numIters,
     }
 }
 #else
- const unsigned int Split::NumDims(unsigned int num) const
+ const Dim Split::NumDims(unsigned int num) const
 {
   switch(m_tunType) 
     {
@@ -550,7 +550,7 @@ void Split::GetSizes(unsigned int num, unsigned int numIters,
     }
 }
 
-const Sizes* Split::Len(unsigned int num, unsigned int dim) const
+const Sizes* Split::Len(unsigned int num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -582,7 +582,7 @@ const Sizes* Split::Len(unsigned int num, unsigned int dim) const
     }
 }
 
-   const Sizes* Split::LocalLen(unsigned int num, unsigned int dim) const
+const Sizes* Split::LocalLen(unsigned int num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -1285,8 +1285,8 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
   if (!m_sizes)
     throw;
   const Size bs = GetMyLoop()->GetBS();
-  unsigned int numDims = InputNumDims(0);
-  for (unsigned int dim; dim < numDims; ++dim) {
+  Dim numDims = InputNumDims(0);
+  for (Dim dim; dim < numDims; ++dim) {
     const Sizes *sizes = InputLen(0,dim);
     unsigned int length = sizes->NumSizes();
     if (length <= execNum) {
@@ -1339,9 +1339,9 @@ void Split::UpdateLocalSizes()
 #else
 void Split::UpdateLocalSizes()
 {
-  unsigned int numDims = InputNumDims(0);
+  Dim numDims = InputNumDims(0);
   const DistType t = InputDistType(0);
-  for (unsigned int dim = 0; dim < numDims; ++ dim) {
+  for (Dim dim = 0; dim < numDims; ++ dim) {
     GetLocalSizes(t, m_sizes+dim, m_lsizes+dim);
   }
 }
