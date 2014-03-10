@@ -45,7 +45,6 @@ class RedistNode : public DLANode
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual bool CanTrans() const;
   RedistNode* CreateTrans(Trans trans);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "redist";}
@@ -54,8 +53,6 @@ class RedistNode : public DLANode
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
   virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
-  virtual const SizesArray AllLens(unsigned int num) const;
-  virtual const SizesArray AllLocalLens(unsigned int num) const;
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);

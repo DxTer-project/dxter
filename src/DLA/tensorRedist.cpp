@@ -101,8 +101,41 @@ void RedistNode::BuildSizeCache()
 
   DLANode *in = (DLANode*)Input(0);
   unsigned int num = InputConnNum(0);
-  m_lsizes = new Sizes[in->NumDims(num)];
-  GetLocalSizes(m_destType, in->AllLens(num), m_lsizes);
+  Dim numDims = in->NumDims(num);
+  m_lsizes = new Sizes[numDims];
+  for (Dim dim = 0; dim < numDims; ++dim)
+    GetLocalSizes(m_destType, dim, in->Len(num,dim), m_lsizes+dim);
+}
+
+void RedistNode::FlattenCore(ofstream &out) const
+{
+  throw;
+  //need to fix flatten code for DistType throughout code base; don't just do a pointer flatten
+}
+   
+void RedistNode::UnflattenCore(ifstream &in, SaveInfo &info)
+{
+  throw;
+}
+
+Name RedistNode::GetName(unsigned int num) const
+{
+  if (num > 0)
+    throw;
+  Name name = GetInputName(0);
+  name.m_type = m_destType;
+  return name;
+}
+
+void RedistNode::PrintCode(IndStream &out)
+{  
+  out.Indent();
+  DistType in = InputDistType(0);
+
+  *out << GetName(0).str()
+       << " = "
+       << GetInputName(0).str()
+       << ";\n";
 }
 
 #endif

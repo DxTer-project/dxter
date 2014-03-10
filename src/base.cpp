@@ -171,6 +171,31 @@ void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes)
     }
   }
 }
+
+void GetLocalSizes(DistType dist, Dim dim, const Sizes* sizes, Sizes* localSizes)
+{
+  unsigned int distVal = dist.m_dists[dim];
+  *localSizes = *sizes;
+  if (distVal != 0) {
+    distVal--;
+    unsigned int currStage = MAX_NUM_DIMS;
+    unsigned int numDists = 0;
+    unsigned int coef = 1;
+    while (distVal >= currStage) {
+      distVal -= currStage;
+      numDists++;
+      currStage *= MAX_NUM_DIMS;
+    }
+    string out;
+    while (distVal > 0) {
+      Dim distDim = distVal % MAX_NUM_DIMS;
+      coef *= GridLens[distDim];
+      distVal = distVal / MAX_NUM_DIMS;
+      --numDists;
+    }    
+    localSizes->SetCoeff(1.0 / coef);
+  }
+}
 #endif
 
 #if DOELEM
