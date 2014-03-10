@@ -29,6 +29,7 @@
 #include <time.h>
 #include "DLAReg.h"
 #include <omp.h>
+#include "contraction.h"
 
 #if DOTENSORS
 
@@ -61,18 +62,12 @@
 //scalapack
 #define TriInv8 0
 
-#if DOELEM
-Size smallSize = 500;
-Size medSize = 20000;
-Size bigSize = 80000;
-Size bs = ELEM_BS;
-#elif DOSQM || DOSM
-Size smallSize = 500;
-Size medSize = 8000;
-Size bigSize = 10000;
+Size smallSize = 5;
+Size medSize = 10;
+Size bigSize = 15;
 //Size bs = ELEM_BS;
-#endif
 
+PSet* Cont1Example();
 void AddTrans()
 {
 
@@ -85,6 +80,9 @@ void AddSimplifiers()
 
 void Usage()
 {
+  cout << "./driver arg1 arg2 arg3 arg4\n";
+  cout <<" arg1 == 0  -> Load from file arg1\n";
+  cout <<"         1  -> Contraction (abcd,cdef,abef)\n";
 }
 
 int main(int argc, const char* argv[])
@@ -105,7 +103,9 @@ int main(int argc, const char* argv[])
   else {
     algNum = atoi(argv[1]);
     switch(algNum) {
-
+    case(1):
+      algFunc = Cont1Example;
+      break;
     default:
       Usage();
       return 0;
@@ -278,6 +278,45 @@ int main(int argc, const char* argv[])
       uni.Print(cout, CODE, whichGraph); */
 
   return 0;
+}
+
+PSet* Cont1Example()
+{
+  Sizes sizes[4];
+
+  for (Dim dim = 0; dim < 4; ++dim)
+    sizes[dim].AddRepeatedSizes(smallSize, 1, 1);
+
+  InputNode *Ain = new InputNode("A input", 4, sizes, "A", "abcd");
+  InputNode *Bin = new InputNode("B input", 4, sizes, "B", "cdef");
+  InputNode *Cin = new InputNode("C input", 4, sizes, "C", "abef");
+
+  PossTunnel *tunA = new PossTunnel(POSSTUNIN);
+  tunA->AddInput(Ain,0);
+
+  PossTunnel *tunB = new PossTunnel(POSSTUNIN);
+  tunB->AddInput(Bin,0);
+
+  PossTunnel *tunC = new PossTunnel(POSSTUNIN);
+  tunC->AddInput(Cin,0);
+
+  Contraction *cont = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,(string)"cd");
+  cont->AddInputs(6,
+		  tunA,0,
+		  tunB,0,
+		  tunC,0);
+
+  Poss *innerPoss = new Poss(cont,true);
+  PSet *innerSet = new PSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(Cout,true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
+
 }
 
 #endif //DOTENSORS
