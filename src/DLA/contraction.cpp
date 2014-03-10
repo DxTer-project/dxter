@@ -60,18 +60,23 @@ void Contraction::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
-    throw;
-    Sizes sizes = *InputLocalLen(2,0);
-    Dim numDims = InputNumDims(2);
-    for (Dim dim = 1; dim < numDims; ++dim) {
-      sizes.MultBy(InputLocalLen(2,dim));
-    }
+    m_cost = 0;
+    cout << "improve Contraction::Prop code\n";
     IndexDimMap dims = MapIndicesToDims(m_indices,GetInputName(0).m_indices);
-    IndexDimMapConstIter iter = dims.begin();
-    for(; iter != dims.end(); ++iter) {
-      sizes.MultBy(InputLocalLen(0,*iter));
+    const Sizes *sizes = InputLocalLen(2,0);
+    unsigned int totNumIters = sizes->NumSizes();
+    for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+      Cost temp = 1;
+      Dim numDims = InputNumDims(2);
+      for (Dim dim = 1; dim < numDims; ++dim) {
+	temp *= (*InputLocalLen(2,dim))[iteration];
+      }
+      IndexDimMapConstIter iter = dims.begin();
+      for(; iter != dims.end(); ++iter) {
+	temp *= (*InputLocalLen(0,*iter))[iteration];
+      }
     }
-    m_cost = 2 * sizes.Sum();
+    m_cost *= 2;
   }
 }
 
