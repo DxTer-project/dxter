@@ -22,7 +22,7 @@
 
 
 #include "helperNodes.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include <cmath>
 
 

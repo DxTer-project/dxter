@@ -23,7 +23,7 @@
 #include "costs.h"
 #include "omp.h"
 #include "transform.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "twoSidedTrxm.h"
 #include "blas.h"
 #include "loopSupport.h"

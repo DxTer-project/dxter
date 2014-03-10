@@ -21,7 +21,7 @@
 
 #include "split.h"
 #include "combine.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include <cmath>
 
 Split::Split() : LoopTunnel(LASTTUNNEL), 

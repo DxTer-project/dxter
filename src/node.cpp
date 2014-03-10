@@ -23,7 +23,7 @@
 
 #include "transform.h"
 #include "poss.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "loop.h"
 #include "gemm.h"
 #include "trxm.h"

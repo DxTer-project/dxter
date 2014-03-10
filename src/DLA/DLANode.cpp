@@ -23,7 +23,7 @@
 
 #include "DLANode.h"
 #include "poss.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include <sstream>
 
 DLANode::DLANode()

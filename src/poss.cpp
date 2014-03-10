@@ -26,7 +26,7 @@
 #include "pset.h"
 #include "loopSupport.h"
 #include <sstream>
-#include "distributions.h"
+#include "elemRedist.h"
 #include <iomanip>
 #include "twoSidedTrxm.h"
 #include "pack.h"

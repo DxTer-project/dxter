@@ -28,7 +28,7 @@
 
 #include "DLAOp.h"
 #include "transform.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "lowerLayer.h"
 
 Loop* GemmVar1Loop(Node *Ain, unsigned int Anum, 

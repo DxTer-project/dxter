@@ -23,7 +23,7 @@
 
 #include "combine.h"
 #include "split.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include <cmath>
 
 void Combine::Prop()

@@ -27,7 +27,7 @@
 #include "TriInv.h"
 #include "blas.h"
 #include "chol.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "gemm.h"
 #include "helperNodes.h"
 #include "hemm.h"

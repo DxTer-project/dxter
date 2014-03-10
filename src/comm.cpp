@@ -20,7 +20,7 @@
  */
 #include "base.h"
 #include "comm.h"
-#include "distributions.h"
+#include "elemRedist.h"
 
 string CommToStr(Comm comm)
 {
