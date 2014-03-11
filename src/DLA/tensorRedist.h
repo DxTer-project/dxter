@@ -32,6 +32,7 @@ class RedistNode : public DLANode
  public:
   DistType m_destType;
   SizesArray m_lsizes;
+  string m_name;
   RedistNode();
   RedistNode(const DistType &destType);
   virtual ~RedistNode();

@@ -31,15 +31,10 @@ void RedistNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 
 NodeType RedistNode::GetType() const
 {
-  if (m_inputs.empty()) {
-    return "RedistNode to " + DistTypeToStr(m_destType) +
-      " without parent";
-  }
+  if (m_name.length()) 
+    return m_name;
   else {
-    Node *parent = Input(0);
-    DistType type = ((DLANode*)parent)->GetDistType(InputConnNum(0));
-    return  "RedistNode " + DistTypeToStr(type) +
-      " -> " + DistTypeToStr(m_destType);
+    return (string)"RedistNode to " +  DistTypeToStr(m_destType);
   }
 }
 
@@ -58,6 +53,8 @@ void RedistNode::SanityCheck()
 void RedistNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
+    if (!m_name.length())
+      m_name = "RedistNode to " +  DistTypeToStr(m_destType);
     DLANode *parent = (DLANode*)Input(0);
     DistType m_srcType = parent->GetDistType(InputConnNum(0));
     parent->Prop();
