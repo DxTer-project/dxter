@@ -24,7 +24,7 @@
 
 #include "trxm.h"
 #include "blas.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "string.h"
 #include "helperNodes.h"
 #include "loopSupport.h"

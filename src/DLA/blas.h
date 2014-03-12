@@ -27,7 +27,7 @@
 
 #include "transform.h"
 #include "DLAOp.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "gemm.h"
 #include "trxm.h"
 #include "herk.h"

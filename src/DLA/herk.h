@@ -27,7 +27,7 @@
 #if DOBLIS||DOELEM
 #include "transform.h"
 #include "DLAOp.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "lowerLayer.h"
 
 Loop* HerkLoopVar1(Node *Ain, unsigned int Anum, 

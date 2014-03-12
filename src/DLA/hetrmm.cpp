@@ -24,7 +24,7 @@
 
 #include "blas.h"
 #include "hetrmm.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "string.h"
 #include "helperNodes.h"
 #include "loopSupport.h"

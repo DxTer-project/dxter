@@ -22,7 +22,7 @@
 #include "gemm.h"
 
 #if DOBLIS||DOELEM
-#include "distributions.h"
+#include "elemRedist.h"
 #include "string.h"
 #include "helperNodes.h"
 #include "loopSupport.h"

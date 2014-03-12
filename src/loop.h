@@ -122,7 +122,7 @@ class Loop : public PSet
   static void FlattenStatic(ofstream &out);
   static void UnflattenStatic(ifstream &in);
 
-#if TWOD
+#if DOBLIS
   void Parallelize(Comm comm);
   bool HasIndepIters() const;
   bool IsParallel() const {return m_comm!=CORECOMM;}

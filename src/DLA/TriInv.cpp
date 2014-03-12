@@ -23,7 +23,7 @@
 #if DOBLIS||DOELEM
 
 
-#include "distributions.h"
+#include "elemRedist.h"
 #include "loopSupport.h"
 #include "blas.h"
 #include <stdio.h>

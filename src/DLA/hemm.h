@@ -27,7 +27,7 @@
 #if DOELEM||DOBLIS
 #include "transform.h"
 #include "DLAOp.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "blis.h"
 #include "lowerLayer.h"
 

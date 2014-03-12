@@ -25,7 +25,7 @@
 
 #include "blas.h"
 #include "her2k.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "stdlib.h"
 #include "helperNodes.h"
 #include "loopSupport.h"

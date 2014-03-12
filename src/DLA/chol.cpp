@@ -24,7 +24,7 @@
 #if DOELEM||DOBLIS
 
 #include "chol.h"
-#include "distributions.h"
+#include "elemRedist.h"
 #include "loopSupport.h"
 #include "blas.h"
 #include <stdio.h>

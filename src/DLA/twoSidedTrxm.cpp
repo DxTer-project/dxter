@@ -22,7 +22,7 @@
 
 #include "twoSidedTrxm.h"
 #ifndef SKIPTWOSIDED
-#include "distributions.h"
+#include "elemRedist.h"
 #include "loop.h"
 #include "blas.h"
 #include <stdio.h>
@@ -31,7 +31,7 @@
 #include <sstream>
 #include "loopSupport.h"
 #include "helperNodes.h"
-#include "distributions.h"
+#include "elemRedist.h"
 
 
 void TwoSidedTrxm::Duplicate(const Node *orig, bool shallow, bool possMerging)
