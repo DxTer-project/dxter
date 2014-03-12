@@ -23,9 +23,11 @@
 #pragma once
 
 #include "layers.h"
-#include "DLANode.h"
 
 #if DOTENSORS
+
+#include "DLANode.h"
+#include "transform.h"
 
 class RedistNode : public DLANode
 {
@@ -58,6 +60,30 @@ class RedistNode : public DLANode
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+};
+
+class RemoveWastedRedist : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "RemoveWastedRedist"; }
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};
+
+class RemoveNOPRedistribs : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "RemoveNOPRedist"; }
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};
+
+class CombineRedistribs : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "CombineRedist"; }
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
 };
 
 #endif

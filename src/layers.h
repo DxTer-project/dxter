@@ -127,6 +127,15 @@ enum Layers {
 };
 #elif DOTENSORS
 
+
+//Software layers
+enum Layers {
+  ABSLAYER = 0,
+  DMLAYER,
+  SMLAYER,
+  BADLAYER
+};
+
 //Phases of generation
 #define DPTENSORPHASE 0
 #define ROTENSORPHASE 1
@@ -146,19 +155,6 @@ enum Layers {
 #define DODPTENSORPHASE 1
 #define DOROTENSORPHASE 1
 
-//Software layers
-enum Layers {
-  ABSLAYER = 0,
-  DMTENSORLAYER,
-  SMTENSORLAYER,
-  BADLAYER,
-  DMLAYER,
-  SMLAYER,
-  S1LAYER,
-  S2LAYER,
-  S3LAYER,
-  SOLAYER,
-};
 
 #else
 bad selection of layering

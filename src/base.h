@@ -203,12 +203,18 @@ inline bool DistTypeNotEqual(const DistType &one, const DistType &two)
   return one != two;
 }
 #elif DOTENSORS
+
 inline bool DistTypeNotEqual(const DistType &one, const DistType &two)
 {
   if (one.m_numDims != two.m_numDims)
     return true;
   return memcmp(one.m_dists,two.m_dists,one.m_numDims*sizeof(unsigned int )) != 0;
 }
+inline bool DistTypeEqual(const DistType &one, const DistType &two)
+{
+  return !DistTypeNotEqual(one, two);
+}
+
 #endif
 
 #if DODM

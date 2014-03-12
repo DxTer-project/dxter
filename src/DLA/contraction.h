@@ -26,6 +26,30 @@ class Contraction : public DLAOp<3,1>
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  //  static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);
+};
+
+/* class GemmLoopExp : public SingleTrans */
+/* { */
+/*  public: */
+/*   Layer m_fromLayer, m_toLayer; */
+/*   unsigned int m_dim; */
+/*  GemmLoopExp(Layer fromLayer, Layer toLayer, unsigned int dim)  */
+/*    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim) {} */
+/*   virtual string GetType() const; */
+/*   virtual bool CanApply(const Poss *poss, const Node *node) const; */
+/*   virtual void Apply(Poss *poss, Node *node) const; */
+/*   virtual bool IsRef() const {return true;} */
+/* }; */
+
+class DistContToLocalContStatC : public SingleTrans
+{
+ public:
+  char m_dists[MAX_NUM_DIMS / 4];
+  virtual string GetType() const {return "Dist Cont to Local Stat C";}
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+  virtual Cost RHSCostEstimate(const Node *node) const;
 };
 #endif
+

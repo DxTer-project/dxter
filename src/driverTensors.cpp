@@ -30,6 +30,7 @@
 #include "DLAReg.h"
 #include <omp.h>
 #include "contraction.h"
+#include "tensorRedist.h"
 
 #if DOTENSORS
 
@@ -75,7 +76,9 @@ void AddTrans()
 
 void AddSimplifiers()
 { 
-
+  Universe::AddTrans(RedistNode::GetClass(), new RemoveNOPRedistribs, SIMP);
+  Universe::AddTrans(RedistNode::GetClass(), new RemoveWastedRedist, SIMP);
+  Universe::AddTrans(RedistNode::GetClass(), new CombineRedistribs, SIMP);
 }
 
 void Usage()

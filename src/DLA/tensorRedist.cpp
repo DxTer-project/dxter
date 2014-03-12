@@ -135,4 +135,133 @@ void RedistNode::PrintCode(IndStream &out)
        << ";\n";
 }
 
+
+bool RemoveWastedRedist::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  RedistNode *redistNode = (RedistNode*)node;
+  const DistType* type = &(redistNode->m_destType);
+  if (node->m_children.size() == 0)
+    throw;
+  while(redistNode->Input(0) 
+        && (redistNode->Input(0)->GetNodeClass() == RedistNode::GetClass()))
+    {
+      redistNode = (RedistNode*)redistNode->Input(0);
+      if (DistTypeEqual(redistNode->m_destType,*type))
+	return true;
+      for(unsigned int i = 0; i < redistNode->m_children.size(); ++i) {
+	Node *tmp = redistNode->Child(i);
+	if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
+	  if (DistTypeEqual(((RedistNode*)tmp)->m_destType, *type))
+	    return true;
+	}
+      }
+    }
+  if (redistNode->Input(0)
+      && DistTypeEqual(((DLANode*)(redistNode->Input(0)))->GetDistType(redistNode->InputConnNum(0)),*type))
+    return true;
+  return false;
+}
+
+void RemoveWastedRedist::Apply(Poss *poss, Node *node) const
+{
+  RedistNode *redistNode = (RedistNode*)node;
+  const DistType* type = &(redistNode->m_destType);
+  while(redistNode->Input(0) 
+        && (redistNode->Input(0)->GetNodeClass() == RedistNode::GetClass()))
+    {
+      redistNode = (RedistNode*)redistNode->Input(0);
+      if (DistTypeEqual(redistNode->m_destType, *type)) {
+	node->RedirectChildren(redistNode, 0);
+	node->m_poss->DeleteChildAndCleanUp(node);
+	return;
+      }
+      for(unsigned int i = 0; i < redistNode->m_children.size(); ++i) {
+	Node *tmp = redistNode->Child(i);
+	if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
+	  if (DistTypeEqual(((RedistNode*)tmp)->m_destType,*type)) {
+	    node->RedirectChildren(tmp, 0);
+	    node->m_poss->DeleteChildAndCleanUp(node);
+	    return;
+	  }
+	}
+      }
+    }
+  if (redistNode->Input(0)
+      && DistTypeEqual(((DLANode*)redistNode->Input(0))->GetDistType(redistNode->InputConnNum(0)),*type))
+    {
+      node->RedirectChildren(redistNode->Input(0), redistNode->InputConnNum(0));
+      node->m_poss->DeleteChildAndCleanUp(node);
+      return;
+    }
+  throw;
+}
+
+
+bool RemoveNOPRedistribs::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const DLANode *ddla = (DLANode*)node;
+  const Node *parent = ddla->Input(0);
+  if (!parent
+      || (DistTypeNotEqual(((DLANode*)parent)->GetDistType(node->InputConnNum(0)), ddla->GetDistType(0)))) {
+    return false;
+  }
+  return true;
+}
+
+void RemoveNOPRedistribs::Apply(Poss *poss, Node *node) const
+{
+  Node *parent = node->Input(0);
+  node->RedirectChildren(parent,node->InputConnNum(0));
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+bool CombineRedistribs::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const Node *parent = node->Input(0);
+  if (!parent)
+    return false;
+  NodeConnVecConstIter iter = parent->m_children.begin();
+  for( ; iter != parent->m_children.end(); ++iter) {
+    DLANode *output = (DLANode*)((*iter)->m_n);
+    if (output != node
+        && (output->GetNodeClass() == RedistNode::GetClass())
+        && (output->InputConnNum(0) == node->InputConnNum(0))
+        && DistTypeEqual(((RedistNode*)output)->m_destType, redist->m_destType)) 
+      {
+	return true;
+      }
+  }
+  return false;
+}
+
+void CombineRedistribs::Apply(Poss *poss, Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const Node *parent = node->Input(0);
+  if (!parent)
+    throw;
+  NodeConnVecConstIter iter = parent->m_children.begin();
+  for( ; iter != parent->m_children.end(); ++iter) {
+    DLANode *output = (DLANode*)((*iter)->m_n);
+    if (output != node
+        && (output->GetNodeClass() == RedistNode::GetClass())
+        && (output->InputConnNum(0) == node->InputConnNum(0))
+        && DistTypeEqual(((RedistNode*)output)->m_destType, redist->m_destType)) 
+      {
+	output->RedirectChildren(node,0);
+	output->m_poss->DeleteChildAndCleanUp(output);
+	return;
+      }
+  }
+  throw;
+}
 #endif
