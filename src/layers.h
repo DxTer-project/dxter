@@ -23,14 +23,18 @@
 
 #pragma once
 
-#define DOELEM 1
+#define DOELEM 0
 #define DOSQM 0
 #define DOSM 0
-#define DOTENSORS 0
+#define DOTENSORS 1
 
 #define DOBLIS DOSM||DOSQM
 #define DODM DOELEM||DOTENSORS
 #define TWOD DOBLIS||DOELEM
+
+#if DOELEM + DOSQM + DOSM + DOTENSORS != 1
+bad layer setup!
+#endif
 
 #if DOELEM
 
