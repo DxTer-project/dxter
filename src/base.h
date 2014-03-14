@@ -183,20 +183,33 @@ extern DistType STAR_VC;
 extern DistType VR_STAR; 
 extern DistType STAR_VR;
 #elif DOTENSORS
+
 typedef unsigned int Dim;
+typedef vector<Dim> DimVec;
+typedef DimVec::iterator DimVecIter;
+typedef DimVec::const_iterator DimVecConstIter;
+//typedef unordered_set<Dim> DimSet;
+typedef set<Dim> DimSet;
+typedef DimSet::iterator DimSetIter;
+typedef DimSet::const_iterator DimSetConstIter;
+
 
 class DistType
 {
  public:
   Dim m_numDims;
   unsigned int *m_dists;
- DistType() : m_numDims(99), m_dists(NULL) {}
+ DistType() 
+   : m_numDims(99), m_dists(NULL) {}
   DistType(const DistType &rhs);
   ~DistType();
   void SetToDefault(Dim numDims);
   static string DistEntryToStr(unsigned int dist);
+  static DimVec DistEntryDims(unsigned int dist);
+  DimSet UsedGridDims() const;
 };
 #endif
+
 #if DOELEM
 inline bool DistTypeNotEqual(const DistType &one, const DistType &two) 
 {
@@ -210,11 +223,11 @@ inline bool DistTypeNotEqual(const DistType &one, const DistType &two)
     return true;
   return memcmp(one.m_dists,two.m_dists,one.m_numDims*sizeof(unsigned int )) != 0;
 }
+
 inline bool DistTypeEqual(const DistType &one, const DistType &two)
 {
   return !DistTypeNotEqual(one, two);
 }
-
 #endif
 
 #if DODM
@@ -306,11 +319,10 @@ typedef vector<Cost> CostVec;
 typedef CostVec::iterator CostVecIter;
 
 #if DOTENSORS
-typedef vector<Dim> IndexDimMap;
-typedef IndexDimMap::iterator IndexDimMapIter;
-typedef IndexDimMap::const_iterator IndexDimMapConstIter;
-
-IndexDimMap MapIndicesToDims(const string &indices, const string &dimIndices);
+typedef vector<DistType*> DistTypeVec;
+typedef DistTypeVec::iterator DistTypeVecIter;
+typedef DistTypeVec::const_iterator DistTypeVecConstIter;
+DimVec MapIndicesToDims(const string &indices, const string &dimIndices);
 #endif
 
 

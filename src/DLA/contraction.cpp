@@ -1,6 +1,17 @@
 #include "contraction.h"
 
 #if DOTENSORS
+#include "tensorRedist.h"
+
+void RecursivelyFindDistributions(DimVec *dists, Dim thisDim, 
+				  const DistType &AType, const DimVec &ADims,
+				  const DistType &BType, const DimVec &BDims,
+				  DimSet &usedDims,
+				  DistTypeVec *distOptions);
+void AddUnusedDimsForDistType(DimVec *dists, Dim numDims, 
+			       DimSet &usedDims,
+			      Dim numDimsUsed,
+			       DistTypeVec *distOptions);
 
 Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type, string indices)
 :
@@ -63,7 +74,7 @@ void Contraction::Prop()
     m_cost = 0;
     cout << "improve Contraction::Prop code\n";
     cout << "reflect in DistContToLocalContStatC::RHSCostEstimate\n";
-    IndexDimMap dims = MapIndicesToDims(m_indices,GetInputName(0).m_indices);
+    DimVec dims = MapIndicesToDims(m_indices,GetInputName(0).m_indices);
     const Sizes *sizes = InputLocalLen(2,0);
     unsigned int totNumIters = sizes->NumSizes();
     for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
@@ -72,7 +83,7 @@ void Contraction::Prop()
       for (Dim dim = 1; dim < numDims; ++dim) {
 	temp *= (*InputLocalLen(2,dim))[iteration];
       }
-      IndexDimMapConstIter iter = dims.begin();
+      DimVecConstIter iter = dims.begin();
       for(; iter != dims.end(); ++iter) {
 	temp *= (*InputLocalLen(0,*iter))[iteration];
       }
@@ -103,12 +114,125 @@ bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) cons
     throw;
   const Contraction *cont = (Contraction*)node;
   Dim numContDims = cont->m_indices.length();
-  if (numContDims > (MAX_NUM_DIMS / 4))
-    throw;
+  
+  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
+  DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
 
+  NodeConn *AConn = cont->InputConn(0);
+   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
+     AConn = AConn->m_n->InputConn(0);
+  NodeConn *BConn = cont->InputConn(0);
+   if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
+     BConn = BConn->m_n->InputConn(0);
+  NodeConn *CConn = cont->InputConn(0);
+   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
+     CConn = CConn->m_n->InputConn(0);
+
+
+
+  const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
+  const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
+  const DistType &CType = ((DLANode*)(CConn->m_n))->GetDistType(CConn->m_num);
+
+  DimVec *dists = new DimVec[numContDims];
   
-  
-  sdlfkj
+  DimSet usedDims = CType.UsedGridDims();
+
+  DistTypeVec *distOptions = new DistTypeVec;
+
+  RecursivelyFindDistributions(dists, 0, AType, ADims, BType, BDims, usedDims, distOptions);
+
+  delete [] dists;
+}
+
+void RecursivelyFindDistributions(DimVec *dists, Dim thisDim, 
+				  const DistType &AType, const DimVec &ADims,
+				  const DistType &BType, const DimVec &BDims,
+				  DimSet &usedDims,
+				  DistTypeVec *distOptions)
+{
+  /*
+    dists ->  a numContDims-length c-style array of DimVecs;
+              the kth DimVec holds the dimensions for
+	      the k-th index's distribution
+    thisDim -> this call is the thisDim^{th} index's call
+    {A,B}Type -> DistType for the {A,B} tensor
+    {A,B}Dims -> Map of contraction indices to dimensions of {A,B} (i.e.,
+                 where those indices are in the tensor}
+		 So the ADim[thisDim] distribution of AType is the
+		 distribution of A for the current contraction index
+    usedDims -> List of processes grid dimensions that have been 
+                used for distribution up to this point in the recursion
+    distOptions -> Vector of DistTypes 
+  */
+  if (thisDim == ADims.size()) {
+    AddUnusedDimsForDistType(dists, ADims.size(), usedDims, usedDims.size(), distOptions);
+    return;
+  }
+  //Fist, call recursively with * for this dim
+  RecursivelyFindDistributions(dists, thisDim+1, 
+			       AType, ADims,
+			       BType, BDims,
+			       usedDims,
+			       distOptions);
+  // Now, call recursively with A's Type (if it's not already used)
+  DimVec ADists = DistType::DistEntryDims(AType.m_dists[ADims[thisDim]]);
+  DimVecIter AIter = ADists.begin();
+  DimSet usedDimsTemp = usedDims;
+  for(; AIter != ADists.end(); ++AIter) {
+    Dim dim = *AIter;
+    //check that this isn't a distribution we've already used
+    if (usedDims.find(dim) != usedDims.end())
+      break;
+    usedDimsTemp.insert(dim);
+    dists[thisDim].push_back(dim);
+    RecursivelyFindDistributions(dists, thisDim+1,
+				 AType, ADims,
+				 BType, BDims,
+				 usedDimsTemp,
+				 distOptions);
+  }
+
+  dists[thisDim].clear();
+  AIter = ADists.begin();
+  DimVec BDists = DistType::DistEntryDims(BType.m_dists[BDims[thisDim]]);
+  DimVecIter BIter = BDists.begin();
+  usedDimsTemp = usedDims;
+  bool stillMatchingA = true;
+  for(; BIter != BDists.end(); ++BIter, ++AIter) {
+    Dim dim = *BIter;
+    if (stillMatchingA) {
+      if (dim == *AIter) {
+	usedDimsTemp.insert(dim);
+	dists[thisDim].push_back(dim);
+	continue;
+      }
+      else
+	stillMatchingA = false;
+    }
+    //check that this isn't a distribution we've already used
+    if (usedDims.find(dim) != usedDims.end())
+      break;
+    usedDimsTemp.insert(dim);
+    dists[thisDim].push_back(dim);
+    RecursivelyFindDistributions(dists, thisDim+1,
+				 AType, ADims,
+				 BType, BDims,
+				 usedDimsTemp,
+				 distOptions);
+  }
+}
+
+void AddUnusedDimsForDistType(DimVec *dists, Dim numDims, 
+			       DimSet &usedDims,
+			      Dim numDimsUsed,
+			       DistTypeVec *distOptions)
+{
+  if (numDims == numDimsUsed) {
+    distOptions->push_back(new DistType(dists));
+    return;
+  }
+asdfasdflkjasdf
 }
 
 void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
@@ -120,7 +244,7 @@ Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
 {
   Cost cost = 0;
   const Contraction *cont = (Contraction*)node;
-  IndexDimMap dims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
+  DimVec dims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
   const Sizes *sizes = cont->InputLocalLen(2,0);
   unsigned int totNumIters = sizes->NumSizes();
   for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
@@ -129,7 +253,7 @@ Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
     for (Dim dim = 1; dim < numDims; ++dim) {
       temp *= (*(cont->InputLocalLen(2,dim)))[iteration];
     }
-    IndexDimMapConstIter iter = dims.begin();
+    DimVecConstIter iter = dims.begin();
     for(; iter != dims.end(); ++iter) {
       temp *= (*(cont->InputLocalLen(0,*iter)))[iteration];
     }

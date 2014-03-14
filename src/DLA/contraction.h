@@ -44,7 +44,6 @@ class Contraction : public DLAOp<3,1>
 class DistContToLocalContStatC : public SingleTrans
 {
  public:
-  char m_dists[MAX_NUM_DIMS / 4];
   virtual string GetType() const {return "Dist Cont to Local Stat C";}
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;

@@ -22,10 +22,10 @@
 
 
 #include "base.h"
+#include <cmath>
 #include "transform.h"
 #include "poss.h"
 #include <cstring>
-#include <cmath>
 #include <math.h>
 #include "costs.h"
 
@@ -84,8 +84,25 @@ DistType::~DistType()
   }
 }
 
+DimSet DistType::UsedGridDims() const
+{
+  DimSet set;
+  for (Dim dim = 0; dim < m_numDims; ++dim) {
+    DimVec vec = DistEntryDims(m_dists[dim]);
+    DimVecIter iter = vec.begin();
+    for(; iter != vec.end(); ++iter) {
+      if (set.insert(*iter).second)
+	throw;
+    }
+  }
+  return set;
+}
+
+
 void DistType::SetToDefault(Dim numDims)
 {
+  if (numDims > MAX_NUM_DIMS)
+    throw;
   m_numDims = numDims;
   m_dists = new Dim[numDims];
   for (Dim i = 0; i < numDims; ++i)
@@ -94,8 +111,27 @@ void DistType::SetToDefault(Dim numDims)
 
 string DistType::DistEntryToStr(unsigned int dist)
 {
-  if (dist == 0)
+#if (MAX_NUM_DIMS > 10)
+  this code needs to be updated since dim "12"
+    will be reversed to be 21
+#endif 
+    DimVec vec = DistEntryDims(dist);
+  if (vec.empty())
     return "*";
+  string ret = "m";
+  DimVecIter iter = vec.begin();
+  for (; iter != vec.end(); ++iter) {
+    ret += "_";
+    ret += *iter;
+  }
+  return ret;
+}
+
+DimVec DistType::DistEntryDims(unsigned int dist)
+{
+  DimVec vec;
+  if (dist == 0)
+    return vec;
   unsigned int currStage = MAX_NUM_DIMS;
   unsigned int distVal = dist-1;
   unsigned int numDists = 0;
@@ -106,16 +142,13 @@ string DistType::DistEntryToStr(unsigned int dist)
   }
   string out;
   while (distVal > 0) {
-    out += distVal % MAX_NUM_DIMS;
+    vec.insert(vec.begin(), distVal % MAX_NUM_DIMS);
     distVal = distVal / MAX_NUM_DIMS;
     --numDists;
   }
   if (numDists != 0)
     throw;
-  string reversed = "m_";
-  reversed.reserve(2+out.size());
-  reversed.append(out.rbegin(),out.rend());  
-  return reversed;
+  return vec;
 }
 
 
@@ -132,9 +165,9 @@ string DistTypeToStr(const DistType &type)
 }
 
 #if DOTENSORS
-IndexDimMap MapIndicesToDims(const string &indices, const string &dimIndices)
+DimVec MapIndicesToDims(const string &indices, const string &dimIndices)
 {
-  IndexDimMap map;
+  DimVec map;
   map.reserve(indices.length());
   string::const_iterator iter = indices.begin();
   for(; iter != indices.end(); ++iter) {
