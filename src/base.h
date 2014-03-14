@@ -206,6 +206,7 @@ class DistType
   void SetToDefault(Dim numDims);
   static string DistEntryToStr(unsigned int dist);
   static DimVec DistEntryDims(unsigned int dist);
+  static unsigned int DimsToDistEntry(DimVec dims);
   DimSet UsedGridDims() const;
 };
 #endif

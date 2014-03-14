@@ -3,15 +3,19 @@
 #if DOTENSORS
 #include "tensorRedist.h"
 
+typedef vector<unsigned int *> ContType;
+typedef ContType::iterator ContTypeIter;
+
 void RecursivelyFindDistributions(DimVec *dists, Dim thisDim, 
 				  const DistType &AType, const DimVec &ADims,
 				  const DistType &BType, const DimVec &BDims,
 				  DimSet &usedDims,
-				  DistTypeVec *distOptions);
-void AddUnusedDimsForDistType(DimVec *dists, Dim numDims, 
-			       DimSet &usedDims,
-			      Dim numDimsUsed,
-			       DistTypeVec *distOptions);
+				  ContType *distOptions);
+void AddUnusedDimsForDistType(DimVec *dists, unsigned int *distEntries,
+			      Dim numIndices,
+			       DimSet &unUsedDims,
+			       ContType *distOptions);
+
 
 Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type, string indices)
 :
@@ -138,10 +142,12 @@ bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) cons
   
   DimSet usedDims = CType.UsedGridDims();
 
-  DistTypeVec *distOptions = new DistTypeVec;
+  ContType *distOptions = new ContType;
 
   RecursivelyFindDistributions(dists, 0, AType, ADims, BType, BDims, usedDims, distOptions);
 
+  store(distOptions)
+  
   delete [] dists;
 }
 
@@ -149,7 +155,7 @@ void RecursivelyFindDistributions(DimVec *dists, Dim thisDim,
 				  const DistType &AType, const DimVec &ADims,
 				  const DistType &BType, const DimVec &BDims,
 				  DimSet &usedDims,
-				  DistTypeVec *distOptions)
+				  ContType *distOptions)
 {
   /*
     dists ->  a numContDims-length c-style array of DimVecs;
@@ -166,7 +172,28 @@ void RecursivelyFindDistributions(DimVec *dists, Dim thisDim,
     distOptions -> Vector of DistTypes 
   */
   if (thisDim == ADims.size()) {
-    AddUnusedDimsForDistType(dists, ADims.size(), usedDims, usedDims.size(), distOptions);
+    DimSet unUsedDims;
+    DimSetIter iter = usedDims.begin();
+    for(Dim dim = 0; dim < MAX_NUM_DIMS; ++dim) {
+      if (iter != usedDims.end()) {
+	if (*iter > dim) {
+	  unUsedDims.insert(dim);
+	}
+	else if (*iter == dim)
+	  ++iter;
+	else
+	  throw;
+      }
+      else
+	unUsedDims.insert(dim);
+    }
+    if (iter != usedDims.end())
+      throw;
+    unsigned int *distEntries = new unsigned int [ADims.size()];
+    for (Dim dim = 0; dim < ADims.size(); ++dim)
+      distEntries[dim] = 0;
+    AddUnusedDimsForDistType(dists, distEntries, ADims.size(), unUsedDims, distOptions);
+    delete [] distEntries;
     return;
   }
   //Fist, call recursively with * for this dim
@@ -223,21 +250,54 @@ void RecursivelyFindDistributions(DimVec *dists, Dim thisDim,
   }
 }
 
-void AddUnusedDimsForDistType(DimVec *dists, Dim numDims, 
-			       DimSet &usedDims,
-			      Dim numDimsUsed,
-			       DistTypeVec *distOptions)
+void AddUnusedDimsForDistType(DimVec *dists,  unsigned int *distEntries,
+			      Dim numIndices,
+			       DimSet &unUsedDims,
+			       ContType *distOptions)
 {
-  if (numDims == numDimsUsed) {
-    distOptions->push_back(new DistType(dists));
+  unsigned int *entries = new unsigned int[numIndices];
+  for (Dim dim = 0; dim < numIndices; ++dim) {
+    if (distEntries[dim] == 0 && !dists[dim].empty()) {
+      distEntries[dim] = DistType::DimsToDistEntry(dists[dim]);
+    }
+    entries[dim] = distEntries[dim];
+  }
+  distOptions->push_back(entries);
+  if (unUsedDims.empty()) {
     return;
   }
-asdfasdflkjasdf
+  DimSetIter iter = unUsedDims.begin();
+  for(; iter != unUsedDims.end(); ++iter) {
+    Dim unused = *iter;
+    DimSet tempUnUsedDims = unUsedDims;
+    tempUnUsedDims.erase(unused);
+    for (Dim dim = 0; dim < numIndices; ++dim) {
+      unsigned int temp = distEntries[dim];
+      distEntries[dim] = 0;
+      dists[dim].push_back(unused);
+      AddUnusedDimsForDistType(dists, distEntries,
+			       numIndices,
+			       tempUnUsedDims,
+			       distOptions);
+      dists[dim].pop_back();
+      distEntries[dim] = temp;
+    }
+  }
 }
 
 void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
 {
-  adsflkj
+  ContType *types;
+  ContTypeIter iter = types->begin();
+  for(; iter != types->end(); ++iter) {
+    unsigned int *entries = *iter;
+    
+    .....
+
+    delete [] entries;
+  }
+
+  delete types;  
 }
 
 Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
