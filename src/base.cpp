@@ -28,6 +28,10 @@
 #include <cstring>
 #include <math.h>
 #include "costs.h"
+#include <ostream>
+#include <sstream>
+
+using namespace std;
 
 #if DOELEM
 DistType STAR_STAR = D_STAR_STAR;
@@ -124,13 +128,14 @@ string DistType::DistEntryToStr(unsigned int dist)
     DimVec vec = DistEntryDims(dist);
   if (vec.empty())
     return "*";
-  string ret = "m";
+  std::stringstream ret;
+  ret << "m";
   DimVecIter iter = vec.begin();
   for (; iter != vec.end(); ++iter) {
-    ret += "_";
-    ret += *iter;
+    ret << "_";
+    ret << *iter;
   }
-  return ret;
+  return ret.str();
 }
 
 DimVec DistType::DistEntryDims(unsigned int dist)
