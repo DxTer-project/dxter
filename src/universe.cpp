@@ -223,12 +223,19 @@ void Universe::AddTrans(const ClassType &classType, Transformation *trans, int p
   }
   if (trans->IsSingle())
     AddToMaps(trans);
-  else {
-    MultiTrans *multi = (MultiTrans*)trans;
-    TransConstVecIter iter = multi->m_trans.begin();
-    for(; iter != multi->m_trans.end(); ++iter)
-      AddToMaps(const_cast<Transformation*>(*iter));
+  else if (trans->IsVarRef()) {
+    VarTrans *var = (VarTrans*)trans;
+    if (var->IsMultiRef()) {
+      MultiTrans *multi = (MultiTrans*)trans;
+      TransConstVecIter iter = multi->m_trans.begin();
+      for(; iter != multi->m_trans.end(); ++iter)
+	AddToMaps(const_cast<Transformation*>(*iter));
+    }
+    else
+      AddToMaps(trans);
   }
+  else
+    throw;
   if (phase == SIMP) {
     if (trans->IsSingle()) 
       M_transCount[NUMPHASES]++;
