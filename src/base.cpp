@@ -140,20 +140,23 @@ DimVec DistType::DistEntryDims(unsigned int dist)
     return vec;
   unsigned int currStage = MAX_NUM_DIMS;
   unsigned int distVal = dist-1;
-  unsigned int numDists = 0;
-  while (dist >= currStage) {
+  unsigned int numDists = 1;
+  while (dist > currStage) {
     distVal -= currStage;
     numDists++;
     currStage *= MAX_NUM_DIMS;
   }
   string out;
-  while (distVal > 0) {
+  while (numDists) {
     vec.insert(vec.begin(), distVal % MAX_NUM_DIMS);
     distVal = distVal / MAX_NUM_DIMS;
     --numDists;
   }
-  if (numDists != 0)
+  if (distVal != 0) {
+    cout << endl << distVal << " != 0\n";
+    cout << "dist = " << dist << endl;
     throw;
+  }
   return vec;
 }
 

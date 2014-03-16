@@ -80,6 +80,29 @@ string Coef::ElemStr() const
     }
 }
 
+string Coef::TenStr() const
+{
+  switch(m_val)
+    {
+    case (COEFVALALPHA):
+      return "alpha";
+    case (COEFVALBETA):
+      return "beta";
+    case (COEFVALZERO):
+      return "0.0";
+    case (COEFVALONE):
+      return "1.0";
+    case (COEFVALONEHALF):
+      return "0.5";
+    case (COEFVALNEGONE):
+      return "-1.0";
+    case (COEFVALNEGONEHALF):
+      return "-0.5";
+    default:
+      throw;
+    }
+}
+
 Coef Coef::operator*(const Coef &coef) const
 {
   if (m_val == COEFVALONE)

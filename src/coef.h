@@ -40,6 +40,7 @@ class Coef
  Coef(CoefVal val) : m_val(val) {}
   string BLISStr() const;
   string ElemStr() const;
+  string TenStr() const;
   Coef operator*(const Coef &coef) const;
   Coef operator/(const Coef &coef) const;
   void operator=(const Coef &coef);

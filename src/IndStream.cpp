@@ -76,6 +76,6 @@ void IndStream::operator<<(const Coef &coef)
     *(*this) << coef.ElemStr();
   }
   else {
-    throw;
+    *(*this) << coef.TenStr();
   }
 }

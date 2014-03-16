@@ -109,7 +109,16 @@ void Contraction::SanityCheck()
 
 void Contraction::PrintCode(IndStream &out)
 {
-  throw;
+  out.Indent();
+  *out << "Contraction(";
+  out << m_alpha;
+  *out << ", " << GetInputName(0).str()
+       << ", " << GetInputName(1).str()
+       << ", ";
+  out << m_beta;
+  *out << ", " << GetInputName(2).str()
+       << ", indices: " << m_indices
+       << ");\n";
 }
 
 Phase Contraction::MaxPhase() const
