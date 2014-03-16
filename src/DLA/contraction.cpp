@@ -16,6 +16,11 @@ void AddUnusedDimsForDistType(DimVec *dists, unsigned int *distEntries,
 			       DimSet &unUsedDims,
 			       ContType *distOptions);
 
+void MatchDistsAndFillIn(string indices, 
+			 const DistType &matchingDists, string matchingIndices,
+			 unsigned int *fillInDists, const DimVec &fillInDims,
+			 DistType &final);
+
 
 Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type, string indices)
 :
@@ -123,14 +128,14 @@ int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void 
   DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
 
   NodeConn *AConn = cont->InputConn(0);
-   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
-     AConn = AConn->m_n->InputConn(0);
+  if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
+    AConn = AConn->m_n->InputConn(0);
   NodeConn *BConn = cont->InputConn(0);
-   if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
-     BConn = BConn->m_n->InputConn(0);
+  if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
+    BConn = BConn->m_n->InputConn(0);
   NodeConn *CConn = cont->InputConn(0);
-   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
-     CConn = CConn->m_n->InputConn(0);
+  if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
+    CConn = CConn->m_n->InputConn(0);
 
 
 
@@ -290,14 +295,89 @@ void AddUnusedDimsForDistType(DimVec *dists,  unsigned int *distEntries,
 void DistContToLocalContStatC::Apply(Poss *poss, int num, Node *node, void **cache) const
 {
   ContType *types = (ContType*)(*cache);
-  ContTypeIter iter = types->begin();
-  for(; iter != types->end(); ++iter) {
-    unsigned int *entries = *iter;
-    
-    .....
+  unsigned int *entries = (*types)[num];
 
-    delete [] entries;
+  Contraction *cont = (Contraction*)node;
+  
+  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
+  DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
+
+  NodeConn *CConn = cont->InputConn(0);
+  if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
+    CConn = CConn->m_n->InputConn(0);
+
+  const DistType &CType = ((DLANode*)(CConn->m_n))->GetDistType(CConn->m_num);
+
+  DistType AType;
+  MatchDistsAndFillIn(cont->GetInputName(0).m_indices,
+		      CType, ((DLANode*)(CConn->m_n))->GetName(CConn->m_num).m_indices,
+		      entries, ADims,
+		      AType);
+  
+  DistType BType;
+  MatchDistsAndFillIn(cont->GetInputName(1).m_indices,
+		      CType, ((DLANode*)(CConn->m_n))->GetName(CConn->m_num).m_indices,
+		      entries, BDims,
+		      BType);
+
+  RedistNode *node1 = new RedistNode(AType);
+  RedistNode *node2 = new RedistNode(BType);
+  RedistNode *node3 = new RedistNode(CType);
+  Contraction *LCont = new Contraction(SMLAYER,  cont->m_alpha, cont->m_beta, cont->m_type, cont->m_indices);
+  node1->AddInput(node->Input(0),node->InputConnNum(0));
+  node2->AddInput(node->Input(1),node->InputConnNum(1));
+  node3->AddInput(node->Input(2),node->InputConnNum(2));
+  LCont->AddInput(node1,0);
+  LCont->AddInput(node2,0);
+  LCont->AddInput(node3,0);
+  
+  throw; // figure out if we need a summation
+  
+  
+  RedistNode *node4 = new RedistNode(cont->InputDistType(2));
+  node4->AddInput(LCont, 0);
+
+  poss->AddNode(node1);
+  poss->AddNode(node2);
+  poss->AddNode(node3);
+  poss->AddNode(LCont);
+  poss->AddNode(node4);
+
+  node->RedirectChildren(node4,0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+void MatchDistsAndFillIn(string indices, 
+			 const DistType &matchingDists, string matchingIndices,
+			 unsigned int *fillInDists, const DimVec &fillInDims,
+			 DistType &final)
+{
+  unsigned int tot = 0;
+  final.PrepForNumDims(indices.length());
+  string::iterator iter = indices.begin();
+  for(; iter != indices.end(); ++iter) {
+    char index = *iter;
+    size_t loc = matchingIndices.find(index);
+    final.m_dists[loc] = matchingDists.m_dists[loc];
+    ++tot;
   }
+  tot += fillInDims.size();
+  if (tot != indices.length())
+    throw;
+  DimVecConstIter iter2 = fillInDims.begin();
+  for(; iter2 != fillInDims.end(); ++iter2) {
+    Dim dim = *iter2;
+    final.m_dists[dim] = fillInDists[dim];
+  }
+}
+
+void DistContToLocalContStatC::CleanCache(void **cache) const
+{
+  ContType *types = (ContType*)(*cache);
+  ContTypeIter iter = types->begin();
+  for(; iter != types->end(); ++iter)
+    delete [] *iter;
+  delete types;
 }
 
 /*

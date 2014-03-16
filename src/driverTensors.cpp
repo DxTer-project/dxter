@@ -71,7 +71,7 @@ Size bigSize = 15;
 PSet* Cont1Example();
 void AddTrans()
 {
-
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC, DPTENSORPHASE);
 }
 
 void AddSimplifiers()

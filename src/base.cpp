@@ -75,6 +75,14 @@ DistType::DistType(const DistType &rhs)
     m_dists = NULL;
 }
 
+void DistType::PrepForNumDims(Dim numDims)
+{
+  if (m_dists)
+    delete [] m_dists;
+  m_numDims = numDims;
+  m_dists = new Dim[numDims];
+}
+
 DistType::~DistType()
 {
   if (m_dists) {

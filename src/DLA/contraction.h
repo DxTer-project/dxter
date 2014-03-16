@@ -48,7 +48,7 @@ class DistContToLocalContStatC : public VarTrans
   virtual int CanApply(const Poss *poss, const Node *node, void **cache) const;
   virtual void Apply(Poss *poss, int num, Node *node, void **cache) const;
   virtual bool IsRef() const {return true;}
-  virtual void CleanCache(void **cache) const = 0;
+  virtual void CleanCache(void **cache) const;
   //  virtual Cost RHSCostEstimate(const Node *node) const;
 };
 #endif

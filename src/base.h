@@ -209,6 +209,7 @@ class DistType
   static DimVec DistEntryDims(unsigned int dist);
   static unsigned int DimsToDistEntry(DimVec dims);
   DimSet UsedGridDims() const;
+  void PrepForNumDims(Dim numDims);
 };
 #endif
 

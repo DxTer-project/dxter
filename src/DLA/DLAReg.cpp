@@ -31,7 +31,7 @@
 #if DOTENSORS
 void RegAllTensorNodes()
 {
-  cout << "no registration!\n";
+  Reg(Contraction);
 }
 #elif DOBLIS||DOELEM
 void RegAllDLANodes()

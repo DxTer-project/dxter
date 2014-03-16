@@ -37,6 +37,7 @@
 #include "twoSidedTrxm.h"
 #include "trxm.h"
 #include "lu.h"
+#include "contraction.h"
 
 void RegAllDLANodes();
 void RegAllTensorNodes();
