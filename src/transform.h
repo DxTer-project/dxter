@@ -89,6 +89,6 @@ class MultiTrans : public VarTrans
   virtual void CleanCache(void **cache) const;
   virtual int CanApply(const Poss *poss, const Node *node, void **cache) const;
   virtual void Apply(Poss *poss, int num, Node *node, void **cache) const;
-  virtual const Transformation* GetTrans(void **cache, int num);
+  virtual const Transformation* GetTrans(void **cache, int num) const;
 };
 

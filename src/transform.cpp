@@ -120,3 +120,12 @@ void MultiTrans::Apply(Poss *poss, int num, Node *node, void **cache) const
     throw;
   ((SingleTrans*)trans)->Apply(poss, node);
 }
+
+
+const Transformation* MultiTrans::GetTrans(void **cache, int num) const
+{
+  TransConstVec *vec = (TransConstVec*)(*cache);
+  if (num >= vec->size())
+    throw;
+  return (*vec)[num];
+}

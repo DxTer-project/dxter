@@ -302,9 +302,9 @@ void Poss::SanityCheck()
 void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging)
 {
   /**********
-   Any changes to this function should be reflected
-   in PSet::InlinePoss
-   **********/
+	     Any changes to this function should be reflected
+	     in PSet::InlinePoss
+  **********/
   Poss *poss = (Poss*)orig;
   m_parent = poss->m_num;
   //If this changes, update PSet::InlinePoss
@@ -491,10 +491,10 @@ void Poss::DeleteChildAndCleanUp(Node *output,
     if ((input->m_poss != output->m_poss)
         && !input->IsPossTunnel()
         && !output->IsPossTunnel())
-    {
-      throw;
-      cout << "input->m_poss != output->m_poss\n";
-    }
+      {
+	throw;
+	cout << "input->m_poss != output->m_poss\n";
+      }
     input->RemoveChild(output,(*iter)->m_num);
     if(input->m_children.empty()) {
       input->m_poss->DeleteChildAndCleanUp(input);
@@ -750,10 +750,10 @@ void Poss::ExpandTunnels()
 bool Poss::MergePosses(PossVec &newPosses,const TransMap &simplifiers, CullFunction cullFunc)
 {
   /*
-   First, recurse through my PSet's then check if
-   any of them can be merged if the recursion doesn't change
-   anything
-   */
+    First, recurse through my PSet's then check if
+    any of them can be merged if the recursion doesn't change
+    anything
+  */
   InvalidateHash();
   bool didMerge = false;
   PSetVecIter iter = m_sets.begin();
@@ -1080,56 +1080,56 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
         NodeConnVecIter newSetOutputInputIter = newSetOutput->m_inputs.begin();
         //	jth input to the children should be wired to outputTunnelOutputNum input to input
         for(; newSetInputChildIter != newSetInput->m_children.end()
-            && newSetOutputInputIter != newSetOutput->m_inputs.end();
+	      && newSetOutputInputIter != newSetOutput->m_inputs.end();
             ++newSetInputChildIter, ++newSetOutputInputIter)
-        {
-          Node *possInput = (*newSetInputChildIter)->m_n;
-          Node *possOutput = (*newSetOutputInputIter)->m_n;
-          Node *inputToPossOutput = possOutput->m_inputs[outputTunnelOutputNum]->m_n;
-          unsigned int inputToPossOutputNum = possOutput->m_inputs[outputTunnelOutputNum]->m_num;
-          if (possInput->m_poss != possOutput->m_poss) {
-            cout << "(possInput->m_poss != possOutput->m_poss)\n";
-            cout << possInput->m_poss << " != " << possOutput->m_poss << endl;
-            throw;
-          }
-          for(unsigned int j = 0; j < possInput->m_children.size(); ++j) {
-            if (possInput->m_children[j]->m_num == inputInputNum) {
-              Node *userOfInput = possInput->m_children[j]->m_n;
-              if (userOfInput->m_poss != inputToPossOutput->m_poss) {
-                cout << "userOfInput->m_poss != inputToPossOutput->m_poss\n";
-                throw;
-              }
-              userOfInput->ChangeInput1Way(possInput, inputInputNum, inputToPossOutput, inputToPossOutputNum);
-              possInput->m_children.erase(possInput->m_children.begin()+j);
-              --j;
-            }
-            else if (possInput->m_children[j]->m_num > inputInputNum) {
-              set.insert(possInput->m_children[j]->m_n);
-              --(possInput->m_children[j]->m_num);
-            }
-          }
-          NodeSetIter setIter = set.begin();
-          for(; setIter != set.end(); ++setIter) {
-            NodeConnVecIter inputsIter = (*setIter)->m_inputs.begin();
-            for(; inputsIter != (*setIter)->m_inputs.end(); ++inputsIter) {
-              if ((*inputsIter)->m_n == possInput) {
-                if ((*inputsIter)->m_num == inputInputNum) {
-                  cout << "(*inputsIter)->m_num == inputInputNum\n";
-                  throw;
-                }
-                else if ((*inputsIter)->m_num > inputInputNum) {
-                  --((*inputsIter)->m_num);
-                }
-              }
-            }
-          }
-        }
+	  {
+	    Node *possInput = (*newSetInputChildIter)->m_n;
+	    Node *possOutput = (*newSetOutputInputIter)->m_n;
+	    Node *inputToPossOutput = possOutput->m_inputs[outputTunnelOutputNum]->m_n;
+	    unsigned int inputToPossOutputNum = possOutput->m_inputs[outputTunnelOutputNum]->m_num;
+	    if (possInput->m_poss != possOutput->m_poss) {
+	      cout << "(possInput->m_poss != possOutput->m_poss)\n";
+	      cout << possInput->m_poss << " != " << possOutput->m_poss << endl;
+	      throw;
+	    }
+	    for(unsigned int j = 0; j < possInput->m_children.size(); ++j) {
+	      if (possInput->m_children[j]->m_num == inputInputNum) {
+		Node *userOfInput = possInput->m_children[j]->m_n;
+		if (userOfInput->m_poss != inputToPossOutput->m_poss) {
+		  cout << "userOfInput->m_poss != inputToPossOutput->m_poss\n";
+		  throw;
+		}
+		userOfInput->ChangeInput1Way(possInput, inputInputNum, inputToPossOutput, inputToPossOutputNum);
+		possInput->m_children.erase(possInput->m_children.begin()+j);
+		--j;
+	      }
+	      else if (possInput->m_children[j]->m_num > inputInputNum) {
+		set.insert(possInput->m_children[j]->m_n);
+		--(possInput->m_children[j]->m_num);
+	      }
+	    }
+	    NodeSetIter setIter = set.begin();
+	    for(; setIter != set.end(); ++setIter) {
+	      NodeConnVecIter inputsIter = (*setIter)->m_inputs.begin();
+	      for(; inputsIter != (*setIter)->m_inputs.end(); ++inputsIter) {
+		if ((*inputsIter)->m_n == possInput) {
+		  if ((*inputsIter)->m_num == inputInputNum) {
+		    cout << "(*inputsIter)->m_num == inputInputNum\n";
+		    throw;
+		  }
+		  else if ((*inputsIter)->m_num > inputInputNum) {
+		    --((*inputsIter)->m_num);
+		  }
+		}
+	      }
+	    }
+	  }
         if (newSetInputChildIter != newSetInput->m_children.end()
             || newSetOutputInputIter != newSetOutput->m_inputs.end())
-        {
-          cout << "unbalanced posses\n";
-          throw;
-        }
+	  {
+	    cout << "unbalanced posses\n";
+	    throw;
+	  }
         newSetInput->m_inputs.erase(newSetInput->m_inputs.begin()+i);
         --i;
         --inputInputNum;
@@ -1250,14 +1250,14 @@ void AddPossTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &poss
       else 
 #endif
 	{
-        PossTunnel *tun = new PossTunnel(POSSTUNIN);
-        possNodes.insert(tun);
-        conn->m_n->RemoveChild(node, conn->m_num);
-        tun->AddInput(conn->m_n, conn->m_num);
-        conn->SetNode(tun);
-        conn->m_num=0;
-        tun->AddChild(node, 0);
-      }
+	  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+	  possNodes.insert(tun);
+	  conn->m_n->RemoveChild(node, conn->m_num);
+	  tun->AddInput(conn->m_n, conn->m_num);
+	  conn->SetNode(tun);
+	  conn->m_num=0;
+	  tun->AddChild(node, 0);
+	}
     }
   }
 #if DOELEM
@@ -1492,7 +1492,7 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
 	  if (isCritSect)
 	    throw;
 #if 0
-	    tun = new CritSectTunnel(POSSTUNOUT);
+	  tun = new CritSectTunnel(POSSTUNOUT);
 #endif
 	  else
 	    tun = new PossTunnel(POSSTUNOUT);
@@ -1518,7 +1518,7 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
 	  if (isCritSect)
 	    throw;
 #if 0
-	    tun = new CritSectTunnel(POSSTUNIN);
+	  tun = new CritSectTunnel(POSSTUNIN);
 #endif
 	  else
 	    tun = new PossTunnel(POSSTUNIN);
@@ -1532,9 +1532,9 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
             if (conn->m_num == connNum && conn->m_n != tun) {
               if (set.find(conn->m_n) != set.end()
                   && !conn->m_n->IsPossTunnel(POSSTUNIN))
-              {
-                conn->m_n->ChangeInput2Way(input, connNum, tun, 0);
-              }
+		{
+		  conn->m_n->ChangeInput2Way(input, connNum, tun, 0);
+		}
             }
           }
         }
@@ -1542,12 +1542,12 @@ PSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
     }
   }
   /*
-   iter = set.begin();
-   for(; iter != set.end(); ++iter) {
-   cout << "node " << *iter << " " << (*iter)->GetNodeClass() << endl;
-   cout << "  first owned by " << (*iter)->m_poss << endl;
-   }
-   */
+    iter = set.begin();
+    for(; iter != set.end(); ++iter) {
+    cout << "node " << *iter << " " << (*iter)->GetNodeClass() << endl;
+    cout << "  first owned by " << (*iter)->m_poss << endl;
+    }
+  */
   //   cout << outputTuns.size() << " outputs\n";
   //   NodeVecIter iter3 = outputTuns.begin();
   //   for(; iter3 != outputTuns.end(); ++iter3) {
@@ -1604,197 +1604,197 @@ void Poss::FormSets(unsigned int phase)
   }
 #endif //DOSOPHASE
   /*
-   else if (phase == ROPHASE || phase == SR1PHASE) {
+    else if (phase == ROPHASE || phase == SR1PHASE) {
    
-   //       Be careful to prevent the following
-   //       B = A
-   //       C = B
-   //       D = Op1 (C)
-   //       E = F
-   //       F = Op2 (B, E)
+    //       Be careful to prevent the following
+    //       B = A
+    //       C = B
+    //       D = Op1 (C)
+    //       E = F
+    //       F = Op2 (B, E)
    
-   //       Where E=F is in a different poss then everything else, forming a loop
-   //       because of F = Op2(...)
-   
-   
-   #ifdef CHECKFORLOOPS
-   NodeVec vec;
-   for(unsigned int i = 0; i < m_possNodes.size(); ++i) {
-   if (FoundLoop(m_possNodes[i],vec)) {
-   cout << "Found loop 1\n";
-   cout.flush();
-   throw;
-   }
-   if (!vec.empty()) {
-   cout << "vec not empty\n";
-   throw;
-   }
-   }
-   #endif
-   
-   InvalidateHash();
+    //       Where E=F is in a different poss then everything else, forming a loop
+    //       because of F = Op2(...)
    
    
-   //It's important to recurse first; otherwise,
-   // we'd form a bunch of sets of just redist nodes,
-   // recurse into it and form a set of those redist nodes
-   // ad infinitum
+    #ifdef CHECKFORLOOPS
+    NodeVec vec;
+    for(unsigned int i = 0; i < m_possNodes.size(); ++i) {
+    if (FoundLoop(m_possNodes[i],vec)) {
+    cout << "Found loop 1\n";
+    cout.flush();
+    throw;
+    }
+    if (!vec.empty()) {
+    cout << "vec not empty\n";
+    throw;
+    }
+    }
+    #endif
    
-   int i;
-   for(i=0; i < (int)(m_sets.size()); ++i) {
-   (m_sets[i])->FormSets(phase);
-   }
-   
-   if (m_pset->m_isTopLevel)
-   return;
-   
-   for(i=0; i < (int)(m_sets.size()); ++i) {
-   if (m_sets[i]->IsLoop()) {
-   m_sets[i]->FormSetAround();
-   i = -1;
-   }
-   }
+    InvalidateHash();
    
    
-   for(i=0; i < (int)(m_possNodes.size()); ++i) {
-   Node *node = m_possNodes[i];
-   if (!node->IsPossTunnel()) {
-   //Found a node that isn't a poss tunnel
-   //Let's form a new set!
-   NodeSet possNodes;
-   NodeVec outputTuns;
-   AddPossTunnels(node, NULL, outputTuns, possNodes);
+    //It's important to recurse first; otherwise,
+    // we'd form a bunch of sets of just redist nodes,
+    // recurse into it and form a set of those redist nodes
+    // ad infinitum
    
-   #if DODPPHASE
-   if (phase == ROPHASE) {
-   bool newNode = true;
-   do {
-   newNode = false;
-   NodeSetIter nodeIter = possNodes.begin();
-   for(; nodeIter != possNodes.end(); ++nodeIter) {
-   Node *currNode = *nodeIter;
-   if (!currNode->IsPossTunnel()) {
-   bool ret = false;
-   for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
-   ret |= AddNodesDown(currNode, j, outputTuns, possNodes);
-   }
-   if (ret) {
-   nodeIter = possNodes.begin();
-   newNode = true;
-   }
-   }
-   }
-   } while (newNode);
-   }
-   #else
-   throw;
-   #endif
+    int i;
+    for(i=0; i < (int)(m_sets.size()); ++i) {
+    (m_sets[i])->FormSets(phase);
+    }
    
-   NodeSetIter nodeIter = possNodes.begin();
-   for(; nodeIter != possNodes.end(); ++nodeIter) {
-   Node *currNode = *nodeIter;
-   if (!currNode->IsPossTunnel()) {
-   for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
-   AddTunnelDown(currNode, j, outputTuns, possNodes);
-   }
-   }
-   }
+    if (m_pset->m_isTopLevel)
+    return;
    
-   Poss *newPoss = new Poss(outputTuns, true);
-   PSet *set = new PSet(newPoss);
-   
-   AddPSet(set, true);
-   
-   for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
-   Node *tun = set->m_inTuns[j];
-   if (!AddElemToVec(m_possNodes, tun, false))
-   throw;
-   tun->SetPoss(this);
-   }
-   
-   for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
-   Node *tun = set->m_outTuns[j];
-   if (!AddElemToVec(m_possNodes, tun, false))
-   throw;
-   tun->SetPoss(this);
-   }
-   
-   i = -1;
-   }
-   }
-   
-   for(i=0; i < (int)(m_possNodes.size()); ++i) {
-   Node *node = m_possNodes[i];
-   if (!node->IsPossTunnel()) {
-   //Found a node that isn't part of a poss set
-   //Let's form a new set!
-   
-   RemoveFromGraphNodes(node);
-   node->m_poss = NULL;
-   
-   NodeVec outputTuns;
-   
-   NodeConnVecIter iter = node->m_inputs.begin();
-   for(; iter != node->m_inputs.end(); ++iter) {
-   NodeConn *conn = *iter;
-   PossTunnel *tun = new PossTunnel(POSSTUNIN);
-   conn->m_n->RemoveChild(node, conn->m_num);
-   tun->AddInput(conn->m_n, conn->m_num);
-   conn->SetNode(tun);
-   conn->m_num=0;
-   tun->AddChild(node, 0);
-   }
-   
-   iter = node->m_children.begin();
-   for(; iter != node->m_children.end(); ++iter) {
-   NodeConn *conn = *iter;
-   Node *child = conn->m_n;
-   PossTunnel *tun = new PossTunnel(POSSTUNOUT);
-   outputTuns.push_back(tun);
-   child->ChangeInput1Way(node, conn->m_num, tun, 0);
-   conn->SetNode(tun);
-   tun->m_inputs.push_back(new NodeConn(node,conn->m_num));
-   }
+    for(i=0; i < (int)(m_sets.size()); ++i) {
+    if (m_sets[i]->IsLoop()) {
+    m_sets[i]->FormSetAround();
+    i = -1;
+    }
+    }
    
    
-   Poss *newPoss = new Poss(outputTuns, true);
-   PSet *set = new PSet(newPoss);
+    for(i=0; i < (int)(m_possNodes.size()); ++i) {
+    Node *node = m_possNodes[i];
+    if (!node->IsPossTunnel()) {
+    //Found a node that isn't a poss tunnel
+    //Let's form a new set!
+    NodeSet possNodes;
+    NodeVec outputTuns;
+    AddPossTunnels(node, NULL, outputTuns, possNodes);
    
-   AddPSet(set, true);
+    #if DODPPHASE
+    if (phase == ROPHASE) {
+    bool newNode = true;
+    do {
+    newNode = false;
+    NodeSetIter nodeIter = possNodes.begin();
+    for(; nodeIter != possNodes.end(); ++nodeIter) {
+    Node *currNode = *nodeIter;
+    if (!currNode->IsPossTunnel()) {
+    bool ret = false;
+    for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
+    ret |= AddNodesDown(currNode, j, outputTuns, possNodes);
+    }
+    if (ret) {
+    nodeIter = possNodes.begin();
+    newNode = true;
+    }
+    }
+    }
+    } while (newNode);
+    }
+    #else
+    throw;
+    #endif
    
-   for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
-   Node *tun = set->m_inTuns[j];
-   if (!AddElemToVec(m_possNodes, tun, false))
-   throw;
-   tun->SetPoss(this);
-   }
+    NodeSetIter nodeIter = possNodes.begin();
+    for(; nodeIter != possNodes.end(); ++nodeIter) {
+    Node *currNode = *nodeIter;
+    if (!currNode->IsPossTunnel()) {
+    for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
+    AddTunnelDown(currNode, j, outputTuns, possNodes);
+    }
+    }
+    }
    
-   for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
-   Node *tun = set->m_outTuns[j];
-   if (!AddElemToVec(m_possNodes, tun, false))
-   throw;
-   tun->SetPoss(this);
-   }
+    Poss *newPoss = new Poss(outputTuns, true);
+    PSet *set = new PSet(newPoss);
    
-   i = -1;
-   }
-   }
+    AddPSet(set, true);
    
-   #ifdef CHECKFORLOOPS
-   for(unsigned int k = 0; k < m_outTuns.size(); ++k) {
-   if (FoundLoop(m_outTuns[k],vec)) {
-   cout << "Found loop 3\n";
-   cout.flush();
-   throw;
-   }
-   if (!vec.empty()) {
-   cout << "vec not empty\n";
-   throw;
-   }
-   }
-   #endif
-   }
-   */
+    for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
+    Node *tun = set->m_inTuns[j];
+    if (!AddElemToVec(m_possNodes, tun, false))
+    throw;
+    tun->SetPoss(this);
+    }
+   
+    for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
+    Node *tun = set->m_outTuns[j];
+    if (!AddElemToVec(m_possNodes, tun, false))
+    throw;
+    tun->SetPoss(this);
+    }
+   
+    i = -1;
+    }
+    }
+   
+    for(i=0; i < (int)(m_possNodes.size()); ++i) {
+    Node *node = m_possNodes[i];
+    if (!node->IsPossTunnel()) {
+    //Found a node that isn't part of a poss set
+    //Let's form a new set!
+   
+    RemoveFromGraphNodes(node);
+    node->m_poss = NULL;
+   
+    NodeVec outputTuns;
+   
+    NodeConnVecIter iter = node->m_inputs.begin();
+    for(; iter != node->m_inputs.end(); ++iter) {
+    NodeConn *conn = *iter;
+    PossTunnel *tun = new PossTunnel(POSSTUNIN);
+    conn->m_n->RemoveChild(node, conn->m_num);
+    tun->AddInput(conn->m_n, conn->m_num);
+    conn->SetNode(tun);
+    conn->m_num=0;
+    tun->AddChild(node, 0);
+    }
+   
+    iter = node->m_children.begin();
+    for(; iter != node->m_children.end(); ++iter) {
+    NodeConn *conn = *iter;
+    Node *child = conn->m_n;
+    PossTunnel *tun = new PossTunnel(POSSTUNOUT);
+    outputTuns.push_back(tun);
+    child->ChangeInput1Way(node, conn->m_num, tun, 0);
+    conn->SetNode(tun);
+    tun->m_inputs.push_back(new NodeConn(node,conn->m_num));
+    }
+   
+   
+    Poss *newPoss = new Poss(outputTuns, true);
+    PSet *set = new PSet(newPoss);
+   
+    AddPSet(set, true);
+   
+    for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
+    Node *tun = set->m_inTuns[j];
+    if (!AddElemToVec(m_possNodes, tun, false))
+    throw;
+    tun->SetPoss(this);
+    }
+   
+    for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
+    Node *tun = set->m_outTuns[j];
+    if (!AddElemToVec(m_possNodes, tun, false))
+    throw;
+    tun->SetPoss(this);
+    }
+   
+    i = -1;
+    }
+    }
+   
+    #ifdef CHECKFORLOOPS
+    for(unsigned int k = 0; k < m_outTuns.size(); ++k) {
+    if (FoundLoop(m_outTuns[k],vec)) {
+    cout << "Found loop 3\n";
+    cout.flush();
+    throw;
+    }
+    if (!vec.empty()) {
+    cout << "vec not empty\n";
+    throw;
+    }
+    }
+    #endif
+    }
+  */
 }
 
 void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc)
@@ -2033,59 +2033,59 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
       ClassType leftOutputType = leftSetOutput->GetNodeClass();
       if ((rightInputType == Split::GetClass() && leftOutputType != Combine::GetClass())
           || (leftOutputType == Combine::GetClass() && rightInputType != Split::GetClass()))
-      {
-        LoopTunnel *inTun = (LoopTunnel*)leftSetOutput->GetMatchingInTun();
-        rightSetInput->ChangeInput1Way(leftSetOutput,0,inTun->Input(0),inTun->InputConnNum(0));
-        leftSetOutput->RemoveChild(rightSetInput,0);
-        leftSetOutput->CopyTunnelInfo(rightSetInput);
-        leftSetOutput->GetMatchingInTun()->CopyTunnelInfo(rightSetInput);
-      }
+	{
+	  LoopTunnel *inTun = (LoopTunnel*)leftSetOutput->GetMatchingInTun();
+	  rightSetInput->ChangeInput1Way(leftSetOutput,0,inTun->Input(0),inTun->InputConnNum(0));
+	  leftSetOutput->RemoveChild(rightSetInput,0);
+	  leftSetOutput->CopyTunnelInfo(rightSetInput);
+	  leftSetOutput->GetMatchingInTun()->CopyTunnelInfo(rightSetInput);
+	}
       else {
         NodeConnVecIter rightSetInputChildIter = rightSetInput->m_children.begin();
         NodeConnVecIter leftSetOutputInputIter = leftSetOutput->m_inputs.begin();
         //	jth input to the children should be wired to outputTunnelOutputNum input to input
         for(; rightSetInputChildIter != rightSetInput->m_children.end()
-            && leftSetOutputInputIter != leftSetOutput->m_inputs.end();
+	      && leftSetOutputInputIter != leftSetOutput->m_inputs.end();
             ++rightSetInputChildIter, ++leftSetOutputInputIter)
-        {
-          Node *rightPossInput = (*rightSetInputChildIter)->m_n;
-          Node *leftPossOutput = (*leftSetOutputInputIter)->m_n;
-          Poss *poss = (Poss*)rightPossInput->m_poss;
-          if (rightPossInput->m_poss != leftPossOutput->m_poss) {
-            cout << "(rightPossInput->m_poss != leftPossOutput->m_poss)\n";
-            cout << rightPossInput->m_poss << " != " << leftPossOutput->m_poss << endl;
-            throw;
-          }
-          while (rightPossInput->m_children.size()) {
-            NodeConn *childConn = rightPossInput->m_children[0];
-            Node *inputToPossOutput = leftPossOutput->Input(childConn->m_num);
-            unsigned int inputToPossOutputNum = leftPossOutput->InputConnNum(childConn->m_num);
-            Node *userOfInput = childConn->m_n;
-            if (userOfInput->m_poss != inputToPossOutput->m_poss) {
-              cout << "userOfInput->m_poss != inputToPossOutput->m_poss\n";
-              throw;
-            }
-            userOfInput->ChangeInput1Way(rightPossInput, childConn->m_num, inputToPossOutput, inputToPossOutputNum);
-            delete childConn;
-            rightPossInput->m_children.erase(rightPossInput->m_children.begin());
-          }
-          delete leftPossOutput->m_children[0];
-          leftPossOutput->m_children.erase(leftPossOutput->m_children.begin());
-          poss->DeleteChildAndCleanUp(leftPossOutput, false, true);
-          if (leftPossOutput->m_children.size() || leftPossOutput->m_inputs.size())
-            throw;
+	  {
+	    Node *rightPossInput = (*rightSetInputChildIter)->m_n;
+	    Node *leftPossOutput = (*leftSetOutputInputIter)->m_n;
+	    Poss *poss = (Poss*)rightPossInput->m_poss;
+	    if (rightPossInput->m_poss != leftPossOutput->m_poss) {
+	      cout << "(rightPossInput->m_poss != leftPossOutput->m_poss)\n";
+	      cout << rightPossInput->m_poss << " != " << leftPossOutput->m_poss << endl;
+	      throw;
+	    }
+	    while (rightPossInput->m_children.size()) {
+	      NodeConn *childConn = rightPossInput->m_children[0];
+	      Node *inputToPossOutput = leftPossOutput->Input(childConn->m_num);
+	      unsigned int inputToPossOutputNum = leftPossOutput->InputConnNum(childConn->m_num);
+	      Node *userOfInput = childConn->m_n;
+	      if (userOfInput->m_poss != inputToPossOutput->m_poss) {
+		cout << "userOfInput->m_poss != inputToPossOutput->m_poss\n";
+		throw;
+	      }
+	      userOfInput->ChangeInput1Way(rightPossInput, childConn->m_num, inputToPossOutput, inputToPossOutputNum);
+	      delete childConn;
+	      rightPossInput->m_children.erase(rightPossInput->m_children.begin());
+	    }
+	    delete leftPossOutput->m_children[0];
+	    leftPossOutput->m_children.erase(leftPossOutput->m_children.begin());
+	    poss->DeleteChildAndCleanUp(leftPossOutput, false, true);
+	    if (leftPossOutput->m_children.size() || leftPossOutput->m_inputs.size())
+	      throw;
           
-          if (rightPossInput->m_children.size())
-            throw;
-          poss->DeleteNode(rightPossInput);
-        }
+	    if (rightPossInput->m_children.size())
+	      throw;
+	    poss->DeleteNode(rightPossInput);
+	  }
         
         if (rightSetInputChildIter != rightSetInput->m_children.end()
             || leftSetOutputInputIter != leftSetOutput->m_inputs.end())
-        {
-          cout << "unbalanced posses\n";
-          throw;
-        }
+	  {
+	    cout << "unbalanced posses\n";
+	    throw;
+	  }
         leftSetOutput->RemoveChild(rightSetInput,0);
         if (leftSetOutput->m_children.size())
           leftSetOutput->RedirectChildren(newOutputToUse);
@@ -2166,13 +2166,13 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 #if TWOD
             if (split1->m_dir == split2->m_dir)
 #else
-            if (split1->m_partDim == split2->m_partDim)
+	      if (split1->m_partDim == split2->m_partDim)
 #endif
-              throw;
-            else {
-              split1->SetAddDir();
-              split2->SetAddDir();
-            }
+		throw;
+	      else {
+		split1->SetAddDir();
+		split2->SetAddDir();
+	      }
           }
         }
       }
@@ -2234,16 +2234,16 @@ void Poss::Print(IndStream &out, unsigned int &graphNum)
   for(; nodeIter != m_inTuns.end(); ++nodeIter) {
     (*nodeIter)->Print(out, graphNum);
     /*
-    if ((*nodeIter)->GetNodeClass() == Split::GetClass()) {
+      if ((*nodeIter)->GetNodeClass() == Split::GetClass()) {
       const Sizes *m = ((DLANode*)(*nodeIter))->GetM(1);
       const Sizes *n = ((DLANode*)(*nodeIter))->GetN(1);
       m->Print();
       n->Print();
-    }
-     */
+      }
+    */
     if (!(*nodeIter)->HasPrinted()) {
       cout << "tunnel input " << (*nodeIter)->GetType()
-      << "hasn't printed even though he should have\n";
+	   << "hasn't printed even though he should have\n";
     }
   }
   out.Indent();
@@ -2259,10 +2259,10 @@ void Poss::Print(IndStream &out, unsigned int &graphNum)
       if (!node->HasPrinted()
           && !node->IsPossTunnel(POSSTUNOUT)
           && node->CanPrintCode())
-      {
-        (*nodeIter)->Print(out, graphNum);
-        hasPrinted |= (*nodeIter)->HasPrinted();
-      }
+	{
+	  (*nodeIter)->Print(out, graphNum);
+	  hasPrinted |= (*nodeIter)->HasPrinted();
+	}
     }
     for(unsigned int i = 0; i < numPSets; ++i) {
       if (m_sets[i]->GetCurrPoss()->CanPrint()) {
@@ -2348,10 +2348,10 @@ void Poss::EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGr
       Cost tot = Eval(transList);
 #ifdef MATLAB
       *out << "cost(" << graphNum << ") = "
-      << setprecision(15) << tot << ";\n";
+	   << setprecision(15) << tot << ";\n";
 #else
       *out << "cost[" << graphNum << ",1] = "
-      << setprecision(15) << tot << ";\n";
+	   << setprecision(15) << tot << ";\n";
 #endif
       
 #ifdef MATLAB
@@ -2405,14 +2405,14 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
       
       if (m_pset && m_pset->IsLoop()
           && ((Loop*)m_pset)->GetType() == BLISLOOP)
-      {
-        string loopLevel = out.LoopLevel(1);
-        string idx = "idx" + loopLevel;
-        string dimLen = "dimLen" + loopLevel;
-        string bs = "bs" + loopLevel;
-        out.Indent();
-        *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
-      }
+	{
+	  string loopLevel = out.LoopLevel(1);
+	  string idx = "idx" + loopLevel;
+	  string dimLen = "dimLen" + loopLevel;
+	  string bs = "bs" + loopLevel;
+	  out.Indent();
+	  *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
+	}
       
       
       //This actualy sets some stuff so it can print
@@ -2539,51 +2539,43 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      node->Applied(single);
 	      if (single->IsRef())
 		node->m_hasRefined = true;
-		Poss *newPoss = new Poss;
-		NodeMap nodeMap = setTunnels;
-		newPoss->Duplicate(this,nodeMap,false);
-		newPoss->PatchAfterDuplicate(nodeMap);
-		Node *newNode = nodeMap[node];
-		single->Apply(newNode->m_poss, newNode);
-		newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
-		newPoss->Simplify(simplifiers);
-		//newPoss->BuildSizeCache();
-		if(!AddElemToVec(newPosses,newPoss)) {
-		  delete newPoss;
-		}
-		else {
-		  didSomething = true;
-		}
+	      Poss *newPoss = new Poss;
+	      NodeMap nodeMap = setTunnels;
+	      newPoss->Duplicate(this,nodeMap,false);
+	      newPoss->PatchAfterDuplicate(nodeMap);
+	      Node *newNode = nodeMap[node];
+	      single->Apply(newNode->m_poss, newNode);
+	      newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
+	      newPoss->Simplify(simplifiers);
+	      //newPoss->BuildSizeCache();
+	      if(!AddElemToVec(newPosses,newPoss)) {
+		delete newPoss;
+	      }
+	      else {
+		didSomething = true;
+	      }
 	    }
 	  }
 	  else if (trans->IsVarRef()) {
 	    const VarTrans *var = (VarTrans*)trans;
 	    void *cache = NULL;
-	    if (!var->IsMultiRef()) {
-	      if (node->HasApplied(var))
-		continue;
-	    }
+	    if (node->HasApplied(var))
+	      continue;
 	    int count = var->CanApply(this, node, &cache);
-
-	    if (!var->IsMultiRef()) {
+	    if (count > 0) {
 	      node->Applied(var);
-	    }
-	    
-	    if (trans->IsRef())
-	      node->m_hasRefined = true;		
-
-	    for (int i = 0; i < count; ++ i) {
-	      //Need to check if this transformationhas been applied since this graph
-	      // could have been loaded from disk, and the transformation could have been
-	      // applied previously, but a different MultiTrans was marked as applied on the node
-	      const Transformation *marking = (var->IsMultiRef() ? 
-					       ((MultiTrans*)var)->GetTrans(&cache,i) :
-					       var );
 	      
-	      //if trans is a SingleTrans, then applicableTrans == trans and it was marked as applied above
-	      if (!var->IsMultiRef() || !node->HasApplied(marking)) {
-		if (var->IsMultiRef())
-		  node->Applied(marking);
+	      if (trans->IsRef())
+		node->m_hasRefined = true;		
+	      
+	      for (int i = 0; i < count; ++ i) {
+		//Need to check if this transformationhas been applied since this graph
+		// could have been loaded from disk, and the transformation could have been
+		// applied previously, but a different MultiTrans was marked as applied on the node
+		const Transformation *marking = (var->IsMultiRef() ? 
+						 ((MultiTrans*)var)->GetTrans(&cache,i) :
+						 var );
+	      
 		Poss *newPoss = new Poss;
 		NodeMap nodeMap = setTunnels;
 		newPoss->Duplicate(this,nodeMap,false);
@@ -2599,9 +2591,6 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 		else {
 		  didSomething = true;
 		}
-	      }
-	      else {
-		cout << "Already applied " << var->GetType() << endl;
 	      }
 	    }
 	  }
