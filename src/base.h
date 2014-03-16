@@ -188,6 +188,7 @@ typedef unsigned int Dim;
 typedef vector<Dim> DimVec;
 typedef DimVec::iterator DimVecIter;
 typedef DimVec::const_iterator DimVecConstIter;
+typedef DimVec::reverse_iterator DimVecConstRevIter;
 //typedef unordered_set<Dim> DimSet;
 typedef set<Dim> DimSet;
 typedef DimSet::iterator DimSetIter;

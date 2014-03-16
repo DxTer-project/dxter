@@ -151,6 +151,22 @@ DimVec DistType::DistEntryDims(unsigned int dist)
   return vec;
 }
 
+unsigned int DistType::DimsToDistEntry(DimVec dims)
+{
+  unsigned int currStage = 1;
+  unsigned int distVal = 0;
+  DimVecConstRevIter iter = dims.rbegin();
+  for(; iter != dims.rend(); ++iter) {
+    //offset coming from the left
+    distVal += currStage;
+    //offset on the right
+    distVal += currStage * *iter;
+    
+    currStage *= MAX_NUM_DIMS;
+  }
+  return distVal;
+}
+
 
 string DistTypeToStr(const DistType &type)
 {
