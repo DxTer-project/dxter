@@ -276,6 +276,7 @@ bool DLANode::IsScalar(unsigned int num) const
 }
 #endif
 
+#if TWOD
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 {
   doNotCull = false;
@@ -353,5 +354,21 @@ void DLACullSR(Poss *poss, bool &cullIfPossible, bool &doNotCull)
       }
     }
   }
+}
+#endif
+#endif
+
+
+#if DOTENSORS
+void TenCullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull)
+{
+  doNotCull = false;
+  cullIfPossible = false;
+}
+
+void TenCullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull)
+{
+  cullIfPossible = false;
+  doNotCull = false;
 }
 #endif

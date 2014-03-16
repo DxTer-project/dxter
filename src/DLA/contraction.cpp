@@ -104,7 +104,7 @@ void Contraction::Prop()
 
 void Contraction::SanityCheck()
 {
-  throw;
+  
 }
 
 void Contraction::PrintCode(IndStream &out)
@@ -123,7 +123,15 @@ void Contraction::PrintCode(IndStream &out)
 
 Phase Contraction::MaxPhase() const
 {
-  throw;
+  switch(GetLayer()) {
+  case (ABSLAYER):
+  case (DMLAYER):
+    return DPTENSORPHASE;
+  case (SMLAYER):
+    return NUMPHASES;
+  default:
+    throw;
+  }
 }
 
 int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void **cache) const
@@ -139,10 +147,10 @@ int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void 
   NodeConn *AConn = cont->InputConn(0);
   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
     AConn = AConn->m_n->InputConn(0);
-  NodeConn *BConn = cont->InputConn(0);
+  NodeConn *BConn = cont->InputConn(1);
   if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
     BConn = BConn->m_n->InputConn(0);
-  NodeConn *CConn = cont->InputConn(0);
+  NodeConn *CConn = cont->InputConn(2);
   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
     CConn = CConn->m_n->InputConn(0);
 
@@ -311,7 +319,7 @@ void DistContToLocalContStatC::Apply(Poss *poss, int num, Node *node, void **cac
   DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
   DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
 
-  NodeConn *CConn = cont->InputConn(0);
+  NodeConn *CConn = cont->InputConn(2);
   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
     CConn = CConn->m_n->InputConn(0);
 
@@ -367,12 +375,17 @@ void MatchDistsAndFillIn(string indices,
   for(; iter != indices.end(); ++iter) {
     char index = *iter;
     size_t loc = matchingIndices.find(index);
-    final.m_dists[loc] = matchingDists.m_dists[loc];
-    ++tot;
+    if (loc != string::npos) {
+      final.m_dists[loc] = matchingDists.m_dists[loc];
+      ++tot;
+    }
   }
-  tot += fillInDims.size();
-  if (tot != indices.length())
+  if ((tot + fillInDims.size()) != indices.length()) {
+    cout << "tot = " << tot << endl;
+    cout << "fillInDims.size() = " << fillInDims.size() << endl;
+    cout << "indices.length() = " << indices.length() << endl;
     throw;
+  }
   DimVecConstIter iter2 = fillInDims.begin();
   for(; iter2 != fillInDims.end(); ++iter2) {
     Dim dim = *iter2;

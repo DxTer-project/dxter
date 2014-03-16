@@ -93,9 +93,14 @@ class DLANode : public Node
   virtual void Parallelize(Comm comm) {throw;}
 };
 
+#if TWOD
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 void DLACullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 void DLACullLA(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 #if DOSQM || DOSM
 void DLACullSR(Poss *poss, bool &cullIfPossible, bool &doNotCull);
+#endif
+#elif DOTENSORS
+void TenCullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull);
+void TenCullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 #endif

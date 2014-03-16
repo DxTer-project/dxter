@@ -101,8 +101,10 @@ DimSet DistType::UsedGridDims() const
     DimVec vec = DistEntryDims(m_dists[dim]);
     DimVecIter iter = vec.begin();
     for(; iter != vec.end(); ++iter) {
-      if (set.insert(*iter).second)
+      if (!set.insert(*iter).second) {
+	cout << DistTypeToStr(*this) << endl;
 	throw;
+      }
     }
   }
   return set;

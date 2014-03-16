@@ -142,10 +142,10 @@ int main(int argc, const char* argv[])
   }
 
 
-#if DODPPHASE
-  if (CurrPhase == DPPHASE) {
+#if DODPTENSORPHASE
+  if (CurrPhase == DPTENSORPHASE) {
     cout << "Expanding DP phase\n";
-    uni.Expand(-1, DPPHASE, DLACullDP);
+    uni.Expand(-1, DPTENSORPHASE, TenCullDP);
     time(&end);
     cout << "DP phase took " << difftime(end,start) << " seconds\n";
 
@@ -158,12 +158,12 @@ int main(int argc, const char* argv[])
   }
 #endif
 
-#if DOROPHASE
-  if (CurrPhase == ROPHASE) {
+#if DOROTENSORPHASE
+  if (CurrPhase == ROTENSORPHASE) {
     cout << "Expanding RO phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
     time(&start2);
-    uni.Expand(numIters, ROPHASE, DLACullRO);
+    uni.Expand(numIters, ROTENSORPHASE, TenCullRO);
     time(&end);
     cout << "RO phase took " << difftime(end,start2) << " seconds\n";
     
@@ -175,100 +175,6 @@ int main(int argc, const char* argv[])
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
 #endif
-
-#if DOSR1PHASE
-  if (CurrPhase == SR1PHASE) {
-    cout << "Expanding SR1 phase\n";
-    cout << "Starting with " << uni.TotalCount() << endl;
-    time(&start2);
-    uni.Expand(numIters, SR1PHASE, DLACullSR);
-    time(&end);
-    cout << "SR1 phase took " << difftime(end,start2) << " seconds\n";
-    
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-#endif
-
-#if DOSR2PHASE
-  if (CurrPhase == SR2PHASE) {
-    cout << "Expanding SR2 phase\n";
-    cout << "Starting with " << uni.TotalCount() << endl;
-    time(&start2);
-    uni.Expand(numIters, SR2PHASE, DLACullSR);
-    time(&end);
-    cout << "SR2 phase took " << difftime(end,start2) << " seconds\n";
-    
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-#endif
-
-
-#if DOSR3PHASE
-  if (CurrPhase == SR3PHASE) {
-    cout << "Expanding SR3 phase\n";
-    cout << "Starting with " << uni.TotalCount() << endl;
-    time(&start2);
-    uni.Expand(numIters, SR3PHASE, DLACullSR);
-    time(&end);
-    cout << "SR3 phase took " << difftime(end,start2) << " seconds\n";
-    
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-#endif
-
-
-#if DOSOPHASE
-  if (CurrPhase == SOPHASE) {
-    cout << "Expanding SO phase\n";
-    cout << "Starting with " << uni.TotalCount() << endl;
-    time(&start2);
-    uni.Expand(numIters, SOPHASE, DLACullSR);
-    time(&end);
-    cout << "SO phase took " << difftime(end,start2) << " seconds\n";
-    
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-#endif
-
-#if DOSMPPHASE
-  if (CurrPhase == SMPPHASE) {
-    cout << "Shared-memory parallelization phase\n";
-    cout << "Starting with " << uni.TotalCount() << endl;
-    time(&start2);
-    uni.Expand(numIters, SMPPHASE, DLACullSR);
-    time(&end);
-    cout << "SMP phase took " << difftime(end,start2) << " seconds\n";
-    
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-#endif
-
-
 
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();

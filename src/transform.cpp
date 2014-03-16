@@ -125,7 +125,7 @@ void MultiTrans::Apply(Poss *poss, int num, Node *node, void **cache) const
 const Transformation* MultiTrans::GetTrans(void **cache, int num) const
 {
   TransConstVec *vec = (TransConstVec*)(*cache);
-  if (num >= vec->size())
+  if ((unsigned int)num >= vec->size())
     throw;
   return (*vec)[num];
 }
