@@ -2529,49 +2529,86 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
         TransVecConstIter transIter = transMapIter->second->begin();
         for(; transIter != transMapIter->second->end(); ++transIter) {
           const Transformation *trans = *transIter;
-          if (node->HasApplied(trans)) {
-            //            cout << "skipping because " << trans->GetType() << " has been applied\n";
-            continue;
-          }
-          TransConstVec applicable = trans->GetApplicableTrans(this, node);
-          TransConstVecIter appIter = applicable.begin();
-          if (appIter!=applicable.end()) {
-            node->Applied(trans);
-            if (trans->IsRef())
-              node->m_hasRefined = true;
-          }
-          for(; appIter != applicable.end(); ++appIter) {
-            const Transformation *applicableTrans = *appIter;
-            //Need to check if this transformationhas been applied since this graph
-            // could have been loaded from disk, and the transformation could have been
-            // applied previously, but a different MultiTrans was marked as applied on the node
-            
-            //if trans is a SingleTrans, then applicableTrans == trans and it was marked as applied above
-            if (trans == applicableTrans || !node->HasApplied(applicableTrans)) {
-              node->Applied(applicableTrans);
-              Poss *newPoss = new Poss;
-              NodeMap nodeMap = setTunnels;
-              newPoss->Duplicate(this,nodeMap,false);
-              newPoss->PatchAfterDuplicate(nodeMap);
-              Node *newNode = nodeMap[node];
-              if (!applicableTrans->IsSingle())
-                throw;
-              ((SingleTrans*)applicableTrans)->Apply(newNode->m_poss, newNode);
-              newPoss->m_transVec.push_back(const_cast<Transformation*>(applicableTrans));
-              newPoss->Simplify(simplifiers);
-              //newPoss->BuildSizeCache();
-              if(!AddElemToVec(newPosses,newPoss)) {
-                delete newPoss;
-              }
-              else {
-                didSomething = true;
-              }
-            }
-            else {
-              cout << "Already applied " << applicableTrans->GetType() << endl;
-            }
-          }
-        }
+	  if (trans->IsSingle()) {
+	    if (node->HasApplied(trans)) {
+	      //            cout << "skipping because " << trans->GetType() << " has been applied\n";
+	      continue;
+	    }
+	    const SingleTrans *single = (SingleTrans*)trans;
+	    if (single->CanApply(this, node)) {
+	      node->Applied(single);
+	      if (single->IsRef())
+		node->m_hasRefined = true;
+		Poss *newPoss = new Poss;
+		NodeMap nodeMap = setTunnels;
+		newPoss->Duplicate(this,nodeMap,false);
+		newPoss->PatchAfterDuplicate(nodeMap);
+		Node *newNode = nodeMap[node];
+		single->Apply(newNode->m_poss, newNode);
+		newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
+		newPoss->Simplify(simplifiers);
+		//newPoss->BuildSizeCache();
+		if(!AddElemToVec(newPosses,newPoss)) {
+		  delete newPoss;
+		}
+		else {
+		  didSomething = true;
+		}
+	    }
+	  }
+	  else if (trans->IsVarRef()) {
+	    const VarTrans *var = (VarTrans*)trans;
+	    void *cache = NULL;
+	    if (!var->IsMultiRef()) {
+	      if (node->HasApplied(var))
+		continue;
+	    }
+	    int count = var->CanApply(this, node, &cache);
+
+	    if (!var->IsMultiRef()) {
+	      node->Applied(var);
+	    }
+	    
+	    if (trans->IsRef())
+	      node->m_hasRefined = true;		
+
+	    for (int i = 0; i < count; ++ i) {
+	      //Need to check if this transformationhas been applied since this graph
+	      // could have been loaded from disk, and the transformation could have been
+	      // applied previously, but a different MultiTrans was marked as applied on the node
+	      const Transformation *marking = (var->IsMultiRef() ? 
+					       ((MultiTrans*)var)->GetTrans(&cache,i) :
+					       var );
+	      
+	      //if trans is a SingleTrans, then applicableTrans == trans and it was marked as applied above
+	      if (!var->IsMultiRef() || !node->HasApplied(marking)) {
+		if (var->IsMultiRef())
+		  node->Applied(marking);
+		Poss *newPoss = new Poss;
+		NodeMap nodeMap = setTunnels;
+		newPoss->Duplicate(this,nodeMap,false);
+		newPoss->PatchAfterDuplicate(nodeMap);
+		Node *newNode = nodeMap[node];
+		var->Apply(newNode->m_poss, i, newNode, &cache);
+		newPoss->m_transVec.push_back(const_cast<Transformation*>(marking));
+		newPoss->Simplify(simplifiers);
+		//newPoss->BuildSizeCache();
+		if(!AddElemToVec(newPosses,newPoss)) {
+		  delete newPoss;
+		}
+		else {
+		  didSomething = true;
+		}
+	      }
+	      else {
+		cout << "Already applied " << var->GetType() << endl;
+	      }
+	    }
+	  }
+	  else {
+	    throw;
+	  }
+	}
       }
     }
     m_fullyExpanded = true;

@@ -23,15 +23,6 @@
 
 #include "transform.h"
 
-TransConstVec SingleTrans::GetApplicableTrans(const Poss *poss, const Node *node) const
-{
-  TransConstVec tmp;
-  if (CanApply(poss, node) && WorthApplying(node)) {
-    tmp.push_back(this);
-  }
-  return tmp;
-}
-
 void MultiTrans::AddTrans(SingleTrans *trans)
 {
   if (m_trans.empty())
@@ -43,9 +34,9 @@ void MultiTrans::AddTrans(SingleTrans *trans)
   m_trans.push_back(trans);
 }
 
-TransConstVec MultiTrans::GetApplicableTrans(const Poss *poss, const Node *node) const
+TransConstVec* MultiTrans::GetApplicableTrans(const Poss *poss, const Node *node) const
 {
-  TransConstVec applicable;
+  TransConstVec *applicable = new TransConstVec;
   CostVec costs;
   TransConstVecIter iter = m_trans.begin();
   for(; iter != m_trans.end(); ++iter) {
@@ -53,25 +44,25 @@ TransConstVec MultiTrans::GetApplicableTrans(const Poss *poss, const Node *node)
       throw;
     const SingleTrans *trans = (SingleTrans*)(*iter);
     if (trans->CanApply(poss, node) && trans->WorthApplying(node)) {
-      applicable.push_back(trans);
+      applicable->push_back(trans);
       Cost cost = trans->RHSCostEstimate(node);
       costs.push_back(cost);
     }    
   }
   
-  if (costs.size() != applicable.size())
+  if (costs.size() != applicable->size())
     throw;
 
-  if (applicable.size() < MAXNUMBEROFREFINEMENTS)
+  if (applicable->size() < MAXNUMBEROFREFINEMENTS)
     return applicable;
 
   
   //sort
   list<const Transformation*> tList;
   list<Cost> cList;
-  iter = applicable.begin();
+  iter = applicable->begin();
   CostVecIter costIter = costs.begin();
-  for(; iter != applicable.end(); ++iter, ++costIter) {
+  for(; iter != applicable->end(); ++iter, ++costIter) {
     const Transformation *trans = *iter;
     Cost cost = *costIter;
     bool added = false;
@@ -99,10 +90,33 @@ TransConstVec MultiTrans::GetApplicableTrans(const Poss *poss, const Node *node)
     }
   }
 
-  applicable.clear();
-    list<const Transformation*>::iterator tListIter = tList.begin();
+  applicable->clear();
+  list<const Transformation*>::iterator tListIter = tList.begin();
   for(; tListIter != tList.end(); ++tListIter)
-    applicable.push_back(*tListIter);
+    applicable->push_back(*tListIter);
 
   return applicable;
+}
+
+int MultiTrans::CanApply(const Poss *poss, const Node *node, void **cache) const
+{
+  TransConstVec *vec = GetApplicableTrans(poss, node);
+  *cache = vec;
+  return vec->size();
+}
+
+void MultiTrans::CleanCache(void **cache) const
+{
+  delete (TransConstVec*)(*cache);
+}
+
+void MultiTrans::Apply(Poss *poss, int num, Node *node, void **cache) const
+{
+  TransConstVec *vec = (TransConstVec*)(*cache);
+  if ((unsigned int)num >= vec->size())
+    throw;
+  const Transformation *trans = (*vec)[num];
+  if (!trans->IsSingle())
+    throw;
+  ((SingleTrans*)trans)->Apply(poss, node);
 }

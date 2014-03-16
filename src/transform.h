@@ -37,9 +37,9 @@ class Transformation
  public:
   virtual ~Transformation() {}
   virtual string GetType() const {return "Transformation";}
-  virtual TransConstVec GetApplicableTrans(const Poss *poss, const Node *node) const = 0;
   virtual bool IsSingle() const {return false;}
   virtual bool IsRef() const {return false;}
+  virtual bool IsVarRef() const {return false;}
 };
 
 //Holds one transformation
@@ -53,22 +53,42 @@ class SingleTrans : public Transformation
   virtual bool CanApply(const Poss *poss, const Node *node) const = 0;
   virtual void Apply(Poss *poss, Node *node) const = 0;
   virtual bool WorthApplying(const Node *node) const {return true;}
-  virtual TransConstVec GetApplicableTrans(const Poss *poss, const Node *node) const;
   virtual Cost RHSCostEstimate(const Node *node) const {throw;}
+};
+
+//Holds one transformation
+class VarTrans : public Transformation
+{
+ public:
+  VarTrans() {}
+  ~VarTrans() {}
+  virtual string GetType() const {return "VarTrans";}
+  virtual bool IsVarRef() const {return true;}
+  virtual bool IsMultiRef() const {return false;}
+  virtual int CanApply(const Poss *poss, const Node *node, void **cache) const = 0;
+  virtual void Apply(Poss *poss, int num, Node *node, void **cache) const = 0;
+  virtual bool WorthApplying(const Node *node) const {return true;}
+  virtual Cost RHSCostEstimate(const Node *node) const {throw;}
+  virtual void CleanCache(void **cache) const = 0;
 };
 
 //Holds multiple transformation and only allows the (estimated)
 // best MAXNUMBEROFREFINEMENTS transformations
-class MultiTrans : public Transformation
+class MultiTrans : public VarTrans
 {
  public:
   TransConstVec m_trans;
   bool m_isRef;
   ~MultiTrans() {}
   void AddTrans(SingleTrans *trans);
+  virtual bool IsMultiRef() const {return true;}
   virtual string GetType() const {return "MultiTrans";}
-  virtual TransConstVec GetApplicableTrans(const Poss *poss, const Node *node) const;
+  virtual TransConstVec* GetApplicableTrans(const Poss *poss, const Node *node) const;
   virtual bool IsRef() const {return m_isRef;}
   unsigned int NumTransformations() const {return m_trans.size();}
+  virtual void CleanCache(void **cache) const;
+  virtual int CanApply(const Poss *poss, const Node *node, void **cache) const;
+  virtual void Apply(Poss *poss, int num, Node *node, void **cache) const;
+  virtual const Transformation* GetTrans(void **cache, int num);
 };
 

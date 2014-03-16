@@ -112,7 +112,7 @@ Phase Contraction::MaxPhase() const
   throw;
 }
 
-bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) const
+int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void **cache) const
 {
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
@@ -146,9 +146,11 @@ bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) cons
 
   RecursivelyFindDistributions(dists, 0, AType, ADims, BType, BDims, usedDims, distOptions);
 
-  store(distOptions)
+  *cache = distOptions;
   
   delete [] dists;
+
+  return distOptions->size();
 }
 
 void RecursivelyFindDistributions(DimVec *dists, Dim thisDim, 
@@ -285,9 +287,9 @@ void AddUnusedDimsForDistType(DimVec *dists,  unsigned int *distEntries,
   }
 }
 
-void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
+void DistContToLocalContStatC::Apply(Poss *poss, int num, Node *node, void **cache) const
 {
-  ContType *types;
+  ContType *types = (ContType*)(*cache);
   ContTypeIter iter = types->begin();
   for(; iter != types->end(); ++iter) {
     unsigned int *entries = *iter;
@@ -296,10 +298,9 @@ void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
 
     delete [] entries;
   }
-
-  delete types;  
 }
 
+/*
 Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
 {
   Cost cost = 0;
@@ -321,6 +322,7 @@ Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
   }
   return cost * 2;
 }
+*/
 
 
 #endif
