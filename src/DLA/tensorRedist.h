@@ -48,7 +48,6 @@ class RedistNode : public DLANode
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  RedistNode* CreateTrans(Trans trans);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "redist";}
   virtual void ClearSizeCache();
@@ -60,6 +59,27 @@ class RedistNode : public DLANode
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+};
+
+class RedistNodeWithSummation : public RedistNode
+{
+ public:
+  DimVec m_sumDims;
+ RedistNodeWithSummation() : RedistNode() {}
+  RedistNodeWithSummation(const DistType &destType, const DimVec &sumDims);
+  static Node* BlankInst() { return  new RedistNodeWithSummation; }
+  virtual Node* GetNewInst() { return BlankInst(); }
+  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+  //  virtual bool IsRedistNode() const {return true;}
+  virtual NodeType GetType() const;
+  virtual void SanityCheck();
+  virtual void Prop();
+  virtual void PrintCode(IndStream &out);
+  RedistNode* CreateTrans(Trans trans);
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "redistWithSum";}
+  virtual void FlattenCore(ofstream &out) const;
+  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
 };
 
 class RemoveWastedRedist : public SingleTrans

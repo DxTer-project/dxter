@@ -1,4 +1,6 @@
 #include "tensorRedist.h"
+#include <ostream>
+#include <sstream>
 
 #if DOTENSORS
 
@@ -133,6 +135,55 @@ void RedistNode::PrintCode(IndStream &out)
        << " = "
        << GetInputName(0).str()
        << ";\n";
+}
+
+
+RedistNodeWithSummation::RedistNodeWithSummation(const DistType &destType, const DimVec &sumDims)
+  : RedistNode(destType)
+{
+  m_sumDims = sumDims;
+}
+
+
+void RedistNodeWithSummation::Duplicate(const Node *orig, bool shallow, bool possMerging)
+{
+  const RedistNodeWithSummation *node = (RedistNodeWithSummation*)orig;
+  RedistNode::Duplicate(node, shallow, possMerging);
+  m_sumDims = node->m_sumDims;  
+}
+
+NodeType RedistNodeWithSummation::GetType() const
+{
+  stringstream str;
+  str << "redistWithSum";
+  DimVecConstIter iter = m_sumDims.begin();
+  for(; iter != m_sumDims.end(); ++iter)
+    str << *iter << ",";
+  return str.str();
+}
+void RedistNodeWithSummation::SanityCheck()
+{
+  throw;
+}
+
+void RedistNodeWithSummation::Prop()
+{
+  throw;
+}
+
+void RedistNodeWithSummation::PrintCode(IndStream &out)
+{
+  throw;
+}
+
+void RedistNodeWithSummation::FlattenCore(ofstream &out) const
+{
+  throw;
+}
+
+void RedistNodeWithSummation::UnflattenCore(ifstream &in, SaveInfo &info)
+{
+  throw;
 }
 
 

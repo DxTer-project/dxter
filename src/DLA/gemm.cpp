@@ -146,7 +146,8 @@ const DistType& Gemm::GetDistType(unsigned int num) const
 #endif
 
 Phase Gemm::MaxPhase() const
-{  switch(GetLayer()) {
+{ 
+  switch(GetLayer()) {
   case (ABSLAYER):
 #if DODPPHASE
   case (DMLAYER):
