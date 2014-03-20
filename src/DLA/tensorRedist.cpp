@@ -56,7 +56,7 @@ void RedistNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
     if (!m_name.length())
-      m_name = "RedistNode to " +  DistTypeToStr(m_destType);
+      m_name = (string)"RedistNode to " +  m_destType.QuickStr();
     DLANode *parent = (DLANode*)Input(0);
     DistType m_srcType = parent->GetDistType(InputConnNum(0));
     parent->Prop();
