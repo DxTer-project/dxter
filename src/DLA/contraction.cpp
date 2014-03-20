@@ -9,10 +9,10 @@ typedef ContType::iterator ContTypeIter;
 void RecursivelyFindDistributions(DimVec *dists, Dim thisDim, 
 				  const DistType &AType, const DimVec &ADims,
 				  const DistType &BType, const DimVec &BDims,
-				  DimSet &usedDims,
+				  DimSet &usedDims, Dim numDims,
 				  ContType *distOptions);
 void AddUnusedDimsForDistType(DimVec *dists, unsigned int *distEntries,
-			      Dim numIndices,
+			      Dim numIndices, 
 			       DimSet &unUsedDims,
 			       ContType *distOptions);
 
@@ -166,7 +166,7 @@ int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void 
 
   ContType *distOptions = new ContType;
 
-  RecursivelyFindDistributions(dists, 0, AType, ADims, BType, BDims, usedDims, distOptions);
+  RecursivelyFindDistributions(dists, 0, AType, ADims, BType, BDims, usedDims, CType.m_numDims+numContDims, distOptions);
 
   *cache = distOptions;
   
@@ -178,7 +178,7 @@ int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void 
 void RecursivelyFindDistributions(DimVec *dists, Dim thisDim, 
 				  const DistType &AType, const DimVec &ADims,
 				  const DistType &BType, const DimVec &BDims,
-				  DimSet &usedDims,
+				  DimSet &usedDims, Dim numDims,
 				  ContType *distOptions)
 {
   /*
@@ -198,7 +198,7 @@ void RecursivelyFindDistributions(DimVec *dists, Dim thisDim,
   if (thisDim == ADims.size()) {
     DimSet unUsedDims;
     DimSetIter iter = usedDims.begin();
-    for(Dim dim = 0; dim < MAX_NUM_DIMS; ++dim) {
+    for(Dim dim = 0; dim < numDims; ++dim) {
       if (iter != usedDims.end()) {
 	if (*iter > dim) {
 	  unUsedDims.insert(dim);
@@ -224,7 +224,7 @@ void RecursivelyFindDistributions(DimVec *dists, Dim thisDim,
   RecursivelyFindDistributions(dists, thisDim+1, 
 			       AType, ADims,
 			       BType, BDims,
-			       usedDims,
+			       usedDims, numDims,
 			       distOptions);
   // Now, call recursively with A's Type (if it's not already used)
   DimVec ADists = DistType::DistEntryDims(AType.m_dists[ADims[thisDim]]);
@@ -240,7 +240,7 @@ void RecursivelyFindDistributions(DimVec *dists, Dim thisDim,
     RecursivelyFindDistributions(dists, thisDim+1,
 				 AType, ADims,
 				 BType, BDims,
-				 usedDimsTemp,
+				 usedDimsTemp, numDims,
 				 distOptions);
   }
 
@@ -269,7 +269,7 @@ void RecursivelyFindDistributions(DimVec *dists, Dim thisDim,
     RecursivelyFindDistributions(dists, thisDim+1,
 				 AType, ADims,
 				 BType, BDims,
-				 usedDimsTemp,
+				 usedDimsTemp, numDims,
 				 distOptions);
   }
 }
