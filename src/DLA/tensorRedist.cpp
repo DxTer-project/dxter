@@ -36,7 +36,7 @@ NodeType RedistNode::GetType() const
   if (m_name.length()) 
     return m_name;
   else {
-    return (string)"RedistNode to " +  DistTypeToStr(m_destType);
+    return (string)"RedistNode to " +  m_destType.QuickStr();
   }
 }
 

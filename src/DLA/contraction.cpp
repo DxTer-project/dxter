@@ -347,13 +347,21 @@ void DistContToLocalContStatC::Apply(Poss *poss, int num, Node *node, void **cac
   LCont->AddInput(node1,0);
   LCont->AddInput(node2,0);
   LCont->AddInput(node3,0);
-  
-  throw; // figure out if we need a summation
-  
-  
-  RedistNode *node4 = new RedistNode(cont->InputDistType(2));
-  node4->AddInput(LCont, 0);
 
+  bool sum = false;
+  for (unsigned int i = 0; i < cont->m_indices.length() && !sum; ++i) {
+    if (entries[i] != 0)
+      sum = true;
+  }
+
+  DLANode *node4;
+  if (sum)
+    cout << "need different refinement code!\n";
+  //  else {
+    node4 = new RedistNode(cont->InputDistType(2));
+    node4->AddInput(LCont, 0);
+    //  }
+    
   poss->AddNode(node1);
   poss->AddNode(node2);
   poss->AddNode(node3);
@@ -387,9 +395,9 @@ void MatchDistsAndFillIn(string indices,
     throw;
   }
   DimVecConstIter iter2 = fillInDims.begin();
-  for(; iter2 != fillInDims.end(); ++iter2) {
+  for(Dim dimNum = 0; iter2 != fillInDims.end(); ++iter2, ++dimNum) {
     Dim dim = *iter2;
-    final.m_dists[dim] = fillInDists[dim];
+    final.m_dists[dim] = fillInDists[dimNum];
   }
 }
 

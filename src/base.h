@@ -210,6 +210,8 @@ class DistType
   static unsigned int DimsToDistEntry(DimVec dims);
   DimSet UsedGridDims() const;
   void PrepForNumDims(Dim numDims);
+  string QuickStr() const;
+  DistType& operator=(const DistType &rhs);
 };
 #endif
 

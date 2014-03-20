@@ -67,14 +67,27 @@ char START = '+';
 
 #if DOTENSORS
 DistType::DistType(const DistType &rhs)
+  :m_dists(NULL)
 {
   m_numDims = rhs.m_numDims;
   if (m_numDims) {
     m_dists = new unsigned int[m_numDims];
-    memcpy(m_dists, rhs.m_dists, m_numDims*sizeof(Dim));
+    memcpy(m_dists, rhs.m_dists, m_numDims*sizeof(unsigned int));
+  }
+}
+
+DistType& DistType::operator=(const DistType &rhs)
+{
+  m_numDims = rhs.m_numDims;
+  if (m_dists)
+    delete [] m_dists;
+  if (m_numDims) {
+    m_dists = new unsigned int[m_numDims];
+    memcpy(m_dists, rhs.m_dists, m_numDims*sizeof(unsigned int));
   }
   else
     m_dists = NULL;
+  return *this;
 }
 
 void DistType::PrepForNumDims(Dim numDims)
@@ -82,7 +95,10 @@ void DistType::PrepForNumDims(Dim numDims)
   if (m_dists)
     delete [] m_dists;
   m_numDims = numDims;
-  m_dists = new Dim[numDims];
+  if (numDims)
+    m_dists = new unsigned int[numDims];
+  else
+    m_dists = NULL;
 }
 
 DistType::~DistType()
@@ -90,8 +106,8 @@ DistType::~DistType()
   if (m_dists) {
     delete [] m_dists;
     m_dists = NULL;
-    m_numDims = 0;
   }
+  m_numDims = 0;
 }
 
 DimSet DistType::UsedGridDims() const
@@ -140,8 +156,26 @@ string DistType::DistEntryToStr(unsigned int dist)
   return ret.str();
 }
 
+string DistType::QuickStr() const
+{
+  std::stringstream ret;
+  if (!m_dists)
+    throw;
+  for(Dim dim = 0; dim < m_numDims; ++dim) {
+    ret << m_dists[dim] << " ";
+  }
+  return ret.str();
+}
+
 DimVec DistType::DistEntryDims(unsigned int dist)
 {
+#if 0
+  if (dist > 3000) {
+    cout << "big dist to start: " << dist << endl;
+    throw;
+  }
+  cout << "\n\nstarting with dist = " << dist << endl;
+#endif
   DimVec vec;
   if (dist == 0)
     return vec;
@@ -149,12 +183,35 @@ DimVec DistType::DistEntryDims(unsigned int dist)
   unsigned int distVal = dist-1;
   unsigned int numDists = 1;
   while (dist > currStage) {
+    if (!currStage) {
+      cout << "!currStage\n";
+      throw;
+    }
+#if 0
+    cout << "distVal bef " << distVal << endl;
+    cout << "numDists bef " << numDists << endl;
+    cout << "currStage bef " << currStage << endl;
+    if ((distVal - currStage) >= distVal) {
+      cout << "problem with current\n";
+      throw;
+    }
+#endif
     distVal -= currStage;
     numDists++;
     currStage *= MAX_NUM_DIMS;
+#if 0
+    cout << "distVal aft " << distVal << endl;
+    cout << "numDists aft " << numDists << endl;
+    cout << "currStage aft " << currStage << endl;
+#endif
   }
   string out;
   while (numDists) {
+#if 0
+    cout << "inserting " << distVal % MAX_NUM_DIMS << endl;
+    cout << "overwriting " << distVal << " with " << distVal / MAX_NUM_DIMS << endl;
+    cout << "numDists " << numDists << " being decremented" << endl;
+#endif
     vec.insert(vec.begin(), distVal % MAX_NUM_DIMS);
     distVal = distVal / MAX_NUM_DIMS;
     --numDists;
@@ -180,6 +237,12 @@ unsigned int DistType::DimsToDistEntry(DimVec dims)
     
     currStage *= MAX_NUM_DIMS;
   }
+
+  if (distVal > 1410273309) {
+    cout << "big distVal: " << distVal << endl;
+    throw;
+  }
+    
   return distVal;
 }
 
