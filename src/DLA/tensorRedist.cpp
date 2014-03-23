@@ -58,8 +58,123 @@ void RedistNode::Prop()
     if (!m_name.length())
       m_name = (string)"RedistNode to " +  m_destType.QuickStr();
     DLANode *parent = (DLANode*)Input(0);
-    DistType m_srcType = parent->GetDistType(InputConnNum(0));
+    const DistType &m_srcType = parent->GetDistType(InputConnNum(0));
     parent->Prop();
+    const Dim numDims = m_destType.m_numDims;
+    
+    if (numDims != InputNumDims(0))
+      throw;
+
+    if (m_srcType.m_numDims != numDims)
+      throw;
+
+    DimSet diffs;
+    
+    for (Dim dim = 0; dim < numDims; ++dim) {
+      if (m_srcType.m_dists[dim] != m_destType.m_dists[dim]) {
+	diffs.insert(dim);
+      }
+    }
+
+    if (diffs.empty()) {
+      throw;
+      m_cost = 0;
+    }
+    else if (diffs.size() == 1) {
+      const Dim dim = *(diffs.begin());
+      DimVec src = DistType::DistEntryDims(m_srcType.m_dists[dim]);
+      DimVec dest = DistType::DistEntryDims(m_destType.m_dists[dim]);
+
+      
+      if (src.empty() || IsPrefix(src, dest)) {
+	//local memory copy
+	m_cost = 0;
+      }
+      else if (IsPrefix(dest, src) || dest.empty()) {
+	m_cost = 0;
+	const unsigned int totNumIters = m_lsizes[0].NumSizes();
+	unsigned int numProcs = 1;
+	DimVecIter iter = src.begin() + dest.size();
+	for(; iter != src.end(); ++iter) {
+	  numProcs *= GridLens[*iter];
+	}
+	for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+	  Cost temp = 1;
+	  for (Dim dim = 0; dim < numDims; ++dim) {
+	    temp *= m_lsizes[dim][iteration];
+	  }
+	  m_cost += AllGather(temp * numProcs, numProcs);
+	}
+      }
+      else {
+	m_cost = 0;
+	const unsigned int totNumIters = m_lsizes[0].NumSizes();
+	unsigned int numProcs = 1;
+	DimVecIter iter = src.begin();
+	DimSet unionSet;
+	for(; iter != src.end(); ++iter) {
+	  numProcs *= GridLens[*iter];
+	  unionSet.insert(*iter);
+	}
+	iter = dest.begin();
+	for(; iter != dest.end(); ++iter) {
+	  if (unionSet.find(*iter) == unionSet.end())
+	    numProcs *= GridLens[*iter];
+	}
+
+	for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+	  Cost temp = 1;
+	  for (Dim dim = 0; dim < numDims; ++dim) {
+	    temp *= m_lsizes[dim][iteration];
+	  }
+	  m_cost += AllToAll(temp * numProcs, numProcs);
+	}
+      }
+    }
+    else {
+      m_cost = 0;
+      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      unsigned int numProcs = 1;
+      DimSet unionSet;
+
+      DimSetIter diffIter = diffs.begin();
+      for(; diffIter != diffs.end(); ++diffIter) {
+	Dim diffDim = *diffIter;
+	DimVec src = DistType::DistEntryDims(m_srcType.m_dists[diffDim]);
+	DimVec dest = DistType::DistEntryDims(m_destType.m_dists[diffDim]);
+
+	if (src.empty() || IsPrefix(src, dest)) {
+	  //local mem copy for this dimensions
+	}
+	else if (IsPrefix(dest, src) || dest.empty()) {
+	  DimVecIter iter = src.begin() + dest.size();
+	  for(; iter != src.end(); ++iter) {
+	    if (unionSet.insert(*iter).second)
+	      numProcs *= GridLens[*iter];
+	  }
+	}
+	else {
+	  DimVecIter iter = src.begin();
+	  for(; iter != src.end(); ++iter) {
+	    if (unionSet.insert(*iter).second)
+	      numProcs *= GridLens[*iter];
+	  }
+	  iter = dest.begin();
+	  for(; iter != dest.end(); ++iter) {
+	    if (unionSet.insert(*iter).second)
+	      numProcs *= GridLens[*iter];
+	  }
+	}
+      }
+
+      for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+	Cost temp = 1;
+	for (Dim dim = 0; dim < numDims; ++dim) {
+	  temp *= m_lsizes[dim][iteration];
+	}
+	m_cost += AllToAll(temp * numProcs, numProcs);
+      }
+    }
     throw;
   }
 }

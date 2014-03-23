@@ -270,6 +270,21 @@ DimVec MapIndicesToDims(const string &indices, const string &dimIndices)
   }
   return map;
 }
+
+bool IsPrefix(const DimVec &isPrefix, const DimVec &dims)
+{
+  if (dims.empty() || isPrefix.empty())
+    return false;
+  DimVecConstIter dimsIter = dims.begin();
+  DimVecConstIter isPrefixIter = isPrefix.begin();
+  for(; dimsIter != dims.end() && isPrefixIter != isPrefix.end(); ++dimsIter, ++isPrefixIter) {
+    if (*isPrefixIter != *dimsIter)
+      return false;
+  }
+  if (isPrefixIter != isPrefix.end() && dimsIter == dims.end())
+    return false;
+  return true;
+}
 #endif
 
 void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes)

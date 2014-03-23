@@ -328,6 +328,7 @@ typedef vector<DistType*> DistTypeVec;
 typedef DistTypeVec::iterator DistTypeVecIter;
 typedef DistTypeVec::const_iterator DistTypeVecConstIter;
 DimVec MapIndicesToDims(const string &indices, const string &dimIndices);
+bool IsPrefix(const DimVec &dims, const DimVec &isPrefix);
 #endif
 
 

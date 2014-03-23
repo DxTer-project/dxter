@@ -85,11 +85,11 @@ void Contraction::Prop()
     cout << "reflect in DistContToLocalContStatC::RHSCostEstimate\n";
     DimVec dims = MapIndicesToDims(m_indices,GetInputName(0).m_indices);
     const Sizes *sizes = InputLocalLen(2,0);
+    Dim numDims = InputNumDims(2);
     unsigned int totNumIters = sizes->NumSizes();
     for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
       Cost temp = 1;
-      Dim numDims = InputNumDims(2);
-      for (Dim dim = 1; dim < numDims; ++dim) {
+      for (Dim dim = 0; dim < numDims; ++dim) {
 	temp *= (*InputLocalLen(2,dim))[iteration];
       }
       DimVecConstIter iter = dims.begin();
