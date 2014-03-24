@@ -152,6 +152,7 @@ blah
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
+#endif
 
 class TempVarNode : public DLANode
 {
@@ -159,30 +160,59 @@ class TempVarNode : public DLANode
   DistType m_distType;
 #endif
   string m_name;
+#if TWOD
   Sizes *m_mlsize, *m_nlsize;
+#else
+  SizesArray m_lsizes;
+#endif
  public:
  TempVarNode() 
    : 
 #if DOELEM
 m_distType(D_LASTDIST),
 #elif DOTENSORS
-  m_distType(DEFAULTDISTTYPE),
+  m_distType(),
 #endif
- m_mlsize(NULL), m_nlsize(NULL) {}
+#if TWOD
+ m_mlsize(NULL), m_nlsize(NULL)
+#elif DOTENSORS
+  m_lsizes(NULL)
+#endif
+ {}
 
  TempVarNode(string name) 
    :  
 #if DOELEM
 m_distType(D_LASTDIST),
 #elif DOTENSORS
-  m_distType(DEFAULTDISTTYPE),
+  m_distType(),
 #endif
-  m_name(name), m_mlsize(NULL), m_nlsize(NULL) {}
+  m_name(name), 
+#if TWOD
+ m_mlsize(NULL), m_nlsize(NULL)
+#elif DOTENSORS
+  m_lsizes(NULL)
+#endif
+ {}
 
 #if DODM
  TempVarNode(DistType dist) 
-   : m_distType(dist), m_mlsize(NULL), m_nlsize(NULL) {}
- TempVarNode(DistType dist, string name) :  m_distType(dist), m_name(name), m_mlsize(NULL), m_nlsize(NULL) {}
+   : m_distType(dist), 
+#if TWOD
+ m_mlsize(NULL), m_nlsize(NULL)
+#elif DOTENSORS
+  m_lsizes(NULL)
+#endif
+ {}
+
+ TempVarNode(DistType dist, string name) 
+   :  m_distType(dist), m_name(name),
+#if TWOD
+ m_mlsize(NULL), m_nlsize(NULL)
+#elif DOTENSORS
+  m_lsizes(NULL)
+#endif
+  {}
 #endif
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new TempVarNode; }
@@ -203,7 +233,9 @@ m_distType(D_LASTDIST),
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
 #else
-basfd
+  virtual const Dim NumDims(unsigned int num) const;
+  virtual const Sizes* Len(unsigned int num, Dim dim) const;
+  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
 #endif
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
@@ -216,6 +248,7 @@ basfd
 };
 
 
+#if TWOD
 #if DOELEM
 class MakeTrapNode : public DLAOp<1,1>
 {

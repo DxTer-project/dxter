@@ -252,21 +252,21 @@ void RedistNode::PrintCode(IndStream &out)
 }
 
 
-RedistNodeWithSummation::RedistNodeWithSummation(const DimSet &sumDims)
+AllReduceNode::AllReduceNode(const DimSet &sumDims)
   : DLAOp<1,1>()
 {
   m_sumDims = sumDims;
 }
 
 
-void RedistNodeWithSummation::Duplicate(const Node *orig, bool shallow, bool possMerging)
+void AllReduceNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  const RedistNodeWithSummation *node = (RedistNodeWithSummation*)orig;
+  const AllReduceNode *node = (AllReduceNode*)orig;
   DLAOp<1,1>::Duplicate(node, shallow, possMerging);
   m_sumDims = node->m_sumDims;  
 }
 
-NodeType RedistNodeWithSummation::GetType() const
+NodeType AllReduceNode::GetType() const
 {
   stringstream str;
   str << "AllReduce";
@@ -275,12 +275,12 @@ NodeType RedistNodeWithSummation::GetType() const
     str << *iter << ",";
   return str.str();
 }
-void RedistNodeWithSummation::SanityCheck()
+void AllReduceNode::SanityCheck()
 {
   throw;
 }
 
-void RedistNodeWithSummation::Prop()
+void AllReduceNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<1,1>::Prop();
@@ -310,7 +310,7 @@ void RedistNodeWithSummation::Prop()
   }
 }
 
-void RedistNodeWithSummation::PrintCode(IndStream &out)
+void AllReduceNode::PrintCode(IndStream &out)
 {
   out.Indent();
   *out << "AllReduceOnDims( " << GetName(0).str()
@@ -322,12 +322,97 @@ void RedistNodeWithSummation::PrintCode(IndStream &out)
   *out << " );\n";
 }
 
-void RedistNodeWithSummation::FlattenCore(ofstream &out) const
+void AllReduceNode::FlattenCore(ofstream &out) const
 {
   throw;
 }
 
-void RedistNodeWithSummation::UnflattenCore(ifstream &in, SaveInfo &info)
+void AllReduceNode::UnflattenCore(ifstream &in, SaveInfo &info)
+{
+  throw;
+}
+
+
+
+SumScatterUpdateNode::SumScatterUpdateNode(const DimSet &sumDims, Coef coef)
+  : DLAOp<2,1>(), m_coef(coef)
+{
+  m_sumDims = sumDims;
+}
+
+
+void SumScatterUpdateNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
+{
+  const SumScatterUpdateNode *node = (SumScatterUpdateNode*)orig;
+  DLAOp<2,1>::Duplicate(node, shallow, possMerging);
+  m_sumDims = node->m_sumDims;  
+  m_coef = node->m_coef;
+}
+
+NodeType SumScatterUpdateNode::GetType() const
+{
+  stringstream str;
+  str << "SumScatterUpdate";
+  DimSetConstIter iter = m_sumDims.begin();
+  for(; iter != m_sumDims.end(); ++iter)
+    str << *iter << ",";
+  return str.str();
+}
+void SumScatterUpdateNode::SanityCheck()
+{
+  throw;
+}
+
+void SumScatterUpdateNode::Prop()
+{
+  if (!IsValidCost(m_cost)) {
+    DLAOp<2,1>::Prop();
+
+
+    m_cost = 0;
+    unsigned int numProcs = 1;
+
+    DimSetIter iter = m_sumDims.begin();
+    for(; iter != m_sumDims.end(); ++iter) {
+      numProcs *= GridLens[*iter];
+    }
+      
+    DLANode *input = (DLANode*)(Input(1));
+    unsigned int num = InputConnNum(1);
+
+    const unsigned int totNumIters = input->LocalLen(num,0)->NumSizes();
+    const Dim numDims = input->NumDims(num);
+
+    for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+      Cost temp = 1;
+      for (Dim dim = 0; dim < numDims; ++dim) {
+	temp *= (*(input->LocalLen(num,dim)))[iteration];
+      }
+      m_cost += AllReduce(temp*numProcs, numProcs);
+    }
+  }
+}
+
+void SumScatterUpdateNode::PrintCode(IndStream &out)
+{
+  out.Indent();
+  *out << GetInputNameStr(1) << ".SumScatterUpdate( ";
+  out << m_coef;
+  *out << ", " << GetInputNameStr(0)
+       << ", m";
+  DimSetConstIter iter = m_sumDims.begin();
+  for(; iter != m_sumDims.end(); ++iter) {
+    *out << "_" << *iter;
+  }
+  *out << " );\n";
+}
+
+void SumScatterUpdateNode::FlattenCore(ofstream &out) const
+{
+  throw;
+}
+
+void SumScatterUpdateNode::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   throw;
 }

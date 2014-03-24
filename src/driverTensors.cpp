@@ -72,7 +72,8 @@ PSet* Cont1Example();
 void AddTrans()
 {
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatA(DMLAYER, SMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
 }
 
 void AddSimplifiers()

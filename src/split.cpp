@@ -1342,6 +1342,7 @@ void Split::UpdateLocalSizes()
   Dim numDims = InputNumDims(0);
   const DistType t = InputDistType(0);
   for (Dim dim = 0; dim < numDims; ++ dim) {
+    throw;
     GetLocalSizes(t, m_sizes+dim, m_lsizes+dim);
   }
 }

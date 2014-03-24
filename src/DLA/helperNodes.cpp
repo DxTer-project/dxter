@@ -486,6 +486,7 @@ void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info)
   m_varName.Unflatten(in);
   READ(m_val);
 }
+#endif
 
 NodeType TempVarNode::GetType() const 
 {
@@ -542,6 +543,7 @@ void TempVarNode::Prop()
   }
 }
 
+#if TWOD
 const Sizes* TempVarNode::GetM(unsigned int num) const
 {
   if (num > 0)
@@ -569,6 +571,24 @@ const Sizes* TempVarNode::LocalN(unsigned int num) const
     throw;
   return m_nlsize;
 }
+#elif DOTENSORS
+const Dim TempVarNode::NumDims(unsigned int num) const
+{
+  return InputNumDims(0);
+}
+
+const Sizes* TempVarNode::Len(unsigned int num, Dim dim) const
+{
+  if (num > 0)
+    throw;
+  return InputLen(0, dim);
+}
+
+const Sizes* TempVarNode::LocalLen(unsigned int num, Dim dim) const
+{
+  return &(m_lsizes[dim]);
+}
+#endif
 
 Name TempVarNode::GetName(unsigned int num) const
 {
@@ -608,16 +628,24 @@ void TempVarNode::UnflattenCore(ifstream &in, SaveInfo &info)
 
 void TempVarNode::ClearSizeCache()
 {
+#if TWOD
   if (!m_mlsize)
     return;
   delete m_mlsize;
   m_mlsize = NULL;
   delete m_nlsize;
   m_nlsize = NULL;
+#elif DOTENSORS
+  if (m_lsizes)
+    return;
+  delete [] m_lsizes;
+  m_lsizes = NULL;
+#endif
 }
 
 void TempVarNode::BuildSizeCache()
 {
+#if TWOD
   if (m_mlsize)
     return;
   m_mlsize = new Sizes;
@@ -630,8 +658,20 @@ void TempVarNode::BuildSizeCache()
 #else
 sdlkfj
 #endif
+#elif DOTENSORS
+
+  if (m_lsizes)
+    return;
+ Dim numDims = InputNumDims(0);
+ m_lsizes = new Sizes[numDims];
+ 
+ for (Dim dim = 0; dim < numDims; ++dim)
+   GetLocalSizes(m_distType, dim, InputLen(0,dim), m_lsizes+dim);
+ 
+#endif
 }
 
+#if TWOD
 #if DOELEM
 void MakeTrapNode::SanityCheck()
 {
