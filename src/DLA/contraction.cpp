@@ -6,6 +6,10 @@
 typedef vector<unsigned int *> ContType;
 typedef ContType::iterator ContTypeIter;
 
+void MatchDistsAndFillInWithStar(string indices, 
+				 const DistType &matchingDists, string matchingIndices,
+				 DistType &final);
+/*
 void RecursivelyFindDistributions(DimVec *dists, Dim thisDim, 
 				  const DistType &AType, const DimVec &ADims,
 				  const DistType &BType, const DimVec &BDims,
@@ -20,7 +24,7 @@ void MatchDistsAndFillIn(string indices,
 			 const DistType &matchingDists, string matchingIndices,
 			 unsigned int *fillInDists, const DimVec &fillInDims,
 			 DistType &final);
-
+*/
 
 Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type, string indices)
 :
@@ -134,6 +138,8 @@ Phase Contraction::MaxPhase() const
   }
 }
 
+
+/*
 int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void **cache) const
 {
   if (node->GetNodeClass() != Contraction::GetClass())
@@ -181,20 +187,20 @@ void RecursivelyFindDistributions(DimVec *dists, Dim thisDim,
 				  DimSet &usedDims, Dim numDims,
 				  ContType *distOptions)
 {
-  /*
-    dists ->  a numContDims-length c-style array of DimVecs;
-              the kth DimVec holds the dimensions for
-	      the k-th index's distribution
-    thisDim -> this call is the thisDim^{th} index's call
-    {A,B}Type -> DistType for the {A,B} tensor
-    {A,B}Dims -> Map of contraction indices to dimensions of {A,B} (i.e.,
-                 where those indices are in the tensor}
-		 So the ADim[thisDim] distribution of AType is the
-		 distribution of A for the current contraction index
-    usedDims -> List of processes grid dimensions that have been 
-                used for distribution up to this point in the recursion
-    distOptions -> Vector of DistTypes 
-  */
+
+//     dists ->  a numContDims-length c-style array of DimVecs;
+//               the kth DimVec holds the dimensions for
+// 	      the k-th index's distribution
+//     thisDim -> this call is the thisDim^{th} index's call
+//     {A,B}Type -> DistType for the {A,B} tensor
+//     {A,B}Dims -> Map of contraction indices to dimensions of {A,B} (i.e.,
+//                  where those indices are in the tensor}
+// 		 So the ADim[thisDim] distribution of AType is the
+// 		 distribution of A for the current contraction index
+//     usedDims -> List of processes grid dimensions that have been 
+//                 used for distribution up to this point in the recursion
+//     distOptions -> Vector of DistTypes 
+  
   if (thisDim == ADims.size()) {
     DimSet unUsedDims;
     DimSetIter iter = usedDims.begin();
@@ -409,7 +415,7 @@ void DistContToLocalContStatC::CleanCache(void **cache) const
     delete [] *iter;
   delete types;
 }
-
+*/
 /*
 Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
 {
@@ -434,5 +440,76 @@ Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
 }
 */
 
+
+string DistContToLocalContStatC::GetType() const
+{
+  return "DistContToLocalContStatC"
+    + LayerNumToStr(m_fromLayer) + LayerNumToStr(m_toLayer);
+}
+
+bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != Contraction::GetClass())
+    throw;
+  const Contraction *cont = (Contraction*)node;
+  return (cont->GetLayer() == m_fromLayer);
+}
+
+void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
+{
+  Contraction *cont = (Contraction*)node;
+
+  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
+  DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
+
+  NodeConn *CConn = cont->InputConn(2);
+  if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
+    CConn = CConn->m_n->InputConn(0);
+
+  const DistType &CType = ((DLANode*)(CConn->m_n))->GetDistType(CConn->m_num);
+
+  DistType AType;
+  MatchDistsAndFillInWithStar(cont->GetInputName(0).m_indices,
+		      CType, ((DLANode*)(CConn->m_n))->GetName(CConn->m_num).m_indices,
+		      AType);
+  
+  DistType BType;
+  MatchDistsAndFillInWithStar(cont->GetInputName(1).m_indices,
+		      CType, ((DLANode*)(CConn->m_n))->GetName(CConn->m_num).m_indices,
+		      BType);
+
+  RedistNode *node1 = new RedistNode(AType);
+  RedistNode *node2 = new RedistNode(BType);
+  RedistNode *node3 = new RedistNode(CType);
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, cont->m_indices);
+  node1->AddInput(node->Input(0),node->InputConnNum(0));
+  node2->AddInput(node->Input(1),node->InputConnNum(1));
+  node3->AddInput(node->Input(2),node->InputConnNum(2));
+  LCont->AddInput(node1,0);
+  LCont->AddInput(node2,0);
+  LCont->AddInput(node3,0);
+
+  cont->RedirectChildren(LCont,0);
+
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+  
+void MatchDistsAndFillInWithStar(string indices, 
+				 const DistType &matchingDists, string matchingIndices,
+				 DistType &final)
+{
+  final.PrepForNumDims(indices.length());
+  string::iterator iter = indices.begin();
+  for(; iter != indices.end(); ++iter) {
+    char index = *iter;
+    size_t loc = matchingIndices.find(index);
+    if (loc == string::npos) {
+      final.m_dists[loc] = 0; // = *
+    }
+    else {
+      final.m_dists[loc] = matchingDists.m_dists[loc];
+    }
+  }
+}
 
 #endif

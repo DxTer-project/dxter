@@ -49,8 +49,7 @@ using namespace std;
 #define BLIS_OUTER_BSVAL 256
 #elif DOTENSORS
 #define TENSOR_BSVAL 128
-#define MAX_NUM_DIMS 4
-#define MAX_NUM_GRID_DIMS 6
+#define NUM_GRID_DIMS 6
 #endif 
 #if TWOD
 #define PVAL RVAL*CVAL
@@ -69,7 +68,7 @@ extern Size P;
 extern Size R;
 extern Size C;
 #elif DOTENSORS
-extern Size GridLens[MAX_NUM_GRID_DIMS];
+extern Size GridLens[NUM_GRID_DIMS];
 #endif
 #if DOELEM
 extern Size ELEM_BS;

@@ -71,6 +71,8 @@ InputNode::InputNode(NodeType type, unsigned int numDims, const SizesArray sizes
 : 
   m_type(type), m_numDims(numDims), m_lsizes(NULL)
 {
+  if (numDims > NUM_GRID_DIMS)
+    throw;
   m_sizes = new Sizes[numDims];
   for(unsigned int i = 0; i < numDims; ++i)
     m_sizes[i] = sizes[i];

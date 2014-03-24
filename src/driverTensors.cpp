@@ -71,7 +71,7 @@ Size bigSize = 15;
 PSet* Cont1Example();
 void AddTrans()
 {
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC, DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
 }
 
 void AddSimplifiers()
@@ -209,7 +209,7 @@ PSet* Cont1Example()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Contraction *cont = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,(string)"cd");
+  Contraction *cont = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,(string)"cd");
   cont->AddInputs(6,
 		  tunA,0,
 		  tunB,0,

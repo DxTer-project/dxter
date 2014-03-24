@@ -129,7 +129,7 @@ DimSet DistType::UsedGridDims() const
 
 void DistType::SetToDefault(Dim numDims)
 {
-  if (numDims > MAX_NUM_DIMS)
+  if (numDims > NUM_GRID_DIMS)
     throw;
   m_numDims = numDims;
   m_dists = new Dim[numDims];
@@ -179,7 +179,7 @@ DimVec DistType::DistEntryDims(unsigned int dist)
   DimVec vec;
   if (dist == 0)
     return vec;
-  unsigned int currStage = MAX_NUM_DIMS;
+  unsigned int currStage = NUM_GRID_DIMS;
   unsigned int distVal = dist-1;
   unsigned int numDists = 1;
   while (dist > currStage) {
@@ -198,7 +198,7 @@ DimVec DistType::DistEntryDims(unsigned int dist)
 #endif
     distVal -= currStage;
     numDists++;
-    currStage *= MAX_NUM_DIMS;
+    currStage *= NUM_GRID_DIMS;
 #if 0
     cout << "distVal aft " << distVal << endl;
     cout << "numDists aft " << numDists << endl;
@@ -212,8 +212,8 @@ DimVec DistType::DistEntryDims(unsigned int dist)
     cout << "overwriting " << distVal << " with " << distVal / MAX_NUM_DIMS << endl;
     cout << "numDists " << numDists << " being decremented" << endl;
 #endif
-    vec.insert(vec.begin(), distVal % MAX_NUM_DIMS);
-    distVal = distVal / MAX_NUM_DIMS;
+    vec.insert(vec.begin(), distVal % NUM_GRID_DIMS);
+    distVal = distVal / NUM_GRID_DIMS;
     --numDists;
   }
   if (distVal != 0) {
@@ -235,7 +235,7 @@ unsigned int DistType::DimsToDistEntry(DimVec dims)
     //offset on the right
     distVal += currStage * *iter;
     
-    currStage *= MAX_NUM_DIMS;
+    currStage *= NUM_GRID_DIMS;
   }
 
   if (distVal > 1410273309) {
@@ -295,19 +295,19 @@ void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes)
     localSizes[dim] = sizes[dim];
     if (distVal != 0) {
       distVal--;
-      unsigned int currStage = MAX_NUM_DIMS;
+      unsigned int currStage = NUM_GRID_DIMS;
       unsigned int numDists = 0;
       unsigned int coef = 1;
       while (distVal >= currStage) {
 	distVal -= currStage;
 	numDists++;
-	currStage *= MAX_NUM_DIMS;
+	currStage *= NUM_GRID_DIMS;
       }
       string out;
       while (distVal > 0) {
-	Dim distDim = distVal % MAX_NUM_DIMS;
+	Dim distDim = distVal % NUM_GRID_DIMS;
 	coef *= GridLens[distDim];
-	distVal = distVal / MAX_NUM_DIMS;
+	distVal = distVal / NUM_GRID_DIMS;
 	--numDists;
       }    
       localSizes[dim].SetCoeff(1.0 / coef);
@@ -321,19 +321,19 @@ void GetLocalSizes(DistType dist, Dim dim, const Sizes* sizes, Sizes* localSizes
   *localSizes = *sizes;
   if (distVal != 0) {
     distVal--;
-    unsigned int currStage = MAX_NUM_DIMS;
+    unsigned int currStage = NUM_GRID_DIMS;
     unsigned int numDists = 0;
     unsigned int coef = 1;
     while (distVal >= currStage) {
       distVal -= currStage;
       numDists++;
-      currStage *= MAX_NUM_DIMS;
+      currStage *= NUM_GRID_DIMS;
     }
     string out;
     while (distVal > 0) {
-      Dim distDim = distVal % MAX_NUM_DIMS;
+      Dim distDim = distVal % NUM_GRID_DIMS;
       coef *= GridLens[distDim];
-      distVal = distVal / MAX_NUM_DIMS;
+      distVal = distVal / NUM_GRID_DIMS;
       --numDists;
     }    
     localSizes->SetCoeff(1.0 / coef);
