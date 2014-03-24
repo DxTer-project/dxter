@@ -28,6 +28,7 @@
 
 #include "DLANode.h"
 #include "transform.h"
+#include "DLAOp.h"
 
 class RedistNode : public DLANode
 {
@@ -61,25 +62,26 @@ class RedistNode : public DLANode
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
 
-class RedistNodeWithSummation : public RedistNode
+class RedistNodeWithSummation : public DLAOp<1,1>
 {
  public:
-  DimVec m_sumDims;
- RedistNodeWithSummation() : RedistNode() {}
-  RedistNodeWithSummation(const DistType &destType, const DimVec &sumDims);
+  DimSet m_sumDims;
+ RedistNodeWithSummation() : DLAOp<1,1>() {}
+  RedistNodeWithSummation(const DimSet &sumDims);
   static Node* BlankInst() { return  new RedistNodeWithSummation; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  //  virtual bool IsRedistNode() const {return true;}
+  virtual bool IsRedistNode() const {return true;}
   virtual NodeType GetType() const;
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  RedistNode* CreateTrans(Trans trans);
+  //  RedistNode* CreateTrans(Trans trans);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "redistWithSum";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
 };
 
 class RemoveWastedRedist : public SingleTrans

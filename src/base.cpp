@@ -139,15 +139,15 @@ void DistType::SetToDefault(Dim numDims)
   unsigned int tipPoint = numDims;
   if (numEndDists != numStartDists) 
     tipPoint = (NUM_GRID_DIMS - numEndDists * numDims) / (numStartDists - numEndDists);
-    
 
+  /*    
   cout <<"numDims: " << numDims 
        << "\ngridDims: " << NUM_GRID_DIMS << endl;
   
   cout << "start " << numStartDists << endl;
   cout << "end " << numEndDists << endl;
   cout << "tip " << tipPoint << endl;
-
+  */
   Dim currDistDim = 0;
   for (Dim i = 0; i < numDims; ++i) {
     DimVec vec;

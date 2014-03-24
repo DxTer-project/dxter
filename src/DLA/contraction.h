@@ -28,6 +28,18 @@ class Contraction : public DLAOp<3,1>
   virtual void PrintCode(IndStream &out);
 };
 
+class DistContToLocalContStatA : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  DistContToLocalContStatA(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 class DistContToLocalContStatC : public SingleTrans
 {
  public:

@@ -252,8 +252,8 @@ void RedistNode::PrintCode(IndStream &out)
 }
 
 
-RedistNodeWithSummation::RedistNodeWithSummation(const DistType &destType, const DimVec &sumDims)
-  : RedistNode(destType)
+RedistNodeWithSummation::RedistNodeWithSummation(const DimSet &sumDims)
+  : DLAOp<1,1>()
 {
   m_sumDims = sumDims;
 }
@@ -262,15 +262,15 @@ RedistNodeWithSummation::RedistNodeWithSummation(const DistType &destType, const
 void RedistNodeWithSummation::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   const RedistNodeWithSummation *node = (RedistNodeWithSummation*)orig;
-  RedistNode::Duplicate(node, shallow, possMerging);
+  DLAOp<1,1>::Duplicate(node, shallow, possMerging);
   m_sumDims = node->m_sumDims;  
 }
 
 NodeType RedistNodeWithSummation::GetType() const
 {
   stringstream str;
-  str << "redistWithSum";
-  DimVecConstIter iter = m_sumDims.begin();
+  str << "AllReduce";
+  DimSetConstIter iter = m_sumDims.begin();
   for(; iter != m_sumDims.end(); ++iter)
     str << *iter << ",";
   return str.str();
@@ -282,12 +282,44 @@ void RedistNodeWithSummation::SanityCheck()
 
 void RedistNodeWithSummation::Prop()
 {
-  throw;
+  if (!IsValidCost(m_cost)) {
+    DLAOp<1,1>::Prop();
+
+
+    m_cost = 0;
+    unsigned int numProcs = 1;
+
+    DimSetIter iter = m_sumDims.begin();
+    for(; iter != m_sumDims.end(); ++iter) {
+      numProcs *= GridLens[*iter];
+    }
+      
+    DLANode *input = (DLANode*)(Input(0));
+    unsigned int num = InputConnNum(0);
+
+    const unsigned int totNumIters = input->LocalLen(num,0)->NumSizes();
+    const Dim numDims = input->NumDims(num);
+
+    for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+      Cost temp = 1;
+      for (Dim dim = 0; dim < numDims; ++dim) {
+	temp *= (*(input->LocalLen(num,dim)))[iteration];
+      }
+      m_cost += AllReduce(temp, numProcs);
+    }
+  }
 }
 
 void RedistNodeWithSummation::PrintCode(IndStream &out)
 {
-  throw;
+  out.Indent();
+  *out << "AllReduceOnDims( " << GetName(0).str()
+       << ", m";
+  DimSetConstIter iter = m_sumDims.begin();
+  for(; iter != m_sumDims.end(); ++iter) {
+    *out << "_" << *iter;
+  }
+  *out << " );\n";
 }
 
 void RedistNodeWithSummation::FlattenCore(ofstream &out) const

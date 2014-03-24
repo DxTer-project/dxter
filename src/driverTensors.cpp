@@ -72,6 +72,7 @@ PSet* Cont1Example();
 void AddTrans()
 {
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatA(DMLAYER, SMLAYER), DPTENSORPHASE);
 }
 
 void AddSimplifiers()
@@ -197,7 +198,7 @@ PSet* Cont1Example()
     sizes[dim].AddRepeatedSizes(smallSize, 1, 1);
 
   InputNode *Ain = new InputNode("A input", 3, sizes, "A", "acd");
-  InputNode *Bin = new InputNode("B input", 4, sizes, "B", "cdef");
+  InputNode *Bin = new InputNode("B input", 4, sizes, "B", "cefd");
   InputNode *Cin = new InputNode("C input", 3, sizes, "C", "aef");
 
   PossTunnel *tunA = new PossTunnel(POSSTUNIN);

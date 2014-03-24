@@ -30,7 +30,7 @@
 
 //Print out code for all generated implementations
 // This takes a while for large search spaces
-//#define PRINTCODE
+#define PRINTCODE
 
 //Save generated implementations to disk
 // so they can be loaded on a separate run
@@ -349,6 +349,8 @@ void Universe::PrintAll(int algNum)
     IndStream codeOut(&out,ELEMSTREAM);
 #elif DOSQM || DOSM
     IndStream codeOut(&out,BLISSTREAM);
+#elif DOTENSORS
+    IndStream codeOut(&out,TENSORSTREAM);
 #endif
   optGraph = 0;
   time(&start);

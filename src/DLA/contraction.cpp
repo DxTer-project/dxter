@@ -85,8 +85,8 @@ void Contraction::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
     m_cost = 0;
-    cout << "improve Contraction::Prop code\n";
-    cout << "reflect in DistContToLocalContStatC::RHSCostEstimate\n";
+    //    cout << "improve Contraction::Prop code\n";
+    //    cout << "reflect in DistContToLocalContStatC::RHSCostEstimate\n";
     DimVec dims = MapIndicesToDims(m_indices,GetInputName(0).m_indices);
     const Sizes *sizes = InputLocalLen(2,0);
     Dim numDims = InputNumDims(2);
@@ -443,8 +443,7 @@ Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
 
 string DistContToLocalContStatC::GetType() const
 {
-  return "DistContToLocalContStatC"
-    + LayerNumToStr(m_fromLayer) + LayerNumToStr(m_toLayer);
+  return "DistContToLocalContStatC";
 }
 
 bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) const
@@ -496,6 +495,87 @@ void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
   poss->AddNode(LCont);
 
   cont->RedirectChildren(LCont,0);
+
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+
+
+string DistContToLocalContStatA::GetType() const
+{
+  return "DistContToLocalContStatA";
+}
+
+bool DistContToLocalContStatA::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != Contraction::GetClass())
+    throw;
+  const Contraction *cont = (Contraction*)node;
+  return (cont->GetLayer() == m_fromLayer);
+}
+
+void DistContToLocalContStatA::Apply(Poss *poss, Node *node) const
+{
+  Contraction *cont = (Contraction*)node;
+
+  DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
+  DimVec CDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(2).m_indices);
+
+
+  NodeConn *AConn = cont->InputConn(0);
+  if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
+    AConn = AConn->m_n->InputConn(0);
+
+  const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
+
+  string AIndices = ((DLANode*)(AConn->m_n))->GetName(AConn->m_num).m_indices;
+  DimSet sumDims;
+  string::iterator iter = cont->m_indices.begin();
+  for(; iter != cont->m_indices.end(); ++iter) {
+    size_t loc = AIndices.find(*iter);
+    if (loc != string::npos) {
+      DimVec dims = AType.DistEntryDims(AType.m_dists[loc]);
+      sumDims.insert(dims.begin(),dims.end());
+    }
+  }
+
+  DistType BType;
+  MatchDistsAndFillInWithStar(cont->GetInputName(1).m_indices,
+			      AType, AIndices,
+			      BType);
+  
+  DistType CType;
+  MatchDistsAndFillInWithStar(cont->GetInputName(2).m_indices,
+			      AType, AIndices, 
+			      CType);
+
+  
+
+
+  RedistNode *node1 = new RedistNode(AType);
+  RedistNode *node2 = new RedistNode(BType);
+  RedistNode *node3 = new RedistNode(CType);
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, cont->m_indices);
+  node1->AddInput(node->Input(0),node->InputConnNum(0));
+  node2->AddInput(node->Input(1),node->InputConnNum(1));
+  node3->AddInput(node->Input(2),node->InputConnNum(2));
+  LCont->AddInput(node1,0);
+  LCont->AddInput(node2,0);
+  LCont->AddInput(node3,0);
+  poss->AddNode(node1);
+  poss->AddNode(node2);
+  poss->AddNode(node3);
+  poss->AddNode(LCont);
+
+  RedistNodeWithSummation *sum = new RedistNodeWithSummation(sumDims);
+  sum->AddInput(LCont, 0);
+  poss->AddNode(sum);
+
+  RedistNode *node4 = new RedistNode(cont->GetDistType(0));
+  node4->AddInput(sum);
+  poss->AddNode(node4);
+
+  cont->RedirectChildren(node4,0);
 
   node->m_poss->DeleteChildAndCleanUp(node);
 }
