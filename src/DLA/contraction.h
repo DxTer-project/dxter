@@ -52,6 +52,31 @@ class DistContToLocalContStatASumScatter : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+
+class DistContToLocalContStatBAllReduce : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  DistContToLocalContStatBAllReduce(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+class DistContToLocalContStatBSumScatter : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  DistContToLocalContStatBSumScatter(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 class DistContToLocalContStatC : public SingleTrans
 {
  public:

@@ -659,6 +659,168 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
 
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+
+
+
+
+
+string DistContToLocalContStatBAllReduce::GetType() const
+{
+  return "DistContToLocalContStatBAllReduce";
+}
+
+bool DistContToLocalContStatBAllReduce::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != Contraction::GetClass())
+    throw;
+  const Contraction *cont = (Contraction*)node;
+  return (cont->GetLayer() == m_fromLayer);
+}
+
+void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
+{
+  Contraction *cont = (Contraction*)node;
+
+  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
+  DimVec CDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(2).m_indices);
+
+
+  NodeConn *BConn = cont->InputConn(1);
+  if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
+    BConn = BConn->m_n->InputConn(0);
+
+  const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
+
+  string BIndices = ((DLANode*)(BConn->m_n))->GetName(BConn->m_num).m_indices;
+  DimSet sumDims;
+  string::iterator iter = cont->m_indices.begin();
+  for(; iter != cont->m_indices.end(); ++iter) {
+    size_t loc = BIndices.find(*iter);
+    if (loc != string::npos) {
+      DimVec dims = BType.DistEntryDims(BType.m_dists[loc]);
+      sumDims.insert(dims.begin(),dims.end());
+    }
+  }
+
+  DistType AType;
+  MatchDistsAndFillInWithStar(cont->GetInputName(0).m_indices,
+			      BType, BIndices,
+			      AType);
+  
+  DistType CType;
+  MatchDistsAndFillInWithStar(cont->GetInputName(2).m_indices,
+			      BType, BIndices, 
+			      CType);
+
+  
+
+
+  RedistNode *node1 = new RedistNode(AType);
+  RedistNode *node2 = new RedistNode(BType);
+  RedistNode *node3 = new RedistNode(CType);
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, cont->m_indices);
+  node1->AddInput(node->Input(0),node->InputConnNum(0));
+  node2->AddInput(node->Input(1),node->InputConnNum(1));
+  node3->AddInput(node->Input(2),node->InputConnNum(2));
+  LCont->AddInput(node1,0);
+  LCont->AddInput(node2,0);
+  LCont->AddInput(node3,0);
+  poss->AddNode(node1);
+  poss->AddNode(node2);
+  poss->AddNode(node3);
+  poss->AddNode(LCont);
+
+  AllReduceNode *sum = new AllReduceNode(sumDims);
+  sum->AddInput(LCont, 0);
+  poss->AddNode(sum);
+
+  RedistNode *node4 = new RedistNode(cont->GetDistType(0));
+  node4->AddInput(sum);
+  poss->AddNode(node4);
+
+  cont->RedirectChildren(node4,0);
+
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+
+
+
+string DistContToLocalContStatBSumScatter::GetType() const
+{
+  return "DistContToLocalContStatBSumScatter";
+}
+
+bool DistContToLocalContStatBSumScatter::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != Contraction::GetClass())
+    throw;
+  const Contraction *cont = (Contraction*)node;
+  return (cont->GetLayer() == m_fromLayer);
+}
+
+void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
+{
+  Contraction *cont = (Contraction*)node;
+
+  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
+  DimVec CDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(2).m_indices);
+
+
+  NodeConn *BConn = cont->InputConn(1);
+  if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
+    BConn = BConn->m_n->InputConn(0);
+
+  const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
+
+  string BIndices = ((DLANode*)(BConn->m_n))->GetName(BConn->m_num).m_indices;
+  DimSet sumDims;
+  string::iterator iter = cont->m_indices.begin();
+  for(; iter != cont->m_indices.end(); ++iter) {
+    size_t loc = BIndices.find(*iter);
+    if (loc != string::npos) {
+      DimVec dims = BType.DistEntryDims(BType.m_dists[loc]);
+      sumDims.insert(dims.begin(),dims.end());
+    }
+  }
+
+  DistType AType;
+  MatchDistsAndFillInWithStar(cont->GetInputName(0).m_indices,
+			      BType, BIndices,
+			      AType);
+  
+  DistType CType;
+  MatchDistsAndFillInWithStar(cont->GetInputName(2).m_indices,
+			      BType, BIndices, 
+			      CType);
+
+
+  RedistNode *node1 = new RedistNode(AType);
+  RedistNode *node2 = new RedistNode(BType);
+
+  TempVarNode *temp = new TempVarNode(CType);
+
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, cont->m_indices);
+  node1->AddInput(node->Input(0),node->InputConnNum(0));
+  node2->AddInput(node->Input(1),node->InputConnNum(1));
+  temp->AddInput(node->Input(2),node->InputConnNum(2));
+  LCont->AddInput(node1,0);
+  LCont->AddInput(node2,0);
+  LCont->AddInput(temp,0);
+  poss->AddNode(node1);
+  poss->AddNode(node2);
+  poss->AddNode(temp);
+  poss->AddNode(LCont);
+
+  SumScatterUpdateNode *sum = new SumScatterUpdateNode(sumDims, cont->m_beta);
+  sum->AddInput(LCont, 0);
+  sum->AddInput(node->Input(2),node->InputConnNum(2));
+  poss->AddNode(sum);
+
+  cont->RedirectChildren(sum,0);
+
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
   
 void MatchDistsAndFillInWithStar(string indices, 
 				 const DistType &matchingDists, string matchingIndices,
