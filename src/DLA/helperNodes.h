@@ -60,7 +60,7 @@ class InputNode : public DLANode
 #endif
   virtual void SanityCheck();
   virtual void Prop();
-  virtual void PrintCode(IndStream &out) {}
+  virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "inputNode";}
 #if TWOD

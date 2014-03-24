@@ -133,8 +133,30 @@ void DistType::SetToDefault(Dim numDims)
     throw;
   m_numDims = numDims;
   m_dists = new Dim[numDims];
-  for (Dim i = 0; i < numDims; ++i)
-    m_dists[i] = i+1;
+
+  unsigned int numStartDists = ceil((double)NUM_GRID_DIMS / numDims);
+  unsigned int numEndDists = floor((double)NUM_GRID_DIMS / numDims);
+  unsigned int tipPoint = numDims;
+  if (numEndDists != numStartDists) 
+    tipPoint = (NUM_GRID_DIMS - numEndDists * numDims) / (numStartDists - numEndDists);
+    
+
+  cout <<"numDims: " << numDims 
+       << "\ngridDims: " << NUM_GRID_DIMS << endl;
+  
+  cout << "start " << numStartDists << endl;
+  cout << "end " << numEndDists << endl;
+  cout << "tip " << tipPoint << endl;
+
+  Dim currDistDim = 0;
+  for (Dim i = 0; i < numDims; ++i) {
+    DimVec vec;
+    for (unsigned int j = 0; j < (i < tipPoint ? numStartDists : numEndDists); ++j)  {
+      vec.push_back(currDistDim);
+      currDistDim++;
+    }
+    m_dists[i] = DimsToDistEntry(vec);
+  }
 }
 
 string DistType::DistEntryToStr(unsigned int dist)
@@ -230,6 +252,8 @@ unsigned int DistType::DimsToDistEntry(DimVec dims)
   unsigned int distVal = 0;
   DimVecConstRevIter iter = dims.rbegin();
   for(; iter != dims.rend(); ++iter) {
+    if (*iter > NUM_GRID_DIMS)
+      throw;
     //offset coming from the left
     distVal += currStage;
     //offset on the right

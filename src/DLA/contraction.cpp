@@ -472,11 +472,13 @@ void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
   MatchDistsAndFillInWithStar(cont->GetInputName(0).m_indices,
 		      CType, ((DLANode*)(CConn->m_n))->GetName(CConn->m_num).m_indices,
 		      AType);
+
   
   DistType BType;
   MatchDistsAndFillInWithStar(cont->GetInputName(1).m_indices,
 		      CType, ((DLANode*)(CConn->m_n))->GetName(CConn->m_num).m_indices,
 		      BType);
+
 
   RedistNode *node1 = new RedistNode(AType);
   RedistNode *node2 = new RedistNode(BType);
@@ -503,15 +505,14 @@ void MatchDistsAndFillInWithStar(string indices,
 				 DistType &final)
 {
   final.PrepForNumDims(indices.length());
-  string::iterator iter = indices.begin();
-  for(; iter != indices.end(); ++iter) {
-    char index = *iter;
+  for(unsigned int i = 0; i < indices.length(); ++i) {
+    char index = indices[i];
     size_t loc = matchingIndices.find(index);
     if (loc == string::npos) {
-      final.m_dists[loc] = 0; // = *
+      final.m_dists[i] = 0; // = *
     }
     else {
-      final.m_dists[loc] = matchingDists.m_dists[loc];
+      final.m_dists[i] = matchingDists.m_dists[loc];
     }
   }
 }

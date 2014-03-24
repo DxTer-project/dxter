@@ -175,7 +175,6 @@ void RedistNode::Prop()
 	m_cost += AllToAll(temp * numProcs, numProcs);
       }
     }
-    throw;
   }
 }
 

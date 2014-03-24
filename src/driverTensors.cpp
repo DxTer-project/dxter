@@ -196,9 +196,9 @@ PSet* Cont1Example()
   for (Dim dim = 0; dim < 4; ++dim)
     sizes[dim].AddRepeatedSizes(smallSize, 1, 1);
 
-  InputNode *Ain = new InputNode("A input", 4, sizes, "A", "abcd");
+  InputNode *Ain = new InputNode("A input", 3, sizes, "A", "acd");
   InputNode *Bin = new InputNode("B input", 4, sizes, "B", "cdef");
-  InputNode *Cin = new InputNode("C input", 4, sizes, "C", "abef");
+  InputNode *Cin = new InputNode("C input", 3, sizes, "C", "aef");
 
   PossTunnel *tunA = new PossTunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);
