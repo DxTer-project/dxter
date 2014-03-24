@@ -488,6 +488,10 @@ void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
   LCont->AddInput(node1,0);
   LCont->AddInput(node2,0);
   LCont->AddInput(node3,0);
+  poss->AddNode(node1);
+  poss->AddNode(node2);
+  poss->AddNode(node3);
+  poss->AddNode(LCont);
 
   cont->RedirectChildren(LCont,0);
 
