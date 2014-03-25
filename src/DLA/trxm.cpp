@@ -583,6 +583,9 @@ bool TrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
       return false;
     if (trxm->m_side != m_side)
       return false;
+    if (m_dim == 1 && trxm->m_side == LEFT 
+	&& (trxm->m_tri != LOWER || trxm->m_trans != NORMAL))
+      return false;
     return true;
   }
   return false;
