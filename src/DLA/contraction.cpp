@@ -86,6 +86,37 @@ void Contraction::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
     m_cost = 0;
+
+    string AIndices = GetInputName(0).m_indices;
+    string BIndices = GetInputName(1).m_indices;
+    string CIndices = GetInputName(2).m_indices;
+
+    string::iterator strIter = m_indices.begin();
+    for(; strIter != m_indices.end(); ++strIter) {
+      const char index = *strIter;
+      if (AIndices.find(index) == string::npos)
+	throw;
+      if (BIndices.find(index) == string::npos)
+	throw;
+      if (CIndices.find(index) != string::npos)
+	throw;
+    }
+    
+    Dim dim = 0;
+    strIter = CIndices.begin();
+    for(; strIter != CIndices.end(); ++strIter, ++dim) {
+      const char index = *strIter;
+      if (AIndices.find(index) == string::npos) {
+	if (BIndices.find(index) == string::npos) {
+	  if (!InputLen(2,dim)->AllOnes())
+	    throw;
+	  //else we're contracting to a scalar or vector or matrix etc.
+	}
+      }
+      else if (BIndices.find(index) != string::npos)
+	throw;
+    }
+    
     //    cout << "improve Contraction::Prop code\n";
     //    cout << "reflect in DistContToLocalContStatC::RHSCostEstimate\n";
     DimVec dims = MapIndicesToDims(m_indices,GetInputName(0).m_indices);

@@ -132,6 +132,8 @@ void DistType::SetToDefault(Dim numDims)
   if (numDims > NUM_GRID_DIMS)
     throw;
   m_numDims = numDims;
+  if (m_dists)
+    delete [] m_dists;
   m_dists = new Dim[numDims];
 
   unsigned int numStartDists = ceil((double)NUM_GRID_DIMS / numDims);
@@ -157,6 +159,19 @@ void DistType::SetToDefault(Dim numDims)
     }
     m_dists[i] = DimsToDistEntry(vec);
   }
+}
+
+void DistType::SetToStar(Dim numDims)
+{
+  if (numDims > NUM_GRID_DIMS)
+    throw;
+  m_numDims = numDims;
+  if (m_dists)
+    delete [] m_dists;
+  m_dists = new Dim[numDims];
+
+  for(Dim dim = 0; dim < numDims; ++dim)
+    m_dists[dim] = 0;
 }
 
 string DistType::DistEntryToStr(unsigned int dist)

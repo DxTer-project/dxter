@@ -63,12 +63,15 @@
 //scalapack
 #define TriInv8 0
 
+Size one = 1;
 Size smallSize = 5;
 Size medSize = 10;
 Size bigSize = 15;
 //Size bs = ELEM_BS;
 
 PSet* Cont1Example();
+PSet* MartinsExample();
+
 void AddTrans()
 {
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
@@ -90,6 +93,7 @@ void Usage()
   cout << "./driver arg1 arg2 arg3 arg4\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
   cout <<"         1  -> Contraction (abcd,cdef,abef)\n";
+  cout <<"         2  -> Martin's Example\n";
 }
 
 int main(int argc, const char* argv[])
@@ -112,6 +116,9 @@ int main(int argc, const char* argv[])
     switch(algNum) {
     case(1):
       algFunc = Cont1Example;
+      break;
+    case(2):
+      algFunc = MartinsExample;
       break;
     default:
       Usage();
@@ -200,9 +207,9 @@ PSet* Cont1Example()
   for (Dim dim = 0; dim < 4; ++dim)
     sizes[dim].AddRepeatedSizes(smallSize, 1, 1);
 
-  InputNode *Ain = new InputNode("A input", 3, sizes, "A", "acd");
-  InputNode *Bin = new InputNode("B input", 4, sizes, "B", "cefd");
-  InputNode *Cin = new InputNode("C input", 3, sizes, "C", "aef");
+  InputNode *Ain = new InputNode("A input",  sizes, "A", "acd");
+  InputNode *Bin = new InputNode("B input",  sizes, "B", "cefd");
+  InputNode *Cin = new InputNode("C input",  sizes, "C", "aef");
 
   PossTunnel *tunA = new PossTunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);
@@ -226,6 +233,99 @@ PSet* Cont1Example()
   Cout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Cout,true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
+
+}
+
+PSet* MartinsExample()
+{
+  Sizes sizes[4];
+
+  for (Dim dim = 0; dim < 4; ++dim)
+    sizes[dim].AddRepeatedSizes(smallSize, 1, 1);
+
+  InputNode *Uin = new InputNode("U input",  sizes, "U", "abcd");
+  InputNode *Vin = new InputNode("V input",  sizes, "V", "acik");
+  InputNode *Win = new InputNode("W input",  sizes, "W", "ijkl");
+  InputNode *T1in = new InputNode("T1 input",  sizes, "T1", "cdij");
+  InputNode *T2in = new InputNode("T2 input",  sizes, "T2", "bcjk");
+  InputNode *T3in = new InputNode("T3 input",  sizes, "T3", "abkl");
+  InputNode *T4in = new InputNode("T4 input",  sizes, "T4", "abij");
+
+  Sizes ones[2];
+
+  for (Dim dim = 0; dim < 2; ++dim)
+    ones[dim].AddRepeatedSizes(one, 1, 1);
+
+  DistType epDist;
+  epDist.SetToStar(2);
+
+  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", "xz");
+
+  InputNode *tempIn = new InputNode("Temp input",  sizes, "Temp", "abij");
+
+  PossTunnel *tunU = new PossTunnel(POSSTUNIN);
+  tunU->AddInput(Uin,0);
+
+  PossTunnel *tunV = new PossTunnel(POSSTUNIN);
+  tunV->AddInput(Vin,0);
+
+  PossTunnel *tunW = new PossTunnel(POSSTUNIN);
+  tunW->AddInput(Win,0);
+
+  PossTunnel *tunT1 = new PossTunnel(POSSTUNIN);
+  tunT1->AddInput(T1in,0);
+
+  PossTunnel *tunT2 = new PossTunnel(POSSTUNIN);
+  tunT2->AddInput(T2in,0);
+
+  PossTunnel *tunT3 = new PossTunnel(POSSTUNIN);
+  tunT3->AddInput(T3in,0);
+
+  PossTunnel *tunT4 = new PossTunnel(POSSTUNIN);
+  tunT4->AddInput(T4in,0);
+
+  PossTunnel *tunIn = new PossTunnel(POSSTUNIN);
+  tunIn->AddInput(tempIn,0);
+
+  PossTunnel *tunOutVal = new PossTunnel(POSSTUNIN);
+  tunOutVal->AddInput(epIn,0);
+
+  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,(string)"cd");
+  cont1->AddInputs(6,
+		  tunU,0,
+		  tunT1,0,
+		  tunIn,0);
+
+
+  Contraction *cont2 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,(string)"ck");
+  cont2->AddInputs(6,
+		   tunV,0,
+		   tunT2,0,
+		   cont1,0);
+
+
+  Contraction *cont3 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,(string)"kl");
+  cont3->AddInputs(6,
+		   tunW,0,
+		   tunT3,0,
+		   cont2,0);
+
+  Contraction *cont4 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,(string)"abij");
+  cont4->AddInputs(6,
+		   tunT4,0,
+		   cont3,0,
+		   tunOutVal,0);
+
+  Poss *innerPoss = new Poss(cont4,true);
+  PSet *innerSet = new PSet(innerPoss);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(innerSet->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out,true);
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
