@@ -25,6 +25,7 @@
 
 #include "layers.h"
 #include "sizes.h"
+#include <cstring>
 
 //Maximum number of refinement to use
 // in a MultiTrans (set to something large
