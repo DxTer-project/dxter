@@ -49,7 +49,7 @@ using namespace std;
 #define BLIS_OUTER_BSVAL 256
 #elif DOTENSORS
 #define TENSOR_BSVAL 128
-#define NUM_GRID_DIMS 6
+#define NUM_GRID_DIMS 4
 #endif 
 #if TWOD
 #define PVAL RVAL*CVAL

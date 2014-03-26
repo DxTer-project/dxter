@@ -36,37 +36,10 @@
 
 #include "debug.h"
 
-
-//These control which transformations are included
-#define USEVR 1
-#define USEMCMR 1
-#define USESTAR 1
-#define USECONTRIB 1
-#define USELOCALCOMP 1
-#define EXPLOREREDISTS 1
-#define EXPLORETRANS 1
-#define USESPECIALTRSM 0
-#define USELOWERING 1
-
-#define REMOVESCALEBYONE 1 
-
-//good
-#define Hetrmm1 1
-//bad
-#define Hetrmm2 0
-#define Hetrmm3 0
-//bad
-#define TriInv1 0
-#define TriInv2 0
-//good
-#define TriInv3 1
-//scalapack
-#define TriInv8 0
-
 Size one = 1;
-Size smallSize = 5;
-Size medSize = 10;
-Size bigSize = 15;
+Size smallSize = 10;
+Size medSize = 100;
+Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
 PSet* Cont1Example();
@@ -248,16 +221,33 @@ PSet* MartinsExample()
 {
   Sizes sizes[4];
 
+  //a-d = medium
+  //i-l = big
+
   for (Dim dim = 0; dim < 4; ++dim)
-    sizes[dim].AddRepeatedSizes(smallSize, 1, 1);
+    sizes[dim].AddRepeatedSizes(medSize, 1, 1);
 
   InputNode *Uin = new InputNode("U input",  sizes, "U", "abcd");
+
+  sizes[2].ClearSizes();
+  sizes[2].AddRepeatedSizes(bigSize,1,1);
+  sizes[3].ClearSizes();
+  sizes[3].AddRepeatedSizes(bigSize,1,1);
+  
   InputNode *Vin = new InputNode("V input",  sizes, "V", "acik");
-  InputNode *Win = new InputNode("W input",  sizes, "W", "ijkl");
   InputNode *T1in = new InputNode("T1 input",  sizes, "T1", "cdij");
   InputNode *T2in = new InputNode("T2 input",  sizes, "T2", "bcjk");
   InputNode *T3in = new InputNode("T3 input",  sizes, "T3", "abkl");
   InputNode *T4in = new InputNode("T4 input",  sizes, "T4", "abij");
+
+
+  sizes[0].ClearSizes();
+  sizes[0].AddRepeatedSizes(medSize,1,1);
+  sizes[1].ClearSizes();
+  sizes[1].AddRepeatedSizes(medSize,1,1);
+
+  InputNode *Win = new InputNode("W input",  sizes, "W", "ijkl");
+  
 
   Sizes ones[2];
 
