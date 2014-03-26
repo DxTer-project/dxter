@@ -584,7 +584,9 @@ bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
 	    if (srcDistEntry != destDistEntry) {
 	      if (srcDistEntry && !IsPrefix(DistType::DistEntryDims(srcDistEntry),
 					    DistType::DistEntryDims(destDistEntry)))
-		return true;
+		{
+		  return true;
+		}
 	    }
 	  }
 	}
@@ -605,15 +607,18 @@ void SplitRedistribs::Apply(Poss *poss, Node *node) const
 
   one.m_dists[m_dim] = two->m_dists[m_dim];
 
+
   for(Dim dim = 0; dim < one.m_numDims; ++dim) {
-    if (one.m_dists[dim] >= 1342179325) {
-      cout << "one val\n";
-      throw;
+    if (dim != m_dim) {
+      if (one.m_dists[dim] != two->m_dists[dim]) {
+	if (!one.m_dists[dim] ||
+	    IsPrefix(DistType::DistEntryDims(one.m_dists[dim]),
+		     DistType::DistEntryDims(two->m_dists[dim]))) 
+	  {
+	    one.m_dists[dim] = two->m_dists[dim];
+	  }
+      }
     }
-    if (two->m_dists[dim] >= 1342179325) {
-      cout << "two val\n";
-      throw;
-    } 
   }
 
   RedistNode *newRedist = new RedistNode(one);
