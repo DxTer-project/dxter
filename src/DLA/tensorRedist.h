@@ -131,4 +131,15 @@ class CombineRedistribs : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
+
+class SplitRedistribs : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ SplitRedistribs(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"SplitRedist" + (char)(m_dim+48); }
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};
+
 #endif

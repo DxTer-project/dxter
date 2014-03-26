@@ -221,6 +221,8 @@ DimVec DistType::DistEntryDims(unsigned int dist)
   unsigned int numDists = 1;
   while (dist > currStage) {
     if (!currStage) {
+      cout << "starting dist " << dist << endl;
+      cout << "numDists " << numDists << endl;
       cout << "!currStage\n";
       throw;
     }
@@ -236,6 +238,11 @@ DimVec DistType::DistEntryDims(unsigned int dist)
     distVal -= currStage;
     numDists++;
     currStage *= NUM_GRID_DIMS;
+    if (numDists > NUM_GRID_DIMS) {
+      cout << "numDists > NUM_GRID_DIMS " << numDists << endl;
+      cout << "starting dist " << dist << endl;
+      throw;
+    }
 #if 0
     cout << "distVal aft " << distVal << endl;
     cout << "numDists aft " << numDists << endl;

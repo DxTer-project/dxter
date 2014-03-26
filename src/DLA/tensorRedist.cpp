@@ -72,12 +72,17 @@ void RedistNode::Prop()
     
     for (Dim dim = 0; dim < numDims; ++dim) {
       if (m_srcType.m_dists[dim] != m_destType.m_dists[dim]) {
-	diffs.insert(dim);
+	if (m_srcType.m_dists[dim] 
+	    && !IsPrefix(DistType::DistEntryDims(m_srcType.m_dists[dim]),
+			 DistType::DistEntryDims(m_destType.m_dists[dim])))
+	  {
+	    diffs.insert(dim);
+	  }
       }
     }
 
     if (diffs.empty()) {
-      throw;
+      //      throw;
       m_cost = 0;
     }
     else if (diffs.size() == 1) {
@@ -88,6 +93,7 @@ void RedistNode::Prop()
       
       if (src.empty() || IsPrefix(src, dest)) {
 	//local memory copy
+	throw;
 	m_cost = 0;
       }
       else if (IsPrefix(dest, src) || dest.empty()) {
@@ -144,6 +150,7 @@ void RedistNode::Prop()
 	DimVec dest = DistType::DistEntryDims(m_destType.m_dists[diffDim]);
 
 	if (src.empty() || IsPrefix(src, dest)) {
+	  throw;
 	  //local mem copy for this dimensions
 	}
 	else if (IsPrefix(dest, src) || dest.empty()) {
@@ -545,5 +552,80 @@ void CombineRedistribs::Apply(Poss *poss, Node *node) const
       }
   }
   throw;
+}
+
+bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &src = redist->InputDistType(0);
+  const DistType *dest = &(redist->m_destType);
+
+  if (src.m_numDims != dest->m_numDims)
+    throw;
+  else if (src.m_numDims <= m_dim)
+    return false;
+  else {
+    if (src.m_dists[m_dim] != dest->m_dists[m_dim]) {
+      //      cout << "src " << src.m_dists[m_dim] << endl;
+      //      cout << "dest " << dest->m_dists[m_dim] << endl;
+      if (!src.m_dists[m_dim] 
+	  || IsPrefix(DistType::DistEntryDims(src.m_dists[m_dim]),
+		      DistType::DistEntryDims(dest->m_dists[m_dim])))
+	{
+	  return false;
+	}
+      else {
+	for (Dim dim = 0; dim < dest->m_numDims; ++dim) {
+	  if (dim != m_dim) {
+	    unsigned int srcDistEntry = src.m_dists[dim];
+	    unsigned int destDistEntry = dest->m_dists[dim];
+	    if (srcDistEntry != destDistEntry) {
+	      if (srcDistEntry && !IsPrefix(DistType::DistEntryDims(srcDistEntry),
+					    DistType::DistEntryDims(destDistEntry)))
+		return true;
+	    }
+	  }
+	}
+	return false;
+      }
+    }
+    else {
+      return false;
+    }
+  }
+}
+
+void SplitRedistribs::Apply(Poss *poss, Node *node) const
+{
+  RedistNode *orig = (RedistNode*)node;
+  DistType one = orig->InputDistType(0);
+  const DistType *two = &(orig->m_destType);
+
+  one.m_dists[m_dim] = two->m_dists[m_dim];
+
+  for(Dim dim = 0; dim < one.m_numDims; ++dim) {
+    if (one.m_dists[dim] >= 1342179325) {
+      cout << "one val\n";
+      throw;
+    }
+    if (two->m_dists[dim] >= 1342179325) {
+      cout << "two val\n";
+      throw;
+    } 
+  }
+
+  RedistNode *newRedist = new RedistNode(one);
+  newRedist->AddInput(orig->Input(0), orig->InputConnNum(0));
+  poss->AddNode(newRedist);
+
+  RedistNode *newRedist2 = new RedistNode(*two);
+  newRedist2->AddInput(newRedist, 0);
+  poss->AddNode(newRedist2);
+
+  node->RedirectChildren(newRedist2, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+
 }
 #endif

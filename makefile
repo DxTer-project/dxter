@@ -1,9 +1,9 @@
 # indicate where the object files are to be created
 CC         := g++
 LINKER     := $(CC)
-CFLAGS     := -O3 -fopenmp -Wall -Isrc/ -Isrc/DLA/
+#CFLAGS     := -O3 -fopenmp -Wall -Isrc/ -Isrc/DLA/
 #CFLAGS     := -O3 -Wall
-#CFLAGS	   := -g -fopenmp -Wall
+CFLAGS	   := -g -fopenmp -Wall -Isrc/ -Isrc/DLA/
 #CFLAGS	   := -g -Wall
 #CFLAGS	   := -pg -Wall
 
