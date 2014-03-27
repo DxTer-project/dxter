@@ -570,9 +570,11 @@ bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
     if (src.m_dists[m_dim] != dest->m_dists[m_dim]) {
       //      cout << "src " << src.m_dists[m_dim] << endl;
       //      cout << "dest " << dest->m_dists[m_dim] << endl;
+      DimVec destDims =  DistType::DistEntryDims(dest->m_dists[m_dim]);
       if (!src.m_dists[m_dim] 
 	  || IsPrefix(DistType::DistEntryDims(src.m_dists[m_dim]),
-		      DistType::DistEntryDims(dest->m_dists[m_dim])))
+		      destDims))
+		     
 	{
 	  return false;
 	}
@@ -581,8 +583,17 @@ bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
 	  if (dim != m_dim) {
 	    unsigned int srcDistEntry = src.m_dists[dim];
 	    unsigned int destDistEntry = dest->m_dists[dim];
+	    DimVec srcDims = DistType::DistEntryDims(srcDistEntry);
+	    DimVecIter iter = srcDims.begin();
+	    for(; iter != srcDims.end(); ++iter) {
+	      DimVecIter iter2 = destDims.begin();
+	      for (; iter2 != destDims.end(); ++iter2) {
+		if (*iter == *iter2)
+		  return false;
+	      }
+	    }
 	    if (srcDistEntry != destDistEntry) {
-	      if (srcDistEntry && !IsPrefix(DistType::DistEntryDims(srcDistEntry),
+	      if (srcDistEntry && !IsPrefix(srcDims,
 					    DistType::DistEntryDims(destDistEntry)))
 		{
 		  return true;
@@ -606,7 +617,6 @@ void SplitRedistribs::Apply(Poss *poss, Node *node) const
   const DistType *two = &(orig->m_destType);
 
   one.m_dists[m_dim] = two->m_dists[m_dim];
-
 
   for(Dim dim = 0; dim < one.m_numDims; ++dim) {
     if (dim != m_dim) {
