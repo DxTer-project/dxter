@@ -214,6 +214,7 @@ m_distType(D_LASTDIST),
 #endif
   {}
 #endif
+ ~TempVarNode();
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new TempVarNode; }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}

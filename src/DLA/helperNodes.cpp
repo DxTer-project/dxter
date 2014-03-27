@@ -505,6 +505,23 @@ void TempVarNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_name = ((TempVarNode*)orig)->m_name;
 }
 
+TempVarNode::~TempVarNode()
+{
+#if TWOD
+  if (m_mlsize) {
+    delete m_mlsize;
+    m_mlsize = NULL;
+    delete m_nlsize;
+    m_nlsize = NULL;
+  }
+#elif DOTENSORS
+  if (m_lsizes) {
+    delete [] m_lsizes;
+    m_lsizes = NULL;
+  }
+#endif
+}
+
 void TempVarNode::PrintCode(IndStream &out)
 {
   /*
