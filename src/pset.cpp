@@ -483,22 +483,18 @@ bool PSet::TakeIter(const TransMap &transMap,
 	  PossMMap newPosses;
 	  didSomething = poss->TakeIter(transMap, simplifiers, newPosses);
 	  if (didSomething && (!newOne || newPosses.size() > 0)) {
-	    /*
-	      #ifdef _OPENMP
-	      omp_set_lock(&lock);
-	      #endif
-	    */
+#ifdef _OPENMP
+	    omp_set_lock(&lock);
+#endif
 	    newOne = true;
 	    PossMMapIter newPossesIter = newPosses.begin();
 	    for(; newPossesIter != newPosses.end(); ++newPossesIter) {
 	      if (!AddPossToMMap(mmap, (*newPossesIter).second, (*newPossesIter).second->GetHash()))
 		delete (*newPossesIter).second;
 	    }
-	    /*
-	      #ifdef _OPENMP
-	      omp_unset_lock(&lock);
-	      #endif
-	    */
+#ifdef _OPENMP
+	    omp_unset_lock(&lock);
+#endif
 	  }
 	}
       }
@@ -1074,13 +1070,14 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 
 void PSet::FormSets(unsigned int phase)
 {
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter) {
-    (*iter).second->FormSets(phase);
-    if ((*iter).first != (*iter).second->GetHash()) {
-      cout << "different hash FormSets\n";
-      throw;
-    }
+  PossMMap temp = m_posses;
+  m_posses.clear();
+  PossMMapIter iter = temp.begin();
+  while (iter != temp.end()) {
+    Poss *poss = (*iter).second;
+    poss->FormSets(phase);
+    m_posses.insert(PossMMapPair(poss->GetHash(),poss));
+    ++iter;
   }
 }
 
