@@ -271,9 +271,11 @@ typedef NodeMap::iterator NodeMapIter;
 //typedef vector<Symb> SymbVec;
 //typedef SymbVec::iterator SymbVecIter;
 //typedef SymbVec::const_iterator SymbVecConstIter;
-typedef vector<Poss*> PossVec;
-typedef PossVec::iterator PossVecIter;
-typedef PossVec::const_iterator PossVecConstIter;
+typedef multimap<size_t,Poss*> PossMMap;
+typedef PossMMap::iterator PossMMapIter;
+typedef PossMMap::const_iterator PossMMapConstIter;
+typedef std::pair<size_t,Poss*> PossMMapPair;
+typedef std::pair<PossMMapIter,PossMMapIter> PossMMapRangePair;
 typedef vector<PSet*> PSetVec;
 typedef PSetVec::iterator PSetVecIter;
 typedef PSetVec::const_iterator PSetVecConstIter;
@@ -367,7 +369,11 @@ bool FoundInNodeVec(const NodeVec &vec, const Node *node);
 
 template<class T>
 bool AddElemToVec(std::vector<T*> &vec, T *elem, bool deep = true);
-bool AddPossesToVecOrDispose(PossVec &vec, const PossVec &newPoss);
+
+bool AddPossToMMap(PossMMap &mmap, Poss *elem, size_t hash, bool deep = true);
+
+
+//bool AddPossesToVecOrDispose(PossVec &vec, const PossVec &newPoss);
 
 
 typedef void (*CullFunction)(Poss *poss, bool &cullIfPossible, bool &doNotCull);

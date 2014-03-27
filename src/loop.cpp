@@ -900,6 +900,7 @@ void Loop::BuildSizeCache()
 LoopTunnel* Loop::CreateNewLoopTunnels(Node *input,
                                        unsigned int num, Poss *possToCareAbout, UpStat stat)
 {
+  /*
   LoopTunnel *newTunIn = new LoopTunnel(SETTUNIN);
   newTunIn->SetAllStats(stat);
   newTunIn->SetPSet(this);
@@ -917,7 +918,7 @@ LoopTunnel* Loop::CreateNewLoopTunnels(Node *input,
   Node *ret = NULL;
   PossVecIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter) {
-    Poss *currPoss = *iter;
+    Poss *currPoss = (*iter).second;
     LoopTunnel *newPossTunIn = new LoopTunnel(POSSTUNIN);
     newPossTunIn->SetAllStats(stat);
     currPoss->AddNode(newPossTunIn);
@@ -936,6 +937,9 @@ LoopTunnel* Loop::CreateNewLoopTunnels(Node *input,
   if (!ret)
     throw;
   return (LoopTunnel*)ret;
+  */
+  throw;
+  return NULL;
 }
 
 void HardDeleteNode(Node *node)

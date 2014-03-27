@@ -30,18 +30,18 @@
 class PSet
 {
  public:
-  PossVec m_posses;
+  PossMMap m_posses;
   NodeVec m_inTuns;
   NodeVec m_outTuns;
   bool m_hasProped;
   bool m_isTopLevel;
   Poss *m_ownerPoss;
-  unsigned int m_currPoss;
+  PossMMapIter m_currPoss;
   PSet();
   PSet(Poss *poss);
   virtual ~PSet();
   void AddPoss(Poss *poss);
-  void AddPossesOrDispose(PossVec &vec, PossVec *added = NULL);
+  void AddPossesOrDispose(PossMMap &mmap, PossMMap *added = NULL);
   unsigned int NumPosses() {return m_posses.size();}
   virtual void SanityCheck();
   bool operator==(const Poss &rhs) const;
@@ -60,14 +60,14 @@ class PSet
   void CombineAndRemoveTunnels();
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
   void Simplify(const TransMap &simplifiers);
-  void RemoveDups();
+  //  void RemoveDups();
   void ClearFullyExpanded();
   virtual bool CanMerge(PSet *pset) const;
   virtual bool IsTransparent() const {return true;}
   bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   unsigned int TotalCount() const;
-  void InlinePoss(unsigned int possNum, PossVec &newPosses);
+  void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
   virtual void ClearPrinted();
   virtual bool IsLoop() const {return false;}
   virtual bool IsCritSect() const {return false;}

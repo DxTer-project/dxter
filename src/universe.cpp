@@ -104,7 +104,7 @@ bool Universe::TakeIter(unsigned int phase)
   
   newOne = m_pset->TakeIter(M_trans[phase], M_simplifiers);
 
-  if (newOne)
+  if (newOne && !M_globSimplifiers.empty())
     if (m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers))
       m_pset->BuildSizeCache();
   
@@ -379,9 +379,9 @@ void Universe::Print(IndStream &out, unsigned int &whichGraph)
 {
   unsigned int graphNum = 0;
   ++graphNum;
-  PossVecIter iter = m_pset->m_posses.begin();
+  PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
-    Poss *poss = *iter;
+    Poss *poss = (*iter).second;
     poss->PrintRoot(out, graphNum, whichGraph);
   }
 
@@ -411,9 +411,9 @@ void Universe::EvalCosts(IndStream &out, unsigned int &whichGraph)
   worstCost = -1;
   unsigned int graphNum = 0;
   ++graphNum;
-  PossVecIter iter = m_pset->m_posses.begin();
+  PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
-    Poss *poss = *iter;
+    Poss *poss = (*iter).second;
     poss->EvalRoot(out, graphNum, whichGraph, optGraph, optCost, worstGraph, worstCost);
   }
     

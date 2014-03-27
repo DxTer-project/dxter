@@ -288,9 +288,9 @@ void Poss::SanityCheck()
   }
   
   bool found = false;
-  PossVecConstIter iter2 = m_pset->m_posses.begin();
-  for(; !found && iter2 != m_pset->m_posses.end(); ++iter2) {
-    if (*iter2 == this)
+  PossMMapRangePair pair = m_pset->m_posses.equal_range(GetHash());
+  for(; !found && pair.first != pair.second; ++pair.first) {
+    if ((*(pair.first)).second == this)
       found = true;
   }
   if (!found) {
@@ -747,7 +747,7 @@ void Poss::ExpandTunnels()
   }
 }
 
-bool Poss::MergePosses(PossVec &newPosses,const TransMap &simplifiers, CullFunction cullFunc)
+bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunction cullFunc)
 {
   /*
     First, recurse through my PSet's then check if
@@ -807,7 +807,7 @@ bool Poss::MergePosses(PossVec &newPosses,const TransMap &simplifiers, CullFunct
                 //throw;
                 newPoss->FuseLoops(left,right,simplifiers,cullFunc);
                 SetFused((Loop*)(m_sets[left]),(Loop*)(m_sets[right]));
-                if (AddElemToVec(newPosses,newPoss))
+                if (AddPossToMMap(newPosses,newPoss,newPoss->GetHash()))
                   didMerge = true;
                 else
                   delete newPoss;
@@ -947,12 +947,12 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
     RemoveFromGraphNodes(*iter);
   }
   
-  for (unsigned int leftNum = 0; leftNum < leftSet->Size(); ++leftNum) {
-    for (unsigned int rightNum = 0; rightNum < rightSet->Size(); ++rightNum) {
+  for (PossMMapIter leftIter = leftSet->m_posses.begin(); leftIter != leftSet->m_posses.end(); ++leftIter) {
+    for (PossMMapIter rightIter = rightSet->m_posses.begin(); rightIter != rightSet->m_posses.end(); ++rightIter) {
       Poss *newLeft = new Poss;
       Poss *newRight = new Poss;
-      newLeft->Duplicate(leftSet->m_posses[leftNum],map,true);
-      newRight->Duplicate(rightSet->m_posses[rightNum],map,true);
+      newLeft->Duplicate((*leftIter).second,map,true);
+      newRight->Duplicate((*rightIter).second,map,true);
       
       for(unsigned int i = 0; i < newLeft->m_inTuns.size(); ++i) {
         map[newLeft->m_inTuns[i]->Input(0)]->AddChild(newLeft->m_inTuns[i],0);
@@ -992,7 +992,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
         throw;
       }
       
-      newSet->m_posses.push_back(newLeft);
+      newSet->m_posses.insert(PossMMapPair(newLeft->GetHash(),newLeft));
       newLeft->m_pset = newSet;
       delete newRight;
     }
@@ -1903,13 +1903,13 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
     RemoveFromGraphNodes(*iter);
   }
   
-  for (unsigned int leftNum = 0; leftNum < leftSet->Size(); ++leftNum) {
-    for (unsigned int rightNum = 0; rightNum < rightSet->Size(); ++rightNum) {
+  for (PossMMapIter leftIter = leftSet->m_posses.begin(); leftIter != leftSet->m_posses.end(); ++leftIter) {
+    for (PossMMapIter rightIter = rightSet->m_posses.begin(); rightIter != rightSet->m_posses.end(); ++rightIter) {
       Poss *newLeft = new Poss;
       Poss *newRight = new Poss;
       NodeMap map = tunMap;
-      newLeft->Duplicate(leftSet->m_posses[leftNum],map,true);
-      newRight->Duplicate(rightSet->m_posses[rightNum],map,true);
+      newLeft->Duplicate((*leftIter).second,map,true);
+      newRight->Duplicate((*rightIter).second,map,true);
       
       for(unsigned int i = 0; i < newLeft->m_inTuns.size(); ++i) {
         map[newLeft->m_inTuns[i]->Input(0)]->AddChild(newLeft->m_inTuns[i],0);
@@ -1945,7 +1945,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
       newRight->m_inTuns.clear();
       newRight->m_outTuns.clear();
       
-      newSet->m_posses.push_back(newLeft);
+      newSet->m_posses.insert(PossMMapPair(newLeft->GetHash(),newLeft));     
       newLeft->m_pset = newSet;
       delete newRight;
     }
@@ -2180,6 +2180,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   }
   
   newSet->Simplify(simplifiers);
+  //adding below.  Seems necessary
+  newSet->BuildSizeCache();
   BuildSizeCache();
 }
 
@@ -2507,7 +2509,7 @@ void Poss::GetCurrTransVec(TransVec &transVec) const
 }
 
 bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
-                    PossVec &newPosses)
+                    PossMMap &newPosses)
 {
   bool didSomething = false;
   PSetVecIter iter = m_sets.begin();
@@ -2548,7 +2550,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
 	      newPoss->Simplify(simplifiers);
 	      //newPoss->BuildSizeCache();
-	      if(!AddElemToVec(newPosses,newPoss)) {
+	      if(!AddPossToMMap(newPosses,newPoss,newPoss->GetHash())) {
 		delete newPoss;
 	      }
 	      else {
@@ -2585,7 +2587,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 		newPoss->m_transVec.push_back(const_cast<Transformation*>(marking));
 		newPoss->Simplify(simplifiers);
 		//newPoss->BuildSizeCache();
-		if(!AddElemToVec(newPosses,newPoss)) {
+		if(!AddPossToMMap(newPosses,newPoss,newPoss->GetHash())) {
 		  delete newPoss;
 		}
 		else {
@@ -2612,16 +2614,20 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 
 bool Poss::GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers)
 {
-  //recurse first since a global simplifier could affect this poss's nodes
-  // (that also means this can't be easily parallelized)
-  bool didSomething = false;
-  PSetVecIter iter = m_sets.begin();
-  for(; iter != m_sets.end(); ++iter) {
-    didSomething |= (*iter)->GlobalSimplification(globalSimplifiers, simplifiers);
+  if (!globalSimplifiers.empty()) {
+    //recurse first since a global simplifier could affect this poss's nodes
+    // (that also means this can't be easily parallelized)
+    bool didSomething = false;
+    PSetVecIter iter = m_sets.begin();
+    for(; iter != m_sets.end(); ++iter) {
+      didSomething |= (*iter)->GlobalSimplification(globalSimplifiers, simplifiers);
+    }
+    didSomething |= Simplify(globalSimplifiers);
+    didSomething |= Simplify(simplifiers);
+    return didSomething;
   }
-  didSomething |= Simplify(globalSimplifiers);
-  didSomething |= Simplify(simplifiers);
-  return didSomething;
+  else
+    return false;
 }
 
 string GetFusedString(const IntSet *set)

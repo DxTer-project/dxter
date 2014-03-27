@@ -498,16 +498,16 @@ DistType GetBaseDistType(DistType distType)
 
 
 
-template<>
-bool AddElemToVec(std::vector<Poss*> &vec, Poss *elem, bool deep)
+bool AddPossToMMap(PossMMap &mmap, Poss *elem, size_t hash, bool deep)
 {
-  std::vector<Poss*>::iterator iter = vec.begin();
-  for( ; iter != vec.end(); ++iter) {
-    if ((deep && **iter == *elem) || (!deep && *iter == elem)) {
+  PossMMapRangePair pair = mmap.equal_range(hash);
+  for( ; pair.first != pair.second; ++pair.first) {
+    Poss *poss = (*(pair.first)).second;
+    if ((deep && *poss == *elem) || (!deep && poss == elem)) {
       return false;
     }
   }
-  vec.push_back(elem);
+  mmap.insert(PossMMapPair(hash, elem));
   return true;
 }
 

@@ -90,7 +90,7 @@ class Poss
   void ExpandTunnels();
   Node* InTun(unsigned int num) const {return m_inTuns[num];}
   Node* OutTun(unsigned int num) const {return m_outTuns[num];}
-  bool MergePosses(PossVec &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
+  bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   void FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
@@ -104,7 +104,7 @@ class Poss
   void GetCurrTransVec(TransVec &transVec) const;
   unsigned int TotalCount() const;
   bool TakeIter(const TransMap &transMap, const TransMap &simplifiers, 
-		PossVec &newPosses);
+		PossMMap &newPosses);
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   bool HasFused(const Loop *left, const Loop *right) const;
   void SetFused(const Loop *left, const Loop *right);

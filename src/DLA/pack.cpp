@@ -550,6 +550,7 @@ bool LoopInvariantPackBuffMotion::CanApply(const Poss *poss, const Node *node) c
 
 void LoopInvariantPackBuffMotion::Apply(Poss *poss, Node *node) const
 {
+  throw; // CreateNewLoopTunnels
   LoopTunnel *possTunIn = (LoopTunnel*)(node->Input(0));
   LoopTunnel *setTunIn = (LoopTunnel*)(possTunIn->Input(0));
   PackBuff *buff = (PackBuff*)node;
