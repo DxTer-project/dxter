@@ -38,7 +38,7 @@
 static unsigned int currNum = 0;
 
 Node::Node()
-:m_flags(0), m_poss(NULL)
+  :m_hasPrinted(false), m_flags(0), m_poss(NULL) 
 {
   m_num = currNum;
   ++currNum;
