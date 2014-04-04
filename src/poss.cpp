@@ -27,12 +27,13 @@
 #include "loopSupport.h"
 #include <sstream>
 #include "elemRedist.h"
+#include "tensorRedist.h"
 #include <iomanip>
 #include "twoSidedTrxm.h"
 #include "pack.h"
 #include "critSect.h"
 
-//#define CHECKFORLOOPS
+#define CHECKFORLOOPS
 
 #define ALWAYSFUSE 1
 
@@ -1185,7 +1186,7 @@ bool AddNodesDown(Node *edgeStart, unsigned int childNum, NodeVec &outputTuns, N
   if (possNodes.find(child) != possNodes.end())
     return false;
   if (
-#if DOELEM
+#if DODM
       (child->GetNodeClass() == RedistNode::GetClass()) || 
 #endif
       child->IsPossTunnel()) {
@@ -1243,7 +1244,7 @@ void AddPossTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &poss
   for(; iter != node->m_inputs.end(); ++iter) {
     NodeConn *conn = *iter;
     if (conn->m_n != ignore) {
-#if DOELEM
+#if DODM
       if (conn->m_n->GetNodeClass() == RedistNode::GetClass()) {
         AddPossTunnels(conn->m_n, node, outputTuns, possNodes);
       }
@@ -1260,7 +1261,7 @@ void AddPossTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &poss
 	}
     }
   }
-#if DOELEM
+#if DODM
   unsigned int i = 0;
   for (; i < node->m_children.size(); ++i) {
     NodeConn *conn = node->m_children[i];
@@ -1586,25 +1587,10 @@ void Poss::FormSets(unsigned int phase)
     
     if (m_pset->m_isTopLevel)
       return;
-    
-    for (int i = 0; i < (int)(m_possNodes.size()); ++i) {
-      Node *node = m_possNodes[i];
-      if (node->GetNodeClass() == PackBuff::GetClass()) {
-        PackBuff *buff = (PackBuff*)node;
-        if (FindOtherPackBuffs(this, buff->m_packMat, buff)) {
-          NodeSet nodeSet;
-          nodeSet.insert(node);
-          AddUsersOfLiveOutput(node, 0, nodeSet);
-          FillClique(nodeSet);
-          FormSetForClique(nodeSet, false);
-          i = 0;
-        }
-      }
-    }
   }
 #endif //DOSOPHASE
-  /*
-    else if (phase == ROPHASE || phase == SR1PHASE) {
+#if DOROTENSORPHASE
+  if (phase == ROTENSORPHASE) {
    
     //       Be careful to prevent the following
     //       B = A
@@ -1617,20 +1603,20 @@ void Poss::FormSets(unsigned int phase)
     //       because of F = Op2(...)
    
    
-    #ifdef CHECKFORLOOPS
+#ifdef CHECKFORLOOPS
     NodeVec vec;
     for(unsigned int i = 0; i < m_possNodes.size(); ++i) {
-    if (FoundLoop(m_possNodes[i],vec)) {
-    cout << "Found loop 1\n";
-    cout.flush();
-    throw;
+      if (FoundLoop(m_possNodes[i],vec)) {
+	cout << "Found loop 1\n";
+	cout.flush();
+	throw;
+      }
+      if (!vec.empty()) {
+	cout << "vec not empty\n";
+	throw;
+      }
     }
-    if (!vec.empty()) {
-    cout << "vec not empty\n";
-    throw;
-    }
-    }
-    #endif
+#endif
    
     InvalidateHash();
    
@@ -1642,159 +1628,160 @@ void Poss::FormSets(unsigned int phase)
    
     int i;
     for(i=0; i < (int)(m_sets.size()); ++i) {
-    (m_sets[i])->FormSets(phase);
+      (m_sets[i])->FormSets(phase);
     }
-   
+    
     if (m_pset->m_isTopLevel)
-    return;
-   
+      return;
+    
     for(i=0; i < (int)(m_sets.size()); ++i) {
-    if (m_sets[i]->IsLoop()) {
-    m_sets[i]->FormSetAround();
-    i = -1;
-    }
+      if (m_sets[i]->IsLoop()) {
+	m_sets[i]->FormSetAround();
+	i = -1;
+      }
     }
    
    
     for(i=0; i < (int)(m_possNodes.size()); ++i) {
-    Node *node = m_possNodes[i];
-    if (!node->IsPossTunnel()) {
-    //Found a node that isn't a poss tunnel
-    //Let's form a new set!
-    NodeSet possNodes;
-    NodeVec outputTuns;
-    AddPossTunnels(node, NULL, outputTuns, possNodes);
+      Node *node = m_possNodes[i];
+      if (!node->IsPossTunnel() && node->GetNodeClass() == RedistNode::GetClass()) {
+	//Found a node that isn't a poss tunnel
+	//Let's form a new set!
+	NodeSet possNodes;
+	NodeVec outputTuns;
+	AddPossTunnels(node, NULL, outputTuns, possNodes);
+	
+#if DOROTENSORPHASE
+       	if (false && phase == ROTENSORPHASE) {
+	  bool newNode = true;
+	  do {
+	    newNode = false;
+	    NodeSetIter nodeIter = possNodes.begin();
+	    for(; nodeIter != possNodes.end(); ++nodeIter) {
+	      Node *currNode = *nodeIter;
+	      if (!currNode->IsPossTunnel()) {
+		bool ret = false;
+		for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
+		  ret |= AddNodesDown(currNode, j, outputTuns, possNodes);
+		}
+		if (ret) {
+		  nodeIter = possNodes.begin();
+		  newNode = true;
+		}
+	      }
+	    }
+	  } while (newNode);
+	}
+#else
+	throw;
+#endif
    
-    #if DODPPHASE
-    if (phase == ROPHASE) {
-    bool newNode = true;
-    do {
-    newNode = false;
-    NodeSetIter nodeIter = possNodes.begin();
-    for(; nodeIter != possNodes.end(); ++nodeIter) {
-    Node *currNode = *nodeIter;
-    if (!currNode->IsPossTunnel()) {
-    bool ret = false;
-    for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
-    ret |= AddNodesDown(currNode, j, outputTuns, possNodes);
-    }
-    if (ret) {
-    nodeIter = possNodes.begin();
-    newNode = true;
-    }
-    }
-    }
-    } while (newNode);
-    }
-    #else
-    throw;
-    #endif
+	NodeSetIter nodeIter = possNodes.begin();
+	for(; nodeIter != possNodes.end(); ++nodeIter) {
+	  Node *currNode = *nodeIter;
+	  if (!currNode->IsPossTunnel()) {
+	    for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
+	      AddTunnelDown(currNode, j, outputTuns, possNodes);
+	    }
+	  }
+	}
    
-    NodeSetIter nodeIter = possNodes.begin();
-    for(; nodeIter != possNodes.end(); ++nodeIter) {
-    Node *currNode = *nodeIter;
-    if (!currNode->IsPossTunnel()) {
-    for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
-    AddTunnelDown(currNode, j, outputTuns, possNodes);
-    }
-    }
-    }
+	Poss *newPoss = new Poss(outputTuns, true, true);
+	PSet *set = new PSet(newPoss);
    
-    Poss *newPoss = new Poss(outputTuns, true);
-    PSet *set = new PSet(newPoss);
+	AddPSet(set, true);
    
-    AddPSet(set, true);
+	for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
+	  Node *tun = set->m_inTuns[j];
+	  if (!AddElemToVec(m_possNodes, tun, false))
+	    throw;
+	  tun->SetPoss(this);
+	}
    
-    for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
-    Node *tun = set->m_inTuns[j];
-    if (!AddElemToVec(m_possNodes, tun, false))
-    throw;
-    tun->SetPoss(this);
-    }
+	for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
+	  Node *tun = set->m_outTuns[j];
+	  if (!AddElemToVec(m_possNodes, tun, false))
+	    throw;
+	  tun->SetPoss(this);
+	}
    
-    for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
-    Node *tun = set->m_outTuns[j];
-    if (!AddElemToVec(m_possNodes, tun, false))
-    throw;
-    tun->SetPoss(this);
-    }
-   
-    i = -1;
-    }
-    }
-   
-    for(i=0; i < (int)(m_possNodes.size()); ++i) {
-    Node *node = m_possNodes[i];
-    if (!node->IsPossTunnel()) {
-    //Found a node that isn't part of a poss set
-    //Let's form a new set!
-   
-    RemoveFromGraphNodes(node);
-    node->m_poss = NULL;
-   
-    NodeVec outputTuns;
-   
-    NodeConnVecIter iter = node->m_inputs.begin();
-    for(; iter != node->m_inputs.end(); ++iter) {
-    NodeConn *conn = *iter;
-    PossTunnel *tun = new PossTunnel(POSSTUNIN);
-    conn->m_n->RemoveChild(node, conn->m_num);
-    tun->AddInput(conn->m_n, conn->m_num);
-    conn->SetNode(tun);
-    conn->m_num=0;
-    tun->AddChild(node, 0);
+	i = -1;
+      }
     }
    
-    iter = node->m_children.begin();
-    for(; iter != node->m_children.end(); ++iter) {
-    NodeConn *conn = *iter;
-    Node *child = conn->m_n;
-    PossTunnel *tun = new PossTunnel(POSSTUNOUT);
-    outputTuns.push_back(tun);
-    child->ChangeInput1Way(node, conn->m_num, tun, 0);
-    conn->SetNode(tun);
-    tun->m_inputs.push_back(new NodeConn(node,conn->m_num));
-    }
+    
+//     for(i=0; i < (int)(m_possNodes.size()); ++i) {
+//       Node *node = m_possNodes[i];
+//       if (!node->IsPossTunnel()) {
+// 	//Found a node that isn't part of a poss set
+// 	//Let's form a new set!
+   
+// 	RemoveFromGraphNodes(node);
+// 	node->m_poss = NULL;
+   
+// 	NodeVec outputTuns;
+   
+// 	NodeConnVecIter iter = node->m_inputs.begin();
+// 	for(; iter != node->m_inputs.end(); ++iter) {
+// 	  NodeConn *conn = *iter;
+// 	  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+// 	  conn->m_n->RemoveChild(node, conn->m_num);
+// 	  tun->AddInput(conn->m_n, conn->m_num);
+// 	  conn->SetNode(tun);
+// 	  conn->m_num=0;
+// 	  tun->AddChild(node, 0);
+// 	}
+   
+// 	iter = node->m_children.begin();
+// 	for(; iter != node->m_children.end(); ++iter) {
+// 	  NodeConn *conn = *iter;
+// 	  Node *child = conn->m_n;
+// 	  PossTunnel *tun = new PossTunnel(POSSTUNOUT);
+// 	  outputTuns.push_back(tun);
+// 	  child->ChangeInput1Way(node, conn->m_num, tun, 0);
+// 	  conn->SetNode(tun);
+// 	  tun->m_inputs.push_back(new NodeConn(node,conn->m_num));
+// 	}
    
    
-    Poss *newPoss = new Poss(outputTuns, true);
-    PSet *set = new PSet(newPoss);
+// 	Poss *newPoss = new Poss(outputTuns, true, true);
+// 	PSet *set = new PSet(newPoss);
    
-    AddPSet(set, true);
+// 	AddPSet(set, true);
    
-    for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
-    Node *tun = set->m_inTuns[j];
-    if (!AddElemToVec(m_possNodes, tun, false))
-    throw;
-    tun->SetPoss(this);
-    }
+// 	for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
+// 	  Node *tun = set->m_inTuns[j];
+// 	  if (!AddElemToVec(m_possNodes, tun, false))
+// 	    throw;
+// 	  tun->SetPoss(this);
+// 	}
    
-    for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
-    Node *tun = set->m_outTuns[j];
-    if (!AddElemToVec(m_possNodes, tun, false))
-    throw;
-    tun->SetPoss(this);
-    }
+// 	for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
+// 	  Node *tun = set->m_outTuns[j];
+// 	  if (!AddElemToVec(m_possNodes, tun, false))
+// 	    throw;
+// 	  tun->SetPoss(this);
+// 	}
    
-    i = -1;
-    }
-    }
+// 	i = -1;
+//       }
+//     }
    
-    #ifdef CHECKFORLOOPS
+#ifdef CHECKFORLOOPS
     for(unsigned int k = 0; k < m_outTuns.size(); ++k) {
-    if (FoundLoop(m_outTuns[k],vec)) {
-    cout << "Found loop 3\n";
-    cout.flush();
-    throw;
+      if (FoundLoop(m_outTuns[k],vec)) {
+	cout << "Found loop 3\n";
+	cout.flush();
+	throw;
+      }
+      if (!vec.empty()) {
+	cout << "vec not empty\n";
+	throw;
+      }
     }
-    if (!vec.empty()) {
-    cout << "vec not empty\n";
-    throw;
+#endif
     }
-    }
-    #endif
-    }
-  */
+#endif
 }
 
 void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc)

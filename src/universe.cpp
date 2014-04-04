@@ -30,11 +30,11 @@
 
 //Print out code for all generated implementations
 // This takes a while for large search spaces
-#define PRINTCODE
+//#define PRINTCODE
 
 //Save generated implementations to disk
 // so they can be loaded on a separate run
-#define SAVETODISK
+//#define SAVETODISK
 
 
 static unsigned int CURRENTSAVEVERSION = 1;
@@ -128,6 +128,12 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
   if (phase == SOPHASE) {
     m_pset->FormSets(phase);   
   }
+#elif DOROTENSORPHASE
+  if (phase == ROTENSORPHASE) {
+    m_pset->FormSets(phase);
+    cout << "\t\tFormed set\n";
+    cout << "\t\t\t" << TotalCount() << " impl's\n";
+  }
 #endif
   
   ClearFullyExpanded();
@@ -169,8 +175,10 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
       // different pieces of data, sequentially.
       //We don't want to now get rid of those sets
       if (phase < SOPHASE)
+#elif DOROTENSORPHASE
+	if (phase < ROTENSORPHASE)
 #endif
-	foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
+	  foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
       time(&end);
       if(difftime(end,start) > 10) {
 	cout << "Took " << difftime(end,start) << " seconds to merge\n";

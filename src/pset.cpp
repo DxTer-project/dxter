@@ -281,14 +281,18 @@ void PSet::Prop()
   }
     PossMMapIter iter;
       unsigned int j = 0;
-#pragma omp parallel private(j,iter)
+      //#pragma omp parallel private(j,iter)
       {
 	iter = m_posses.begin();
 	j = 0;
 	unsigned int size = m_posses.size();
 	//BAM par
-#pragma omp for schedule(static) 
+	//#pragma omp for schedule(static) 
 	for (unsigned int i = 0; i < size; ++i) {
+	  if (j > i) {
+	    cout << "uhoh\n";
+	    throw;
+	  }
 	  while (j < i) {
 	    ++iter;
 	    ++j;
@@ -296,71 +300,83 @@ void PSet::Prop()
 	  (*iter).second->Prop();
 	}
       }
-  iter = m_posses.begin();
-  while (iter != m_posses.end()) {
-    Poss *poss = (*iter).second;
-    if (poss->GetHash() != (*iter).first) {
-      m_posses.erase(iter);
-	
-      bool existing = false;
-      PossMMapRangePair pair = m_posses.equal_range(poss->GetHash());
-      for( ; !existing && pair.first != pair.second; ++pair.first) {
-	if (*((*(pair.first)).second) == *poss) {
-	  RemoveAndDeletePoss(poss, false);
-	  existing = true;
+      iter = m_posses.begin();
+      while (iter != m_posses.end()) {
+	Poss *poss = (*iter).second;
+	if (poss->GetHash() != (*iter).first) {
+	  m_posses.erase(iter);
+	  
+	  bool existing = false;
+	  PossMMapRangePair pair = m_posses.equal_range(poss->GetHash());
+	  for( ; !existing && pair.first != pair.second; ++pair.first) {
+	    if (*((*(pair.first)).second) == *poss) {
+	      RemoveAndDeletePoss(poss, false);
+	      existing = true;
+	    }
+	  }
+    
+	  if (!existing)
+	    m_posses.insert(PossMMapPair(poss->GetHash(),poss));
+      
+	  iter = m_posses.begin();
+	}
+	else {
+	  ++iter;
 	}
       }
-    
-      if (!existing)
-	m_posses.insert(PossMMapPair(poss->GetHash(),poss));
-      
-      iter = m_posses.begin();
-    }
-    else {
-      ++iter;
-    }
-  }
 
-  iter = m_posses.begin();
-  while (iter != m_posses.end()) {
-    Poss *poss = (*iter).second;
-    if (!poss->IsSane()) {
-      RemoveAndDeletePoss(poss, false);
-      m_posses.erase(iter);
       iter = m_posses.begin();
-      if (!m_posses.size()) {
-        cout << "Ran out of posses in set " << this << endl;
-        throw;
+      while (iter != m_posses.end()) {
+	Poss *poss = (*iter).second;
+	if (!poss->IsSane()) {
+	  RemoveAndDeletePoss(poss, false);
+	  m_posses.erase(iter);
+	  iter = m_posses.begin();
+	  if (!m_posses.size()) {
+	    cout << "Ran out of posses in set " << this << endl;
+	    throw;
+	  }
+	}
+	else {
+	  ++iter;
+	}
       }
-    }
-    else {
-      ++iter;
-    }
-  }
-  m_hasProped = true;
+      m_hasProped = true;
 }
 
 void PSet::Cull(Phase phase)
 {
+  PossMMapIter iter2 = m_posses.begin();
+  for(; iter2 != m_posses.end(); ++iter2) 
+    (*iter2).second->m_isSane = false;
+  
+  //#pragma omp parallel// private(j,iter)
+  {
     PossMMapIter iter;
-      unsigned int j = 0;
-#pragma omp parallel private(j,iter)
-      {
-	iter = m_posses.begin();
-	j = 0;
-	unsigned int size = m_posses.size();
-	//BAM par
-#pragma omp for schedule(static) 
-      for (unsigned int i = 0; i < size; ++i) {
-	while (j < i) {
-	  ++iter;
-	  ++j;
-	}
-	Poss *poss = (*iter).second;
-	poss->m_isSane = true;
-	poss->Cull(phase);
+    unsigned int j = 0;
+    iter = m_posses.begin();
+    j = 0;
+    unsigned int size = m_posses.size();
+    //BAM par
+    //#pragma omp for schedule(static) 
+    for (unsigned int i = 0; i < size; ++i) {
+      if (i < j) {
+	cout << "uhoh";
+	cout.flush();
+	throw;
       }
+      while (j < i) {
+	++iter;
+	++j;
       }
+      Poss *poss = (*iter).second;
+      if (poss->m_isSane)
+	throw;
+      poss->m_isSane = true;
+      poss->Cull(phase);
+    }
+  }
+    PossMMapIter iter;
 
   iter = m_posses.begin();
   while (iter != m_posses.end()) {
@@ -463,15 +479,15 @@ bool PSet::TakeIter(const TransMap &transMap,
   if (size > 1) {
     PossMMap mmap;
     PossMMapIter iter;
-      unsigned int j = 0;
+    unsigned int j = 0;
 
-#pragma omp parallel private(j,iter)
-      {
-	iter = m_posses.begin();
-	j = 0;
-	unsigned int size = m_posses.size();
-	//BAM par
-#pragma omp for schedule(static) 
+    //#pragma omp parallel private(j,iter)
+    {
+      iter = m_posses.begin();
+      j = 0;
+      unsigned int size = m_posses.size();
+      //BAM par
+      //#pragma omp for schedule(static) 
       for (unsigned int i = 0; i < size; ++i) {
 	while (j < i) {
 	  ++iter;
@@ -614,40 +630,40 @@ void PSet::CombineAndRemoveTunnels()
           && setInput2->m_inputs.size()
           && setInput1->Input(0) == setInput2->Input(0)
           && setInput1->InputConnNum(0) == setInput2->InputConnNum(0))
-      {
-        if (setInput1->IsLoopTunnel() && setInput2->IsLoopTunnel()) {
-          ClassType type1 = setInput1->GetNodeClass();
-          ClassType type2 = setInput2->GetNodeClass();
-          if ((type1 == Split::GetClass() && type2 != Split::GetClass())
-              || (type1 != Split::GetClass() && type2 == Split::GetClass()))
-          {
-            continue;
-          }
-          if (type1 == Split::GetClass()) {
+	{
+	  if (setInput1->IsLoopTunnel() && setInput2->IsLoopTunnel()) {
+	    ClassType type1 = setInput1->GetNodeClass();
+	    ClassType type2 = setInput2->GetNodeClass();
+	    if ((type1 == Split::GetClass() && type2 != Split::GetClass())
+		|| (type1 != Split::GetClass() && type2 == Split::GetClass()))
+	      {
+		continue;
+	      }
+	    if (type1 == Split::GetClass()) {
 #if TWOD
-            if (((Split*)setInput1)->m_dir != ((Split*)setInput2)->m_dir)
-              continue;
+	      if (((Split*)setInput1)->m_dir != ((Split*)setInput2)->m_dir)
+		continue;
 #else
-            if (((Split*)setInput1)->m_partDim != ((Split*)setInput2)->m_partDim)
-              continue;
+	      if (((Split*)setInput1)->m_partDim != ((Split*)setInput2)->m_partDim)
+		continue;
 #endif
-          }
-        }
-        NodeConnVecIter connIter1 = setInput1->m_children.begin();
-        NodeConnVecIter connIter2 = setInput2->m_children.begin();
-        for(; connIter1 != setInput1->m_children.end(); ++connIter1, ++connIter2) {
-          Node *possIn1 = (*connIter1)->m_n;
-          Node *possIn2 = (*connIter2)->m_n;
-          possIn2->RedirectAllChildren(possIn1);
-        }
-        if (connIter2 != setInput2->m_children.end()) {
-          cout << "connIter2 != setInput2->m_children.end()\n";
-          throw;
-        }
-        setInput2->Input(0)->RemoveChild(setInput2,setInput2->InputConnNum(0));
-        delete setInput2->InputConn(0);
-        setInput2->m_inputs.clear();
-      }
+	    }
+	  }
+	  NodeConnVecIter connIter1 = setInput1->m_children.begin();
+	  NodeConnVecIter connIter2 = setInput2->m_children.begin();
+	  for(; connIter1 != setInput1->m_children.end(); ++connIter1, ++connIter2) {
+	    Node *possIn1 = (*connIter1)->m_n;
+	    Node *possIn2 = (*connIter2)->m_n;
+	    possIn2->RedirectAllChildren(possIn1);
+	  }
+	  if (connIter2 != setInput2->m_children.end()) {
+	    cout << "connIter2 != setInput2->m_children.end()\n";
+	    throw;
+	  }
+	  setInput2->Input(0)->RemoveChild(setInput2,setInput2->InputConnNum(0));
+	  delete setInput2->InputConn(0);
+	  setInput2->m_inputs.clear();
+	}
     }
   }
   
@@ -767,34 +783,28 @@ void PSet::CombineAndRemoveTunnels()
 void PSet::Simplify(const TransMap &simplifiers)
 {
   //BAM par
-  /*
-  int size = m_posses.size();
 #pragma omp parallel
   {
-#pragma omp for 
-    for (int i = 0; i < size; ++i) {
-      m_posses[i]->Simplify(simplifiers);
+  }
+
+  PossMMapIter iter;
+  unsigned int j = 0;
+  //#pragma omp parallel private(j,iter)
+  {
+    iter = m_posses.begin();
+    j = 0;
+    unsigned int size = m_posses.size();
+    //BAM par
+    //#pragma omp for schedule(static) 
+    for (unsigned int i = 0; i < size; ++i) {
+      while (j < i) {
+	++iter;
+	++j;
+      }
+      Poss *poss = (*iter).second;
+      poss->Simplify(simplifiers);
     }
   }
-  */
-    PossMMapIter iter;
-      unsigned int j = 0;
-#pragma omp parallel private(j,iter)
-      {
-	iter = m_posses.begin();
-	j = 0;
-	unsigned int size = m_posses.size();
-	//BAM par
-#pragma omp for schedule(static) 
-      for (unsigned int i = 0; i < size; ++i) {
-	while (j < i) {
-	  ++iter;
-	  ++j;
-	}
-	Poss *poss = (*iter).second;
-	poss->Simplify(simplifiers);
-      }
-      }
 }
 
 // void PSet::RemoveDups()
@@ -964,12 +974,12 @@ bool PSet::CanMerge(PSet *pset) const
 bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 {
   /*
-   Here's the idea:
-   If one or more of the posses in this PSet has PSets on them
-   that can be merged or a single PSet that can be removed (i.e.
-   the posses in that set can be inlined), then do it now.  We want
-   to do this from the bottom-up, though.
-   */
+    Here's the idea:
+    If one or more of the posses in this PSet has PSets on them
+    that can be merged or a single PSet that can be removed (i.e.
+    the posses in that set can be inlined), then do it now.  We want
+    to do this from the bottom-up, though.
+  */
 #ifdef _OPENMP
   static omp_lock_t lock;
   static bool inited = false;
@@ -985,14 +995,14 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
     PossMMap mmap;
     //BAM par
     PossMMapIter iter;
-      unsigned int j = 0;
-#pragma omp parallel private(j,iter)
-      {
-	iter = m_posses.begin();
+    unsigned int j = 0;
+    //#pragma omp parallel private(j,iter)
+    {
+      iter = m_posses.begin();
 	j = 0;
 	unsigned int size = m_posses.size();
 	//BAM par
-#pragma omp for schedule(static) 
+	//#pragma omp for schedule(static) 
       for (unsigned int i = 0; i < size; ++i) {
 	while (j < i) {
 	  ++iter;
@@ -1001,22 +1011,18 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 	Poss *poss = (*iter).second;
         PossMMap newPosses;
         if (poss->MergePosses(newPosses, simplifiers, cullFunc)) {
-	  /*
 #ifdef _OPENMP
           omp_set_lock(&lock);
 #endif
-	  */
           didMerge = true;
           PossMMapIter newPossesIter = newPosses.begin();
           for(; newPossesIter != newPosses.end(); ++newPossesIter) {
             if (!AddPossToMMap(mmap, (*newPossesIter).second, (*newPossesIter).first))
               delete (*newPossesIter).second;
           }
-	  /*
 #ifdef _OPENMP
           omp_unset_lock(&lock);
 #endif
-	  */
 	}
       }
       }

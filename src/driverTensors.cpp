@@ -49,14 +49,15 @@ void AddTrans()
 {
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
   
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
+  //  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
+  //  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
 
-  
+
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim)
     Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
+
 }
 
 void AddSimplifiers()
@@ -76,7 +77,7 @@ void Usage()
 
 int main(int argc, const char* argv[])
 {
-  //    omp_set_num_threads(1);
+  //omp_set_num_threads(1);
   omp_set_nested(true);
   //  PrintType printType = CODE;
   int numIters = -1;
@@ -257,7 +258,8 @@ PSet* MartinsExample()
   DistType epDist;
   epDist.SetToStar(2);
 
-  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", "xz");
+  //  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", "xz");
+  InputNode *epIn = new InputNode("ep input",  ones, "epsilon", "xz");
 
   InputNode *tempIn = new InputNode("Temp input",  sizes, "Temp", "abij");
 
