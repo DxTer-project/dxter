@@ -60,6 +60,7 @@ class RedistNode : public DLANode
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+  virtual Phase MaxPhase() const;
 };
 
 class AllReduceNode : public DLAOp<1,1>
@@ -130,7 +131,6 @@ class CombineRedistribs : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
-
 
 class SplitRedistribs : public SingleTrans
 {

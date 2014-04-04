@@ -185,6 +185,11 @@ void RedistNode::Prop()
   }
 }
 
+Phase RedistNode::MaxPhase() const
+{
+  return NUMPHASES;
+}
+
 const Dim RedistNode::NumDims(unsigned int num) const
 {
   if (num > 0)
@@ -592,6 +597,7 @@ bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
 		  return false;
 	      }
 	    }
+	    /*
 	    if (srcDistEntry != destDistEntry) {
 	      if (srcDistEntry && !IsPrefix(srcDims,
 					    DistType::DistEntryDims(destDistEntry)))
@@ -599,9 +605,10 @@ bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
 		  return true;
 		}
 	    }
+	    */
 	  }
 	}
-	return false;
+	return true;//false;
       }
     }
     else {
