@@ -4,6 +4,12 @@
 
 #if DOTENSORS
 
+void GetCommonSuffix(const DimVec &dims1, const DimVec &dims2, 
+		     DimVec &suff,
+		     DimVec &pref1, DimVec &pref2);
+void GetDifferentSuffix(const DimVec &dims1, const DimVec &dims2, 
+			DimVec &suff1, DimVec &suff2);
+
 RedistNode::RedistNode() 
 {
   m_destType.SetToDefault(0);
@@ -68,16 +74,14 @@ void RedistNode::Prop()
     if (m_srcType.m_numDims != numDims)
       throw;
 
+    if (!m_destType.IsSane())
+      throw;
+
     DimSet diffs;
     
     for (Dim dim = 0; dim < numDims; ++dim) {
       if (m_srcType.m_dists[dim] != m_destType.m_dists[dim]) {
-	if (m_srcType.m_dists[dim] 
-	    && !IsPrefix(DistType::DistEntryDims(m_srcType.m_dists[dim]),
-			 DistType::DistEntryDims(m_destType.m_dists[dim])))
-	  {
-	    diffs.insert(dim);
-	  }
+	diffs.insert(dim);
       }
     }
 
@@ -93,7 +97,7 @@ void RedistNode::Prop()
       
       if (src.empty() || IsPrefix(src, dest)) {
 	//local memory copy
-	throw;
+	//	throw;
 	m_cost = 0;
       }
       else if (IsPrefix(dest, src) || dest.empty()) {
@@ -137,12 +141,15 @@ void RedistNode::Prop()
 	}
       }
     }
+    else if (diffs.size() > 2) {
+      m_cost = 0;
+    }
     else {
       m_cost = 0;
       const unsigned int totNumIters = m_lsizes[0].NumSizes();
       unsigned int numProcs = 1;
       DimSet unionSet;
-
+      
       DimSetIter diffIter = diffs.begin();
       for(; diffIter != diffs.end(); ++diffIter) {
 	Dim diffDim = *diffIter;
@@ -150,24 +157,29 @@ void RedistNode::Prop()
 	DimVec dest = DistType::DistEntryDims(m_destType.m_dists[diffDim]);
 
 	if (src.empty() || IsPrefix(src, dest)) {
-	  throw;
+	  m_cost = 0;
 	  //local mem copy for this dimensions
 	}
 	else if (IsPrefix(dest, src) || dest.empty()) {
-	  DimVecIter iter = src.begin() + dest.size();
-	  for(; iter != src.end(); ++iter) {
-	    if (unionSet.insert(*iter).second)
-	      numProcs *= GridLens[*iter];
-	  }
+	  m_cost = 0;
+	  //	  cout << "AllGather with AllToAll\n";
+	  //	  throw;
+	  //	  DimVecIter iter = src.begin() + dest.size();
+	  //	  for(; iter != src.end(); ++iter) {
+	  //	    if (unionSet.insert(*iter).second)
+	  //	      numProcs *= GridLens[*iter];
+	  //	  }
 	}
 	else {
-	  DimVecIter iter = src.begin();
-	  for(; iter != src.end(); ++iter) {
+	  DimVec suff1, suff2;
+	  GetDifferentSuffix(src, dest, suff1, suff2);
+	  DimVecIter iter = suff1.begin();
+	  for(; iter != suff1.end(); ++iter) {
 	    if (unionSet.insert(*iter).second)
 	      numProcs *= GridLens[*iter];
 	  }
-	  iter = dest.begin();
-	  for(; iter != dest.end(); ++iter) {
+	  iter = suff2.begin();
+	  for(; iter != suff2.end(); ++iter) {
 	    if (unionSet.insert(*iter).second)
 	      numProcs *= GridLens[*iter];
 	  }
@@ -185,8 +197,124 @@ void RedistNode::Prop()
   }
 }
 
+void GetCommonSuffix(const DimVec &dims1, const DimVec &dims2, 
+		     DimVec &suff,
+		     DimVec &pref1, DimVec &pref2)
+{
+  DimVecConstRevIter iter1 = dims1.rbegin();
+  DimVecConstRevIter iter2 = dims2.rbegin();
+  while(iter1 != dims1.rend() && iter2 != dims2.rend()) {
+    if (*iter1 == *iter2) {
+      suff.insert(suff.begin(), *iter1);
+      ++iter1;
+      ++iter2;
+    }
+    else {
+      break;
+    }
+  }
+  while (iter1 != dims1.rend()) {
+    pref1.insert(pref1.begin(),*iter1);
+    ++iter1;
+  }
+  while (iter2 != dims2.rend()) {
+    pref2.insert(pref2.begin(),*iter2);
+    ++iter2;
+  }
+}
+
+void GetDifferentSuffix(const DimVec &dims1, const DimVec &dims2, 
+			DimVec &suff1, DimVec &suff2)
+{
+  DimVecConstIter iter1 = dims1.begin();
+  DimVecConstIter iter2 = dims2.begin();
+  while (iter1 != dims1.end() && iter2 != dims2.end()) {
+    if (*iter1 == *iter2) {
+      ++iter1;
+      ++iter2;
+    }
+    else
+      break;
+  }
+  if (iter1 == dims1.end())
+    throw;
+  if (iter2 == dims2.end())
+    throw;
+  while (iter1 != dims1.end()) {
+    suff1.push_back(*iter1);
+    ++iter1;
+  }
+  while (iter2 != dims2.end()) {
+    suff2.push_back(*iter2);
+    ++iter2;
+  }
+}
+
+
 Phase RedistNode::MaxPhase() const
 {
+  DLANode *parent = (DLANode*)Input(0);
+  const DistType &m_srcType = parent->GetDistType(InputConnNum(0));
+  const Dim numDims = m_destType.m_numDims;
+  
+  bool foundMemCopy = false;
+  bool foundAllGather = false;
+  bool foundAllToAll = false;
+  DimSet diffs;
+  
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    unsigned int srcDistEntry = m_srcType.m_dists[dim];
+    unsigned int destDistEntry = m_destType.m_dists[dim];
+    if (srcDistEntry != destDistEntry) {
+      DimVec srcDims = DistType::DistEntryDims(srcDistEntry);
+      DimVec destDims = DistType::DistEntryDims(destDistEntry);
+      if (!srcDistEntry || IsPrefix(srcDims, destDims)) {
+	foundMemCopy = true;
+	if (foundAllGather || foundAllToAll) {
+	  return ROTENSORPHASE;
+	}
+      }
+      else if (!destDistEntry || IsPrefix(destDims, srcDims)) {
+	if (foundAllGather || foundMemCopy || foundAllToAll)
+	  return ROTENSORPHASE;
+	else
+	  foundAllGather = true;
+      }
+      else {
+	if (foundMemCopy || foundAllGather)
+	  return ROTENSORPHASE;
+	else {
+	  foundAllToAll = true;
+	  if (diffs.size() > 2)
+	    return ROTENSORPHASE;
+	  else if (diffs.size() == 1) {
+	    Dim otherDim = *(diffs.begin());
+	    DimVec otherSrcDims = DistType::DistEntryDims(m_srcType.m_dists[otherDim]);
+	    DimVec otherDestDims = DistType::DistEntryDims(m_destType.m_dists[otherDim]);
+	    
+	    DimVec commonSuff1, commonSuff2, otherSrcPref, destPref, srcPref, otherDestPref;
+	    GetCommonSuffix(otherSrcDims, destDims, commonSuff1, otherSrcPref, destPref);
+	    GetCommonSuffix(srcDims, otherDestDims, commonSuff2, srcPref, otherDestPref);
+	    
+	    if (commonSuff1.empty())
+	      return ROTENSORPHASE;
+
+	    if (commonSuff1 != commonSuff2) {
+	      return ROTENSORPHASE;
+	    }
+	    if (otherSrcPref != otherDestPref) {
+	      return ROTENSORPHASE;
+	    }
+	    if (srcPref != destPref) {
+	      return ROTENSORPHASE;
+	    }
+	  }
+	  diffs.insert(dim);
+	}
+      }
+    }
+  }
+
   return NUMPHASES;
 }
 
@@ -576,40 +704,31 @@ bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
       //      cout << "src " << src.m_dists[m_dim] << endl;
       //      cout << "dest " << dest->m_dists[m_dim] << endl;
       DimVec destDims =  DistType::DistEntryDims(dest->m_dists[m_dim]);
-      if (!src.m_dists[m_dim] 
-	  || IsPrefix(DistType::DistEntryDims(src.m_dists[m_dim]),
-		      destDims))
-		     
-	{
-	  return false;
-	}
-      else {
-	for (Dim dim = 0; dim < dest->m_numDims; ++dim) {
-	  if (dim != m_dim) {
-	    unsigned int srcDistEntry = src.m_dists[dim];
-	    unsigned int destDistEntry = dest->m_dists[dim];
-	    DimVec srcDims = DistType::DistEntryDims(srcDistEntry);
-	    DimVecIter iter = srcDims.begin();
-	    for(; iter != srcDims.end(); ++iter) {
-	      DimVecIter iter2 = destDims.begin();
-	      for (; iter2 != destDims.end(); ++iter2) {
-		if (*iter == *iter2)
-		  return false;
-	      }
+      for (Dim dim = 0; dim < dest->m_numDims; ++dim) {
+	if (dim != m_dim) {
+	  unsigned int srcDistEntry = src.m_dists[dim];
+	  //	    unsigned int destDistEntry = dest->m_dists[dim];
+	  DimVec srcDims = DistType::DistEntryDims(srcDistEntry);
+	  DimVecIter iter = srcDims.begin();
+	  for(; iter != srcDims.end(); ++iter) {
+	    DimVecIter iter2 = destDims.begin();
+	    for (; iter2 != destDims.end(); ++iter2) {
+	      if (*iter == *iter2)
+		return false;
 	    }
-	    /*
-	    if (srcDistEntry != destDistEntry) {
-	      if (srcDistEntry && !IsPrefix(srcDims,
-					    DistType::DistEntryDims(destDistEntry)))
-		{
-		  return true;
-		}
-	    }
-	    */
 	  }
+	  /*
+	    if (srcDistEntry != destDistEntry) {
+	    if (srcDistEntry && !IsPrefix(srcDims,
+	    DistType::DistEntryDims(destDistEntry)))
+	    {
+	    return true;
+	    }
+	    }
+	  */
 	}
-	return true;//false;
       }
+      return true;//false;
     }
     else {
       return false;
@@ -625,18 +744,15 @@ void SplitRedistribs::Apply(Poss *poss, Node *node) const
 
   one.m_dists[m_dim] = two->m_dists[m_dim];
 
-  for(Dim dim = 0; dim < one.m_numDims; ++dim) {
-    if (dim != m_dim) {
-      if (one.m_dists[dim] != two->m_dists[dim]) {
-	if (!one.m_dists[dim] ||
-	    IsPrefix(DistType::DistEntryDims(one.m_dists[dim]),
-		     DistType::DistEntryDims(two->m_dists[dim]))) 
-	  {
-	    one.m_dists[dim] = two->m_dists[dim];
-	  }
-      }
-    }
-  }
+/*  if (!one.IsSane()) {
+    cout << "splitting " << m_dim << endl;
+    cout << DistTypeToStr(one) << endl;
+    cout << "from " << DistTypeToStr(orig->InputDistType(0))
+	 << " -> " << DistTypeToStr(orig->m_destType);
+    throw;
+    }*/
+
+
 
   RedistNode *newRedist = new RedistNode(one);
   newRedist->AddInput(orig->Input(0), orig->InputConnNum(0));

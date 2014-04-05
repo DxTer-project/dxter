@@ -189,7 +189,8 @@ typedef unsigned int Dim;
 typedef vector<Dim> DimVec;
 typedef DimVec::iterator DimVecIter;
 typedef DimVec::const_iterator DimVecConstIter;
-typedef DimVec::reverse_iterator DimVecConstRevIter;
+typedef DimVec::reverse_iterator DimVecRevIter;
+typedef DimVec::const_reverse_iterator DimVecConstRevIter;
 //typedef unordered_set<Dim> DimSet;
 typedef set<Dim> DimSet;
 typedef DimSet::iterator DimSetIter;
@@ -211,6 +212,7 @@ class DistType
   static DimVec DistEntryDims(unsigned int dist);
   static unsigned int DimsToDistEntry(DimVec dims);
   DimSet UsedGridDims() const;
+  bool IsSane() const;
   void PrepForNumDims(Dim numDims);
   string QuickStr() const;
   DistType& operator=(const DistType &rhs);

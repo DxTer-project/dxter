@@ -112,6 +112,7 @@ DistType::~DistType()
 
 DimSet DistType::UsedGridDims() const
 {
+  //Reflect changes in IsSane
   DimSet set;
   for (Dim dim = 0; dim < m_numDims; ++dim) {
     DimVec vec = DistEntryDims(m_dists[dim]);
@@ -124,6 +125,22 @@ DimSet DistType::UsedGridDims() const
     }
   }
   return set;
+}
+
+bool DistType::IsSane() const
+{
+  //Reflect changes in UsedGridDims
+  DimSet set;
+  for (Dim dim = 0; dim < m_numDims; ++dim) {
+    DimVec vec = DistEntryDims(m_dists[dim]);
+    DimVecIter iter = vec.begin();
+    for(; iter != vec.end(); ++iter) {
+      if (!set.insert(*iter).second) {
+	return false;
+      }
+    }
+  }
+  return true;
 }
 
 

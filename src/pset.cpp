@@ -376,7 +376,7 @@ void PSet::Cull(Phase phase)
       poss->Cull(phase);
     }
   }
-    PossMMapIter iter;
+  PossMMapIter iter;
 
   iter = m_posses.begin();
   while (iter != m_posses.end()) {
@@ -785,6 +785,7 @@ void PSet::Simplify(const TransMap &simplifiers)
   //BAM par
 #pragma omp parallel
   {
+    unsigned int asldkjf = 0;
   }
 
   PossMMapIter iter;
