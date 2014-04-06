@@ -511,6 +511,44 @@ void SumScatterUpdateNode::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
 
+    const DistType &inType = InputDistType(0);
+    const DistType &outType = InputDistType(1);
+
+    if (inType.m_numDims != outType.m_numDims)
+      throw;
+
+    if (CurrPhase >= ROTENSORPHASE) {
+      for (Dim dim = 0; dim < inType.m_numDims; ++dim) {
+	if (inType.m_dists[dim] != outType.m_dists[dim]) {
+	  if (inType.m_dists[dim] != 0) {
+	    cout << "trying SumScatter from " << DistTypeToStr(inType)
+		 << " to " << DistTypeToStr(outType) << " with reduction on ";
+	    DimSetIter iter = m_sumDims.begin();
+	    for( ; iter != m_sumDims.end(); ++iter)
+	      cout << *iter << " ";
+	    cout << endl;
+	    throw;
+	  }
+	  else {
+	    DimVec dims = DistType::DistEntryDims(outType.m_dists[dim]);
+	    DimVecIter iter = dims.begin();
+	    for(; iter != dims.end(); ++iter) {
+	      if (m_sumDims.find(*iter) == m_sumDims.end()) {
+		cout << "SumScatter error\n";
+		cout << "trying SumScatter from " << DistTypeToStr(inType)
+		     << " to " << DistTypeToStr(outType) << " with reduction on ";
+		DimSetIter iter = m_sumDims.begin();
+		for( ; iter != m_sumDims.end(); ++iter)
+		  cout << *iter << " ";
+		cout << endl;
+		throw;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+
 
     m_cost = 0;
     unsigned int numProcs = 1;
