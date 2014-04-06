@@ -561,13 +561,18 @@ void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
   const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
 
   string AIndices = ((DLANode*)(AConn->m_n))->GetName(AConn->m_num).m_indices;
-  DimSet sumDims;
+  DimVec sumDims;
+  string sumIndices;
   string::iterator iter = cont->m_indices.begin();
   for(; iter != cont->m_indices.end(); ++iter) {
     size_t loc = AIndices.find(*iter);
     if (loc != string::npos) {
       DimVec dims = AType.DistEntryDims(AType.m_dists[loc]);
-      sumDims.insert(dims.begin(),dims.end());
+      DimVecIter iter2 = dims.begin();
+      for( ; iter2 != dims.end(); ++iter2) {
+	sumDims.push_back(*iter2);
+	sumIndices += *iter;
+      }
     }
   }
 
@@ -599,7 +604,7 @@ void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
   poss->AddNode(node3);
   poss->AddNode(LCont);
 
-  AllReduceNode *sum = new AllReduceNode(sumDims);
+  AllReduceNode *sum = new AllReduceNode(sumDims, sumIndices);
   sum->AddInput(LCont, 0);
   poss->AddNode(sum);
 
@@ -723,13 +728,18 @@ void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
   const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
 
   string BIndices = ((DLANode*)(BConn->m_n))->GetName(BConn->m_num).m_indices;
-  DimSet sumDims;
+  DimVec sumDims;
+  string sumIndices;
   string::iterator iter = cont->m_indices.begin();
   for(; iter != cont->m_indices.end(); ++iter) {
     size_t loc = BIndices.find(*iter);
     if (loc != string::npos) {
       DimVec dims = BType.DistEntryDims(BType.m_dists[loc]);
-      sumDims.insert(dims.begin(),dims.end());
+      DimVecIter iter2 = dims.begin();
+      for(; iter2 != dims.end(); ++iter2) {
+	sumDims.push_back(*iter2);
+	sumIndices += *iter;
+      }
     }
   }
 
@@ -761,7 +771,7 @@ void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
   poss->AddNode(node3);
   poss->AddNode(LCont);
 
-  AllReduceNode *sum = new AllReduceNode(sumDims);
+  AllReduceNode *sum = new AllReduceNode(sumDims, sumIndices);
   sum->AddInput(LCont, 0);
   poss->AddNode(sum);
 

@@ -66,9 +66,10 @@ class RedistNode : public DLANode
 class AllReduceNode : public DLAOp<1,1>
 {
  public:
-  DimSet m_sumDims;
+  DimVec m_sumDims;
+  string m_sumIndices;
  AllReduceNode() : DLAOp<1,1>() {}
-  AllReduceNode(const DimSet &sumDims);
+  AllReduceNode(const DimVec &sumDims, const string &sumIndices);
   static Node* BlankInst() { return  new AllReduceNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

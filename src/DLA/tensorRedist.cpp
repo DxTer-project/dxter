@@ -392,10 +392,11 @@ void RedistNode::PrintCode(IndStream &out)
 }
 
 
-AllReduceNode::AllReduceNode(const DimSet &sumDims)
+AllReduceNode::AllReduceNode(const DimVec &sumDims, const string &sumIndices)
   : DLAOp<1,1>()
 {
   m_sumDims = sumDims;
+  m_sumIndices = sumIndices;
 }
 
 
@@ -404,15 +405,17 @@ void AllReduceNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   const AllReduceNode *node = (AllReduceNode*)orig;
   DLAOp<1,1>::Duplicate(node, shallow, possMerging);
   m_sumDims = node->m_sumDims;  
+  m_sumIndices = node->m_sumIndices;
 }
 
 NodeType AllReduceNode::GetType() const
 {
   stringstream str;
   str << "AllReduce";
-  DimSetConstIter iter = m_sumDims.begin();
+  DimVecConstIter iter = m_sumDims.begin();
   for(; iter != m_sumDims.end(); ++iter)
     str << *iter << ",";
+  //  str << m_sumIndices;
   return str.str();
 }
 void AllReduceNode::SanityCheck()
@@ -429,7 +432,7 @@ void AllReduceNode::Prop()
     m_cost = 0;
     unsigned int numProcs = 1;
 
-    DimSetIter iter = m_sumDims.begin();
+    DimVecIter iter = m_sumDims.begin();
     for(; iter != m_sumDims.end(); ++iter) {
       numProcs *= GridLens[*iter];
     }
@@ -455,11 +458,11 @@ void AllReduceNode::PrintCode(IndStream &out)
   out.Indent();
   *out << "AllReduceOnDims( " << GetName(0).str()
        << ", m";
-  DimSetConstIter iter = m_sumDims.begin();
+  DimVecConstIter iter = m_sumDims.begin();
   for(; iter != m_sumDims.end(); ++iter) {
     *out << "_" << *iter;
   }
-  *out << " );\n";
+  *out << ", " << m_sumIndices << " );\n";
 }
 
 void AllReduceNode::FlattenCore(ofstream &out) const
