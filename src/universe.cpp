@@ -398,8 +398,8 @@ void Universe::Print(IndStream &out, unsigned int &whichGraph)
 
 void Universe::EvalCosts(IndStream &out, unsigned int &whichGraph)
 {
-  unsigned int optGraph, worstGraph;
-  double optCost, worstCost;
+  unsigned int optGraph;
+  double optCost;
 
 #ifdef MATLAB
   *out << "transMap = containers.Map('KeyType','uint64','ValueType','char');\n";
@@ -416,18 +416,16 @@ void Universe::EvalCosts(IndStream &out, unsigned int &whichGraph)
 
   Prop();
   optCost = -1;
-  worstCost = -1;
   unsigned int graphNum = 0;
   ++graphNum;
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
-    poss->EvalRoot(out, graphNum, whichGraph, optGraph, optCost, worstGraph, worstCost);
+    poss->EvalRoot(out, graphNum, whichGraph, optGraph, optCost);
   }
     
   cout << "Opt is graph " << optGraph << endl;
   cout << "\t\t " << optCost << endl;
-  cout << "\tWorst is graph " << worstGraph << endl;
   cout.flush();
     
   whichGraph = optGraph;

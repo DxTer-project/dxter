@@ -69,7 +69,7 @@ class Poss
   virtual void DeleteNode(Node *node);
   virtual Cost Eval(TransConstVec &transList);
   virtual void Print(IndStream &out, unsigned int &graphNum);
-  virtual void EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph, unsigned int &optGraph, Cost &optCost, unsigned int &worstGraph, Cost &worstCost);
+  virtual void EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph, unsigned int &optGraph, Cost &optCost);
   virtual void PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph);
   void ForcePrint();
   bool CanPrint() const;

@@ -2325,7 +2325,7 @@ void Poss::Print(IndStream &out, unsigned int &graphNum)
   m_hasPrinted = true;
 }
 
-void Poss::EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph, unsigned int &optGraphs, double &optCosts, unsigned int &worstGraph, Cost &worstCost)
+void Poss::EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph, unsigned int &optGraphs, double &optCosts)
 {
   bool keepGoing = true;
   
@@ -2357,10 +2357,6 @@ void Poss::EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGr
       if (optCosts <= 0 || tot < optCosts) {
         optCosts = tot;
         optGraphs = graphNum;
-      }
-      if (worstCost <= 0 || tot > worstCost) {
-        worstCost = tot;
-        worstGraph = graphNum;
       }
     }
     
