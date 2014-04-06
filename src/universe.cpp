@@ -204,7 +204,7 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
   time(&start);
   Cull();
   time(&end);
-  cout << "Done culling in " << difftime(end,start) << " seconds\n";
+  cout << "Done culling in " << difftime(end,start) << " seconds; left with " << TotalCount() << " impl's\n";
   cout.flush();
 
   return count;
