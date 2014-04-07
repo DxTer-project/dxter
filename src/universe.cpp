@@ -59,6 +59,10 @@ void Universe::Init(PSet *seed)
   CurrPhase = FIRSTPHASE;
   m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers);
   m_pset->BuildSizeCache();
+
+#if DOTENSORS
+  CheckMaxDims();
+#endif
 }
 
 void Universe::Init(string fileName)
@@ -91,6 +95,31 @@ Universe::~Universe()
       delete iter3->second;
   }
   delete m_pset;
+}
+
+void Universe::CheckMaxDims()
+{
+  Dim maxDims = 0;
+  PossMMapIter iter = m_pset->m_posses.begin();
+  for(; iter != m_pset->m_posses.end(); ++iter) {
+    Poss *poss = (*iter).second;
+    NodeVecIter iter2 = poss->m_possNodes.begin();
+    for(; iter2 != poss->m_possNodes.end(); ++iter2) {
+      Node *node = *iter2;
+      if (node->GetNodeClass() == InputNode::GetClass()) {
+	InputNode *in = (InputNode*)node;
+	Dim numDims = in->NumDims(0);
+	if (numDims > maxDims)
+	  maxDims = numDims;
+      }
+    }
+  }  
+  if (maxDims != NUM_GRID_DIMS) {
+    cout << "maxDims = " << maxDims << endl;
+    cout << "NUM_GRID_DIMS = " << NUM_GRID_DIMS << endl;
+    cout << "update it!\n";
+    throw;
+  }
 }
 
 bool Universe::TakeIter(unsigned int phase)
