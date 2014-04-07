@@ -1358,7 +1358,24 @@ Cost PSet::EvalCurrPoss(TransConstVec &transList)
   if (m_currPoss == m_posses.end()) {
     throw;
   }
-  return (*m_currPoss).second->Eval(transList);
+  return (*m_currPoss).second->EvalCurr(transList);
+}
+
+Cost PSet::EvalAndSetBest()
+{
+  Cost optCost = -1;
+  PossMMapIter best;
+  PossMMapIter iter = m_posses.begin();
+  for(; iter != m_posses.end(); ++iter) {
+    Poss *poss = (*iter).second;
+    Cost tmp = poss->EvalAndSetBest();
+    if (optCost < 0 || tmp < optCost) {
+      optCost = tmp;
+      best = iter;
+    }
+  }
+  m_currPoss = best;
+  return optCost;
 }
 
 void PSet::PrintCurrPoss(IndStream &out, unsigned int &graphNum)

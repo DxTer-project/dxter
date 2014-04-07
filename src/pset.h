@@ -78,6 +78,7 @@ class PSet
   void ClearCurrPoss();
   bool IncrementCurrPoss();
   Cost EvalCurrPoss(TransConstVec &transList);
+  Cost EvalAndSetBest();
   virtual void PrintCurrPoss(IndStream &out, unsigned int &graphNum);
   bool CanPrint() const;
   Poss* GetCurrPoss() const;

@@ -2192,7 +2192,7 @@ void Poss::ClearFullyExpanded()
   m_fullyExpanded = false;
 }
 
-Cost Poss::Eval(TransConstVec &transList)
+Cost Poss::EvalCurr(TransConstVec &transList)
 {
   unsigned int numPSets = m_sets.size();
   Cost tot = 0;
@@ -2210,6 +2210,25 @@ Cost Poss::Eval(TransConstVec &transList)
   }
   for(unsigned int i = 0; i < numPSets; ++i) {
     tot += m_sets[i]->EvalCurrPoss(transList);
+  }
+  
+  return tot;
+}
+
+Cost Poss::EvalAndSetBest()
+{
+  unsigned int numPSets = m_sets.size();
+  Cost tot = 0;
+  
+  NodeVecConstIter iter = m_possNodes.begin();
+  for( ; iter != m_possNodes.end(); ++iter) {
+    DLANode *node =  (DLANode*)(*iter);
+    double cost = node->GetCost();
+    tot += cost;
+  }
+
+  for(unsigned int i = 0; i < numPSets; ++i) {
+    tot += m_sets[i]->EvalAndSetBest();
   }
   
   return tot;
@@ -2334,7 +2353,7 @@ void Poss::EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGr
   while (keepGoing) {
     if (whichGraph <= 0 || whichGraph == graphNum) {
       TransConstVec transList;
-      Cost tot = Eval(transList);
+      Cost tot = EvalCurr(transList);
 #ifdef MATLAB
       *out << "cost(" << graphNum << ") = "
 	   << setprecision(15) << tot << ";\n";
@@ -2452,6 +2471,83 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
   }
   
   m_hasPrinted = true;
+}
+
+void Poss::PrintCurrRoot(IndStream &out)
+{
+  unsigned int numPSets = m_sets.size();
+  
+  ClearPrinted();
+  
+  *out << "\tUnique Num: " << m_num << endl;
+  *out << "\tChild of: " << m_parent << endl;
+  *out << "\tResult of transformations:" << endl;
+  TransVec transVec;
+  GetCurrTransVec(transVec);
+  TransVecConstIter transIter = transVec.begin();
+  for( ; transIter != transVec.end(); ++transIter)
+    *out << "\t" << (*transIter)->GetType() << endl;
+  *out << "*****************************************" << endl;
+  
+  if (m_pset && m_pset->IsLoop()
+      && ((Loop*)m_pset)->GetType() == BLISLOOP)
+    {
+      string loopLevel = out.LoopLevel(1);
+      string idx = "idx" + loopLevel;
+      string dimLen = "dimLen" + loopLevel;
+      string bs = "bs" + loopLevel;
+      out.Indent();
+      *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
+    }
+      
+      
+  //This actualy sets some stuff so it can print
+  if (!CanPrint()) {
+    cout << "couldn't print\n";
+    throw;
+  }
+
+  unsigned int graphNum = -1;
+      
+  NodeVecConstIter nodeIter = m_inTuns.begin();
+  for(; nodeIter != m_inTuns.end(); ++nodeIter) {
+    (*nodeIter)->Print(out, graphNum);
+  }
+  bool hasPrinted = true;
+  while(hasPrinted) {
+    hasPrinted = false;
+    NodeVecConstIter nodeIter = m_possNodes.begin();
+    for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
+      //Don't print the poss out tunnels until the end
+      // so the repartitioning code all goes after the loop body
+      if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsPossTunnel(POSSTUNOUT)) {
+	(*nodeIter)->Print(out, graphNum);
+	hasPrinted |= (*nodeIter)->HasPrinted();
+      }
+    }
+    for(unsigned int i = 0; i < numPSets; ++i) {
+      if (m_sets[i]->GetCurrPoss()->CanPrint()) {
+	m_sets[i]->PrintCurrPoss(out, graphNum);
+	hasPrinted = true;
+      }
+    }
+  }
+      
+  nodeIter = m_outTuns.begin();
+  for(; nodeIter != m_outTuns.end(); ++nodeIter) {
+    (*nodeIter)->Print(out, graphNum);
+    (*nodeIter)->SetPrinted();
+  }
+  
+  nodeIter = m_pset->m_outTuns.begin();
+  for(; nodeIter != m_pset->m_outTuns.end(); ++nodeIter) {
+    (*nodeIter)->Print(out, graphNum);
+    (*nodeIter)->SetPrinted();
+  }
+  *out << endl;
+  
+  out.Indent();
+  *out << "*****************************************" << endl;
 }
 
 void Poss::ClearPrinted()

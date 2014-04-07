@@ -383,6 +383,25 @@ void Universe::PrintAll(int algNum)
 #endif
 }
 
+void Universe::PrintBest()
+{
+  time_t start,end;
+
+  time(&start);
+  EvalCostsAndSetBest();
+  time(&end);
+  cout << "\tCost eval took " << difftime(end,start) << " seconds\n";
+  cout.flush();
+#if DOELEM
+    IndStream optOut(&cout,ELEMSTREAM);
+#elif DOSQM || DOSM
+    IndStream optOut(&cout,BLISSTREAM);
+#elif DOTENSORS
+    IndStream optOut(&cout,TENSORSTREAM);
+#endif
+    m_pset->GetCurrPoss()->PrintCurrRoot(optOut);
+}
+
 void Universe::Print(IndStream &out, unsigned int &whichGraph)
 {
   unsigned int graphNum = 0;
@@ -431,6 +450,12 @@ void Universe::EvalCosts(IndStream &out, unsigned int &whichGraph)
   whichGraph = optGraph;
   
   *out << "numAlgs = " << TotalCount() << endl;
+}
+
+void Universe::EvalCostsAndSetBest()
+{
+  Prop();
+  m_pset->EvalAndSetBest();
 }
 
 unsigned int Universe::TotalCount() const

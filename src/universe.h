@@ -54,6 +54,7 @@ class Universe
   virtual ~Universe();
   unsigned int Expand(unsigned int numIters, unsigned int phase, CullFunction Cull);
   void EvalCosts(IndStream &out, unsigned int &graphNum);
+  void EvalCostsAndSetBest();
   void Print(IndStream &out, unsigned int &graphNum);
   static void AddTrans(const ClassType &classType, Transformation *trans, int phase);
   static void AddToMaps(Transformation *trans);
@@ -61,6 +62,7 @@ class Universe
   void Cull();
   void Prop();
   void PrintAll(int algNum);
+  void PrintBest();
   unsigned int TotalCount() const;
   void ClearFullyExpanded();
   void PrintStats();
