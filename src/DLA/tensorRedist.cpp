@@ -517,6 +517,7 @@ void SumScatterUpdateNode::Prop()
     if (inType.m_numDims != outType.m_numDims)
       throw;
 
+#if 0
     if (CurrPhase >= ROTENSORPHASE) {
       for (Dim dim = 0; dim < inType.m_numDims; ++dim) {
 	if (inType.m_dists[dim] != outType.m_dists[dim]) {
@@ -548,6 +549,7 @@ void SumScatterUpdateNode::Prop()
 	}
       }
     }
+#endif
 
 
     m_cost = 0;
