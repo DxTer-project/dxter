@@ -52,7 +52,9 @@ class Universe
   void Init(PSet *seed);
   void Init(string fileName);
   virtual ~Universe();
+#if DOTENSORS
   void CheckMaxDims();
+#endif
   unsigned int Expand(unsigned int numIters, unsigned int phase, CullFunction Cull);
   void EvalCosts(IndStream &out, unsigned int &graphNum);
   void EvalCostsAndSetBest();

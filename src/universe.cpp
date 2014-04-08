@@ -97,6 +97,7 @@ Universe::~Universe()
   delete m_pset;
 }
 
+#if DOTENSORS
 void Universe::CheckMaxDims()
 {
   Dim maxDims = 0;
@@ -121,6 +122,7 @@ void Universe::CheckMaxDims()
     throw;
   }
 }
+#endif
 
 bool Universe::TakeIter(unsigned int phase)
 {
