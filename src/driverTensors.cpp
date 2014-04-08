@@ -78,7 +78,7 @@ void Usage()
 
 int main(int argc, const char* argv[])
 {
-  omp_set_num_threads(1);
+  //  omp_set_num_threads(1);
   omp_set_nested(true);
   //  PrintType printType = CODE;
   int numIters = -1;

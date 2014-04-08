@@ -281,13 +281,13 @@ void PSet::Prop()
   }
     PossMMapIter iter;
       unsigned int j = 0;
-      //#pragma omp parallel private(j,iter)
+#pragma omp parallel private(j,iter)
       {
 	iter = m_posses.begin();
 	j = 0;
 	unsigned int size = m_posses.size();
 	//BAM par
-	//#pragma omp for schedule(static) 
+#pragma omp for schedule(static) 
 	for (unsigned int i = 0; i < size; ++i) {
 	  if (j > i) {
 	    cout << "uhoh\n";
@@ -349,16 +349,17 @@ void PSet::Cull(Phase phase)
   PossMMapIter iter2 = m_posses.begin();
   for(; iter2 != m_posses.end(); ++iter2) 
     (*iter2).second->m_isSane = false;
+
+  unsigned int j;
+  PossMMapIter iter;
   
-  //#pragma omp parallel// private(j,iter)
+#pragma omp parallel private(j,iter)
   {
-    PossMMapIter iter;
-    unsigned int j = 0;
     iter = m_posses.begin();
     j = 0;
     unsigned int size = m_posses.size();
     //BAM par
-    //#pragma omp for schedule(static) 
+#pragma omp for schedule(static) 
     for (unsigned int i = 0; i < size; ++i) {
       if (i < j) {
 	cout << "uhoh";
@@ -376,7 +377,6 @@ void PSet::Cull(Phase phase)
       poss->Cull(phase);
     }
   }
-  PossMMapIter iter;
 
   iter = m_posses.begin();
   while (iter != m_posses.end()) {
@@ -481,13 +481,13 @@ bool PSet::TakeIter(const TransMap &transMap,
     PossMMapIter iter;
     unsigned int j = 0;
 
-    //#pragma omp parallel private(j,iter)
+#pragma omp parallel private(j,iter)
     {
       iter = m_posses.begin();
       j = 0;
       unsigned int size = m_posses.size();
       //BAM par
-      //#pragma omp for schedule(static) 
+#pragma omp for schedule(static) 
       for (unsigned int i = 0; i < size; ++i) {
 	while (j < i) {
 	  ++iter;
@@ -790,13 +790,13 @@ void PSet::Simplify(const TransMap &simplifiers)
 
   PossMMapIter iter;
   unsigned int j = 0;
-  //#pragma omp parallel private(j,iter)
+#pragma omp parallel private(j,iter)
   {
     iter = m_posses.begin();
     j = 0;
     unsigned int size = m_posses.size();
     //BAM par
-    //#pragma omp for schedule(static) 
+#pragma omp for schedule(static) 
     for (unsigned int i = 0; i < size; ++i) {
       while (j < i) {
 	++iter;
@@ -997,13 +997,13 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
     //BAM par
     PossMMapIter iter;
     unsigned int j = 0;
-    //#pragma omp parallel private(j,iter)
+#pragma omp parallel private(j,iter)
     {
       iter = m_posses.begin();
 	j = 0;
 	unsigned int size = m_posses.size();
 	//BAM par
-	//#pragma omp for schedule(static) 
+#pragma omp for schedule(static) 
       for (unsigned int i = 0; i < size; ++i) {
 	while (j < i) {
 	  ++iter;
