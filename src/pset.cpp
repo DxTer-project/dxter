@@ -1381,7 +1381,7 @@ Cost PSet::EvalAndSetBest()
 void PSet::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
 {
   out.Indent();
-  *out << "//****\n";
+  *out << "//**** (out of " << m_posses.size() << ")\n";
   
   if (m_currPoss == m_posses.end()) {
     throw;
