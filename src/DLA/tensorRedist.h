@@ -29,6 +29,7 @@
 #include "DLANode.h"
 #include "transform.h"
 #include "DLAOp.h"
+#include "tensorSumScatter.h"
 
 class RedistNode : public DLANode
 {
@@ -86,28 +87,7 @@ class AllReduceNode : public DLAOp<1,1>
   virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
 };
 
-class SumScatterUpdateNode : public DLAOp<2,1>
-{
- public:
-  DimSet m_sumDims;
-  Coef m_coef;
- SumScatterUpdateNode() : DLAOp<2,1>(), m_coef(COEFVALZERO) {}
-  SumScatterUpdateNode(const DimSet &sumDims, Coef coeff);
-  static Node* BlankInst() { return  new SumScatterUpdateNode; }
-  virtual Node* GetNewInst() { return BlankInst(); }
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  virtual bool IsRedistNode() const {return true;}
-  virtual NodeType GetType() const;
-  virtual void SanityCheck();
-  virtual void Prop();
-  virtual void PrintCode(IndStream &out);
-  //  RedistNode* CreateTrans(Trans trans);
-  virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "redistWithSum";}
-  virtual void FlattenCore(ofstream &out) const;
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
-};
+
 
 class RemoveWastedRedist : public SingleTrans
 {
