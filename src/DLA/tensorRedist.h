@@ -106,7 +106,7 @@ class SumScatterUpdateNode : public DLAOp<2,1>
   static ClassType GetClass() {return "redistWithSum";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
+  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
 };
 
 class RemoveWastedRedist : public SingleTrans
