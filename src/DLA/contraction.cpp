@@ -672,7 +672,7 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
   RedistNode *node1 = new RedistNode(AType);
   RedistNode *node2 = new RedistNode(BType);
 
-  TempVarNode *temp = new TempVarNode(CType);
+  TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, cont->m_indices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));

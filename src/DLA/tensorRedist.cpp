@@ -71,8 +71,10 @@ void RedistNode::Prop()
     if (numDims != InputNumDims(0))
       throw;
 
-    if (m_srcType.m_numDims != numDims)
+    if (m_srcType.m_numDims != numDims) {
+      cout << m_destType.str() << " <- " << m_srcType.str() << endl;
       throw;
+    }
 
     if (!m_destType.IsSane())
       throw;
@@ -514,10 +516,18 @@ void SumScatterUpdateNode::Prop()
     const DistType &inType = InputDistType(0);
     const DistType &outType = InputDistType(1);
 
-    if (inType.m_numDims != outType.m_numDims)
+    if (inType.m_numDims != (outType.m_numDims + m_sumDims.size())) {
+      cout << "inType " << inType.str() << endl;
+      cout << "outType " << outType.str() << endl;
+      cout << "sumDims ";
+      DimSetIter iter = m_sumDims.begin();
+      for( ; iter != m_sumDims.end(); ++iter) 
+	cout << *iter << " ";
+      cout << endl;      
       throw;
+    }
 
-#if 0
+#if 1
     if (CurrPhase >= ROTENSORPHASE) {
       for (Dim dim = 0; dim < inType.m_numDims; ++dim) {
 	if (inType.m_dists[dim] != outType.m_dists[dim]) {

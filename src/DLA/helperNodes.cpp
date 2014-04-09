@@ -486,6 +486,25 @@ void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 #endif
 
+
+#if DOTENSORS
+TempVarNode::TempVarNode(DistType dist, DimSet sumDims) 
+   : m_lsizes(NULL),
+     m_sumLens(NULL),
+     m_sumDims(sumDims)
+{
+  Dim numSumDims = sumDims.size();
+  m_distType.PrepForNumDims(dist.m_numDims+numSumDims);
+  for (Dim dim = 0; dim < dist.m_numDims; ++dim)
+    m_distType.m_dists[dim] = dist.m_dists[dim];
+  DimSetIter iter = m_sumDims.begin();
+  for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
+    m_distType.m_dists[dist.m_numDims + dim] = *iter+1;
+  }
+}
+#endif
+
+
 NodeType TempVarNode::GetType() const 
 {
   if (m_inputs.size() != 1) {
@@ -503,6 +522,9 @@ void TempVarNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_distType = ((TempVarNode*)orig)->m_distType;
 #endif
   m_name = ((TempVarNode*)orig)->m_name;
+#if DOTENSORS
+  m_sumDims = ((TempVarNode*)orig)->m_sumDims;
+#endif
 }
 
 TempVarNode::~TempVarNode()
@@ -589,19 +611,37 @@ const Sizes* TempVarNode::LocalN(unsigned int num) const
 #elif DOTENSORS
 const Dim TempVarNode::NumDims(unsigned int num) const
 {
-  return InputNumDims(0);
+  return InputNumDims(0) + m_sumDims.size();
 }
 
 const Sizes* TempVarNode::Len(unsigned int num, Dim dim) const
 {
   if (num > 0)
     throw;
-  return InputLen(0, dim);
+  if (!m_sumDims.empty()) {
+    Dim dims = InputNumDims(0);
+    if (dim >= dims)
+      return m_sumLens + (dim - dims);
+    else
+      return InputLen(0, dim);
+  }
+  else
+    return InputLen(0, dim);
 }
 
 const Sizes* TempVarNode::LocalLen(unsigned int num, Dim dim) const
 {
-  return &(m_lsizes[dim]);
+  if (num > 0)
+    throw;
+  if (!m_sumDims.empty()) {
+    Dim dims = InputNumDims(0);
+    if (dim >= dims)
+      return &m_ones;
+    else
+      return &(m_lsizes[dim]);
+  }
+  else
+    return &(m_lsizes[dim]);
 }
 #endif
 
@@ -630,6 +670,9 @@ void TempVarNode::FlattenCore(ofstream &out) const
   WRITE(m_distType);
 #endif
   out << m_name << endl;
+#if DOTENSORS
+  throw; //m_sumDims
+#endif
 }
 
 void TempVarNode::UnflattenCore(ifstream &in, SaveInfo &info)
@@ -639,6 +682,9 @@ void TempVarNode::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_distType);
 #endif
   getline(in,m_name);
+#if DOTENSORS
+  throw; //m_sumDims
+#endif
 }
 
 void TempVarNode::ClearSizeCache()
@@ -655,6 +701,9 @@ void TempVarNode::ClearSizeCache()
     return;
   delete [] m_lsizes;
   m_lsizes = NULL;
+  m_ones.ClearSizes();
+  delete [] m_sumLens;
+  m_sumLens = NULL;
 #endif
 }
 
@@ -682,6 +731,16 @@ sdlkfj
  
  for (Dim dim = 0; dim < numDims; ++dim)
    GetLocalSizes(m_distType, dim, InputLen(0,dim), m_lsizes+dim);
+
+
+ m_sumLens = new Sizes[m_sumDims.size()];
+ m_ones.AddRepeatedSizes(1, InputLen(0,0)->NumSizes(), 1);
+ DimSetIter iter = m_sumDims.begin();
+ for(Dim dim = 0; iter != m_sumDims.end(); ++dim, ++iter) {
+   if (*iter >= NUM_GRID_DIMS) 
+     throw;
+   m_sumLens[dim].AddRepeatedSizes(GridLens[*iter], InputLen(0,0)->NumSizes(), 1);
+ }
  
 #endif
 }

@@ -164,6 +164,10 @@ class TempVarNode : public DLANode
   Sizes *m_mlsize, *m_nlsize;
 #else
   SizesArray m_lsizes;
+  SizesArray m_sumLens;
+  DimSet m_sumDims;
+  Sizes m_ones;
+
 #endif
  public:
  TempVarNode() 
@@ -176,7 +180,7 @@ m_distType(D_LASTDIST),
 #if TWOD
  m_mlsize(NULL), m_nlsize(NULL)
 #elif DOTENSORS
-  m_lsizes(NULL)
+  m_lsizes(NULL),m_sumLens(NULL)
 #endif
  {}
 
@@ -191,7 +195,7 @@ m_distType(D_LASTDIST),
 #if TWOD
  m_mlsize(NULL), m_nlsize(NULL)
 #elif DOTENSORS
-  m_lsizes(NULL)
+  m_lsizes(NULL), m_sumLens(NULL)
 #endif
  {}
 
@@ -201,16 +205,23 @@ m_distType(D_LASTDIST),
 #if TWOD
  m_mlsize(NULL), m_nlsize(NULL)
 #elif DOTENSORS
-  m_lsizes(NULL)
+  m_lsizes(NULL), m_sumLens(NULL)
 #endif
  {}
+#endif
 
+#if DOTENSORS
+ TempVarNode(DistType dist, DimSet sumDims);
+#endif
+
+#if DODM
  TempVarNode(DistType dist, string name) 
    :  m_distType(dist), m_name(name),
 #if TWOD
  m_mlsize(NULL), m_nlsize(NULL)
 #elif DOTENSORS
-  m_lsizes(NULL)
+  m_lsizes(NULL),
+  m_sumLens(NULL)
 #endif
   {}
 #endif
