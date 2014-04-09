@@ -33,18 +33,19 @@
 class SumScatterUpdateNode : public DLAOp<2,1>
 {
  public:
-  DimSet m_sumDims;
   Coef m_coef;
  SumScatterUpdateNode() : DLAOp<2,1>(), m_coef(COEFVALZERO) {}
-  SumScatterUpdateNode(const DimSet &sumDims, Coef coeff);
+  SumScatterUpdateNode(Coef coeff);
   static Node* BlankInst() { return  new SumScatterUpdateNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual bool IsRedistNode() const {return true;}
   virtual NodeType GetType() const;
   virtual void SanityCheck();
+  virtual Phase MaxPhase() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
+  Dim MySumDim() const;
   //  RedistNode* CreateTrans(Trans trans);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "redistWithSum";}

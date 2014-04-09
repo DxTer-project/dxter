@@ -686,7 +686,7 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
   poss->AddNode(temp);
   poss->AddNode(LCont);
 
-  SumScatterUpdateNode *sum = new SumScatterUpdateNode(sumDims, cont->m_beta);
+  SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta);
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
   poss->AddNode(sum);
@@ -853,7 +853,7 @@ void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
   poss->AddNode(temp);
   poss->AddNode(LCont);
 
-  SumScatterUpdateNode *sum = new SumScatterUpdateNode(sumDims, cont->m_beta);
+  SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta);
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
   poss->AddNode(sum);
