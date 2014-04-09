@@ -309,17 +309,23 @@ unsigned int DistType::DimsToDistEntry(DimVec dims)
   return distVal;
 }
 
-
-string DistTypeToStr(const DistType &type)
+string DistType::str() const
 {
   string out = "[";
-  for (unsigned int i = 0; i < type.m_numDims; ++i) {
-    out += DistType::DistEntryToStr(type.m_dists[i]);
-    if (i+1 < type.m_numDims)
+  for (unsigned int i = 0; i < m_numDims; ++i) {
+    out += DistType::DistEntryToStr(m_dists[i]);
+    if (i+1 < m_numDims)
       out += ",";
   }
   out += "]";
   return out;
+}
+
+
+
+string DistTypeToStr(const DistType &type)
+{
+  return type.str();
 }
 
 #if DOTENSORS

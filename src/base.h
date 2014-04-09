@@ -215,6 +215,7 @@ class DistType
   bool IsSane() const;
   void PrepForNumDims(Dim numDims);
   string QuickStr() const;
+  string str() const;
   DistType& operator=(const DistType &rhs);
 };
 #endif
