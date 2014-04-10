@@ -276,7 +276,7 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
   EntrySet sumDims;
   GetSumScatterInfo(inTypeInt, outType, sumDims);
 
-  for(Dim dim = 0; dim < inTypeInt.m_numDims; ++dim) {
+  for(Dim dim = 0; dim < outType.m_numDims; ++dim) {
     DistEntry inEntry = inTypeInt.m_dists[dim];
     DistEntry outEntry = outType.m_dists[dim];
     if (inEntry != outEntry) {
@@ -338,6 +338,8 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
   sum2->AddInput(redist, 0);
   sum2->AddInput(sum->Input(1), sum->InputConnNum(1));
 
+  poss->AddNode(redist);
+  poss->AddNode(sum2);
   sum->RedirectChildren(sum2,0);
 
   node->m_poss->DeleteChildAndCleanUp(node);
