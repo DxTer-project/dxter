@@ -165,7 +165,7 @@ class TempVarNode : public DLANode
 #else
   SizesArray m_lsizes;
   SizesArray m_sumLens;
-  DimSet m_sumDims;
+  EntrySet m_sumDims;
   Sizes m_ones;
 
 #endif
@@ -211,7 +211,7 @@ m_distType(D_LASTDIST),
 #endif
 
 #if DOTENSORS
- TempVarNode(DistType dist, DimSet sumDims);
+ TempVarNode(DistType dist, EntrySet sumDims);
 #endif
 
 #if DODM

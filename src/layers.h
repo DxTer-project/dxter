@@ -142,7 +142,8 @@ enum Layers {
 
 //Phases of generation
 #define DPTENSORPHASE 0
-#define ROTENSORPHASE 1
+#define SUMSCATTERTENSORPHASE 1
+#define ROTENSORPHASE 2
 
 #define FIRSTPHASE DPTENSORPHASE
 
@@ -157,6 +158,7 @@ enum Layers {
 #define DOSOPHASE 0
 #define DOSMPPHASE 0
 #define DODPTENSORPHASE 1
+#define DOSUMSCATTERTENSORPHASE 1
 #define DOROTENSORPHASE 1
 
 

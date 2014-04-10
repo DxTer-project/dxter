@@ -95,8 +95,8 @@ void RedistNode::Prop()
     }
     else if (diffs.size() == 1) {
       const Dim dim = *(diffs.begin());
-      DimVec src = DistType::DistEntryDims(m_srcType.m_dists[dim]);
-      DimVec dest = DistType::DistEntryDims(m_destType.m_dists[dim]);
+      DimVec src = m_srcType.m_dists[dim].DistEntryDims();
+      DimVec dest = m_destType.m_dists[dim].DistEntryDims();
 
       
       if (src.empty() || IsPrefix(src, dest)) {
@@ -157,8 +157,8 @@ void RedistNode::Prop()
       DimSetIter diffIter = diffs.begin();
       for(; diffIter != diffs.end(); ++diffIter) {
 	Dim diffDim = *diffIter;
-	DimVec src = DistType::DistEntryDims(m_srcType.m_dists[diffDim]);
-	DimVec dest = DistType::DistEntryDims(m_destType.m_dists[diffDim]);
+	DimVec src = m_srcType.m_dists[diffDim].DistEntryDims();
+	DimVec dest = m_destType.m_dists[diffDim].DistEntryDims();
 
 	if (src.empty() || IsPrefix(src, dest)) {
 	  m_cost = 0;
@@ -267,18 +267,18 @@ Phase RedistNode::MaxPhase() const
   DimSet diffs;
   
   for (Dim dim = 0; dim < numDims; ++dim) {
-    unsigned int srcDistEntry = m_srcType.m_dists[dim];
-    unsigned int destDistEntry = m_destType.m_dists[dim];
+    DistEntry srcDistEntry = m_srcType.m_dists[dim];
+    DistEntry destDistEntry = m_destType.m_dists[dim];
     if (srcDistEntry != destDistEntry) {
-      DimVec srcDims = DistType::DistEntryDims(srcDistEntry);
-      DimVec destDims = DistType::DistEntryDims(destDistEntry);
-      if (!srcDistEntry || IsPrefix(srcDims, destDims)) {
+      DimVec srcDims = srcDistEntry.DistEntryDims();
+      DimVec destDims = destDistEntry.DistEntryDims();
+      if (srcDistEntry.IsStar() || IsPrefix(srcDims, destDims)) {
 	foundMemCopy = true;
 	if (foundAllGather || foundAllToAll) {
 	  return ROTENSORPHASE;
 	}
       }
-      else if (!destDistEntry || IsPrefix(destDims, srcDims)) {
+      else if (destDistEntry.IsStar() || IsPrefix(destDims, srcDims)) {
 	if (foundAllGather || foundMemCopy || foundAllToAll)
 	  return ROTENSORPHASE;
 	else
@@ -293,8 +293,8 @@ Phase RedistNode::MaxPhase() const
 	    return ROTENSORPHASE;
 	  else if (diffs.size() == 1) {
 	    Dim otherDim = *(diffs.begin());
-	    DimVec otherSrcDims = DistType::DistEntryDims(m_srcType.m_dists[otherDim]);
-	    DimVec otherDestDims = DistType::DistEntryDims(m_destType.m_dists[otherDim]);
+	    DimVec otherSrcDims = m_srcType.m_dists[otherDim].DistEntryDims();
+	    DimVec otherDestDims = m_destType.m_dists[otherDim].DistEntryDims();
 	    
 	    DimVec commonSuff1, commonSuff2, otherSrcPref, destPref, srcPref, otherDestPref;
 	    GetCommonSuffix(otherSrcDims, destDims, commonSuff1, otherSrcPref, destPref);
@@ -626,12 +626,12 @@ bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
     if (src.m_dists[m_dim] != dest->m_dists[m_dim]) {
       //      cout << "src " << src.m_dists[m_dim] << endl;
       //      cout << "dest " << dest->m_dists[m_dim] << endl;
-      DimVec destDims =  DistType::DistEntryDims(dest->m_dists[m_dim]);
+      DimVec destDims =  dest->m_dists[m_dim].DistEntryDims();
       for (Dim dim = 0; dim < dest->m_numDims; ++dim) {
 	if (dim != m_dim) {
-	  unsigned int srcDistEntry = src.m_dists[dim];
+	  DistEntry srcDistEntry = src.m_dists[dim];
 	  //	    unsigned int destDistEntry = dest->m_dists[dim];
-	  DimVec srcDims = DistType::DistEntryDims(srcDistEntry);
+	  DimVec srcDims = srcDistEntry.DistEntryDims();
 	  DimVecIter iter = srcDims.begin();
 	  for(; iter != srcDims.end(); ++iter) {
 	    DimVecIter iter2 = destDims.begin();

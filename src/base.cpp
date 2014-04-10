@@ -71,8 +71,9 @@ DistType::DistType(const DistType &rhs)
 {
   m_numDims = rhs.m_numDims;
   if (m_numDims) {
-    m_dists = new unsigned int[m_numDims];
-    memcpy(m_dists, rhs.m_dists, m_numDims*sizeof(unsigned int));
+    m_dists = new DistEntry[m_numDims];
+    for (Dim dim = 0; dim < m_numDims; ++dim)
+      m_dists[dim] = rhs.m_dists[dim];
   }
 }
 
@@ -82,8 +83,9 @@ DistType& DistType::operator=(const DistType &rhs)
   if (m_dists)
     delete [] m_dists;
   if (m_numDims) {
-    m_dists = new unsigned int[m_numDims];
-    memcpy(m_dists, rhs.m_dists, m_numDims*sizeof(unsigned int));
+    m_dists = new DistEntry[m_numDims];
+    for (Dim dim = 0; dim < m_numDims; ++dim)
+      m_dists[dim] = rhs.m_dists[dim];
   }
   else
     m_dists = NULL;
@@ -96,7 +98,7 @@ void DistType::PrepForNumDims(Dim numDims)
     delete [] m_dists;
   m_numDims = numDims;
   if (numDims)
-    m_dists = new unsigned int[numDims];
+    m_dists = new DistEntry[numDims];
   else
     m_dists = NULL;
 }
@@ -115,7 +117,7 @@ DimSet DistType::UsedGridDims() const
   //Reflect changes in IsSane
   DimSet set;
   for (Dim dim = 0; dim < m_numDims; ++dim) {
-    DimVec vec = DistEntryDims(m_dists[dim]);
+    DimVec vec = m_dists[dim].DistEntryDims();
     DimVecIter iter = vec.begin();
     for(; iter != vec.end(); ++iter) {
       if (!set.insert(*iter).second) {
@@ -132,7 +134,7 @@ bool DistType::IsSane() const
   //Reflect changes in UsedGridDims
   DimSet set;
   for (Dim dim = 0; dim < m_numDims; ++dim) {
-    DimVec vec = DistEntryDims(m_dists[dim]);
+    DimVec vec = m_dists[dim].DistEntryDims();
     DimVecIter iter = vec.begin();
     for(; iter != vec.end(); ++iter) {
       if (!set.insert(*iter).second) {
@@ -151,7 +153,7 @@ void DistType::SetToDefault(Dim numDims)
   m_numDims = numDims;
   if (m_dists)
     delete [] m_dists;
-  m_dists = new Dim[numDims];
+  m_dists = new DistEntry[numDims];
 
   unsigned int numStartDists = ceil((double)NUM_GRID_DIMS / numDims);
   unsigned int numEndDists = floor((double)NUM_GRID_DIMS / numDims);
@@ -174,7 +176,7 @@ void DistType::SetToDefault(Dim numDims)
       vec.push_back(currDistDim);
       currDistDim++;
     }
-    m_dists[i] = DimsToDistEntry(vec);
+    m_dists[i].DimsToDistEntry(vec);
   }
 }
 
@@ -185,19 +187,19 @@ void DistType::SetToStar(Dim numDims)
   m_numDims = numDims;
   if (m_dists)
     delete [] m_dists;
-  m_dists = new Dim[numDims];
+  m_dists = new DistEntry[numDims];
 
   for(Dim dim = 0; dim < numDims; ++dim)
-    m_dists[dim] = 0;
+    m_dists[dim].SetToStar();
 }
 
-string DistType::DistEntryToStr(unsigned int dist)
+string DistEntry::DistEntryToStr() const
 {
 #if (MAX_NUM_DIMS > 10)
   this code needs to be updated since dim "12"
     will be reversed to be 21
 #endif 
-    DimVec vec = DistEntryDims(dist);
+    DimVec vec = DistEntryDims();
   if (vec.empty())
     return "*";
   std::stringstream ret;
@@ -216,12 +218,12 @@ string DistType::QuickStr() const
   if (!m_dists)
     throw;
   for(Dim dim = 0; dim < m_numDims; ++dim) {
-    ret << m_dists[dim] << " ";
+    ret << m_dists[dim].m_val << " ";
   }
   return ret.str();
 }
 
-DimVec DistType::DistEntryDims(unsigned int dist)
+DimVec DistEntry::DistEntryDims() const
 {
 #if 0
   if (dist > 3000) {
@@ -231,14 +233,14 @@ DimVec DistType::DistEntryDims(unsigned int dist)
   cout << "\n\nstarting with dist = " << dist << endl;
 #endif
   DimVec vec;
-  if (dist == 0)
+  if (IsStar())
     return vec;
   unsigned int currStage = NUM_GRID_DIMS;
-  unsigned int distVal = dist-1;
+  unsigned int distVal = m_val-1;
   unsigned int numDists = 1;
-  while (dist > currStage) {
+  while (distVal > currStage) {
     if (!currStage) {
-      cout << "starting dist " << dist << endl;
+      cout << "starting dist " << m_val << endl;
       cout << "numDists " << numDists << endl;
       cout << "!currStage\n";
       throw;
@@ -255,11 +257,6 @@ DimVec DistType::DistEntryDims(unsigned int dist)
     distVal -= currStage;
     numDists++;
     currStage *= NUM_GRID_DIMS;
-    if (numDists > NUM_GRID_DIMS) {
-      cout << "numDists > NUM_GRID_DIMS " << numDists << endl;
-      cout << "starting dist " << dist << endl;
-      throw;
-    }
 #if 0
     cout << "distVal aft " << distVal << endl;
     cout << "numDists aft " << numDists << endl;
@@ -279,13 +276,13 @@ DimVec DistType::DistEntryDims(unsigned int dist)
   }
   if (distVal != 0) {
     cout << endl << distVal << " != 0\n";
-    cout << "dist = " << dist << endl;
+    cout << "dist = " << m_val << endl;
     throw;
   }
   return vec;
 }
 
-unsigned int DistType::DimsToDistEntry(DimVec dims)
+void DistEntry::DimsToDistEntry(DimVec dims)
 {
   unsigned int currStage = 1;
   unsigned int distVal = 0;
@@ -306,14 +303,14 @@ unsigned int DistType::DimsToDistEntry(DimVec dims)
     throw;
   }
     
-  return distVal;
+  m_val = distVal;
 }
 
 string DistType::str() const
 {
   string out = "[";
   for (unsigned int i = 0; i < m_numDims; ++i) {
-    out += DistType::DistEntryToStr(m_dists[i]);
+    out += m_dists[i].DistEntryToStr();
     if (i+1 < m_numDims)
       out += ",";
   }
@@ -360,7 +357,7 @@ void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes)
 {
   const Dim  numDims = dist.m_numDims;
   for (Dim dim = 0; dim < numDims; ++ dim) {
-    unsigned int distVal = dist.m_dists[dim];
+    unsigned int distVal = dist.m_dists[dim].m_val;
     localSizes[dim] = sizes[dim];
     if (distVal != 0) {
       distVal--;
@@ -386,7 +383,7 @@ void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes)
 
 void GetLocalSizes(DistType dist, Dim dim, const Sizes* sizes, Sizes* localSizes)
 {
-  unsigned int distVal = dist.m_dists[dim];
+  unsigned int distVal = dist.m_dists[dim].m_val;
   *localSizes = *sizes;
   if (distVal != 0) {
     distVal--;

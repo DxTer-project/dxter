@@ -197,20 +197,44 @@ typedef DimSet::iterator DimSetIter;
 typedef DimSet::const_iterator DimSetConstIter;
 
 
+class DistEntry
+{
+ public:
+  unsigned int m_val;
+  DistEntry() { m_val = 0; }
+  inline DistEntry& operator=(const DistEntry &rhs)  { m_val = rhs.m_val; return *this; }
+  inline bool operator==(const DistEntry &rhs) const { return m_val == rhs.m_val; }
+  inline bool operator!=(const DistEntry &rhs) const { return m_val != rhs.m_val; }
+  inline bool operator<(const DistEntry &rhs) const { return m_val < rhs.m_val; }
+  inline bool IsStar() const { return m_val == 0; }
+  inline void SetToStar() { m_val = 0; }
+  string DistEntryToStr() const;
+  DimVec DistEntryDims() const;
+  void DimsToDistEntry(DimVec dims);
+};
+
+struct DistEntryCompare {
+  bool operator() (const DistEntry& lhs, const DistEntry& rhs) const{
+    return lhs < rhs;
+  }
+};
+
+typedef set<DistEntry,DistEntryCompare> EntrySet;
+typedef EntrySet::iterator EntrySetIter;
+typedef EntrySet::const_iterator EntrySetConstIter;
+
+
 class DistType
 {
  public:
   Dim m_numDims;
-  unsigned int *m_dists;
+  DistEntry *m_dists;
  DistType() 
    : m_numDims(99), m_dists(NULL) {}
   DistType(const DistType &rhs);
   ~DistType();
   void SetToDefault(Dim numDims);
   void SetToStar(Dim numDims);
-  static string DistEntryToStr(unsigned int dist);
-  static DimVec DistEntryDims(unsigned int dist);
-  static unsigned int DimsToDistEntry(DimVec dims);
   DimSet UsedGridDims() const;
   bool IsSane() const;
   void PrepForNumDims(Dim numDims);
@@ -335,7 +359,7 @@ typedef vector<DistType*> DistTypeVec;
 typedef DistTypeVec::iterator DistTypeVecIter;
 typedef DistTypeVec::const_iterator DistTypeVecConstIter;
 DimVec MapIndicesToDims(const string &indices, const string &dimIndices);
-bool IsPrefix(const DimVec &dims, const DimVec &isPrefix);
+bool IsPrefix(const DimVec &isPrefix, const DimVec &dims);
 #endif
 
 

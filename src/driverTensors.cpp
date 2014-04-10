@@ -47,12 +47,14 @@ PSet* MartinsExample();
 
 void AddTrans()
 {
-   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
+  //   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
   
-   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
+  //   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
-   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
-   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
+  //   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
+  //   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
+
+    Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
 
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim)
@@ -78,7 +80,7 @@ void Usage()
 
 int main(int argc, const char* argv[])
 {
-  //  omp_set_num_threads(1);
+  omp_set_num_threads(1);
   omp_set_nested(true);
   //  PrintType printType = CODE;
   int numIters = -1;
@@ -140,6 +142,24 @@ int main(int argc, const char* argv[])
     time(&end);
     cout << "DP phase took " << difftime(end,start) << " seconds\n";
 
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
+#if DOROTENSORPHASE
+  if (CurrPhase == SUMSCATTERTENSORPHASE) {
+    cout << "SumScatterOpt phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, SUMSCATTERTENSORPHASE, TenCullRO);
+    time(&end);
+    cout << "SumScatter phase took " << difftime(end,start2) << " seconds\n";
+    
     cout << "Propagating\n";
     cout.flush();
     time(&start2);

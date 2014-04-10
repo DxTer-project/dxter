@@ -567,7 +567,7 @@ void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
   for(; iter != cont->m_indices.end(); ++iter) {
     size_t loc = AIndices.find(*iter);
     if (loc != string::npos) {
-      DimVec dims = AType.DistEntryDims(AType.m_dists[loc]);
+      DimVec dims = AType.m_dists[loc].DistEntryDims();
       DimVecIter iter2 = dims.begin();
       for( ; iter2 != dims.end(); ++iter2) {
 	sumDims.push_back(*iter2);
@@ -648,13 +648,12 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
   const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
 
   string AIndices = ((DLANode*)(AConn->m_n))->GetName(AConn->m_num).m_indices;
-  DimSet sumDims;
+  EntrySet sumDims;
   string::iterator iter = cont->m_indices.begin();
   for(; iter != cont->m_indices.end(); ++iter) {
     size_t loc = AIndices.find(*iter);
     if (loc != string::npos) {
-      DimVec dims = AType.DistEntryDims(AType.m_dists[loc]);
-      sumDims.insert(dims.begin(),dims.end());
+      sumDims.insert(AType.m_dists[loc]);
     }
   }
 
@@ -674,7 +673,8 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
-  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, cont->m_indices);
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, 
+				       cont->m_type, cont->m_indices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node->Input(1),node->InputConnNum(1));
   temp->AddInput(node->Input(2),node->InputConnNum(2));
@@ -734,7 +734,7 @@ void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
   for(; iter != cont->m_indices.end(); ++iter) {
     size_t loc = BIndices.find(*iter);
     if (loc != string::npos) {
-      DimVec dims = BType.DistEntryDims(BType.m_dists[loc]);
+      DimVec dims = BType.m_dists[loc].DistEntryDims();
       DimVecIter iter2 = dims.begin();
       for(; iter2 != dims.end(); ++iter2) {
 	sumDims.push_back(*iter2);
@@ -815,13 +815,12 @@ void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
   const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
 
   string BIndices = ((DLANode*)(BConn->m_n))->GetName(BConn->m_num).m_indices;
-  DimSet sumDims;
+  EntrySet sumDims;
   string::iterator iter = cont->m_indices.begin();
   for(; iter != cont->m_indices.end(); ++iter) {
     size_t loc = BIndices.find(*iter);
     if (loc != string::npos) {
-      DimVec dims = BType.DistEntryDims(BType.m_dists[loc]);
-      sumDims.insert(dims.begin(),dims.end());
+      sumDims.insert(BType.m_dists[loc]);
     }
   }
 
@@ -872,7 +871,7 @@ void MatchDistsAndFillInWithStar(string indices,
     char index = indices[i];
     size_t loc = matchingIndices.find(index);
     if (loc == string::npos) {
-      final.m_dists[i] = 0; // = *
+      final.m_dists[i].SetToStar();
     }
     else {
       final.m_dists[i] = matchingDists.m_dists[loc];

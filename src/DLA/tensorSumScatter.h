@@ -54,15 +54,25 @@ class SumScatterUpdateNode : public DLAOp<2,1>
   virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
 };
 
+class SeparateRedistFromSumScatter : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "SeparateRedistFromSumScatter"; }
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 /* class SplitSumScatter : public SingleTrans */
 /* { */
 /*  public: */
 /*   Dim m_dim; */
-/*  SplitRedistribs(Dim dim) : m_dim(dim) {} */
-/*   virtual string GetType() const { return (string)"SplitRedist" + (char)(m_dim+48); } */
+/*  SplitSumScatter(Dim dim) : m_dim(dim) {} */
+/*   virtual string GetType() const { return (string)"SplitSumScatter" + (char)(m_dim+48); } */
 /*   virtual bool CanApply(const Poss *poss, const Node *node) const; */
 /*   virtual void Apply(Poss *poss, Node *node) const; */
 /*   virtual bool IsRef() const {return true;} */
 /* }; */
+
 
 #endif

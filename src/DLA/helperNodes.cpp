@@ -488,7 +488,7 @@ void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info)
 
 
 #if DOTENSORS
-TempVarNode::TempVarNode(DistType dist, DimSet sumDims) 
+TempVarNode::TempVarNode(DistType dist, EntrySet sumDims) 
    : m_lsizes(NULL),
      m_sumLens(NULL),
      m_sumDims(sumDims)
@@ -497,9 +497,9 @@ TempVarNode::TempVarNode(DistType dist, DimSet sumDims)
   m_distType.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
     m_distType.m_dists[dim] = dist.m_dists[dim];
-  DimSetIter iter = m_sumDims.begin();
+  EntrySetIter iter = m_sumDims.begin();
   for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
-    m_distType.m_dists[dist.m_numDims + dim] = *iter+1;
+    m_distType.m_dists[dist.m_numDims + dim] = *iter;
   }
 }
 #endif
@@ -735,11 +735,14 @@ sdlkfj
 
  m_sumLens = new Sizes[m_sumDims.size()];
  m_ones.AddRepeatedSizes(1, InputLen(0,0)->NumSizes(), 1);
- DimSetIter iter = m_sumDims.begin();
+ EntrySetIter iter = m_sumDims.begin();
  for(Dim dim = 0; iter != m_sumDims.end(); ++dim, ++iter) {
-   if (*iter >= NUM_GRID_DIMS) 
-     throw;
-   m_sumLens[dim].AddRepeatedSizes(GridLens[*iter], InputLen(0,0)->NumSizes(), 1);
+   DimVec vec = (*iter).DistEntryDims();
+   unsigned int numProcs = 1;
+   DimVecIter iter2 = vec.begin();
+   for(; iter2 != vec.end(); ++iter2)
+     numProcs *= GridLens[*iter2];
+   m_sumLens[dim].AddRepeatedSizes(numProcs, InputLen(0,0)->NumSizes(), 1);
  }
  
 #endif
