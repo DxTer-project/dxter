@@ -78,8 +78,10 @@ void RedistNode::Prop()
       throw;
     }
 
-    if (!m_destType.IsSane())
+    if (!m_destType.IsSane()) {
+      cout << m_destType.str() << endl;
       throw;
+    }
 
     DimSet diffs;
     
