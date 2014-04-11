@@ -541,7 +541,7 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims)
   }
 }
 
-TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name) 
+TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name)
   :  m_lsizes(NULL),
      m_sumLens(NULL),
      m_sumDims(sumDims),
@@ -712,6 +712,9 @@ Name TempVarNode::GetName(unsigned int num) const
   }
   else {
     tmp.m_name = m_name;
+#if DOTENSORS
+    tmp.m_indices = GetInputName(0).m_indices;
+#endif
   }
 #if DODM
   tmp.m_type = m_distType;
