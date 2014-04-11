@@ -115,11 +115,13 @@ Phase SumScatterUpdateNode::MaxPhase() const
   if (CurrPhase >= SUMSCATTERTENSORPHASE) {
     DistEntry sumDims;
     if (inType.m_numDims != (outType.m_numDims + 1)) {
+      /*
       if (!m_hasRefined) {
 	cout << "Too many SumScatter dimensions\n";
 	cout << "trying SumScatter from " << DistTypeToStr(inType)
 	     << " to " << DistTypeToStr(outType)  << endl;
       }
+      */
       return SUMSCATTERTENSORPHASE;
     }
     else {
@@ -152,9 +154,11 @@ Phase SumScatterUpdateNode::MaxPhase() const
 		DimVec dims = sumDims.DistEntryDims();
 		inVec.insert(inVec.end(), dims.begin(), dims.end());
 		if (inVec != outVec) {
+		  /*
 		  if (!m_hasRefined)
 		    cout << "trying SumScatter from " << DistTypeToStr(inType)
 			 << " to " << DistTypeToStr(outType)  << endl;
+		  */
 		  return SUMSCATTERTENSORPHASE;	
 		}
 	      }
