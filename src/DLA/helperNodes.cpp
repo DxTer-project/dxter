@@ -73,9 +73,15 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, string name, string 
 {
   if (m_numDims > NUM_GRID_DIMS)
     throw;
-  m_sizes = new Sizes[m_numDims];
-  for(unsigned int i = 0; i < m_numDims; ++i)
-    m_sizes[i] = sizes[i];
+  if (m_numDims) {
+    m_sizes = new Sizes[m_numDims];
+    for(unsigned int i = 0; i < m_numDims; ++i)
+      m_sizes[i] = sizes[i];
+  }
+  else {
+    m_sizes = new Sizes;
+    *m_sizes = sizes[0];
+  }
   m_varName.m_name = name;
   m_varName.m_indices = indices;
   m_varName.m_type.SetToDefault(m_numDims);
@@ -104,9 +110,16 @@ InputNode::~InputNode()
     delete m_nlsize;
   }
 #else
-  delete [] m_sizes;
-  if (m_lsizes)
-    delete [] m_lsizes;
+  if (m_numDims) {
+    delete [] m_sizes;
+    if (m_lsizes)
+      delete [] m_lsizes;
+  }
+  else {
+    delete m_sizes;
+    if (m_lsizes)
+      delete m_lsizes;
+  }
 #endif
 }
 
@@ -131,13 +144,23 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_nsize = node->m_nsize;
 #else
   m_numDims = node->m_numDims;
-  m_sizes = new Sizes[m_numDims];
-  for (unsigned int i = 0; i < m_numDims; ++i)
-    m_sizes[i] = node->m_sizes[i];
-  if(node->m_lsizes) {
-    m_lsizes = new Sizes[m_numDims];
+  if (m_numDims) {
+    m_sizes = new Sizes[m_numDims];
     for (unsigned int i = 0; i < m_numDims; ++i)
-      m_lsizes[i] = node->m_lsizes[i];
+      m_sizes[i] = node->m_sizes[i];
+    if(node->m_lsizes) {
+      m_lsizes = new Sizes[m_numDims];
+      for (unsigned int i = 0; i < m_numDims; ++i)
+	m_lsizes[i] = node->m_lsizes[i];
+    }
+  }
+  else {
+    m_sizes = new Sizes;
+    *m_sizes = *(node->m_sizes);
+    if (node->m_lsizes) {
+      m_lsizes = new Sizes;
+      *m_lsizes = *(node->m_lsizes);
+    }
   }
 #endif
   m_varName = node->m_varName;
@@ -202,6 +225,8 @@ const Sizes* InputNode::Len(unsigned int num,Dim dim) const
 {
   if (num > 0)
     throw;
+  if (!m_numDims)
+    return m_sizes;
   if (dim >= m_numDims)
     throw;
   return m_sizes+dim;
@@ -212,6 +237,8 @@ const Sizes* InputNode::LocalLen(unsigned int num,Dim dim) const
 {
   if (num > 0)
     throw;
+  if (!m_numDims)
+    return m_lsizes;
   if (dim >= m_numDims)
     throw;
   if (!m_lsizes)
@@ -242,8 +269,12 @@ void InputNode::ClearSizeCache()
 
 void InputNode::ClearSizeCache()
 {
-  if (m_lsizes)
-    delete [] m_lsizes;
+  if (m_lsizes) {
+    if (m_numDims)
+      delete [] m_lsizes;
+    else
+      delete m_lsizes;
+  }
   m_lsizes = NULL;
 }
 #endif
@@ -269,8 +300,14 @@ void InputNode::BuildSizeCache()
 {
   if (m_lsizes)
     return;
-  m_lsizes = new Sizes[m_numDims];
-  GetLocalSizes(m_varName.m_type, m_sizes, m_lsizes);
+  if (m_numDims) {
+    m_lsizes = new Sizes[m_numDims];
+    GetLocalSizes(m_varName.m_type, m_sizes, m_lsizes);
+  }
+  else {
+    m_lsizes = new Sizes;
+    *m_lsizes = *m_sizes;
+  }
 }
 #endif
 

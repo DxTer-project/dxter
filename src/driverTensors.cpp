@@ -286,7 +286,7 @@ PSet* MartinsExample()
   epDist.SetToStar(2);
 
   //  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", "xz");
-  InputNode *epIn = new InputNode("ep input",  ones, "epsilon", "xz");
+  InputNode *epIn = new InputNode("ep input",  ones, "epsilon", "");
 
   InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", "abij");
 
