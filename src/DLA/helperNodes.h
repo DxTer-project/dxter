@@ -156,6 +156,7 @@ blah
 
 class TempVarNode : public DLANode
 {
+ public:
 #if DODM
   DistType m_distType;
 #endif
@@ -169,7 +170,7 @@ class TempVarNode : public DLANode
   Sizes m_ones;
 
 #endif
- public:
+
  TempVarNode() 
    : 
 #if DOELEM

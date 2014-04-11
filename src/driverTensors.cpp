@@ -57,8 +57,10 @@ void AddTrans()
     Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
 
 #if 1
-  for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim)
-    Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
+    for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
+      Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
+      Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SplitSumScatter(dim), SUMSCATTERTENSORPHASE);
+    }
 #endif
 
 }

@@ -239,6 +239,7 @@ DimVec DistEntry::DistEntryDims() const
   unsigned int distVal = m_val-1;
   unsigned int numDists = 1;
   while (distVal > currStage) {
+  //  while (m_val > currStage) {
     if (!currStage) {
       cout << "starting dist " << m_val << endl;
       cout << "numDists " << numDists << endl;

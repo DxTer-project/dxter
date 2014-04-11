@@ -34,8 +34,9 @@ class SumScatterUpdateNode : public DLAOp<2,1>
 {
  public:
   Coef m_coef;
+  EntrySet m_sumDims;
  SumScatterUpdateNode() : DLAOp<2,1>(), m_coef(COEFVALZERO) {}
-  SumScatterUpdateNode(Coef coeff);
+  SumScatterUpdateNode(Coef coeff, const EntrySet &sumDims);
   static Node* BlankInst() { return  new SumScatterUpdateNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -63,16 +64,16 @@ class SeparateRedistFromSumScatter : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
-/* class SplitSumScatter : public SingleTrans */
-/* { */
-/*  public: */
-/*   Dim m_dim; */
-/*  SplitSumScatter(Dim dim) : m_dim(dim) {} */
-/*   virtual string GetType() const { return (string)"SplitSumScatter" + (char)(m_dim+48); } */
-/*   virtual bool CanApply(const Poss *poss, const Node *node) const; */
-/*   virtual void Apply(Poss *poss, Node *node) const; */
-/*   virtual bool IsRef() const {return true;} */
-/* }; */
+class SplitSumScatter : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ SplitSumScatter(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"SplitSumScatter" + (char)(m_dim+48); }
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
 
 
 #endif

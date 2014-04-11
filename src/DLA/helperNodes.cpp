@@ -619,7 +619,7 @@ const Sizes* TempVarNode::Len(unsigned int num, Dim dim) const
   if (num > 0)
     throw;
   if (!m_sumDims.empty()) {
-    Dim dims = InputNumDims(0);
+    Dim dims = m_distType.m_numDims-m_sumDims.size();
     if (dim >= dims)
       return m_sumLens + (dim - dims);
     else
@@ -634,7 +634,7 @@ const Sizes* TempVarNode::LocalLen(unsigned int num, Dim dim) const
   if (num > 0)
     throw;
   if (!m_sumDims.empty()) {
-    Dim dims = InputNumDims(0);
+    Dim dims = m_distType.m_numDims-m_sumDims.size();
     if (dim >= dims)
       return &m_ones;
     else
@@ -726,7 +726,7 @@ sdlkfj
 
   if (m_lsizes)
     return;
- Dim numDims = InputNumDims(0);
+ Dim numDims = m_distType.m_numDims-m_sumDims.size();
  m_lsizes = new Sizes[numDims];
  
  for (Dim dim = 0; dim < numDims; ++dim)
