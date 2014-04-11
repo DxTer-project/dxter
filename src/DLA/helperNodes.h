@@ -213,6 +213,7 @@ m_distType(D_LASTDIST),
 
 #if DOTENSORS
  TempVarNode(DistType dist, EntrySet sumDims);
+ TempVarNode(DistType dist, EntrySet sumDims, string name);
 #endif
 
 #if DODM

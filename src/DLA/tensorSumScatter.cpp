@@ -501,7 +501,7 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
 	}
 	cout << "sums after " << sums.size() << endl;
 
-	TempVarNode *temp = new TempVarNode(newOutTypeNoSums, sums);
+	TempVarNode *temp = new TempVarNode(newOutTypeNoSums, sums, node->GetInputName(0).m_name);
 	temp->AddInput(node->Input(0), node->InputConnNum(0));
 	poss->AddNode(temp);
 

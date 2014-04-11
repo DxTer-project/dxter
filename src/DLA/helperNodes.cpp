@@ -493,6 +493,24 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims)
      m_sumLens(NULL),
      m_sumDims(sumDims)
 {
+  //update below, too
+  Dim numSumDims = sumDims.size();
+  m_distType.PrepForNumDims(dist.m_numDims+numSumDims);
+  for (Dim dim = 0; dim < dist.m_numDims; ++dim)
+    m_distType.m_dists[dim] = dist.m_dists[dim];
+  EntrySetIter iter = m_sumDims.begin();
+  for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
+    m_distType.m_dists[dist.m_numDims + dim] = *iter;
+  }
+}
+
+TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name) 
+  :  m_lsizes(NULL),
+     m_sumLens(NULL),
+     m_sumDims(sumDims),
+     m_name(name)
+{
+  //update above, too
   Dim numSumDims = sumDims.size();
   m_distType.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
@@ -512,7 +530,8 @@ NodeType TempVarNode::GetType() const
     cout.flush();
     throw;
   }
-  return GetInputNameStr(0) + " temp";
+
+  return GetName(0).m_name;
 }
 
 void TempVarNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
