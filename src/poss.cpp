@@ -1589,8 +1589,8 @@ void Poss::FormSets(unsigned int phase)
       return;
   }
 #endif //DOSOPHASE
-#if DOROTENSORPHASE
-  if (phase == ROTENSORPHASE) {
+#if DOSUMSCATTERTENSORPHASE
+  if (phase == SUMSCATTERTENSORPHASE) {
    
     //       Be careful to prevent the following
     //       B = A
@@ -1651,8 +1651,8 @@ void Poss::FormSets(unsigned int phase)
 	NodeVec outputTuns;
 	AddPossTunnels(node, NULL, outputTuns, possNodes);
 	
-#if DOROTENSORPHASE
-       	if (false && phase == ROTENSORPHASE) {
+#if DOSUMSCATTERTENSORPHASE
+       	if (false && phase == SUMSCATTERTENSORPHASE) {
 	  bool newNode = true;
 	  do {
 	    newNode = false;

@@ -159,8 +159,8 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
   if (phase == SOPHASE) {
     m_pset->FormSets(phase);   
   }
-#elif DOROTENSORPHASE
-  if (phase == ROTENSORPHASE) {
+#elif DOSUMSCATTERTENSORPHASE
+  if (phase == SUMSCATTERTENSORPHASE) {
     m_pset->FormSets(phase);
     cout << "\t\tFormed set\n";
     cout << "\t\t\t" << TotalCount() << " impl's\n";
@@ -206,8 +206,8 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
       // different pieces of data, sequentially.
       //We don't want to now get rid of those sets
       if (phase < SOPHASE)
-#elif DOROTENSORPHASE
-	if (phase < ROTENSORPHASE)
+#elif DOSUMSCATTERTENSORPHASE
+	if (phase < SUMSCATTERTENSORPHASE)
 #endif
 	  foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
       time(&end);

@@ -413,6 +413,9 @@ Node* PSet::OutTun(unsigned int num) const
 void PSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
 {
   if (m_posses.size() <= 1) {
+    if (m_posses.size()) {
+      poss->ForcePrint();
+    }
     throw;
   }
   if (removeFromMyList) {
