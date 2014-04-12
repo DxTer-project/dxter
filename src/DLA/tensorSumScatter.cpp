@@ -74,8 +74,12 @@ void SumScatterUpdateNode::Prop()
       throw;
 
     if (!IsScalar(0)) {
-      if (m_sumDims.size() != (inType.m_numDims - outType.m_numDims))
+      if (m_sumDims.size() != (inType.m_numDims - outType.m_numDims)) {
+	cout << "in: " << inType.str() << endl;
+	cout << "out: " << outType.str() << endl;
+	cout << m_sumDims.size() << " sum dims\n";
 	throw;
+      }
     }
     
     if (m_sumDims.size() == 1) {
