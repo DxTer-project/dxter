@@ -177,6 +177,14 @@ int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void 
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
+  
+  NodeConn *CConn = cont->InputConn(2);
+  if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
+    CConn = CConn->m_n->InputConn(0);
+  const DistType &CType = ((DLANode*)(CConn->m_n))->GetDistType(CConn->m_num);
+  if (!CType.m_numDims)
+    return false;
+  
   Dim numContDims = cont->m_indices.length();
   
   DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
@@ -188,15 +196,12 @@ int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void 
   NodeConn *BConn = cont->InputConn(1);
   if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
     BConn = BConn->m_n->InputConn(0);
-  NodeConn *CConn = cont->InputConn(2);
-  if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
-    CConn = CConn->m_n->InputConn(0);
 
 
 
   const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
   const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
-  const DistType &CType = ((DLANode*)(CConn->m_n))->GetDistType(CConn->m_num);
+
 
   DimVec *dists = new DimVec[numContDims];
   
@@ -483,6 +488,8 @@ bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) cons
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
+  if (((DLANode*)(cont->Input(2)))->IsScalar(cont->InputConnNum(2)))
+    return false;
   return (cont->GetLayer() == m_fromLayer);
 }
 
@@ -543,6 +550,8 @@ bool DistContToLocalContStatAAllReduce::CanApply(const Poss *poss, const Node *n
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
+  if (((DLANode*)(cont->Input(0)))->IsScalar(cont->InputConnNum(0)))
+    return false;
   return (cont->GetLayer() == m_fromLayer);
 }
 
@@ -630,6 +639,8 @@ bool DistContToLocalContStatASumScatter::CanApply(const Poss *poss, const Node *
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
+  if (((DLANode*)(cont->Input(0)))->IsScalar(cont->InputConnNum(0)))
+    return false;
   return (cont->GetLayer() == m_fromLayer);
 }
 
@@ -647,10 +658,18 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
 
   const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
 
+  /*
+  cout << "A " << cont->GetInputName(0).m_indices << endl;
+  cout << "B " << cont->GetInputName(1).m_indices << endl;
+  cout << "C " << cont->GetInputName(2).m_indices << endl;
+  */
+
   string AIndices = ((DLANode*)(AConn->m_n))->GetName(AConn->m_num).m_indices;
   EntrySet sumDims;
+  //  cout << cont->m_indices.size() << " indices\n";
   string::iterator iter = cont->m_indices.begin();
   for(; iter != cont->m_indices.end(); ++iter) {
+    //    cout << *iter << endl;
     size_t loc = AIndices.find(*iter);
     if (loc != string::npos) {
       sumDims.insert(AType.m_dists[loc]);
@@ -690,7 +709,11 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
   poss->AddNode(sum);
-
+  /*
+  cout << "created SumScatter " << LCont->GetDistType(0).str() << " -> "
+       << ((DLANode*)(node->Input(2)))->GetDistType(node->InputConnNum(2)).str() << endl;
+  cout << sumDims.size() << " sumDims\n";
+  */
   cont->RedirectChildren(sum,0);
 
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -710,6 +733,8 @@ bool DistContToLocalContStatBAllReduce::CanApply(const Poss *poss, const Node *n
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
+  if (((DLANode*)(cont->Input(1)))->IsScalar(cont->InputConnNum(1)))
+    return false;
   return (cont->GetLayer() == m_fromLayer);
 }
 
@@ -797,6 +822,8 @@ bool DistContToLocalContStatBSumScatter::CanApply(const Poss *poss, const Node *
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
+  if (((DLANode*)(cont->Input(1)))->IsScalar(cont->InputConnNum(1)))
+    return false;
   return (cont->GetLayer() == m_fromLayer);
 }
 
