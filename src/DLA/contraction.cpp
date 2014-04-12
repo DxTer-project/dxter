@@ -658,18 +658,10 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
 
   const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
 
-  /*
-  cout << "A " << cont->GetInputName(0).m_indices << endl;
-  cout << "B " << cont->GetInputName(1).m_indices << endl;
-  cout << "C " << cont->GetInputName(2).m_indices << endl;
-  */
-
   string AIndices = ((DLANode*)(AConn->m_n))->GetName(AConn->m_num).m_indices;
   EntrySet sumDims;
-  //  cout << cont->m_indices.size() << " indices\n";
   string::iterator iter = cont->m_indices.begin();
   for(; iter != cont->m_indices.end(); ++iter) {
-    //    cout << *iter << endl;
     size_t loc = AIndices.find(*iter);
     if (loc != string::npos) {
       sumDims.insert(AType.m_dists[loc]);
@@ -865,7 +857,7 @@ void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
   RedistNode *node1 = new RedistNode(AType);
   RedistNode *node2 = new RedistNode(BType);
 
-  TempVarNode *temp = new TempVarNode(CType);
+  TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, cont->m_indices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
