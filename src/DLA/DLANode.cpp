@@ -269,12 +269,15 @@ void DLANode::UpdateInnerPackingMultiple(PackSize size)
   throw;
 }
 
-#if TWOD
 bool DLANode::IsScalar(unsigned int num) const
 {
+#if TWOD
   return GetM(num)->AllOnes() && GetN(num)->AllOnes();
-}
+#else
+  return GetName(num).m_indices.empty();
 #endif
+}
+
 
 #if TWOD
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull)
