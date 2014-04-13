@@ -72,6 +72,8 @@ void RedistNode::Prop()
     
     if (numDims != InputNumDims(0))
       throw;
+    if (InputDistType(0).m_numDims != numDims)
+      throw;
 
     if (m_srcType.m_numDims != numDims) {
       cout << m_destType.str() << " <- " << m_srcType.str() << endl;
@@ -80,6 +82,7 @@ void RedistNode::Prop()
 
     if (!m_destType.IsSane()) {
       cout << m_destType.str() << endl;
+      m_poss->PrintTransVec();
       throw;
     }
 
