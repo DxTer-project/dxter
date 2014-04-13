@@ -232,6 +232,9 @@ void SumScatterUpdateNode::UnflattenCore(ifstream &in, SaveInfo &info)
 bool SeparateRedistFromSumScatter::CanApply(const Poss *poss, const Node *node) const
 {
   const SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
+
+  if (((DLANode*)(sum->Input(0)))->IsScalar(sum->InputConnNum(0)))
+    return false;
   
   const DistType &inType = sum->InputDistType(0);
   const DistType &outType = sum->InputDistType(1);
@@ -307,64 +310,62 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
   const DistType &outType = sum->InputDistType(1);
 
   const EntrySet &sumDims = sum->m_sumDims;
+  const unsigned int numReds = sumDims.size();
 
-  for(Dim dim = 0; dim < outType.m_numDims; ++dim) {
-    DistEntry inEntry = inTypeInt.m_dists[dim];
-    DistEntry outEntry = outType.m_dists[dim];
-    if (inEntry != outEntry) {
-      if (inEntry.IsStar()) {
-	bool found = false;
-	EntrySetIter iter2 = sumDims.begin();
-	for(; !found && iter2 != sumDims.end(); ++iter2) {
-	  if (SameDims(*iter2, outEntry))
-	    found = true;
-	}
-	if (!found) {
-	  inTypeInt.m_dists[dim] = outType.m_dists[dim];
-	}
-      }
-      else if (outEntry.IsStar()) {
-	inTypeInt.m_dists[dim].SetToStar();
-      }
-      else {
-	DimVec inVec = inEntry.DistEntryDims();
-	DimSet inSet;
-	inSet.insert(inVec.begin(), inVec.end());
-	DimVec outVec = outEntry.DistEntryDims();
-	DimSet outSet;
-	outSet.insert(outVec.begin(), outVec.end());
-	
-	bool found = false;
-	EntrySetIter iter = sumDims.begin();
-	for(; !found && iter != sumDims.end(); ++iter) {
-	  DimVec sumVec = (*iter).DistEntryDims();
-	  DimSet sumSet;
-	  sumSet.insert(sumVec.begin(), sumVec.end());
-
-	  if (includes(outSet.begin(), outSet.end(),
-		       sumSet.begin(), sumSet.end()))
-	    {
-	      DimVec tempVec = outVec;
-	      DimVecIter iter2 = tempVec.begin();
-	      while (iter2 != tempVec.end()) {
-		if (sumSet.find(*iter2) != sumSet.end()) {
-		  tempVec.erase(iter2);
-		  iter2 = tempVec.begin();
-		}
-		else
-		  ++iter2;
-	      }
-	      inTypeInt.m_dists[dim].DimsToDistEntry(tempVec);
-	      found = true;
-	    }
-	}
+  EntrySet tempSet = sumDims;
+  Dim lastDim;
+  for(lastDim = inTypeInt.m_numDims-1; lastDim > 0; --lastDim) {
+    EntrySetIter found = tempSet.find(inTypeInt.m_dists[lastDim]);
+    if (found != tempSet.end()) {
+      tempSet.erase(found);
+      if (tempSet.empty()) {
+	break;
       }
     }
   }
-  
+
+  //  for(Dim dim = outType.m_numDims-1; dim >=
+
+
+  DimSet allSumDims;
+  EntrySetConstIter iter = sumDims.begin();
+  for(; iter != sumDims.end(); ++iter) {
+    DimVec vec = (*iter).DistEntryDims();
+    allSumDims.insert(vec.begin(), vec.end());
+  }
+
+  Dim overlap = lastDim - (inTypeInt.m_numDims - outType.m_numDims) - 1;
+
+  for(Dim dim = 0; dim < (outType.m_numDims - overlap); ++dim) {
+    DistEntry inEntry = inTypeInt.m_dists[dim];
+    DistEntry outEntry = outType.m_dists[dim];
+    if (inEntry != outEntry) {
+      DimVec outVec = outEntry.DistEntryDims();
+      DimVecIter iter = outVec.begin();
+      while (iter != outVec.end()) {
+	DimSetIter found = allSumDims.find(*iter);
+	if (found != allSumDims.end()) {
+	  outVec.erase(iter);
+	  allSumDims.erase(found);
+	  iter = outVec.begin();
+	}
+	else
+	  ++iter;
+      }
+      inTypeInt.m_dists[dim].DimsToDistEntry(outVec);
+    }
+  }
   
   RedistNode *redist = new RedistNode(inTypeInt);
   redist->AddInput(sum->Input(0), sum->InputConnNum(0));
+
+  if (!inTypeInt.IsSane()) {
+    cout << "!sane: " << inTypeInt.str() << endl;
+    if (((DLANode*)(sum->Input(0)))->IsScalar(sum->InputConnNum(0)))
+      cout << "is scalar\n";
+    throw;
+  }
+
   
   SumScatterUpdateNode *sum2 = new SumScatterUpdateNode(sum->m_coef, sumDims);
   sum2->AddInput(redist, 0);
@@ -372,6 +373,7 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
 
   poss->AddNode(redist);
   poss->AddNode(sum2);
+
   sum->RedirectChildren(sum2,0);
 
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -593,6 +595,13 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
 	    newRedist = new RedistNode(newOutTypeFull);
 	    newRedist->AddInput(newSum, 0);
 	    poss->AddNode(newRedist);
+
+	    if (!newOutTypeFull.IsSane()) {
+	      cout << "created new " << newSum->GetDistType(0).str() << " -> " << newOutTypeFull.str() << endl;
+	      throw;
+	    }
+	    if (newSum->GetDistType(0).m_numDims != newOutTypeFull.m_numDims)
+	      throw;
 	  }
 
 	  if (DistTypeNotEqual(newOutTypeFull, outType)) {
