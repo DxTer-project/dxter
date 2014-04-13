@@ -32,6 +32,7 @@
 #include "blas.h"
 #include "split.h"
 #include "twoSidedTrxm.h"
+#include "tensorSumScatter.h"
 
 //#define PRINTCOSTS
 
@@ -88,6 +89,16 @@ void Node::Cull(Phase phase)
 #endif
       cout << "skipping culling for invalid node type " << GetType() << endl;
       cout << MaxPhase() << " is MaxPhase\n";
+#if DOTENSORS
+      if (GetNodeClass() == SumScatterUpdateNode::GetClass()) {
+	SumScatterUpdateNode *sum = (SumScatterUpdateNode*)this;
+	cout << "sumscatter " << sum->InputDistType(0).str() 
+	     << " -> " << sum->GetDistType(0).str() << endl;
+	if (sum->IsScalar(0))
+	  cout << "IsScalar\n";
+      }
+
+#endif
       for (unsigned int i = 0; i < m_inputs.size(); ++i) {
         DLANode *in = (DLANode*)Input(i);
         cout << "Input " << i 
@@ -130,6 +141,10 @@ void Node::RemoveChild(Node *node, unsigned int num)
   printf("in RemoveChild child %s %p not found on %s %p\n", node->GetType().c_str(), node, GetType().c_str(), this);
   cout << "only has " << m_children.size() << " children\n";
   cout << "child on " << node->m_poss << " parent on " << node->m_poss << endl;
+  iter = m_children.begin();
+  for (; iter != m_children.end(); ++iter) {
+    cout << "child: " << (*iter)->m_n->GetNodeClass() << endl;
+  }
   fflush(stdout);
   throw;
 }
