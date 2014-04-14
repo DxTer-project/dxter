@@ -345,13 +345,22 @@ const Sizes* RedistNode::LocalLen(unsigned int num, Dim dim) const
 {
   if (num > 0)
     throw;
-  return m_lsizes+dim;
+  if (!InputNumDims(0)) {
+    return m_lsizes;
+  }
+  else
+    return m_lsizes+dim;
 }
 
 void RedistNode::ClearSizeCache()
 {
   if (m_lsizes) {
-    delete m_lsizes;
+    if (!InputNumDims(0)) {
+      delete m_lsizes;
+    }
+    else {
+      delete [] m_lsizes;
+    }
     m_lsizes = NULL;
   }
 }
@@ -364,9 +373,17 @@ void RedistNode::BuildSizeCache()
   DLANode *in = (DLANode*)Input(0);
   unsigned int num = InputConnNum(0);
   Dim numDims = in->NumDims(num);
-  m_lsizes = new Sizes[numDims];
-  for (Dim dim = 0; dim < numDims; ++dim)
-    GetLocalSizes(m_destType, dim, in->Len(num,dim), m_lsizes+dim);
+  if (numDims) {
+    m_lsizes = new Sizes[numDims];
+    for (Dim dim = 0; dim < numDims; ++dim)
+      GetLocalSizes(m_destType, dim, in->Len(num,dim), m_lsizes+dim);
+  }
+  else {
+    if (!in->IsScalar(num))
+      throw;
+    m_lsizes = new Sizes;
+    *m_lsizes = *(in->Len(num,0));
+  }
 }
 
 void RedistNode::FlattenCore(ofstream &out) const
