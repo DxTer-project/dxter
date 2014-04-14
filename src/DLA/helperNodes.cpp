@@ -537,6 +537,10 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims)
 {
   //update below, too
   Dim numSumDims = sumDims.size();
+  if (!numSumDims) {
+    cout << "!numSumDims\n";
+    throw;
+  }
   m_distType.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
     m_distType.m_dists[dim] = dist.m_dists[dim];
@@ -554,6 +558,10 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name)
 {
   //update above, too
   Dim numSumDims = sumDims.size();
+  if (!numSumDims) {
+    cout << "!numSumDims 2\n";
+    throw;
+  }
   m_distType.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
     m_distType.m_dists[dim] = dist.m_dists[dim];
