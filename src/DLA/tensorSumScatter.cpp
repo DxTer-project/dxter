@@ -27,15 +27,6 @@ bool SameDims(DistEntry entry1, DistEntry entry2)
   return true;
 }
 
-/*
-  void GetSumScatterInfo(const DistType &inType, const DistType &outType, EntrySet &sumDims)
-  {
-  for(Dim dim = inType.m_numDims-1; dim >= outType.m_numDims; --dim) {
-  sumDims.insert(inType.m_dists[dim]);
-  }
-  }
-*/
-
 SumScatterUpdateNode::SumScatterUpdateNode(Coef coef, const EntrySet &sumDims)
   : DLAOp<2,1>(), m_coef(coef), m_sumDims(sumDims)
 {
@@ -162,6 +153,47 @@ void SumScatterUpdateNode::Prop()
       throw;
     }
   }
+}
+
+void SumScatterUpdateNode::CheckSumDimsInOutput() const
+{
+    const DistType &outType = InputDistType(1);
+    
+    if (((DLANode*)Input(0))->IsScalar(InputConnNum(0)))
+      return;
+
+    DimSet allSumDims;
+    EntrySetConstIter iter = m_sumDims.begin();
+    for(; iter != m_sumDims.end(); ++iter) {
+      DimVec vec = (*iter).DistEntryDims();
+      allSumDims.insert(vec.begin(), vec.end());
+    }
+      
+    bool foundAll = false;
+
+    for(Dim dim = 0; !foundAll && dim < outType.m_numDims; ++dim) {
+      DistEntry outEntry = outType.m_dists[dim];
+      DimVec outVec = outEntry.DistEntryDims();
+      DimVecIter iter = outVec.begin();
+      while (!foundAll && iter != outVec.end()) {
+	DimSetIter found = allSumDims.find(*iter);
+	if (found != allSumDims.end()) {
+	  allSumDims.erase(found);
+	  iter = outVec.begin();
+	  foundAll = allSumDims.empty();
+	}
+	else
+	  ++iter;
+      }
+    }
+    if (!foundAll) {
+      cout << "bad out type\n";
+      cout << "outType " << outType.str() << endl;
+      cout << "inType " << InputDistType(0).str() << endl;
+      m_poss->PrintTransVec();
+      throw;
+    }
+
 }
 
 Phase SumScatterUpdateNode::MaxPhase() const
@@ -404,6 +436,7 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
   sum2->AddInput(sum->Input(1), sum->InputConnNum(1));
   poss->AddNode(sum2);
 
+
   sum->RedirectChildren(sum2,0);
 
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -524,6 +557,7 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
     newSum->AddInput(node->Input(0), node->InputConnNum(0));
     newSum->AddInput(temp, 0);
     poss->AddNode(newSum);
+
 
     node->ChangeInput2Way(node->Input(0), node->InputConnNum(0),
 			  newSum, 0);
@@ -780,6 +814,7 @@ void MoveSumScatterRedistAfter::Apply(Poss *poss, Node *node) const
   newSum->AddInput(node->Input(0), node->InputConnNum(0));
   newSum->AddInput(temp, 0);
   poss->AddNode(newSum);
+
 
   RedistNode *redist = new RedistNode(outType);
   redist->AddInput(newSum, 0);

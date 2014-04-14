@@ -53,6 +53,7 @@ class SumScatterUpdateNode : public DLAOp<2,1>
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
+  void CheckSumDimsInOutput() const;
 };
 
 class SeparateRedistFromSumScatter : public SingleTrans
