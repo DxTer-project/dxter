@@ -72,6 +72,8 @@ void SumScatterUpdateNode::Prop()
 
     const DistType &inType = InputDistType(0);
     const DistType &outType = InputDistType(1);
+
+
     
     if (m_sumDims.empty())
       throw;
@@ -81,6 +83,39 @@ void SumScatterUpdateNode::Prop()
 	cout << "in: " << inType.str() << endl;
 	cout << "out: " << outType.str() << endl;
 	cout << m_sumDims.size() << " sum dims\n";
+	throw;
+      }
+
+
+
+      DimSet allSumDims;
+      EntrySetConstIter iter = m_sumDims.begin();
+      for(; iter != m_sumDims.end(); ++iter) {
+	DimVec vec = (*iter).DistEntryDims();
+	allSumDims.insert(vec.begin(), vec.end());
+      }
+      
+      bool foundAll = false;
+
+      for(Dim dim = 0; !foundAll && dim < outType.m_numDims; ++dim) {
+	DistEntry outEntry = outType.m_dists[dim];
+	DimVec outVec = outEntry.DistEntryDims();
+	DimVecIter iter = outVec.begin();
+	while (!foundAll && iter != outVec.end()) {
+	  DimSetIter found = allSumDims.find(*iter);
+	  if (found != allSumDims.end()) {
+	    allSumDims.erase(found);
+	    iter = outVec.begin();
+	    foundAll = allSumDims.empty();
+	  }
+	  else
+	    ++iter;
+	}
+      }
+
+      if (!foundAll) {
+	cout << "Bad sum scatter from " << inType.str() << " -> "
+	     << outType.str() << " with " << m_sumDims.size() << " sums\n";
 	throw;
       }
     }
@@ -244,18 +279,6 @@ bool SeparateRedistFromSumScatter::CanApply(const Poss *poss, const Node *node) 
 
   const EntrySet &sumDims = sum->m_sumDims;
 
-  EntrySet tempSet = sumDims;
-  Dim lastDim;
-  for(lastDim = inType.m_numDims-1; lastDim > 0; --lastDim) {
-    EntrySetIter found = tempSet.find(inType.m_dists[lastDim]);
-    if (found != tempSet.end()) {
-      tempSet.erase(found);
-      if (tempSet.empty()) {
-	break;
-      }
-    }
-  }
-
   DimSet allSumDims;
   EntrySetConstIter iter = sumDims.begin();
   for(; iter != sumDims.end(); ++iter) {
@@ -263,10 +286,14 @@ bool SeparateRedistFromSumScatter::CanApply(const Poss *poss, const Node *node) 
     allSumDims.insert(vec.begin(), vec.end());
   }
 
-  Dim overlap = lastDim - (inType.m_numDims - outType.m_numDims) - 1;
-
-  for(Dim dim = 0; dim < (outType.m_numDims - overlap); ++dim) {
+  for(Dim dim = 0; dim < inType.m_numDims; ++dim) {
     DistEntry inEntry = inType.m_dists[dim];
+    if (dim >= outType.m_numDims) {
+      cout << "dim >= outType.m_numDims\n";
+      cout << sum->InputDistType(0).str() << " -> " 
+	   << outType.str() << " with " << sum->m_sumDims.size() << endl;
+      throw;
+    }
     DistEntry outEntry = outType.m_dists[dim];
     if (inEntry != outEntry) {
       DimVec outVec = outEntry.DistEntryDims();
@@ -282,9 +309,11 @@ bool SeparateRedistFromSumScatter::CanApply(const Poss *poss, const Node *node) 
 	  ++iter;
       }
       DistEntry entry;
-      entry.DimsToDistEntry(outVec); 
+      entry.DimsToDistEntry(outVec);
       if (inType.m_dists[dim] != entry)
 	return true;
+      if (allSumDims.empty())
+	break;
     }
   }
   return false;
@@ -299,18 +328,6 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
 
   const EntrySet &sumDims = sum->m_sumDims;
 
-  EntrySet tempSet = sumDims;
-  Dim lastDim;
-  for(lastDim = inTypeInt.m_numDims-1; lastDim > 0; --lastDim) {
-    EntrySetIter found = tempSet.find(inTypeInt.m_dists[lastDim]);
-    if (found != tempSet.end()) {
-      tempSet.erase(found);
-      if (tempSet.empty()) {
-	break;
-      }
-    }
-  }
-
   DimSet allSumDims;
   EntrySetConstIter iter = sumDims.begin();
   for(; iter != sumDims.end(); ++iter) {
@@ -318,13 +335,14 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
     allSumDims.insert(vec.begin(), vec.end());
   }
 
-  Dim overlap = lastDim - (inTypeInt.m_numDims - outType.m_numDims);
-  if (!overlap)
-    throw;
-  --overlap;
-
-  for(Dim dim = 0; dim < (outType.m_numDims - overlap); ++dim) {
+  for(Dim dim = 0; dim < inTypeInt.m_numDims; ++dim) {
     DistEntry inEntry = inTypeInt.m_dists[dim];
+    if (dim >= outType.m_numDims) {
+      cout << "dim >= outType.m_numDims\n";
+      cout << sum->InputDistType(0).str() << " -> " 
+	   << outType.str() << " with " << sum->m_sumDims.size() << endl;
+      throw;
+    }
     DistEntry outEntry = outType.m_dists[dim];
     if (inEntry != outEntry) {
       DimVec outVec = outEntry.DistEntryDims();
@@ -340,6 +358,8 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
 	  ++iter;
       }
       inTypeInt.m_dists[dim].DimsToDistEntry(outVec);
+      if (allSumDims.empty())
+	break;
     }
   }
 
@@ -367,6 +387,14 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
     cout << "!sane: " << inTypeInt.str() << endl;
     if (((DLANode*)(sum->Input(0)))->IsScalar(sum->InputConnNum(0)))
       cout << "is scalar\n";
+    cout << "was " << sum->InputDistType(0).str() << " -> "
+	 << outType.str() << " with " << sumDims.size() << endl;
+      EntrySetConstIter iter = sumDims.begin();
+      for(; iter != sumDims.end(); ++iter) {
+	DimVec vec = (*iter).DistEntryDims();
+	cout << "sum on " << *(vec.begin()) << endl;
+      }
+
     throw;
   }
   
