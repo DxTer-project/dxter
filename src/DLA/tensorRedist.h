@@ -36,6 +36,7 @@ class RedistNode : public DLANode
  public:
   DistType m_destType;
   SizesArray m_lsizes;
+  bool m_isArray;
   string m_name;
   RedistNode();
   RedistNode(const DistType &destType);

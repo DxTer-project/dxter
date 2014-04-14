@@ -27,7 +27,10 @@ RedistNode::RedistNode(const DistType &destType)
 RedistNode::~RedistNode()
 {
   if (m_lsizes) {
-    delete [] m_lsizes;
+    if (m_isArray)
+      delete [] m_lsizes;
+    else
+      delete m_lsizes;
     m_lsizes = NULL;
   }
 }
@@ -345,7 +348,7 @@ const Sizes* RedistNode::LocalLen(unsigned int num, Dim dim) const
 {
   if (num > 0)
     throw;
-  if (!InputNumDims(0)) {
+  if (!m_isArray) {
     return m_lsizes;
   }
   else
@@ -355,7 +358,7 @@ const Sizes* RedistNode::LocalLen(unsigned int num, Dim dim) const
 void RedistNode::ClearSizeCache()
 {
   if (m_lsizes) {
-    if (!InputNumDims(0)) {
+    if (!m_isArray) {
       delete m_lsizes;
     }
     else {
@@ -374,11 +377,13 @@ void RedistNode::BuildSizeCache()
   unsigned int num = InputConnNum(0);
   Dim numDims = in->NumDims(num);
   if (numDims) {
+    m_isArray = true;
     m_lsizes = new Sizes[numDims];
     for (Dim dim = 0; dim < numDims; ++dim)
       GetLocalSizes(m_destType, dim, in->Len(num,dim), m_lsizes+dim);
   }
   else {
+    m_isArray = false;
     if (!in->IsScalar(num))
       throw;
     m_lsizes = new Sizes;
