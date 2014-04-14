@@ -47,30 +47,31 @@ PSet* MartinsExample();
 
 void AddTrans()
 {
-    Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
   
-    Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
-    Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
-    Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
-
-    Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
-    Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
-
-#if 1
-    for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
-      Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
-      Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SplitSumScatter(dim), SUMSCATTERTENSORPHASE);
-    }
+#if 0
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
 #endif
-
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
+  //    Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
+  
+  Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
+  Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
+  
+#if 1
+  for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
+    Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
+    Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SplitSumScatter(dim), SUMSCATTERTENSORPHASE);
+  }
+#endif
 }
 
 void AddSimplifiers()
 { 
-  Universe::AddTrans(RedistNode::GetClass(), new RemoveNOPRedistribs, SIMP);
-  Universe::AddTrans(RedistNode::GetClass(), new RemoveWastedRedist, SIMP);
-  Universe::AddTrans(RedistNode::GetClass(), new CombineRedistribs, SIMP);
+   Universe::AddTrans(RedistNode::GetClass(), new RemoveNOPRedistribs, SIMP);
+   Universe::AddTrans(RedistNode::GetClass(), new RemoveWastedRedist, SIMP);
+   Universe::AddTrans(RedistNode::GetClass(), new CombineRedistribs, SIMP);
 }
 
 void Usage()
