@@ -91,6 +91,8 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist
 :
   m_type(type), m_numDims(dist.m_numDims), m_lsizes(NULL)
 {
+  if (!dist.m_numDims)
+    throw;
   m_sizes = new Sizes[dist.m_numDims];
   for(unsigned int i = 0; i < m_numDims; ++i)
     m_sizes[i] = sizes[i];
@@ -272,8 +274,11 @@ void InputNode::ClearSizeCache()
   if (m_lsizes) {
     if (m_numDims)
       delete [] m_lsizes;
-    else
+    else {
+      delete m_sizes;
+      m_sizes = NULL;
       delete m_lsizes;
+    }
   }
   m_lsizes = NULL;
 }
