@@ -552,6 +552,8 @@ bool DistContToLocalContStatAAllReduce::CanApply(const Poss *poss, const Node *n
   const Contraction *cont = (Contraction*)node;
   if (((DLANode*)(cont->Input(0)))->IsScalar(cont->InputConnNum(0)))
     return false;
+  if (((DLANode*)(cont->Input(2)))->IsScalar(cont->InputConnNum(2)))
+    return false;
   return (cont->GetLayer() == m_fromLayer);
 }
 
@@ -561,7 +563,6 @@ void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
 
   DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
   DimVec CDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(2).m_indices);
-
 
   NodeConn *AConn = cont->InputConn(0);
   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
@@ -701,6 +702,9 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
   poss->AddNode(sum);
+
+  //  sum->CheckSumDimsInOutput();
+
   /*
   cout << "created SumScatter " << LCont->GetDistType(0).str() << " -> "
        << ((DLANode*)(node->Input(2)))->GetDistType(node->InputConnNum(2)).str() << endl;
@@ -726,6 +730,8 @@ bool DistContToLocalContStatBAllReduce::CanApply(const Poss *poss, const Node *n
     throw;
   const Contraction *cont = (Contraction*)node;
   if (((DLANode*)(cont->Input(1)))->IsScalar(cont->InputConnNum(1)))
+    return false;
+  if (((DLANode*)(cont->Input(2)))->IsScalar(cont->InputConnNum(2)))
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -875,6 +881,8 @@ void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
   poss->AddNode(sum);
+
+  //  sum->CheckSumDimsInOutput();
 
   cont->RedirectChildren(sum,0);
 
