@@ -76,4 +76,14 @@ class SplitSumScatter : public SingleTrans
 };
 
 
+class MoveSumScatterRedistAfter : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "MoveSumScatterRedistAfter"; }
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+
 #endif
