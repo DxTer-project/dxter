@@ -214,6 +214,8 @@ string DistEntry::DistEntryToStr() const
 
 string DistType::QuickStr() const
 {
+  if (!m_numDims) 
+    return "[]";
   std::stringstream ret;
   if (!m_dists)
     throw;
