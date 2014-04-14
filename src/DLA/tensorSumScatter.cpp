@@ -116,6 +116,7 @@ void SumScatterUpdateNode::Prop()
       if (!foundAll) {
 	cout << "Bad sum scatter from " << inType.str() << " -> "
 	     << outType.str() << " with " << m_sumDims.size() << " sums\n";
+	m_poss->PrintTransVec();
 	throw;
       }
     }
