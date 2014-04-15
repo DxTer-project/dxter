@@ -197,7 +197,7 @@ string DistEntry::str() const
 {
     DimVec vec = DistEntryDims();
   if (vec.empty())
-    return "*";
+    return "S";
   std::stringstream ret;
   ret << "D";
   DimVecIter iter = vec.begin();
@@ -211,7 +211,7 @@ string DistEntry::str() const
 string DistType::QuickStr() const
 {
   if (!m_numDims) 
-    return "[]";
+    return "";
   std::stringstream ret;
   if (!m_dists)
     throw;
@@ -307,13 +307,12 @@ void DistEntry::DimsToDistEntry(DimVec dims)
 
 string DistType::str() const
 {
-  string out = "[";
+  string out;
   for (unsigned int i = 0; i < m_numDims; ++i) {
     out += m_dists[i].str();
     if (i+1 < m_numDims)
-      out += ",";
+      out += "__";
   }
-  out += "]";
   return out;
 }
 
