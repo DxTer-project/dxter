@@ -75,7 +75,7 @@ void RedistNode::Prop()
     
     if (numDims != InputNumDims(0))
       throw;
-    if (InputDistType(0).m_numDims != numDims)
+    if (m_srcType.m_numDims != numDims)
       throw;
 
     if (m_srcType.m_numDims != numDims) {
@@ -414,12 +414,85 @@ Name RedistNode::GetName(unsigned int num) const
 void RedistNode::PrintCode(IndStream &out)
 {  
   out.Indent();
-  DistType in = InputDistType(0);
 
-  *out << GetName(0).str()
-       << " = "
-       << GetInputName(0).str()
-       << ";\n";
+  const DistType &m_srcType = InputDistType(0);
+  const Dim numDims = m_destType.m_numDims;
+
+  string inName = GetInputName(0).str();
+  string outName = GetName(0).str();
+  
+  if (m_srcType.m_numDims != numDims)
+    throw;
+
+  DimSet diffs;
+    
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    if (m_srcType.m_dists[dim] != m_destType.m_dists[dim]) {
+      diffs.insert(dim);
+    }
+  }
+
+  if (diffs.empty()) {
+    throw;
+  }
+  else if (diffs.size() == 1) {
+    const Dim dim = *(diffs.begin());
+    DimVec src = m_srcType.m_dists[dim].DistEntryDims();
+    DimVec dest = m_destType.m_dists[dim].DistEntryDims();
+       
+    if (src.empty() || IsPrefix(src, dest)) {
+      cout << "redist " << m_srcType.str() << " -> " << m_destType.str() << endl;
+    }
+    else if (IsPrefix(dest, src) || dest.empty()) {
+      *out << "AllGatherRedist( " << outName << ", "
+	   << inName << ", " << dim << " );\n";
+    }
+    else {
+      *out << "PermutationRedist( " << outName << ", "
+	   << inName << ", " << dim << " );\n";
+    }
+  }
+  else if (diffs.size() > 2) {
+    throw;
+  }
+  else {
+    DimSetConstIter iter = diffs.begin();
+    Dim diff1 = *iter;
+    ++iter;
+    Dim diff2 = *iter;
+
+    *out << "AllToAllDoubleIndexRedist( "  << outName << ", "
+	 << inName << ", " << " std::pair(" << diff1 << "," << diff2 
+	 << "), modeArrayPair_";
+    
+    bool first = true;
+    iter = diffs.begin();
+    for(; iter != diffs.end(); ++iter) {
+      Dim diffDim = *iter;
+      DimVec src = m_srcType.m_dists[diffDim].DistEntryDims();
+      DimVec dest = m_destType.m_dists[diffDim].DistEntryDims();
+
+      if (src.empty() || IsPrefix(src, dest)) {
+	throw;
+      }
+      else if (IsPrefix(dest, src) || dest.empty()) {
+	throw;
+      }
+      else {
+	DimVec suff1, suff2;
+	GetDifferentSuffix(src, dest, suff1, suff2);
+	DimVecIter suffIter = suff2.begin();
+	for(; suffIter != suff2.end(); ++suffIter) {
+	  *out << "_" << *suffIter;
+	}
+      }
+      if (first) {
+	first = false;
+	*out << "_";
+      }
+    }
+    *out << " );\n";
+  }
 }
 
 
