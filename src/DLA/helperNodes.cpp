@@ -551,10 +551,10 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims)
 }
 
 TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name)
-  :  m_lsizes(NULL),
+  :  m_name(name),
+     m_lsizes(NULL),
      m_sumLens(NULL),
-     m_sumDims(sumDims),
-     m_name(name)
+     m_sumDims(sumDims)
 {
   //update above, too
   Dim numSumDims = sumDims.size();

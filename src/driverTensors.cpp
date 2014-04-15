@@ -213,7 +213,7 @@ PSet* Cont1Example()
   Sizes sizes[4];
 
   for (Dim dim = 0; dim < 4; ++dim)
-    sizes[dim].AddRepeatedSizes(smallSize, 1, 1);
+    sizes[dim].AddRepeatedSizes(bigSize, 1, 1);
 
   InputNode *Ain = new InputNode("A input",  sizes, "A", "acd");
   InputNode *Bin = new InputNode("B input",  sizes, "B", "cefd");

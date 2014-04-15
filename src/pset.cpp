@@ -280,15 +280,15 @@ void PSet::Prop()
     InTun(i)->Prop();
   }
     PossMMapIter iter;
-      unsigned int j = 0;
+      int j = 0;
 #pragma omp parallel private(j,iter)
       {
 	iter = m_posses.begin();
 	j = 0;
-	unsigned int size = m_posses.size();
+	int size = m_posses.size();
 	//BAM par
 #pragma omp for schedule(static) 
-	for (unsigned int i = 0; i < size; ++i) {
+	for (int i = 0; i < size; ++i) {
 	  if (j > i) {
 	    cout << "uhoh\n";
 	    throw;
@@ -350,17 +350,17 @@ void PSet::Cull(Phase phase)
   for(; iter2 != m_posses.end(); ++iter2) 
     (*iter2).second->m_isSane = false;
 
-  unsigned int j;
+  int j;
   PossMMapIter iter;
   
 #pragma omp parallel private(j,iter)
   {
     iter = m_posses.begin();
     j = 0;
-    unsigned int size = m_posses.size();
+    int size = m_posses.size();
     //BAM par
 #pragma omp for schedule(static) 
-    for (unsigned int i = 0; i < size; ++i) {
+    for (int i = 0; i < size; ++i) {
       if (i < j) {
 	cout << "uhoh";
 	cout.flush();
@@ -482,16 +482,16 @@ bool PSet::TakeIter(const TransMap &transMap,
   if (size > 1) {
     PossMMap mmap;
     PossMMapIter iter;
-    unsigned int j = 0;
+    int j = 0;
 
 #pragma omp parallel private(j,iter)
     {
       iter = m_posses.begin();
       j = 0;
-      unsigned int size = m_posses.size();
+      int size = m_posses.size();
       //BAM par
 #pragma omp for schedule(static) 
-      for (unsigned int i = 0; i < size; ++i) {
+      for (int i = 0; i < size; ++i) {
 	while (j < i) {
 	  ++iter;
 	  ++j;
@@ -786,21 +786,16 @@ void PSet::CombineAndRemoveTunnels()
 void PSet::Simplify(const TransMap &simplifiers)
 {
   //BAM par
-#pragma omp parallel
-  {
-    unsigned int asldkjf = 0;
-  }
-
   PossMMapIter iter;
-  unsigned int j = 0;
+  int j = 0;
 #pragma omp parallel private(j,iter)
   {
     iter = m_posses.begin();
     j = 0;
-    unsigned int size = m_posses.size();
+    int size = m_posses.size();
     //BAM par
 #pragma omp for schedule(static) 
-    for (unsigned int i = 0; i < size; ++i) {
+    for (int i = 0; i < size; ++i) {
       while (j < i) {
 	++iter;
 	++j;
@@ -999,15 +994,15 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
     PossMMap mmap;
     //BAM par
     PossMMapIter iter;
-    unsigned int j = 0;
+    int j = 0;
 #pragma omp parallel private(j,iter)
     {
       iter = m_posses.begin();
 	j = 0;
-	unsigned int size = m_posses.size();
+	int size = m_posses.size();
 	//BAM par
 #pragma omp for schedule(static) 
-      for (unsigned int i = 0; i < size; ++i) {
+      for (int i = 0; i < size; ++i) {
 	while (j < i) {
 	  ++iter;
 	  ++j;

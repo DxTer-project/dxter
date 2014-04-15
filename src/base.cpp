@@ -193,17 +193,13 @@ void DistType::SetToStar(Dim numDims)
     m_dists[dim].SetToStar();
 }
 
-string DistEntry::DistEntryToStr() const
+string DistEntry::str() const
 {
-#if (MAX_NUM_DIMS > 10)
-  this code needs to be updated since dim "12"
-    will be reversed to be 21
-#endif 
     DimVec vec = DistEntryDims();
   if (vec.empty())
     return "*";
   std::stringstream ret;
-  ret << "m";
+  ret << "D";
   DimVecIter iter = vec.begin();
   for (; iter != vec.end(); ++iter) {
     ret << "_";
@@ -313,7 +309,7 @@ string DistType::str() const
 {
   string out = "[";
   for (unsigned int i = 0; i < m_numDims; ++i) {
-    out += m_dists[i].DistEntryToStr();
+    out += m_dists[i].str();
     if (i+1 < m_numDims)
       out += ",";
   }

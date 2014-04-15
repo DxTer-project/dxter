@@ -208,7 +208,7 @@ class DistEntry
   inline bool operator<(const DistEntry &rhs) const { return m_val < rhs.m_val; }
   inline bool IsStar() const { return m_val == 0; }
   inline void SetToStar() { m_val = 0; }
-  string DistEntryToStr() const;
+  string str() const;
   DimVec DistEntryDims() const;
   void DimsToDistEntry(DimVec dims);
 };

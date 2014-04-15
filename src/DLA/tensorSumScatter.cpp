@@ -228,9 +228,9 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	      if (outEntry != sumDims) {
 		cout << "2trying SumScatter from " << DistTypeToStr(inType)
 		     << " to " << DistTypeToStr(outType)  << endl;
-		cout << inEntry.DistEntryToStr() << " -> "
-		     << outEntry.DistEntryToStr() << endl;
-		cout << "sumDims " << sumDims.DistEntryToStr() << endl;
+		cout << inEntry.str() << " -> "
+		     << outEntry.str() << endl;
+		cout << "sumDims " << sumDims.str() << endl;
 		
 		throw;
 	      }
@@ -539,7 +539,7 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
       cout << "didn't find entry\n";
       cout << "in " << inType.str()
 	   << "\nout " << outType.str()
-	   << "\ninEntry: " << inEntry.DistEntryToStr() << endl;
+	   << "\ninEntry: " << inEntry.str() << endl;
       throw;
     }
 
