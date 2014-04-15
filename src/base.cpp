@@ -307,7 +307,7 @@ void DistEntry::DimsToDistEntry(DimVec dims)
 
 string DistType::str() const
 {
-  string out;
+  string out = "_";
   for (unsigned int i = 0; i < m_numDims; ++i) {
     out += m_dists[i].str();
     if (i+1 < m_numDims)
