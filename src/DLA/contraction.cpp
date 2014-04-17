@@ -145,14 +145,29 @@ void Contraction::SanityCheck()
 
 void Contraction::PrintCode(IndStream &out)
 {
+  Name in0 = GetInputName(0);
+  Name in1 = GetInputName(1);
+  Name in2 = GetInputName(2);
+
   out.Indent();
+  *out << "   // ";
+  out << m_alpha;
+  *out << " * " << in0.PrettyStr(true)
+       << " * " << in1.PrettyStr(true)
+       << " + ";
+  out << m_beta;
+  *out << " * " << in2.PrettyStr(true)
+       << endl;
+  out.Indent();
+    
+
   *out << "Contraction(";
   out << m_alpha;
-  *out << ", " << GetInputName(0).str()
-       << ", " << GetInputName(1).str()
+  *out << ", " << in0.str()
+       << ", " << in1.str()
        << ", ";
   out << m_beta;
-  *out << ", " << GetInputName(2).str()
+  *out << ", " << in2.str()
        << ", indices: " << m_indices
        << ");\n";
 }

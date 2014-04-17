@@ -286,9 +286,9 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
   DistEntry sumDims = *(m_sumDims.begin());
     
 
-  *out << "   // " << GetInputName(0).PrettyStr() 
-       << " <- " << GetName(0).PrettyStr() 
-       << " (with SumScatter on " << sumDims.PrettyStr() << ");\n";
+  *out << "   // " << GetInputName(0).PrettyStr(false) 
+       << " <- " << GetName(0).PrettyStr(false) 
+       << " (with SumScatter on " << sumDims.PrettyStr() << ")\n";
 
   out.Indent();
   

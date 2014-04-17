@@ -387,7 +387,7 @@ class Name
     m_name("noname") {}
   string str() const;
 #if DOTENSORS
-  string PrettyStr() const;
+  string PrettyStr(bool printIndices) const;
 #endif
   Name& operator=(const Name &rhs);
   void Flatten(ofstream &out) const;

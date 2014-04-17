@@ -722,9 +722,12 @@ string Name::str() const
 }
 
 #if DOTENSORS
-string Name::PrettyStr() const
+string Name::PrettyStr(bool printIndices) const
 {
-  return m_name + m_type.PrettyStr();
+  if (printIndices)
+    return m_name + "_" + m_indices + m_type.PrettyStr();
+  else
+    return m_name + m_type.PrettyStr();
 }
 #endif
 

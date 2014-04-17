@@ -421,8 +421,8 @@ void RedistNode::PrintCode(IndStream &out)
   string inName = GetInputName(0).str();
   string outName = GetName(0).str(); 
 
-  *out << "   // " << GetInputName(0).PrettyStr() 
-       << " <- " << GetName(0).PrettyStr() << endl;
+  *out << "   // " << GetName(0).PrettyStr(false) 
+       << " <- " << GetInputName(0).PrettyStr(false) << endl;
   out.Indent();
   
   if (m_srcType.m_numDims != numDims)
