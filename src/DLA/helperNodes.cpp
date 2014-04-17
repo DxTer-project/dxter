@@ -721,7 +721,11 @@ Name TempVarNode::GetName(unsigned int num) const
   Name tmp;
   if (m_name.empty()) {
     tmp = GetInputName(0);
+#if DOTENSORS
+    
+#else
     tmp.m_name = tmp.m_name + "temp";
+#endif
   }
   else {
     tmp.m_name = m_name;
