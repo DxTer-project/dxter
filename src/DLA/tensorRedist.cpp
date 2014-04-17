@@ -419,7 +419,11 @@ void RedistNode::PrintCode(IndStream &out)
   const Dim numDims = m_destType.m_numDims;
 
   string inName = GetInputName(0).str();
-  string outName = GetName(0).str();
+  string outName = GetName(0).str(); 
+
+  *out << "   // " << GetInputName(0).PrettyStr() 
+       << " <- " << GetName(0).PrettyStr() << endl;
+  out.Indent();
   
   if (m_srcType.m_numDims != numDims)
     throw;
@@ -441,7 +445,8 @@ void RedistNode::PrintCode(IndStream &out)
     DimVec dest = m_destType.m_dists[dim].DistEntryDims();
        
     if (src.empty() || IsPrefix(src, dest)) {
-      cout << "redist " << m_srcType.str() << " -> " << m_destType.str() << endl;
+      *out << "LocalRedist( " << outName << ", "
+	   << inName << ", " << dim << " );\n";
     }
     else if (IsPrefix(dest, src) || dest.empty()) {
       *out << "AllGatherRedist( " << outName << ", "
@@ -449,7 +454,7 @@ void RedistNode::PrintCode(IndStream &out)
     }
     else {
       *out << "PermutationRedist( " << outName << ", "
-	   << inName << ", " << dim << " );\n";
+      	   << inName << ", " << dim << " );\n";
     }
   }
   else if (diffs.size() > 2) {
@@ -559,6 +564,7 @@ void AllReduceNode::Prop()
 
 void AllReduceNode::PrintCode(IndStream &out)
 {
+  throw;
   out.Indent();
   *out << "AllReduceOnDims( " << GetName(0).str()
        << ", m";

@@ -209,6 +209,7 @@ class DistEntry
   inline bool IsStar() const { return m_val == 0; }
   inline void SetToStar() { m_val = 0; }
   string str() const;
+  string PrettyStr() const;
   DimVec DistEntryDims() const;
   void DimsToDistEntry(DimVec dims);
 };
@@ -240,6 +241,7 @@ class DistType
   void PrepForNumDims(Dim numDims);
   string QuickStr() const;
   string str() const;
+  string PrettyStr() const;
   DistType& operator=(const DistType &rhs);
 };
 #endif
@@ -384,6 +386,9 @@ class Name
 #endif
     m_name("noname") {}
   string str() const;
+#if DOTENSORS
+  string PrettyStr() const;
+#endif
   Name& operator=(const Name &rhs);
   void Flatten(ofstream &out) const;
   void Unflatten(ifstream &in);

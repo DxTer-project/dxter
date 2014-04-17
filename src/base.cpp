@@ -208,6 +208,23 @@ string DistEntry::str() const
   return ret.str();
 }
 
+
+string DistEntry::PrettyStr() const
+{
+  DimVec vec = DistEntryDims();
+  if (vec.empty())
+    return "*";
+  std::stringstream ret;
+  ret << "D";
+  DimVecIter iter = vec.begin();
+  for (; iter != vec.end(); ++iter) {
+    ret << *iter;
+  }
+  return ret.str();
+}
+
+
+
 string DistType::QuickStr() const
 {
   if (!m_numDims) 
@@ -314,6 +331,17 @@ string DistType::str() const
       out += "__";
   }
   return out;
+}
+
+string DistType::PrettyStr() const
+{
+  string out = "[";
+  for (unsigned int i = 0; i < m_numDims; ++i) {
+    out += m_dists[i].PrettyStr();
+    if (i+1 < m_numDims)
+      out += ",";
+  }
+  return out + "]";
 }
 
 
@@ -692,6 +720,13 @@ string Name::str() const
   return m_name;
 #endif
 }
+
+#if DOTENSORS
+string Name::PrettyStr() const
+{
+  return m_name + m_type.PrettyStr();
+}
+#endif
 
 Name& Name::operator= (const Name &rhs)
 {

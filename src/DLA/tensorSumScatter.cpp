@@ -272,20 +272,64 @@ Phase SumScatterUpdateNode::MaxPhase() const
 
 void SumScatterUpdateNode::PrintCode(IndStream &out)
 {
+  if (m_sumDims.size() != 1)
+    throw;
   out.Indent();
-  *out << GetInputNameStr(1) << ".SumScatterUpdate( ";
-  out << m_coef;
-  *out << ", " << GetInputNameStr(0) << ", D";
 
-  EntrySetIter setIter = m_sumDims.begin();
-  for(; setIter != m_sumDims.end(); ++setIter) {
-    DimVec sumDims = (*setIter).DistEntryDims();
-    DimVecConstIter iter = sumDims.begin();
-    for(; iter != sumDims.end(); ++iter) {
-      *out << "_" << *iter;
-    }
+  const DistType &m_srcType = InputDistType(0);
+  const DistType &m_destType = InputDistType(1);
+
+  Dim srcNumDims = m_srcType.m_numDims;
+
+  string inName = GetInputName(0).str();
+  string outName = GetName(0).str();
+  DistEntry sumDims = *(m_sumDims.begin());
+    
+
+  *out << "   // " << GetInputName(0).PrettyStr() 
+       << " <- " << GetName(0).PrettyStr() 
+       << " (with SumScatter on " << sumDims.PrettyStr() << ");\n";
+
+  out.Indent();
+  
+  if (((DLANode*)Input(0))->IsScalar(InputConnNum(0))) {
+    cout << "sum scatter for scalar\n";
+    throw;
   }
-  *out << " );\n";
+  else {
+    if (srcNumDims != (m_destType.m_numDims+1))
+      throw;
+
+    *out << "ReduceScatterRedist( " << outName << ", " << inName << ", ";
+
+    DimVec scatDims = sumDims.DistEntryDims();
+
+
+    Dim redDim = srcNumDims;
+    for (Dim dim = srcNumDims-1; dim >= 0; --dim) {
+      if (m_srcType.m_dists[dim] == sumDims) {
+	redDim = dim;
+	break;
+      }
+    }
+    if (redDim == srcNumDims)
+      throw;
+
+    Dim scatDim = srcNumDims;
+    for(Dim dim = 0; dim < m_destType.m_numDims; ++dim) {
+      DimVec destDims = m_destType.m_dists[dim].DistEntryDims();
+      DimVec srcDims = m_srcType.m_dists[dim].DistEntryDims();
+      srcDims.insert(srcDims.end(), scatDims.begin(), scatDims.end());
+      if (destDims == srcDims) {
+	scatDim = dim;
+	break;
+      }
+    }
+    if (scatDim == srcNumDims)
+      throw;
+
+    *out << redDim << ", " << scatDim << " );\n";
+  }
 }
 
 void SumScatterUpdateNode::FlattenCore(ofstream &out) const
