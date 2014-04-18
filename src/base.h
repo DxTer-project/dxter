@@ -237,6 +237,7 @@ class DistType
   DistType(const DistType &rhs);
   ~DistType();
   void SetToDefault(Dim numDims);
+  void SetToScalarNoRep();
   void SetToStar(Dim numDims);
   DimSet UsedGridDims() const;
   bool IsSane() const;

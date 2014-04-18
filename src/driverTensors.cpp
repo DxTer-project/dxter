@@ -285,10 +285,10 @@ PSet* MartinsExample()
     ones[dim].AddRepeatedSizes(one, 1, 1);
 
   DistType epDist;
-  epDist.SetToStar(2);
+  epDist.SetToScalarNoRep();
 
-  //  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", "xz");
-  InputNode *epIn = new InputNode("ep input",  ones, "epsilon", "");
+  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", "");
+  //InputNode *epIn = new InputNode("ep input",  ones, "epsilon", "");
 
   InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", "abij");
 

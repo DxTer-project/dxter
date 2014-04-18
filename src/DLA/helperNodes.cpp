@@ -88,14 +88,20 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, string name, string 
 }
 
 InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, string indices)
-:
+  :
   m_type(type), m_numDims(dist.m_numDims), m_lsizes(NULL)
 {
-  if (!dist.m_numDims)
+  if (dist.m_numDims > NUM_GRID_DIMS)
     throw;
-  m_sizes = new Sizes[dist.m_numDims];
-  for(unsigned int i = 0; i < m_numDims; ++i)
-    m_sizes[i] = sizes[i];
+  if (m_numDims) {
+    m_sizes = new Sizes[dist.m_numDims];
+    for(unsigned int i = 0; i < m_numDims; ++i)
+      m_sizes[i] = sizes[i];
+  }
+  else {
+    m_sizes = new Sizes;
+    *m_sizes = sizes[0];
+  }
   m_varName.m_name = name;
   m_varName.m_type = dist;
   m_varName.m_indices = indices;

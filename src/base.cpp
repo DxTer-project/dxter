@@ -192,6 +192,21 @@ void DistType::SetToDefault(Dim numDims)
   }
 }
 
+void DistType::SetToScalarNoRep()
+{
+  m_numDims = 0;
+  if (m_dists) {
+    delete [] m_dists;
+    m_dists = NULL;
+  }
+  m_notReped.SetToStar();
+  DimVec vec;
+  for (unsigned int j = 0; j < NUM_GRID_DIMS; ++j)  {
+      vec.push_back(j);
+  }
+    m_notReped.DimsToDistEntry(vec);
+}
+
 void DistType::SetToStar(Dim numDims)
 {
   if (numDims > NUM_GRID_DIMS)
