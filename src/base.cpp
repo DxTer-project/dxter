@@ -80,6 +80,7 @@ DistType::DistType(const DistType &rhs)
 DistType& DistType::operator=(const DistType &rhs)
 {
   m_numDims = rhs.m_numDims;
+  m_notReped = rhs.m_notReped;
   if (m_dists)
     delete [] m_dists;
   if (m_numDims) {
@@ -101,6 +102,7 @@ void DistType::PrepForNumDims(Dim numDims)
     m_dists = new DistEntry[numDims];
   else
     m_dists = NULL;
+  m_notReped.SetToStar();
 }
 
 DistType::~DistType()
@@ -126,6 +128,8 @@ DimSet DistType::UsedGridDims() const
       }
     }
   }
+  DimSet repedSet = m_notReped.DistEntryDimSet();
+  set.insert(repedSet.begin(), repedSet.end());
   return set;
 }
 
@@ -142,6 +146,13 @@ bool DistType::IsSane() const
       }
     }
   }
+  DimVec vec = m_notReped.DistEntryDims();
+  DimVecIter iter = vec.begin();
+  for(; iter != vec.end(); ++iter) {
+    if (!set.insert(*iter).second) {
+      return false;
+      }
+  }
   return true;
 }
 
@@ -153,6 +164,7 @@ void DistType::SetToDefault(Dim numDims)
   m_numDims = numDims;
   if (m_dists)
     delete [] m_dists;
+  m_notReped.SetToStar();
   m_dists = new DistEntry[numDims];
 
   unsigned int numStartDists = ceil((double)NUM_GRID_DIMS / numDims);
@@ -188,6 +200,7 @@ void DistType::SetToStar(Dim numDims)
   if (m_dists)
     delete [] m_dists;
   m_dists = new DistEntry[numDims];
+  m_notReped.SetToStar();
 
   for(Dim dim = 0; dim < numDims; ++dim)
     m_dists[dim].SetToStar();
@@ -235,6 +248,7 @@ string DistType::QuickStr() const
   for(Dim dim = 0; dim < m_numDims; ++dim) {
     ret << m_dists[dim].m_val << " ";
   }
+  ret << "|" << m_notReped.m_val;    
   return ret.str();
 }
 
@@ -298,6 +312,14 @@ DimVec DistEntry::DistEntryDims() const
   return vec;
 }
 
+DimSet DistEntry::DistEntryDimSet() const
+{
+  DimVec vec(DistEntryDims());
+  DimSet set;
+  set.insert(vec.begin(), vec.end());
+  return set;
+}
+
 void DistEntry::DimsToDistEntry(DimVec dims)
 {
   unsigned int currStage = 1;
@@ -330,6 +352,8 @@ string DistType::str() const
     if (i+1 < m_numDims)
       out += "__";
   }
+  out += "_N_";
+  out += m_notReped.str();
   return out;
 }
 
@@ -341,7 +365,14 @@ string DistType::PrettyStr() const
     if (i+1 < m_numDims)
       out += ",";
   }
-  return out + "]";
+  out += "]";
+  if (!m_notReped.IsStar()) {
+    out += " | [";
+    out += m_notReped.PrettyStr();
+    out += "]";      
+  }
+
+  return out;
 }
 
 

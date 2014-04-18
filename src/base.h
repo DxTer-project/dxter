@@ -211,6 +211,7 @@ class DistEntry
   string str() const;
   string PrettyStr() const;
   DimVec DistEntryDims() const;
+  DimSet DistEntryDimSet() const;
   void DimsToDistEntry(DimVec dims);
 };
 
@@ -230,6 +231,7 @@ class DistType
  public:
   Dim m_numDims;
   DistEntry *m_dists;
+  DistEntry m_notReped; //not replicated
  DistType() 
    : m_numDims(99), m_dists(NULL) {}
   DistType(const DistType &rhs);
