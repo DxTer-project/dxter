@@ -554,6 +554,7 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims)
   for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
     m_distType.m_dists[dist.m_numDims + dim] = *iter;
   }
+  m_distType.m_notReped = dist.m_notReped;
 }
 
 TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name)
@@ -575,6 +576,7 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name)
   for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
     m_distType.m_dists[dist.m_numDims + dim] = *iter;
   }
+  m_distType.m_notReped = dist.m_notReped;
 }
 #endif
 

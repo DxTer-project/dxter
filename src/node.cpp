@@ -94,8 +94,6 @@ void Node::Cull(Phase phase)
 	SumScatterUpdateNode *sum = (SumScatterUpdateNode*)this;
 	cout << "sumscatter " << sum->InputDistType(0).str() 
 	     << " -> " << sum->GetDistType(0).str() << endl;
-	if (sum->IsScalar(0))
-	  cout << "IsScalar\n";
       }
 
 #endif

@@ -384,8 +384,6 @@ void RedistNode::BuildSizeCache()
   }
   else {
     m_isArray = false;
-    if (!in->IsScalar(num))
-      throw;
     m_lsizes = new Sizes;
     *m_lsizes = *(in->Len(num,0));
   }

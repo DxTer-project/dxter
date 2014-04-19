@@ -80,7 +80,9 @@ class DLANode : public Node
   DLANode* FindNonRedistParent(unsigned int num, unsigned int &parentNum);
 #endif
   DLANode* FindSideEffectingUser(unsigned int num);
+#if TWOD
   bool IsScalar(unsigned int num) const;
+#endif
   virtual bool ShouldCullDP() const {return false;}
   virtual bool DoNotCullDP() const {return false;}
   virtual bool ShouldCullSR() const {return false;}

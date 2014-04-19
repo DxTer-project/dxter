@@ -503,7 +503,7 @@ bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) cons
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (((DLANode*)(cont->Input(2)))->IsScalar(cont->InputConnNum(2)))
+  if (!cont->InputDistType(2).HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -565,9 +565,9 @@ bool DistContToLocalContStatAAllReduce::CanApply(const Poss *poss, const Node *n
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (((DLANode*)(cont->Input(0)))->IsScalar(cont->InputConnNum(0)))
+  if (!cont->InputDistType(0).HasNoReped())
     return false;
-  if (((DLANode*)(cont->Input(2)))->IsScalar(cont->InputConnNum(2)))
+  if (!cont->InputDistType(2).HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -655,7 +655,7 @@ bool DistContToLocalContStatASumScatter::CanApply(const Poss *poss, const Node *
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (((DLANode*)(cont->Input(0)))->IsScalar(cont->InputConnNum(0)))
+  if (!cont->InputDistType(0).HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -717,14 +717,14 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
   poss->AddNode(sum);
+  /*
+  cout << "Sum scatter " << node->Input(2)->GetNameStr(0) << " " 
+       << LCont->GetDistType(0).PrettyStr() << " -> "
+       << cont->GetDistType(0).PrettyStr() << endl;
+  */
 
   //  sum->CheckSumDimsInOutput();
 
-  /*
-  cout << "created SumScatter " << LCont->GetDistType(0).str() << " -> "
-       << ((DLANode*)(node->Input(2)))->GetDistType(node->InputConnNum(2)).str() << endl;
-  cout << sumDims.size() << " sumDims\n";
-  */
   cont->RedirectChildren(sum,0);
 
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -744,9 +744,9 @@ bool DistContToLocalContStatBAllReduce::CanApply(const Poss *poss, const Node *n
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (((DLANode*)(cont->Input(1)))->IsScalar(cont->InputConnNum(1)))
+  if (!cont->InputDistType(1).HasNoReped())
     return false;
-  if (((DLANode*)(cont->Input(2)))->IsScalar(cont->InputConnNum(2)))
+  if (!cont->InputDistType(2).HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -835,7 +835,7 @@ bool DistContToLocalContStatBSumScatter::CanApply(const Poss *poss, const Node *
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (((DLANode*)(cont->Input(1)))->IsScalar(cont->InputConnNum(1)))
+  if (!cont->InputDistType(1).HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }

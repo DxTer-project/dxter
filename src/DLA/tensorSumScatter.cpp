@@ -69,7 +69,7 @@ void SumScatterUpdateNode::Prop()
     if (m_sumDims.empty())
       throw;
 
-    if (!IsScalar(0)) {
+    if (inType.m_notReped == outType.m_notReped) {
       if (m_sumDims.size() != (inType.m_numDims - outType.m_numDims)) {
 	cout << "in: " << inType.str() << endl;
 	cout << "out: " << outType.str() << endl;
@@ -125,7 +125,7 @@ void SumScatterUpdateNode::Prop()
       unsigned int num = InputConnNum(1);
       const Dim numDims = input->NumDims(num);
 
-      if (input->IsScalar(num)) {
+      if (inType.m_notReped != outType.m_notReped) {
 	input = (DLANode*)(Input(0));
 	num = InputConnNum(0);
 	m_cost = input->LocalLen(num,0)->NumSizes() * ReduceScatter(numProcs,numProcs);
@@ -159,7 +159,7 @@ void SumScatterUpdateNode::CheckSumDimsInOutput() const
 {
     const DistType &outType = InputDistType(1);
     
-    if (((DLANode*)Input(0))->IsScalar(InputConnNum(0)))
+    if (InputDistType(0).m_notReped != outType.m_notReped)
       return;
 
     DimSet allSumDims;
@@ -214,7 +214,7 @@ Phase SumScatterUpdateNode::MaxPhase() const
       */
       return SUMSCATTERTENSORPHASE;
     }
-    else if (!IsScalar(0)) {
+    else if (inType.m_notReped == outType.m_notReped) {
       sumDims = *(m_sumDims.begin());
 
       bool foundSumDim = false;
@@ -286,13 +286,13 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
   DistEntry sumDims = *(m_sumDims.begin());
     
 
-  *out << "   // " << GetInputName(0).PrettyStr(false) 
-       << " <- " << GetName(0).PrettyStr(false) 
+  *out << "   // " << GetName(0).PrettyStr(false) 
+       << " <- " << GetInputName(0).PrettyStr(false) 
        << " (with SumScatter on " << sumDims.PrettyStr() << ")\n";
 
   out.Indent();
   
-  if (((DLANode*)Input(0))->IsScalar(InputConnNum(0))) {
+  if (m_srcType.m_notReped != m_destType.m_notReped) {
     cout << "sum scatter for scalar\n";
     throw;
   }
@@ -347,12 +347,12 @@ void SumScatterUpdateNode::UnflattenCore(ifstream &in, SaveInfo &info)
 bool SeparateRedistFromSumScatter::CanApply(const Poss *poss, const Node *node) const
 {
   const SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
-
-  if (((DLANode*)(sum->Input(0)))->IsScalar(sum->InputConnNum(0)))
-    return false;
-  
   const DistType &inType = sum->InputDistType(0);
   const DistType &outType = sum->InputDistType(1);
+
+  if (inType.m_notReped != outType.m_notReped)
+    return false;
+  
 
   const EntrySet &sumDims = sum->m_sumDims;
 
@@ -462,8 +462,6 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
 
   if (!inTypeInt.IsSane()) {
     cout << "!sane: " << inTypeInt.str() << endl;
-    if (((DLANode*)(sum->Input(0)))->IsScalar(sum->InputConnNum(0)))
-      cout << "is scalar\n";
     cout << "was " << sum->InputDistType(0).str() << " -> "
 	 << outType.str() << " with " << sumDims.size() << endl;
       EntrySetConstIter iter = sumDims.begin();
@@ -493,7 +491,7 @@ bool SplitSumScatter::CanApply(const Poss *poss, const Node *node) const
   const DistType &inType = sum->InputDistType(0);
   const DistType &outType = sum->InputDistType(1);
 
-  if (sum->IsScalar(0)) {
+  if (inType.m_notReped != outType.m_notReped) {
     if (m_dim >= inType.m_numDims)
       return false;
     else
@@ -573,11 +571,14 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
   const DistType &outType = sum->InputDistType(1);
 
 
-  if (sum->IsScalar(0)) {
+  if (inType.m_notReped != outType.m_notReped) {
     DistEntry inEntry = inType.m_dists[m_dim];
 
+    //    cout << "applying to sum scatter " << sum->InputDistType(0).PrettyStr() << " -> "
+    //	 <<  sum->GetDistType(0).PrettyStr() << endl;
+
+
     EntrySet sums = sum->m_sumDims;
-    EntrySetIter sumIter = sums.begin();
     if (!sums.erase(inEntry)) {
       cout << "scalar " << sum->GetNameStr(0) << endl;
       cout << "didn't find entry\n";
@@ -590,9 +591,21 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
     if (sums.empty())
       throw;
 
-    TempVarNode *temp = new TempVarNode(sum->GetDistType(0), sums, sum->GetInputName(0).m_name);
+    DistType intType = sum->GetDistType(0);
+    {
+    DimSet set = inEntry.DistEntryDimSet();
+    DimVec vec;
+    vec.insert(vec.end(), set.begin(), set.end()); // order them correctly
+    intType.m_notReped.DimsToDistEntry(vec);
+    }
+
+    //    cout << "intType " << intType.PrettyStr() << endl;
+
+    TempVarNode *temp = new TempVarNode(intType, sums, sum->GetInputName(0).m_name);
     temp->AddInput(node->Input(1), node->InputConnNum(1));
     poss->AddNode(temp);
+
+    //    cout << "tempType " << temp->GetDistType(0).PrettyStr() << endl;
 
     EntrySet set;
     set.insert(inEntry);
@@ -605,6 +618,11 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
 
     node->ChangeInput2Way(node->Input(0), node->InputConnNum(0),
 			  newSum, 0);
+
+    //    cout << "new sum scatter " << newSum->InputDistType(0).PrettyStr() << " -> "
+    //	 <<  newSum->GetDistType(0).PrettyStr() << endl;
+
+
 
     if (sums.empty()) {
       cout << "sums is empty1\n";

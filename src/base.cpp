@@ -75,6 +75,7 @@ DistType::DistType(const DistType &rhs)
     for (Dim dim = 0; dim < m_numDims; ++dim)
       m_dists[dim] = rhs.m_dists[dim];
   }
+  m_notReped = rhs.m_notReped;
 }
 
 DistType& DistType::operator=(const DistType &rhs)
@@ -367,8 +368,10 @@ string DistType::str() const
     if (i+1 < m_numDims)
       out += "__";
   }
-  out += "_N_";
-  out += m_notReped.str();
+  if (!m_notReped.IsStar()) {
+    out += "_N_";
+    out += m_notReped.str();
+  }
   return out;
 }
 
@@ -388,6 +391,25 @@ string DistType::PrettyStr() const
   }
 
   return out;
+}
+
+void DistType::AddNotReped(Dim dim)
+{
+  DimSet set = m_notReped.DistEntryDimSet();
+  set.insert(dim);
+  DimVec vec;
+  vec.insert(vec.end(), set.begin(), set.end());
+  m_notReped.DimsToDistEntry(vec);
+}
+
+void DistType::AddNotReped(DistEntry entry)
+{
+  DimSet set = m_notReped.DistEntryDimSet();
+  DimSet set2 = entry.DistEntryDimSet();
+  set.insert(set2.begin(),set2.end());
+  DimVec vec;
+  vec.insert(vec.end(), set.begin(), set.end());
+  m_notReped.DimsToDistEntry(vec);
 }
 
 

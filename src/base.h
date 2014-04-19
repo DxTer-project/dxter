@@ -245,6 +245,9 @@ class DistType
   string QuickStr() const;
   string str() const;
   string PrettyStr() const;
+  bool HasNoReped() const { return m_notReped.IsStar(); }
+  void AddNotReped(Dim dim);
+  void AddNotReped(DistEntry entry);
   DistType& operator=(const DistType &rhs);
 };
 #endif
