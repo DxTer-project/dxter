@@ -623,10 +623,12 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
 
     DistType intType = sum->GetDistType(0);
     {
-    DimSet set = inEntry.DistEntryDimSet();
-    DimVec vec;
-    vec.insert(vec.end(), set.begin(), set.end()); // order them correctly
-    intType.m_notReped.DimsToDistEntry(vec);
+      DimSet set = inType.m_notReped.DistEntryDimSet();
+      DimSet tempSet = inEntry.DistEntryDimSet();
+      set.insert(tempSet.begin(), tempSet.end()); // order them correctly
+      DimVec vec;
+      vec.insert(vec.end(), set.begin(), set.end());
+      intType.m_notReped.DimsToDistEntry(vec);
     }
 
     //    cout << "intType " << intType.PrettyStr() << endl;
