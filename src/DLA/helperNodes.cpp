@@ -138,7 +138,7 @@ void InputNode::PrintCode(IndStream &out)
   *out << "// " << m_type << " has " << m_numDims 
        << " dims and indices " << m_varName.m_indices << endl;
   out.Indent();
-  *out << "//\tStarting distribution: " << DistTypeToStr(m_varName.m_type) << endl;
+  *out << "//\tStarting distribution: " << m_varName.m_type.PrettyStr() << " or " << DistTypeToStr(m_varName.m_type) << endl;
 #endif
 }
 
