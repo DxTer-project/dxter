@@ -377,20 +377,27 @@ string DistType::str() const
 
 string DistType::PrettyStr() const
 {
-  string out = "[";
+  std::stringstream out;
+  out << "[";
   for (unsigned int i = 0; i < m_numDims; ++i) {
-    out += m_dists[i].PrettyStr();
+    out << m_dists[i].PrettyStr();
     if (i+1 < m_numDims)
-      out += ",";
+      out << ",";
   }
-  out += "]";
+  out << "]";
   if (!m_notReped.IsStar()) {
-    out += " | [";
-    out += m_notReped.PrettyStr();
-    out += "]";      
+    out << " | {";
+    DimVec vec = m_notReped.DistEntryDims();
+    DimVecIter iter = vec.begin();
+    out << *iter;
+    ++iter;
+    for(; iter != vec.end(); ++iter) {
+      out << "," << *iter;
+    }
+    out << "}";      
   }
 
-  return out;
+  return out.str();
 }
 
 void DistType::AddNotReped(Dim dim)
