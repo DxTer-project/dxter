@@ -327,6 +327,21 @@ Phase RedistNode::MaxPhase() const
     }
   }
 
+  if (diffs.size() == 1 && foundAllToAll) {
+    Dim dim = *(diffs.begin());
+    DistEntry srcDistEntry = m_srcType.m_dists[dim];
+    DistEntry destDistEntry = m_destType.m_dists[dim];
+
+    DimSet srcSet = srcDistEntry.DistEntryDimSet();
+    DimSet destSet = destDistEntry.DistEntryDimSet();
+    if (srcSet.size() != destSet.size())
+      return ROTENSORPHASE;
+    if (!includes(srcSet.begin(), srcSet.end(),
+		  destSet.begin(), destSet.end())) {
+      return ROTENSORPHASE;
+    }
+  }
+
   return NUMPHASES;
 }
 
@@ -793,4 +808,108 @@ void SplitRedistribs::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 
 }
+
+bool SingleIndexAllToAll::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDistType(0);
+
+  if (srcType.m_numDims != redist->m_destType.m_numDims)
+    return false;
+  else if (srcType.m_numDims <= m_dim)
+    return false;
+
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = redist->m_destType.m_dists[m_dim];
+  if (srcEntry == destEntry)
+    return false;
+
+  for(Dim dim = 0; dim < srcType.m_numDims; ++dim) {
+    if (dim != m_dim) {
+      if (srcType.m_dists[dim] != redist->m_destType.m_dists[dim])
+	return false;
+    }
+  }
+
+  if (srcEntry.IsStar() || destEntry.IsStar())
+    return false;
+  
+  DimVec srcDims = srcEntry.DistEntryDims();
+  DimVec destDims = destEntry.DistEntryDims();
+
+  if (IsPrefix(srcDims,destDims) || IsPrefix(destDims,srcDims))
+    return false;
+
+  if (srcDims.size() == destDims.size()) {
+    DimSet srcSet;
+    srcSet.insert(srcDims.begin(), srcDims.end());
+    DimSet destSet;
+    destSet.insert(destDims.begin(), destDims.end());
+    if (includes(srcSet.begin(), srcSet.end(),
+		 destSet.begin(), destSet.end()))
+      return false;
+  }
+
+  return true;
+}
+
+void SingleIndexAllToAll::Apply(Poss *poss, Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDistType(0);
+
+  DistType type1 = srcType;
+  DistEntry entry1 = type1.m_dists[m_dim];
+  DimVec vec1 = entry1.DistEntryDims();
+  DimSet set1;
+  set1.insert(vec1.begin(), vec1.end());
+  
+  DimVec destVec = redist->m_destType.m_dists[m_dim].DistEntryDims();
+  DimVecIter iter = destVec.begin();
+  for(; iter != destVec.end(); ++iter) {
+    Dim dim = *iter;
+    if (set1.find(dim) == set1.end()) {
+      vec1.push_back(dim);
+    }
+  }
+  type1.m_dists[m_dim].DimsToDistEntry(vec1);
+
+  RedistNode *redist1 = new RedistNode(type1);
+  redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
+  poss->AddNode(redist1);
+
+  DistType type2 = redist->m_destType;
+  DistEntry entry2 = type2.m_dists[m_dim];
+  DimVec vec2 = entry2.DistEntryDims();
+  DimSet set2;
+  set2.insert(vec2.begin(), vec2.end());
+  
+  DimVec srcVec = srcType.m_dists[m_dim].DistEntryDims();
+  iter = srcVec.begin();
+  for(; iter != srcVec.end(); ++iter) {
+    Dim dim = *iter;
+    if (set2.find(dim) == set2.end()) {
+      vec2.push_back(dim);
+    }
+  }
+  type2.m_dists[m_dim].DimsToDistEntry(vec2);
+  
+  RedistNode *redist2 = new RedistNode(type2);
+  redist2->AddInput(redist1, 0);
+  poss->AddNode(redist2);
+
+  RedistNode *redist3 = new RedistNode(redist->m_destType);
+  redist3->AddInput(redist2, 0);
+  poss->AddNode(redist3);
+
+  node->RedirectChildren(redist3, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+
 #endif
+

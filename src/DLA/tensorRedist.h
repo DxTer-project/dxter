@@ -125,4 +125,16 @@ class SplitRedistribs : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+
+class SingleIndexAllToAll : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ SingleIndexAllToAll(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"SingleIndexAllToAll" + (char)(m_dim+48); }
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 #endif
