@@ -111,6 +111,27 @@ void SumScatterUpdateNode::Prop()
 	throw;
       }
     }
+    else {
+      DistEntry inNotReped = inType.m_notReped;
+      DimSet notReped = inNotReped.DistEntryDimSet();
+      EntrySetIter iter = m_sumDims.begin();
+      for(; iter != m_sumDims.end(); ++iter) {
+	DistEntry entry = *iter;
+	DimSet set = entry.DistEntryDimSet();
+	notReped.insert(set.begin(), set.end());
+      }
+      DimVec vec;
+      vec.insert(vec.end(), notReped.begin(), notReped.end());
+      inNotReped.DimsToDistEntry(vec);
+      if (outType.m_notReped != inNotReped) {
+	cout << "bad notReped\n";
+	cout << inType.PrettyStr() << " -> "
+	     << outType.PrettyStr() << " with "
+	     << m_sumDims.size() << endl;	  
+	throw;
+      }
+      
+    }
     
     if (m_sumDims.size() == 1) {
       unsigned int numProcs = 1;
