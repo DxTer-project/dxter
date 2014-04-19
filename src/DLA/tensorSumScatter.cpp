@@ -293,8 +293,17 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
   out.Indent();
   
   if (m_srcType.m_notReped != m_destType.m_notReped) {
-    cout << "sum scatter for scalar\n";
-    throw;
+    *out << "ReduceScatterRedistDisappear( " << outName << ", " << inName << ", ";
+    bool found = false;
+    for(Dim dim = 0; !found &&dim < srcNumDims; ++dim) {
+      if (m_srcType.m_dists[dim] == sumDims) {
+	*out << dim;
+	found = true;
+      }
+    }
+    if (!found)
+      throw;
+    *out << " );\n";
   }
   else {
     if (srcNumDims != (m_destType.m_numDims+1))
