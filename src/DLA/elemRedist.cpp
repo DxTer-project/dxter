@@ -898,8 +898,6 @@ CombineRedistribs::CombineRedistribs(DistType srcType, DistType destType)
 bool CombineRedistribs::CanApply(const Poss *poss, const Node *node) const
 {
   const static ClassType classType = RedistNode::GetClass();
-  if (node->GetNodeClass() != classType)
-    return false;
   if (((RedistNode*)node)->m_destType != m_destType)
     return false;
   const Node *parent = node->Input(0);
