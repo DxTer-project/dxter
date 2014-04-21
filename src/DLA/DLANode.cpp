@@ -231,6 +231,13 @@ DLANode* DLANode::FindNonRedistParent(unsigned int num, unsigned int &parentNum)
 }
 #endif
 
+#if TWOD
+bool DLANode::IsScalar(unsigned int num) const
+{
+  return GetM(num)->AllOnes() && GetN(num)->AllOnes();
+}
+#endif
+
 DLANode* DLANode::FindSideEffectingUser(unsigned int num)
 {
   NodeConnVecIter iter = m_children.begin();
