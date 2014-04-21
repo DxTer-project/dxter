@@ -135,8 +135,13 @@ void InputNode::PrintCode(IndStream &out)
 {
 #if DOTENSORS
   out.Indent();
-  *out << "// " << m_type << " has " << m_numDims 
-       << " dims and indices " << m_varName.m_indices << endl;
+  *out << "// " << m_type << " has " << m_numDims << " dims";
+  if (m_varName.m_indices.empty()) {
+    *out << endl;
+  }
+  else {
+    *out << " and indices " << m_varName.m_indices << endl;
+  }
   out.Indent();
   *out << "//\tStarting distribution: " << m_varName.m_type.PrettyStr() << " or " << DistTypeToStr(m_varName.m_type) << endl;
 #endif

@@ -137,4 +137,16 @@ class SingleIndexAllToAll : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+
+
+class SplitAllGathers : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ SplitAllGathers(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"SplitAllGathers" + (char)(m_dim+48); }
+  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual void Apply(Poss *poss, Node *node) const;
+};
+
 #endif

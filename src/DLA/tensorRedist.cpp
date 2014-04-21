@@ -817,7 +817,7 @@ bool SingleIndexAllToAll::CanApply(const Poss *poss, const Node *node) const
   const DistType &srcType = redist->InputDistType(0);
 
   if (srcType.m_numDims != redist->m_destType.m_numDims)
-    return false;
+    throw;
   else if (srcType.m_numDims <= m_dim)
     return false;
 
@@ -910,6 +910,80 @@ void SingleIndexAllToAll::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+bool SplitAllGathers::CanApply(const Poss *poss, const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDistType(0);
+  const DistType &destType = redist->m_destType;
+
+  if (srcType.m_numDims != redist->m_destType.m_numDims)
+    throw;
+  else if (srcType.m_numDims <= m_dim)
+    return false;
+
+  for (Dim dim = 0; dim < srcType.m_numDims; ++dim) {
+    if (dim != m_dim) {
+      if (srcType.m_dists[dim] != destType.m_dists[dim])
+	return false;
+    }
+  }
+
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
+  if (srcEntry == destEntry)
+    return false;
+
+  DimVec srcDims = srcEntry.DistEntryDims();
+
+  if (destEntry.IsStar() && srcDims.size() > 1)
+    return true;
+
+  DimVec destDims = destEntry.DistEntryDims();
+
+  if (srcDims.size() < destDims.size())
+    return false;
+
+  if ((srcDims.size() - destDims.size()) > 1 &&  IsPrefix(destDims, srcDims))
+    return true;
+  else
+    return false;
+}
+
+void SplitAllGathers::Apply(Poss *poss, Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDistType(0);
+  const DistType &destType = redist->m_destType;
+
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
+
+  DimVec destDims = destEntry.DistEntryDims();
+  DimVec srcDims = srcEntry.DistEntryDims();
+
+  srcDims.pop_back();
+
+  DistType intType = srcType;
+  intType.m_dists[m_dim].DimsToDistEntry(srcDims);
+
+  RedistNode *redist1 = new RedistNode(intType);
+  redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
+  poss->AddNode(redist1);
+
+  RedistNode *redist2 = new RedistNode(destType);
+  redist2->AddInput(redist1, 0);
+  poss->AddNode(redist2);
+
+  node->RedirectChildren(redist2, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
 
 #endif
+
+
 

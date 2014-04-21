@@ -369,7 +369,7 @@ string DistType::str() const
       out += "__";
   }
   if (!m_notReped.IsStar()) {
-    out += "_N_";
+    out += "__N_";
     out += m_notReped.str();
   }
   return out;
