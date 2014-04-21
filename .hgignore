@@ -17,3 +17,6 @@ xcode/DxTer.xcodeproj/xcuserdata/bamarker.xcuserdatad/xcschemes/DxTer.xcscheme
 clustering/clusterInitResults.mat
 clustering/transformations.txt
 BLASResults/*
+archive/*
+res*
+test.sh
