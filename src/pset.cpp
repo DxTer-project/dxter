@@ -1622,6 +1622,13 @@ void PSet::Unflatten(ifstream &in, SaveInfo &info)
   }
 }
 
+#if DOTENSORS
+void PSet::AddCurrPossVars(VarSet &set) const
+{
+  GetCurrPoss()->AddCurrPossVars(set);
+}
+#endif
+
 void PSet::BuildSizeCache()
 {
   PossMMapIter iter = m_posses.begin();

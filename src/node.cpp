@@ -900,3 +900,12 @@ Comm Node::WithinParallelism() const
   }
   return CORECOMM;
 }
+
+#if DOTENSORS
+void Node::AddVariables(VarSet &set) const
+{
+  for(unsigned int i = 0; i < NumOutputs(); ++i) {
+    set.insert(GetName(i));
+  }
+}
+#endif

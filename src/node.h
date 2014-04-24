@@ -90,6 +90,9 @@ class Node
   virtual Name GetName(unsigned int num) const = 0;
   virtual bool Overwrites(const Node *input, unsigned int num) const = 0;
   virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const = 0;
+#if DOTENSORS
+  virtual void AddVariables(VarSet &set) const;
+#endif
 
   virtual void ClearSizeCache() {}
   virtual void BuildSizeCache() {}

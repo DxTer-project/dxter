@@ -84,6 +84,9 @@ class PSet
   Poss* GetCurrPoss() const;
   void GetCurrTransVec(TransVec &transVec) const;
   Comm ParallelismWithinCurrentPosses() const;
+#if DOTENSORS
+  void AddCurrPossVars(VarSet &set) const;
+#endif
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}

@@ -430,6 +430,14 @@ void Universe::PrintBest()
 #elif DOTENSORS
     IndStream optOut(&cout,TENSORSTREAM);
 #endif
+    VarSet set;
+    m_pset->AddCurrPossVars(set);
+    VarSetIter iter = set.begin();
+    for(; iter != set.end(); ++iter) {
+      *optOut << "\t//" << (*iter).PrettyStr(true) << endl;
+      *optOut << "DistTensor " << (*iter).str() << ";" << endl;
+    }
+
     m_pset->GetCurrPoss()->PrintCurrRoot(optOut);
 }
 
