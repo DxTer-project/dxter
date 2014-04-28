@@ -72,7 +72,7 @@ class Poss
   virtual void Print(IndStream &out, unsigned int &graphNum);
   virtual void EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph, unsigned int &optGraph, Cost &optCost);
   virtual void PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph);
-  virtual void PrintCurrRoot(IndStream &out);
+  virtual void PrintCurrRoot(IndStream &out, const VarSet &set);
   void ForcePrint();
   bool CanPrint() const;
   virtual void SanityCheck();

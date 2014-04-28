@@ -2473,7 +2473,7 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
   m_hasPrinted = true;
 }
 
-void Poss::PrintCurrRoot(IndStream &out)
+void Poss::PrintCurrRoot(IndStream &out, const VarSet &set)
 {
   unsigned int numPSets = m_sets.size();
   
@@ -2488,6 +2488,19 @@ void Poss::PrintCurrRoot(IndStream &out)
   for( ; transIter != transVec.end(); ++transIter)
     *out << "\t" << (*transIter)->GetType() << endl;
   *out << "*****************************************" << endl;
+
+
+  VarSetIter varIter = set.begin();
+  for(; varIter != set.end(); ++varIter) {
+#if DOTENSORS
+    *out << "\t//" << (*varIter).PrettyStr(true) << endl;
+    *out << "DistTensor " << (*varIter).str() << ";" << endl;
+#else
+    *out << "don't know what to do\n";
+    throw;
+#endif
+  }
+
   
   if (m_pset && m_pset->IsLoop()
       && ((Loop*)m_pset)->GetType() == BLISLOOP)

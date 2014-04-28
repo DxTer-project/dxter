@@ -431,17 +431,14 @@ void Universe::PrintBest()
     IndStream optOut(&cout,TENSORSTREAM);
 #endif
 
-#if DOTENSORS
     VarSet set;
+#if DOTENSORS
     m_pset->AddCurrPossVars(set);
-    VarSetIter iter = set.begin();
-    for(; iter != set.end(); ++iter) {
-      *optOut << "\t//" << (*iter).PrettyStr(true) << endl;
-      *optOut << "DistTensor " << (*iter).str() << ";" << endl;
-    }
 #endif
+    m_pset->GetCurrPoss()->PrintCurrRoot(optOut, set);
 
-    m_pset->GetCurrPoss()->PrintCurrRoot(optOut);
+
+
 }
 
 void Universe::Print(IndStream &out, unsigned int &whichGraph)
