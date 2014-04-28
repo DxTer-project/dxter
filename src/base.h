@@ -400,7 +400,7 @@ class Name
   void Unflatten(ifstream &in);
 };
 
-#if DOTENSORS
+//#if DOTENSORS
 struct VarCompare {
   bool operator() (const Name& lhs, const Name& rhs) const{
     return lhs.str() < rhs.str();
@@ -410,7 +410,7 @@ struct VarCompare {
 typedef set<Name,VarCompare> VarSet; // inefficient compare, so only do with small sizes
 typedef VarSet::iterator VarSetIter;
 typedef VarSet::const_iterator VarSetConstIter;
-#endif
+//#endif
 
 
 bool FoundInNodeVec(const NodeVec &vec, const Node *node);
