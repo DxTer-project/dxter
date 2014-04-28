@@ -1389,7 +1389,10 @@ Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
 		   splitC, 1,
 		   splitD, 1,
                    ETun, 0);
-  
+
+#if DOELEM
+    throw;
+#elif DOBLIS  
   Combine *comA = splitA->CreateMatchingCombine(0);
   
   Combine *comB = splitB->CreateMatchingCombine(0);
@@ -1404,16 +1407,14 @@ Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
   EtunOut->CopyTunnelInfo(ETun);
   
   Loop *loop;
-#if DOELEM
-    throw;
-#elif DOBLIS
+
   Poss *loopPoss = new Poss(5, comA, comB, comC, comD, EtunOut);
   loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
-#endif
-
   loop->SetDim(DIMK);
   
   return loop;
+#endif
+
 }
 
 
