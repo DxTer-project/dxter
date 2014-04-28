@@ -2494,7 +2494,7 @@ void Poss::PrintCurrRoot(IndStream &out, const VarSet &set)
   for(; varIter != set.end(); ++varIter) {
 #if DOTENSORS
     *out << "\t//" << (*varIter).PrettyStr(true) << endl;
-    *out << "DistTensor " << (*varIter).str() << ";" << endl;
+    *out << "DistTensor<double> " << (*varIter).str() << "(shape, dist, indices, g);" << endl;
 #else
     *out << "don't know what to do\n";
     throw;
