@@ -27,24 +27,30 @@ void MatchDistsAndFillIn(string indices,
 			 DistType &final);
 */
 
-Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type, string indices)
+Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type, 
+	      string AIndices, string BIndices, string CIndices,
+	      string contIndices)
 :
   m_alpha(alpha),
   m_beta (beta),
   m_type (type),
-  m_indices(indices)
+  m_AIndices(AIndices),
+  m_BIndices(BIndices),
+  m_CIndices(CIndices),
+  m_contIndices(contIndices)
 {
   SetLayer(layer);
 }
 
 Node* Contraction::BlankInst()
 {
-  return new Contraction(ABSLAYER, COEFONE, COEFONE, REAL, "");
+  return new Contraction(ABSLAYER, COEFONE, COEFONE, REAL, "", "", "", "");
 }
 
 NodeType Contraction::GetType() const
 {
-  return "Contraction " + m_indices
+  return "Contraction " + m_AIndices + " " + m_BIndices + " " 
+    + m_CIndices + " " + m_contIndices
     + LayerNumToStr(GetLayer());
 }
 
@@ -55,7 +61,10 @@ void Contraction::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_alpha = cont->m_alpha;
   m_beta = cont->m_beta;
   m_type = cont->m_type;
-  m_indices = cont->m_indices;
+  m_AIndices = cont->m_AIndices;
+  m_BIndices = cont->m_BIndices;
+  m_CIndices = cont->m_CIndices;
+  m_contIndices = cont->m_contIndices;
 }
 
 void Contraction::FlattenCore(ofstream &out) const
@@ -64,7 +73,10 @@ void Contraction::FlattenCore(ofstream &out) const
   WRITE(m_alpha);
   WRITE(m_beta);
   WRITE(m_type);
-  out << m_indices << endl;
+  out << m_AIndices <<endl;
+  out << m_BIndices <<endl;
+  out << m_CIndices <<endl;
+  out << m_contIndices << endl;
 }
 
 void Contraction::UnflattenCore(ifstream &in, SaveInfo &info)
@@ -73,7 +85,10 @@ void Contraction::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_alpha);
   READ(m_beta);
   READ(m_type);
-  getline(in, m_indices);
+  getline(in, m_AIndices);
+  getline(in, m_BIndices);
+  getline(in, m_CIndices);
+  getline(in, m_contIndices);
 }
 
 const DistType& Contraction::GetDistType(unsigned int num) const
@@ -87,39 +102,34 @@ void Contraction::Prop()
     DLAOp<3,1>::Prop();
     m_cost = 0;
 
-    string AIndices = GetInputName(0).m_indices;
-    string BIndices = GetInputName(1).m_indices;
-    string CIndices = GetInputName(2).m_indices;
+    if(InputNumDims(0) != m_AIndices.size())
+      throw;
 
-    string::iterator strIter = m_indices.begin();
-    for(; strIter != m_indices.end(); ++strIter) {
-      const char index = *strIter;
-      if (AIndices.find(index) == string::npos)
-	throw;
-      if (BIndices.find(index) == string::npos)
-	throw;
-      if (CIndices.find(index) != string::npos)
-	throw;
+    if(InputNumDims(1) != m_BIndices.size())
+      throw;
+
+    if(InputNumDims(2) != m_CIndices.size()) {
+      cout << "num " << InputNumDims(2) << endl;
+      cout << "dist " << InputDistType(2).PrettyStr() << endl;
+      cout << m_CIndices << endl;
+      cout << "Input " << Input(2)->GetNodeClass() << endl;
+      throw;
     }
-    
-    Dim dim = 0;
-    strIter = CIndices.begin();
-    for(; strIter != CIndices.end(); ++strIter, ++dim) {
+
+    string::iterator strIter = m_contIndices.begin();
+    for(; strIter != m_contIndices.end(); ++strIter) {
       const char index = *strIter;
-      if (AIndices.find(index) == string::npos) {
-	if (BIndices.find(index) == string::npos) {
-	  if (!InputLen(2,dim)->AllOnes())
-	    throw;
-	  //else we're contracting to a scalar or vector or matrix etc.
-	}
-      }
-      else if (BIndices.find(index) != string::npos)
+      if (m_AIndices.find(index) == string::npos)
 	throw;
+      if (m_BIndices.find(index) == string::npos)
+	throw;
+      //      if (m_CIndices.find(index) != string::npos)
+      //	throw;
     }
     
     //    cout << "improve Contraction::Prop code\n";
     //    cout << "reflect in DistContToLocalContStatC::RHSCostEstimate\n";
-    DimVec dims = MapIndicesToDims(m_indices,GetInputName(0).m_indices);
+    DimVec dims = MapIndicesToDims(m_contIndices,m_AIndices);
     const Sizes *sizes = InputLocalLen(2,0);
     Dim numDims = InputNumDims(2);
     unsigned int totNumIters = sizes->NumSizes();
@@ -152,11 +162,11 @@ void Contraction::PrintCode(IndStream &out)
   out.Indent();
   *out << "   // ";
   out << m_alpha;
-  *out << " * " << in0.PrettyStr(true)
-       << " * " << in1.PrettyStr(true)
+  *out << " * " << in0.PrettyStr() + "_" + m_AIndices
+       << " * " << in1.PrettyStr() + "_" + m_BIndices
        << " + ";
   out << m_beta;
-  *out << " * " << in2.PrettyStr(true)
+  *out << " * " << in2.PrettyStr() + "_" + m_CIndices
        << endl;
   out.Indent();
     
@@ -168,7 +178,7 @@ void Contraction::PrintCode(IndStream &out)
        << ", ";
   out << m_beta;
   *out << ", " << in2.str()
-       << ", indices: " << m_indices
+       << ", indices: " << m_contIndices
        << ");\n";
 }
 
@@ -200,10 +210,10 @@ int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void 
   if (!CType.m_numDims)
     return false;
   
-  Dim numContDims = cont->m_indices.length();
+  Dim numContDims = cont->m_contIndices.length();
   
-  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
-  DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
+  DimVec ADims = MapIndicesToDims(cont->m_contIndices,cont->m_AIndices);
+  DimVec BDims = MapIndicesToDims(cont->m_contIndices,cont->m_BIndices);
 
   NodeConn *AConn = cont->InputConn(0);
   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
@@ -374,8 +384,8 @@ void DistContToLocalContStatC::Apply(Poss *poss, int num, Node *node, void **cac
 
   Contraction *cont = (Contraction*)node;
   
-  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
-  DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
+  DimVec ADims = MapIndicesToDims(cont->m_contIndices,cont->GetInputName(0).m_indices);
+  DimVec BDims = MapIndicesToDims(cont->m_contIndices,cont->GetInputName(1).m_indices);
 
   NodeConn *CConn = cont->InputConn(2);
   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
@@ -512,8 +522,8 @@ void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
-  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
-  DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
+  DimVec ADims = MapIndicesToDims(cont->m_contIndices,cont->m_AIndices);
+  DimVec BDims = MapIndicesToDims(cont->m_contIndices,cont->m_BIndices);
 
   NodeConn *CConn = cont->InputConn(2);
   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
@@ -522,21 +532,22 @@ void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
   const DistType &CType = ((DLANode*)(CConn->m_n))->GetDistType(CConn->m_num);
 
   DistType AType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(0).m_indices,
-		      CType, ((DLANode*)(CConn->m_n))->GetName(CConn->m_num).m_indices,
-		      AType);
+  MatchDistsAndFillInWithStar(cont->m_AIndices,
+			      CType, cont->m_CIndices,
+			      AType);
 
   
   DistType BType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(1).m_indices,
-		      CType, ((DLANode*)(CConn->m_n))->GetName(CConn->m_num).m_indices,
-		      BType);
+  MatchDistsAndFillInWithStar(cont->m_BIndices,
+			      CType, cont->m_CIndices,
+			      BType);
 
 
   RedistNode *node1 = new RedistNode(AType);
   RedistNode *node2 = new RedistNode(BType);
   RedistNode *node3 = new RedistNode(CType);
-  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, cont->m_indices);
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, 
+				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices, cont->m_contIndices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node->Input(1),node->InputConnNum(1));
   node3->AddInput(node->Input(2),node->InputConnNum(2));
@@ -576,8 +587,8 @@ void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
-  DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
-  DimVec CDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(2).m_indices);
+  DimVec BDims = MapIndicesToDims(cont->m_contIndices,cont->m_BIndices);
+  DimVec CDims = MapIndicesToDims(cont->m_contIndices,cont->m_CIndices);
 
   NodeConn *AConn = cont->InputConn(0);
   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
@@ -585,12 +596,11 @@ void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
 
   const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
 
-  string AIndices = ((DLANode*)(AConn->m_n))->GetName(AConn->m_num).m_indices;
   DimVec sumDims;
   string sumIndices;
-  string::iterator iter = cont->m_indices.begin();
-  for(; iter != cont->m_indices.end(); ++iter) {
-    size_t loc = AIndices.find(*iter);
+  string::iterator iter = cont->m_contIndices.begin();
+  for(; iter != cont->m_contIndices.end(); ++iter) {
+    size_t loc = cont->m_AIndices.find(*iter);
     if (loc != string::npos) {
       DimVec dims = AType.m_dists[loc].DistEntryDims();
       DimVecIter iter2 = dims.begin();
@@ -602,13 +612,13 @@ void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
   }
 
   DistType BType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(1).m_indices,
-			      AType, AIndices,
+  MatchDistsAndFillInWithStar(cont->m_BIndices,
+			      AType, cont->m_AIndices,
 			      BType);
   
   DistType CType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(2).m_indices,
-			      AType, AIndices, 
+  MatchDistsAndFillInWithStar(cont->m_CIndices,
+			      AType, cont->m_AIndices, 
 			      CType);
 
   
@@ -617,7 +627,8 @@ void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
   RedistNode *node1 = new RedistNode(AType);
   RedistNode *node2 = new RedistNode(BType);
   RedistNode *node3 = new RedistNode(CType);
-  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, cont->m_indices);
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, 
+				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices, cont->m_contIndices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node->Input(1),node->InputConnNum(1));
   node3->AddInput(node->Input(2),node->InputConnNum(2));
@@ -664,8 +675,8 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
-  DimVec BDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(1).m_indices);
-  DimVec CDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(2).m_indices);
+  DimVec BDims = MapIndicesToDims(cont->m_contIndices,cont->m_BIndices);
+  DimVec CDims = MapIndicesToDims(cont->m_contIndices,cont->m_CIndices);
 
 
   NodeConn *AConn = cont->InputConn(0);
@@ -674,24 +685,23 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
 
   const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
 
-  string AIndices = ((DLANode*)(AConn->m_n))->GetName(AConn->m_num).m_indices;
   EntrySet sumDims;
-  string::iterator iter = cont->m_indices.begin();
-  for(; iter != cont->m_indices.end(); ++iter) {
-    size_t loc = AIndices.find(*iter);
+  string::iterator iter = cont->m_contIndices.begin();
+  for(; iter != cont->m_contIndices.end(); ++iter) {
+    size_t loc = cont->m_AIndices.find(*iter);
     if (loc != string::npos) {
       sumDims.insert(AType.m_dists[loc]);
     }
   }
 
   DistType BType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(1).m_indices,
-			      AType, AIndices,
+  MatchDistsAndFillInWithStar(cont->m_BIndices,
+			      AType, cont->m_AIndices,
 			      BType);
   
   DistType CType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(2).m_indices,
-			      AType, AIndices, 
+  MatchDistsAndFillInWithStar(cont->m_CIndices,
+			      AType, cont->m_AIndices, 
 			      CType);
 
 
@@ -700,8 +710,8 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
-  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, 
-				       cont->m_type, cont->m_indices);
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
+				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node->Input(1),node->InputConnNum(1));
   temp->AddInput(node->Input(2),node->InputConnNum(2));
@@ -755,8 +765,8 @@ void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
-  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
-  DimVec CDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(2).m_indices);
+  DimVec ADims = MapIndicesToDims(cont->m_contIndices,cont->m_AIndices);
+  DimVec CDims = MapIndicesToDims(cont->m_contIndices,cont->m_CIndices);
 
 
   NodeConn *BConn = cont->InputConn(1);
@@ -765,12 +775,11 @@ void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
 
   const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
 
-  string BIndices = ((DLANode*)(BConn->m_n))->GetName(BConn->m_num).m_indices;
   DimVec sumDims;
   string sumIndices;
-  string::iterator iter = cont->m_indices.begin();
-  for(; iter != cont->m_indices.end(); ++iter) {
-    size_t loc = BIndices.find(*iter);
+  string::iterator iter = cont->m_contIndices.begin();
+  for(; iter != cont->m_contIndices.end(); ++iter) {
+    size_t loc = cont->m_BIndices.find(*iter);
     if (loc != string::npos) {
       DimVec dims = BType.m_dists[loc].DistEntryDims();
       DimVecIter iter2 = dims.begin();
@@ -782,13 +791,13 @@ void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
   }
 
   DistType AType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(0).m_indices,
-			      BType, BIndices,
+  MatchDistsAndFillInWithStar(cont->m_AIndices,
+			      BType, cont->m_BIndices,
 			      AType);
   
   DistType CType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(2).m_indices,
-			      BType, BIndices, 
+  MatchDistsAndFillInWithStar(cont->m_CIndices,
+			      BType, cont->m_BIndices, 
 			      CType);
 
   
@@ -797,7 +806,8 @@ void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
   RedistNode *node1 = new RedistNode(AType);
   RedistNode *node2 = new RedistNode(BType);
   RedistNode *node3 = new RedistNode(CType);
-  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, cont->m_indices);
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, 
+				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices, cont->m_contIndices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node->Input(1),node->InputConnNum(1));
   node3->AddInput(node->Input(2),node->InputConnNum(2));
@@ -844,8 +854,8 @@ void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
-  DimVec ADims = MapIndicesToDims(cont->m_indices,cont->GetInputName(0).m_indices);
-  DimVec CDims = MapIndicesToDims(cont->m_indices,cont->GetInputName(2).m_indices);
+  DimVec ADims = MapIndicesToDims(cont->m_contIndices,cont->m_AIndices);
+  DimVec CDims = MapIndicesToDims(cont->m_contIndices,cont->m_CIndices);
 
 
   NodeConn *BConn = cont->InputConn(1);
@@ -854,24 +864,23 @@ void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
 
   const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
 
-  string BIndices = ((DLANode*)(BConn->m_n))->GetName(BConn->m_num).m_indices;
   EntrySet sumDims;
-  string::iterator iter = cont->m_indices.begin();
-  for(; iter != cont->m_indices.end(); ++iter) {
-    size_t loc = BIndices.find(*iter);
+  string::iterator iter = cont->m_contIndices.begin();
+  for(; iter != cont->m_contIndices.end(); ++iter) {
+    size_t loc = cont->m_BIndices.find(*iter);
     if (loc != string::npos) {
       sumDims.insert(BType.m_dists[loc]);
     }
   }
 
   DistType AType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(0).m_indices,
-			      BType, BIndices,
+  MatchDistsAndFillInWithStar(cont->m_AIndices,
+			      BType, cont->m_BIndices,
 			      AType);
   
   DistType CType;
-  MatchDistsAndFillInWithStar(cont->GetInputName(2).m_indices,
-			      BType, BIndices, 
+  MatchDistsAndFillInWithStar(cont->m_CIndices,
+			      BType, cont->m_BIndices, 
 			      CType);
 
 
@@ -880,7 +889,8 @@ void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
-  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, cont->m_indices);
+  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
+				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node->Input(1),node->InputConnNum(1));
   temp->AddInput(node->Input(2),node->InputConnNum(2));

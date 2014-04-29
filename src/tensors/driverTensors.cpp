@@ -48,13 +48,13 @@ PSet* MartinsExample();
 void AddTrans()
 {
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
-  
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);  
 #if 0
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
-#endif
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
   //    Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
+#endif
+
   
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
@@ -217,9 +217,9 @@ PSet* Cont1Example()
   for (Dim dim = 0; dim < 4; ++dim)
     sizes[dim].AddRepeatedSizes(bigSize, 1, 1);
 
-  InputNode *Ain = new InputNode("A input",  sizes, "A", "acd");
-  InputNode *Bin = new InputNode("B input",  sizes, "B", "cefd");
-  InputNode *Cin = new InputNode("C input",  sizes, "C", "aef");
+  InputNode *Ain = new InputNode("A input",  sizes, "A", 3);
+  InputNode *Bin = new InputNode("B input",  sizes, "B", 4);
+  InputNode *Cin = new InputNode("C input",  sizes, "C", 3);
 
   PossTunnel *tunA = new PossTunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);
@@ -230,7 +230,7 @@ PSet* Cont1Example()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Contraction *cont = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,(string)"cd");
+  Contraction *cont = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"acd", "cefd", "aef", (string)"cd");
   cont->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
@@ -259,18 +259,18 @@ PSet* MartinsExample()
   for (Dim dim = 0; dim < 4; ++dim)
     sizes[dim].AddRepeatedSizes(medSize, 1, 1);
 
-  InputNode *Uin = new InputNode("U input",  sizes, "U", "abcd");
+  InputNode *Uin = new InputNode("U input",  sizes, "U", 4);
 
   sizes[2].ClearSizes();
   sizes[2].AddRepeatedSizes(bigSize,1,1);
   sizes[3].ClearSizes();
   sizes[3].AddRepeatedSizes(bigSize,1,1);
   
-  InputNode *Vin = new InputNode("V input",  sizes, "V", "acik");
-  InputNode *T1in = new InputNode("T1 input",  sizes, "T1", "cdij");
-  InputNode *T2in = new InputNode("T2 input",  sizes, "T2", "bcjk");
-  InputNode *T3in = new InputNode("T3 input",  sizes, "T3", "abkl");
-  InputNode *T4in = new InputNode("T4 input",  sizes, "T4", "abij");
+  InputNode *Vin = new InputNode("V input",  sizes, "V", 4);
+  InputNode *T1in = new InputNode("T1 input",  sizes, "T1", 4);
+  InputNode *T2in = new InputNode("T2 input",  sizes, "T2", 4);
+  InputNode *T3in = new InputNode("T3 input",  sizes, "T3", 4);
+  InputNode *T4in = new InputNode("T4 input",  sizes, "T4", 4);
 
 
   sizes[0].ClearSizes();
@@ -278,7 +278,7 @@ PSet* MartinsExample()
   sizes[1].ClearSizes();
   sizes[1].AddRepeatedSizes(medSize,1,1);
 
-  InputNode *Win = new InputNode("W input",  sizes, "W", "ijkl");
+  InputNode *Win = new InputNode("W input",  sizes, "W", 4);
   
 
   Sizes ones[2];
@@ -289,10 +289,10 @@ PSet* MartinsExample()
   DistType epDist;
   epDist.SetToScalarNoRep();
 
-  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", "");
-  //InputNode *epIn = new InputNode("ep input",  ones, "epsilon", "");
+  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", 0);
+  //InputNode *epIn = new InputNode("ep input",  ones, "epsilon", 0);
 
-  InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", "abij");
+  InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", 4);
 
   PossTunnel *tunU = new PossTunnel(POSSTUNIN);
   tunU->AddInput(Uin,0);
@@ -321,27 +321,27 @@ PSet* MartinsExample()
   PossTunnel *tunOutVal = new PossTunnel(POSSTUNIN);
   tunOutVal->AddInput(epIn,0);
 
-  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,(string)"cd");
+  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abcd","cdij","abij",(string)"cd");
   cont1->AddInputs(6,
 		  tunU,0,
 		  tunT1,0,
 		  tunIn,0);
 
 
-  Contraction *cont2 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,(string)"ck");
+  Contraction *cont2 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"acik","bcjk","abij",(string)"ck");
   cont2->AddInputs(6,
 		   tunV,0,
 		   tunT2,0,
 		   cont1,0);
 
 
-  Contraction *cont3 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,(string)"kl");
+  Contraction *cont3 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"ijkl","abkl","abij",(string)"kl");
   cont3->AddInputs(6,
 		   tunW,0,
 		   tunT3,0,
 		   cont2,0);
 
-  Contraction *cont4 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,(string)"abij");
+  Contraction *cont4 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abij","abij","", (string)"abij");
   cont4->AddInputs(6,
 		   tunT4,0,
 		   cont3,0,

@@ -67,9 +67,9 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 
 
 #if DOTENSORS
-InputNode::InputNode(NodeType type, const SizesArray sizes, string name, string indices)
+InputNode::InputNode(NodeType type, const SizesArray sizes, string name, Dim numDims)
 : 
-  m_type(type), m_numDims(indices.length()), m_lsizes(NULL)
+  m_type(type), m_numDims(numDims), m_lsizes(NULL)
 {
   if (m_numDims > NUM_GRID_DIMS)
     throw;
@@ -83,14 +83,15 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, string name, string 
     *m_sizes = sizes[0];
   }
   m_varName.m_name = name;
-  m_varName.m_indices = indices;
   m_varName.m_type.SetToDefault(m_numDims);
 }
 
-InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, string indices)
+InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, Dim numDims)
   :
-  m_type(type), m_numDims(dist.m_numDims), m_lsizes(NULL)
+  m_type(type), m_numDims(numDims), m_lsizes(NULL)
 {
+  if (dist.m_numDims != numDims)
+    throw;
   if (dist.m_numDims > NUM_GRID_DIMS)
     throw;
   if (m_numDims) {
@@ -104,9 +105,6 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist
   }
   m_varName.m_name = name;
   m_varName.m_type = dist;
-  m_varName.m_indices = indices;
-  if (m_varName.m_indices.size() != m_numDims)
-    throw;
 }
 #endif
 
@@ -135,13 +133,7 @@ void InputNode::PrintCode(IndStream &out)
 {
 #if DOTENSORS
   out.Indent();
-  *out << "// " << m_type << " has " << m_numDims << " dims";
-  if (m_varName.m_indices.empty()) {
-    *out << endl;
-  }
-  else {
-    *out << " and indices " << m_varName.m_indices << endl;
-  }
+  *out << "// " << m_type << " has " << m_numDims << " dims\n";
   out.Indent();
   *out << "//\tStarting distribution: " << m_varName.m_type.PrettyStr() << " or " << DistTypeToStr(m_varName.m_type) << endl;
 #endif
@@ -742,9 +734,6 @@ Name TempVarNode::GetName(unsigned int num) const
   }
   else {
     tmp.m_name = m_name;
-#if DOTENSORS
-    tmp.m_indices = GetInputName(0).m_indices;
-#endif
   }
 #if DODM
   tmp.m_type = m_distType;

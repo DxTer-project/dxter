@@ -46,8 +46,8 @@ class InputNode : public DLANode
   InputNode(NodeType type, Size m, Size n, string name, DistType dist);
 #endif
 #else
-  InputNode(NodeType type, const SizesArray sizes, string name, string indices);
-  InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, string indices);
+  InputNode(NodeType type, const SizesArray sizes, string name, Dim numDims);
+  InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, Dim numDims);
 #endif
   virtual ~InputNode();
   virtual NodeType GetType() const {return m_type;}

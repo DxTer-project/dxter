@@ -380,20 +380,16 @@ class Name
   DistType m_type;
 #elif DOTENSORS
   DistType m_type;
-  string m_indices;
 #endif
   string m_name;
  Name() :
 #if DOELEM
   m_type(UNKNOWN), 
 #endif
-#if DOTENSORS
-    m_indices(""),
-#endif
     m_name("noname") {}
   string str() const;
 #if DOTENSORS
-  string PrettyStr(bool printIndices) const;
+  string PrettyStr() const;
 #endif
   Name& operator=(const Name &rhs);
   void Flatten(ofstream &out) const;

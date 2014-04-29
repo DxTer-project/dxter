@@ -73,8 +73,13 @@ void RedistNode::Prop()
     parent->Prop();
     const Dim numDims = m_destType.m_numDims;
     
-    if (numDims != InputNumDims(0))
+    if (numDims != InputNumDims(0)) {
+      cout << "numDims " << numDims << " " << InputNumDims(0) << endl;
+      cout << "input " << Input(0)->GetNodeClass() << endl;
+      cout << GetInputNameStr(0) << endl;
+      cout << m_destType.PrettyStr() << endl;
       throw;
+    }
     if (m_srcType.m_numDims != numDims)
       throw;
 
@@ -434,8 +439,8 @@ void RedistNode::PrintCode(IndStream &out)
   string inName = GetInputName(0).str();
   string outName = GetName(0).str(); 
 
-  *out << "   // " << GetName(0).PrettyStr(false) 
-       << " <- " << GetInputName(0).PrettyStr(false) << endl;
+  *out << "   // " << GetName(0).PrettyStr() 
+       << " <- " << GetInputName(0).PrettyStr() << endl;
   out.Indent();
   
   if (m_srcType.m_numDims != numDims)
