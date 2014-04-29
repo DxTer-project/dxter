@@ -116,6 +116,8 @@ void Contraction::Prop()
       throw;
     }
 
+    //    const DistType &CType = InputDistType(2);
+
     string::iterator strIter = m_contIndices.begin();
     for(; strIter != m_contIndices.end(); ++strIter) {
       const char index = *strIter;
@@ -125,6 +127,35 @@ void Contraction::Prop()
 	throw;
       //      if (m_CIndices.find(index) != string::npos)
       //	throw;
+    }
+
+    const DistType &AType = InputDistType(0);
+    const DistType &BType = InputDistType(1);
+    
+    Dim dim = 0;
+    strIter = m_CIndices.begin();
+    for(; strIter != m_CIndices.end(); ++strIter, ++dim) {
+      const char index = *strIter;
+      size_t aFind = m_AIndices.find(index);
+      if (aFind == string::npos) {
+	size_t bFind = m_BIndices.find(index);
+	if (bFind == string::npos) {
+	  if (!InputLen(2,dim)->AllOnes())
+	    throw;
+	  //else we're contracting to a scalar or vector or matrix etc.
+	}
+      }
+      else { 
+	size_t bFind = m_BIndices.find(index);
+	if (bFind != string::npos) {
+	  if (AType.m_dists[aFind].IsStar())
+	    throw;
+	  if (BType.m_dists[bFind] != AType.m_dists[aFind])
+	    throw;
+	  if (!InputLocalLen(2,dim)->AllOnes())
+	    throw;
+	}
+      }
     }
     
     //    cout << "improve Contraction::Prop code\n";
