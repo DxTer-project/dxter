@@ -29,6 +29,7 @@ class Contraction : public DLAOp<3,1>
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
+  void CheckInputTypesAlign() const;
 };
 
 class DistContToLocalContStatAAllReduce : public SingleTrans

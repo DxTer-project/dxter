@@ -129,34 +129,7 @@ void Contraction::Prop()
       //	throw;
     }
 
-    const DistType &AType = InputDistType(0);
-    const DistType &BType = InputDistType(1);
-    
-    Dim dim = 0;
-    strIter = m_CIndices.begin();
-    for(; strIter != m_CIndices.end(); ++strIter, ++dim) {
-      const char index = *strIter;
-      size_t aFind = m_AIndices.find(index);
-      if (aFind == string::npos) {
-	size_t bFind = m_BIndices.find(index);
-	if (bFind == string::npos) {
-	  if (!InputLen(2,dim)->AllOnes())
-	    throw;
-	  //else we're contracting to a scalar or vector or matrix etc.
-	}
-      }
-      else { 
-	size_t bFind = m_BIndices.find(index);
-	if (bFind != string::npos) {
-	  if (AType.m_dists[aFind].IsStar())
-	    throw;
-	  if (BType.m_dists[bFind] != AType.m_dists[aFind])
-	    throw;
-	  if (!InputLocalLen(2,dim)->AllOnes())
-	    throw;
-	}
-      }
-    }
+    CheckInputTypesAlign();
     
     //    cout << "improve Contraction::Prop code\n";
     //    cout << "reflect in DistContToLocalContStatC::RHSCostEstimate\n";
@@ -178,6 +151,62 @@ void Contraction::Prop()
     m_cost *= 2;
   }
 }
+
+void Contraction::CheckInputTypesAlign() const
+{
+  if (m_layer != SMLAYER)
+    return;
+
+  const DistType &AType = InputDistType(0);
+  const DistType &BType = InputDistType(1);
+  const DistType &CType = InputDistType(2);
+    
+  Dim dim = 0;
+  string::const_iterator strIter = m_CIndices.begin();
+  for(; strIter != m_CIndices.end(); ++strIter, ++dim) {
+    const char index = *strIter;
+    size_t aFind = m_AIndices.find(index);
+    if (aFind == string::npos) {
+      size_t bFind = m_BIndices.find(index);
+      if (bFind == string::npos) {
+	if (!InputLen(2,dim)->AllOnes())
+	  throw;
+	//else we're contracting to a scalar or vector or matrix etc.
+      }
+      else {
+	if (CType.m_dists[dim] != BType.m_dists[bFind]) {
+	  cout << AType.PrettyStr() << endl;
+	  cout << m_AIndices << endl;
+	  cout << BType.PrettyStr() << endl;
+	  cout << m_BIndices << endl;
+	  cout << CType.PrettyStr() << endl;
+	  cout << m_CIndices << endl;
+	  cout << m_contIndices << endl;
+
+
+	  cout << *strIter << " " << m_BIndices[bFind] << endl;
+	  cout << CType.m_dists[dim].str() << endl;
+	  cout << BType.m_dists[bFind].str() << endl;
+	  throw;
+	}
+      }
+    }
+    else {
+      if (CType.m_dists[dim] != AType.m_dists[aFind])
+	throw;
+      size_t bFind = m_BIndices.find(index);
+      if (bFind != string::npos) {
+	if (AType.m_dists[aFind].IsStar())
+	  throw;
+	if (BType.m_dists[bFind] != AType.m_dists[aFind])
+	  throw;
+	if (!InputLocalLen(2,dim)->AllOnes())
+	  throw;
+      }
+    }
+  }
+}
+
 
 void Contraction::SanityCheck()
 {
