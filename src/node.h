@@ -24,6 +24,7 @@
 #pragma once
 
 #include "base.h"
+#include "var.h"
 #include <stdarg.h>
 #include "comm.h"
 

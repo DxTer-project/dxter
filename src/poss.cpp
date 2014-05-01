@@ -2492,13 +2492,7 @@ void Poss::PrintCurrRoot(IndStream &out, const VarSet &set)
 
   VarSetIter varIter = set.begin();
   for(; varIter != set.end(); ++varIter) {
-#if DOTENSORS
-    *out << "\t//" << (*varIter).PrettyStr() << endl;
-    *out << "DistTensor<double> " << (*varIter).str() << "(shape, dist, indices, g);" << endl;
-#else
-    *out << "don't know what to do\n";
-    throw;
-#endif
+    (*varIter).PrintDecl(out);
   }
 
   
