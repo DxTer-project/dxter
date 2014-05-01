@@ -63,6 +63,7 @@ class RedistNode : public DLANode
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
   virtual Phase MaxPhase() const;
+  virtual void AddVariables(VarSet &set) const;
 };
 
 class AllReduceNode : public DLAOp<1,1>

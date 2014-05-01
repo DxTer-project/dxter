@@ -431,6 +431,7 @@ Name RedistNode::GetName(unsigned int num) const
 
 void RedistNode::PrintCode(IndStream &out)
 {  
+  //Reflect in AddVars
   out.Indent();
 
   const DistType &m_srcType = InputDistType(0);
@@ -467,8 +468,28 @@ void RedistNode::PrintCode(IndStream &out)
 	   << inName << ", " << dim << " );\n";
     }
     else if (IsPrefix(dest, src) || dest.empty()) {
-      *out << "AllGatherRedist( " << outName << ", "
-	   << inName << ", " << dim << " );\n";
+      if (!src.empty()) {
+	
+	*out << "AllGatherRedistPartial( " << outName << ", "
+	     << inName << ", " << dim << ", ";
+	DimVec suff1, suff2;
+	GetDifferentSuffix(src, dest, suff1, suff2);
+	if (!suff2.empty()) {
+	  throw;
+	}
+	else if (suff1.empty()) {
+	  throw;
+	}
+	else {
+	  *out << ModeArrayVarName(suff2);
+	}
+	*out << " );\n";
+
+      }
+      else {
+	*out << "AllGatherRedist( " << outName << ", "
+	     << inName << ", " << dim << " );\n";
+      }
     }
     else {
       *out << "PermutationRedist( " << outName << ", "
@@ -515,6 +536,103 @@ void RedistNode::PrintCode(IndStream &out)
       }
     }
     *out << " );\n";
+  }
+}
+
+void RedistNode::AddVariables(VarSet &set) const
+{
+  //Reflect in PrintCode
+  DLANode::AddVariables(set);
+  
+  const DistType &m_srcType = InputDistType(0);
+  const Dim numDims = m_destType.m_numDims;
+
+  string inName = GetInputName(0).str();
+  string outName = GetName(0).str(); 
+
+  if (m_srcType.m_numDims != numDims)
+    throw;
+
+  DimSet diffs;
+    
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    if (m_srcType.m_dists[dim] != m_destType.m_dists[dim]) {
+      diffs.insert(dim);
+    }
+  }
+
+  if (diffs.empty()) {
+    throw;
+  }
+  else if (diffs.size() == 1) {
+    const Dim dim = *(diffs.begin());
+    DimVec src = m_srcType.m_dists[dim].DistEntryDims();
+    DimVec dest = m_destType.m_dists[dim].DistEntryDims();
+       
+    if (src.empty() || IsPrefix(src, dest)) {
+
+    }
+    else if (IsPrefix(dest, src) || dest.empty()) {
+      if (!src.empty()) {
+	DimVec suff1, suff2;
+	GetDifferentSuffix(src, dest, suff1, suff2);
+	if (!suff2.empty()) {
+	  throw;
+	}
+	else if (suff1.empty()) {
+	  throw;
+	}
+	else {
+	  Var var(suff2);
+	  set.insert(var);
+	}
+      }
+    }
+    else {
+
+    }
+
+  }
+  else if (diffs.size() > 2) {
+    throw;
+  }
+  else {
+    DimSetConstIter iter = diffs.begin();
+    Dim diff1 = *iter;
+    ++iter;
+    Dim diff2 = *iter;
+
+    Var pairVar(diff1, diff2);
+    set.insert(pairVar);
+
+    DimVec firstVec, secondVec;
+    bool first = true;
+    iter = diffs.begin();
+    for(; iter != diffs.end(); ++iter) {
+      Dim diffDim = *iter;
+      DimVec src = m_srcType.m_dists[diffDim].DistEntryDims();
+      DimVec dest = m_destType.m_dists[diffDim].DistEntryDims();
+
+      if (src.empty() || IsPrefix(src, dest)) {
+	throw;
+      }
+      else if (IsPrefix(dest, src) || dest.empty()) {
+	throw;
+      }
+      else {
+	DimVec suff1, suff2;
+	GetDifferentSuffix(src, dest, suff1, suff2);
+	if (first)
+	  firstVec = suff2;
+	else
+	  secondVec = suff2;
+      }
+      if (first) {
+	first = false;
+      }
+    }
+    Var arrayPairVar(firstVec, secondVec);
+    set.insert(arrayPairVar);
   }
 }
 

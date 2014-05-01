@@ -22,10 +22,18 @@
 
 #include "base.h"
 
+string ModeArrayVarName(const DimVec &vec);
+string IndexPairVarName(Dim dim1, Dim dim2);
+string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2);
+
+
+
 enum VarType {
 #if DOTENSORS
   TensorVarType,
   ModeArrayVarType,
+  IndexPairType,
+  ModeArrayPairVarType,
 #endif
   InvalidType
 };
@@ -37,16 +45,21 @@ class Var
   union {
     Name *m_name;
     DimVec *m_vec;
+    std::pair<DimVec, DimVec> *m_arrPair;
+    std::pair<Dim,Dim> *m_pair;
   };
   string m_compStr;
  Var() : m_type(InvalidType) {}
   Var(const Name &name);
   Var(const DimVec &vec);
   Var(const Var &var);
+  Var(Dim dim1, Dim dim2);
+  Var(const DimVec &vec1, const DimVec &vec2);
   ~Var();
     Var& operator=(const Var &rhs);
-  virtual string CompStr() const {return m_compStr;}
-  virtual void PrintDecl(IndStream &out) const;
+  string CompStr() const {return m_compStr;}
+  void PrintDecl(IndStream &out) const;
+  string GetVarName() const;
 };
 
 struct VarCompare {
