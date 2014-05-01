@@ -11,6 +11,8 @@ void GetCommonSuffix(const DimVec &dims1, const DimVec &dims2,
 		     DimVec &pref1, DimVec &pref2);
 void GetDifferentSuffix(const DimVec &dims1, const DimVec &dims2, 
 			DimVec &suff1, DimVec &suff2);
+void GetSuffix(const DimVec &dims1, const DimVec &dims2, 
+	       DimVec &suff);
 
 RedistNode::RedistNode() 
 {
@@ -267,6 +269,27 @@ void GetDifferentSuffix(const DimVec &dims1, const DimVec &dims2,
   }
 }
 
+void GetSuffix(const DimVec &dims1, const DimVec &dims2, 
+			DimVec &suff)
+{
+  DimVecConstIter iter1 = dims1.begin();
+  DimVecConstIter iter2 = dims2.begin();
+  while (iter1 != dims1.end() && iter2 != dims2.end()) {
+    if (*iter1 == *iter2) {
+      ++iter1;
+      ++iter2;
+    }
+    else
+      break;
+  }
+  if (iter2 == dims2.end())
+    throw;
+  while (iter2 != dims2.end()) {
+    suff.push_back(*iter2);
+    ++iter2;
+  }
+}
+
 
 Phase RedistNode::MaxPhase() const
 {
@@ -472,18 +495,9 @@ void RedistNode::PrintCode(IndStream &out)
 	
 	*out << "AllGatherRedistPartial( " << outName << ", "
 	     << inName << ", " << dim << ", ";
-	DimVec suff1, suff2;
-	GetDifferentSuffix(src, dest, suff1, suff2);
-	if (!suff2.empty()) {
-	  throw;
-	}
-	else if (suff1.empty()) {
-	  throw;
-	}
-	else {
-	  *out << ModeArrayVarName(suff2);
-	}
-	*out << " );\n";
+	DimVec suff;
+	GetSuffix(dest, src, suff);
+	*out << ModeArrayVarName(suff) << " );\n";
 
       }
       else {
@@ -574,18 +588,10 @@ void RedistNode::AddVariables(VarSet &set) const
     }
     else if (IsPrefix(dest, src) || dest.empty()) {
       if (!src.empty()) {
-	DimVec suff1, suff2;
-	GetDifferentSuffix(src, dest, suff1, suff2);
-	if (!suff2.empty()) {
-	  throw;
-	}
-	else if (suff1.empty()) {
-	  throw;
-	}
-	else {
-	  Var var(suff2);
-	  set.insert(var);
-	}
+	DimVec suff;
+	GetSuffix(dest, src, suff);
+	Var var(suff);
+	set.insert(var);
       }
     }
     else {
