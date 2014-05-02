@@ -905,8 +905,11 @@ Comm Node::WithinParallelism() const
 void Node::AddVariables(VarSet &set) const
 {
   for(unsigned int i = 0; i < NumOutputs(); ++i) {
-    Var var(GetName(i));
+    Name name = GetName(i);
+    Var var(name);
     set.insert(var);
+    Var var2(name.m_type);
+    set.insert(var2);
   }
 }
 #endif

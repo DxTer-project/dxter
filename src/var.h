@@ -25,6 +25,7 @@
 string ModeArrayVarName(const DimVec &vec);
 string IndexPairVarName(Dim dim1, Dim dim2);
 string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2);
+string TensorDistVarName(const DistType &type);
 
 
 
@@ -34,6 +35,7 @@ enum VarType {
   ModeArrayVarType,
   IndexPairType,
   ModeArrayPairVarType,
+  TensorDistVarType,
 #endif
   InvalidType
 };
@@ -47,6 +49,7 @@ class Var
     DimVec *m_vec;
     std::pair<DimVec, DimVec> *m_arrPair;
     std::pair<Dim,Dim> *m_pair;
+    DistType *m_distType;
   };
   string m_compStr;
  Var() : m_type(InvalidType) {}
@@ -54,6 +57,7 @@ class Var
   Var(const DimVec &vec);
   Var(const Var &var);
   Var(Dim dim1, Dim dim2);
+  Var(const DistType &type);
   Var(const DimVec &vec1, const DimVec &vec2);
   ~Var();
     Var& operator=(const Var &rhs);

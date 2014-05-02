@@ -252,6 +252,7 @@ const Sizes* InputNode::LocalLen(unsigned int num,Dim dim) const
 }
 #endif
 
+
 Name InputNode::GetName(unsigned int num) const
 {
   if (num > 0)

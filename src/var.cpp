@@ -35,11 +35,23 @@ string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2)
   return name.str();
 }
 
+string TensorDistVarName(const DistType &type)
+{
+  return "dist_" + type.str();
+}
+
+Var::Var(const DistType &type)
+{
+  m_type = TensorDistVarType;
+  m_distType = new DistType(type);
+  m_compStr = "a"+type.QuickStr();
+}
+
 Var::Var(const Name &name)
 {
   m_type = TensorVarType;
   m_name = new Name(name);
-  m_compStr = "a"+m_name->str();
+  m_compStr = "b"+m_name->str();
 }
 
 
@@ -48,7 +60,7 @@ Var::Var(const DimVec &vec)
   m_type = ModeArrayVarType;
   m_vec = new DimVec(vec);
   std::stringstream str;
-  str << "b";
+  str << "c";
   DimVecConstIter iter = m_vec->begin();
   for(; iter != m_vec->end(); ++iter)
     str << "_" << *iter;
@@ -59,7 +71,7 @@ Var::Var(Dim dim1, Dim dim2)
 {
   m_type = IndexPairType;
   std::stringstream str;
-  str << "c" << dim1 << "_" << dim2;
+  str << "d" << dim1 << "_" << dim2;
   m_compStr = str.str();
   m_pair = new std::pair<Dim,Dim>;
   m_pair->first = dim1;
@@ -70,7 +82,7 @@ Var::Var(const DimVec &vec1, const DimVec &vec2)
 {
   m_type = ModeArrayPairVarType;
   std::stringstream str;
-  str << "d";
+  str << "e";
   DimVecConstIter iter = vec1.begin();
   for(; iter != vec1.end(); ++iter)
     str << "_" << *iter;
@@ -98,6 +110,9 @@ Var::~Var()
     case (ModeArrayPairVarType):
       delete m_arrPair;
       break;
+    case (TensorDistVarType):
+      delete m_distType;
+      break;
     case (InvalidType) :
     default:
       throw;
@@ -114,7 +129,8 @@ void Var::PrintDecl(IndStream &out) const
 	out.Indent();
 	*out << "\t//" << m_name->PrettyStr() << endl;
 	out.Indent();
-	*out << "DistTensor<double> " << m_name->str() << "(shape, dist, indices, g);" << endl;
+	*out << "DistTensor<double> " << m_name->str() << "(shape, " + TensorDistVarName(m_name->m_type)
+	  + ", indices, g);" << endl;
 	break;
       }
     case (ModeArrayVarType) :
@@ -155,6 +171,32 @@ void Var::PrintDecl(IndStream &out) const
 	  *out << name << ".second.push_back("
 	       << *iter << ");\n";
 	}
+	break;
+      }
+    case (TensorDistVarType):
+      {
+	out.Indent();
+	*out << "TensorDistribution " << GetVarName() << " = "
+	     << "tmen::StringToTensorDist(\"[";
+	for(Dim dim = 0; dim < m_distType->m_numDims; ++dim) {
+	  DimVec vec = m_distType->m_dists[dim].DistEntryDims();
+	  if (dim)
+	    *out << ",";
+	  *out << "(";
+	  bool start = true;
+	  DimVecIter iter = vec.begin();
+	  for( ; iter != vec.end(); ++iter) {
+	    if (!start) {
+	      *out << ",";
+	    }
+	    else
+	      start = false;
+	    *out << *iter;
+	  }
+	  *out << ")";
+	}
+	*out <<"]\");\n";
+	break;
       }
     case (InvalidType):
       throw;
@@ -183,6 +225,11 @@ string Var::GetVarName() const
     case (ModeArrayPairVarType):
       {
 	return ModeArrayPairVarName(m_arrPair->first, m_arrPair->second);
+	break;
+      }
+    case (TensorDistVarType):
+      {
+	return TensorDistVarName(*m_distType);
 	break;
       }
     case (InvalidType):
@@ -215,6 +262,9 @@ Var& Var::operator=(const Var &rhs)
       case (ModeArrayPairVarType):
 	delete m_arrPair;
 	break;
+      case (TensorDistVarType):
+	delete m_distType;
+	break;
       case (InvalidType):
 	throw;
       }    
@@ -238,6 +288,9 @@ Var& Var::operator=(const Var &rhs)
       m_arrPair = new std::pair<DimVec, DimVec>;
       m_arrPair->first = rhs.m_arrPair->first;
       m_arrPair->second = rhs.m_arrPair->second;
+      break;
+    case (TensorDistVarType):
+      m_distType = new DistType(*rhs.m_distType);
       break;
     case (InvalidType):
       throw;
