@@ -4,7 +4,7 @@
 string ModeArrayVarName(const DimVec &vec)
 {
   std::stringstream name;
-  name << "Modes";
+  name << "modes";
   DimVecConstIter iter = vec.begin();
   for(; iter != vec.end(); ++iter) {
 	  name << "_" << *iter;
@@ -15,14 +15,14 @@ string ModeArrayVarName(const DimVec &vec)
 string IndexPairVarName(Dim dim1, Dim dim2)
 {
   std::stringstream name;
-  name << "IndexPair_" << dim1 << "_" << dim2;
+  name << "indexPair_" << dim1 << "_" << dim2;
   return name.str();
 }
 
 string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2)
 {
   std::stringstream name;
-  name << "ModeArray";
+  name << "modeArray";
   DimVecConstIter iter = arr1.begin();
   for(; iter != arr1.end(); ++iter) {
 	  name << "_" << *iter;

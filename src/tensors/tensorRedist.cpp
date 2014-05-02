@@ -487,8 +487,12 @@ void RedistNode::PrintCode(IndStream &out)
     DimVec dest = m_destType.m_dists[dim].DistEntryDims();
        
     if (src.empty() || IsPrefix(src, dest)) {
+      DimVec suff;
+      GetSuffix(src, dest, suff);
       *out << "LocalRedist( " << outName << ", "
-	   << inName << ", " << dim << " );\n";
+	   << inName << ", " << dim 
+	   << ", " << ModeArrayVarName(suff)
+	   << " );\n";
     }
     else if (IsPrefix(dest, src) || dest.empty()) {
       if (!src.empty()) {
@@ -520,9 +524,12 @@ void RedistNode::PrintCode(IndStream &out)
     Dim diff2 = *iter;
 
     *out << "AllToAllDoubleIndexRedist( "  << outName << ", "
-	 << inName << ", " << " std::pair(" << diff1 << "," << diff2 
-	 << "), modeArrayPair_";
+	 << inName << ", " 
+	 << IndexPairVarName(diff1, diff2)
+	 << ", ";
+
     
+    DimVec firstVec, secondVec;
     bool first = true;
     iter = diffs.begin();
     for(; iter != diffs.end(); ++iter) {
@@ -539,17 +546,18 @@ void RedistNode::PrintCode(IndStream &out)
       else {
 	DimVec suff1, suff2;
 	GetDifferentSuffix(src, dest, suff1, suff2);
-	DimVecIter suffIter = suff2.begin();
-	for(; suffIter != suff2.end(); ++suffIter) {
-	  *out << "_" << *suffIter;
-	}
+	if (first)
+	  firstVec = suff2;
+	else
+	  secondVec = suff2;
       }
       if (first) {
 	first = false;
-	*out << "_";
       }
     }
-    *out << " );\n";
+
+    *out << ModeArrayPairVarName(firstVec, secondVec)
+	 << " );\n";
   }
 }
 
@@ -584,7 +592,10 @@ void RedistNode::AddVariables(VarSet &set) const
     DimVec dest = m_destType.m_dists[dim].DistEntryDims();
        
     if (src.empty() || IsPrefix(src, dest)) {
-
+      DimVec suff;
+      GetSuffix(src, dest, suff);
+      Var var(suff);
+      set.insert(var);
     }
     else if (IsPrefix(dest, src) || dest.empty()) {
       if (!src.empty()) {
