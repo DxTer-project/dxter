@@ -289,7 +289,7 @@ template<class TrxmType>
 class TrxmLowerLayer : public LowerLayer
 {
  public:
- TrxmLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+ TrxmLowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const { return "Trxm lower layer"; }
   virtual bool CanApply(const Poss *poss, const Node *node) const;

@@ -27,12 +27,13 @@
 #define DOSQM 0
 #define DOSM 0
 #define DOTENSORS 1
+#define DOLLDLA 0
 
-#define DOBLIS DOSM||DOSQM
-#define DODM DOELEM||DOTENSORS
-#define TWOD DOBLIS||DOELEM
+#define DOBLIS (DOSM||DOSQM)
+#define DODM (DOELEM||DOTENSORS)
+#define TWOD (DOBLIS||DOELEM||DOLLDLA)
 
-#if DOELEM + DOSQM + DOSM + DOTENSORS != 1
+#if DOELEM + DOSQM + DOSM + DOTENSORS + DOLLDLA != 1
 bad layer setup!
 #endif
 
@@ -54,6 +55,7 @@ bad layer setup!
 #define DOSR2PHASE 0
 #define DOSOPHASE 0
 #define DOSMPPHASE 0
+#define DOLLDLAPHASE 0
 
 //Software layers
 enum Layers {
@@ -86,6 +88,7 @@ enum Layers {
 #define DOSR3PHASE 1
 #define DOSOPHASE 1
 #define DOSMPPHASE 0
+#define DOLLDLAPHASE 0
 
 //Software layers
 enum Layers {
@@ -118,6 +121,7 @@ enum Layers {
 #define DOSR3PHASE 1
 #define DOSMPPHASE 1
 #define DOSOPHASE 1
+#define DOLLDLAPHASE 0
 
 //Software layers
 enum Layers {
@@ -160,6 +164,33 @@ enum Layers {
 #define DODPTENSORPHASE 1
 #define DOSUMSCATTERTENSORPHASE 1
 #define DOROTENSORPHASE 1
+#define DOLLDLAPHASE 0
+
+#elif DOLLDLA
+
+#define LLDLAPHASE 0
+
+#define FIRSTPHASE LLDLAPHASE
+
+//Max phase for which to generate code
+#define MAXPHASE LLDLAPHASE
+#define NUMPHASES (MAXPHASE+1)
+
+//#define DODPPHASE 0
+//#define DOROPHASE 0
+//#define DOSR1PHASE 0
+//#define DOSR2PHASE 0
+//#define DOSOPHASE 0
+//#define DOSMPPHASE 0
+#define DOLLDLAPHASE 1
+
+//Software layers
+enum Layers {
+  ABSLAYER = 0,
+  CACHEDLLDLALAYER,
+  LLDLAPRIMLAYER,
+  BADLAYER,
+};
 
 
 #else

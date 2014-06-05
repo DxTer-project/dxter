@@ -59,7 +59,7 @@ class DLANode : public Node
   const Sizes* GetInputN(unsigned int num) const;
   const Sizes* InputLocalM(unsigned int num) const;
   const Sizes* InputLocalN(unsigned int num) const;
-#else
+#elif DOTENSORS
   virtual const Dim NumDims(unsigned int num) const = 0;
   virtual const Sizes* Len(unsigned int num, Dim dim) const = 0;
   virtual const Sizes* LocalLen(unsigned int num, Dim dim) const = 0;  
@@ -100,7 +100,11 @@ void DLACullLA(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 #if DOSQM || DOSM
 void DLACullSR(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 #endif
+#if DOLLDLA
+void LLDLACull(Poss *poss, bool &cullIfPossible, bool &doNotCull);
+#endif
 #elif DOTENSORS
 void TenCullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 void TenCullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
+
 #endif

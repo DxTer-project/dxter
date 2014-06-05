@@ -21,7 +21,7 @@
 
 
 #include "layers.h"
-#if TWOD
+#if DOELEM||DOBLIS
 #include "base.h"
 #include "blas.h"
 #include "elemRedist.h"

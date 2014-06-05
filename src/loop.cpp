@@ -719,7 +719,7 @@ bool Loop::WorthFusing(Loop *loop)
   //Therefore, prohibit such fusion to allow for the same
   // buffer to be reused.
 #if DOBLIS
-  if (FindOtherPackBuffs(m_posses[0], PACKABLOCK, NULL)) {
+  if (FindOtherPackBuffs((*(m_posses.begin())).second, PACKABLOCK, NULL)) {
     return false;
   }
 #endif
@@ -1096,9 +1096,9 @@ bool ContainsOnlyParallelization(PSet *set)
     }
   }
   
-  PossVecIter iter = set->m_posses.begin();
+  PossMMapIter iter = set->m_posses.begin();
   for(; iter != set->m_posses.end(); ++iter) {
-    Poss *poss = *iter;
+    Poss *poss = (*iter).second;
     bool foundParSet = false;
     PSetVecIter setIter = poss->m_sets.begin();
     for(; !foundParSet && setIter != poss->m_sets.end(); ++setIter) {

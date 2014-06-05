@@ -850,10 +850,10 @@ bool LegalParallelizationNestingUp(const Node *node, Comm comm)
 
 bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
 {
-  PossVecConstIter iter = pset->m_posses.begin();
+  PossMMapConstIter iter = pset->m_posses.begin();
   bool foundGood = false;
   for(; !foundGood && iter != pset->m_posses.end(); ++iter) {
-    const Poss *poss = *iter;
+    const Poss *poss = (*iter).second;
     bool foundBad = false;
     PSetVecConstIter iter2 = poss->m_sets.begin();
     for(; !foundBad && iter2 != poss->m_sets.end(); ++iter2) {

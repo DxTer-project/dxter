@@ -83,7 +83,7 @@ class LoopTunnel : public PossTunnel
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "LoopTunnel";}
   
-  virtual void PrintVarDeclarations() const {throw;}
+  virtual void PrintVarDeclarations(IndStream &out) const {throw;}
   LoopType GetLoopType() const;
 
   virtual void StartFillingSizes();

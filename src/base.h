@@ -107,7 +107,7 @@ enum PackSize { USEMRSIZE,
 		BADPACKSIZE };
 
 #if TWOD
-enum Dim {
+enum DimName {
   DIMM,
   DIMK,
   DIMN,

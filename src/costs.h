@@ -50,6 +50,9 @@ using namespace std;
 #elif DOTENSORS
 #define TENSOR_BSVAL 128
 #define NUM_GRID_DIMS 4
+#elif DOLLDLA
+#define RVAL 40
+#define CVAL 40
 #endif 
 #if TWOD
 #define PVAL RVAL*CVAL

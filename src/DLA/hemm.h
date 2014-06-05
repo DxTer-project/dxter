@@ -181,7 +181,7 @@ class BLISHemmToGemm: public SingleTrans
 class HemmLowerLayer : public LowerLayer
 {
  public:
- HemmLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+ HemmLowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;

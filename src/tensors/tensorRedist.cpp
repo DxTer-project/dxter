@@ -471,6 +471,9 @@ void RedistNode::PrintCode(IndStream &out)
     throw;
 
   DimSet diffs;
+
+  *out << outName << ".SizeTo( " << inName << " );\n";
+  out.Indent();
     
   for (Dim dim = 0; dim < numDims; ++dim) {
     if (m_srcType.m_dists[dim] != m_destType.m_dists[dim]) {

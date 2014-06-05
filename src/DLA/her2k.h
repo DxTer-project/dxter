@@ -23,6 +23,10 @@
 
 #pragma once
 
+#include "layers.h"
+
+#if DOELEM||DOBLIS
+
 #include "transform.h"
 #include "elemRedist.h"
 #include "DLAOp.h"
@@ -197,12 +201,12 @@ class Tri2kTrans : public TransTransformation
   virtual string GetTransType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
 };
-#endif DOELEM
+#endif //DOELEM
 
 class Tri2kLowerLayer : public LowerLayer
 {
  public:
- Tri2kLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+ Tri2kLowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;
@@ -245,3 +249,4 @@ class Tri2kLoopExp : public SingleTrans
   virtual void Apply(Poss *poss, Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+#endif

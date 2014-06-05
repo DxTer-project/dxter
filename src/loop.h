@@ -87,7 +87,7 @@ class Loop : public PSet
   Comm m_comm;
 #endif
 #if TWOD
-  Dim m_dim;
+  DimName m_dim;
 #endif
   
   Loop();
@@ -111,7 +111,7 @@ class Loop : public PSet
   LoopTunnel* CreateNewLoopTunnels(Node *input, unsigned int num, Poss *possToCareAbout, UpStat stat);
   void TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun);
 #if TWOD
-  inline void SetDim(Dim dim) {m_dim = dim;}
+  inline void SetDimName(DimName dim) {m_dim = dim;}
 #endif
 
   void FillTunnelSizes();

@@ -405,7 +405,7 @@ Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
 
-  loop->SetDim(DIMN);
+  loop->SetDimName(DIMN);
   
   return loop;
 }
@@ -531,7 +531,7 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
 
-  loop->SetDim(DIMK);
+  loop->SetDimName(DIMK);
   
   return loop;
 }
@@ -1094,7 +1094,7 @@ void BLISHemmLoopExp::Apply(Poss *poss, Node *node) const
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
 
-  loop->SetDim(DIMM);
+  loop->SetDimName(DIMM);
   
   poss->AddLoop(loop);
 

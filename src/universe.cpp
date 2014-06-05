@@ -373,6 +373,8 @@ void Universe::PrintAll(int algNum)
     IndStream optOut(&cout,BLISSTREAM);
 #elif DOTENSORS
     IndStream optOut(&cout,TENSORSTREAM);
+#elif DOLLDLA
+    IndStream optOut(&cout,LLDLASTREAM);
 #endif
     Print(optOut, optGraph);
   }
@@ -390,6 +392,8 @@ void Universe::PrintAll(int algNum)
     IndStream codeOut(&out,BLISSTREAM);
 #elif DOTENSORS
     IndStream codeOut(&out,TENSORSTREAM);
+#elif DOLLDLA
+    IndStream codeOut(&out,LLDLASTREAM);
 #endif
   optGraph = 0;
   time(&start);

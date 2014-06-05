@@ -86,6 +86,11 @@ void RegAllDLANodes()
   Reg(ViewTL);
   Reg(ViewTLCombine);
 }
+#elif DOLLDLA
+void RegAllLLDLANodes()
+{
+
+}
 #else
 asdklfja
 #endif

@@ -973,7 +973,7 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
     Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
   
-  loop->SetDim(DIMK);
+  loop->SetDimName(DIMK);
   
   return loop;
 #endif
@@ -1045,7 +1045,7 @@ Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum,
   else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
 
-  loop->SetDim(DIMN);
+  loop->SetDimName(DIMN);
   
   return loop;
 }
@@ -1208,7 +1208,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
 
-  loop->SetDim(DIMM);
+  loop->SetDimName(DIMM);
   
   return loop;
 }

@@ -23,7 +23,7 @@
 
 #include "layers.h"
 
-#if TWOD
+#if DOELEM||DOBLIS
 
 #include "transform.h"
 #include "DLAOp.h"

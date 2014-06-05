@@ -1336,7 +1336,7 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
   else
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
 
-  loop->SetDim(DIMN);
+  loop->SetDimName(DIMN);
   
   return loop;
 }
@@ -1410,7 +1410,7 @@ Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
 
   Poss *loopPoss = new Poss(5, comA, comB, comC, comD, EtunOut);
   loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
-  loop->SetDim(DIMK);
+  loop->SetDimName(DIMK);
   
   return loop;
 #endif

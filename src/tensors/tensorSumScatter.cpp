@@ -139,7 +139,7 @@ void SumScatterUpdateNode::Prop()
       DimVec sums = (*(m_sumDims.begin())).DistEntryDims();
       DimVecConstIter iter = sums.begin();
       for(; iter != sums.end(); ++iter) {
-	GridLens[*iter];
+	numProcs *= GridLens[*iter];
       }
 
       DLANode *input = (DLANode*)(Input(1));
@@ -311,6 +311,9 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
        << " <- " << GetInputName(0).PrettyStr() 
        << " (with SumScatter on " << sumDims.PrettyStr() << ")\n";
 
+  out.Indent();
+
+  *out << outName << ".SizeTo( " << inName << " );\n";
   out.Indent();
   
   if (m_srcType.m_notReped != m_destType.m_notReped) {

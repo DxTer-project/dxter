@@ -697,7 +697,9 @@ void Usage()
 int main(int argc, const char* argv[])
 {
   //    omp_set_num_threads(1);
+#ifdef _OPENMP
   omp_set_nested(true);
+#endif
   //  PrintType printType = CODE;
   int numIters = -1;
   PSet* (*algFunc)();

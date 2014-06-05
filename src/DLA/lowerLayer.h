@@ -28,9 +28,9 @@ class LowerLayer : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  Dim m_dim;
+  DimName m_dim;
   Size m_bs;
- LowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+ LowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
 };
 

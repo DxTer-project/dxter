@@ -913,57 +913,57 @@ bool Split::QuadInUse(Quad quad, bool atEnd) const
       unsigned int num = (*iter)->m_num;
       switch (m_dir) {
       case (PARTDOWN):
-	if ((quad == TL || quad == TR) && (!atEnd && num == 0 || atEnd && (num == 0 || num == 1)))
+	if ((quad == TL || quad == TR) && ((!atEnd && num == 0) || (atEnd && (num == 0 || num == 1))))
 	  check = true;
-	else if ((quad == BL || quad == BR) && (!atEnd && (num == 1 || num == 2) || atEnd && (num == 2)))
+	else if ((quad == BL || quad == BR) && ((!atEnd && (num == 1 || num == 2)) || (atEnd && (num == 2))))
 	  check = true;
 	else
 	  check = false;
 	break;
       case (PARTUPWARD):
-	if ((quad == TL || quad == TR) && (!atEnd && (num == 0 || num == 1) || atEnd && (num == 0)))
+	if ((quad == TL || quad == TR) && ((!atEnd && (num == 0 || num == 1)) || (atEnd && (num == 0))))
 	  check = true;
-	else if ((quad == BL || quad == BR) && (!atEnd && num == 2 || atEnd && (num == 1 || num == 2)))
+	else if ((quad == BL || quad == BR) && ((!atEnd && num == 2) || (atEnd && (num == 1 || num == 2))))
 	  check = true;
 	else
 	  check = false;
 	break;
       case (PARTRIGHT):
-	if ((quad == TL || quad == BL) && (!atEnd && num == 0 || atEnd && (num == 0 || num == 1)))
+	if ((quad == TL || quad == BL) && ((!atEnd && num == 0) || (atEnd && (num == 0 || num == 1))))
 	  check = true;
-	else if ((quad == TR || quad == BR) && (!atEnd && (num == 1 || num == 2) || atEnd && num == 2))
+	else if ((quad == TR || quad == BR) && ((!atEnd && (num == 1 || num == 2)) || (atEnd && num == 2)))
 	  check = true;
 	else
 	  check = false;
 	break;
       case (PARTLEFT):
-	if ((quad == TL || quad == BL) && (!atEnd && (num == 0 || num == 1) || atEnd && num == 0))
+	if ((quad == TL || quad == BL) && ((!atEnd && (num == 0 || num == 1)) || (atEnd && num == 0)))
 	  check = true;
-	else if ((quad == TR || quad == BR) && (!atEnd && num == 2 || atEnd && (num == 1 || num == 2)))
+	else if ((quad == TR || quad == BR) && ((!atEnd && num == 2) || (atEnd && (num == 1 || num == 2))))
 	  check = true;
 	else
 	  check = false;
 	break;
       case (PARTDIAG):
-	if (quad == TL && (!atEnd && num == 0 || atEnd && (num == 0 || num == 1 || num == 3 || num == 4)))
+	if (quad == TL && ((!atEnd && num == 0) || (atEnd && (num == 0 || num == 1 || num == 3 || num == 4))))
 	  check = true;
-	else if (quad == BL && (!atEnd && (num == 1 || num == 2) || atEnd && (num == 2 || num == 5)))
+	else if (quad == BL && ((!atEnd && (num == 1 || num == 2)) || (atEnd && (num == 2 || num == 5))))
 	  check = true;
-	else if (quad == TR && (!atEnd && (num == 3 || num == 6) || atEnd && (num == 6 || num == 7)))
+	else if (quad == TR && ((!atEnd && (num == 3 || num == 6)) || (atEnd && (num == 6 || num == 7))))
 	  check = true;
-	else if (quad == BR && (!atEnd && (num == 4 || num == 5 || num == 7 || num == 8)) || atEnd && num == 8)
+	else if (quad == BR && ((!atEnd && (num == 4 || num == 5 || num == 7 || num == 8)) || (atEnd && num == 8)))
 	  check = true;
 	else
 	  check = false;
 	break;
       case (PARTDIAGBACK):
-	if (quad == TL && (!atEnd && (num == 0 || num == 1 || num == 3 || num == 4) || atEnd && num == 0))
+	if (quad == TL && ((!atEnd && (num == 0 || num == 1 || num == 3 || num == 4)) || (atEnd && num == 0)))
 	  check = true;
-	else if (quad == BL && (!atEnd && (num == 2 || num == 5) || atEnd && (num == 1 || num == 2)))
+	else if (quad == BL && ((!atEnd && (num == 2 || num == 5)) || (atEnd && (num == 1 || num == 2))))
 	  check = true;
-	else if (quad == TR && (!atEnd && (num == 6 || num == 7) || atEnd && (num == 3 || num == 6)))
+	else if (quad == TR && ((!atEnd && (num == 6 || num == 7)) || (atEnd && (num == 3 || num == 6))))
 	  check = true;
-	else if (quad == BR && (!atEnd && (num == 8) || atEnd && (num == 4 || num == 5 || num == 7 || num == 8)))
+	else if (quad == BR && ((!atEnd && (num == 8)) || (atEnd && (num == 4 || num == 5 || num == 7 || num == 8))))
 	  check = true;
 	else
 	  check = false;
@@ -1286,7 +1286,7 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
     throw;
   const Size bs = GetMyLoop()->GetBS();
   Dim numDims = InputNumDims(0);
-  for (Dim dim; dim < numDims; ++dim) {
+  for (Dim dim = 0; dim < numDims; ++dim) {
     const Sizes *sizes = InputLen(0,dim);
     unsigned int length = sizes->NumSizes();
     if (length <= execNum) {

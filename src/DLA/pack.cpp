@@ -971,9 +971,9 @@ const Node* FindOtherPackBuffs(const Poss *poss, PackMat pack, const Node *ignor
   PSetVecConstIter iter2 = poss->m_sets.begin();
   for(; iter2 != poss->m_sets.end(); ++iter2) {
     const PSet *set = *iter2;
-    PossVecConstIter iter3 = set->m_posses.begin();
+    PossMMapConstIter iter3 = set->m_posses.begin();
     for(; iter3 != set->m_posses.end(); ++iter3) {
-      const Node *node = FindOtherPackBuffs(*iter3, pack, ignore);
+      const Node *node = FindOtherPackBuffs((*iter3).second, pack, ignore);
       if (node != NULL)
         return node;
     }

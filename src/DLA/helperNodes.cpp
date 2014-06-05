@@ -297,7 +297,7 @@ void InputNode::BuildSizeCache()
   m_nlsize = new Sizes;
 #if DODM
   GetLocalSizes(m_varName.m_type, &m_msize, &m_nsize, *m_mlsize, *m_nlsize);
-#elif DOBLIS
+#elif DOBLIS||DOLLDLA
   *m_mlsize = m_msize;
   *m_nlsize = m_nsize;
 #else
@@ -795,7 +795,7 @@ void TempVarNode::BuildSizeCache()
   m_nlsize = new Sizes;
 #if DODM
   GetLocalSizes(m_distType, GetM(0), GetN(0), *m_mlsize, *m_nlsize);
-#elif DOBLIS
+#elif (DOBLIS||DOLLDLA)
   *m_mlsize = *GetM(0);
   *m_nlsize = *GetN(0);
 #else
@@ -1513,6 +1513,7 @@ void ViewTL::SanityCheck()
 
 void ViewTL::PrintCode(IndStream &out)
 {
+#if DOBLIS
   if (GetLayer() == S3LAYER) {
     string name = GetNameStr(0);
     out.Indent();
@@ -1527,6 +1528,7 @@ void ViewTL::PrintCode(IndStream &out)
 	 << "tmp, &" << name << " );\n";
   }
   else
+#endif
     throw;
 }
 

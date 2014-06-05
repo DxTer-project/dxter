@@ -372,3 +372,11 @@ void TenCullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull)
   doNotCull = false;
 }
 #endif
+
+#if DOLLDLA
+void LLDLACull(Poss *poss, bool &cullIfPossible, bool &doNotCull)
+{
+  doNotCull = false;
+  cullIfPossible = false;
+}
+#endif

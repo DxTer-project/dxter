@@ -1,6 +1,7 @@
 #include "var.h"
 #include <sstream>
 
+#if DOTENSORS
 string ModeArrayVarName(const DimVec &vec)
 {
   std::stringstream name;
@@ -40,21 +41,31 @@ string TensorDistVarName(const DistType &type)
   return "dist_" + type.str();
 }
 
+string IndexArrayVarName(const string &indices)
+{
+  return "indices_" + indices;
+}
+#endif
+
+#if DOTENSORS
 Var::Var(const DistType &type)
 {
   m_type = TensorDistVarType;
   m_distType = new DistType(type);
   m_compStr = "a"+type.QuickStr();
 }
+#endif
 
+#if DOTENSORS
 Var::Var(const Name &name)
 {
   m_type = TensorVarType;
   m_name = new Name(name);
   m_compStr = "b"+m_name->str();
 }
+#endif
 
-
+#if DOTENSORS
 Var::Var(const DimVec &vec)
 {
   m_type = ModeArrayVarType;
@@ -67,6 +78,7 @@ Var::Var(const DimVec &vec)
   m_compStr = str.str();
 }
 
+
 Var::Var(Dim dim1, Dim dim2)
 {
   m_type = IndexPairType;
@@ -77,6 +89,7 @@ Var::Var(Dim dim1, Dim dim2)
   m_pair->first = dim1;
   m_pair->second = dim2;
 }
+
 
 Var::Var(const DimVec &vec1, const DimVec &vec2)
 {
@@ -94,10 +107,21 @@ Var::Var(const DimVec &vec1, const DimVec &vec2)
   m_arrPair->second = vec2;
 }
 
+Var::Var(const string &indices)
+{
+  m_type = IndexArrayType;
+  m_indices = new string(indices);
+  //  *m_indices = indices;
+  m_compStr = "e" + indices;
+}
+
+#endif
+
 Var::~Var()
 {
   switch (m_type) 
     {
+#if DOTENSORS
     case (TensorVarType) :
       delete m_name;
       break;
@@ -113,6 +137,10 @@ Var::~Var()
     case (TensorDistVarType):
       delete m_distType;
       break;
+    case (IndexArrayType):
+      delete m_indices;
+      break;
+#endif
     case (InvalidType) :
     default:
       throw;
@@ -124,13 +152,15 @@ void Var::PrintDecl(IndStream &out) const
 {
   switch (m_type) 
     {
+#if DOTENSORS
     case (TensorVarType) :
       {
 	out.Indent();
 	*out << "\t//" << m_name->PrettyStr() << endl;
 	out.Indent();
-	*out << "DistTensor<double> " << m_name->str() << "(shape, " + TensorDistVarName(m_name->m_type)
-	  + ", indices, g);" << endl;
+	*out << "DistTensor<double> " << m_name->str() << "( "
+	     << TensorDistVarName(m_name->m_type)
+	     << ", g );" << endl;
 	break;
       }
     case (ModeArrayVarType) :
@@ -198,6 +228,19 @@ void Var::PrintDecl(IndStream &out) const
 	*out <<"]\");\n";
 	break;
       }
+    case (IndexArrayType):
+      {
+	out.Indent();
+	string name = GetVarName();
+	*out << "IndexArray " << name << "( " << m_indices->size() << " );\n";
+	string::iterator iter = m_indices->begin();
+	for(unsigned int i = 0; iter != m_indices->end(); ++iter,++i) {
+	  out.Indent();
+	  *out << name << "[" << i <<"] = '" << *iter << "';\n";
+	}
+	break;
+      }
+#endif
     case (InvalidType):
       throw;
     }
@@ -207,6 +250,7 @@ string Var::GetVarName() const
 {
   switch (m_type) 
     {
+#if DOTENSORS
     case (TensorVarType) :
       {
 	return m_name->str();
@@ -232,6 +276,12 @@ string Var::GetVarName() const
 	return TensorDistVarName(*m_distType);
 	break;
       }
+    case (IndexArrayType):
+      {
+	return IndexArrayVarName(*m_indices);
+	break;
+      }
+#endif
     case (InvalidType):
       throw;
       return "";
@@ -250,6 +300,7 @@ Var& Var::operator=(const Var &rhs)
   if (m_type != InvalidType) {
     switch (m_type) 
       {
+#if DOTENSORS
       case (TensorVarType) :
 	delete m_name;
 	break;
@@ -265,6 +316,10 @@ Var& Var::operator=(const Var &rhs)
       case (TensorDistVarType):
 	delete m_distType;
 	break;
+      case (IndexArrayType):
+	delete m_indices;
+	break;
+#endif
       case (InvalidType):
 	throw;
       }    
@@ -273,6 +328,7 @@ Var& Var::operator=(const Var &rhs)
   m_compStr = rhs.m_compStr;
   switch (m_type) 
     {
+#if DOTENSORS
     case (TensorVarType):
       m_name = new Name(*(rhs.m_name));
       break;
@@ -292,6 +348,10 @@ Var& Var::operator=(const Var &rhs)
     case (TensorDistVarType):
       m_distType = new DistType(*rhs.m_distType);
       break;
+    case (IndexArrayType):
+      m_indices = new std::string(*(rhs.m_indices));
+      break;
+#endif
     case (InvalidType):
       throw;
     }

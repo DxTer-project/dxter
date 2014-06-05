@@ -205,7 +205,7 @@ class BLISTriRKLoopExp : public SingleTrans
 class TriRKLowerLayer : public LowerLayer
 {
  public:
- TriRKLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+ TriRKLowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;

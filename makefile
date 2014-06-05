@@ -1,9 +1,9 @@
 # indicate where the object files are to be created
 CC         := g++
 LINKER     := $(CC)
-#CFLAGS     := -O3 -fopenmp -Wall -Isrc/ -Isrc/DLA/ -Isrc/tensors/
+#CFLAGS     := -O3 -fopenmp -Wall -Isrc/ -Isrc/DLA/ -Isrc/tensors/ -Isrc/LLDLA
 #CFLAGS     := -O3 -Wall
-CFLAGS	   := -g -fopenmp -Wall -Isrc/ -Isrc/DLA/ -Isrc/tensors
+CFLAGS	   := -g -Wall -Isrc/ -Isrc/DLA/ -Isrc/tensors -Isrc/LLDLA
 #CFLAGS	   := -g -Wall
 #CFLAGS	   := -pg -Wall
 
@@ -20,13 +20,13 @@ dxter.x: $(OBJS) $(HEADERS)
 	$(LINKER) $(CFLAGS) $(OBJS) -o $@
 
 clean:
-	rm -f obj/*.o obj/DLA/*.o obj/tensors/*.o src/*~ src/DLA/*~ *.x *~
+	rm -f obj/*.o obj/DLA/*.o obj/tensors/*.o src/*~ src/DLA/*~ src/LLDLA/*~ src/LLDLA/*.o *.x *~
 
 open:
-	emacs -nw src/*cpp src/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h makefile
+	emacs -nw src/*cpp src/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h src/LLDLA/*cpp src/LLDLA/*h makefile
 
 opencpp:
-	emacs -nw src/*cpp src/DLA/*cpp src/tensors/*cpp
+	emacs -nw src/*cpp src/DLA/*cpp src/tensors/*cpp src/LLDLA/*cpp
 
 openh:
-	emacs -nw src/*h src/DLA/*h src/tensors/*h
+	emacs -nw src/*h src/DLA/*h src/tensors/*h src/LLDLA/*h

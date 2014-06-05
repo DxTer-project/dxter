@@ -1813,7 +1813,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   Loop *newSet = (Loop*)leftSet->GetNewInst();
 #if TWOD
   if (leftSet->m_dim == rightSet->m_dim)
-    newSet->SetDim(leftSet->m_dim);
+    newSet->SetDimName(leftSet->m_dim);
 #endif
   newSet->m_bsSize = (((Loop*)leftSet)->m_bsSize);
   newSet->m_label.clear();

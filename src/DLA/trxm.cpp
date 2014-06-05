@@ -1587,7 +1587,7 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
   Combine *comA = splitA->CreateMatchingCombine(0);
   
   Combine *comB;
-  if (tri == LOWER && trans != NORMAL || tri == UPPER && trans == NORMAL)
+  if ((tri == LOWER && trans != NORMAL) || (tri == UPPER && trans == NORMAL))
     comB = splitB->CreateMatchingCombine(2,
                                          1, trmm, 0,
                                          2, gemm, 0);
@@ -1886,7 +1886,7 @@ Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
-  loop->SetDim(DIMK);
+  loop->SetDimName(DIMK);
   
   return loop;
 }
@@ -1931,7 +1931,7 @@ Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
   
-  loop->SetDim(DIMN);
+  loop->SetDimName(DIMN);
   
   return loop;
 }
@@ -2365,14 +2365,14 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   Poss *loopPoss = new Poss(3, comA, comB, packTunOut);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
   
-  loop->SetDim(DIMM);
+  loop->SetDimName(DIMM);
   
   poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
-#endif DOBLIS
+#endif //DOBLIS
 
 Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
                         Node *Bin, unsigned int Bnum,
@@ -2781,7 +2781,7 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
   Poss *loopPoss = new Poss(4, comA, comB, packTunOut, comC);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
   
-  loop->SetDim(DIMM);
+  loop->SetDimName(DIMM);
   
   poss->AddLoop(loop);
   

@@ -1251,7 +1251,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
     loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
 #endif
 
-  loop->SetDim(DIMM);
+  loop->SetDimName(DIMM);
   
   return loop;
 }
@@ -1346,7 +1346,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
 
-  loop->SetDim(DIMK);
+  loop->SetDimName(DIMK);
   
   return loop;
 }
@@ -1404,7 +1404,7 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
 
-  loop->SetDim(DIMN);
+  loop->SetDimName(DIMN);
   
   return loop;
 }
@@ -1513,7 +1513,7 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
 
-  loop->SetDim(DIMM);
+  loop->SetDimName(DIMM);
   
   
   

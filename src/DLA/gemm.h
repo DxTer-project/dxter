@@ -24,7 +24,7 @@
 #pragma once
 
 #include "layers.h"
-#ifdef DOBLIS||DOELEM
+#if (DOBLIS||DOELEM)
 
 #include "DLAOp.h"
 #include "transform.h"
@@ -196,7 +196,7 @@ class BLISGemmLoopExp : public SingleTrans
 class GemmLowerLayer : public LowerLayer
 {
  public:
- GemmLowerLayer(Layer fromLayer, Layer toLayer, Dim dim, Size bs)
+ GemmLowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Poss *poss, const Node *node) const;

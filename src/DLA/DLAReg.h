@@ -40,4 +40,5 @@
 #include "contraction.h"
 
 void RegAllDLANodes();
+void RegAllLLDLANodes();
 void RegAllTensorNodes();
