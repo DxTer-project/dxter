@@ -24,7 +24,9 @@
 #include "base.h"
 #include "transform.h"
 #include "pset.h"
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 #include "loopSupport.h"
 
 extern unsigned int M_phase;

@@ -2766,13 +2766,13 @@ bool Poss::IncrementCurrPoss()
 
 size_t Poss::GetHash()
 {
-  static hash<const char*> hasher;
+  static std::hash<std::string> hasher;
   if (m_hashValid)
     return m_hash;
   else {
     m_hash = m_sets.size();
     for(unsigned int i = 0; i < m_possNodes.size(); ++i) {
-      m_hash += hasher(m_possNodes[i]->GetType().c_str());
+      m_hash += hasher(m_possNodes[i]->GetType());
     }
     m_hashValid = true;
     return m_hash;

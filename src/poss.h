@@ -29,9 +29,9 @@
 #include "pset.h"
 #include "possTunnel.h"
 #include <stdarg.h>
-#include <ext/hash_set>
+//#include <ext/hash_set>
 
-using namespace __gnu_cxx;
+//using namespace __gnu_cxx;
 
 class Node;
 

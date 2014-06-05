@@ -23,12 +23,16 @@
 
 #include "base.h"
 #include "costs.h"
+#ifdef _OPENMP
 #include "omp.h"
+#endif
 #include "transform.h"
 #include "loopSupport.h"
 #include <time.h>
 #include "DLAReg.h"
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 #include "contraction.h"
 #include "tensorRedist.h"
 
@@ -86,8 +90,10 @@ void Usage()
 
 int main(int argc, const char* argv[])
 {
+#ifdef _OPENMP
   omp_set_num_threads(1);
   omp_set_nested(true);
+#endif
   //  PrintType printType = CODE;
   int numIters = -1;
   PSet* (*algFunc)();

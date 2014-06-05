@@ -21,7 +21,9 @@
 
 #include "base.h"
 #include "costs.h"
+#ifdef _OPENMP
 #include "omp.h"
+#endif
 #include "transform.h"
 #include "elemRedist.h"
 #include "twoSidedTrxm.h"
@@ -31,7 +33,9 @@
 #include <time.h>
 #include "DLAReg.h"
 #include "pack.h"
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 #include "lu.h"
 
 #if DOELEM||DOBLIS
