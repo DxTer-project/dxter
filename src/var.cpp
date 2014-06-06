@@ -171,7 +171,7 @@ void Var::PrintDecl(IndStream &out) const
 	DimVecConstIter iter = m_vec->begin();
 	for(; iter != m_vec->end(); ++iter) {
 	  out.Indent();
-	  *out << name << ".pubsh_back("
+	  *out << name << ".push_back("
 	       << *iter << ");\n";
 	}
 	break;
