@@ -313,7 +313,7 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 
   out.Indent();
 
-  *out << outName << ".SizeTo( " << inName << " );\n";
+  *out << outName << ".ResizeTo( " << inName << " );\n";
   out.Indent();
   
   if (m_srcType.m_notReped != m_destType.m_notReped) {

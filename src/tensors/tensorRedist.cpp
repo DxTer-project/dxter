@@ -472,7 +472,7 @@ void RedistNode::PrintCode(IndStream &out)
 
   DimSet diffs;
 
-  *out << outName << ".SizeTo( " << inName << " );\n";
+  *out << outName << ".ResizeTo( " << inName << " );\n";
   out.Indent();
     
   for (Dim dim = 0; dim < numDims; ++dim) {
@@ -500,7 +500,7 @@ void RedistNode::PrintCode(IndStream &out)
     else if (IsPrefix(dest, src) || dest.empty()) {
       if (!src.empty()) {
 	
-	*out << "AllGatherRedistPartial( " << outName << ", "
+	*out << "AllGatherRedist( " << outName << ", "
 	     << inName << ", " << dim << ", ";
 	DimVec suff;
 	GetSuffix(dest, src, suff);

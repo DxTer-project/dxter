@@ -187,27 +187,27 @@ DistTensorTest( const Grid& g )
     Set(B);
     Set(C);
 
-//**** (out of 4)
+    //**** (out of 4)
     //------------------------------------//
 
     //**** (out of 2)
     //------------------------------------//
 
     // A[D0,D2,D3] <- A[D01,D2,D3]
-    A__D_0__D_2__D_3.SizeTo( A__D_0_1__D_2__D_3 );
-    AllGatherRedistPartial( A__D_0__D_2__D_3, A__D_0_1__D_2__D_3, 0, modes_1 );
+    A__D_0__D_2__D_3.ResizeTo( A__D_0_1__D_2__D_3 );
+    AllGatherRedist( A__D_0__D_2__D_3, A__D_0_1__D_2__D_3, 0, modes_1 );
     // A[*,D2,D3] <- A[D0,D2,D3]
-    A__S__D_2__D_3.SizeTo( A__D_0__D_2__D_3 );
-    AllGatherRedistPartial( A__S__D_2__D_3, A__D_0__D_2__D_3, 0, modes_0 );
+    A__S__D_2__D_3.ResizeTo( A__D_0__D_2__D_3 );
+    AllGatherRedist( A__S__D_2__D_3, A__D_0__D_2__D_3, 0, modes_0 );
     // A[*,D20,D3] <- A[*,D2,D3]
-    A__S__D_2_0__D_3.SizeTo( A__S__D_2__D_3 );
+    A__S__D_2_0__D_3.ResizeTo( A__S__D_2__D_3 );
     LocalRedist( A__S__D_2_0__D_3, A__S__D_2__D_3, 1, modes_0 );
     // A[*,D02,D3] <- A[*,D20,D3]
-    A__S__D_0_2__D_3.SizeTo( A__S__D_2_0__D_3 );
+    A__S__D_0_2__D_3.ResizeTo( A__S__D_2_0__D_3 );
     PermutationRedist( A__S__D_0_2__D_3, A__S__D_2_0__D_3, 1 );
     // A[*,D0,D3] <- A[*,D02,D3]
-    A__S__D_0__D_3.SizeTo( A__S__D_0_2__D_3 );
-    AllGatherRedistPartial( A__S__D_0__D_3, A__S__D_0_2__D_3, 1, modes_2 );
+    A__S__D_0__D_3.ResizeTo( A__S__D_0_2__D_3 );
+    AllGatherRedist( A__S__D_0__D_3, A__S__D_0_2__D_3, 1, modes_2 );
 
     //------------------------------------//
 
@@ -216,35 +216,37 @@ DistTensorTest( const Grid& g )
     A__S__D_0__D_3.SetIndices( indices_acd );
     B__D_0__D_1__D_2__D_3.SetIndices( indices_cefd );
     C__S__D_1__D_2__D_0__D_3.SetIndices( indices_aefcd );
-    LocalContract(1.0, A__S__D_0__D_3, B__D_0__D_1__D_2__D_3, 0.0, C__S__D_1__D_2__D_0__D_3);
+    LocalContract(1.0, A__S__D_0__D_3.LockedTensor(), B__D_0__D_1__D_2__D_3.LockedTensor(), 0.0, C__S__D_1__D_2__D_0__D_3.Tensor());
     // C[*,D1,*,D0,D3] <- C[*,D1,D2,D0,D3]
-    C__S__D_1__S__D_0__D_3.SizeTo( C__S__D_1__D_2__D_0__D_3 );
-    AllGatherRedistPartial( C__S__D_1__S__D_0__D_3, C__S__D_1__D_2__D_0__D_3, 2, modes_2 );
+    C__S__D_1__S__D_0__D_3.ResizeTo( C__S__D_1__D_2__D_0__D_3 );
+    AllGatherRedist( C__S__D_1__S__D_0__D_3, C__S__D_1__D_2__D_0__D_3, 2, modes_2 );
     // C[*,D12,*,D0,D3] <- C[*,D1,*,D0,D3]
-    C__S__D_1_2__S__D_0__D_3.SizeTo( C__S__D_1__S__D_0__D_3 );
+    C__S__D_1_2__S__D_0__D_3.ResizeTo( C__S__D_1__S__D_0__D_3 );
     LocalRedist( C__S__D_1_2__S__D_0__D_3, C__S__D_1__S__D_0__D_3, 1, modes_2 );
     // C[*,D21,*,D0,D3] <- C[*,D12,*,D0,D3]
-    C__S__D_2_1__S__D_0__D_3.SizeTo( C__S__D_1_2__S__D_0__D_3 );
+    C__S__D_2_1__S__D_0__D_3.ResizeTo( C__S__D_1_2__S__D_0__D_3 );
     PermutationRedist( C__S__D_2_1__S__D_0__D_3, C__S__D_1_2__S__D_0__D_3, 1 );
     // C[*,D2,*,D0,D3] <- C[*,D21,*,D0,D3]
-    C__S__D_2__S__D_0__D_3.SizeTo( C__S__D_2_1__S__D_0__D_3 );
-    AllGatherRedistPartial( C__S__D_2__S__D_0__D_3, C__S__D_2_1__S__D_0__D_3, 1, modes_1 );
+    C__S__D_2__S__D_0__D_3.ResizeTo( C__S__D_2_1__S__D_0__D_3 );
+    AllGatherRedist( C__S__D_2__S__D_0__D_3, C__S__D_2_1__S__D_0__D_3, 1, modes_1 );
     // C[D1,D2,*,D0,D3] <- C[*,D2,*,D0,D3]
-    C__D_1__D_2__S__D_0__D_3.SizeTo( C__S__D_2__S__D_0__D_3 );
+    C__D_1__D_2__S__D_0__D_3.ResizeTo( C__S__D_2__S__D_0__D_3 );
     LocalRedist( C__D_1__D_2__S__D_0__D_3, C__S__D_2__S__D_0__D_3, 0, modes_1 );
     // C[D10,D2,*,D3] <- C[D1,D2,*,D0,D3] (with SumScatter on D0)
-    C__D_1_0__D_2__S__D_3.SizeTo( C__D_1__D_2__S__D_0__D_3 );
+    C__D_1_0__D_2__S__D_3.ResizeTo( C__D_1__D_2__S__D_0__D_3 );
     ReduceScatterRedist( C__D_1_0__D_2__S__D_3, C__D_1__D_2__S__D_0__D_3, 3, 0 );
     // C[D10,D2,D3] <- C[D10,D2,*,D3] (with SumScatter on D3)
-    C__D_1_0__D_2__D_3.SizeTo( C__D_1_0__D_2__S__D_3 );
+    C__D_1_0__D_2__D_3.ResizeTo( C__D_1_0__D_2__S__D_3 );
     ReduceScatterRedist( C__D_1_0__D_2__D_3, C__D_1_0__D_2__S__D_3, 3, 2 );
     // C[D01,D2,D3] <- C[D10,D2,D3]
-    C__D_0_1__D_2__D_3.SizeTo( C__D_1_0__D_2__D_3 );
+    C__D_0_1__D_2__D_3.ResizeTo( C__D_1_0__D_2__D_3 );
     PermutationRedist( C__D_0_1__D_2__D_3, C__D_1_0__D_2__D_3, 0 );
 
     //------------------------------------//
 
     //****
+
+
 }
 
 int 

@@ -263,10 +263,10 @@ void Contraction::PrintCode(IndStream &out)
   *out << "LocalContract(";
   out << m_alpha;
   *out << ", " << in0.str()
-       << ", " << in1.str()
-       << ", ";
+       << ".LockedTensor(), " << in1.str()
+       << ".LockedTensor(), ";
   out << m_beta;
-  *out << ", " << in2.str() << ");\n";
+  *out << ", " << in2.str() << ".Tensor());\n";
 }
 
 Phase Contraction::MaxPhase() const
