@@ -38,6 +38,7 @@ void ProcessInput(int argc,  char** const argv, Params& args){
     }
 
     args.gridShape.resize(GRIDORDER);
+    args.nProcs = 1;
     for(int i = 0; i < GRIDORDER; i++){
         int gridDim = atoi(argv[++argCount]);
         if(gridDim <= 0){
@@ -45,9 +46,10 @@ void ProcessInput(int argc,  char** const argv, Params& args){
             Usage();
             throw ArgException();
         }
+	std::cout << "order " << i << " is " << gridDim << std::endl;
+	args.nProcs *= gridDim;
         args.gridShape[i] = gridDim;
     }
-    args.nProcs = tmen::prod(args.gridShape);
 }
 
 template<typename T>
@@ -266,6 +268,7 @@ main( int argc, char* argv[] )
 
         if(commRank == 0 && commSize != args.nProcs){
             std::cerr << "program not started with correct number of processes\n";
+	    std::cerr << commSize << " vs " << args.nProcs << std::endl;
             Usage();
             throw ArgException();
         }
