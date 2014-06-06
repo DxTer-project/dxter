@@ -469,10 +469,12 @@ Phase Trmm3::MaxPhase() const
   }
 }
 
+#if DOELEM
 bool Trmm3::DoNotCullDP() const
 {
   return GetLayer() == DMLAYER;
 }
+#endif
 
 NodeType Trmm3::GetType() const
 {

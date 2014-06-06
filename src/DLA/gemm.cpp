@@ -237,25 +237,27 @@ void Gemm::Prop()
 #elif DOBLIS
       case (S1LAYER):
       case (S2LAYER):
-      case (S3LAYER):
-        DLANode *in0 = (DLANode*)Input(0);
-        unsigned int num0 = InputConnNum(0);
-        DLANode *in2 = (DLANode*)Input(2);
-        unsigned int num2 = InputConnNum(2);
-        const Sizes *size1 = in0->LocalM(num0);
-        const Sizes *size2 = in0->LocalN(num0);
-        const Sizes *size3 = in2->LocalN(num2);
-        if (size1->NumSizes() != size2->NumSizes())
-          throw;
-        if (size2->NumSizes() != size3->NumSizes())
-          throw;
-        m_cost = GetCost(S3LAYER, size1, size2, size3) / NumCoresInComm(m_comm);
-	if (GetLayer() == S3LAYER && NumCoresInComm(m_comm) > 1) {
-	  //BAM Should add cost for B panel, too.
-	  Size numAElems = size1->SumProds11(*size2);
-	  m_cost += AdditionalCostForBringingIntoL2(this, 0, numAElems, m_comm);
+      case (S3LAYER): 
+	{
+	  DLANode *in0 = (DLANode*)Input(0);
+	  unsigned int num0 = InputConnNum(0);
+	  DLANode *in2 = (DLANode*)Input(2);
+	  unsigned int num2 = InputConnNum(2);
+	  const Sizes *size1 = in0->LocalM(num0);
+	  const Sizes *size2 = in0->LocalN(num0);
+	  const Sizes *size3 = in2->LocalN(num2);
+	  if (size1->NumSizes() != size2->NumSizes())
+	    throw;
+	  if (size2->NumSizes() != size3->NumSizes())
+	    throw;
+	  m_cost = GetCost(S3LAYER, size1, size2, size3) / NumCoresInComm(m_comm);
+	  if (GetLayer() == S3LAYER && NumCoresInComm(m_comm) > 1) {
+	    //BAM Should add cost for B panel, too.
+	    Size numAElems = size1->SumProds11(*size2);
+	    m_cost += AdditionalCostForBringingIntoL2(this, 0, numAElems, m_comm);
+	  }
+	  break;
 	}
-	break;
 #endif
     default:
       throw;
