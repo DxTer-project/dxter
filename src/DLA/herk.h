@@ -151,6 +151,7 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const;
+  virtual bool CanTransposeInputs() const;
 #endif
   virtual void SanityCheck();
   virtual void Prop();
@@ -158,14 +159,15 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "TriRK";}
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  virtual bool CanTransposeInputs() const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
+#if DOBLIS
   virtual bool IsBLISParallelizable() const;
   virtual void Parallelize(Comm comm);
   virtual bool IsParallel() const;
   virtual bool RemoveParallelization();
   virtual Comm ParallelComm() const {return m_comm;}
+#endif
 };
 
 #if DOELEM

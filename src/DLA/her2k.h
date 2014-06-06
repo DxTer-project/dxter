@@ -117,13 +117,13 @@ class Her2k : public DLAOp<3,1>, public Her2kProps
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const;
+  virtual bool CanTransposeInputs() const {return false;}
+  virtual bool ShouldCullDP() const;
 #endif
   virtual void Prop();
   virtual void SanityCheck();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual Phase MaxPhase() const;
-  virtual bool ShouldCullDP() const;
-  virtual bool CanTransposeInputs() const {return false;}
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "Her2kLoop";}

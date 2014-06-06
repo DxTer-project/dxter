@@ -263,6 +263,7 @@ DLANode* DLANode::FindSideEffectingUser(unsigned int num)
   return NULL;
 }
 
+#if DOBLIS
 void DLANode::UpdateInnerPackingMultiple(PackSize size)
 {
   cout << GetNodeClass() << endl;
@@ -275,8 +276,9 @@ void DLANode::UpdateInnerPackingMultiple(PackSize size)
 
   throw;
 }
+#endif
 
-#if TWOD
+#if DOELEM
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 {
   doNotCull = false;
@@ -302,7 +304,9 @@ void DLACullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull)
   cullIfPossible = false;
   doNotCull = false;
 }
+#endif
 
+#if TWOD
 void DLACullLA(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 {
   cullIfPossible = false;

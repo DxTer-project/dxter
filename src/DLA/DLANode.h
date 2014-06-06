@@ -78,24 +78,26 @@ class DLANode : public Node
 #if DOELEM
   DLANode* FindNonRedistParent(unsigned int num);
   DLANode* FindNonRedistParent(unsigned int num, unsigned int &parentNum);
+  virtual bool CanTransposeInputs() const {return false;} 
+  virtual bool ShouldCullDP() const {return false;}
+  virtual bool DoNotCullDP() const {return false;}
 #endif
   DLANode* FindSideEffectingUser(unsigned int num);
 #if TWOD
   bool IsScalar(unsigned int num) const;
 #endif
-  virtual bool ShouldCullDP() const {return false;}
-  virtual bool DoNotCullDP() const {return false;}
-  virtual bool ShouldCullSR() const {return false;}
-  virtual bool DoNotCullSR() const {return false;}
-  virtual bool CanTransposeInputs() const {return false;} 
+#if DOBLIS
   virtual void UpdateInnerPackingMultiple(PackSize size);
   virtual bool IsBLISParallelizable() const {return false;}
   virtual void Parallelize(Comm comm) {throw;}
+#endif
 };
 
 #if TWOD
+#if DOELEM
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 void DLACullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
+#endif
 void DLACullLA(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 #if DOSQM || DOSM
 void DLACullSR(Poss *poss, bool &cullIfPossible, bool &doNotCull);

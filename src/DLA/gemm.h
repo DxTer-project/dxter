@@ -24,7 +24,7 @@
 #pragma once
 
 #include "layers.h"
-#if (DOBLIS||DOELEM)
+#if (DOBLIS||DOELEM||DOLLDLA)
 
 #include "DLAOp.h"
 #include "transform.h"
@@ -38,6 +38,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
 		Coef alpha, Coef beta, 
 		Layer layer, Type type);
 
+#if DOBLIS||DOELEM
 Loop* GemmVar3Loop(Node *Ain, unsigned int Anum, 
 		    Node *Bin, unsigned int Bnum, 
 		      Node *Cin, unsigned int Cnum,
@@ -45,6 +46,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
 		   bool reverse,
 		      Coef alpha, Coef beta, 
 		   Layer layer, Type type);
+#endif //DOBLIS||DOELEM
 
 Loop* GemmVar2Loop(Node *Ain, unsigned int Anum, 
 		    Node *Bin, unsigned int Bnum, 
@@ -71,23 +73,22 @@ class Gemm : public DLAOp<3,1>
   virtual NodeType GetType() const;
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const;
+  virtual bool CanTransposeInputs() const;
+  virtual bool DoNotCullDP() const;
 #endif
   virtual Phase MaxPhase() const;
   virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual bool DoNotCullDP() const;
-  virtual bool ShouldCullSR() const;
-  virtual bool CanTransposeInputs() const;
   static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);
 #if DOBLIS
   virtual void UpdateInnerPackingMultiple(PackSize size);
-#endif
   virtual bool IsBLISParallelizable() const;
   virtual void Parallelize(Comm comm);
   virtual bool IsParallel() const;
   virtual bool RemoveParallelization();
   virtual Comm ParallelComm() const {return m_comm;}
+#endif
 };
 
 class GemmLoopExp : public SingleTrans
@@ -203,6 +204,7 @@ class GemmLowerLayer : public LowerLayer
   virtual void Apply(Poss *poss, Node *node) const;
 };
 
+#if DOELEM||DOBLIS
 class SplitGemm : public SingleTrans
 {
  public:
@@ -212,5 +214,6 @@ class SplitGemm : public SingleTrans
   virtual bool CanApply(const Poss *poss, const Node *node) const;
   virtual void Apply(Poss *poss, Node *node) const;
 };
+#endif
 
 #endif

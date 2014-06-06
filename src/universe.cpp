@@ -433,6 +433,8 @@ void Universe::PrintBest()
     IndStream optOut(&cout,BLISSTREAM);
 #elif DOTENSORS
     IndStream optOut(&cout,TENSORSTREAM);
+#elif DOLLDLA
+    IndStream optOut(&cout,LLDLASTREAM);
 #endif
 
     VarSet set;

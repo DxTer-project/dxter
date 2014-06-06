@@ -399,6 +399,7 @@ Phase TriRK::MaxPhase() const
 #endif
 }
 
+#if DOBLIS
 bool TriRK::IsBLISParallelizable() const
 {
   return GetLayer() == S3LAYER;
@@ -425,6 +426,7 @@ void TriRK::Parallelize(Comm comm)
   else
     throw;
 }
+#endif
 
 #if DOELEM
 const DistType& TriRK::GetDistType(unsigned int num) const
@@ -668,6 +670,7 @@ void TriRK::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_comm);
 }
 
+#if DOELEM
 bool TriRK::CanTransposeInputs() const
 {
   if (GetLayer() == SMLAYER)
@@ -676,7 +679,6 @@ bool TriRK::CanTransposeInputs() const
     return false;
 }
 
-#if DOELEM
 string TriRKTrans::GetTransType() const
 {
   return "TriRK";

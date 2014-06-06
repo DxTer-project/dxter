@@ -60,7 +60,6 @@ class Trxm : public DLAOp<2,1>, public TrProps
   virtual void SanityCheck();
 
   static Cost GetCost(Layer layer, Side side, const Sizes *localMs, const Sizes *localNs);
-  virtual bool ShouldCullSR() const;
 };
 
 class Trmm3 : public DLAOp<3,1>, public TrProps
@@ -77,13 +76,12 @@ class Trmm3 : public DLAOp<3,1>, public TrProps
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const;
+  virtual bool DoNotCullDP() const;
 #endif
   virtual Phase MaxPhase() const;
-  virtual bool DoNotCullDP() const;
   virtual NodeType GetType() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual bool ShouldCullSR() const;
 };
 
 #if DOBLIS

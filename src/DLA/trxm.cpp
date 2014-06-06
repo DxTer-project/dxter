@@ -380,13 +380,7 @@ void Trxm::SanityCheck()
 #endif
 }
 
-bool Trxm::ShouldCullSR() const
-{
-  if (GetLayer() == SMLAYER)
-    return m_hasRefined;
-  else
-    return false;
-}
+
 
 
 Cost Trxm::GetCost(Layer layer, Side side, const Sizes *localMs, const Sizes *localNs)
@@ -548,13 +542,6 @@ void Trmm3::PrintCode(IndStream &out)
   << ");\n";
 }
 
-bool Trmm3::ShouldCullSR() const
-{
-  if (GetLayer() == SMLAYER)
-    return m_hasRefined;
-  else
-    return false;
-}
 
 string TrxmLoopExp::GetType() const
 {

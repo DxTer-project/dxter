@@ -21,7 +21,7 @@
 
 #include "gemm.h"
 
-#if DOBLIS||DOELEM
+#if DOBLIS||DOELEM||DOLLDLA
 #include "elemRedist.h"
 #include "string.h"
 #include "helperNodes.h"
@@ -31,6 +31,7 @@
 
 using namespace std;
 
+#if DOELEM
 bool IsDMGemm(const Node *node)
 {
   if (node->GetNodeClass() != Gemm::GetClass())
@@ -41,6 +42,7 @@ bool IsDMGemm(const Node *node)
   else
     return true;
 }
+#endif
 
 Gemm::Gemm(Layer layer, Trans transA, Trans transB, Coef alpha, Coef beta, Type type)
 : m_transA(transA),
@@ -53,6 +55,7 @@ m_beta(beta),
   SetLayer(layer);
 }
 
+#if DOBLIS
 bool Gemm::IsBLISParallelizable() const
 {
   return GetLayer() == S3LAYER;
@@ -76,6 +79,7 @@ void Gemm::Parallelize(Comm comm)
   else
     throw;
 }
+#endif //DOBLIS
 
 
 Node* Gemm::BlankInst()
@@ -165,30 +169,30 @@ Phase Gemm::MaxPhase() const
 #endif
   default:
     throw;
-}
+  }
 }
 
+#if DOELEM
 bool Gemm::DoNotCullDP() const
 {
   return GetLayer() == DMLAYER;
-}
-
-bool Gemm::ShouldCullSR() const
-{
-  if (GetLayer() == SMLAYER)
-    return m_hasRefined;
-  else
-    return false;
 }
 
 bool Gemm::CanTransposeInputs() const
 {
   return GetLayer() == SMLAYER;
 }
+#endif
 
 Cost Gemm::GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3)
 {
-  if (layer == SMLAYER || layer == S1LAYER || layer == S2LAYER || layer == S3LAYER)
+#if DOELEM
+  if (layer == SMLAYER)
+#elif DOBLIS
+  if (layer == S1LAYER || layer == S2LAYER || layer == S3LAYER)
+#else
+  if (false)
+#endif
     return TWO * GAMMA * localDim1->SumProds111(*localDim2, *localDim3);
   else
     throw;
@@ -212,10 +216,12 @@ void Gemm::Prop()
     DLAOp<3,1>::Prop();
     switch(GetLayer()) {
       case(ABSLAYER):
-      case (DMLAYER):
         m_cost = ZERO;
         break;
 #if DOELEM
+      case (DMLAYER):
+        m_cost = ZERO;
+        break;
       case (SMLAYER):
       {
         DLANode *in0 = (DLANode*)Input(0);
@@ -251,6 +257,8 @@ void Gemm::Prop()
 	}
 	break;
 #endif
+    default:
+      throw;
     }
   }
 }
@@ -390,13 +398,10 @@ void LocalGemmTransUpdate(DistType t0, DistType t1, Trans &transA, Trans &transB
 void Gemm::PrintCode(IndStream &out)
 {
   out.Indent();
-  if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER) {
-    if (GetLayer() == ABSLAYER)
-      *out << "AbsGemm( ";
-    else
-      *out << "DistGemm( ";
-    *out << TransToStr(m_transA) << ", " << TransToStr(m_transB)
-    << ", \n\t";
+  if (GetLayer() == ABSLAYER ) {
+    *out << "AbsGemm( "
+	 << TransToStr(m_transA) << ", " << TransToStr(m_transB)
+	 << ", \n\t";
     out << m_alpha;
     *out << ", "
     << GetInputName(0).str() << ", " << GetInputName(1).str()
@@ -405,6 +410,17 @@ void Gemm::PrintCode(IndStream &out)
     *out << ", " << GetInputName(2).str() << " );\n";
   }
 #if DOELEM
+  else if (GetLayer() == DMLAYER) {
+    *out << "DistGemm( "
+	 << TransToStr(m_transA) << ", " << TransToStr(m_transB)
+    << ", \n\t";
+    out << m_alpha;
+    *out << ", "
+    << GetInputName(0).str() << ", " << GetInputName(1).str()
+    << ", ";
+    out << m_beta;
+    *out << ", " << GetInputName(2).str() << " );\n";
+  }
   else if (GetLayer() == SMLAYER) {
     string transAStr, transBStr;
     DistType t0 = InputDistType(0);
@@ -422,7 +438,7 @@ void Gemm::PrintCode(IndStream &out)
     out << m_beta;
     *out << ", " << GetInputName(2).str() << " );\n";
   }
-#endif
+#elif DOBLIS
   else if (GetLayer() == S1LAYER ||
            GetLayer() == S2LAYER ||
            GetLayer() == S3LAYER) {
@@ -466,6 +482,7 @@ void Gemm::PrintCode(IndStream &out)
       throw;
     
   }
+#endif
   else {
     throw;
   }
@@ -532,6 +549,7 @@ void GemmLoopExp::Apply(Poss *poss, Node *node) const
                           gemm->m_transA, gemm->m_transB,
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
       break;
+#if DOBLIS||DOELEM
     case(1):
       loop = GemmVar3Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
@@ -548,6 +566,7 @@ void GemmLoopExp::Apply(Poss *poss, Node *node) const
                           true,
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
       break;
+#endif //DOBLIS||DOELEM
     case(2):
       loop = GemmVar2Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
@@ -1241,7 +1260,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
                                                 1, gepp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
-  Loop *loop;
+  Loop *loop = NULL;
 #if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -1257,6 +1276,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
 }
 
 
+#if DOBLIS||DOELEM
 Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
                    Node *Bin, unsigned int Bnum,
                    Node *Cin, unsigned int Cnum,
@@ -1350,6 +1370,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   
   return loop;
 }
+#endif //DOBLIS||DOELEM
 
 
 Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
@@ -1394,7 +1415,7 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
                                                 1, gepp, 0);
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
-  Loop *loop;
+  Loop *loop = NULL;
 #if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
@@ -1566,7 +1587,7 @@ string GemmLowerLayer::GetType() const
   + " to " + LayerNumToStr(m_toLayer);
 }
 
-
+#if DOBLIS||DOELEM
 string SplitGemm::GetType() const
 { 
   return "Split Gemm " + LayerNumToStr(m_layer);
@@ -1610,5 +1631,5 @@ void SplitGemm::Apply(Poss *poss, Node *node) const
   poss->AddNode(CTmp);
   poss->AddNode(axpy);
 }
-
+#endif //DOBLIS||DOELEM
 #endif

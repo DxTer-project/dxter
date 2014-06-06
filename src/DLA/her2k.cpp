@@ -238,6 +238,7 @@ Phase Her2k::MaxPhase() const
 #endif
 }
 
+#if DOELEM
 bool Her2k::ShouldCullDP() const
 {
   if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
@@ -245,6 +246,7 @@ bool Her2k::ShouldCullDP() const
   else
     return false;
 }
+#endif
 
 
 void Her2k::PrintCode(IndStream &out)

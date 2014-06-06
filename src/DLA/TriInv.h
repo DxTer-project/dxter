@@ -58,9 +58,11 @@ class TriInv : public DLAOp<1,1>
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual Phase MaxPhase() const;
+#if DOELEM
   virtual bool ShouldCullDP() const {return m_layer==ABSLAYER;}
   virtual bool DoNotCullDP() const {return m_layer==DMLAYER;}
   virtual bool CanTransposeInputs() const {return m_layer==SMLAYER;}
+#endif
 };
 
 class TriInvLoopExp : public SingleTrans

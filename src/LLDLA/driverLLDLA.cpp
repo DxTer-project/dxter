@@ -167,17 +167,14 @@ PSet* Example1()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Contraction *cont = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"acd", "cefd", "aef", (string)"cd");
-  cont->AddInputs(6,
+  Gemm *gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, REAL);
+  gemm->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
 		  tunC,0);
 
-  Poss *innerPoss = new Poss(cont,true);
-  PSet *innerSet = new PSet(innerPoss);
-
   OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0),0);
+  Cout->AddInput(gemm,0);
 
   Poss *outerPoss = new Poss(Cout,true);
   PSet *outerSet = new PSet(outerPoss);
