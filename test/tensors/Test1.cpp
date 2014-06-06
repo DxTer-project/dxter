@@ -10,22 +10,16 @@
 #include "tensormental.hpp"
 using namespace tmen;
 
+#define GRIDORDER 4
+
 void Usage(){
-    std::cout << "./DistTensor <gridOrder> <gridDim0> <gridDim1> ... <tenOrder> <tenDim0> <tenDim1> ... \"<tensorDist>\"\n";
-    std::cout << "<gridOrder>  : order of the grid ( >0 )\n";
+  std::cout << "./DistTensor <gridDim0> <gridDim1> ... \n";
     std::cout << "<gridDimK>   : dimension of mode-K of grid\n";
-    std::cout << "<tenOrder>   : order of the tensor ( >0 )\n";
-    std::cout << "<tenDimK>    : dimension of mode-K of tensor\n";
-    std::cout << "<tensorDist> : distribution of tensor(Must be in quotes)\n";
 }
 
 typedef struct Arguments{
-  Unsigned gridOrder;
-  Unsigned tenOrder;
-  Unsigned nProcs;
   ObjShape gridShape;
-  ObjShape tensorShape;
-  TensorDistribution tensorDist;
+  Unsigned nProcs;
 } Params;
 
 void ProcessInput(int argc,  char** const argv, Params& args){
@@ -37,22 +31,14 @@ void ProcessInput(int argc,  char** const argv, Params& args){
         throw ArgException();
     }
 
-    Unsigned gridOrder = atoi(argv[++argCount]);
-    args.gridOrder = gridOrder;
-    if(gridOrder <= 0){
-        std::cerr << "Grid order must be greater than 0\n";
-        Usage();
-        throw ArgException();
-    }
-
-    if(argCount + gridOrder >= argc){
+    if(argCount + GRIDORDER >= argc){
         std::cerr << "Missing required grid dimensions\n";
         Usage();
         throw ArgException();
     }
 
-    args.gridShape.resize(gridOrder);
-    for(int i = 0; i < gridOrder; i++){
+    args.gridShape.resize(GRIDORDER);
+    for(int i = 0; i < GRIDORDER; i++){
         int gridDim = atoi(argv[++argCount]);
         if(gridDim <= 0){
             std::cerr << "Grid dim must be greater than 0\n";
@@ -62,47 +48,6 @@ void ProcessInput(int argc,  char** const argv, Params& args){
         args.gridShape[i] = gridDim;
     }
     args.nProcs = tmen::prod(args.gridShape);
-
-    if(argCount + 1 >= argc){
-        std::cerr << "Missing required tenOrder argument\n";
-        Usage();
-        throw ArgException();
-    }
-    Unsigned tenOrder = atoi(argv[++argCount]);
-    args.tenOrder = tenOrder;
-
-    if(argCount + tenOrder >= argc){
-        std::cerr << "Missing required tensor dimensions\n";
-        Usage();
-        throw ArgException();
-    }
-
-    args.tensorShape.resize(tenOrder);
-    for(i = 0; i < tenOrder; i++){
-        Unsigned tensorDim = atoi(argv[++argCount]);
-        if(tensorDim == 0){
-            std::cerr << "Tensor dimension must be greater than 0\n";
-            Usage();
-            throw ArgException();
-        }
-        args.tensorShape[i] = tensorDim;
-    }
-
-    if(argCount + 1 >= argc){
-        std::cerr << "Missing tensor distribution argument\n";
-        Usage();
-        throw ArgException();
-    }
-
-    std::string tensorDist(argv[++argCount]);
-    args.tensorDist = tmen::StringToTensorDist(tensorDist);
-
-
-    if(args.tensorDist.size() != args.tensorShape.size()){
-        std::cerr << "Tensor distribution must be of same order as tensor\n";
-        Usage();
-        throw ArgException();
-    }
 }
 
 template<typename T>
@@ -317,7 +262,7 @@ main( int argc, char* argv[] )
 
         ProcessInput(argc, argv, args);
 
-        if(commRank == 0 && commSize != 4){
+        if(commRank == 0 && commSize != args.nProcs){
             std::cerr << "program not started with correct number of processes\n";
             Usage();
             throw ArgException();
@@ -325,17 +270,12 @@ main( int argc, char* argv[] )
 
         if(commRank == 0){
             printf("Creating %d", args.gridShape[0]);
-            for(i = 1; i < args.gridOrder; i++)
+            for(i = 1; i < GRIDORDER; i++)
                 printf(" x %d", args.gridShape[i]);
             printf(" grid\n");
-
-            printf("Creating [%d", args.tensorShape[0]);
-            for(i = 1; i < args.tenOrder; i++)
-                printf(", %d", args.tensorShape[i]);
-            printf("] tensor\n");
         }
 
-        const Grid g( comm, args.gridOrder, args.gridShape );
+        const Grid g( comm, GRIDORDER, args.gridShape );
 
         if( commRank == 0 )
         {
