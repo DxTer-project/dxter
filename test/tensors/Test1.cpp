@@ -120,8 +120,6 @@ DistTensorTest( const Grid& g )
     TensorDistribution dist__D_0_1__D_2__D_3 = tmen::StringToTensorDist("[(0,1),(2),(3)]");
     TensorDistribution dist__D_1_0__D_2__S__D_3 = tmen::StringToTensorDist("[(1,0),(2),(),(3)]");
     TensorDistribution dist__D_1_0__D_2__D_3 = tmen::StringToTensorDist("[(1,0),(2),(3)]");
-    //A[D01,D2,D3]
-    DistTensor<double> A__D_0_1__D_2__D_3( dist__D_0_1__D_2__D_3, g );
     //A[D0,D2,D3]
     DistTensor<double> A__D_0__D_2__D_3( dist__D_0__D_2__D_3, g );
     //A[*,D02,D3]
@@ -132,10 +130,6 @@ DistTensorTest( const Grid& g )
     DistTensor<double> A__S__D_2_0__D_3( dist__S__D_2_0__D_3, g );
     //A[*,D2,D3]
     DistTensor<double> A__S__D_2__D_3( dist__S__D_2__D_3, g );
-    //B[D0,D1,D2,D3]
-    DistTensor<double> B__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
-    //C[D01,D2,D3]
-    DistTensor<double> C__D_0_1__D_2__D_3( dist__D_0_1__D_2__D_3, g );
     //C[D10,D2,D3]
     DistTensor<double> C__D_1_0__D_2__D_3( dist__D_1_0__D_2__D_3, g );
     //C[D10,D2,*,D3]
@@ -181,13 +175,13 @@ DistTensorTest( const Grid& g )
 // C input has 3 dims
 //	Starting distribution: [D01,D2,D3] or _D_0_1__D_2__D_3
 
-    DistTensor<T> A(shapes3, dist__D_0_1__D_2__D_3, indices_acd, g);
-    DistTensor<T> B(shapes4, dist__D_0__D_1__D_2__D_3, indices_cefd, g);
-    DistTensor<T> C(shapes3, dist__D_0_1__D_2__D_3, indices_acd, g);
+    DistTensor<T> A__D_0_1__D_2__D_3(shapes3, dist__D_0_1__D_2__D_3, indices_acd, g);
+    DistTensor<T> B__D_0__D_1__D_2__D_3(shapes4, dist__D_0__D_1__D_2__D_3, indices_cefd, g);
+    DistTensor<T> C__D_0_1__D_2__D_3(shapes3, dist__D_0_1__D_2__D_3, indices_acd, g);
 
-    Set(A);
-    Set(B);
-    Set(C);
+    Set(A__D_0_1__D_2__D_3);
+    Set(B__D_0__D_1__D_2__D_3);
+    Set(C__D_0_1__D_2__D_3);
 
     //**** (out of 4)
     //------------------------------------//

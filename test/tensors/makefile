@@ -26,8 +26,11 @@ all: Test1.x
 Test1.o: Test1.cpp $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-Test1.x: Test1.o $(HEADERS)
+Test1.x: Test1.o $(HEADERS) $(TENSORMENTALLIB)
 	$(LINKER) $(CFLAGS) Test1.o $(TENSORMENTALLIB) -framework Accelerate -o $@
+
+#	$(LINKER) $(CFLAGS) Test1.o $(TENSORMENTALLIB) $(BLIS_LIB) -o $@
+#
 
 clean:
 	rm -f *.o *.x *~
