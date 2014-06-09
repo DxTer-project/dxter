@@ -154,9 +154,9 @@ int main(int argc, const char* argv[])
 
 PSet* Example1()
 {
-  InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A");
-  InputNode *Bin = new InputNode("B input",  smallSize, smallSize, "B");
-  InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C");
+  InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", UNITSTRIDE, NONUNITSTRIDE);
+  InputNode *Bin = new InputNode("B input",  smallSize, smallSize, "B", UNITSTRIDE, NONUNITSTRIDE);
+  InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", UNITSTRIDE, NONUNITSTRIDE);
 
   PossTunnel *tunA = new PossTunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);

@@ -139,6 +139,20 @@ const Sizes* Combine::LocalN(unsigned int num) const
     return InputLocalN(0);
   }
 }
+
+
+#if DOLLDLA
+Stride Combine::RowStride(unsigned int num) const
+{
+  return InputRowStride(0);
+}
+
+Stride Combine::ColStride(unsigned int num) const
+{
+  return InputColStride(0);
+}
+#endif //DOLLDLA
+
 #else
 const Dim Combine::NumDims(unsigned int num) const
 {

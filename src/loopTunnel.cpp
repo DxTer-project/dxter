@@ -274,6 +274,19 @@ const Sizes* LoopTunnel::LocalN(unsigned int num) const
       throw;
   }
 }
+
+#if DOLLDLA
+Stride LoopTunnel::RowStride(unsigned int num) const
+{
+  return InputRowStride(0);
+}
+
+Stride LoopTunnel::ColStride(unsigned int num) const
+{
+  return InputColStride(0);
+}
+#endif //DOLLDLA
+
 #else
 const Sizes* LoopTunnel::Len(unsigned int num,Dim dim) const
 {

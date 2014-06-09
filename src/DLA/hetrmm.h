@@ -28,6 +28,8 @@
 #include "elemRedist.h"
 #include "gemm.h"
 
+#if DOBLIS||DOELEM
+
 Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num);
 Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num);
 
@@ -82,3 +84,5 @@ class DistHetrmmToLocalHetrmm : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 #endif
+
+#endif //DOBLIS||DOELEM

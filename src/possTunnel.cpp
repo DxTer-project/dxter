@@ -182,6 +182,19 @@ const Sizes* PossTunnel::LocalN(unsigned int num) const
   
   return input->LocalN(conn->m_num);
 }
+
+#if DOLLDLA
+Stride PossTunnel::RowStride(unsigned int num) const
+{
+  return InputRowStride(0);
+}
+
+Stride PossTunnel::ColStride(unsigned int num) const
+{
+  return InputColStride(0);
+}
+#endif //DOLLDLA
+
 #else
 const Dim PossTunnel::NumDims(unsigned int num) const
 {

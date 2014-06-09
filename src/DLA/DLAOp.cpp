@@ -55,6 +55,25 @@ template<unsigned int numIn, unsigned int numOut>
     throw;
   return InputLocalN(numIn - numOut + num);  
 }
+
+#if DOLLDLA
+template<unsigned int numIn, unsigned int numOut>
+Stride DLAOp<numIn, numOut>::RowStride(unsigned int num) const
+{
+  if (num >= numOut)
+    throw;
+  return InputRowStride(numIn - numOut + num);  
+}
+
+template<unsigned int numIn, unsigned int numOut>
+   Stride DLAOp<numIn, numOut>::ColStride(unsigned int num) const
+{
+  if (num >= numOut)
+    throw;
+  return InputColStride(numIn - numOut + num);  
+}
+#endif //DOLLDLA
+
 #else
 template<unsigned int numIn, unsigned int numOut>
 const Sizes* DLAOp<numIn, numOut>::Len(unsigned int num, Dim dim) const

@@ -86,6 +86,24 @@ const DistType& DLANode::InputDistType(unsigned int num) const
 }
 #endif
 
+#if DOLLDLA
+Stride DLANode::InputRowStride(unsigned int num) const
+{
+  const NodeConn *conn = m_inputs[num];
+  DLANode *in = (DLANode*)(conn->m_n);
+  unsigned int inNum = conn->m_num;
+  return in->RowStride(inNum);
+}
+
+Stride DLANode::InputColStride(unsigned int num) const
+{
+  const NodeConn *conn = m_inputs[num];
+  DLANode *in = (DLANode*)(conn->m_n);
+  unsigned int inNum = conn->m_num;
+  return in->ColStride(inNum);
+}
+#endif //DOLLDLA
+
 string DLANode::GetCostStr()
 {
   std::stringstream str;

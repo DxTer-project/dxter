@@ -72,6 +72,10 @@ class LoopTunnel : public PossTunnel
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#if DOLLDLA
+  virtual Stride RowStride(unsigned int num) const;
+  virtual Stride ColStride(unsigned int num) const;
+#endif //DOLLDLA
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;

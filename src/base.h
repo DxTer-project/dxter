@@ -452,3 +452,26 @@ string LayerNumToStr(Layer layer);
 
 #define SIMP -1
 #define GLOBSIMP -2
+
+
+#if DOLLDLA
+enum Stride { UNITSTRIDE,
+	      NONUNITSTRIDE,
+	      BADSTRIDE };
+
+inline bool IsUnitStride(const Stride &stride)
+{
+  switch (stride)
+    {
+    case (UNITSTRIDE):
+      return true;
+    case (NONUNITSTRIDE):
+      return false;
+    case (BADSTRIDE):
+    default:
+      throw;
+    }
+}
+
+
+#endif //DOLLDLA

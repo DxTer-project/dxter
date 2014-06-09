@@ -32,6 +32,9 @@ class InputNode : public DLANode
 #if TWOD
   Sizes m_msize, m_nsize;
   Sizes *m_mlsize, *m_nlsize;
+#if DOLLDLA
+  Stride m_rowStride, m_colStride;
+#endif //DOLLDLA
 #else
   Dim m_numDims;
   SizesArray m_sizes;
@@ -41,7 +44,13 @@ class InputNode : public DLANode
  public:
   InputNode();
 #if TWOD
+#if DOLLDLA
+  InputNode(NodeType type, Size m, Size n, 
+	    string name, 
+	    Stride rowStride, Stride colStride);
+#else
   InputNode(NodeType type, Size m, Size n, string name);
+#endif
 #if DODM
   InputNode(NodeType type, Size m, Size n, string name, DistType dist);
 #endif
@@ -68,6 +77,10 @@ class InputNode : public DLANode
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#if DOLLDLA
+  virtual Stride RowStride(unsigned int num) const {return m_rowStride;}
+  virtual Stride ColStride(unsigned int num) const {return m_colStride;}
+#endif //DOLLDLA
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -105,6 +118,10 @@ class OutputNode : public DLANode
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#if DOLLDLA
+  virtual Stride RowStride(unsigned int num) const;
+  virtual Stride ColStride(unsigned int num) const;
+#endif //DOLLDLA
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -116,9 +133,7 @@ class OutputNode : public DLANode
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
 
-#if TWOD
-
-
+#if DOBLIS||DOELEM
 //Constant value (e.g. used for Axpy)
 class ConstVal : public DLANode
 {
@@ -168,7 +183,6 @@ class TempVarNode : public DLANode
   SizesArray m_sumLens;
   EntrySet m_sumDims;
   Sizes m_ones;
-
 #endif
 
  TempVarNode() 
@@ -246,6 +260,10 @@ m_distType(D_LASTDIST),
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#if DOLLDLA
+  virtual Stride RowStride(unsigned int num) const;
+  virtual Stride ColStride(unsigned int num) const;
+#endif //DOLLDLA
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -392,6 +410,7 @@ sdlkfj
 };
 
 
+#if DOBLIS||DOELEM
 //View the square around the diagonal on block
 class ViewAroundDiag : public DLANode
 {
@@ -433,7 +452,9 @@ sdlkjf
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
+#endif //DOBLIS||DOELEM
 
+#if DOBLIS||DOELEM
 //Recombine the square around the diagonal and the other
 // part of a block
 class ViewAroundDiagCombine : public DLAOp<5,3>
@@ -455,9 +476,11 @@ class ViewAroundDiagCombine : public DLAOp<5,3>
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
 };
+#endif //DOBLIS||DOELEM
 #endif
 
 
+#if DOBLIS||DOELEM
 class ViewTL : public DLANode
 {
  public:
@@ -521,4 +544,5 @@ class ViewTLCombine : public DLANode
   virtual NodeType GetType() const {return "ViewTLCombine";}
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
+#endif //DOBLIS||DOELEM
 #endif

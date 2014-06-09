@@ -34,9 +34,26 @@ InputNode::InputNode()
 #else
   m_numDims(0)
 #endif
-    {}
+{
+#if DOLLDLA
+  m_rowStride = BADSTRIDE;
+  m_colStride = BADSTRIDE;
+#endif //DOLLDLA
+}
 
 #if TWOD
+#if DOLLDLA
+InputNode::InputNode(NodeType type, Size m, Size n, string name, Stride rowStride, Stride colStride)
+: 
+m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
+{
+  m_msize.AddRepeatedSizes(m, 1, 1);
+  m_nsize.AddRepeatedSizes(n, 1, 1);
+  m_varName.m_name = name;
+  m_rowStride = rowStride;
+  m_colStride = colStride;
+}
+#else //!DOLLDLA
 InputNode::InputNode(NodeType type, Size m, Size n, string name)
 : 
 #if DODM
@@ -51,6 +68,7 @@ m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
   m_varName.m_type = D_MC_MR;
 #endif
 }
+#endif //DOLLDLA
 #endif
 
 #if DODM&&TWOD
@@ -420,6 +438,20 @@ const Sizes* OutputNode::LocalN(unsigned int num) const
   return InputLocalN(0);
 }
 
+
+#if DOLLDLA
+Stride OutputNode::RowStride(unsigned int num) const
+{
+  return InputRowStride(0);
+}
+
+Stride OutputNode::ColStride(unsigned int num) const
+{
+  return InputColStride(0);
+}
+#endif //DOLLDLA
+
+
 #else
 
 const Dim OutputNode::NumDims(unsigned int num) const
@@ -463,8 +495,7 @@ void OutputNode::UnflattenCore(ifstream &in, SaveInfo &info)
   getline(in, m_type);
 }
 
-#if TWOD
-
+#if DOBLIS||DOELEM
 ConstVal::ConstVal(string name, Coef val)
   :m_val(val)
 {
@@ -530,7 +561,7 @@ void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info)
   m_varName.Unflatten(in);
   READ(m_val);
 }
-#endif
+#endif //DOELEM||DOBLIS
 
 
 #if DOTENSORS
@@ -683,6 +714,19 @@ const Sizes* TempVarNode::LocalN(unsigned int num) const
     throw;
   return m_nlsize;
 }
+
+#if DOLLDLA
+Stride TempVarNode::RowStride(unsigned int num) const
+{
+  return InputRowStride(0);
+}
+
+Stride TempVarNode::ColStride(unsigned int num) const
+{
+  return InputColStride(0);
+}
+#endif //DOLLDLA
+
 #elif DOTENSORS
 const Dim TempVarNode::NumDims(unsigned int num) const
 {
@@ -1488,6 +1532,7 @@ void ViewAroundDiagCombine::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 #endif
 
+#if DOELEM||DOBLIS
 Name ViewTL::GetName(unsigned int num) const
 {
   Name name = GetInputName(0);
@@ -1541,4 +1586,5 @@ void ViewTLCombine::Prop()
     Input(1)->Prop();
   }
 }
+#endif //DOELEM||DOBLIS
 #endif
