@@ -257,10 +257,12 @@ bool PSet::operator==(const PSet &rhs) const
         }
       }
     }
+#if DOBLIS
     else if (IsCritSect()) {
       if (!rhs.IsCritSect())
 	return false;
     }
+#endif
     if ((*(m_posses.begin())).second->GetHash() != (*(rhs.m_posses.begin())).second->GetHash())
       return false;
     //BAM Really, instead of doing all of this comparison,

@@ -567,8 +567,10 @@ void Universe::Flatten(ofstream &out) const
   WRITE(m_pset);
   bool isLoop = m_pset->IsLoop();
   WRITE(isLoop);
+#if DOBLIS
   bool isCrit = m_pset->IsCritSect();
   WRITE(isCrit);
+#endif
   m_pset->Flatten(out);
   WRITE(END);
 }

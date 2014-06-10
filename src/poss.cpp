@@ -2932,11 +2932,14 @@ void Poss::UnflattenStatic(ifstream &in)
 
 void Poss::BuildSizeCache()
 {
-  PSetVecIter setIter = m_sets.begin();
+  PSetVecIter setIter;
+#if DOBLIS
+  setIter = m_sets.begin();
   for(; setIter != m_sets.end(); ++setIter) {
     if ((*setIter)->IsCritSect())
       (*setIter)->BuildSizeCache();
   }
+#endif
   NodeVecIter iter1 = m_possNodes.begin();
   for(; iter1 != m_possNodes.end(); ++iter1) {
     Node *node = *iter1;
@@ -2947,11 +2950,13 @@ void Poss::BuildSizeCache()
     Node *node = *iter1;
     node->BuildSizeCacheRecursive();
   }
+#if DOBLIS
   setIter = m_sets.begin();
   for(; setIter != m_sets.end(); ++setIter) {
     if (!(*setIter)->IsCritSect())
       (*setIter)->BuildSizeCache();
   }
+#endif
 }
 
 void Poss::ClearSizeCache()
