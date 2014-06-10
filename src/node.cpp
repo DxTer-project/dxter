@@ -868,6 +868,7 @@ void Node::BuildSizeCacheRecursive()
   }
 }
 
+#if DOBLIS
 bool Node::InCriticalSection() const
 {
   Poss *poss = m_poss;
@@ -900,6 +901,7 @@ Comm Node::WithinParallelism() const
   }
   return CORECOMM;
 }
+#endif //DOBLIS
 
 #if DOTENSORS
 void Node::AddVariables(VarSet &set) const

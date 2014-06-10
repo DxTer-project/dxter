@@ -70,7 +70,6 @@ class PSet
   void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
   virtual void ClearPrinted();
   virtual bool IsLoop() const {return false;}
-  virtual bool IsCritSect() const {return false;}
   void RemoveInTun(Node *tun);
   void RemoveOutTun(Node *tun);
   void Cull(CullFunction cullFunc);
@@ -83,7 +82,6 @@ class PSet
   bool CanPrint() const;
   Poss* GetCurrPoss() const;
   void GetCurrTransVec(TransVec &transVec) const;
-  Comm ParallelismWithinCurrentPosses() const;
 #if DOTENSORS
   void AddCurrPossVars(VarSet &set) const;
 #endif
@@ -95,7 +93,12 @@ class PSet
 
   virtual void BuildSizeCache();
   virtual void ClearSizeCache();
+
+#if DOBLIS
+  virtual bool IsCritSect() const {return false;}
+  Comm ParallelismWithinCurrentPosses() const;
   bool RemoveParallelization(Comm comm);
   void ReplaceAllComms(Comm comm1, Comm comm2);
+#endif //DOBLIS
 };
 

@@ -147,11 +147,15 @@ class Node
   virtual bool IsPossTunnel(PossTunType type) const;
   virtual bool IsLoopTunnel() const {return false;}
   virtual bool IsParallel() const {return false;}
+
+#if DOBLIS
   virtual Comm ParallelComm() const {throw;}
   virtual Comm WithinParallelism() const;
   virtual Comm HasBarrier() const {return CORECOMM;}
   virtual bool RemoveParallelization() {throw;}
   bool InCriticalSection() const;
+#endif
+
   virtual bool IsDataDependencyOfInput() const {return true;}
 
   void PrintChildren();

@@ -1656,6 +1656,7 @@ bool PSet::CanPrint() const
   return true;
 }
 
+#if DOBLIS
 bool PSet::RemoveParallelization(Comm comm)
 {
 #if DOBLIS
@@ -1740,3 +1741,4 @@ Comm PSet::ParallelismWithinCurrentPosses() const
   return CORECOMM;
 #endif
 }
+#endif //DOBLIS

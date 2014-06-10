@@ -55,16 +55,17 @@ enum Quad { TL, TR,
 
 enum BSSize { 
 #if DOELEM
-              USEELEMBS,
+  USEELEMBS,
 #elif DOBLIS
-	      USEBLISMC,
-	      USEBLISKC,
-	      USEBLISNC,
-	      USEBLISOUTERBS,
+  USEBLISMC,
+  USEBLISKC,
+  USEBLISNC,
+  USEBLISOUTERBS,
 #elif DOTENSORS
-              USETENSORBS,
+  USETENSORBS,
 #endif
-	      BADBSSIZE };
+  BADBSSIZE 
+};
 
 Size BSSizeToSize(BSSize size);	      
 string BSSizeToSubSizeStr(BSSize size);
