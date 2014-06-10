@@ -558,11 +558,10 @@ bool PSet::GlobalSimplification(const TransMap &globalSimplifiers, const TransMa
       didSomething = true;
       if ((*iter).first != (*iter).second->GetHash()) {
 	cout << "GlobalSimplification different hash\n";
+	cout << (*iter).first  << " vs " << (*iter).second->GetHash() << endl;
 	throw;
       }
     }
-      
-   
   }
   return didSomething;
 }

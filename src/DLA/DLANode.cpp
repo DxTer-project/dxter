@@ -321,7 +321,7 @@ void DLACullSR(Poss *poss, bool &cullIfPossible, bool &doNotCull)
       DLANode *ddla = (DLANode*)node;
       if (CurrPhase == SR1PHASE) {
 	if (ddla->GetLayer() == S1LAYER) {
-	  if (ddla->m_hasRefined) {
+	  if (ddla->HasRefined()) {
 	    cullIfPossible = true;
 	  }
 	  else {
@@ -332,7 +332,7 @@ void DLACullSR(Poss *poss, bool &cullIfPossible, bool &doNotCull)
       }
       if (CurrPhase == SR2PHASE) {
 	if (ddla->GetLayer() == S2LAYER) {
-	  if (ddla->m_hasRefined) {
+	  if (ddla->HasRefined()) {
 	    cullIfPossible = true;
 	  }
 	  else {
@@ -343,7 +343,7 @@ void DLACullSR(Poss *poss, bool &cullIfPossible, bool &doNotCull)
       }
       if (CurrPhase == SR3PHASE) {
 	if (ddla->GetLayer() == S3LAYER) {
-	  if (ddla->m_hasRefined) {
+	  if (ddla->HasRefined()) {
 	    cullIfPossible = true;
 	  }
 	  else {

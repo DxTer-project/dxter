@@ -159,7 +159,7 @@ void PossTunnel::Prop()
       }
     }    
     else if (m_tunType == POSSTUNOUT) {
-      if (!IsCombine() && m_inputs.size() != 1) {
+      if (!IsLoopTunnel() && m_inputs.size() != 1) {
 	throw;
       }
     }
