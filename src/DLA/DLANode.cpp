@@ -104,13 +104,6 @@ Stride DLANode::InputColStride(unsigned int num) const
 }
 #endif //DOLLDLA
 
-string DLANode::GetCostStr()
-{
-  std::stringstream str;
-  str << m_cost;
-  return str.str();
-}
-
 bool DLANode::HasProped() const
 {
   return IsValidCost(m_cost);

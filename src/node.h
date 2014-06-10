@@ -84,7 +84,6 @@ class Node
   virtual NodeType GetType() const;
   virtual void SanityCheck();
   virtual unsigned int NumOutputs() const {return 1;}
-  virtual string GetCostStr() = 0;
   virtual Cost GetCost() = 0;
   virtual ClassType GetNodeClass() const = 0;
   static ClassType GetClass() {return "node";}

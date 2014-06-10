@@ -77,7 +77,6 @@ class DLANode : public Node
 #if DODM
   const DistType& InputDistType(unsigned int num) const;
 #endif
-  virtual string GetCostStr();
   virtual bool HasProped() const;
   virtual bool IsDLA() const {return true;}
   virtual Cost GetCost() {return m_cost;}
