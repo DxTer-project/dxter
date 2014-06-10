@@ -39,11 +39,10 @@
 static unsigned int currNum = 0;
 
 Node::Node()
-  :m_hasPrinted(false), m_flags(0), m_poss(NULL) 
+  :m_flags(0), m_poss(NULL) 
 {
   m_num = currNum;
   ++currNum;
-  m_hasRefined = false;
 #ifdef TRACKORIG
   m_orig = NULL;
 #endif
@@ -68,7 +67,7 @@ Node::~Node()
 void Node::Cull(Phase phase)
 {
   if (MaxPhase() < phase) {
-    if (!m_hasRefined) {
+    if (!HasRefined()) {
 #if DOELEM||DOBLIS
       if (GetNodeClass() == Gemm::GetClass()) {
         if (((Gemm*)this)->GetLayer() == SMLAYER)
@@ -229,8 +228,8 @@ void Node::Duplicate(const Node *orig, bool shallow, bool possMerging)
   if (possMerging)
     m_applications = orig->m_applications;
   m_inverseOps = orig->m_inverseOps;
-  
-  m_hasRefined = orig->m_hasRefined;
+
+  m_flags = orig->m_flags;
   
   //Don't duplicate this multiple times through double inheritance
   if (!shallow && m_inputs.empty()) {

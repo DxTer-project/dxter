@@ -52,13 +52,14 @@ class NodeConn {
 };
 
 typedef unsigned int Flags;
-#define BUILDFLAG 1L
+#define BUILDFLAG (1L<<1)
+#define PRINTEDFLAG (1L<<2)
+#define HASREFINEDFLAG (1L<<3)
 
 class Node
 {
  private:
   unsigned int m_num;
-  bool m_hasPrinted;
 
  public:
   Flags m_flags;
@@ -68,7 +69,6 @@ class Node
   NodeConnVec m_inputs;
   NodeConnVec m_children;
   Poss *m_poss;
-  bool m_hasRefined;
 
 #ifdef TRACKORIG
   const Node *m_orig;
@@ -89,7 +89,8 @@ class Node
   static ClassType GetClass() {return "node";}
   virtual Name GetName(unsigned int num) const = 0;
   virtual bool Overwrites(const Node *input, unsigned int num) const = 0;
-  virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const = 0;
+  virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, 
+				 unsigned int &numOut) const = 0;
 #if DOTENSORS
   virtual void AddVariables(VarSet &set) const;
 #endif
@@ -126,9 +127,12 @@ class Node
   string GetNameStr(unsigned int num) const {return GetName(num).str();}
   Name GetInputName(unsigned int num) const;
   string GetInputNameStr(unsigned int num) const {return GetInputName(num).str();}
-  inline void ClearPrinted() {m_hasPrinted=false;}
-  inline void SetPrinted() {m_hasPrinted=true;}
-  inline bool HasPrinted() const {return m_hasPrinted;}
+  inline void ClearPrinted() {m_flags &= ~PRINTEDFLAG;}
+  inline void SetPrinted() {m_flags |= PRINTEDFLAG;} 
+  inline bool HasPrinted() const {return m_flags & PRINTEDFLAG;}
+  inline void ClearHasRefined() {m_flags &= ~HASREFINEDFLAG;}
+  inline void SetHasRefined() {m_flags |= HASREFINEDFLAG;} 
+  inline bool HasRefined() const {return m_flags & HASREFINEDFLAG;}
   Node* Input(unsigned int num) const;
   NodeConn* InputConn(unsigned int num) const;
   //output number of the input taken as input

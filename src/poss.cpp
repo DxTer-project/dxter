@@ -2626,7 +2626,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	    if (single->CanApply(this, node)) {
 	      node->Applied(single);
 	      if (single->IsRef())
-		node->m_hasRefined = true;
+		node->SetHasRefined();
 	      Poss *newPoss = new Poss;
 	      NodeMap nodeMap = setTunnels;
 	      newPoss->Duplicate(this,nodeMap,false);
@@ -2654,7 +2654,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      node->Applied(var);
 	      
 	      if (trans->IsRef())
-		node->m_hasRefined = true;		
+		node->SetHasRefined();
 	      
 	      for (int i = 0; i < count; ++ i) {
 		//Need to check if this transformationhas been applied since this graph
