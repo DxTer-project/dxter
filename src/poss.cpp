@@ -2950,13 +2950,13 @@ void Poss::BuildSizeCache()
     Node *node = *iter1;
     node->BuildSizeCacheRecursive();
   }
-#if DOBLIS
   setIter = m_sets.begin();
   for(; setIter != m_sets.end(); ++setIter) {
+#if DOBLIS
     if (!(*setIter)->IsCritSect())
+#endif
       (*setIter)->BuildSizeCache();
   }
-#endif
 }
 
 void Poss::ClearSizeCache()
