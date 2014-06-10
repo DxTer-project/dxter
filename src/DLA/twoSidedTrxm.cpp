@@ -103,31 +103,27 @@ void TwoSidedTrxm::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_invert);
 }
 
-void TwoSidedTrxm::SanityCheck()
-{
-  DLAOp<2,1>::SanityCheck();
-  if (m_inputs.size() != 2)
-    throw;
-#if DOELEM
-  if (m_layer == DMLAYER) {
-    if (InputDistType(0) != D_MC_MR)
-      throw;
-    else if (InputDistType(1) != D_MC_MR)
-      throw;
-  }
-  else if (m_layer == SMLAYER) {
-    if (InputDistType(0) != D_STAR_STAR)
-      throw;
-    else if (InputDistType(1) != D_STAR_STAR)
-      throw;
-  }
-#endif
-}
-
 void TwoSidedTrxm::Prop()
 {
-  DLAOp<2,1>::Prop();
-  m_cost = ZERO;
+  if (!IsValidCost(m_cost)) {
+    DLAOp<2,1>::Prop();
+#if DOELEM
+    if (m_layer == DMLAYER) {
+      if (InputDistType(0) != D_MC_MR)
+	throw;
+      else if (InputDistType(1) != D_MC_MR)
+	throw;
+    }
+    else if (m_layer == SMLAYER) {
+      if (InputDistType(0) != D_STAR_STAR)
+	throw;
+      else if (InputDistType(1) != D_STAR_STAR)
+	throw;
+    }
+#endif
+
+    m_cost = ZERO;
+  }
 }
 
 void TwoSidedTrxm::PrintCode(IndStream &out)

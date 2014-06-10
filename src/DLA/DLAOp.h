@@ -49,7 +49,6 @@ class DLAOp : public DLANode
 #endif
   virtual Name GetName(unsigned int num) const;
   virtual void Prop();
-  virtual void SanityCheck();
   virtual unsigned int NumOutputs() const;
   virtual bool Overwrites(const Node *input, unsigned int num) const;
   virtual bool KeepsInputVarLive(Node *input, unsigned int numInArg, unsigned int &numOutArg) const;

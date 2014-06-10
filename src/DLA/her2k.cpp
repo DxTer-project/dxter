@@ -87,69 +87,65 @@ Her2k::Her2k(Layer layer, Tri tri, Trans trans, Coef alpha, Coef beta, Type type
   SetLayer(layer);
 }
 
-void Her2k::SanityCheck()
-{
-  DLAOp<3,1>::SanityCheck();
-#if DOELEM
-  if (GetLayer() == ABSLAYER) {
-    if (InputDistType(0) != D_MC_MR)
-      throw;
-    if (InputDistType(1) != D_MC_MR)
-      throw;
-  }
-  else if (GetLayer() == DMLAYER) {
-    if (InputDistType(2) != D_MC_MR)
-      cout << "input not D_MC_MR";
-    
-  }
-  else if (GetLayer() == SMLAYER) {
-    DistType t0, t1;
-    t0 = InputDistType(0);
-    t1 = InputDistType(1);
-    
-    if (m_trans == NORMAL) {
-      if (t0 == D_STAR_VR) {
-        if (t1 != D_VR_STAR)
-          throw;
-      }
-      else if (t0 == D_STAR_VC) {
-        if (t1 != D_VC_STAR)
-          throw;
-      }
-      else
-        throw;
-    }
-    else {
-      if (t0 == D_VR_STAR) {
-        if (t1 != D_STAR_VR)
-          throw;
-      }
-      else if (t0 == D_VC_STAR) {
-        if (t1 != D_STAR_VC)
-          throw;
-      }
-    }
-    
-    if (InputDistType(2) != D_STAR_STAR)
-      throw;
-  }
-#endif
-  
-  
-  if (m_type == REAL) {
-    if (m_trans != NORMAL && m_trans != TRANS)
-      throw;
-  }
-  else {
-    if (m_trans != NORMAL && m_trans != CONJTRANS)
-      throw;
-  }
-}
-
 void Her2k::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
+
+#if DOELEM
+    if (GetLayer() == ABSLAYER) {
+      if (InputDistType(0) != D_MC_MR)
+	throw;
+      if (InputDistType(1) != D_MC_MR)
+	throw;
+    }
+    else if (GetLayer() == DMLAYER) {
+      if (InputDistType(2) != D_MC_MR)
+	cout << "input not D_MC_MR";
+    
+    }
+    else if (GetLayer() == SMLAYER) {
+      DistType t0, t1;
+      t0 = InputDistType(0);
+      t1 = InputDistType(1);
+    
+      if (m_trans == NORMAL) {
+	if (t0 == D_STAR_VR) {
+	  if (t1 != D_VR_STAR)
+	    throw;
+	}
+	else if (t0 == D_STAR_VC) {
+	  if (t1 != D_VC_STAR)
+	    throw;
+	}
+	else
+	  throw;
+      }
+      else {
+	if (t0 == D_VR_STAR) {
+	  if (t1 != D_STAR_VR)
+	    throw;
+	}
+	else if (t0 == D_VC_STAR) {
+	  if (t1 != D_STAR_VC)
+	    throw;
+	}
+      }
+    
+      if (InputDistType(2) != D_STAR_STAR)
+	throw;
+    }
+#endif
+  
+  
+    if (m_type == REAL) {
+      if (m_trans != NORMAL && m_trans != TRANS)
+	throw;
+    }
+    else {
+      if (m_trans != NORMAL && m_trans != CONJTRANS)
+	throw;
+    }
     
     if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
       m_cost = 0;
@@ -420,98 +416,97 @@ void Tri2k::Duplicate(const Node *orig, bool shallow, bool possMerging)
 }
 
 
-void Tri2k::SanityCheck()
-{
-  DLAOp<5,1>::SanityCheck();
-#if DOELEM
-  if (GetLayer() == SMLAYER) {
-    
-    if (m_type == REAL) {
-      if (m_trans != NORMAL && m_trans != TRANS)
-        throw;
-    }
-    else {
-      if (m_trans != NORMAL && m_trans != CONJTRANS)
-        throw;
-    }
-    
-    if(m_type == REAL && m_trans == CONJTRANS)
-      throw;
-    else if (m_type == COMPLEX && m_trans == TRANS)
-      throw;
-    
-    DistType t;
-    
-    if (m_trans == NORMAL) {
-      t = InputDistType(0);
-      if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
-        throw;
-      
-      t = InputDistType(1);
-      if ((t != D_MR_STAR)
-          && (m_type == REAL && t != D_STAR_MR_T)
-          && (m_type == COMPLEX && t != D_STAR_MR_H))
-        throw;
-      
-      t = InputDistType(2);
-      if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
-        throw;
-      
-      t = InputDistType(3);
-      if ((t != D_MR_STAR)
-          && (m_type == REAL && t != D_STAR_MR_T)
-          && (m_type == COMPLEX && t != D_STAR_MR_H))
-        throw;
-    }
-    else {
-      t = InputDistType(0);
-      if ((t != D_STAR_MC)
-          && (m_type == REAL && t != D_MC_STAR_T)
-          && (m_type == COMPLEX && t != D_MC_STAR_H))
-        throw;
-      
-      t = InputDistType(1);
-      if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
-        throw;
-      
-      t = InputDistType(2);
-      if ((t != D_STAR_MC)
-          && (m_type == REAL && t != D_MC_STAR_T)
-          && (m_type == COMPLEX && t != D_MC_STAR_H))
-        throw;
-      
-      t = InputDistType(3);
-      if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
-        throw;
-    }
-    
-    if (InputDistType(4) != D_MC_MR)
-      throw;
-  }
-#elif DOBLIS
-  if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
-    if (*InputLocalM(0) != *InputLocalM(2))
-      throw;
-    if (*InputLocalM(0) != *InputLocalM(4))
-      throw;
-    
-    if (*InputLocalN(0) != *InputLocalM(1))
-      throw;
-    if (*InputLocalN(2) != *InputLocalM(3))
-      throw;
-    
-    if (*InputLocalN(1) != *InputLocalN(3))
-      throw;
-    if (*InputLocalN(1) != *InputLocalN(4))
-      throw;
-  }
-#endif
-}
-
 void Tri2k::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<5,1>::Prop();
+
+#if DOELEM
+    if (GetLayer() == SMLAYER) {
+    
+      if (m_type == REAL) {
+	if (m_trans != NORMAL && m_trans != TRANS)
+	  throw;
+      }
+      else {
+	if (m_trans != NORMAL && m_trans != CONJTRANS)
+	  throw;
+      }
+    
+      if(m_type == REAL && m_trans == CONJTRANS)
+	throw;
+      else if (m_type == COMPLEX && m_trans == TRANS)
+	throw;
+    
+      DistType t;
+    
+      if (m_trans == NORMAL) {
+	t = InputDistType(0);
+	if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
+	  throw;
+      
+	t = InputDistType(1);
+	if ((t != D_MR_STAR)
+	    && (m_type == REAL && t != D_STAR_MR_T)
+	    && (m_type == COMPLEX && t != D_STAR_MR_H))
+	  throw;
+      
+	t = InputDistType(2);
+	if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
+	  throw;
+      
+	t = InputDistType(3);
+	if ((t != D_MR_STAR)
+	    && (m_type == REAL && t != D_STAR_MR_T)
+	    && (m_type == COMPLEX && t != D_STAR_MR_H))
+	  throw;
+      }
+      else {
+	t = InputDistType(0);
+	if ((t != D_STAR_MC)
+	    && (m_type == REAL && t != D_MC_STAR_T)
+	    && (m_type == COMPLEX && t != D_MC_STAR_H))
+	  throw;
+      
+	t = InputDistType(1);
+	if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
+	  throw;
+      
+	t = InputDistType(2);
+	if ((t != D_STAR_MC)
+	    && (m_type == REAL && t != D_MC_STAR_T)
+	    && (m_type == COMPLEX && t != D_MC_STAR_H))
+	  throw;
+      
+	t = InputDistType(3);
+	if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
+	  throw;
+      }
+    
+      if (InputDistType(4) != D_MC_MR)
+	throw;
+    }
+#elif DOBLIS
+    if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+      if (*InputLocalM(0) != *InputLocalM(2))
+	throw;
+      if (*InputLocalM(0) != *InputLocalM(4))
+	throw;
+    
+      if (*InputLocalN(0) != *InputLocalM(1))
+	throw;
+      if (*InputLocalN(2) != *InputLocalM(3))
+	throw;
+    
+      if (*InputLocalN(1) != *InputLocalN(3))
+	throw;
+      if (*InputLocalN(1) != *InputLocalN(4))
+	throw;
+    }
+#endif
+
+
+
 #if DOELEM
     if (GetLayer() == SMLAYER) {
       const Sizes *localM = InputLocalM(4);

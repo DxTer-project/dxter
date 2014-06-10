@@ -50,17 +50,13 @@ Phase LU::MaxPhase() const
     }
 }
 
-void LU::SanityCheck()
-{
-  if (GetLayer() != ABSLAYER)
-    throw;
-  DLAOp<2,2>::SanityCheck();
-}
-
 void LU::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2,2>::Prop();
+    if (GetLayer() != ABSLAYER)
+      throw;
+
     m_cost = ZERO;
   }
 }

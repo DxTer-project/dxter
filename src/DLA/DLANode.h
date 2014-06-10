@@ -37,7 +37,6 @@ class DLANode : public Node
 #if DODM
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif
-  virtual void SanityCheck();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
@@ -49,6 +48,8 @@ class DLANode : public Node
   inline Layer GetLayer() const {return m_layer;}
   virtual bool IsReadOnly() const {return false;}
   virtual bool CanTrans() const {return false;}
+
+  virtual void Prop();
 
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const = 0;

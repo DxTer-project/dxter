@@ -92,25 +92,6 @@ void LoopTunnel::CopyTunnelInfo(const LoopTunnel *tun)
   m_indepIters = tun->m_indepIters;
 }
 
-void LoopTunnel::SanityCheck()
-{
-  PossTunnel::SanityCheck();
-  if (m_statTL == BADUP || m_statTR == BADUP
-      || m_statBL == BADUP || m_statBR == BADUP)
-  {
-    cout << "update status not set for " << GetType() << " " << this << endl;
-    cout << "it's a " << TunTypeToStr(m_tunType) << endl;
-    throw;
-  }
-  if (m_tunType == POSSTUNOUT) {
-    Node *in = m_inputs[m_inputs.size()-1]->m_n;
-    if (!in->IsLoopTunnel())
-      throw;
-    if (((LoopTunnel*)in)->m_tunType != POSSTUNIN)
-      throw;
-  }
-}
-
 #if DODM
 const DistType& LoopTunnel::GetDistType(unsigned int num) const 
 { 
@@ -134,6 +115,24 @@ PossTunnel* LoopTunnel::GetSetTunnel()
 void LoopTunnel::Prop()
 {
   if (!IsValidCost(m_cost)) {
+    PossTunnel::Prop();
+
+    if (m_statTL == BADUP || m_statTR == BADUP
+	|| m_statBL == BADUP || m_statBR == BADUP)
+      {
+	cout << "update status not set for " << GetType() << " " << this << endl;
+	cout << "it's a " << TunTypeToStr(m_tunType) << endl;
+	throw;
+      }
+    if (m_tunType == POSSTUNOUT) {
+      Node *in = m_inputs[m_inputs.size()-1]->m_n;
+      if (!in->IsLoopTunnel())
+	throw;
+      if (((LoopTunnel*)in)->m_tunType != POSSTUNIN)
+	throw;
+    }
+
+
     if (m_tunType == SETTUNIN && m_inputs.size() != 1) {
       cout << "1 m_inputs.size() = " << m_inputs.size() << endl;
       for(unsigned int i = 0; i < m_inputs.size(); ++i) {
@@ -141,7 +140,7 @@ void LoopTunnel::Prop()
       }
       throw;
     }
-    if (m_tunType == POSSTUNOUT && m_inputs.size() != 2) {
+    if (m_tunType == POSSTUNOUT && !IsCombine() && m_inputs.size() != 2) {
       if (Input(1)->GetNodeClass() != LoopTunnel::GetClass())
         throw;
       cout << "2 m_inputs.size() = " << m_inputs.size() << endl;
@@ -155,10 +154,6 @@ void LoopTunnel::Prop()
       }
     }
     m_cost = ZERO;
-    if (m_tunType==POSSTUNOUT || GetMyLoop()->GetType()==ELEMLOOP) {
-      if (m_inputs.size()) 
-        Input(0)->Prop();
-    }
   }
 }
 

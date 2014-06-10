@@ -43,7 +43,6 @@ class PSet
   void AddPoss(Poss *poss);
   void AddPossesOrDispose(PossMMap &mmap, PossMMap *added = NULL);
   unsigned int NumPosses() {return m_posses.size();}
-  virtual void SanityCheck();
   bool operator==(const Poss &rhs) const;
   bool operator==(const PSet &rhs) const;
   virtual void Prop();

@@ -49,7 +49,6 @@ class LoopTunnel : public PossTunnel
   bool IsConst() const;
   UpStat GetUpStat(Quad quad) const;
   bool AllFullyUpdated() const;
-  virtual void SanityCheck();  
 #if DODM
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif

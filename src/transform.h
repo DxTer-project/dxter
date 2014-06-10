@@ -23,8 +23,6 @@
 
 #pragma once
 
-#define LIMITEDSANITYCHECK
-
 #include "base.h"
 #include "node.h"
 #include "universe.h"

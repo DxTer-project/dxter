@@ -47,7 +47,6 @@ class LU : public DLAOp<2,2>
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif
   virtual Phase MaxPhase() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
 };

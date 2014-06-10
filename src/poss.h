@@ -53,7 +53,6 @@ class Poss
   PSet *m_pset;
   TransVec m_transVec;
   bool m_fullyExpanded;
-  bool m_hasChecked;
   PSetVec m_sets;
   static StrSet M_fusedSets;
   Poss();
@@ -75,7 +74,6 @@ class Poss
   virtual void PrintCurrRoot(IndStream &out, const VarSet &set);
   void ForcePrint();
   bool CanPrint() const;
-  virtual void SanityCheck();
   virtual bool IsBoundary(Node *node) {return node->IsPossTunnel();}
   virtual void Duplicate(const Poss *orig, NodeMap &map, bool possMerging);
   bool operator==(Poss &rhs);

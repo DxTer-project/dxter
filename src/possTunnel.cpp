@@ -122,18 +122,53 @@ PossTunnel* PossTunnel::GetSetTunnel()
 
 void PossTunnel::Prop()
 {
-  if (m_tunType == POSSTUNIN || m_tunType == POSSTUNOUT) {
-    if (m_inputs.size() != 1) {
-      cout << "m_inputs.size() != 1\n";
-      throw;
-    }
-  }    
-  if (m_tunType == SETTUNIN || m_tunType == POSSTUNIN)
-    if (!m_inputs.size()) {
-      cout << "!m_inputs.size() on " << this << "\n";
-      throw;
-    }
   if (!IsValidCost(m_cost)) {
+    DLANode::Prop();
+
+    if ((m_tunType == SETTUNIN || m_tunType == SETTUNOUT) && !m_pset)
+      throw;
+    if ((m_tunType == POSSTUNIN && m_inputs.size() != 1)
+	|| (m_tunType == POSSTUNOUT && m_children.size() != 1))
+      {
+	cout << "m_inputs.size() != 1\n";
+	if (m_tunType == POSSTUNIN)
+	  cout << "m_tunType == POSSTUNIN\n";
+	else
+	  cout << "m_tunType == POSSTUNOUT\n";
+	throw;
+      }
+    if (m_tunType == LASTTUNNEL) {
+      cout << "bad tunnel type!\n";
+      throw;
+    }
+    if (m_tunType == SETTUNIN || m_tunType == POSSTUNIN)
+      if (!m_inputs.size()) {
+	cout << "!m_inputs.size() on this = " << this << "\n";
+	if (m_tunType == POSSTUNIN)
+	  cout << "m_tunType == POSSTUNIN\n";
+	else 
+	  cout << "m_tunType == SETTUNIN is on " << m_pset << endl;
+	throw;
+      }
+
+
+    if (m_tunType == POSSTUNIN) {
+      if (m_inputs.size() != 1) {
+	cout << "m_inputs.size() != 1\n";
+	throw;
+      }
+    }    
+    else if (m_tunType == POSSTUNOUT) {
+      if (!IsCombine() && m_inputs.size() != 1) {
+	throw;
+      }
+    }
+    if (m_tunType == SETTUNIN || m_tunType == POSSTUNIN)
+      if (!m_inputs.size()) {
+	cout << "!m_inputs.size() on " << this << "\n";
+	throw;
+      }
+
     m_cost = ZERO;
     if (m_tunType == SETTUNOUT) {
       m_pset->Prop();
@@ -236,36 +271,6 @@ Name PossTunnel::GetName(unsigned int num) const
       throw;
     return GetInputName(0);
   }
-}
-
-void PossTunnel::SanityCheck()
-{
-  if ((m_tunType == SETTUNIN || m_tunType == SETTUNOUT) && !m_pset)
-    throw;
-  if ((m_tunType == POSSTUNIN && m_inputs.size() != 1)
-      || (m_tunType == POSSTUNOUT && m_children.size() != 1))
-    {
-      cout << "m_inputs.size() != 1\n";
-      if (m_tunType == POSSTUNIN)
-	cout << "m_tunType == POSSTUNIN\n";
-      else
-	cout << "m_tunType == POSSTUNOUT\n";
-      throw;
-    }
-  if (m_tunType == LASTTUNNEL) {
-    cout << "bad tunnel type!\n";
-    throw;
-  }
-  if (m_tunType == SETTUNIN || m_tunType == POSSTUNIN)
-    if (!m_inputs.size()) {
-      cout << "!m_inputs.size() on this = " << this << "\n";
-      if (m_tunType == POSSTUNIN)
-	cout << "m_tunType == POSSTUNIN\n";
-      else 
-	cout << "m_tunType == SETTUNIN is on " << m_pset << endl;
-      throw;
-    }
-  DLANode::SanityCheck();
 }
 
 unsigned int PossTunnel::NumOutputs() const

@@ -221,11 +221,6 @@ void Contraction::CheckInputTypesAlign() const
 }
 
 
-void Contraction::SanityCheck()
-{
-  
-}
-
 void Contraction::PrintCode(IndStream &out)
 {
   Name in0 = GetInputName(0);

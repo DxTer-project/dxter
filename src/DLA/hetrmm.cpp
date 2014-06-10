@@ -54,32 +54,24 @@ void Hetrmm::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_tri);
 }
 
-void Hetrmm::SanityCheck()
-{
-  DLAOp<1,1>::SanityCheck();
-  if (m_inputs.size() != 1)
-    cout << "m_inputs.size() != 1\n";
-#if DOELEM
-  if (m_layer == ABSLAYER || m_layer == DMLAYER) {
-    if (InputDistType(0) != D_MC_MR)
-      throw;
-  }
-  else if (m_layer == SMLAYER) {
-    if (InputDistType(0) != D_STAR_STAR)
-      throw;
-  }
-  else
-    throw;
-#else
-  throw;
-#endif
-}
 
 void Hetrmm::Prop()
 {
 #if DOELEM
   if (!IsValidCost(m_cost)) {
     DLAOp<1,1>::Prop();
+
+    if (m_layer == ABSLAYER || m_layer == DMLAYER) {
+      if (InputDistType(0) != D_MC_MR)
+	throw;
+    }
+    else if (m_layer == SMLAYER) {
+      if (InputDistType(0) != D_STAR_STAR)
+	throw;
+    }
+    else
+      throw;
+
     if (m_layer == SMLAYER)
       m_cost = GAMMA * 1.0/3 * GetM(0)->SumCubes();
     else

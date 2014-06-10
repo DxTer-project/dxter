@@ -61,7 +61,6 @@ class Universe
   void Print(IndStream &out, unsigned int &graphNum);
   static void AddTrans(const ClassType &classType, Transformation *trans, int phase);
   static void AddToMaps(Transformation *trans);
-  void SanityCheck();
   void Cull();
   void Prop();
   void PrintAll(int algNum);

@@ -536,7 +536,7 @@ bool Node::Applied(const Transformation *trans)
   return true;
 }
 
-void Node::SanityCheck()
+void Node::CheckConnections()
 {
   NodeConnVecIter iter1 = m_inputs.begin();
   for( ; iter1 != m_inputs.end(); ++iter1 ) {
@@ -902,9 +902,9 @@ Comm Node::WithinParallelism() const
 }
 #endif //DOBLIS
 
-#if DOTENSORS
 void Node::AddVariables(VarSet &set) const
 {
+#if DOTENSORS
   for(unsigned int i = 0; i < NumOutputs(); ++i) {
     Name name = GetName(i);
     Var var(name);
@@ -912,5 +912,6 @@ void Node::AddVariables(VarSet &set) const
     Var var2(name.m_type);
     set.insert(var2);
   }
-}
 #endif
+}
+

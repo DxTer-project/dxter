@@ -101,27 +101,29 @@ const DistType& Herk::GetDistType(unsigned int num) const
 }
 #endif
 
-void Herk::SanityCheck()
+void Herk::Prop()
 {
-  DLAOp<2,1>::SanityCheck();
-  if (m_inputs.size() != 2) {
-    throw;
-  }
-  if (m_type == REAL) {
-    if (m_transA == CONJTRANS || m_transB == CONJTRANS)
-      throw;
-  }
+  if (!IsValidCost(m_cost)) {
+    DLAOp<2,1>::Prop();
+
+    if (m_type == REAL) {
+      if (m_transA == CONJTRANS || m_transB == CONJTRANS)
+	throw;
+    }
   
 #if DOELEM
-  if (GetLayer() != ABSLAYER && GetLayer() != DMLAYER)
-    throw;
-  if (InputDistType(0) != D_MC_MR)
-    throw;
-  if (InputDistType(1) != D_MC_MR)
-    throw;
+    if (GetLayer() != ABSLAYER && GetLayer() != DMLAYER)
+      throw;
+    if (InputDistType(0) != D_MC_MR)
+      throw;
+    if (InputDistType(1) != D_MC_MR)
+      throw;
 #else
-  
+    if (GetLayer() != ABSLAYER)
+      throw;
 #endif
+    m_cost = ZERO;
+  }
 }
 
 
@@ -465,44 +467,36 @@ void TriRK::Duplicate(const Node *orig, bool shallow, bool possMerging)
 #endif
 }
 
-
-void TriRK::SanityCheck()
-{
-  DLAOp<3,1>::SanityCheck();
-  if (m_inputs.size() != 3) {
-    cout << "m_inputs.size() != 3 2\n";
-    throw;
-  }
-#if DOELEM
-  if (GetLayer() == SMLAYER) {
-    if (InputDistType(2) != D_MC_MR)
-      throw;
-    if (m_type == REAL) {
-      if (m_transA == CONJTRANS || m_transB == CONJTRANS)
-        throw;
-    }
-  }
-#elif DOBLIS
-  if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
-    if (m_transA != NORMAL || m_transB != NORMAL)
-      throw;
-    
-    if (*InputLocalM(0) != *InputLocalM(2))
-      throw;
-    
-    if (*InputLocalN(0) != *InputLocalM(1))
-      throw;
-    
-    if (*InputLocalN(1) != *InputLocalN(2))
-      throw;
-  }
-#endif
-}
-
 void TriRK::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
+
+#if DOELEM
+    if (GetLayer() == SMLAYER) {
+      if (InputDistType(2) != D_MC_MR)
+	throw;
+      if (m_type == REAL) {
+	if (m_transA == CONJTRANS || m_transB == CONJTRANS)
+	  throw;
+      }
+    }
+#elif DOBLIS
+    if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
+      if (m_transA != NORMAL || m_transB != NORMAL)
+	throw;
+    
+      if (*InputLocalM(0) != *InputLocalM(2))
+	throw;
+    
+      if (*InputLocalN(0) != *InputLocalM(1))
+	throw;
+    
+      if (*InputLocalN(1) != *InputLocalN(2))
+	throw;
+    }
+#endif
+
     
 #if DOELEM
     if (GetLayer() == SMLAYER) {

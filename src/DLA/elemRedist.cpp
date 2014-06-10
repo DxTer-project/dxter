@@ -1196,21 +1196,18 @@ NodeType RedistNode::GetType() const
   }
 }
 
-void RedistNode::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (m_inputs.size() != 1) {
-    cout << "m_inputs.size() != 1\n";
-    throw;
-  }
-  
-  if (!m_children.size())
-    throw;
-}
-
 void RedistNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
+    DLANode::Prop();
+    if (m_inputs.size() != 1) {
+      cout << "m_inputs.size() != 1\n";
+      throw;
+    }
+  
+    if (!m_children.size())
+      throw;
+
     DLANode *parent = (DLANode*)Input(0);
     DistType m_srcType = parent->GetDistType(InputConnNum(0));
     const Sizes *m = GetM(0);
@@ -1474,19 +1471,19 @@ NodeType SumScatterNode::GetType() const
   return "SumScatterNode";
 }
 
-void SumScatterNode::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (m_inputs.size() != 2)
-    cout << "m_inputs.size() != 2\n";
-}
-
 void SumScatterNode::Prop()
 {
-  DLANode *from = (DLANode*)Input(0);
-  DLANode *to = (DLANode*)Input(1);
-  
   if (!IsValidCost(m_cost)) {
+    DLANode::Prop();
+    
+  if (m_inputs.size() != 2)
+    cout << "m_inputs.size() != 2\n";
+    
+
+    DLANode *from = (DLANode*)Input(0);
+    DLANode *to = (DLANode*)Input(1);
+  
+
     from->Prop();
     to->Prop();
     
@@ -1658,19 +1655,17 @@ void SumScatterNode::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_coeff);
 }
 
-void SumScatterFrom::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (m_inputs.size() != 2)
-    cout << "m_inputs.size() != 2\n";
-}
-
 void SumScatterFrom::Prop()
 {
   DLANode *from = (DLANode*)Input(0);
   DLANode *to = (DLANode*)Input(1);
   
   if (!IsValidCost(m_cost)) {
+    if (m_inputs.size() != 2)
+      cout << "m_inputs.size() != 2\n";
+
+    DLANode::Prop();
+
     from->Prop();
     to->Prop();
     
@@ -1681,7 +1676,6 @@ void SumScatterFrom::Prop()
     const Sizes *localNs = LocalN(0);
 
     m_cost = GetCost(destType, m_srcType, localMs, localNs);
-
   }
 }
 
@@ -1819,19 +1813,16 @@ NodeType SumOverCommNode::GetType() const
   return "SumOverCommNode";
 }
 
-void SumOverCommNode::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (m_inputs.size() != 1) {
-    cout << "m_inputs.size() != 1\n";
-    throw;
-  }
-}
-
 void SumOverCommNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    DistType destType = InputDistType(0);
+     DLANode::Prop();
+    if (m_inputs.size() != 1) {
+      cout << "m_inputs.size() != 1\n";
+      throw;
+    }   
+ 
+   DistType destType = InputDistType(0);
     if (GetRowDist(destType) != STAR && GetColDist(destType) != STAR)
       throw;
 

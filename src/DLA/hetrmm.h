@@ -54,7 +54,6 @@ class Hetrmm : public DLAOp<1,1>
   static Node* BlankInst() { return new Hetrmm(ABSLAYER, LOWER); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual Phase MaxPhase() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
 #if DOELEM

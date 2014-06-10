@@ -217,6 +217,89 @@ void Trxm::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
+
+    if (m_invert) {
+      const Sizes *localM = InputLocalM(0);
+      const Sizes *localN = InputLocalN(0);
+      if (*localM != *localN) {
+	cout << "Trsm::Prop 1\n";
+	throw;
+      }
+      if ((m_side == LEFT && *localN != *InputLocalM(0))
+	  || (m_side == RIGHT && *localM != *InputLocalN(0)))
+	{
+	  cout << "Trsm::Prop 2\n";
+	  throw;
+	}
+    
+      if (GetLayer() == ABSLAYER) {
+#if DOELEM
+	if (InputDistType(1) != D_MC_MR) {
+	  cout << "input not D_MC_MR 7";
+	  throw;
+	}
+#endif
+      }
+#if DOELEM
+      else if (GetLayer() == DMLAYER) {
+	if (m_inputs.size() != 2)
+	  cout << "1 m_inputs.size() != 2\n";
+	else {
+	  if (InputDistType(0) != D_MC_MR)
+	    cout << "input not D_MC_MR 1 from " << Input(0)->GetType() << endl;
+	  if (InputDistType(1) != D_MC_MR)
+	    cout << "input not D_MC_MR 2 from " << Input(0)->GetType() << endl;
+	}
+      }
+      else if (GetLayer() == SMLAYER) {
+	if (InputDistType(0) == D_VC_STAR && InputDistType(1) == D_VC_STAR) {
+	  if (m_tri != LOWER || m_side != LEFT || m_trans != NORMAL)
+	    throw;
+	  if (m_inputs.size() != 2)
+	    cout << "2 m_inputs.size() != 2\n";
+	}
+	else {
+	  if (m_inputs.size() != 2)
+	    cout << "2 m_inputs.size() != 2\n";
+	  else {
+	    if (InputDistType(0) != D_STAR_STAR)
+	      cout << "input not D_STAR_STAR";
+	  }
+	}
+      }
+#endif
+    }
+#if DOELEM
+    else {
+      if (GetLayer() == DMLAYER) {
+	if (m_inputs.size() != 2)
+	  cout << "1 m_inputs.size() != 2\n";
+	else {
+	  if (InputDistType(0) != D_MC_MR)
+	    cout << "input not D_MC_MR 1 from " << Input(0)->GetType() << endl;
+	  if (InputDistType(1) != D_MC_MR)
+	    cout << "input not D_MC_MR 2 from " << Input(0)->GetType() << endl;
+	}
+      }
+      else if (GetLayer() == SMLAYER) {
+	if (m_inputs.size() != 2) {
+	  cout << "2 m_inputs.size() != 2\n";
+	  throw;
+	}
+	else {
+	  if (InputDistType(0) != D_STAR_STAR) {
+	    cout << "input not D_STAR_STAR";
+	    throw;
+	  }
+	  DistType type = InputDistType(1);
+	  if (type != GetDistType(0))
+	    m_poss->MarkInsane();
+	}
+      }
+    }
+#endif
+
+
     switch (GetLayer()) {
       case (ABSLAYER):
       case (DMLAYER):
@@ -292,96 +375,6 @@ void Trxm::PrintCode(IndStream &out)
   << "\n" << out.Tabs(2) << "" << GetInputName(1).str()
   << ");\n";
 }
-
-
-
-void Trxm::SanityCheck()
-{
-  DLAOp<2,1>::SanityCheck();
-  if (m_invert) {
-    const Sizes *localM = InputLocalM(0);
-    const Sizes *localN = InputLocalN(0);
-    if (*localM != *localN) {
-      cout << "Trsm::Prop 1\n";
-      throw;
-    }
-    if ((m_side == LEFT && *localN != *InputLocalM(0))
-        || (m_side == RIGHT && *localM != *InputLocalN(0)))
-    {
-      cout << "Trsm::Prop 2\n";
-      throw;
-    }
-    
-    if (GetLayer() == ABSLAYER) {
-#if DOELEM
-      if (InputDistType(1) != D_MC_MR) {
-        cout << "input not D_MC_MR 7";
-        throw;
-      }
-#endif
-    }
-#if DOELEM
-    else if (GetLayer() == DMLAYER) {
-      if (m_inputs.size() != 2)
-        cout << "1 m_inputs.size() != 2\n";
-      else {
-        if (InputDistType(0) != D_MC_MR)
-          cout << "input not D_MC_MR 1 from " << Input(0)->GetType() << endl;
-        if (InputDistType(1) != D_MC_MR)
-          cout << "input not D_MC_MR 2 from " << Input(0)->GetType() << endl;
-      }
-    }
-    else if (GetLayer() == SMLAYER) {
-      if (InputDistType(0) == D_VC_STAR && InputDistType(1) == D_VC_STAR) {
-        if (m_tri != LOWER || m_side != LEFT || m_trans != NORMAL)
-          throw;
-        if (m_inputs.size() != 2)
-          cout << "2 m_inputs.size() != 2\n";
-      }
-      else {
-        if (m_inputs.size() != 2)
-          cout << "2 m_inputs.size() != 2\n";
-        else {
-          if (InputDistType(0) != D_STAR_STAR)
-            cout << "input not D_STAR_STAR";
-        }
-      }
-    }
-#endif
-  }
-#if DOELEM
-  else {
-    if (GetLayer() == DMLAYER) {
-      if (m_inputs.size() != 2)
-        cout << "1 m_inputs.size() != 2\n";
-      else {
-        if (InputDistType(0) != D_MC_MR)
-          cout << "input not D_MC_MR 1 from " << Input(0)->GetType() << endl;
-        if (InputDistType(1) != D_MC_MR)
-          cout << "input not D_MC_MR 2 from " << Input(0)->GetType() << endl;
-      }
-    }
-    else if (GetLayer() == SMLAYER) {
-      if (m_inputs.size() != 2) {
-        cout << "2 m_inputs.size() != 2\n";
-        throw;
-      }
-      else {
-        if (InputDistType(0) != D_STAR_STAR) {
-          cout << "input not D_STAR_STAR";
-          throw;
-        }
-        DistType type = InputDistType(1);
-        if (type != GetDistType(0))
-          m_poss->MarkInsane();
-      }
-    }
-  }
-#endif
-}
-
-
-
 
 Cost Trxm::GetCost(Layer layer, Side side, const Sizes *localMs, const Sizes *localNs)
 {

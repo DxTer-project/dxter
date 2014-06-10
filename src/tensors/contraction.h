@@ -26,7 +26,6 @@ class Contraction : public DLAOp<3,1>
   virtual NodeType GetType() const;
   virtual const DistType& GetDistType(unsigned int num) const;
   virtual Phase MaxPhase() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   void CheckInputTypesAlign() const;

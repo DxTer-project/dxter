@@ -42,7 +42,6 @@ class SumScatterUpdateNode : public DLAOp<2,1>
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual bool IsRedistNode() const {return true;}
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual Phase MaxPhase() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);

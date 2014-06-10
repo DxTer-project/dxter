@@ -210,22 +210,19 @@ Cost Gemm::GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, 
     throw;
 }
 
-void Gemm::SanityCheck()
-{
-#if DOELEM
-  if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER) {
-    if (InputDistType(2) != D_MC_MR) {
-      cout << "input not D_MC_MR 7";
-      throw;
-    }
-  }
-#endif
-}
-
 void Gemm::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
+#if DOELEM
+    if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER) {
+      if (InputDistType(2) != D_MC_MR) {
+	cout << "input not D_MC_MR 7";
+	throw;
+      }
+    }
+#endif
+
     switch(GetLayer()) {
       case(ABSLAYER):
         m_cost = ZERO;

@@ -96,7 +96,6 @@ class Loop : public PSet
   Loop(LoopType type, Poss *poss, BSSize bsSize);
   virtual PSet* GetNewInst() {return new Loop(m_type);}
   virtual bool IsLoop() const {return true;}
-  virtual void SanityCheck();
   virtual bool IsTransparent() const {return false;}
   virtual bool CanMerge(PSet *pset) const;
   virtual bool WorthFusing(Loop *loop);
@@ -107,6 +106,7 @@ class Loop : public PSet
   void SetBS(BSSize size);
   int GetBS() const;
   Split* GetControl() const;
+  virtual void Prop();
   //  unsigned int NumIters() const;
   bool ValidIter() const;
   LoopTunnel* CreateNewLoopTunnels(Node *input, unsigned int num, Poss *possToCareAbout, UpStat stat);

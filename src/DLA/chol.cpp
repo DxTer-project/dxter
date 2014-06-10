@@ -42,6 +42,22 @@ void Chol::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<1,1>::Prop();
+
+#if DOELEM
+  if (m_layer == DMLAYER) {
+    if (InputDistType(0) != D_MC_MR)
+      cout << "input not D_MC_MR";
+  }
+  else if (m_layer == SMLAYER) {
+    if (InputDistType(0) != D_STAR_STAR) {
+      cout << "input not D_STAR_STAR";
+      throw;
+    }
+    if (!(*InputLocalM(0) == *InputLocalN(0)))
+      throw;
+  }
+#endif
+
     const Sizes *ms = GetM(0);
     const Sizes *ns = GetN(0);
     if (! (*ms == *ns)) {
@@ -120,26 +136,6 @@ Phase Chol::MaxPhase() const
 #endif
 }
 
-void Chol::SanityCheck()
-{
-  DLAOp<1,1>::SanityCheck();
-  if (m_inputs.size() != 1)
-    cout << "m_inputs.size() != 1\n";
-#if DOELEM
-  if (m_layer == DMLAYER) {
-    if (InputDistType(0) != D_MC_MR)
-      cout << "input not D_MC_MR";
-  }
-  else if (m_layer == SMLAYER) {
-    if (InputDistType(0) != D_STAR_STAR) {
-      cout << "input not D_STAR_STAR";
-      throw;
-    }
-    if (!(*InputLocalM(0) == *InputLocalN(0)))
-      throw;
-  }
-#endif
-}
 
 string CholLoopExp::GetType() const 
 {

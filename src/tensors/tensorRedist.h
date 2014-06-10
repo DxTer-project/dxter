@@ -48,7 +48,6 @@ class RedistNode : public DLANode
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual bool IsRedistNode() const {return true;}
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -78,7 +77,6 @@ class AllReduceNode : public DLAOp<1,1>
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual bool IsRedistNode() const {return true;}
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   //  RedistNode* CreateTrans(Trans trans);

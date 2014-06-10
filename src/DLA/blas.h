@@ -54,7 +54,6 @@ class Axpy : public DLAOp<2,1>
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual Phase MaxPhase() const;
@@ -111,7 +110,6 @@ class Scal : public DLAOp<2,1>
   Scal(Layer layer) {SetLayer(layer);}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "Scal";}
-  virtual void SanityCheck();
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new Scal(ABSLAYER); }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -155,7 +153,6 @@ class ConstScal : public DLAOp<1,1>
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif
-  virtual void SanityCheck();
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
 };

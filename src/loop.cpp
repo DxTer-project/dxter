@@ -215,9 +215,9 @@ Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
     throw;
 }
 
-void Loop::SanityCheck()
+void Loop::Prop()
 {
-  PSet::SanityCheck();
+  PSet::Prop();
 
   
   bool foundControl = false;

@@ -74,29 +74,6 @@ Phase TriInv::MaxPhase() const
 #endif
 }
 
-void TriInv::SanityCheck()
-{
-  DLAOp<1,1>::SanityCheck();
-  if (m_inputs.size() != 1)
-    cout << "m_inputs.size() != 1\n";
-#if DOELEM
-  if (m_layer == ABSLAYER || m_layer == DMLAYER) {
-    if (InputDistType(0) != D_MC_MR) {
-      cout << "input not D_MC_MR";
-      throw;
-    }
-  }
-  else if (m_layer == SMLAYER) {
-    if (InputDistType(0) != D_STAR_STAR) {
-      cout << "input not D_STAR_STAR";
-      throw;
-    }
-  }
-#else
-  throw;
-#endif
-}
-
 void TriInv::PrintCode(IndStream &out)
 {
   out.Indent();
@@ -116,6 +93,25 @@ void TriInv::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<1,1>::Prop();
+
+#if DOELEM
+  if (m_layer == ABSLAYER || m_layer == DMLAYER) {
+    if (InputDistType(0) != D_MC_MR) {
+      cout << "input not D_MC_MR";
+      throw;
+    }
+  }
+  else if (m_layer == SMLAYER) {
+    if (InputDistType(0) != D_STAR_STAR) {
+      cout << "input not D_STAR_STAR";
+      throw;
+    }
+  }
+#else
+  throw;
+#endif
+
+
     if (m_layer == ABSLAYER || m_layer == DMLAYER)
       m_cost = ZERO;
     else if (m_layer == SMLAYER)

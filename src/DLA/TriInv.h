@@ -45,7 +45,6 @@ class TriInv : public DLAOp<1,1>
  TriInv(Layer layer, Tri tri) : m_tri(tri) {SetLayer(layer);}
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void Prop();
-  virtual void SanityCheck();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "TriInv";}

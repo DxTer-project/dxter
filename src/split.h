@@ -54,7 +54,6 @@ class Split : public LoopTunnel
   virtual void PrintCode(IndStream &out);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual unsigned int NumOutputs() const;
   virtual bool QuadInUse(Quad quad, bool atEnd) const;
   virtual ClassType GetNodeClass() const {return GetClass();}

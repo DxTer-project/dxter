@@ -209,26 +209,16 @@ Name Pack::GetName(unsigned int num) const
 
 void Pack::Prop()
 {
-  if (m_inputs.size() != 2)
-    throw;
   if (!IsValidCost(m_cost)) {
-    Input(0)->Prop();
-    Input(1)->Prop();
+    if (m_inputs.size() != 2)
+      throw;
+    DLAOp<2,1>::Prop();
+
     const Sizes *size1 = InputLocalM(0);
     const Sizes *size2 = InputLocalN(0);
     m_cost = (size1->SumProds11(*size2) * (PSIWVAL + PSIRVAL)) / NumCoresInComm(m_comm);
     m_cost += AdditionalCostOfBarrier(m_comm, size1->NumSizes());
   }
-}
-
-void Pack::SanityCheck()
-{
-  if (m_inputs.size() != 2) {
-    cout << "Error on " << GetNodeClass() << endl;
-    cout << "Has " << m_inputs.size() << " inputs\n";
-    throw;
-  }
-  DLANode::SanityCheck();
 }
 
 void PackBuff::UpdateChildrensInnerMultiple(PackSize size)
@@ -436,16 +426,6 @@ void PackBuff::Prop()
     else
       throw;
   }
-}
-
-void PackBuff::SanityCheck()
-{
-  if (m_inputs.size() != 1) {
-    cout << "Error on " << GetNodeClass() << endl;
-    cout << "Has " << m_inputs.size() << " inputs\n";
-    throw;
-  }
-  DLANode::SanityCheck();
 }
 
 PackBuff::PackBuff(string name,

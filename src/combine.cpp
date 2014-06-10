@@ -29,50 +29,84 @@
 void Combine::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    if (m_tunType==POSSTUNOUT) {
+    LoopTunnel::Prop();
+
+#if TWOD
+    if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
+	&& (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR))) 
+      {
+	cout << "bad statuses\n";
+	throw;
+      }
+    else if ((m_dir == PARTRIGHT || m_dir == PARTLEFT)
+	     && (GetUpStat(TL) != GetUpStat(BL) || GetUpStat(TR) != GetUpStat(BR)))
+      {
+	cout << "bad statuses\n";
+	throw;
+      }
+#else
+    throw;
+#endif
+  
+    if (m_tunType == SETTUNOUT) {
+      if (!m_pset->IsLoop())
+	throw;
+    
+      for(unsigned int i = 0; i < m_inputs.size(); ++i) {
+	if (Input(i)->GetNodeClass() != Combine::GetClass()) {
+	  throw;
+	}
+      }
+    }
+    else if (m_tunType == POSSTUNOUT) {
 #if TWOD
       if (m_inputs.size() != GetNumElems(m_dir)+1) {
 #else
-      if (m_inputs.size() != 4) {
+	if (m_inputs.size() != 4) {
 #endif
-        cout << "wrong number of inputs " << this << endl;
-	//        cout << m_inputs.size() << " inputs instead of " << GetNumElems(m_dir)+1 << endl;
-        throw;
-      }
-      else {
+	  int num = m_inputs.size();
+	  cout << "combine has wrong number of inputs\n";
+	  cout << num <<endl;
+	  throw;
+	}
         NodeConn *conn = m_inputs[m_inputs.size()-1];
 #if TWOD
-        if (conn->m_num != GetNumElems(m_dir))
+        if (conn->m_num != GetNumElems(m_dir)) {
 #else
-        if (conn->m_num != 3)
+	  if (conn->m_num != 3) {
 #endif
-          throw;
-        else if (conn->m_n->GetNodeClass() != Split::GetClass())
-          throw;
+	    throw;
+	  }
+	  else if (conn->m_n->GetNodeClass() != Split::GetClass())
+	    throw;
+	
+	if (Input(m_inputs.size()-1)->GetNodeClass() != Split::GetClass()) {
+	  cout << "Last input isn't the right size\n";
+	}
+	for (unsigned int i = 0; i < m_children.size(); ++i) {
+	  if (Child(i)->GetNodeClass() != Combine::GetClass()) {
+	    cout << Child(i)->GetType() << endl;
+	    throw;
+	  }
+	}
       }
-    }
-    
-    if (m_tunType==POSSTUNOUT || GetMyLoop()->GetType()==ELEMLOOP) {
-      unsigned int size = m_inputs.size();
-      for (unsigned int i = 0; i < size; ++i) {
-        Node *input = Input(i);
-        input->Prop();
-      }
-    }
-    
-    m_cost = ZERO;
+    else
+	throw;
+
 #if DODM
-    DistType type = InputDistType(0);
+    DistType type = this->InputDistType(0);
     for(unsigned int i = 0; i < m_inputs.size(); ++i) {
       if (DistTypeNotEqual(type, InputDistType(i))) {
         cout << "Bad input types\n";
         cout << DistTypeToStr(type) << endl;
         cout << DistTypeToStr(InputDistType(i)) << endl;
         throw;
-        m_poss->MarkInsane();
       }
     }
 #endif
+
+
+    m_cost = ZERO;
   }
 }
 
@@ -350,62 +384,6 @@ NodeType Combine::GetType() const
   str += m_partDim;
   return str + " ( " + PossTunnel::GetType() + " )";
 #endif
-}
-
-void Combine::SanityCheck()
-{
-  LoopTunnel::SanityCheck();
-  
-#if TWOD
-  if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
-      && (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR))) 
-  {
-    cout << "bad statuses\n";
-    throw;
-  }
-  else if ((m_dir == PARTRIGHT || m_dir == PARTLEFT)
-           && (GetUpStat(TL) != GetUpStat(BL) || GetUpStat(TR) != GetUpStat(BR)))
-  {
-    cout << "bad statuses\n";
-    throw;
-  }
-#else
-  throw;
-#endif
-  
-  if (m_tunType == SETTUNOUT) {
-    if (!m_pset->IsLoop())
-      throw;
-    
-    for(unsigned int i = 0; i < m_inputs.size(); ++i) {
-      if (Input(i)->GetNodeClass() != Combine::GetClass()) {
-        throw;
-      }
-    }
-  }
-  else if (m_tunType == POSSTUNOUT) {
-#if TWOD
-    if (m_inputs.size() != GetNumElems(m_dir)+1) {
-#else
-    if (m_inputs.size() != 4) {
-#endif
-      int num = m_inputs.size();
-      cout << "combine has wrong number of inputs\n";
-      cout << num <<endl;
-      throw;
-    }
-    if (Input(m_inputs.size()-1)->GetNodeClass() != Split::GetClass()) {
-      cout << "Last input isn't the right size\n";
-    }
-    for (unsigned int i = 0; i < m_children.size(); ++i) {
-      if (Child(i)->GetNodeClass() != Combine::GetClass()) {
-        cout << Child(i)->GetType() << endl;
-        throw;
-      }
-    }
-  }
-  else
-    throw;
 }
 
 void Combine::FlattenCore(ofstream &out) const

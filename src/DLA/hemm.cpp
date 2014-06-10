@@ -126,9 +126,25 @@ Phase Hemm::MaxPhase() const
   }
 }
 
-void Hemm::SanityCheck()
+
+bool Hemm::ShouldCullDP() const 
 {
-  DLAOp<3,1>::SanityCheck();
+  switch (GetLayer()) {
+  case (ABSLAYER):
+  case (DMLAYER):
+    return true;
+  case (SMLAYER):
+    return false;
+  default:
+    throw;
+  }
+}
+
+void Hemm::Prop()
+{
+  if (!IsValidCost(m_cost)) {
+    DLAOp<3,1>::Prop();
+
 #if DOELEM
   if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER) {
     if (InputDistType(2) != D_MC_MR) {
@@ -151,25 +167,7 @@ void Hemm::SanityCheck()
   else
     throw;
 #endif
-}
 
-bool Hemm::ShouldCullDP() const 
-{
-  switch (GetLayer()) {
-  case (ABSLAYER):
-  case (DMLAYER):
-    return true;
-  case (SMLAYER):
-    return false;
-  default:
-    throw;
-  }
-}
-
-void Hemm::Prop()
-{
-  if (!IsValidCost(m_cost)) {
-    DLAOp<3,1>::Prop();
     if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
       m_cost = ZERO;
     else if (GetLayer() == SMLAYER)
@@ -718,44 +716,44 @@ void LocalSymmAcc::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_type = acc->m_type;
 }
 
-void LocalSymmAcc::SanityCheck()
-{
-  DLAOp<5,2>::SanityCheck();
-  DistType t0 = InputDistType(0);
-  DistType t1 = InputDistType(1);
-  DistType t2 = InputDistType(2);
-  DistType t3 = InputDistType(3);
-  DistType t4 = InputDistType(4);
-  if (m_tri == LOWER) {
-    if (t0 != D_MC_MR)
-      throw;
-    if (t1 != D_MC_STAR)
-      throw;
-    if ((t2 != D_STAR_MR_T && m_type == REAL) || (t2 != D_STAR_MR_H && m_type == COMPLEX))
-      throw;
-    if (t3 != D_MC_STAR)
-      throw;
-    if (t4 != D_MR_STAR)
-      throw;
-  }
-  else {
-    if (t0 != D_MC_MR)
-      throw;
-    if (t1 != D_STAR_MC)
-      throw;
-    if ((t2 != D_MR_STAR_T && m_type == REAL) || (t2 != D_MR_STAR_H && m_type == COMPLEX))
-      throw;
-    if ((t3 != D_MC_STAR_T && m_type == REAL) || (t3 != D_MC_STAR_H && m_type == COMPLEX))
-      throw;
-    if ((t4 != D_MR_STAR_T && m_type == REAL) || (t4 != D_MR_STAR_H && m_type == COMPLEX))
-      throw;
-  }
-}
-
 void LocalSymmAcc::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<5,2>::Prop();
+
+    DistType t0 = InputDistType(0);
+    DistType t1 = InputDistType(1);
+    DistType t2 = InputDistType(2);
+    DistType t3 = InputDistType(3);
+    DistType t4 = InputDistType(4);
+    if (m_tri == LOWER) {
+      if (t0 != D_MC_MR)
+	throw;
+      if (t1 != D_MC_STAR)
+	throw;
+      if ((t2 != D_STAR_MR_T && m_type == REAL) || (t2 != D_STAR_MR_H && m_type == COMPLEX))
+	throw;
+      if (t3 != D_MC_STAR)
+	throw;
+      if (t4 != D_MR_STAR)
+	throw;
+    }
+    else {
+      if (t0 != D_MC_MR)
+	throw;
+      if (t1 != D_STAR_MC)
+	throw;
+      if ((t2 != D_MR_STAR_T && m_type == REAL) || (t2 != D_MR_STAR_H && m_type == COMPLEX))
+	throw;
+      if ((t3 != D_MC_STAR_T && m_type == REAL) || (t3 != D_MC_STAR_H && m_type == COMPLEX))
+	throw;
+      if ((t4 != D_MR_STAR_T && m_type == REAL) || (t4 != D_MR_STAR_H && m_type == COMPLEX))
+	throw;
+    }
+
+
+
+
     m_cost = GetCost(m_side, InputLocalM(1), InputLocalN(1));
   }
 }

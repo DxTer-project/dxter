@@ -53,21 +53,19 @@ NodeType RedistNode::GetType() const
   }
 }
 
-void RedistNode::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (m_inputs.size() != 1) {
-    cout << "m_inputs.size() != 1\n";
-    throw;
-  }
-  
-  if (!m_children.size())
-    throw;
-}
-
 void RedistNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
+    DLANode::Prop()
+
+    if (m_inputs.size() != 1) {
+      cout << "m_inputs.size() != 1\n";
+      throw;
+    }
+    
+    if (!m_children.size())
+      throw;
+  
     if (!m_name.length())
       m_name = (string)"RedistNode to " +  m_destType.QuickStr();
     DLANode *parent = (DLANode*)Input(0);
@@ -683,10 +681,7 @@ NodeType AllReduceNode::GetType() const
   //  str << m_sumIndices;
   return str.str();
 }
-void AllReduceNode::SanityCheck()
-{
-  throw;
-}
+
 
 void AllReduceNode::Prop()
 {

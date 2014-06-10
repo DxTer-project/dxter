@@ -100,11 +100,11 @@ class Herk : public DLAOp<2,1>, public HerkProps
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif
-  virtual void SanityCheck();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "Herk";}
+  virtual void Prop();
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual Phase MaxPhase() const;
@@ -155,7 +155,6 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   virtual const DistType& GetDistType(unsigned int num) const;
   virtual bool CanTransposeInputs() const;
 #endif
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}

@@ -47,7 +47,6 @@ Poss::Poss()
   m_parent = 0;
   ++M_count;
   m_fullyExpanded = false;
-  m_hasChecked = false;
   m_pset = NULL;
   m_hashValid = false;
   m_isSane = true;
@@ -64,7 +63,6 @@ Poss::Poss(PossTunnel *tunn)
   ++M_count;
   AddUp(m_possNodes, tunn, true, false);
   m_fullyExpanded = false;
-  m_hasChecked = false;
   m_pset = NULL;
   m_hashValid = false;
   m_isSane = true;
@@ -76,7 +74,6 @@ Poss::Poss(Node *node, bool goUp)
   m_parent = 0;
   ++M_count;
   m_fullyExpanded = false;
-  m_hasChecked = false;
   m_pset = NULL;
   m_hashValid = false;
   m_isSane = true;
@@ -152,7 +149,6 @@ void Poss::InitHelper(const NodeVec &vec, bool outTuns, bool disconnectFromOwner
   m_parent = 0;
   ++M_count;
   m_fullyExpanded = false;
-  m_hasChecked = false;
   m_pset = NULL;
   m_hashValid = false;
   m_isSane = true;
@@ -229,75 +225,6 @@ bool Poss::CanPrint() const
     }
   }
   return true;
-}
-
-void Poss::SanityCheck()
-{
-#ifdef LIMITEDSANITYCHECK
-  if (m_hasChecked)
-    return;
-  m_hasChecked = true;
-#endif
-  
-  NodeVecConstIter iter = m_possNodes.begin();
-  for( ; iter != m_possNodes.end(); ++iter) {
-    (*iter)->SanityCheck();
-    if ((*iter)->m_poss != this) {
-      cout << (*iter)->GetType() << endl;
-      cout << (*iter)->GetNameStr(0) << endl;
-      cout << (*iter)->GetNodeClass() << endl;
-      throw;
-    }
-  }
-  
-  PSetVecIter setIter = m_sets.begin();
-  for(; setIter != m_sets.end(); ++setIter)
-    (*setIter)->SanityCheck();
-  
-  iter = m_outTuns.begin();
-  for( ; iter != m_outTuns.end(); ++iter) {
-    (*iter)->SanityCheck();
-  }
-  
-  unsigned int i = 0;
-  iter = m_inTuns.begin();
-  for( ; iter != m_inTuns.end(); ++iter, ++i) {
-    (*iter)->SanityCheck();
-    if (m_inTuns.size() != m_pset->m_inTuns.size()) {
-      cout << m_inTuns.size() << endl;
-      cout << m_pset->m_inTuns.size() << endl;
-      cout << this << " " << m_pset << endl;
-      throw;
-    }
-    if (m_pset->InTun(i) != InTun(i)->Input(0)) {
-      cout << "(m_pset->m_inputs[i] != m_inputs[i]->m_inputs[0]->m_n)\n";
-      
-      throw;
-    }
-    if (!m_pset->InTun(i)->InChildren(*iter,0)) {
-      cout << "!m_pset->m_inputs[i]->InChildren(*iter,0)\n";
-      cout << "poss tunnel " << *iter << " on poss " << this << " on set " << m_pset << endl;
-      cout << "expected on set tunnel " << m_pset->InTun(i) << endl;
-      cout << "i = " << i << endl;
-      for(unsigned int j = 0; j < m_pset->InTun(0)->m_children.size(); ++j) {
-        cout << m_pset->InTun(i)->m_children[j]->m_n << " is " << j << " child\n";
-        if ( m_pset->InTun(i)->m_children[j]->m_num)
-          cout << "!!!!!" << m_pset->InTun(i)->m_children[j]->m_num << " is " << j << " num\n";
-      }
-      throw;
-    }
-  }
-  
-  bool found = false;
-  PossMMapRangePair pair = m_pset->m_posses.equal_range(GetHash());
-  for(; !found && pair.first != pair.second; ++pair.first) {
-    if ((*(pair.first)).second == this)
-      found = true;
-  }
-  if (!found) {
-    cout << "PSet doesn't know about poss\n";
-    throw;
-  }
 }
 
 void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging)
@@ -383,7 +310,7 @@ void Poss::AddNode(Node *node)
     throw;
   }
   node->m_poss = this;
-#ifndef LIMITEDSANITYCHECK
+#if 0
   NodeVecIter iter = m_possNodes.begin();
   for(; iter != m_possNodes.end(); ++iter) {
     if (*iter == node)  {
@@ -648,11 +575,45 @@ void Poss::Prop()
 {
   NodeVecIter nodeIter = m_possNodes.begin();
   for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
-    (*nodeIter)->Prop();
+    Node *node = *nodeIter;
+    node->Prop();
+    if (node->m_poss != this) {
+      cout << node->GetType() << endl;
+      cout << node->GetNameStr(0) << endl;
+      cout << node->GetNodeClass() << endl;
+      throw;
+    }
   }
-  PSetVecIter possIter = m_sets.begin();
-  for( ; possIter != m_sets.end(); ++possIter) {
-    (*possIter)->Prop();
+  PSetVecIter setIter = m_sets.begin();
+  for( ; setIter != m_sets.end(); ++setIter) {
+    PSet *set = *setIter;
+    set->Prop();
+  }
+
+  if (m_inTuns.size() != m_pset->m_inTuns.size()) {
+    cout << m_inTuns.size() << endl;
+    cout << m_pset->m_inTuns.size() << endl;
+    cout << this << " " << m_pset << endl;
+    throw;
+  }
+  
+  unsigned int i = 0;
+  nodeIter = m_inTuns.begin();
+  for(; nodeIter != m_inTuns.end(); ++nodeIter, ++i) {
+    if (m_pset->InTun(i) != (*nodeIter)->Input(0))
+      throw;
+    if (!m_pset->InTun(i)->InChildren(*nodeIter,0)) {
+      cout << "!m_pset->m_inputs[i]->InChildren(*iter,0)\n";
+      cout << "poss tunnel " << *nodeIter << " on poss " << this << " on set " << m_pset << endl;
+      cout << "expected on set tunnel " << m_pset->InTun(i) << endl;
+      cout << "i = " << i << endl;
+      for(unsigned int j = 0; j < m_pset->InTun(0)->m_children.size(); ++j) {
+        cout << m_pset->InTun(i)->m_children[j]->m_n << " is " << j << " child\n";
+        if ( m_pset->InTun(i)->m_children[j]->m_num)
+          cout << "!!!!!" << m_pset->InTun(i)->m_children[j]->m_num << " is " << j << " num\n";
+      }
+      throw;
+    }
   }
 }
 

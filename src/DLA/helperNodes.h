@@ -67,7 +67,6 @@ class InputNode : public DLANode
 #if DODM
   virtual const DistType& GetDistType(unsigned int num) const { return m_varName.m_type; }
 #endif
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -108,7 +107,6 @@ class OutputNode : public DLANode
 #if DODM
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out) {}
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -149,7 +147,6 @@ class ConstVal : public DLANode
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const { return STAR_STAR; }
 #endif
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -250,7 +247,7 @@ m_distType(D_LASTDIST),
 #if DODM
   virtual const DistType& GetDistType(unsigned int num) const { return m_distType; }
 #endif
-  virtual void SanityCheck();
+
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -294,7 +291,6 @@ class MakeTrapNode : public DLAOp<1,1>
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const {return "MakeTrap";}
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -325,7 +321,6 @@ class ScaleNode : public DLAOp<1,1>
   static Node* BlankInst() { return  new ScaleNode(ABSLAYER, COEFZERO); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual NodeType GetType() const {return "Scale";}
-  virtual void SanityCheck();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "scale";}
@@ -358,7 +353,6 @@ class ScaleTrapNode : public DLAOp<1,1>
   static Node* BlankInst() { return  new ScaleTrapNode(ABSLAYER,LEFT,LOWER,COEFONE); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual NodeType GetType() const {return "ScaleTrap";}
-  virtual void SanityCheck();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "scaleTrap";}
@@ -499,7 +493,6 @@ bljsdf
 #endif
   virtual Name GetName(unsigned int num) const;
   virtual void Prop();
-  virtual void SanityCheck();
   virtual unsigned int NumOutputs() const {return 1;}
   static Node* BlankInst() { return  new ViewTL(ABSLAYER); }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
@@ -530,7 +523,6 @@ class ViewTLCombine : public DLANode
   { return InputLocalN(1); }
   virtual Name GetName(unsigned int num) const {return GetInputName(1);}
   virtual void Prop();
-  virtual void SanityCheck() {DLANode::SanityCheck();}
   virtual unsigned int NumOutputs() const {return 1;}
   static Node* BlankInst() { return  new ViewTLCombine(ABSLAYER); }
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}

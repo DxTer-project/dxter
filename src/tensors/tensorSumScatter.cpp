@@ -47,12 +47,6 @@ NodeType SumScatterUpdateNode::GetType() const
 {
   return "SumScatterUpdate";
 }
-void SumScatterUpdateNode::SanityCheck()
-{
-  throw;
-}
-
-
 
 void SumScatterUpdateNode::Prop()
 {

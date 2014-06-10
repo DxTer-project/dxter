@@ -57,8 +57,6 @@ class Trxm : public DLAOp<2,1>, public TrProps
   virtual NodeType GetType() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual void SanityCheck();
-
   static Cost GetCost(Layer layer, Side side, const Sizes *localMs, const Sizes *localNs);
 };
 

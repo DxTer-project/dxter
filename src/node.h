@@ -82,7 +82,6 @@ class Node
   virtual void PrintCode(IndStream &out) = 0;
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual unsigned int NumOutputs() const {return 1;}
   virtual Cost GetCost() = 0;
   virtual ClassType GetNodeClass() const = 0;
@@ -91,9 +90,7 @@ class Node
   virtual bool Overwrites(const Node *input, unsigned int num) const = 0;
   virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, 
 				 unsigned int &numOut) const = 0;
-#if DOTENSORS
   virtual void AddVariables(VarSet &set) const;
-#endif
 
   virtual void ClearSizeCache() {}
   virtual void BuildSizeCache() {}
@@ -102,6 +99,7 @@ class Node
   Node();
   virtual ~Node();
   void Cull(Phase phase);
+  void CheckConnections();
   void AddChild(Node *node, unsigned int num);
   void RemoveChild(Node *node, unsigned int num);
   void RemoveInput(Node *node, unsigned int num);

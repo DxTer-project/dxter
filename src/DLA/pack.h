@@ -68,7 +68,6 @@ class Pack : public DLAOp<2,1>
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual Name GetName(unsigned int num) const;
-  virtual void SanityCheck();
   virtual unsigned int NumOutputs() const {return 1;}
   inline void Parallelize(Comm comm) {m_comm=comm;}
   virtual Comm HasBarrier() const {return m_comm;}
@@ -109,7 +108,6 @@ class PackBuff : public DLAOp<1,1>
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
   virtual Name GetName(unsigned int num) const;
-  virtual void SanityCheck();
   virtual unsigned int NumOutputs() const {return 1;}
   void UpdateChildrensInnerMultiple(PackSize size);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}

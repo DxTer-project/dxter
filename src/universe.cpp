@@ -139,8 +139,6 @@ bool Universe::TakeIter(unsigned int phase)
     if (m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers))
       m_pset->BuildSizeCache();
   
-  SanityCheck();
-
   cout << "\tFinishing iteration\n";
   cout.flush();
 
@@ -168,7 +166,7 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
 #endif
   
   ClearFullyExpanded();
-  SanityCheck();
+
   if (m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers))
     m_pset->BuildSizeCache();
 
@@ -182,13 +180,6 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
     foundNew = TakeIter(phase);
     unsigned int total = TotalCount();
     ++count;
-    if (foundNew) {
-      cout << "\tSanity checking\n";
-      cout.flush();
-      SanityCheck();
-      cout << "\tDone sanity check\n";
-      cout.flush();
-    }
     time(&end);
     cout << "//Done iteration " << count << " with " 
 	 << total << " algorithms";
@@ -218,10 +209,9 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
       if (foundNew) {
 	total = TotalCount();
 	cout << total << " algorithms now" << endl;
-	cout << "\tProping and sanity checking\n";
+	cout << "\tProp'ing\n";
 	Prop();
-	SanityCheck();
-	cout << "\tDone with checking\n";
+	cout << "\tDone Prop'ing\n";
 	cout.flush();
       }
     }
@@ -322,10 +312,6 @@ void Universe::AddTrans(const ClassType &classType, Transformation *trans, int p
       M_trans[phase][classType] = vec;
     }
   }
-}
-void Universe::SanityCheck()
-{
-  m_pset->SanityCheck();
 }
 
 void Universe::Prop()

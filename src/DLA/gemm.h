@@ -79,7 +79,6 @@ class Gemm : public DLAOp<3,1>
   virtual bool DoNotCullDP() const;
 #endif
   virtual Phase MaxPhase() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);

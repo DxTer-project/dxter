@@ -121,7 +121,6 @@ class Her2k : public DLAOp<3,1>, public Her2kProps
   virtual bool ShouldCullDP() const;
 #endif
   virtual void Prop();
-  virtual void SanityCheck();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual Phase MaxPhase() const;
   virtual void PrintCode(IndStream &out);
@@ -158,7 +157,6 @@ class Tri2k : public DLAOp<5,1>, public Her2kProps
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(4); }
 #endif
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}

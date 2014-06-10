@@ -46,7 +46,6 @@ class PossTunnel : public DLANode
   virtual void PrintCode(IndStream &out) {};
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual bool IsPossTunnel() const {return true;}
   virtual bool IsPossTunnel(PossTunType type) const;
   virtual unsigned int NumOutputs() const;
@@ -71,6 +70,7 @@ class PossTunnel : public DLANode
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, unsigned int num) const;
   virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
+  virtual bool IsCombine() const {return false;}
 };
 
 string TunTypeToStr(PossTunType type);

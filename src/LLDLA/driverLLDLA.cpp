@@ -105,7 +105,6 @@ int main(int argc, const char* argv[])
     uni.Init(fileName);
     time(&end);
     cout << "Unflatten took " << difftime(end,start) << " seconds\n";
-    //    uni.SanityCheck();
     cout << "Propagating\n";
     cout.flush();
     time(&start2);

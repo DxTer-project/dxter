@@ -128,32 +128,6 @@ bool Axpy::DoNotCullDP() const
 #endif
 }
 
-
-void Axpy::SanityCheck()
-{
-  DLAOp<2,1>::SanityCheck();
-  if (m_inputs.size() != 2)
-    cout << "2 m_inputs.size() != 2\n";
-#if DODPPHASE
-  else if (m_layer == DMLAYER) {
-    if (InputDistType(0) != D_MC_MR)
-      throw;
-    if (InputDistType(1) != D_MC_MR)
-      throw;
-  }
-  else if (m_layer == SMLAYER) {
-    if (InputDistType(0) != InputDistType(1))
-      m_poss->MarkInsane();
-  }
-#if DOBLIS
-  if (m_comm != CORECOMM)
-    throw;
-#endif
-#else
-
-#endif
-}
-
 void Axpy::PrintCode(IndStream &out)
 {
   out.Indent();
@@ -190,6 +164,26 @@ void Axpy::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
+
+#if DODPPHASE
+    if (m_layer == DMLAYER) {
+      if (InputDistType(0) != D_MC_MR)
+	throw;
+      if (InputDistType(1) != D_MC_MR)
+	throw;
+    }
+    else if (m_layer == SMLAYER) {
+      if (InputDistType(0) != InputDistType(1))
+	m_poss->MarkInsane();
+    }
+#if DOBLIS
+    if (m_comm != CORECOMM)
+      throw;
+#endif
+#else
+
+#endif
+
     if (m_layer == DMLAYER)
       m_cost = 0;
     else if (m_layer == SMLAYER)
@@ -408,32 +402,6 @@ bool Scal::ShouldCullDP() const
 #endif
 }
 
-void Scal::SanityCheck()
-{
-  DLAOp<2,1>::SanityCheck();
-  if (m_inputs.size() != 2) {
-    cout << "1 m_inputs.size() != 2\n";
-    throw;
-  }
-  if (!((DLANode*)Input(0))->IsScalar(InputConnNum(0)))
-    throw;
-#if DODPPHASE
-  else if (m_layer == DMLAYER) {
-    if (InputDistType(0) != D_STAR_STAR)
-      throw;
-    if (InputDistType(1) != D_MC_MR)
-      throw;
-  }
-  else if (m_layer == SMLAYER) {
-    if (InputDistType(0) != D_STAR_STAR)
-      cout << "input not D_STAR_STAR";
-  }
-  else
-    throw;
-#else
-  throw;
-#endif
-}
 
 void Scal::PrintCode(IndStream &out)
 {
@@ -444,7 +412,28 @@ void Scal::PrintCode(IndStream &out)
 void Scal::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    Scal::Prop();
+    DLAOp<2,1>::Prop();
+
+    if (!((DLANode*)Input(0))->IsScalar(InputConnNum(0)))
+      throw;
+#if DODPPHASE
+    else if (m_layer == DMLAYER) {
+      if (InputDistType(0) != D_STAR_STAR)
+	throw;
+      if (InputDistType(1) != D_MC_MR)
+	throw;
+    }
+    else if (m_layer == SMLAYER) {
+      if (InputDistType(0) != D_STAR_STAR)
+	cout << "input not D_STAR_STAR";
+    }
+    else
+      throw;
+#else
+    throw;
+#endif
+
+
     if (m_layer == SMLAYER)
       m_cost = GAMMA * LocalM(1)->SumProds11(*LocalN(1));
     else if (m_layer == DMLAYER)
@@ -546,21 +535,6 @@ void ConstScal::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_alpha);
 }
 
-void ConstScal::SanityCheck()
-{
-  DLAOp<1,1>::SanityCheck();
-  if (m_inputs.size() != 1) {
-    cout << "1 m_inputs.size() != 1\n";
-    throw;
-  }
-#if DOELEM
-  else if (m_layer == DMLAYER) {
-    if (InputDistType(1) != D_MC_MR)
-      throw;
-  }
-#endif
-}
-
 void ConstScal::PrintCode(IndStream &out)
 {
   out.Indent();
@@ -582,6 +556,15 @@ void ConstScal::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<1,1>::Prop();
+
+#if DOELEM
+    if (m_layer == DMLAYER) {
+      if (InputDistType(1) != D_MC_MR)
+	throw;
+    }
+#endif
+
+
     if (m_layer == SMLAYER)
       m_cost = GAMMA * LocalM(0)->SumProds11(*LocalN(0));
     else if (m_layer == DMLAYER)

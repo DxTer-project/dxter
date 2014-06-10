@@ -81,7 +81,6 @@ class Hemm : public DLAOp<3,1>
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual Phase MaxPhase() const;
@@ -130,7 +129,6 @@ class LocalSymmAcc : public DLAOp<5,2>
   static Node* BlankInst() { return  new LocalSymmAcc(LEFT, UPPER, COMPLEX, COEFONE); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(3+num); }
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}

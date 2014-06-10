@@ -189,18 +189,15 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_varName = node->m_varName;
 }
 
-void InputNode::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (!m_inputs.empty()) {
-    cout << "!m_inputs.empty()\n";
-    throw;
-  }
-}
-
 void InputNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
+    DLANode::Prop();
+    if (!m_inputs.empty()) {
+      cout << "!m_inputs.empty()\n";
+      throw;
+    }
+
     m_cost = ZERO;
   }
 }
@@ -390,18 +387,16 @@ const DistType& OutputNode::GetDistType(unsigned int num) const
 }
 #endif
 
-void OutputNode::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (m_inputs.size() != 1) {
-    cout << "m_inputs.size() != 1\n";
-    throw;
-  }
-}
-
 void OutputNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
+    DLANode::Prop();
+
+    if (m_inputs.size() != 1) {
+      cout << "m_inputs.size() != 1\n";
+      throw;
+    }
+
     Node *input = Input(0);
     input->Prop();
     m_cost = ZERO;
@@ -524,18 +519,14 @@ void ConstVal::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_varName = node->m_varName;
 }
 
-void ConstVal::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (!m_inputs.empty()) {
-    cout << "!m_inputs.empty()\n";
-    throw;
-  }
-}
-
 void ConstVal::Prop()
 {
   if (!IsValidCost(m_cost)) {
+    DLANode::Prop();
+    if (!m_inputs.empty()) {
+      cout << "!m_inputs.empty()\n";
+      throw;
+    }
     m_cost = ZERO;
   }
 }
@@ -664,23 +655,15 @@ void TempVarNode::PrintCode(IndStream &out)
   }*/
 }
 
-void TempVarNode::SanityCheck()
-{
-  DLANode::SanityCheck();
-  if (m_inputs.size() != 1) {
-    cout << "m_inputs.size() != 1\n";
-    throw;
-  }
-}
 
 void TempVarNode::Prop()
 {
-  if (m_inputs.size() != 1) {
-    cout << "m_inputs.size() != 1\n";
-    cout.flush();
-    throw;
-  }
   if (!IsValidCost(m_cost)) {
+    if (m_inputs.size() != 1) {
+      cout << "m_inputs.size() != 1\n";
+      cout.flush();
+      throw;
+    }
     Input(0)->Prop();
     m_cost = ZERO;
   }
@@ -873,12 +856,6 @@ sdlkfj
 
 #if TWOD
 #if DOELEM
-void MakeTrapNode::SanityCheck()
-{
-  DLAOp<1,1>::SanityCheck();
-  if (m_inputs.size() != 1)
-    cout << "m_inputs.size() != 1\n";
-}
 
 void MakeTrapNode::Prop()
 {
@@ -981,13 +958,6 @@ void RemoveScaleByOne::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-void ScaleTrapNode::SanityCheck()
-{
-  DLAOp<1,1>::SanityCheck();
-  if (m_inputs.size() != 1)
-    cout << "m_inputs.size() != 1\n";
-}
-
 void ScaleTrapNode::PrintCode(IndStream &out)
 {  
   Layer layer = GetLayer();
@@ -1068,13 +1038,6 @@ ScaleNode::ScaleNode(Layer layer, Coef val)
   : m_val(val) 
 {
   SetLayer(layer); 
-}
-
-void ScaleNode::SanityCheck()
-{
-  DLAOp<1,1>::SanityCheck();
-  if (m_inputs.size() != 1)
-    cout << "m_inputs.size() != 1\n";
 }
 
 void ScaleNode::Prop()
@@ -1543,18 +1506,16 @@ Name ViewTL::GetName(unsigned int num) const
  void ViewTL::Prop()
 {
   if (!IsValidCost(m_cost)) {
+    if (m_inputs.size() != 3)
+      throw;
     Input(0)->Prop();
     Input(1)->Prop();
     Input(2)->Prop();
-    //    DLANode::Prop();
+    DLANode::Prop();
     m_cost = ZERO;
   }
 }
 
-void ViewTL::SanityCheck()
-{
-  DLANode::SanityCheck();
-}
 
 void ViewTL::PrintCode(IndStream &out)
 {

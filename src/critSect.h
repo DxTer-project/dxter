@@ -36,7 +36,6 @@ class CritSect : public PSet
   virtual bool IsCritSect() const {return true;}
   virtual bool IsTransparent() const {return false;}
   virtual bool CanMerge(PSet *pset) const {return false;}
-  virtual void SanityCheck();
   virtual void BuildSizeCache();
 };
 
@@ -51,7 +50,6 @@ class CritSectTunnel : public PossTunnel
   static Node* BlankInst() { return new CritSectTunnel;}
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual NodeType GetType() const {return "CritSectTunnel";}
-  virtual void SanityCheck();
   virtual unsigned int NumOutputs() const {return 1;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "CritSectTunnel";}

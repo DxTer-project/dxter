@@ -161,53 +161,6 @@ void PSet::AddPoss(Poss *poss)
   poss->m_pset = this;
 }
 
-void PSet::SanityCheck()
-{
-
-  //BAM Par + check for > 1
-  PossMMapIter iter = m_posses.begin();
-  for (; iter != m_posses.end(); ++iter) {
-    (*iter).second->SanityCheck();
-  }
-  
-  for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
-    Node *in = InTun(i);
-    for (unsigned int j = 0; j < in->m_children.size(); ++j) {
-      Node *child = in->m_children[j]->m_n;
-      if (child->m_inputs.size() != 1) {
-        cout << "child->m_inputs.size() != 1\n";
-        throw;
-      }
-      if (child->Input(0) != in) {
-        cout << "child->m_inputs[0]->m_n != in\n";
-        throw;
-      }
-    }
-    
-    in->SanityCheck();
-  }
-  
-  for (unsigned int i = 0; i < m_outTuns.size(); ++i) {
-    Node *out = m_outTuns[i];
-    for (unsigned int j = 0; j < out->m_inputs.size(); ++j) {
-      Node *parent = out->Input(j);
-      if (parent->m_children.size() != 1) {
-        cout << "parent->m_children.size() != 1\n";
-        throw;
-      }
-      if (parent->m_children[0]->m_n != out) {
-        cout << "parent->m_children[0]->m_n != out\n";
-        throw;
-      }
-    }
-    out->SanityCheck();
-  }
-  
-  if (!m_isTopLevel && !m_ownerPoss) {
-    cout << "no owner\n";
-    throw;
-  }
-}
 
 bool PSet::operator==(const Poss &rhs) const
 {
@@ -280,72 +233,112 @@ void PSet::Prop()
 {
   if(m_hasProped)
     return;
+
+  //BAM Par + check for > 1
+  for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
+    Node *in = InTun(i);
+    for (unsigned int j = 0; j < in->m_children.size(); ++j) {
+      Node *child = in->m_children[j]->m_n;
+      if (child->m_inputs.size() != 1) {
+        cout << "child->m_inputs.size() != 1\n";
+        throw;
+      }
+      if (child->Input(0) != in) {
+        cout << "child->m_inputs[0]->m_n != in\n";
+        throw;
+      }
+    }
+  }
+  
+  for (unsigned int i = 0; i < m_outTuns.size(); ++i) {
+    Node *out = m_outTuns[i];
+    for (unsigned int j = 0; j < out->m_inputs.size(); ++j) {
+      Node *parent = out->Input(j);
+      if (parent->m_children.size() != 1) {
+        cout << "parent->m_children.size() != 1\n";
+        throw;
+      }
+      if (parent->m_children[0]->m_n != out) {
+        cout << "parent->m_children[0]->m_n != out\n";
+        throw;
+      }
+    }
+  }
+  
+  if (!m_isTopLevel && !m_ownerPoss) {
+    cout << "no owner\n";
+    throw;
+  }
+
+
+
+
   for(unsigned int i = 0; i < m_inTuns.size(); ++i) {
     InTun(i)->Prop();
   }
-    PossMMapIter iter;
-      int j = 0;
+  PossMMapIter iter;
+  int j = 0;
 #pragma omp parallel private(j,iter)
-      {
-	iter = m_posses.begin();
-	j = 0;
-	int size = m_posses.size();
-	//BAM par
+  {
+    iter = m_posses.begin();
+    j = 0;
+    int size = m_posses.size();
+    //BAM par
 #pragma omp for schedule(static) 
-	for (int i = 0; i < size; ++i) {
-	  if (j > i) {
-	    cout << "uhoh\n";
-	    throw;
-	  }
-	  while (j < i) {
-	    ++iter;
-	    ++j;
-	  }
-	  (*iter).second->Prop();
-	}
+    for (int i = 0; i < size; ++i) {
+      if (j > i) {
+	cout << "uhoh\n";
+	throw;
       }
-      iter = m_posses.begin();
-      while (iter != m_posses.end()) {
-	Poss *poss = (*iter).second;
-	if (poss->GetHash() != (*iter).first) {
-	  m_posses.erase(iter);
+      while (j < i) {
+	++iter;
+	++j;
+      }
+      (*iter).second->Prop();
+    }
+  }
+  iter = m_posses.begin();
+  while (iter != m_posses.end()) {
+    Poss *poss = (*iter).second;
+    if (poss->GetHash() != (*iter).first) {
+      m_posses.erase(iter);
 	  
-	  bool existing = false;
-	  PossMMapRangePair pair = m_posses.equal_range(poss->GetHash());
-	  for( ; !existing && pair.first != pair.second; ++pair.first) {
-	    if (*((*(pair.first)).second) == *poss) {
-	      RemoveAndDeletePoss(poss, false);
-	      existing = true;
-	    }
-	  }
-    
-	  if (!existing)
-	    m_posses.insert(PossMMapPair(poss->GetHash(),poss));
-      
-	  iter = m_posses.begin();
-	}
-	else {
-	  ++iter;
-	}
-      }
-
-      iter = m_posses.begin();
-      while (iter != m_posses.end()) {
-	Poss *poss = (*iter).second;
-	if (!poss->IsSane()) {
+      bool existing = false;
+      PossMMapRangePair pair = m_posses.equal_range(poss->GetHash());
+      for( ; !existing && pair.first != pair.second; ++pair.first) {
+	if (*((*(pair.first)).second) == *poss) {
 	  RemoveAndDeletePoss(poss, false);
-	  m_posses.erase(iter);
-	  iter = m_posses.begin();
-	  if (!m_posses.size()) {
-	    cout << "Ran out of posses in set " << this << endl;
-	    throw;
-	  }
-	}
-	else {
-	  ++iter;
+	  existing = true;
 	}
       }
-      m_hasProped = true;
+    
+      if (!existing)
+	m_posses.insert(PossMMapPair(poss->GetHash(),poss));
+      
+      iter = m_posses.begin();
+    }
+    else {
+      ++iter;
+    }
+  }
+
+  iter = m_posses.begin();
+  while (iter != m_posses.end()) {
+    Poss *poss = (*iter).second;
+    if (!poss->IsSane()) {
+      RemoveAndDeletePoss(poss, false);
+      m_posses.erase(iter);
+      iter = m_posses.begin();
+      if (!m_posses.size()) {
+	cout << "Ran out of posses in set " << this << endl;
+	throw;
+      }
+    }
+    else {
+      ++iter;
+    }
+  }
+  m_hasProped = true;
 }
 
 void PSet::Cull(Phase phase)

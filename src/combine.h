@@ -46,7 +46,6 @@ class Combine : public LoopTunnel
   static Node* BlankInst() { return new Combine(LASTPARTDIR,LASTTUNNEL);}
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual PossTunnel* GetSetTunnel();
   virtual unsigned int NumOutputs() const {return 1;}
@@ -69,4 +68,5 @@ class Combine : public LoopTunnel
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
+  virtual bool IsCombine() const {return true;}
 };

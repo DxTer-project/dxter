@@ -207,8 +207,49 @@ Name Split::GetName(unsigned int num, LoopType type) const
 void Split::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    for (unsigned int i = 0; i < m_inputs.size(); ++i)
-      Input(i)->Prop();
+    PossTunnel::Prop();
+
+#if TWOD
+    if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
+	&& (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR))) 
+      {
+	cout << "bad statuses\n";
+	throw;
+      }
+    else if ((m_dir == PARTRIGHT ||m_dir == PARTLEFT)
+	     && (GetUpStat(TL) != GetUpStat(BL) || GetUpStat(TR) != GetUpStat(BR)))
+      {
+	cout << "bad statuses\n";
+	throw;
+      }
+#else
+    throw;
+#endif  
+    if (m_tunType == POSSTUNIN) {
+      for(unsigned int i = 0; i < m_inputs.size(); ++i) {
+	if (Input(i)->GetNodeClass() != Split::GetClass()) {
+	  throw;
+	}
+      }
+    }
+    else if (m_tunType == SETTUNIN) {
+      if (!m_pset->IsLoop())
+	throw;
+      if (m_inputs.size() != 1) {
+	cout << "split has wrong number of inputs\n";
+	throw;
+      }
+      for (unsigned int i = 0; i < m_children.size(); ++i) {
+	if (Child(i)->GetNodeClass() != Split::GetClass()) {
+	  throw;
+	}
+      }
+    }
+    else {
+      cout << "bad tunType\n";
+      throw;
+    }
+
     m_cost = ZERO;
     if (GetMyLoop()->GetBS() == ZERO)
       throw;
@@ -840,53 +881,6 @@ NodeType Split::GetType() const
   return tmp  + "( " + PossTunnel::GetType() + " )";
 #endif
 }
-
-void Split::SanityCheck()
-{
-  LoopTunnel::SanityCheck();
-  
-#if TWOD
-  if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
-      && (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR))) 
-    {
-      cout << "bad statuses\n";
-      throw;
-    }
-  else if ((m_dir == PARTRIGHT ||m_dir == PARTLEFT)
-           && (GetUpStat(TL) != GetUpStat(BL) || GetUpStat(TR) != GetUpStat(BR)))
-    {
-      cout << "bad statuses\n";
-      throw;
-    }
-#else
-  throw;
-#endif  
-  if (m_tunType == POSSTUNIN) {
-    for(unsigned int i = 0; i < m_inputs.size(); ++i) {
-      if (Input(i)->GetNodeClass() != Split::GetClass()) {
-        throw;
-      }
-    }
-  }
-  else if (m_tunType == SETTUNIN) {
-    if (!m_pset->IsLoop())
-      throw;
-    if (m_inputs.size() != 1) {
-      cout << "split has wrong number of inputs\n";
-      throw;
-    }
-    for (unsigned int i = 0; i < m_children.size(); ++i) {
-      if (Child(i)->GetNodeClass() != Split::GetClass()) {
-        throw;
-      }
-    }
-  }
-  else {
-    cout << "bad tunType\n";
-    throw;
-  }
-}
-
 
 unsigned int Split::NumOutputs() const 
 {

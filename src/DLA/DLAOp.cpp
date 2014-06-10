@@ -115,18 +115,13 @@ template<unsigned int numIn, unsigned int numOut>
   if (!IsValidCost(m_cost)) {
     for(unsigned int i = 0; i < numIn; ++i)
       Input(i)->Prop();
-  }
-}
 
-template<unsigned int numIn, unsigned int numOut>
-   void DLAOp<numIn, numOut>::SanityCheck()
-{
-  if (m_inputs.size() != numIn) {
-    cout << "Error on " << GetNodeClass() << endl;
-    cout << "Has " << m_inputs.size() << " inputs\n";
-    throw;
+    if (m_inputs.size() != numIn) {
+      cout << "Error on " << GetNodeClass() << endl;
+      cout << "Has " << m_inputs.size() << " inputs\n";
+      throw;
+    }
   }
-  DLANode::SanityCheck();
 }
 
 template<unsigned int numIn, unsigned int numOut>

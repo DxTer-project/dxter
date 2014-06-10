@@ -38,6 +38,12 @@ DLANode::DLANode(Layer layer)
   m_layer = layer;
 }
 
+void DLANode::Prop()
+{
+  //  Node::Prop();
+  CheckConnections();
+}
+
 #if DOELEM
 const DistType& DLANode::GetDistType(unsigned int num) const
 { 
@@ -54,27 +60,6 @@ const DistType& DLANode::GetDistType(unsigned int num) const
 void DLANode::ClearBeforeProp()
 {
   m_cost = -1;
-}
-
-
-void DLANode::SanityCheck()
-{
-  Node::SanityCheck();
-  NodeConnVecIter iter1 = m_inputs.begin();
-  for( ; iter1 != m_inputs.end(); ++iter1 ) {
-    if (!(*iter1)->m_n->IsDLA()) {
-      cout << "input not DLA" << endl;
-      throw;
-    }
-  }
-  
-  NodeConnVecConstIter iter2 = m_children.begin();
-  for( ; iter2 != m_children.end(); ++iter2 ) {
-    if (!(*iter2)->m_n->IsDLA()) {
-      cout << "output not DLA" << endl;
-      throw;
-    }
-  }
 }
 
 #if DODM

@@ -175,7 +175,6 @@ class RedistNode : public DLANode
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual bool IsRedistNode() const {return true;}
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual bool CanTrans() const;
@@ -207,7 +206,6 @@ class SumScatterNode : public DLANode
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -232,7 +230,6 @@ class SumScatterFrom : public DLANode
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual NodeType GetType() const {return "sumScatterFrom";}
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -257,7 +254,6 @@ class SumOverCommNode : public DLANode
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}

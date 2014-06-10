@@ -89,7 +89,6 @@ class TwoSidedTrxm : public DLAOp<2,1>
 #endif
   virtual Phase MaxPhase() const;
   virtual bool ShouldCullDP() const;
-  virtual void SanityCheck();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
 };
