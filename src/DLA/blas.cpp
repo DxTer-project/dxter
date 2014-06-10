@@ -31,14 +31,22 @@
 using namespace std;
 
 Axpy::Axpy(Layer layer, Coef coeff) 
-: m_coeff(coeff), m_comm(CORECOMM) 
+: m_coeff(coeff)
 { 
   SetLayer(layer); 
+#if DOBLIS
+  m_comm = CORECOMM;
+#endif
 }
 
 NodeType Axpy::GetType() const
 {
-  return "Axpy " + LayerNumToStr(GetLayer()) + CommToStr(m_comm);
+  return "Axpy " + LayerNumToStr(GetLayer()) 
+#if DOBLIS
+    + CommToStr(m_comm);
+#else
+  ;
+#endif
 }
 
 void Axpy::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -46,21 +54,27 @@ void Axpy::Duplicate(const Node *orig, bool shallow, bool possMerging)
   DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
   const Axpy *axpy = (Axpy*)orig;
   m_coeff = axpy->m_coeff;
+#if DOBLIS
   m_comm = axpy->m_comm;
+#endif
 }
 
 void Axpy::FlattenCore(ofstream &out) const
 {
   DLAOp<2,1>::FlattenCore(out);
   WRITE(m_coeff);
+#if DOBLIS
   WRITE(m_comm);
+#endif
 }
 
 void Axpy::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLAOp<2,1>::UnflattenCore(in, info);
   READ(m_coeff);
+#if DOBLIS
   READ(m_comm);
+#endif
 }
 
 #if DOELEM
@@ -131,8 +145,10 @@ void Axpy::SanityCheck()
     if (InputDistType(0) != InputDistType(1))
       m_poss->MarkInsane();
   }
+#if DOBLIS
   if (m_comm != CORECOMM)
     throw;
+#endif
 #else
 
 #endif
@@ -150,6 +166,7 @@ void Axpy::PrintCode(IndStream &out)
 	 << "\n" << out.Tabs(2) << GetInputName(1).str()
 	 << ");\n";
     break;
+#if DOBLIS
   case (S3LAYER):
     if (m_comm == CORECOMM) {
       *out << "bli_axpym( ";
@@ -163,6 +180,7 @@ void Axpy::PrintCode(IndStream &out)
 	 << "\n" << out.Tabs(2) << "&" << GetInputName(1).str()
 	 << ");\n";
     break;
+#endif
   default:
     throw;
   }
@@ -176,12 +194,14 @@ void Axpy::Prop()
       m_cost = 0;
     else if (m_layer == SMLAYER)
       m_cost = GetCost(SMLAYER, LocalM(0), LocalN(0));
+#if DOBLIS
     else if (m_layer == S3LAYER) {
       m_cost = GetCost(S3LAYER, LocalM(0), LocalN(0));
       if (m_comm != CORECOMM) {
 	m_cost /= NumCoresInComm(m_comm);
       }
     }
+#endif
     else if (m_layer == ABSLAYER)
       m_cost = ZERO;
     else {

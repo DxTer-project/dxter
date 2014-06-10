@@ -49,10 +49,12 @@ Gemm::Gemm(Layer layer, Trans transA, Trans transB, Coef alpha, Coef beta, Type 
 m_transB(transB),
 m_alpha(alpha),
 m_beta(beta),
-  m_type(type),
-  m_comm(CORECOMM)
+  m_type(type)
 {
   SetLayer(layer);
+#if DOBLIS
+  m_comm = CORECOMM;
+#endif
 }
 
 #if DOBLIS
@@ -93,7 +95,11 @@ NodeType Gemm::GetType() const
   + TransToStr(m_transA)
   + TransToStr(m_transB) + " "
   + LayerNumToStr(GetLayer())
+#if DOBLIS
     + " " + CommToStr(m_comm);
+#else
+  ;
+#endif
 }
 
 void Gemm::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -105,7 +111,9 @@ void Gemm::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_alpha = gemm->m_alpha;
   m_beta = gemm->m_beta;
   m_type = gemm->m_type;
+#if DOBLIS
   m_comm = gemm->m_comm;
+#endif
 }
 
 void Gemm::FlattenCore(ofstream &out) const
@@ -116,7 +124,9 @@ void Gemm::FlattenCore(ofstream &out) const
   WRITE(m_alpha);
   WRITE(m_beta);
   WRITE(m_type);
+#if DOBLIS
   WRITE(m_comm);
+#endif
 }
 
 void Gemm::UnflattenCore(ifstream &in, SaveInfo &info)
@@ -127,7 +137,9 @@ void Gemm::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_alpha);
   READ(m_beta);
   READ(m_type);
+#if DOBLIS
   READ(m_comm);
+#endif
 }
 
 #if DOELEM

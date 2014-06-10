@@ -23,6 +23,8 @@
 
 #pragma once
 
+#if DOBLIS
+
 //#include "transform.h"
 //#include "DLANode.h"
 
@@ -140,4 +142,4 @@ inline unsigned int NumGroupsInComm(Comm comm)
     }
 }
 
-
+#endif //DOBLIS

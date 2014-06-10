@@ -365,10 +365,12 @@ void TriRKLoopExp::Apply(Poss *poss, Node *node) const
 
 
 TriRK::TriRK(Layer layer, Tri tri, Trans transA, Trans transB, Coef alpha, Coef beta, Type type)
-: HerkProps(tri, transA, transB, alpha, beta, type),
-m_comm(CORECOMM)
+: HerkProps(tri, transA, transB, alpha, beta, type)
 {
   SetLayer(layer);
+#if DOBLIS
+  m_comm = CORECOMM;
+#endif
 }
 
 
@@ -445,7 +447,11 @@ NodeType TriRK::GetType() const
   string str = "TriRK " 
     + TriToStr(m_tri) 
     + LayerNumToStr(GetLayer())
+#if DOBLIS
     + " " + CommToStr(m_comm);
+#else
+  ;
+#endif
   return str;
 }
 
@@ -454,7 +460,9 @@ void TriRK::Duplicate(const Node *orig, bool shallow, bool possMerging)
   const TriRK *triRK = (TriRK*)orig;
   HerkProps::Duplicate(triRK);
   DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
+#if DOBLIS
   m_comm = triRK->m_comm;
+#endif
 }
 
 
@@ -660,14 +668,18 @@ void TriRK::FlattenCore(ofstream &out) const
 {
   DLAOp<3,1>::FlattenCore(out);
   HerkProps::FlattenCore(out);
+#if DOBLIS
   WRITE(m_comm);
+#endif
 }
 
 void TriRK::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLAOp<3,1>::UnflattenCore(in, info);
   TriRK::UnflattenCore(in,info);
+#if DOBLIS
   READ(m_comm);
+#endif
 }
 
 #if DOELEM

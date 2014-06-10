@@ -39,7 +39,9 @@ class Axpy : public DLAOp<2,1>
 {
  public:
   Coef m_coeff;
+#if DOBLIS
   Comm m_comm;
+#endif
   Axpy(Layer layer, Coef coeff);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
@@ -59,7 +61,9 @@ class Axpy : public DLAOp<2,1>
   virtual bool ShouldCullDP() const;
   virtual bool DoNotCullDP() const;
   static Cost GetCost(Layer layer, const Sizes *localMs, const Sizes *localNs);
+#if DOBLIS
   void SetComm(Comm comm) {m_comm = comm;}
+#endif
 };
 
 class AxpyLowerLayer : public SingleTrans

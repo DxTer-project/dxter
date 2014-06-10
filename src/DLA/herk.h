@@ -143,7 +143,9 @@ class TriRKLoopExp : public SingleTrans
 class TriRK : public DLAOp<3,1>, public HerkProps
 {
  public:
+#if DOBLIS
   Comm m_comm;
+#endif
   TriRK(Layer layer, Tri tri, Trans transA, Trans transB, Coef alpha, Coef beta, Type type);
   virtual Phase MaxPhase() const;
   virtual NodeType GetType() const;

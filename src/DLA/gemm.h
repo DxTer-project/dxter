@@ -61,7 +61,9 @@ class Gemm : public DLAOp<3,1>
   Trans m_transA, m_transB;
   Coef m_alpha, m_beta;
   Type m_type;
+#if DOBLIS
   Comm m_comm;
+#endif
   Gemm(Layer layer, Trans transA, Trans transB, Coef alpha, Coef beta, Type type);
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }

@@ -20,6 +20,9 @@
  */
 #include "base.h"
 #include "comm.h"
+
+#if DOBLIS
+
 #include "elemRedist.h"
 
 string CommToStr(Comm comm)
@@ -151,3 +154,5 @@ Comm MaxComm(Comm comm1, Comm comm2)
       throw;
   }
 }
+
+#endif
