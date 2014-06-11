@@ -53,7 +53,7 @@ using namespace std;
 #elif DOLLDLA
 #define RVAL 40
 #define CVAL 40
-#define LLDLAMU 2
+#define LLDLA_MU 2
 #endif 
 #if TWOD
 #define PVAL RVAL*CVAL

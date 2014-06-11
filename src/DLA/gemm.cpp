@@ -104,14 +104,20 @@ void Gemm::Parallelize(Comm comm)
 Node* Gemm::BlankInst()
 {
   //These are default settings for a basic Gemm node
+#if !DOLLDLA
   return new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, REAL);
+#else
+  return new Gemm(ABSLAYER, COEFONE, COEFONE, REAL);
+#endif
 }
 
 NodeType Gemm::GetType() const
 {
   return "Gemm "
+#if !DOLLDLA
   + TransToStr(m_transA)
   + TransToStr(m_transB) + " "
+#endif
   + LayerNumToStr(GetLayer())
 #if DOBLIS
     + " " + CommToStr(m_comm);
@@ -139,8 +145,10 @@ void Gemm::Duplicate(const Node *orig, bool shallow, bool possMerging)
 void Gemm::FlattenCore(ofstream &out) const
 {
   DLAOp<3,1>::FlattenCore(out);
+#if !DOLLDLA
   WRITE(m_transA);
   WRITE(m_transB);
+#endif
   WRITE(m_alpha);
   WRITE(m_beta);
   WRITE(m_type);
@@ -152,8 +160,10 @@ void Gemm::FlattenCore(ofstream &out) const
 void Gemm::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLAOp<3,1>::UnflattenCore(in, info);
+#if !DOLLDLA
   READ(m_transA);
   READ(m_transB);
+#endif
   READ(m_alpha);
   READ(m_beta);
   READ(m_type);
@@ -431,8 +441,12 @@ void Gemm::PrintCode(IndStream &out)
   out.Indent();
   if (GetLayer() == ABSLAYER ) {
     *out << "AbsGemm( "
+#if !DOLLDLA
 	 << TransToStr(m_transA) << ", " << TransToStr(m_transB)
 	 << ", \n\t";
+#else 
+    ;
+#endif
     out << m_alpha;
     *out << ", "
     << GetInputName(0).str() << ", " << GetInputName(1).str()
@@ -443,8 +457,12 @@ void Gemm::PrintCode(IndStream &out)
 #if DOELEM
   else if (GetLayer() == DMLAYER) {
     *out << "DistGemm( "
+#if !DOLLDLA
 	 << TransToStr(m_transA) << ", " << TransToStr(m_transB)
-    << ", \n\t";
+	 << ", \n\t";
+#else
+    ;
+#endif
     out << m_alpha;
     *out << ", "
     << GetInputName(0).str() << ", " << GetInputName(1).str()
