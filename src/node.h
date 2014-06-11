@@ -74,25 +74,59 @@ class Node
   const Node *m_orig;
 #endif
 
-  //Implement these in sub-classes
+  //Implement at least these in sub-classes
+  /*****************/
+  //Get a new instance of the node's class 
+  // (with default values or whatever since Duplicate will be called)
   virtual Node* GetNewInst() = 0;
+  //Propagate data type information, calculate node costs, and check for
+  // error conditions
   virtual void Prop() = 0;
+  //The maximum phase in which this node should be found
+  // Going from that phase to the next, a Poss with this node
+  // should be culled (but HasRefined will be checked
+  // and an exception will be thrown if the node hasn't refined)
+  //Should super message
   virtual Phase MaxPhase() const {return NUMPHASES;}
+  //Print code
   virtual void PrintCode(IndStream &out) = 0;
+  //Duplicate all of the original node's type information
+  // into me
+  //Should super message
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+  //Get the node type used for comparing two nodes for equality
   virtual NodeType GetType() const;
+  //Number of outputs expected
   virtual unsigned int NumOutputs() const {return 1;}
+  //Cost of the node (guaranteed to be called after Prop is called
   virtual Cost GetCost() = 0;
+  //Get the node's class so you know its type
   virtual ClassType GetNodeClass() const = 0;
+  //Static class type
   static ClassType GetClass() {return "node";}
+  //Get the name of the output variable
   virtual Name GetName(unsigned int num) const = 0;
+  //Returns true if the node overwrites the variable passed in by Node input
   virtual bool Overwrites(const Node *input, unsigned int num) const = 0;
+  //Returns true if the variable passed in by Node input is also passed
+  // out of the node
   virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, 
 				 unsigned int &numOut) const = 0;
+  //Add any variable declarations for this node (e.g., new
+  // variables that are used as temporaries)
+  //Should super message
   virtual void AddVariables(VarSet &set) const;
+  //Clear any cached information before propagating (e.g., cost
+  // or data type info)
   virtual void ClearBeforeProp() {}
+  //Clear the size cache specifically
   virtual void ClearSizeCache() {}
+  //Build the size cache
   virtual void BuildSizeCache() {}
+  /*****************/
+
+
+
 
   Node();
   virtual ~Node();
