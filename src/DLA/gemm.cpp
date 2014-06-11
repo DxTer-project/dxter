@@ -44,6 +44,7 @@ bool IsDMGemm(const Node *node)
 }
 #endif
 
+#if !DOLLDLA
 Gemm::Gemm(Layer layer, Trans transA, Trans transB, Coef alpha, Coef beta, Type type)
 : m_transA(transA),
 m_transB(transB),
@@ -56,6 +57,19 @@ m_beta(beta),
   m_comm = CORECOMM;
 #endif
 }
+#else //DOLLDLA
+Gemm::Gemm(Layer layer, Coef alpha, Coef beta, Type type)
+: m_alpha(alpha),
+m_beta(beta),
+  m_type(type)
+{
+  SetLayer(layer);
+#if DOBLIS
+  m_comm = CORECOMM;
+#endif
+}
+#endif //DOLLDLA
+
 
 #if DOBLIS
 bool Gemm::IsBLISParallelizable() const
@@ -86,6 +100,7 @@ void Gemm::Parallelize(Comm comm)
 
 Node* Gemm::BlankInst()
 {
+  //These are default settings for a basic Gemm node
   return new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, REAL);
 }
 
@@ -104,10 +119,12 @@ NodeType Gemm::GetType() const
 
 void Gemm::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  DLANode::Duplicate(orig, shallow, possMerging);
+  DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
   const Gemm *gemm = (Gemm*)orig;
+#if !DOLLDLA
   m_transA = gemm->m_transA;
   m_transB = gemm->m_transB;
+#endif
   m_alpha = gemm->m_alpha;
   m_beta = gemm->m_beta;
   m_type = gemm->m_type;

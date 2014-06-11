@@ -58,20 +58,32 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
 class Gemm : public DLAOp<3,1>
 {
  public:
+#if !DOLLDLA
   Trans m_transA, m_transB;
+#endif
   Coef m_alpha, m_beta;
   Type m_type;
 #if DOBLIS
   Comm m_comm;
 #endif
+
+#if !DOLLDLA
   Gemm(Layer layer, Trans transA, Trans transB, Coef alpha, Coef beta, Type type);
+#else
+  Gemm(Layer layer, Coef alpha, Coef beta, Type type);
+#endif
+
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  virtual ClassType GetNodeClass() const {return GetClass();}
+
   static ClassType GetClass() {return "Gemm";}
+  virtual ClassType GetNodeClass() const {return GetClass();}
+
+  //Ignore these for now
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
+
   virtual NodeType GetType() const;
 #if DOELEM
   virtual const DistType& GetDistType(unsigned int num) const;
@@ -81,6 +93,7 @@ class Gemm : public DLAOp<3,1>
   virtual Phase MaxPhase() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
+  
   static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);
 #if DOBLIS
   virtual void UpdateInnerPackingMultiple(PackSize size);

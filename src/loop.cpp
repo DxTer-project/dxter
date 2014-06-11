@@ -50,6 +50,9 @@ Size BSSizeToSize(BSSize size)
 #elif DOTENSORS
   case (USETENSORBS):
     return TENSOR_BS;
+#elif DOLLDLA
+  case (USELLDLAMU):
+    return LLDLA_MU;
 #endif
     default:
       throw;

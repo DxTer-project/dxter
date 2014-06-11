@@ -63,6 +63,8 @@ enum BSSize {
   USEBLISOUTERBS,
 #elif DOTENSORS
   USETENSORBS,
+#elif DOLLDLA
+  USELLDLAMU,
 #endif
   BADBSSIZE 
 };
