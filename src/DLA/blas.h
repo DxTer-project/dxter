@@ -29,6 +29,7 @@
 #include "DLAOp.h"
 #include "elemRedist.h"
 #include "gemm.h"
+#include "gemmTransformations.h"
 #include "trxm.h"
 #include "herk.h"
 #include "her2k.h"
