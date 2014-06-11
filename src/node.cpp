@@ -726,13 +726,6 @@ bool Node::InInputs(Node *node, unsigned int num) const
   return false;
 }
 
-
-bool Node::IsPossTunnel(PossTunType type) const
-{
-  return false;
-}
-
-
 void Node::PrintChildren()
 {
   for (unsigned int i = 0; i < m_children.size(); ++i)

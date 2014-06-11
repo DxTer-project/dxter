@@ -89,11 +89,6 @@ Stride DLANode::InputColStride(unsigned int num) const
 }
 #endif //DOLLDLA
 
-bool DLANode::HasProped() const
-{
-  return IsValidCost(m_cost);
-}
-
 void DLANode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLANode *origDLA = (DLANode*)orig;

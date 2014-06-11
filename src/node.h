@@ -78,7 +78,6 @@ class Node
   virtual Node* GetNewInst() = 0;
   virtual void Prop() = 0;
   virtual Phase MaxPhase() const {return NUMPHASES;}
-  virtual bool HasProped() const = 0;
   virtual void PrintCode(IndStream &out) = 0;
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
@@ -91,10 +90,9 @@ class Node
   virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, 
 				 unsigned int &numOut) const = 0;
   virtual void AddVariables(VarSet &set) const;
-
+  virtual void ClearBeforeProp() {}
   virtual void ClearSizeCache() {}
   virtual void BuildSizeCache() {}
-  void BuildSizeCacheRecursive();
 
   Node();
   virtual ~Node();
@@ -110,6 +108,7 @@ class Node
   bool CanPrintCode() const;
   void AddInput(Node *node);
   void AddInputs(int numArgs, ...);
+
   //num is the output number of the input that this is taking as input
   void AddInput(Node *node, unsigned int num);
   void ChangeInput1Way(Node *oldInput, unsigned int oldNum, Node *newInput, unsigned int newNum);
@@ -138,14 +137,13 @@ class Node
   Node* Child(unsigned int num) const;
   //child of my output number num
   unsigned int ChildConnNum(unsigned int num) const;
-  virtual void ClearBeforeProp() {}
   void AddToPoss(Poss *poss);
   unsigned int NumChildrenOfOutput(unsigned int num) const;
   bool InChildren(Node *node, unsigned int num) const;
   bool InInputs(Node *node, unsigned int num) const;
   virtual bool IsDLA() const {return false;}
   virtual bool IsPossTunnel() const {return false;}
-  virtual bool IsPossTunnel(PossTunType type) const;
+  virtual bool IsPossTunnel(PossTunType type) const {return false;}
   virtual bool IsLoopTunnel() const {return false;}
   virtual bool IsParallel() const {return false;}
 
@@ -161,6 +159,8 @@ class Node
 
   void PrintChildren();
   void PrintInputs();
+
+  void BuildSizeCacheRecursive();
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const = 0;
