@@ -26,7 +26,7 @@
 #include "layers.h"
 #if (DOBLIS||DOELEM||DOLLDLA)
 
-#include "Gemm.h"
+#include "gemm.h"
 #include "DLAOp.h"
 #include "transform.h"
 #include "elemRedist.h"
