@@ -310,6 +310,37 @@ bool SizeEntry::operator!=(const SizeEntry &rhs) const
   return !(*this == rhs);
 }
 
+bool SizeEntry::operator==(const Size &rhs) const
+{
+  switch(m_type)
+    {
+    case (MIDSIZES):
+      {
+	if (m_valA != rhs)
+	  return false;
+	return (fmod(m_valB, m_valA) == 0);
+      }
+    case (REPEATEDSIZES):
+      {
+	return m_valA == rhs;
+      }
+    case (RANGESIZES):
+      {
+	return false;
+	break;
+      }
+    default:
+      throw;
+    }
+}
+
+
+bool SizeEntry::operator!=(const Size &rhs) const
+{
+  return !(*this == rhs);
+}
+
+
 bool SizeEntry::operator<= (const Size &rhs) const
 {
   switch(m_type) {
@@ -591,6 +622,24 @@ bool Sizes::operator==(const Sizes &rhs) const
 }
 
 bool Sizes::operator!=(const Sizes &rhs) const
+{
+  return !(*this == rhs);
+}
+
+bool Sizes::operator==(const Size &rhs) const
+{
+  if (!std::isnan((double)m_constVal) && (m_constVal != rhs))
+    return false;
+  EntryVecConstIter iter = m_entries.begin();
+  for(; iter != m_entries.end(); ++iter) {
+    if (**iter != rhs)
+      return false;
+  }
+  return true;
+}
+
+
+bool Sizes::operator!=(const Size &rhs) const
 {
   return !(*this == rhs);
 }

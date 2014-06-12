@@ -51,6 +51,8 @@ class DLANode : public Node
 
   virtual void Prop();
 
+  //BAMTODO: eventually use DataTypeInfo to pass around data sizes
+
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const = 0;
   virtual const Sizes* GetN(unsigned int num) const = 0;

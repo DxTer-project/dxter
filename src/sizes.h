@@ -87,6 +87,8 @@ class SizeEntry
   void operator= (const SizeEntry &rhs);
   bool operator==(const SizeEntry &rhs) const;
   bool operator!=(const SizeEntry &rhs) const;
+  bool operator==(const Size &rhs) const;
+  bool operator!=(const Size &rhs) const;
   bool operator<= (const Size &rhs) const;
   void Print() const;
   void Print(IndStream &out) const;
@@ -130,6 +132,8 @@ class Sizes
   void operator= (const Sizes &rhs);
   bool operator== (const Sizes &rhs) const;
   bool operator!= (const Sizes &rhs) const;
+  bool operator== (const Size &rhs) const;
+  bool operator!= (const Size &rhs) const;
   bool operator<= (const Size &rhs) const;
   Cost Sum() const;
   Cost SumSquares() const;
