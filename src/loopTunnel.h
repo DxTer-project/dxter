@@ -92,7 +92,7 @@ class LoopTunnel : public PossTunnel
   virtual void StartFillingSizes();
   virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
   virtual void UpdateLocalSizes();
-  virtual void ClearSizeCache();
+  virtual void ClearDataTypeCache();
 
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);

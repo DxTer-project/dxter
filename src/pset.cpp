@@ -526,7 +526,7 @@ bool PSet::TakeIter(const TransMap &transMap,
         cout << "\t\tDone adding ( " << actuallyAdded.size() << " actually added )\n";
       PossMMapIter added = actuallyAdded.begin();
       for(; added != actuallyAdded.end(); ++added) {
-        (*added).second->BuildSizeCache();
+        (*added).second->BuildDataTypeCache();
       }
     }
   }
@@ -542,7 +542,7 @@ bool PSet::TakeIter(const TransMap &transMap,
         cout << "\t\tDone adding\n";
       PossMMapIter added = actuallyAdded.begin();
       for(; added != actuallyAdded.end(); ++added) {
-        (*added).second->BuildSizeCache();
+        (*added).second->BuildDataTypeCache();
       }
     }
   }
@@ -1023,7 +1023,7 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
       }
     PossMMapIter mmapIter = mmap.begin();
     for(; mmapIter != mmap.end(); ++mmapIter)
-      (*mmapIter).second->BuildSizeCache();
+      (*mmapIter).second->BuildDataTypeCache();
     AddPossesOrDispose(mmap);
   }
   else {
@@ -1035,7 +1035,7 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
         didMerge = true;
         PossMMapIter mmapIter = newPosses.begin();
         for(; mmapIter != newPosses.end(); ++mmapIter)
-          (*mmapIter).second->BuildSizeCache();
+          (*mmapIter).second->BuildDataTypeCache();
         AddPossesOrDispose(newPosses);
       }
     }
@@ -1058,7 +1058,7 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 	  iter = m_posses.begin();
           PossMMapIter mapIter = newPosses.begin();
           for(; mapIter != newPosses.end(); ++mapIter)
-            (*mapIter).second->BuildSizeCache();
+            (*mapIter).second->BuildDataTypeCache();
           AddPossesOrDispose(newPosses);
         }
       else {
@@ -1625,18 +1625,18 @@ void PSet::AddCurrPossVars(VarSet &set) const
 }
 #endif
 
-void PSet::BuildSizeCache()
+void PSet::BuildDataTypeCache()
 {
   PossMMapIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter)
-    (*iter).second->BuildSizeCache();
+    (*iter).second->BuildDataTypeCache();
 }
 
-void PSet::ClearSizeCache()
+void PSet::ClearDataTypeCache()
 {
   PossMMapIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter)
-    (*iter).second->ClearSizeCache();
+    (*iter).second->ClearDataTypeCache();
 }
 
 bool PSet::CanPrint() const

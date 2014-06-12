@@ -52,8 +52,8 @@ class RedistNode : public DLANode
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "redist";}
-  virtual void ClearSizeCache();
-  virtual void BuildSizeCache();
+  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache();
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
   virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;

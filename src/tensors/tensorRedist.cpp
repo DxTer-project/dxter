@@ -416,7 +416,7 @@ const Sizes* RedistNode::LocalLen(unsigned int num, Dim dim) const
     return m_lsizes+dim;
 }
 
-void RedistNode::ClearSizeCache()
+void RedistNode::ClearDataTypeCache()
 {
   if (m_lsizes) {
     if (!m_isArray) {
@@ -429,7 +429,7 @@ void RedistNode::ClearSizeCache()
   }
 }
 
-void RedistNode::BuildSizeCache()
+void RedistNode::BuildDataTypeCache()
 {
   if (m_lsizes)
     return;

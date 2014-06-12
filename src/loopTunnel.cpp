@@ -702,7 +702,7 @@ void LoopTunnel::UpdateLocalSizes()
 }
 
 #if TWOD
-void LoopTunnel::ClearSizeCache()
+void LoopTunnel::ClearDataTypeCache()
 {
   if (!m_msizes) 
     return;
@@ -716,7 +716,7 @@ void LoopTunnel::ClearSizeCache()
   m_nlsizes = NULL;
 }
 #else
-void LoopTunnel::ClearSizeCache()
+void LoopTunnel::ClearDataTypeCache()
 {
   if (!m_sizes) 
     return;

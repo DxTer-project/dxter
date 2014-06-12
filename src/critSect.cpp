@@ -70,13 +70,13 @@ bool HasParallelCode(Poss *poss)
   return false;
 }
 
-void CritSect::BuildSizeCache()
+void CritSect::BuildDataTypeCache()
 {
   NodeVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
-    (*iter)->BuildSizeCacheRecursive();
+    (*iter)->BuildDataTypeCacheRecursive();
   }
-  PSet::BuildSizeCache();
+  PSet::BuildDataTypeCache();
 }
 
 void CritSect::SanityCheck()
@@ -223,7 +223,7 @@ const Sizes* CritSectTunnel::LocalN(unsigned int num) const
   }
 }
 
-void CritSectTunnel::BuildSizeCache()
+void CritSectTunnel::BuildDataTypeCache()
 {
   if (m_msizes)
     return;
@@ -251,7 +251,7 @@ void CritSectTunnel::BuildSizeCache()
   }
 }
 
-void CritSectTunnel::ClearSizeCache()
+void CritSectTunnel::ClearDataTypeCache()
 {
   if (!m_msizes)
     return;

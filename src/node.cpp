@@ -844,7 +844,7 @@ void FullyUnflatten(NodeVec &vec, ifstream &in, SaveInfo &info)
 }
 
 
-void Node::BuildSizeCacheRecursive()
+void Node::BuildDataTypeCacheRecursive()
 {
   if (!(m_flags & BUILDFLAG)) {
     NodeConnVecIter iter = m_inputs.begin();
@@ -852,11 +852,11 @@ void Node::BuildSizeCacheRecursive()
       Node *node = (*iter)->m_n;
       if (node->m_poss == m_poss)
 	{
-	  node->BuildSizeCacheRecursive();
+	  node->BuildDataTypeCacheRecursive();
 	}
     }
     m_flags |= BUILDFLAG;
-    BuildSizeCache();
+    BuildDataTypeCache();
   }
 }
 

@@ -1188,7 +1188,7 @@ void Split::StartFillingSizes()
 }
 #endif
 
-void Split::ClearSizeCache()
+void Split::ClearDataTypeCache()
 {
 #if TWOD
   if (!m_msizes)

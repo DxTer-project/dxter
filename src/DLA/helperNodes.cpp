@@ -277,7 +277,7 @@ Name InputNode::GetName(unsigned int num) const
 
 #if TWOD
 
-void InputNode::ClearSizeCache()
+void InputNode::ClearDataTypeCache()
 {
   if (!m_mlsize)
     return;
@@ -288,7 +288,7 @@ void InputNode::ClearSizeCache()
 }
 #else
 
-void InputNode::ClearSizeCache()
+void InputNode::ClearDataTypeCache()
 {
   if (m_lsizes) {
     if (m_numDims)
@@ -304,7 +304,7 @@ void InputNode::ClearSizeCache()
 #endif
 
 #if TWOD
-void InputNode::BuildSizeCache()
+void InputNode::BuildDataTypeCache()
 {
   if (m_mlsize)
     return;
@@ -320,7 +320,7 @@ void InputNode::BuildSizeCache()
 #endif
 }
 #else
-void InputNode::BuildSizeCache()
+void InputNode::BuildDataTypeCache()
 {
   if (m_lsizes)
     return;
@@ -793,7 +793,7 @@ void TempVarNode::UnflattenCore(ifstream &in, SaveInfo &info)
 #endif
 }
 
-void TempVarNode::ClearSizeCache()
+void TempVarNode::ClearDataTypeCache()
 {
 #if TWOD
   if (!m_mlsize)
@@ -813,7 +813,7 @@ void TempVarNode::ClearSizeCache()
 #endif
 }
 
-void TempVarNode::BuildSizeCache()
+void TempVarNode::BuildDataTypeCache()
 {
 #if TWOD
   if (m_mlsize)
@@ -1132,7 +1132,7 @@ void ViewPan::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_name = ((ViewPan*)orig)->m_name;
 }
 
-void ViewPan::ClearSizeCache()
+void ViewPan::ClearDataTypeCache()
 {
   if (m_sizes) {
     delete m_sizes;
@@ -1142,7 +1142,7 @@ void ViewPan::ClearSizeCache()
   }
 }
 
-void ViewPan::BuildSizeCache()
+void ViewPan::BuildDataTypeCache()
 {
   if (m_sizes)
     return;
@@ -1294,7 +1294,7 @@ void ViewAroundDiag::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_name = ((ViewAroundDiag*)orig)->m_name;
 }
 
-void ViewAroundDiag::ClearSizeCache()
+void ViewAroundDiag::ClearDataTypeCache()
 {
   if (m_sizes0) {
     delete m_sizes0;
@@ -1308,7 +1308,7 @@ void ViewAroundDiag::ClearSizeCache()
   }
 }
 
-void ViewAroundDiag::BuildSizeCache()
+void ViewAroundDiag::BuildDataTypeCache()
 {
   if (m_sizes0)
     return;

@@ -120,9 +120,9 @@ class Node
   // or data type info)
   virtual void ClearBeforeProp() {}
   //Clear the size cache specifically
-  virtual void ClearSizeCache() {}
+  virtual void ClearDataTypeCache() {}
   //Build the size cache
-  virtual void BuildSizeCache() {}
+  virtual void BuildDataTypeCache() {}
   /*****************/
 
 
@@ -194,7 +194,7 @@ class Node
   void PrintChildren();
   void PrintInputs();
 
-  void BuildSizeCacheRecursive();
+  void BuildDataTypeCacheRecursive();
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const = 0;

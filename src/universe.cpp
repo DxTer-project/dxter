@@ -58,7 +58,7 @@ void Universe::Init(PSet *seed)
   m_pset->m_isTopLevel = true;
   CurrPhase = FIRSTPHASE;
   m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers);
-  m_pset->BuildSizeCache();
+  m_pset->BuildDataTypeCache();
 
 #if DOTENSORS
   CheckMaxDims();
@@ -131,13 +131,13 @@ bool Universe::TakeIter(unsigned int phase)
   cout << "\tStarting iteration\n";
   cout.flush();
 
-  m_pset->BuildSizeCache();
+  m_pset->BuildDataTypeCache();
   
   newOne = m_pset->TakeIter(M_trans[phase], M_simplifiers);
 
   if (newOne && !M_globSimplifiers.empty())
     if (m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers))
-      m_pset->BuildSizeCache();
+      m_pset->BuildDataTypeCache();
   
   cout << "\tFinishing iteration\n";
   cout.flush();
@@ -168,7 +168,7 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
   ClearFullyExpanded();
 
   if (m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers))
-    m_pset->BuildSizeCache();
+    m_pset->BuildDataTypeCache();
 
   unsigned int count = 0;
   double prevAlgs = TotalCount();

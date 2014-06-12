@@ -88,7 +88,7 @@ class Split : public LoopTunnel
   unsigned int NumberOfLoopExecs() const;
   void SetAddDir() {m_addDir = true;}
   virtual void StartFillingSizes();
-  virtual void ClearSizeCache();
+  virtual void ClearDataTypeCache();
   virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
   virtual void UpdateLocalSizes();
 };

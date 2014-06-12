@@ -88,8 +88,8 @@ class InputNode : public DLANode
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual void ClearSizeCache();
-  virtual void BuildSizeCache();
+  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
 
@@ -269,8 +269,8 @@ m_distType(D_LASTDIST),
   virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual void ClearSizeCache();
-  virtual void BuildSizeCache();
+  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache();
   virtual bool IsReadOnly() const {return true;}
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
   virtual bool IsDataDependencyOfInput() const {return false;}
@@ -377,8 +377,8 @@ class ViewPan : public DLANode
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual unsigned int NumOutputs() const {return 1;}
-  virtual void ClearSizeCache();
-  virtual void BuildSizeCache();
+  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache();
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
@@ -421,8 +421,8 @@ class ViewAroundDiag : public DLANode
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual unsigned int NumOutputs() const {return 2;}
-  virtual void ClearSizeCache();
-  virtual void BuildSizeCache();
+  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache();
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;

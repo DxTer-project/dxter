@@ -1136,7 +1136,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
   }
   
   newSet->Simplify(simplifiers);
-  newSet->BuildSizeCache();
+  newSet->BuildDataTypeCache();
 }
 
 bool AddNodesDown(Node *edgeStart, unsigned int childNum, NodeVec &outputTuns, NodeSet &possNodes)
@@ -2129,8 +2129,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   
   newSet->Simplify(simplifiers);
   //adding below.  Seems necessary
-  newSet->BuildSizeCache();
-  BuildSizeCache();
+  newSet->BuildDataTypeCache();
+  BuildDataTypeCache();
 }
 
 void Poss::ClearBeforeProp()
@@ -2596,7 +2596,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      single->Apply(newNode);
 	      newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
 	      newPoss->Simplify(simplifiers);
-	      //newPoss->BuildSizeCache();
+	      //newPoss->BuildDataTypeCache();
 	      if(!AddPossToMMap(newPosses,newPoss,newPoss->GetHash())) {
 		delete newPoss;
 	      }
@@ -2633,7 +2633,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 		var->Apply(i, newNode, &cache);
 		newPoss->m_transVec.push_back(const_cast<Transformation*>(marking));
 		newPoss->Simplify(simplifiers);
-		//newPoss->BuildSizeCache();
+		//newPoss->BuildDataTypeCache();
 		if(!AddPossToMMap(newPosses,newPoss,newPoss->GetHash())) {
 		  delete newPoss;
 		}
@@ -2891,14 +2891,14 @@ void Poss::UnflattenStatic(ifstream &in)
   }
 }
 
-void Poss::BuildSizeCache()
+void Poss::BuildDataTypeCache()
 {
   PSetVecIter setIter;
 #if DOBLIS
   setIter = m_sets.begin();
   for(; setIter != m_sets.end(); ++setIter) {
     if ((*setIter)->IsCritSect())
-      (*setIter)->BuildSizeCache();
+      (*setIter)->BuildDataTypeCache();
   }
 #endif
   NodeVecIter iter1 = m_possNodes.begin();
@@ -2909,25 +2909,25 @@ void Poss::BuildSizeCache()
   iter1 = m_possNodes.begin();
   for(; iter1 != m_possNodes.end(); ++iter1) {
     Node *node = *iter1;
-    node->BuildSizeCacheRecursive();
+    node->BuildDataTypeCacheRecursive();
   }
   setIter = m_sets.begin();
   for(; setIter != m_sets.end(); ++setIter) {
 #if DOBLIS
     if (!(*setIter)->IsCritSect())
 #endif
-      (*setIter)->BuildSizeCache();
+      (*setIter)->BuildDataTypeCache();
   }
 }
 
-void Poss::ClearSizeCache()
+void Poss::ClearDataTypeCache()
 {
   NodeVecIter iter1 = m_possNodes.begin();
   for(; iter1 != m_possNodes.end(); ++iter1)
-    (*iter1)->ClearSizeCache();
+    (*iter1)->ClearDataTypeCache();
   PSetVecIter iter2 = m_sets.begin();
   for(; iter2 != m_sets.end(); ++iter2)
-    (*iter2)->ClearSizeCache();
+    (*iter2)->ClearDataTypeCache();
 }
 
 void PrintSetOrNodeInputs(Node *node)

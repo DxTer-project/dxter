@@ -125,8 +125,8 @@ class Poss
   size_t GetHash();
   virtual void InvalidateHash() {m_hashValid=false;}
 
-  void BuildSizeCache();
-  void ClearSizeCache();
+  void BuildDataTypeCache();
+  void ClearDataTypeCache();
 
   void Flatten(ofstream &out) const;
   static void FlattenStatic(ofstream &out);

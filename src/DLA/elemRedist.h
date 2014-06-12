@@ -181,8 +181,8 @@ class RedistNode : public DLANode
   RedistNode* CreateTrans(Trans trans);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "redist";}
-  virtual void ClearSizeCache();
-  virtual void BuildSizeCache();
+  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache();
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;

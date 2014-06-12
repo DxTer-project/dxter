@@ -863,7 +863,7 @@ void Loop::FillTunnelSizes()
   iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
     LoopTunnel *tun = (LoopTunnel*)(*iter);
-    tun->ClearSizeCache();
+    tun->ClearDataTypeCache();
   }
   iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
@@ -894,10 +894,10 @@ void Loop::FillTunnelSizes()
   }
 }
 
-void Loop::BuildSizeCache()
+void Loop::BuildDataTypeCache()
 {
   FillTunnelSizes();
-  PSet::BuildSizeCache();
+  PSet::BuildDataTypeCache();
 }
 
 LoopTunnel* Loop::CreateNewLoopTunnels(Node *input,
@@ -1077,7 +1077,7 @@ void Loop::Parallelize(Comm comm)
   
   
   
-  ClearSizeCache();
+  ClearDataTypeCache();
   
   //If we're parallelizing a loop that is on a poss
   // that just got duplicated as part of a transformation,
@@ -1085,7 +1085,7 @@ void Loop::Parallelize(Comm comm)
   //We need to form it and this loop's size cache (which will be
   // different thanks to paralellization.
   if (m_ownerPoss)
-    m_ownerPoss->BuildSizeCache();
+    m_ownerPoss->BuildDataTypeCache();
 }
 
 bool ContainsOnlyParallelization(PSet *set)

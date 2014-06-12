@@ -325,7 +325,7 @@ const Sizes* GetUpToDiag::LocalN(unsigned int num) const
     return InputLocalN(num+1);
 }
 
-void GetUpToDiag::ClearSizeCache()
+void GetUpToDiag::ClearDataTypeCache()
 {
   if (m_sizes) {
     delete m_sizes;
@@ -335,7 +335,7 @@ void GetUpToDiag::ClearSizeCache()
   }
 }
 
-void GetUpToDiag::BuildSizeCache()
+void GetUpToDiag::BuildDataTypeCache()
 {
   if (m_sizes)
     return;

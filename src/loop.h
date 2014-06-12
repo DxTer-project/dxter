@@ -118,7 +118,7 @@ class Loop : public PSet
 #endif
 
   void FillTunnelSizes();
-  virtual void BuildSizeCache();
+  virtual void BuildDataTypeCache();
 
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);

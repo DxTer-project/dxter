@@ -90,8 +90,8 @@ class PSet
   void Unflatten(ifstream &in, SaveInfo &info);
   virtual void UnflattenCore(ifstream &in, SaveInfo &info) {}
 
-  virtual void BuildSizeCache();
-  virtual void ClearSizeCache();
+  virtual void BuildDataTypeCache();
+  virtual void ClearDataTypeCache();
 
 #if DOBLIS
   virtual bool IsCritSect() const {return false;}

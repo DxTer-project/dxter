@@ -1914,7 +1914,7 @@ void SumOverCommNode::PrintCode(IndStream &out)
     throw;
 }
 
-void RedistNode::ClearSizeCache()
+void RedistNode::ClearDataTypeCache()
 {
   if (m_mSizes) {
     delete m_mSizes;
@@ -1924,7 +1924,7 @@ void RedistNode::ClearSizeCache()
   }
 }
 
-void RedistNode::BuildSizeCache()
+void RedistNode::BuildDataTypeCache()
 {
   if (m_mSizes)
     return;
