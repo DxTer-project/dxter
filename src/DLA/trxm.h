@@ -119,8 +119,8 @@ class TrxmLoopExp : public SingleTrans
  TrxmLoopExp(Layer fromLayer, Layer toLayer, unsigned int dim, Side side) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_side(side) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -132,8 +132,8 @@ class Trmm3LoopExp : public SingleTrans
  Trmm3LoopExp(Layer fromLayer, Layer toLayer, unsigned int var) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_var(var) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -144,8 +144,8 @@ class DistTrxmToLocalTrxm : public SingleTrans
  public:
   DistTrxmToLocalTrxm(DistType leftType, DistType rightType) : m_leftType(leftType), m_rightType(rightType) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -158,8 +158,8 @@ class DistTrsmToSpecialLocalTrsm : public SingleTrans
 {
  public:
   virtual string GetType() const  {return "dist trsm to special local"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -193,8 +193,8 @@ class DistTrmmToLocalTrmmStatA : public  SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed Trmm to Local Trmm stat A";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -205,7 +205,7 @@ class TrxmTrans : public TransTransformation
  public:
   TrxmTrans(Trans trans) : TransTransformation(1,trans) {}
   virtual string GetTransType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual bool CanApply(const Node *node) const;
   virtual void PreApply(Node *node) const;
   virtual void PostApply(Node *node) const;
 };
@@ -215,16 +215,16 @@ class DTrmmToTrsm : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Dist Trmm of inverse to Trsm";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;  
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;  
 };
 
 class LTrmmToTrsm : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Local Trmm of inverse to Trsm";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;  
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;  
 };
 #endif
 
@@ -236,8 +236,8 @@ class BLISTrxmLoopExp : public SingleTrans
   BLISTrxmLoopExp(Layer fromLayer, Layer toLayer)
     : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const { return "BLISTrxmLoop Exp"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -248,8 +248,8 @@ class BLISTrmm3LoopExp : public SingleTrans
   BLISTrmm3LoopExp(Layer fromLayer, Layer toLayer)
     : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const { return "BLISTrmm3Loop Exp"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -265,8 +265,8 @@ class TrxmRightToLeft : public SingleTrans
   TrxmRightToLeft(Layer layer)
     : m_layer(layer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class Trmm3RightToLeft : public SingleTrans
@@ -276,8 +276,8 @@ class Trmm3RightToLeft : public SingleTrans
   Trmm3RightToLeft(Layer layer)
     : m_layer(layer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 #endif
 
@@ -288,8 +288,8 @@ class TrxmLowerLayer : public LowerLayer
  TrxmLowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const { return "Trxm lower layer"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 
@@ -301,8 +301,8 @@ class TrmmAxpytoTrxm3 : public SingleTrans
   TrmmAxpytoTrxm3(Layer layer)
     : m_layer(layer) {}
   virtual string GetType() const { return "TrmmAxpytoTrxm3"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 
@@ -313,8 +313,8 @@ class CopyTrmmtoTrxm3 : public SingleTrans
   CopyTrmmtoTrxm3(Layer layer)
     : m_layer(layer) {}
   virtual string GetType() const { return "CopyTrmmtoTrxm3"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 #endif
 #endif

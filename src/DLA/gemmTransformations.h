@@ -64,8 +64,8 @@ class GemmLoopExp : public SingleTrans
  GemmLoopExp(Layer fromLayer, Layer toLayer, unsigned int dim) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -74,8 +74,8 @@ class DistGemmToLocalGemmStatC : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed Gemm to Local Stat C";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -84,8 +84,8 @@ class DistGemmToContribLocalGemmStatANonTrans : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed Gemm to Local Stat A NonTrans";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -96,8 +96,8 @@ class DistGemmToContribLocalGemmStatBNonTrans : public SingleTrans
   bool m_trans;
  DistGemmToContribLocalGemmStatBNonTrans(bool trans) :m_trans(trans) {}
   virtual string GetType() const {return (string)"Distributed Gemm to Local Stat B NonTrans "+(m_trans?"trans":"nonTrans");}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -107,8 +107,8 @@ class DistGemmToContribLocalGemmStatBTrans : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed Gemm to Local Stat B Trans";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -117,8 +117,8 @@ class DistGemmToContribLocalGemmStatATrans : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed Gemm to Local Stat A Trans";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -129,7 +129,7 @@ class GemmTrans : public TransTransformation
  public:
   GemmTrans(unsigned int argNum, Trans trans) : TransTransformation(argNum,trans) {}
   virtual string GetTransType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual bool CanApply(const Node *node) const;
 };
 
 
@@ -140,8 +140,8 @@ class GemmInputReordering : public SingleTrans
   const SingleTrans *m_inverse;
   GemmInputReordering(int type) :m_type(type) {}
   virtual string GetType() const {return ((string)"Gemm Reordering ") + (char)(m_type+48);}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 #endif
 
@@ -153,8 +153,8 @@ class BLISGemmLoopExp : public SingleTrans
  BLISGemmLoopExp(Layer fromLayer, Layer toLayer) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 #endif
@@ -165,8 +165,8 @@ class GemmLowerLayer : public LowerLayer
  GemmLowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #if DOELEM||DOBLIS
@@ -176,8 +176,8 @@ class SplitGemm : public SingleTrans
   Layer m_layer;
  SplitGemm(Layer layer) : m_layer(layer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 #endif
 

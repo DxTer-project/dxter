@@ -76,7 +76,7 @@ string LULoopExp::GetType() const
     throw;
 }
 
-bool LULoopExp::CanApply(const Poss *poss, const Node *node) const
+bool LULoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == LU::GetClass()) {
     const LU *lu = (LU*)node;
@@ -86,7 +86,7 @@ bool LULoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void LULoopExp::Apply(Poss *poss, Node *node) const
+void LULoopExp::Apply(Node *node) const
 {
   LU *lu = (LU*)node;
   Loop *loop;
@@ -105,7 +105,7 @@ void LULoopExp::Apply(Poss *poss, Node *node) const
     throw;
   }
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(0, loop->OutTun(0), 0);
   node->RedirectChildren(1, loop->OutTun(1), 0);

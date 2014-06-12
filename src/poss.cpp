@@ -540,10 +540,10 @@ bool Poss::Simplify(const TransMap &simplifiers)
         const Transformation *trans = *transIter;
         if (!trans->IsSingle())
           throw;
-        if (((SingleTrans*)trans)->CanApply(this, node)) {
+        if (((SingleTrans*)trans)->CanApply(node)) {
           didSomething = true;
           InvalidateHash();
-          ((SingleTrans*)trans)->Apply(node->m_poss, node);
+          ((SingleTrans*)trans)->Apply(node);
           m_transVec.push_back(const_cast<Transformation*>(trans));
           nodeIdx = -1;
           break;
@@ -2584,7 +2584,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      continue;
 	    }
 	    const SingleTrans *single = (SingleTrans*)trans;
-	    if (single->CanApply(this, node)) {
+	    if (single->CanApply(node)) {
 	      node->Applied(single);
 	      if (single->IsRef())
 		node->SetHasRefined();
@@ -2593,7 +2593,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      newPoss->Duplicate(this,nodeMap,false);
 	      newPoss->PatchAfterDuplicate(nodeMap);
 	      Node *newNode = nodeMap[node];
-	      single->Apply(newNode->m_poss, newNode);
+	      single->Apply(newNode);
 	      newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
 	      newPoss->Simplify(simplifiers);
 	      //newPoss->BuildSizeCache();
@@ -2610,7 +2610,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	    void *cache = NULL;
 	    if (node->HasApplied(var))
 	      continue;
-	    int count = var->CanApply(this, node, &cache);
+	    int count = var->CanApply(node, &cache);
 	    if (count > 0) {
 	      node->Applied(var);
 	      
@@ -2630,7 +2630,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 		newPoss->Duplicate(this,nodeMap,false);
 		newPoss->PatchAfterDuplicate(nodeMap);
 		Node *newNode = nodeMap[node];
-		var->Apply(newNode->m_poss, i, newNode, &cache);
+		var->Apply(i, newNode, &cache);
 		newPoss->m_transVec.push_back(const_cast<Transformation*>(marking));
 		newPoss->Simplify(simplifiers);
 		//newPoss->BuildSizeCache();

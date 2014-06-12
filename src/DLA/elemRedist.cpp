@@ -660,7 +660,7 @@ RemoveWastedRedist::RemoveWastedRedist(DistType destType)
 }
 
 
-bool RemoveWastedRedist::CanApply(const Poss *poss, const Node *node) const
+bool RemoveWastedRedist::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
@@ -689,7 +689,7 @@ bool RemoveWastedRedist::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void RemoveWastedRedist::Apply(Poss *poss, Node *node) const
+void RemoveWastedRedist::Apply(Node *node) const
 {
   RedistNode *redistNode = (RedistNode*)node;
   while(redistNode->Input(0) 
@@ -730,7 +730,7 @@ ExpandRedistribution<SrcType,DestType>::ExpandRedistribution()
 }
 
 template<DistType SrcType, DistType DestType>
-bool ExpandRedistribution<SrcType, DestType>::CanApply(const Poss *poss, const Node *node) const
+bool ExpandRedistribution<SrcType, DestType>::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
@@ -765,13 +765,13 @@ bool ExpandRedistribution<SrcType, DestType>::WorthApplying(const Node *node) co
 
 
 template<>
-void ExpandRedistribution<D_MC_MR,D_VR_STAR>::Apply(Poss *poss, Node *node) const
+void ExpandRedistribution<D_MC_MR,D_VR_STAR>::Apply(Node *node) const
 {
   RedistNode *node1 = new RedistNode(D_VC_STAR);
   RedistNode *node2 = new RedistNode(D_VR_STAR);
   node2->AddInput(node1,0);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
-  poss->AddNodes(2,node1,node2);
+  node->m_poss->AddNodes(2,node1,node2);
   node->RedirectChildren(node2, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -786,13 +786,13 @@ bool ExpandRedistribution<D_MC_MR,D_VR_STAR>::ExpansionHasPossibleTrans() const
 
 
 template<>
-void ExpandRedistribution<D_MC_MR,D_MC_STAR>::Apply(Poss *poss, Node *node) const
+void ExpandRedistribution<D_MC_MR,D_MC_STAR>::Apply(Node *node) const
 {
   RedistNode *node1 = new RedistNode(D_VC_STAR);
   RedistNode *node2 = new RedistNode(D_MC_STAR);
   node2->AddInput(node1,0);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
-  poss->AddNodes(2,node1,node2);
+  node->m_poss->AddNodes(2,node1,node2);
   node->RedirectChildren(node2, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -805,13 +805,13 @@ bool ExpandRedistribution<D_MC_MR,D_MC_STAR>::ExpansionHasPossibleTrans() const
 }
 
 template<>
-void ExpandRedistribution<D_MC_MR,D_STAR_MR>::Apply(Poss *poss, Node *node) const
+void ExpandRedistribution<D_MC_MR,D_STAR_MR>::Apply(Node *node) const
 {
   RedistNode *node1 = new RedistNode(D_STAR_VR);
   RedistNode *node2 = new RedistNode(D_STAR_MR);
   node2->AddInput(node1,0);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
-  poss->AddNodes(2,node1,node2);
+  node->m_poss->AddNodes(2,node1,node2);
   node->RedirectChildren(node2,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -824,7 +824,7 @@ bool ExpandRedistribution<D_MC_MR,D_STAR_MR>::ExpansionHasPossibleTrans() const
 }
 
 template<>
-void ExpandRedistribution<D_MC_MR,D_MR_STAR>::Apply(Poss *poss, Node *node) const
+void ExpandRedistribution<D_MC_MR,D_MR_STAR>::Apply(Node *node) const
 {
   RedistNode *node1 = new RedistNode(D_VC_STAR);
   RedistNode *node2 = new RedistNode(D_VR_STAR);
@@ -832,7 +832,7 @@ void ExpandRedistribution<D_MC_MR,D_MR_STAR>::Apply(Poss *poss, Node *node) cons
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node1,0);
   node3->AddInput(node2,0);
-  poss->AddNodes(3,node1,node2,node3);
+  node->m_poss->AddNodes(3,node1,node2,node3);
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -846,7 +846,7 @@ bool ExpandRedistribution<D_MC_MR,D_MR_STAR>::ExpansionHasPossibleTrans() const
 }
 
 template<>
-void ExpandRedistribution<D_MC_MR,D_STAR_MC>::Apply(Poss *poss, Node *node) const
+void ExpandRedistribution<D_MC_MR,D_STAR_MC>::Apply(Node *node) const
 {
   RedistNode *node1 = new RedistNode(D_STAR_VR);
   RedistNode *node2 = new RedistNode(D_STAR_VC);
@@ -854,7 +854,7 @@ void ExpandRedistribution<D_MC_MR,D_STAR_MC>::Apply(Poss *poss, Node *node) cons
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node1,0);
   node3->AddInput(node2,0);
-  poss->AddNodes(3,node1,node2,node3);
+  node->m_poss->AddNodes(3,node1,node2,node3);
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -868,13 +868,13 @@ bool ExpandRedistribution<D_MC_MR,D_STAR_MC>::ExpansionHasPossibleTrans() const
 }
 
 template<>
-void ExpandRedistribution<D_VC_STAR,D_MR_STAR>::Apply(Poss *poss, Node *node) const
+void ExpandRedistribution<D_VC_STAR,D_MR_STAR>::Apply(Node *node) const
 {
   RedistNode *node1 = new RedistNode(D_VR_STAR);
   RedistNode *node2 = new RedistNode(D_MR_STAR);
   node2->AddInput(node1,0);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
-  poss->AddNodes(2,node1,node2);
+  node->m_poss->AddNodes(2,node1,node2);
   node->RedirectChildren(node2,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -895,7 +895,7 @@ CombineRedistribs::CombineRedistribs(DistType srcType, DistType destType)
     DistTypeToStr(m_destType);
 }
 
-bool CombineRedistribs::CanApply(const Poss *poss, const Node *node) const
+bool CombineRedistribs::CanApply(const Node *node) const
 {
   const static ClassType classType = RedistNode::GetClass();
   if (((RedistNode*)node)->m_destType != m_destType)
@@ -917,7 +917,7 @@ bool CombineRedistribs::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void CombineRedistribs::Apply(Poss *poss, Node *node) const
+void CombineRedistribs::Apply(Node *node) const
 {
   Node *parent = node->Input(0);
   NodeConnVecIter iter = parent->m_children.begin();
@@ -940,7 +940,7 @@ RemoveNOPRedistribs::RemoveNOPRedistribs(DistType type)
   m_type = "Remove NOP Redistribution " + DistTypeToStr(m_distribType);
 }
 
-bool RemoveNOPRedistribs::CanApply(const Poss *poss, const Node *node) const
+bool RemoveNOPRedistribs::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
@@ -956,7 +956,7 @@ bool RemoveNOPRedistribs::CanApply(const Poss *poss, const Node *node) const
   return true;
 }
 
-void RemoveNOPRedistribs::Apply(Poss *poss, Node *node) const
+void RemoveNOPRedistribs::Apply(Node *node) const
 {
   Node *parent = node->Input(0);
   node->RedirectChildren(parent,node->InputConnNum(0));
@@ -1005,7 +1005,7 @@ DLANode* FindRedistribution(DLANode *root, unsigned int num, DLANode *ignore, Di
 }
 
 
-bool FindMidDistributions::CanApply(const Poss *poss, const Node *node) const
+bool FindMidDistributions::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
@@ -1028,7 +1028,7 @@ bool FindMidDistributions::CanApply(const Poss *poss, const Node *node) const
   return FindRedistribution(parent, ddla->InputConnNum(0), ddla, m_midType, true, num) != NULL;
 }
 
-void FindMidDistributions::Apply(Poss *poss, Node *node) const
+void FindMidDistributions::Apply(Node *node) const
 {
   DLANode *ddla = (DLANode*)node;
   DLANode *parent = (DLANode*)(ddla->Input(0));
@@ -1063,7 +1063,7 @@ ReplaceWithTrans::ReplaceWithTrans(DistType srcType, DistType origDestType, Dist
     DistTypeToStr(m_origDestType) + " with transpose to " + DistTypeToStr(m_newDestType);
 }
 
-bool ReplaceWithTrans::CanApply(const Poss *poss, const Node *node) const
+bool ReplaceWithTrans::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
@@ -1078,17 +1078,17 @@ bool ReplaceWithTrans::CanApply(const Poss *poss, const Node *node) const
   return true;
 }
 
-void ReplaceWithTrans::Apply(Poss *poss, Node *node) const
+void ReplaceWithTrans::Apply(Node *node) const
 {
   Node *parent = node->Input(0);
   RedistNode *newNode = new RedistNode(m_newDestType);
-  poss->AddNode(newNode);
+  node->m_poss->AddNode(newNode);
   newNode->AddInput(parent,node->InputConnNum(0));
   node->RedirectChildren(newNode,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-void TransTransformation::Apply(Poss *poss, Node *node) const
+void TransTransformation::Apply(Node *node) const
 {
   PreApply(node);
   Node *in = node->Input(m_argNum);
@@ -1098,7 +1098,7 @@ void TransTransformation::Apply(Poss *poss, Node *node) const
     newRedist->AddInput(oldRedist->Input(0),oldRedist->InputConnNum(0));
     node->ChangeInput1Way(oldRedist, 0, newRedist, 0);
     oldRedist->RemoveChild(node, node->InputConnNum(m_argNum));
-    poss->AddNode(newRedist);
+    node->m_poss->AddNode(newRedist);
     if (oldRedist->m_children.empty())
       oldRedist->m_poss->DeleteChildAndCleanUp(oldRedist);
   }
@@ -1111,7 +1111,7 @@ void TransTransformation::Apply(Poss *poss, Node *node) const
     newRedist->AddInput(oldRedist->Input(0),oldRedist->InputConnNum(0));
     trap->ChangeInput1Way(oldRedist, 0, newRedist, 0);
     oldRedist->RemoveChild(trap, trap->InputConnNum(0));
-    poss->AddNode(newRedist);
+    node->m_poss->AddNode(newRedist);
     if (oldRedist->m_children.empty())
       oldRedist->m_poss->DeleteChildAndCleanUp(oldRedist);
   }
@@ -1135,7 +1135,7 @@ string RedistTrans::GetTransType() const
   return "redist";
 }
 
-bool RedistTrans::CanApply(const Poss *poss, const Node *node) const
+bool RedistTrans::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
@@ -1996,7 +1996,7 @@ bool CanUseUp(const Node *root)
   }
 }
 
-bool UniqueTransTrans::CanApply(const Poss *poss, const Node *node) const
+bool UniqueTransTrans::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass()) 
     return false;
@@ -2019,7 +2019,7 @@ bool UniqueTransTrans::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void UniqueTransTrans::Apply(Poss *poss, Node *node) const 
+void UniqueTransTrans::Apply(Node *node) const 
 {
   if (node->GetNodeClass() != RedistNode::GetClass()) 
     throw;
@@ -2038,7 +2038,7 @@ void UniqueTransTrans::Apply(Poss *poss, Node *node) const
 	      = new RedistNode(childRedist->m_destType == D_MR_STAR_H ? D_VC_STAR_H : D_VC_STAR_T);
 	    redist->AddInput(childRedist, 0);
 	    node->ChangeInput2Way(par, num, redist, 0);
-	    poss->AddNode(redist);
+	    node->m_poss->AddNode(redist);
 	    return;
 	  }
 	}
@@ -2063,7 +2063,7 @@ string UseTransposedRedist::GetType() const
   return "Use transposed redist for " + DistTypeToStr(m_destType); 
 }
 
-bool UseTransposedRedist::CanApply(const Poss *poss, const Node *node) const
+bool UseTransposedRedist::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
@@ -2086,7 +2086,7 @@ bool UseTransposedRedist::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void UseTransposedRedist::Apply(Poss *poss, Node *node) const
+void UseTransposedRedist::Apply(Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;

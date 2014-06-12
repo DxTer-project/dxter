@@ -281,7 +281,7 @@ bool DistAxpyToLocalAxpy::WorthApplying(const Node *node) const
   return false;
 }
 
-bool DistAxpyToLocalAxpy::CanApply(const Poss *poss, const Node *node) const
+bool DistAxpyToLocalAxpy::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Axpy::GetClass())
     return false;
@@ -290,7 +290,7 @@ bool DistAxpyToLocalAxpy::CanApply(const Poss *poss, const Node *node) const
   return true;
 }
 
-void DistAxpyToLocalAxpy::Apply(Poss *poss, Node *node) const
+void DistAxpyToLocalAxpy::Apply(Node *node) const
 {
   RedistNode *node1 = new RedistNode(m_type);
   RedistNode *node2 = new RedistNode(m_type);
@@ -301,7 +301,7 @@ void DistAxpyToLocalAxpy::Apply(Poss *poss, Node *node) const
   node3->AddInput(node1,0);
   node3->AddInput(node2,0);
   node4->AddInput(node3,0);
-  poss->AddNodes(4, node1, node2, node3, node4);
+  node->m_poss->AddNodes(4, node1, node2, node3, node4);
   node->RedirectChildren(node4,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -325,14 +325,14 @@ Cost DistAxpyToLocalAxpy::RHSCostEstimate(const Node *node) const
 }
 #endif
 
-bool AxpyToBLASAxpy::CanApply(const Poss *poss, const Node *node) const
+bool AxpyToBLASAxpy::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Axpy::GetClass())
     return false;
   return ((DLANode*)node)->GetLayer() == m_fromLayer;
 }
 
-void AxpyToBLASAxpy::Apply(Poss *poss, Node *node) const
+void AxpyToBLASAxpy::Apply(Node *node) const
 {
   ((DLANode*)node)->SetLayer(m_toLayer);
 }
@@ -343,7 +343,7 @@ string AxpyLowerLayer::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
-bool AxpyLowerLayer::CanApply(const Poss *poss, const Node *node) const
+bool AxpyLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Axpy::GetClass()) {
     const Axpy *axpy = (Axpy*)node;
@@ -353,7 +353,7 @@ bool AxpyLowerLayer::CanApply(const Poss *poss, const Node *node) const
   
 }
 
-void AxpyLowerLayer::Apply(Poss *poss, Node *node) const
+void AxpyLowerLayer::Apply(Node *node) const
 {
   Axpy *axpy = (Axpy*)node;
   axpy->SetLayer(m_toLayer);
@@ -449,14 +449,14 @@ string DistScalToLocalScal::GetType() const
   return "Distributed Scal to Local Scal " + DistTypeToStr(m_type);
 }
 
-bool DistScalToLocalScal::CanApply(const Poss *poss, const Node *node) const
+bool DistScalToLocalScal::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Scal::GetClass())
     return false;
   return (((Scal*)node)->GetLayer() == DMLAYER);
 }
 
-void DistScalToLocalScal::Apply(Poss *poss, Node *node) const
+void DistScalToLocalScal::Apply(Node *node) const
 {
   RedistNode *node1 = new RedistNode(D_STAR_STAR);
   RedistNode *node2 = new RedistNode(m_type);
@@ -467,7 +467,7 @@ void DistScalToLocalScal::Apply(Poss *poss, Node *node) const
   node3->AddInput(node1,0);
   node3->AddInput(node2,0);
   node4->AddInput(node3,0);
-  poss->AddNodes(4, node1, node2, node3, node4);
+  node->m_poss->AddNodes(4, node1, node2, node3, node4);
   node->RedirectChildren(node4,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -580,14 +580,14 @@ string DistConstScalToLocalConstScal::GetType() const
   return "Distributed ConstScal to Local ConstScal " + DistTypeToStr(m_type);
 }
 
-bool DistConstScalToLocalConstScal::CanApply(const Poss *poss, const Node *node) const
+bool DistConstScalToLocalConstScal::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != DistConstScal::GetClass())
     return false;
   return true;
 }
 
-void DistConstScalToLocalConstScal::Apply(Poss *poss, Node *node) const
+void DistConstScalToLocalConstScal::Apply(Node *node) const
 {
   DistConstScal *scal = (DistConstScal*)node;
   RedistNode *node2 = new RedistNode(m_type);

@@ -304,8 +304,8 @@ class MakeTrapNode : public DLAOp<1,1>
 class MoveMakeTrap : public SingleTrans
 {
  public:
-  bool CanApply(const Poss *poss, const Node *node) const;
-  void Apply(Poss *poss, Node *node) const;
+  bool CanApply(const Node *node) const;
+  void Apply(Node *node) const;
 };
 #endif
 
@@ -335,8 +335,8 @@ class RemoveScaleByOne : public SingleTrans
  public:
   RemoveScaleByOne() {}
   virtual string GetType() const { return "RemoveScaleByOne"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return false;}
 };
 

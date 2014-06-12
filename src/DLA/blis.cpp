@@ -213,7 +213,7 @@ Transpose* AddTranspose(Trans transVal, bool objTrans, Node *input, unsigned int
   return trans;
 }
 
-bool CombineTranspose::CanApply(const Poss *poss, const Node *node) const
+bool CombineTranspose::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Transpose::GetClass())
     return false;
@@ -237,7 +237,7 @@ bool CombineTranspose::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void CombineTranspose::Apply(Poss *poss, Node *node) const
+void CombineTranspose::Apply(Node *node) const
 {
   Transpose *trans = (Transpose*)node;
   NodeConnVecConstIter iter = trans->m_inputs.begin();
@@ -610,7 +610,7 @@ void Copy::PrintCode(IndStream &out)
   << GetInputNameStr(1) << " );\n";
 }
 
-bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
+bool ParallelizeMDim::CanApply(const Node *node) const
 {
   const PackBuff *buff = (PackBuff*)node;
   if (buff->m_packMat == PACKBPANEL) {
@@ -635,7 +635,7 @@ bool ParallelizeMDim::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void ParallelizeMDim::Apply(Poss *poss, Node *node) const
+void ParallelizeMDim::Apply(Node *node) const
 {
   PackBuff *buff = (PackBuff*)node;
   buff->Parallelize(m_comm);
@@ -683,7 +683,7 @@ void ParallelizeMDim::Apply(Poss *poss, Node *node) const
 }
 
 
-bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
+bool ParallelizeInnerNDim::CanApply(const Node *node) const
 {
   const PackBuff *buff = (PackBuff*)node;
   if (buff->m_packMat == PACKABLOCK) {
@@ -716,7 +716,7 @@ bool ParallelizeInnerNDim::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void ParallelizeInnerNDim::Apply(Poss *poss, Node *node) const
+void ParallelizeInnerNDim::Apply(Node *node) const
 {
   PackBuff *buff = (PackBuff*)node;
   buff->Parallelize(m_comm);
@@ -731,7 +731,7 @@ void ParallelizeInnerNDim::Apply(Poss *poss, Node *node) const
   }
 }
 
-bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
+bool ParallelizeOuterNDim::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != LoopTunnel::GetClass())
     throw;
@@ -771,7 +771,7 @@ bool ParallelizeOuterNDim::CanApply(const Poss *poss, const Node *node) const
   return true;
 }
 
-void ParallelizeOuterNDim::Apply(Poss *poss, Node *node) const
+void ParallelizeOuterNDim::Apply(Node *node) const
 {
   LoopTunnel *tun = (LoopTunnel*)node;
   Loop *loop = (Loop*)(tun->m_pset);
@@ -779,7 +779,7 @@ void ParallelizeOuterNDim::Apply(Poss *poss, Node *node) const
 }
 
 
-bool ParallelizeK::CanApply(const Poss *poss, const Node *node) const
+bool ParallelizeK::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != LoopTunnel::GetClass())
     throw;
@@ -808,7 +808,7 @@ bool ParallelizeK::CanApply(const Poss *poss, const Node *node) const
   }
 }
 
-void ParallelizeK::Apply(Poss *poss, Node *node) const
+void ParallelizeK::Apply(Node *node) const
 {
   LoopTunnel *tun = (LoopTunnel*)node;
   Loop *loop = (Loop*)(tun->m_pset);
@@ -880,7 +880,7 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
   return foundGood;
 }
 /*
- bool IncreaseParallelizedLoop::CanApply(const Poss *poss, const Node *node) const
+ bool IncreaseParallelizedLoop::CanApply(const Node *node) const
  {
  if (node->GetNodeClass() != Split::GetClass())
  throw;
@@ -902,7 +902,7 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
  return !IsImmediateSubComm(comm, loop->m_comm);
  }
  
- void IncreaseParallelizedLoop::Apply(Poss *poss, Node *node) const
+ void IncreaseParallelizedLoop::Apply(Node *node) const
  {
  Split *split = (Split*)node;
  Loop *loop = split->GetMyLoop();

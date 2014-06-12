@@ -907,7 +907,7 @@ void MakeTrapNode::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_offset);
 }
 
-bool MoveMakeTrap::CanApply(const Poss *poss, const Node *node) const
+bool MoveMakeTrap::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != MakeTrapNode::GetClass()) {
     return false;
@@ -925,7 +925,7 @@ bool MoveMakeTrap::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void MoveMakeTrap::Apply(Poss *poss, Node *node) const
+void MoveMakeTrap::Apply(Node *node) const
 {
   Node *child = node->Child(0);
   if (child->GetNodeClass() != RedistNode::GetClass())
@@ -940,7 +940,7 @@ void MoveMakeTrap::Apply(Poss *poss, Node *node) const
 #endif
 
 #if DOBLIS||DOELEM
-bool RemoveScaleByOne::CanApply(const Poss *poss, const Node *node) const
+bool RemoveScaleByOne::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != ScaleNode::GetClass())
     return false;
@@ -952,7 +952,7 @@ bool RemoveScaleByOne::CanApply(const Poss *poss, const Node *node) const
     return false;
 }
 
-void RemoveScaleByOne::Apply(Poss *poss, Node *node) const
+void RemoveScaleByOne::Apply(Node *node) const
 {
   node->RedirectChildren(node->Input(0), node->InputConnNum(0));
   node->m_poss->DeleteChildAndCleanUp(node);

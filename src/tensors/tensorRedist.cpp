@@ -76,7 +76,7 @@ NodeType RedistNode::GetType() const
 void RedistNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    DLANode::Prop()
+    DLANode::Prop();
 
     if (m_inputs.size() != 1) {
       cout << "m_inputs.size() != 1\n";
@@ -758,7 +758,7 @@ void AllReduceNode::UnflattenCore(ifstream &in, SaveInfo &info)
 
 
 
-bool RemoveWastedRedist::CanApply(const Poss *poss, const Node *node) const
+bool RemoveWastedRedist::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
@@ -786,7 +786,7 @@ bool RemoveWastedRedist::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void RemoveWastedRedist::Apply(Poss *poss, Node *node) const
+void RemoveWastedRedist::Apply(Node *node) const
 {
   RedistNode *redistNode = (RedistNode*)node;
   const DistType* type = &(redistNode->m_destType);
@@ -821,7 +821,7 @@ void RemoveWastedRedist::Apply(Poss *poss, Node *node) const
 }
 
 
-bool RemoveNOPRedistribs::CanApply(const Poss *poss, const Node *node) const
+bool RemoveNOPRedistribs::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
@@ -834,14 +834,14 @@ bool RemoveNOPRedistribs::CanApply(const Poss *poss, const Node *node) const
   return true;
 }
 
-void RemoveNOPRedistribs::Apply(Poss *poss, Node *node) const
+void RemoveNOPRedistribs::Apply(Node *node) const
 {
   Node *parent = node->Input(0);
   node->RedirectChildren(parent,node->InputConnNum(0));
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-bool CombineRedistribs::CanApply(const Poss *poss, const Node *node) const
+bool CombineRedistribs::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
@@ -863,7 +863,7 @@ bool CombineRedistribs::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void CombineRedistribs::Apply(Poss *poss, Node *node) const
+void CombineRedistribs::Apply(Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
@@ -887,7 +887,7 @@ void CombineRedistribs::Apply(Poss *poss, Node *node) const
   throw;
 }
 
-bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
+bool SplitRedistribs::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
@@ -936,7 +936,7 @@ bool SplitRedistribs::CanApply(const Poss *poss, const Node *node) const
   }
 }
 
-void SplitRedistribs::Apply(Poss *poss, Node *node) const
+void SplitRedistribs::Apply(Node *node) const
 {
   RedistNode *orig = (RedistNode*)node;
   DistType one = orig->InputDistType(0);
@@ -956,18 +956,18 @@ void SplitRedistribs::Apply(Poss *poss, Node *node) const
 
   RedistNode *newRedist = new RedistNode(one);
   newRedist->AddInput(orig->Input(0), orig->InputConnNum(0));
-  poss->AddNode(newRedist);
+  node->m_poss->AddNode(newRedist);
 
   RedistNode *newRedist2 = new RedistNode(*two);
   newRedist2->AddInput(newRedist, 0);
-  poss->AddNode(newRedist2);
+  node->m_poss->AddNode(newRedist2);
 
   node->RedirectChildren(newRedist2, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 
 }
 
-bool SingleIndexAllToAll::CanApply(const Poss *poss, const Node *node) const
+bool SingleIndexAllToAll::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
@@ -1013,7 +1013,7 @@ bool SingleIndexAllToAll::CanApply(const Poss *poss, const Node *node) const
   return true;
 }
 
-void SingleIndexAllToAll::Apply(Poss *poss, Node *node) const
+void SingleIndexAllToAll::Apply(Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
@@ -1038,7 +1038,7 @@ void SingleIndexAllToAll::Apply(Poss *poss, Node *node) const
 
   RedistNode *redist1 = new RedistNode(type1);
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
-  poss->AddNode(redist1);
+  node->m_poss->AddNode(redist1);
 
   DistType type2 = redist->m_destType;
   DistEntry entry2 = type2.m_dists[m_dim];
@@ -1058,17 +1058,17 @@ void SingleIndexAllToAll::Apply(Poss *poss, Node *node) const
   
   RedistNode *redist2 = new RedistNode(type2);
   redist2->AddInput(redist1, 0);
-  poss->AddNode(redist2);
+  node->m_poss->AddNode(redist2);
 
   RedistNode *redist3 = new RedistNode(redist->m_destType);
   redist3->AddInput(redist2, 0);
-  poss->AddNode(redist3);
+  node->m_poss->AddNode(redist3);
 
   node->RedirectChildren(redist3, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-bool SplitAllGathers::CanApply(const Poss *poss, const Node *node) const
+bool SplitAllGathers::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
@@ -1109,7 +1109,7 @@ bool SplitAllGathers::CanApply(const Poss *poss, const Node *node) const
     return false;
 }
 
-void SplitAllGathers::Apply(Poss *poss, Node *node) const
+void SplitAllGathers::Apply(Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
@@ -1130,11 +1130,11 @@ void SplitAllGathers::Apply(Poss *poss, Node *node) const
 
   RedistNode *redist1 = new RedistNode(intType);
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
-  poss->AddNode(redist1);
+  node->m_poss->AddNode(redist1);
 
   RedistNode *redist2 = new RedistNode(destType);
   redist2->AddInput(redist1, 0);
-  poss->AddNode(redist2);
+  node->m_poss->AddNode(redist2);
 
   node->RedirectChildren(redist2, 0);
   node->m_poss->DeleteChildAndCleanUp(node);

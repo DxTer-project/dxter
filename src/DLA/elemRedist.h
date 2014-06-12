@@ -58,8 +58,8 @@ class RemoveWastedRedist : public SingleTrans
  public:
   RemoveWastedRedist(DistType destType);
   virtual string GetType() const { return m_type; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 template<DistType SrcType, DistType DestType>
@@ -69,8 +69,8 @@ class ExpandRedistribution : public SingleTrans
  public:
   ExpandRedistribution();
   virtual string GetType() const { return m_type; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool WorthApplying(const Node *node) const;
   virtual bool ExpansionHasPossibleTrans() const;
 };
@@ -83,8 +83,8 @@ class CombineRedistribs : public SingleTrans
  public:
   CombineRedistribs(DistType srcType, DistType destType);
   virtual string GetType() const { return m_type; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class RemoveNOPRedistribs : public SingleTrans
@@ -94,8 +94,8 @@ class RemoveNOPRedistribs : public SingleTrans
  public:
   RemoveNOPRedistribs(DistType type);
   virtual string GetType() const { return m_type; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class FindMidDistributions : public SingleTrans
@@ -107,8 +107,8 @@ class FindMidDistributions : public SingleTrans
  public:
   FindMidDistributions(DistType srcType, DistType midType, DistType destType);
   virtual string GetType() const { return m_type; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class ReplaceWithTrans : public SingleTrans
@@ -120,8 +120,8 @@ class ReplaceWithTrans : public SingleTrans
  public:
   ReplaceWithTrans(DistType srcType, DistType origDestType, DistType newDestType);
   virtual string GetType() const { return m_type; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class UseTransposedRedist : public SingleTrans
@@ -132,8 +132,8 @@ class UseTransposedRedist : public SingleTrans
  public:
   UseTransposedRedist(DistType destType, DistType srcType1, DistType srcType2); 
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class TransTransformation : public SingleTrans
@@ -142,7 +142,7 @@ class TransTransformation : public SingleTrans
   unsigned int m_argNum;
   Trans m_trans;
   TransTransformation(unsigned int argNum, Trans trans) : m_argNum(argNum), m_trans(trans) {}
-  void Apply(Poss *poss, Node *node) const;
+  void Apply(Node *node) const;
   virtual void PreApply(Node *node) const {}
   virtual void PostApply(Node *node) const {}
   virtual string GetType() const;
@@ -155,7 +155,7 @@ class RedistTrans : public TransTransformation
  public:
   RedistTrans(Trans trans) : TransTransformation(0,trans) {}
   virtual string GetTransType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual bool CanApply(const Node *node) const;
   virtual bool WorthApplying(const Node *node) const;
 };
 
@@ -271,8 +271,8 @@ class UniqueTransTrans : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Unique Trans Trans";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
   
 

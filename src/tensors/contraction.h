@@ -59,8 +59,8 @@ class DistContToLocalContStatAAllReduce : public SingleTrans
   DistContToLocalContStatAAllReduce(Layer fromLayer, Layer toLayer)
     : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -71,8 +71,8 @@ class DistContToLocalContStatASumScatter : public SingleTrans
   DistContToLocalContStatASumScatter(Layer fromLayer, Layer toLayer)
     : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -84,8 +84,8 @@ class DistContToLocalContStatBAllReduce : public SingleTrans
   DistContToLocalContStatBAllReduce(Layer fromLayer, Layer toLayer)
     : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -96,8 +96,8 @@ class DistContToLocalContStatBSumScatter : public SingleTrans
   DistContToLocalContStatBSumScatter(Layer fromLayer, Layer toLayer)
     : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -108,8 +108,8 @@ class DistContToLocalContStatC : public SingleTrans
   DistContToLocalContStatC(Layer fromLayer, Layer toLayer)
     : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -118,8 +118,8 @@ class DistContToLocalContStatC : public VarTrans
 {
  public:
   virtual string GetType() const {return "Dist Cont to Local Stat C";}
-  virtual int CanApply(const Poss *poss, const Node *node, void **cache) const;
-  virtual void Apply(Poss *poss, int num, Node *node, void **cache) const;
+  virtual int CanApply(const Node *node, void **cache) const;
+  virtual void Apply(int num, Node *node, void **cache) const;
   virtual bool IsRef() const {return true;}
   virtual void CleanCache(void **cache) const;
   //  virtual Cost RHSCostEstimate(const Node *node) const;

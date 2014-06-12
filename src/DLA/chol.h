@@ -65,8 +65,8 @@ class CholLoopExp : public SingleTrans
   int m_varNum;
   CholLoopExp(int varNum) : m_varNum(varNum) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -74,8 +74,8 @@ class DistCholToLocalChol : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed Cholesky to Local Cholesky";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 #endif

@@ -391,7 +391,7 @@ void SumScatterUpdateNode::UnflattenCore(ifstream &in, SaveInfo &info)
 
 
 
-bool SeparateRedistFromSumScatter::CanApply(const Poss *poss, const Node *node) const
+bool SeparateRedistFromSumScatter::CanApply(const Node *node) const
 {
   const SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
   const DistType &inType = sum->InputDistType(0);
@@ -443,7 +443,7 @@ bool SeparateRedistFromSumScatter::CanApply(const Poss *poss, const Node *node) 
   return false;
 }
 
-void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
+void SeparateRedistFromSumScatter::Apply(Node *node) const
 {
   SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
 
@@ -487,11 +487,11 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
     }
   }
 
-  if (sum->Input(1)->m_poss != poss) {
-    cout << "input 1 on " << sum->Input(1)->m_poss << " and this is on " << poss << endl;
+  if (sum->Input(1)->m_poss != node->m_poss) {
+    cout << "input 1 on " << sum->Input(1)->m_poss << " and this is on " << node->m_poss << endl;
     throw;
   }
-  if (sum->m_poss != poss) {
+  if (sum->m_poss != node->m_poss) {
     cout << "one\n";
     throw;
   }
@@ -505,7 +505,7 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
   RedistNode *redist = new RedistNode(inTypeInt);
   redist->AddInput(sum->Input(0), sum->InputConnNum(0));
   
-  poss->AddNode(redist);
+  node->m_poss->AddNode(redist);
 
   if (!inTypeInt.IsSane()) {
     cout << "!sane: " << inTypeInt.str() << endl;
@@ -523,7 +523,7 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
   SumScatterUpdateNode *sum2 = new SumScatterUpdateNode(sum->m_coef, sumDims);
   sum2->AddInput(redist, 0);
   sum2->AddInput(sum->Input(1), sum->InputConnNum(1));
-  poss->AddNode(sum2);
+  node->m_poss->AddNode(sum2);
 
 
   sum->RedirectChildren(sum2,0);
@@ -531,7 +531,7 @@ void SeparateRedistFromSumScatter::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-bool SplitSumScatter::CanApply(const Poss *poss, const Node *node) const
+bool SplitSumScatter::CanApply(const Node *node) const
 {
   const SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
   
@@ -610,7 +610,7 @@ bool SplitSumScatter::CanApply(const Poss *poss, const Node *node) const
   }
 }
 
-void SplitSumScatter::Apply(Poss *poss, Node *node) const
+void SplitSumScatter::Apply(Node *node) const
 {
   SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
 
@@ -652,7 +652,7 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
 
     TempVarNode *temp = new TempVarNode(intType, sums, sum->GetInputName(0).m_name);
     temp->AddInput(node->Input(1), node->InputConnNum(1));
-    poss->AddNode(temp);
+    node->m_poss->AddNode(temp);
 
     //    cout << "tempType " << temp->GetDistType(0).PrettyStr() << endl;
 
@@ -662,7 +662,7 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
     SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFONE, set);
     newSum->AddInput(node->Input(0), node->InputConnNum(0));
     newSum->AddInput(temp, 0);
-    poss->AddNode(newSum);
+    node->m_poss->AddNode(newSum);
 
 
     node->ChangeInput2Way(node->Input(0), node->InputConnNum(0),
@@ -760,7 +760,7 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
 
 	  TempVarNode *temp = new TempVarNode(newOutTypeNoSums, sums, node->GetInputName(0).m_name);
 	  temp->AddInput(node->Input(1), node->InputConnNum(1));
-	  poss->AddNode(temp);
+	  node->m_poss->AddNode(temp);
 	  
 
 	  EntrySet set;
@@ -769,13 +769,13 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
 	  SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFONE, set);
 	  newSum->AddInput(node->Input(0), node->InputConnNum(0));
 	  newSum->AddInput(temp, 0);
-	  poss->AddNode(newSum);
+	  node->m_poss->AddNode(newSum);
 
 	  RedistNode *newRedist = NULL;
 	  if (needRedist) {
 	    newRedist = new RedistNode(newOutTypeFull);
 	    newRedist->AddInput(newSum, 0);
-	    poss->AddNode(newRedist);
+	    node->m_poss->AddNode(newRedist);
 
 	    if (!newOutTypeFull.IsSane()) {
 	      cout << "created new " << newSum->GetDistType(0).str() << " -> " << newOutTypeFull.str() << endl;
@@ -815,7 +815,7 @@ void SplitSumScatter::Apply(Poss *poss, Node *node) const
   }
 }
 
-bool MoveSumScatterRedistAfter::CanApply(const Poss *poss, const Node *node) const
+bool MoveSumScatterRedistAfter::CanApply(const Node *node) const
 {
   const SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
   
@@ -866,7 +866,7 @@ bool MoveSumScatterRedistAfter::CanApply(const Poss *poss, const Node *node) con
   return false;
 }
 
-void MoveSumScatterRedistAfter::Apply(Poss *poss, Node *node) const
+void MoveSumScatterRedistAfter::Apply(Node *node) const
 {
   SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
   
@@ -919,17 +919,17 @@ void MoveSumScatterRedistAfter::Apply(Poss *poss, Node *node) const
 
   TempVarNode *temp = new TempVarNode(outTypeInt, node->GetInputName(0).m_name);
   temp->AddInput(node->Input(1), node->InputConnNum(1));
-  poss->AddNode(temp);
+  node->m_poss->AddNode(temp);
 
   SumScatterUpdateNode *newSum = new SumScatterUpdateNode(sum->m_coef, sum->m_sumDims);
   newSum->AddInput(node->Input(0), node->InputConnNum(0));
   newSum->AddInput(temp, 0);
-  poss->AddNode(newSum);
+  node->m_poss->AddNode(newSum);
 
 
   RedistNode *redist = new RedistNode(outType);
   redist->AddInput(newSum, 0);
-  poss->AddNode(redist);
+  node->m_poss->AddNode(redist);
 
 
   sum->RedirectChildren(redist, 0);

@@ -121,32 +121,32 @@ class LoopInvariantPackBuffMotion : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Loop Invariant PackBuff Motion";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class LoopInvariantPackMotion : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Loop Invariant Pack Motion";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class CombinePacking : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Combine packing";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class CombinePackBuff : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Combine Pack Buff";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 
@@ -154,8 +154,8 @@ class UnifyPackBuffParams : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Unify Pack Buff Params";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class ReuseTrsmPacking : public SingleTrans
@@ -164,8 +164,8 @@ class ReuseTrsmPacking : public SingleTrans
   Layer m_layer;
  ReuseTrsmPacking(Layer layer) : m_layer(layer) {}
   virtual string GetType() const {return "Reuse Trsm packing";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #if DOSOPHASE
@@ -173,8 +173,8 @@ class RenamePackBuff : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Rename PackBuff";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   string GetNewName(const PackBuff *buff) const;
 };
 #endif //DOSOPHASE

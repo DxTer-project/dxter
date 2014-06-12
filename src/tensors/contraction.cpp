@@ -304,7 +304,7 @@ string DistContToLocalContStatC::GetType() const
   return "DistContToLocalContStatC";
 }
 
-bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) const
+bool DistContToLocalContStatC::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
@@ -314,7 +314,7 @@ bool DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node) cons
   return (cont->GetLayer() == m_fromLayer);
 }
 
-void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
+void DistContToLocalContStatC::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
@@ -350,10 +350,10 @@ void DistContToLocalContStatC::Apply(Poss *poss, Node *node) const
   LCont->AddInput(node1,0);
   LCont->AddInput(node2,0);
   LCont->AddInput(node3,0);
-  poss->AddNode(node1);
-  poss->AddNode(node2);
-  poss->AddNode(node3);
-  poss->AddNode(LCont);
+  node->m_poss->AddNode(node1);
+  node->m_poss->AddNode(node2);
+  node->m_poss->AddNode(node3);
+  node->m_poss->AddNode(LCont);
 
   cont->RedirectChildren(LCont,0);
 
@@ -367,7 +367,7 @@ string DistContToLocalContStatAAllReduce::GetType() const
   return "DistContToLocalContStatAAllReduce";
 }
 
-bool DistContToLocalContStatAAllReduce::CanApply(const Poss *poss, const Node *node) const
+bool DistContToLocalContStatAAllReduce::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
@@ -379,7 +379,7 @@ bool DistContToLocalContStatAAllReduce::CanApply(const Poss *poss, const Node *n
   return (cont->GetLayer() == m_fromLayer);
 }
 
-void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
+void DistContToLocalContStatAAllReduce::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
@@ -431,18 +431,18 @@ void DistContToLocalContStatAAllReduce::Apply(Poss *poss, Node *node) const
   LCont->AddInput(node1,0);
   LCont->AddInput(node2,0);
   LCont->AddInput(node3,0);
-  poss->AddNode(node1);
-  poss->AddNode(node2);
-  poss->AddNode(node3);
-  poss->AddNode(LCont);
+  node->m_poss->AddNode(node1);
+  node->m_poss->AddNode(node2);
+  node->m_poss->AddNode(node3);
+  node->m_poss->AddNode(LCont);
 
   AllReduceNode *sum = new AllReduceNode(sumDims, sumIndices);
   sum->AddInput(LCont, 0);
-  poss->AddNode(sum);
+  node->m_poss->AddNode(sum);
 
   RedistNode *node4 = new RedistNode(cont->GetDistType(0));
   node4->AddInput(sum);
-  poss->AddNode(node4);
+  node->m_poss->AddNode(node4);
 
   cont->RedirectChildren(node4,0);
 
@@ -457,7 +457,7 @@ string DistContToLocalContStatASumScatter::GetType() const
   return "DistContToLocalContStatASumScatter";
 }
 
-bool DistContToLocalContStatASumScatter::CanApply(const Poss *poss, const Node *node) const
+bool DistContToLocalContStatASumScatter::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
@@ -467,7 +467,7 @@ bool DistContToLocalContStatASumScatter::CanApply(const Poss *poss, const Node *
   return (cont->GetLayer() == m_fromLayer);
 }
 
-void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
+void DistContToLocalContStatASumScatter::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
@@ -514,15 +514,15 @@ void DistContToLocalContStatASumScatter::Apply(Poss *poss, Node *node) const
   LCont->AddInput(node1,0);
   LCont->AddInput(node2,0);
   LCont->AddInput(temp,0);
-  poss->AddNode(node1);
-  poss->AddNode(node2);
-  poss->AddNode(temp);
-  poss->AddNode(LCont);
+  node->m_poss->AddNode(node1);
+  node->m_poss->AddNode(node2);
+  node->m_poss->AddNode(temp);
+  node->m_poss->AddNode(LCont);
 
   SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta, sumDims);
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
-  poss->AddNode(sum);
+  node->m_poss->AddNode(sum);
   /*
   cout << "Sum scatter " << node->Input(2)->GetNameStr(0) << " " 
        << LCont->GetDistType(0).PrettyStr() << " -> "
@@ -545,7 +545,7 @@ string DistContToLocalContStatBAllReduce::GetType() const
   return "DistContToLocalContStatBAllReduce";
 }
 
-bool DistContToLocalContStatBAllReduce::CanApply(const Poss *poss, const Node *node) const
+bool DistContToLocalContStatBAllReduce::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
@@ -557,7 +557,7 @@ bool DistContToLocalContStatBAllReduce::CanApply(const Poss *poss, const Node *n
   return (cont->GetLayer() == m_fromLayer);
 }
 
-void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
+void DistContToLocalContStatBAllReduce::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
@@ -610,18 +610,18 @@ void DistContToLocalContStatBAllReduce::Apply(Poss *poss, Node *node) const
   LCont->AddInput(node1,0);
   LCont->AddInput(node2,0);
   LCont->AddInput(node3,0);
-  poss->AddNode(node1);
-  poss->AddNode(node2);
-  poss->AddNode(node3);
-  poss->AddNode(LCont);
+  node->m_poss->AddNode(node1);
+  node->m_poss->AddNode(node2);
+  node->m_poss->AddNode(node3);
+  node->m_poss->AddNode(LCont);
 
   AllReduceNode *sum = new AllReduceNode(sumDims, sumIndices);
   sum->AddInput(LCont, 0);
-  poss->AddNode(sum);
+  node->m_poss->AddNode(sum);
 
   RedistNode *node4 = new RedistNode(cont->GetDistType(0));
   node4->AddInput(sum);
-  poss->AddNode(node4);
+  node->m_poss->AddNode(node4);
 
   cont->RedirectChildren(node4,0);
 
@@ -636,7 +636,7 @@ string DistContToLocalContStatBSumScatter::GetType() const
   return "DistContToLocalContStatBSumScatter";
 }
 
-bool DistContToLocalContStatBSumScatter::CanApply(const Poss *poss, const Node *node) const
+bool DistContToLocalContStatBSumScatter::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
@@ -646,7 +646,7 @@ bool DistContToLocalContStatBSumScatter::CanApply(const Poss *poss, const Node *
   return (cont->GetLayer() == m_fromLayer);
 }
 
-void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
+void DistContToLocalContStatBSumScatter::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
 
@@ -693,15 +693,15 @@ void DistContToLocalContStatBSumScatter::Apply(Poss *poss, Node *node) const
   LCont->AddInput(node1,0);
   LCont->AddInput(node2,0);
   LCont->AddInput(temp,0);
-  poss->AddNode(node1);
-  poss->AddNode(node2);
-  poss->AddNode(temp);
-  poss->AddNode(LCont);
+  node->m_poss->AddNode(node1);
+  node->m_poss->AddNode(node2);
+  node->m_poss->AddNode(temp);
+  node->m_poss->AddNode(LCont);
 
   SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta, sumDims);
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
-  poss->AddNode(sum);
+  node->m_poss->AddNode(sum);
 
   //  sum->CheckSumDimsInOutput();
 
@@ -730,7 +730,7 @@ void MatchDistsAndFillInWithStar(string indices,
 
 
 /*
-int DistContToLocalContStatC::CanApply(const Poss *poss, const Node *node, void **cache) const
+int DistContToLocalContStatC::CanApply(const Node *node, void **cache) const
 {
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
@@ -910,7 +910,7 @@ void AddUnusedDimsForDistType(DimVec *dists,  unsigned int *distEntries,
   }
 }
 
-void DistContToLocalContStatC::Apply(Poss *poss, int num, Node *node, void **cache) const
+void DistContToLocalContStatC::Apply(int num, Node *node, void **cache) const
 {
   ContType *types = (ContType*)(*cache);
   unsigned int *entries = (*types)[num];
@@ -963,11 +963,11 @@ void DistContToLocalContStatC::Apply(Poss *poss, int num, Node *node, void **cac
     node4->AddInput(LCont, 0);
     //  }
     
-  poss->AddNode(node1);
-  poss->AddNode(node2);
-  poss->AddNode(node3);
-  poss->AddNode(LCont);
-  poss->AddNode(node4);
+  node->m_poss->AddNode(node1);
+  node->m_poss->AddNode(node2);
+  node->m_poss->AddNode(node3);
+  node->m_poss->AddNode(LCont);
+  node->m_poss->AddNode(node4);
 
   node->RedirectChildren(node4,0);
   node->m_poss->DeleteChildAndCleanUp(node);

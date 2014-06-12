@@ -61,8 +61,8 @@ class CombineTranspose : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Combine transpose";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 Transpose* AddTranspose(Trans trans, bool objTrans, Node *input, unsigned int num, bool addToPoss);
@@ -164,8 +164,8 @@ class ParallelizeMDim : public ParallelizeTrans
   ParallelizeMDim(Comm comm)
     : ParallelizeTrans(comm) {}
   virtual string GetType() const {return "ParallelizeMDim"+CommToStr(m_comm);}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class ParallelizeInnerNDim : public ParallelizeTrans
@@ -174,8 +174,8 @@ class ParallelizeInnerNDim : public ParallelizeTrans
   ParallelizeInnerNDim(Comm comm)
     : ParallelizeTrans(comm) {}
   virtual string GetType() const {return "ParallelizeInnerNDim"+CommToStr(m_comm);}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class ParallelizeOuterNDim : public ParallelizeTrans
@@ -184,8 +184,8 @@ class ParallelizeOuterNDim : public ParallelizeTrans
   ParallelizeOuterNDim(Comm comm)
     : ParallelizeTrans(comm) {}
   virtual string GetType() const {return "ParallelizeOuterNDim"+CommToStr(m_comm);}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class ParallelizeK : public ParallelizeTrans
@@ -194,15 +194,15 @@ class ParallelizeK : public ParallelizeTrans
   ParallelizeK(Comm comm)
     : ParallelizeTrans(comm) {}
   virtual string GetType() const {return "ParallelizeK"+CommToStr(m_comm);}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 /*
 class IncreaseParallelizedLoop : public SingleTrans
 {
   virtual string GetType() const {return "IncreaseParallelizedLoop";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 */
 bool LegalParallelizationNestingUp(const Node *node, Comm comm);

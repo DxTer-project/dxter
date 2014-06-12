@@ -96,8 +96,8 @@ class HemmLoopExp : public SingleTrans
  HemmLoopExp(Layer fromLayer, Layer toLayer, int var) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_var(var) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -108,8 +108,8 @@ class DistHemmToLocalHemm : public SingleTrans
  public:
  DistHemmToLocalHemm(DistType leftType, DistType rightType) :m_leftType(leftType),m_rightType(rightType) {}
   virtual string GetType() const {return "Distributed Hemm to Local Hemm " + DistTypeToStr(m_leftType) + "," + DistTypeToStr(m_rightType);}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -144,8 +144,8 @@ class DistHemmToLocalHemmStatA : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed Hemm to Local Hemm stat A";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -159,8 +159,8 @@ class BLISHemmLoopExp : public SingleTrans
  BLISHemmLoopExp(Layer fromLayer, Layer toLayer) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -171,8 +171,8 @@ class BLISHemmToGemm: public SingleTrans
   BLISHemmToGemm(Layer layer)
     : m_layer(layer) {}
   virtual string GetType() const { return "Hemm to Gemm"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 #endif
 
@@ -182,7 +182,7 @@ class HemmLowerLayer : public LowerLayer
  HemmLowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 #endif

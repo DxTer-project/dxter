@@ -78,8 +78,8 @@ class LULoopExp : public SingleTrans
    : m_fromLayer(fromLayer), m_toBLASLayer(toBLASLayer), 
     m_toLAPACKLayer(toLAPACKLayer), m_var(var) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 #endif

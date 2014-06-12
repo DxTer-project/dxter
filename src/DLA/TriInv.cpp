@@ -121,7 +121,7 @@ void TriInv::Prop()
   }
 }
 
-bool TriInvLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool TriInvLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != TriInv::GetClass())
     return false;
@@ -145,7 +145,7 @@ string TriInvLoopExp::GetType() const
   }
 }
 
-void TriInvLoopExp::Apply(Poss *poss, Node *node) const
+void TriInvLoopExp::Apply(Node *node) const
 {
   TriInv *triInv = (TriInv*)node;
   Tri tri = triInv->m_tri;
@@ -177,14 +177,14 @@ void TriInvLoopExp::Apply(Poss *poss, Node *node) const
     throw;
   }
 
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(0),0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 #if DOELEM
-bool DistTriInvToLocalTriInv::CanApply(const Poss *poss, const Node *node) const
+bool DistTriInvToLocalTriInv::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != TriInv::GetClass())
     return false;
@@ -192,7 +192,7 @@ bool DistTriInvToLocalTriInv::CanApply(const Poss *poss, const Node *node) const
   return triInv->GetLayer() == DMLAYER;
 }
 
-void DistTriInvToLocalTriInv::Apply(Poss *poss, Node *node) const
+void DistTriInvToLocalTriInv::Apply(Node *node) const
 {
   TriInv *triInv = (TriInv*)node;
   RedistNode *node1 = new RedistNode(D_STAR_STAR);
@@ -201,7 +201,7 @@ void DistTriInvToLocalTriInv::Apply(Poss *poss, Node *node) const
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node1,0);
   node3->AddInput(node2,0);
-  poss->AddNodes(3, node1, node2, node3);
+  node->m_poss->AddNodes(3, node1, node2, node3);
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }

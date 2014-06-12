@@ -48,8 +48,8 @@ class SingleTrans : public Transformation
   ~SingleTrans() {}
   virtual string GetType() const {return "SingleTrans";}
   virtual bool IsSingle() const {return true;}
-  virtual bool CanApply(const Poss *poss, const Node *node) const = 0;
-  virtual void Apply(Poss *poss, Node *node) const = 0;
+  virtual bool CanApply(const Node *node) const = 0;
+  virtual void Apply(Node *node) const = 0;
   virtual bool WorthApplying(const Node *node) const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const {throw;}
 };
@@ -63,8 +63,8 @@ class VarTrans : public Transformation
   virtual string GetType() const {return "VarTrans";}
   virtual bool IsVarRef() const {return true;}
   virtual bool IsMultiRef() const {return false;}
-  virtual int CanApply(const Poss *poss, const Node *node, void **cache) const = 0;
-  virtual void Apply(Poss *poss, int num, Node *node, void **cache) const = 0;
+  virtual int CanApply(const Node *node, void **cache) const = 0;
+  virtual void Apply(int num, Node *node, void **cache) const = 0;
   virtual bool WorthApplying(const Node *node) const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const {throw;}
   virtual void CleanCache(void **cache) const = 0;
@@ -81,12 +81,12 @@ class MultiTrans : public VarTrans
   void AddTrans(SingleTrans *trans);
   virtual bool IsMultiRef() const {return true;}
   virtual string GetType() const {return "MultiTrans";}
-  virtual TransConstVec* GetApplicableTrans(const Poss *poss, const Node *node) const;
+  virtual TransConstVec* GetApplicableTrans(const Node *node) const;
   virtual bool IsRef() const {return m_isRef;}
   unsigned int NumTransformations() const {return m_trans.size();}
   virtual void CleanCache(void **cache) const;
-  virtual int CanApply(const Poss *poss, const Node *node, void **cache) const;
-  virtual void Apply(Poss *poss, int num, Node *node, void **cache) const;
+  virtual int CanApply(const Node *node, void **cache) const;
+  virtual void Apply(int num, Node *node, void **cache) const;
   virtual const Transformation* GetTrans(void **cache, int num) const;
 };
 

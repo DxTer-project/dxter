@@ -151,7 +151,7 @@ string HetrmmLoopExp::GetType() const
 }
 
 
-bool HetrmmLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool HetrmmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Hetrmm::GetClass())
     return ((Hetrmm*)node)->GetLayer() == ABSLAYER;
@@ -159,7 +159,7 @@ bool HetrmmLoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void HetrmmLoopExp::Apply(Poss *poss, Node *node) const
+void HetrmmLoopExp::Apply(Node *node) const
 {
   Hetrmm *hetrmm = (Hetrmm*)node;
   Loop *loop=NULL;
@@ -186,14 +186,14 @@ void HetrmmLoopExp::Apply(Poss *poss, Node *node) const
     throw;
   }
 
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(0),0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 #if DOELEM
-bool DistHetrmmToLocalHetrmm::CanApply(const Poss *poss, const Node *node) const
+bool DistHetrmmToLocalHetrmm::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Hetrmm::GetClass()) {
     return ((Hetrmm*)node)->GetLayer() == DMLAYER;
@@ -201,7 +201,7 @@ bool DistHetrmmToLocalHetrmm::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void DistHetrmmToLocalHetrmm::Apply(Poss *poss, Node *node) const
+void DistHetrmmToLocalHetrmm::Apply(Node *node) const
 {
   Hetrmm *hetrmm = (Hetrmm*)node;
   RedistNode *node1 = new RedistNode(D_STAR_STAR);
@@ -210,7 +210,7 @@ void DistHetrmmToLocalHetrmm::Apply(Poss *poss, Node *node) const
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node1,0);
   node3->AddInput(node2,0);
-  poss->AddNodes(3, node1, node2, node3);
+  node->m_poss->AddNodes(3, node1, node2, node3);
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }

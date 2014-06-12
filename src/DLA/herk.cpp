@@ -238,7 +238,7 @@ string HerkLoopExp::GetType() const
   }
 }
 
-bool HerkLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool HerkLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Herk::GetClass()
       && ((Herk*)node)->GetLayer() == m_fromLayer)
@@ -246,7 +246,7 @@ bool HerkLoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void HerkLoopExp::Apply(Poss *poss, Node *node) const
+void HerkLoopExp::Apply(Node *node) const
 {
   Herk *herk = (Herk*)node;
   Loop *loop;
@@ -281,7 +281,7 @@ void HerkLoopExp::Apply(Poss *poss, Node *node) const
       throw;
   }
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   
   node->RedirectChildren(loop->OutTun(1),0);
@@ -305,7 +305,7 @@ string TriRKLoopExp::GetType() const
   }
 }
 
-bool TriRKLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool TriRKLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == TriRK::GetClass()
       && ((TriRK*)node)->GetLayer() == m_fromLayer)
@@ -313,7 +313,7 @@ bool TriRKLoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void TriRKLoopExp::Apply(Poss *poss, Node *node) const
+void TriRKLoopExp::Apply(Node *node) const
 {
   TriRK *trirk = (TriRK*)node;
   Loop *loop;
@@ -358,7 +358,7 @@ void TriRKLoopExp::Apply(Poss *poss, Node *node) const
       throw;
   }
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -690,7 +690,7 @@ string TriRKTrans::GetTransType() const
   return "TriRK";
 }
 
-bool TriRKTrans::CanApply(const Poss *poss, const Node *node) const
+bool TriRKTrans::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != TriRK::GetClass())
     return false;
@@ -715,7 +715,7 @@ bool TriRKTrans::CanApply(const Poss *poss, const Node *node) const
 #endif
 
 #if DOELEM
-bool DistHerkToLocalTriRK::CanApply(const Poss *poss, const Node *node) const
+bool DistHerkToLocalTriRK::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Herk::GetClass()
       && ((Herk*)node)->GetLayer() == DMLAYER)
@@ -724,7 +724,7 @@ bool DistHerkToLocalTriRK::CanApply(const Poss *poss, const Node *node) const
 }
 
 
-void DistHerkToLocalTriRK::Apply(Poss *poss, Node *node) const
+void DistHerkToLocalTriRK::Apply(Node *node) const
 {
   Herk *orig = (Herk*)node;
   RedistNode *node1;
@@ -745,7 +745,7 @@ void DistHerkToLocalTriRK::Apply(Poss *poss, Node *node) const
   node3->AddInput(node1,0);
   node3->AddInput(node2,0);
   node3->AddInput(node->Input(1),node->InputConnNum(1));
-  poss->AddNodes(3, node1, node2, node3);
+  node->m_poss->AddNodes(3, node1, node2, node3);
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -1072,7 +1072,7 @@ string BLISTriRKLoopExp::GetType() const
 }
 
 
-bool BLISTriRKLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool BLISTriRKLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != TriRK::GetClass())
     return false;
@@ -1084,7 +1084,7 @@ bool BLISTriRKLoopExp::CanApply(const Poss *poss, const Node *node) const
   
 }
 
-void BLISTriRKLoopExp::Apply(Poss *poss, Node *node) const
+void BLISTriRKLoopExp::Apply(Node *node) const
 {
   TriRK *orig = (TriRK*)node;
   
@@ -1116,7 +1116,7 @@ void BLISTriRKLoopExp::Apply(Poss *poss, Node *node) const
                             orig->m_type,
                             m_toLayer);
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -1222,7 +1222,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
 }
 #endif
 
-bool TriRKLowerLayer::CanApply(const Poss *poss, const Node *node) const
+bool TriRKLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == TriRK::GetClass()) {
     const TriRK *trirk = (TriRK*)node;
@@ -1243,7 +1243,7 @@ bool TriRKLowerLayer::CanApply(const Poss *poss, const Node *node) const
   
 }
 
-void TriRKLowerLayer::Apply(Poss *poss, Node *node) const
+void TriRKLowerLayer::Apply(Node *node) const
 {
   TriRK *trirk = (TriRK*)node;
   trirk->SetLayer(m_toLayer);
@@ -1257,13 +1257,13 @@ string TriRKLowerLayer::GetType() const
 }
 
 #if DOBLIS
-bool HerkToTriRK::CanApply(const Poss *poss, const Node *node) const
+bool HerkToTriRK::CanApply(const Node *node) const
 {
   return (node->GetNodeClass() == Herk::GetClass() &&
           ((DLANode*)node)->GetLayer() == m_layer);
 }
 
-void HerkToTriRK::Apply(Poss *poss, Node *node) const
+void HerkToTriRK::Apply(Node *node) const
 {
   Herk *herk = (Herk*)node;
   Transpose *Atrans = new Transpose(herk->m_type == REAL ? 
@@ -1296,11 +1296,11 @@ void HerkToTriRK::Apply(Poss *poss, Node *node) const
   
   trirk->AddInput(herk->Input(1), herk->InputConnNum(1));
   
-  poss->AddNode(trirk);
-  poss->AddNode(Atrans);
+  node->m_poss->AddNode(trirk);
+  node->m_poss->AddNode(Atrans);
   
   herk->RedirectChildren(trirk, 0);
-  poss->DeleteChildAndCleanUp(node);
+  node->m_poss->DeleteChildAndCleanUp(node);
 }
 #endif
 #endif

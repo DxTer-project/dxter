@@ -99,8 +99,8 @@ class DistTwoSidedTrxmToLocalTwoSidedTrxm : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed TwoSidedTrxm to Local TwoSidedTrxm";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 #endif
@@ -115,8 +115,8 @@ class TwoSidedTrxmLoopExp : public SingleTrans
    : m_varNum(varNum), m_fromLayer(fromLayer), 
     m_toLayerBLAS(toLayerBLAS), m_toLayerTwoSidedTrxm(toLayerTwoSidedTrxm) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -127,8 +127,8 @@ class TwoSidedTrxmLowerLayer : public SingleTrans
  TwoSidedTrxmLowerLayer(Layer fromLayer, Layer toLayer)
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const { return "TwoSidedTrxm lower layer"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #endif // !SKIPTWOSIDED

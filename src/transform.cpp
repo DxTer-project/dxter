@@ -34,7 +34,7 @@ void MultiTrans::AddTrans(SingleTrans *trans)
   m_trans.push_back(trans);
 }
 
-TransConstVec* MultiTrans::GetApplicableTrans(const Poss *poss, const Node *node) const
+TransConstVec* MultiTrans::GetApplicableTrans(const Node *node) const
 {
   TransConstVec *applicable = new TransConstVec;
   CostVec costs;
@@ -43,7 +43,7 @@ TransConstVec* MultiTrans::GetApplicableTrans(const Poss *poss, const Node *node
     if (!(*iter)->IsSingle())
       throw;
     const SingleTrans *trans = (SingleTrans*)(*iter);
-    if (trans->CanApply(poss, node) && trans->WorthApplying(node)) {
+    if (trans->CanApply(node) && trans->WorthApplying(node)) {
       applicable->push_back(trans);
       Cost cost = trans->RHSCostEstimate(node);
       costs.push_back(cost);
@@ -98,9 +98,9 @@ TransConstVec* MultiTrans::GetApplicableTrans(const Poss *poss, const Node *node
   return applicable;
 }
 
-int MultiTrans::CanApply(const Poss *poss, const Node *node, void **cache) const
+int MultiTrans::CanApply(const Node *node, void **cache) const
 {
-  TransConstVec *vec = GetApplicableTrans(poss, node);
+  TransConstVec *vec = GetApplicableTrans(node);
   *cache = vec;
   return vec->size();
 }
@@ -110,7 +110,7 @@ void MultiTrans::CleanCache(void **cache) const
   delete (TransConstVec*)(*cache);
 }
 
-void MultiTrans::Apply(Poss *poss, int num, Node *node, void **cache) const
+void MultiTrans::Apply(int num, Node *node, void **cache) const
 {
   TransConstVec *vec = (TransConstVec*)(*cache);
   if ((unsigned int)num >= vec->size())
@@ -118,7 +118,7 @@ void MultiTrans::Apply(Poss *poss, int num, Node *node, void **cache) const
   const Transformation *trans = (*vec)[num];
   if (!trans->IsSingle())
     throw;
-  ((SingleTrans*)trans)->Apply(poss, node);
+  ((SingleTrans*)trans)->Apply(node);
 }
 
 

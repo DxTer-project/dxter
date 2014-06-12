@@ -93,24 +93,24 @@ class RemoveWastedRedist : public SingleTrans
 {
  public:
   virtual string GetType() const { return "RemoveWastedRedist"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class RemoveNOPRedistribs : public SingleTrans
 {
  public:
   virtual string GetType() const { return "RemoveNOPRedist"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class CombineRedistribs : public SingleTrans
 {
  public:
   virtual string GetType() const { return "CombineRedist"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class SplitRedistribs : public SingleTrans
@@ -119,8 +119,8 @@ class SplitRedistribs : public SingleTrans
   Dim m_dim;
  SplitRedistribs(Dim dim) : m_dim(dim) {}
   virtual string GetType() const { return (string)"SplitRedist" + (char)(m_dim+48); }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -131,8 +131,8 @@ class SingleIndexAllToAll : public SingleTrans
   Dim m_dim;
  SingleIndexAllToAll(Dim dim) : m_dim(dim) {}
   virtual string GetType() const { return (string)"SingleIndexAllToAll" + (char)(m_dim+48); }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -144,8 +144,8 @@ class SplitAllGathers : public SingleTrans
   Dim m_dim;
  SplitAllGathers(Dim dim) : m_dim(dim) {}
   virtual string GetType() const { return (string)"SplitAllGathers" + (char)(m_dim+48); }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #endif

@@ -140,8 +140,8 @@ class Her2kLoopExp : public SingleTrans
  Her2kLoopExp(Layer fromLayer, Layer toLayer, unsigned int variant) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_var(variant) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -173,8 +173,8 @@ class DistHer2kToLocalTri2k : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed Her2k to Local Tri2k";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -186,8 +186,8 @@ class DistHer2kToLocalHer2kContrib : public SingleTrans
   DistHer2kToLocalHer2kContrib(DistType aType, DistType bType)
     : m_AType(aType), m_BType(bType) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
@@ -197,7 +197,7 @@ class Tri2kTrans : public TransTransformation
  public:
   Tri2kTrans(unsigned int argNum, Trans trans) : TransTransformation(argNum,trans) {}
   virtual string GetTransType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
+  virtual bool CanApply(const Node *node) const;
 };
 #endif //DOELEM
 
@@ -207,8 +207,8 @@ class Tri2kLowerLayer : public LowerLayer
  Tri2kLowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : LowerLayer(fromLayer, toLayer, dim, bs) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #if DOBLIS
@@ -218,8 +218,8 @@ class Her2kToTri2K : public SingleTrans
   Layer m_layer;
  Her2kToTri2K(Layer layer) : m_layer(layer) {}
   virtual string GetType() const {return "Her2k to Tri2K";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 #endif
 
@@ -230,8 +230,8 @@ class Tri2kToTriRK : public SingleTrans
  Tri2kToTriRK(Layer fromLayer, Layer toLayer) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -243,8 +243,8 @@ class Tri2kLoopExp : public SingleTrans
  Tri2kLoopExp(Layer fromLayer, Layer toLayer, unsigned int variant)
    : m_var(variant), m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 #endif

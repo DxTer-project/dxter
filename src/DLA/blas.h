@@ -73,8 +73,8 @@ class AxpyLowerLayer : public SingleTrans
  AxpyLowerLayer(Layer fromLayer, Layer toLayer)
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #if DOELEM
@@ -85,8 +85,8 @@ class DistAxpyToLocalAxpy : public SingleTrans
   DistAxpyToLocalAxpy(DistType type) : m_type(type) {}
   virtual string GetType() const {return "DistAxpy to LocalAxpy " + DistTypeToStr(m_type);}
   virtual bool WorthApplying(const Node *node) const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
   Cost RHSCostEstimate(const Node *node) const;
 };
@@ -99,8 +99,8 @@ class AxpyToBLASAxpy : public SingleTrans
  AxpyToBLASAxpy(Layer fromLayer, Layer toLayer) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const {return "AxpyToBLASAxpy"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -130,8 +130,8 @@ class DistScalToLocalScal : public SingleTrans
  public:
  DistScalToLocalScal(DistType type) : m_type(type) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 #endif
@@ -165,8 +165,8 @@ class DistConstScalToLocalConstScal : public SingleTrans
  public:
  DistConstScalToLocalConstScal(DistType type) : m_type(type) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 #endif

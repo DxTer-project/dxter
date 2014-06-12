@@ -59,8 +59,8 @@ class SeparateRedistFromSumScatter : public SingleTrans
 {
  public:
   virtual string GetType() const { return "SeparateRedistFromSumScatter"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -70,8 +70,8 @@ class SplitSumScatter : public SingleTrans
   Dim m_dim;
  SplitSumScatter(Dim dim) : m_dim(dim) {}
   virtual string GetType() const { return (string)"SplitSumScatter" + (char)(m_dim+48); }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -80,8 +80,8 @@ class MoveSumScatterRedistAfter : public SingleTrans
 {
  public:
   virtual string GetType() const { return "MoveSumScatterRedistAfter"; }
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 

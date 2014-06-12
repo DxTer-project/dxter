@@ -156,7 +156,7 @@ void TwoSidedTrxm::PrintCode(IndStream &out)
 }
 
 #if DODPPHASE
-bool DistTwoSidedTrxmToLocalTwoSidedTrxm::CanApply(const Poss *poss, const Node *node) const
+bool DistTwoSidedTrxmToLocalTwoSidedTrxm::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == TwoSidedTrxm::GetClass()) {
     const TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
@@ -165,7 +165,7 @@ bool DistTwoSidedTrxmToLocalTwoSidedTrxm::CanApply(const Poss *poss, const Node 
   return false;
 }
 
-void DistTwoSidedTrxmToLocalTwoSidedTrxm::Apply(Poss *poss, Node *node) const
+void DistTwoSidedTrxmToLocalTwoSidedTrxm::Apply(Node *node) const
 {
   TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
   RedistNode *redist1 = new RedistNode(D_STAR_STAR);
@@ -177,7 +177,7 @@ void DistTwoSidedTrxmToLocalTwoSidedTrxm::Apply(Poss *poss, Node *node) const
   node2->AddInput(redist1,0);
   node2->AddInput(redist2,0);
   node3->AddInput(node2,0);
-  poss->AddNodes(4, redist1, redist2, node2, node3);
+  node->m_poss->AddNodes(4, redist1, redist2, node2, node3);
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -193,7 +193,7 @@ string TwoSidedTrxmLoopExp::GetType() const
 
 }
 
-bool TwoSidedTrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool TwoSidedTrxmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != TwoSidedTrxm::GetClass()) 
     return false;
@@ -203,7 +203,7 @@ bool TwoSidedTrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
   return true;
 }
 
-void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
+void TwoSidedTrxmLoopExp::Apply(Node *node) const
 {
   TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
   Loop *loop;
@@ -249,7 +249,7 @@ void TwoSidedTrxmLoopExp::Apply(Poss *poss, Node *node) const
       throw;
   }
 
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(0),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -789,7 +789,7 @@ Loop* TwoSidedTrmmLowerVar4Alg(
 
 
 
-bool TwoSidedTrxmLowerLayer::CanApply(const Poss *poss, const Node *node) const
+bool TwoSidedTrxmLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == TwoSidedTrxm::GetClass()) {
     const TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
@@ -801,7 +801,7 @@ bool TwoSidedTrxmLowerLayer::CanApply(const Poss *poss, const Node *node) const
   
 }
 
-void TwoSidedTrxmLowerLayer::Apply(Poss *poss, Node *node) const
+void TwoSidedTrxmLowerLayer::Apply(Node *node) const
 {
   TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
   hegst->SetLayer(m_toLayer);

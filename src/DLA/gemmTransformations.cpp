@@ -49,7 +49,7 @@ string GemmLoopExp::GetType() const
   }
 }
 
-bool GemmLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool GemmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     const Gemm *gemm = (Gemm*)node;
@@ -59,7 +59,7 @@ bool GemmLoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void GemmLoopExp::Apply(Poss *poss, Node *node) const
+void GemmLoopExp::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
   Loop *loop;
@@ -118,7 +118,7 @@ void GemmLoopExp::Apply(Poss *poss, Node *node) const
       throw;
   }
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -127,13 +127,13 @@ void GemmLoopExp::Apply(Poss *poss, Node *node) const
 
 
 #if DOELEM
-bool DistGemmToLocalGemmStatC::CanApply(const Poss *poss, const Node *node) const
+bool DistGemmToLocalGemmStatC::CanApply(const Node *node) const
 {
   return IsDMGemm(node);
 }
 
 
-void DistGemmToLocalGemmStatC::Apply(Poss *poss, Node *node) const
+void DistGemmToLocalGemmStatC::Apply(Node *node) const
 {
   Gemm *orig = (Gemm*)node;
   RedistNode *node1 = new RedistNode(orig->m_transA==NORMAL ? D_MC_STAR : D_STAR_MC);
@@ -144,9 +144,9 @@ void DistGemmToLocalGemmStatC::Apply(Poss *poss, Node *node) const
   node3->AddInput(node1,0);
   node3->AddInput(node2,0);
   node3->AddInput(node->Input(2),node->InputConnNum(2));
-  poss->AddNode(node1);
-  poss->AddNode(node2);
-  poss->AddNode(node3);
+  node->m_poss->AddNode(node1);
+  node->m_poss->AddNode(node2);
+  node->m_poss->AddNode(node3);
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -175,7 +175,7 @@ Cost DistGemmToLocalGemmStatC::RHSCostEstimate(const Node *node) const
 }
 
 
-bool DistGemmToContribLocalGemmStatANonTrans::CanApply(const Poss *poss, const Node *node) const
+bool DistGemmToContribLocalGemmStatANonTrans::CanApply(const Node *node) const
 {
   if (IsDMGemm(node) &&
       (((Gemm*)node)->m_transA == NORMAL)) {
@@ -184,7 +184,7 @@ bool DistGemmToContribLocalGemmStatANonTrans::CanApply(const Poss *poss, const N
   return false;
 }
 
-void DistGemmToContribLocalGemmStatANonTrans::Apply(Poss *poss, Node *node) const
+void DistGemmToContribLocalGemmStatANonTrans::Apply(Node *node) const
 {
   Gemm *orig = (Gemm*)node;
   Trans transB = orig->m_transB;
@@ -207,10 +207,10 @@ void DistGemmToContribLocalGemmStatANonTrans::Apply(Poss *poss, Node *node) cons
   node3->AddInput(localGemm,0);
   node3->AddInput(node->Input(2),node->InputConnNum(2));
   
-  poss->AddNode(redistB);
-  poss->AddNode(localGemm);
-  poss->AddNode(node3);
-  poss->AddNode(tmp);
+  node->m_poss->AddNode(redistB);
+  node->m_poss->AddNode(localGemm);
+  node->m_poss->AddNode(node3);
+  node->m_poss->AddNode(tmp);
   orig->RedirectChildren(node3,0);
   orig->m_poss->DeleteChildAndCleanUp(orig);
 }
@@ -239,7 +239,7 @@ Cost DistGemmToContribLocalGemmStatANonTrans::RHSCostEstimate(const Node *node) 
 }
 
 //e.g. in GemmNNB
-bool DistGemmToContribLocalGemmStatBNonTrans::CanApply(const Poss *poss, const Node *node) const
+bool DistGemmToContribLocalGemmStatBNonTrans::CanApply(const Node *node) const
 {
   if (IsDMGemm(node) &&
       (((Gemm*)node)->m_transB != CONJTRANS) &&
@@ -249,7 +249,7 @@ bool DistGemmToContribLocalGemmStatBNonTrans::CanApply(const Poss *poss, const N
   return false;
 }
 
-void DistGemmToContribLocalGemmStatBNonTrans::Apply(Poss *poss, Node *node) const
+void DistGemmToContribLocalGemmStatBNonTrans::Apply(Node *node) const
 {
   Gemm *orig = (Gemm*)node;
   Trans transA = orig->m_transA;
@@ -274,17 +274,17 @@ void DistGemmToContribLocalGemmStatBNonTrans::Apply(Poss *poss, Node *node) cons
       RedistNode *redist = new RedistNode(D_MR_MC);
       redist->AddInput(node->Input(1),node->InputConnNum(1));
       node2->AddInput(redist,0);
-      poss->AddNode(redist);
+      node->m_poss->AddNode(redist);
     }
     node2->AddInput(tmp,0);
     
     node3->AddInput(node2,0);
     node3->AddInput(node->Input(2),node->InputConnNum(2));
     
-    poss->AddNode(node1);
-    poss->AddNode(node2);
-    poss->AddNode(node3);
-    poss->AddNode(tmp);
+    node->m_poss->AddNode(node1);
+    node->m_poss->AddNode(node2);
+    node->m_poss->AddNode(node3);
+    node->m_poss->AddNode(tmp);
     node->RedirectChildren(node3,0);
     orig->m_poss->DeleteChildAndCleanUp(orig);
   }
@@ -305,7 +305,7 @@ void DistGemmToContribLocalGemmStatBNonTrans::Apply(Poss *poss, Node *node) cons
       RedistNode *redist = new RedistNode(D_MR_MC);
       redist->AddInput(node->Input(1),node->InputConnNum(1));
       node2->AddInput(redist,0);
-      poss->AddNode(redist);
+      node->m_poss->AddNode(redist);
     }
     node2->AddInput(node1,0);
     node2->AddInput(tmp,0);
@@ -313,10 +313,10 @@ void DistGemmToContribLocalGemmStatBNonTrans::Apply(Poss *poss, Node *node) cons
     node3->AddInput(node2,0);
     node3->AddInput(node->Input(2),node->InputConnNum(2));
     
-    poss->AddNode(node1);
-    poss->AddNode(node2);
-    poss->AddNode(node3);
-    poss->AddNode(tmp);
+    node->m_poss->AddNode(node1);
+    node->m_poss->AddNode(node2);
+    node->m_poss->AddNode(node3);
+    node->m_poss->AddNode(tmp);
     node->RedirectChildren(node3,0);
     orig->m_poss->DeleteChildAndCleanUp(orig);
   }
@@ -367,7 +367,7 @@ Cost DistGemmToContribLocalGemmStatBNonTrans::RHSCostEstimate(const Node *node) 
 }
 
 
-bool DistGemmToContribLocalGemmStatBTrans::CanApply(const Poss *poss, const Node *node) const
+bool DistGemmToContribLocalGemmStatBTrans::CanApply(const Node *node) const
 {
   if (IsDMGemm(node) &&
       (((Gemm*)node)->m_transB != NORMAL)) {
@@ -376,7 +376,7 @@ bool DistGemmToContribLocalGemmStatBTrans::CanApply(const Poss *poss, const Node
   return false;
 }
 
-void DistGemmToContribLocalGemmStatBTrans::Apply(Poss *poss, Node *node) const
+void DistGemmToContribLocalGemmStatBTrans::Apply(Node *node) const
 {
   Gemm *orig = (Gemm*)node;
   Trans transA = orig->m_transA;
@@ -413,7 +413,7 @@ void DistGemmToContribLocalGemmStatBTrans::Apply(Poss *poss, Node *node) const
                   redist, 0,
                   node->Input(2), node->InputConnNum(2));
   
-  poss->AddNodes(7,
+  node->m_poss->AddNodes(7,
                  node1,
                  node2,
                  node3,
@@ -453,7 +453,7 @@ Cost DistGemmToContribLocalGemmStatBTrans::RHSCostEstimate(const Node *node) con
   return cost;
 }
 
-bool DistGemmToContribLocalGemmStatATrans::CanApply(const Poss *poss, const Node *node) const
+bool DistGemmToContribLocalGemmStatATrans::CanApply(const Node *node) const
 {
   if (IsDMGemm(node) &&
       (((Gemm*)node)->m_transA != NORMAL)) {
@@ -462,7 +462,7 @@ bool DistGemmToContribLocalGemmStatATrans::CanApply(const Poss *poss, const Node
   return false;
 }
 
-void DistGemmToContribLocalGemmStatATrans::Apply(Poss *poss, Node *node) const
+void DistGemmToContribLocalGemmStatATrans::Apply(Node *node) const
 {
   Gemm *orig = (Gemm*)node;
   Trans transA = orig->m_transA;
@@ -498,7 +498,7 @@ void DistGemmToContribLocalGemmStatATrans::Apply(Poss *poss, Node *node) const
                   redist, 0,
                   node->Input(2), node->InputConnNum(2));
   
-  poss->AddNodes(7,
+  node->m_poss->AddNodes(7,
                  redistB,
                  localGemm,
                  node3,
@@ -544,7 +544,7 @@ string GemmTrans::GetTransType() const
   return "Gemm";
 }
 
-bool GemmTrans::CanApply(const Poss *poss, const Node *node) const
+bool GemmTrans::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Gemm::GetClass())
     return false;
@@ -569,7 +569,7 @@ bool GemmTrans::CanApply(const Poss *poss, const Node *node) const
 }
 
 
-bool GemmInputReordering::CanApply(const Poss *poss, const Node *node) const
+bool GemmInputReordering::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Gemm::GetClass())
     return false;
@@ -687,7 +687,7 @@ bool GemmInputReordering::CanApply(const Poss *poss, const Node *node) const
   }
 }
 
-void GemmInputReordering::Apply(Poss *poss, Node *node) const
+void GemmInputReordering::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
   gemm->m_inverseOps.insert(m_inverse);
@@ -984,7 +984,7 @@ string BLISGemmLoopExp::GetType() const
   return "BLISGemmLoopExp";
 }
 
-bool BLISGemmLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool BLISGemmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     const Gemm *gemm = (Gemm*)node;
@@ -994,7 +994,7 @@ bool BLISGemmLoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
+void BLISGemmLoopExp::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
   
@@ -1026,8 +1026,8 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   bPack->AddInput(Bin,Bnum);
   bPack->AddInput(bBuff, 0);
   
-  poss->AddNode(bBuff);
-  poss->AddNode(bPack);
+  node->m_poss->AddNode(bBuff);
+  node->m_poss->AddNode(bPack);
   
   LoopTunnel *Btun = new LoopTunnel(POSSTUNIN);
   Btun->AddInput(bPack, 0);
@@ -1086,7 +1086,7 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
   
   
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(2), 0);
   
@@ -1094,7 +1094,7 @@ void BLISGemmLoopExp::Apply(Poss *poss, Node *node) const
 }
 #endif
 
-bool GemmLowerLayer::CanApply(const Poss *poss, const Node *node) const
+bool GemmLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     const Gemm *gemm = (Gemm*)node;
@@ -1131,7 +1131,7 @@ bool GemmLowerLayer::CanApply(const Poss *poss, const Node *node) const
   
 }
 
-void GemmLowerLayer::Apply(Poss *poss, Node *node) const
+void GemmLowerLayer::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
   gemm->SetLayer(m_toLayer);
@@ -1149,7 +1149,7 @@ string SplitGemm::GetType() const
   return "Split Gemm " + LayerNumToStr(m_layer);
 }
 
-bool SplitGemm::CanApply(const Poss *poss, const Node *node) const
+bool SplitGemm::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     const Gemm *gemm = (Gemm*)node;
@@ -1160,7 +1160,7 @@ bool SplitGemm::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void SplitGemm::Apply(Poss *poss, Node *node) const
+void SplitGemm::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
   Node *Cin = gemm->Input(2);
@@ -1184,8 +1184,8 @@ void SplitGemm::Apply(Poss *poss, Node *node) const
 		  gemm, 0,
 		  Cin, Cnum);
 
-  poss->AddNode(CTmp);
-  poss->AddNode(axpy);
+  node->m_poss->AddNode(CTmp);
+  node->m_poss->AddNode(axpy);
 }
 #endif //DOBLIS||DOELEM
 #endif

@@ -225,7 +225,7 @@ string HemmLoopExp::GetType() const
   }
 }
 
-bool HemmLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool HemmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Hemm::GetClass()
       && ((Hemm*)node)->GetLayer() == m_fromLayer)
@@ -236,7 +236,7 @@ bool HemmLoopExp::CanApply(const Poss *poss, const Node *node) const
     return false;
 }
 
-void HemmLoopExp::Apply(Poss *poss, Node *node) const
+void HemmLoopExp::Apply(Node *node) const
 {
   Hemm *hemm = (Hemm*)node;
   Loop *loop;
@@ -280,14 +280,14 @@ void HemmLoopExp::Apply(Poss *poss, Node *node) const
       throw;
   }
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 #if DOELEM
-bool DistHemmToLocalHemm::CanApply(const Poss *poss, const Node *node) const
+bool DistHemmToLocalHemm::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Hemm::GetClass()
       && ((Hemm*)node)->GetLayer() == DMLAYER) 
@@ -298,7 +298,7 @@ bool DistHemmToLocalHemm::CanApply(const Poss *poss, const Node *node) const
     return false;
 }
 
-void DistHemmToLocalHemm::Apply(Poss *poss, Node *node) const
+void DistHemmToLocalHemm::Apply(Node *node) const
 {
   Hemm *orig = (Hemm*)node;
   bool left = orig->m_side == LEFT;
@@ -314,7 +314,7 @@ void DistHemmToLocalHemm::Apply(Poss *poss, Node *node) const
   hemm->AddInput(redist3,0);
   RedistNode *redist4 = new RedistNode(D_MC_MR);
   redist4->AddInput(hemm,0);
-  poss->AddNodes(5, redist1, redist2, redist3, hemm, redist4);
+  node->m_poss->AddNodes(5, redist1, redist2, redist3, hemm, redist4);
   node->RedirectChildren(redist4,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -817,7 +817,7 @@ void LocalSymmAcc::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 
-bool DistHemmToLocalHemmStatA::CanApply(const Poss *poss, const Node *node) const
+bool DistHemmToLocalHemmStatA::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Hemm::GetClass()
       && ((Hemm*)node)->GetLayer() == DMLAYER) 
@@ -828,7 +828,7 @@ bool DistHemmToLocalHemmStatA::CanApply(const Poss *poss, const Node *node) cons
     return false;
 }
 
-void DistHemmToLocalHemmStatA::Apply(Poss *poss, Node *node) const
+void DistHemmToLocalHemmStatA::Apply(Node *node) const
 {
   Hemm *orig = (Hemm*)node;
   Type type = orig->m_type;
@@ -881,7 +881,7 @@ void DistHemmToLocalHemmStatA::Apply(Poss *poss, Node *node) const
 		    up, 0,
 		    Cconn->m_n, Cconn->m_num);
 
-    poss->AddNodes(11, redist1, redist2, redist3, tmp1, tmp2, acc,
+    node->m_poss->AddNodes(11, redist1, redist2, redist3, tmp1, tmp2, acc,
 		   from, tmp3, redist4, up, axpy);
     node->RedirectChildren(axpy,0);
     node->m_poss->DeleteChildAndCleanUp(node);
@@ -932,7 +932,7 @@ void DistHemmToLocalHemmStatA::Apply(Poss *poss, Node *node) const
 		    redist4, 0,
 		    Cconn->m_n, Cconn->m_num);
 
-    poss->AddNodes(11, redist1, redist2, tmp1, tmp2, acc,
+    node->m_poss->AddNodes(11, redist1, redist2, tmp1, tmp2, acc,
 		   from, tmp3, redist3, up, redist4, axpy);
     node->RedirectChildren(axpy,0);
     node->m_poss->DeleteChildAndCleanUp(node);
@@ -998,7 +998,7 @@ string BLISHemmLoopExp::GetType() const
   return "BLIS Hemm Loop Exp";
 }
 
-bool BLISHemmLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool BLISHemmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Hemm::GetClass()) {
     const Hemm *hemm = (Hemm*)node;
@@ -1008,7 +1008,7 @@ bool BLISHemmLoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void BLISHemmLoopExp::Apply(Poss *poss, Node *node) const
+void BLISHemmLoopExp::Apply(Node *node) const
 {
   Hemm *hemm = (Hemm*)node;
 
@@ -1048,8 +1048,8 @@ void BLISHemmLoopExp::Apply(Poss *poss, Node *node) const
   bPack->AddInput(Bin,Bnum);
   bPack->AddInput(bBuff, 0);
   
-  poss->AddNode(bBuff);
-  poss->AddNode(bPack);
+  node->m_poss->AddNode(bBuff);
+  node->m_poss->AddNode(bPack);
 
   LoopTunnel *Btun = new LoopTunnel(POSSTUNIN);
   Btun->AddInput(bPack, 0);
@@ -1094,14 +1094,14 @@ void BLISHemmLoopExp::Apply(Poss *poss, Node *node) const
 
   loop->SetDimName(DIMM);
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
 
   node->RedirectChildren(loop->OutTun(2), 0);
 
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-bool BLISHemmToGemm::CanApply(const Poss *poss, const Node *node) const
+bool BLISHemmToGemm::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Hemm::GetClass()) {
     const Hemm *hemm = (Hemm*)node;
@@ -1112,7 +1112,7 @@ bool BLISHemmToGemm::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void BLISHemmToGemm::Apply(Poss *poss, Node *node) const
+void BLISHemmToGemm::Apply(Node *node) const
 {
   Hemm *hemm = (Hemm*)node;
 
@@ -1136,8 +1136,8 @@ void BLISHemmToGemm::Apply(Poss *poss, Node *node) const
 		    props, 0,
 		    hemm->m_inputs[2]->m_n, hemm->m_inputs[2]->m_num);
 
-  poss->AddNode(gemm);
-  poss->AddNode(props);
+  node->m_poss->AddNode(gemm);
+  node->m_poss->AddNode(props);
   hemm->RedirectAllChildren(gemm);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -1145,7 +1145,7 @@ void BLISHemmToGemm::Apply(Poss *poss, Node *node) const
 #endif
 
 
-bool HemmLowerLayer::CanApply(const Poss *poss, const Node *node) const
+bool HemmLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Hemm::GetClass()) {
     const Hemm *hemm = (Hemm*)node;
@@ -1165,7 +1165,7 @@ bool HemmLowerLayer::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void HemmLowerLayer::Apply(Poss *poss, Node *node) const
+void HemmLowerLayer::Apply(Node *node) const
 {
   Hemm *hemm = (Hemm*)node;
   hemm->SetLayer(m_toLayer);

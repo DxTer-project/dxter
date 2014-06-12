@@ -70,8 +70,8 @@ class TriInvLoopExp : public SingleTrans
   unsigned int m_var;
  TriInvLoopExp(unsigned int var) : m_var(var) {}
   virtual string GetType() const;
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 
@@ -79,8 +79,8 @@ class DistTriInvToLocalTriInv : public SingleTrans
 {
  public:
   virtual string GetType() const {return "Distributed TriInv to Local TriInv";}
-  virtual bool CanApply(const Poss *poss, const Node *node) const;
-  virtual void Apply(Poss *poss, Node *node) const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
 #endif

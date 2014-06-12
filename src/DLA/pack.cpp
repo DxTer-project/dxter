@@ -513,7 +513,7 @@ void PackBuff::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_comm);
 }
 
-bool LoopInvariantPackBuffMotion::CanApply(const Poss *poss, const Node *node) const
+bool LoopInvariantPackBuffMotion::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != PackBuff::GetClass())
     return false;
@@ -528,13 +528,13 @@ bool LoopInvariantPackBuffMotion::CanApply(const Poss *poss, const Node *node) c
   return tun->IsConst();
 }
 
-void LoopInvariantPackBuffMotion::Apply(Poss *poss, Node *node) const
+void LoopInvariantPackBuffMotion::Apply(Node *node) const
 {
   throw; // CreateNewLoopTunnels
   LoopTunnel *possTunIn = (LoopTunnel*)(node->Input(0));
   LoopTunnel *setTunIn = (LoopTunnel*)(possTunIn->Input(0));
   PackBuff *buff = (PackBuff*)node;
-  Loop *loop = (Loop*)(poss->m_pset);
+  Loop *loop = (Loop*)(node->m_poss->m_pset);
   Poss *owningPoss = loop->m_ownerPoss;
   PackBuff *newBuff = new PackBuff(buff->m_name.m_name,
                                    buff->m_pack,
@@ -546,13 +546,13 @@ void LoopInvariantPackBuffMotion::Apply(Poss *poss, Node *node) const
   owningPoss->AddNode(newBuff);
   newBuff->AddInput(setTunIn->Input(0), setTunIn->InputConnNum(0));
   
-  Node *newTun = loop->CreateNewLoopTunnels(newBuff, 0, poss, FULLUP);
+  Node *newTun = loop->CreateNewLoopTunnels(newBuff, 0, node->m_poss, FULLUP);
   
   buff->RedirectChildren(newTun, 0);
-  poss->DeleteChildAndCleanUp(buff, true);
+  node->m_poss->DeleteChildAndCleanUp(buff, true);
 }
 
-bool LoopInvariantPackMotion::CanApply(const Poss *poss, const Node *node) const
+bool LoopInvariantPackMotion::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Pack::GetClass())
     throw;
@@ -565,12 +565,12 @@ bool LoopInvariantPackMotion::CanApply(const Poss *poss, const Node *node) const
   return true;
 }
 
-void LoopInvariantPackMotion::Apply(Poss *poss, Node *node) const
+void LoopInvariantPackMotion::Apply(Node *node) const
 {
-  if (!poss->m_pset->IsLoop())
+  if (!node->m_poss->m_pset->IsLoop())
     throw;
   Pack *oldPack = (Pack*)node;
-  Loop *loop = (Loop*)(poss->m_pset);
+  Loop *loop = (Loop*)(node->m_poss->m_pset);
   Poss *loopOwner = loop->m_ownerPoss;
   LoopTunnel *oldPossTunIn0 = (LoopTunnel*)(node->Input(0));
   LoopTunnel *oldSetTunIn0 = (LoopTunnel*)(oldPossTunIn0->Input(0));
@@ -600,7 +600,7 @@ void LoopInvariantPackMotion::Apply(Poss *poss, Node *node) const
   loopOwner->AddNode(newPack);
   
   LoopTunnel *newPossTunIn = loop->CreateNewLoopTunnels(newPack,
-                                                        0, poss, stat);
+                                                        0, node->m_poss, stat);
   if (!newPossTunIn)
     throw;
   
@@ -609,7 +609,7 @@ void LoopInvariantPackMotion::Apply(Poss *poss, Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node, true);
 }
 
-bool CombinePacking::CanApply(const Poss *poss, const Node *node) const
+bool CombinePacking::CanApply(const Node *node) const
 {
   const Pack *pack = (Pack*)node;
   if (node->GetNodeClass() != Pack::GetClass())
@@ -646,7 +646,7 @@ bool CombinePacking::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void CombinePacking::Apply(Poss *poss, Node *node) const
+void CombinePacking::Apply(Node *node) const
 {
   Pack *pack = (Pack*)node;
   Node *par = node->Input(0);
@@ -706,13 +706,13 @@ bool FoundNodeUp(const Node *node, const Node *find)
   return false;
 }
 
-bool CombinePackBuff::CanApply(const Poss *poss, const Node *node) const
+bool CombinePackBuff::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != PackBuff::GetClass())
     return false;
   const PackBuff *packBuff = (PackBuff*)node;
-  NodeVecConstIter iter = poss->m_possNodes.begin();
-  for(; iter != poss->m_possNodes.end(); ++iter) {
+  NodeVecConstIter iter = node->m_poss->m_possNodes.begin();
+  for(; iter != node->m_poss->m_possNodes.end(); ++iter) {
     const Node *possNode = *iter;
     if (node != possNode) {
       if (possNode->GetNodeClass() == PackBuff::GetClass()) {
@@ -748,11 +748,11 @@ bool CombinePackBuff::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void CombinePackBuff::Apply(Poss *poss, Node *node) const
+void CombinePackBuff::Apply(Node *node) const
 {
   PackBuff *packBuff = (PackBuff*)node;
-  NodeVecConstIter iter = poss->m_possNodes.begin();
-  for(; iter != poss->m_possNodes.end(); ++iter) {
+  NodeVecConstIter iter = node->m_poss->m_possNodes.begin();
+  for(; iter != node->m_poss->m_possNodes.end(); ++iter) {
     Node *possNode = *iter;
     if (node != possNode) {
       if (possNode->GetNodeClass() == PackBuff::GetClass()) {
@@ -803,13 +803,13 @@ void CombinePackBuff::Apply(Poss *poss, Node *node) const
   throw;
 }
 
-bool UnifyPackBuffParams::CanApply(const Poss *poss, const Node *node) const
+bool UnifyPackBuffParams::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != PackBuff::GetClass())
     return false;
   const PackBuff *packBuff = (PackBuff*)node;
-  NodeVecConstIter iter = poss->m_possNodes.begin();
-  for(; iter != poss->m_possNodes.end(); ++iter) {
+  NodeVecConstIter iter = node->m_poss->m_possNodes.begin();
+  for(; iter != node->m_poss->m_possNodes.end(); ++iter) {
     const Node *possNode = *iter;
     if (node != possNode) {
       if (possNode->GetNodeClass() == PackBuff::GetClass()) {
@@ -845,11 +845,11 @@ bool UnifyPackBuffParams::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void UnifyPackBuffParams::Apply(Poss *poss, Node *node) const
+void UnifyPackBuffParams::Apply(Node *node) const
 {
   PackBuff *packBuff = (PackBuff*)node;
-  NodeVecIter iter = poss->m_possNodes.begin();
-  for(; iter != poss->m_possNodes.end(); ++iter) {
+  NodeVecIter iter = node->m_poss->m_possNodes.begin();
+  for(; iter != node->m_poss->m_possNodes.end(); ++iter) {
     Node *possNode = *iter;
     if (node != possNode) {
       if (possNode->GetNodeClass() == PackBuff::GetClass()) {
@@ -885,7 +885,7 @@ void UnifyPackBuffParams::Apply(Poss *poss, Node *node) const
   throw;
 }
 
-bool ReuseTrsmPacking::CanApply(const Poss *poss, const Node *node) const
+bool ReuseTrsmPacking::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Pack::GetClass())
     throw;
@@ -912,7 +912,7 @@ bool ReuseTrsmPacking::CanApply(const Poss *poss, const Node *node) const
     return true;
 }
 
-void ReuseTrsmPacking::Apply(Poss *poss, Node *node) const
+void ReuseTrsmPacking::Apply(Node *node) const
 {
   PossTunnel *setTun = (PossTunnel*)(node->Input(0));
   PossTunnel *possTun = (PossTunnel*)(setTun->Input(0));
@@ -929,7 +929,7 @@ void ReuseTrsmPacking::Apply(Poss *poss, Node *node) const
           throw;
         PossTunnel *setTunOut = (PossTunnel*)(possTunOut->m_children[0]->m_n);
         node->RedirectChildren(setTunOut,0);
-        poss->DeleteChildAndCleanUp(node, false);
+        node->m_poss->DeleteChildAndCleanUp(node, false);
         return;
       }
     }
@@ -976,7 +976,7 @@ string RenamePackBuff::GetNewName(const PackBuff *buff) const
   }
 }
 
-bool RenamePackBuff::CanApply(const Poss *poss, const Node *node) const
+bool RenamePackBuff::CanApply(const Node *node) const
 {
   if (CurrPhase != SOPHASE)
     return false;
@@ -985,7 +985,7 @@ bool RenamePackBuff::CanApply(const Poss *poss, const Node *node) const
   const PackBuff *buff = (PackBuff*)node;
   if (buff->m_name.m_name == GetNewName(buff))
     return false;
-  const PackBuff *buff2 = (PackBuff*)FindOtherPackBuffs(poss, buff->m_packMat, node);
+  const PackBuff *buff2 = (PackBuff*)FindOtherPackBuffs(node->m_poss, buff->m_packMat, node);
   if (buff2 != NULL) {
     throw;
   }
@@ -993,7 +993,7 @@ bool RenamePackBuff::CanApply(const Poss *poss, const Node *node) const
     return true;
 }
 
-void RenamePackBuff::Apply(Poss *poss, Node *node) const
+void RenamePackBuff::Apply(Node *node) const
 {
   PackBuff *buff = (PackBuff*)node;
   buff->m_name.m_name = GetNewName(buff);

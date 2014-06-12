@@ -557,7 +557,7 @@ string TrxmLoopExp::GetType() const
   return str  + (m_side == LEFT ? " left" : " right");
 }
 
-bool TrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool TrxmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Trxm::GetClass()) {
     const Trxm *trxm = (Trxm*)node;
@@ -573,7 +573,7 @@ bool TrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void TrxmLoopExp::Apply(Poss *poss, Node *node) const
+void TrxmLoopExp::Apply(Node *node) const
 {
   Trxm *trxm = (Trxm*)node;
   Loop *loop;
@@ -683,7 +683,7 @@ void TrxmLoopExp::Apply(Poss *poss, Node *node) const
     }
   }
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(1),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -696,7 +696,7 @@ string Trmm3LoopExp::GetType() const
   + " -> " + LayerNumToStr(m_toLayer);
 }
 
-bool Trmm3LoopExp::CanApply(const Poss *poss, const Node *node) const
+bool Trmm3LoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Trmm3::GetClass()) {
     const Trmm3 *trmm3 = (Trmm3*)node;
@@ -707,7 +707,7 @@ bool Trmm3LoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void Trmm3LoopExp::Apply(Poss *poss, Node *node) const
+void Trmm3LoopExp::Apply(Node *node) const
 {
   Trmm3 *trmm3 = (Trmm3*)node;
   Loop *loop = NULL;
@@ -732,7 +732,7 @@ void Trmm3LoopExp::Apply(Poss *poss, Node *node) const
                              trmm3->m_coeff, trmm3->m_beta, trmm3->m_type,
                              m_toLayer);
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -743,12 +743,12 @@ string DistTrxmToLocalTrxm::GetType() const
   return "Distributed Trxm to Local Trxm " + DistTypeToStr(m_leftType) + ", " + DistTypeToStr(m_rightType);
 }
 
-bool DistTrxmToLocalTrxm::CanApply(const Poss *poss, const Node *node) const
+bool DistTrxmToLocalTrxm::CanApply(const Node *node) const
 {
   return IsDMTrxm(node);
 }
 
-void DistTrxmToLocalTrxm::Apply(Poss *poss, Node *node) const
+void DistTrxmToLocalTrxm::Apply(Node *node) const
 {
   Trxm *trxm = (Trxm*)node;
   RedistNode *node1 = new RedistNode(D_STAR_STAR);
@@ -760,7 +760,7 @@ void DistTrxmToLocalTrxm::Apply(Poss *poss, Node *node) const
   node3->AddInput(node1,0);
   node3->AddInput(node2,0);
   node4->AddInput(node3,0);
-  poss->AddNodes(4, node1, node2, node3, node4);
+  node->m_poss->AddNodes(4, node1, node2, node3, node4);
   node->RedirectChildren(node4,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -782,7 +782,7 @@ Cost DistTrxmToLocalTrxm::RHSCostEstimate(const Node *node) const
   return cost;
 }
 
-bool DistTrsmToSpecialLocalTrsm::CanApply(const Poss *poss, const Node *node) const
+bool DistTrsmToSpecialLocalTrsm::CanApply(const Node *node) const
 {
   if (!IsDMTrxm(node, true))
     return false;
@@ -792,7 +792,7 @@ bool DistTrsmToSpecialLocalTrsm::CanApply(const Poss *poss, const Node *node) co
   return true;
 }
 
-void DistTrsmToSpecialLocalTrsm::Apply(Poss *poss, Node *node) const
+void DistTrsmToSpecialLocalTrsm::Apply(Node *node) const
 {
   Trxm *trxm = (Trxm*)node;
   if (trxm->m_side != LEFT || trxm->m_tri != LOWER || trxm->m_trans != NORMAL)
@@ -809,7 +809,7 @@ void DistTrsmToSpecialLocalTrsm::Apply(Poss *poss, Node *node) const
   node3->AddInput(node1,0);
   node3->AddInput(node2,0);
   node4->AddInput(node3,0);
-  poss->AddNodes(4, node1, node2, node3, node4);
+  node->m_poss->AddNodes(4, node1, node2, node3, node4);
   node->RedirectChildren(node4,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -914,12 +914,12 @@ void LocalTrmmAcc::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_type);
 }
 
-bool DistTrmmToLocalTrmmStatA::CanApply(const Poss *poss, const Node *node) const
+bool DistTrmmToLocalTrmmStatA::CanApply(const Node *node) const
 {
   return IsDMTrxm(node, false);
 }
 
-void DistTrmmToLocalTrmmStatA::Apply(Poss *poss, Node *node) const
+void DistTrmmToLocalTrmmStatA::Apply(Node *node) const
 {
   Trxm *trmm = (Trxm*)node;
   
@@ -951,10 +951,10 @@ void DistTrmmToLocalTrmmStatA::Apply(Poss *poss, Node *node) const
                       acc, 0,
                       Bin, Bnum);
       
-      poss->AddNodes(5, redist, redist2, tmp1, acc, from);
+      node->m_poss->AddNodes(5, redist, redist2, tmp1, acc, from);
       
       node->RedirectChildren(from, 0);
-      poss->DeleteChildAndCleanUp(node);
+      node->m_poss->DeleteChildAndCleanUp(node);
     }
     else {
       RedistNode *redist = new RedistNode(D_MC_STAR);
@@ -981,10 +981,10 @@ void DistTrmmToLocalTrmmStatA::Apply(Poss *poss, Node *node) const
       RedistNode *redist2 = new RedistNode(D_MC_MR);
       redist2->AddInput(from, 0);
       
-      poss->AddNodes(6, redist, tmp1, acc, tmp2, from, redist2);
+      node->m_poss->AddNodes(6, redist, tmp1, acc, tmp2, from, redist2);
       
       node->RedirectChildren(redist2, 0);
-      poss->DeleteChildAndCleanUp(node);
+      node->m_poss->DeleteChildAndCleanUp(node);
     }
   }
   else if (trmm->m_side == RIGHT) {
@@ -1016,10 +1016,10 @@ void DistTrmmToLocalTrmmStatA::Apply(Poss *poss, Node *node) const
       RedistNode *redist3 = new RedistNode(D_MC_MR);
       redist3->AddInput(from, 0);
       
-      poss->AddNodes(7, redist, redist2, tmp1, acc, tmp2, from, redist3);
+      node->m_poss->AddNodes(7, redist, redist2, tmp1, acc, tmp2, from, redist3);
       
       node->RedirectChildren(redist3, 0);
-      poss->DeleteChildAndCleanUp(node);
+      node->m_poss->DeleteChildAndCleanUp(node);
     }
     else {
       bool trans = trmm->m_trans == TRANS;
@@ -1050,10 +1050,10 @@ void DistTrmmToLocalTrmmStatA::Apply(Poss *poss, Node *node) const
       RedistNode *redist4 = new RedistNode(D_MC_MR);
       redist4->AddInput(redist3, 0);
       
-      poss->AddNodes(7, redist, tmp1, acc, tmp2, from, redist3, redist4);
+      node->m_poss->AddNodes(7, redist, tmp1, acc, tmp2, from, redist3, redist4);
       
       node->RedirectChildren(redist4, 0);
-      poss->DeleteChildAndCleanUp(node);
+      node->m_poss->DeleteChildAndCleanUp(node);
     }
   }
   else
@@ -1132,7 +1132,7 @@ string TrxmTrans::GetTransType() const
   return "Trxm";
 }
 
-bool TrxmTrans::CanApply(const Poss *poss, const Node *node) const
+bool TrxmTrans::CanApply(const Node *node) const
 {
   //Any change should also be made to TrsmTrans
   if (node->GetNodeClass() != Trxm::GetClass())
@@ -1183,7 +1183,7 @@ void TrxmTrans::PostApply(Node *node) const
 }
 
 
-bool DTrmmToTrsm::CanApply(const Poss *poss, const Node *node) const
+bool DTrmmToTrsm::CanApply(const Node *node) const
 {
   if (!IsDMTrxm(node,false))
     return false;
@@ -1198,7 +1198,7 @@ bool DTrmmToTrsm::CanApply(const Poss *poss, const Node *node) const
     return false;
 }
 
-void DTrmmToTrsm::Apply(Poss *poss, Node *node) const
+void DTrmmToTrsm::Apply(Node *node) const
 {
   if (!IsDMTrxm(node,false))
     throw;
@@ -1220,7 +1220,7 @@ void DTrmmToTrsm::Apply(Poss *poss, Node *node) const
 }
 
 
-bool LTrmmToTrsm::CanApply(const Poss *poss, const Node *node) const
+bool LTrmmToTrsm::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Trxm::GetClass())
     return false;
@@ -1238,7 +1238,7 @@ bool LTrmmToTrsm::CanApply(const Poss *poss, const Node *node) const
     return false;
 }
 
-void LTrmmToTrsm::Apply(Poss *poss, Node *node) const
+void LTrmmToTrsm::Apply(Node *node) const
 {
   Trxm *trmm = (Trxm*)node;
   DLANode *parent = trmm->FindNonRedistParent(0);
@@ -2143,14 +2143,14 @@ void TrxmBP::PrintCode(IndStream &out)
   *out <<  ");\n";
 }
 
-bool BLISTrxmLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool BLISTrxmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Trxm::GetClass())
     return ((Trxm*)node)->GetLayer() == m_fromLayer;
   return false;
 }
 
-void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
+void BLISTrxmLoopExp::Apply(Node *node) const
 {
   Trxm *trxm = (Trxm*)node;
   bool isTrsm = trxm->m_invert;
@@ -2277,8 +2277,8 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   rhsPack->AddInput(rhsSrc, rhsSrcNum);
   rhsPack->AddInput(rhsBuff, 0);
   
-  poss->AddNode(rhsBuff);
-  poss->AddNode(rhsPack);
+  node->m_poss->AddNode(rhsBuff);
+  node->m_poss->AddNode(rhsPack);
   
   LoopTunnel *packTun = new LoopTunnel(POSSTUNIN);
   packTun->AddInput(rhsPack);
@@ -2349,7 +2349,7 @@ void BLISTrxmLoopExp::Apply(Poss *poss, Node *node) const
   
   loop->SetDimName(DIMM);
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -2514,7 +2514,7 @@ string TrxmRightToLeft<Trxm>::GetType() const
 }
 
 template<class TrxmType>
-bool TrxmRightToLeft<TrxmType>::CanApply(const Poss *poss, const Node *node) const
+bool TrxmRightToLeft<TrxmType>::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == TrxmType::GetClass()) {
     const TrxmType *trxm = (TrxmType*)node;
@@ -2526,7 +2526,7 @@ bool TrxmRightToLeft<TrxmType>::CanApply(const Poss *poss, const Node *node) con
 }
 
 template<class TrxmType>
-void TrxmRightToLeft<TrxmType>::Apply(Poss *poss, Node *node) const
+void TrxmRightToLeft<TrxmType>::Apply(Node *node) const
 {
   TrxmType *trxm = (TrxmType*)node;
   trxm->m_side = LEFT;
@@ -2542,7 +2542,7 @@ void TrxmRightToLeft<TrxmType>::Apply(Poss *poss, Node *node) const
   InsertTranspose(TRANS, false, trxm, 1, true);
   
   Transpose *newTrans = new Transpose(TRANS, false);
-  poss->AddNode(newTrans);
+  node->m_poss->AddNode(newTrans);
   trxm->RedirectAllChildren(newTrans);
   newTrans->AddInput(trxm, 0);
 }
@@ -2552,7 +2552,7 @@ string Trmm3RightToLeft::GetType() const
   return "Trmm3 right to left";
 }
 
-bool Trmm3RightToLeft::CanApply(const Poss *poss, const Node *node) const
+bool Trmm3RightToLeft::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Trmm3::GetClass()) {
     const Trmm3 *trmm3 = (Trmm3*)node;
@@ -2564,7 +2564,7 @@ bool Trmm3RightToLeft::CanApply(const Poss *poss, const Node *node) const
 }
 
 
-void Trmm3RightToLeft::Apply(Poss *poss, Node *node) const
+void Trmm3RightToLeft::Apply(Node *node) const
 {
   Trmm3 *trmm3 = (Trmm3*)node;
   trmm3->m_side = LEFT;
@@ -2581,7 +2581,7 @@ void Trmm3RightToLeft::Apply(Poss *poss, Node *node) const
   InsertTranspose(TRANS, false, trmm3, 2, true);
   
   Transpose *newTrans = new Transpose(TRANS, false);
-  poss->AddNode(newTrans);
+  node->m_poss->AddNode(newTrans);
   trmm3->RedirectAllChildren(newTrans);
   newTrans->AddInput(trmm3, 0);
 }
@@ -2602,7 +2602,7 @@ string TrxmLowerLayer<Trmm3>::GetType() const
 }
 
 template<class TrxmType>
-bool TrxmLowerLayer<TrxmType>::CanApply(const Poss *poss, const Node *node) const
+bool TrxmLowerLayer<TrxmType>::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == TrxmType::GetClass()) {
     const TrxmType *trxm = (TrxmType*)node;
@@ -2636,7 +2636,7 @@ bool TrxmLowerLayer<TrxmType>::CanApply(const Poss *poss, const Node *node) cons
 }
 
 template<class TrxmType>
-void TrxmLowerLayer<TrxmType>::Apply(Poss *poss, Node *node) const
+void TrxmLowerLayer<TrxmType>::Apply(Node *node) const
 {
   TrxmType *trxm = (TrxmType*)node;
   trxm->SetLayer(m_toLayer);
@@ -2644,14 +2644,14 @@ void TrxmLowerLayer<TrxmType>::Apply(Poss *poss, Node *node) const
 
 
 #if DOBLIS
-bool BLISTrmm3LoopExp::CanApply(const Poss *poss, const Node *node) const
+bool BLISTrmm3LoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Trmm3::GetClass())
     return ((Trmm3*)node)->GetLayer() == m_fromLayer;
   return false;
 }
 
-void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
+void BLISTrmm3LoopExp::Apply(Node *node) const
 {
   Trmm3 *trmm3 = (Trmm3*)node;
   Tri tri = trmm3->m_tri;
@@ -2709,8 +2709,8 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
   bPack->AddInput(bSrc, bSrcNum);
   bPack->AddInput(bBuff, 0);
   
-  poss->AddNode(bBuff);
-  poss->AddNode(bPack);
+  node->m_poss->AddNode(bBuff);
+  node->m_poss->AddNode(bPack);
   
   LoopTunnel *packTun = new LoopTunnel(POSSTUNIN);
   packTun->AddInput(bPack);
@@ -2765,7 +2765,7 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
   
   loop->SetDimName(DIMM);
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(3), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -2773,7 +2773,7 @@ void BLISTrmm3LoopExp::Apply(Poss *poss, Node *node) const
 #endif
 
 #if DOBLIS
-bool TrmmAxpytoTrxm3::CanApply(const Poss *poss, const Node *node) const
+bool TrmmAxpytoTrxm3::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Trxm::GetClass())
     throw;
@@ -2789,7 +2789,7 @@ bool TrmmAxpytoTrxm3::CanApply(const Poss *poss, const Node *node) const
   return child->GetLayer() == m_layer;
 }
 
-void TrmmAxpytoTrxm3::Apply(Poss *poss, Node *node) const
+void TrmmAxpytoTrxm3::Apply(Node *node) const
 {
   Trxm *trmm = (Trxm*)node;
   Axpy *axpy = (Axpy*)(trmm->Child(0));
@@ -2804,13 +2804,13 @@ void TrmmAxpytoTrxm3::Apply(Poss *poss, Node *node) const
                    axpy->Input(1), axpy->InputConnNum(1));
   
   
-  poss->AddNode(trmm3);
+  node->m_poss->AddNode(trmm3);
   axpy->RedirectChildren(trmm3);
-  poss->DeleteChildAndCleanUp(axpy);
+  node->m_poss->DeleteChildAndCleanUp(axpy);
 }
 
 
-bool CopyTrmmtoTrxm3::CanApply(const Poss *poss, const Node *node) const
+bool CopyTrmmtoTrxm3::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Trxm::GetClass())
     throw;
@@ -2824,7 +2824,7 @@ bool CopyTrmmtoTrxm3::CanApply(const Poss *poss, const Node *node) const
   return parent->GetLayer() == m_layer;
 }
 
-void CopyTrmmtoTrxm3::Apply(Poss *poss, Node *node) const
+void CopyTrmmtoTrxm3::Apply(Node *node) const
 {
   Trxm *trmm = (Trxm*)node;
   Copy *copy = (Copy*)(trmm->Input(1));
@@ -2838,9 +2838,9 @@ void CopyTrmmtoTrxm3::Apply(Poss *poss, Node *node) const
                    copy->Input(0), copy->InputConnNum(0),
                    copy->Input(1), copy->InputConnNum(1));
   
-  poss->AddNode(trmm3);
+  node->m_poss->AddNode(trmm3);
   trmm->RedirectChildren(trmm3);
-  poss->DeleteChildAndCleanUp(trmm);
+  node->m_poss->DeleteChildAndCleanUp(trmm);
 }
 
 template class TrxmRightToLeft<Trxm>;

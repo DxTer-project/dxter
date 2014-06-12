@@ -146,7 +146,7 @@ string CholLoopExp::GetType() const
 
 }
 
-bool CholLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool CholLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Chol::GetClass()) 
     return false;
@@ -154,7 +154,7 @@ bool CholLoopExp::CanApply(const Poss *poss, const Node *node) const
   return chol->GetLayer() == ABSLAYER;
 }
 
-void CholLoopExp::Apply(Poss *poss, Node *node) const
+void CholLoopExp::Apply(Node *node) const
 {
   Chol *chol = (Chol*)node;
   Loop *loop;
@@ -177,7 +177,7 @@ void CholLoopExp::Apply(Poss *poss, Node *node) const
       throw;
   }
 
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(0),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -185,7 +185,7 @@ void CholLoopExp::Apply(Poss *poss, Node *node) const
 
 #if DOELEM
 
-bool DistCholToLocalChol::CanApply(const Poss *poss, const Node *node) const
+bool DistCholToLocalChol::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Chol::GetClass())
     return false;
@@ -193,7 +193,7 @@ bool DistCholToLocalChol::CanApply(const Poss *poss, const Node *node) const
   return chol->GetLayer() == DMLAYER;
 }
 
-void DistCholToLocalChol::Apply(Poss *poss, Node *node) const
+void DistCholToLocalChol::Apply(Node *node) const
 {
   Chol *chol = (Chol*)node;
   RedistNode *node1 = new RedistNode(D_STAR_STAR);
@@ -202,7 +202,7 @@ void DistCholToLocalChol::Apply(Poss *poss, Node *node) const
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node1,0);
   node3->AddInput(node2,0);
-  poss->AddNodes(3, node1, node2, node3);
+  node->m_poss->AddNodes(3, node1, node2, node3);
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }

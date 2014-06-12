@@ -295,7 +295,7 @@ string Her2kLoopExp::GetType() const
   }
 }
 
-bool Her2kLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool Her2kLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Her2k::GetClass()
       && ((Her2k*)node)->GetLayer() == m_fromLayer)
@@ -303,7 +303,7 @@ bool Her2kLoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void Her2kLoopExp::Apply(Poss *poss, Node *node) const
+void Her2kLoopExp::Apply(Node *node) const
 {
   Her2k *her2k = (Her2k*)node;
   Loop *loop;
@@ -364,7 +364,7 @@ void Her2kLoopExp::Apply(Poss *poss, Node *node) const
       throw;
   }
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -613,7 +613,7 @@ void Tri2k::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 #if DOELEM
-bool DistHer2kToLocalTri2k::CanApply(const Poss *poss, const Node *node) const
+bool DistHer2kToLocalTri2k::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Her2k::GetClass()
       && ((Her2k*)node)->GetLayer() == DMLAYER)
@@ -624,7 +624,7 @@ bool DistHer2kToLocalTri2k::CanApply(const Poss *poss, const Node *node) const
     return false;
 }
 
-void DistHer2kToLocalTri2k::Apply(Poss *poss, Node *node) const
+void DistHer2kToLocalTri2k::Apply(Node *node) const
 {
   Her2k *orig = (Her2k*)node;
   bool normal = orig->m_trans == NORMAL;
@@ -652,8 +652,8 @@ void DistHer2kToLocalTri2k::Apply(Poss *poss, Node *node) const
   tri2k->AddInput(redist3,0);
   tri2k->AddInput(redist4,0);
   tri2k->AddInput(node->Input(2),node->InputConnNum(2));
-  poss->AddNodes(4, redist1, redist2, redist3, redist4);
-  poss->AddNode(tri2k);
+  node->m_poss->AddNodes(4, redist1, redist2, redist3, redist4);
+  node->m_poss->AddNode(tri2k);
   node->RedirectChildren(tri2k,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -681,7 +681,7 @@ string DistHer2kToLocalHer2kContrib::GetType() const
   + " " + DistTypeToStr(m_BType);
 }
 
-bool DistHer2kToLocalHer2kContrib::CanApply(const Poss *poss, const Node *node) const
+bool DistHer2kToLocalHer2kContrib::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Her2k::GetClass()
       && ((Her2k*)node)->GetLayer() == DMLAYER)
@@ -692,7 +692,7 @@ bool DistHer2kToLocalHer2kContrib::CanApply(const Poss *poss, const Node *node) 
     return false;
 }
 
-void DistHer2kToLocalHer2kContrib::Apply(Poss *poss, Node *node) const
+void DistHer2kToLocalHer2kContrib::Apply(Node *node) const
 {
   Her2k *orig = (Her2k*)node;
   bool normal = orig->m_trans == NORMAL;
@@ -713,7 +713,7 @@ void DistHer2kToLocalHer2kContrib::Apply(Poss *poss, Node *node) const
   her2k->AddInput(tmp,0);
   node3->AddInput(her2k);
   node3->AddInput(orig->Input(2),node->InputConnNum(2));
-  poss->AddNodes(5, redist1, redist2, node3, tmp, her2k);
+  node->m_poss->AddNodes(5, redist1, redist2, node3, tmp, her2k);
   node->RedirectChildren(node3,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -746,7 +746,7 @@ string Tri2kTrans::GetTransType() const
   return "Tri2k";
 }
 
-bool Tri2kTrans::CanApply(const Poss *poss, const Node *node) const
+bool Tri2kTrans::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Tri2k::GetClass()
       || ((Tri2k*)node)->GetLayer() != SMLAYER)
@@ -1420,7 +1420,7 @@ string Tri2kToTriRK::GetType() const
   return "Tri2K to 2 TriRKs " + LayerNumToStr(m_fromLayer);
 }
 
-bool Tri2kToTriRK::CanApply(const Poss *poss, const Node *node) const
+bool Tri2kToTriRK::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Tri2k::GetClass()
       && ((Her2k*)node)->GetLayer() == m_fromLayer)
@@ -1431,7 +1431,7 @@ bool Tri2kToTriRK::CanApply(const Poss *poss, const Node *node) const
     return false;
 }
 
-void Tri2kToTriRK::Apply(Poss *poss, Node *node) const
+void Tri2kToTriRK::Apply(Node *node) const
 {
   Tri2k *orig = (Tri2k*)node;
   
@@ -1457,14 +1457,14 @@ void Tri2kToTriRK::Apply(Poss *poss, Node *node) const
                  orig->Input(3), orig->InputConnNum(3),
                  one, 0);
   
-  poss->AddNode(one);
-  poss->AddNode(two);
+  node->m_poss->AddNode(one);
+  node->m_poss->AddNode(two);
   
   node->RedirectChildren(two,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-bool Tri2kLowerLayer::CanApply(const Poss *poss, const Node *node) const
+bool Tri2kLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Tri2k::GetClass()) {
     const Tri2k *tri2k = (Tri2k*)node;
@@ -1481,7 +1481,7 @@ bool Tri2kLowerLayer::CanApply(const Poss *poss, const Node *node) const
   return false;  
 }
 
-void Tri2kLowerLayer::Apply(Poss *poss, Node *node) const
+void Tri2kLowerLayer::Apply(Node *node) const
 {
   Tri2k *tri2k = (Tri2k*)node;
   tri2k->SetLayer(m_toLayer);
@@ -1494,13 +1494,13 @@ string Tri2kLowerLayer::GetType() const
 }
 
 #if DOBLIS
-bool Her2kToTri2K::CanApply(const Poss *poss, const Node *node) const
+bool Her2kToTri2K::CanApply(const Node *node) const
 {
   return (node->GetNodeClass() == Her2k::GetClass() &&
           ((DLANode*)node)->GetLayer() == m_layer);
 }
 
-void Her2kToTri2K::Apply(Poss *poss, Node *node) const
+void Her2kToTri2K::Apply(Node *node) const
 {
   Her2k *her2k = (Her2k*)node;
   
@@ -1544,12 +1544,12 @@ void Her2kToTri2K::Apply(Poss *poss, Node *node) const
   
   tri2k->AddInput(her2k->Input(2), her2k->InputConnNum(2));
   
-  poss->AddNode(tri2k);
-  poss->AddNode(Atrans);
-  poss->AddNode(Btrans);
+  node->m_poss->AddNode(tri2k);
+  node->m_poss->AddNode(Atrans);
+  node->m_poss->AddNode(Btrans);
   
   her2k->RedirectChildren(tri2k, 0);
-  poss->DeleteChildAndCleanUp(node);
+  node->m_poss->DeleteChildAndCleanUp(node);
 }
 #endif
 
@@ -1570,7 +1570,7 @@ string Tri2kLoopExp::GetType() const
   }
 }
 
-bool Tri2kLoopExp::CanApply(const Poss *poss, const Node *node) const
+bool Tri2kLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Tri2k::GetClass()
       && ((Tri2k*)node)->GetLayer() == m_fromLayer)
@@ -1578,7 +1578,7 @@ bool Tri2kLoopExp::CanApply(const Poss *poss, const Node *node) const
   return false;
 }
 
-void Tri2kLoopExp::Apply(Poss *poss, Node *node) const
+void Tri2kLoopExp::Apply(Node *node) const
 {
   Tri2k *trirk = (Tri2k*)node;
   Loop *loop;
@@ -1629,7 +1629,7 @@ void Tri2kLoopExp::Apply(Poss *poss, Node *node) const
       throw;
   }
   
-  poss->AddLoop(loop);
+  node->m_poss->AddLoop(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
