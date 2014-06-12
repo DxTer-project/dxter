@@ -13,7 +13,12 @@ OBJS := $(patsubst src/%.cpp, obj/%.o, $(SOURCES))
 
 all: dxter.x
 
+
 obj/%.o: src/%.cpp $(HEADERS)
+	@mkdir  -p obj
+	@mkdir  -p obj/DLA
+	@mkdir  -p obj/LLDLA
+	@mkdir  -p obj/tensors
 	$(CC) $(CFLAGS) -c $< -o $@
 
 dxter.x: $(OBJS) $(HEADERS)
