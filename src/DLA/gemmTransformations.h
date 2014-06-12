@@ -60,8 +60,8 @@ class GemmLoopExp : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  unsigned int m_dim;
- GemmLoopExp(Layer fromLayer, Layer toLayer, unsigned int dim) 
+  int m_dim;
+ GemmLoopExp(Layer fromLayer, Layer toLayer, int dim) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
