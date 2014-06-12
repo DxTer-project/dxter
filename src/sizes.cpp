@@ -574,10 +574,10 @@ void Sizes::operator=(const Sizes &rhs)
 
 bool Sizes::operator==(const Sizes &rhs) const
 {
-  if ((!isnan((double)m_constVal) && isnan((double)(rhs.m_constVal)))
-      || (isnan((double)m_constVal) && !isnan((double)(rhs.m_constVal))))
+  if ((!std::isnan((double)m_constVal) && std::isnan((double)(rhs.m_constVal)))
+      || (std::isnan((double)m_constVal) && !std::isnan((double)(rhs.m_constVal))))
     throw;
-  if (!isnan((double)m_constVal) && (m_constVal != rhs.m_constVal))
+  if (!std::isnan((double)m_constVal) && (m_constVal != rhs.m_constVal))
     return false;
   if (m_entries.size() != rhs.m_entries.size())
     throw;
@@ -608,7 +608,7 @@ unsigned int Sizes::NumSizes() const
 
 Cost Sizes::Sum() const
 {
-  if (!isnan((double)m_constVal))
+  if (!std::isnan((double)m_constVal))
     throw;
   Cost cost = 0;
   EntryVecConstIter iter = m_entries.begin();
@@ -650,7 +650,7 @@ bool Sizes::IsZero(unsigned int n) const
 
 Cost Sizes::SumSquares() const
 {
-  if (!isnan((double)m_constVal))
+  if (!std::isnan((double)m_constVal))
     throw;
   Cost cost = 0;
   EntryVecConstIter iter = m_entries.begin();
@@ -694,7 +694,7 @@ Size Sizes::Update(Size size) const
 
 Cost Sizes::SumCubes() const
 {
-  if (!isnan((double)m_constVal))
+  if (!std::isnan((double)m_constVal))
     throw;
   Cost cost = 0;
   EntryVecConstIter iter = m_entries.begin();
@@ -730,10 +730,10 @@ Cost Sizes::SumCubes() const
 
 Cost Sizes::SumProds11(const Sizes &sizes) const
 {
-  if (!isnan((double)m_constVal)) {
+  if (!std::isnan((double)m_constVal)) {
     return m_constVal * sizes.Sum();
   }
-  if (!isnan((double)(sizes.m_constVal))) {
+  if (!std::isnan((double)(sizes.m_constVal))) {
     return sizes.m_constVal * Sum();
   }
   if (m_entries.size() != sizes.m_entries.size())
@@ -761,10 +761,10 @@ Cost Sizes::SumProds11(const Sizes &sizes) const
 
 Cost Sizes::SumProds21(const Sizes &sizes) const
 {
-  if (!isnan((double)m_constVal)) {
+  if (!std::isnan((double)m_constVal)) {
     return m_constVal * m_constVal * sizes.Sum();
   }
-  if (!isnan((double)(sizes.m_constVal))) {
+  if (!std::isnan((double)(sizes.m_constVal))) {
     return sizes.m_constVal * SumSquares();
   }
   if (m_entries.size() != sizes.m_entries.size())
@@ -788,13 +788,13 @@ Cost Sizes::SumProds21(const Sizes &sizes) const
 
 Cost Sizes::SumProds111(const Sizes &sizes1, const Sizes &sizes2) const
 {
-  if (!isnan((double)m_constVal)) {
+  if (!std::isnan((double)m_constVal)) {
     return m_constVal * sizes1.SumProds11(sizes2);
   }
-  if (!isnan((double)(sizes1.m_constVal))) {
+  if (!std::isnan((double)(sizes1.m_constVal))) {
     return sizes1.m_constVal * SumProds11(sizes2);
   }
-  if (!isnan((double)(sizes2.m_constVal))) {
+  if (!std::isnan((double)(sizes2.m_constVal))) {
     return sizes2.m_constVal * SumProds11(sizes1);
   }
   if (m_entries.size() != sizes1.m_entries.size() || m_entries.size() != sizes2.m_entries.size())
@@ -857,7 +857,7 @@ void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
     throw;
   if (sizes1.m_coeff || sizes2.m_coeff)
     throw;
-  if (!isnan((double)(sizes1.m_constVal))) {
+  if (!std::isnan((double)(sizes1.m_constVal))) {
     if (sizes1.m_constVal == 1) {
       *this = sizes2;
       return;
@@ -888,7 +888,7 @@ void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
       }
     }
   }
-  if (!isnan((double)(sizes2.m_constVal))) {
+  if (!std::isnan((double)(sizes2.m_constVal))) {
     PairwiseSum(sizes2, sizes1);
     return;
   }
