@@ -20,3 +20,4 @@ BLASResults/*
 archive/*
 res*
 test.sh
+test/LLDLA/basicTests/all_tests
