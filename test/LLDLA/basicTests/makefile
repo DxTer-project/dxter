@@ -4,7 +4,7 @@ LINKER     := $(CC)
 CFLAGS	   := -O3 -msse3 -mfpmath=sse -Wall -I../kernels
 
 HEADERS = gen_stride_tests.h row_stride_tests.h
-SOURCES = gen_stride_tests.c row_stride_tests.c
+SOURCES = all_tests.c gen_stride_tests.c row_stride_tests.c
 HEADERS +=  $(shell find ../kernels -type f -name '*.h')
 SOURCES +=  $(shell find ../kernels -type f -name '*.c')
 
