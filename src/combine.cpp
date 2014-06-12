@@ -110,6 +110,11 @@ void Combine::Prop()
   }
 }
 
+    const DataTypeInfo& Combine::DataType(unsigned int num) const
+    {
+      return InputDataType(0);
+    }
+
 #if TWOD
 const Sizes* Combine::GetM(unsigned int num) const
 {
@@ -175,17 +180,6 @@ const Sizes* Combine::LocalN(unsigned int num) const
 }
 
 
-#if DOLLDLA
-Stride Combine::RowStride(unsigned int num) const
-{
-  return InputRowStride(0);
-}
-
-Stride Combine::ColStride(unsigned int num) const
-{
-  return InputColStride(0);
-}
-#endif //DOLLDLA
 
 #else
 const Dim Combine::NumDims(unsigned int num) const

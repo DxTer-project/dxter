@@ -56,6 +56,8 @@ typedef unsigned int Flags;
 #define PRINTEDFLAG (1L<<2)
 #define HASREFINEDFLAG (1L<<3)
 
+class DataTypeInfo;
+
 class Node
 {
  private:
@@ -200,6 +202,10 @@ class Node
   virtual void FlattenCore(ofstream &out) const = 0;
   void Unflatten(ifstream &in, SaveInfo &info);
   virtual void UnflattenCore(ifstream &in, SaveInfo &info) = 0;
+
+  virtual const DataTypeInfo& DataType(unsigned int num) const = 0;
+  virtual const DataTypeInfo& InputDataType(unsigned int num) const;
+    
 };
 
 void FullyFlatten(const NodeVec &vec, ofstream &out);

@@ -170,6 +170,7 @@ class RedistNode : public DLANode
   virtual ~RedistNode();
   virtual const DistType& GetDistType(unsigned int num) const { return m_destType; }
   static Node* BlankInst() { return  new RedistNode; }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -202,6 +203,7 @@ class SumScatterNode : public DLANode
  SumScatterNode(Coef coeff) : m_coeff(coeff) {}
   virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
   static Node* BlankInst() { return  new SumScatterNode; }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -227,6 +229,7 @@ class SumScatterFrom : public DLANode
   SumScatterFrom() {}
   virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
   static Node* BlankInst() { return  new SumScatterFrom; }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual NodeType GetType() const {return "sumScatterFrom";}
@@ -250,6 +253,7 @@ class SumOverCommNode : public DLANode
   SumOverCommNode() {} 
   virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
   static Node* BlankInst() { return  new SumOverCommNode; }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

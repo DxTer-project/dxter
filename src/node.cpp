@@ -908,3 +908,8 @@ void Node::AddVariables(VarSet &set) const
 #endif
 }
 
+const DataTypeInfo& Node::InputDataType(unsigned int num) const
+{
+  const NodeConn *conn = m_inputs[num];
+  return conn->m_n->DataType(conn->m_num);
+}

@@ -25,16 +25,15 @@
 
 #include "DLANode.h"
 #include "DLAOp.h"
+#include "LLDLA.h"
 
 class InputNode : public DLANode
 {
   NodeType m_type;
+  DataTypeInfo m_dataTypeInfo;
 #if TWOD
   Sizes m_msize, m_nsize;
   Sizes *m_mlsize, *m_nlsize;
-#if DOLLDLA
-  Stride m_rowStride, m_colStride;
-#endif //DOLLDLA
 #else
   Dim m_numDims;
   SizesArray m_sizes;
@@ -47,7 +46,9 @@ class InputNode : public DLANode
 #if DOLLDLA
   InputNode(NodeType type, Size m, Size n, 
 	    string name, 
-	    Stride rowStride, Stride colStride);
+	    Stride rowStride, Stride colStride,
+	    string numRowsVar, string numColsVar,
+	    string rowStrideVar, string colStrideVar);
 #else
   InputNode(NodeType type, Size m, Size n, string name);
 #endif
@@ -64,6 +65,7 @@ class InputNode : public DLANode
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+  virtual const DataTypeInfo& DataType(unsigned int num) const;
 #if DODM
   virtual const DistType& GetDistType(unsigned int num) const { return m_varName.m_type; }
 #endif
@@ -76,10 +78,6 @@ class InputNode : public DLANode
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
-#if DOLLDLA
-  virtual Stride RowStride(unsigned int num) const {return m_rowStride;}
-  virtual Stride ColStride(unsigned int num) const {return m_colStride;}
-#endif //DOLLDLA
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -104,6 +102,7 @@ class OutputNode : public DLANode
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+  virtual const DataTypeInfo& DataType(unsigned int num) const;
 #if DODM
   virtual const DistType& GetDistType(unsigned int num) const;
 #endif
@@ -116,10 +115,6 @@ class OutputNode : public DLANode
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
-#if DOLLDLA
-  virtual Stride RowStride(unsigned int num) const;
-  virtual Stride ColStride(unsigned int num) const;
-#endif //DOLLDLA
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -141,6 +136,7 @@ class ConstVal : public DLANode
   ConstVal(string name, Coef val);
   virtual NodeType GetType() const {return "const val";}
   static Node* BlankInst() { return  new ConstVal("const", COEFZERO); }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -252,15 +248,12 @@ m_distType(D_LASTDIST),
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "tempVar";}
+  virtual const DataTypeInfo& DataType(unsigned int num) const;
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
-#if DOLLDLA
-  virtual Stride RowStride(unsigned int num) const;
-  virtual Stride ColStride(unsigned int num) const;
-#endif //DOLLDLA
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -390,6 +383,7 @@ sdlkfj
   virtual Name GetName(unsigned int num) const;
   virtual NodeType GetType() const {return "ViewPan";}
   static Node* BlankInst() { return new ViewPan(false,""); }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
@@ -434,6 +428,7 @@ sdlkjf
   virtual Name GetName(unsigned int num) const;
   virtual NodeType GetType() const {return "ViewAround";}
   static Node* BlankInst() { return  new ViewAroundDiag(false,""); }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
@@ -495,6 +490,7 @@ bljsdf
   virtual void Prop();
   virtual unsigned int NumOutputs() const {return 1;}
   static Node* BlankInst() { return  new ViewTL(ABSLAYER); }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
@@ -525,6 +521,7 @@ class ViewTLCombine : public DLANode
   virtual void Prop();
   virtual unsigned int NumOutputs() const {return 1;}
   static Node* BlankInst() { return  new ViewTLCombine(ABSLAYER); }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM

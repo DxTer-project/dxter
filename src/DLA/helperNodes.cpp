@@ -35,23 +35,23 @@ InputNode::InputNode()
   m_numDims(0)
 #endif
 {
-#if DOLLDLA
-  m_rowStride = BADSTRIDE;
-  m_colStride = BADSTRIDE;
-#endif //DOLLDLA
 }
 
 #if TWOD
 #if DOLLDLA
-InputNode::InputNode(NodeType type, Size m, Size n, string name, Stride rowStride, Stride colStride)
+InputNode::InputNode(NodeType type, Size m, Size n, string name, 
+		     Stride rowStride, Stride colStride,
+		     string numRowsVar, string numColsVar,
+		     string rowStrideVar, string colStrideVar)
 : 
-m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
+  m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL),
+  m_dataTypeInfo(rowStride, colStride,
+	     numRowsVar, numColsVar,
+	     rowStrideVar, colStrideVar)
 {
   m_msize.AddRepeatedSizes(m, 1, 1);
   m_nsize.AddRepeatedSizes(n, 1, 1);
   m_varName.m_name = name;
-  m_rowStride = rowStride;
-  m_colStride = colStride;
 }
 #else //!DOLLDLA
 InputNode::InputNode(NodeType type, Size m, Size n, string name)
@@ -147,6 +147,11 @@ InputNode::~InputNode()
 #endif
 }
 
+const DataTypeInfo& InputNode::DataType(unsigned int num) const
+{
+  return m_dataTypeInfo;
+}
+
 void InputNode::PrintCode(IndStream &out)
 {
 #if DOTENSORS
@@ -162,6 +167,7 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   DLANode::Duplicate(orig, shallow, possMerging);
   const InputNode *node = (InputNode*)orig;
   m_type = node->m_type;
+  m_dataTypeInfo = node->m_dataTypeInfo;
 #if TWOD
   m_msize = node->m_msize;
   m_nsize = node->m_nsize;
@@ -339,6 +345,8 @@ void InputNode::FlattenCore(ofstream &out) const
 {
   DLANode::FlattenCore(out);
   WRITE(m_type);
+  cout << "not flattening m_dataTypeInfo\n";
+  throw;
 #if TWOD
   Size size = m_msize[0];
   WRITE(size);
@@ -354,6 +362,8 @@ void InputNode::FlattenCore(ofstream &out) const
 void InputNode::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLANode::UnflattenCore(in, info);
+  cout << "not unflattening m_dataTypeInfo\n";
+  throw;
 #if TWOD
   READ(m_type);
   Size size;
@@ -403,6 +413,11 @@ void OutputNode::Prop()
   }
 }
 
+const DataTypeInfo& OutputNode::DataType(unsigned int num) const
+{
+  return InputDataType(0);
+}
+
 #if TWOD
 const Sizes* OutputNode::GetM(unsigned int num) const
 {
@@ -434,17 +449,6 @@ const Sizes* OutputNode::LocalN(unsigned int num) const
 }
 
 
-#if DOLLDLA
-Stride OutputNode::RowStride(unsigned int num) const
-{
-  return InputRowStride(0);
-}
-
-Stride OutputNode::ColStride(unsigned int num) const
-{
-  return InputColStride(0);
-}
-#endif //DOLLDLA
 
 
 #else
@@ -669,6 +673,12 @@ void TempVarNode::Prop()
   }
 }
 
+const DataTypeInfo& TempVarNode::DataType(unsigned int num) const
+{
+  cout << "Didn't implement  TempVarNode::DataType\n";
+  throw;
+}
+
 #if TWOD
 const Sizes* TempVarNode::GetM(unsigned int num) const
 {
@@ -697,18 +707,6 @@ const Sizes* TempVarNode::LocalN(unsigned int num) const
     throw;
   return m_nlsize;
 }
-
-#if DOLLDLA
-Stride TempVarNode::RowStride(unsigned int num) const
-{
-  return InputRowStride(0);
-}
-
-Stride TempVarNode::ColStride(unsigned int num) const
-{
-  return InputColStride(0);
-}
-#endif //DOLLDLA
 
 #elif DOTENSORS
 const Dim TempVarNode::NumDims(unsigned int num) const

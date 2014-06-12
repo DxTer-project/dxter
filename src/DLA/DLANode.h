@@ -60,12 +60,6 @@ class DLANode : public Node
   const Sizes* GetInputN(unsigned int num) const;
   const Sizes* InputLocalM(unsigned int num) const;
   const Sizes* InputLocalN(unsigned int num) const;
-#if DOLLDLA
-  virtual Stride RowStride(unsigned int num) const = 0;
-  virtual Stride ColStride(unsigned int num) const = 0;
-  virtual Stride InputRowStride(unsigned int num) const;
-  virtual Stride InputColStride(unsigned int num) const;  
-#endif //DOLLDLA
 #elif DOTENSORS
   virtual const Dim NumDims(unsigned int num) const = 0;
   virtual const Sizes* Len(unsigned int num, Dim dim) const = 0;
@@ -113,5 +107,16 @@ void LLDLACull(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 #elif DOTENSORS
 void TenCullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 void TenCullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
+
+#endif
+
+
+#if !DOLLDLA
+
+class DataTypeInfo
+{
+ public:
+  DataTypeInfo& operator=(const DataTypeInfo &rhs) {return *this;}
+};
 
 #endif

@@ -157,6 +157,11 @@ void LoopTunnel::Prop()
   }
 }
 
+const DataTypeInfo& LoopTunnel::DataType(unsigned int num) const
+{
+  return InputDataType(0);
+}
+
 #if TWOD
 const Sizes* LoopTunnel::GetM(unsigned int num) const
 {
@@ -270,17 +275,6 @@ const Sizes* LoopTunnel::LocalN(unsigned int num) const
   }
 }
 
-#if DOLLDLA
-Stride LoopTunnel::RowStride(unsigned int num) const
-{
-  return InputRowStride(0);
-}
-
-Stride LoopTunnel::ColStride(unsigned int num) const
-{
-  return InputColStride(0);
-}
-#endif //DOLLDLA
 
 #else
 const Sizes* LoopTunnel::Len(unsigned int num,Dim dim) const

@@ -23,6 +23,14 @@
 
 #include "DLAOp.h"
 
+template<unsigned int numIn, unsigned int numOut>
+const DataTypeInfo& DLAOp<numIn, numOut>::DataType(unsigned int num) const
+{
+  if (num >= numOut)
+    throw;
+  return InputDataType(numIn - numOut + num);  
+}
+
 #if TWOD
 template<unsigned int numIn, unsigned int numOut>
 const Sizes* DLAOp<numIn, numOut>::GetM(unsigned int num) const
@@ -56,23 +64,6 @@ template<unsigned int numIn, unsigned int numOut>
   return InputLocalN(numIn - numOut + num);  
 }
 
-#if DOLLDLA
-template<unsigned int numIn, unsigned int numOut>
-Stride DLAOp<numIn, numOut>::RowStride(unsigned int num) const
-{
-  if (num >= numOut)
-    throw;
-  return InputRowStride(numIn - numOut + num);  
-}
-
-template<unsigned int numIn, unsigned int numOut>
-   Stride DLAOp<numIn, numOut>::ColStride(unsigned int num) const
-{
-  if (num >= numOut)
-    throw;
-  return InputColStride(numIn - numOut + num);  
-}
-#endif //DOLLDLA
 
 #else
 template<unsigned int numIn, unsigned int numOut>
