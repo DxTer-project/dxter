@@ -65,7 +65,17 @@ string IndexArrayVarName(const string &indices)
 {
   return "indices_" + indices;
 }
-#endif
+#endif //DOTENSORS
+
+#if DOLLDLA
+string LoopIndexVarName(unsigned int loopLevel) 
+{
+  std::stringstream name;
+  name << "idx" << loopLevel;
+  return name.str();
+}
+#endif //DOLLDLA
+
 
 #if DOTENSORS
 Var::Var(const DistType &type)
@@ -135,6 +145,15 @@ Var::Var(const string &indices)
   m_compStr = "e" + indices;
 }
 
+#endif //DOTENSORS
+
+#if DOLLDLA
+Var::Var(unsigned int level)
+{
+  m_type = LoopIndexType;
+  m_loopLevel = level;
+  m_compStr = "f" + (char)level;
+}
 #endif
 
 Var::~Var()
@@ -159,6 +178,9 @@ Var::~Var()
       break;
     case (IndexArrayType):
       delete m_indices;
+      break;
+#elif DOLLDLA
+    case (LoopIndexType):
       break;
 #endif
     case (InvalidType) :
@@ -260,6 +282,14 @@ void Var::PrintDecl(IndStream &out) const
 	}
 	break;
       }
+#elif DOLLDA
+    case (LoopIndexType):
+      {
+	out.Indent();
+	string name = GetVarName();
+	*out << "unsigned int " << name << ";\n";
+	break;
+      }
 #endif
     case (InvalidType):
       throw;
@@ -301,7 +331,13 @@ string Var::GetVarName() const
 	return IndexArrayVarName(*m_indices);
 	break;
       }
-#endif
+#elif DOLLDA
+    case (LoopIndexType):
+      {
+	return LoopIndexVarName(m_loopLevel);
+	break;
+      }
+#endif      
     case (InvalidType):
       throw;
       return "";
@@ -339,7 +375,11 @@ Var& Var::operator=(const Var &rhs)
       case (IndexArrayType):
 	delete m_indices;
 	break;
+#elif DOLLDA
+      case (LoopIndexType):
+	break;
 #endif
+
       case (InvalidType):
 	throw;
       }    
@@ -370,6 +410,10 @@ Var& Var::operator=(const Var &rhs)
       break;
     case (IndexArrayType):
       m_indices = new std::string(*(rhs.m_indices));
+      break;
+#elif DOLLDA
+    case (LoopIndexType):
+      m_loopLevel = rhs.m_loopLevel;
       break;
 #endif
     case (InvalidType):

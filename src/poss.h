@@ -115,9 +115,7 @@ class Poss
   void FillClique(NodeSet &set);
   PSet* FormSetForClique(NodeSet &set, bool isCritSect);
 
-#if DOTENSORS
   void AddCurrPossVars(VarSet &set) const;
-#endif
 
   void ClearCurrPoss();
   bool IncrementCurrPoss();

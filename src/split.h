@@ -91,4 +91,9 @@ class Split : public LoopTunnel
   virtual void ClearDataTypeCache();
   virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
   virtual void UpdateLocalSizes();
+#if DOLLDLA
+  string BoundingDimensionVarName();
+#endif
+
+  virtual void AddVariables(VarSet &set) const;
 };

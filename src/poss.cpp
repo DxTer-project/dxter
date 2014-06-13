@@ -3043,7 +3043,6 @@ void Poss::PrintSetConnections()
     throw;
 }
 
-#if DOTENSORS
 void Poss::AddCurrPossVars(VarSet &set) const
 {
   PSetVecConstIter iter = m_sets.begin();
@@ -3056,4 +3055,3 @@ void Poss::AddCurrPossVars(VarSet &set) const
     (*iter2)->AddVariables(set);
   }
 }
-#endif

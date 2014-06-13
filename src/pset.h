@@ -81,9 +81,7 @@ class PSet
   bool CanPrint() const;
   Poss* GetCurrPoss() const;
   void GetCurrTransVec(TransVec &transVec) const;
-#if DOTENSORS
-  void AddCurrPossVars(VarSet &set) const;
-#endif
+  virtual void AddCurrPossVars(VarSet &set) const;
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}

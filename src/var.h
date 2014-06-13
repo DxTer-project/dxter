@@ -23,12 +23,14 @@
 #include "base.h"
 
 #if DOTENSORS
-
 string ModeArrayVarName(const DimVec &vec);
 string IndexPairVarName(Dim dim1, Dim dim2);
 string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2);
 string TensorDistVarName(const DistType &type);
 string IndexArrayVarName(const string &indices);
+#elif DOLLDLA
+string LoopIndexVarName(unsigned int loopLevel);
+string PartVarName(string var, unsigned int part);
 #endif
 
 
@@ -41,6 +43,8 @@ enum VarType {
   ModeArrayPairVarType,
   TensorDistVarType,
   IndexArrayType,
+#elif DOLLDLA
+  LoopIndexType,
 #endif
   InvalidType
 };
@@ -60,6 +64,9 @@ class Var
 #if DODM
     DistType *m_distType;
 #endif
+#if DOLLDLA
+    unsigned int m_loopLevel;
+#endif
   };
   string m_compStr;
  Var() : m_type(InvalidType) {}
@@ -74,8 +81,12 @@ class Var
 #if DODM
   Var(const DistType &type);
 #endif
+#if DOLLDLA
+  Var(unsigned int level);
+  Var(const string &varName, unsigned int partNum);
+#endif
   ~Var();
-    Var& operator=(const Var &rhs);
+  Var& operator=(const Var &rhs);
   string CompStr() const {return m_compStr;}
   void PrintDecl(IndStream &out) const;
   string GetVarName() const;

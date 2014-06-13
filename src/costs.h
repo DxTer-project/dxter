@@ -54,6 +54,7 @@ using namespace std;
 #define RVAL 40
 #define CVAL 40
 #define LLDLA_MU 2
+#define MU_VAR_NAME "MUVALUE"
 #endif 
 #if TWOD
 #define PVAL RVAL*CVAL

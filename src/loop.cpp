@@ -554,15 +554,16 @@ bool Loop::CanMerge(PSet *pset) const
 
 void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
 {
-  string loopLevel = out.LoopLevel(1);
-  
   NodeVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
     if ((*iter)->GetNodeClass() == Split::GetClass()) {
       ((Split*)(*iter))->PrintVarDeclarations(out);
     }
   }
+
 #if DOBLIS
+  string loopLevel = out.LoopLevel(1);
+  
   if (m_type == BLISLOOP) {
     if (m_comm != CORECOMM) {
       bool barrier = false;
@@ -682,13 +683,54 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     out.Indent(1);
     *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
   }
+#elif DOLLDLA
+  if (m_type != LLDLALOOP)
+    throw;
+  if (m_bsSize != USELLDLAMU)
+    throw;
+  Split *split = GetControl();
+  string indexVarName = LoopIndexVarName(LoopLevel());
+  *out << "while ( " << split->GetNameStr(1) << " < " << split->BoundingDimensionVarName() << " )  {\n";
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);
+
   if (m_type == BLISLOOP) {
     out.Indent();
     *out << "}\n";
   }
+  else if (m_type == LLDLALOOP) {
+    out.Indent();
+    *out << split->GetNameStr(1) << " += " << MU_VAR_NAME << ";\n";
+    out.Indent();
+    *out << "}\n";
+  }
+}
+ 
+unsigned int Loop::LoopLevel() const
+{
+  unsigned int level = 0;
+  Poss *poss = m_ownerPoss;
+  while (poss) {
+    if (!poss->m_pset)
+      throw;
+    if (poss->m_pset->IsLoop())
+      ++level;
+    poss = poss->m_pset->m_ownerPoss;
+  }
+  return level;
+}
+ 
+void Loop::AddCurrPossVars(VarSet &set) const
+{
+  PSet::AddCurrPossVars(set);
+  
+#if DOLLDLA
+  if (m_type == LLDLALOOP) {
+    Var var(LoopLevel());
+    set.insert(var);      
+  }
+#endif
 }
 
 void Loop::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)

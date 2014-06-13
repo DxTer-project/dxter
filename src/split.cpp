@@ -23,6 +23,7 @@
 #include "combine.h"
 #include "elemRedist.h"
 #include <cmath>
+#include "LLDLA.h"
 
 Split::Split() : LoopTunnel(LASTTUNNEL), 
 #if TWOD
@@ -1008,11 +1009,30 @@ void Split::PrintVarDeclarations(IndStream &out) const
       << var << "3, " << var << "4, " << var << "5, "
       << var << "6, " << var << "7, " << var << "8\n";
   }
+  else if (type == LLDLALOOP) {
+
+  }
   else
     throw;
 #else
   cout << "need print var code\n";
   throw;
+#endif
+}
+
+void Split::AddVariables(VarSet &set) const
+{
+#if DOLLDA
+  if (m_tunType != SETTUNIN)
+    return;
+  if (GetLoopType() == LLDLALOOP) {
+    if (m_dir != PARTDOWN && m_dir != PARTRIGHT)
+      throw;
+    Var var1(InputNameStr(0), 1);
+    set.insert(var1);
+  }
+  else
+    throw;
 #endif
 }
 
@@ -1339,5 +1359,33 @@ void Split::UpdateLocalSizes()
     throw;
     GetLocalSizes(t, m_sizes+dim, m_lsizes+dim);
   }
+}
+#endif
+
+#if DOLLDLA
+string Split::BoundingDimensionVarName()
+{
+  switch(m_dir)
+    {
+    case (PARTDOWN):
+    case (PARTDIAG):
+      return InputDataType(0).m_numRowsVar;
+      break;
+    case (PARTRIGHT):
+      return InputDataType(0).m_numColsVar;
+	break;
+    case (PARTUPWARD):
+      throw;
+      break;
+    case (PARTLEFT):     
+      throw;
+      break;
+
+    case (PARTDIAGBACK):
+      throw;
+      break;
+    default:
+      throw;
+    }
 }
 #endif
