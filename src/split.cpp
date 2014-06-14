@@ -1010,7 +1010,7 @@ void Split::PrintVarDeclarations(IndStream &out) const
       << var << "6, " << var << "7, " << var << "8\n";
   }
   else if (type == LLDLALOOP) {
-
+    cout << "need var declarations?\n";
   }
   else
     throw;
