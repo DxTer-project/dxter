@@ -56,6 +56,7 @@ class Split : public LoopTunnel
   virtual NodeType GetType() const;
   virtual unsigned int NumOutputs() const;
   virtual bool QuadInUse(Quad quad, bool atEnd) const;
+  virtual bool PartInUse(unsigned int partNum) const;
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "split";}
 #if TWOD

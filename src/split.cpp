@@ -983,41 +983,33 @@ bool Split::QuadInUse(Quad quad, bool atEnd) const
 
 void Split::PrintVarDeclarations(IndStream &out) const
 {
-  if (m_tunType != SETTUNIN)
-    return;
-  //BAMTODO: eventually predefine each obj_t matrix to be used ahead of the loop
-  return;
-#if TWOD
-  LoopType type = GetLoopType();
-  if (type == ELEMLOOP) {
-    
-  }
-  else if (type == BLISLOOP) {
-    string var = GetName(0).str();
-    out.Indent();
-    if (m_dir == PARTDOWN || m_dir == PARTUPWARD) 
-      *out << "obj_t " << var << "T," << var << "B, " 
-      << var << "0, " << var << "1, " << var << "2\n";
-    else if (m_dir == PARTRIGHT || m_dir == PARTLEFT)
-      *out << "obj_t " << var << "L," << var << "R, " 
-      << var << "0, " << var << "1, " << var << "2\n";
-    else if (m_dir == PARTDIAG || m_dir == PARTDIAGBACK)
-      *out << "obj_t " << var << "TL," << var << "TR, " 
-      << var << "BL," << var << "BR, \n" 
-      << out.Tabs(1)
-      << var << "0, " << var << "1, " << var << "2, "
-      << var << "3, " << var << "4, " << var << "5, "
-      << var << "6, " << var << "7, " << var << "8\n";
-  }
-  else if (type == LLDLALOOP) {
-    cout << "need var declarations?\n";
-  }
-  else
+#if DOLLDLA
+  if (m_tunType != POSSTUNIN)
     throw;
-#else
-  cout << "need print var code\n";
-  throw;
+  const string name = GetInputNameStr(0);
+  if (m_dir != PARTDOWN && m_dir != PARTRIGHT)
+    throw;
+  if (PartInUse(0) || PartInUse(2))
+    throw;
+  out.Indent();
+  *out << LLDLAPartVarName(name, 1) << " = " 
+       << name << endl;
 #endif
+}
+
+bool Split::PartInUse(unsigned int partNum) const
+{
+  if (m_tunType != POSSTUNIN)
+    throw;
+  NodeConnVecConstIter iter = m_children.begin();
+  for(; iter != m_children.end(); ++iter) {
+    const NodeConn *conn = *iter;
+    if (conn->m_num == partNum) {
+      if (!conn->m_n->IsPossTunnel(POSSTUNOUT))
+	return true;
+    }
+  }
+  return false;	    
 }
 
 void Split::AddVariables(VarSet &set) const
@@ -1029,20 +1021,17 @@ void Split::AddVariables(VarSet &set) const
     if (m_dir != PARTDOWN && m_dir != PARTRIGHT)
       throw;
     const string name = GetInputNameStr(0);
-    for (unsigned int i = 0; i < NumOutputs()-1; ++i) {
-      NodeConnVecConstIter iter = m_children.begin();
-      bool alreadyAdded = false;
-      for(; !alreadyAdded && iter != m_children.end(); ++iter) {
-	const NodeConn *conn = *iter;
-	if (conn->m_num == i) {
-	  if (!conn->m_n->IsPossTunnel(POSSTUNOUT)) {
-	    Var var(name, i);
-	    set.insert(var);
-	    alreadyAdded = true;
-	  }
-	}
-      }
+    if (PartInUse(0)) {
+      Var var(name, 0);
+      set.insert(var);
     }
+    Var var1(name, 1);
+    set.insert(var1);
+    if (PartInUse(2)) {
+      Var var(name, 2);
+      set.insert(var);
+    }
+
   }
   else
     throw;

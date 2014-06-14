@@ -554,8 +554,9 @@ bool Loop::CanMerge(PSet *pset) const
 
 void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
 {
-  NodeVecIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
+  Poss *poss = GetCurrPoss();
+  NodeVecIter iter = poss->m_inTuns.begin();
+  for(; iter != poss->m_inTuns.end(); ++iter) {
     if ((*iter)->GetNodeClass() == Split::GetClass()) {
       ((Split*)(*iter))->PrintVarDeclarations(out);
     }
@@ -704,8 +705,21 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   }
 #elif DOLLDLA
   if (m_type == LLDLALOOP) {
-    out.Indent(1);
-    *out << LLDLAPartVarName(split->GetInputNameStr(0),1) << " += " << MU_VAR_NAME << ";\n";
+    Poss *poss = GetCurrPoss();
+    NodeVecIter iter = poss->m_inTuns.begin();
+    for(; iter != poss->m_inTuns.end(); ++iter) {
+      Node *node = *iter;
+      if (node->GetNodeClass() == Split::GetClass()) {
+	Split *split = (Split*)node;
+	out.Indent(1);
+	if (split->m_dir != PARTDOWN && split->m_dir != PARTRIGHT)
+	  throw;
+	if (split->PartInUse(0) || split->PartInUse(2))
+	  throw;
+	out.Indent(1);
+	*out << LLDLAPartVarName(split->GetInputNameStr(0),1) << " += " << MU_VAR_NAME << ";\n";
+      }
+    }
     out.Indent();
     *out << "}\n";
   }
