@@ -167,13 +167,14 @@ enum Layers {
 #define DOLLDLAPHASE 0
 
 #elif DOLLDLA
-
+// Layering for LLDLA operations
 #define LLDLAPHASE 0
+#define LLDLAPRIMPHASE 1
 
 #define FIRSTPHASE LLDLAPHASE
 
 //Max phase for which to generate code
-#define MAXPHASE LLDLAPHASE
+#define MAXPHASE LLDLAPRIMPHASE
 #define NUMPHASES (MAXPHASE+1)
 
 //#define DODPPHASE 0
@@ -187,8 +188,9 @@ enum Layers {
 //Software layers
 enum Layers {
   ABSLAYER = 0,
-  CACHEDLLDLALAYER,
-  LLDLAPRIMLAYER,
+  LLDLAMULAYER,
+  MUBYMULLDLALAYER,
+  LLDLAPRIMITIVELAYER,
   BADLAYER,
 };
 

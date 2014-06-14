@@ -41,6 +41,7 @@ class Coef
   string BLISStr() const;
   string ElemStr() const;
   string TenStr() const;
+  string LLDLAStr() const;
   Coef operator*(const Coef &coef) const;
   Coef operator/(const Coef &coef) const;
   void operator=(const Coef &coef);

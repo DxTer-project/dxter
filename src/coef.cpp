@@ -103,6 +103,27 @@ string Coef::TenStr() const
     }
 }
 
+string Coef::LLDLAStr() const
+{
+  switch(m_val)
+    {
+    case (COEFVALALPHA):
+      return "alpha";
+    case(COEFVALBETA):
+      return "beta";
+    case(COEFVALZERO):
+      return "&LLDLA_ZERO";
+    case(COEFVALONE):
+      return "&LLDLA_ONE";
+    case(COEFVALONEHALF):
+      return "&LLDLA_ONE_HALF";
+    case(COEFVALNEGONE):
+      return "&LLDLA_NEG_ONE";
+    case(COEFVALNEGONEHALF):
+      return "&LLDLA_NEG_ONE_HALF";
+    }
+}
+
 Coef Coef::operator*(const Coef &coef) const
 {
   if (m_val == COEFVALONE)

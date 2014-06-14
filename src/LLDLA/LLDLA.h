@@ -67,6 +67,3 @@ class DataTypeInfo
 
 
 #endif //DOLLDLA
-
-
-
