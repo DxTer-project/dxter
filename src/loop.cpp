@@ -699,12 +699,14 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     out.Indent();
     *out << "}\n";
   }
+#if DLLLDLA
   else if (m_type == LLDLALOOP) {
     out.Indent();
     *out << split->GetNameStr(1) << " += " << MU_VAR_NAME << ";\n";
     out.Indent();
     *out << "}\n";
   }
+#endif //DOLLDLA
 }
  
 unsigned int Loop::LoopLevel() const
