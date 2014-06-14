@@ -33,6 +33,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include "primitiveGemm.h"
 
 #if DOLLDLA
 
@@ -181,14 +182,16 @@ PSet* Example1()
 		  tunB,0,
 		  tunC,0);
 
+  Poss *innerPoss = new Poss(gemm,true);
+  PSet *innerSet = new PSet(innerPoss);
+
   OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(gemm,0);
+  Cout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Cout,true);
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
-
 }
 
 
