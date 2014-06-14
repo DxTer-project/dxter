@@ -544,16 +544,17 @@ bool LoopTunnel::InputIsTemp() const
   }
   else if (m_tunType == SETTUNIN) {
     const ClassType type = Input(0)->GetNodeClass();
-#if DOELEM||DOBLIS
+#if DOELEM||DOBLIS||DOLLDLA
     if (type == TempVarNode::GetClass())
       return true;
-    else if (type == ScaleNode::GetClass()) {
+#endif
+#if DOELEM||DOBLIS
+    if (type == ScaleNode::GetClass()) {
       const ScaleNode *scale = (ScaleNode*)Input(0);
       return scale->Input(0)->GetNodeClass() == TempVarNode::GetClass();
     }
-    else
 #endif
-      return false;
+    return false;
   }
   else
     throw;
