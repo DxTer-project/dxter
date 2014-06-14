@@ -65,14 +65,16 @@ string IndexArrayVarName(const string &indices)
 {
   return "indices_" + indices;
 }
+
+
 #endif //DOTENSORS
 
 #if DOLLDLA
-string LoopIndexVarName(unsigned int loopLevel) 
+string LLDLAPartVarName(const string &var, unsigned int part)
 {
-  std::stringstream name;
-  name << "idx" << loopLevel;
-  return name.str();
+  std::stringstream str;
+  str << var << "_" << part;
+  return str.str();
 }
 #endif //DOLLDLA
 
@@ -135,6 +137,7 @@ Var::Var(const DimVec &vec1, const DimVec &vec2)
   m_arrPair = new std::pair<DimVec, DimVec>;
   m_arrPair->first = vec1;
   m_arrPair->second = vec2;
+  m_compStr = str.str();
 }
 
 Var::Var(const string &indices)
@@ -148,11 +151,11 @@ Var::Var(const string &indices)
 #endif //DOTENSORS
 
 #if DOLLDLA
-Var::Var(unsigned int level)
+Var::Var(const string &varName, unsigned int partNum)
 {
-  m_type = LoopIndexType;
-  m_loopLevel = level;
-  m_compStr = "f" + (char)level;
+  m_type = VarPartType;
+  m_part = new string(LLDLAPartVarName(varName, partNum));
+  m_compStr = "f" + *m_part;
 }
 #endif
 
@@ -180,7 +183,8 @@ Var::~Var()
       delete m_indices;
       break;
 #elif DOLLDLA
-    case (LoopIndexType):
+    case (VarPartType):
+      delete m_part;
       break;
 #endif
     case (InvalidType) :
@@ -282,12 +286,11 @@ void Var::PrintDecl(IndStream &out) const
 	}
 	break;
       }
-#elif DOLLDA
-    case (LoopIndexType):
+#elif DOLLDLA
+    case (VarPartType):
       {
 	out.Indent();
-	string name = GetVarName();
-	*out << "unsigned int " << name << ";\n";
+	*out << "double *" << *m_part << ";\n";
 	break;
       }
 #endif
@@ -331,10 +334,10 @@ string Var::GetVarName() const
 	return IndexArrayVarName(*m_indices);
 	break;
       }
-#elif DOLLDA
-    case (LoopIndexType):
+#elif DOLLDLA
+    case (VarPartType):
       {
-	return LoopIndexVarName(m_loopLevel);
+	return *m_part;
 	break;
       }
 #endif      
@@ -375,8 +378,9 @@ Var& Var::operator=(const Var &rhs)
       case (IndexArrayType):
 	delete m_indices;
 	break;
-#elif DOLLDA
-      case (LoopIndexType):
+#elif DOLLDLA
+      case (VarPartType):
+	delete m_part;
 	break;
 #endif
 
@@ -411,9 +415,9 @@ Var& Var::operator=(const Var &rhs)
     case (IndexArrayType):
       m_indices = new std::string(*(rhs.m_indices));
       break;
-#elif DOLLDA
-    case (LoopIndexType):
-      m_loopLevel = rhs.m_loopLevel;
+#elif DOLLDLA
+    case (VarPartType):
+      m_part = new string(*(rhs.m_part));
       break;
 #endif
     case (InvalidType):

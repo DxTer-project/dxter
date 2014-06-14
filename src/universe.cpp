@@ -424,13 +424,8 @@ void Universe::PrintBest()
 #endif
 
     VarSet set;
-#if DOTENSORS
     m_pset->AddCurrPossVars(set);
-#endif
     m_pset->GetCurrPoss()->PrintCurrRoot(optOut, set);
-
-
-
 }
 
 void Universe::Print(IndStream &out, unsigned int &whichGraph)

@@ -29,8 +29,7 @@ string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2);
 string TensorDistVarName(const DistType &type);
 string IndexArrayVarName(const string &indices);
 #elif DOLLDLA
-string LoopIndexVarName(unsigned int loopLevel);
-string PartVarName(string var, unsigned int part);
+string LLDLAPartVarName(const string &var, unsigned int part);
 #endif
 
 
@@ -44,7 +43,7 @@ enum VarType {
   TensorDistVarType,
   IndexArrayType,
 #elif DOLLDLA
-  LoopIndexType,
+  VarPartType,
 #endif
   InvalidType
 };
@@ -65,7 +64,7 @@ class Var
     DistType *m_distType;
 #endif
 #if DOLLDLA
-    unsigned int m_loopLevel;
+    string *m_part;
 #endif
   };
   string m_compStr;
@@ -82,7 +81,6 @@ class Var
   Var(const DistType &type);
 #endif
 #if DOLLDLA
-  Var(unsigned int level);
   Var(const string &varName, unsigned int partNum);
 #endif
   ~Var();

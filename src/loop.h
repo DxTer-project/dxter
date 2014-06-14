@@ -118,7 +118,6 @@ class Loop : public PSet
   inline void SetDimName(DimName dim) {m_dim = dim;}
 #endif
   unsigned int LoopLevel() const;
-  virtual void AddCurrPossVars(VarSet &set) const;
 
   void FillTunnelSizes();
   virtual void BuildDataTypeCache();

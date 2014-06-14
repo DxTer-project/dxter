@@ -81,7 +81,7 @@ class PSet
   bool CanPrint() const;
   Poss* GetCurrPoss() const;
   void GetCurrTransVec(TransVec &transVec) const;
-  virtual void AddCurrPossVars(VarSet &set) const;
+  void AddCurrPossVars(VarSet &set) const;
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}

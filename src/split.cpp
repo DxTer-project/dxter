@@ -1022,14 +1022,27 @@ void Split::PrintVarDeclarations(IndStream &out) const
 
 void Split::AddVariables(VarSet &set) const
 {
-#if DOLLDA
-  if (m_tunType != SETTUNIN)
+#if DOLLDLA
+  if (m_tunType != POSSTUNIN)
     return;
   if (GetLoopType() == LLDLALOOP) {
     if (m_dir != PARTDOWN && m_dir != PARTRIGHT)
       throw;
-    Var var1(InputNameStr(0), 1);
-    set.insert(var1);
+    const string name = GetInputNameStr(0);
+    for (unsigned int i = 0; i < NumOutputs()-1; ++i) {
+      NodeConnVecConstIter iter = m_children.begin();
+      bool alreadyAdded = false;
+      for(; !alreadyAdded && iter != m_children.end(); ++iter) {
+	const NodeConn *conn = *iter;
+	if (conn->m_num == i) {
+	  if (!conn->m_n->IsPossTunnel(POSSTUNOUT)) {
+	    Var var(name, i);
+	    set.insert(var);
+	    alreadyAdded = true;
+	  }
+	}
+      }
+    }
   }
   else
     throw;

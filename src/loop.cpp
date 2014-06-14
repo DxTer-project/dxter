@@ -689,9 +689,10 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   if (m_bsSize != USELLDLAMU)
     throw;
   Split *split = GetControl();
-  string indexVarName = LoopIndexVarName(LoopLevel());
   out.Indent();
-  *out << "while ( " << split->GetInputNameStr(0) << "_1 < " << split->BoundingDimensionVarName() << " )  {\n";
+  *out << "while ( " << LLDLAPartVarName(split->GetInputNameStr(0),1) 
+       << " < " 
+       << split->BoundingDimensionVarName() << " )  {\n";
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);
@@ -704,7 +705,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
 #elif DOLLDLA
   if (m_type == LLDLALOOP) {
     out.Indent(1);
-    *out << split->GetInputNameStr(0) << "_1 += " << MU_VAR_NAME << ";\n";
+    *out << LLDLAPartVarName(split->GetInputNameStr(0),1) << " += " << MU_VAR_NAME << ";\n";
     out.Indent();
     *out << "}\n";
   }
@@ -725,18 +726,6 @@ unsigned int Loop::LoopLevel() const
   return level;
 }
  
-void Loop::AddCurrPossVars(VarSet &set) const
-{
-  PSet::AddCurrPossVars(set);
-  
-#if DOLLDLA
-  if (m_type == LLDLALOOP) {
-    Var var(LoopLevel());
-    set.insert(var);      
-  }
-#endif
-}
-
 void Loop::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
 {
   PSet::Duplicate(orig,map,possMerging);
