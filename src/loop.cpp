@@ -690,19 +690,21 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     throw;
   Split *split = GetControl();
   string indexVarName = LoopIndexVarName(LoopLevel());
-  *out << "while ( " << split->GetNameStr(1) << " < " << split->BoundingDimensionVarName() << " )  {\n";
+  out.Indent();
+  *out << "while ( " << split->GetInputNameStr(0) << "_1 < " << split->BoundingDimensionVarName() << " )  {\n";
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);
 
+#if DOBLIS
   if (m_type == BLISLOOP) {
     out.Indent();
     *out << "}\n";
   }
-#if DLLLDLA
-  else if (m_type == LLDLALOOP) {
-    out.Indent();
-    *out << split->GetNameStr(1) << " += " << MU_VAR_NAME << ";\n";
+#elif DOLLDLA
+  if (m_type == LLDLALOOP) {
+    out.Indent(1);
+    *out << split->GetInputNameStr(0) << "_1 += " << MU_VAR_NAME << ";\n";
     out.Indent();
     *out << "}\n";
   }
