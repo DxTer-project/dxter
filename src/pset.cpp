@@ -416,12 +416,15 @@ void PSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
     throw;
   }
   if (removeFromMyList) {
+    cout << "m_posses has " << m_posses.size() << endl;
     PossMMapIter possIter = m_posses.begin();
     bool found = false;
     for(; !found && possIter != m_posses.end(); ++possIter) {
+      cout << "another iteration\n";
       if ((*possIter).second == poss) {
         m_posses.erase(possIter);
         found = true;
+	break;
       }
     }
     if (!found)
