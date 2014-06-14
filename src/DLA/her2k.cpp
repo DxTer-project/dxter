@@ -94,20 +94,20 @@ void Her2k::Prop()
 
 #if DOELEM
     if (GetLayer() == ABSLAYER) {
-      if (InputDistType(0) != D_MC_MR)
+      if (InputDataType(0).m_dist != D_MC_MR)
 	throw;
-      if (InputDistType(1) != D_MC_MR)
+      if (InputDataType(1).m_dist != D_MC_MR)
 	throw;
     }
     else if (GetLayer() == DMLAYER) {
-      if (InputDistType(2) != D_MC_MR)
+      if (InputDataType(2).m_dist != D_MC_MR)
 	cout << "input not D_MC_MR";
     
     }
     else if (GetLayer() == SMLAYER) {
       DistType t0, t1;
-      t0 = InputDistType(0);
-      t1 = InputDistType(1);
+      t0 = InputDataType(0).m_dist;
+      t1 = InputDataType(1).m_dist;
     
       if (m_trans == NORMAL) {
 	if (t0 == D_STAR_VR) {
@@ -132,7 +132,7 @@ void Her2k::Prop()
 	}
       }
     
-      if (InputDistType(2) != D_STAR_STAR)
+      if (InputDataType(2).m_dist != D_STAR_STAR)
 	throw;
     }
 #endif
@@ -183,20 +183,6 @@ Cost Her2k::GetCost(Layer layer, const Sizes *m, const Sizes *k)
   else
     throw;
 }
-
-#if DOELEM
-const DistType& Her2k::GetDistType(unsigned int num) const
-{
-  if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
-    return MC_MR;
-  else if (GetLayer() == SMLAYER)
-    return InputDistType(2);
-  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER)
-    return InputDistType(2);
-  else
-    throw;
-}
-#endif
 
 void Her2k::FlattenCore(ofstream &out) const
 {
@@ -441,49 +427,49 @@ void Tri2k::Prop()
       DistType t;
     
       if (m_trans == NORMAL) {
-	t = InputDistType(0);
+	t = InputDataType(0).m_dist;
 	if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
 	  throw;
       
-	t = InputDistType(1);
+	t = InputDataType(1).m_dist;
 	if ((t != D_MR_STAR)
 	    && (m_type == REAL && t != D_STAR_MR_T)
 	    && (m_type == COMPLEX && t != D_STAR_MR_H))
 	  throw;
       
-	t = InputDistType(2);
+	t = InputDataType(2).m_dist;
 	if ((t != D_MC_STAR) && (t != D_STAR_MC_T) && (t != D_STAR_MC_H))
 	  throw;
       
-	t = InputDistType(3);
+	t = InputDataType(3).m_dist;
 	if ((t != D_MR_STAR)
 	    && (m_type == REAL && t != D_STAR_MR_T)
 	    && (m_type == COMPLEX && t != D_STAR_MR_H))
 	  throw;
       }
       else {
-	t = InputDistType(0);
+	t = InputDataType(0).m_dist;
 	if ((t != D_STAR_MC)
 	    && (m_type == REAL && t != D_MC_STAR_T)
 	    && (m_type == COMPLEX && t != D_MC_STAR_H))
 	  throw;
       
-	t = InputDistType(1);
+	t = InputDataType(1).m_dist;
 	if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
 	  throw;
       
-	t = InputDistType(2);
+	t = InputDataType(2).m_dist;
 	if ((t != D_STAR_MC)
 	    && (m_type == REAL && t != D_MC_STAR_T)
 	    && (m_type == COMPLEX && t != D_MC_STAR_H))
 	  throw;
       
-	t = InputDistType(3);
+	t = InputDataType(3).m_dist;
 	if ((t != D_STAR_MR) && (t != D_MR_STAR_T))
 	  throw;
       }
     
-      if (InputDistType(4) != D_MC_MR)
+      if (InputDataType(4).m_dist != D_MC_MR)
 	throw;
     }
 #elif DOBLIS
@@ -511,7 +497,7 @@ void Tri2k::Prop()
     if (GetLayer() == SMLAYER) {
       const Sizes *localM = InputLocalM(4);
       const Sizes *localN = InputLocalN(4);
-      const Sizes *others = (UpdateTrans(m_trans, InputDistType(0)) == NORMAL ?
+      const Sizes *others = (UpdateTrans(m_trans, InputDataType(0).m_dist) == NORMAL ?
                              InputLocalN(0) : InputLocalM(0));
       
       m_cost = GetCost(SMLAYER, localM, localN, others);
@@ -555,19 +541,19 @@ void Tri2k::PrintCode(IndStream &out)
       otherExpected = NORMAL;
     
     Trans upTrans;
-    upTrans = UpdateTrans(m_trans, InputDistType(0));
+    upTrans = UpdateTrans(m_trans, InputDataType(0).m_dist);
     if (upTrans != NORMAL)
       *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
     
-    upTrans = UpdateTrans(otherExpected, InputDistType(1));
+    upTrans = UpdateTrans(otherExpected, InputDataType(1).m_dist);
     if (upTrans != NORMAL)
       *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
     
-    upTrans = UpdateTrans(m_trans, InputDistType(2));
+    upTrans = UpdateTrans(m_trans, InputDataType(2).m_dist);
     if (upTrans != NORMAL)
       *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
     
-    upTrans = UpdateTrans(otherExpected, InputDistType(3));
+    upTrans = UpdateTrans(otherExpected, InputDataType(3).m_dist);
     if (upTrans != NORMAL)
       *out << TransToStr(upTrans) << ", \n" << out.Tabs(1) << "";
     

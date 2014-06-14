@@ -66,6 +66,7 @@ m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
   m_varName.m_name = name;
 #if DOELEM
   m_varName.m_type = D_MC_MR;
+  m_dataTypeInfo.m_dist = D_MC_MR;
 #endif
 }
 #endif //DOLLDLA
@@ -74,7 +75,8 @@ m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
 #if DODM&&TWOD
 InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 : m_type(type),
- m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
+  m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL),
+  m_dataTypeInfo(dist)
 {
   m_msize.AddRepeatedSizes(m,1,1);
   m_nsize.AddRepeatedSizes(n,1,1);
@@ -123,6 +125,7 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist
   }
   m_varName.m_name = name;
   m_varName.m_type = dist;
+  m_dataTypeInfo.m_dist = dist;
 }
 #endif
 
@@ -193,6 +196,7 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   }
 #endif
   m_varName = node->m_varName;
+  m_dataTypeInfo = node->m_dataTypeInfo;
 }
 
 void InputNode::Prop()
@@ -382,20 +386,6 @@ void OutputNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
   DLANode::Duplicate(orig, shallow, possMerging);
   m_type = ((OutputNode*)orig)->m_type;
 }
-
-#if DODM
-const DistType& OutputNode::GetDistType(unsigned int num) const 
-{ 
-#if DOELEM
-  return MC_MR; 
-#elif DOTENSORS
-  throw;
-  //  return DEFAULTDISTTYPE;
-#else
-  throw;
-#endif
-}
-#endif
 
 void OutputNode::Prop()
 {
@@ -619,9 +609,7 @@ NodeType TempVarNode::GetType() const
 void TempVarNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig,shallow, possMerging);
-#if DODM
-  m_distType = ((TempVarNode*)orig)->m_distType;
-#endif
+  m_info = ((TempVarNode*)orig)->m_info;
   m_name = ((TempVarNode*)orig)->m_name;
 #if DOTENSORS
   m_sumDims = ((TempVarNode*)orig)->m_sumDims;
@@ -675,8 +663,7 @@ void TempVarNode::Prop()
 
 const DataTypeInfo& TempVarNode::DataType(unsigned int num) const
 {
-  cout << "Didn't implement  TempVarNode::DataType\n";
-  throw;
+  return m_info;
 }
 
 #if TWOD
@@ -762,7 +749,7 @@ Name TempVarNode::GetName(unsigned int num) const
     tmp.m_name = m_name;
   }
 #if DODM
-  tmp.m_type = m_distType;
+  tmp.m_type = m_info.m_dist;
 #endif
   return tmp;
 }
@@ -770,9 +757,7 @@ Name TempVarNode::GetName(unsigned int num) const
 void TempVarNode::FlattenCore(ofstream &out) const
 {
   DLANode::FlattenCore(out);
-#if DODM
-  WRITE(m_distType);
-#endif
+  throw; // m_info
   out << m_name << endl;
 #if DOTENSORS
   throw; //m_sumDims
@@ -782,9 +767,7 @@ void TempVarNode::FlattenCore(ofstream &out) const
 void TempVarNode::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLANode::UnflattenCore(in, info);
-#if DODM
-  READ(m_distType);
-#endif
+  throw; // m_info
   getline(in,m_name);
 #if DOTENSORS
   throw; //m_sumDims
@@ -819,7 +802,7 @@ void TempVarNode::BuildDataTypeCache()
   m_mlsize = new Sizes;
   m_nlsize = new Sizes;
 #if DODM
-  GetLocalSizes(m_distType, GetM(0), GetN(0), *m_mlsize, *m_nlsize);
+  GetLocalSizes(m_info.m_dist, GetM(0), GetN(0), *m_mlsize, *m_nlsize);
 #elif (DOBLIS||DOLLDLA)
   *m_mlsize = *GetM(0);
   *m_nlsize = *GetN(0);
@@ -998,15 +981,6 @@ void ScaleTrapNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_tri = scal->m_tri;
 }
 
-#if DOELEM
-const DistType& ScaleTrapNode::GetDistType(unsigned int num) const
-{
-  if (num > 0)
-    throw;
-  return ((DLANode*)Input(0))->GetDistType(InputConnNum(0));
-}
-#endif
-
 
 void ScaleTrapNode::Prop()
 {
@@ -1067,15 +1041,6 @@ void ScaleNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   ScaleNode *scal = (ScaleNode*)orig;
   m_val = scal->m_val;
 }
-
-#if DODM
-const DistType& ScaleNode::GetDistType(unsigned int num) const
-{
-  if (num > 0)
-    throw;
-  return ((DLANode*)Input(0))->GetDistType(InputConnNum(0));
-}
-#endif
 
 void ScaleNode::FlattenCore(ofstream &out) const
 {
@@ -1146,7 +1111,7 @@ void ViewPan::BuildDataTypeCache()
     return;
   m_sizes = new Sizes;
   m_lsizes = new Sizes;
-  DistType t = GetDistType(0);
+  DistType t = DataType(0).m_dist;
   if (m_isVert) {
     const Sizes *size1 = GetInputM(0);
     const Sizes *size2 = GetInputM(1);
@@ -1314,7 +1279,7 @@ void ViewAroundDiag::BuildDataTypeCache()
   m_lsizes0 = new Sizes;
   m_sizes1 = new Sizes;
   m_lsizes1 = new Sizes;
-  DistType t = GetDistType(0);
+  DistType t = DataType(0).m_dist;
   if (m_isVert) {
     const Sizes *size0 = GetInputM(0);
     const Sizes *size1 = GetInputM(1);

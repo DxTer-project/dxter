@@ -163,14 +163,13 @@ class RedistTrans : public TransTransformation
 class RedistNode : public DLANode
 {
  public:
-  DistType m_destType;
+  DataTypeInfo m_info;
   Sizes *m_mSizes, *m_nSizes;
- RedistNode() : m_destType(UNKNOWN), m_mSizes(NULL), m_nSizes(NULL) {}
+ RedistNode() : m_info(UNKNOWN), m_mSizes(NULL), m_nSizes(NULL) {}
   RedistNode(DistType destType);
   virtual ~RedistNode();
-  virtual const DistType& GetDistType(unsigned int num) const { return m_destType; }
   static Node* BlankInst() { return  new RedistNode; }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
+  virtual const DataTypeInfo& DataType(unsigned int num) const {return m_info;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -201,9 +200,8 @@ class SumScatterNode : public DLANode
   Coef m_coeff;
  SumScatterNode() : m_coeff(COEFZERO) {}
  SumScatterNode(Coef coeff) : m_coeff(coeff) {}
-  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
   static Node* BlankInst() { return  new SumScatterNode; }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
+  virtual const DataTypeInfo& DataType(unsigned int num) const {return InputDataType(1);}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -227,9 +225,8 @@ class SumScatterFrom : public DLANode
 {
  public:
   SumScatterFrom() {}
-  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(1); }
   static Node* BlankInst() { return  new SumScatterFrom; }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
+  virtual const DataTypeInfo& DataType(unsigned int num) const {return InputDataType(1);}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual NodeType GetType() const {return "sumScatterFrom";}
@@ -250,10 +247,9 @@ class SumScatterFrom : public DLANode
 class SumOverCommNode : public DLANode
 {
  public:
-  SumOverCommNode() {} 
-  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
+  SumOverCommNode() {}
   static Node* BlankInst() { return  new SumOverCommNode; }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
+  virtual const DataTypeInfo& DataType(unsigned int num) const {return InputDataType(0);}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

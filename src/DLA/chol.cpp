@@ -45,11 +45,11 @@ void Chol::Prop()
 
 #if DOELEM
   if (m_layer == DMLAYER) {
-    if (InputDistType(0) != D_MC_MR)
+    if (InputDataType(0).m_dist != D_MC_MR)
       cout << "input not D_MC_MR";
   }
   else if (m_layer == SMLAYER) {
-    if (InputDistType(0) != D_STAR_STAR) {
+    if (InputDataType(0).m_dist != D_STAR_STAR) {
       cout << "input not D_STAR_STAR";
       throw;
     }
@@ -86,17 +86,6 @@ void Chol::PrintCode(IndStream &out)
     throw;
 }
 
-#if DOELEM
-const DistType& Chol::GetDistType(unsigned int num) const
-{
-  if (m_layer == ABSLAYER || m_layer == DMLAYER)
-    return MC_MR;
-  else if (m_layer == SMLAYER)
-    return STAR_STAR;
-  else
-    throw;
-}
-#endif
 
 
 void Chol::FlattenCore(ofstream &out) const

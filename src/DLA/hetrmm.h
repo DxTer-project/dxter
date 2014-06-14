@@ -56,9 +56,6 @@ class Hetrmm : public DLAOp<1,1>
   virtual Phase MaxPhase() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-#if DOELEM
-  virtual const DistType& GetDistType(unsigned int num) const;
-#endif
   virtual bool ShouldCullDP() const;
 };
 

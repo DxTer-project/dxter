@@ -84,9 +84,6 @@ class TwoSidedTrxm : public DLAOp<2,1>
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new TwoSidedTrxm(ABSLAYER, false, LOWER); }
   virtual Node* GetNewInst() { return BlankInst(); }
-#if DOELEM
-  virtual const DistType& GetDistType(unsigned int num) const;
-#endif
   virtual Phase MaxPhase() const;
   virtual bool ShouldCullDP() const;
   virtual void Prop();

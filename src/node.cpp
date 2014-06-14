@@ -91,8 +91,8 @@ void Node::Cull(Phase phase)
 #if DOTENSORS
       if (GetNodeClass() == SumScatterUpdateNode::GetClass()) {
 	SumScatterUpdateNode *sum = (SumScatterUpdateNode*)this;
-	cout << "sumscatter " << sum->InputDistType(0).str() 
-	     << " -> " << sum->GetDistType(0).str() << endl;
+	cout << "sumscatter " << sum->InputDataType(0).m_dist.str() 
+	     << " -> " << sum->DataType(0).m_dist.str() << endl;
       }
 
 #endif
@@ -100,14 +100,14 @@ void Node::Cull(Phase phase)
         DLANode *in = (DLANode*)Input(i);
         cout << "Input " << i 
 #if DOELEM
-	     << " " << DistTypeToStr(((DLANode*)this)->InputDistType(i)) << endl;
+	     << " " << DistTypeToStr(((DLANode*)this)->InputDataType(i).m_dist) << endl;
 #else
 	<<endl;
 #endif
         ClassType type = in->GetNodeClass();
 #if DOELEM
         if (type == RedistNode::GetClass()) {
-          cout << DistTypeToStr(in->InputDistType(0)) << endl;
+          cout << DistTypeToStr(in->InputDataType(0).m_dist) << endl;
         }
 #endif
       }

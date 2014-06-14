@@ -62,11 +62,11 @@ void Hetrmm::Prop()
     DLAOp<1,1>::Prop();
 
     if (m_layer == ABSLAYER || m_layer == DMLAYER) {
-      if (InputDistType(0) != D_MC_MR)
+      if (InputDataType(0).m_dist != D_MC_MR)
 	throw;
     }
     else if (m_layer == SMLAYER) {
-      if (InputDistType(0) != D_STAR_STAR)
+      if (InputDataType(0).m_dist != D_STAR_STAR)
 	throw;
     }
     else
@@ -96,18 +96,6 @@ Phase Hetrmm::MaxPhase() const
   throw;
 #endif
 }
-
-#if DOELEM
-const DistType& Hetrmm::GetDistType(unsigned int num) const 
-{ 
-  if (m_layer == DMLAYER || m_layer == ABSLAYER)
-    return MC_MR; 
-  else if (m_layer == SMLAYER)
-    return STAR_STAR;
-  else
-    throw;
-}
-#endif
 
 bool Hetrmm::ShouldCullDP() const 
 {

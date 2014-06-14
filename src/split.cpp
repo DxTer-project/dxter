@@ -1338,7 +1338,7 @@ void Split::UpdateLocalSizes()
   const LoopType loopType = GetMyLoop()->GetType();
   if (loopType == ELEMLOOP) {
 #if DOELEM
-    const DistType t = InputDistType(0);
+    const DistType t = InputDataType(0).m_dist;
 
     for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
       GetLocalSizes(t, m_msizes+subMat, m_nsizes+subMat, m_mlsizes[subMat], m_nlsizes[subMat]);
@@ -1356,7 +1356,7 @@ void Split::UpdateLocalSizes()
 void Split::UpdateLocalSizes()
 {
   Dim numDims = InputNumDims(0);
-  const DistType t = InputDistType(0);
+  const DistType t = InputDataType(0).m_dist;
   for (Dim dim = 0; dim < numDims; ++ dim) {
     throw;
     GetLocalSizes(t, m_sizes+dim, m_lsizes+dim);

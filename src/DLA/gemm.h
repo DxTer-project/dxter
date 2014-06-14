@@ -68,7 +68,6 @@ class Gemm : public DLAOp<3,1>
 
   virtual NodeType GetType() const;
 #if DOELEM
-  virtual const DistType& GetDistType(unsigned int num) const;
   virtual bool CanTransposeInputs() const;
   virtual bool DoNotCullDP() const;
 #endif

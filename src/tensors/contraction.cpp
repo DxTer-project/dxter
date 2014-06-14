@@ -111,11 +111,6 @@ void Contraction::UnflattenCore(ifstream &in, SaveInfo &info)
   getline(in, m_contIndices);
 }
 
-const DistType& Contraction::GetDistType(unsigned int num) const
-{
-  return InputDistType(2);
-}
-
 void Contraction::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -130,13 +125,13 @@ void Contraction::Prop()
 
     if(InputNumDims(2) != m_CIndices.size()) {
       cout << "num " << InputNumDims(2) << endl;
-      cout << "dist " << InputDistType(2).PrettyStr() << endl;
+      cout << "dist " << InputDataType(2).m_dist.PrettyStr() << endl;
       cout << m_CIndices << endl;
       cout << "Input " << Input(2)->GetNodeClass() << endl;
       throw;
     }
 
-    //    const DistType &CType = InputDistType(2);
+    //    const DistType &CType = InputDataType(2).m_dist;
 
     string::iterator strIter = m_contIndices.begin();
     for(; strIter != m_contIndices.end(); ++strIter) {
@@ -190,9 +185,9 @@ void Contraction::CheckInputTypesAlign() const
   if (m_layer != SMLAYER)
     return;
 
-  const DistType &AType = InputDistType(0);
-  const DistType &BType = InputDistType(1);
-  const DistType &CType = InputDistType(2);
+  const DistType &AType = InputDataType(0).m_dist;
+  const DistType &BType = InputDataType(1).m_dist;
+  const DistType &CType = InputDataType(2).m_dist;
     
   Dim dim = 0;
   string::const_iterator strIter = m_CIndices.begin();
@@ -309,7 +304,7 @@ bool DistContToLocalContStatC::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDistType(2).HasNoReped())
+  if (!cont->InputDataType(2).m_dist.HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -325,7 +320,7 @@ void DistContToLocalContStatC::Apply(Node *node) const
   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
     CConn = CConn->m_n->InputConn(0);
 
-  const DistType &CType = ((DLANode*)(CConn->m_n))->GetDistType(CConn->m_num);
+  const DistType &CType = ((DLANode*)(CConn->m_n))->DataType(CConn->m_num).m_dist;
 
   DistType AType;
   MatchDistsAndFillInWithStar(cont->m_AIndices,
@@ -372,9 +367,9 @@ bool DistContToLocalContStatAAllReduce::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDistType(0).HasNoReped())
+  if (!cont->InputDataType(0).m_dist.HasNoReped())
     return false;
-  if (!cont->InputDistType(2).HasNoReped())
+  if (!cont->InputDataType(2).m_dist.HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -390,7 +385,7 @@ void DistContToLocalContStatAAllReduce::Apply(Node *node) const
   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
     AConn = AConn->m_n->InputConn(0);
 
-  const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
+  const DistType &AType = ((DLANode*)(AConn->m_n))->DataType(AConn->m_num).m_dist;
 
   DimVec sumDims;
   string sumIndices;
@@ -440,7 +435,7 @@ void DistContToLocalContStatAAllReduce::Apply(Node *node) const
   sum->AddInput(LCont, 0);
   node->m_poss->AddNode(sum);
 
-  RedistNode *node4 = new RedistNode(cont->GetDistType(0));
+  RedistNode *node4 = new RedistNode(cont->DataType(0).m_dist);
   node4->AddInput(sum);
   node->m_poss->AddNode(node4);
 
@@ -462,7 +457,7 @@ bool DistContToLocalContStatASumScatter::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDistType(0).HasNoReped())
+  if (!cont->InputDataType(0).m_dist.HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -479,7 +474,7 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
     AConn = AConn->m_n->InputConn(0);
 
-  const DistType &AType = ((DLANode*)(AConn->m_n))->GetDistType(AConn->m_num);
+  const DistType &AType = ((DLANode*)(AConn->m_n))->DataType(AConn->m_num).m_dist;
 
   EntrySet sumDims;
   string::iterator iter = cont->m_contIndices.begin();
@@ -523,11 +518,7 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
   node->m_poss->AddNode(sum);
-  /*
-  cout << "Sum scatter " << node->Input(2)->GetNameStr(0) << " " 
-       << LCont->GetDistType(0).PrettyStr() << " -> "
-       << cont->GetDistType(0).PrettyStr() << endl;
-  */
+
 
   //  sum->CheckSumDimsInOutput();
 
@@ -550,9 +541,9 @@ bool DistContToLocalContStatBAllReduce::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDistType(1).HasNoReped())
+  if (!cont->InputDataType(1).m_dist.HasNoReped())
     return false;
-  if (!cont->InputDistType(2).HasNoReped())
+  if (!cont->InputDataType(2).m_dist.HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -569,7 +560,7 @@ void DistContToLocalContStatBAllReduce::Apply(Node *node) const
   if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
     BConn = BConn->m_n->InputConn(0);
 
-  const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
+  const DistType &BType = ((DLANode*)(BConn->m_n))->DataType(BConn->m_num).m_dist;
 
   DimVec sumDims;
   string sumIndices;
@@ -619,7 +610,7 @@ void DistContToLocalContStatBAllReduce::Apply(Node *node) const
   sum->AddInput(LCont, 0);
   node->m_poss->AddNode(sum);
 
-  RedistNode *node4 = new RedistNode(cont->GetDistType(0));
+  RedistNode *node4 = new RedistNode(cont->DataType(0).m_dist);
   node4->AddInput(sum);
   node->m_poss->AddNode(node4);
 
@@ -641,7 +632,7 @@ bool DistContToLocalContStatBSumScatter::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDistType(1).HasNoReped())
+  if (!cont->InputDataType(1).m_dist.HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -658,7 +649,7 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
   if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
     BConn = BConn->m_n->InputConn(0);
 
-  const DistType &BType = ((DLANode*)(BConn->m_n))->GetDistType(BConn->m_num);
+  const DistType &BType = ((DLANode*)(BConn->m_n))->DataType(BConn->m_num).m_dist;
 
   EntrySet sumDims;
   string::iterator iter = cont->m_contIndices.begin();
@@ -924,7 +915,7 @@ void DistContToLocalContStatC::Apply(int num, Node *node, void **cache) const
   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
     CConn = CConn->m_n->InputConn(0);
 
-  const DistType &CType = ((DLANode*)(CConn->m_n))->GetDistType(CConn->m_num);
+    const DistType &CType = ((DLANode*)(CConn->m_n))->DataType(CConn->m_num).m_dist;
 
   DistType AType;
   MatchDistsAndFillIn(cont->GetInputName(0).m_indices,
@@ -959,7 +950,7 @@ void DistContToLocalContStatC::Apply(int num, Node *node, void **cache) const
   if (sum)
     cout << "need different refinement code!\n";
   //  else {
-    node4 = new RedistNode(cont->InputDistType(2));
+    node4 = new RedistNode(cont->InputDataType(2).m_dist);
     node4->AddInput(LCont, 0);
     //  }
     

@@ -44,7 +44,6 @@ class Contraction : public DLAOp<3,1>
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
-  virtual const DistType& GetDistType(unsigned int num) const;
   virtual Phase MaxPhase() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);

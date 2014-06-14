@@ -153,25 +153,6 @@ void Trxm::UnflattenCore(ifstream &in, SaveInfo &info)
   TrProps::UnflattenCore(in,info);
 }
 
-#if DOELEM
-const DistType& Trxm::GetDistType(unsigned int num) const
-{
-  switch(GetLayer()) {
-    case (ABSLAYER):
-    case (DMLAYER):
-      return MC_MR;
-    case (SMLAYER):
-      return InputDistType(1);
-    case (S1LAYER):
-    case (S2LAYER):
-    case (S3LAYER):
-      return InputDistType(1);
-    default:
-      throw;
-  }
-}
-#endif
-
 
 Phase Trxm::MaxPhase() const
 {
@@ -206,7 +187,7 @@ NodeType Trxm::GetType() const
   return (m_invert ? "Trsm" : "Trmm") + LayerNumToStr(GetLayer()) + " " +
   SideToStr(m_side) + " " + TriToStr(m_tri) + " " + TransToStr(m_trans) 
 #if DOELEM
-    + " " + DistTypeToStr(InputDistType(1));
+    + " " + DistTypeToStr(InputDataType(1).m_dist);
 #else
   ;
 #endif  
@@ -234,7 +215,7 @@ void Trxm::Prop()
     
       if (GetLayer() == ABSLAYER) {
 #if DOELEM
-	if (InputDistType(1) != D_MC_MR) {
+	if (InputDataType(1).m_dist != D_MC_MR) {
 	  cout << "input not D_MC_MR 7";
 	  throw;
 	}
@@ -245,14 +226,14 @@ void Trxm::Prop()
 	if (m_inputs.size() != 2)
 	  cout << "1 m_inputs.size() != 2\n";
 	else {
-	  if (InputDistType(0) != D_MC_MR)
+	  if (InputDataType(0).m_dist != D_MC_MR)
 	    cout << "input not D_MC_MR 1 from " << Input(0)->GetType() << endl;
-	  if (InputDistType(1) != D_MC_MR)
+	  if (InputDataType(1).m_dist != D_MC_MR)
 	    cout << "input not D_MC_MR 2 from " << Input(0)->GetType() << endl;
 	}
       }
       else if (GetLayer() == SMLAYER) {
-	if (InputDistType(0) == D_VC_STAR && InputDistType(1) == D_VC_STAR) {
+	if (InputDataType(0).m_dist == D_VC_STAR && InputDataType(1).m_dist == D_VC_STAR) {
 	  if (m_tri != LOWER || m_side != LEFT || m_trans != NORMAL)
 	    throw;
 	  if (m_inputs.size() != 2)
@@ -262,7 +243,7 @@ void Trxm::Prop()
 	  if (m_inputs.size() != 2)
 	    cout << "2 m_inputs.size() != 2\n";
 	  else {
-	    if (InputDistType(0) != D_STAR_STAR)
+	    if (InputDataType(0).m_dist != D_STAR_STAR)
 	      cout << "input not D_STAR_STAR";
 	  }
 	}
@@ -275,9 +256,9 @@ void Trxm::Prop()
 	if (m_inputs.size() != 2)
 	  cout << "1 m_inputs.size() != 2\n";
 	else {
-	  if (InputDistType(0) != D_MC_MR)
+	  if (InputDataType(0).m_dist != D_MC_MR)
 	    cout << "input not D_MC_MR 1 from " << Input(0)->GetType() << endl;
-	  if (InputDistType(1) != D_MC_MR)
+	  if (InputDataType(1).m_dist != D_MC_MR)
 	    cout << "input not D_MC_MR 2 from " << Input(0)->GetType() << endl;
 	}
       }
@@ -287,12 +268,12 @@ void Trxm::Prop()
 	  throw;
 	}
 	else {
-	  if (InputDistType(0) != D_STAR_STAR) {
+	  if (InputDataType(0).m_dist != D_STAR_STAR) {
 	    cout << "input not D_STAR_STAR";
 	    throw;
 	  }
-	  DistType type = InputDistType(1);
-	  if (type != GetDistType(0))
+	  DistType type = InputDataType(1).m_dist;
+	  if (type != DataType(0).m_dist)
 	    m_poss->MarkInsane();
 	}
       }
@@ -330,7 +311,7 @@ void Trxm::PrintCode(IndStream &out)
         *out << "DistTrsm( ";
         break;
       case (SMLAYER):
-        if (InputDistType(0) == D_VC_STAR && InputDistType(1) == D_VC_STAR)
+        if (InputDataType(0).m_dist == D_VC_STAR && InputDataType(1).m_dist == D_VC_STAR)
           *out << "internal::SpecialLocalTrsm( ";
         else
           *out << "internal::LocalTrsm( ";
@@ -420,24 +401,6 @@ void Trmm3::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_beta);
 }
 
-#if DOELEM
-const DistType& Trmm3::GetDistType(unsigned int num) const
-{
-  switch(GetLayer()) {
-    case (ABSLAYER):
-    case (DMLAYER):
-      return MC_MR;
-    case (SMLAYER):
-      return InputDistType(2);
-    case (S1LAYER):
-    case (S2LAYER):
-      return InputDistType(2);
-    default:
-      throw;
-  }
-}
-#endif
-
 
 Phase Trmm3::MaxPhase() const
 {
@@ -474,7 +437,7 @@ NodeType Trmm3::GetType() const
   return "Trmm3" + LayerNumToStr(GetLayer()) + " " +
   SideToStr(m_side) + " " + TriToStr(m_tri) + " " + TransToStr(m_trans) 
 #if DOELEM
-    + " " + DistTypeToStr(InputDistType(1));
+    + " " + DistTypeToStr(InputDataType(1).m_dist);
 #elif DOBLIS
   ;
 #endif
@@ -838,7 +801,7 @@ void LocalTrmmAcc::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
-    bool isTrans = IsTransType(GetDistType(0));
+    bool isTrans = IsTransType(DataType(0).m_dist);
     m_cost = GetCost(m_side, isTrans, LocalM(0), LocalN(0));
   }
 }
@@ -1155,8 +1118,8 @@ bool TrxmTrans::CanApply(const Node *node) const
     }
     else {
       RedistNode *redist = (RedistNode*)(node->Child(i));
-      DistType inType = ((DLANode*)node)->GetDistType(0);
-      if (!CanTrans(inType, redist->m_destType, true))
+      DistType inType = ((DLANode*)node)->DataType(0).m_dist;
+      if (!CanTrans(inType, redist->m_info.m_dist, true))
         return false;
     }
   }

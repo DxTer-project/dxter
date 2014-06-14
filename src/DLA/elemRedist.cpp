@@ -665,7 +665,7 @@ bool RemoveWastedRedist::CanApply(const Node *node) const
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
   RedistNode *redistNode = (RedistNode*)node;
-  if (redistNode->GetDistType(0) != m_destType)
+  if (redistNode->m_info.m_dist != m_destType)
     return false;
   if (node->m_children.size() == 0)
     throw;
@@ -673,18 +673,18 @@ bool RemoveWastedRedist::CanApply(const Node *node) const
         && (redistNode->Input(0)->GetNodeClass() == RedistNode::GetClass()))
     {
       redistNode = (RedistNode*)redistNode->Input(0);
-      if (redistNode->GetDistType(0) == m_destType)
+      if (redistNode->m_info.m_dist == m_destType)
 	return true;
       for(unsigned int i = 0; i < redistNode->m_children.size(); ++i) {
 	Node *tmp = redistNode->Child(i);
 	if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
-	  if (((RedistNode*)tmp)->m_destType == m_destType)
+	  if (((RedistNode*)tmp)->m_info.m_dist == m_destType)
 	    return true;
 	}
       }
     }
   if (redistNode->Input(0)
-      && (((DLANode*)(redistNode->Input(0)))->GetDistType(redistNode->InputConnNum(0)) == m_destType))
+      && (((DLANode*)(redistNode->Input(0)))->DataType(redistNode->InputConnNum(0)).m_dist == m_destType))
     return true;
   return false;
 }
@@ -696,7 +696,7 @@ void RemoveWastedRedist::Apply(Node *node) const
         && (redistNode->Input(0)->GetNodeClass() == RedistNode::GetClass()))
     {
       redistNode = (RedistNode*)redistNode->Input(0);
-      if (redistNode->GetDistType(0) == m_destType) {
+      if (redistNode->m_info.m_dist == m_destType) {
 	node->RedirectChildren(redistNode, 0);
 	node->m_poss->DeleteChildAndCleanUp(node);
 	return;
@@ -704,7 +704,7 @@ void RemoveWastedRedist::Apply(Node *node) const
       for(unsigned int i = 0; i < redistNode->m_children.size(); ++i) {
 	Node *tmp = redistNode->Child(i);
 	if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
-	  if (((RedistNode*)tmp)->m_destType == m_destType) {
+	  if (((RedistNode*)tmp)->m_info.m_dist == m_destType) {
 	    node->RedirectChildren(tmp, 0);
 	    node->m_poss->DeleteChildAndCleanUp(node);
 	    return;
@@ -713,7 +713,7 @@ void RemoveWastedRedist::Apply(Node *node) const
       }
     }
   if (redistNode->Input(0)
-      && (((DLANode*)redistNode->Input(0))->GetDistType(redistNode->InputConnNum(0)) == m_destType))
+      && (((DLANode*)redistNode->Input(0))->DataType(redistNode->InputConnNum(0)).m_dist == m_destType))
     {
       node->RedirectChildren(redistNode->Input(0), redistNode->InputConnNum(0));
       node->m_poss->DeleteChildAndCleanUp(node);
@@ -735,11 +735,11 @@ bool ExpandRedistribution<SrcType, DestType>::CanApply(const Node *node) const
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
   RedistNode *redistNode = (RedistNode*)node;
-  if (redistNode->GetDistType(0) != DestType)
+  if (redistNode->m_info.m_dist != DestType)
     return false;
   Node *input = redistNode->Input(0);
   if (!input 
-      || (((DLANode*)input)->GetDistType(redistNode->InputConnNum(0)) != SrcType))
+      || ((input->DataType(redistNode->InputConnNum(0)).m_dist != SrcType)))
     return false;
   return true;
 }
@@ -898,18 +898,18 @@ CombineRedistribs::CombineRedistribs(DistType srcType, DistType destType)
 bool CombineRedistribs::CanApply(const Node *node) const
 {
   const static ClassType classType = RedistNode::GetClass();
-  if (((RedistNode*)node)->m_destType != m_destType)
+  if (((RedistNode*)node)->m_info.m_dist != m_destType)
     return false;
   const Node *parent = node->Input(0);
   if (!parent
-      || (((DLANode*)parent)->GetDistType(node->InputConnNum(0)) != m_srcType))
+      || (((DLANode*)parent)->DataType(node->InputConnNum(0)).m_dist != m_srcType))
     return false;
   NodeConnVecConstIter iter = parent->m_children.begin();
   for( ; iter != parent->m_children.end(); ++iter) {
     DLANode *output = (DLANode*)((*iter)->m_n);
     if (output != node
         && (output->GetNodeClass() == classType)
-        && (((RedistNode*)output)->m_destType == m_destType)
+        && (((RedistNode*)output)->m_info.m_dist == m_destType)
         && (output->InputConnNum(0) == node->InputConnNum(0))) {
       return true;
     }
@@ -925,7 +925,7 @@ void CombineRedistribs::Apply(Node *node) const
     DLANode *output = (DLANode*)(*iter)->m_n;
     if (output != node
         && (output->GetNodeClass() == RedistNode::GetClass())
-        && (output->GetDistType(0) == m_destType)
+        && (output->DataType(0).m_dist == m_destType)
         && (output->InputConnNum(0) == node->InputConnNum(0))) {
       output->RedirectChildren(node,0);
       output->m_poss->DeleteChildAndCleanUp(output);
@@ -945,12 +945,12 @@ bool RemoveNOPRedistribs::CanApply(const Node *node) const
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
   DLANode *ddla = (DLANode*)node;
-  if (ddla->GetDistType(0) != m_distribType) {
+  if (ddla->DataType(0).m_dist != m_distribType) {
     return false;
   }
   Node *parent = ddla->Input(0);
   if (!parent
-      || (((DLANode*)parent)->GetDistType(node->InputConnNum(0)) != m_distribType)) {
+      || (((DLANode*)parent)->DataType(node->InputConnNum(0)).m_dist != m_distribType)) {
     return false;
   }
   return true;
@@ -976,7 +976,7 @@ DLANode* FindRedistribution(DLANode *root, unsigned int num, DLANode *ignore, Di
 {
   if (!root)
     return NULL;
-  if (root->GetDistType(num) == type) {
+  if (root->DataType(num).m_dist == type) {
     outNum = num;
     return root;
   }
@@ -986,7 +986,7 @@ DLANode* FindRedistribution(DLANode *root, unsigned int num, DLANode *ignore, Di
       DLANode *output = (DLANode*)(*iter)->m_n;
       if (output != ignore) {
         if ((output->GetNodeClass() == RedistNode::GetClass())) {
-          if (output->GetDistType(0) == type) {
+          if (output->DataType(0).m_dist == type) {
             outNum = 0;
             return output;
           }
@@ -1010,16 +1010,16 @@ bool FindMidDistributions::CanApply(const Node *node) const
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
   DLANode *ddla = (DLANode*)node;
-  if (ddla->GetDistType(0) != m_destType)
+  if (ddla->DataType(0).m_dist != m_destType)
     return false;
   DLANode *parent = (DLANode*)(ddla->Input(0));
   if (!parent
-      || ((parent)->GetDistType(node->InputConnNum(0)) != m_srcType))
+      || ((parent)->DataType(node->InputConnNum(0)).m_dist != m_srcType))
     return false;
   for(unsigned int i = 0; i < ddla->m_children.size(); ++i) {
     if (ddla->Child(i)->GetNodeClass() == RedistNode::GetClass()) {
       RedistNode *tmp = (RedistNode*)(ddla->Child(i));
-      if (tmp->m_destType == m_midType) {
+      if (tmp->m_info.m_dist == m_midType) {
 	return true;
       }
     }
@@ -1035,7 +1035,7 @@ void FindMidDistributions::Apply(Node *node) const
   for(unsigned int i = 0; i < ddla->m_children.size(); ++i) {
     if (ddla->Child(i)->GetNodeClass() == RedistNode::GetClass()) {
       RedistNode *tmp = (RedistNode*)(ddla->Child(i));
-      if (tmp->m_destType == m_midType) {
+      if (tmp->m_info.m_dist == m_midType) {
 	tmp->ChangeInput2Way(ddla, ddla->ChildConnNum(i), parent, ddla->InputConnNum(0));
 	ddla->ChangeInput2Way(parent, ddla->InputConnNum(0), tmp, 0);
 	if (ddla->m_children.size() == 0)
@@ -1068,11 +1068,11 @@ bool ReplaceWithTrans::CanApply(const Node *node) const
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
   DLANode *ddla = (DLANode*)node;
-  if (ddla->GetDistType(0) != m_origDestType)
+  if (ddla->DataType(0).m_dist != m_origDestType)
     return false;
   Node *parent = ddla->Input(0);
   if (!parent
-      || (((DLANode*)parent)->GetDistType(node->InputConnNum(0)) != m_srcType))
+      || (((DLANode*)parent)->DataType(node->InputConnNum(0)).m_dist != m_srcType))
     return false;
   
   return true;
@@ -1141,15 +1141,15 @@ bool RedistTrans::CanApply(const Node *node) const
     return false;
   RedistNode *redist = (RedistNode*)node;
   DLANode *source = (DLANode*)redist->Input(0);
-  switch(redist->m_destType) {
+  switch(redist->m_info.m_dist) {
   case(D_STAR_VR):
-    return redist->InputDistType(0) == D_STAR_MR && source->CanTrans();
+    return redist->InputDataType(0).m_dist == D_STAR_MR && source->CanTrans();
   case(D_VR_STAR):
-    return redist->InputDistType(0) == D_MR_STAR && source->CanTrans();
+    return redist->InputDataType(0).m_dist == D_MR_STAR && source->CanTrans();
   case(D_STAR_VC):
-    return redist->InputDistType(0) == D_STAR_MC && source->CanTrans();
+    return redist->InputDataType(0).m_dist == D_STAR_MC && source->CanTrans();
   case(D_VC_STAR):
-    return redist->InputDistType(0) == D_MC_STAR && source->CanTrans();
+    return redist->InputDataType(0).m_dist == D_MC_STAR && source->CanTrans();
   default:
     return false;
   }
@@ -1161,7 +1161,7 @@ bool RedistTrans::WorthApplying(const Node *node) const
 }
 
 RedistNode::RedistNode(DistType destType)
-  : m_destType(destType), m_mSizes(NULL), m_nSizes(NULL)
+  : m_info(destType), m_mSizes(NULL), m_nSizes(NULL)
 {
 }
 
@@ -1179,20 +1179,20 @@ void RedistNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig,shallow, possMerging);
   const RedistNode *origNode = (RedistNode*)orig;
-  m_destType = origNode->m_destType;
+  m_info = origNode->m_info;
 }
 
 NodeType RedistNode::GetType() const
 {
   if (m_inputs.empty()) {
-    return "RedistNode to " + DistTypeToStr(m_destType) +
+    return "RedistNode to " + DistTypeToStr(m_info.m_dist) +
       " without parent";
   }
   else {
     Node *parent = Input(0);
-    DistType type = ((DLANode*)parent)->GetDistType(InputConnNum(0));
+    DistType type = ((DLANode*)parent)->DataType(InputConnNum(0)).m_dist;
     return  "RedistNode " + DistTypeToStr(type) +
-      " -> " + DistTypeToStr(m_destType);
+      " -> " + DistTypeToStr(m_info.m_dist);
   }
 }
 
@@ -1209,11 +1209,11 @@ void RedistNode::Prop()
       throw;
 
     DLANode *parent = (DLANode*)Input(0);
-    DistType m_srcType = parent->GetDistType(InputConnNum(0));
+    DistType m_srcType = parent->DataType(InputConnNum(0)).m_dist;
     const Sizes *m = GetM(0);
     const Sizes *n = GetN(0);
     parent->Prop();
-    m_cost = GetCost(m_srcType, m_destType, m, n);
+    m_cost = GetCost(m_srcType, m_info.m_dist, m, n);
   }
 
 }
@@ -1328,26 +1328,26 @@ Name RedistNode::GetName(unsigned int num) const
   if (num > 0)
     throw;
   Name name = GetInputName(0);
-  name.m_type = m_destType;
+  name.m_type = m_info.m_dist;
   return name;
 }
 
 void RedistNode::PrintCode(IndStream &out)
 {  
   out.Indent();
-  DistType in = InputDistType(0);
-  if ((in == D_MR_MC_H && m_destType == D_MC_MR) || 
-      (in == D_VC_STAR_H && m_destType == D_STAR_MC)) {
+  DistType in = InputDataType(0).m_dist;
+  if ((in == D_MR_MC_H && m_info.m_dist == D_MC_MR) || 
+      (in == D_VC_STAR_H && m_info.m_dist == D_STAR_MC)) {
     *out << "Adjoint( " << GetInputNameStr(0) << ".LockedLocalMatrix(), " 
 	 << GetName(0).str() << " );\n";
   }
-  else if ((in == D_MR_MC_T && m_destType == D_MC_MR) ||
-	   (in == D_VC_STAR_T && m_destType == D_STAR_MC)) {
+  else if ((in == D_MR_MC_T && m_info.m_dist == D_MC_MR) ||
+	   (in == D_VC_STAR_T && m_info.m_dist == D_STAR_MC)) {
     *out << "Transpose( " << GetInputNameStr(0) << ".LockedLocalMatrix(), " 
     << GetName(0).str() << ".LocalMatrix() );\n";
   }
   else {
-    switch(m_destType) {
+    switch(m_info.m_dist) {
     case (D_MC_STAR_T) :
     case (D_STAR_MC_T) :
     case (D_MR_STAR_T) :
@@ -1367,7 +1367,7 @@ void RedistNode::PrintCode(IndStream &out)
 	   << " );\n";
       break;
     default:
-      switch(((DLANode*)Input(0))->GetDistType(InputConnNum(0))) {
+      switch(((DLANode*)Input(0))->DataType(InputConnNum(0)).m_dist) {
       case (D_MC_STAR_T) :
       case (D_STAR_MC_T) :
       case (D_MR_STAR_T) :
@@ -1399,7 +1399,7 @@ void RedistNode::PrintCode(IndStream &out)
 
 bool RedistNode::CanTrans() const
 {
-  return ::CanTrans(InputDistType(0),m_destType);
+  return ::CanTrans(InputDataType(0).m_dist,m_info.m_dist);
 }
 
 RedistNode* RedistNode::CreateTrans(Trans trans)
@@ -1410,11 +1410,11 @@ RedistNode* RedistNode::CreateTrans(Trans trans)
   }
   if (!CanTrans()) {
     cout << "Tried to transpose when it wasn't possible\n";
-    cout << DistTypeToStr(InputDistType(0)) << endl;
-    cout << DistTypeToStr(m_destType) << endl;
+    cout << DistTypeToStr(InputDataType(0).m_dist) << endl;
+    cout << DistTypeToStr(m_info.m_dist) << endl;
     throw;
   }
-  switch (m_destType) {
+  switch (m_info.m_dist) {
     case (D_STAR_MR):
       return new RedistNode(trans==TRANS ? D_MR_STAR_T : D_MR_STAR_H);
     case (D_STAR_MC):
@@ -1433,14 +1433,16 @@ RedistNode* RedistNode::CreateTrans(Trans trans)
 void RedistNode::FlattenCore(ofstream &out) const
 {
   DLANode::FlattenCore(out);
-  WRITE(m_destType);
+  throw;
+  //not handling m_info
 }
 
 
 void RedistNode::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLANode::UnflattenCore(in, info);
-  READ(m_destType);
+  throw;
+  //not handling m_info
 }
 
 void SumScatterNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
@@ -1487,9 +1489,9 @@ void SumScatterNode::Prop()
     from->Prop();
     to->Prop();
     
-    DistType destType = to->GetDistType(InputConnNum(1));
+    DistType destType = to->DataType(InputConnNum(1)).m_dist;
     
-    DistType m_srcType = from->GetDistType(InputConnNum(0));
+    DistType m_srcType = from->DataType(InputConnNum(0)).m_dist;
 
     const Sizes *localMs = LocalM(0);
     const Sizes *localNs = LocalN(0);
@@ -1599,7 +1601,7 @@ Name SumScatterNode::GetName(unsigned int num) const
 {
   if (num > 0)
     throw;
-  DistType m_destType = ((DLANode*)Input(1))->GetDistType(InputConnNum(1));
+  DistType m_destType = ((DLANode*)Input(1))->DataType(InputConnNum(1)).m_dist;
   Name tmp = GetInputName(1);
   tmp.m_type = m_destType;
   return tmp;
@@ -1607,11 +1609,11 @@ Name SumScatterNode::GetName(unsigned int num) const
 
 void SumScatterNode::PrintCode(IndStream &out)
 {  
-  DistType inType = InputDistType(0);
+  DistType inType = InputDataType(0).m_dist;
   out.Indent();
   Trans trans = DistTransType(inType);
   if (trans != NORMAL) {
-    Trans trans2 = DistTransType(InputDistType(1));
+    Trans trans2 = DistTransType(InputDataType(1).m_dist);
     if (trans2 != NORMAL) {
       if (trans != trans2)
 	throw;
@@ -1669,8 +1671,8 @@ void SumScatterFrom::Prop()
     from->Prop();
     to->Prop();
     
-    DistType destType = to->GetDistType(InputConnNum(1));
-    DistType m_srcType = from->GetDistType(InputConnNum(0));
+    DistType destType = to->DataType(InputConnNum(1)).m_dist;
+    DistType m_srcType = from->DataType(InputConnNum(0)).m_dist;
 
     const Sizes *localMs = LocalM(0);
     const Sizes *localNs = LocalN(0);
@@ -1773,7 +1775,7 @@ Name SumScatterFrom::GetName(unsigned int num) const
 {
   if (num > 0)
     throw;
-  DistType m_destType = ((DLANode*)Input(1))->GetDistType(InputConnNum(1));
+  DistType m_destType = ((DLANode*)Input(1))->DataType(InputConnNum(1)).m_dist;
   Name tmp = GetInputName(1);
   tmp.m_type = m_destType;
   return tmp;
@@ -1822,7 +1824,7 @@ void SumOverCommNode::Prop()
       throw;
     }   
  
-   DistType destType = InputDistType(0);
+   DistType destType = InputDataType(0).m_dist;
     if (GetRowDist(destType) != STAR && GetColDist(destType) != STAR)
       throw;
 
@@ -1895,7 +1897,7 @@ Name SumOverCommNode::GetName(unsigned int num) const
 {
   if (num > 0)
     throw;
-  DistType m_destType = ((DLANode*)Input(0))->GetDistType(InputConnNum(0));
+  DistType m_destType = ((DLANode*)Input(0))->DataType(InputConnNum(0)).m_dist;
   Name tmp = GetInputName(0);
   tmp.m_type = m_destType;
   return tmp;
@@ -1903,7 +1905,7 @@ Name SumOverCommNode::GetName(unsigned int num) const
 
 void SumOverCommNode::PrintCode(IndStream &out)
 {
-  DistType type = InputDistType(0);
+  DistType type = InputDataType(0).m_dist;
   out.Indent();
   *out << GetName(0).str();
   if (type == D_MC_STAR || type == D_STAR_MC)
@@ -1939,7 +1941,7 @@ void RedistNode::BuildDataTypeCache()
   }
   m_mSizes = new Sizes;
   m_nSizes = new Sizes;
-  GetLocalSizes(m_destType, ms, ns, *m_mSizes, *m_nSizes);
+  GetLocalSizes(m_info.m_dist, ms, ns, *m_mSizes, *m_nSizes);
 }
 
 const Sizes* RedistNode::LocalM(unsigned int num) const
@@ -2001,7 +2003,7 @@ bool UniqueTransTrans::CanApply(const Node *node) const
   if (node->GetNodeClass() != RedistNode::GetClass()) 
     return false;
   RedistNode *redist = (RedistNode*)node;
-  if (redist->m_destType == D_STAR_MC) {
+  if (redist->m_info.m_dist == D_STAR_MC) {
     const DLANode *par = (DLANode*)(redist->Input(0));
     unsigned int num = redist->InputConnNum(0);
     NodeConnVecConstIter iter = par->m_children.begin();
@@ -2010,7 +2012,7 @@ bool UniqueTransTrans::CanApply(const Node *node) const
 	const DLANode *child = (DLANode*)(*iter)->m_n;
 	if (child->GetNodeClass() == RedistNode::GetClass()) {
 	  const RedistNode *childRedist = (RedistNode*)child;
-	  if (childRedist->m_destType == D_MR_STAR_H || childRedist->m_destType == D_MR_STAR_T)
+	  if (childRedist->m_info.m_dist == D_MR_STAR_H || childRedist->m_info.m_dist == D_MR_STAR_T)
 	    return true;
 	}
       }
@@ -2024,7 +2026,7 @@ void UniqueTransTrans::Apply(Node *node) const
   if (node->GetNodeClass() != RedistNode::GetClass()) 
     throw;
   RedistNode *redist = (RedistNode*)node;
-  if (redist->m_destType == D_STAR_MC) {
+  if (redist->m_info.m_dist == D_STAR_MC) {
     DLANode *par = (DLANode*)(redist->Input(0));
     unsigned int num = redist->InputConnNum(0);
     NodeConnVecIter iter = par->m_children.begin();
@@ -2033,9 +2035,9 @@ void UniqueTransTrans::Apply(Node *node) const
 	DLANode *child = (DLANode*)(*iter)->m_n;
 	if (child->GetNodeClass() == RedistNode::GetClass()) {
 	  RedistNode *childRedist = (RedistNode*)child;
-	  if (childRedist->m_destType == D_MR_STAR_H || childRedist->m_destType == D_MR_STAR_T) {
+	  if (childRedist->m_info.m_dist == D_MR_STAR_H || childRedist->m_info.m_dist == D_MR_STAR_T) {
 	    RedistNode *redist 
-	      = new RedistNode(childRedist->m_destType == D_MR_STAR_H ? D_VC_STAR_H : D_VC_STAR_T);
+	      = new RedistNode(childRedist->m_info.m_dist == D_MR_STAR_H ? D_VC_STAR_H : D_VC_STAR_T);
 	    redist->AddInput(childRedist, 0);
 	    node->ChangeInput2Way(par, num, redist, 0);
 	    node->m_poss->AddNode(redist);
@@ -2068,10 +2070,10 @@ bool UseTransposedRedist::CanApply(const Node *node) const
   if (node->GetNodeClass() != RedistNode::GetClass())
     return false;
   RedistNode *redist = (RedistNode*)node;
-  if (redist->m_destType != m_destType)
+  if (redist->m_info.m_dist != m_destType)
     return false;
-  if (redist->InputDistType(0) == m_srcType1 ||
-      redist->InputDistType(0) == m_srcType2)
+  if (redist->InputDataType(0).m_dist == m_srcType1 ||
+      redist->InputDataType(0).m_dist == m_srcType2)
     return false;
   DLANode *parent = (DLANode*)(redist->Input(0));
   unsigned int outNum;
@@ -2091,7 +2093,7 @@ void UseTransposedRedist::Apply(Node *node) const
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
   RedistNode *redist = (RedistNode*)node;
-  if (redist->m_destType != m_destType)
+  if (redist->m_info.m_dist != m_destType)
     throw;
   DLANode *parent = (DLANode*)(redist->Input(0));
   unsigned int outNum;

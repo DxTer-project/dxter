@@ -34,6 +34,7 @@
 class RedistNode : public DLANode
 {
  public:
+  DataTypeInfo m_info;
   DistType m_destType;
   SizesArray m_lsizes;
   bool m_isArray;
@@ -41,9 +42,8 @@ class RedistNode : public DLANode
   RedistNode();
   RedistNode(const DistType &destType);
   virtual ~RedistNode();
-  virtual const DistType& GetDistType(unsigned int num) const { return m_destType; }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {return m_info; }
   static Node* BlankInst() { return  new RedistNode; }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -85,7 +85,7 @@ class AllReduceNode : public DLAOp<1,1>
   static ClassType GetClass() {return "AllGather";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual const DistType& GetDistType(unsigned int num) const { return InputDistType(0); }
+  virtual const DataTypeInfo& DataType(unsigned int num) const {return InputDataType(0); }
 };
 
 

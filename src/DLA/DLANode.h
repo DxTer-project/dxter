@@ -34,9 +34,6 @@ class DLANode : public Node
   Layer m_layer;
 
   //Implement in sub-classes
-#if DODM
-  virtual const DistType& GetDistType(unsigned int num) const;
-#endif
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
@@ -71,9 +68,6 @@ class DLANode : public Node
   const Sizes* InputLocalLen(unsigned int num, Dim dim) const;
 #endif
   virtual void ClearBeforeProp();
-#if DODM
-  const DistType& InputDistType(unsigned int num) const;
-#endif
   virtual bool IsDLA() const {return true;}
   virtual Cost GetCost() {return m_cost;}
 #if DOELEM
@@ -118,7 +112,11 @@ void TenCullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 class DataTypeInfo
 {
  public:
-  DataTypeInfo& operator=(const DataTypeInfo &rhs) {return *this;}
+  DistType m_dist;
+  DataTypeInfo();
+  DataTypeInfo(DistType dist);
+  DataTypeInfo(const DataTypeInfo &rhs);
+  DataTypeInfo& operator=(const DataTypeInfo &rhs);
 };
 
 #endif

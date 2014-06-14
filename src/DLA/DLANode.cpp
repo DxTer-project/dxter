@@ -44,32 +44,10 @@ void DLANode::Prop()
   CheckConnections();
 }
 
-#if DOELEM
-const DistType& DLANode::GetDistType(unsigned int num) const
-{ 
-  return MC_MR;
-}
-#elif DOTENSORS
-const DistType& DLANode::GetDistType(unsigned int num) const
-{ 
-  throw;
-  //  return DEFAULTDISTTYPE;
-}
-#endif
-
 void DLANode::ClearBeforeProp()
 {
   m_cost = -1;
 }
-
-#if DODM
-const DistType& DLANode::InputDistType(unsigned int num) const
-{
-  DLANode *in = (DLANode*)Input(num);
-  unsigned int inNum = InputConnNum(num);
-  return in->GetDistType(inNum);
-}
-#endif
 
 void DLANode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
@@ -356,4 +334,33 @@ void LLDLACull(Poss *poss, bool &cullIfPossible, bool &doNotCull)
   doNotCull = false;
   cullIfPossible = false;
 }
+#endif
+
+
+#if !DOLLDLA
+
+DataTypeInfo::DataTypeInfo()
+  :m_dist(UNKNOWN)
+{
+
+}
+
+
+DataTypeInfo::DataTypeInfo(DistType dist)
+  :m_dist(dist)
+{
+}
+
+
+DataTypeInfo::DataTypeInfo(const DataTypeInfo &rhs)
+{
+  m_dist = rhs.m_dist;
+}
+
+DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
+{
+  m_dist = rhs.m_dist;
+  return *this;
+}
+
 #endif

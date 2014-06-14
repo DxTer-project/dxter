@@ -97,9 +97,6 @@ class Herk : public DLAOp<2,1>, public HerkProps
   virtual NodeType GetType() const;
   static Node* BlankInst() { return new Herk(ABSLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
-#if DOELEM
-  virtual const DistType& GetDistType(unsigned int num) const;
-#endif
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -152,7 +149,6 @@ class TriRK : public DLAOp<3,1>, public HerkProps
   static Node* BlankInst() { return new TriRK(SMLAYER, LOWER, NORMAL, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
 #if DOELEM
-  virtual const DistType& GetDistType(unsigned int num) const;
   virtual bool CanTransposeInputs() const;
 #endif
   virtual void Prop();

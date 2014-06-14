@@ -54,9 +54,6 @@ class Chol : public DLAOp<1,1>
   static Node* BlankInst() { return new Chol(ABSLAYER, LOWER); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void PrintCode(IndStream &out);
-#if DOELEM
-  virtual const DistType& GetDistType(unsigned int num) const;
-#endif
 };
 
 class CholLoopExp : public SingleTrans

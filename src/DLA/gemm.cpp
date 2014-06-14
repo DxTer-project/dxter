@@ -172,25 +172,6 @@ void Gemm::UnflattenCore(ifstream &in, SaveInfo &info)
 #endif
 }
 
-#if DOELEM
-const DistType& Gemm::GetDistType(unsigned int num) const
-{
-#if DODPPHASE
-  switch(GetLayer()) {
-    case (ABSLAYER):
-    case (DMLAYER):
-      return MC_MR;
-    case (SMLAYER):
-      return InputDistType(2);
-    default:
-      throw;
-  }
-#else
-  return InputDistType(2);
-#endif
-}
-#endif
-
 Phase Gemm::MaxPhase() const
 { 
   switch(GetLayer()) {
@@ -248,7 +229,7 @@ void Gemm::Prop()
     DLAOp<3,1>::Prop();
 #if DOELEM
     if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER) {
-      if (InputDistType(2) != D_MC_MR) {
+      if (InputDataType(2).m_dist != D_MC_MR) {
 	cout << "input not D_MC_MR 7";
 	throw;
       }
@@ -478,8 +459,8 @@ void Gemm::PrintCode(IndStream &out)
   }
   else if (GetLayer() == SMLAYER) {
     string transAStr, transBStr;
-    DistType t0 = InputDistType(0);
-    DistType t1 = InputDistType(1);
+    DistType t0 = InputDataType(0).m_dist;
+    DistType t1 = InputDataType(1).m_dist;
     Trans transA = m_transA;
     Trans transB = m_transB;
     LocalGemmTransUpdate(t0, t1, transA, transB);

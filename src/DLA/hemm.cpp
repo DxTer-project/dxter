@@ -81,24 +81,6 @@ NodeType Hemm::GetType() const
   return str;
 }
 
-#if DOELEM
-const DistType& Hemm::GetDistType(unsigned int num) const
-{ 
-  switch(GetLayer()) {
-  case (ABSLAYER):
-  case (DMLAYER):
-    return MC_MR;
-  case (SMLAYER):
-  case (S1LAYER):
-  case (S2LAYER):
-    return InputDistType(2); 
-      
-  default:
-    throw;
-  } 
-}
-#endif
-
 Phase Hemm::MaxPhase() const 
 {  
   switch(GetLayer()) {
@@ -147,21 +129,21 @@ void Hemm::Prop()
 
 #if DOELEM
   if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER) {
-    if (InputDistType(2) != D_MC_MR) {
+    if (InputDataType(2).m_dist != D_MC_MR) {
       cout << "input not D_MC_MR 7";
       throw;
     }
   }
   else if (GetLayer() == SMLAYER) {
-    DistType t0 = InputDistType(0);
-    DistType t1 = InputDistType(1);
+    DistType t0 = InputDataType(0).m_dist;
+    DistType t1 = InputDataType(1).m_dist;
     if (t0 != D_STAR_STAR)
       m_poss->MarkInsane();
     if ((m_side == RIGHT && t1 != D_VC_STAR && t1 != D_VR_STAR && t1 != D_STAR_STAR && t1 != D_MC_STAR && t1 != D_MR_STAR)
 	|| 
 	(m_side == LEFT && t1 != D_STAR_VC && t1 != D_STAR_VR && t1 != D_STAR_STAR && t1 != D_STAR_MC && t1 != D_STAR_MR))
       m_poss->MarkInsane();
-    if (t1 != InputDistType(2))
+    if (t1 != InputDataType(2).m_dist)
       m_poss->MarkInsane();
   }
   else
@@ -721,11 +703,11 @@ void LocalSymmAcc::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<5,2>::Prop();
 
-    DistType t0 = InputDistType(0);
-    DistType t1 = InputDistType(1);
-    DistType t2 = InputDistType(2);
-    DistType t3 = InputDistType(3);
-    DistType t4 = InputDistType(4);
+    DistType t0 = InputDataType(0).m_dist;
+    DistType t1 = InputDataType(1).m_dist;
+    DistType t2 = InputDataType(2).m_dist;
+    DistType t3 = InputDataType(3).m_dist;
+    DistType t4 = InputDataType(4).m_dist;
     if (m_tri == LOWER) {
       if (t0 != D_MC_MR)
 	throw;

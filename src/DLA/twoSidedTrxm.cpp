@@ -49,20 +49,6 @@ NodeType TwoSidedTrxm::GetType() const
     return "TwoSidedTrmm" + TriToStr(m_tri) + " " + LayerNumToStr(GetLayer());
 }
 
-#if DOELEM
-const DistType& TwoSidedTrxm::GetDistType(unsigned int num) const 
-{ 
-  if (m_layer == ABSLAYER || m_layer == DMLAYER)
-    return MC_MR; 
-  else if (m_layer == SMLAYER)
-    return STAR_STAR;
-  else if (m_layer == S1LAYER || m_layer == S2LAYER || m_layer == S3LAYER)
-    return InputDistType(1);
-  else
-    throw;
-}
-#endif
-
 Phase TwoSidedTrxm::MaxPhase() const 
 {  switch(GetLayer()) {
   case (ABSLAYER):
@@ -109,15 +95,15 @@ void TwoSidedTrxm::Prop()
     DLAOp<2,1>::Prop();
 #if DOELEM
     if (m_layer == DMLAYER) {
-      if (InputDistType(0) != D_MC_MR)
+      if (InputDataType(0).m_dist != D_MC_MR)
 	throw;
-      else if (InputDistType(1) != D_MC_MR)
+      else if (InputDataType(1).m_dist != D_MC_MR)
 	throw;
     }
     else if (m_layer == SMLAYER) {
-      if (InputDistType(0) != D_STAR_STAR)
+      if (InputDataType(0).m_dist != D_STAR_STAR)
 	throw;
-      else if (InputDistType(1) != D_STAR_STAR)
+      else if (InputDataType(1).m_dist != D_STAR_STAR)
 	throw;
     }
 #endif

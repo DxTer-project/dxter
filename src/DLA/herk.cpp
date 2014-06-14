@@ -88,19 +88,6 @@ Herk::Herk(Layer layer, Tri tri, Trans trans, Coef alpha, Coef beta, Type type)
   }
 }
 
-#if DOELEM
-const DistType& Herk::GetDistType(unsigned int num) const
-{
-  switch (GetLayer()) {
-    case (ABSLAYER):
-    case (DMLAYER):
-      return MC_MR;
-    default:
-      throw;
-  }  
-}
-#endif
-
 void Herk::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -114,9 +101,9 @@ void Herk::Prop()
 #if DOELEM
     if (GetLayer() != ABSLAYER && GetLayer() != DMLAYER)
       throw;
-    if (InputDistType(0) != D_MC_MR)
+    if (InputDataType(0).m_dist != D_MC_MR)
       throw;
-    if (InputDistType(1) != D_MC_MR)
+    if (InputDataType(1).m_dist != D_MC_MR)
       throw;
 #else
     if (GetLayer() != ABSLAYER)
@@ -432,18 +419,6 @@ void TriRK::Parallelize(Comm comm)
 }
 #endif
 
-#if DOELEM
-const DistType& TriRK::GetDistType(unsigned int num) const
-{
-  if (GetLayer() == SMLAYER)
-    return InputDistType(2);
-  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER)
-    return InputDistType(2);
-  else
-    throw;
-}
-#endif
-
 NodeType TriRK::GetType() const
 {
   string str = "TriRK " 
@@ -474,7 +449,7 @@ void TriRK::Prop()
 
 #if DOELEM
     if (GetLayer() == SMLAYER) {
-      if (InputDistType(2) != D_MC_MR)
+      if (InputDataType(2).m_dist != D_MC_MR)
 	throw;
       if (m_type == REAL) {
 	if (m_transA == CONJTRANS || m_transB == CONJTRANS)
@@ -500,8 +475,8 @@ void TriRK::Prop()
     
 #if DOELEM
     if (GetLayer() == SMLAYER) {
-      DistType t0 = InputDistType(0);
-      DistType t1 = InputDistType(1);
+      DistType t0 = InputDataType(0).m_dist;
+      DistType t1 = InputDataType(1).m_dist;
       
       if (UpdateTrans(m_transB,t1) == NORMAL)
         m_cost = GAMMA * InputLocalM(0)->SumProds111(*InputLocalN(0),*InputLocalN(1));
@@ -571,8 +546,8 @@ void TriRK::PrintCode(IndStream &out)
   string transAStr, transBStr;
 
 #if DOELEM
-  DistType t0 = InputDistType(0);
-  DistType t1 = InputDistType(1);
+  DistType t0 = InputDataType(0).m_dist;
+  DistType t1 = InputDataType(1).m_dist;
   
   if (GetLayer() == SMLAYER) {
     if (m_transA == NORMAL) {

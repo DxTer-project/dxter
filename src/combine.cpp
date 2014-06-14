@@ -94,12 +94,12 @@ void Combine::Prop()
 	throw;
 
 #if DODM
-    DistType type = this->InputDistType(0);
+	DistType type = this->InputDataType(0).m_dist;
     for(unsigned int i = 0; i < m_inputs.size(); ++i) {
-      if (DistTypeNotEqual(type, InputDistType(i))) {
+      if (DistTypeNotEqual(type, InputDataType(i).m_dist)) {
         cout << "Bad input types\n";
         cout << DistTypeToStr(type) << endl;
-        cout << DistTypeToStr(InputDistType(i)) << endl;
+        cout << DistTypeToStr(InputDataType(i).m_dist) << endl;
         throw;
       }
     }

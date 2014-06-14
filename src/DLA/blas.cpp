@@ -77,18 +77,6 @@ void Axpy::UnflattenCore(ifstream &in, SaveInfo &info)
 #endif
 }
 
-#if DOELEM
-const DistType& Axpy::GetDistType(unsigned int num) const 
-{ 
-  if (m_layer == DMLAYER || m_layer == ABSLAYER)
-    return MC_MR; 
-  else if (m_layer == SMLAYER)
-    return InputDistType(1);
-  else
-    throw;
-}
-#endif
-
 Phase Axpy::MaxPhase() const 
 {
 #if DODPPHASE
@@ -167,13 +155,13 @@ void Axpy::Prop()
 
 #if DODPPHASE
     if (m_layer == DMLAYER) {
-      if (InputDistType(0) != D_MC_MR)
+      if (InputDataType(0).m_dist != D_MC_MR)
 	throw;
-      if (InputDistType(1) != D_MC_MR)
+      if (InputDataType(1).m_dist != D_MC_MR)
 	throw;
     }
     else if (m_layer == SMLAYER) {
-      if (InputDistType(0) != InputDistType(1))
+      if (InputDataType(0).m_dist != InputDataType(1).m_dist)
 	m_poss->MarkInsane();
     }
 #if DOBLIS
@@ -218,20 +206,20 @@ Cost Axpy::GetCost(Layer layer, const Sizes *localMs, const Sizes *localNs)
 #if DOELEM
 bool FindDistUp(const RedistNode *node, DistType type)
 {
-  if (node->m_destType == type)
+  if (node->m_info.m_dist == type)
     return true;
   Node *input = node->Input(0);
   if (input->GetNodeClass() == RedistNode::GetClass())
     return FindDistUp((RedistNode*)input, type);
   else
-    return node->InputDistType(0) == type;
+    return node->InputDataType(0).m_dist == type;
 }
 
 bool FindDistDown(const Node *node, DistType type)
 {
   if (node->GetNodeClass() != RedistNode::GetClass()) 
     return false;
-  if (((RedistNode*)node)->m_destType == type)
+  if (((RedistNode*)node)->m_info.m_dist == type)
     return true;
   else {
     NodeConnVecConstIter iter = node->m_children.begin();
@@ -251,7 +239,7 @@ bool CheckInput(const Node *node, unsigned int inNum, DistType type, bool skipFi
   if (skipFirstRedist && in->GetNodeClass() == RedistNode::GetClass()) {
     return CheckInput(in, 0, type, false);
   }
-  DistType inType = ((DLANode*)node)->InputDistType(inNum);  
+  DistType inType = ((DLANode*)node)->InputDataType(inNum).m_dist;
   if (inType == type)
     return true;
   if (in->GetNodeClass() == RedistNode::GetClass()) {
@@ -365,20 +353,6 @@ NodeType Scal::GetType() const
   return "Scal" + LayerNumToStr(GetLayer());
 }
 
-#if DOELEM
-const DistType& Scal::GetDistType(unsigned int num) const
-{ 
-  if (m_layer == DMLAYER)
-    return MC_MR; 
-  else if (m_layer == SMLAYER)
-    return InputDistType(1);
-  else if (m_layer == S3LAYER)
-    return InputDistType(1);
-  else
-    throw;
-}
-#endif
-
 Phase Scal::MaxPhase() const 
 {
 #if DODPPHASE
@@ -418,13 +392,13 @@ void Scal::Prop()
       throw;
 #if DODPPHASE
     else if (m_layer == DMLAYER) {
-      if (InputDistType(0) != D_STAR_STAR)
+      if (InputDataType(0).m_dist != D_STAR_STAR)
 	throw;
-      if (InputDistType(1) != D_MC_MR)
+      if (InputDataType(1).m_dist != D_MC_MR)
 	throw;
     }
     else if (m_layer == SMLAYER) {
-      if (InputDistType(0) != D_STAR_STAR)
+      if (InputDataType(0).m_dist != D_STAR_STAR)
 	cout << "input not D_STAR_STAR";
     }
     else
@@ -488,18 +462,6 @@ Phase ConstScal::MaxPhase() const
 #endif
 }
 
-#if DOELEM
-const DistType& ConstScal::GetDistType(unsigned int num) const
-{ 
-  if (m_layer == DMLAYER)
-    return MC_MR; 
-  else if (m_layer == SMLAYER)
-    return InputDistType(0);
-  else
-    throw;
-}
-#endif
-
 bool ConstScal::ShouldCullDP() const 
 {
 #if DODPPHASE
@@ -559,7 +521,7 @@ void ConstScal::Prop()
 
 #if DOELEM
     if (m_layer == DMLAYER) {
-      if (InputDistType(1) != D_MC_MR)
+      if (InputDataType(1).m_dist != D_MC_MR)
 	throw;
     }
 #endif

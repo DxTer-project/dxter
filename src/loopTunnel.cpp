@@ -92,13 +92,6 @@ void LoopTunnel::CopyTunnelInfo(const LoopTunnel *tun)
   m_indepIters = tun->m_indepIters;
 }
 
-#if DODM
-const DistType& LoopTunnel::GetDistType(unsigned int num) const 
-{ 
-  return InputDistType(0); 
-}
-#endif
-
 PossTunnel* LoopTunnel::GetSetTunnel()
 {
   LoopTunnel *tun;
