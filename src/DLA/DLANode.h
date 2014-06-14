@@ -107,7 +107,7 @@ void TenCullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 #endif
 
 
-#if !DOLLDLA
+#if DODM
 
 class DataTypeInfo
 {
@@ -117,6 +117,13 @@ class DataTypeInfo
   DataTypeInfo(DistType dist);
   DataTypeInfo(const DataTypeInfo &rhs);
   DataTypeInfo& operator=(const DataTypeInfo &rhs);
+};
+
+#elif !DOLLDLA
+class DataTypeInfo
+{
+ public:
+  DataTypeInfo& operator=(const DataTypeInfo &rhs) {return *this;}
 };
 
 #endif

@@ -337,7 +337,7 @@ void LLDLACull(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 #endif
 
 
-#if !DOLLDLA
+#if DODM
 
 DataTypeInfo::DataTypeInfo()
   :m_dist(UNKNOWN)
