@@ -812,8 +812,10 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
     throw;
 #elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+#else
+    throw;
 #endif
-
+    (void)loopPoss;
   loop->SetDimName(DIMM);
   
   return loop;
@@ -971,6 +973,9 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
     throw;
 #elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+#else
+    (void)loopPoss;
+    throw;
 #endif
 
   loop->SetDimName(DIMN);
