@@ -167,62 +167,20 @@ class TempVarNode : public DLANode
   Sizes m_ones;
 #endif
 
- TempVarNode() 
-   : 
-#if DOELEM
-m_info(D_LASTDIST),
-#elif DOTENSORS
-  m_info(),
-#endif
-#if TWOD
- m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-  m_lsizes(NULL),m_sumLens(NULL)
-#endif
- {}
-
- TempVarNode(string name) 
-   :  
-#if DOELEM
-m_info(D_LASTDIST),
-#elif DOTENSORS
-  m_info(),
-#endif
-  m_name(name), 
-#if TWOD
- m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-  m_lsizes(NULL), m_sumLens(NULL)
-#endif
- {}
-
-#if DODM
- TempVarNode(DistType dist) 
-   : m_info(dist), 
-#if TWOD
- m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-  m_lsizes(NULL), m_sumLens(NULL)
-#endif
- {}
-#endif
+  TempVarNode();
+  TempVarNode(string name);
 
 #if DOTENSORS
- TempVarNode(DistType dist, EntrySet sumDims);
- TempVarNode(DistType dist, EntrySet sumDims, string name);
+  TempVarNode(DistType dist, EntrySet sumDims);
+  TempVarNode(DistType dist, EntrySet sumDims, string name);
 #endif
 
 #if DODM
- TempVarNode(DistType dist, string name) 
-   :  m_info(dist), m_name(name),
-#if TWOD
- m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-  m_lsizes(NULL),
-  m_sumLens(NULL)
+  TempVarNode(DistType dist);
+  TempVarNode(DistType dist, string name); 
 #endif
-  {}
-#endif
+
+
  ~TempVarNode();
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new TempVarNode; }

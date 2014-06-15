@@ -549,6 +549,61 @@ void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 #endif //DOELEM||DOBLIS
 
+TempVarNode::TempVarNode() 
+   : 
+#if DOELEM
+m_info(D_LASTDIST),
+#elif DOTENSORS
+  m_info(),
+#endif
+#if TWOD
+ m_mlsize(NULL), m_nlsize(NULL)
+#elif DOTENSORS
+  m_lsizes(NULL),m_sumLens(NULL)
+#endif
+ {}
+
+TempVarNode::TempVarNode(string name) 
+   :  
+#if DOELEM
+m_info(D_LASTDIST),
+#elif DOTENSORS
+  m_info(),
+#endif
+  m_name(name), 
+#if TWOD
+ m_mlsize(NULL), m_nlsize(NULL)
+#elif DOTENSORS
+  m_lsizes(NULL), m_sumLens(NULL)
+#endif
+ {}
+
+#if DODM
+TempVarNode::TempVarNode(DistType dist) 
+   : m_info(dist), 
+#if TWOD
+ m_mlsize(NULL), m_nlsize(NULL)
+#elif DOTENSORS
+  m_lsizes(NULL), m_sumLens(NULL)
+#endif
+ {}
+#endif
+
+
+#if DODM
+TempVarNode::TempVarNode(DistType dist, string name) 
+   :  m_info(dist), m_name(name),
+#if TWOD
+ m_mlsize(NULL), m_nlsize(NULL)
+#elif DOTENSORS
+  m_lsizes(NULL),
+  m_sumLens(NULL)
+#endif
+  {}
+#endif
+
+
+
 
 #if DOTENSORS
 TempVarNode::TempVarNode(DistType dist, EntrySet sumDims) 
