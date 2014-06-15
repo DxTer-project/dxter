@@ -27,7 +27,7 @@
 #if DOLLDLA
 
 PrimitiveGemm::PrimitiveGemm(Coef alpha, Coef beta, Type type)
- : Gemm(LLDLAPRIMITIVELAYER, alpha, beta, type)
+  : Gemm(LLDLAPRIMITIVELAYER, NORMAL, NORMAL, alpha, beta, type)
 {
 }
 

@@ -176,7 +176,7 @@ PSet* Example1()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Gemm *gemm = new Gemm(ABSLAYER, COEFONE, COEFONE, REAL);
+  Gemm *gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, REAL);
   gemm->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
