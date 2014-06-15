@@ -73,7 +73,7 @@ string IndexArrayVarName(const string &indices)
 string LLDLAPartVarName(const string &var, unsigned int part)
 {
   std::stringstream str;
-  str << var << "_" << part;
+  str << var << part;
   return str.str();
 }
 #endif //DOLLDLA
