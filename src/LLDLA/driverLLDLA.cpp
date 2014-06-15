@@ -38,6 +38,7 @@
 #if DOLLDLA
 
 #include "debug.h"
+#include "LLDLAGemmTransformations.h"
 
 Size one = 1;
 Size smallSize = 10;
@@ -49,7 +50,9 @@ PSet* Example1();
 
 void AddTrans()
 {
-
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLAPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLAPHASE);
+  //  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, LLDLAPRIMITIVELAYER, 0), LLDLAPHASE);
 }
 
 void AddSimplifiers()
@@ -155,15 +158,15 @@ int main(int argc, const char* argv[])
 PSet* Example1()
 {
   InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", 
-				 UNITSTRIDE, NONUNITSTRIDE,
+				 NONUNITSTRIDE, UNITSTRIDE,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
   InputNode *Bin = new InputNode("B input",  smallSize, smallSize, "B", 
-				 UNITSTRIDE, NONUNITSTRIDE,
+				 NONUNITSTRIDE, UNITSTRIDE,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
   InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", 
-				 UNITSTRIDE, NONUNITSTRIDE,
+				 NONUNITSTRIDE, UNITSTRIDE,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 

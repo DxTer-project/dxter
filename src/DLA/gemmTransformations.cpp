@@ -35,6 +35,7 @@ using namespace std;
 
 string GemmLoopExp::GetType() const
 {
+  //If these change, match in LLDLAGemmLoopExp
   switch(m_dim) {
     case(0):
       return "Gemm Loop Exp - m";
@@ -807,11 +808,11 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
-#else
-    throw;
+  loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+#elif DOLLDLA
+    loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
 #endif
-    (void)loopPoss;
+
   loop->SetDimName(DIMM);
   
   return loop;
@@ -966,8 +967,7 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
 #elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
 #else
-    (void)loopPoss;
-    throw;
+    loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
 #endif
 
   loop->SetDimName(DIMN);
