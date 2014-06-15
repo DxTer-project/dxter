@@ -716,7 +716,6 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
 	  throw;
 	if (split->PartInUse(0) || split->PartInUse(2))
 	  throw;
-	out.Indent(1);
 	*out << LLDLAPartVarName(split->GetInputNameStr(0),1) << " += " << MU_VAR_NAME << ";\n";
       }
     }
