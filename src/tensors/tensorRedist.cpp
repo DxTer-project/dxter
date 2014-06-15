@@ -61,7 +61,7 @@ void RedistNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig,shallow, possMerging);
   const RedistNode *origNode = (RedistNode*)orig;
-  m_info = origNode->m_info
+  m_info = origNode->m_info;
 }
 
 NodeType RedistNode::GetType() const
@@ -69,7 +69,7 @@ NodeType RedistNode::GetType() const
   if (m_name.length()) 
     return m_name;
   else {
-    return (string)"RedistNode to " +  m_info.m_dis.QuickStr();
+    return (string)"RedistNode to " +  m_info.m_dist.QuickStr();
   }
 }
 

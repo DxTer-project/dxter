@@ -172,7 +172,7 @@ class TempVarNode : public DLANode
 #if DOELEM
 m_info(D_LASTDIST),
 #elif DOTENSORS
-  m_distType(),
+  m_info(),
 #endif
 #if TWOD
  m_mlsize(NULL), m_nlsize(NULL)
@@ -186,7 +186,7 @@ m_info(D_LASTDIST),
 #if DOELEM
 m_info(D_LASTDIST),
 #elif DOTENSORS
-  m_distType(),
+  m_info(),
 #endif
   m_name(name), 
 #if TWOD

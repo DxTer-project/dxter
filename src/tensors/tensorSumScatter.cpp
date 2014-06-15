@@ -778,10 +778,10 @@ void SplitSumScatter::Apply(Node *node) const
 	    node->m_poss->AddNode(newRedist);
 
 	    if (!newOutTypeFull.IsSane()) {
-	      cout << "created new " << newSum->GetDistType(0).str() << " -> " << newOutTypeFull.str() << endl;
+	      cout << "created new " << newSum->DataType(0).m_dist.str() << " -> " << newOutTypeFull.str() << endl;
 	      throw;
 	    }
-	    if (newSum->GetDistType(0).m_numDims != newOutTypeFull.m_numDims)
+	    if (newSum->DataType(0).m_dist.m_numDims != newOutTypeFull.m_numDims)
 	      throw;
 	  }
 

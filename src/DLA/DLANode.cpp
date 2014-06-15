@@ -340,7 +340,6 @@ void LLDLACull(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 #if DODM
 
 DataTypeInfo::DataTypeInfo()
-  :m_dist(UNKNOWN)
 {
 
 }

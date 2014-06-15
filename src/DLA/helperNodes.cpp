@@ -561,14 +561,14 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims)
     cout << "!numSumDims\n";
     throw;
   }
-  m_distType.PrepForNumDims(dist.m_numDims+numSumDims);
+  m_info.m_dist.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
-    m_distType.m_dists[dim] = dist.m_dists[dim];
+    m_info.m_dist.m_dists[dim] = dist.m_dists[dim];
   EntrySetIter iter = m_sumDims.begin();
   for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
-    m_distType.m_dists[dist.m_numDims + dim] = *iter;
+    m_info.m_dist.m_dists[dist.m_numDims + dim] = *iter;
   }
-  m_distType.m_notReped = dist.m_notReped;
+  m_info.m_dist.m_notReped = dist.m_notReped;
 }
 
 TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name)
@@ -583,14 +583,14 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name)
     cout << "!numSumDims 2\n";
     throw;
   }
-  m_distType.PrepForNumDims(dist.m_numDims+numSumDims);
+  m_info.m_dist.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
-    m_distType.m_dists[dim] = dist.m_dists[dim];
+    m_info.m_dist.m_dists[dim] = dist.m_dists[dim];
   EntrySetIter iter = m_sumDims.begin();
   for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
-    m_distType.m_dists[dist.m_numDims + dim] = *iter;
+    m_info.m_dist.m_dists[dist.m_numDims + dim] = *iter;
   }
-  m_distType.m_notReped = dist.m_notReped;
+  m_info.m_dist.m_notReped = dist.m_notReped;
 }
 #endif
 
@@ -706,7 +706,7 @@ const Sizes* TempVarNode::Len(unsigned int num, Dim dim) const
   if (num > 0)
     throw;
   if (!m_sumDims.empty()) {
-    Dim dims = m_distType.m_numDims-m_sumDims.size();
+    Dim dims = m_info.m_dist.m_numDims-m_sumDims.size();
     if (dim >= dims)
       return m_sumLens + (dim - dims);
     else
@@ -721,7 +721,7 @@ const Sizes* TempVarNode::LocalLen(unsigned int num, Dim dim) const
   if (num > 0)
     throw;
   if (!m_sumDims.empty()) {
-    Dim dims = m_distType.m_numDims-m_sumDims.size();
+    Dim dims = m_info.m_dist.m_numDims-m_sumDims.size();
     if (dim >= dims)
       return &m_ones;
     else
@@ -813,11 +813,11 @@ sdlkfj
 
   if (m_lsizes)
     return;
- Dim numDims = m_distType.m_numDims-m_sumDims.size();
+ Dim numDims = m_info.m_dist.m_numDims-m_sumDims.size();
  m_lsizes = new Sizes[numDims];
  
  for (Dim dim = 0; dim < numDims; ++dim)
-   GetLocalSizes(m_distType, dim, InputLen(0,dim), m_lsizes+dim);
+   GetLocalSizes(m_info.m_dist, dim, InputLen(0,dim), m_lsizes+dim);
 
 
  m_sumLens = new Sizes[m_sumDims.size()];
