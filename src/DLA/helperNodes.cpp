@@ -104,6 +104,7 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, string name, Dim num
   }
   m_varName.m_name = name;
   m_varName.m_type.SetToDefault(m_numDims);
+  m_dataTypeInfo.m_dist.SetToDefault(m_numDims);
 }
 
 InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, Dim numDims)
