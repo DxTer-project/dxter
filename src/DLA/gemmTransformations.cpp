@@ -784,11 +784,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
   
   Node *gepp;
   
-#if !DOLLDLA
   gepp = new Gemm(layer, transA, transB, alpha, beta, type);
-#else
-  gepp = new Gemm(layer, alpha, beta, type);
-#endif
   gepp->AddInput(splitA, 1);
   gepp->AddInput(Btun, 0);
   gepp->AddInput(splitC, 1);
@@ -944,11 +940,7 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   
   Node *gepp;
   
-#if !DOLLDLA
   gepp = new Gemm(layer, transA, transB, alpha, beta, type);
-#else
-  gepp = new Gemm(layer, alpha, beta, type);
-#endif
   gepp->AddInput(Atun, 0);
   gepp->AddInput(splitB, 1);
   gepp->AddInput(splitC, 1);

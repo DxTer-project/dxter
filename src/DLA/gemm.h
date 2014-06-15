@@ -40,20 +40,14 @@ bool IsDMGemm(const Node *node);
 class Gemm : public DLAOp<3,1>
 {
  public:
-#if !DOLLDLA
   Trans m_transA, m_transB;
-#endif
   Coef m_alpha, m_beta;
   Type m_type;
 #if DOBLIS
   Comm m_comm;
 #endif
 
-#if !DOLLDLA
   Gemm(Layer layer, Trans transA, Trans transB, Coef alpha, Coef beta, Type type);
-#else
-  Gemm(Layer layer, Coef alpha, Coef beta, Type type);
-#endif
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
