@@ -120,6 +120,7 @@ void Axpy::PrintCode(IndStream &out)
 {
   out.Indent();
   switch (GetLayer()) {
+#if DOELEM
   case (SMLAYER):
     *out << "Axpy( ";
     out << m_coeff;
@@ -128,7 +129,7 @@ void Axpy::PrintCode(IndStream &out)
 	 << "\n" << out.Tabs(2) << GetInputName(1).str()
 	 << ");\n";
     break;
-#if DOBLIS
+#elif DOBLIS
   case (S3LAYER):
     if (m_comm == CORECOMM) {
       *out << "bli_axpym( ";
@@ -172,12 +173,13 @@ void Axpy::Prop()
 
 #endif
 
+#if DOELEM
     if (m_layer == DMLAYER)
       m_cost = 0;
     else if (m_layer == SMLAYER)
       m_cost = GetCost(SMLAYER, LocalM(0), LocalN(0));
-#if DOBLIS
-    else if (m_layer == S3LAYER) {
+#elif DOBLIS
+    if (m_layer == S3LAYER) {
       m_cost = GetCost(S3LAYER, LocalM(0), LocalN(0));
       if (m_comm != CORECOMM) {
 	m_cost /= NumCoresInComm(m_comm);
@@ -195,10 +197,13 @@ void Axpy::Prop()
 
 Cost Axpy::GetCost(Layer layer, const Sizes *localMs, const Sizes *localNs)
 {
+#if DOELEM
   if (layer == SMLAYER)
     return TWO * GAMMA * localMs->SumProds11(*localNs);
-  else if (layer == S3LAYER)
+#elif DOBLIS
+  if (layer == S3LAYER)
     return TWO * GAMMA * localMs->SumProds11(*localNs) + (2*PSIWVAL+PSIRVAL) * localNs->Sum();
+#endif
   else
     throw;
 }
@@ -408,11 +413,13 @@ void Scal::Prop()
 #endif
 
 
+#if DOELEM
     if (m_layer == SMLAYER)
       m_cost = GAMMA * LocalM(1)->SumProds11(*LocalN(1));
     else if (m_layer == DMLAYER)
       m_cost = 0;
     else
+#endif
       throw;
   }
 }
@@ -500,6 +507,7 @@ void ConstScal::UnflattenCore(ifstream &in, SaveInfo &info)
 void ConstScal::PrintCode(IndStream &out)
 {
   out.Indent();
+#if DOELEM
   if (m_layer == DMLAYER) {
     *out << "DistConstScal( ";
     out << m_alpha;
@@ -511,6 +519,7 @@ void ConstScal::PrintCode(IndStream &out)
     *out << ", " << GetInputName(0).str() << ");\n";
   }
   else
+#endif
     throw;
 }
 
@@ -527,11 +536,13 @@ void ConstScal::Prop()
 #endif
 
 
+#if DOELEM
     if (m_layer == SMLAYER)
       m_cost = GAMMA * LocalM(0)->SumProds11(*LocalN(0));
     else if (m_layer == DMLAYER)
       m_cost = 0;
     else
+#endif
       throw;
   }
 }

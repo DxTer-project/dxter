@@ -40,8 +40,8 @@ void RegAllDLANodes()
   Reg(Axpy);
   Reg(Scal);
   Reg(ConstScal);
-  Reg(Chol);
 #if DOELEM
+  Reg(Chol);
   Reg(RedistNode);
   Reg(SumScatterNode);
   Reg(SumScatterFrom);
@@ -65,7 +65,9 @@ void RegAllDLANodes()
   Reg(Tri2k);
   Reg(Herk);
   Reg(TriRK);
+#if DOELEM
   Reg(Hetrmm);
+#endif
 #ifndef SKIPTWOSIDED
   Reg(TwoSidedTrxm);
 #endif

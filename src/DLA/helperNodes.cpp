@@ -999,6 +999,7 @@ void ScaleTrapNode::PrintCode(IndStream &out)
 {  
   Layer layer = GetLayer();
   out.Indent();
+#if DOELEM
   if (layer == DMLAYER) {
     *out << "ScaleTrapezoid( ";
     out << m_val;
@@ -1007,7 +1008,8 @@ void ScaleTrapNode::PrintCode(IndStream &out)
 	 << TriToStr(m_tri) << ", 0, "
 	 << GetNameStr(0) << " );\n";
   }
-  else if (layer == S1LAYER 
+#elif DOBLIS
+  if (layer == S1LAYER 
 	   || layer == S2LAYER
 	   || layer == S3LAYER) 
     {
@@ -1026,6 +1028,10 @@ void ScaleTrapNode::PrintCode(IndStream &out)
       out.Indent();
       *out << "bli_obj_set_uplo( BLIS_DENSE, " << name << " );\n";
     }
+#else
+  throw;
+#endif
+  
 }
 
 void ScaleTrapNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -1079,11 +1085,16 @@ void ScaleNode::Prop()
 void ScaleNode::PrintCode(IndStream &out)
 {  
   out.Indent();
+#if DOELEM
   if (GetLayer() == DMLAYER || GetLayer() == ABSLAYER) {
     *out << "Scale( ";
   }
-  else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER)
+#elif DOBLIS
+  if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER)
     *out << "bli_scalm( ";
+#else
+  throw;
+#endif
 
   out << m_val;
   *out << ", "

@@ -68,7 +68,7 @@ void Node::Cull(Phase phase)
 {
   if (MaxPhase() < phase) {
     if (!HasRefined()) {
-#if DOELEM||DOBLIS
+#if DOELEM
       if (GetNodeClass() == Gemm::GetClass()) {
         if (((Gemm*)this)->GetLayer() == SMLAYER)
           return;

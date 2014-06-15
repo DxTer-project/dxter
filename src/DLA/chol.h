@@ -24,7 +24,7 @@
 #pragma once
 
 #include "layers.h"
-#if DOBLIS|DOELEM
+#if DOELEM
 
 #include "transform.h"
 #include "DLAOp.h"

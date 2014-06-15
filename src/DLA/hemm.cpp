@@ -113,10 +113,13 @@ bool Hemm::ShouldCullDP() const
 {
   switch (GetLayer()) {
   case (ABSLAYER):
+    return true;
+#if DOELEM
   case (DMLAYER):
     return true;
   case (SMLAYER):
     return false;
+#endif
   default:
     throw;
   }
@@ -150,12 +153,17 @@ void Hemm::Prop()
     throw;
 #endif
 
-    if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
-      m_cost = ZERO;
+  if (GetLayer() == ABSLAYER)
+    m_cost = ZERO;
+#if DOELEM
+  else if (GetLayer() == DMLAYER)
+    m_cost = ZERO;
     else if (GetLayer() == SMLAYER)
       m_cost = GetCost(SMLAYER, m_side,LocalM(0),LocalN(0));
+#elif DOBLIS
     else if (GetLayer() == S1LAYER || GetLayer() == S2LAYER)
       m_cost = 0;
+#endif
     else
       throw;
   }
@@ -163,8 +171,10 @@ void Hemm::Prop()
 
 Cost Hemm::GetCost(Layer layer, Side side, const Sizes *localMs, const Sizes *localNs)
 {
+#if DOELEM
   if (layer != SMLAYER)
     throw;
+#endif
   if (side == LEFT)
     return TWO * GAMMA * localMs->SumProds21(*localNs);
   else
@@ -176,10 +186,12 @@ void Hemm::PrintCode(IndStream &out)
   out.Indent();
   if (GetLayer() == ABSLAYER)
     *out << "AbsHemm( ";
+#if DOELEM
   else if (GetLayer() == DMLAYER)
     *out << "DistHemm( ";
   else if (GetLayer() == SMLAYER)
     *out << "blas::Hemm( ";
+#endif
   else
     throw;
   *out << SideToStr(m_side) << ", " << TriToStr(m_tri) 

@@ -147,7 +147,10 @@ void Her2k::Prop()
 	throw;
     }
     
-    if (GetLayer() == ABSLAYER || GetLayer() == DMLAYER)
+    if (GetLayer() == ABSLAYER)
+      m_cost = 0;
+#if DOELEM
+    else if (GetLayer() == DMLAYER)
       m_cost = 0;
     else if (GetLayer() == SMLAYER) {
       if (m_trans == NORMAL)
@@ -155,6 +158,7 @@ void Her2k::Prop()
       else
         m_cost = GetCost(SMLAYER, InputLocalM(2),InputLocalM(0));
     }
+#endif
     else
       m_cost = ZERO;
   }
@@ -178,9 +182,11 @@ NodeType Her2k::GetType() const
 
 Cost Her2k::GetCost(Layer layer, const Sizes *m, const Sizes *k)
 {
+#if DOELEM
   if (layer == SMLAYER)
     return 2 * GAMMA * m->SumProds21(*k);
   else
+#endif
     throw;
 }
 
@@ -240,6 +246,7 @@ void Her2k::PrintCode(IndStream &out)
     else
       *out << "AbsHer2k( " ;
   }
+#if DOELEM
   else if (GetLayer() == DMLAYER) {
     if (m_type == REAL)
       *out << "DistSyr2k( " ;
@@ -252,6 +259,7 @@ void Her2k::PrintCode(IndStream &out)
     else
       *out << "Her2k( " ;
   }
+#endif
   *out << TriToStr(m_tri) << ", " << TransToStr(m_trans)
   << ", \n" << out.Tabs(1);
   out << m_alpha;
@@ -508,7 +516,7 @@ void Tri2k::Prop()
       const Sizes *localN = InputLocalN(4);
       const Sizes *others = (InputLocalN(0));
       
-      m_cost = GetCost(SMLAYER, localM, localN, others);
+      m_cost = GetCost(S1LAYER, localM, localN, others);
     }
 #endif
   }
@@ -516,7 +524,11 @@ void Tri2k::Prop()
 
 Cost Tri2k::GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3)
 {
+#if DOELEM
   if (layer == SMLAYER)
+#elif DOBLIS
+   if (layer == S1LAYER)
+#endif
     return 2 * GAMMA * localDim1->SumProds111(*localDim2, *localDim3);
   else
     throw;
@@ -1314,9 +1326,11 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(5, AtunOut, comB, CtunOut, comD, comE);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     throw;
   else
+#endif
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
 
   loop->SetDimName(DIMN);

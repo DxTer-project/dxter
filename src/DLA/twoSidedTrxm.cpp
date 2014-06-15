@@ -58,8 +58,6 @@ Phase TwoSidedTrxm::MaxPhase() const
   case (SMLAYER):
     return NUMPHASES;
 #else
-  case (SMLAYER):
-    return SR1PHASE;
   case (S1LAYER):
     return SR1PHASE;
   case (S2LAYER):
@@ -72,7 +70,11 @@ Phase TwoSidedTrxm::MaxPhase() const
 
 bool TwoSidedTrxm::ShouldCullDP() const 
 {
+#if DOELEM
   return m_layer == DMLAYER;
+#else
+  throw;
+#endif
 }
 
 void TwoSidedTrxm::FlattenCore(ofstream &out) const
@@ -115,13 +117,15 @@ void TwoSidedTrxm::Prop()
 void TwoSidedTrxm::PrintCode(IndStream &out)
 {
   out.Indent();
+#if DOBLIS
   if (m_layer == S2LAYER) {
     *out << "libflame_Hegst( &"
 	 << GetInputName(1).str()
       << ", &" << GetInputName(0).str() << " );\n";
     return;
   }
-  else if (m_layer == DMLAYER) {
+#elif DOELEM
+  if (m_layer == DMLAYER) {
     if (m_invert)
       *out << "TwoSidedTrsm( ";
     else
@@ -133,6 +137,7 @@ void TwoSidedTrxm::PrintCode(IndStream &out)
     else
       *out << "internal::TwoSidedTrmm( ";
   }
+#endif
   else
     throw;
 
@@ -709,10 +714,11 @@ Loop* TwoSidedTrmmLowerVar4Alg(
 
 #if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+  throw; //SetLayer
 #else
   TempVarNode *Yin = new TempVarNode("Y10");
-#endif
   Yin->SetLayer(S3LAYER);
+#endif
   Yin->AddInput(splitA, 1);
 
   //  InputNode *Yin = new InputNode("Y10 input", bigSize, BLIS_KC_BSVAL, "Y10");

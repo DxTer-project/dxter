@@ -67,12 +67,14 @@ void TriInv::PrintCode(IndStream &out)
   out.Indent();
   if (m_layer == ABSLAYER)
     *out << "AbsTriInv( " << TriToStr(m_tri) << ", NON_UNIT" << GetInputName(0).str() << " );\n";
+#if DOELEM
   else if (m_layer == DMLAYER)
     *out << "DistTriInv( " << TriToStr(m_tri) << ", NON_UNIT, " << GetInputName(0).str() << " );\n";
   else if (m_layer == SMLAYER)
     *out << "internal::LocalTriangularInverse( " 
 	 << TriToStr(m_tri) << ", NON_UNIT, " 
 	 << GetInputName(0).str() << " );\n";
+#endif
   else
     throw;  
 }
@@ -100,11 +102,15 @@ void TriInv::Prop()
 #endif
 
 
-    if (m_layer == ABSLAYER || m_layer == DMLAYER)
-      m_cost = ZERO;
-    else if (m_layer == SMLAYER)
-      m_cost = GAMMA * 1.0/3 * GetM(0)->SumCubes();
-    else 
+  if (m_layer == ABSLAYER) 
+    m_cost = ZERO;
+#if DOELEM
+  else if (m_layer == DMLAYER)
+    m_cost = ZERO;
+  else if (m_layer == SMLAYER)
+    m_cost = GAMMA * 1.0/3 * GetM(0)->SumCubes();
+#endif
+  else 
       throw;
   }
 }
@@ -197,7 +203,7 @@ void DistTriInvToLocalTriInv::Apply(Node *node) const
 
 Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
 {
-
+#if DOELEM
   Split *split = new Split(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(FULLUP, FULLUP,
@@ -233,7 +239,6 @@ Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
-#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
@@ -244,6 +249,7 @@ Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
 
 Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
 {
+#if DOELEM
   Split *split = new Split(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
   split->SetUpStats(FULLUP, NOTUP,
@@ -280,7 +286,6 @@ Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
-#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
@@ -291,7 +296,7 @@ Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
 
 Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
 {
-
+#if DOELEM
   Split *split = new Split(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(FULLUP, FULLUP,
@@ -328,7 +333,6 @@ Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
 
   Poss *loopPoss = new Poss(1, comA2);
 
-#if DOELEM
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
@@ -340,6 +344,7 @@ Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
 
 Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
 {
+#if DOELEM
   Split *split = new Split(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
   split->SetUpStats(FULLUP, FULLUP,
@@ -377,7 +382,7 @@ Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
 
   Poss *loopPoss = new Poss(1, comA2);
 
-#if DOELEM
+
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
@@ -388,6 +393,7 @@ Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
 
 Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
 {
+#if DOELEM
   Split *split = new Split(PARTDIAGBACK, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(NOTUP, FULLUP,
@@ -427,7 +433,7 @@ Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
-#if DOELEM
+
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
@@ -440,7 +446,7 @@ Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
 
 Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
 {
-
+#if DOELEM
   Split *split = new Split(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(FULLUP, FULLUP,
@@ -481,7 +487,7 @@ Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
-#if DOELEM
+
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;
@@ -493,6 +499,7 @@ Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
 
 Loop* TriInvAlgVar3Upper(Node *in, unsigned int num)
 {
+#if DOELEM
   Split *split = new Split(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
   split->SetUpStats(FULLUP, PARTUP,
@@ -533,7 +540,7 @@ Loop* TriInvAlgVar3Upper(Node *in, unsigned int num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
-#if DOELEM
+
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   return loop;

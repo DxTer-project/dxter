@@ -171,7 +171,9 @@ Loop* LUVar5Loop(Node *Ain, unsigned int Anum,
 
 Phase PanelLU::MaxPhase() const
 {
+#if DOBLIS
   if (m_layer != S3LAYER)
+#endif
     throw;
   return NUMPHASES;
 }

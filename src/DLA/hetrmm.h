@@ -28,7 +28,7 @@
 #include "elemRedist.h"
 #include "gemm.h"
 
-#if DOBLIS||DOELEM
+#if DOELEM
 
 Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num);
 Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num);

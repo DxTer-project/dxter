@@ -1075,6 +1075,7 @@ PSet* TrsmExample()
 
 PSet* CholExample()
 {
+#if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
   PossTunnel *tun = new PossTunnel(POSSTUNIN);
@@ -1093,10 +1094,14 @@ PSet* CholExample()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+#else
+  throw;
+#endif
 }
 
 PSet* CholTrsmExample()
 {
+#if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
   InputNode *Bin = new InputNode("B input", bigSize, bigSize, "B");
 
@@ -1123,10 +1128,15 @@ PSet* CholTrsmExample()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+#else
+  throw;
+#endif
+  
 }
 
 PSet* CholTriInvExample()
 {
+#if DOELEM
   InputNode *Ain = new InputNode("L input", bigSize, bigSize, "L");
 
   PossTunnel *tun = new PossTunnel(POSSTUNIN);
@@ -1148,6 +1158,9 @@ PSet* CholTriInvExample()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+#else
+  throw;
+#endif
 }
 
 
@@ -1233,6 +1246,7 @@ PSet* HegstR2Example()
 
 PSet* HegstL1Example()
 {
+#if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
   Split *splitA = new Split(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain,0);
@@ -1246,10 +1260,11 @@ PSet* HegstL1Example()
 
 #if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
+  throw; //SetLayer?
 #else
   TempVarNode *Yin = new TempVarNode("Y21");
-#endif
   Yin->SetLayer(S3LAYER);
+#endif
   Yin->AddInput(splitA, 5);
 
   Hemm *hemm = new Hemm(DMLAYER, LEFT, LOWER, COEFONE, COEFZERO, COMPLEX);
@@ -1302,7 +1317,7 @@ PSet* HegstL1Example()
   Poss *loopPoss = new Poss(2,
 			    comA,
 			    comL);
-#if DOELEM
+
   Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
 
   OutputNode *Aout = new OutputNode("A output");
@@ -1312,6 +1327,7 @@ PSet* HegstL1Example()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+
 #else
   throw;
 #endif
@@ -1379,6 +1395,7 @@ PSet* HegstLExample()
 
 PSet* HegstL5Example()
 {
+#if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
   Split *splitA = new Split(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain,0);
@@ -1392,10 +1409,11 @@ PSet* HegstL5Example()
 
 #if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+  throw; //setlayer ?
 #else
   TempVarNode *Yin = new TempVarNode("Y10");
-#endif
   Yin->SetLayer(S3LAYER);
+#endif
   Yin->AddInput(splitA, 1);
 
   Hemm *hemm = new Hemm(DMLAYER, LEFT, LOWER, COEFONE, COEFZERO, COMPLEX);
@@ -1460,6 +1478,7 @@ PSet* HegstL5Example()
   return outerSet;
 #else
   throw;
+#endif
 #endif
 }
 
@@ -1543,6 +1562,7 @@ PSet* TriInvExample()
 
 PSet* HetrmmExample()
 {
+#if DOELEM
   InputNode *Ain = new InputNode("input", bigSize, bigSize, tri == LOWER ? "L" : "U");
 
   PossTunnel *tun = new PossTunnel(POSSTUNIN);
@@ -1561,10 +1581,14 @@ PSet* HetrmmExample()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+#else
+  throw;
+#endif
 }
 
 PSet* PartSPDInvLowerExample()
 {
+#if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
   PossTunnel *tun = new PossTunnel(POSSTUNIN);
@@ -1586,10 +1610,14 @@ PSet* PartSPDInvLowerExample()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+#else
+  throw;
+#endif
 }
 
 PSet* SPDInvLowerExample()
 {
+#if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
   PossTunnel *tun = new PossTunnel(POSSTUNIN);
@@ -1614,10 +1642,14 @@ PSet* SPDInvLowerExample()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+#else
+  throw;
+#endif
 }
 
 PSet* SPDInvUpperExample()
 {
+#if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
   PossTunnel *tun = new PossTunnel(POSSTUNIN);
@@ -1642,38 +1674,15 @@ PSet* SPDInvUpperExample()
   PSet *outerSet = new PSet(outerPoss);
   
   return outerSet;
+#else
+  throw;
+#endif
 }
 
 
 PSet* Test()
 {
-  InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
-  InputNode *Bin = new InputNode("B input", bigSize, bigSize, "B");
-  InputNode *Cin = new InputNode("C input", bigSize, bigSize, "C");
-  InputNode *Din = new InputNode("D input", bigSize, bigSize, "D");
-
-  Trxm *trsm = new Trxm(true, DMLAYER, LEFT, LOWER, NONUNIT, NORMAL, COEFONE,REAL);
-  trsm->AddInputs(4, Ain, 0, Bin, 0);
-  Poss *poss2 = new Poss(trsm,false);
-  PSet *set2 = new PSet(poss2);
-
-  Gemm *gemm = new Gemm(DMLAYER, NORMAL, NORMAL, COEFONE, COEFONE, REAL);
-  gemm->AddInputs(6, Din, 0,
-		  Bin, 0,
-		  Cin, 0);
-  Poss *poss3 = new Poss(gemm, false);
-  PSet *set3 = new PSet(poss3);
-
-  OutputNode *out = new OutputNode("out");
-  out->AddInput(set2->OutTun(0), 0);
-
-  OutputNode *out2 = new OutputNode("out2");
-  out2->AddInput(set3->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(2, out, out2, true);
-  PSet *outerSet = new PSet(outerPoss);
-
-  return outerSet;
+  return NULL;
 }
 
 
@@ -2151,6 +2160,7 @@ PSet* Trmm3Example()
 
 PSet* CholHegstExample()
 {
+#if DOELEM
   if (side == RIGHT) {
     InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
     Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
@@ -2167,12 +2177,8 @@ PSet* CholHegstExample()
     splitL->AddInput(cholloop,0);
     splitL->SetAllStats(FULLUP);
 
-#if DOELEM
     TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y21");
-#else
-    TempVarNode *Yin = new TempVarNode("Y21");
-#endif
-    Yin->SetLayer(S3LAYER);
+    Yin->SetLayer(ABSLAYER);
     Yin->AddInput(splitA, 5);
 
     Trxm *trsm = new Trxm(true, DMLAYER, LEFT, LOWER, NONUNIT, NORMAL, COEFONE,COMPLEX);
@@ -2274,10 +2280,11 @@ PSet* CholHegstExample()
 
 #if DOELEM
     TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
+    throw; //SetLayer?
 #else
     TempVarNode *Yin = new TempVarNode("Y10");
-#endif
     Yin->SetLayer(S3LAYER);
+#endif
     Yin->AddInput(splitA, 1);
 
     Hemm *hemm = new Hemm(DMLAYER, LEFT, LOWER, COEFONE, COEFZERO, COMPLEX);
@@ -2353,6 +2360,9 @@ PSet* CholHegstExample()
     throw;
 #endif
   }
+#else
+  throw;
+#endif
 }
 
 PSet* LUExample()

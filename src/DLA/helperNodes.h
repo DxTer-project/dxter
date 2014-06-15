@@ -169,17 +169,14 @@ class TempVarNode : public DLANode
 
   TempVarNode();
   TempVarNode(string name);
-
 #if DOTENSORS
   TempVarNode(DistType dist, EntrySet sumDims);
   TempVarNode(DistType dist, EntrySet sumDims, string name);
 #endif
-
 #if DODM
   TempVarNode(DistType dist);
   TempVarNode(DistType dist, string name); 
 #endif
-
 
  ~TempVarNode();
   virtual NodeType GetType() const;

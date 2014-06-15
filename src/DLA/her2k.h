@@ -151,7 +151,7 @@ class Tri2k : public DLAOp<5,1>, public Her2kProps
   Tri2k(Layer layer, Tri tri, Trans trans, Coef alpha, Coef beta, Type type);
   virtual Phase MaxPhase() const;
   virtual NodeType GetType() const;
-  static Node* BlankInst() { return  new Tri2k(SMLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
+  static Node* BlankInst() { return  new Tri2k(ABSLAYER, LOWER, NORMAL, COEFONE, COEFONE, REAL); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Prop();
   virtual void PrintCode(IndStream &out);

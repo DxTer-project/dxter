@@ -35,8 +35,10 @@
 #include "TrProps.h"
 #include "lowerLayer.h"
 
+#if DOELEM
 bool IsDMTrxm(const Node *node);
 bool IsDMTrxm(const Node *node, bool invert);
+#endif
 
 class Trxm : public DLAOp<2,1>, public TrProps
 {

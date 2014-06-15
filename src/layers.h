@@ -51,22 +51,13 @@ bad layer setup!
 
 #define DODPPHASE 1
 #define DOROPHASE 1
-#define DOSR1PHASE 0
-#define DOSR2PHASE 0
-#define DOSOPHASE 0
-#define DOSMPPHASE 0
-#define DOLLDLAPHASE 0
 
 //Software layers
 enum Layers {
   ABSLAYER = 0,
   DMLAYER,
   SMLAYER,
-  BADLAYER,
-  S1LAYER,
-  S2LAYER,
-  S3LAYER,
-  SOLAYER,
+  BADLAYER
 };
 #elif DOSQM
 
@@ -81,14 +72,11 @@ enum Layers {
 #define MAXPHASE SOPHASE
 #define NUMPHASES (MAXPHASE+1)
 
-#define DODPPHASE 0
-#define DOROPHASE 0
 #define DOSR1PHASE 1
 #define DOSR2PHASE 1
 #define DOSR3PHASE 1
 #define DOSOPHASE 1
 #define DOSMPPHASE 0
-#define DOLLDLAPHASE 0
 
 //Software layers
 enum Layers {
@@ -96,10 +84,9 @@ enum Layers {
   S1LAYER,
   S2LAYER,
   S3LAYER,
-  BADLAYER,
-  DMLAYER,
-  SMLAYER
+  BADLAYER
 };
+
 #elif DOSM
 
 #define SR1PHASE 0
@@ -114,14 +101,11 @@ enum Layers {
 #define MAXPHASE SMPPHASE
 #define NUMPHASES (MAXPHASE+1)
 
-#define DODPPHASE 0
-#define DOROPHASE 0
 #define DOSR1PHASE 1
 #define DOSR2PHASE 1
 #define DOSR3PHASE 1
 #define DOSMPPHASE 1
 #define DOSOPHASE 1
-#define DOLLDLAPHASE 0
 
 //Software layers
 enum Layers {
@@ -130,8 +114,6 @@ enum Layers {
   S2LAYER,
   S3LAYER,
   BADLAYER,
-  DMLAYER,
-  SMLAYER
 };
 #elif DOTENSORS
 
@@ -155,16 +137,9 @@ enum Layers {
 #define MAXPHASE ROTENSORPHASE
 #define NUMPHASES (MAXPHASE+1)
 
-#define DODPPHASE 0
-#define DOROPHASE 0
-#define DOSR1PHASE 0
-#define DOSR2PHASE 0
-#define DOSOPHASE 0
-#define DOSMPPHASE 0
 #define DODPTENSORPHASE 1
 #define DOSUMSCATTERTENSORPHASE 1
 #define DOROTENSORPHASE 1
-#define DOLLDLAPHASE 0
 
 #elif DOLLDLA
 // Layering for LLDLA operations
@@ -177,12 +152,6 @@ enum Layers {
 #define MAXPHASE LLDLAPRIMPHASE
 #define NUMPHASES (MAXPHASE+1)
 
-//#define DODPPHASE 0
-//#define DOROPHASE 0
-//#define DOSR1PHASE 0
-//#define DOSR2PHASE 0
-//#define DOSOPHASE 0
-//#define DOSMPPHASE 0
 #define DOLLDLAPHASE 1
 
 //Software layers

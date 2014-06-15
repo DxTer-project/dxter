@@ -110,6 +110,7 @@ Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
 
 
 
+#if DOELEM
 bool IsDMTrxm(const Node *node)
 {
   if (node->GetNodeClass() == Trxm::GetClass()) {
@@ -127,6 +128,7 @@ bool IsDMTrxm(const Node *node, bool invert)
   }
   return false;
 }
+#endif
 
 Trxm::Trxm(bool invert, Layer layer, Side side, Tri tri, Diag diag, Trans trans, Coef coeff, Type type)
 : TrProps(invert, side, tri, diag, trans, coeff, type)
@@ -179,7 +181,11 @@ Phase Trxm::MaxPhase() const
 
 bool Trxm::DoNotCullDP() const
 {
+#if DOELEM
   return GetLayer() == DMLAYER;
+#else
+  return false;
+#endif
 }
 
 NodeType Trxm::GetType() const
@@ -283,17 +289,25 @@ void Trxm::Prop()
 
     switch (GetLayer()) {
       case (ABSLAYER):
+        m_cost = ZERO;
+        break;
+#if DOELEM
       case (DMLAYER):
         m_cost = ZERO;
         break;
       case (SMLAYER):
         m_cost = GetCost(SMLAYER, m_side, LocalM(0), LocalN(0));
         break;
+#elif DOBLIS
       case (S1LAYER):
       case (S2LAYER):
       case (S3LAYER):
         m_cost = ZERO;
         break;
+#else
+    default:
+      throw;
+#endif
     }
   }
 }
@@ -326,12 +340,14 @@ void Trxm::PrintCode(IndStream &out)
       case (ABSLAYER):
         *out << "AbsTrmm( ";
         break;
+#if DOELEM
       case (DMLAYER):
         *out << "DistTrmm( ";
         break;
       case (SMLAYER):
         *out << "internal::LocalTrmm( ";
         break;
+#elif DOBLIS
       case (S1LAYER):
         *out << "BLISTrmmLimitedN( ";
         break;
@@ -341,6 +357,7 @@ void Trxm::PrintCode(IndStream &out)
       case (S3LAYER):
         *out << "PackedTrmmGebp( ";
         break;
+#endif
       default:
         throw;
     }
@@ -359,7 +376,7 @@ void Trxm::PrintCode(IndStream &out)
 
 Cost Trxm::GetCost(Layer layer, Side side, const Sizes *localMs, const Sizes *localNs)
 {
-  
+#if DOELEM
   if (layer == SMLAYER) {
     if (side == LEFT)
       return GAMMA * localMs->SumProds21(*localNs);
@@ -367,6 +384,7 @@ Cost Trxm::GetCost(Layer layer, Side side, const Sizes *localMs, const Sizes *lo
       return GAMMA * localNs->SumProds21(*localMs);
   }
   else
+#endif
     throw;
 }
 
@@ -452,15 +470,21 @@ void Trmm3::Prop()
       case (ABSLAYER):
         m_cost = ZERO;
         break;
+#if DOELEM
       case (DMLAYER):
       case (SMLAYER):
         throw;
         break;
+#elif DOBLIS
       case (S1LAYER):
       case (S2LAYER):
       case (S3LAYER):
         m_cost = ZERO;
         break;
+#else
+    default:
+      throw;
+#endif
     }
   }
 }
@@ -472,18 +496,21 @@ void Trmm3::PrintCode(IndStream &out)
     case (ABSLAYER):
       *out << "AbsTrmm3( ";
       break;
+#if DOELEM
     case (DMLAYER):
       *out << "DistTrmm3( ";
       break;
     case (SMLAYER):
       *out << "internal::LocalTrmm3( ";
       break;
+#elif DOBLIS
     case (S1LAYER):
       *out << "BLISTrmm3LimitedN( ";
       break;
     case (S2LAYER):
       *out << "Trmm3RankKUpdate( ";
       break;
+#endif
     default:
       throw;
   }

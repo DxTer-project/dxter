@@ -21,7 +21,7 @@
 
 
 #include "layers.h"
-#if DOELEM||DOBLIS
+#if DOELEM
 
 #include "chol.h"
 #include "elemRedist.h"
@@ -63,9 +63,13 @@ void Chol::Prop()
     if (! (*ms == *ns)) {
       cout << "chol m_m != m_n :" << GetM(0) << " " << GetN(0) << " on " << GetInputName(0).str() << endl; 
     }
+#if DOELEM
     if (m_layer == SMLAYER) 
       m_cost = GAMMA * 1.0/3 * InputLocalM(0)->SumCubes();
-    else if (m_layer == ABSLAYER || m_layer == DMLAYER)
+    else if (m_layer == DMLAYER)
+      m_cost = 0;
+#endif
+    if (m_layer == ABSLAYER)
       m_cost = 0;
   }
 }
@@ -75,6 +79,7 @@ void Chol::PrintCode(IndStream &out)
   if (m_layer == ABSLAYER) {
     *out << "AbsChol( " << TriToStr(m_tri) << ", " << GetInputName(0).str() << " );\n";
   }
+#if DOELEM
   else if (m_layer == DMLAYER) {
     *out << "DMChol( " << TriToStr(m_tri) << ", " << GetInputName(0).str() << " );\n";
   }
@@ -82,6 +87,7 @@ void Chol::PrintCode(IndStream &out)
     out.Indent();
     *out << "internal::LocalCholesky( " << TriToStr(m_tri) << ", " << GetInputName(0).str() << " );\n";
   }
+#endif
   else
     throw;
 }

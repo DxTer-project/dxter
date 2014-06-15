@@ -20,7 +20,7 @@
 */
 
 #include "layers.h"
-#if DOELEM||DOBLIS
+#if DOELEM
 
 #include "blas.h"
 #include "hetrmm.h"

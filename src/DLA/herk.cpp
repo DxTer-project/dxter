@@ -150,12 +150,14 @@ void Herk::PrintCode(IndStream &out)
     else
       *out << "AbsHerk( " ;
   }
+#if DOELEM
   else if(GetLayer() == DMLAYER) {
     if (m_type == REAL)
       *out << "DistSyrk( " ;
     else
       *out << "DistHerk( " ;
   }
+#endif
   *out << TriToStr(m_tri) << ", "
   << TransToStr(m_transA) << ", " << TransToStr(m_transB);
   out << m_alpha;
@@ -203,8 +205,10 @@ bool Herk::ShouldCullDP() const
   switch (GetLayer()) {
     case (ABSLAYER):
       return false;
+#if DOELEM
     case (DMLAYER):
       return true;
+#endif
     default:
       throw;
   }
@@ -1023,9 +1027,11 @@ Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     throw;
   else
+#endif
     loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
 
   loop->SetDimName(DIMN);
@@ -1186,9 +1192,11 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
   Loop *loop;
+#if DOELEM
   if (layer == DMLAYER)
     throw;
   else
+#endif
     loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
 
   loop->SetDimName(DIMM);
