@@ -44,10 +44,11 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
 		     string numRowsVar, string numColsVar,
 		     string rowStrideVar, string colStrideVar)
 : 
-  m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL),
   m_dataTypeInfo(rowStride, colStride,
-	     numRowsVar, numColsVar,
-	     rowStrideVar, colStrideVar)
+		 numRowsVar, numColsVar,
+		 rowStrideVar, colStrideVar),
+  m_msize(NAN), m_nsize(NAN), 
+  m_mlsize(NULL), m_nlsize(NULL)
 {
   m_msize.AddRepeatedSizes(m, 1, 1);
   m_nsize.AddRepeatedSizes(n, 1, 1);
