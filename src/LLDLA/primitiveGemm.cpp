@@ -26,8 +26,8 @@
 
 #if DOLLDLA
 
-PrimitiveGemm::PrimitiveGemm(Coef alpha, Coef beta, Type type)
-  : Gemm(LLDLAPRIMITIVELAYER, NORMAL, NORMAL, alpha, beta, type)
+PrimitiveGemm::PrimitiveGemm(Coef alpha, Coef beta, Type type, Layer layer)
+  : Gemm(layer, NORMAL, NORMAL, alpha, beta, type)
 {
 }
 
@@ -93,11 +93,62 @@ void PrimitiveGemm::Prop()
 
 Node* PrimitiveGemm::BlankInst()
 {
-  return new PrimitiveGemm(COEFONE, COEFONE, REAL);
+  return new PrimitiveGemm(COEFONE, COEFONE, REAL, ABSLAYER);
 }
 
 NodeType PrimitiveGemm::GetType() const
 {
   return "PrimitiveGemm" + LayerNumToStr(GetLayer());
 }
+
+string LLDLAGemmToPrim::GetType() const
+{
+  return "LLDLAGemmToPrim";
+}
+
+bool LLDLAGemmToPrim::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == Gemm::GetClass()) {
+    const Gemm *gemm = (Gemm*)node;
+    if (gemm->m_transA != NORMAL || gemm->m_transB != NORMAL)
+      return false;
+    if (gemm->GetLayer() != m_fromLayer)
+      return false;
+
+    if ((*(gemm->GetInputM(2)) <= LLDLA_MU) &&
+	(*(gemm->GetInputN(2)) <= LLDLA_MU))
+      {
+	return true;
+      }
+    else
+      return false;
+  }
+  return false;
+}
+
+void LLDLAGemmToPrim::Apply(Node *node) const
+{
+  Gemm *gemm = (Gemm*)node;
+
+  NodeConn *connA, *connB, *connC;
+  connA = gemm->m_inputs[0];
+  connB = gemm->m_inputs[1];
+  connC = gemm->m_inputs[2];
+  
+  PrimitiveGemm *prim = new PrimitiveGemm(gemm->m_alpha,
+					  gemm->m_beta,
+					  gemm->m_type,
+					  m_toLayer);
+
+  prim->AddInputs(6, 
+		  connA->m_n, connA->m_num,
+		  connB->m_n, connB->m_num,
+		  connC->m_n, connC->m_num);
+
+  node->m_poss->AddNode(prim);
+
+  node->RedirectChildren(prim,0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
 #endif //DOLLDLA

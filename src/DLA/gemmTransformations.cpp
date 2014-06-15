@@ -36,15 +36,18 @@ using namespace std;
 string GemmLoopExp::GetType() const
 {
   //If these change, match in LLDLAGemmLoopExp
+  string str = "Gemm Loop Exp " + LayerNumToStr(m_fromLayer)
+				+ " + " 
+				+ LayerNumToStr(m_toLayer);
   switch(m_dim) {
     case(0):
-      return "Gemm Loop Exp - m";
+      return str + " - m";
     case(1):
-      return "Gemm Loop Exp - k";
+      return str + " - k";
     case(-1):
-      return "Gemm Loop Exp - k reversed";
+      return str + " - k reversed";
     case(2):
-      return "Gemm Loop Exp - n";
+      return str + " - n";
     default:
       throw;
   }

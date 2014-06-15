@@ -50,9 +50,11 @@ PSet* Example1();
 
 void AddTrans()
 {
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLAPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLAPHASE);
-  //  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, LLDLAPRIMITIVELAYER, 0), LLDLAPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, LLDLAMIDLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, LLDLAMIDLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(LLDLAMIDLAYER, LLDLAMIDLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(LLDLAMIDLAYER, LLDLAMIDLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLAPRIMPHASE);
 }
 
 void AddSimplifiers()
@@ -122,12 +124,12 @@ int main(int argc, const char* argv[])
   }
 
 
-#if DOLLDLAPHASE
-  if (CurrPhase == LLDLAPHASE) {
-    cout << "Expanding LL DLA phase\n";
-    uni.Expand(-1, LLDLAPHASE, LLDLACull);
+#if DOLLDLALOOPPHASE
+  if (CurrPhase == LLDLALOOPPHASE) {
+    cout << "Expanding LL DLA loop phase\n";
+    uni.Expand(-1, LLDLALOOPPHASE, LLDLACull);
     time(&end);
-    cout << "LLDLA phase took " << difftime(end,start) << " seconds\n";
+    cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
 
     cout << "Propagating\n";
     cout.flush();
@@ -137,6 +139,25 @@ int main(int argc, const char* argv[])
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
 #endif
+
+#if DOLLDLAPRIMPHASE
+  if (CurrPhase == LLDLAPRIMPHASE) {
+    cout << "Expanding LL DLA prim phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, LLDLAPRIMPHASE, LLDLACull);
+    time(&end);
+    cout << "LLDLAPRIM phase took " << difftime(end,start2) << " seconds\n";
+    
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
 
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();

@@ -41,7 +41,7 @@
 class PrimitiveGemm : public Gemm
 {
  public:
-  PrimitiveGemm(Coef alpha, Coef beta, Type type);
+  PrimitiveGemm(Coef alpha, Coef beta, Type type, Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
   virtual Phase MaxPhase() const {return NUMPHASES;}
@@ -58,6 +58,19 @@ class PrimitiveGemm : public Gemm
   void PrintColStride(IndStream &out);
   void PrintGeneralStride(IndStream &out);
 };
+
+class LLDLAGemmToPrim : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+ LLDLAGemmToPrim(Layer fromLayer, Layer toLayer) 
+   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 
 
 #endif //DOLLDLA

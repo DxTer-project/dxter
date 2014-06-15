@@ -165,7 +165,9 @@ Phase Gemm::MaxPhase() const
   case (S3LAYER):
     return NUMPHASES;
 #elif DOLLDLA
-    return LLDLAPHASE;
+    return LLDLALOOPPHASE;
+  case (LLDLAMIDLAYER):
+    return LLDLAPRIMPHASE;
 #endif
   default:
     throw;
@@ -256,6 +258,8 @@ void Gemm::Prop()
 	  break;
 	}
 #elif DOLLDLA
+    case (LLDLAMIDLAYER):
+      m_cost = 0;
     case (LLDLAPRIMITIVELAYER):
       //m_cost will be set in PrimitiveGemm::Prop
       break;
