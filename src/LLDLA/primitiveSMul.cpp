@@ -81,11 +81,11 @@ void PrimitiveSMul::Prop()
       GetInputM(1)->Print();
       cout << endl;
       GetInputN(1)->Print();
-      cout << "ERROR: PrimitiveSMul only operates on LLDLA_MU by LLDLA_MU matrices\n";
+      cout << "ERROR: PrimitiveSMul input 1 must be an LLDLAMU by LLDLAMU matrix\n";
     }
 
     if (!((DLANode*) Input(0))->IsScalar(InputConnNum(0))) {
-      cout << "ERROR: PrimitiveSMul first argument is not a scalar\n";
+      cout << "ERROR: PrimitiveSMul input 0 is not a scalar\n";
     }
     
     m_cost = ZERO;
