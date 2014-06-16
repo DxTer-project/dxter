@@ -67,7 +67,7 @@ void AddSimplifiers()
 
 void Usage()
 {
-  cout << "./driver arg1 arg2 arg3 arg4\n";
+  cout << "./driver arg1 arg2 ...\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
   cout <<"         1  -> Gemm Example N/T N/T\n";
 }
@@ -93,6 +93,10 @@ int main(int argc, const char* argv[])
     algNum = atoi(argv[1]);
     switch(algNum) {
     case(1):
+      if (argc != 3) {
+	Usage();
+	return 0;
+      }
       algFunc = GemmExample;
       transA = CharToTrans(*argv[2]);
       transB = CharToTrans(*argv[3]);
