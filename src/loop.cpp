@@ -698,26 +698,21 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   
   PSet::PrintCurrPoss(out, graphNum);
 
-#if DOBLIS
-  if (m_type == BLISLOOP) {
-    out.Indent();
-    *out << "}\n";
-  }
-#elif DOLLDLA
-  if (m_type == LLDLALOOP) {
-    Poss *poss = GetCurrPoss();
-    NodeVecIter iter = poss->m_inTuns.begin();
-    for(; iter != poss->m_inTuns.end(); ++iter) {
-      Node *node = *iter;
-      if (node->GetNodeClass() == Split::GetClass()) {
-	Split *split = (Split*)node;
-	split->PrintIncrementAtEndOfLoop(out);
-      }
+  iter = poss->m_inTuns.begin();
+  for(; iter != poss->m_inTuns.end(); ++iter) {
+    Node *node = *iter;
+    if (node->GetNodeClass() == Split::GetClass()) {
+      Split *split = (Split*)node;
+      split->PrintIncrementAtEndOfLoop(out);
     }
+  }
+
+#if DOBLIS||DOLLDLA
+  if (m_type == BLISLOOP || m_type == LLDLALOOP) {
     out.Indent();
     *out << "}\n";
   }
-#endif //DOLLDLA
+#endif //DOBLIS||DOLLDLA
 }
  
 unsigned int Loop::LoopLevel() const
