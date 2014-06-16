@@ -1365,17 +1365,32 @@ void Split::UpdateLocalSizes()
 #endif
 
 #if DOLLDLA
-string Split::BoundingDimensionVarName()
+string Split::LoopBound()
 {
+  const DataTypeInfo &info = InputDataType(0);
   switch(m_dir)
     {
     case (PARTDOWN):
-    case (PARTDIAG):
-      return InputDataType(0).m_numRowsVar;
-      break;
-    case (PARTRIGHT):
-      return InputDataType(0).m_numColsVar;
+      {
+	string tmp = "(" + GetInputNameStr(0) +
+	  " + " + info.m_numRowsVar;
+	if (!IsUnitStride(info.m_rowStride))
+	  tmp += " * " + info.m_rowStrideVar;
+	return tmp + ")";
 	break;
+      }
+    case (PARTRIGHT):
+      {
+	string tmp = "(" + GetInputNameStr(0) +
+	  " + " + info.m_numColsVar;
+	if (!IsUnitStride(info.m_colStride))
+	  tmp += " * " + info.m_colStrideVar;
+	return tmp + ")";
+	break;
+      }
+    case (PARTDIAG):
+      throw;
+      break;
     case (PARTUPWARD):
       throw;
       break;

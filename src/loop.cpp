@@ -693,7 +693,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   out.Indent();
   *out << "while ( " << LLDLAPartVarName(split->GetInputNameStr(0),1) 
        << " < " 
-       << split->BoundingDimensionVarName() << " )  {\n";
+       << split->LoopBound() << " )  {\n";
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);
