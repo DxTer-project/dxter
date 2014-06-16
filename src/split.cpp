@@ -1391,3 +1391,30 @@ string Split::BoundingDimensionVarName()
     }
 }
 #endif
+
+
+void Split::PrintIncrementAtEndOfLoop(IndStream &out) const
+{
+  if (m_tunType != POSSTUNIN)
+    throw;
+#if DOLLDLA
+  out.Indent(1);
+  const DataTypeInfo &type = InputDataType(0);
+  *out << LLDLAPartVarName(GetInputNameStr(0),1) << " += ";
+  if (m_dir == PARTDOWN) {
+    if (!IsUnitStride(type.m_rowStride))
+      *out << type.m_rowStrideVar << " * ";
+    *out << MU_VAR_NAME << ";\n";
+  }
+  else if (m_dir == PARTRIGHT) {
+    if (!IsUnitStride(type.m_colStride))
+      *out << type.m_colStrideVar << " * ";
+    *out << MU_VAR_NAME << ";\n";
+  }
+  else
+    throw;
+  if (PartInUse(0) || PartInUse(2))
+    throw;
+
+#endif
+}

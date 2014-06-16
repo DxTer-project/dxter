@@ -97,4 +97,6 @@ class Split : public LoopTunnel
 #endif
 
   virtual void AddVariables(VarSet &set) const;
+
+  void PrintIncrementAtEndOfLoop(IndStream &out) const;
 };

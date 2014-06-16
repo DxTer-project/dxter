@@ -711,12 +711,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
       Node *node = *iter;
       if (node->GetNodeClass() == Split::GetClass()) {
 	Split *split = (Split*)node;
-	out.Indent(1);
-	if (split->m_dir != PARTDOWN && split->m_dir != PARTRIGHT)
-	  throw;
-	if (split->PartInUse(0) || split->PartInUse(2))
-	  throw;
-	*out << LLDLAPartVarName(split->GetInputNameStr(0),1) << " += " << MU_VAR_NAME << ";\n";
+	split->PrintIncrementAtEndOfLoop(out);
       }
     }
     out.Indent();
