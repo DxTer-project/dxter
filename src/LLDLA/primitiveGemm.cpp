@@ -51,7 +51,14 @@ void PrimitiveGemm::PrintCode(IndStream &out)
 
 void PrimitiveGemm::PrintRowStride(IndStream &out)
 {
-  *out << "ROW STRIDE not yet implemented\n";
+  if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
+    *out << "row_stride_mmul_2x2_2x2( " <<
+      GetInputName(0).str() << ", " <<
+      GetInputName(1).str() << ", " <<
+      GetInputName(2).str() << ");\n";
+  }
+  else
+    throw;
 }
 
 void PrimitiveGemm::PrintColStride(IndStream &out)

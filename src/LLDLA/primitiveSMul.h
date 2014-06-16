@@ -19,58 +19,32 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-  This file defines the PrimitiveGemm class. This class is used in
-  LLDLA operations to represent multiplication a gemm  whose input's
-  row and column dimensions are both equal to mu.
-
-  The only significant differences from Gemm are that this class appears
-  only in the primitive layer of LLDLA operations and that it has 2
-  fields (m_rowStride, m_colStride) which denotes the row and column
-  stride of its arguments. Based on these two field's
-  values PrimitiveGemm's PrintCode method generates the appropriate API
-  call.
-*/
-
-#pragma once
-
-#include "gemm.h"
+#include "DLAOp.h"
 
 #if DOLLDLA
 
-class PrimitiveGemm : public Gemm
+class PrimitiveSMul : DLAOp<2, 1>
 {
  public:
-  PrimitiveGemm(Coef alpha, Coef beta, Type type, Layer layer);
+  Type m_type;
+  PrimitiveSMul(Type type);
+
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
-  virtual Phase MaxPhase() const { return NUMPHASES; }
+  virtual Phase MaxPhase() { return NUMPHASES; }
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  static ClassType GetClass() { return "LLDLAPrimGemm"; }
+  static ClassType GetClass() { return "LLDLAPrimSMul"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
 
   virtual NodeType GetType() const;
 
+ private:
   void PrintRowStride(IndStream &out);
   void PrintColStride(IndStream &out);
   void PrintGeneralStride(IndStream &out);
 };
 
-class LLDLAGemmToPrim : public SingleTrans
-{
- public:
-  Layer m_fromLayer, m_toLayer;
- LLDLAGemmToPrim(Layer fromLayer, Layer toLayer) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
-  virtual string GetType() const;
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-
-
-
-#endif //DOLLDLA
+#endif // DOLLDLA
