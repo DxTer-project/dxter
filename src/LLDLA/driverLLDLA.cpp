@@ -40,6 +40,7 @@
 #include "driverUtils.h"
 #include "debug.h"
 #include "LLDLAGemmTransformations.h"
+#include "primitiveSMul.h"
 
 Size one = 1;
 Size smallSize = 10;
@@ -60,6 +61,10 @@ void AddTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLAMU), LLDLALOOPPHASE);
+
+  //Introduces loops in the m and n dimension for PrimitiveSMul
+  Universe::AddTrans(PrimitiveSMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(PrimitiveSMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
 
   //Lowers the layer tag of a Gemm node that is LLDLA_MU in all three dimensions
   Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);

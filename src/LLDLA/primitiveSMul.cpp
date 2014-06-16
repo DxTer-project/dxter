@@ -104,4 +104,119 @@ NodeType PrimitiveSMul::GetType() const
   return "PrimitiveSMul" + LayerNumToStr(GetLayer());
 }
 
+string SMulLoopRef::GetType() const
+{
+  switch (m_dim)
+    {
+    case (DIMM):
+      return "SMulLoopRef - dim m";
+    case (DIMN):
+      return "SMulLoopRef - dim n";
+    default:
+      throw;
+    }
+  
+}
+
+bool SMulLoopRef::CanApply(const Node *node) const
+{
+  const PrimitiveSMul *mul = (PrimitiveSMul*)node;
+  if (mul->GetLayer() != m_fromLayer)
+    return false;
+  
+  if (m_dim == DIMM) {
+    if (!(*(mul->GetInputM(1)) <= BSSizeToSize(m_bs)))
+      return true;
+  }
+  else if (m_dim == DIMN) {
+    if (!(*(mul->GetInputN(1)) <= BSSizeToSize(m_bs)))
+      return true;
+  }
+  else
+    throw;
+  return false;
+}
+
+void SMulLoopRef::Apply(Node *node) const
+{
+  PrimitiveSMul *mul = (PrimitiveSMul*)node;
+
+
+  //Create a split for the input matrix
+  // If we're splitting on the m dimension, then the split moves down 
+  //    (i.e., it's horizontal)
+  // If we're splitting on the n dimension, then the split moves right
+  //    (i.e., it's vertical)
+  Split *split = new Split(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  // Add input, which is the matrix input to mul
+  split->AddInput(mul->Input(1), mul->InputConnNum(1));
+  //Set the update statuses
+  //If we're moving down, then everything above the thick line is fully updated
+  if (m_dim == DIMM) {
+    split->SetUpStats(FULLUP, FULLUP,
+		      NOTUP, NOTUP);		     
+  }
+  //If we're moving right, then everything left of the thick line is fully updated
+  else {
+    split->SetUpStats(FULLUP, NOTUP,
+		       FULLUP, NOTUP);
+  }
+  //Independent iterations
+  split->SetIndepIters();
+
+  //Create a loop tunnel - the scalar is input to each iteration of the loop
+  LoopTunnel *scalarTun = new LoopTunnel(POSSTUNIN);
+  //Wire up the scalar input
+  scalarTun->AddInput(mul->Input(0), mul->InputConnNum(0));
+  //Always updated since it doesn't change
+  scalarTun->SetAllStats(FULLUP);
+  //Independent iterations
+  scalarTun->SetIndepIters();
+  
+
+  //Create a new SMul or the same type and in my m_toLayer layer
+  PrimitiveSMul *newMul = new PrimitiveSMul(mul->m_type);
+  newMul->SetLayer(m_toLayer);
+
+  //Wire inputs - the scalar loop tunnel and 
+  //   the 1st (0-based) partition of the matrix split tunnel
+  newMul->AddInput(scalarTun, 0);
+  newMul->AddInput(split, 1);
+
+  //Create an output tunnel for the scalar just for consistency
+  LoopTunnel *scalarTunOut = new LoopTunnel(POSSTUNOUT);
+  //Wire two inputs, the first is for the data that is passed out
+  // and the second is to the input tunnel to which this one
+  // should match
+  scalarTunOut->AddInput(scalarTun, 0);
+  scalarTunOut->AddInput(scalarTun, 0);
+  scalarTunOut->CopyTunnelInfo(scalarTun);
+
+  
+  //Create an output tunnel for the matrix and overwrite
+  // the 1st (0-based) partition of the output matrix
+  Combine *com = split->CreateMatchingCombine(1,
+					     1, newMul, 0);
+  
+  //Put all of this into single poss (this constructor
+  // will recursively move up the flow of data, adding
+  // all nodes it finds
+  Poss *loopPoss = new Poss(2, scalarTunOut, com);
+  //Put that poss into a loop - it's LLDLALOOP type and
+  // uses the LLDLA_MU blocksize
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+
+  //Set the dimension over which this loop iterates
+  loop->SetDimName(m_dim);
+  
+  //Add the loop to the node's owning Poss
+  node->m_poss->AddLoop(loop);
+  //Redirect children of the node to use the loop's output
+  // (it's the 1st (0-base) output since the 0th is the scalar)
+  node->RedirectChildren(loop->OutTun(1), 0);
+  //Delete the node and recursively move up to delete any stragling
+  // nodes (in this case, there shouldn't be any)
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
 #endif //DOLLDLA

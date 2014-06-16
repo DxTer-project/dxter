@@ -20,10 +20,11 @@
 */
 
 #include "DLAOp.h"
+#include "loopSupport.h"
 
 #if DOLLDLA
 
-class PrimitiveSMul : DLAOp<2, 1>
+class PrimitiveSMul : public DLAOp<2, 1>
 {
  public:
   Type m_type;
@@ -46,5 +47,20 @@ class PrimitiveSMul : DLAOp<2, 1>
   void PrintColStride(IndStream &out);
   void PrintGeneralStride(IndStream &out);
 };
+
+class SMulLoopRef : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  DimName m_dim;
+  BSSize m_bs;
+ SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs) 
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 
 #endif // DOLLDLA
