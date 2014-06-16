@@ -57,6 +57,7 @@ void Universe::Init(PSet *seed)
   m_pset = seed;
   m_pset->m_isTopLevel = true;
   CurrPhase = FIRSTPHASE;
+  m_pset->Simplify(M_simplifiers);
   m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers);
   m_pset->BuildDataTypeCache();
 
