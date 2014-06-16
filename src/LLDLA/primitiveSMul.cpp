@@ -125,11 +125,15 @@ bool SMulLoopRef::CanApply(const Node *node) const
     return false;
   
   if (m_dim == DIMM) {
-    if (!(*(mul->GetInputM(1)) <= BSSizeToSize(m_bs)))
+    if (*(mul->GetInputM(1)) <= BSSizeToSize(m_bs))
+      return false;
+    else
       return true;
   }
   else if (m_dim == DIMN) {
-    if (!(*(mul->GetInputN(1)) <= BSSizeToSize(m_bs)))
+    if (*(mul->GetInputN(1)) <= BSSizeToSize(m_bs))
+      return false;
+    else
       return true;
   }
   else
@@ -196,7 +200,7 @@ void SMulLoopRef::Apply(Node *node) const
   //Create an output tunnel for the matrix and overwrite
   // the 1st (0-based) partition of the output matrix
   Combine *com = split->CreateMatchingCombine(1,
-					     1, newMul, 0);
+					      1, newMul, 0);
   
   //Put all of this into single poss (this constructor
   // will recursively move up the flow of data, adding
