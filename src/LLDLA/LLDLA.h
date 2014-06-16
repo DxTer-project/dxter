@@ -19,6 +19,7 @@
  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma once
 
 #include "layers.h"
 

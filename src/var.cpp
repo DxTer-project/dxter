@@ -76,6 +76,21 @@ string LLDLAPartVarName(const string &var, unsigned int part)
   str << var << part;
   return str.str();
 }
+
+string LLDLATransVarName(const string &var, Trans trans)
+{
+  switch (trans) 
+    {
+    case (CONJ):
+      return var+"C";
+    case (TRANS):
+      return var+"T";
+    case (CONJTRANS):
+      return var+"H";
+    default:
+      throw;
+    }
+}
 #endif //DOLLDLA
 
 
@@ -155,7 +170,14 @@ Var::Var(const string &varName, unsigned int partNum)
 {
   m_type = VarPartType;
   m_part = new string(LLDLAPartVarName(varName, partNum));
-  m_compStr = "f" + *m_part;
+  m_compStr = "g" + *m_part;
+}
+
+Var::Var(const string &varName, Trans trans)
+{
+  m_type = VarTransType;
+  m_transVar = new string (LLDLATransVarName(varName, trans));
+  m_compStr = "f" + *m_transVar;
 }
 #endif
 
@@ -185,6 +207,9 @@ Var::~Var()
 #elif DOLLDLA
     case (VarPartType):
       delete m_part;
+      break;
+    case (VarTransType):
+      delete m_transVar;
       break;
 #endif
     case (InvalidType) :
@@ -293,6 +318,12 @@ void Var::PrintDecl(IndStream &out) const
 	*out << "double *" << *m_part << ";\n";
 	break;
       }
+    case (VarTransType):
+      {
+	out.Indent();
+	*out << "double *" << *m_transVar << ";\n";
+	break;
+      }
 #endif
     case (InvalidType):
       throw;
@@ -340,6 +371,11 @@ string Var::GetVarName() const
 	return *m_part;
 	break;
       }
+    case (VarTransType):
+      {
+	return *m_transVar;
+	break;
+      }
 #endif      
     case (InvalidType):
       throw;
@@ -382,6 +418,9 @@ Var& Var::operator=(const Var &rhs)
       case (VarPartType):
 	delete m_part;
 	break;
+      case (VarTransType):
+	delete m_transVar;
+	break;
 #endif
 
       case (InvalidType):
@@ -418,6 +457,9 @@ Var& Var::operator=(const Var &rhs)
 #elif DOLLDLA
     case (VarPartType):
       m_part = new string(*(rhs.m_part));
+      break;
+    case (VarTransType):
+      m_transVar = new string (*(rhs.m_transVar));
       break;
 #endif
     case (InvalidType):

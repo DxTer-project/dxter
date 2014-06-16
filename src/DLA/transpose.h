@@ -31,16 +31,28 @@
 #include "pack.h"
 #include "comm.h"
 #include "loopSupport.h"
+#include "LLDLA.h"
 
 class Transpose : public DLAOp<1,1>
 {
  public:
   Trans m_trans;
+#if DOLLDLA
+  DataTypeInfo m_info;
+#endif
+#if DOBLIS
   bool m_objTrans;
   Transpose(Trans trans, bool objectTrans);
+#elif DOLLDLA
+  Transpose(Trans trans);
+#endif
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void PrintCode(IndStream &out);
+#if DOBLIS
   static Node* BlankInst() {return new Transpose(NORMAL, false); }
+#elif DOLLDLA
+  static Node* BlankInst() {return new Transpose(NORMAL); }
+#endif
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "Transpose";}
@@ -55,6 +67,13 @@ class Transpose : public DLAOp<1,1>
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
   virtual bool Overwrites(const Node *input, unsigned int num) const;
+  virtual bool KeepsInputVarLive(Node *input, unsigned int numInArg, unsigned int &numOutArg) const;
+#if DOLLDLA
+  virtual const DataTypeInfo& DataType(unsigned int num) const;
+  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache();
+  virtual void AddVariables(VarSet &set) const;
+#endif
 };
 
 class CombineTranspose : public SingleTrans
@@ -65,11 +84,14 @@ class CombineTranspose : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+#if DOBLIS
 Transpose* AddTranspose(Trans trans, bool objTrans, Node *input, unsigned int num, bool addToPoss);
-
-Node* AddTrans(Trans trans, bool objTrans, Node *input, unsigned int num, bool addToPoss);
-
+//Node* AddTrans(Trans trans, bool objTrans, Node *input, unsigned int num, bool addToPoss);
 Transpose* InsertTranspose(Trans trans, bool objTrans, Node *node, unsigned int inNum, bool addToPoss);
-
+#elif DOLLDLA
+Transpose* AddTranspose(Trans trans, Node *input, unsigned int num, bool addToPoss);
+//Node* AddTrans(Trans trans, Node *input, unsigned int num, bool addToPoss);
+Transpose* InsertTranspose(Trans trans, Node *node, unsigned int inNum, bool addToPoss);
+#endif
 
 #endif

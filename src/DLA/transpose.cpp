@@ -25,33 +25,46 @@
 #include "transpose.h"
 #include "loopSupport.h"
 #include "helperNodes.h"
+#include "var.h"
 
-
+#if DOBLIS
 Transpose::Transpose(Trans trans, bool objectTrans)
 : m_trans(trans), m_objTrans(objectTrans)
 {
 }
+#elif DOLLDLA
+Transpose::Transpose(Trans trans)
+: m_trans(trans)
+{
+}
+#endif
 
 void Transpose::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<1,1>::Duplicate(orig, shallow, possMerging);
   const Transpose *trans = (Transpose*)orig;
   m_trans = trans->m_trans;
+#if DOBLIS
   m_objTrans = trans->m_objTrans;
+#endif
 }
 
 void Transpose::Flatten(ofstream &out) const
 {
   DLAOp<1,1>::Flatten(out);
   WRITE(m_trans);
+#if DOBLIS
   WRITE(m_objTrans);
+#endif
 }
 
 void Transpose::Unflatten(ifstream &in, SaveInfo &info)
 {
   DLAOp<1,1>::Unflatten(in, info);
   READ(m_trans);
+#if DOBLIS
   READ(m_objTrans);
+#endif
 }
 
 
@@ -90,7 +103,10 @@ const Sizes* Transpose::LocalN(unsigned int num) const
 void Transpose::PrintCode(IndStream &out)
 {
   string inputName = GetInputName(0).str();
+
   out.Indent();
+
+#if DOBLIS
   if (!m_objTrans) {
 #if DOSMPPHASE
     bool barrierBack = false;
@@ -165,22 +181,46 @@ void Transpose::PrintCode(IndStream &out)
     *out << ", " << inputName << ", "
     << name << ");\n";
   }
+#elif DOLLDLA
+  string inName = GetInputNameStr(0);
+  *out << LLDLATransVarName(inName,m_trans) << " = " << inName << endl;
+#endif
 }
 
 bool Transpose::Overwrites(const Node *input, unsigned int num) const
 {
+#if DOBLIS
   if (m_objTrans)
     return false;
-  else {
+  else 
+    {
     const NodeConn *conn = m_inputs[0];
     return conn->m_n == input && conn->m_num == num;
+    }
+#elif DOLLDLA
+  return false;
+#endif
+}
+
+bool Transpose::KeepsInputVarLive(Node *input, unsigned int numInArg, unsigned int &numOutArg) const
+{
+#if DOBLIS
+  if (Overwrites(input, numInArg)) {
+    numOutArg = 0;
+    return true;
   }
+  else
+    return false;
+#elif DOLLDLA
+  return false;
+#endif
 }
 
 Name Transpose::GetName(unsigned int num) const
 {
   if (num > 0)
     throw;
+#if DOBLIS
   if (m_objTrans) {
     Name name = GetInputName(0);
     if (m_trans == TRANS)
@@ -193,19 +233,72 @@ Name Transpose::GetName(unsigned int num) const
   }
   else
     return GetInputName(0);
+#elif DOLLDLA
+  Name in = GetInputName(0);
+  in.m_name = LLDLATransVarName(in.m_name, m_trans);
+  return in;
+#endif
 }
+
+#if DOLLDLA
+void Transpose::AddVariables(VarSet &set) const
+{
+  DLAOp<1,1>::AddVariables(set);
+  Var var(GetInputNameStr(0), m_trans);
+  set.insert(var);
+}
+#endif
 
 void Transpose::Prop()
 {
   if (!IsValidCost(m_cost)) {
+    if (m_trans == NORMAL)
+      throw;
     DLAOp<1,1>::Prop();
     m_cost = ZERO;
   }
 }
 
-Transpose* AddTranspose(Trans transVal, bool objTrans, Node *input, unsigned int num, bool addToPoss)
+#if DOLLDLA
+const DataTypeInfo& Transpose::DataType(unsigned int num) const
 {
+  return m_info;
+}
+
+void Transpose::ClearDataTypeCache()
+{
+  m_info.m_rowStride = BADSTRIDE;
+}
+
+void Transpose::BuildDataTypeCache()
+{
+  const DataTypeInfo &in = InputDataType(0);
+  if (m_trans == CONJ) {
+    m_info = in;
+  }
+  else {
+    m_info.m_rowStride = in.m_colStride;
+    m_info.m_colStride = in.m_rowStride;
+    m_info.m_numRowsVar = in.m_numColsVar;
+    m_info.m_numColsVar = in.m_numRowsVar;
+    m_info.m_rowStrideVar = in.m_colStrideVar;
+    m_info.m_colStrideVar = in.m_rowStrideVar;
+  }
+}
+#endif
+
+
+Transpose* AddTranspose(Trans transVal,
+#if DOBLIS
+			bool objTrans,
+#endif
+			Node *input, unsigned int num, bool addToPoss)
+{
+#if DOBLIS
   Transpose *trans = new Transpose(transVal, objTrans);
+#elif DOLLDLA
+  Transpose *trans = new Transpose(transVal);
+#endif
   trans->AddInput(input, num);
   if (addToPoss)
     input->m_poss->AddNode(trans);
@@ -262,14 +355,24 @@ void CombineTranspose::Apply(Node *node) const
 }
 
 
-Transpose* InsertTranspose(Trans trans, bool objTrans,
+
+Transpose* InsertTranspose(Trans trans, 
+#if DOBLIS
+			   bool objTrans,
+#endif
                            Node *node, unsigned int inNum, bool addToPoss)
 {
   Node *input = node->Input(inNum);
   unsigned int num = node->InputConnNum(inNum);
-  Transpose *newTrans = AddTranspose(trans, objTrans, input, num, addToPoss);
+  Transpose *newTrans = AddTranspose(trans, 
+#if DOBLIS
+				     objTrans, 
+#endif
+				     input, num, addToPoss);
   node->ChangeInput2Way(input, num, newTrans, 0);
   return newTrans;
 }
+
+
 
 #endif

@@ -19,6 +19,7 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
 
 #include "base.h"
 
@@ -30,6 +31,7 @@ string TensorDistVarName(const DistType &type);
 string IndexArrayVarName(const string &indices);
 #elif DOLLDLA
 string LLDLAPartVarName(const string &var, unsigned int part);
+string LLDLATransVarName(const string &var, Trans trans);
 #endif
 
 
@@ -44,6 +46,7 @@ enum VarType {
   IndexArrayType,
 #elif DOLLDLA
   VarPartType,
+  VarTransType,
 #endif
   InvalidType
 };
@@ -65,6 +68,7 @@ class Var
 #endif
 #if DOLLDLA
     string *m_part;
+    string *m_transVar;
 #endif
   };
   string m_compStr;
@@ -82,6 +86,7 @@ class Var
 #endif
 #if DOLLDLA
   Var(const string &varName, unsigned int partNum);
+  Var(const string &varName, Trans trans);
 #endif
   ~Var();
   Var& operator=(const Var &rhs);
