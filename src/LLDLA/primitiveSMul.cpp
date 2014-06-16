@@ -114,8 +114,7 @@ string SMulLoopRef::GetType() const
       return "SMulLoopRef - dim n";
     default:
       throw;
-    }
-  
+    }  
 }
 
 bool SMulLoopRef::CanApply(const Node *node) const

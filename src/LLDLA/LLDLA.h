@@ -33,6 +33,9 @@ enum Stride { UNITSTRIDE,
 	      NONUNITSTRIDE,
 	      BADSTRIDE };
 
+enum VecType { ROWVECTOR,
+	       COLVECTOR };
+
 inline bool IsUnitStride(const Stride &stride)
 {
   switch (stride)
