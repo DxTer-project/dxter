@@ -93,7 +93,7 @@ int main(int argc, const char* argv[])
     algNum = atoi(argv[1]);
     switch(algNum) {
     case(1):
-      if (argc != 3) {
+      if (argc != 4) {
 	Usage();
 	return 0;
       }
