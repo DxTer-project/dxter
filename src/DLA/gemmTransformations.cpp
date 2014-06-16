@@ -85,16 +85,7 @@ void GemmLoopExp::Apply(Node *node) const
 #endif
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
       break;
-#if DOBLIS||DOELEM
     case(1):
-      loop = GemmVar3Loop(connA->m_n, connA->m_num,
-                          connB->m_n, connB->m_num,
-                          connC->m_n, connC->m_num,
-                          gemm->m_transA, gemm->m_transB,
-                          false,
-                          gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
-      break;
-    case(-1):
       loop = GemmVar3Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
                           connC->m_n, connC->m_num,
@@ -103,6 +94,15 @@ void GemmLoopExp::Apply(Node *node) const
 #else
 			  NORMAL, NORMAL,
 #endif
+                          false,
+                          gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
+      break;
+#if DOBLIS||DOELEM
+    case(-1):
+      loop = GemmVar3Loop(connA->m_n, connA->m_num,
+                          connB->m_n, connB->m_num,
+                          connC->m_n, connC->m_num,
+                          gemm->m_transA, gemm->m_transB,
                           true,
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
       break;
@@ -822,7 +822,6 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
 }
 
 
-#if DOBLIS||DOELEM
 Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
                    Node *Bin, unsigned int Bnum,
                    Node *Cin, unsigned int Cnum,
@@ -876,18 +875,32 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   splitB->SetUpStats(FULLUP, FULLUP,
                      FULLUP, FULLUP);
   splitB->SetIndepIters();
-  
+
+#if DOLLDLA
+  if (beta != COEFONE) {
+    cout << "need scale node for beta != 1\n";
+    throw;
+  }
+#else  
   ScaleNode *scale = new ScaleNode(layer, beta);
   scale->AddInput(Cin, Cnum);
+#endif
   
   LoopTunnel *Ctun = new LoopTunnel(POSSTUNIN);
+#if DOLLDLA
+  if (beta != COEFONE) {
+    throw;
+  }
+  Ctun->AddInput(Cin, Cnum);
+#else
   Ctun->AddInput(scale, 0);
+#endif
   Ctun->SetUpStats(PARTUP, PARTUP,
                    PARTUP, PARTUP);
   
   Node *gepp;
   
-  gepp = new Gemm(layer, transA, transB, alpha, beta, type);
+  gepp = new Gemm(layer, transA, transB, alpha, COEFONE, type);
   gepp->AddInput(splitA, 1);
   gepp->AddInput(splitB, 1);
   gepp->AddInput(Ctun, 0);
@@ -910,13 +923,14 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
     throw;
 #elif DOBLIS
     loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+#elif DOLLDLA
+    loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
 #endif
 
   loop->SetDimName(DIMK);
   
   return loop;
 }
-#endif //DOBLIS||DOELEM
 
 
 Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,

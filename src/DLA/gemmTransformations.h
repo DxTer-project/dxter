@@ -39,7 +39,6 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
 		Coef alpha, Coef beta, 
 		Layer layer, Type type);
 
-#if DOBLIS||DOELEM
 Loop* GemmVar3Loop(Node *Ain, unsigned int Anum, 
 		    Node *Bin, unsigned int Bnum, 
 		      Node *Cin, unsigned int Cnum,
@@ -47,7 +46,6 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
 		   bool reverse,
 		      Coef alpha, Coef beta, 
 		   Layer layer, Type type);
-#endif //DOBLIS||DOELEM
 
 Loop* GemmVar2Loop(Node *Ain, unsigned int Anum, 
 		    Node *Bin, unsigned int Bnum, 

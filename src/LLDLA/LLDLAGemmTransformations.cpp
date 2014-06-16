@@ -26,7 +26,7 @@
 #if DOLLDLA
 
 LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize)
-  : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMN ? 2 : 5))),
+  : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5)))),
     m_bsSize(BSSizeToSize(bsSize))
 {
 }
@@ -50,6 +50,12 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
     {
       return !(*(gemm->GetInputM(0)) <= m_bsSize);
       //DIMM
+      break;
+    }
+  case (1):
+    {
+      return !(*(gemm->GetInputN(0)) <= m_bsSize);
+      //DIMK
       break;
     }
   case (2):

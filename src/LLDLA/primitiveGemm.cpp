@@ -82,11 +82,19 @@ void PrimitiveGemm::Prop()
       throw;
     }
     
-    if (*GetInputM(0) != LLDLA_MU || *GetInputN(0) != LLDLA_MU
-	|| *GetInputM(1) != LLDLA_MU || *GetInputN(1) != LLDLA_MU
-	|| *GetInputM(2) != LLDLA_MU || *GetInputN(2) != LLDLA_MU) {
-      cout << "ERROR: PrimitiveGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
+    if (*GetInputM(0) != LLDLA_MU || *GetInputN(0) != LLDLA_MU) 
+      cout << "ERROR1: PrimitiveGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
+
+    if (*GetInputM(1) != LLDLA_MU || *GetInputN(1) != LLDLA_MU) {
+      GetInputM(1)->Print();
+      cout << endl;
+      GetInputN(1)->Print();
+      cout << "ERROR2: PrimitiveGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
     }
+
+    if (*GetInputM(2) != LLDLA_MU || *GetInputN(2) != LLDLA_MU) 
+      cout << "ERROR3: PrimitiveGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
+    
     m_cost = ZERO;
   }
 }
@@ -116,7 +124,8 @@ bool LLDLAGemmToPrim::CanApply(const Node *node) const
       return false;
 
     if ((*(gemm->GetInputM(2)) <= LLDLA_MU) &&
-	(*(gemm->GetInputN(2)) <= LLDLA_MU))
+	(*(gemm->GetInputN(2)) <= LLDLA_MU) &&
+	(*(gemm->GetInputN(0)) <= LLDLA_MU))
       {
 	return true;
       }
