@@ -499,7 +499,7 @@ void OutputNode::UnflattenCore(ifstream &in, SaveInfo &info)
   getline(in, m_type);
 }
 
-#if DOBLIS||DOELEM
+#if DOBLIS||DOELEM||DOLLDLA
 ConstVal::ConstVal(string name, Coef val)
   :m_val(val)
 {
@@ -514,10 +514,12 @@ ConstVal::ConstVal(string name, Coef val)
 
 void ConstVal::PrintCode(IndStream &out)
 {
+#if DOELEM||DOBLIS
   out.Indent();
   *out << GetName(0).str() << ".LocalBuffer(0,0) = ";
   out << m_val;
   *out << endl;
+#endif
 }
 
 void ConstVal::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -561,7 +563,7 @@ void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info)
   m_varName.Unflatten(in);
   READ(m_val);
 }
-#endif //DOELEM||DOBLIS
+#endif //DOELEM||DOBLIS||DOLLDLA
 
 TempVarNode::TempVarNode() 
 #if DOELEM

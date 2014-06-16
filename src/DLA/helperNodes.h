@@ -128,7 +128,7 @@ class OutputNode : public DLANode
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
 
-#if DOBLIS||DOELEM
+#if DOBLIS||DOELEM||DOLLDLA
 //Constant value (e.g. used for Axpy)
 class ConstVal : public DLANode
 {
@@ -137,7 +137,7 @@ class ConstVal : public DLANode
  public:
   ConstVal(string name, Coef val);
   virtual NodeType GetType() const {return "const val";}
-  static Node* BlankInst() { return  new ConstVal("const", COEFZERO); }
+  static Node* BlankInst() { return  new ConstVal("constVal", COEFZERO); }
   virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
