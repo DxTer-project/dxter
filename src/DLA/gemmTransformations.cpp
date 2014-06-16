@@ -783,7 +783,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
   Split *splitC = new Split(PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   splitC->SetUpStats(FULLUP, FULLUP,
-                     PARTUP, PARTUP);
+                     NOTUP, NOTUP);
   splitC->SetIndepIters();
   
   Node *gepp;
