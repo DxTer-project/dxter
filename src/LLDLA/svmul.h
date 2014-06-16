@@ -19,6 +19,8 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #include "DLAOp.h"
 #include "loopSupport.h"
 #include "LLDLA.h"
@@ -35,10 +37,11 @@ class SVMul : public DLAOp<2, 1>
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
-  virtual Phase MaxPhase() const { return NUMPHASES; }
+  virtual Phase MaxPhase() const;
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
+  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 
   static ClassType GetClass() { return "LLDLASVMul"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -52,7 +55,7 @@ class SVMul : public DLAOp<2, 1>
 
 };
 
-class SVMulLoopRef : SingleTrans
+class SVMulLoopRef : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
