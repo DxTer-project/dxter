@@ -139,9 +139,9 @@ bool SVMulLoopRef::CanApply(const Node *node) const
     return false;
   }
   if (m_vtype == ROWVECTOR) {
-    return *(svmul->GetInputN(1)) <= BSSizeToSize(m_bs);
+    return !(*(svmul->GetInputN(1)) <= BSSizeToSize(m_bs));
   } else if (m_vtype == COLVECTOR) {
-    return *(svmul->GetInputM(1)) <= BSSizeToSize(m_bs);
+    return !(*(svmul->GetInputM(1)) <= BSSizeToSize(m_bs));
   } else {
     throw;
   }
@@ -150,6 +150,48 @@ bool SVMulLoopRef::CanApply(const Node *node) const
 
 void SVMulLoopRef::Apply(Node *node) const
 {
+  SVMul *svmul = (SVMul*) node;
+
+  Split *split = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  split->AddInput(svmul->Input(1), svmul->InputConnNum(1));
+
+  if (m_vtype == COLVECTOR) {
+    split->SetUpStats(FULLUP, FULLUP,
+		      NOTUP, NOTUP);		     
+  } else {
+    split->SetUpStats(FULLUP, NOTUP,
+		       FULLUP, NOTUP);
+  }
+
+  split->SetIndepIters();
+
+  LoopTunnel *scalarTun = new LoopTunnel(POSSTUNIN);
+  scalarTun->AddInput(svmul->Input(0),svmul->InputConnNum(0));
+  scalarTun->SetAllStats(FULLUP);
+  scalarTun->SetIndepIters();
+  SVMul *newMul = new SVMul(svmul->m_vecType, svmul->m_layer, svmul->m_type);
+  newMul->SetLayer(m_toLayer);
+
+  newMul->AddInput(scalarTun, 0);
+  newMul->AddInput(split, 1);
+
+  LoopTunnel *scalarTunOut = new LoopTunnel(POSSTUNOUT);
+  scalarTunOut->AddInput(scalarTun, 0);
+  scalarTunOut->AddInput(scalarTun, 0);
+  scalarTunOut->CopyTunnelInfo(scalarTun);
+
+  Combine *com = split->CreateMatchingCombine(1, 1, newMul, 0);
+  
+  Poss *loopPoss = new Poss(2, scalarTunOut, com);
+  
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  // Row vectors are partitioned in the N dimension, column vectors in the M dimension
+  loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
+  
+  node->m_poss->AddLoop(loop);
+  node->RedirectChildren(loop->OutTun(1), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+
 }
 
 bool SVMulLowerLayer::CanApply(const Node *node) const
