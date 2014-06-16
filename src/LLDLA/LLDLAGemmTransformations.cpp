@@ -90,6 +90,34 @@ void GemmTransToNotTrans::Apply(Node *node) const
   }
 }
 
+bool LLDAGemmLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == Gemm::GetClass()) {
+    const Gemm *gemm = (Gemm*)node;
+    if (gemm->GetLayer() != m_fromLayer)
+      return false;
+    if (*(gemm->GetInputM(0)) <= m_bs &&
+	*(gemm->GetInputN(0)) <= m_bs &&
+	*(gemm->GetInputN(1)) <= m_bs)
+      return true;
+    else
+      return false;
+  }
+  return false;
+  
+}
+
+void LLDAGemmLowerLayer::Apply(Node *node) const
+{
+  Gemm *gemm = (Gemm*)node;
+  gemm->SetLayer(m_toLayer);
+}
+
+string LLDAGemmLowerLayer::GetType() const
+{ 
+  return "Gemm lower layer " + LayerNumToStr(m_fromLayer) 
+  + " to " + LayerNumToStr(m_toLayer);
+}
 
 
 #endif

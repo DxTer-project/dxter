@@ -49,4 +49,17 @@ class GemmTransToNotTrans : public SingleTrans
 };
 
 
+class LLDAGemmLowerLayer : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  Size m_bs;
+ LLDAGemmLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
+   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+  };
+  
 #endif

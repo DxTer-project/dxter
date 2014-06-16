@@ -54,12 +54,10 @@ Trans transA, transB;
 void AddTrans()
 {
   Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(ABSLAYER), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, LLDLAMIDLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, LLDLAMIDLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, LLDLAMIDLAYER, DIMK, USELLDLAMU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(LLDLAMIDLAYER, LLDLAMIDLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(LLDLAMIDLAYER, LLDLAMIDLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(LLDLAMIDLAYER, LLDLAMIDLAYER, DIMK, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLAPRIMPHASE);
 }
 
