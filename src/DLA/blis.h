@@ -41,12 +41,10 @@ class GetUpToDiag : public DLANode
  public:
   PartDir m_dir;
   Tri m_tri;
-  Sizes *m_sizes, *m_lsizes;
+  Sizes *m_sizes;
   GetUpToDiag(Tri tri, PartDir dir);
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
   virtual Name GetName(unsigned int num) const;
   virtual void Prop();
   virtual unsigned int NumOutputs() const;

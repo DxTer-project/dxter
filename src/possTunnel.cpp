@@ -200,6 +200,7 @@ const Sizes* PossTunnel::GetN(unsigned int num) const
   }
 }
 
+#if DODM
 const Sizes* PossTunnel::LocalM(unsigned int num) const
 {
   const NodeConn *conn = m_inputs[0];
@@ -215,7 +216,7 @@ const Sizes* PossTunnel::LocalN(unsigned int num) const
   
   return input->LocalN(conn->m_num);
 }
-
+#endif
 
 #else
 const Dim PossTunnel::NumDims(unsigned int num) const

@@ -925,11 +925,13 @@ void Loop::FillTunnelSizes()
       }
     }
   }
+#if DODM
   iter = m_inTuns.begin();
   for (; iter != m_inTuns.end(); ++iter) {
     LoopTunnel *in = (LoopTunnel*)(*iter);
     in->UpdateLocalSizes();
   }
+#endif
 }
 
 void Loop::BuildDataTypeCache()

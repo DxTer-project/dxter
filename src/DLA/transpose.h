@@ -64,8 +64,10 @@ class Transpose : public DLAOp<1,1>
   virtual unsigned int NumOutputs() const {return 1;}
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#endif
   virtual bool Overwrites(const Node *input, unsigned int num) const;
   virtual bool KeepsInputVarLive(Node *input, unsigned int numInArg, unsigned int &numOutArg) const;
 #if DOLLDLA

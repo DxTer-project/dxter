@@ -55,12 +55,14 @@ Split::~Split()
   if (m_msizes) {
     delete [] m_msizes;
     m_msizes = NULL;
-    delete [] m_mlsizes;
-    m_mlsizes = NULL;
     delete [] m_nsizes;
     m_nsizes = NULL;
+#if DODM
+    delete [] m_mlsizes;
+    m_mlsizes = NULL;
     delete [] m_nlsizes;
     m_nlsizes = NULL;
+#endif
   }
 #else
   if (m_sizes) {
@@ -346,6 +348,7 @@ const Sizes* Split::GetN(unsigned int num) const
     }
 }
 
+#if DODM
 const Sizes* Split::LocalM(unsigned int num) const
 {
   switch(m_tunType) 
@@ -399,6 +402,7 @@ const Sizes* Split::LocalN(unsigned int num) const
       throw;
     }
 }
+#endif
 
 
 void Split::GetSizes(unsigned int num, unsigned int numIters,
@@ -1103,9 +1107,9 @@ unsigned int Split::NumIters(Size bs, Size size) const
 unsigned int Split::NumIters(unsigned int iterNum) const
 {
   Size bs = GetMyLoop()->GetBS();
-  const bool BLISLoop = (GetMyLoop()->GetType() == BLISLOOP);
-  const Sizes *ms = (BLISLoop ? InputLocalM(0) : GetInputM(0));
-  const Sizes *ns = (BLISLoop ? InputLocalN(0) : GetInputN(0));
+
+  const Sizes *ms = GetInputM(0);
+  const Sizes *ns = GetInputN(0);
   if (!ms || !ns) {
     if (Input(0)->m_flags & BUILDFLAG)
       cout << "has built\n";
@@ -1192,8 +1196,10 @@ void Split::StartFillingSizes()
   unsigned int numElems = GetNumElems(m_dir);
   m_msizes = new Sizes[numElems];
   m_nsizes = new Sizes[numElems];
+#if DODM
   m_mlsizes = new Sizes[numElems];
   m_nlsizes = new Sizes[numElems];
+#endif
 }
 #else
 void Split::StartFillingSizes()
@@ -1217,12 +1223,14 @@ void Split::ClearDataTypeCache()
     return;
   delete [] m_msizes;
   m_msizes = NULL;
-  delete [] m_mlsizes;
-  m_mlsizes = NULL;
   delete [] m_nsizes;
   m_nsizes = NULL;
+#if DODM
+  delete [] m_mlsizes;
+  m_mlsizes = NULL;
   delete [] m_nlsizes;
   m_nlsizes = NULL;
+#endif
 #else
   if (!m_sizes)
     return;
@@ -1240,10 +1248,8 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
     return;
   if (!m_msizes)
     throw;
-  const LoopType loopType = GetMyLoop()->GetType();
-  const bool BLISLoop = loopType == BLISLOOP;
-  const Sizes *ms = (BLISLoop ? InputLocalM(0) : GetInputM(0));
-  const Sizes *ns = (BLISLoop ? InputLocalN(0) : GetInputN(0));
+  const Sizes *ms = GetInputM(0);
+  const Sizes *ns = GetInputN(0);
   
   if (!ms || !ns) {
     if (Input(0)->m_flags & BUILDFLAG)
@@ -1270,8 +1276,8 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
   const unsigned int numElems = GetNumElems(m_dir);
 
   if (NumIters(bs, m, n) != numIters) {
-    InputLocalN(0)->Print();
-    cout << endl;
+    //    InputLocalN(0)->Print();
+    //    cout << endl;
     GetInputN(0)->Print();
     cout << endl;
     cout << NumIters(bs, m, n) << " vs. " << numIters << endl;
@@ -1331,28 +1337,23 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
 }
 #endif
 
-#if TWOD
+#if TWOD&&DODM
 void Split::UpdateLocalSizes()
 {
   const unsigned int numElems = GetNumElems(m_dir);
   const LoopType loopType = GetMyLoop()->GetType();
   if (loopType == ELEMLOOP) {
-#if DOELEM
     const DistType t = InputDataType(0).m_dist;
 
     for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
       GetLocalSizes(t, m_msizes+subMat, m_nsizes+subMat, m_mlsizes[subMat], m_nlsizes[subMat]);
     }
-#endif
   }
   else {
-    for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
-      m_mlsizes[subMat] = m_msizes[subMat];
-      m_nlsizes[subMat] = m_nsizes[subMat];
-    }    
+    throw;
   }
 }
-#else
+#elif DOTENSORS
 void Split::UpdateLocalSizes()
 {
   Dim numDims = InputNumDims(0);

@@ -25,14 +25,15 @@
 #include "elemRedist.h"
 #include <cmath>
 
-
 InputNode::InputNode() 
   : 
-  m_type("InputNode"), 
+  m_type("InputNode")
 #if TWOD
-    m_mlsize(NULL), m_nlsize(NULL) 
+#if DODM
+  , m_mlsize(NULL), m_nlsize(NULL) 
+#endif //DODM
 #else
-  m_numDims(0)
+  , m_numDims(0)
 #endif
 {
 }
@@ -47,20 +48,26 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
   m_dataTypeInfo(rowStride, colStride,
 		 numRowsVar, numColsVar,
 		 rowStrideVar, colStrideVar),
-  m_msize(NAN), m_nsize(NAN), 
-  m_mlsize(NULL), m_nlsize(NULL)
+  m_msize(NAN), m_nsize(NAN)
 {
   m_msize.AddRepeatedSizes(m, 1, 1);
   m_nsize.AddRepeatedSizes(n, 1, 1);
   m_varName.m_name = name;
 }
-#else //!DOLLDLA
+#endif //DOLLDLA
+#endif //TWODO
+
+#if TWOD
+#if !DOLLDLA
 InputNode::InputNode(NodeType type, Size m, Size n, string name)
 : 
 #if DODM
 m_type(type),
 #endif
-m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
+m_msize(NAN), m_nsize(NAN)
+#if DODM
+, m_mlsize(NULL), m_nlsize(NULL)
+#endif
 {
   m_msize.AddRepeatedSizes(m, 1, 1);
   m_nsize.AddRepeatedSizes(n, 1, 1);
@@ -71,12 +78,15 @@ m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL)
 #endif
 }
 #endif //DOLLDLA
-#endif
+#endif //TWOD
 
-#if DODM&&TWOD
+#if (DODM&&TWOD)
 InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 : m_type(type),
-  m_msize(NAN), m_nsize(NAN), m_mlsize(NULL), m_nlsize(NULL),
+  m_msize(NAN), m_nsize(NAN), 
+#if DODM
+  m_mlsize(NULL), m_nlsize(NULL),
+#endif
   m_dataTypeInfo(dist)
 {
   m_msize.AddRepeatedSizes(m,1,1);
@@ -134,10 +144,12 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist
 InputNode::~InputNode()
 {
 #if TWOD
+#if DODM
   if (m_mlsize) {
     delete m_mlsize;
     delete m_nlsize;
   }
+#endif
 #else
   if (m_numDims) {
     delete [] m_sizes;
@@ -230,6 +242,7 @@ const Sizes* InputNode::GetN(unsigned int num) const
 }
 
 
+#if DODM
 const Sizes* InputNode::LocalM(unsigned int num) const
 {
   if (num > 0)
@@ -243,6 +256,7 @@ const Sizes* InputNode::LocalN(unsigned int num) const
     throw;
   return m_nlsize;
 }
+#endif //DODM
 #else
 
 const Dim InputNode::NumDims(unsigned int num) const
@@ -291,12 +305,14 @@ Name InputNode::GetName(unsigned int num) const
 
 void InputNode::ClearDataTypeCache()
 {
+#if DODM
   if (!m_mlsize)
     return;
   delete m_mlsize;
   m_mlsize = NULL;
   delete m_nlsize;
   m_nlsize = NULL;
+#endif
 }
 #else
 
@@ -318,17 +334,12 @@ void InputNode::ClearDataTypeCache()
 #if TWOD
 void InputNode::BuildDataTypeCache()
 {
+#if DODM
   if (m_mlsize)
     return;
   m_mlsize = new Sizes;
   m_nlsize = new Sizes;
-#if DODM
   GetLocalSizes(m_varName.m_type, &m_msize, &m_nsize, *m_mlsize, *m_nlsize);
-#elif DOBLIS||DOLLDLA
-  *m_mlsize = m_msize;
-  *m_nlsize = m_nsize;
-#else
-  lkjsdf
 #endif
 }
 #else
@@ -426,6 +437,7 @@ const Sizes* OutputNode::GetN(unsigned int num) const
 }
 
 
+#if DODM
 const Sizes* OutputNode::LocalM(unsigned int num) const
 {
   if (num > 0)
@@ -439,6 +451,7 @@ const Sizes* OutputNode::LocalN(unsigned int num) const
     throw;
   return InputLocalN(0);
 }
+#endif //DODM
 
 
 
@@ -551,31 +564,27 @@ void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info)
 #endif //DOELEM||DOBLIS
 
 TempVarNode::TempVarNode() 
-   : 
 #if DOELEM
-m_info(D_LASTDIST),
+  : m_info(D_LASTDIST), m_mlsize(NULL), m_nlsize(NULL)
 #elif DOTENSORS
-  m_info(),
+    : m_info(), m_lsizes(NULL), m_sumLens(NULL)
 #endif
-#if TWOD
- m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-  m_lsizes(NULL),m_sumLens(NULL)
-#endif
- {}
+{
+
+}
 
 TempVarNode::TempVarNode(string name) 
-   :  
 #if DOELEM
-m_info(D_LASTDIST),
+  : m_info(D_LASTDIST), m_name(name)
 #elif DOTENSORS
-  m_info(),
+    : m_info(), m_name(name)
+#else
+    : m_name(name)
 #endif
-  m_name(name), 
-#if TWOD
- m_mlsize(NULL), m_nlsize(NULL)
+#if DOELEM
+  , m_mlsize(NULL), m_nlsize(NULL)
 #elif DOTENSORS
-  m_lsizes(NULL), m_sumLens(NULL)
+, m_lsizes(NULL), m_sumLens(NULL)
 #endif
  {}
 
@@ -676,12 +685,14 @@ void TempVarNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 TempVarNode::~TempVarNode()
 {
 #if TWOD
+#if DODM
   if (m_mlsize) {
     delete m_mlsize;
     m_mlsize = NULL;
     delete m_nlsize;
     m_nlsize = NULL;
   }
+#endif
 #elif DOTENSORS
   if (m_lsizes) {
     delete [] m_lsizes;
@@ -738,6 +749,7 @@ const Sizes* TempVarNode::GetN(unsigned int num) const
   return GetInputN(0);
 }
 
+#if DODM
 const Sizes* TempVarNode::LocalM(unsigned int num) const
 {
   if (num > 0)
@@ -751,6 +763,7 @@ const Sizes* TempVarNode::LocalN(unsigned int num) const
     throw;
   return m_nlsize;
 }
+#endif //DODM
 
 #elif DOTENSORS
 const Dim TempVarNode::NumDims(unsigned int num) const
@@ -833,7 +846,7 @@ void TempVarNode::UnflattenCore(ifstream &in, SaveInfo &info)
 
 void TempVarNode::ClearDataTypeCache()
 {
-#if TWOD
+#if TWOD&&DODM
   if (!m_mlsize)
     return;
   delete m_mlsize;
@@ -853,19 +866,12 @@ void TempVarNode::ClearDataTypeCache()
 
 void TempVarNode::BuildDataTypeCache()
 {
-#if TWOD
+#if DOELEM
   if (m_mlsize)
     return;
   m_mlsize = new Sizes;
   m_nlsize = new Sizes;
-#if DODM
   GetLocalSizes(m_info.m_dist, GetM(0), GetN(0), *m_mlsize, *m_nlsize);
-#elif (DOBLIS||DOLLDLA)
-  *m_mlsize = *GetM(0);
-  *m_nlsize = *GetN(0);
-#else
-sdlkfj
-#endif
 #elif DOTENSORS
 
   if (m_lsizes)

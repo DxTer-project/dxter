@@ -482,19 +482,19 @@ void Tri2k::Prop()
     }
 #elif DOBLIS
     if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
-      if (*InputLocalM(0) != *InputLocalM(2))
+      if (*GetInputM(0) != *GetInputM(2))
 	throw;
-      if (*InputLocalM(0) != *InputLocalM(4))
-	throw;
-    
-      if (*InputLocalN(0) != *InputLocalM(1))
-	throw;
-      if (*InputLocalN(2) != *InputLocalM(3))
+      if (*GetInputM(0) != *GetInputM(4))
 	throw;
     
-      if (*InputLocalN(1) != *InputLocalN(3))
+      if (*GetInputN(0) != *GetInputM(1))
 	throw;
-      if (*InputLocalN(1) != *InputLocalN(4))
+      if (*GetInputN(2) != *GetInputM(3))
+	throw;
+    
+      if (*GetInputN(1) != *GetInputN(3))
+	throw;
+      if (*GetInputN(1) != *GetInputN(4))
 	throw;
     }
 #endif
@@ -512,9 +512,9 @@ void Tri2k::Prop()
     }
 #elif DOBLIS
     if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
-      const Sizes *localM = InputLocalM(4);
-      const Sizes *localN = InputLocalN(4);
-      const Sizes *others = (InputLocalN(0));
+      const Sizes *localM = GetInputM(4);
+      const Sizes *localN = GetInputN(4);
+      const Sizes *others = (GetInputN(0));
       
       m_cost = GetCost(S1LAYER, localM, localN, others);
     }
@@ -1471,10 +1471,10 @@ bool Tri2kLowerLayer::CanApply(const Node *node) const
     if (tri2k->GetLayer() != m_fromLayer)
       return false;
     if (m_dim == DIMK) {
-      return (*(tri2k->InputLocalN(0)) <= m_bs);
+      return (*(tri2k->GetInputN(0)) <= m_bs);
     }
     else if (m_dim == DIMN)
-      return (*(tri2k->InputLocalN(4)) <= m_bs);
+      return (*(tri2k->GetInputN(4)) <= m_bs);
     else
       throw;
   }

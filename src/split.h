@@ -62,8 +62,10 @@ class Split : public LoopTunnel
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#endif
   void GetSizes(unsigned int num, unsigned int numIters,
 		Size bs, unsigned int parFactor,
 		   Size m, Size n,
@@ -91,7 +93,9 @@ class Split : public LoopTunnel
   virtual void StartFillingSizes();
   virtual void ClearDataTypeCache();
   virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
+#if DODM
   virtual void UpdateLocalSizes();
+#endif
 #if DOLLDLA
   string LoopBound();
 #endif

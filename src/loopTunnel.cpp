@@ -37,8 +37,10 @@ LoopTunnel::LoopTunnel(PossTunType type)
 #if TWOD
   m_msizes = NULL;
   m_nsizes = NULL;
+#if DODM
   m_mlsizes = NULL;
   m_nlsizes = NULL;
+#endif
 #else
   m_sizes = NULL;
   m_lsizes = NULL;
@@ -52,12 +54,14 @@ LoopTunnel::~LoopTunnel()
   if (m_msizes) {
     delete m_msizes;
     m_msizes = NULL;
-    delete m_mlsizes;
-    m_mlsizes = NULL;
     delete m_nsizes;
     m_nsizes = NULL;
+#if DODM
+    delete m_mlsizes;
+    m_mlsizes = NULL;
     delete m_nlsizes;
     m_nlsizes = NULL;
+#endif
   }
 #else
   if (m_sizes) {
@@ -212,6 +216,7 @@ const Sizes* LoopTunnel::GetN(unsigned int num) const
   }
 }
 
+#if DODM
 const Sizes* LoopTunnel::LocalM(unsigned int num) const
 {
   switch(m_tunType) 
@@ -267,7 +272,7 @@ const Sizes* LoopTunnel::LocalN(unsigned int num) const
       throw;
   }
 }
-
+#endif
 
 #else
 const Sizes* LoopTunnel::Len(unsigned int num,Dim dim) const
@@ -601,9 +606,11 @@ void LoopTunnel::StartFillingSizes()
   if (m_msizes)
     throw;
   m_msizes = new Sizes;
-  m_mlsizes = new Sizes;
   m_nsizes = new Sizes;
+#if DODM
+  m_mlsizes = new Sizes;
   m_nlsizes = new Sizes;
+#endif
 #else
   if (m_sizes)
     throw;
@@ -628,28 +635,38 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     throw;
   }
   const Sizes *ns = input->GetN(num);
+#if DODM
   const Sizes *lms = input->LocalM(num);
   const Sizes *lns = input->LocalN(num);
+#endif
   unsigned int length = ms->NumSizes();
   if (length != ns->NumSizes() 
+#if DODM
       || length != lms->NumSizes() 
       || length != lns->NumSizes() 
+#endif
       || length <= execNum) 
   {
     cout << ms->NumSizes() << endl;
     cout << ns->NumSizes() << endl;
+#if DODM
     cout << lms->NumSizes() << endl;
     cout << lns->NumSizes() << endl;
+#endif
     throw;
   }
   const Size m = (*ms)[execNum];
   const Size n = (*ns)[execNum];
+#if DODM
   const Size lm = (*lms)[execNum];
   const Size ln = (*lns)[execNum];
+#endif
   m_msizes->AddRepeatedSizes(m, numIters, parFactor);
   m_nsizes->AddRepeatedSizes(n, numIters, parFactor);
+#if DODM
   m_mlsizes->AddRepeatedSizes(lm, numIters, parFactor);
   m_nlsizes->AddRepeatedSizes(ln, numIters, parFactor);
+#endif
 }
 #else
 void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
@@ -684,10 +701,12 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
 }
 #endif
 
+#if DODM
 void LoopTunnel::UpdateLocalSizes()
 {
   //already calculated in AppendSizes
 }
+#endif
 
 #if TWOD
 void LoopTunnel::ClearDataTypeCache()
@@ -696,12 +715,14 @@ void LoopTunnel::ClearDataTypeCache()
     return;
   delete m_msizes;
   m_msizes = NULL;
-  delete m_mlsizes;
-  m_mlsizes = NULL;
   delete m_nsizes;
   m_nsizes = NULL;
+#if DODM
+  delete m_mlsizes;
+  m_mlsizes = NULL;
   delete m_nlsizes;
   m_nlsizes = NULL;
+#endif
 }
 #else
 void LoopTunnel::ClearDataTypeCache()

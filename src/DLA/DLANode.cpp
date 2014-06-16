@@ -93,6 +93,7 @@ const Sizes* DLANode::GetInputN(unsigned int num) const
   return in->GetN(inNum);
 }
 
+#if DODM
 const Sizes* DLANode::InputLocalM(unsigned int num) const
 {
   if (num >= m_inputs.size()) {
@@ -115,6 +116,7 @@ const Sizes* DLANode::InputLocalN(unsigned int num) const
   unsigned int inNum = InputConnNum(num);
   return in->LocalN(inNum);
 }
+#endif //DODM
 
 #else
 const Sizes* DLANode::InputLen(unsigned int num, Dim dim) const

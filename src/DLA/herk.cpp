@@ -465,13 +465,13 @@ void TriRK::Prop()
       if (m_transA != NORMAL || m_transB != NORMAL)
 	throw;
     
-      if (*InputLocalM(0) != *InputLocalM(2))
+      if (*GetInputM(0) != *GetInputM(2))
 	throw;
     
-      if (*InputLocalN(0) != *InputLocalM(1))
+      if (*GetInputN(0) != *GetInputM(1))
 	throw;
     
-      if (*InputLocalN(1) != *InputLocalN(2))
+      if (*GetInputN(1) != *GetInputN(2))
 	throw;
     }
 #endif
@@ -529,9 +529,9 @@ void TriRK::Prop()
     }
 #elif DOBLIS
      if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
-      const Sizes *sizes1 = InputLocalM(0);
-      const Sizes *sizes2 = InputLocalN(0);
-      const Sizes *sizes3 = InputLocalN(1);
+      const Sizes *sizes1 = GetInputM(0);
+      const Sizes *sizes2 = GetInputN(0);
+      const Sizes *sizes3 = GetInputN(1);
       unsigned int parFactor = NumCoresInComm(m_comm);
       m_cost = GAMMA * sizes1->SumProds111(*sizes2,*sizes3) / parFactor;
       if (GetLayer() == S3LAYER) {
@@ -1214,10 +1214,10 @@ bool TriRKLowerLayer::CanApply(const Node *node) const
     if (trirk->m_transA != NORMAL || trirk->m_transB != NORMAL)
       throw;
     if (m_dim == DIMK) {
-      return (*(trirk->InputLocalN(0)) <= m_bs);
+      return (*(trirk->GetInputN(0)) <= m_bs);
     }
     else if (m_dim == DIMN) {
-      return (*(trirk->InputLocalN(2)) <= m_bs);
+      return (*(trirk->GetInputN(2)) <= m_bs);
     }
     else
       throw;

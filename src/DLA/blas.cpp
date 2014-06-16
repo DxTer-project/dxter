@@ -180,7 +180,7 @@ void Axpy::Prop()
       m_cost = GetCost(SMLAYER, LocalM(0), LocalN(0));
 #elif DOBLIS
     if (m_layer == S3LAYER) {
-      m_cost = GetCost(S3LAYER, LocalM(0), LocalN(0));
+      m_cost = GetCost(S3LAYER, GetM(0), GetN(0));
       if (m_comm != CORECOMM) {
 	m_cost /= NumCoresInComm(m_comm);
       }

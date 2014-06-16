@@ -214,8 +214,8 @@ void Pack::Prop()
       throw;
     DLAOp<2,1>::Prop();
 
-    const Sizes *size1 = InputLocalM(0);
-    const Sizes *size2 = InputLocalN(0);
+    const Sizes *size1 = GetInputM(0);
+    const Sizes *size2 = GetInputN(0);
     m_cost = (size1->SumProds11(*size2) * (PSIWVAL + PSIRVAL)) / NumCoresInComm(m_comm);
     m_cost += AdditionalCostOfBarrier(m_comm, size1->NumSizes());
   }
@@ -407,8 +407,8 @@ void PackBuff::Prop()
     DLAOp<1,1>::Prop();
     m_cost = 0;
 
-    const Sizes *size1 = InputLocalM(0);
-    const Sizes *size2 = InputLocalN(0);
+    const Sizes *size1 = GetInputM(0);
+    const Sizes *size2 = GetInputN(0);
 
     m_cost += AdditionalCostOfBarrier(m_comm, size1->NumSizes());
     if (m_packMat == PACKABLOCK) {

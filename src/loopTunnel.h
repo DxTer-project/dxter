@@ -33,7 +33,9 @@ class LoopTunnel : public PossTunnel
     m_statBL, m_statBR;
 #if TWOD
   Sizes *m_msizes, *m_nsizes;
+#if DODM
   Sizes *m_mlsizes, *m_nlsizes;
+#endif
 #else
   SizesArray m_sizes, m_lsizes;
 #endif
@@ -67,8 +69,10 @@ class LoopTunnel : public PossTunnel
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#endif
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -85,7 +89,9 @@ class LoopTunnel : public PossTunnel
 
   virtual void StartFillingSizes();
   virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
+#if DODM
   virtual void UpdateLocalSizes();
+#endif
   virtual void ClearDataTypeCache();
 
   virtual void FlattenCore(ofstream &out) const;

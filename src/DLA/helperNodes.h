@@ -33,11 +33,15 @@ class InputNode : public DLANode
   DataTypeInfo m_dataTypeInfo;
 #if TWOD
   Sizes m_msize, m_nsize;
+#if DODM
   Sizes *m_mlsize, *m_nlsize;
+#endif
 #else
   Dim m_numDims;
   SizesArray m_sizes;
+#if DODM
   SizesArray m_lsizes;
+#endif//DODM
 #endif
   Name m_varName;
  public:
@@ -73,8 +77,10 @@ class InputNode : public DLANode
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#endif
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -107,8 +113,10 @@ class OutputNode : public DLANode
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#endif
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -141,8 +149,10 @@ class ConstVal : public DLANode
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const {return ONES;}
   virtual const Sizes* GetN(unsigned int num) const {return ONES;}
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const {return ONES;}
   virtual const Sizes* LocalN(unsigned int num) const {return ONES;}
+#endif
 #else
 blah
 #endif
@@ -158,9 +168,9 @@ class TempVarNode : public DLANode
  public:
   DataTypeInfo m_info;
   string m_name;
-#if TWOD
+#if DOELEM
   Sizes *m_mlsize, *m_nlsize;
-#else
+#elif DOTENSORS
   SizesArray m_lsizes;
   SizesArray m_sumLens;
   EntrySet m_sumDims;
@@ -193,8 +203,10 @@ class TempVarNode : public DLANode
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#endif
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -297,9 +309,16 @@ class ViewPan : public DLANode
  public:
   bool m_isVert;
   string m_name;
-  Sizes *m_sizes,*m_lsizes;
+  Sizes *m_sizes;
+#if DODM
+  Sizes *m_lsizes;
+#endif
  ViewPan(bool isVert, string name) 
-   : m_isVert(isVert), m_name(name), m_sizes(NULL), m_lsizes(NULL) {}
+   : m_isVert(isVert), m_name(name), m_sizes(NULL)
+#if DODM
+    , m_lsizes(NULL) 
+#endif
+    {}
   virtual ~ViewPan();
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -309,8 +328,10 @@ class ViewPan : public DLANode
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#endif
 #else
 sdlkfj
 #endif
@@ -336,12 +357,17 @@ class ViewAroundDiag : public DLANode
  public:
   bool m_isVert;
   string m_name;
-  Sizes *m_sizes0,*m_lsizes0;
-  Sizes *m_sizes1,*m_lsizes1;
+  Sizes *m_sizes0,*m_sizes1;
+#if DODM 
+  Sizes *m_lsizes0,*m_lsizes1;
+#endif
  ViewAroundDiag(bool isVert, string name) 
    : m_isVert(isVert), m_name(name), 
-    m_sizes0(NULL), m_lsizes0(NULL),
-    m_sizes1(NULL), m_lsizes1(NULL) {}
+    m_sizes0(NULL), m_sizes1(NULL)
+#if DODM
+    , m_lsizes0(NULL), m_lsizes1(NULL) 
+#endif
+    {}
   virtual ~ViewAroundDiag();
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -351,8 +377,10 @@ class ViewAroundDiag : public DLANode
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
+#endif
 #else
 sdlkjf
 #endif
@@ -404,10 +432,12 @@ class ViewTL : public DLANode
   { return GetInputM(2); }
   virtual const Sizes* GetN(unsigned int num) const
   { return GetInputN(1); }
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const
   { return InputLocalM(2); }
   virtual const Sizes* LocalN(unsigned int num) const
   { return InputLocalN(1); }
+#endif
 #else
 bljsdf
 #endif
@@ -435,10 +465,12 @@ class ViewTLCombine : public DLANode
   { return GetInputM(1); }
   virtual const Sizes* GetN(unsigned int num) const
   { return GetInputN(1); }
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const
   { return InputLocalM(1); }
   virtual const Sizes* LocalN(unsigned int num) const
   { return InputLocalN(1); }
+#endif
   virtual Name GetName(unsigned int num) const {return GetInputName(1);}
   virtual void Prop();
   virtual unsigned int NumOutputs() const {return 1;}

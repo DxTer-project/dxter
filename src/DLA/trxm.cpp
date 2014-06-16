@@ -206,14 +206,24 @@ void Trxm::Prop()
     DLAOp<2,1>::Prop();
 
     if (m_invert) {
+#if DODM
       const Sizes *localM = InputLocalM(0);
       const Sizes *localN = InputLocalN(0);
+#else
+      const Sizes *localM = GetInputM(0);
+      const Sizes *localN = GetInputN(0);
+#endif
       if (*localM != *localN) {
 	cout << "Trsm::Prop 1\n";
 	throw;
       }
+#if DODM
       if ((m_side == LEFT && *localN != *InputLocalM(0))
 	  || (m_side == RIGHT && *localM != *InputLocalN(0)))
+#else
+      if ((m_side == LEFT && *localN != *GetInputM(0))
+	  || (m_side == RIGHT && *localM != *GetInputN(0)))
+#endif
 	{
 	  cout << "Trsm::Prop 2\n";
 	  throw;
@@ -2073,12 +2083,12 @@ void TrxmBP::Prop()
     switch (GetLayer()) {
       case (S3LAYER):
       {
-        const Sizes *ms0 = InputLocalM(0);
-        const Sizes *ns0 = InputLocalN(0);
-	//        const Sizes *ms1 = InputLocalM(1);
-        const Sizes *ns1 = InputLocalN(1);
-        //	const Sizes *ms2 = InputLocalM(2);
-        //	const Sizes *ns2 = InputLocalN(2);
+        const Sizes *ms0 = GetInputM(0);
+        const Sizes *ns0 = GetInputN(0);
+	//        const Sizes *ms1 = GetInputM(1);
+        const Sizes *ns1 = GetInputN(1);
+        //	const Sizes *ms2 = GetInputM(2);
+        //	const Sizes *ns2 = GetInputN(2);
 	m_cost = GAMMA * ms0->SumProds111(*ns0,*ns1) / NumCoresInComm(m_comm);
 	if (NumCoresInComm(m_comm) > 1) {
 	    Size numAElems = ms0->SumProds11(*ns0);
@@ -2600,21 +2610,21 @@ bool TrxmLowerLayer<TrxmType>::CanApply(const Node *node) const
       return false;
     if (trxm->m_side == LEFT) {
       if (m_dim == DIMK)
-        return (*(trxm->InputLocalM(0)) <= m_bs
-                && *(trxm->InputLocalN(0)) <= m_bs);
+        return (*(trxm->GetInputM(0)) <= m_bs
+                && *(trxm->GetInputN(0)) <= m_bs);
       else if (m_dim == DIMN)
-        return (*(trxm->InputLocalN(1)) <= m_bs);
+        return (*(trxm->GetInputN(1)) <= m_bs);
       else
         throw;
     }
     else {
       if (m_dim == DIMK)
-        return (*(trxm->InputLocalN(1)) <= m_bs);
+        return (*(trxm->GetInputN(1)) <= m_bs);
       else if (m_dim == DIMN) {
         if (trxm->m_trans == NORMAL)
-          return (*(trxm->InputLocalN(0)) <= m_bs);
+          return (*(trxm->GetInputN(0)) <= m_bs);
         else
-          return (*(trxm->InputLocalM(0)) <= m_bs);
+          return (*(trxm->GetInputM(0)) <= m_bs);
       }
       else
         throw;

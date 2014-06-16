@@ -146,6 +146,7 @@ const Sizes* Combine::GetN(unsigned int num) const
   }
 }
 
+#if DODM
 const Sizes* Combine::LocalM(unsigned int num) const
 {
   if (num > 0)
@@ -178,6 +179,7 @@ const Sizes* Combine::LocalN(unsigned int num) const
     return InputLocalN(0);
   }
 }
+#endif //DODM
 
 
 

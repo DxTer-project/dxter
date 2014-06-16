@@ -53,12 +53,16 @@ class DLANode : public Node
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const = 0;
   virtual const Sizes* GetN(unsigned int num) const = 0;
+#if DODM
   virtual const Sizes* LocalM(unsigned int num) const = 0;
   virtual const Sizes* LocalN(unsigned int num) const = 0;
+#endif
   const Sizes* GetInputM(unsigned int num) const;
   const Sizes* GetInputN(unsigned int num) const;
+#if DODM
   const Sizes* InputLocalM(unsigned int num) const;
   const Sizes* InputLocalN(unsigned int num) const;
+#endif
 #elif DOTENSORS
   virtual const Dim NumDims(unsigned int num) const = 0;
   virtual const Sizes* Len(unsigned int num, Dim dim) const = 0;

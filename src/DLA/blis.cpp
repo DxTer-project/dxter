@@ -32,7 +32,6 @@ GetUpToDiag::GetUpToDiag(Tri tri, PartDir dir)
 {
   m_tri = tri;
   m_sizes = NULL;
-  m_lsizes = NULL;
   if (dir != PARTRIGHT && dir != PARTDOWN)
     throw;
   m_dir = dir;
@@ -63,30 +62,11 @@ const Sizes* GetUpToDiag::GetN(unsigned int num) const
   else
     return GetInputN(num+1);
 }
-
-const Sizes* GetUpToDiag::LocalM(unsigned int num) const
-{
-  if (m_dir == PARTDOWN)
-    return InputLocalM(num+1);
-  else
-    return m_lsizes;
-}
-
-const Sizes* GetUpToDiag::LocalN(unsigned int num) const
-{
-  if (m_dir == PARTDOWN)
-    return m_lsizes;
-  else
-    return InputLocalN(num+1);
-}
-
 void GetUpToDiag::ClearDataTypeCache()
 {
   if (m_sizes) {
     delete m_sizes;
     m_sizes = NULL;
-    delete m_lsizes;
-    m_lsizes = NULL;
   }
 }
 
@@ -98,14 +78,10 @@ void GetUpToDiag::BuildDataTypeCache()
     if (m_dir == PARTDOWN) {
       m_sizes = new Sizes;
       m_sizes->PairwiseSum(*GetInputM(0), *GetInputM(1));
-      m_lsizes = new Sizes;
-      m_lsizes->PairwiseSum(*InputLocalM(0), *InputLocalM(1));
     }
     else if (m_dir == PARTRIGHT) {
       m_sizes = new Sizes;
       m_sizes->PairwiseSum(*GetInputN(0), *GetInputN(1));
-      m_lsizes = new Sizes;
-      m_lsizes->PairwiseSum(*InputLocalN(0), *InputLocalN(1));
     }
     else
       throw;
@@ -354,7 +330,7 @@ void Copy::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
-    m_cost = (PSIRVAL+PSIWVAL) * LocalM(0)->SumProds11(*LocalN(0));
+    m_cost = (PSIRVAL+PSIWVAL) * GetM(0)->SumProds11(*GetN(0));
   }
 }
 

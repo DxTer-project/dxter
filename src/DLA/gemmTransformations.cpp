@@ -1117,25 +1117,25 @@ bool GemmLowerLayer::CanApply(const Node *node) const
     if (m_dim == DIMK) {
 #if !DOLLDLA
       if (gemm->m_transA == NORMAL) {
-        return (*(gemm->InputLocalN(0)) <= m_bs);
+        return (*(gemm->GetInputN(0)) <= m_bs);
       }
       else {
-        return (*(gemm->InputLocalM(0)) <= m_bs);
+        return (*(gemm->GetInputM(0)) <= m_bs);
       }
 #else
-      return (*(gemm->InputLocalN(0)) <= m_bs);
+      return (*(gemm->GetInputN(0)) <= m_bs);
 #endif
     }
     else if (m_dim == DIMN) {
 #if !DOLLDLA
       if (gemm->m_transB == NORMAL) {
-        return (*(gemm->InputLocalN(1)) <= m_bs);
+        return (*(gemm->GetInputN(1)) <= m_bs);
       }
       else {
-        return (*(gemm->InputLocalM(1)) <= m_bs);
+        return (*(gemm->GetInputM(1)) <= m_bs);
       }
 #else
-      return (*(gemm->InputLocalN(1)) <= m_bs);
+      return (*(gemm->GetInputN(1)) <= m_bs);
 #endif
     }
     else

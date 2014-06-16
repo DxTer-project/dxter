@@ -242,9 +242,9 @@ void Gemm::Prop()
 	  unsigned int num0 = InputConnNum(0);
 	  DLANode *in2 = (DLANode*)Input(2);
 	  unsigned int num2 = InputConnNum(2);
-	  const Sizes *size1 = in0->LocalM(num0);
-	  const Sizes *size2 = in0->LocalN(num0);
-	  const Sizes *size3 = in2->LocalN(num2);
+	  const Sizes *size1 = in0->GetM(num0);
+	  const Sizes *size2 = in0->GetN(num0);
+	  const Sizes *size3 = in2->GetN(num2);
 	  if (size1->NumSizes() != size2->NumSizes())
 	    throw;
 	  if (size2->NumSizes() != size3->NumSizes())

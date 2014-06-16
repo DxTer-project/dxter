@@ -84,6 +84,7 @@ const Sizes* Transpose::GetN(unsigned int num) const
     return GetInputM(0);
 }
 
+#if DODM
 const Sizes* Transpose::LocalM(unsigned int num) const
 {
   if (m_trans == NORMAL || m_trans == CONJ)
@@ -99,6 +100,7 @@ const Sizes* Transpose::LocalN(unsigned int num) const
   else
     return InputLocalM(0);
 }
+#endif
 
 void Transpose::PrintCode(IndStream &out)
 {

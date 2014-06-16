@@ -48,6 +48,7 @@ template<unsigned int numIn, unsigned int numOut>
   return GetInputN(numIn - numOut + num);  
 }
 
+#if DODM
 template<unsigned int numIn, unsigned int numOut>
    const Sizes* DLAOp<numIn, numOut>::LocalM(unsigned int num) const
 {
@@ -63,6 +64,7 @@ template<unsigned int numIn, unsigned int numOut>
     throw;
   return InputLocalN(numIn - numOut + num);  
 }
+#endif //DODM
 
 
 #else
