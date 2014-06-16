@@ -31,45 +31,7 @@
 #include "pack.h"
 #include "comm.h"
 #include "loopSupport.h"
-
-class Transpose : public DLAOp<1,1>
-{
- public:
-  Trans m_trans;
-  bool m_objTrans;
-  Transpose(Trans trans, bool objectTrans);
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  virtual void PrintCode(IndStream &out);
-  static Node* BlankInst() {return new Transpose(NORMAL, false); }
-  virtual Node* GetNewInst() { return BlankInst(); }
-  virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "Transpose";}
-  virtual NodeType GetType() const {return "Transpose";}
-  void Flatten(ofstream &out) const;
-  void Unflatten(ifstream &in, SaveInfo &info);
-  virtual Name GetName(unsigned int num) const;
-  virtual void Prop();
-  virtual unsigned int NumOutputs() const {return 1;}
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
-  virtual bool Overwrites(const Node *input, unsigned int num) const;
-};
-
-class CombineTranspose : public SingleTrans
-{
- public:
-  virtual string GetType() const {return "Combine transpose";}
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-};
-
-Transpose* AddTranspose(Trans trans, bool objTrans, Node *input, unsigned int num, bool addToPoss);
-
-Node* AddTrans(Trans trans, bool objTrans, Node *input, unsigned int num, bool addToPoss);
-
-Transpose* InsertTranspose(Trans trans, bool objTrans, Node *node, unsigned int inNum, bool addToPoss);
+#include "transpose.h"
 
 //Input 0 is the off-diagonal partition of the triangular matrix
 //Input 1 is the on-diagonal partition
