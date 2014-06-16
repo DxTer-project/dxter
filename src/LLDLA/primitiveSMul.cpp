@@ -219,4 +219,35 @@ void SMulLoopRef::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+
+
+bool SMulLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == PrimitiveSMul::GetClass()) {
+    const PrimitiveSMul *smul = (PrimitiveSMul*)node;
+    if (smul->GetLayer() != m_fromLayer)
+      return false;
+    if (*(smul->GetInputM(1)) <= m_bs &&
+	*(smul->GetInputN(1)) <= m_bs)
+      return true;
+    else
+      return false;
+  }
+  else
+    throw;  
+}
+
+void SMulLowerLayer::Apply(Node *node) const
+{
+  PrimitiveSMul *smul = (PrimitiveSMul*)node;
+  smul->SetLayer(m_toLayer);
+}
+
+string SMulLowerLayer::GetType() const
+{ 
+  return "SMul lower layer " + LayerNumToStr(m_fromLayer) 
+  + " to " + LayerNumToStr(m_toLayer);
+}
+
+
 #endif //DOLLDLA

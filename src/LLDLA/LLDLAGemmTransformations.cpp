@@ -103,8 +103,7 @@ bool LLDAGemmLowerLayer::CanApply(const Node *node) const
     else
       return false;
   }
-  return false;
-  
+  throw;
 }
 
 void LLDAGemmLowerLayer::Apply(Node *node) const

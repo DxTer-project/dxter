@@ -69,6 +69,9 @@ void AddTrans()
   //Lowers the layer tag of a Gemm node that is LLDLA_MU in all three dimensions
   Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
 
+  //Lowers the layer tag of a PrimitiveSMul node that is LLDLA_MU in both dimensions
+  Universe::AddTrans(PrimitiveSMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
+
   //Replaces a Gemm node with a PrimitiveGemm node
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLAPRIMPHASE);
 }

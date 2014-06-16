@@ -29,6 +29,7 @@
 #include "blas.h"
 #include "pack.h"
 #include "gemmTransformations.h"
+#include "primitiveSMul.h"
 
 using namespace std;
 
@@ -877,24 +878,31 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   splitB->SetIndepIters();
 
 #if DOLLDLA
+  PrimitiveSMul *scale = NULL;
   if (beta != COEFONE) {
-    cout << "need scale node for beta != 1\n";
-    throw;
+    ConstVal *constVal = new ConstVal(beta.LLDLAStr(),beta);
+    
+    scale = new PrimitiveSMul(type);
+    scale->SetLayer(layer);
+    scale->AddInputs(4, 
+		     constVal, 0,
+		     Cin, Cnum);
   }
 #else  
-  ScaleNode *scale = new ScaleNode(layer, beta);
-  scale->AddInput(Cin, Cnum);
+  ScaleNode *scale = NULL;
+  if (beta != COEFONE) {
+    scale = new ScaleNode(layer, beta);
+    scale->AddInput(Cin, Cnum);
+  }
 #endif
   
   LoopTunnel *Ctun = new LoopTunnel(POSSTUNIN);
-#if DOLLDLA
   if (beta != COEFONE) {
-    throw;
+    Ctun->AddInput(scale, 0);
   }
-  Ctun->AddInput(Cin, Cnum);
-#else
-  Ctun->AddInput(scale, 0);
-#endif
+  else {
+    Ctun->AddInput(Cin, Cnum);
+  }
   Ctun->SetUpStats(PARTUP, PARTUP,
                    PARTUP, PARTUP);
   

@@ -62,5 +62,19 @@ class SMulLoopRef : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+class SMulLowerLayer : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  Size m_bs;
+ SMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
+   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+
 
 #endif // DOLLDLA

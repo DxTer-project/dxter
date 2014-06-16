@@ -60,6 +60,6 @@ class LLDAGemmLowerLayer : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
-  };
-  
+};
+
 #endif
