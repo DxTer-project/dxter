@@ -19,34 +19,57 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 #pragma once
 
-#include "layers.h"
+#include "base.h"
 
-#if DOLLDLA
-
-#include "gemmTransformations.h"
-#include "loop.h"
-
-class LLDLAGemmLoopExp : public GemmLoopExp
+Trans CharToTrans(char c) 
 {
- public:
-  Size m_bsSize;
-  LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize);
-  virtual string GetType() const;
-  virtual bool CanApply(const Node *node) const;
-};
+  switch (c) {
+  case('N'):
+    return NORMAL;
+  case('T'):
+    return TRANS;
+  case ('C'):
+    return CONJTRANS;
+  default:
+    throw;
+  }
+}
 
-class GemmTransToNotTrans : public SingleTrans
+Tri CharToTri(char c)
 {
- public:
-  Layer m_layer;
- GemmTransToNotTrans(Layer layer) :m_layer(layer) {}
-  virtual string GetType() const {return "GemmTransToNotTrans";}
-  virtual bool IsRef() const {return true;}
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-};
+  switch (c) {
+  case('L'):
+    return LOWER;
+  case('U'):
+    return UPPER;
+  default:
+    throw;
+  }
+}
 
+Side CharToSide(char c)
+{
+  switch (c) {
+  case('L'):
+    return LEFT;
+  case('R'):
+    return RIGHT;
+  default:
+    throw;
+  }
+}
 
-#endif
+Type CharToType(char c)
+{
+  switch(c) {
+  case('R'):
+    return REAL;
+  case('C'):
+    return COMPLEX;
+  default:
+    throw;
+  }
+}

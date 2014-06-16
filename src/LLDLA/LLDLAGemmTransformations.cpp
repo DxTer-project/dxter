@@ -21,6 +21,7 @@
 
 #include "LLDLAGemmTransformations.h"
 #include "loop.h"
+#include "transpose.h"
 
 #if DOLLDLA
 
@@ -60,6 +61,29 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
     throw;
   }
 }
+
+bool GemmTransToNotTrans::CanApply(const Node *node) const
+{
+  const Gemm *gemm = (Gemm*)node;
+  if (gemm->GetLayer() == m_layer) {
+    return gemm->m_transA != NORMAL || gemm->m_transB != NORMAL;
+  }
+  return false;
+}
+
+void GemmTransToNotTrans::Apply(Node *node) const
+{
+  Gemm *gemm = (Gemm*)node;
+  if (gemm->m_transA != NORMAL) {
+    InsertTranspose(gemm->m_transA, gemm, 0, true);
+    gemm->m_transA = NORMAL;
+  }
+  if (gemm->m_transB != NORMAL) {
+    InsertTranspose(gemm->m_transB, gemm, 1, true);
+    gemm->m_transB = NORMAL;
+  }
+}
+
 
 
 #endif

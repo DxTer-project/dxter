@@ -37,6 +37,7 @@
 
 #if DOLLDLA
 
+#include "driverUtils.h"
 #include "debug.h"
 #include "LLDLAGemmTransformations.h"
 
@@ -46,10 +47,13 @@ Size medSize = 100;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
-PSet* Example1();
+PSet* GemmExample();
+
+Trans transA, transB;
 
 void AddTrans()
 {
+  Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(ABSLAYER), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, LLDLAMIDLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, LLDLAMIDLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(LLDLAMIDLAYER, LLDLAMIDLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
@@ -59,14 +63,13 @@ void AddTrans()
 
 void AddSimplifiers()
 { 
-
 }
 
 void Usage()
 {
   cout << "./driver arg1 arg2 arg3 arg4\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
-  cout <<"         1  -> Basic Example\n";
+  cout <<"         1  -> Gemm Example N/T N/T\n";
 }
 
 int main(int argc, const char* argv[])
@@ -90,7 +93,9 @@ int main(int argc, const char* argv[])
     algNum = atoi(argv[1]);
     switch(algNum) {
     case(1):
-      algFunc = Example1;
+      algFunc = GemmExample;
+      transA = CharToTrans(*argv[2]);
+      transB = CharToTrans(*argv[3]);
       break;
     default:
       Usage();
@@ -176,7 +181,7 @@ int main(int argc, const char* argv[])
   return 0;
 }
 
-PSet* Example1()
+PSet* GemmExample()
 {
   InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", 
 				 NONUNITSTRIDE, UNITSTRIDE,
@@ -200,7 +205,7 @@ PSet* Example1()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Gemm *gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, REAL);
+  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);
   gemm->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
@@ -217,6 +222,8 @@ PSet* Example1()
   
   return outerSet;
 }
+
+
 
 
 

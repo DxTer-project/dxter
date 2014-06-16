@@ -40,6 +40,7 @@
 
 #if DOELEM||DOBLIS
 
+#include "driverUtils.h"
 #include "debug.h"
 
 
@@ -88,56 +89,6 @@ char charIn;
 Type type;
 double size; 
 int variant;
-
-Trans CharToTrans(char c) 
-{
-  switch (c) {
-  case('N'):
-    return NORMAL;
-  case('T'):
-    return TRANS;
-  case ('C'):
-    return CONJTRANS;
-  default:
-    throw;
-  }
-}
-
-Tri CharToTri(char c)
-{
-  switch (c) {
-  case('L'):
-    return LOWER;
-  case('U'):
-    return UPPER;
-  default:
-    throw;
-  }
-}
-
-Side CharToSide(char c)
-{
-  switch (c) {
-  case('L'):
-    return LEFT;
-  case('R'):
-    return RIGHT;
-  default:
-    throw;
-  }
-}
-
-Type CharToType(char c)
-{
-  switch(c) {
-  case('R'):
-    return REAL;
-  case('C'):
-    return COMPLEX;
-  default:
-    throw;
-  }
-}
 
 PSet* CholExample();
 PSet* CholTrsmExample();
