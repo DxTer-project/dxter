@@ -22,6 +22,8 @@
 #include "LLDLA.h"
 #include "primitiveSMul.h"
 
+#if DOLLDLA
+
 PrimitiveSMul::PrimitiveSMul(Type type)
 {
   m_layer = LLDLAPRIMITIVELAYER;
@@ -101,3 +103,5 @@ NodeType PrimitiveSMul::GetType() const
 {
   return "PrimitiveSMul" + LayerNumToStr(GetLayer());
 }
+
+#endif //DOLLDLA
