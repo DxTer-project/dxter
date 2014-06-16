@@ -803,6 +803,17 @@ void PSet::Simplify(const TransMap &simplifiers)
       poss->Simplify(simplifiers);
     }
   }
+  iter = m_posses.begin();
+  do {
+    Poss *poss = (*iter).second;
+    if (poss->GetHash() != (*iter).first) {
+      m_posses.erase(iter);
+      m_posses.insert(PossMMapPair(poss->GetHash(),poss));
+      iter = m_posses.begin();
+    }
+    else
+      ++iter;
+  } while (iter != m_posses.end());
 }
 
 // void PSet::RemoveDups()
