@@ -93,6 +93,11 @@ void VAdd::Prop()
     VectorOpInputDimensionCheck(0);
     VectorOpInputDimensionCheck(1);
 
+    if ((*GetInputM(0) != *GetInputM(1)) || (*GetInputN(0) != *GetInputN(1))) {
+      cout << "ERROR: Cannot VAdd two vectors of different dimension\n";
+      throw;
+    }
+
     m_cost = ZERO;
   }
 
@@ -105,6 +110,7 @@ void VAdd::VectorOpInputDimensionCheck(unsigned int inputNum)
     throw;
   } else if (m_vecType == COLVECTOR && *GetInputN(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum  << " has more than 1 column\n";
+    throw;
   }
   
   if (m_layer == LLDLAPRIMITIVELAYER) {
@@ -126,6 +132,81 @@ Node* VAdd::BlankInst()
 NodeType VAdd::GetType() const
 {
   return "VADD" + LayerNumToStr(GetLayer());
+}
+
+string VAddLoopRef::GetType() const
+{
+  switch(m_vtype)
+    {
+    case(ROWVECTOR):
+      return "VAddLoopRef - row vector";
+    case(COLVECTOR):
+      return "VAddLoopRef - column vector";
+    default:
+      throw;
+    }
+}
+
+bool VAddLoopRef::CanApply(const Node *node) const
+{
+  const VAdd *vadd = (VAdd*) node;
+  if (vadd->GetLayer() != m_fromLayer) {
+    return false;
+  }
+  if (m_vtype == ROWVECTOR) {
+    if (!(*(vadd->GetInputN(0)) <= BSSizeToSize(m_bs))
+	&& !(*(vadd->GetInputN(1)) <= BSSizeToSize(m_bs))) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (m_vtype == COLVECTOR) {
+    if (!(*(vadd->GetInputM(0)) <= BSSizeToSize(m_bs))
+	&& !(*(vadd->GetInputM(1)) <= BSSizeToSize(m_bs))) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    throw;
+  }
+  return false;
+}
+
+void VAddLoopRef::Apply(Node *node) const
+{
+  VAdd *vadd = (VAdd*) node;
+}
+
+bool VAddLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == VAdd::GetClass()) {
+    const VAdd *vadd = (VAdd*) node;
+    if (vadd->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if (*(vadd->GetInputM(1)) <= m_bs &&
+	*(vadd->GetInputN(1)) <= m_bs) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  else {
+    throw;
+  }
+}
+
+void VAddLowerLayer::Apply(Node *node) const
+{
+  VAdd *vadd = (VAdd*) node;
+  vadd->SetLayer(m_toLayer);
+}
+
+string VAddLowerLayer::GetType() const
+{
+  return "VAdd lower layer " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
 #endif // DOLLDLA

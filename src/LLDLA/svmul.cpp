@@ -86,7 +86,6 @@ void SVMul::PrintGeneralStride(IndStream &out)
   }
 }
 
-
 void SVMul::Prop()
 {
   if (!IsValidCost(m_cost)) {
