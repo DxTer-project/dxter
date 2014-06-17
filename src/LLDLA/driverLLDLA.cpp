@@ -40,7 +40,7 @@
 #include "driverUtils.h"
 #include "debug.h"
 #include "LLDLAGemmTransformations.h"
-#include "primitiveSMul.h"
+#include "smmul.h"
 
 Size one = 1;
 Size smallSize = 10;

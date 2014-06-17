@@ -29,7 +29,7 @@
 #include "blas.h"
 #include "pack.h"
 #include "gemmTransformations.h"
-#include "primitiveSMul.h"
+#include "smmul.h"
 
 using namespace std;
 

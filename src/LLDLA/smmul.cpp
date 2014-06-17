@@ -20,7 +20,7 @@
 */
 
 #include "LLDLA.h"
-#include "primitiveSMul.h"
+#include "smmul.h"
 
 #if DOLLDLA
 
