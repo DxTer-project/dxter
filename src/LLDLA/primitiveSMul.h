@@ -24,15 +24,15 @@
 
 #if DOLLDLA
 
-class PrimitiveSMul : public DLAOp<2, 1>
+class SMMul : public DLAOp<2, 1>
 {
  public:
   Type m_type;
-  PrimitiveSMul(Type type);
+  SMMul(Type type, Layer layer);
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
-  virtual Phase MaxPhase() const { return NUMPHASES; }
+  virtual Phase MaxPhase() const;
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }

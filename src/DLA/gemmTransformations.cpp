@@ -878,11 +878,11 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   splitB->SetIndepIters();
 
 #if DOLLDLA
-  PrimitiveSMul *scale = NULL;
+  SMMul *scale = NULL;
   if (beta != COEFONE) {
     ConstVal *constVal = new ConstVal(beta.LLDLAStr(),beta);
     
-    scale = new PrimitiveSMul(type);
+    scale = new SMMul(type, layer);
     scale->SetLayer(layer);
     scale->AddInputs(4, 
 		     constVal, 0,
