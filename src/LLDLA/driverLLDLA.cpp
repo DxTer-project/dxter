@@ -49,6 +49,7 @@ Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
 PSet* GemmExample();
+PSet* DoubleGemmExample();
 
 Trans transA, transB;
 
@@ -88,6 +89,7 @@ void Usage()
   cout << "./driver arg1 arg2 ...\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
   cout <<"         1  -> Gemm Example N/T N/T\n";
+  cout <<"         2  -> Double Gemm Example N/T N/T\n";
 }
 
 int main(int argc, const char* argv[])
@@ -116,6 +118,15 @@ int main(int argc, const char* argv[])
 	return 0;
       }
       algFunc = GemmExample;
+      transA = CharToTrans(*argv[2]);
+      transB = CharToTrans(*argv[3]);
+      break;
+    case(2):
+      if (argc != 4) {
+	Usage();
+	return 0;
+      }
+      algFunc = DoubleGemmExample;
       transA = CharToTrans(*argv[2]);
       transB = CharToTrans(*argv[3]);
       break;
@@ -189,7 +200,7 @@ int main(int argc, const char* argv[])
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-#if 0
+#if 1
   uni.PrintAll(algNum);
 #else
   uni.PrintBest();
@@ -234,6 +245,54 @@ PSet* GemmExample()
 		  tunC,0);
 
   Poss *innerPoss = new Poss(gemm,true);
+  PSet *innerSet = new PSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(Cout,true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
+}
+
+PSet* DoubleGemmExample()
+{
+  InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", 
+				 NONUNITSTRIDE, UNITSTRIDE,
+				 "ANumRows","ANumCols",
+				 "ARowStride","AColStride");
+  InputNode *Bin = new InputNode("B input",  smallSize, smallSize, "B", 
+				 NONUNITSTRIDE, UNITSTRIDE,
+				 "BNumRows","BNumCols",
+				 "BRowStride","BColStride");
+  InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", 
+				 NONUNITSTRIDE, UNITSTRIDE,
+				 "CNumRows","CNumCols",
+				 "CRowStride","CColStride");
+
+  PossTunnel *tunA = new PossTunnel(POSSTUNIN);
+  tunA->AddInput(Ain,0);
+
+  PossTunnel *tunB = new PossTunnel(POSSTUNIN);
+  tunB->AddInput(Bin,0);
+
+  PossTunnel *tunC = new PossTunnel(POSSTUNIN);
+  tunC->AddInput(Cin,0);
+
+  Gemm *gemm1 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFBETA, REAL);
+  gemm1->AddInputs(6,
+		  tunA,0,
+		  tunB,0,
+		  tunC,0);
+
+  Gemm *gemm2 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFBETA, REAL);
+  gemm2->AddInputs(6,
+		  tunA,0,
+		  tunB,0,
+		  gemm1,0);
+
+  Poss *innerPoss = new Poss(gemm2,true);
   PSet *innerSet = new PSet(innerPoss);
 
   OutputNode *Cout = new OutputNode("C output");
