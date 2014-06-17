@@ -55,7 +55,7 @@ void RegAllDLANodes()
 #endif
   Reg(Gemm);
   Reg(InputNode);
-  Reg(ConstVal);
+  //  Reg(ConstVal);
   Reg(TempVarNode);
   Reg(OutputNode);
   Reg(ScaleNode);

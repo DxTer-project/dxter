@@ -128,7 +128,7 @@ class OutputNode : public DLANode
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
 };
 
-#if DOBLIS||DOELEM||DOLLDLA
+#if DOLLDLA
 //Constant value (e.g. used for Axpy)
 class ConstVal : public DLANode
 {
