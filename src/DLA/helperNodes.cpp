@@ -499,9 +499,9 @@ void OutputNode::UnflattenCore(ifstream &in, SaveInfo &info)
   getline(in, m_type);
 }
 
-#if DOBLIS||DOELEM||DOLLDLA
+#if DOLLDLA
 ConstVal::ConstVal(string name, Coef val)
-  :m_val(val)
+  :m_val(val), m_sizes(NULL)
 {
   m_val = val;
   m_varName.m_name = name;
@@ -534,8 +534,8 @@ void ConstVal::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLANode::Prop();
-    if (!m_inputs.empty()) {
-      cout << "!m_inputs.empty()\n";
+    if (m_inputs.size()!=1) {
+      cout << "m_inputs != 1\n";
       throw;
     }
     m_cost = ZERO;
@@ -554,6 +554,43 @@ void ConstVal::FlattenCore(ofstream &out) const
   DLANode::FlattenCore(out);
   m_varName.Flatten(out);
   WRITE(m_val);
+}
+
+
+void ConstVal::ClearDataTypeCache()
+{
+  if (m_sizes){
+    delete m_sizes;
+    m_sizes = NULL;
+  }
+}
+
+void ConstVal::BuildDataTypeCache()
+{
+  const Sizes *sizes = GetInputM(0);
+  m_sizes = new Sizes;
+  m_sizes->AddRepeatedSizes(1, sizes->NumSizes(), 1);
+}
+
+#if TWOD
+const Sizes* ConstVal::GetM(unsigned int num) const
+{
+  return m_sizes;
+}
+
+const Sizes* ConstVal::GetN(unsigned int num) const
+{
+  return m_sizes;
+}
+#endif
+
+
+ConstVal::~ConstVal()
+{
+  if (m_sizes){
+    delete m_sizes;
+    m_sizes = NULL;
+  }
 }
 
 

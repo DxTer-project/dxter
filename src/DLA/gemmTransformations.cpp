@@ -881,6 +881,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   SMMul *scale = NULL;
   if (beta != COEFONE) {
     ConstVal *constVal = new ConstVal(beta.LLDLAStr(),beta);
+    constVal->AddInput(Cin, Cnum);
     
     scale = new SMMul(type, layer);
     scale->SetLayer(layer);
