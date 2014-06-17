@@ -35,7 +35,7 @@
 
 #define CHECKFORLOOPS
 
-#define ALWAYSFUSE 1
+#define ALWAYSFUSE 0
 
 StrSet Poss::M_fusedSets;
 
