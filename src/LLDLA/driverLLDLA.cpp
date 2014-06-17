@@ -33,7 +33,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-#include "primitiveGemm.h"
+#include "LLDLAGemm.h"
 
 #if DOLLDLA
 

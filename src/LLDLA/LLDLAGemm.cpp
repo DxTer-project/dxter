@@ -21,7 +21,7 @@
 
 #include "LLDLA.h"
 #include "layers.h"
-#include "primitiveGemm.h"
+#include "LLDLAGemm.h"
 #include "loopSupport.h"
 
 #if DOLLDLA
