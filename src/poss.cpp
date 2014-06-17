@@ -35,7 +35,7 @@
 
 #define CHECKFORLOOPS
 
-#define ALWAYSFUSE 0
+#define ALWAYSFUSE !DOLLDLA
 
 StrSet Poss::M_fusedSets;
 
