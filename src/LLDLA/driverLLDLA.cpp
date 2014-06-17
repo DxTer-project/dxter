@@ -40,7 +40,7 @@
 #include "driverUtils.h"
 #include "debug.h"
 #include "LLDLAGemmTransformations.h"
-#include "primitiveSMul.h"
+#include "smmul.h"
 
 Size one = 1;
 Size smallSize = 10;
@@ -62,21 +62,21 @@ void AddTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLAMU), LLDLALOOPPHASE);
 
-  //Introduces loops in the m and n dimension for PrimitiveSMul
-  Universe::AddTrans(PrimitiveSMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
-  Universe::AddTrans(PrimitiveSMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
+  //Introduces loops in the m and n dimension for SMMul
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
 
   //Lowers the layer tag of a Gemm node that is LLDLA_MU in all three dimensions
   Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
 
-  //Lowers the layer tag of a PrimitiveSMul node that is LLDLA_MU in both dimensions
-  Universe::AddTrans(PrimitiveSMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
+  //Lowers the layer tag of a SMMul node that is LLDLA_MU in both dimensions
+  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
 
   //Replaces a Gemm node with a PrimitiveGemm node
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLAPRIMPHASE);
 
-  //Lowers the layer tag of a PrimitiveSMul node that is LLDLA_MU in both dimensions
-  Universe::AddTrans(PrimitiveSMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLA_MU), LLDLAPRIMPHASE);
+  //Lowers the layer tag of a SMMul node that is LLDLA_MU in both dimensions
+  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLA_MU), LLDLAPRIMPHASE);
 }
 
 void AddSimplifiers()
@@ -227,7 +227,7 @@ PSet* GemmExample()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);
+  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFBETA, REAL);
   gemm->AddInputs(6,
 		  tunA,0,
 		  tunB,0,

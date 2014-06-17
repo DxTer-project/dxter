@@ -653,6 +653,7 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     cout << lms->NumSizes() << endl;
     cout << lns->NumSizes() << endl;
 #endif
+    (*(((Loop*)m_pset)->m_posses.begin())).second->ForcePrint();
     throw;
   }
   const Size m = (*ms)[execNum];

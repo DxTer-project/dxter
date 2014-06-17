@@ -20,18 +20,21 @@
 */
 
 #include "LLDLA.h"
-#include "primitiveSMul.h"
+#include "smmul.h"
 
 #if DOLLDLA
 
-PrimitiveSMul::PrimitiveSMul(Type type)
+SMMul::SMMul(Type type, Layer layer)
 {
-  m_layer = LLDLAPRIMITIVELAYER;
   m_type = type;
+  SetLayer(layer);
 }
 
-void PrimitiveSMul::PrintCode(IndStream &out)
+void SMMul::PrintCode(IndStream &out)
 {
+  if (GetLayer() != LLDLAPRIMITIVELAYER)
+    throw;
+
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;
@@ -49,19 +52,19 @@ void PrimitiveSMul::PrintCode(IndStream &out)
 }
 
 
-void PrimitiveSMul::PrintRowStride(IndStream &out)
+void SMMul::PrintRowStride(IndStream &out)
 {
   *out << "row_stride_smul_2x2( " <<
     GetInputName(0).str() << ", " <<
     GetInputName(1).str() << ");\n";
 }
 
-void PrimitiveSMul::PrintColStride(IndStream &out)
+void SMMul::PrintColStride(IndStream &out)
 {
   *out << "COL STRIDE not yet implemented\n";
 }
 
-void PrimitiveSMul::PrintGeneralStride(IndStream &out)
+void SMMul::PrintGeneralStride(IndStream &out)
 {
   *out << "gen_stride_smul_2x2( " <<
     GetInputName(0).str() << ", " <<
@@ -69,39 +72,51 @@ void PrimitiveSMul::PrintGeneralStride(IndStream &out)
 }
 
 
-void PrimitiveSMul::Prop()
+void SMMul::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp::Prop();
 
-    if (m_layer != LLDLAPRIMITIVELAYER) {
-      cout << "ERROR: PrimitiveSMul appears in layer " <<  LayerNumToStr(m_layer) << "\n" ;
-      throw;
-    }
-
-    if (*GetInputM(1) != LLDLA_MU || *GetInputN(1) != LLDLA_MU) {
-      GetInputM(1)->Print();
-      cout << endl;
-      GetInputN(1)->Print();
-      cout << "ERROR: PrimitiveSMul input 1 must be an LLDLAMU by LLDLAMU matrix\n";
-    }
-
     if (!((DLANode*) Input(0))->IsScalar(InputConnNum(0))) {
-      cout << "ERROR: PrimitiveSMul input 0 is not a scalar\n";
+      cout << "ERROR: SMMul input 0 is not a scalar\n";
     }
     
+    if (GetLayer() == LLDLAPRIMITIVELAYER || GetLayer() == LLDLAMIDLAYER) {
+      if (*GetInputM(1) != LLDLA_MU || *GetInputN(1) != LLDLA_MU) {
+	GetInputM(1)->Print();
+	cout << endl;
+	GetInputN(1)->Print();
+	cout << "ERROR: SMMul input 1 must be an LLDLAMU by LLDLAMU matrix\n";
+      }
+    }      
+
     m_cost = ZERO;
   }
 }
 
-Node* PrimitiveSMul::BlankInst()
+Phase SMMul::MaxPhase() const
 {
-  return new PrimitiveSMul(REAL);
+  switch (m_layer)
+    { 
+    case(ABSLAYER):
+      return LLDLALOOPPHASE;
+    case(LLDLAMIDLAYER):
+      return LLDLAPRIMPHASE;
+    case (LLDLAPRIMITIVELAYER):
+      return NUMPHASES; 
+    default:
+      throw;
+    }
 }
 
-NodeType PrimitiveSMul::GetType() const
+Node* SMMul::BlankInst()
 {
-  return "PrimitiveSMul" + LayerNumToStr(GetLayer());
+  return new SMMul(REAL, ABSLAYER);
+}
+
+NodeType SMMul::GetType() const
+{
+  return "SMMul" + LayerNumToStr(GetLayer());
 }
 
 string SMulLoopRef::GetType() const
@@ -119,7 +134,7 @@ string SMulLoopRef::GetType() const
 
 bool SMulLoopRef::CanApply(const Node *node) const
 {
-  const PrimitiveSMul *mul = (PrimitiveSMul*)node;
+  const SMMul *mul = (SMMul*)node;
   if (mul->GetLayer() != m_fromLayer)
     return false;
   
@@ -142,7 +157,7 @@ bool SMulLoopRef::CanApply(const Node *node) const
 
 void SMulLoopRef::Apply(Node *node) const
 {
-  PrimitiveSMul *mul = (PrimitiveSMul*)node;
+  SMMul *mul = (SMMul*)node;
 
 
   //Create a split for the input matrix
@@ -150,7 +165,7 @@ void SMulLoopRef::Apply(Node *node) const
   //    (i.e., it's horizontal)
   // If we're splitting on the n dimension, then the split moves right
   //    (i.e., it's vertical)
-  Split *split = new Split(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  Split *split = new Split(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   // Add input, which is the matrix input to mul
   split->AddInput(mul->Input(1), mul->InputConnNum(1));
   //Set the update statuses
@@ -164,6 +179,7 @@ void SMulLoopRef::Apply(Node *node) const
     split->SetUpStats(FULLUP, NOTUP,
 		       FULLUP, NOTUP);
   }
+
   //Independent iterations
   split->SetIndepIters();
 
@@ -178,7 +194,7 @@ void SMulLoopRef::Apply(Node *node) const
   
 
   //Create a new SMul or the same type and in my m_toLayer layer
-  PrimitiveSMul *newMul = new PrimitiveSMul(mul->m_type);
+  SMMul *newMul = new SMMul(mul->m_type, m_toLayer);
   newMul->SetLayer(m_toLayer);
 
   //Wire inputs - the scalar loop tunnel and 
@@ -226,8 +242,8 @@ void SMulLoopRef::Apply(Node *node) const
 
 bool SMulLowerLayer::CanApply(const Node *node) const
 {
-  if (node->GetNodeClass() == PrimitiveSMul::GetClass()) {
-    const PrimitiveSMul *smul = (PrimitiveSMul*)node;
+  if (node->GetNodeClass() == SMMul::GetClass()) {
+    const SMMul *smul = (SMMul*)node;
     if (smul->GetLayer() != m_fromLayer)
       return false;
     if (*(smul->GetInputM(1)) <= m_bs &&
@@ -242,7 +258,7 @@ bool SMulLowerLayer::CanApply(const Node *node) const
 
 void SMulLowerLayer::Apply(Node *node) const
 {
-  PrimitiveSMul *smul = (PrimitiveSMul*)node;
+  SMMul *smul = (SMMul*)node;
   smul->SetLayer(m_toLayer);
 }
 

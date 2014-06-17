@@ -134,6 +134,7 @@ class ConstVal : public DLANode
 {
   Name m_varName;
   Coef m_val;
+  Sizes *m_sizes;
  public:
   ConstVal(string name, Coef val);
   virtual NodeType GetType() const {return "const val";}
@@ -147,8 +148,8 @@ class ConstVal : public DLANode
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "const val";}
 #if TWOD
-  virtual const Sizes* GetM(unsigned int num) const {return ONES;}
-  virtual const Sizes* GetN(unsigned int num) const {return ONES;}
+  virtual const Sizes* GetM(unsigned int num) const;
+  virtual const Sizes* GetN(unsigned int num) const;
 #if DODM
   virtual const Sizes* LocalM(unsigned int num) const {return ONES;}
   virtual const Sizes* LocalN(unsigned int num) const {return ONES;}
@@ -156,7 +157,10 @@ class ConstVal : public DLANode
 #else
 blah
 #endif
-  virtual Name GetName(unsigned int num) const;
+  virtual void ClearDataTypeCache();
+ virtual void BuildDataTypeCache();
+  virtual ~ConstVal();
+ virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}

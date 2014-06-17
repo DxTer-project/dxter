@@ -89,7 +89,7 @@ void SVMul::PrintGeneralStride(IndStream &out)
 void SVMul::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    DLAOp::Prop();
+    DLAOp<2,1>::Prop();
 
     if (!((DLANode*) Input(0))->IsScalar(InputConnNum(0))) {
       cout << "ERROR: SVMul input 0 is not a scalar\n";
@@ -132,6 +132,29 @@ NodeType SVMul::GetType() const
   return "SVMul" +  LayerNumToStr(GetLayer());
 }
 
+void SVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
+{
+  DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
+  const SVMul *rhs = (SVMul*)orig;
+  m_type = rhs->m_type;
+  m_vecType = rhs->m_vecType;
+}
+
+Phase SVMul::MaxPhase() const 
+{ 
+  switch (m_layer)
+    { 
+    case(ABSLAYER):
+      return LLDLALOOPPHASE;
+    case(LLDLAMIDLAYER):
+      return LLDLAPRIMPHASE;
+    case (LLDLAPRIMITIVELAYER):
+      return NUMPHASES; 
+    default:
+      throw;
+    }
+}
+
 string SVMulLoopRef::GetType() const
 {
   switch(m_vtype)
@@ -145,6 +168,7 @@ string SVMulLoopRef::GetType() const
     }
 }
 
+
 bool SVMulLoopRef::CanApply(const Node *node) const
 {
   const SVMul *svmul = (SVMul*) node;
@@ -153,9 +177,11 @@ bool SVMulLoopRef::CanApply(const Node *node) const
   }
   if (m_vtype == ROWVECTOR) {
     return !(*(svmul->GetInputN(1)) <= BSSizeToSize(m_bs));
-  } else if (m_vtype == COLVECTOR) {
+  } 
+  else if (m_vtype == COLVECTOR) {
     return !(*(svmul->GetInputM(1)) <= BSSizeToSize(m_bs));
-  } else {
+  } 
+  else {
     throw;
   }
   return false;
@@ -165,7 +191,7 @@ void SVMulLoopRef::Apply(Node *node) const
 {
   SVMul *svmul = (SVMul*) node;
 
-  Split *split = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  Split *split = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split->AddInput(svmul->Input(1), svmul->InputConnNum(1));
 
   if (m_vtype == COLVECTOR) {
@@ -182,6 +208,7 @@ void SVMulLoopRef::Apply(Node *node) const
   scalarTun->AddInput(svmul->Input(0),svmul->InputConnNum(0));
   scalarTun->SetAllStats(FULLUP);
   scalarTun->SetIndepIters();
+
   SVMul *newMul = new SVMul(svmul->m_vecType, svmul->m_layer, svmul->m_type);
   newMul->SetLayer(m_toLayer);
 
@@ -193,7 +220,8 @@ void SVMulLoopRef::Apply(Node *node) const
   scalarTunOut->AddInput(scalarTun, 0);
   scalarTunOut->CopyTunnelInfo(scalarTun);
 
-  Combine *com = split->CreateMatchingCombine(1, 1, newMul, 0);
+  Combine *com = split->CreateMatchingCombine(1, 
+					      1, newMul, 0);
   
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
   
