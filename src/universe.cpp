@@ -30,7 +30,9 @@
 
 //Print out code for all generated implementations
 // This takes a while for large search spaces
-//#define PRINTCODE
+#if DOLLDLA
+#define PRINTCODE
+#endif
 
 //Save generated implementations to disk
 // so they can be loaded on a separate run
