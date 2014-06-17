@@ -176,6 +176,42 @@ bool VAddLoopRef::CanApply(const Node *node) const
 void VAddLoopRef::Apply(Node *node) const
 {
   VAdd *vadd = (VAdd*) node;
+
+  Split *split1 = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  split1->AddInput(vadd->Input(1), vadd->InputConnNum(1));
+
+  Split *split0 = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  split0->AddInput(vadd->Input(0), vadd->InputConnNum(0));
+
+  split0->SetAllStats(FULLUP);
+  if (m_vtype == COLVECTOR) {
+    split1->SetUpStats(FULLUP, FULLUP,
+		      NOTUP, NOTUP);
+  } else {
+    split1->SetUpStats(FULLUP, NOTUP,
+		       FULLUP, NOTUP);
+  }
+
+  split0->SetIndepIters();
+  split1->SetIndepIters();
+
+  VAdd *newVAdd = new VAdd(vadd->m_vecType, vadd->m_layer, vadd->m_type);
+  newVAdd->SetLayer(m_toLayer);
+
+  newVAdd->AddInput(split0, 1);
+  newVAdd->AddInput(split1, 1);
+
+  Combine *com0 = split0->CreateMatchingCombine(0);
+  Combine *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
+
+  Poss *loopPoss = new Poss(2, com0, com1);
+
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
+  
+  node->m_poss->AddLoop(loop);
+  node->RedirectChildren(loop->OutTun(1), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 bool VAddLowerLayer::CanApply(const Node *node) const
