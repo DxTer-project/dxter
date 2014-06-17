@@ -94,18 +94,32 @@ void SVMul::Prop()
 
     if (!((DLANode*) Input(0))->IsScalar(InputConnNum(0))) {
       cout << "ERROR: SVMul input 0 is not a scalar\n";
+      throw;
     }
 
-    if (m_layer == LLDLAPRIMITIVELAYER) {
-      if (m_vecType == ROWVECTOR &&
-	  (*GetInputM(1) != 1 || *GetInputN(1) != LLDLA_MU)) {
-	cout << "ERROR: SVMul row vector argument dimensions are incorrect\n";
-      } else if(m_vecType == COLVECTOR &&
-		(*GetInputM(1) != LLDLA_MU || *GetInputN(1) != 1)) {
-	cout << "ERROR: SVMul col vector argument dimensions are incorrect\n";
-      }
-    }
+    VectorOpInputDimensionCheck(1);
+
     m_cost = ZERO;
+  }
+}
+
+void SVMul::VectorOpInputDimensionCheck(unsigned int inputNum)
+{
+  if (m_vecType == ROWVECTOR && *GetInputM(inputNum) != 1) {
+    cout << "ERROR: " << GetType() << " input # " << inputNum << " has more than 1 row\n";
+    throw;
+  } else if (m_vecType == COLVECTOR && *GetInputN(inputNum) != 1) {
+    cout << "ERROR: " << GetType() << " input # " << inputNum  << " has more than 1 column\n";
+  }
+  
+  if (m_layer == LLDLAPRIMITIVELAYER) {
+    if (m_vecType == ROWVECTOR && *GetInputN(inputNum) != LLDLA_MU) {
+      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have LLDLA_MU columns\n";
+      throw;
+    } else if(m_vecType == COLVECTOR && *GetInputM(inputNum) != LLDLA_MU) {
+      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have LLDLA_MU rows\n";
+      throw;
+    }
   }
 }
 
