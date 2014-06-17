@@ -75,7 +75,7 @@ void AddTrans()
   //Changes Gemm with transposition to non-transposed version use Transpose nodes
   Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(LLDLAMIDLAYER), LLDLAPRIMPHASE);
 
-  //Replaces a Gemm node with a PrimitiveGemm node
+  //Replaces a Gemm node with a LLDLAGemm node
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLAPRIMPHASE);
 
   //Lowers the layer tag of a SMMul node that is LLDLA_MU in both dimensions

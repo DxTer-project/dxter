@@ -20,7 +20,7 @@
 */
 
 /*
-  This file defines the PrimitiveGemm class. This class is used in
+  This file defines the LLDLAGemm class. This class is used in
   LLDLA operations to represent multiplication a gemm  whose input's
   row and column dimensions are both equal to mu.
 
@@ -28,7 +28,7 @@
   only in the primitive layer of LLDLA operations and that it has 2
   fields (m_rowStride, m_colStride) which denotes the row and column
   stride of its arguments. Based on these two field's
-  values PrimitiveGemm's PrintCode method generates the appropriate API
+  values LLDLAGemm's PrintCode method generates the appropriate API
   call.
 */
 
@@ -38,10 +38,10 @@
 
 #if DOLLDLA
 
-class PrimitiveGemm : public Gemm
+class LLDLAGemm : public Gemm
 {
  public:
-  PrimitiveGemm(Coef alpha, Coef beta, Type type, Layer layer);
+  LLDLAGemm(Coef alpha, Coef beta, Type type, Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
   virtual Phase MaxPhase() const { return NUMPHASES; }

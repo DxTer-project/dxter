@@ -26,12 +26,12 @@
 
 #if DOLLDLA
 
-PrimitiveGemm::PrimitiveGemm(Coef alpha, Coef beta, Type type, Layer layer)
+LLDLAGemm::LLDLAGemm(Coef alpha, Coef beta, Type type, Layer layer)
   : Gemm(layer, NORMAL, NORMAL, alpha, beta, type)
 {
 }
 
-void PrimitiveGemm::PrintCode(IndStream &out)
+void LLDLAGemm::PrintCode(IndStream &out)
 {
   const DataTypeInfo &inInfo = InputDataType(2);
   const Stride rowStride = inInfo.m_rowStride;
@@ -49,7 +49,7 @@ void PrimitiveGemm::PrintCode(IndStream &out)
   }
 }
 
-void PrimitiveGemm::PrintRowStride(IndStream &out)
+void LLDLAGemm::PrintRowStride(IndStream &out)
 {
   if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
     *out << "row_stride_mmul_2x2_2x2( " <<
@@ -61,13 +61,13 @@ void PrimitiveGemm::PrintRowStride(IndStream &out)
     throw;
 }
 
-void PrimitiveGemm::PrintColStride(IndStream &out)
+void LLDLAGemm::PrintColStride(IndStream &out)
 {
   *out << "COL STRIDE not yet implemented\n";
 }
 
 // Currently only handles the case where alpha = beta = 1.0
-void PrimitiveGemm::PrintGeneralStride(IndStream &out)
+void LLDLAGemm::PrintGeneralStride(IndStream &out)
 {
   if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
     *out << "gen_stride_mmul_2x2_2x2( " <<
@@ -79,41 +79,41 @@ void PrimitiveGemm::PrintGeneralStride(IndStream &out)
     throw;
 }
 
-void PrimitiveGemm::Prop()
+void LLDLAGemm::Prop()
 {
   if (!IsValidCost(m_cost)) {
     Gemm::Prop();
 
     if (m_layer != LLDLAPRIMITIVELAYER) {
-      cout << "ERROR: PrimitiveGemm appears in layer " <<  LayerNumToStr(m_layer) << "\n" ;
+      cout << "ERROR: LLDLAGemm appears in layer " <<  LayerNumToStr(m_layer) << "\n" ;
       throw;
     }
     
     if (*GetInputM(0) != LLDLA_MU || *GetInputN(0) != LLDLA_MU) 
-      cout << "ERROR1: PrimitiveGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
+      cout << "ERROR1: LLDLAGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
 
     if (*GetInputM(1) != LLDLA_MU || *GetInputN(1) != LLDLA_MU) {
       GetInputM(1)->Print();
       cout << endl;
       GetInputN(1)->Print();
-      cout << "ERROR2: PrimitiveGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
+      cout << "ERROR2: LLDLAGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
     }
 
     if (*GetInputM(2) != LLDLA_MU || *GetInputN(2) != LLDLA_MU) 
-      cout << "ERROR3: PrimitiveGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
+      cout << "ERROR3: LLDLAGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
     
     m_cost = ZERO;
   }
 }
 
-Node* PrimitiveGemm::BlankInst()
+Node* LLDLAGemm::BlankInst()
 {
-  return new PrimitiveGemm(COEFONE, COEFONE, REAL, ABSLAYER);
+  return new LLDLAGemm(COEFONE, COEFONE, REAL, ABSLAYER);
 }
 
-NodeType PrimitiveGemm::GetType() const
+NodeType LLDLAGemm::GetType() const
 {
-  return "PrimitiveGemm" + LayerNumToStr(GetLayer());
+  return "LLDLAGemm" + LayerNumToStr(GetLayer());
 }
 
 string LLDLAGemmToPrim::GetType() const
@@ -151,7 +151,7 @@ void LLDLAGemmToPrim::Apply(Node *node) const
   connB = gemm->m_inputs[1];
   connC = gemm->m_inputs[2];
   
-  PrimitiveGemm *prim = new PrimitiveGemm(gemm->m_alpha,
+  LLDLAGemm *prim = new LLDLAGemm(gemm->m_alpha,
 					  gemm->m_beta,
 					  gemm->m_type,
 					  m_toLayer);

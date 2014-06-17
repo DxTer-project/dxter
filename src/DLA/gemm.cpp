@@ -261,7 +261,7 @@ void Gemm::Prop()
     case (LLDLAMIDLAYER):
       m_cost = 0;
     case (LLDLAPRIMITIVELAYER):
-      //m_cost will be set in PrimitiveGemm::Prop
+      //m_cost will be set in LLDLAGemm::Prop
       break;
 #endif
     default:
