@@ -79,22 +79,14 @@ void GemmLoopExp::Apply(Node *node) const
       loop = GemmVar1Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
                           connC->m_n, connC->m_num,
-#if !DOLLDLA
                           gemm->m_transA, gemm->m_transB,
-#else
-			  NORMAL, NORMAL,
-#endif
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
       break;
     case(1):
       loop = GemmVar3Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
                           connC->m_n, connC->m_num,
-#if !DOLLDLA
                           gemm->m_transA, gemm->m_transB,
-#else
-			  NORMAL, NORMAL,
-#endif
                           false,
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
       break;
@@ -112,11 +104,7 @@ void GemmLoopExp::Apply(Node *node) const
       loop = GemmVar2Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
                           connC->m_n, connC->m_num,
-#if !DOLLDLA
                           gemm->m_transA, gemm->m_transB,
-#else
-			  NORMAL, NORMAL,
-#endif
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
       break;
     default:

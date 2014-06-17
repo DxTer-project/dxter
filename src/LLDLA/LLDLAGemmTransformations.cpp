@@ -42,19 +42,21 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   if (!GemmLoopExp::CanApply(node))
     return false;
   const Gemm *gemm = (Gemm*)node;
-  if (gemm->m_transA != NORMAL ||
-      gemm->m_transB != NORMAL)
-    return false;
   switch (m_dim) {
   case (0):
     {
-      return !(*(gemm->GetInputM(0)) <= m_bsSize);
+      return !(*(gemm->GetInputM(2)) <= m_bsSize);
       //DIMM
       break;
     }
   case (1):
     {
-      return !(*(gemm->GetInputN(0)) <= m_bsSize);
+      if (gemm->m_transA == NORMAL)
+	return !(*(gemm->GetInputN(0)) <= m_bsSize);
+      else if (gemm->m_transA != CONJ)
+	return !(*(gemm->GetInputM(0)) <= m_bsSize);
+      else
+	throw;
       //DIMK
       break;
     }

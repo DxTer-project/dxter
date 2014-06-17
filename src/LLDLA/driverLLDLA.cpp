@@ -55,9 +55,6 @@ Trans transA, transB;
 
 void AddTrans()
 {
-  //Changes Gemm with transposition to non-transposed version use Transpose nodes
-  Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(ABSLAYER), LLDLALOOPPHASE);
-
   //Introduces loops in the m, n, and k dimensions, respectively
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
@@ -70,8 +67,13 @@ void AddTrans()
   //Lowers the layer tag of a Gemm node that is LLDLA_MU in all three dimensions
   Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
 
+
   //Lowers the layer tag of a SMMul node that is LLDLA_MU in both dimensions
   Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
+
+
+  //Changes Gemm with transposition to non-transposed version use Transpose nodes
+  Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(LLDLAMIDLAYER), LLDLAPRIMPHASE);
 
   //Replaces a Gemm node with a PrimitiveGemm node
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLAPRIMPHASE);
