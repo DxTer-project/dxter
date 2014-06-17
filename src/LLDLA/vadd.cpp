@@ -20,18 +20,18 @@
 */
 
 #include "LLDLA.h"
-#include "svmul.h"
+#include "vadd.h"
 
 #if DOLLDLA
 
-SVMul::SVMul(VecType vecType, Layer layer, Type type)
+VAdd::VAdd(VecType vecType, Layer layer, Type type)
 {
   m_vecType = vecType;
   m_layer = layer;
   m_type = type;
 }
 
-void SVMul::PrintCode(IndStream &out)
+void VAdd::PrintCode(IndStream &out)
 {
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
@@ -51,64 +51,66 @@ void SVMul::PrintCode(IndStream &out)
   } else {
     *out << "ERROR: BAD STRIDE\n";
   }
-
 }
 
 
-void SVMul::PrintRowStride(IndStream &out)
+void VAdd::PrintRowStride(IndStream &out)
 {
   if (m_vecType == COLVECTOR) {
-    *out << "row_stride_smul_2x1( " <<
+    *out << "row_stride_add_2x1( " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ");\n";
   } else {
-    *out << "row_stride_smul_1x2( " <<
+    *out << "row_stride_add_1x2( " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ");\n";
   }
 }
 
-void SVMul::PrintColStride(IndStream &out)
+void VAdd::PrintColStride(IndStream &out)
 {
   *out << "COL STRIDE not yet implemented\n";
 }
 
-void SVMul::PrintGeneralStride(IndStream &out)
+void VAdd::PrintGeneralStride(IndStream &out)
 {
   if (m_vecType == COLVECTOR) {
-    *out << "gen_stride_smul_2x1( " <<
+    *out << "gen_stride_add_2x1( " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ");\n";
   } else {
-    *out << "gen_stride_smul_1x2( " <<
+    *out << "gen_stride_add_1x2( " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ");\n";
   }
 }
 
-void SVMul::Prop()
+void VAdd::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    DLAOp<2,1>::Prop();
+    DLAOp::Prop();
+    
+    VectorOpInputDimensionCheck(0);
+    VectorOpInputDimensionCheck(1);
 
-    if (!((DLANode*) Input(0))->IsScalar(InputConnNum(0))) {
-      cout << "ERROR: SVMul input 0 is not a scalar\n";
+    if ((*GetInputM(0) != *GetInputM(1)) || (*GetInputN(0) != *GetInputN(1))) {
+      cout << "ERROR: Cannot VAdd two vectors of different dimension\n";
       throw;
     }
 
-    VectorOpInputDimensionCheck(1);
-
     m_cost = ZERO;
   }
+
 }
 
-void SVMul::VectorOpInputDimensionCheck(unsigned int inputNum)
+void VAdd::VectorOpInputDimensionCheck(unsigned int inputNum)
 {
   if (m_vecType == ROWVECTOR && *GetInputM(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum << " has more than 1 row\n";
     throw;
   } else if (m_vecType == COLVECTOR && *GetInputN(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum  << " has more than 1 column\n";
+    throw;
   }
   
   if (m_layer == LLDLAPRIMITIVELAYER) {
@@ -122,128 +124,105 @@ void SVMul::VectorOpInputDimensionCheck(unsigned int inputNum)
   }
 }
 
-Node* SVMul::BlankInst()
+Node* VAdd::BlankInst()
 {
-  return new SVMul(ROWVECTOR, LLDLAPRIMITIVELAYER, REAL);
+  return new VAdd(ROWVECTOR, LLDLAPRIMITIVELAYER, REAL);
 }
 
-NodeType SVMul::GetType() const
+NodeType VAdd::GetType() const
 {
-  return "SVMul" +  LayerNumToStr(GetLayer());
+  return "VADD" + LayerNumToStr(GetLayer());
 }
 
-void SVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
-{
-  DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
-  const SVMul *rhs = (SVMul*)orig;
-  m_type = rhs->m_type;
-  m_vecType = rhs->m_vecType;
-}
-
-Phase SVMul::MaxPhase() const 
-{ 
-  switch (m_layer)
-    { 
-    case(ABSLAYER):
-      return LLDLALOOPPHASE;
-    case(LLDLAMIDLAYER):
-      return LLDLAPRIMPHASE;
-    case (LLDLAPRIMITIVELAYER):
-      return NUMPHASES; 
-    default:
-      throw;
-    }
-}
-
-string SVMulLoopRef::GetType() const
+string VAddLoopRef::GetType() const
 {
   switch(m_vtype)
     {
     case(ROWVECTOR):
-      return "SVMulLoopRef - row vector";
+      return "VAddLoopRef - row vector";
     case(COLVECTOR):
-      return "SVMulLoopRef - column vector";
+      return "VAddLoopRef - column vector";
     default:
       throw;
     }
 }
 
-
-bool SVMulLoopRef::CanApply(const Node *node) const
+bool VAddLoopRef::CanApply(const Node *node) const
 {
-  const SVMul *svmul = (SVMul*) node;
-  if (svmul->GetLayer() != m_fromLayer) {
+  const VAdd *vadd = (VAdd*) node;
+  if (vadd->GetLayer() != m_fromLayer) {
     return false;
   }
   if (m_vtype == ROWVECTOR) {
-    return !(*(svmul->GetInputN(1)) <= BSSizeToSize(m_bs));
-  } 
-  else if (m_vtype == COLVECTOR) {
-    return !(*(svmul->GetInputM(1)) <= BSSizeToSize(m_bs));
-  } 
-  else {
+    if (!(*(vadd->GetInputN(0)) <= BSSizeToSize(m_bs))
+	&& !(*(vadd->GetInputN(1)) <= BSSizeToSize(m_bs))) {
+      return true;
+    } else {
+      return false;
+    }
+  } else if (m_vtype == COLVECTOR) {
+    if (!(*(vadd->GetInputM(0)) <= BSSizeToSize(m_bs))
+	&& !(*(vadd->GetInputM(1)) <= BSSizeToSize(m_bs))) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
     throw;
   }
   return false;
 }
 
-void SVMulLoopRef::Apply(Node *node) const
+void VAddLoopRef::Apply(Node *node) const
 {
-  SVMul *svmul = (SVMul*) node;
+  VAdd *vadd = (VAdd*) node;
 
-  Split *split = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
-  split->AddInput(svmul->Input(1), svmul->InputConnNum(1));
+  Split *split1 = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  split1->AddInput(vadd->Input(1), vadd->InputConnNum(1));
 
+  Split *split0 = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  split0->AddInput(vadd->Input(0), vadd->InputConnNum(0));
+
+  split0->SetAllStats(FULLUP);
   if (m_vtype == COLVECTOR) {
-    split->SetUpStats(FULLUP, FULLUP,
-		      NOTUP, NOTUP);		     
+    split1->SetUpStats(FULLUP, FULLUP,
+		      NOTUP, NOTUP);
   } else {
-    split->SetUpStats(FULLUP, NOTUP,
+    split1->SetUpStats(FULLUP, NOTUP,
 		       FULLUP, NOTUP);
   }
 
-  split->SetIndepIters();
+  split0->SetIndepIters();
+  split1->SetIndepIters();
 
-  LoopTunnel *scalarTun = new LoopTunnel(POSSTUNIN);
-  scalarTun->AddInput(svmul->Input(0),svmul->InputConnNum(0));
-  scalarTun->SetAllStats(FULLUP);
-  scalarTun->SetIndepIters();
+  VAdd *newVAdd = new VAdd(vadd->m_vecType, vadd->m_layer, vadd->m_type);
+  newVAdd->SetLayer(m_toLayer);
 
-  SVMul *newMul = new SVMul(svmul->m_vecType, svmul->m_layer, svmul->m_type);
-  newMul->SetLayer(m_toLayer);
+  newVAdd->AddInput(split0, 1);
+  newVAdd->AddInput(split1, 1);
 
-  newMul->AddInput(scalarTun, 0);
-  newMul->AddInput(split, 1);
+  Combine *com0 = split0->CreateMatchingCombine(0);
+  Combine *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
 
-  LoopTunnel *scalarTunOut = new LoopTunnel(POSSTUNOUT);
-  scalarTunOut->AddInput(scalarTun, 0);
-  scalarTunOut->AddInput(scalarTun, 0);
-  scalarTunOut->CopyTunnelInfo(scalarTun);
+  Poss *loopPoss = new Poss(2, com0, com1);
 
-  Combine *com = split->CreateMatchingCombine(1, 
-					      1, newMul, 0);
-  
-  Poss *loopPoss = new Poss(2, scalarTunOut, com);
-  
   Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
-  // Row vectors are partitioned in the N dimension, column vectors in the M dimension
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
   
   node->m_poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
-
 }
 
-bool SVMulLowerLayer::CanApply(const Node *node) const
+bool VAddLowerLayer::CanApply(const Node *node) const
 {
-  if (node->GetNodeClass() == SVMul::GetClass()) {
-    const SVMul *smul = (SVMul*) node;
-    if (smul->GetLayer() != m_fromLayer) {
+  if (node->GetNodeClass() == VAdd::GetClass()) {
+    const VAdd *vadd = (VAdd*) node;
+    if (vadd->GetLayer() != m_fromLayer) {
       return false;
     }
-    if (*(smul->GetInputM(1)) <= m_bs &&
-	*(smul->GetInputN(1)) <= m_bs) {
+    if (*(vadd->GetInputM(1)) <= m_bs &&
+	*(vadd->GetInputN(1)) <= m_bs) {
       return true;
     } else {
       return false;
@@ -254,15 +233,15 @@ bool SVMulLowerLayer::CanApply(const Node *node) const
   }
 }
 
-void SVMulLowerLayer::Apply(Node *node) const
+void VAddLowerLayer::Apply(Node *node) const
 {
-  SVMul *svmul = (SVMul*) node;
-  svmul->SetLayer(m_toLayer);
+  VAdd *vadd = (VAdd*) node;
+  vadd->SetLayer(m_toLayer);
 }
 
-string SVMulLowerLayer::GetType() const
+string VAddLowerLayer::GetType() const
 {
-  return "SVMul lower layer " + LayerNumToStr(m_fromLayer)
+  return "VAdd lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
 }
 

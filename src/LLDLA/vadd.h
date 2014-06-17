@@ -19,29 +19,26 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "DLAOp.h"
-#include "loopSupport.h"
 #include "LLDLA.h"
+#include "loopSupport.h"
 
 #if DOLLDLA
 
-class SVMul : public DLAOp<2, 1>
+class VAdd : public DLAOp<2, 1>
 {
  public:
   Type m_type;
   VecType m_vecType;
 
-  SVMul(VecType vecType, Layer layer, Type type);
+  VAdd(VecType vecType, Layer layer, Type type);
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
-  virtual Phase MaxPhase() const;
+  virtual Phase MaxPhase() const { return NUMPHASES; }
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 
   static ClassType GetClass() { return "LLDLASVMul"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -53,16 +50,16 @@ class SVMul : public DLAOp<2, 1>
   void PrintColStride(IndStream &out);
   void PrintGeneralStride(IndStream &out);
   void VectorOpInputDimensionCheck(unsigned int inputNum);
-
 };
 
-class SVMulLoopRef : public SingleTrans
+
+class VAddLoopRef : SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   VecType m_vtype;
   BSSize m_bs;
- SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs) 
+ VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vtype(vtype), m_bs(bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
@@ -70,17 +67,19 @@ class SVMulLoopRef : public SingleTrans
   virtual bool IsRef() const { return true; }
 };
 
-class SVMulLowerLayer : public SingleTrans
+
+class VAddLowerLayer : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- SVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
+ VAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
    :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+
 
 #endif // DOLLDLA
