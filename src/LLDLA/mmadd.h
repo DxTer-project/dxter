@@ -20,24 +20,25 @@
 */
 
 #include "DLAOp.h"
+#include "LLDLA.h"
 #include "loopSupport.h"
 
 #if DOLLDLA
 
-class SMMul : public DLAOp<2, 1>
+class MAdd : public DLAOp<2, 1>
 {
  public:
   Type m_type;
-  SMMul(Type type, Layer layer);
 
+  MAdd(Type type, Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
-  virtual Phase MaxPhase() const;
+  virtual Phase MaxPhase() const { return NUMPHASES; }
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  static ClassType GetClass() { return "LLDLAPrimSMul"; }
+  static ClassType GetClass() { return "LLDLAPrimGemm"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
 
   virtual NodeType GetType() const;
@@ -46,28 +47,29 @@ class SMMul : public DLAOp<2, 1>
   void PrintRowStride(IndStream &out);
   void PrintColStride(IndStream &out);
   void PrintGeneralStride(IndStream &out);
+
 };
 
-class SMulLoopRef : public SingleTrans
+class MAddLoopRef : SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
   BSSize m_bs;
- SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
+ MAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs) 
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vtype(vtype), m_bs(bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
+  virtual bool IsRef() const { return true; }
 };
 
-class SMulLowerLayer : public SingleTrans
+class MAddLowerLayer : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- SMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
+ MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
    :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
@@ -75,4 +77,5 @@ class SMulLowerLayer : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
-#endif // DOLLDLA
+
+#endif //DOLLDLA

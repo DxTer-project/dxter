@@ -100,7 +100,6 @@ void VAdd::Prop()
 
     m_cost = ZERO;
   }
-
 }
 
 void VAdd::VectorOpInputDimensionCheck(unsigned int inputNum)
