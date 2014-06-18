@@ -102,6 +102,21 @@ NodeType MAdd::GetType() const
   return "MAdd" + LayerNumToStr(GetLayer());
 }
 
+Phase MAdd::MaxPhase() const
+{
+  switch (m_layer)
+    { 
+    case(ABSLAYER):
+      return LLDLALOOPPHASE;
+    case(LLDLAMIDLAYER):
+      return LLDLAPRIMPHASE;
+    case (LLDLAPRIMITIVELAYER):
+      return NUMPHASES; 
+    default:
+      throw;
+    }
+}
+
 string MAddLoopRef::GetType() const
 {
   return "MAdd";
@@ -134,9 +149,11 @@ void MAddLoopRef::Apply(Node *node) const
 
   split0->SetAllStats(FULLUP);
   if (m_dim == DIMM) {
-    split1->SetUpStats(FULLUP, FULLUP, NOTUP, NOTUP);
+    split1->SetUpStats(FULLUP, FULLUP,
+		       NOTUP, NOTUP);
   } else {
-    split1->SetUpStats(FULLUP, NOTUP, FULLUP, NOTUP);
+    split1->SetUpStats(FULLUP, NOTUP,
+		       FULLUP, NOTUP);
   }
 
   split0->SetIndepIters();
@@ -146,8 +163,8 @@ void MAddLoopRef::Apply(Node *node) const
   newMAdd->AddInput(split0, 1);
   newMAdd->AddInput(split1, 1);
 
-  Combine *com0 = split->CreateMatchingCombine(0);
-  Combine *com1 = split->CreateMatchingCombine(1, 1, newMAdd, 0);
+  Combine *com0 = split0->CreateMatchingCombine(0);
+  Combine *com1 = split1->CreateMatchingCombine(1, 1, newMAdd, 0);
 
   Poss *loopPoss = new Poss(2, com0, com1);
 
@@ -157,6 +174,11 @@ void MAddLoopRef::Apply(Node *node) const
   node->m_poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+string MAddToVAddLoopRef::GetType() const
+{
+  return "MAddToVAddLoopRef";
 }
 
 bool MAddLowerLayer::CanApply(const Node *node) const

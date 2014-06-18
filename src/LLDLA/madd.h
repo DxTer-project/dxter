@@ -33,7 +33,7 @@ class MAdd : public DLAOp<2, 1>
   MAdd(Type type, Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
-  virtual Phase MaxPhase() const { return NUMPHASES; }
+  virtual Phase MaxPhase() const;
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -64,6 +64,22 @@ class MAddLoopRef : SingleTrans
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const { return true; }
 };
+
+class MAddToVAddLoopRef : SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  DimName m_dim;
+  VecType m_vtype;
+  BSSize m_bs;
+ MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs) 
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vtype(vtype), m_bs(bs) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const { return true; }
+};
+
 
 class MAddLowerLayer : public SingleTrans
 {
