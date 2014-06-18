@@ -179,6 +179,8 @@ bool PSet::operator==(const PSet &rhs) const
       if (!rhs.IsLoop())
         return false;
       else {
+	if (((Loop*)this)->m_dim != ((Loop*)(&rhs))->m_dim)
+	  return false;
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
           const LoopTunnel *tun1 = (LoopTunnel*)(m_inTuns[i]);
           const LoopTunnel *tun2 = (LoopTunnel*)(rhs.m_inTuns[i]);
