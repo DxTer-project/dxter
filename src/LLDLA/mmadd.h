@@ -55,6 +55,7 @@ class MAddLoopRef : SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
+  VecType m_vtype;
   BSSize m_bs;
  MAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs) 
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vtype(vtype), m_bs(bs) {}

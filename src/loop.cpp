@@ -690,6 +690,29 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   if (m_bsSize != USELLDLAMU)
     throw;
   Split *split = GetControl();
+  switch(m_dim) 
+    {
+    case (DIMM):
+      {
+	out.Indent();
+	*out << "//Dim-m loop\n";;
+	break;
+      }
+    case (DIMN):
+      {
+	out.Indent();
+	*out << "//Dim-n loop\n";
+	break;
+      }
+    case (DIMK):
+      {
+	out.Indent();
+	*out << "//Dim-k loop\n";
+	break;
+    }
+    default:
+      break;
+    }
   out.Indent();
   *out << "while ( " << LLDLAPartVarName(split->GetInputNameStr(0),1) 
        << " < " 

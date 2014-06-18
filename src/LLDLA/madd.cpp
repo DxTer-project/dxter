@@ -113,7 +113,12 @@ bool MAddLoopRef::CanApply(const Node *node) const
   if (madd->GetLayer() != m_fromLayer) {
     return false;
   }
-  
+  throw; // not completed
+}
+
+void MAddLoopRef::Apply(Node *node) const
+{
+  throw; // not implemented
 }
 
 bool MAddLowerLayer::CanApply(const Node *node) const
