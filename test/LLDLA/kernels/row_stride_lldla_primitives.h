@@ -126,8 +126,7 @@ inline void row_stride_mmul_2x2_2x1(
 
 	v2df_t
 		a_00_01_vreg, a_10_11_vreg,
-		b_00_10_vreg,
-		c_00_10_vreg;
+	  b_00_10_vreg;
 
 	a_00_01_vreg.v = VEC_PD_LOAD(&A(0, 0));
 	a_10_11_vreg.v = VEC_PD_LOAD(&A(1, 0));
