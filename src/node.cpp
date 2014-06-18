@@ -195,9 +195,6 @@ bool Node::operator==(const Node &rhs) const
         PSet *set2 = tun2->m_pset;
         if (!(*set1 == *set2))
           return false;
-        if (set1->m_inTuns.size() != set2->m_inTuns.size()) {
-          return false;
-        }
         for(unsigned int i = 0; i < set1->m_inTuns.size(); ++i) {
           if (! (*(set1->m_inTuns[i]) == *(set2->m_inTuns[i])))
             return false;
