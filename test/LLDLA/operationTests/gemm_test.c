@@ -33,7 +33,7 @@ void dxt_gemm(int CNumCols, int CNumRows, int ANumCols,
 	//**** (out of 1)
 	//------------------------------------//
 
-	//	row_stride_mmul_2x2_2x2( A11, ARowStride, B11, BRowStride, C11, CRowStride );
+	row_stride_mmul_2x2_2x2( A11, ARowStride, B11, BRowStride, C11, CRowStride );
 
 	//------------------------------------//
 
@@ -81,9 +81,9 @@ int main() {
   int n = m;
   int k = m;
   
-  int a_rs = 3;
-  int b_rs = 2;
-  int c_rs = 5;
+  int a_rs = 6;
+  int b_rs = 8;
+  int c_rs = 4;
 
   // Do operations and compare results
   dxt_gemm(m, n, k, a_buf, a_rs, b_buf, b_rs, c_buf, c_rs);
