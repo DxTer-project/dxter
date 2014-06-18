@@ -67,6 +67,7 @@ enum BSSize {
 #elif DOLLDLA
   USELLDLAMU,
 #endif
+  USEUNITBS,
   BADBSSIZE 
 };
 

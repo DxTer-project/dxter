@@ -231,7 +231,7 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   
   Poss *loopPoss = new Poss(2, com0, com1);
 
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USEUNITBLOCKSIZE);
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, USEUNITBS);
   loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
 
   node->m_poss->AddLoop(loop);
