@@ -54,8 +54,11 @@ void LLDLAGemm::PrintRowStride(IndStream &out)
   if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
     *out << "row_stride_mmul_2x2_2x2( " <<
       GetInputName(0).str() << ", " <<
+      InputDataType(0).m_rowStrideVar << ", " << 
       GetInputName(1).str() << ", " <<
-      GetInputName(2).str() << ");\n";
+      InputDataType(1).m_rowStrideVar << ", " <<
+      GetInputName(2).str() << ", " <<
+      InputDataType(2).m_rowStrideVar << ");\n";
   }
   else
     throw;
@@ -72,8 +75,14 @@ void LLDLAGemm::PrintGeneralStride(IndStream &out)
   if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
     *out << "gen_stride_mmul_2x2_2x2( " <<
       GetInputName(0).str() << ", " <<
+      InputDataType(0).m_rowStrideVar << ", " <<
+      InputDataType(0).m_colStrideVar << ", " <<
       GetInputName(1).str() << ", " <<
-      GetInputName(2).str() << ");\n";
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << ", " <<
+      GetInputName(2).str() << ", " <<
+      InputDataType(2).m_rowStrideVar << ", " <<
+      InputDataType(2).m_colStrideVar << ");\n";
   }
   else
     throw;

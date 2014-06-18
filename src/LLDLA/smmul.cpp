@@ -56,7 +56,8 @@ void SMMul::PrintRowStride(IndStream &out)
 {
   *out << "row_stride_smul_2x2( " <<
     GetInputName(0).str() << ", " <<
-    GetInputName(1).str() << ");\n";
+    GetInputName(1).str() << ", " <<
+    InputDataType(1).m_rowStrideVar << ");\n";
 }
 
 void SMMul::PrintColStride(IndStream &out)
@@ -66,9 +67,11 @@ void SMMul::PrintColStride(IndStream &out)
 
 void SMMul::PrintGeneralStride(IndStream &out)
 {
-  *out << "gen_stride_smul_2x2( " <<
+  *out << "gen_stride_mmul_2x2_2x2( " <<
     GetInputName(0).str() << ", " <<
-    GetInputName(1).str() << ");\n";
+    GetInputName(1).str() << ", " <<
+    InputDataType(1).m_rowStrideVar << ", " <<
+    InputDataType(1).m_colStrideVar << ");\n";
 }
 
 
