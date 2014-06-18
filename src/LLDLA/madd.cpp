@@ -20,6 +20,7 @@
 */
 
 #include "madd.h"
+#include "vadd.h"
 
 #if DOLLDLA
 
@@ -179,6 +180,63 @@ void MAddLoopRef::Apply(Node *node) const
 string MAddToVAddLoopRef::GetType() const
 {
   return "MAddToVAddLoopRef";
+}
+
+bool MAddToVAddLoopRef::CanApply(const Node *node) const
+{
+  const MAdd *madd = (MAdd*) node;
+  if (madd->GetLayer() != m_fromLayer) {
+    return false;
+  }
+  if (m_dim == DIMM) {
+    return (*(madd->GetInputN(0)) == LLDLA_MU) && (*(madd->GetInputN(1)) == LLDLA_MU) &&
+      !(*(madd->GetInputM(0)) <= LLDLA_MU) && !(*(madd->GetInputM(1)) <= LLDLA_MU);
+  } else if (m_dim == DIMN) {
+    return (*(madd->GetInputM(0)) == LLDLA_MU) && (*(madd->GetInputM(0)) == LLDLA_MU) &&
+      !(*(madd->GetInputN(0)) <= LLDLA_MU) && !(*(madd->GetInputN(1)) <= LLDLA_MU);
+  } else {
+    return false;
+  }  
+}
+
+void MAddToVAddLoopRef::Apply(Node *node) const
+{
+  MAdd *madd = (MAdd*) node;
+
+  Split *split0 = new Split(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  split0->AddInput(madd->Input(0), madd->InputConnNum(0));
+
+  Split *split1 = new Split(m_dim == DIMN ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  split1->AddInput(madd->Input(1), madd->InputConnNum(1));
+
+  split0->SetAllStats(FULLUP);
+  if (m_dim == DIMM) {
+    split1->SetUpStats(FULLUP, FULLUP,
+		       NOTUP, NOTUP);
+  } else {
+    split1->SetUpStats(FULLUP, NOTUP,
+		       FULLUP, NOTUP);
+  }
+
+  split0->SetIndepIters();
+  split1->SetIndepIters();
+
+  VAdd *newVAdd = new VAdd(m_dim == DIMM ? ROWVECTOR : COLVECTOR, m_toLayer, madd->m_type);
+  newVAdd->AddInput(split0, 1);
+  newVAdd->AddInput(split1, 1);
+
+  Combine *com0 = split0->CreateMatchingCombine(0);
+  Combine *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
+
+  
+  Poss *loopPoss = new Poss(2, com0, com1);
+
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
+
+  node->m_poss->AddLoop(loop);
+  node->RedirectChildren(loop->OutTun(1), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 bool MAddLowerLayer::CanApply(const Node *node) const
