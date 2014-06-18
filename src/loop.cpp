@@ -54,6 +54,8 @@ Size BSSizeToSize(BSSize size)
   case (USELLDLAMU):
     return LLDLA_MU;
 #endif
+  case (USEUNITBS):
+    return ONE;
     default:
       throw;
   }
