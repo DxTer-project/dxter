@@ -37,6 +37,7 @@ class PSet
   bool m_isTopLevel;
   Poss *m_ownerPoss;
   PossMMapIter m_currPoss;
+  string m_functionality;
   PSet();
   PSet(Poss *poss);
   virtual ~PSet();
@@ -97,5 +98,7 @@ class PSet
   bool RemoveParallelization(Comm comm);
   void ReplaceAllComms(Comm comm1, Comm comm2);
 #endif //DOBLIS
+
+  const string& GetFunctionalityString() const;
 };
 

@@ -32,13 +32,18 @@
 extern unsigned int M_phase;
 
 PSet::PSet()
-  : m_isTopLevel(false), m_ownerPoss(NULL)
+  : m_isTopLevel(false), m_ownerPoss(NULL), m_functionality()
 {
 }
 
 PSet::PSet(Poss *poss)
-  : m_isTopLevel(false), m_ownerPoss(NULL)
+  : m_isTopLevel(false), m_ownerPoss(NULL),
+    m_functionality(poss->GetFunctionalityString())
 {
+  if (m_functionality.empty()) {
+    cout << "starting PSet without functionality\n";
+    throw;
+  }
   //Make single tunnels with multiple inputs/outputs into individual tunnels
   //Poss mergin with multiple intput/output tunnels is very buggy
   poss->ExpandTunnels();
@@ -122,6 +127,12 @@ void PSet::AddPossesOrDispose(PossMMap &mmap, PossMMap *added)
 
 void PSet::AddPoss(Poss *poss)
 {
+  if (m_functionality.empty()) {
+    if (m_posses.size())
+      throw;
+    else
+      m_functionality = poss->GetFunctionalityString();
+  }
   if (m_inTuns.size() != poss->m_inTuns.size()) {
     cout << "New poss doesn't have same number of inputs\n";
     throw;
@@ -236,6 +247,9 @@ void PSet::Prop()
   if(m_hasProped)
     return;
 
+  if (m_functionality.empty())
+    throw;
+
   //BAM Par + check for > 1
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
     Node *in = InTun(i);
@@ -296,11 +310,18 @@ void PSet::Prop()
 	++iter;
 	++j;
       }
+
+//       if ((*iter).first != (*iter).second->GetHash()) {
+// 	cout << "Bad hash in prop\n";
+// 	throw;
+//       }
+
       (*iter).second->Prop();
     }
   }
+
   iter = m_posses.begin();
-  while (iter != m_posses.end()) {
+  do {
     Poss *poss = (*iter).second;
     if (poss->GetHash() != (*iter).first) {
       m_posses.erase(iter);
@@ -322,7 +343,7 @@ void PSet::Prop()
     else {
       ++iter;
     }
-  }
+  } while (iter != m_posses.end());
 
   iter = m_posses.begin();
   while (iter != m_posses.end()) {
@@ -411,7 +432,7 @@ Node* PSet::OutTun(unsigned int num) const
 
 void PSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
 {
-  if (m_posses.size() <= 1) {
+  if (removeFromMyList && m_posses.size() <= 1) {
     if (m_posses.size()) {
       poss->ForcePrint();
     }
@@ -575,6 +596,7 @@ bool PSet::GlobalSimplification(const TransMap &globalSimplifiers, const TransMa
 void PSet::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
 {
   m_isTopLevel = orig->m_isTopLevel;
+  m_functionality = orig->m_functionality;
   NodeVecConstIter iter  = orig->m_inTuns.begin();
   for (; iter != orig->m_inTuns.end(); ++iter) {
     PossTunnel *tun = (PossTunnel*)(map[*iter]);
@@ -810,7 +832,23 @@ void PSet::Simplify(const TransMap &simplifiers)
     Poss *poss = (*iter).second;
     if (poss->GetHash() != (*iter).first) {
       m_posses.erase(iter);
-      m_posses.insert(PossMMapPair(poss->GetHash(),poss));
+
+      bool existing = false;
+      PossMMapRangePair pair = m_posses.equal_range(poss->GetHash());
+      for( ; !existing && pair.first != pair.second; ++pair.first) {
+	if (*((*(pair.first)).second) == *poss) {
+	  RemoveAndDeletePoss(poss, false);
+	  existing = true;
+	}
+      }
+
+      if (!existing)
+	m_posses.insert(PossMMapPair(poss->GetHash(),poss));
+      else {
+	if (m_posses.size() == 0)
+	  throw;
+      }
+
       iter = m_posses.begin();
     }
     else
@@ -1750,3 +1788,11 @@ Comm PSet::ParallelismWithinCurrentPosses() const
 #endif
 }
 #endif //DOBLIS
+
+const string& PSet::GetFunctionalityString() const
+{
+  if (m_functionality.empty())
+    throw;
+  else
+    return m_functionality;
+}

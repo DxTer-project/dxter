@@ -1772,6 +1772,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   
   NodeMap tunMap;
   Loop *newSet = (Loop*)leftSet->GetNewInst();
+  newSet->m_functionality = leftSet->m_functionality + rightSet->m_functionality;
 #if TWOD
   if (leftSet->m_dim == rightSet->m_dim)
     newSet->SetDimName(leftSet->m_dim);
@@ -2724,6 +2725,16 @@ bool Poss::IncrementCurrPoss()
   return true;
 }
 
+string Poss::GetFunctionalityString() const
+{
+  string str;
+  NodeVecConstIter iter = m_outTuns.begin();
+  for(; iter != m_outTuns.end(); ++iter) {
+    const Node *node = *iter;
+    str += node->GetFunctionalityString();
+  }
+  return str;
+}
 
 size_t Poss::GetHash()
 {
@@ -2731,10 +2742,7 @@ size_t Poss::GetHash()
   if (m_hashValid)
     return m_hash;
   else {
-    m_hash = m_sets.size();
-    for(unsigned int i = 0; i < m_possNodes.size(); ++i) {
-      m_hash += hasher(m_possNodes[i]->GetType());
-    }
+    m_hash = hasher(GetFunctionalityString());
     m_hashValid = true;
     return m_hash;
   }

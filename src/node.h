@@ -205,7 +205,8 @@ class Node
 
   virtual const DataTypeInfo& DataType(unsigned int num) const = 0;
   virtual const DataTypeInfo& InputDataType(unsigned int num) const;
-    
+
+  string GetFunctionalityString() const;
 };
 
 void FullyFlatten(const NodeVec &vec, ofstream &out);

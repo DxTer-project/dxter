@@ -100,6 +100,7 @@ class Poss
   virtual void ClearNodesPrinted();
   void ClearFullyExpanded();
   virtual void ClearPrinted();
+  string GetFunctionalityString() const;
   void GetTransVec(TransVec &transVec) const;
   void GetCurrTransVec(TransVec &transVec) const;
   unsigned int TotalCount() const;
