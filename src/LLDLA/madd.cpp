@@ -19,7 +19,7 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "mmadd.h"
+#include "madd.h"
 
 #if DOLLDLA
 
@@ -113,12 +113,50 @@ bool MAddLoopRef::CanApply(const Node *node) const
   if (madd->GetLayer() != m_fromLayer) {
     return false;
   }
-  throw; // not completed
+  if (m_dim == DIMM) {
+    return !(*(madd->GetInputM(0)) <= m_bs) && !(*(madd->GetInputM(1)) <= m_bs);
+  } else if (m_dim == DIMN) {
+    return !(*(madd->GetInputN(0)) <= m_bs) && !(*(madd->GetInputN(1)) <= m_bs);
+  } else {
+    return false;
+  }
 }
 
 void MAddLoopRef::Apply(Node *node) const
 {
-  throw; // not implemented
+  MAdd *madd = (MAdd*) node;
+  
+  Split *split0 = new Split(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  split0->AddInput(madd->Input(0), madd->InputConnNum(0));
+
+  Split *split1 = new Split(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  split1->AddInput(madd->Input(1), madd->InputConnNum(1));
+
+  split0->SetAllStats(FULLUP);
+  if (m_dim == DIMM) {
+    split1->SetUpStats(FULLUP, FULLUP, NOTUP, NOTUP);
+  } else {
+    split1->SetUpStats(FULLUP, NOTUP, FULLUP, NOTUP);
+  }
+
+  split0->SetIndepIters();
+  split1->SetIndepIters();
+
+  MAdd *newMAdd = new MAdd(madd->m_type, m_toLayer);
+  newMAdd->AddInput(split0, 1);
+  newMAdd->AddInput(split1, 1);
+
+  Combine *com0 = split->CreateMatchingCombine(0);
+  Combine *com1 = split->CreateMatchingCombine(1, 1, newMAdd, 0);
+
+  Poss *loopPoss = new Poss(2, com0, com1);
+
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
+
+  node->m_poss->AddLoop(loop);
+  node->RedirectChildren(loop->OutTun(1), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 bool MAddLowerLayer::CanApply(const Node *node) const
