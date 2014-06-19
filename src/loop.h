@@ -82,6 +82,12 @@ class LoopTunnel;
 
 class Loop : public PSet
 {
+ private:
+#if TWOD
+  DimName m_dim;
+#endif
+
+ public:
   //  typedef int Size;
   LoopType m_type;
   static int M_currLabel;
@@ -90,9 +96,6 @@ class Loop : public PSet
   BSSize m_bsSize;
 #if DOBLIS
   Comm m_comm;
-#endif
-#if TWOD
-  DimName m_dim;
 #endif
   
   Loop();
@@ -116,7 +119,8 @@ class Loop : public PSet
   LoopTunnel* CreateNewLoopTunnels(Node *input, unsigned int num, Poss *possToCareAbout, UpStat stat);
   void TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun);
 #if TWOD
-  inline void SetDimName(DimName dim) {m_dim = dim;}
+  void SetDimName(DimName dim);
+  DimName GetDimName() {return m_dim;}
 #endif
   unsigned int LoopLevel() const;
 

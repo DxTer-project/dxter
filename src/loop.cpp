@@ -256,7 +256,6 @@ void Loop::Prop()
 
 bool Loop::CanMerge(PSet *pset) const
 {
-  //  return false;
   if (!pset->IsLoop())
     return false;
   if (m_bsSize != ((Loop*)pset)->m_bsSize)
@@ -1253,3 +1252,10 @@ bool Loop::HasIndepIters() const
 }
 #endif
 
+#if TWOD
+ void Loop::SetDimName(DimName dim)
+ {
+   m_functionality += (char)(48+dim);
+   m_dim = dim;
+ }
+#endif
