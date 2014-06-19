@@ -11,57 +11,57 @@ void dxt_gemm(int CNumCols, int CNumRows, int ANumCols,
   double b = 1.0;
   double *beta = &b;
   double *A1, *B1, *C1, *A11, *B11, *C11;
+  //**** (out of 4)
+  //------------------------------------//
 
   B1 = B;
-    C1 = C;
-    //Dim-n loop
-    while ( C1 < (C + CNumCols) )  {
-      //**** (out of 2)
+  C1 = C;
+  //Dim-n loop
+  while ( C1 < (C + CNumCols) )  {
+    //**** (out of 2)
+    //------------------------------------//
+
+    A1 = A;
+    C11 = C1;
+    //Dim-m loop
+    while ( C11 < (C1 + CNumRows * CRowStride) )  {
+      //**** (out of 1)
       //------------------------------------//
 
-      A1 = A;
-      C11 = C1;
-      //Dim-m loop
-      while ( C11 < (C1 + CNumRows * CRowStride) )  {
+      row_stride_smul_2x2( beta, C11, CRowStride);
+      A11 = A1;
+      B11 = B1;
+      //Dim-k loop
+      while ( A11 < (A1 + ANumCols) )  {
 	//**** (out of 1)
 	//------------------------------------//
 
-	row_stride_smul_2x2( beta, C11, CRowStride);
-	A11 = A1;
-	B11 = B1;
-	//Dim-k loop
-	while ( A11 < (A1 + ANumCols) )  {
-	  //**** (out of 1)
-	  //------------------------------------//
-
-	  row_stride_mmul_2x2_2x2( A11, ARowStride, B11, BRowStride, C11, CRowStride);
-
-	  //------------------------------------//
-
-	  //****
-	  A11 += MUVALUE;
-	  B11 += BRowStride * MUVALUE;
-	}
+	row_stride_mmul_2x2_2x2( A11, ARowStride, B11, BRowStride, C11, CRowStride);
 
 	//------------------------------------//
 
 	//****
-	A1 += ARowStride * MUVALUE;
-	C11 += CRowStride * MUVALUE;
+	A11 += MUVALUE;
+	B11 += BRowStride * MUVALUE;
       }
 
       //------------------------------------//
 
       //****
-      B1 += MUVALUE;
-      C1 += MUVALUE;
+      A1 += ARowStride * MUVALUE;
+      C11 += CRowStride * MUVALUE;
     }
+
+    //------------------------------------//
+
+    //****
+    B1 += MUVALUE;
+    C1 += MUVALUE;
+  }
 
   //------------------------------------//
 
   //****
-
-
 
 }
 
