@@ -489,6 +489,20 @@ void Gemm::PrintCode(IndStream &out)
       throw;
     
   }
+#elif DOLLDLA
+  else if (m_layer == ABSLAYER) {
+    out.Indent();
+    *out << "AbsGemm("
+	 << GetInputName(0).str() << ", " << GetInputName(1).str() << ", "
+	 << GetInputName(2).str() << ")\n";
+  }
+  else if (m_layer == LLDLAMIDLAYER) {
+    out.Indent();
+    *out << "MidGemm("
+	 << GetInputName(0).str() << ", " << GetInputName(1).str() << ", "
+	 << GetInputName(2).str() << ")\n";
+  }
+
 #endif
   else {
     throw;
