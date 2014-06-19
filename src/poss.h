@@ -121,6 +121,7 @@ class Poss
   void ClearCurrPoss();
   bool IncrementCurrPoss();
 
+  static size_t Hash(const string &str);
   size_t GetHash();
   virtual void InvalidateHash() {m_hashValid=false;}
 

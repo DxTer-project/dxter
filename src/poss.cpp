@@ -289,8 +289,9 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging)
 bool Poss::operator==(Poss &rhs)
 {
   Poss &poss = (Poss&)rhs;
-  if (poss.GetHash() != GetHash())
+  if (poss.GetHash() != GetHash()) {
     return false;
+  }
   if (m_possNodes.size() != poss.m_possNodes.size()
       || m_inTuns.size() != poss.m_inTuns.size()
       || m_outTuns.size() != poss.m_outTuns.size()
@@ -1776,8 +1777,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   Loop *newSet = (Loop*)leftSet->GetNewInst();
   newSet->m_functionality = leftSet->m_functionality + rightSet->m_functionality;
 #if TWOD
-  if (leftSet->m_dim == rightSet->m_dim)
-    newSet->SetDimName(leftSet->m_dim);
+  if (leftSet->GetDimName() == rightSet->GetDimName())
+    newSet->SetDimName(leftSet->GetDimName());
 #endif
   newSet->m_bsSize = (((Loop*)leftSet)->m_bsSize);
   newSet->m_label.clear();
@@ -2597,6 +2598,14 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      newPoss->PatchAfterDuplicate(nodeMap);
 	      Node *newNode = nodeMap[node];
 	      single->Apply(newNode);
+	      /*
+	      if (m_sets.size()  && m_sets.size() != newPoss->m_sets.size()) {
+	        cout << "\n\ncomparison\n";
+		cout << newPoss->GetFunctionalityString() << endl;
+		cout << " vs. \n";
+		cout << this->GetFunctionalityString() << endl;
+		}		
+	      */
 	      newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
 	      newPoss->Simplify(simplifiers);
 	      //newPoss->BuildDataTypeCache();
@@ -2738,19 +2747,26 @@ string Poss::GetFunctionalityString() const
   return str;
 }
 
-size_t Poss::GetHash()
+size_t Poss::Hash(const string &str)
 {
   static std::hash<std::string> hasher;
+  size_t tmp = 0;
+  for (int i = 0; i < str.size(); i+=10) {
+    tmp += hasher(str.substr(i,10));
+  }
+  return tmp;
+}
+
+size_t Poss::GetHash()
+{
   if (m_hashValid)
     return m_hash;
   else {
-    m_hash = hasher(GetFunctionalityString());
+    m_hash = Hash(GetFunctionalityString());
     m_hashValid = true;
     return m_hash;
   }
 }
-
-
 
 void Poss::RemoveFromGraphNodes(Node *node)
 {
@@ -3015,7 +3031,7 @@ void Poss::PrintSetConnections()
               if(psetSet.find(set) != psetSet.end())
                 throw;
               psetSet.insert(set);
-              cout << "Set " << set << endl;
+              cout << "Set " << set << "\t" << set->GetFunctionalityString() << endl;
               if (set->IsLoop())
                 cout << "\tIs Loop\n";
               else
