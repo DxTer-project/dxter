@@ -97,6 +97,8 @@ PSet::~PSet()
 
 void PSet::AddPossesOrDispose(PossMMap &mmap, PossMMap *added)
 {
+  if (m_functionality.empty())
+    throw;
   PossMMapIter newIter = mmap.begin();
   for( ; newIter != mmap.end(); ++newIter) {
     Poss *poss = (*newIter).second;
@@ -182,15 +184,17 @@ bool PSet::operator==(const Poss &rhs) const
 bool PSet::operator==(const PSet &rhs) const
 {
   if (m_inTuns.size() != rhs.m_inTuns.size()
-      || m_outTuns.size() != rhs.m_outTuns.size()
-      || m_posses.size() != rhs.m_posses.size())
+      || m_outTuns.size() != rhs.m_outTuns.size())
     return false;
+  if (GetFunctionalityString() != rhs.GetFunctionalityString()) {
+    return false;
+  }
   else {
     if (IsLoop()) {
       if (!rhs.IsLoop())
         return false;
       else {
-	if (((Loop*)this)->m_dim != ((Loop*)(&rhs))->m_dim)
+	if (((Loop*)this)->GetDimName() != ((Loop*)(&rhs))->GetDimName())
 	  return false;
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
           const LoopTunnel *tun1 = (LoopTunnel*)(m_inTuns[i]);
@@ -229,15 +233,6 @@ bool PSet::operator==(const PSet &rhs) const
 	return false;
     }
 #endif
-    if ((*(m_posses.begin())).second->GetHash() != (*(rhs.m_posses.begin())).second->GetHash())
-      return false;
-    //BAM Really, instead of doing all of this comparison,
-    //    it would be better to keep track of what PSets implement
-    //    and compare that.  If they implement the same thing, they'll
-    //    eventually (with enough iterations) be the same
-    /*    for (unsigned int i = 0; i < m_posses.size(); ++i)
-	  if (!(*(m_posses[i]) == *(rhs.m_posses[i])))
-	  return false;*/
     return true;
   }
 }
@@ -247,8 +242,11 @@ void PSet::Prop()
   if(m_hasProped)
     return;
 
-  if (m_functionality.empty())
+  if (m_functionality.empty()) {
+    cout << m_posses.size() << endl;
+    (*(m_posses.begin())).second->PrintSetConnections();
     throw;
+  }
 
   //BAM Par + check for > 1
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
@@ -502,74 +500,57 @@ bool PSet::TakeIter(const TransMap &transMap,
   
   int size = m_posses.size();
   
-  if (size > 1) {
-    PossMMap mmap;
-    PossMMapIter iter;
-    int j = 0;
+
+  PossMMap mmap;
+  PossMMapIter iter;
+  int j = 0;
 
 #pragma omp parallel private(j,iter)
-    {
-      iter = m_posses.begin();
-      j = 0;
-      int size = m_posses.size();
-      //BAM par
+  {
+    iter = m_posses.begin();
+    j = 0;
+    int size = m_posses.size();
+    //BAM par
 #pragma omp for schedule(static) 
-      for (int i = 0; i < size; ++i) {
-	while (j < i) {
-	  ++iter;
-	  ++j;
-	}
-	Poss *poss = (*iter).second;
-	if (!poss->m_fullyExpanded) {
-	  bool didSomething;
-	  PossMMap newPosses;
-	  didSomething = poss->TakeIter(transMap, simplifiers, newPosses);
-	  if (didSomething && (!newOne || newPosses.size() > 0)) {
-#ifdef _OPENMP
-	    omp_set_lock(&lock);
-#endif
-	    newOne = true;
-	    PossMMapIter newPossesIter = newPosses.begin();
-	    for(; newPossesIter != newPosses.end(); ++newPossesIter) {
-	      if (!AddPossToMMap(mmap, (*newPossesIter).second, (*newPossesIter).second->GetHash()))
-		delete (*newPossesIter).second;
-	    }
-#ifdef _OPENMP
-	    omp_unset_lock(&lock);
-#endif
-	  }
-	}
+    for (int i = 0; i < size; ++i) {
+      while (j < i) {
+	++iter;
+	++j;
       }
-    }
-    //have to add these at the end or we'd be adding posses while iterating
-    // over the posses
-    // BAM: Or do I?
-    if (mmap.size()) {
-      if (mmap.size() > 50)
-        cout << "\t\tAdding " << mmap.size() << " posses\n";
-      AddPossesOrDispose(mmap, &actuallyAdded);
-      if (mmap.size() > 50)
-        cout << "\t\tDone adding ( " << actuallyAdded.size() << " actually added )\n";
-      PossMMapIter added = actuallyAdded.begin();
-      for(; added != actuallyAdded.end(); ++added) {
-        (*added).second->BuildDataTypeCache();
+      Poss *poss = (*iter).second;
+      if (!poss->m_fullyExpanded) {
+	bool didSomething;
+	PossMMap newPosses;
+	didSomething = poss->TakeIter(transMap, simplifiers, newPosses);
+	if (didSomething && (!newOne || newPosses.size() > 0)) {
+#ifdef _OPENMP
+	  omp_set_lock(&lock);
+#endif
+	  newOne = true;
+	  PossMMapIter newPossesIter = newPosses.begin();
+	  for(; newPossesIter != newPosses.end(); ++newPossesIter) {
+	    if (!AddPossToMMap(mmap, (*newPossesIter).second, (*newPossesIter).second->GetHash()))
+	      delete (*newPossesIter).second;
+	  }
+#ifdef _OPENMP
+	  omp_unset_lock(&lock);
+#endif
+	}
       }
     }
   }
-  else {
-    Poss *poss = (*(m_posses.begin())).second;
-    PossMMap newPosses;
-    newOne = poss->TakeIter(transMap, simplifiers, newPosses);
-    if (newPosses.size()) {
-      if (newPosses.size() > 50)
-        cout << "\t\tAdding " << newPosses.size() << " posses\n";
-      AddPossesOrDispose(newPosses, &actuallyAdded);
-      if (newPosses.size() > 50)
-        cout << "\t\tDone adding\n";
-      PossMMapIter added = actuallyAdded.begin();
-      for(; added != actuallyAdded.end(); ++added) {
-        (*added).second->BuildDataTypeCache();
-      }
+  //have to add these at the end or we'd be adding posses while iterating
+  // over the posses
+  // BAM: Or do I?
+  if (mmap.size()) {
+    if (mmap.size() > 100)
+      cout << "\t\tAdding " << mmap.size() << " posses\n";
+    AddPossesOrDispose(mmap, &actuallyAdded);
+    if (mmap.size() > 100)
+      cout << "\t\tDone adding ( " << actuallyAdded.size() << " actually added )\n";
+    PossMMapIter added = actuallyAdded.begin();
+    for(; added != actuallyAdded.end(); ++added) {
+      (*added).second->BuildDataTypeCache();
     }
   }
   return newOne;
@@ -1554,6 +1535,7 @@ void PSet::FormSetAround()
     throw;
   newPoss->m_sets.push_back(this);
   m_ownerPoss = newPoss;
+  newSet->m_functionality = newPoss->GetFunctionalityString();
 }
 
 
