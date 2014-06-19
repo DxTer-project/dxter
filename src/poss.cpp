@@ -2360,7 +2360,7 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
     if (whichGraph <= 0 || whichGraph == graphNum) {
       ClearPrinted();
       
-      *out << "*** Algorithm " << graphNum << " ***" << endl;
+      *out << "/*** Algorithm " << graphNum << " ***" << endl;
       *out << "\tUnique Num: " << m_num << endl;
       *out << "\tChild of: " << m_parent << endl;
       *out << "\tResult of transformations:" << endl;
@@ -2369,7 +2369,7 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
       TransVecConstIter transIter = transVec.begin();
       for( ; transIter != transVec.end(); ++transIter)
         *out << "\t" << (*transIter)->GetType() << endl;
-      *out << "*****************************************" << endl;
+      *out << "*****************************************/" << endl;
       
       
       if (m_pset && m_pset->IsLoop()
@@ -2428,7 +2428,7 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
       *out << endl;
       
       out.Indent();
-      *out << "*****************************************" << endl;
+      *out << "/*****************************************/" << endl;
     }
     
     ++graphNum;

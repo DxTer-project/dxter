@@ -37,10 +37,13 @@
 
 #if DOLLDLA
 
+#include <sstream>
+
 #include "driverUtils.h"
 #include "debug.h"
 #include "LLDLAGemmTransformations.h"
 #include "smmul.h"
+#include "runtimeEvaluation.h"
 
 Size one = 1;
 Size smallSize = 10;
@@ -52,6 +55,20 @@ PSet* GemmExample();
 PSet* DoubleGemmExample();
 
 Trans transA, transB;
+
+ImplementationMap ImpStrMap(Universe *uni)
+{
+  ImplementationMap impMap;
+  unsigned int i;
+  for (i = 1; i <= uni->TotalCount(); i++) {
+    std::stringbuf sbuf;
+    std::ostream out(&sbuf);
+    IndStream istream = IndStream(&out, LLDLASTREAM);
+    uni->Print(istream, i);
+    impMap.insert(NumImplementationPair(i, sbuf.str()));    
+  }
+  return impMap;
+}
 
 void AddTrans()
 {
@@ -201,7 +218,16 @@ int main(int argc, const char* argv[])
 
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
+  
+  cout << "Writing all implementations to runtime eval files\n";
+  
+  string evalDirName = "runtimeEvaluation";
+  string opName = "dxt_gemm";
+  string prelude = "#include \"row_stride_lldla_primitives.h\"\n#define MUVALUE 2\nvoid dxt_gemm(int CNumCols, int CNumRows, int ANumCols,\ndouble *A, int ARowStride, double *B, int BRowStride, double *C, int CRowStride) {\ndouble b = 1.0;\ndouble *beta = &b;\ndouble *A1, *B1, *C1, *A11, *B11, *C11;\n";
 
+  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, opName, prelude);
+  evaler.WriteImplementationsToFiles(ImpStrMap(&uni));
+  
 #if 1
   uni.PrintAll(algNum);
 #else

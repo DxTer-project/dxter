@@ -454,7 +454,7 @@ void Universe::Print(IndStream &out, unsigned int &whichGraph)
     poss->PrintRoot(out, graphNum, whichGraph);
   }
 
-  *out << "numAlgs = " << TotalCount() << endl;
+  *out << "// numAlgs = " << TotalCount() << endl;
 }
 
 void Universe::EvalCosts(IndStream &out, unsigned int &whichGraph)
