@@ -913,21 +913,27 @@ const DataTypeInfo& Node::InputDataType(unsigned int num) const
 
 string Node::GetFunctionalityString() const
 {
-  string str = GetType();
+  if (IsPossTunnel(POSSTUNIN))
+    return "";
+  string str;
+  if (!IsPossTunnel())
+    str = GetType();
   NodeConnVecConstIter iter = m_inputs.begin();
   for( ;iter != m_inputs.end(); ++iter) {
     const NodeConn *conn = *iter;
     const Node *in = conn->m_n;
-    str += (char)(conn->m_num);
     if (!in->IsPossTunnel()) {
+      str += (char)(conn->m_num + 48);
       str += in->GetFunctionalityString();
     }
     else if (in->IsPossTunnel(SETTUNOUT)) {
       const PSet *set = ((PossTunnel*)in)->m_pset;
+      str += "(";
       str += set->GetFunctionalityString();
+      str += ")";
       NodeVecConstIter iter2 = set->m_inTuns.begin();
       for(; iter2 != set->m_inTuns.end(); ++iter2) {
-	str += (*iter2)->Input(0)->GetFunctionalityString();
+	str += (*iter2)->GetFunctionalityString();
       }
     }
   }
