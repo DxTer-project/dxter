@@ -997,7 +997,7 @@ void Split::PrintVarDeclarations(IndStream &out) const
     throw;
   out.Indent();
   *out << LLDLAPartVarName(name, 1) << " = " 
-       << name << endl;
+       << name << ";\n";
 #endif
 }
 
