@@ -832,6 +832,8 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
   
   NodeMap map;
   PSet *newSet = leftSet->GetNewInst();
+
+  newSet->m_functionality = leftSet->m_functionality+rightSet->m_functionality;
   
   m_sets.erase(m_sets.begin()+left);
   if (*(m_sets.begin()+right-1) != rightSet) {
