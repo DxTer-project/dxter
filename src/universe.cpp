@@ -34,6 +34,8 @@
 #define PRINTCODE
 #endif
 
+#define OUTPUTCODEATEACHITER 0
+
 //Save generated implementations to disk
 // so they can be loaded on a separate run
 //#define SAVETODISK
@@ -180,6 +182,18 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
     time_t start, end;
     time(&start);
     foundNew = TakeIter(phase);
+
+#if OUTPUTCODEATEACHITER
+    stringstream str;
+    unsigned int optGraph = 0;
+    str << "codeOutput" << count << ".txt";
+    ofstream out;
+    out.open(str.str());
+    IndStream codeOut(&out,LLDLASTREAM);
+    Print(codeOut, optGraph);
+    out.close();
+#endif //OUTPUTCODEATEACHITER
+    
     unsigned int total = TotalCount();
     ++count;
     time(&end);
