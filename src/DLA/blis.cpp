@@ -474,7 +474,7 @@ bool ParallelizeOuterNDim::CanApply(const Node *node) const
   const Loop *loop = (Loop*)(tun->m_pset);
   if (loop->m_comm == m_comm)
     return false;
-  if (loop->m_dim != DIMN)
+  if (loop->GetDimName() != DIMN)
     return false;
   if (loop->m_comm == m_comm)
     return false;
@@ -522,7 +522,7 @@ bool ParallelizeK::CanApply(const Node *node) const
   const Loop *loop = (Loop*)(tun->m_pset);
   if (loop->m_comm == m_comm)
     return false;
-  if (loop->m_dim != DIMK)
+  if (loop->GetDimName() != DIMK)
     return false;
   if (!LegalParallelizationNestingDown(loop, m_comm))
     return false;

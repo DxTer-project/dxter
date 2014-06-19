@@ -120,7 +120,7 @@ class Loop : public PSet
   void TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun);
 #if TWOD
   void SetDimName(DimName dim);
-  DimName GetDimName() {return m_dim;}
+  DimName GetDimName() const {return m_dim;}
 #endif
   unsigned int LoopLevel() const;
 
