@@ -1,8 +1,6 @@
 #include "row_stride_lldla_primitives.h"
 #include "utils.h"
 
-#include "dxt_gemm_2.h"
-
 int main() {
   // Allocate 16 aligned storage for test buffers
   int dim = 50;

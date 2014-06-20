@@ -222,11 +222,13 @@ int main(int argc, const char* argv[])
   cout << "Writing all implementations to runtime eval files\n";
   
   string evalDirName = "runtimeEvaluation";
+  string driverFileName = "gemm_test";
   string opName = "dxt_gemm";
   string prelude = "#include \"row_stride_lldla_primitives.h\"\n#define MUVALUE 2\nvoid dxt_gemm(int CNumCols, int CNumRows, int ANumCols,\ndouble *A, int ARowStride, double *B, int BRowStride, double *C, int CRowStride) {\ndouble b = 1.0;\ndouble *beta = &b;\ndouble *A1, *B1, *C1, *A11, *B11, *C11;\n";
 
-  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, opName, prelude);
+  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, driverFileName, opName, prelude);
   evaler.WriteImplementationsToFiles(ImpStrMap(&uni));
+  evaler.CompileAndRunAllImplementations(ImpStrMap(&uni));
   
 #if 1
   uni.PrintAll(algNum);

@@ -31,10 +31,16 @@ class RuntimeEvaluator
 {
  public:
   string m_evalDirName;
+  string m_driverCode;
+  string m_driverFileName;
   string m_operationName;
   string m_functionPrelude;
 
-  RuntimeEvaluator(string evalDirName, string m_operationName, string functionPrelude);
-  ImplementationRuntimeMap timeImplementations(ImplementationMap imps);
+  RuntimeEvaluator(string evalDirName, string driverFileName, string operationName, string functionPrelude);
+  void ImplementationRuntimeMap(ImplementationMap imps);
+  void CompileAndRunAllImplementations(ImplementationMap imps);
+  void CompileAndRunImplementation(NumImplementationPair numImp);
+  void WriteImplementationHeaderToDriverFile(string impHeaderName);
   void WriteImplementationsToFiles(ImplementationMap imps);
+  void ClearDriverFile();
 };

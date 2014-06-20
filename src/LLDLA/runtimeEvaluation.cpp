@@ -19,14 +19,57 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <unistd.h>
+#include <iostream>
 #include <fstream>
+#include <sstream>
 #include "runtimeEvaluation.h"
 
-RuntimeEvaluator::RuntimeEvaluator(string evalDirName, string operationName, string functionPrelude)
+RuntimeEvaluator::RuntimeEvaluator(string evalDirName, string driverFileName, string operationName, string functionPrelude)
 {
   m_evalDirName = evalDirName;
+  m_driverFileName = driverFileName + ".c";
+  std::ifstream t(m_evalDirName + "/" + m_driverFileName);
+  std:: stringstream buffer;
+  buffer << t.rdbuf();
+  m_driverCode = buffer.str();
   m_operationName = operationName;
   m_functionPrelude = functionPrelude;
+}
+
+void RuntimeEvaluator::CompileAndRunAllImplementations(ImplementationMap imps)
+{
+  chdir("runtimeEvaluation/");
+  ImplementationMap::iterator it;
+  for (it = imps.begin(); it != imps.end(); ++it) {
+    CompileAndRunImplementation(NumImplementationPair(it->first, it->second));
+  }
+}
+
+void RuntimeEvaluator::CompileAndRunImplementation(NumImplementationPair numImp)
+{
+  WriteImplementationHeaderToDriverFile(m_operationName + "_" + std::to_string(numImp.first) + ".h");
+  system("pwd");
+  const char *cc = ("gcc -mfpmath=sse -msse3 -o " + m_operationName + " " + m_driverFileName + " utils.c").c_str();
+  system(cc);
+  const char *run_command = ("./" + m_operationName).c_str();
+  system(run_command);
+  ClearDriverFile();
+}
+
+void RuntimeEvaluator::WriteImplementationHeaderToDriverFile(string impHeaderName)
+{
+  string fileContents = "#include \"" + impHeaderName + "\"\n" + m_driverCode;
+  std::ofstream outputFile(m_driverFileName);
+  outputFile << fileContents;
+  outputFile.close();
+}
+
+void RuntimeEvaluator::ClearDriverFile()
+{
+  std::ofstream outputFile(m_driverFileName);
+  outputFile << m_driverCode;
+  outputFile.close();
 }
 
 void RuntimeEvaluator::WriteImplementationsToFiles(ImplementationMap imps)
