@@ -22,6 +22,8 @@
 #include "LLDLA.h"
 #include <map>
 
+using namespace std;
+
 typedef std::map<unsigned int, string> ImplementationMap;
 typedef std::map<unsigned int, double> ImplementationRuntimeMap;
 typedef std::pair<unsigned int, string> NumImplementationPair;
