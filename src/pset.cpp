@@ -500,9 +500,6 @@ bool PSet::TakeIter(const TransMap &transMap,
   }
 #endif
   
-  int size = m_posses.size();
-  
-
   PossMMap mmap;
   PossMMapIter iter;
   int j = 0;
