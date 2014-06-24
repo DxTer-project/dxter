@@ -2600,14 +2600,6 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      newPoss->PatchAfterDuplicate(nodeMap);
 	      Node *newNode = nodeMap[node];
 	      single->Apply(newNode);
-	      /*
-	      if (m_sets.size()  && m_sets.size() != newPoss->m_sets.size()) {
-	        cout << "\n\ncomparison\n";
-		cout << newPoss->GetFunctionalityString() << endl;
-		cout << " vs. \n";
-		cout << this->GetFunctionalityString() << endl;
-		}		
-	      */
 	      newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
 	      newPoss->Simplify(simplifiers);
 	      //newPoss->BuildDataTypeCache();
@@ -2963,9 +2955,6 @@ void PrintSetOrNodeInputs(Node *node)
   NodeConnVecIter iter = node->m_inputs.begin();
   for(; iter != node->m_inputs.end(); ++iter) {
     Node *input = (*iter)->m_n;
-    /*    if (input->IsPossTunnel(POSSTUNIN))
-     continue;
-     else*/
     if (input->IsPossTunnel(SETTUNOUT)) {
       cout << "\tInput: Set " << ((PossTunnel*)input)->m_pset << endl;
     }
