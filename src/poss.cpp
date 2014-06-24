@@ -2456,6 +2456,8 @@ void Poss::PrintCurrRoot(IndStream &out, const VarSet &set)
 
 
   VarSetIter varIter = set.begin();
+  out.Indent();
+  *out << "ObjShape tempShape;\n";
   for(; varIter != set.end(); ++varIter) {
     (*varIter).PrintDecl(out);
   }
