@@ -253,31 +253,23 @@ void Contraction::PrintCode(IndStream &out)
        << endl;
 
   out.Indent();
-  *out << in0.str() << ".SetIndices( " 
-       << IndexArrayVarName(m_AIndices)
-       << " );\n";
-
-  out.Indent();
-  *out << in1.str() << ".SetIndices( " 
-       << IndexArrayVarName(m_BIndices)
-       << " );\n";
-
-
-  out.Indent();
-  *out << in2.str() << ".SetIndices( " 
-       << IndexArrayVarName(m_CIndices)
-       << " );\n";
-    
-
-  out.Indent();
   *out << "LocalContract(";
   out << m_alpha;
   *out << ", " << in0.str()
-       << ".LockedTensor(), " << in1.str()
-       << ".LockedTensor(), ";
+       << ".LockedTensor(), " 
+       << IndexArrayVarName(m_AIndices) << ",\n";
+  out.Indent(1);
+  *out << in1.str()
+       << ".LockedTensor(), "
+       << IndexArrayVarName(m_BIndices) << ",\n";
+  out.Indent(1);
   out << m_beta;
-  *out << ", " << in2.str() << ".Tensor());\n";
+  *out << ", " << in2.str() << ".Tensor(), "
+       << IndexArrayVarName(m_CIndices) << ");\n";
+
+  
 }
+
 
 Phase Contraction::MaxPhase() const
 {

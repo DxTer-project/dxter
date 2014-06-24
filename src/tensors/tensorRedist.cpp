@@ -490,9 +490,6 @@ void RedistNode::PrintCode(IndStream &out)
 
   DimSet diffs;
 
-  *out << outName << ".ResizeTo( " << inName << " );\n";
-  out.Indent();
-    
   for (Dim dim = 0; dim < numDims; ++dim) {
     if (m_srcType.m_dists[dim] != m_info.m_dist.m_dists[dim]) {
       diffs.insert(dim);
@@ -510,7 +507,13 @@ void RedistNode::PrintCode(IndStream &out)
     if (src.empty() || IsPrefix(src, dest)) {
       DimVec suff;
       GetSuffix(src, dest, suff);
-      *out << "LocalRedist( " << outName << ", "
+      /*
+       *out << "LocalRedist( " << outName << ", "
+       << inName << ", " << dim 
+       << ", " << ModeArrayVarName(suff)
+       << " );\n";
+      */
+      *out << outName << ".LocalRedistFrom( " 
 	   << inName << ", " << dim 
 	   << ", " << ModeArrayVarName(suff)
 	   << " );\n";
@@ -518,21 +521,29 @@ void RedistNode::PrintCode(IndStream &out)
     else if (IsPrefix(dest, src) || dest.empty()) {
       if (!src.empty()) {
 	
-	*out << "AllGatherRedist( " << outName << ", "
-	     << inName << ", " << dim << ", ";
+	//	*out << "AllGatherRedist( " << outName << ", "
+	//	     << inName << ", " << dim << ", ";
+	//	DimVec suff;
+	//	GetSuffix(dest, src, suff);
+	//	*out << ModeArrayVarName(suff) << " );\n";
+	*out << outName << ".AllGatherRedistFrom( " << inName
+	     << ", " << dim << ", ";
 	DimVec suff;
 	GetSuffix(dest, src, suff);
 	*out << ModeArrayVarName(suff) << " );\n";
-
       }
       else {
-	*out << "AllGatherRedist( " << outName << ", "
-	     << inName << ", " << dim << " );\n";
+	throw;
+	//*out << "AllGatherRedist( " << outName << ", "
+	//	     << inName << ", " << dim << " );\n";
       }
     }
     else {
-      *out << "PermutationRedist( " << outName << ", "
-      	   << inName << ", " << dim << " );\n";
+      //      *out << "PermutationRedist( " << outName << ", "
+      //      	   << inName << ", " << dim << " );\n";
+      *out << outName << ".PermutationRedistFrom( "
+      	   << inName << ", " << dim << ", "
+	   << ModeArrayVarName(src) << " );\n";
     }
   }
   else if (diffs.size() > 2) {
@@ -544,7 +555,13 @@ void RedistNode::PrintCode(IndStream &out)
     ++iter;
     Dim diff2 = *iter;
 
+    /*
     *out << "AllToAllDoubleIndexRedist( "  << outName << ", "
+	 << inName << ", " 
+	 << IndexPairVarName(diff1, diff2)
+	 << ", ";
+    */
+    *out << outName << "AllToAllDoubleIndexRedistFrom( "
 	 << inName << ", " 
 	 << IndexPairVarName(diff1, diff2)
 	 << ", ";
@@ -627,7 +644,8 @@ void RedistNode::AddVariables(VarSet &set) const
       }
     }
     else {
-
+      Var var(src);
+      set.insert(var);
     }
 
   }
