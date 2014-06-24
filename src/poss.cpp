@@ -2370,7 +2370,17 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
       for( ; transIter != transVec.end(); ++transIter)
         *out << "\t" << (*transIter)->GetType() << endl;
       *out << "*****************************************/" << endl;
-      
+
+      VarSet set;
+      AddCurrPossVars(set);
+      VarSetIter varIter = set.begin();
+#if DOTENSORS
+      out.Indent();
+      *out << "ObjShape tempShape;\n";
+#endif
+      for(; varIter != set.end(); ++varIter) {
+	(*varIter).PrintDecl(out);
+      }
       
       if (m_pset && m_pset->IsLoop()
           && ((Loop*)m_pset)->GetType() == BLISLOOP)
