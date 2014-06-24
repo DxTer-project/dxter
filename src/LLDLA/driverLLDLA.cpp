@@ -241,7 +241,11 @@ int main(int argc, const char* argv[])
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, driverFileName, opName, prelude);
   std::map<unsigned int, vector<double>> impMap = evaler.ImplementationRuntimeMap(ImpStrMap(&uni));
   PrintImpMap(impMap);
-  
+
+  vector<string>::iterator decIter = uni.m_declarationVectors.begin();
+  for (; decIter != uni.m_declarationVectors.end(); ++decIter) {
+    cout << *decIter << endl;
+  }
 #if 1
   uni.PrintAll(algNum);
 #else

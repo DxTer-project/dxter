@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <vector>
 #include "base.h"
 
 typedef Node* (*ConstructorFunc)();
@@ -55,6 +56,11 @@ class Universe
 #if DOTENSORS
   void CheckMaxDims();
 #endif
+
+#if DOLLDLA
+  vector<string> m_declarationVectors;
+#endif //DOLLDLA
+
   unsigned int Expand(unsigned int numIters, unsigned int phase, CullFunction Cull);
   void EvalCosts(IndStream &out, unsigned int &graphNum);
   void EvalCostsAndSetBest();
@@ -76,4 +82,5 @@ class Universe
   void Flatten(ofstream &out) const;
   void LoadFromFile(string fileName);
   void Unflatten(ifstream &in);
+
 };

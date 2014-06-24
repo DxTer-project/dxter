@@ -54,6 +54,21 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
   m_nsize.AddRepeatedSizes(n, 1, 1);
   m_varName.m_name = name;
 }
+
+string InputNode::DataDeclaration()
+{
+  // For now the only supported type is double
+  string intStr = "int ";
+  string doubleStr = "double *";
+  string endStr = ";\n";
+  string varDecString = doubleStr + m_varName.str() + endStr;
+  string rowStrideDec = intStr + m_dataTypeInfo.m_rowStrideVar + endStr;
+  string colStrideDec = intStr + m_dataTypeInfo.m_colStrideVar + endStr;
+  string numRowsDec = intStr + m_dataTypeInfo.m_numRowsVar + endStr;
+  string numColsDec = intStr + m_dataTypeInfo.m_colStrideVar + endStr;
+  string allDecs = varDecString + rowStrideDec + colStrideDec + numRowsDec + numColsDec;
+  return allDecs;
+}
 #endif //DOLLDLA
 #endif //TWODO
 

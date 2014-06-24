@@ -53,6 +53,7 @@ class InputNode : public DLANode
 	    Stride rowStride, Stride colStride,
 	    string numRowsVar, string numColsVar,
 	    string rowStrideVar, string colStrideVar);
+  string DataDeclaration();
 #else
   InputNode(NodeType type, Size m, Size n, string name);
 #endif
