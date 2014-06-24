@@ -66,7 +66,7 @@ string InputNode::DataDeclaration()
   string colStrideDec = intStr + m_dataTypeInfo.m_colStrideVar + endStr;
   string numRowsDec = intStr + m_dataTypeInfo.m_numRowsVar + endStr;
   string numColsDec = intStr + m_dataTypeInfo.m_colStrideVar + endStr;
-  string allDecs = varDecString + rowStrideDec + colStrideDec + numRowsDec + numColsDec;
+  string allDecs = varDecString + rowStrideDec + colStrideDec + numRowsDec + numRowsDec + numColsDec;
   return allDecs;
 }
 #endif //DOLLDLA
