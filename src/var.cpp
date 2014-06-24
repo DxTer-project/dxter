@@ -155,15 +155,34 @@ Var::Var(const DimVec &vec1, const DimVec &vec2)
   m_compStr = str.str();
 }
 
-Var::Var(const string &indices)
+#endif //DOTENSORS
+
+Var::Var(VarType type, const string &str)
 {
-  m_type = IndexArrayType;
-  m_indices = new string(indices);
-  //  *m_indices = indices;
-  m_compStr = "e" + indices;
+  switch(type)
+    {
+    case (DirectVarDeclType):
+      {
+	m_type = DirectVarDeclType;
+	m_varDecl = new string(str);
+	m_compStr = "a " + str;
+      }      
+#if DOTENSORS
+    case (IndexArrayType):
+      {
+	m_type = IndexArrayType;
+	m_indices = new string(str);
+	//  *m_indices = indices;
+	m_compStr = "e" + str;
+	break;
+      }
+#endif //DOTENSORS
+    default:
+      throw;
+    }
 }
 
-#endif //DOTENSORS
+
 
 #if DOLLDLA
 Var::Var(const string &varName, unsigned int partNum)
@@ -212,6 +231,9 @@ Var::~Var()
       delete m_transVar;
       break;
 #endif
+    case (DirectVarDeclType):
+      delete m_varDecl;
+      break;
     case (InvalidType) :
     default:
       throw;
@@ -325,6 +347,12 @@ void Var::PrintDecl(IndStream &out) const
 	break;
       }
 #endif
+    case (DirectVarDeclType):
+      {
+	out.Indent();
+	*out << *m_varDecl << endl;
+	break;
+      }
     case (InvalidType):
       throw;
     }
@@ -376,7 +404,9 @@ string Var::GetVarName() const
 	return *m_transVar;
 	break;
       }
-#endif      
+#endif
+    case (DirectVarDeclType):
+      throw;
     case (InvalidType):
       throw;
       return "";
@@ -422,7 +452,9 @@ Var& Var::operator=(const Var &rhs)
 	delete m_transVar;
 	break;
 #endif
-
+      case (DirectVarDeclType):
+	delete m_varDecl;
+	break;
       case (InvalidType):
 	throw;
       }    
@@ -462,6 +494,9 @@ Var& Var::operator=(const Var &rhs)
       m_transVar = new string (*(rhs.m_transVar));
       break;
 #endif
+    case (DirectVarDeclType):
+      m_varDecl = new string (*(rhs.m_varDecl));
+      break;
     case (InvalidType):
       throw;
     }

@@ -327,10 +327,8 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 
   out.Indent();
 
-  *out << outName << ".ResizeTo( " << inName << " );\n";
-  out.Indent();
-  
   if (m_srcType.m_notReped != m_destType.m_notReped) {
+    throw;
     *out << "ReduceScatterRedistDisappear( " << outName << ", " << inName << ", ";
     bool found = false;
     for(Dim dim = 0; !found &&dim < srcNumDims; ++dim) {
@@ -347,7 +345,9 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
     if (srcNumDims != (m_destType.m_numDims+1))
       throw;
 
-    *out << "ReduceScatterRedist( " << outName << ", " << inName << ", ";
+    //    *out << "ReduceScatterRedist( " << outName << ", " << inName << ", ";
+    *out << outName << ".ReduceScatterRedistFrom( " 
+	 << inName << ", ";
 
     DimVec scatDims = sumDims.DistEntryDims();
 

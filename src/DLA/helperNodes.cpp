@@ -767,6 +767,25 @@ void TempVarNode::PrintCode(IndStream &out)
     out.Indent();
     *out << "bli_copym(&" << name << ", &" << GetNameStr(0) << ");\n";
   }*/
+#if DOTENSORS
+  out.Indent();
+  *out << "tempShape = " << GetInputNameStr(0) << ".Shape();\n";
+  EntrySetIter iter = m_sumDims.begin();
+  for (; iter != m_sumDims.end(); ++iter) {
+    out.Indent();
+    DistEntry entry = *iter;
+    DimVec vec = entry.DistEntryDims();
+    if (vec.empty())
+      throw;
+    if (vec.size() > 1) {
+      cout << "do something more complicated, where you have to multiply grid dims\n";
+      throw;
+    }
+    *out << "tempShape.push_back( g.Shape()[" << vec[0] << "] );\n";
+  }
+  out.Indent();
+  *out << GetNameStr(0) << ".ResizeTo( tempShape );\n";
+#endif
 }
 
 
