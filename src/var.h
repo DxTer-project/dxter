@@ -48,6 +48,7 @@ enum VarType {
   VarPartType,
   VarTransType,
 #endif
+  DirectVarDeclType,
   InvalidType
 };
 
@@ -57,6 +58,7 @@ class Var
   VarType m_type;
   union {
     Name *m_name;
+    string *m_varDecl;
 #if DOTENSORS
     DimVec *m_vec;
     std::pair<DimVec, DimVec> *m_arrPair;
@@ -78,9 +80,9 @@ class Var
   Var(const DimVec &vec);
   Var(const DimVec &vec1, const DimVec &vec2);
   Var(Dim dim1, Dim dim2);
-  Var(const string &indices);
 #endif
   Var(const Var &var);
+  Var(VarType type, const string &str);
 #if DODM
   Var(const DistType &type);
 #endif

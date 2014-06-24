@@ -172,11 +172,11 @@ void Contraction::AddVariables(VarSet &set) const
   //Reflect in PrintCode
   DLANode::AddVariables(set);
   
-  Var varA(m_AIndices);
+  Var varA(IndexArrayType, m_AIndices);
   set.insert(varA);
-  Var varB(m_BIndices);
+  Var varB(IndexArrayType, m_BIndices);
   set.insert(varB);
-  Var varC(m_CIndices);
+  Var varC(IndexArrayType, m_CIndices);
   set.insert(varC);
 }
 
