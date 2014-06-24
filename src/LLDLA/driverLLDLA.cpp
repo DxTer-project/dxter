@@ -70,6 +70,18 @@ ImplementationMap ImpStrMap(Universe *uni)
   return impMap;
 }
 
+void PrintImpMap(std::map<unsigned int, vector<double>> impTimes)
+{
+  std::map<unsigned int, vector<double>>::iterator mit;
+  for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
+    std::vector<double>::iterator vit;
+    cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
+    for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
+      cout << std::to_string(*vit) << endl;
+    }
+    cout << endl;
+  }
+}
 void AddTrans()
 {
   //Introduces loops in the m, n, and k dimensions, respectively
@@ -227,8 +239,8 @@ int main(int argc, const char* argv[])
   string prelude = "#include \"row_stride_lldla_primitives.h\"\n#define MUVALUE 2\nvoid dxt_gemm(int CNumCols, int CNumRows, int ANumCols,\ndouble *A, int ARowStride, double *B, int BRowStride, double *C, int CRowStride) {\ndouble b = 1.0;\ndouble *beta = &b;\ndouble *A1, *B1, *C1, *A11, *B11, *C11;\n";
 
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, driverFileName, opName, prelude);
-  evaler.WriteImplementationsToFiles(ImpStrMap(&uni));
-  evaler.CompileAndRunAllImplementations(ImpStrMap(&uni));
+  std::map<unsigned int, vector<double>> impMap = evaler.ImplementationRuntimeMap(ImpStrMap(&uni));
+  PrintImpMap(impMap);
   
 #if 1
   uni.PrintAll(algNum);

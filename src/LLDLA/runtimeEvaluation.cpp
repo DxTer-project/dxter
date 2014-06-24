@@ -35,34 +35,76 @@ RuntimeEvaluator::RuntimeEvaluator(string evalDirName, string driverFileName, st
   m_driverCode = buffer.str();
   m_operationName = operationName;
   m_functionPrelude = functionPrelude;
+
+  m_numIterations = 10;
+  m_dataFileName = "time_data.txt";
 }
 
-void RuntimeEvaluator::CompileAndRunAllImplementations(ImplementationMap imps)
+std::map<unsigned int, vector<double>> RuntimeEvaluator::ImplementationRuntimeMap(ImplementationMap imps)
+{
+  return CompileAndRunAllImplementations(imps);
+}
+
+std::map<unsigned int, vector<double>> RuntimeEvaluator::CompileAndRunAllImplementations(ImplementationMap imps)
 {
   chdir("runtimeEvaluation/");
+  std::map<unsigned int, vector<double>> runMap;
   ImplementationMap::iterator it;
   for (it = imps.begin(); it != imps.end(); ++it) {
-    CompileAndRunImplementation(NumImplementationPair(it->first, it->second));
+    vector<double> runtimes = CompileAndRunImplementation(NumImplementationPair(it->first, it->second));
+    runMap.insert(NumRuntimePair(it->first, runtimes));
   }
+  return runMap;
 }
 
-void RuntimeEvaluator::CompileAndRunImplementation(NumImplementationPair numImp)
+vector<double> RuntimeEvaluator::CompileAndRunImplementation(NumImplementationPair numImp)
 {
   WriteImplementationHeaderToDriverFile(m_operationName + "_" + std::to_string(numImp.first) + ".h");
   system("pwd");
   const char *cc = ("gcc -mfpmath=sse -msse3 -o " + m_operationName + " " + m_driverFileName + " utils.c").c_str();
   system(cc);
-  const char *run_command = ("./" + m_operationName).c_str();
+  const char *run_command = ("./" + m_operationName + " > " + m_dataFileName).c_str();
   system(run_command);
   ClearDriverFile();
+  return ReadTimeDataFromFile();
 }
 
 void RuntimeEvaluator::WriteImplementationHeaderToDriverFile(string impHeaderName)
 {
-  string fileContents = "#include \"" + impHeaderName + "\"\n" + m_driverCode;
+  string fileContents = "#define NUM_ITERATIONS " + std::to_string(m_numIterations) + "\n";
+  fileContents = fileContents + "#include \"" + impHeaderName + "\"\n";
+  fileContents = fileContents +  m_driverCode;
   std::ofstream outputFile(m_driverFileName);
   outputFile << fileContents;
   outputFile.close();
+}
+
+vector<double> RuntimeEvaluator::ReadTimeDataFromFile()
+{
+  std::ifstream dataStream(m_dataFileName);
+  std::stringstream buffer;
+  buffer << dataStream.rdbuf();
+  string timeData = buffer.str();
+  vector<string> runtimeStrings;
+  Tokenize(timeData, runtimeStrings, "\n");
+  vector<double> runtimes;
+  for (std::vector<string>::iterator it = runtimeStrings.begin(); it != runtimeStrings.end(); ++it) {
+    runtimes.push_back(stod(*it));
+  }
+  return runtimes;
+}
+
+void RuntimeEvaluator::Tokenize(const string& str, vector<string>& tokens, const string& delimiters = " ")
+{
+  string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+  while (string::npos != pos || string::npos != lastPos)
+    {
+      tokens.push_back(str.substr(lastPos, pos - lastPos));
+      lastPos = str.find_first_not_of(delimiters, pos);
+      pos = str.find_first_of(delimiters, lastPos);
+    }
 }
 
 void RuntimeEvaluator::ClearDriverFile()
