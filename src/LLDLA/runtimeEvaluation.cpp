@@ -127,20 +127,22 @@ void RuntimeEvaluator::WriteImplementationsToFiles(ImplementationMap imps)
   }
 }
 
-RuntimeTest::RuntimeTest(string operationName, vector<string> argDeclarations, vector<string> defines)
+RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines)
 {
   m_operationName = operationName;
+  m_argNames = argNames;
   m_argDeclarations = argDeclarations;
   m_defines = defines;
-  m_headers.push_back("#include \"#row_stride_lldla_primitives.h\"");
-  m_headers.push_back("#include \"gen_stride_lldla_primitives.h\"");
+  m_headers.push_back("#include \"row_stride_lldla_primitives.h\"");
   m_headers.push_back("#include \"utils.h\"");
-  m_defines.push_back("#define max(i, j) ((i) >= (j) ? (i) : (j))");
   m_defines.push_back("#define BUF_SIZE 1000000");
+  m_defines.push_back("#define NUM_ITERATIONS 10");
 }
 
 string RuntimeTest::MakeTestCode(ImplementationMap imps)
 {
+  int numImplementations = imps.size();
+  m_defines.push_back("#define NUM_ALGS " + std::to_string(numImplementations));
   string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
   string implementationFunctions = MakeImpFuncs(imps);
   string driverCode = MainFuncCode(imps);
@@ -152,7 +154,29 @@ string RuntimeTest::MainFuncCode(ImplementationMap imps)
 {
   string prototype = "int main() {\n";
   string argBufferAllocation = AllocateArgBuffers();
-  return prototype + argBufferAllocation + "\n}";
+  string timingSetup = "\tint i, j;\n\tclock_t begin, end;\n\tdouble exec_time;\n";    
+  string mainFunc = prototype + argBufferAllocation + "\n" + timingSetup;
+  string timingLoop = TimingLoop(imps);
+  mainFunc = mainFunc + "\n" + timingLoop + "\n}";
+  return mainFunc;
+}
+
+string RuntimeTest::TimingLoop(ImplementationMap imps)
+{
+  int i;
+  string loopBody = "";
+  for (i = 1; i <= imps.size(); i++) {
+    loopBody += "\tfor (j = 0; j < NUM_ITERATIONS; j++) {\n";
+    loopBody += "\t\tbegin = clock();\n";
+    loopBody += "\t\t" + m_operationName + "_" + std::to_string(i) + "(" + CArgList(m_argNames) + ");\n";
+    loopBody += "\t\tend = clock();\n";
+    loopBody += "\t\texec_time = (double) (end - begin);\n";
+    loopBody += "\t\tchar exec_time_str[100];\n";
+    loopBody += "\t\tsprintf(exec_time_str, \"%f\\n\", exec_time);\n";
+    loopBody += "\t\twrite(1, exec_time_str, strlen(exec_time_str));\n";
+    loopBody += "\t}\n";
+  }
+  return loopBody;
 }
 
 string RuntimeTest::AllocateArgBuffers()
@@ -160,7 +184,7 @@ string RuntimeTest::AllocateArgBuffers()
   std::vector<string> argAllocs;
   std::vector<string>::iterator argIter;
   for (argIter = m_argDeclarations.begin(); argIter != m_argDeclarations.end(); ++argIter) {
-    argAllocs.push_back(*argIter + " = alloc_aligned_16(BUF_SIZE * sizeof(double))");
+    argAllocs.push_back("\t" + *argIter + " = alloc_aligned_16(BUF_SIZE * sizeof(double));");
   }
   return ToCStatements(argAllocs);
 }

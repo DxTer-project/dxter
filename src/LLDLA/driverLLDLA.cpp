@@ -234,7 +234,7 @@ int main(int argc, const char* argv[])
   
   cout << "Writing all implementations to runtime eval files\n";
 
-  RuntimeTest rtest("dxt_gemm", uni.m_declarationVectors, uni.m_constantDefines);
+  RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines);
   string testCodeStr = rtest.MakeTestCode(ImpStrMap(&uni));
   std::ofstream outputFile("runtimeEvaluation/auto_gen_test.c");
   outputFile << testCodeStr;
