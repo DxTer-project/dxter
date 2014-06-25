@@ -126,3 +126,80 @@ void RuntimeEvaluator::WriteImplementationsToFiles(ImplementationMap imps)
     outputFile.close();
   }
 }
+
+RuntimeTest::RuntimeTest(string operationName, vector<string> argDeclarations, vector<string> defines)
+{
+  m_operationName = operationName;
+  m_argDeclarations = argDeclarations;
+  m_defines = defines;
+  m_headers.push_back("#include \"#row_stride_lldla_primitives.h\"");
+  m_headers.push_back("#include \"gen_stride_lldla_primitives.h\"");
+  m_headers.push_back("#include \"utils.h\"");
+  m_defines.push_back("#define max(i, j) ((i) >= (j) ? (i) : (j))");
+  m_defines.push_back("#define BUF_SIZE 1000000");
+}
+
+string RuntimeTest::MakeTestCode(ImplementationMap imps)
+{
+  string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
+  string implementationFunctions = MakeImpFuncs(imps);
+  string driverCode = MainFuncCode(imps);
+  string testCode = headersAndDefines + "\n" + implementationFunctions + "\n" + driverCode;
+  return testCode;
+}
+
+string RuntimeTest::MainFuncCode(ImplementationMap imps)
+{
+  string prototype = "int main() {\n";
+  string argBufferAllocation = AllocateArgBuffers();
+  return prototype + argBufferAllocation + "\n}";
+}
+
+string RuntimeTest::AllocateArgBuffers()
+{
+  std::vector<string> argAllocs;
+  std::vector<string>::iterator argIter;
+  for (argIter = m_argDeclarations.begin(); argIter != m_argDeclarations.end(); ++argIter) {
+    argAllocs.push_back(*argIter + " = alloc_aligned_16(BUF_SIZE * sizeof(double))");
+  }
+  return ToCStatements(argAllocs);
+}
+string RuntimeTest::ToCStatements(vector<string> lines)
+{
+  string cStatements = "";
+  std::vector<string>::iterator lineIt;
+  for (lineIt = lines.begin(); lineIt != lines.end(); ++lineIt) {
+    cStatements = cStatements + *lineIt + "\n";
+  }
+  return cStatements;
+}
+
+string RuntimeTest::CArgList(vector<string> args)
+{
+  string argList = "";
+  std::vector<string>::iterator argsIt;
+  int i = 0;
+  for (argsIt = args.begin(); argsIt != args.end(); ++argsIt) {
+    argList = argList + *argsIt;
+    if (i < args.size() - 1) {
+      argList = argList + ", ";
+    }
+    i++;
+  }
+  return argList;
+}
+
+string RuntimeTest::MakeImpFuncs(ImplementationMap imps)
+{
+  string endOfFuncDec = "(" + CArgList(m_argDeclarations) + ")";
+  string allImplementationFuncs = "";
+  ImplementationMap::iterator impIt;
+  for (impIt = imps.begin(); impIt != imps.end(); ++impIt) {
+    string funcDec = m_operationName + "_" + std::to_string(impIt->first);
+    funcDec = funcDec + endOfFuncDec + " {\n";
+    funcDec = funcDec + impIt->second;
+    funcDec = funcDec + "\n}\n";
+    allImplementationFuncs = allImplementationFuncs + funcDec;
+  }
+  return allImplementationFuncs;
+}

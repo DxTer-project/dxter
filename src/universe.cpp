@@ -78,6 +78,10 @@ void Universe::Init(PSet *seed)
     if (node->GetNodeClass() == InputNode::GetClass()) {
       InputNode *inNode = (InputNode*) node;
       m_declarationVectors.push_back(inNode->DataDeclaration());
+      m_constantDefines.push_back(inNode->NumRowsDefine());
+      m_constantDefines.push_back(inNode->NumColsDefine());
+      m_constantDefines.push_back(inNode->RowStrideDefine());
+      m_constantDefines.push_back(inNode->ColStrideDefine());
     }
   }
  

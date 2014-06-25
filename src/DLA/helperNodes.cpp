@@ -41,15 +41,32 @@ InputNode::InputNode()
 #if TWOD
 #if DOLLDLA
 InputNode::InputNode(NodeType type, Size m, Size n, string name, 
-		     Stride rowStride, Stride colStride,
+		     Size rowStrideVal, Size colStrideVal,
 		     string numRowsVar, string numColsVar,
 		     string rowStrideVar, string colStrideVar)
 : 
-  m_dataTypeInfo(rowStride, colStride,
-		 numRowsVar, numColsVar,
-		 rowStrideVar, colStrideVar),
   m_msize(NAN), m_nsize(NAN)
 {
+  Stride rs, cs;
+  if (rowStrideVal == 1) {
+    rs = UNITSTRIDE;
+  } else {
+    rs = NONUNITSTRIDE;
+  }
+  if (colStrideVal == 1) {
+    cs = UNITSTRIDE;
+  } else {
+    cs = NONUNITSTRIDE;
+  }
+
+  m_dataTypeInfo = DataTypeInfo(rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar);
+
+  m_rowStrideVal = rowStrideVal;
+  m_colStrideVal = colStrideVal;
+
+  cout << "m_rowStrideVal = " << std::to_string(m_rowStrideVal) << endl;
+  cout << "m_colStrideVal = " << std::to_string(m_colStrideVal) << endl;
+
   m_msize.AddRepeatedSizes(m, 1, 1);
   m_nsize.AddRepeatedSizes(n, 1, 1);
   m_varName.m_name = name;
@@ -58,17 +75,31 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
 string InputNode::DataDeclaration()
 {
   // For now the only supported type is double
-  string intStr = "int ";
   string doubleStr = "double *";
-  string endStr = ";\n";
-  string varDecString = doubleStr + m_varName.str() + endStr;
-  string rowStrideDec = intStr + m_dataTypeInfo.m_rowStrideVar + endStr;
-  string colStrideDec = intStr + m_dataTypeInfo.m_colStrideVar + endStr;
-  string numRowsDec = intStr + m_dataTypeInfo.m_numRowsVar + endStr;
-  string numColsDec = intStr + m_dataTypeInfo.m_colStrideVar + endStr;
-  string allDecs = varDecString + rowStrideDec + colStrideDec + numRowsDec + numRowsDec + numColsDec;
-  return allDecs;
+  string varDecString = doubleStr + m_varName.str();
+  return varDecString;
 }
+
+string InputNode::RowStrideDefine()
+{
+  return "#define " + m_dataTypeInfo.m_rowStrideVar + " " + std::to_string(m_rowStrideVal);
+}
+
+string InputNode::ColStrideDefine()
+{
+  return "#define " + m_dataTypeInfo.m_colStrideVar + " " + std::to_string(m_colStrideVal);
+}
+
+string InputNode::NumRowsDefine()
+{
+  return "#define " + m_dataTypeInfo.m_numRowsVar + " " +  std::to_string(m_msize[0]);
+}
+
+string InputNode::NumColsDefine()
+{
+  return "#define " + m_dataTypeInfo.m_numColsVar + " " +  std::to_string(m_nsize[0]);
+}
+
 #endif //DOLLDLA
 #endif //TWODO
 

@@ -51,3 +51,21 @@ class RuntimeEvaluator
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
   void ClearDriverFile();
 };
+
+class RuntimeTest
+{
+ public:
+  vector<string> m_defines;
+  vector<string> m_headers;
+  string m_operationName;
+  vector<string> m_operationArgs;
+  vector<string> m_argDeclarations;
+
+  RuntimeTest(string operationName, vector<string> argDeclarations, vector<string> defines);
+  string MakeTestCode(ImplementationMap imps);
+  string ToCStatements(vector<string> lines);
+  string CArgList(vector<string> args);
+  string MakeImpFuncs(ImplementationMap imps);
+  string MainFuncCode(ImplementationMap imps);
+  string AllocateArgBuffers();
+};

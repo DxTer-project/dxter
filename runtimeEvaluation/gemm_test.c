@@ -5,7 +5,7 @@
 
 int main() {
   // Allocate 16 aligned storage for test buffers
-  int dim = 50;
+  int dim = 500;
   int size = dim*dim;
   double *a_buf = alloc_aligned_16(size*sizeof(double));
   double *b_buf = alloc_aligned_16(size*sizeof(double));
