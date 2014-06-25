@@ -2409,7 +2409,7 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
         hasPrinted = false;
         NodeVecConstIter nodeIter = m_possNodes.begin();
         for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
-          //Don't pring the poss out tunnels until the end
+          //Don't bring the poss out tunnels until the end
           // so the repartitioning code all goes after the loop body
           if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsPossTunnel(POSSTUNOUT)) {
             (*nodeIter)->Print(out, graphNum);

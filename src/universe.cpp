@@ -67,6 +67,21 @@ void Universe::Init(PSet *seed)
 #if DOTENSORS
   CheckMaxDims();
 #endif
+
+#if DOLLDLA
+  int pSize = seed->m_posses.size();
+  cout << std::to_string(pSize) << endl;
+  Poss *poss = seed->m_posses.begin()->second;
+  NodeVecIter nodeIter = poss->m_possNodes.begin();
+  for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
+    Node *node = *nodeIter;
+    if (node->GetNodeClass() == InputNode::GetClass()) {
+      InputNode *inNode = (InputNode*) node;
+      m_declarationVectors.push_back(inNode->DataDeclaration());
+    }
+  }
+ 
+#endif
 }
 
 void Universe::Init(string fileName)
