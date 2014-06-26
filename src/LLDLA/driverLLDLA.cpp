@@ -292,7 +292,7 @@ PSet* GemmExample()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFBETA, REAL);
+  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);
   gemm->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
@@ -334,13 +334,13 @@ PSet* DoubleGemmExample()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Gemm *gemm1 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFBETA, REAL);
+  Gemm *gemm1 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);
   gemm1->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
 		  tunC,0);
 
-  Gemm *gemm2 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFBETA, REAL);
+  Gemm *gemm2 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);
   gemm2->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
