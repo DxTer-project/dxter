@@ -241,14 +241,11 @@ int main(int argc, const char* argv[])
   outputFile.close();
   cout << "DONE WITH TEST CODE\n";
   
-  /*  string evalDirName = "runtimeEvaluation";
-  string driverFileName = "gemm_test";
-  string opName = "dxt_gemm";
-  string prelude = "#include \"row_stride_lldla_primitives.h\"\n#define MUVALUE 2\nvoid dxt_gemm(int CNumCols, int CNumRows, int ANumCols,\ndouble *A, int ARowStride, double *B, int BRowStride, double *C, int CRowStride) {\ndouble b = 1.0;\ndouble *beta = &b;\ndouble *A1, *B1, *C1, *A11, *B11, *C11;\n";
+  string evalDirName = "runtimeEvaluation";
 
-  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, driverFileName, opName, prelude);
-  std::map<unsigned int, vector<double>> impMap = evaler.ImplementationRuntimeMap(ImpStrMap(&uni));
-  PrintImpMap(impMap);*/
+  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, 10);
+  std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
+  PrintImpMap(impMap);
 
   vector<string>::iterator decIter = uni.m_declarationVectors.begin();
   for (; decIter != uni.m_declarationVectors.end(); ++decIter) {

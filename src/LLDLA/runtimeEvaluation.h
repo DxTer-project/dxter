@@ -30,28 +30,6 @@ typedef std::map<unsigned int, vector<double>> ImplementationRuntimeMap;
 typedef std::pair<unsigned int, string> NumImplementationPair;
 typedef std::pair<unsigned int, vector<double>> NumRuntimePair;
 
-class RuntimeEvaluator
-{
- public:
-  string m_evalDirName;
-  string m_driverCode;
-  string m_driverFileName;
-  string m_operationName;
-  string m_functionPrelude;
-  int m_numIterations;
-  string m_dataFileName;
-
-  RuntimeEvaluator(string evalDirName, string driverFileName, string operationName, string functionPrelude);
-  std::map<unsigned int, vector<double>> ImplementationRuntimeMap(ImplementationMap imps);
-  std::map<unsigned int, vector<double>> CompileAndRunAllImplementations(ImplementationMap imps);
-  vector<double> CompileAndRunImplementation(NumImplementationPair numImp);
-  void WriteImplementationHeaderToDriverFile(string impHeaderName);
-  void WriteImplementationsToFiles(ImplementationMap imps);
-  vector<double> ReadTimeDataFromFile();
-  void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
-  void ClearDriverFile();
-};
-
 class RuntimeTest
 {
  public:
@@ -70,4 +48,18 @@ class RuntimeTest
   string MainFuncCode(ImplementationMap imps);
   string AllocateArgBuffers();
   string TimingLoop(ImplementationMap imps);
+};
+
+
+class RuntimeEvaluator
+{
+ public:
+  string m_evalDirName;
+  string m_dataFileName;
+  int m_numIterations;
+
+  RuntimeEvaluator(string evalDirName, int numIterations);
+  std::map<unsigned int, vector<double>> EvaluateImplementations(RuntimeTest test, ImplementationMap imps);
+  std::map<unsigned int, vector<double>> ReadTimeDataFromFile(int numImpls, int numIters);
+  void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
 };
