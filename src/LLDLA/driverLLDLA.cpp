@@ -82,6 +82,7 @@ void PrintImpMap(std::map<unsigned int, vector<double>> impTimes)
     cout << endl;
   }
 }
+
 void AddTrans()
 {
   //Introduces loops in the m, n, and k dimensions, respectively
@@ -232,14 +233,18 @@ int main(int argc, const char* argv[])
   cout.flush();
   
   cout << "Writing all implementations to runtime eval files\n";
+
+  RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines);
+  string testCodeStr = rtest.MakeTestCode(ImpStrMap(&uni));
+  std::ofstream outputFile("runtimeEvaluation/auto_gen_test.c");
+  outputFile << testCodeStr;
+  outputFile.close();
+  cout << "DONE WITH TEST CODE\n";
   
   string evalDirName = "runtimeEvaluation";
-  string driverFileName = "gemm_test";
-  string opName = "dxt_gemm";
-  string prelude = "#include \"row_stride_lldla_primitives.h\"\n#define MUVALUE 2\nvoid dxt_gemm(int CNumCols, int CNumRows, int ANumCols,\ndouble *A, int ARowStride, double *B, int BRowStride, double *C, int CRowStride) {\ndouble b = 1.0;\ndouble *beta = &b;\ndouble *A1, *B1, *C1, *A11, *B11, *C11;\n";
 
-  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, driverFileName, opName, prelude);
-  std::map<unsigned int, vector<double>> impMap = evaler.ImplementationRuntimeMap(ImpStrMap(&uni));
+  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, 10);
+  std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
   PrintImpMap(impMap);
 
   vector<string>::iterator decIter = uni.m_declarationVectors.begin();
@@ -263,15 +268,15 @@ int main(int argc, const char* argv[])
 PSet* GemmExample()
 {
   InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", 
-				 NONUNITSTRIDE, UNITSTRIDE,
+				 6, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
   InputNode *Bin = new InputNode("B input",  smallSize, smallSize, "B", 
-				 NONUNITSTRIDE, UNITSTRIDE,
+				 4, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
   InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", 
-				 NONUNITSTRIDE, UNITSTRIDE,
+				 2, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
@@ -284,7 +289,7 @@ PSet* GemmExample()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFBETA, REAL);
+  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);
   gemm->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
@@ -305,15 +310,15 @@ PSet* GemmExample()
 PSet* DoubleGemmExample()
 {
   InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", 
-				 NONUNITSTRIDE, UNITSTRIDE,
+				 4, 13,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
   InputNode *Bin = new InputNode("B input",  smallSize, smallSize, "B", 
-				 NONUNITSTRIDE, UNITSTRIDE,
+				 6, 12,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
   InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", 
-				 NONUNITSTRIDE, UNITSTRIDE,
+				 2, 10,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
@@ -326,13 +331,13 @@ PSet* DoubleGemmExample()
   PossTunnel *tunC = new PossTunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Gemm *gemm1 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFBETA, REAL);
+  Gemm *gemm1 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);
   gemm1->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
 		  tunC,0);
 
-  Gemm *gemm2 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFBETA, REAL);
+  Gemm *gemm2 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);
   gemm2->AddInputs(6,
 		  tunA,0,
 		  tunB,0,

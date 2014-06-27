@@ -30,24 +30,36 @@ typedef std::map<unsigned int, vector<double>> ImplementationRuntimeMap;
 typedef std::pair<unsigned int, string> NumImplementationPair;
 typedef std::pair<unsigned int, vector<double>> NumRuntimePair;
 
+class RuntimeTest
+{
+ public:
+  vector<string> m_defines;
+  vector<string> m_argNames;
+  vector<string> m_headers;
+  string m_operationName;
+  vector<string> m_operationArgs;
+  vector<string> m_argDeclarations;
+
+  RuntimeTest(string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines);
+  string MakeTestCode(ImplementationMap imps);
+  string ToCStatements(vector<string> lines);
+  string CArgList(vector<string> args);
+  string MakeImpFuncs(ImplementationMap imps);
+  string MainFuncCode(ImplementationMap imps);
+  string AllocateArgBuffers();
+  string TimingLoop(ImplementationMap imps);
+};
+
+
 class RuntimeEvaluator
 {
  public:
   string m_evalDirName;
-  string m_driverCode;
-  string m_driverFileName;
-  string m_operationName;
-  string m_functionPrelude;
-  int m_numIterations;
   string m_dataFileName;
+  int m_numIterations;
 
-  RuntimeEvaluator(string evalDirName, string driverFileName, string operationName, string functionPrelude);
-  std::map<unsigned int, vector<double>> ImplementationRuntimeMap(ImplementationMap imps);
-  std::map<unsigned int, vector<double>> CompileAndRunAllImplementations(ImplementationMap imps);
-  vector<double> CompileAndRunImplementation(NumImplementationPair numImp);
-  void WriteImplementationHeaderToDriverFile(string impHeaderName);
-  void WriteImplementationsToFiles(ImplementationMap imps);
-  vector<double> ReadTimeDataFromFile();
+  RuntimeEvaluator(string evalDirName, int numIterations);
+  std::map<unsigned int, vector<double>> EvaluateImplementations(RuntimeTest test, ImplementationMap imps);
+  std::map<unsigned int, vector<double>> ReadTimeDataFromFile(int numImpls, int numIters);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
-  void ClearDriverFile();
 };

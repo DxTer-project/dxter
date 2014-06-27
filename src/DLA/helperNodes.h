@@ -1,5 +1,5 @@
 /*
-    This file is part of DxTer.
+n    This file is part of DxTer.
     DxTer is a prototype using the Design by Transformation (DxT)
     approach to program generation.
 
@@ -48,12 +48,17 @@ class InputNode : public DLANode
   InputNode();
 #if TWOD
 #if DOLLDLA
-  InputNode(NodeType type, Size m, Size n, 
+  Size m_rowStrideVal, m_colStrideVal;
+  InputNode(NodeType type, Size m, Size n,
 	    string name, 
-	    Stride rowStride, Stride colStride,
+	    Size rowStrideVal, Size colStrideVal,
 	    string numRowsVar, string numColsVar,
 	    string rowStrideVar, string colStrideVar);
   string DataDeclaration();
+  string RowStrideDefine();
+  string ColStrideDefine();
+  string NumRowsDefine();
+  string NumColsDefine();
 #else
   InputNode(NodeType type, Size m, Size n, string name);
 #endif

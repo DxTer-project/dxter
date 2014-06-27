@@ -59,6 +59,8 @@ class Universe
 
 #if DOLLDLA
   vector<string> m_declarationVectors;
+  vector<string> m_constantDefines;
+  vector<string> m_argNames;
 #endif //DOLLDLA
 
   unsigned int Expand(unsigned int numIters, unsigned int phase, CullFunction Cull);

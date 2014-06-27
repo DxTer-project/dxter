@@ -282,7 +282,7 @@ main( int argc, char* argv[] )
             printf(" grid\n");
         }
 
-        const Grid g( comm, GRIDORDER, args.gridShape );
+        const Grid g( comm, args.gridShape );
 
         if( commRank == 0 )
         {

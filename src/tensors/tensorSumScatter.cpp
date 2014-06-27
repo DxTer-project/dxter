@@ -328,8 +328,8 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
   out.Indent();
 
   if (m_srcType.m_notReped != m_destType.m_notReped) {
-    throw;
-    *out << "ReduceScatterRedistDisappear( " << outName << ", " << inName << ", ";
+    *out << outName << ".ReduceToOneRedistFrom( "
+	 << inName << ", ";
     bool found = false;
     for(Dim dim = 0; !found &&dim < srcNumDims; ++dim) {
       if (m_srcType.m_dists[dim] == sumDims) {
