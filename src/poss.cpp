@@ -2349,8 +2349,9 @@ void Poss::EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGr
   }
 }
 
-void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph)
+void Poss::PrintRoot(IndStream &out, unsigned int whichGraph)
 {
+  unsigned int graphNum = 1;
   bool keepGoing = true;
   unsigned int numPSets = m_sets.size();
   

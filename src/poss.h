@@ -70,7 +70,7 @@ class Poss
   virtual Cost EvalAndSetBest();
   virtual void Print(IndStream &out, unsigned int &graphNum);
   virtual void EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph, unsigned int &optGraph, Cost &optCost);
-  virtual void PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph);
+  virtual void PrintRoot(IndStream &out, unsigned int whichGraph);
   virtual void PrintCurrRoot(IndStream &out);
   void ForcePrint();
   bool CanPrint() const;

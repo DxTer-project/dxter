@@ -464,12 +464,10 @@ void Universe::PrintBest()
 
 void Universe::Print(IndStream &out, unsigned int &whichGraph)
 {
-  unsigned int graphNum = 0;
-  ++graphNum;
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
-    poss->PrintRoot(out, graphNum, whichGraph);
+    poss->PrintRoot(out, whichGraph);
   }
 
   *out << "// numAlgs = " << TotalCount() << endl;
