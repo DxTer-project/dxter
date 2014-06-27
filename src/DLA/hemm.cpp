@@ -715,6 +715,7 @@ void LocalSymmAcc::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<5,2>::Prop();
 
+    /*
     DistType t0 = InputDataType(0).m_dist;
     DistType t1 = InputDataType(1).m_dist;
     DistType t2 = InputDataType(2).m_dist;
@@ -745,7 +746,7 @@ void LocalSymmAcc::Prop()
 	throw;
     }
 
-
+*/
 
 
     m_cost = GetCost(m_side, InputLocalM(1), InputLocalN(1));

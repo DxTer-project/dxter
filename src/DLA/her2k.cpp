@@ -414,7 +414,7 @@ void Tri2k::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<5,1>::Prop();
-
+    /*
 #if DOELEM
     if (GetLayer() == SMLAYER) {
     
@@ -480,7 +480,8 @@ void Tri2k::Prop()
       if (InputDataType(4).m_dist != D_MC_MR)
 	throw;
     }
-#elif DOBLIS
+    */
+#if DOBLIS
     if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER) {
       if (*GetInputM(0) != *GetInputM(2))
 	throw;

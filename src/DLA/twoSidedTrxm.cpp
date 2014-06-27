@@ -714,7 +714,7 @@ Loop* TwoSidedTrmmLowerVar4Alg(
 
 #if DOELEM
   TempVarNode *Yin = new TempVarNode(D_MC_MR, "Y10");
-  throw; //SetLayer
+  Yin->SetLayer(ABSLAYER);
 #else
   TempVarNode *Yin = new TempVarNode("Y10");
   Yin->SetLayer(S3LAYER);
