@@ -2448,7 +2448,7 @@ void Poss::PrintRoot(IndStream &out, unsigned int &graphNum, unsigned int whichG
   m_hasPrinted = true;
 }
 
-void Poss::PrintCurrRoot(IndStream &out, const VarSet &set)
+void Poss::PrintCurrRoot(IndStream &out)
 {
   unsigned int numPSets = m_sets.size();
   
@@ -2464,7 +2464,8 @@ void Poss::PrintCurrRoot(IndStream &out, const VarSet &set)
     *out << "\t" << (*transIter)->GetType() << endl;
   *out << "*****************************************" << endl;
 
-
+  VarSet set;
+  AddCurrPossVars(set);
   VarSetIter varIter = set.begin();
 #if DOTENSORS
   out.Indent();

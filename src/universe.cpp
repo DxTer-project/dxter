@@ -459,9 +459,7 @@ void Universe::PrintBest()
     IndStream optOut(&cout,LLDLASTREAM);
 #endif
 
-    VarSet set;
-    m_pset->AddCurrPossVars(set);
-    m_pset->GetCurrPoss()->PrintCurrRoot(optOut, set);
+    m_pset->GetCurrPoss()->PrintCurrRoot(optOut);
 }
 
 void Universe::Print(IndStream &out, unsigned int &whichGraph)
