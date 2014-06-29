@@ -459,19 +459,15 @@ void Universe::PrintBest()
     IndStream optOut(&cout,LLDLASTREAM);
 #endif
 
-    VarSet set;
-    m_pset->AddCurrPossVars(set);
-    m_pset->GetCurrPoss()->PrintCurrRoot(optOut, set);
+    m_pset->GetCurrPoss()->PrintRoot(optOut, 0);
 }
 
 void Universe::Print(IndStream &out, unsigned int &whichGraph)
 {
-  unsigned int graphNum = 0;
-  ++graphNum;
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
-    poss->PrintRoot(out, graphNum, whichGraph);
+    poss->PrintRoot(out, whichGraph);
   }
 
   *out << "// numAlgs = " << TotalCount() << endl;

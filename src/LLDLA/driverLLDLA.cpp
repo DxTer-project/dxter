@@ -37,6 +37,8 @@
 
 #if DOLLDLA
 
+#define DOEMPIRICALEVAL 1
+
 #include <sstream>
 
 #include "driverUtils.h"
@@ -231,7 +233,8 @@ int main(int argc, const char* argv[])
 
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
-  
+
+#if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
   RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines);
@@ -251,6 +254,9 @@ int main(int argc, const char* argv[])
   for (; decIter != uni.m_declarationVectors.end(); ++decIter) {
     cout << *decIter << endl;
   }
+
+#endif //DOEMPIRICALEVAL
+
 #if 1
   uni.PrintAll(algNum);
 #else
