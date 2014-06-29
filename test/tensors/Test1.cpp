@@ -25,6 +25,47 @@ using namespace std;
 
 #define GRIDORDER 4
 
+template <typename T>
+void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
+{
+    DistTensor<T> *tmp = new DistTensor<T>(A);
+  //  DistTensor<T> *tmp = new DistTensor<T>(A.TensorDist(), A.Grid());
+  //  *tmp = A;
+
+  for(Unsigned i = 0; i < A.Order(); ++i) {
+    cout << i << " " << A.Dimension(i) << " vs. " << tmp->Dimension(i) << endl;
+  }
+
+  for (Unsigned mode = 0; mode < tmp->Order(); ++mode) {
+    TensorDistribution dist = tmp->TensorDist();
+    ModeDistribution modeDist = dist[mode];
+    if (!(modeDist.empty())) {
+      TensorDistribution newDist = dist;
+      ModeDistribution newIgnoreDist = newDist[newDist.size() - 1];
+      newIgnoreDist.insert(newIgnoreDist.end(), modeDist.begin(), modeDist.end());
+      newDist[newDist.size() - 1] = newIgnoreDist;
+      modeDist.clear();
+      newDist[mode] = modeDist;
+      DistTensor<T> *tmp2 = new DistTensor<T>(newDist, tmp->Grid());
+      tmp2->GatherToOneRedistFrom(*tmp, mode);
+      delete tmp;
+      tmp = tmp2;
+    }
+  }
+
+  if (TensorDistToString(B.TensorDist()) != TensorDistToString(tmp->TensorDist())) {
+    cout << TensorDistToString(B.TensorDist()) << endl;
+    cout << TensorDistToString(tmp->TensorDist()) << endl;
+    throw;
+  }
+  B = *tmp;
+  delete tmp;
+
+  for(Unsigned i = 0; i < A.Order(); ++i) {
+    cout << i << " " << A.Dimension(i) << " vs. " << B.Dimension(i) << endl;
+  }
+}
+
 void Usage(){
   std::cout << "./DistTensor <gridDim0> <gridDim1> ... \n";
     std::cout << "<gridDimK>   : dimension of mode-K of grid\n";
@@ -206,7 +247,17 @@ DistTensorTest( const Grid& g )
     DistTensor<T> B__D_0__D_1__D_2__D_3(shapes4, dist__D_0__D_1__D_2__D_3, g);
     DistTensor<T> C__D_0_1__D_2__D_3(shapes3, dist__D_0_1__D_2__D_3, g);
 
+     Set(A__D_0_1__D_2__D_3);
+     Set(B__D_0__D_1__D_2__D_3);
+     Set(C__D_0_1__D_2__D_3);
 
+     DistTensor<T> A_local( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );
+     DistTensor<T> B_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
+     DistTensor<T> C_local( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );
+
+     GatherAllModes(A__D_0_1__D_2__D_3, A_local);
+     GatherAllModes(B__D_0__D_1__D_2__D_3, B_local);
+     GatherAllModes(C__D_0_1__D_2__D_3, C_local);
 
 
     //**** (out of 4)
@@ -240,6 +291,7 @@ DistTensorTest( const Grid& g )
 
     //****
     // 1.0 * A[*,D0,D3]_acd * B[D0,D1,D2,D3]_cefd + 0.0 * C[*,D1,D2,D0,D3]_aefcd
+    
     LocalContract(1.0, A__S__D_0__D_3.LockedTensor(), indices_acd,
 		  B__D_0__D_1__D_2__D_3.LockedTensor(), indices_cefd,
 		  0.0, C__S__D_1__D_2__D_0__D_3.Tensor(), indices_aefcd);
@@ -265,31 +317,32 @@ DistTensorTest( const Grid& g )
     //****
 
 
-     Set(A__D_0_1__D_2__D_3);
-     Set(B__D_0__D_1__D_2__D_3);
-     Set(C__D_0_1__D_2__D_3);
-
-     DistTensor<T> A_local( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );
-     DistTensor<T> B_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
-     DistTensor<T> C_local( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );
-
-     /*     
-     A gather...
-     */
-
     IndexArray indices_aef( 3 );
     indices_aefcd[0] = 'a';
     indices_aefcd[1] = 'e';
     indices_aefcd[2] = 'f';
 
-    /*
+    for (int i = 0; i < 3; ++i) {
+      cout << A_local.LockedTensor().Dimension(i) << endl;
+    }
+    cout << endl;
+    for (int i = 0; i < 4; ++i) {
+      cout << B_local.LockedTensor().Dimension(i) << endl;
+    }
+    cout << endl;
+    for (int i = 0; i < 3; ++i) {
+      cout << C_local.LockedTensor().Dimension(i) << endl;
+    }
+    cout << endl;
+
     LocalContract(1.0, A_local.LockedTensor(), indices_acd,
-		  B_local.LockedTensor(), indices_cefd,
-		  1.0, C_local.Tensor(), indices_aef);
+    		  B_local.LockedTensor(), indices_cefd,
+    		  1.0, C_local.Tensor(), indices_aef);
 
     DistTensor<T> C_local_comparison( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );    
-    C_local_comparison.GatherFrom( C__D_0_1__D_2__D_3 );
+    GatherAllModes(C__D_0_1__D_2__D_3, C_local_comparison);
 
+    /*
     Compare( C_local, C_local_comparison );
     */
 }
