@@ -149,8 +149,7 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
   string compileStr = "gcc -O3 -mfpmath=sse -msse3 -o " +  executableName;
-  compileStr += " " + testFileName + " utils.h utils.c";
-  compileStr += " row_stride_lldla_primitives.h";
+  compileStr += " " + testFileName + " utils.c";
   system(compileStr.c_str());
   string runStr = "./" + executableName + " > " + m_dataFileName;
   system(runStr.c_str());
