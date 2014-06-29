@@ -267,15 +267,15 @@ int main(int argc, const char* argv[])
 
 PSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", 
+  InputNode *Ain = new InputNode("A input",  medSize, medSize, "A", 
 				 6, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input",  smallSize, smallSize, "B", 
+  InputNode *Bin = new InputNode("B input",  medSize, medSize, "B", 
 				 4, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", 
+  InputNode *Cin = new InputNode("C input",  medSize, medSize, "C", 
 				 2, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");

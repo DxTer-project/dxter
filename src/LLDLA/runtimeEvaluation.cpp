@@ -34,9 +34,11 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_defines = defines;
   m_headers.push_back("#include \"row_stride_lldla_primitives.h\"");
   m_headers.push_back("#include \"utils.h\"");
+  m_headers.push_back("#include <string.h>");
   m_defines.push_back("#define BUF_SIZE 1000000");
   m_defines.push_back("#define NUM_ITERATIONS 10");
-  m_defines.push_back("#define CHUNK_SIZE 10000");
+  m_defines.push_back("#define CHUNK_SIZE 5");
+  m_defines.push_back("#define MUVALUE 2");
 }
 
 string RuntimeTest::MakeTestCode(ImplementationMap imps)
@@ -121,10 +123,10 @@ string RuntimeTest::MakeImpFuncs(ImplementationMap imps)
   string allImplementationFuncs = "";
   ImplementationMap::iterator impIt;
   for (impIt = imps.begin(); impIt != imps.end(); ++impIt) {
-    string funcDec = m_operationName + "_" + std::to_string(impIt->first);
+    string funcDec = "void " + m_operationName + "_" + std::to_string(impIt->first);
     funcDec = funcDec + endOfFuncDec + " {\n";
     funcDec = funcDec + impIt->second;
-    funcDec = funcDec + "\n}\n";
+    funcDec = funcDec + "return;\n}\n";
     allImplementationFuncs = allImplementationFuncs + funcDec;
   }
   return allImplementationFuncs;
@@ -146,8 +148,9 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations
   outStream.close(); 
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
-  string compileStr = "gcc -mfpmath=sse -msse3 -o " +  executableName;
+  string compileStr = "gcc -O3 -mfpmath=sse -msse3 -o " +  executableName;
   compileStr += " " + testFileName + " utils.h utils.c";
+  compileStr += " row_stride_lldla_primitives.h";
   system(compileStr.c_str());
   string runStr = "./" + executableName + " > " + m_dataFileName;
   system(runStr.c_str());
