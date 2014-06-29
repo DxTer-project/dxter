@@ -318,7 +318,23 @@ void Var::PrintDecl(IndStream &out) const
 	  }
 	  *out << ")";
 	}
-	*out <<"]\");\n";
+	*out <<"]";
+	if (!m_distType->m_notReped.IsStar()) {
+	  *out << "|(";
+	  DimVec vec = m_distType->m_notReped.DistEntryDims();
+	  bool start = true;	
+	  DimVecIter iter = vec.begin();
+	  for( ; iter != vec.end(); ++iter) {
+	    if (!start) {
+	      *out << ",";
+	    }
+	    else
+	      start = false;
+	    *out << *iter;
+	  }
+	  *out << ")";
+	}
+	*out << "\");\n";
 	break;
       }
     case (IndexArrayType):
