@@ -250,11 +250,6 @@ int main(int argc, const char* argv[])
   std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
   PrintImpMap(impMap);
 
-  vector<string>::iterator decIter = uni.m_declarationVectors.begin();
-  for (; decIter != uni.m_declarationVectors.end(); ++decIter) {
-    cout << *decIter << endl;
-  }
-
 #endif //DOEMPIRICALEVAL
 
 #if 1
