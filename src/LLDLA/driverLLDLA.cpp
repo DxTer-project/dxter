@@ -268,16 +268,16 @@ int main(int argc, const char* argv[])
 
 PSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input",  medSize, medSize, "A", 
-				 6, 1,
+  InputNode *Ain = new InputNode("A input", bigSize, 2, "A", 
+				 2, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input",  medSize, medSize, "B", 
-				 4, 1,
+  InputNode *Bin = new InputNode("B input", 2, bigSize, "B", 
+				 bigSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  medSize, medSize, "C", 
-				 2, 1,
+  InputNode *Cin = new InputNode("C input",  bigSize, bigSize, "C", 
+				 bigSize, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
@@ -310,16 +310,16 @@ PSet* GemmExample()
 
 PSet* DoubleGemmExample()
 {
-  InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", 
-				 4, 13,
+  InputNode *Ain = new InputNode("A input",  bigSize, 2, "A", 
+				 2, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input",  smallSize, smallSize, "B", 
-				 6, 12,
+  InputNode *Bin = new InputNode("B input",  2, bigSize, "B", 
+				 bigSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", 
-				 2, 10,
+  InputNode *Cin = new InputNode("C input",  bigSize, bigSize, "C", 
+				 bigSize, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 

@@ -33,11 +33,12 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_argDeclarations = argDeclarations;
   m_defines = defines;
   m_headers.push_back("#include \"row_stride_lldla_primitives.h\"");
+  //  m_headers.push_back("#include \"gen_stride_lldla_primitives.h\"");
   m_headers.push_back("#include \"utils.h\"");
   m_headers.push_back("#include <string.h>");
   m_defines.push_back("#define BUF_SIZE 1000000");
   m_defines.push_back("#define NUM_ITERATIONS 10");
-  m_defines.push_back("#define CHUNK_SIZE 5");
+  m_defines.push_back("#define CHUNK_SIZE 50");
   m_defines.push_back("#define MUVALUE 2");
 }
 
