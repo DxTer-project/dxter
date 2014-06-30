@@ -417,13 +417,12 @@ void Universe::PrintAll(int algNum)
 #elif DOLLDLA
     IndStream codeOut(&out,LLDLASTREAM);
 #endif
-  optGraph = 0;
-  time(&start);
-  Print(codeOut, optGraph);
-  out.close();
-  time(&end);
-  cout << "\tTook " << difftime(end,start) << " seconds\n";
-
+    optGraph = 0;
+    time(&start);
+    Print(codeOut, optGraph);
+    out.close();
+    time(&end);
+    cout << "\tTook " << difftime(end,start) << " seconds\n";
 #endif
 
 #ifdef SAVETODISK
@@ -459,15 +458,15 @@ void Universe::PrintBest()
     IndStream optOut(&cout,LLDLASTREAM);
 #endif
 
-    m_pset->GetCurrPoss()->PrintRoot(optOut, 0);
+    m_pset->GetCurrPoss()->PrintRoot(optOut, 0, true);
 }
 
-void Universe::Print(IndStream &out, unsigned int &whichGraph)
+void Universe::Print(IndStream &out, unsigned int &whichGraph, bool currOnly)
 {
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
-    poss->PrintRoot(out, whichGraph);
+    poss->PrintRoot(out, whichGraph, currOnly);
   }
 
   *out << "// numAlgs = " << TotalCount() << endl;
