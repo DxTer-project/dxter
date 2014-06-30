@@ -185,7 +185,7 @@ void Transpose::PrintCode(IndStream &out)
   }
 #elif DOLLDLA
   string inName = GetInputNameStr(0);
-  *out << LLDLATransVarName(inName,m_trans) << " = " << inName << endl;
+  *out << LLDLATransVarName(inName,m_trans) << " = " << inName << ";\n";
 #endif
 }
 
