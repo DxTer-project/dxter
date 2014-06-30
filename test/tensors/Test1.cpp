@@ -28,42 +28,45 @@ using namespace std;
 template <typename T>
 void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
 {
-    DistTensor<T> *tmp = new DistTensor<T>(A);
+  DistTensor<T> *tmp = NULL;
   //  DistTensor<T> *tmp = new DistTensor<T>(A.TensorDist(), A.Grid());
   //  *tmp = A;
+  
+  const TensorDistribution dist = A.TensorDist();
 
-  for(Unsigned i = 0; i < A.Order(); ++i) {
-    cout << i << " " << A.Dimension(i) << " vs. " << tmp->Dimension(i) << endl;
-  }
-
-  for (Unsigned mode = 0; mode < tmp->Order(); ++mode) {
-    TensorDistribution dist = tmp->TensorDist();
+  for (Unsigned mode = 0; mode < A.Order(); ++mode) {
     ModeDistribution modeDist = dist[mode];
     if (!(modeDist.empty())) {
-      TensorDistribution newDist = dist;
+      TensorDistribution newDist = (tmp ? tmp->TensorDist() : A.TensorDist());
       ModeDistribution newIgnoreDist = newDist[newDist.size() - 1];
       newIgnoreDist.insert(newIgnoreDist.end(), modeDist.begin(), modeDist.end());
       newDist[newDist.size() - 1] = newIgnoreDist;
       modeDist.clear();
       newDist[mode] = modeDist;
-      DistTensor<T> *tmp2 = new DistTensor<T>(newDist, tmp->Grid());
-      tmp2->GatherToOneRedistFrom(*tmp, mode);
-      delete tmp;
+      DistTensor<T> *tmp2 = new DistTensor<T>(newDist, A.Grid());
+      if (!tmp) {
+	tmp2->ResizeTo(A);
+	tmp2->GatherToOneRedistFrom(A, mode);
+      }
+      else {
+	tmp2->ResizeTo(*tmp);
+	tmp2->GatherToOneRedistFrom(*tmp, mode);
+	delete tmp;
+      }
       tmp = tmp2;
     }
   }
 
+  if (!tmp)
+    throw;
   if (TensorDistToString(B.TensorDist()) != TensorDistToString(tmp->TensorDist())) {
     cout << TensorDistToString(B.TensorDist()) << endl;
     cout << TensorDistToString(tmp->TensorDist()) << endl;
     throw;
   }
+
   B = *tmp;
   delete tmp;
-
-  for(Unsigned i = 0; i < A.Order(); ++i) {
-    cout << i << " " << A.Dimension(i) << " vs. " << B.Dimension(i) << endl;
-  }
 }
 
 void Usage(){
@@ -100,7 +103,6 @@ void ProcessInput(int argc,  char** const argv, Params& args){
             Usage();
             throw ArgException();
         }
-	std::cout << "order " << i << " is " << gridDim << std::endl;
 	args.nProcs *= gridDim;
         args.gridShape[i] = gridDim;
     }
@@ -148,18 +150,8 @@ DistTensorTest( const Grid& g )
     const Int commRank = mpi::CommRank( mpi::COMM_WORLD );
     const Unsigned gridOrder = 4;
 
-    ObjShape shapes3(3);
-    shapes3[0] = 10;
-    shapes3[1] = 10;
-    shapes3[2] = 10;
-
-    ObjShape shapes4(4);
-    shapes4[0] = 10;
-    shapes4[1] = 10;
-    shapes4[2] = 10;
-    shapes4[3] = 10;
-
-
+    ObjShape shapes3(3, 10);
+    ObjShape shapes4(4, 10);
 
     ObjShape tempShape;
 
@@ -318,20 +310,21 @@ DistTensorTest( const Grid& g )
 
 
     IndexArray indices_aef( 3 );
-    indices_aefcd[0] = 'a';
-    indices_aefcd[1] = 'e';
-    indices_aefcd[2] = 'f';
+    indices_aef[0] = 'a';
+    indices_aef[1] = 'e';
+    indices_aef[2] = 'f';
+
 
     for (int i = 0; i < 3; ++i) {
-      cout << A_local.LockedTensor().Dimension(i) << endl;
+      cout << A_local.LockedTensor().Shape()[i] << endl;
     }
     cout << endl;
     for (int i = 0; i < 4; ++i) {
-      cout << B_local.LockedTensor().Dimension(i) << endl;
+      cout << B_local.LockedTensor().Shape()[i] << endl;
     }
     cout << endl;
     for (int i = 0; i < 3; ++i) {
-      cout << C_local.LockedTensor().Dimension(i) << endl;
+      cout << C_local.LockedTensor().Shape()[i] << endl;
     }
     cout << endl;
 
