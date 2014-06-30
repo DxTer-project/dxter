@@ -64,9 +64,6 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
 
-  cout << "m_rowStrideVal = " << std::to_string(m_rowStrideVal) << endl;
-  cout << "m_colStrideVal = " << std::to_string(m_colStrideVal) << endl;
-
   m_msize.AddRepeatedSizes(m, 1, 1);
   m_nsize.AddRepeatedSizes(n, 1, 1);
   m_varName.m_name = name;
