@@ -2349,107 +2349,109 @@ void Poss::EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGr
   }
 }
 
-void Poss::PrintRoot(IndStream &out, unsigned int whichGraph)
+void Poss::PrintRoot(IndStream &out, unsigned int whichGraph, bool currOnly)
 {
-  if (whichGraph != 0) {
-    unsigned int graphNum = 1;
+  if (!currOnly)
     ClearCurrPoss();
-    bool keepGoing = true;
-
-    while (keepGoing && graphNum != whichGraph) {
-      ++graphNum;
-      keepGoing = !IncrementCurrPoss();
-    }
-    
-    if (graphNum != whichGraph) {
-      throw;
-    }
-  }
   
   unsigned int numPSets = m_sets.size();
-  
-  ClearPrinted();
 
-  if (whichGraph != 0)
-    *out << "/*** Algorithm " << whichGraph << " ***" << endl;
-  *out << "\tUnique Num: " << m_num << endl;
-  *out << "\tChild of: " << m_parent << endl;
-  *out << "\tResult of transformations:" << endl;
-  TransVec transVec;
-  GetCurrTransVec(transVec);
-  TransVecConstIter transIter = transVec.begin();
-  for( ; transIter != transVec.end(); ++transIter)
-    *out << "\t" << (*transIter)->GetType() << endl;
-  *out << "*****************************************/" << endl;
+  bool keepGoing = true;
+  unsigned int graphNum = 1;
 
-  VarSet set;
-  AddCurrPossVars(set);
-  VarSetIter varIter = set.begin();
+  while (keepGoing) {
+    if (currOnly || whichGraph == 0 || whichGraph == graphNum) {
+      ClearPrinted();
+
+      if (whichGraph != 0)
+	*out << "/*** Algorithm " << whichGraph << " ***" << endl;
+      *out << "\tUnique Num: " << m_num << endl;
+      *out << "\tChild of: " << m_parent << endl;
+      *out << "\tResult of transformations:" << endl;
+      TransVec transVec;
+      GetCurrTransVec(transVec);
+      TransVecConstIter transIter = transVec.begin();
+      for( ; transIter != transVec.end(); ++transIter)
+	*out << "\t" << (*transIter)->GetType() << endl;
+      *out << "*****************************************/" << endl;
+
+      VarSet set;
+      AddCurrPossVars(set);
+      VarSetIter varIter = set.begin();
 #if DOTENSORS
-  out.Indent();
-  *out << "ObjShape tempShape;\n";
-#endif
-  for(; varIter != set.end(); ++varIter) {
-    (*varIter).PrintDecl(out);
-  }
-      
-  if (m_pset && m_pset->IsLoop()
-      && ((Loop*)m_pset)->GetType() == BLISLOOP)
-    {
-      string loopLevel = out.LoopLevel(1);
-      string idx = "idx" + loopLevel;
-      string dimLen = "dimLen" + loopLevel;
-      string bs = "bs" + loopLevel;
       out.Indent();
-      *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
-    }
+      *out << "ObjShape tempShape;\n";
+#endif
+      for(; varIter != set.end(); ++varIter) {
+	(*varIter).PrintDecl(out);
+      }
+      
+      if (m_pset && m_pset->IsLoop()
+	  && ((Loop*)m_pset)->GetType() == BLISLOOP)
+	{
+	  string loopLevel = out.LoopLevel(1);
+	  string idx = "idx" + loopLevel;
+	  string dimLen = "dimLen" + loopLevel;
+	  string bs = "bs" + loopLevel;
+	  out.Indent();
+	  *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
+	}
       
       
-  //This actualy sets some stuff so it can print
-  if (!CanPrint()) {
-    cout << "couldn't print\n";
-    throw;
-  }
+      //This actualy sets some stuff so it can print
+      if (!CanPrint()) {
+	cout << "couldn't print\n";
+	throw;
+      }
       
-  NodeVecConstIter nodeIter = m_inTuns.begin();
-  for(; nodeIter != m_inTuns.end(); ++nodeIter) {
-    (*nodeIter)->Print(out, whichGraph);
-  }
-  bool hasPrinted = true;
-  while(hasPrinted) {
-    hasPrinted = false;
-    NodeVecConstIter nodeIter = m_possNodes.begin();
-    for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
-      //Don't bring the poss out tunnels until the end
-      // so the repartitioning code all goes after the loop body
-      if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsPossTunnel(POSSTUNOUT)) {
+      NodeVecConstIter nodeIter = m_inTuns.begin();
+      for(; nodeIter != m_inTuns.end(); ++nodeIter) {
 	(*nodeIter)->Print(out, whichGraph);
-	hasPrinted |= (*nodeIter)->HasPrinted();
+      }
+      bool hasPrinted = true;
+      while(hasPrinted) {
+	hasPrinted = false;
+	NodeVecConstIter nodeIter = m_possNodes.begin();
+	for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
+	  //Don't bring the poss out tunnels until the end
+	  // so the repartitioning code all goes after the loop body
+	  if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsPossTunnel(POSSTUNOUT)) {
+	    (*nodeIter)->Print(out, whichGraph);
+	    hasPrinted |= (*nodeIter)->HasPrinted();
+	  }
+	}
+	for(unsigned int i = 0; i < numPSets; ++i) {
+	  if (m_sets[i]->GetCurrPoss()->CanPrint()) {
+	    m_sets[i]->PrintCurrPoss(out, whichGraph);
+	    hasPrinted = true;
+	  }
+	}
+      }
+      
+      nodeIter = m_outTuns.begin();
+      for(; nodeIter != m_outTuns.end(); ++nodeIter) {
+	(*nodeIter)->Print(out, whichGraph);
+	(*nodeIter)->SetPrinted();
+      }
+      
+      nodeIter = m_pset->m_outTuns.begin();
+      for(; nodeIter != m_pset->m_outTuns.end(); ++nodeIter) {
+	(*nodeIter)->Print(out, whichGraph);
+	(*nodeIter)->SetPrinted();
+      }
+      *out << endl;
+      
+      out.Indent();
+      *out << "/*****************************************/" << endl;
+      if (whichGraph != 0 || currOnly) {
+	keepGoing = false;
       }
     }
-    for(unsigned int i = 0; i < numPSets; ++i) {
-      if (m_sets[i]->GetCurrPoss()->CanPrint()) {
-	m_sets[i]->PrintCurrPoss(out, whichGraph);
-	hasPrinted = true;
-      }
-    }
+
+    ++graphNum;
+    if (keepGoing)
+      keepGoing = !IncrementCurrPoss();
   }
-      
-  nodeIter = m_outTuns.begin();
-  for(; nodeIter != m_outTuns.end(); ++nodeIter) {
-    (*nodeIter)->Print(out, whichGraph);
-    (*nodeIter)->SetPrinted();
-  }
-      
-  nodeIter = m_pset->m_outTuns.begin();
-  for(; nodeIter != m_pset->m_outTuns.end(); ++nodeIter) {
-    (*nodeIter)->Print(out, whichGraph);
-    (*nodeIter)->SetPrinted();
-  }
-  *out << endl;
-      
-  out.Indent();
-  *out << "/*****************************************/" << endl;
 
   m_hasPrinted = true;
 }
@@ -2890,13 +2892,13 @@ void PrintSetOrNodeInputs(Node *node)
     }
     else if (input->IsPossTunnel(POSSTUNIN)) {
       cout << "\tInput: PossTunIn " << input << " ("
-      << (*iter)->m_num << ") " << input->GetNodeClass() << endl;
+	   << (*iter)->m_num << ") " << input->GetNodeClass() << endl;
     }
     else if (input->IsPossTunnel())
       throw;
     else {
       cout << "\tInput: Node " << input << " ("
-      << (*iter)->m_num << ") " << input->GetNodeClass() << endl;
+	   << (*iter)->m_num << ") " << input->GetNodeClass() << endl;
     }
   }
 }
@@ -2910,14 +2912,14 @@ void PrintSetOrNodeChildren(Node *node)
       continue;
     else if (child->IsPossTunnel(SETTUNIN)) {
       cout << "\tChild: Set " << ((PossTunnel*)child)->m_pset
-      << " (" << (*iter)->m_num << ")" << endl;
+	   << " (" << (*iter)->m_num << ")" << endl;
       cout << "\t\t" << node->GetNameStr((*iter)->m_num) << endl;
     }
     else if (child->IsPossTunnel())
       throw;
     else {
       cout << "\tChild: Node " << child << " ("
-      << (*iter)->m_num << ") " << child->GetNodeClass() << endl;
+	   << (*iter)->m_num << ") " << child->GetNodeClass() << endl;
       cout << "\t\t" << node->GetNameStr((*iter)->m_num) << endl;
     }
   }
