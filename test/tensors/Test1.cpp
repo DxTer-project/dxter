@@ -26,6 +26,17 @@ using namespace std;
 #define GRIDORDER 4
 
 template <typename T>
+void PrintLocalSizes(const DistTensor<T>& A) 
+{
+  const Int commRank = mpi::CommRank( mpi::COMM_WORLD );
+  if (commRank == 0) {
+    for (Unsigned i = 0; i < A.Order(); ++i) {
+      cout << i << " is " << A.LocalDimension(i) << endl;
+    }
+  }
+}
+
+template <typename T>
 void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
 {
   DistTensor<T> *tmp = NULL;
@@ -284,9 +295,28 @@ DistTensorTest( const Grid& g )
     //****
     // 1.0 * A[*,D0,D3]_acd * B[D0,D1,D2,D3]_cefd + 0.0 * C[*,D1,D2,D0,D3]_aefcd
     
+    
+    cout << "in" << endl;
+    cout.flush();
+
+    if (commRank == 0) {
+      cout << "A " << endl;
+      PrintLocalSizes(A__S__D_0__D_3);
+      
+      cout << "B " << endl;
+      PrintLocalSizes(B__D_0__D_1__D_2__D_3);
+      
+      cout << "C" << endl;
+      PrintLocalSizes(C__S__D_1__D_2__D_0__D_3);
+    }
+
     LocalContract(1.0, A__S__D_0__D_3.LockedTensor(), indices_acd,
 		  B__D_0__D_1__D_2__D_3.LockedTensor(), indices_cefd,
 		  0.0, C__S__D_1__D_2__D_0__D_3.Tensor(), indices_aefcd);
+
+    cout << "out" << endl;
+    cout.flush();
+
     // C[*,D1,*,D0,D3] <- C[*,D1,D2,D0,D3]
     C__S__D_1__S__D_0__D_3.AllGatherRedistFrom( C__S__D_1__D_2__D_0__D_3, 2, modes_2 );
     // C[*,D12,*,D0,D3] <- C[*,D1,*,D0,D3]
@@ -324,10 +354,11 @@ DistTensorTest( const Grid& g )
     diffTensor.ResizeTo(C_local);
     Diff( C_local.LockedTensor(), C_local_comparison.LockedTensor(), diffTensor.Tensor() );
 
-    cout << "Norm is " << Norm(diffTensor.LockedTensor()) << endl;
-    /*
-    Compare( C_local, C_local_comparison );
-    */
+    if (commRank == 0) {
+      cout << "Norm of distributed is " << Norm(C_local_comparison.LockedTensor()) << endl;
+      cout << "Norm of local is " << Norm(C_local.LockedTensor()) << endl;
+      cout << "Norm is " << Norm(diffTensor.LockedTensor()) << endl;
+    }
 }
 
 int 
