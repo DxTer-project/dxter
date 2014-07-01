@@ -219,7 +219,21 @@ void InputNode::PrintCode(IndStream &out)
   *out << "// " << m_type << " has " << m_numDims << " dims\n";
   out.Indent();
   *out << "//\tStarting distribution: " << m_varName.m_type.PrettyStr() << " or " << DistTypeToStr(m_varName.m_type) << endl;
+#if 1
+  out.Indent();
+  *out << "Set( " << GetNameStr(0) << " );\n";
+  out.Indent();
+  *out << "DistTensor<T> " << m_varName.m_name << "_local( tmen::StringToTensorDist(\"[";
+  for (Dim dim = 0; dim < m_dataTypeInfo.m_dist.m_numDims; ++dim)
+    *out << (dim ? "," : "") << "()";
+  *out << "]|(";
+  for (Dim dim = 0; dim < NUM_GRID_DIMS; ++dim)
+    *out << (dim ? "," : "") << dim;
+  *out << ")\"), g );\n";
+  out.Indent();
+  *out << "GatherAllModes( " << GetNameStr(0) << ", " << m_varName.m_name << "_local );\n";
 #endif
+#endif //DOTENSORS
 }
 
 void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
