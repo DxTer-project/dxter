@@ -21,7 +21,7 @@ BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 #CFLAGS += -fno-underscoring -fno-second-underscore 
 
 
-all: Test1.x
+all: Test1.x Test2.x
 
 Test1.o: Test1.cpp $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -29,8 +29,12 @@ Test1.o: Test1.cpp $(HEADERS)
 Test1.x: Test1.o $(HEADERS) $(TENSORMENTALLIB)
 	$(LINKER) $(CFLAGS) Test1.o $(TENSORMENTALLIB) -framework Accelerate -o $@
 
-#	$(LINKER) $(CFLAGS) Test1.o $(TENSORMENTALLIB) $(BLIS_LIB) -o $@
-#
+
+Test2.o: Test2.cpp $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+Test2.x: Test2.o $(HEADERS) $(TENSORMENTALLIB)
+	$(LINKER) $(CFLAGS) Test2.o $(TENSORMENTALLIB) -framework Accelerate -o $@
 
 clean:
 	rm -f *.o *.x *~
