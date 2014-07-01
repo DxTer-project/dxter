@@ -308,33 +308,23 @@ DistTensorTest( const Grid& g )
 
     //****
 
-
     IndexArray indices_aef( 3 );
     indices_aef[0] = 'a';
     indices_aef[1] = 'e';
     indices_aef[2] = 'f';
 
-
-    for (int i = 0; i < 3; ++i) {
-      cout << A_local.LockedTensor().Shape()[i] << endl;
-    }
-    cout << endl;
-    for (int i = 0; i < 4; ++i) {
-      cout << B_local.LockedTensor().Shape()[i] << endl;
-    }
-    cout << endl;
-    for (int i = 0; i < 3; ++i) {
-      cout << C_local.LockedTensor().Shape()[i] << endl;
-    }
-    cout << endl;
-
-    LocalContract(1.0, A_local.LockedTensor(), indices_acd,
-    		  B_local.LockedTensor(), indices_cefd,
-    		  1.0, C_local.Tensor(), indices_aef);
+    LocalContractAndLocalEliminate(1.0, A_local.LockedTensor(), indices_acd,
+			      B_local.LockedTensor(), indices_cefd,
+			      1.0, C_local.Tensor(), indices_aef);
 
     DistTensor<T> C_local_comparison( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );    
     GatherAllModes(C__D_0_1__D_2__D_3, C_local_comparison);
 
+    DistTensor<T> diffTensor( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );    
+    diffTensor.ResizeTo(C_local);
+    Diff( C_local.LockedTensor(), C_local_comparison.LockedTensor(), diffTensor.Tensor() );
+
+    cout << "Norm is " << Norm(diffTensor.LockedTensor()) << endl;
     /*
     Compare( C_local, C_local_comparison );
     */
