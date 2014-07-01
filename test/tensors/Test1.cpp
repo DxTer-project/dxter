@@ -56,11 +56,9 @@ void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
       newDist[mode] = modeDist;
       DistTensor<T> *tmp2 = new DistTensor<T>(newDist, A.Grid());
       if (!tmp) {
-	tmp2->ResizeTo(A);
 	tmp2->GatherToOneRedistFrom(A, mode);
       }
       else {
-	tmp2->ResizeTo(*tmp);
 	tmp2->GatherToOneRedistFrom(*tmp, mode);
 	delete tmp;
       }
