@@ -221,6 +221,15 @@ void InputNode::PrintCode(IndStream &out)
   *out << "//\tStarting distribution: " << m_varName.m_type.PrettyStr() << " or " << DistTypeToStr(m_varName.m_type) << endl;
 #if 1
   out.Indent();
+  string name = GetNameStr(0) + "_tempShape";
+  *out << "ObjShape " << name << ";\n";
+  for(Dim dim = 0; dim < m_numDims; ++dim) {
+    out.Indent();
+    *out << name << ".push_back( " << (m_sizes[dim])[0] << " );\n";
+  }
+  out.Indent();
+  *out << GetNameStr(0) << ".ResizeTo( " << name << " );\n";
+  out.Indent();
   *out << "Set( " << GetNameStr(0) << " );\n";
   out.Indent();
   *out << "DistTensor<T> " << m_varName.m_name << "_local( tmen::StringToTensorDist(\"[";
