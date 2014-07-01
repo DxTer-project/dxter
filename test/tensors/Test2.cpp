@@ -56,11 +56,9 @@ void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
       newDist[mode] = modeDist;
       DistTensor<T> *tmp2 = new DistTensor<T>(newDist, A.Grid());
       if (!tmp) {
-	tmp2->ResizeTo(A);
 	tmp2->GatherToOneRedistFrom(A, mode);
       }
       else {
-	tmp2->ResizeTo(*tmp);
 	tmp2->GatherToOneRedistFrom(*tmp, mode);
 	delete tmp;
       }
@@ -450,23 +448,37 @@ DistTensorTest( const Grid& g )
     //------------------------------------//
 
 
-    LocalContractAndLocalEliminate(1.0, A_local.LockedTensor(), indices_acd,
-			      B_local.LockedTensor(), indices_cefd,
-			      1.0, C_local.Tensor(), indices_aef);
+    LocalContractAndLocalEliminate(1.0, U_local.LockedTensor(), indices_abcd,
+			      T1_local.LockedTensor(), indices_cdij,
+			      0.0, Accum_local.Tensor(), indices_abij);
 
-    DistTensor<T> C_local_comparison( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );    
-    GatherAllModes(C__D_0_1__D_2__D_3, C_local_comparison);
+    LocalContractAndLocalEliminate(1.0, V_local.LockedTensor(), indices_acik,
+				   T2_local.LockedTensor(), indices_bcjk,
+				   1.0, Accum_local.Tensor(), indices_abij);
 
-    DistTensor<T> diffTensor( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );    
-    diffTensor.ResizeTo(C_local);
-    Diff( C_local.LockedTensor(), C_local_comparison.LockedTensor(), diffTensor.Tensor() );
+    LocalContractAndLocalEliminate(1.0, W_local.LockedTensor(), indices_ijkl,
+				   T3_local.LockedTensor(), indices_abkl,
+				   1.0, Accum_local.Tensor(), indices_abij);
+
+
+    IndexArray blank_indices;
+
+    LocalContractAndLocalEliminate(1.0, T4_local.LockedTensor(), indices_abij,
+				   Accum_local.LockedTensor(), indices_abij,
+				   1.0, epsilon_local.Tensor(), blank_indices);
+
+    DistTensor<T> epsilon_local_comparison( tmen::StringToTensorDist("[]|(0,1,2,3)"), g );    
+    GatherAllModes(epsilon____N_D_0_1_2_3, epsilon_local_comparison);
+
+    DistTensor<T> diffTensor( tmen::StringToTensorDist("[]|(0,1,2,3)"), g );    
+    diffTensor.ResizeTo(epsilon_local_comparison);
+    Diff( epsilon_local_comparison.LockedTensor(), epsilon_local.LockedTensor(), diffTensor.Tensor() );
 
     if (commRank == 0) {
-      cout << "Norm of distributed is " << Norm(C_local_comparison.LockedTensor()) << endl;
-      cout << "Norm of local is " << Norm(C_local.LockedTensor()) << endl;
+      cout << "Norm of distributed is " << Norm(epsilon_local_comparison.LockedTensor()) << endl;
+      cout << "Norm of local is " << Norm(epsilon_local.LockedTensor()) << endl;
       cout << "Norm is " << Norm(diffTensor.LockedTensor()) << endl;
     }
-
 }
 
 int 
