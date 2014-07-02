@@ -1284,7 +1284,4 @@ bool Loop::HasIndepIters() const
 #endif
 
 
-const string& Loop::GetFunctionalityString() const
-{
-  return PSet::GetFunctionalityString() + (char)(m_bsSize);
-}
+
