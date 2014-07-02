@@ -141,5 +141,4 @@ class Loop : public PSet
   bool OnlyParallelizedOnNonIndependentData() const;
 #endif
 
-  virtual const string& GetFunctionalityString() const;
 };

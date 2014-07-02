@@ -37,12 +37,17 @@ PSet::PSet()
 }
 
 PSet::PSet(Poss *poss)
-  : m_isTopLevel(false), m_ownerPoss(NULL),
-    m_functionality(poss->GetFunctionalityString())
+  : m_isTopLevel(false), m_ownerPoss(NULL)
 {
+  m_functionality = poss->GetFunctionalityString();
+
   if (m_functionality.empty()) {
     cout << "starting PSet without functionality\n";
     throw;
+  }
+  if (IsLoop()) {
+    Loop *loop = (Loop*)this;
+    m_functionality += (char)(loop->m_bsSize);
   }
   //Make single tunnels with multiple inputs/outputs into individual tunnels
   //Poss mergin with multiple intput/output tunnels is very buggy
@@ -132,8 +137,13 @@ void PSet::AddPoss(Poss *poss)
   if (m_functionality.empty()) {
     if (m_posses.size())
       throw;
-    else
+    else {
       m_functionality = poss->GetFunctionalityString();
+      if (IsLoop()) {
+	Loop *loop = (Loop*)this;
+	m_functionality += (char)(loop->m_bsSize);
+      }
+    }
   }
   if (m_inTuns.size() != poss->m_inTuns.size()) {
     cout << "New poss doesn't have same number of inputs\n";
@@ -1557,6 +1567,10 @@ void PSet::FormSetAround()
   newPoss->m_sets.push_back(this);
   m_ownerPoss = newPoss;
   newSet->m_functionality = newPoss->GetFunctionalityString();
+  if (newSet->IsLoop()) {
+    Loop *loop = (Loop*)(newSet);
+    newSet->m_functionality += (char)(loop->m_bsSize);
+  }
 }
 
 
