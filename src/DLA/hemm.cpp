@@ -351,12 +351,12 @@ Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
   Atun->SetAllStats(FULLUP);
   Atun->SetIndepIters();
   
-  Split *splitB = new Split(side==LEFT ? PARTRIGHT : PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(side==LEFT ? PARTRIGHT : PARTDOWN, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
   
-  Split *splitC = new Split(side==LEFT ? PARTRIGHT : PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(side==LEFT ? PARTRIGHT : PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   if (side == LEFT) {
     splitC->SetUpStats(FULLUP, NOTUP,
@@ -411,12 +411,12 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
 		   Type type,
 		   Layer layer)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
@@ -424,7 +424,7 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
   ScaleNode *scale = new ScaleNode(layer, beta);
   scale->AddInput(Cin, Cnum);
   
-  Split *splitC = new Split(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   splitC->AddInput(scale, 0);
   splitC->SetAllStats(PARTUP);
 
@@ -538,12 +538,12 @@ Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
 		   Type type,
 			  Layer layer)
 {  
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
@@ -551,7 +551,7 @@ Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
   ScaleNode *scale = new ScaleNode(layer, beta);
   scale->AddInput(Cin, Cnum);
   
-  Split *splitC = new Split(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(side==LEFT ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   splitC->AddInput(scale, 0);
   splitC->SetAllStats(PARTUP);
 
@@ -1029,7 +1029,7 @@ void BLISHemmLoopExp::Apply(Node *node) const
     Cnum = 0;
   }
 
-  Split *splitA = new Split(PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -1052,7 +1052,7 @@ void BLISHemmLoopExp::Apply(Node *node) const
   Btun->SetIndepIters();
 
   
-  Split *splitC = new Split(PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   splitC->SetUpStats(FULLUP, FULLUP,
                      NOTUP, NOTUP);

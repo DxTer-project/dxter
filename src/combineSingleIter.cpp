@@ -21,12 +21,36 @@
 
 
 
-#include "combine.h"
-#include "split.h"
+#include "combineSingleIter.h"
+#include "splitSingleIter.h"
 #include "elemRedist.h"
 #include <cmath>
 
-void Combine::Prop()
+#if TWOD
+CombineSingleIter::CombineSingleIter() 
+  :CombineBase()
+{
+}
+
+CombineSingleIter::CombineSingleIter(PartDir dir, PossTunType type) 
+  : CombineBase(dir,type)
+{
+}
+#else
+
+CombineSingleIter::CombineSingleIter() 
+  : CombineBase()
+{
+}
+
+CombineSingleIter::CombineSingleIter(Dim partDim, PossTunType type) 
+  : CombineBase(partDim, type)
+{
+}
+#endif
+
+
+void CombineSingleIter::Prop()
 {
   if (!IsValidCost(m_cost)) {
     LoopTunnel::Prop();
@@ -51,9 +75,9 @@ void Combine::Prop()
     if (m_tunType == SETTUNOUT) {
       if (!m_pset->IsLoop())
 	throw;
-    
+
       for(unsigned int i = 0; i < m_inputs.size(); ++i) {
-	if (Input(i)->GetNodeClass() != Combine::GetClass()) {
+	if (Input(i)->GetNodeClass() != CombineSingleIter::GetClass()) {
 	  throw;
 	}
       }
@@ -77,14 +101,14 @@ void Combine::Prop()
 #endif
 	    throw;
 	  }
-	  else if (conn->m_n->GetNodeClass() != Split::GetClass())
+	  else if (conn->m_n->GetNodeClass() != SplitSingleIter::GetClass())
 	    throw;
 	
-	if (Input(m_inputs.size()-1)->GetNodeClass() != Split::GetClass()) {
+	if (Input(m_inputs.size()-1)->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  cout << "Last input isn't the right size\n";
 	}
 	for (unsigned int i = 0; i < m_children.size(); ++i) {
-	  if (Child(i)->GetNodeClass() != Combine::GetClass()) {
+	  if (Child(i)->GetNodeClass() != CombineSingleIter::GetClass()) {
 	    cout << Child(i)->GetType() << endl;
 	    throw;
 	  }
@@ -110,13 +134,13 @@ void Combine::Prop()
   }
 }
 
-    const DataTypeInfo& Combine::DataType(unsigned int num) const
+    const DataTypeInfo& CombineSingleIter::DataType(unsigned int num) const
     {
       return InputDataType(0);
     }
 
 #if TWOD
-const Sizes* Combine::GetM(unsigned int num) const
+const Sizes* CombineSingleIter::GetM(unsigned int num) const
 {
   if (num > 0)
     throw;
@@ -131,7 +155,7 @@ const Sizes* Combine::GetM(unsigned int num) const
   }
 }
 
-const Sizes* Combine::GetN(unsigned int num) const
+const Sizes* CombineSingleIter::GetN(unsigned int num) const
 {
   if (num > 0)
     throw;
@@ -147,7 +171,7 @@ const Sizes* Combine::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* Combine::LocalM(unsigned int num) const
+const Sizes* CombineSingleIter::LocalM(unsigned int num) const
 {
   if (num > 0)
     throw;
@@ -165,7 +189,7 @@ const Sizes* Combine::LocalM(unsigned int num) const
   }
 }
 
-const Sizes* Combine::LocalN(unsigned int num) const
+const Sizes* CombineSingleIter::LocalN(unsigned int num) const
 {
   if (num > 0)
     throw;
@@ -184,7 +208,7 @@ const Sizes* Combine::LocalN(unsigned int num) const
 
 
 #else
-const Dim Combine::NumDims(unsigned int num) const
+const Dim CombineSingleIter::NumDims(unsigned int num) const
 {
   if (num > 0)
     throw;
@@ -199,7 +223,7 @@ const Dim Combine::NumDims(unsigned int num) const
   }
 }
 
-const Sizes* Combine::Len(unsigned int num, Dim dim) const
+const Sizes* CombineSingleIter::Len(unsigned int num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -214,7 +238,7 @@ const Sizes* Combine::Len(unsigned int num, Dim dim) const
   }
 }
 
-const Sizes* Combine::LocalLen(unsigned int num, Dim dim) const
+const Sizes* CombineSingleIter::LocalLen(unsigned int num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -239,30 +263,30 @@ const Sizes* Combine::LocalLen(unsigned int num, Dim dim) const
 
 #endif
 
-Name Combine::GetName(unsigned int num) const
+Name CombineSingleIter::GetName(unsigned int num) const
 {
   if (num > 0)
     throw;
   if (m_tunType == POSSTUNOUT)
-    return ((Split*)Input(m_inputs.size()-1))->GetOrigName();
+    return ((SplitSingleIter*)Input(m_inputs.size()-1))->GetOrigName();
   else
     return Input(0)->GetName(0);
 }
 
-PossTunnel* Combine::GetSetTunnel()
+PossTunnel* CombineSingleIter::GetSetTunnel()
 {
-  Combine *tun;
+  CombineSingleIter *tun;
   if (m_tunType == POSSTUNIN)
 #if TWOD
-    tun = new Combine(m_dir, SETTUNIN);
+    tun = new CombineSingleIter(m_dir, SETTUNIN);
 #else
-    tun = new Combine(m_partDim, SETTUNIN);
+    tun = new CombineSingleIter(m_partDim, SETTUNIN);
 #endif
   else if (m_tunType == POSSTUNOUT)
 #if TWOD
-    tun = new Combine(m_dir, SETTUNOUT);
+    tun = new CombineSingleIter(m_dir, SETTUNOUT);
 #else
-    tun = new Combine(m_partDim, SETTUNOUT);
+    tun = new CombineSingleIter(m_partDim, SETTUNOUT);
 #endif
   else
     throw;
@@ -270,7 +294,7 @@ PossTunnel* Combine::GetSetTunnel()
   return tun;
 }
 
-void Combine::PrintCode(IndStream &out)
+void CombineSingleIter::PrintCode(IndStream &out)
 {
   if (m_tunType != POSSTUNOUT) {
     //    cout << "returning from " << GetNameStr(0) << endl;
@@ -360,18 +384,7 @@ void Combine::PrintCode(IndStream &out)
 #endif
 }
 
-void Combine::Duplicate(const Node *orig, bool shallow, bool possMerging)
-{
-  LoopTunnel::Duplicate(orig, shallow, possMerging);
-  const Combine *com = (Combine*)orig;
-#if TWOD
-  m_dir = com->m_dir;
-#else
-  m_partDim = com->m_partDim;
-#endif
-}
-
-NodeType Combine::GetType() const
+NodeType CombineSingleIter::GetType() const
 {
 #if TWOD
   return "Combine " + PartDirToStr(m_dir) + "( " + PossTunnel::GetType() + " )";
@@ -382,22 +395,3 @@ NodeType Combine::GetType() const
 #endif
 }
 
-void Combine::FlattenCore(ofstream &out) const
-{
-  LoopTunnel::FlattenCore(out);
-#if TWOD
-  WRITE(m_dir);
-#else
-  WRITE(m_partDim);
-#endif
-}
-
-void Combine::UnflattenCore(ifstream &in, SaveInfo &info) 
-{
-  LoopTunnel::UnflattenCore(in,info);
-#if TWOD
-  READ(m_dir);
-#else
-  READ(m_partDim);
-#endif
-}

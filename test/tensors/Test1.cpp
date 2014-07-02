@@ -26,6 +26,17 @@ using namespace std;
 #define GRIDORDER 4
 
 template <typename T>
+void PrintLocalSizes(const DistTensor<T>& A) 
+{
+  const Int commRank = mpi::CommRank( mpi::COMM_WORLD );
+  if (commRank == 0) {
+    for (Unsigned i = 0; i < A.Order(); ++i) {
+      cout << i << " is " << A.LocalDimension(i) << endl;
+    }
+  }
+}
+
+template <typename T>
 void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
 {
   DistTensor<T> *tmp = NULL;
@@ -45,11 +56,9 @@ void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
       newDist[mode] = modeDist;
       DistTensor<T> *tmp2 = new DistTensor<T>(newDist, A.Grid());
       if (!tmp) {
-	tmp2->ResizeTo(A);
 	tmp2->GatherToOneRedistFrom(A, mode);
       }
       else {
-	tmp2->ResizeTo(*tmp);
 	tmp2->GatherToOneRedistFrom(*tmp, mode);
 	delete tmp;
       }
@@ -284,9 +293,28 @@ DistTensorTest( const Grid& g )
     //****
     // 1.0 * A[*,D0,D3]_acd * B[D0,D1,D2,D3]_cefd + 0.0 * C[*,D1,D2,D0,D3]_aefcd
     
+    
+    cout << "in" << endl;
+    cout.flush();
+
+    if (commRank == 0) {
+      cout << "A " << endl;
+      PrintLocalSizes(A__S__D_0__D_3);
+      
+      cout << "B " << endl;
+      PrintLocalSizes(B__D_0__D_1__D_2__D_3);
+      
+      cout << "C" << endl;
+      PrintLocalSizes(C__S__D_1__D_2__D_0__D_3);
+    }
+
     LocalContract(1.0, A__S__D_0__D_3.LockedTensor(), indices_acd,
 		  B__D_0__D_1__D_2__D_3.LockedTensor(), indices_cefd,
 		  0.0, C__S__D_1__D_2__D_0__D_3.Tensor(), indices_aefcd);
+
+    cout << "out" << endl;
+    cout.flush();
+
     // C[*,D1,*,D0,D3] <- C[*,D1,D2,D0,D3]
     C__S__D_1__S__D_0__D_3.AllGatherRedistFrom( C__S__D_1__D_2__D_0__D_3, 2, modes_2 );
     // C[*,D12,*,D0,D3] <- C[*,D1,*,D0,D3]
@@ -302,42 +330,34 @@ DistTensorTest( const Grid& g )
     // C[D10,D2,D3] <- C[D10,D2,*,D3] (with SumScatter on D3)
     C__D_1_0__D_2__D_3.ReduceScatterRedistFrom( C__D_1_0__D_2__S__D_3, 3, 2 );
     // C[D01,D2,D3] <- C[D10,D2,D3]
-    C__D_0_1__D_2__D_3.PermutationRedistFrom( C__D_1_0__D_2__D_3, 0, modes_1_0 );
+    C__D_0_1__D_2__D_3_temp.PermutationRedistFrom( C__D_1_0__D_2__D_3, 0, modes_1_0 );
+    C__D_0_1__D_2__D_3= beta*C__D_0_1__D_2__D_3 + C__D_0_1__D_2__D_3_temp;
 
     //------------------------------------//
 
     //****
-
 
     IndexArray indices_aef( 3 );
     indices_aef[0] = 'a';
     indices_aef[1] = 'e';
     indices_aef[2] = 'f';
 
-
-    for (int i = 0; i < 3; ++i) {
-      cout << A_local.LockedTensor().Shape()[i] << endl;
-    }
-    cout << endl;
-    for (int i = 0; i < 4; ++i) {
-      cout << B_local.LockedTensor().Shape()[i] << endl;
-    }
-    cout << endl;
-    for (int i = 0; i < 3; ++i) {
-      cout << C_local.LockedTensor().Shape()[i] << endl;
-    }
-    cout << endl;
-
-    LocalContract(1.0, A_local.LockedTensor(), indices_acd,
-    		  B_local.LockedTensor(), indices_cefd,
-    		  1.0, C_local.Tensor(), indices_aef);
+    LocalContractAndLocalEliminate(1.0, A_local.LockedTensor(), indices_acd,
+			      B_local.LockedTensor(), indices_cefd,
+			      1.0, C_local.Tensor(), indices_aef);
 
     DistTensor<T> C_local_comparison( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );    
     GatherAllModes(C__D_0_1__D_2__D_3, C_local_comparison);
 
-    /*
-    Compare( C_local, C_local_comparison );
-    */
+    DistTensor<T> diffTensor( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );    
+    diffTensor.ResizeTo(C_local);
+    Diff( C_local.LockedTensor(), C_local_comparison.LockedTensor(), diffTensor.Tensor() );
+
+    if (commRank == 0) {
+      cout << "Norm of distributed is " << Norm(C_local_comparison.LockedTensor()) << endl;
+      cout << "Norm of local is " << Norm(C_local.LockedTensor()) << endl;
+      cout << "Norm is " << Norm(diffTensor.LockedTensor()) << endl;
+    }
 }
 
 int 

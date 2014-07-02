@@ -206,7 +206,7 @@ void DistHetrmmToLocalHetrmm::Apply(Node *node) const
 
 Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num)
 {
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
   split->SetUpStats(PARTUP, FULLUP,
 		    NOTUP, NOTUP);
@@ -260,7 +260,7 @@ Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num)
 
 Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num)
 {
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(PARTUP, NOTUP,
 		    FULLUP, NOTUP);
@@ -307,7 +307,7 @@ Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num)
 
 Loop* HetrmmAlgVar2Lower(Node *in, unsigned int num)
 {
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
   split->SetUpStats(FULLUP, FULLUP,
 		    NOTUP, NOTUP);
@@ -363,7 +363,7 @@ Loop* HetrmmAlgVar2Lower(Node *in, unsigned int num)
 
 Loop* HetrmmAlgVar2Upper(Node *in, unsigned int num)
 {
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(FULLUP, NOTUP,
 		    FULLUP, NOTUP);
@@ -416,7 +416,7 @@ Loop* HetrmmAlgVar2Upper(Node *in, unsigned int num)
 
 Loop* HetrmmAlgVar3Lower(Node *in, unsigned int num)
 {
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
   split->SetUpStats(FULLUP, FULLUP,
 		      FULLUP, NOTUP);
@@ -470,7 +470,7 @@ Loop* HetrmmAlgVar3Lower(Node *in, unsigned int num)
 
 Loop* HetrmmAlgVar3Upper(Node *in, unsigned int num)
 {
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(FULLUP, FULLUP,
 		    FULLUP, NOTUP);

@@ -798,7 +798,7 @@ Cost Sizes::SumProds11(const Sizes &sizes) const
         cout << "bad\n";
         throw;
       }
-      cost += *iter1 + *iter2;
+      cost += *iter1 * *iter2;
       ++iter1;
       ++iter2;
     }
@@ -857,7 +857,7 @@ Cost Sizes::SumProds111(const Sizes &sizes1, const Sizes &sizes2) const
       Size size1 = *iter1;
       Size size2 = *iter2;
       Size size3 = *iter3;
-      cost += size1 + size2 + size3;
+      cost += size1 * size2 * size3;
       ++iter1;
       ++iter2;
       ++iter3;

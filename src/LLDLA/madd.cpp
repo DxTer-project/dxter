@@ -142,10 +142,10 @@ void MAddLoopRef::Apply(Node *node) const
 {
   MAdd *madd = (MAdd*) node;
   
-  Split *split0 = new Split(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split0 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split0->AddInput(madd->Input(0), madd->InputConnNum(0));
 
-  Split *split1 = new Split(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter *split1 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
   split1->AddInput(madd->Input(1), madd->InputConnNum(1));
 
   split0->SetAllStats(FULLUP);
@@ -164,8 +164,8 @@ void MAddLoopRef::Apply(Node *node) const
   newMAdd->AddInput(split0, 1);
   newMAdd->AddInput(split1, 1);
 
-  Combine *com0 = split0->CreateMatchingCombine(0);
-  Combine *com1 = split1->CreateMatchingCombine(1, 1, newMAdd, 0);
+  CombineSingleIter *com0 = split0->CreateMatchingCombine(0);
+  CombineSingleIter *com1 = split1->CreateMatchingCombine(1, 1, newMAdd, 0);
 
   Poss *loopPoss = new Poss(2, com0, com1);
 
@@ -203,10 +203,10 @@ void MAddToVAddLoopRef::Apply(Node *node) const
 {
   MAdd *madd = (MAdd*) node;
 
-  Split *split0 = new Split(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split0 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split0->AddInput(madd->Input(0), madd->InputConnNum(0));
 
-  Split *split1 = new Split(m_dim == DIMN ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter *split1 = new SplitSingleIter(m_dim == DIMN ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
   split1->AddInput(madd->Input(1), madd->InputConnNum(1));
 
   split0->SetAllStats(FULLUP);
@@ -225,8 +225,8 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   newVAdd->AddInput(split0, 1);
   newVAdd->AddInput(split1, 1);
 
-  Combine *com0 = split0->CreateMatchingCombine(0);
-  Combine *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
+  CombineSingleIter *com0 = split0->CreateMatchingCombine(0);
+  CombineSingleIter *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
 
   
   Poss *loopPoss = new Poss(2, com0, com1);

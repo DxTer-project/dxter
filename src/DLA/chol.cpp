@@ -206,7 +206,7 @@ void DistCholToLocalChol::Apply(Node *node) const
 
 Loop* Chol1LowerAlg(Node *in, unsigned int num, bool dist)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in, num);
   splitA->SetUpStats(FULLUP, FULLUP,
 		     NOTUP, NOTUP);
@@ -266,7 +266,7 @@ Loop* Chol1LowerAlg(Node *in, unsigned int num, bool dist)
 
 Loop* Chol2LowerAlg(Node *in, unsigned int num, bool dist)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in, num);
   splitA->SetUpStats(FULLUP, FULLUP,
 		     FULLUP, NOTUP);
@@ -333,7 +333,7 @@ Loop* Chol2LowerAlg(Node *in, unsigned int num, bool dist)
 
 Loop* Chol2UpperAlg(Node *in, unsigned int num, bool dist)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in, num);
   splitA->SetUpStats(FULLUP, FULLUP,
 		     FULLUP, NOTUP);
@@ -401,7 +401,7 @@ Loop* Chol2UpperAlg(Node *in, unsigned int num, bool dist)
 
 Loop* Chol3LowerAlg(Node *in, unsigned int num, bool dist)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in, num);
   splitA->SetUpStats(FULLUP, FULLUP,
 		    FULLUP, PARTUP);
@@ -465,7 +465,7 @@ Loop* Chol3LowerAlg(Node *in, unsigned int num, bool dist)
 
 Loop* Chol3UpperAlg(Node *in, unsigned int num, bool dist)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in,num);
   splitA->SetUpStats(FULLUP, FULLUP,
 		     FULLUP, PARTUP);

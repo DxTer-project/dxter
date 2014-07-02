@@ -21,14 +21,37 @@
 
 
 
-#pragma once
-
-#include "loop.h"
-#include "loopTunnel.h"
 #include "combineSingleIter.h"
-#include "combineUnrolled.h"
-#include "combineBase.h"
-//#include "combineSingleIter.h"
-#include "splitBase.h"
 #include "splitSingleIter.h"
-#include "splitUnrolled.h"
+#include "elemRedist.h"
+#include <cmath>
+
+void CombineBase::Duplicate(const Node *orig, bool shallow, bool possMerging)
+{
+  LoopTunnel::Duplicate(orig, shallow, possMerging);
+  const CombineBase *com = (CombineBase*)orig;
+#if TWOD
+  m_dir = com->m_dir;
+#else
+  m_partDim = com->m_partDim;
+#endif
+}
+void CombineBase::FlattenCore(ofstream &out) const
+{
+  LoopTunnel::FlattenCore(out);
+#if TWOD
+  WRITE(m_dir);
+#else
+  WRITE(m_partDim);
+#endif
+}
+
+void CombineBase::UnflattenCore(ifstream &in, SaveInfo &info) 
+{
+  LoopTunnel::UnflattenCore(in,info);
+#if TWOD
+  READ(m_dir);
+#else
+  READ(m_partDim);
+#endif
+}

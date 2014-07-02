@@ -25,40 +25,30 @@
 
 #include "loop.h"
 #include "loopTunnel.h"
+#include "combineBase.h"
 
-class Combine;
-
-//LoopTunnel for spliting/indxing into a matrix
-class Split : public LoopTunnel
+class CombineUnrolled : public CombineBase
 {
  public:
+  unsigned int m_unrollFactor;
 #if TWOD
-  PartDir m_dir;
+  CombineUnrolled();
+  CombineUnrolled(PartDir dir, unsigned int unrollFactor, PossTunType type);
 #else
-  //no m_lsizes - in loop tunnel
-  unsigned int m_partDim;
+  CombineUnrolled();
+  CombineUnrolled(Dim partDim, unsigned int unrollFactor, PossTunType type);
 #endif
-  bool m_isControlTun;
-  bool m_addDir;
-  Split();
-#if TWOD
-  Split(PartDir dir, PossTunType type, bool isControl = false);
-#else
-  Split(unsigned int partDim, PossTunType type, bool isControl = false);
-#endif
-  virtual ~Split();
-  static Node* BlankInst();
-  virtual Node* GetNewInst() {return BlankInst(); }
-  virtual PossTunnel* GetSetTunnel();
-  virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+  static Node* BlankInst() { return new CombineUnrolled(LASTPARTDIR,0,LASTTUNNEL);}
+  virtual Node* GetNewInst() {return BlankInst(); }
   virtual NodeType GetType() const;
-  virtual unsigned int NumOutputs() const;
-  virtual bool QuadInUse(Quad quad, bool atEnd) const;
-  virtual bool PartInUse(unsigned int partNum) const;
+  virtual void Prop();
+  virtual PossTunnel* GetSetTunnel();
+  virtual unsigned int NumOutputs() const {return 1;}
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "split";}
+  static ClassType GetClass() {return "combineUnrolled";}
+  virtual const DataTypeInfo& DataType(unsigned int num) const;
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
@@ -66,41 +56,13 @@ class Split : public LoopTunnel
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
 #endif
-  void GetSizes(unsigned int num, unsigned int numIters,
-		Size bs, unsigned int parFactor,
-		   Size m, Size n,
-		   Sizes &ms, Sizes &ns);
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
   virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
 #endif
   virtual Name GetName(unsigned int num) const;
-  virtual Name GetName(unsigned int num, LoopType type) const;
-  virtual void PrintVarDeclarations(IndStream &out) const;
-  Combine* CreateMatchingCombine(int numArgs, ...);
-  bool ValidIter() const;
-#if TWOD
-  unsigned int NumIters(Size bs, Size m, Size n) const;
-#else
-  unsigned int NumIters(Size bs, Size size) const;
-#endif
-  unsigned int NumIters(unsigned int iterNum) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  unsigned int NumberOfLoopExecs() const;
-  void SetAddDir() {m_addDir = true;}
-  virtual void StartFillingSizes();
-  virtual void ClearDataTypeCache();
-  virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
-#if DODM
-  virtual void UpdateLocalSizes();
-#endif
-#if DOLLDLA
-  string LoopBound();
-#endif
-
-  virtual void AddVariables(VarSet &set) const;
-
-  void PrintIncrementAtEndOfLoop(IndStream &out) const;
+  virtual bool IsCombine() const {throw;return true;}
 };

@@ -168,7 +168,7 @@ void SMulLoopRef::Apply(Node *node) const
   //    (i.e., it's horizontal)
   // If we're splitting on the n dimension, then the split moves right
   //    (i.e., it's vertical)
-  Split *split = new Split(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   // Add input, which is the matrix input to mul
   split->AddInput(mul->Input(1), mul->InputConnNum(1));
   //Set the update statuses
@@ -217,8 +217,8 @@ void SMulLoopRef::Apply(Node *node) const
   
   //Create an output tunnel for the matrix and overwrite
   // the 1st (0-based) partition of the output matrix
-  Combine *com = split->CreateMatchingCombine(1,
-					      1, newMul, 0);
+  CombineSingleIter *com = split->CreateMatchingCombine(1,
+							1, newMul, 0);
   
   //Put all of this into single poss (this constructor
   // will recursively move up the flow of data, adding

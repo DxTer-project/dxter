@@ -204,7 +204,7 @@ void DistTriInvToLocalTriInv::Apply(Node *node) const
 Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
 {
 #if DOELEM
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(FULLUP, FULLUP,
 		    NOTUP, NOTUP);
@@ -250,7 +250,7 @@ Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
 Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
 {
 #if DOELEM
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
   split->SetUpStats(FULLUP, NOTUP,
 		    FULLUP, NOTUP);
@@ -297,7 +297,7 @@ Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
 Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
 {
 #if DOELEM
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(FULLUP, FULLUP,
 		    FULLUP, NOTUP);
@@ -345,7 +345,7 @@ Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
 Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
 {
 #if DOELEM
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
   split->SetUpStats(FULLUP, FULLUP,
 		    FULLUP, NOTUP);
@@ -394,7 +394,7 @@ Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
 Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
 {
 #if DOELEM
-  Split *split = new Split(PARTDIAGBACK, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAGBACK, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(NOTUP, FULLUP,
                     NOTUP, FULLUP);
@@ -447,7 +447,7 @@ Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
 Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
 {
 #if DOELEM
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
   split->SetUpStats(FULLUP, FULLUP,
 		    PARTUP, NOTUP);
@@ -500,7 +500,7 @@ Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
 Loop* TriInvAlgVar3Upper(Node *in, unsigned int num)
 {
 #if DOELEM
-  Split *split = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
   split->SetUpStats(FULLUP, PARTUP,
 		    FULLUP, NOTUP);

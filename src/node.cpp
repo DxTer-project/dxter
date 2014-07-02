@@ -30,7 +30,7 @@
 #include "chol.h"
 #include "node.h"
 #include "blas.h"
-#include "split.h"
+#include "splitSingleIter.h"
 #include "twoSidedTrxm.h"
 #include "tensorSumScatter.h"
 

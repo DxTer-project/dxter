@@ -792,17 +792,17 @@ Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum,
                     Coef alpha, Coef beta, Type type,
                     Layer layer)
 {
-  Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
   
-  Split *splitC = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   if (tri == LOWER)
     splitC->SetUpStats(FULLUP, FULLUP,
@@ -893,17 +893,17 @@ Loop* Her2kLoopVar2(Node *Ain, unsigned int Anum,
   ScaleTrapNode *scal = new ScaleTrapNode(layer, LEFT, tri, beta);
   scal->AddInput(Cin, Cnum);
   
-  Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
   
-  Split *splitC = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitC->AddInput(scal, 0);
   if (tri == LOWER)
     splitC->SetUpStats(FULLUP, FULLUP,
@@ -995,17 +995,17 @@ Loop* Her2kLoopVar3(Node *Ain, unsigned int Anum,
   ScaleTrapNode *scal = new ScaleTrapNode(layer, LEFT, tri, beta);
   scal->AddInput(Cin, Cnum);
   
-  Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
   
-  Split *splitC = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitC->AddInput(scal, 0);
   if (tri == LOWER)
     splitC->SetUpStats(FULLUP, FULLUP,
@@ -1099,17 +1099,17 @@ Loop* Her2kLoopVar4(Node *Ain, unsigned int Anum,
   ScaleTrapNode *scal = new ScaleTrapNode(layer, LEFT, tri, beta);
   scal->AddInput(Cin, Cnum);
   
-  Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
   
-  Split *splitC = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitC->AddInput(scal, 0);
   if (tri == LOWER)
     splitC->SetUpStats(FULLUP, FULLUP,
@@ -1201,12 +1201,12 @@ Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
   ScaleTrapNode *scal = new ScaleTrapNode(layer, LEFT, tri, beta);
   scal->AddInput(Cin, Cnum);
   
-  Split *splitA = new Split(trans==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(trans==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(trans==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(trans==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
@@ -1260,7 +1260,7 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
   Atun->SetAllStats(FULLUP);
   Atun->SetIndepIters();
   
-  Split *splitB = new Split(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, false);
+  SplitSingleIter *splitB = new SplitSingleIter(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, false);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
@@ -1270,12 +1270,12 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
   Ctun->SetAllStats(FULLUP);
   Ctun->SetIndepIters();
   
-  Split *splitD = new Split(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, false);
+  SplitSingleIter *splitD = new SplitSingleIter(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, false);
   splitD->AddInput(Din, Dnum);
   splitD->SetAllStats(FULLUP);
   splitD->SetIndepIters();
   
-  Split *splitE = new Split(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, true);
+  SplitSingleIter *splitE = new SplitSingleIter(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, true);
   splitE->AddInput(Ein, Enum);
   if (tri==LOWER)
     splitE->SetUpStats(FULLUP, NOTUP,
@@ -1356,22 +1356,22 @@ Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
   ScaleTrapNode *scal = new ScaleTrapNode(layer, LEFT, tri, beta);
   scal->AddInput(Ein, Enum);
   
-  Split *splitA = new Split(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
 
-  Split *splitC = new Split(PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTRIGHT, POSSTUNIN);
   splitC->AddInput(Cin, Cnum);
   splitC->SetAllStats(FULLUP);
   splitC->SetIndepIters();
   
-  Split *splitD = new Split(PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitD = new SplitSingleIter(PARTDOWN, POSSTUNIN);
   splitD->AddInput(Din, Dnum);
   splitD->SetAllStats(FULLUP);
   splitD->SetIndepIters();

@@ -1,5 +1,5 @@
 /*
-n    This file is part of DxTer.
+    This file is part of DxTer.
     DxTer is a prototype using the Design by Transformation (DxT)
     approach to program generation.
 

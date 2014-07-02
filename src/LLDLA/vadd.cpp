@@ -176,10 +176,10 @@ void VAddLoopRef::Apply(Node *node) const
 {
   VAdd *vadd = (VAdd*) node;
 
-  Split *split1 = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split1 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split1->AddInput(vadd->Input(1), vadd->InputConnNum(1));
 
-  Split *split0 = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter *split0 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
   split0->AddInput(vadd->Input(0), vadd->InputConnNum(0));
 
   split0->SetAllStats(FULLUP);
@@ -200,8 +200,8 @@ void VAddLoopRef::Apply(Node *node) const
   newVAdd->AddInput(split0, 1);
   newVAdd->AddInput(split1, 1);
 
-  Combine *com0 = split0->CreateMatchingCombine(0);
-  Combine *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
+  CombineSingleIter *com0 = split0->CreateMatchingCombine(0);
+  CombineSingleIter *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
 
   Poss *loopPoss = new Poss(2, com0, com1);
 

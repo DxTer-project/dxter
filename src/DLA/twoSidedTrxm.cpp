@@ -253,12 +253,12 @@ Loop* TwoSidedTrsmLowerVar1Alg(
 			     Node *Ain, unsigned int Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetUpStats(FULLUP, FULLUP,
 		     NOTUP, NOTUP);
 
-  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
@@ -341,12 +341,12 @@ Loop* TwoSidedTrsmLowerVar2Alg(
 			     Node *Ain, unsigned int Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetUpStats(FULLUP, FULLUP,
 		     PARTUP, NOTUP);
 
-  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
@@ -436,12 +436,12 @@ Loop* TwoSidedTrsmLowerVar4Alg(
 			     Node *Ain, unsigned int Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetUpStats(PARTUP, FULLUP,
 		     PARTUP, PARTUP);
 
-  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
@@ -534,12 +534,12 @@ Loop* TwoSidedTrmmLowerVar1Alg(
 			     Node *Ain, unsigned int Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetUpStats(FULLUP, FULLUP,
 		     PARTUP, NOTUP);
 
-  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
@@ -622,12 +622,12 @@ Loop* TwoSidedTrmmLowerVar2Alg(
 			     Node *Ain, unsigned int Anum,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetUpStats(FULLUP, NOTUP,
 		     PARTUP, NOTUP);
 
-  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 
@@ -702,13 +702,13 @@ Loop* TwoSidedTrmmLowerVar4Alg(
 			    Node *Ain, unsigned int Anum,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetUpStats(PARTUP, FULLUP,
 		     PARTUP, NOTUP);
 
 
-  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitL->AddInput(Lin, Lnum);
   splitL->SetAllStats(FULLUP);
 

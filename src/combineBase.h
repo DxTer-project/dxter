@@ -25,10 +25,24 @@
 
 #include "loop.h"
 #include "loopTunnel.h"
-#include "combineSingleIter.h"
-#include "combineUnrolled.h"
-#include "combineBase.h"
-//#include "combineSingleIter.h"
-#include "splitBase.h"
-#include "splitSingleIter.h"
-#include "splitUnrolled.h"
+
+class CombineBase : public LoopTunnel
+{
+ public:
+#if TWOD
+  PartDir m_dir;
+#else
+  Dim m_partDim;
+#endif
+#if TWOD
+ CombineBase() :LoopTunnel(LASTTUNNEL),m_dir(LASTPARTDIR) {}
+ CombineBase(PartDir dir, PossTunType type) : LoopTunnel(type), m_dir(dir) {}
+#else
+ CombineBase() :LoopTunnel(LASTTUNNEL),m_partDim(99) {}
+   CombineBase(Dim partDim, PossTunType type) : LoopTunnel(type), m_partDim(partDim) {}
+#endif
+  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+  virtual void FlattenCore(ofstream &out) const;
+  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
+  virtual bool IsCombine() const {throw; return true;}
+};

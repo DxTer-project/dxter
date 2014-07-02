@@ -77,7 +77,7 @@ string BSSizeToSubSizeStr(BSSize size);
 unsigned int GetNumElems(PartDir dir);
 string PartDirToStr(PartDir dir);
 
-class Split;
+class SplitBase;
 class LoopTunnel;
 
 class Loop : public PSet
@@ -112,7 +112,7 @@ class Loop : public PSet
   void AssignNewLabel();
   void SetBS(BSSize size);
   int GetBS() const;
-  Split* GetControl() const;
+  SplitBase* GetControl() const;
   virtual void Prop();
   //  unsigned int NumIters() const;
   bool ValidIter() const;

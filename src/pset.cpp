@@ -210,20 +210,24 @@ bool PSet::operator==(const PSet &rhs) const
               || tun1->m_statTR != tun2->m_statTR
               || tun1->m_statBR != tun2->m_statBR)
             return false;
-          if (tun1->GetNodeClass() == Split::GetClass()) {
-            if (tun2->GetNodeClass() == Split::GetClass()) {
+          if (tun1->IsSplit()) {
+            if (tun2->GetNodeClass() == tun1->GetNodeClass()) {
 #if TWOD
-              if (((Split*)tun1)->m_dir != ((Split*)tun2)->m_dir)
+              if (((SplitBase*)tun1)->m_dir != ((SplitBase*)tun2)->m_dir)
                 return false;
 #else
-	      if (((Split*)tun1)->m_partDim != ((Split*)tun2)->m_partDim)
+	      if (((SplitBase*)tun1)->m_partDim != ((SplitBase*)tun2)->m_partDim)
                 return false;
 #endif
+	      if (tun1->GetNodeClass() == SplitUnrolled::GetClass()) {
+		if (((SplitUnrolled*)tun1)->m_unrollFactor != ((SplitUnrolled*)tun2)->m_unrollFactor)
+		  return false;
+	      }
             }
             else
               return false;
           }
-          else if (tun2->GetNodeClass() == Split::GetClass()) {
+          else if (tun2->IsSplit()) {
             return false;
           }
         }
@@ -638,19 +642,24 @@ void PSet::CombineAndRemoveTunnels()
           && setInput1->InputConnNum(0) == setInput2->InputConnNum(0))
 	{
 	  if (setInput1->IsLoopTunnel() && setInput2->IsLoopTunnel()) {
-	    ClassType type1 = setInput1->GetNodeClass();
-	    ClassType type2 = setInput2->GetNodeClass();
-	    if ((type1 == Split::GetClass() && type2 != Split::GetClass())
-		|| (type1 != Split::GetClass() && type2 == Split::GetClass()))
+	    const LoopTunnel *tun1 = (LoopTunnel*)(setInput1);
+	    const LoopTunnel *tun2 = (LoopTunnel*)(setInput2);
+	    if ((tun1->IsSplit() && !tun2->IsSplit()) || (!tun1->IsSplit() && tun2->IsSplit()))
 	      {
 		continue;
 	      }
-	    if (type1 == Split::GetClass()) {
+	    if (tun1->IsSplit()) {
+	      if (tun1->GetNodeClass() != tun2->GetNodeClass())
+		continue;
+	      if (tun1->GetNodeClass() == SplitUnrolled::GetClass()) {
+		if (((SplitUnrolled*)tun1)->m_unrollFactor != ((SplitUnrolled*)tun2)->m_unrollFactor)
+		  continue;
+	      }
 #if TWOD
-	      if (((Split*)setInput1)->m_dir != ((Split*)setInput2)->m_dir)
+	      if (((SplitBase*)setInput1)->m_dir != ((SplitBase*)setInput2)->m_dir)
 		continue;
 #else
-	      if (((Split*)setInput1)->m_partDim != ((Split*)setInput2)->m_partDim)
+	      if (((SplitBase*)setInput1)->m_partDim != ((SplitBase*)setInput2)->m_partDim)
 		continue;
 #endif
 	    }
@@ -741,10 +750,10 @@ void PSet::CombineAndRemoveTunnels()
         continue;
       }
     }
-    if (tun->GetNodeClass() == Combine::GetClass()) {
+    if (tun->IsLoopTunnel() && (((LoopTunnel*)tun)->IsCombine())) {
       for(unsigned int j = i+1; j < m_outTuns.size(); ++j) {
         Node *tun2 = OutTun(j);
-        if (tun2->GetNodeClass() == Combine::GetClass()) {
+        if (tun2->GetNodeClass() == tun->GetNodeClass()) {
           if (!((LoopTunnel*)tun)->IsConst()) {
             continue;
           }
@@ -754,8 +763,8 @@ void PSet::CombineAndRemoveTunnels()
               in2->Input(in2->m_inputs.size()-1)) {
             continue;
           }
-          Split *split1 = (Split*)tun;
-          Split *split2 = (Split*)tun2;
+          SplitBase *split1 = (SplitBase*)tun;
+          SplitBase *split2 = (SplitBase*)tun2;
 #if TWOD
           if (split1->m_dir != split2->m_dir) {
             continue;
@@ -765,6 +774,12 @@ void PSet::CombineAndRemoveTunnels()
             continue;
           }
 #endif
+	  if (split1->GetNodeClass() != split2->GetNodeClass())
+	    continue;
+	  if (split1->GetNodeClass() == SplitUnrolled::GetClass()) {
+	    if (((SplitUnrolled*)split1)->m_unrollFactor != ((SplitUnrolled*)split1)->m_unrollFactor)
+	      continue;
+	  }
           split2->RedirectAllChildren(split1);
           NodeConnVecIter iter = split2->m_inputs.begin();
           for( ; iter != split2->m_inputs.end(); ++iter) {

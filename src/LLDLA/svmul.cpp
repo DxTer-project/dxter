@@ -191,7 +191,7 @@ void SVMulLoopRef::Apply(Node *node) const
 {
   SVMul *svmul = (SVMul*) node;
 
-  Split *split = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split->AddInput(svmul->Input(1), svmul->InputConnNum(1));
 
   if (m_vtype == COLVECTOR) {
@@ -220,7 +220,7 @@ void SVMulLoopRef::Apply(Node *node) const
   scalarTunOut->AddInput(scalarTun, 0);
   scalarTunOut->CopyTunnelInfo(scalarTun);
 
-  Combine *com = split->CreateMatchingCombine(1, 
+  CombineSingleIter *com = split->CreateMatchingCombine(1, 
 					      1, newMul, 0);
   
   Poss *loopPoss = new Poss(2, scalarTunOut, com);

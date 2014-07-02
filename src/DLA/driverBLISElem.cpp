@@ -1199,13 +1199,13 @@ PSet* HegstL1Example()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain,0);
   splitA->SetUpStats(FULLUP, NOTUP,
 		     FULLUP, NOTUP);
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
-  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitL->AddInput(Lin,0);
   splitL->SetAllStats(FULLUP);
 
@@ -1348,13 +1348,13 @@ PSet* HegstL5Example()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain,0);
   splitA->SetUpStats(PARTUP, FULLUP,
 		     PARTUP, NOTUP);
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
-  Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitL->AddInput(Lin,0);
   splitL->SetAllStats(FULLUP);
 
@@ -1644,17 +1644,17 @@ PSet* Test()
   InputNode *Yin = new InputNode("Y input", bigSize, bigSize, "Y");
   InputNode *Uin = new InputNode("U input", bigSize, bigSize, "U");
 
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain,0);
   splitA->SetUpStats(FULLUP, FULLUP,
   FULLUP, PARTUP);
 
-  Split *splitU = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitU = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitU->AddInput(Uin,0);
   splitU->SetUpStats(FULLUP, FULLUP,
   FULLUP, PARTUP);
 
-  Split *splitY = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitY = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitY->AddInput(Yin,0);
   splitY->SetUpStats(FULLUP, FULLUP,
   FULLUP, PARTUP);
@@ -2114,7 +2114,7 @@ PSet* CholHegstExample()
 #if DOELEM
   if (side == RIGHT) {
     InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
-    Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+    SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
     splitA->AddInput(Ain,0);
     splitA->SetUpStats(PARTUP, FULLUP,
 		       PARTUP, PARTUP);
@@ -2124,7 +2124,7 @@ PSet* CholHegstExample()
     Chol *cholloop = new Chol(ABSLAYER, LOWER);
     cholloop->AddInput(Lin,0);
 
-    Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+    SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
     splitL->AddInput(cholloop,0);
     splitL->SetAllStats(FULLUP);
 
@@ -2215,7 +2215,7 @@ PSet* CholHegstExample()
   }
   else {
     InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
-    Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+    SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
     splitA->AddInput(Ain,0);
     splitA->SetUpStats(PARTUP, FULLUP,
 		       PARTUP, NOTUP);
@@ -2225,7 +2225,7 @@ PSet* CholHegstExample()
     Chol *cholloop = new Chol(ABSLAYER, LOWER);
     cholloop->AddInput(Lin,0);
 
-    Split *splitL = new Split(PARTDIAG, POSSTUNIN);
+    SplitSingleIter *splitL = new SplitSingleIter(PARTDIAG, POSSTUNIN);
     splitL->AddInput(cholloop,0);
     splitL->SetAllStats(FULLUP);
 
@@ -2345,16 +2345,16 @@ PSet* AppBlkHouseExample()
   InputNode *T = new InputNode("T input", BLIS_KC_BSVAL, BLIS_KC_BSVAL*10, "T");
   InputNode *B = new InputNode("B input", BLIS_KC_BSVAL*10, BLIS_KC_BSVAL*10, "B");
   
-  Split *splitU = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitU = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitU->AddInput(U,0);
   splitU->SetAllStats(FULLUP);
 
-  Split *splitB = new Split(PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN);
   splitB->AddInput(B,0);
   splitB->SetUpStats(FULLUP, FULLUP,
 		     PARTUP, PARTUP);
 
-  Split *splitT = new Split(PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitT = new SplitSingleIter(PARTRIGHT, POSSTUNIN);
   splitT->AddInput(T,0);
   splitT->SetAllStats(FULLUP);
 

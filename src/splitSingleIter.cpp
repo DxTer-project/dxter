@@ -19,37 +19,33 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "split.h"
-#include "combine.h"
+#include "splitSingleIter.h"
+#include "combineSingleIter.h"
 #include "elemRedist.h"
 #include <cmath>
 #include "LLDLA.h"
 
-Split::Split() : LoopTunnel(LASTTUNNEL), 
-#if TWOD
-m_dir(LASTPARTDIR)
-#else
-m_partDim(99)
-#endif
+SplitSingleIter::SplitSingleIter() 
+  : SplitBase()
 {
   m_addDir = false;
 }
 
 #if TWOD
-Split::Split(PartDir dir, PossTunType type, bool isControl) 
-  : LoopTunnel(type), m_dir(dir), m_isControlTun(isControl)
+SplitSingleIter::SplitSingleIter(PartDir dir, PossTunType type, bool isControl) 
+  : SplitBase(dir, type, isControl)
 {
   m_addDir = false;
 }
 #else
-Split::Split(unsigned int partDim, PossTunType type, bool isControl) 
-  : LoopTunnel(type), m_partDim(partDim), m_isControlTun(isControl)
+SplitSingleIter::SplitSingleIter(unsigned int partDim, PossTunType type, bool isControl) 
+  : SplitBase(partDim, type, isControl)
 {
   m_addDir = false;
 }
 #endif
 
-Split::~Split()
+SplitSingleIter::~SplitSingleIter()
 {
 #if TWOD
   if (m_msizes) {
@@ -74,21 +70,21 @@ Split::~Split()
 #endif
 }
 
-Node* Split::BlankInst() 
+Node* SplitSingleIter::BlankInst() 
 { 
 #if TWOD
-  return new Split(LASTPARTDIR,LASTTUNNEL,false);
+  return new SplitSingleIter(LASTPARTDIR,LASTTUNNEL,false);
 #else
-  return new Split(99,LASTTUNNEL,false);
+  return new SplitSingleIter(99,LASTTUNNEL,false);
 #endif
 }
 
-Name Split::GetName(unsigned int num) const 
+Name SplitSingleIter::GetName(unsigned int num) const 
 {
   return GetName(num, GetLoopType());
 }
 
-Name Split::GetName(unsigned int num, LoopType type) const 
+Name SplitSingleIter::GetName(unsigned int num, LoopType type) const 
 {
   Name name;
   if (type == BLISLOOP) {
@@ -207,7 +203,7 @@ Name Split::GetName(unsigned int num, LoopType type) const
     return name;
 }
 
-void Split::Prop()
+void SplitSingleIter::Prop()
 {
   if (!IsValidCost(m_cost)) {
     PossTunnel::Prop();
@@ -230,7 +226,7 @@ void Split::Prop()
 #endif  
     if (m_tunType == POSSTUNIN) {
       for(unsigned int i = 0; i < m_inputs.size(); ++i) {
-	if (Input(i)->GetNodeClass() != Split::GetClass()) {
+	if (Input(i)->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  throw;
 	}
       }
@@ -243,7 +239,7 @@ void Split::Prop()
 	throw;
       }
       for (unsigned int i = 0; i < m_children.size(); ++i) {
-	if (Child(i)->GetNodeClass() != Split::GetClass()) {
+	if (Child(i)->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  throw;
 	}
       }
@@ -257,7 +253,7 @@ void Split::Prop()
     if (GetMyLoop()->GetBS() == ZERO)
       throw;
     if (m_tunType == POSSTUNIN) {
-      if (Input(0)->GetNodeClass() != Split::GetClass())
+      if (Input(0)->GetNodeClass() != SplitSingleIter::GetClass())
         throw;
       Node *child = NULL;
       unsigned int size = m_children.size();  
@@ -278,10 +274,10 @@ void Split::Prop()
         //m_poss->ForcePrint();
         throw;
       }
-      else if (child->GetNodeClass() != Combine::GetClass())
+      else if (child->GetNodeClass() != CombineSingleIter::GetClass())
         throw;
       else {
-        Combine* com = (Combine*)child;
+        CombineSingleIter* com = (CombineSingleIter*)child;
 #if TWOD
         if (com->m_dir != m_dir)
 #else
@@ -294,7 +290,7 @@ void Split::Prop()
 }
 
 #if TWOD
-const Sizes* Split::GetM(unsigned int num) const
+const Sizes* SplitSingleIter::GetM(unsigned int num) const
 {
   switch(m_tunType) 
     {
@@ -321,7 +317,7 @@ const Sizes* Split::GetM(unsigned int num) const
     }
 }
 
-const Sizes* Split::GetN(unsigned int num) const
+const Sizes* SplitSingleIter::GetN(unsigned int num) const
 {
   switch(m_tunType) 
     {
@@ -349,7 +345,7 @@ const Sizes* Split::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* Split::LocalM(unsigned int num) const
+const Sizes* SplitSingleIter::LocalM(unsigned int num) const
 {
   switch(m_tunType) 
     {
@@ -376,7 +372,7 @@ const Sizes* Split::LocalM(unsigned int num) const
     }
 }
 
-const Sizes* Split::LocalN(unsigned int num) const
+const Sizes* SplitSingleIter::LocalN(unsigned int num) const
 {
   switch(m_tunType) 
     {
@@ -405,7 +401,7 @@ const Sizes* Split::LocalN(unsigned int num) const
 #endif
 
 
-void Split::GetSizes(unsigned int num, unsigned int numIters,
+void SplitSingleIter::GetSizes(unsigned int num, unsigned int numIters,
 		     Size bs, unsigned int parFactor,
 		     Size m, Size n,
 		     Sizes &ms, Sizes &ns)
@@ -577,7 +573,7 @@ void Split::GetSizes(unsigned int num, unsigned int numIters,
     }
 }
 #else
- const Dim Split::NumDims(unsigned int num) const
+ const Dim SplitSingleIter::NumDims(unsigned int num) const
 {
   switch(m_tunType) 
     {
@@ -596,7 +592,7 @@ void Split::GetSizes(unsigned int num, unsigned int numIters,
     }
 }
 
-const Sizes* Split::Len(unsigned int num, Dim dim) const
+const Sizes* SplitSingleIter::Len(unsigned int num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -628,7 +624,7 @@ const Sizes* Split::Len(unsigned int num, Dim dim) const
     }
 }
 
-const Sizes* Split::LocalLen(unsigned int num, Dim dim) const
+const Sizes* SplitSingleIter::LocalLen(unsigned int num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -662,26 +658,26 @@ const Sizes* Split::LocalLen(unsigned int num, Dim dim) const
 #endif
 
 #if TWOD
-PossTunnel* Split::GetSetTunnel()
+PossTunnel* SplitSingleIter::GetSetTunnel()
 {
-  Split *tun;
+  SplitSingleIter *tun;
   if (m_tunType == POSSTUNIN)
-    tun = new Split(m_dir, SETTUNIN);
+    tun = new SplitSingleIter(m_dir, SETTUNIN, m_isControlTun);
   else if (m_tunType == POSSTUNOUT)
-    tun = new Split(m_dir, SETTUNOUT);
+    tun = new SplitSingleIter(m_dir, SETTUNOUT, m_isControlTun);
   else
     throw;
   tun->CopyTunnelInfo(this);
   return tun;
 }
 #else
-PossTunnel* Split::GetSetTunnel()
+PossTunnel* SplitSingleIter::GetSetTunnel()
 {
-  Split *tun;
+  SplitSingleIter *tun;
   if (m_tunType == POSSTUNIN)
-    tun = new Split(m_partDim, SETTUNIN);
+    tun = new SplitSingleIter(m_partDim, SETTUNIN, m_isControlTun);
   else if (m_tunType == POSSTUNOUT)
-    tun = new Split(m_partDim, SETTUNOUT);
+    tun = new SplitSingleIter(m_partDim, SETTUNOUT, m_isControlTun);
   else
     throw;
   tun->CopyTunnelInfo(this);
@@ -689,7 +685,7 @@ PossTunnel* Split::GetSetTunnel()
 }
 #endif
 
-void Split::PrintCode(IndStream &out)
+void SplitSingleIter::PrintCode(IndStream &out)
 {
   if (m_tunType != POSSTUNIN)
     return;
@@ -863,31 +859,25 @@ void Split::PrintCode(IndStream &out)
 #endif
 }
 
-void Split::Duplicate(const Node *orig, bool shallow, bool possMerging)
+void SplitSingleIter::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  LoopTunnel::Duplicate(orig, shallow, possMerging);
-  const Split *split = (Split*)orig;
-#if TWOD
-  m_dir = split->m_dir;
-#else
-  m_partDim = split->m_partDim;
-#endif
-  m_isControlTun = split->m_isControlTun;
+  SplitBase::Duplicate(orig, shallow, possMerging);
+  const SplitSingleIter *split = (SplitSingleIter*)orig;
   m_addDir = split->m_addDir;
 }
 
-NodeType Split::GetType() const
+NodeType SplitSingleIter::GetType() const
 {
 #if TWOD
-  return "Split " + PartDirToStr(m_dir)  + "( " + PossTunnel::GetType() + " )";
+  return "SplitSingleIter " + PartDirToStr(m_dir)  + "( " + PossTunnel::GetType() + " )";
 #else
-  string tmp = "Split";
+  string tmp = "SplitSingleIter";
   tmp += m_partDim;
   return tmp  + "( " + PossTunnel::GetType() + " )";
 #endif
 }
 
-unsigned int Split::NumOutputs() const 
+unsigned int SplitSingleIter::NumOutputs() const 
 {
 #if TWOD
   return GetNumElems(m_dir)+1;
@@ -897,7 +887,7 @@ unsigned int Split::NumOutputs() const
 }
 
 #if TWOD
-bool Split::QuadInUse(Quad quad, bool atEnd) const
+bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
 {
   if (m_tunType == SETTUNIN) {
     Node *child = Child(0);
@@ -979,13 +969,13 @@ bool Split::QuadInUse(Quad quad, bool atEnd) const
     throw;
 }
 #else
-bool Split::QuadInUse(Quad quad, bool atEnd) const
+bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
 {
   throw;
 }
 #endif
 
-void Split::PrintVarDeclarations(IndStream &out) const
+void SplitSingleIter::PrintVarDeclarations(IndStream &out) const
 {
 #if DOLLDLA
   if (m_tunType != POSSTUNIN)
@@ -1001,7 +991,7 @@ void Split::PrintVarDeclarations(IndStream &out) const
 #endif
 }
 
-bool Split::PartInUse(unsigned int partNum) const
+bool SplitSingleIter::PartInUse(unsigned int partNum) const
 {
   if (m_tunType != POSSTUNIN)
     throw;
@@ -1016,7 +1006,7 @@ bool Split::PartInUse(unsigned int partNum) const
   return false;	    
 }
 
-void Split::AddVariables(VarSet &set) const
+void SplitSingleIter::AddVariables(VarSet &set) const
 {
 #if DOLLDLA
   if (m_tunType != POSSTUNIN)
@@ -1042,14 +1032,14 @@ void Split::AddVariables(VarSet &set) const
 #endif
 }
 
-Combine* Split::CreateMatchingCombine(int numArgs, ...)
+CombineSingleIter* SplitSingleIter::CreateMatchingCombine(int numArgs, ...)
 {
   int numComIns = NumOutputs();
   int j = 0;
 #if TWOD
-  Combine *com = new Combine(m_dir, POSSTUNOUT);
+  CombineSingleIter *com = new CombineSingleIter(m_dir, POSSTUNOUT);
 #else
-  Combine *com = new Combine(m_partDim, POSSTUNOUT);
+  CombineSingleIter *com = new CombineSingleIter(m_partDim, POSSTUNOUT);
 #endif
   
   va_list listPointer;
@@ -1076,7 +1066,7 @@ Combine* Split::CreateMatchingCombine(int numArgs, ...)
 }
 
 #if TWOD
-unsigned int Split::NumIters(Size bs, Size m, Size n) const
+unsigned int SplitSingleIter::NumIters(Size bs, Size m, Size n) const
 {
   if (!bs)
     throw;
@@ -1095,7 +1085,7 @@ unsigned int Split::NumIters(Size bs, Size m, Size n) const
   throw;
 }
 #else
-unsigned int Split::NumIters(Size bs, Size size) const
+unsigned int SplitSingleIter::NumIters(Size bs, Size size) const
 {
   if (!bs)
     throw;
@@ -1104,7 +1094,7 @@ unsigned int Split::NumIters(Size bs, Size size) const
 #endif
 
 #if TWOD
-unsigned int Split::NumIters(unsigned int iterNum) const
+unsigned int SplitSingleIter::NumIters(unsigned int iterNum) const
 {
   Size bs = GetMyLoop()->GetBS();
 
@@ -1124,7 +1114,7 @@ unsigned int Split::NumIters(unsigned int iterNum) const
   return NumIters(bs, m, n);
 }
 #else
-unsigned int Split::NumIters(unsigned int iterNum) const
+unsigned int SplitSingleIter::NumIters(unsigned int iterNum) const
 {
   Size bs = GetMyLoop()->GetBS();
   const Sizes *sizes = InputLen(0,m_partDim);
@@ -1142,32 +1132,20 @@ unsigned int Split::NumIters(unsigned int iterNum) const
 }
 #endif
 
-void Split::FlattenCore(ofstream &out) const
+void SplitSingleIter::FlattenCore(ofstream &out) const
 {
-  LoopTunnel::FlattenCore(out);
-#if TWOD
-  WRITE(m_dir);
-#else
-  WRITE(m_partDim);
-#endif
-  WRITE(m_isControlTun);
+  SplitBase::FlattenCore(out);
   WRITE(m_addDir);
 }
 
 
-void Split::UnflattenCore(ifstream &in, SaveInfo &info) 
+void SplitSingleIter::UnflattenCore(ifstream &in, SaveInfo &info) 
 {
-  LoopTunnel::UnflattenCore(in,info);
-#if TWOD
-  READ(m_dir);
-#else
-  READ(m_partDim);
-#endif
-  READ(m_isControlTun);
+  SplitBase::UnflattenCore(in,info);
   READ(m_addDir);
 }
 
-unsigned int Split::NumberOfLoopExecs() const
+unsigned int SplitSingleIter::NumberOfLoopExecs() const
 {
   if (!m_isControlTun)
     throw;
@@ -1187,7 +1165,7 @@ unsigned int Split::NumberOfLoopExecs() const
 }
 
 #if TWOD
-void Split::StartFillingSizes()
+void SplitSingleIter::StartFillingSizes()
 {
   if (m_msizes)
     throw;
@@ -1202,7 +1180,7 @@ void Split::StartFillingSizes()
 #endif
 }
 #else
-void Split::StartFillingSizes()
+void SplitSingleIter::StartFillingSizes()
 {
   if (m_sizes)
     throw;
@@ -1216,7 +1194,7 @@ void Split::StartFillingSizes()
 }
 #endif
 
-void Split::ClearDataTypeCache()
+void SplitSingleIter::ClearDataTypeCache()
 {
 #if TWOD
   if (!m_msizes)
@@ -1242,7 +1220,7 @@ void Split::ClearDataTypeCache()
 }
 
 #if TWOD
-void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
+void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -1300,7 +1278,7 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
   }
 }
 #else
-void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
+void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -1338,7 +1316,7 @@ void Split::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned in
 #endif
 
 #if TWOD&&DODM
-void Split::UpdateLocalSizes()
+void SplitSingleIter::UpdateLocalSizes()
 {
   const unsigned int numElems = GetNumElems(m_dir);
   const LoopType loopType = GetMyLoop()->GetType();
@@ -1354,7 +1332,7 @@ void Split::UpdateLocalSizes()
   }
 }
 #elif DOTENSORS
-void Split::UpdateLocalSizes()
+void SplitSingleIter::UpdateLocalSizes()
 {
   Dim numDims = InputNumDims(0);
   const DistType t = InputDataType(0).m_dist;
@@ -1366,7 +1344,7 @@ void Split::UpdateLocalSizes()
 #endif
 
 #if DOLLDLA
-string Split::LoopBound()
+string SplitSingleIter::LoopBound()
 {
   const DataTypeInfo &info = InputDataType(0);
   switch(m_dir)
@@ -1409,7 +1387,7 @@ string Split::LoopBound()
 #endif
 
 
-void Split::PrintIncrementAtEndOfLoop(IndStream &out) const
+void SplitSingleIter::PrintIncrementAtEndOfLoop(IndStream &out) const
 {
   if (m_tunType != POSSTUNIN)
     throw;
