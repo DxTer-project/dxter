@@ -1985,8 +1985,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
       }
       ClassType rightInputType = rightSetInput->GetNodeClass();
       ClassType leftOutputType = leftSetOutput->GetNodeClass();
-      if ((rightInputType == SplitSingleIter::GetClass() && leftOutputType != Combine::GetClass())
-          || (leftOutputType == Combine::GetClass() && rightInputType != SplitSingleIter::GetClass()))
+      if ((rightInputType == SplitSingleIter::GetClass() && leftOutputType != CombineSingleIter::GetClass())
+          || (leftOutputType == CombineSingleIter::GetClass() && rightInputType != SplitSingleIter::GetClass()))
 	{
 	  LoopTunnel *inTun = (LoopTunnel*)leftSetOutput->GetMatchingInTun();
 	  rightSetInput->ChangeInput1Way(leftSetOutput,0,inTun->Input(0),inTun->InputConnNum(0));

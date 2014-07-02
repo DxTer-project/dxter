@@ -783,14 +783,14 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
   gepp->AddInput(Btun, 0);
   gepp->AddInput(splitC, 1);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
   LoopTunnel *BtunOut = new LoopTunnel(POSSTUNOUT);
   BtunOut->AddInput(Btun, 0);
   BtunOut->AddInput(Btun, 0);
   BtunOut->CopyTunnelInfo(Btun);
   
-  Combine *comC = splitC->CreateMatchingCombine(1,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
                                                 1, gepp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
@@ -903,9 +903,9 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   gepp->AddInput(splitB, 1);
   gepp->AddInput(Ctun, 0);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
   LoopTunnel *CtunOut = new LoopTunnel(POSSTUNOUT);
   CtunOut->AddInput(gepp, 0);
@@ -967,9 +967,9 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   AtunOut->AddInput(Atun, 1);
   AtunOut->CopyTunnelInfo(Atun);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC = splitC->CreateMatchingCombine(1,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
                                                 1, gepp, 0);
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);

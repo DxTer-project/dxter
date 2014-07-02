@@ -25,15 +25,11 @@
 
 #include "loop.h"
 #include "loopTunnel.h"
+#include "combineBase.h"
 
-class CombineUnrolled : public LoopTunnel
+class CombineUnrolled : public CombineBase
 {
  public:
-#if TWOD
-  PartDir m_dir;
-#else
-  Dim m_partDim;
-#endif
   unsigned int m_unrollFactor;
 #if TWOD
   CombineUnrolled();

@@ -200,8 +200,8 @@ void VAddLoopRef::Apply(Node *node) const
   newVAdd->AddInput(split0, 1);
   newVAdd->AddInput(split1, 1);
 
-  Combine *com0 = split0->CreateMatchingCombine(0);
-  Combine *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
+  CombineSingleIter *com0 = split0->CreateMatchingCombine(0);
+  CombineSingleIter *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
 
   Poss *loopPoss = new Poss(2, com0, com1);
 

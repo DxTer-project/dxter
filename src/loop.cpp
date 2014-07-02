@@ -366,12 +366,12 @@ bool Loop::CanMerge(PSet *pset) const
           }
           //Check if the way the inputs/outputs are split are ok
           // for fusion
-          if (leftOutTun->GetNodeClass() == Combine::GetClass()) {
+          if (leftOutTun->GetNodeClass() == CombineSingleIter::GetClass()) {
             if (rightInTun->GetNodeClass() == SplitSingleIter::GetClass()) {
 #if TWOD
-              if (((Combine*)leftOutTun)->m_dir != ((SplitSingleIter*)rightInTun)->m_dir) {
+              if (((CombineSingleIter*)leftOutTun)->m_dir != ((SplitSingleIter*)rightInTun)->m_dir) {
 #else
-              if (((Combine*)leftOutTun)->m_partDim != ((SplitSingleIter*)rightInTun)->m_partDim) {
+              if (((CombineSingleIter*)leftOutTun)->m_partDim != ((SplitSingleIter*)rightInTun)->m_partDim) {
 #endif
                 if (!leftOutTun->IsConst() || !rightInTun->IsConst())
                   return false;

@@ -66,7 +66,7 @@ class SplitUnrolled : public SplitBase
   virtual Name GetName(unsigned int num) const;
   virtual Name GetName(unsigned int num, LoopType type) const;
   virtual void PrintVarDeclarations(IndStream &out) const;
-  CombineUnrolled* CreateMatchingCombine(int numArgs, ...);
+  virtual CombineUnrolled* CreateMatchingCombine(int numArgs, ...);
   bool ValidIter() const;
 #if TWOD
   virtual unsigned int NumIters(Size bs, Size m, Size n) const;

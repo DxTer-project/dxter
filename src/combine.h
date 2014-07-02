@@ -25,25 +25,20 @@
 
 #include "loop.h"
 #include "loopTunnel.h"
+#include "combineBase.h"
 
-class Combine : public LoopTunnel
+class CombineSingleIter : public CombineBase
 {
  public:
 #if TWOD
-  PartDir m_dir;
+  CombineSingleIter();
+  CombineSingleIter(PartDir dir, PossTunType type);
 #else
-  Dim m_partDim;
-#endif
-#if TWOD
- Combine() :LoopTunnel(LASTTUNNEL),m_dir(LASTPARTDIR) {}
- Combine(PartDir dir, PossTunType type) : LoopTunnel(type), m_dir(dir) {}
-#else
- Combine() :LoopTunnel(LASTTUNNEL),m_partDim(99) {}
-   Combine(Dim partDim, PossTunType type) : LoopTunnel(type), m_partDim(partDim) {}
+  CombineSingleIter();
+  CombineSingleIter(Dim partDim, PossTunType type);
 #endif
   virtual void PrintCode(IndStream &out);
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  static Node* BlankInst() { return new Combine(LASTPARTDIR,LASTTUNNEL);}
+  static Node* BlankInst() { return new CombineSingleIter(LASTPARTDIR,LASTTUNNEL);}
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual NodeType GetType() const;
   virtual void Prop();
@@ -65,7 +60,5 @@ class Combine : public LoopTunnel
   virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
 #endif
   virtual Name GetName(unsigned int num) const;
-  virtual void FlattenCore(ofstream &out) const;
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool IsCombine() const {return true;}
 };

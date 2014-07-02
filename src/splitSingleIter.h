@@ -27,7 +27,7 @@
 #include "loopTunnel.h"
 #include "splitBase.h"
 
-class Combine;
+class CombineSingleIter;
 
 //LoopTunnel for spliting/indxing into a matrix
 class SplitSingleIter : public SplitBase
@@ -72,7 +72,7 @@ class SplitSingleIter : public SplitBase
   virtual Name GetName(unsigned int num) const;
   virtual Name GetName(unsigned int num, LoopType type) const;
   virtual void PrintVarDeclarations(IndStream &out) const;
-  Combine* CreateMatchingCombine(int numArgs, ...);
+  CombineSingleIter* CreateMatchingCombine(int numArgs, ...);
   bool ValidIter() const;
 #if TWOD
   virtual unsigned int NumIters(Size bs, Size m, Size n) const;

@@ -217,8 +217,8 @@ void SMulLoopRef::Apply(Node *node) const
   
   //Create an output tunnel for the matrix and overwrite
   // the 1st (0-based) partition of the output matrix
-  Combine *com = split->CreateMatchingCombine(1,
-					      1, newMul, 0);
+  CombineSingleIter *com = split->CreateMatchingCombine(1,
+							1, newMul, 0);
   
   //Put all of this into single poss (this constructor
   // will recursively move up the flow of data, adding

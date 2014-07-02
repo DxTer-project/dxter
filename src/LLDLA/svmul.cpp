@@ -220,7 +220,7 @@ void SVMulLoopRef::Apply(Node *node) const
   scalarTunOut->AddInput(scalarTun, 0);
   scalarTunOut->CopyTunnelInfo(scalarTun);
 
-  Combine *com = split->CreateMatchingCombine(1, 
+  CombineSingleIter *com = split->CreateMatchingCombine(1, 
 					      1, newMul, 0);
   
   Poss *loopPoss = new Poss(2, scalarTunOut, com);

@@ -274,10 +274,10 @@ void SplitSingleIter::Prop()
         //m_poss->ForcePrint();
         throw;
       }
-      else if (child->GetNodeClass() != Combine::GetClass())
+      else if (child->GetNodeClass() != CombineSingleIter::GetClass())
         throw;
       else {
-        Combine* com = (Combine*)child;
+        CombineSingleIter* com = (CombineSingleIter*)child;
 #if TWOD
         if (com->m_dir != m_dir)
 #else
@@ -1032,14 +1032,14 @@ void SplitSingleIter::AddVariables(VarSet &set) const
 #endif
 }
 
-Combine* SplitSingleIter::CreateMatchingCombine(int numArgs, ...)
+CombineSingleIter* SplitSingleIter::CreateMatchingCombine(int numArgs, ...)
 {
   int numComIns = NumOutputs();
   int j = 0;
 #if TWOD
-  Combine *com = new Combine(m_dir, POSSTUNOUT);
+  CombineSingleIter *com = new CombineSingleIter(m_dir, POSSTUNOUT);
 #else
-  Combine *com = new Combine(m_partDim, POSSTUNOUT);
+  CombineSingleIter *com = new CombineSingleIter(m_partDim, POSSTUNOUT);
 #endif
   
   va_list listPointer;

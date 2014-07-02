@@ -27,33 +27,28 @@
 #include <cmath>
 
 #if TWOD
- CombineUnrolled::CombineUnrolled() 
- :
-   LoopTunnel(LASTTUNNEL),
-   m_dir(LASTPARTDIR),
-   m_unrollFactor(0)
+CombineUnrolled::CombineUnrolled() 
+  : CombineBase (),
+    m_unrollFactor(0)
 {
 }
 
 CombineUnrolled::CombineUnrolled(PartDir dir, unsigned int unrollFactor, PossTunType type) 
-  : LoopTunnel(type), 
-    m_dir(dir),
+  : CombineBase(dir,type), 
     m_unrollFactor(unrollFactor)
 {
 }
 
 #else
 CombineUnrolled::CombineUnrolled() 
- : LoopTunnel(LASTTUNNEL),
-   m_partDim(99),
+  : CombineBase(),
    m_unrollFactor(0)
 {
 }
 
 
 CombineUnrolled::CombineUnrolled(Dim partDim, unsigned int unrollFactor, PossTunType type) 
-  : LoopTunnel(type), 
-    m_partDim(partDim),
+  : CombineBase(partDim, type), 
     m_unrollFactor(unrollFactor)
 {
 }
@@ -63,7 +58,7 @@ CombineUnrolled::CombineUnrolled(Dim partDim, unsigned int unrollFactor, PossTun
 void CombineUnrolled::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    LoopTunnel::Prop();
+    CombineBase::Prop();
     
     if (m_tunType == POSSTUNOUT) {
       if (m_inputs.size() != m_unrollFactor+1)
@@ -254,13 +249,8 @@ void CombineUnrolled::PrintCode(IndStream &out)
 
 void CombineUnrolled::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  LoopTunnel::Duplicate(orig, shallow, possMerging);
+  CombineBase::Duplicate(orig, shallow, possMerging);
   const CombineUnrolled *com = (CombineUnrolled*)orig;
-#if TWOD
-  m_dir = com->m_dir;
-#else
-  m_partDim = com->m_partDim;
-#endif
   m_unrollFactor = com->m_unrollFactor;
 }
 
@@ -278,22 +268,12 @@ NodeType CombineUnrolled::GetType() const
 
 void CombineUnrolled::FlattenCore(ofstream &out) const
 {
-  LoopTunnel::FlattenCore(out);
-#if TWOD
-  WRITE(m_dir);
-#else
-  WRITE(m_partDim);
-#endif
+  CombineBase::FlattenCore(out);
   WRITE(m_unrollFactor);
 }
 
 void CombineUnrolled::UnflattenCore(ifstream &in, SaveInfo &info) 
 {
-  LoopTunnel::UnflattenCore(in,info);
-#if TWOD
-  READ(m_dir);
-#else
-  READ(m_partDim);
-#endif
+  CombineBase::UnflattenCore(in,info);
   READ(m_unrollFactor);
 }

@@ -750,10 +750,10 @@ void PSet::CombineAndRemoveTunnels()
         continue;
       }
     }
-    if (tun->GetNodeClass() == Combine::GetClass()) {
+    if (tun->IsLoopTunnel() && (((LoopTunnel*)tun)->IsCombine())) {
       for(unsigned int j = i+1; j < m_outTuns.size(); ++j) {
         Node *tun2 = OutTun(j);
-        if (tun2->GetNodeClass() == Combine::GetClass()) {
+        if (tun2->GetNodeClass() == tun->GetNodeClass()) {
           if (!((LoopTunnel*)tun)->IsConst()) {
             continue;
           }
