@@ -22,7 +22,7 @@
 
 
 #include "combine.h"
-#include "split.h"
+#include "splitSingleIter.h"
 #include "elemRedist.h"
 #include <cmath>
 

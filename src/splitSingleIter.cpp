@@ -19,7 +19,7 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "split.h"
+#include "splitSingleIter.h"
 #include "combine.h"
 #include "elemRedist.h"
 #include <cmath>

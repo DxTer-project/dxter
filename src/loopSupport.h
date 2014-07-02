@@ -27,5 +27,5 @@
 #include "loopTunnel.h"
 #include "combine.h"
 #include "splitBase.h"
-#include "split.h"
+#include "splitSingleIter.h"
 #include "splitUnrolled.h"
