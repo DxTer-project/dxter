@@ -89,5 +89,5 @@ class SplitUnrolled : public SplitBase
 
   virtual void AddVariables(VarSet &set) const;
 
-  virtual void PrintIncrementAtEndOfLoop(IndStream &out) const;
+  virtual void PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const;
 };

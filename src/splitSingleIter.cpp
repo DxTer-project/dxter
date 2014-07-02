@@ -1387,7 +1387,7 @@ string SplitSingleIter::LoopBound()
 #endif
 
 
-void SplitSingleIter::PrintIncrementAtEndOfLoop(IndStream &out) const
+void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 {
   if (m_tunType != POSSTUNIN)
     throw;
@@ -1398,12 +1398,22 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(IndStream &out) const
   if (m_dir == PARTDOWN) {
     if (!IsUnitStride(type.m_rowStride))
       *out << type.m_rowStrideVar << " * ";
-    *out << MU_VAR_NAME << ";\n";
+    if (bs == USELLDLAMU)
+      *out << MU_VAR_NAME << ";\n";
+    else if (bs == USELLDLA2MU)
+      *out << "2 * " << MU_VAR_NAME << ";\n";
+    else if (bs == USELLDLA3MU)
+      *out << "3 * " << MU_VAR_NAME << ";\n";
   }
   else if (m_dir == PARTRIGHT) {
     if (!IsUnitStride(type.m_colStride))
       *out << type.m_colStrideVar << " * ";
-    *out << MU_VAR_NAME << ";\n";
+    if (bs == USELLDLAMU)
+      *out << MU_VAR_NAME << ";\n";
+    else if (bs == USELLDLA2MU)
+      *out << "2 * " << MU_VAR_NAME << ";\n";
+    else if (bs == USELLDLA3MU)
+      *out << "3 * " << MU_VAR_NAME << ";\n";
   }
   else
     throw;

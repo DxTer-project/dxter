@@ -747,11 +747,13 @@ string SplitUnrolled::LoopBound()
 #endif
 
 
-void SplitUnrolled::PrintIncrementAtEndOfLoop(IndStream &out) const
+void SplitUnrolled::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 {
   if (m_tunType != POSSTUNIN)
     throw;
 #if DOLLDLA
+  throw;
+  //need bs
   out.Indent(1);
   const DataTypeInfo &type = InputDataType(0);
   for (unsigned int i = 0; i < m_unrollFactor; ++i) {
