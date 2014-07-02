@@ -839,13 +839,13 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
   Loop *loop = NULL;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, bs);
   else
     throw;
 #elif DOBLIS
-  loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+  loop = new Loop(BLISLOOP, loopPoss, bs);
 #elif DOLLDLA
-    loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+    loop = new Loop(LLDLALOOP, loopPoss, bs);
 #endif
 
   loop->SetDimName(DIMM);
