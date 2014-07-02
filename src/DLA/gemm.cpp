@@ -1,5 +1,5 @@
 /*
- This file is part of DxTer.
+n This file is part of DxTer.
  DxTer is a prototype using the Design by Transformation (DxT)
  approach to program generation.
  
@@ -212,10 +212,19 @@ void Gemm::Prop()
       }
     }
 #endif
-
+    double m, n, p;
     switch(GetLayer()) {
       case(ABSLAYER):
-        m_cost = ZERO;
+	/*m = (*GetInputM(0))[0];
+	n = (*GetInputN(1))[0];
+	p = (*GetInputN(0))[0];
+	GetInputM(0)->Print();
+	GetInputN(0)->Print();
+	GetInputM(1)->Print();
+	GetInputN(1)->Print();*/
+	//	m_cost = 2 * m * n * p;
+	m_cost = GetInputM(0)->SumProds111(*GetInputN(1), *GetInputM(1));
+	cout << "Gemm ABSTRACT cost is " << m_cost;
         break;
 #if DOELEM
       case (DMLAYER):

@@ -26,19 +26,21 @@
 #include "runtimeEvaluation.h"
 
 
-RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines)
+RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize)
 {
   m_operationName = operationName;
   m_argNames = argNames;
   m_argDeclarations = argDeclarations;
   m_defines = defines;
+  m_numIterations = numIterations;
+  m_chunkSize = chunkSize;
   m_headers.push_back("#include \"row_stride_lldla_primitives.h\"");
-  //  m_headers.push_back("#include \"gen_stride_lldla_primitives.h\"");
+  m_headers.push_back("#include \"gen_stride_lldla_primitives.h\"");
   m_headers.push_back("#include \"utils.h\"");
   m_headers.push_back("#include <string.h>");
   m_defines.push_back("#define BUF_SIZE 1000000");
-  m_defines.push_back("#define NUM_ITERATIONS 10");
-  m_defines.push_back("#define CHUNK_SIZE 50");
+  m_defines.push_back("#define NUM_ITERATIONS " + std::to_string(m_numIterations));
+  m_defines.push_back("#define CHUNK_SIZE " + std::to_string(m_chunkSize));
   m_defines.push_back("#define MUVALUE 2");
 }
 
@@ -133,15 +135,16 @@ string RuntimeTest::MakeImpFuncs(ImplementationMap imps)
   return allImplementationFuncs;
 }
 
-RuntimeEvaluator::RuntimeEvaluator(string evalDirName, int numIterations)
+RuntimeEvaluator::RuntimeEvaluator(string evalDirName)
 {
   m_evalDirName = evalDirName;
-  m_numIterations = numIterations;
+  m_numIterations = 0;
   m_dataFileName = "time_data.txt";
 }
 
 std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations(RuntimeTest test, ImplementationMap imps)
 {
+  m_numIterations = test.m_numIterations;
   string executableName = test.m_operationName;
   string testFileName = executableName + ".c";
   std::ofstream outStream(m_evalDirName + "/" + testFileName);
@@ -154,10 +157,10 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations
   system(compileStr.c_str());
   string runStr = "./" + executableName + " > " + m_dataFileName;
   system(runStr.c_str());
-  return ReadTimeDataFromFile(imps.size(), m_numIterations);
+  return ReadTimeDataFromFile(imps.size());
 }
 
-std::map<unsigned int, vector<double>> RuntimeEvaluator::ReadTimeDataFromFile(int numImpls, int numIters)
+std::map<unsigned int, vector<double>> RuntimeEvaluator::ReadTimeDataFromFile(int numImpls)
 {
   std::ifstream dataStream(m_dataFileName);
   std::stringstream buffer;
@@ -170,7 +173,7 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::ReadTimeDataFromFile(in
   int i, j;
   for (i = 1; i <= numImpls; i++) {
     vector<double> impTimes;
-    for (j = 0; j < numIters; j++) {
+    for (j = 0; j < m_numIterations; j++) {
       impTimes.push_back(std::stod(*it));
       it++;
     }

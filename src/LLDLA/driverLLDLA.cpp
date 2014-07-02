@@ -19,8 +19,6 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #include "base.h"
 #include "costs.h"
 #ifdef _OPENMP
@@ -80,6 +78,27 @@ void PrintImpMap(std::map<unsigned int, vector<double>> impTimes)
     cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
     for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
       cout << std::to_string(*vit) << endl;
+    }
+    cout << endl;
+  }
+}
+
+void PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double flopCost, int chunkSize) {
+  /***************************************************************************
+   * WARNING: These numbers are processor specific to Dillon's machine in GDC
+   ***************************************************************************/
+  double ticksPerSec = 1.0e6;
+  double peakFLOPS = 30e9;
+  std::map<unsigned int, vector<double>>::iterator mit;
+  for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
+    std::vector<double>::iterator vit;
+    cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
+    for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
+      double totalFlops = flopCost * chunkSize;
+      double totalTimeInSecs = *vit / ticksPerSec;
+      double actualFLOPS = totalFlops / totalTimeInSecs;
+      double pctPeak = (actualFLOPS / peakFLOPS) * 100;
+      cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
     }
     cout << endl;
   }
@@ -177,7 +196,7 @@ int main(int argc, const char* argv[])
   Universe uni;
   time_t start, start2, end;
   uni.PrintStats();
-
+  Cost flopCost;
   if (algNum==0) {
     time(&start);
     uni.Init(fileName);
@@ -191,7 +210,11 @@ int main(int argc, const char* argv[])
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
   else {
-    uni.Init(algFunc());
+    PSet *startSet = algFunc();
+    uni.Init(startSet);
+    uni.Prop();
+    flopCost = startSet->EvalAndSetBest();
+    cout << "Flops for operation = " << std::to_string(flopCost) << endl;
     time(&start);
   }
 
@@ -202,7 +225,6 @@ int main(int argc, const char* argv[])
     uni.Expand(-1, LLDLALOOPPHASE, LLDLACull);
     time(&end);
     cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
-
     cout << "Propagating\n";
     cout.flush();
     time(&start2);
@@ -237,18 +259,15 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines);
-  string testCodeStr = rtest.MakeTestCode(ImpStrMap(&uni));
-  std::ofstream outputFile("runtimeEvaluation/auto_gen_test.c");
-  outputFile << testCodeStr;
-  outputFile.close();
-  cout << "DONE WITH TEST CODE\n";
-  
+  int chunkSize = 50;
+  int numIterations = 10;
+  RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
-
-  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName, 10);
+  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
+  cout << "About to evaluate\n";
   std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
-  PrintImpMap(impMap);
+  cout << "Done evaluating\n";
+  PrintImpMapInFlops(impMap, flopCost, chunkSize);
 
 #endif //DOEMPIRICALEVAL
 
@@ -355,9 +374,6 @@ PSet* DoubleGemmExample()
   
   return outerSet;
 }
-
-
-
 
 
 #endif //DOLLDLA

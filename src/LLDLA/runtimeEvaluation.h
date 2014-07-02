@@ -39,8 +39,10 @@ class RuntimeTest
   string m_operationName;
   vector<string> m_operationArgs;
   vector<string> m_argDeclarations;
+  int m_numIterations;
+  int m_chunkSize;
 
-  RuntimeTest(string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines);
+  RuntimeTest(string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize);
   string MakeTestCode(ImplementationMap imps);
   string ToCStatements(vector<string> lines);
   string CArgList(vector<string> args);
@@ -58,8 +60,8 @@ class RuntimeEvaluator
   string m_dataFileName;
   int m_numIterations;
 
-  RuntimeEvaluator(string evalDirName, int numIterations);
+  RuntimeEvaluator(string evalDirName);
   std::map<unsigned int, vector<double>> EvaluateImplementations(RuntimeTest test, ImplementationMap imps);
-  std::map<unsigned int, vector<double>> ReadTimeDataFromFile(int numImpls, int numIters);
+  std::map<unsigned int, vector<double>> ReadTimeDataFromFile(int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
 };

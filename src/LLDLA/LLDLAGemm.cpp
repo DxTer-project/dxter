@@ -110,8 +110,14 @@ void LLDLAGemm::Prop()
 
     if (*GetInputM(2) != LLDLA_MU || *GetInputN(2) != LLDLA_MU) 
       cout << "ERROR3: LLDLAGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
-    
-    m_cost = ZERO;
+
+    switch(m_layer) {
+    case (ABSLAYER):
+      m_cost = 2 * GetInputM(0)->SumProds111(*GetInputN(1), *GetInputM(1));
+      break;
+    default:
+      m_cost = 0;
+    }
   }
 }
 
