@@ -242,7 +242,7 @@ Loop* Chol1LowerAlg(Node *in, unsigned int num, bool dist)
   Poss *poss2 = new Poss(chol,false);
   PSet *set2 = new PSet(poss2);
   
-  Combine *comA = splitA->CreateMatchingCombine(2, 
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(2, 
 						1, set4->OutTun(0), 0,
 						4, set2->OutTun(0), 0);
   
@@ -312,7 +312,7 @@ Loop* Chol2LowerAlg(Node *in, unsigned int num, bool dist)
   Poss *poss4 = new Poss(trsm,false);
   PSet *set4 = new PSet(poss4);
   
-  Combine *comA = splitA->CreateMatchingCombine(2, 
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(2, 
 						4, set2->OutTun(0), 0,
 						5, set4->OutTun(0), 0);
   
@@ -380,7 +380,7 @@ Loop* Chol2UpperAlg(Node *in, unsigned int num, bool dist)
   Poss *poss4 = new Poss(trsm,false);
   PSet *set4 = new PSet(poss4);
   
-  Combine *comA = splitA->CreateMatchingCombine(2, 
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(2, 
 						4, set3->OutTun(0), 0,
 						7, set4->OutTun(0), 0);
   
@@ -442,7 +442,7 @@ Loop* Chol3LowerAlg(Node *in, unsigned int num, bool dist)
   Poss *poss3 = new Poss(tri,false);
   PSet *set3 = new PSet(poss3);
 
-  Combine *comA = splitA->CreateMatchingCombine(3,
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(3,
 						4, set1->OutTun(0), 0,
 						5, set2->OutTun(0), 0,
 						8, set3->OutTun(0), 0);
@@ -505,7 +505,7 @@ Loop* Chol3UpperAlg(Node *in, unsigned int num, bool dist)
     Poss *poss3 = new Poss(tri,false);
     PSet *set3 = new PSet(poss3);
     
-    Combine *comA = new Combine(PARTDIAG, POSSTUNOUT);
+    CombineSingleIter *comA = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
     comA->AddInput(splitA,0);
     comA->AddInput(splitA,1);
     comA->AddInput(splitA,2);

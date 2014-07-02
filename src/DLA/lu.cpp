@@ -143,7 +143,7 @@ Loop* LUVar5Loop(Node *Ain, unsigned int Anum,
 		  trxm, 0,
 		  lu, 5);
   
-  Combine *comA = splitA->CreateMatchingCombine(6,
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(6,
 						1, lu, 0,
 						2, lu, 1,
 						4, lu, 2,
@@ -152,7 +152,7 @@ Loop* LUVar5Loop(Node *Ain, unsigned int Anum,
 						8, gemm, 0);
 						
   
-  Combine *comP = splitP->CreateMatchingCombine(1,
+  CombineSingleIter *comP = splitP->CreateMatchingCombine(1,
                                                 1, lu, 6);
   
   Poss *loopPoss = new Poss(2, comA, comP);

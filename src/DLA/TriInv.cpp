@@ -224,7 +224,7 @@ Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
   Poss *poss4 = new Poss(triInv,false);
   PSet *set4 = new PSet(poss4);
 
-  Combine *comA2 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
   comA2->AddInput(set7->OutTun(0),0);
   comA2->AddInput(split,2);
@@ -271,7 +271,7 @@ Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
   PSet *set4 = new PSet(poss4);
 
 
-  Combine *comA2 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
   comA2->AddInput(split,1);
   comA2->AddInput(split,2);
@@ -317,7 +317,7 @@ Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
   Poss *poss4 = new Poss(triInv,false);
   PSet *set4 = new PSet(poss4);
 
-  Combine *comA2 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
   comA2->AddInput(split,1);
   comA2->AddInput(split,2);
@@ -366,7 +366,7 @@ Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
   PSet *set4 = new PSet(poss4);
 
 
-  Combine *comA2 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
   comA2->AddInput(split,1);
   comA2->AddInput(split,2);
@@ -418,7 +418,7 @@ Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
   Poss *poss4 = new Poss(triInv,false);
   PSet *set4 = new PSet(poss4);
 
-  Combine *comA2 = new Combine(PARTDIAGBACK, POSSTUNOUT);
+  CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAGBACK, POSSTUNOUT);
   comA2->AddInput(split,0);
   comA2->AddInput(split,1);
   comA2->AddInput(split,2);
@@ -472,7 +472,7 @@ Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
   Poss *poss4 = new Poss(triInv,false);
   PSet *set4 = new PSet(poss4);
 
-  Combine *comA2 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
   comA2->AddInput(set7->OutTun(0),0);
   comA2->AddInput(set6->OutTun(0),0);
@@ -525,7 +525,7 @@ Loop* TriInvAlgVar3Upper(Node *in, unsigned int num)
   Poss *poss4 = new Poss(triInv,false);
   PSet *set4 = new PSet(poss4);
 
-  Combine *comA2 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
   comA2->AddInput(split,1);
   comA2->AddInput(split,2);

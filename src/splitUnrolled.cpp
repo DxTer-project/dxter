@@ -176,7 +176,7 @@ const Sizes* SplitUnrolled::LocalM(unsigned int num) const
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         if (!input->m_mlsizes)
           throw;
-        return input->m_mlsizes
+        return input->m_mlsizes;
       }
       else if (num == m_unrollFactor) {
         return InputLocalM(0);

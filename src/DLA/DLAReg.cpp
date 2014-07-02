@@ -71,7 +71,7 @@ void RegAllDLANodes()
 #ifndef SKIPTWOSIDED
   Reg(TwoSidedTrxm);
 #endif
-  Reg(Combine);
+  Reg(CombineSingleIter);
   Reg(SplitSingleIter);
   Reg(LoopTunnel);
 #if 0

@@ -40,7 +40,7 @@ GemmLoopExp::GemmLoopExp(Layer fromLayer, Layer toLayer, int dim)
   m_dim(dim) 
 {
 #if DOELEM
-  m_bsSize = USELEMBS;
+  m_bsSize = USEELEMBS;
 #elif DOBLIS
   switch(dim) {
   case (0) :
@@ -1200,12 +1200,12 @@ string GemmLowerLayer::GetType() const
 }
 
 #if DOBLIS||DOELEM
-string SplitSingleIterGemm::GetType() const
+string SplitGemm::GetType() const
 { 
   return "SplitSingleIter Gemm " + LayerNumToStr(m_layer);
 }
 
-bool SplitSingleIterGemm::CanApply(const Node *node) const
+bool SplitGemm::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     const Gemm *gemm = (Gemm*)node;
@@ -1216,7 +1216,7 @@ bool SplitSingleIterGemm::CanApply(const Node *node) const
   return false;
 }
 
-void SplitSingleIterGemm::Apply(Node *node) const
+void SplitGemm::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
   Node *Cin = gemm->Input(2);

@@ -1319,9 +1319,9 @@ Loop* TrmmLoopLeftVar1(Node *Ain, unsigned int Anum,
     }
   }
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(1,
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(1,
                                                 1, gemm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
@@ -1399,9 +1399,9 @@ Loop* TrmmLoopLeftVar2(Node *Ain, unsigned int Anum,
                   splitA, 4,
                   splitB, 1);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB;
+  CombineSingleIter *comB;
   if (rev)
     comB = splitB->CreateMatchingCombine(2,
                                          1, trmm, 0,
@@ -1485,9 +1485,9 @@ Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
     }
   }
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(1,
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(1,
                                                 1, gemm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
@@ -1566,9 +1566,9 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
                   splitA, 4,
                   splitB, 1);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB;
+  CombineSingleIter *comB;
   if ((tri == LOWER && trans != NORMAL) || (tri == UPPER && trans == NORMAL))
     comB = splitB->CreateMatchingCombine(2,
                                          1, trmm, 0,
@@ -1623,7 +1623,7 @@ Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
   AtunOut->AddInput(Atun, 0);
   AtunOut->CopyTunnelInfo(Atun);
   
-  Combine *comB = splitB->CreateMatchingCombine(1,
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(1,
                                                 1, trxm, 0);
   
   Poss *loopPoss = new Poss(2, AtunOut, comB);
@@ -1681,9 +1681,9 @@ Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,
                   splitA, 4,
                   gemm, 0);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB;
+  CombineSingleIter *comB;
   comB = splitB->CreateMatchingCombine(1,
                                        1, trsm, 0);
   
@@ -1763,9 +1763,9 @@ Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
                   gemm, 0);
   
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(1,
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(1,
                                                 1, trmm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
@@ -1848,9 +1848,9 @@ Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
     }
   }
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB;
+  CombineSingleIter *comB;
   if (rev)
     comB = splitB->CreateMatchingCombine(2,
                                          0, gemm, 0,
@@ -1902,7 +1902,7 @@ Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
   AtunOut->AddInput(Atun, 0);
   AtunOut->CopyTunnelInfo(Atun);
   
-  Combine *comB = splitB->CreateMatchingCombine(1,
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(1,
                                                 1, trxm, 0);
   
   Poss *loopPoss = new Poss(2, AtunOut, comB);
@@ -1978,9 +1978,9 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
     gemm->AddInput(splitB, 2);
   
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB;
+  CombineSingleIter *comB;
   if (rev)
     comB = splitB->CreateMatchingCombine(2,
                                          0, gemm, 0,
@@ -2331,9 +2331,9 @@ void BLISTrxmLoopExp::Apply(Node *node) const
   trbp->AddInput(packTun, 0);
   trbp->AddInput(splitOutput, 1);
   
-  Combine *comA = splitLHS->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitLHS->CreateMatchingCombine(0);
   
-  Combine *comB = splitOutput->CreateMatchingCombine(1,
+  CombineSingleIter *comB = splitOutput->CreateMatchingCombine(1,
                                                      1, trbp, isTrsm ? 1 : 0);
   
   LoopTunnel *packTunOut = new LoopTunnel(POSSTUNOUT);
@@ -2429,11 +2429,11 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
     throw;
     return NULL;
 #else
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC;
+  CombineSingleIter *comC;
   if (rev)
     comC = splitC->CreateMatchingCombine(2,
                                          1, trmm3, 0,
@@ -2490,9 +2490,9 @@ Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
   AtunOut->AddInput(Atun, 0);
   AtunOut->CopyTunnelInfo(Atun);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC = splitC->CreateMatchingCombine(1,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
                                                 1, trmm3, 0);
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
@@ -2748,11 +2748,11 @@ void BLISTrmm3LoopExp::Apply(Node *node) const
   trbp->AddInput(packTun, 0);
   trbp->AddInput(splitC, 1);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC = splitC->CreateMatchingCombine(1,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
                                                 1, trbp, 0);
   
   LoopTunnel *packTunOut = new LoopTunnel(POSSTUNOUT);

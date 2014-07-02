@@ -1257,12 +1257,12 @@ PSet* HegstL1Example()
   trmm2->AddInput(set8->OutTun(0),0);
   PSet *set5 = new PSet(new Poss(trmm2,false));
 
-  Combine *comA = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA;
   comA = splitA->CreateMatchingCombine(2, 
 				       4, set7->OutTun(0), 0,
 				       5, set5->OutTun(0), 0);
 
-  Combine *comL = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comL;
   comL = splitL->CreateMatchingCombine(0);
 
   Poss *loopPoss = new Poss(2,
@@ -1404,14 +1404,14 @@ PSet* HegstL5Example()
   hegst->AddInput(splitA,4);
   PSet *set4 = new PSet(new Poss(hegst,false));
 
-  Combine *comA;
+  CombineSingleIter *comA;
   comA = splitA->CreateMatchingCombine(3,
 				       0, set7->OutTun(0), 0,
 				       1, set5->OutTun(0), 0,
 				       4, set4->OutTun(0), 0);
 				       
 
-  Combine *comL;
+  CombineSingleIter *comL;
   comL = splitL->CreateMatchingCombine(0);
   
   Poss *loopPoss = new Poss(2,
@@ -1809,7 +1809,7 @@ PSet* Test()
   Poss *poss14 = new Poss(scal2, false);
   PSet *set14 = new PSet(poss14);		   
 
-  Combine *comA = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA->AddInput(splitA,0);
   comA->AddInput(splitA,1);
   comA->AddInput(splitA,2);
@@ -1826,7 +1826,7 @@ PSet* Test()
 
   comA->CopyUpStats(splitA);
 
-  Combine *comU = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comU = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comU->AddInput(splitU,0);
   comU->AddInput(splitU,1);
   comU->AddInput(splitU,2);
@@ -1841,7 +1841,7 @@ PSet* Test()
 
   comU->CopyUpStats(splitU);
 
-  Combine *comY = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comY = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comY->AddInput(splitY,0);
   comY->AddInput(splitY,1);
   comY->AddInput(splitY,2);
@@ -2176,7 +2176,7 @@ PSet* CholHegstExample()
     axpy2->AddInput(set6->OutTun(0),0);
     PSet *set8 = new PSet(new Poss(axpy2,false));
 
-    Combine *comA = new Combine(PARTDIAG, POSSTUNOUT);
+    CombineSingleIter *comA = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
     comA->AddInput(splitA,0);
     comA->AddInput(set1->OutTun(0),0);
     comA->AddInput(set3->OutTun(0),0);
@@ -2190,7 +2190,7 @@ PSet* CholHegstExample()
   
     comA->CopyTunnelInfo(splitA);
 
-    Combine *comL = splitL->CreateMatchingCombine(0);
+    CombineSingleIter *comL = splitL->CreateMatchingCombine(0);
 
     Poss *loopPoss = new Poss(2,
 			      comA,
@@ -2281,7 +2281,7 @@ PSet* CholHegstExample()
     trmm2->AddInput(splitA,5);
     PSet *set5 = new PSet(new Poss(trmm2,false));
 
-    Combine *comA;
+    CombineSingleIter *comA;
     comA = splitA->CreateMatchingCombine(5,
 					 0,set7->OutTun(0),0,
 					 1,set2->OutTun(0),0,
@@ -2289,7 +2289,7 @@ PSet* CholHegstExample()
 					 4,set4->OutTun(0),0,
 					 5,set5->OutTun(0),0);
 
-    Combine *comL = splitL->CreateMatchingCombine(0);
+    CombineSingleIter *comL = splitL->CreateMatchingCombine(0);
 
     Poss *loopPoss = new Poss(2,
 			      comA,
@@ -2414,13 +2414,13 @@ PSet* AppBlkHouseExample()
 		   trmm2, 0,
 		   splitB, 1);
 
-  Combine *comB = splitB->CreateMatchingCombine(2,
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(2,
 						1, axpy1, 0,
 						2, gemm2, 0);
   
-  Combine *comU = splitU->CreateMatchingCombine(0);
+  CombineSingleIter *comU = splitU->CreateMatchingCombine(0);
 
-  Combine *comT = splitT->CreateMatchingCombine(0);
+  CombineSingleIter *comT = splitT->CreateMatchingCombine(0);
   
   Poss *loopPoss = new Poss(3, comB, comU, comT);
   Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);

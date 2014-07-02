@@ -381,9 +381,9 @@ Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
   AtunOut->AddInput(Atun, 0);
   AtunOut->CopyTunnelInfo(Atun);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC = splitC->CreateMatchingCombine(1,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
                                                 1, hemm, 0);
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
@@ -503,11 +503,11 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
   }
   gemm2->AddInput(splitC, 2);
 
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC = splitC->CreateMatchingCombine(3,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(3,
                                                 0, gemm1, 0,
 						1, hemm, 0,
 						2, gemm2, 0);
@@ -670,11 +670,11 @@ Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
 		 splitC, 2);
 
 
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC = splitC->CreateMatchingCombine(3,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(3,
                                                 0, com, 0,
 						1, com, 1,
 						2, com, 2);
@@ -1074,14 +1074,14 @@ void BLISHemmLoopExp::Apply(Node *node) const
   gebp->AddInput(Btun, 0);
   gebp->AddInput(splitC, 1);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
   LoopTunnel *BtunOut = new LoopTunnel(POSSTUNOUT);
   BtunOut->AddInput(Btun, 0);
   BtunOut->AddInput(Btun, 0);
   BtunOut->CopyTunnelInfo(Btun);
   
-  Combine *comC = splitC->CreateMatchingCombine(1,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
                                                 1, gebp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
