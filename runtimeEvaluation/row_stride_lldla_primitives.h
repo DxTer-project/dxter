@@ -160,10 +160,10 @@ inline void row_stride_mmul_2x2_2x2(
 
 	c_00_01_vreg.v = VEC_PD_LOAD(&C(0, 0));
 	c_00_01_vreg.v += a_00_vreg.v * b_00_10_vreg.v + a_01_vreg.v * b_10_11_vreg.v;
+	VEC_PD_STORE(&C(0, 0), c_00_01_vreg.v);
+
 	c_10_11_vreg.v = VEC_PD_LOAD(&C(1, 0));
 	c_10_11_vreg.v += a_10_vreg.v * b_00_10_vreg.v + a_11_vreg.v * b_10_11_vreg.v;
-
-	VEC_PD_STORE(&C(0, 0), c_00_01_vreg.v);
 	VEC_PD_STORE(&C(1, 0), c_10_11_vreg.v);
 }
 
