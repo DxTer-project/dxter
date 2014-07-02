@@ -53,6 +53,10 @@ Size BSSizeToSize(BSSize size)
 #elif DOLLDLA
   case (USELLDLAMU):
     return LLDLA_MU;
+  case (USELLDLA2MU):
+    return 2*LLDLA_MU;
+  case (USELLDLA3MU):
+    return 3*LLDLA_MU;
 #endif
   case (USEUNITBS):
     return ONE;
@@ -699,7 +703,9 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
 #elif DOLLDLA
   if (m_type != LLDLALOOP)
     throw;
-  if (m_bsSize != USELLDLAMU)
+  if (m_bsSize != USELLDLAMU &&
+      m_bsSize != USELLDLA2MU &&
+      m_bsSize != USELLDLA3MU)
     throw;
   SplitBase *split = GetControl();
   switch(m_dim) 
@@ -738,7 +744,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     LoopTunnel *tun = (LoopTunnel*)(*iter);
     if (tun->IsSplit()) {
       SplitBase *split = (SplitBase*)tun;
-      split->PrintIncrementAtEndOfLoop(out);
+      split->PrintIncrementAtEndOfLoop(m_bsSize, out);
     }
   }
 
@@ -1276,3 +1282,9 @@ bool Loop::HasIndepIters() const
    m_dim = dim;
  }
 #endif
+
+
+const string& Loop::GetFunctionalityString() const
+{
+  return PSet::GetFunctionalityString() + (char)(m_bsSize);
+}

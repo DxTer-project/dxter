@@ -2365,8 +2365,8 @@ void Poss::PrintRoot(IndStream &out, unsigned int whichGraph, bool currOnly)
     if (currOnly || whichGraph == 0 || whichGraph == graphNum) {
       ClearPrinted();
 
-      if (whichGraph != 0)
-	*out << "/*** Algorithm " << whichGraph << " ***" << endl;
+      //      if (whichGraph != 0)
+      *out << "/*** Algorithm " << graphNum << " ***" << endl;
       *out << "\tUnique Num: " << m_num << endl;
       *out << "\tChild of: " << m_parent << endl;
       *out << "\tResult of transformations:" << endl;

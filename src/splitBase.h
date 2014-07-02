@@ -50,7 +50,7 @@ class SplitBase : public LoopTunnel
   virtual bool IsSplit() const {return true;}
   virtual unsigned int NumberOfLoopExecs() const = 0;
   virtual void PrintVarDeclarations(IndStream &out) const = 0;
-  virtual void PrintIncrementAtEndOfLoop(IndStream &out) const = 0;
+  virtual void PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const = 0;
 #if TWOD
   virtual unsigned int NumIters(Size bs, Size m, Size n) const = 0;
 #else
