@@ -21,7 +21,7 @@
 
 
 
-#include "combine.h"
+#include "combineSingleIter.h"
 #include "splitSingleIter.h"
 #include "elemRedist.h"
 #include <cmath>

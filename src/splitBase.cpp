@@ -20,7 +20,7 @@
 */
 
 #include "splitSingleIter.h"
-#include "combine.h"
+#include "combineSingleIter.h"
 #include "elemRedist.h"
 #include <cmath>
 #include "LLDLA.h"

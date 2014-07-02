@@ -25,7 +25,7 @@
 
 #include "loop.h"
 #include "loopTunnel.h"
-#include "combine.h"
+#include "combineSingleIter.h"
 #include "combineUnrolled.h"
 #include "combineBase.h"
 //#include "combineSingleIter.h"
