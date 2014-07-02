@@ -53,6 +53,10 @@ Size BSSizeToSize(BSSize size)
 #elif DOLLDLA
   case (USELLDLAMU):
     return LLDLA_MU;
+  case (USELLDLA2MU):
+    return 2*LLDLA_MU;
+  case (USELLDLA3MU):
+    return 3*LLDLA_MU;
 #endif
   case (USEUNITBS):
     return ONE;
@@ -1276,3 +1280,9 @@ bool Loop::HasIndepIters() const
    m_dim = dim;
  }
 #endif
+
+
+const string& Loop::GetFunctionalityString() const
+{
+  return PSet::GetFunctionalityString() + (char)(m_bsSize);
+}

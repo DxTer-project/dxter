@@ -66,6 +66,8 @@ enum BSSize {
   USETENSORBS,
 #elif DOLLDLA
   USELLDLAMU,
+  USELLDLA2MU,
+  USELLDLA3MU,
 #endif
   USEUNITBS,
   BADBSSIZE 
@@ -138,4 +140,6 @@ class Loop : public PSet
   bool IsParallel() const {return m_comm!=CORECOMM;}
   bool OnlyParallelizedOnNonIndependentData() const;
 #endif
+
+  virtual const string& GetFunctionalityString() const;
 };

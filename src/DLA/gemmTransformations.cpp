@@ -33,13 +33,47 @@
 
 using namespace std;
 
+GemmLoopExp::GemmLoopExp(Layer fromLayer, Layer toLayer, int dim)
+  : 
+  m_fromLayer(fromLayer), 
+  m_toLayer(toLayer), 
+  m_dim(dim) 
+{
+#if DOELEM
+  m_bsSize = USELEMBS;
+#elif DOBLIS
+  switch(dim) {
+  case (0) :
+    m_bsSize = USEBLISMC;
+      break;
+  case (1) :
+    m_bsSize = USEBLISKC;
+      break;
+  case (2) : 
+    m_bsSize = USEBLISNC;
+  }
+#elif DOLLDLA
+  throw;
+#endif
+}
+
+GemmLoopExp::GemmLoopExp(Layer fromLayer, Layer toLayer, int dim, BSSize bsSize)
+  : 
+  m_fromLayer(fromLayer), 
+  m_toLayer(toLayer), 
+  m_dim(dim),
+  m_bsSize(bsSize)
+{
+}
 
 string GemmLoopExp::GetType() const
 {
   //If these change, match in LLDLAGemmLoopExp
-  string str = "Gemm Loop Exp " + LayerNumToStr(m_fromLayer)
-				+ " + " 
-				+ LayerNumToStr(m_toLayer);
+  string str = "Gemm Loop Exp " 
+    + LayerNumToStr(m_fromLayer)
+    + " + " 
+    + LayerNumToStr(m_toLayer)
+    + " bs:" + std::to_string(BSSizeToSize(m_bsSize));
   switch(m_dim) {
     case(0):
       return str + " - m";
@@ -79,6 +113,7 @@ void GemmLoopExp::Apply(Node *node) const
       loop = GemmVar1Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
                           connC->m_n, connC->m_num,
+			  m_bsSize,
                           gemm->m_transA, gemm->m_transB,
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
       break;
@@ -86,6 +121,7 @@ void GemmLoopExp::Apply(Node *node) const
       loop = GemmVar3Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
                           connC->m_n, connC->m_num,
+			  m_bsSize,
                           gemm->m_transA, gemm->m_transB,
                           false,
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
@@ -95,6 +131,7 @@ void GemmLoopExp::Apply(Node *node) const
       loop = GemmVar3Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
                           connC->m_n, connC->m_num,
+			  m_bsSize,
                           gemm->m_transA, gemm->m_transB,
                           true,
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
@@ -104,12 +141,16 @@ void GemmLoopExp::Apply(Node *node) const
       loop = GemmVar2Loop(connA->m_n, connA->m_num,
                           connB->m_n, connB->m_num,
                           connC->m_n, connC->m_num,
+			  m_bsSize,
                           gemm->m_transA, gemm->m_transB,
                           gemm->m_alpha, gemm->m_beta, m_toLayer, gemm->m_type);
       break;
     default:
       throw;
   }
+  
+  if (!(loop->GetBS()))
+    throw;
   
   node->m_poss->AddLoop(loop);
   
@@ -755,6 +796,7 @@ void GemmInputReordering::Apply(Node *node) const
 Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
                    Node *Bin, unsigned int Bnum,
                    Node *Cin, unsigned int Cnum,
+		   BSSize bs,
                    Trans transA, Trans transB,
                    Coef alpha, Coef beta,
                    Layer layer, Type type)
@@ -815,6 +857,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
 Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
                    Node *Bin, unsigned int Bnum,
                    Node *Cin, unsigned int Cnum,
+		   BSSize bs,
                    Trans transA, Trans transB,
                    bool reverse,
                    Coef alpha, Coef beta,
@@ -916,13 +959,13 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
   Loop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, bs);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new Loop(BLISLOOP, loopPoss, bs);
 #elif DOLLDLA
-    loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+    loop = new Loop(LLDLALOOP, loopPoss, bs);
 #endif
 
   loop->SetDimName(DIMK);
@@ -934,6 +977,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
 Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
                    Node *Bin, unsigned int Bnum,
                    Node *Cin, unsigned int Cnum,
+		   BSSize bs,
                    Trans transA, Trans transB,
                    Coef alpha, Coef beta,
                    Layer layer, Type type)
@@ -976,13 +1020,13 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   Loop *loop = NULL;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, bs);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new Loop(BLISLOOP, loopPoss, bs);
 #else
-    loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+    loop = new Loop(LLDLALOOP, loopPoss, bs);
 #endif
 
   loop->SetDimName(DIMN);
@@ -1092,7 +1136,7 @@ void BLISGemmLoopExp::Apply(Node *node) const
                                                 1, gebp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
-  Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+  Loop *loop = new Loop(BLISLOOP, loopPoss, bs);
 
   loop->SetDimName(DIMM);
   

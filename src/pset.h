@@ -99,6 +99,6 @@ class PSet
   void ReplaceAllComms(Comm comm1, Comm comm2);
 #endif //DOBLIS
 
-  const string& GetFunctionalityString() const;
+  virtual const string& GetFunctionalityString() const;
 };
 

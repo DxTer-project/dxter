@@ -31,10 +31,10 @@
 class LLDLAGemmLoopExp : public GemmLoopExp
 {
  public:
-  Size m_bsSize;
   LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 class GemmTransToNotTrans : public SingleTrans

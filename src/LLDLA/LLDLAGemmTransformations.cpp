@@ -26,15 +26,14 @@
 #if DOLLDLA
 
 LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize)
-  : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5)))),
-    m_bsSize(BSSizeToSize(bsSize))
+  : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5))),bsSize)
 {
 }
 
 
 string LLDLAGemmLoopExp::GetType() const
 {
-  return GemmLoopExp::GetType() + " for LLDLA";
+  return "LLDLA " + GemmLoopExp::GetType();
 }
   
 bool LLDLAGemmLoopExp::CanApply(const Node *node) const
@@ -45,16 +44,16 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   switch (m_dim) {
   case (0):
     {
-      return !(*(gemm->GetInputM(2)) <= m_bsSize);
+      return !(*(gemm->GetInputM(2)) <= BSSizeToSize(m_bsSize));
       //DIMM
       break;
     }
   case (1):
     {
       if (gemm->m_transA == NORMAL)
-	return !(*(gemm->GetInputN(0)) <= m_bsSize);
+	return !(*(gemm->GetInputN(0)) <= BSSizeToSize(m_bsSize));
       else if (gemm->m_transA != CONJ)
-	return !(*(gemm->GetInputM(0)) <= m_bsSize);
+	return !(*(gemm->GetInputM(0)) <= BSSizeToSize(m_bsSize));
       else
 	throw;
       //DIMK
@@ -62,12 +61,17 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
     }
   case (2):
     {
-      return !(*(gemm->GetInputN(2)) <= m_bsSize);
+      return !(*(gemm->GetInputN(2)) <= BSSizeToSize(m_bsSize));
       //DIMN
     }
   default:
     throw;
   }
+}
+
+void LLDLAGemmLoopExp::Apply(Node *node) const
+{
+  GemmLoopExp::Apply(node);
 }
 
 bool GemmTransToNotTrans::CanApply(const Node *node) const

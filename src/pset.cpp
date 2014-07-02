@@ -198,6 +198,13 @@ bool PSet::operator==(const PSet &rhs) const
 	if (((Loop*)this)->GetDimName() != ((Loop*)(&rhs))->GetDimName())
 	  return false;
 #endif
+	if (((Loop*)this)->m_bsSize != ((Loop*)(&rhs))->m_bsSize)
+	  return false;
+	if (BSSizeToSize(((Loop*)this)->m_bsSize) == 0) {
+	  cout << "BS bs\n";
+	  cout << ((Loop*)this)->m_bsSize << endl;
+	  throw;
+	}
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
           const LoopTunnel *tun1 = (LoopTunnel*)(m_inTuns[i]);
           const LoopTunnel *tun2 = (LoopTunnel*)(rhs.m_inTuns[i]);

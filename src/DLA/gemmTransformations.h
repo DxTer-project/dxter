@@ -31,10 +31,12 @@
 #include "transform.h"
 #include "elemRedist.h"
 #include "lowerLayer.h"
+#include "loop.h"
 
 Loop* GemmVar1Loop(Node *Ain, unsigned int Anum, 
 		Node *Bin, unsigned int Bnum, 
 		Node *Cin, unsigned int Cnum,
+		   BSSize bs,
 		Trans transA, Trans transB,
 		Coef alpha, Coef beta, 
 		Layer layer, Type type);
@@ -42,6 +44,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
 Loop* GemmVar3Loop(Node *Ain, unsigned int Anum, 
 		    Node *Bin, unsigned int Bnum, 
 		      Node *Cin, unsigned int Cnum,
+		   BSSize bs,
 		      Trans transA, Trans transB,
 		   bool reverse,
 		      Coef alpha, Coef beta, 
@@ -50,6 +53,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
 Loop* GemmVar2Loop(Node *Ain, unsigned int Anum, 
 		    Node *Bin, unsigned int Bnum, 
 		      Node *Cin, unsigned int Cnum,
+		   BSSize bs,
 		      Trans transA, Trans transB,
 		      Coef alpha, Coef beta, 
 		Layer layer, Type type);
@@ -59,8 +63,10 @@ class GemmLoopExp : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   int m_dim;
- GemmLoopExp(Layer fromLayer, Layer toLayer, int dim) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim) {}
+  BSSize m_bsSize;
+  GemmLoopExp(Layer fromLayer, Layer toLayer, int dim);
+  GemmLoopExp(Layer fromLayer, Layer toLayer, int dim, BSSize bsSize);
+
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
