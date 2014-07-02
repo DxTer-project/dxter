@@ -216,7 +216,6 @@ void Gemm::Prop()
     switch(GetLayer()) {
       case(ABSLAYER):
 	m_cost = 2 * GetInputM(0)->SumProds111(*GetInputN(1), *GetInputM(1));
-	cout << "Gemm ABSTRACT cost is " << m_cost << endl;
         break;
 #if DOELEM
       case (DMLAYER):
