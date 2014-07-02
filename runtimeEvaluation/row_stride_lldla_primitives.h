@@ -151,8 +151,8 @@ inline void row_stride_mmul_2x2_2x2(
 		c_00_01_vreg, c_10_11_vreg;
 
 	a_00_vreg.v = VEC_DUP_LOAD(&A(0, 0));
-	a_10_vreg.v = VEC_DUP_LOAD(&A(1, 0));
 	a_01_vreg.v = VEC_DUP_LOAD(&A(0, 1));
+	a_10_vreg.v = VEC_DUP_LOAD(&A(1, 0));
 	a_11_vreg.v = VEC_DUP_LOAD(&A(1, 1));
 
 	b_00_10_vreg.v = VEC_PD_LOAD(&B(0, 0));

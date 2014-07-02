@@ -10,7 +10,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    DxTer is distributed in the hope that it will be useful,
+n    DxTer is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.               
@@ -259,7 +259,7 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 50;
+  int chunkSize = 500;
   int numIterations = 10;
   RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
@@ -329,16 +329,16 @@ PSet* GemmExample()
 
 PSet* DoubleGemmExample()
 {
-  InputNode *Ain = new InputNode("A input",  bigSize, 2, "A", 
-				 2, 1,
+  InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", 
+				 smallSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input",  2, bigSize, "B", 
-				 bigSize, 1,
+  InputNode *Bin = new InputNode("B input", smallSize, smallSize, "B", 
+				 smallSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  bigSize, bigSize, "C", 
-				 bigSize, 1,
+  InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", 
+				 smallSize, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
