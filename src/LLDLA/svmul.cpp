@@ -191,7 +191,7 @@ void SVMulLoopRef::Apply(Node *node) const
 {
   SVMul *svmul = (SVMul*) node;
 
-  Split *split = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split->AddInput(svmul->Input(1), svmul->InputConnNum(1));
 
   if (m_vtype == COLVECTOR) {

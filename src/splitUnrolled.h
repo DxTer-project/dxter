@@ -27,20 +27,19 @@
 #include "loopTunnel.h"
 #include "splitBase.h"
 
-class Combine;
+class CombineUnrolled;
 
 //LoopTunnel for spliting/indxing into a matrix
-class SplitSingleIter : public SplitBase
+class SplitUnrolled : public SplitBase
 {
  public:
-  bool m_addDir;
-  SplitSingleIter();
+  unsigned int m_unrollFactor;
+  SplitUnrolled();
 #if TWOD
-  SplitSingleIter(PartDir dir, PossTunType type, bool isControl = false);
+  SplitUnrolled(PartDir dir, unsigned int unrollFactor, PossTunType type, bool isControl = false);
 #else
-  SplitSingleIter(unsigned int partDim, PossTunType type, bool isControl = false);
+  SplitUnrolled(unsigned int partDim, unsigned int unrollFactor, PossTunType type, bool isControl = false);
 #endif
-  virtual ~SplitSingleIter();
   static Node* BlankInst();
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual PossTunnel* GetSetTunnel();
@@ -48,11 +47,10 @@ class SplitSingleIter : public SplitBase
   virtual void PrintCode(IndStream &out);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
-  virtual unsigned int NumOutputs() const;
+  virtual unsigned int NumOutputs() const {return m_unrollFactor+1;}
   virtual bool QuadInUse(Quad quad, bool atEnd) const;
-  virtual bool PartInUse(unsigned int partNum) const;
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "split";}
+  static ClassType GetClass() {return "splitUnrolled";}
 #if TWOD
   virtual const Sizes* GetM(unsigned int num) const;
   virtual const Sizes* GetN(unsigned int num) const;
@@ -60,10 +58,6 @@ class SplitSingleIter : public SplitBase
   virtual const Sizes* LocalM(unsigned int num) const;
   virtual const Sizes* LocalN(unsigned int num) const;
 #endif
-  void GetSizes(unsigned int num, unsigned int numIters,
-		Size bs, unsigned int parFactor,
-		   Size m, Size n,
-		   Sizes &ms, Sizes &ns);
 #else
   virtual const Dim NumDims(unsigned int num) const;
   virtual const Sizes* Len(unsigned int num, Dim dim) const;
@@ -72,7 +66,7 @@ class SplitSingleIter : public SplitBase
   virtual Name GetName(unsigned int num) const;
   virtual Name GetName(unsigned int num, LoopType type) const;
   virtual void PrintVarDeclarations(IndStream &out) const;
-  Combine* CreateMatchingCombine(int numArgs, ...);
+  CombineUnrolled* CreateMatchingCombine(int numArgs, ...);
   bool ValidIter() const;
 #if TWOD
   virtual unsigned int NumIters(Size bs, Size m, Size n) const;
@@ -83,7 +77,6 @@ class SplitSingleIter : public SplitBase
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual unsigned int NumberOfLoopExecs() const;
-  void SetAddDir() {m_addDir = true;}
   virtual void StartFillingSizes();
   virtual void ClearDataTypeCache();
   virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);

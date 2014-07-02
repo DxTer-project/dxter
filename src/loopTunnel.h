@@ -86,6 +86,7 @@ class LoopTunnel : public PossTunnel
   
   virtual void PrintVarDeclarations(IndStream &out) const {throw;}
   LoopType GetLoopType() const;
+  virtual bool IsSplit() const {return false;}
 
   virtual void StartFillingSizes();
   virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);

@@ -1266,12 +1266,12 @@ Loop* TrmmLoopLeftVar1(Node *Ain, unsigned int Anum,
 {
   bool rev = (tri == UPPER && trans != NORMAL) || (tri == LOWER && trans == NORMAL);
   
-  Split *splitA = new Split(rev ? PARTDIAGBACK: PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(rev ? PARTDIAGBACK: PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   if (!rev)
     splitB->SetUpStats(FULLUP, FULLUP,
@@ -1346,12 +1346,12 @@ Loop* TrmmLoopLeftVar2(Node *Ain, unsigned int Anum,
 {
   bool rev = (tri == UPPER && trans != NORMAL) || (tri == LOWER && trans == NORMAL);
   
-  Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   if (rev)
     splitB->SetUpStats(NOTUP, NOTUP,
@@ -1434,12 +1434,12 @@ Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
 {
   bool rev = (tri == UPPER && trans == NORMAL) || (tri == LOWER && trans != NORMAL);
   
-  Split *splitA = new Split(rev ? PARTDIAGBACK: PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(rev ? PARTDIAGBACK: PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   if (!rev)
     splitB->SetUpStats(FULLUP, NOTUP,
@@ -1513,12 +1513,12 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
 {
   bool rev = (tri == UPPER && trans == NORMAL) || (tri == LOWER && trans != NORMAL);
   
-  Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   if (rev)
     splitB->SetUpStats(NOTUP, PARTUP,
@@ -1605,7 +1605,7 @@ Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
   Atun->SetAllStats(FULLUP);
   Atun->SetIndepIters();
   
-  Split *splitB = new Split(PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   splitB->SetUpStats(FULLUP, FULLUP,
                      NOTUP, NOTUP);
@@ -1650,7 +1650,7 @@ Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,
   if (tri != LOWER || trans != NORMAL)
     throw;
   
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -1659,7 +1659,7 @@ Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,
   
   scale->AddInput(Bin, Bnum);
   
-  Split *splitB = new Split(PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitB->AddInput(scale, 0);
   splitB->SetUpStats(FULLUP, FULLUP,
                      NOTUP, NOTUP);
@@ -1710,12 +1710,12 @@ Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
 {
   bool rev = (tri == LOWER && trans == NORMAL) || (tri == UPPER && trans != NORMAL);
   
-  Split *splitA = new Split(rev ? PARTDIAGBACK: PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(rev ? PARTDIAGBACK: PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   if (!rev)
     splitB->SetUpStats(FULLUP, NOTUP,
@@ -1788,7 +1788,7 @@ Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
 {
   bool rev = (tri == UPPER && trans == NORMAL) || (tri == LOWER && trans != NORMAL);
   
-  Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -1796,7 +1796,7 @@ Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
   ScaleNode *scale = new ScaleNode(layer, coeff);
   scale->AddInput(Bin, Bnum);
   
-  Split *splitB = new Split(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
   splitB->AddInput(scale, 0);
   if (rev)
     splitB->SetUpStats(PARTUP, PARTUP,
@@ -1884,7 +1884,7 @@ Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
   Atun->SetAllStats(FULLUP);
   Atun->SetIndepIters();
   
-  Split *splitB = new Split(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   splitB->SetUpStats(FULLUP, NOTUP,
                      FULLUP, NOTUP);
@@ -1926,7 +1926,7 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
 {
   bool rev = ((tri == UPPER && trans != NORMAL) || (tri == LOWER && trans == NORMAL));
   
-  Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -1935,7 +1935,7 @@ Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
   
   scale->AddInput(Bin, Bnum);
   
-  Split *splitB = new Split(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(rev ? PARTLEFT : PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(scale, 0);
   if (rev)
     splitB->SetUpStats(PARTUP, FULLUP,
@@ -2220,7 +2220,7 @@ void BLISTrxmLoopExp::Apply(Node *node) const
     }
   }
   
-  Split *splitLHS = new Split(lhsDir, POSSTUNIN, true);
+  SplitSingleIter *splitLHS = new SplitSingleIter(lhsDir, POSSTUNIN, true);
   if (isLeft) {
     splitLHS->AddInput(node->Input(0), node->InputConnNum(0));
   }
@@ -2230,7 +2230,7 @@ void BLISTrxmLoopExp::Apply(Node *node) const
   splitLHS->SetAllStats(FULLUP);
   splitLHS->SetIndepIters();
   
-  Split *splitOutput = new Split(outputDir, POSSTUNIN);
+  SplitSingleIter *splitOutput = new SplitSingleIter(outputDir, POSSTUNIN);
   splitOutput->AddInput(trxm->Input(1), trxm->InputConnNum(1));
   splitOutput->SetUpStats(FULLUP, FULLUP,
                           NOTUP, NOTUP);
@@ -2365,17 +2365,17 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
 {
   bool rev = (tri == UPPER && trans != NORMAL) || (tri == LOWER && trans == NORMAL);
   
-  Split *splitA = new Split(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(rev ? PARTDIAGBACK : PARTDIAG, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
   
-  Split *splitC = new Split(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(rev ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   if (rev)
     splitC->SetUpStats(NOTUP, NOTUP,
@@ -2465,13 +2465,13 @@ Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
   Atun->SetAllStats(FULLUP);
   Atun->SetIndepIters();
   
-  Split *splitB = new Split(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(Bin, Bnum);
   splitB->SetUpStats(FULLUP, FULLUP,
                      FULLUP, FULLUP);
   splitB->SetIndepIters();
   
-  Split *splitC = new Split(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitC->AddInput(Bin, Bnum);
   splitC->SetUpStats(FULLUP, NOTUP,
                      FULLUP, NOTUP);
@@ -2678,16 +2678,16 @@ void BLISTrmm3LoopExp::Apply(Node *node) const
   else
     bDir = PARTDOWN;
   
-  Split *splitA = new Split(aDir, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(aDir, POSSTUNIN, true);
   splitA->AddInput(trmm3->Input(0), trmm3->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
   //BAM IndepIters
   
-  Split *splitB = new Split(bDir, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(bDir, POSSTUNIN);
   splitB->AddInput(trmm3->Input(1), trmm3->InputConnNum(1));
   splitB->SetAllStats(FULLUP);
   
-  Split *splitC = new Split(PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN);
   splitC->AddInput(trmm3->Input(2), trmm3->InputConnNum(2));
   splitC->SetUpStats(FULLUP, FULLUP,
                      NOTUP, NOTUP);

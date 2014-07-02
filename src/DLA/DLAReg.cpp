@@ -72,7 +72,7 @@ void RegAllDLANodes()
   Reg(TwoSidedTrxm);
 #endif
   Reg(Combine);
-  Reg(Split);
+  Reg(SplitSingleIter);
   Reg(LoopTunnel);
 #if 0
   Reg(CritSectTunnel);

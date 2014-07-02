@@ -759,7 +759,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
                    Coef alpha, Coef beta,
                    Layer layer, Type type)
 {
-  Split *splitA = new Split(transA==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(transA==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -769,11 +769,12 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
   Btun->SetAllStats(FULLUP);
   Btun->SetIndepIters();
   
-  Split *splitC = new Split(PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   splitC->SetUpStats(FULLUP, FULLUP,
                      NOTUP, NOTUP);
   splitC->SetIndepIters();
+
   
   Node *gepp;
   
@@ -836,7 +837,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
       aDir = PARTDOWN;
     }
   }
-  Split *splitA = new Split(aDir, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(aDir, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetUpStats(FULLUP, FULLUP,
                      FULLUP, FULLUP);
@@ -859,7 +860,7 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
       bDir = PARTRIGHT;
     }
   }
-  Split *splitB = new Split(bDir, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(bDir, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetUpStats(FULLUP, FULLUP,
                      FULLUP, FULLUP);
@@ -942,12 +943,12 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   Atun->SetAllStats(FULLUP);
   Atun->SetIndepIters();
   
-  Split *splitB = new Split(transB==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitB = new SplitSingleIter(transB==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
   
-  Split *splitC = new Split(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   splitC->SetUpStats(FULLUP, NOTUP,
                      FULLUP, NOTUP);
@@ -1019,7 +1020,7 @@ void BLISGemmLoopExp::Apply(Node *node) const
   Node *Cin = connC->m_n;
   unsigned int Cnum = connC->m_num;
   
-  Split *splitA = new Split(gemm->m_transA == NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(gemm->m_transA == NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(connA->m_n, connA->m_num);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -1045,7 +1046,7 @@ void BLISGemmLoopExp::Apply(Node *node) const
   Btun->SetAllStats(FULLUP);
   Btun->SetIndepIters();
   
-  Split *splitC = new Split(PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   splitC->SetUpStats(FULLUP, FULLUP,
                      PARTUP, PARTUP);
@@ -1155,12 +1156,12 @@ string GemmLowerLayer::GetType() const
 }
 
 #if DOBLIS||DOELEM
-string SplitGemm::GetType() const
+string SplitSingleIterGemm::GetType() const
 { 
-  return "Split Gemm " + LayerNumToStr(m_layer);
+  return "SplitSingleIter Gemm " + LayerNumToStr(m_layer);
 }
 
-bool SplitGemm::CanApply(const Node *node) const
+bool SplitSingleIterGemm::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     const Gemm *gemm = (Gemm*)node;
@@ -1171,7 +1172,7 @@ bool SplitGemm::CanApply(const Node *node) const
   return false;
 }
 
-void SplitGemm::Apply(Node *node) const
+void SplitSingleIterGemm::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
   Node *Cin = gemm->Input(2);

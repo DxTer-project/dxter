@@ -737,12 +737,12 @@ Loop* HerkLoopVar1(Node *Ain, unsigned int Anum,
                    Coef alpha, Coef beta, Type type,
                    Layer layer)
 {
-  Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitC = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitC->AddInput(Cin, Cnum);
   if (tri == LOWER)
     splitC->SetUpStats(FULLUP, FULLUP,
@@ -808,12 +808,12 @@ Loop* HerkLoopVar2(Node *Ain, unsigned int Anum,
                    Coef alpha, Coef beta, Type type,
                    Layer layer)
 {
-  Split *splitA = new Split(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(trans==NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitC = new Split(PARTDIAG, POSSTUNIN);
+  SplitSingleIter *splitC = new SplitSingleIter(PARTDIAG, POSSTUNIN);
   splitC->AddInput(Cin, Cnum);
   if (tri == LOWER)
     splitC->SetUpStats(FULLUP, FULLUP,
@@ -880,7 +880,7 @@ Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
   ScaleTrapNode *scal = new ScaleTrapNode(layer, LEFT, tri, beta);
   scal->AddInput(Cin, Cnum);
   
-  Split *splitA = new Split(trans==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(trans==NORMAL ? PARTRIGHT : PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -922,12 +922,12 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
   ScaleTrapNode *scal = new ScaleTrapNode(layer, LEFT, tri, beta);
   scal->AddInput(Cin, Cnum);
   
-  Split *splitA = new Split(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
-  Split *splitB = new Split(PARTDOWN, POSSTUNIN, false);
+  SplitSingleIter *splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
@@ -981,12 +981,12 @@ Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum,
   Atun->SetAllStats(FULLUP);
   Atun->SetIndepIters();
   
-  Split *splitB = new Split(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, false);
+  SplitSingleIter *splitB = new SplitSingleIter(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, false);
   splitB->AddInput(Bin, Bnum);
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
   
-  Split *splitC = new Split(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(tri==LOWER ? PARTRIGHT : PARTLEFT, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   if (tri==LOWER)
     splitC->SetUpStats(FULLUP, NOTUP,
@@ -1110,7 +1110,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
                    Coef alpha, Type type,
                    Layer layer)
 {
-  Split *splitA = new Split(tri==LOWER ? PARTUPWARD : PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitA = new SplitSingleIter(tri==LOWER ? PARTUPWARD : PARTDOWN, POSSTUNIN);
   splitA->AddInput(Ain, Anum);
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -1131,7 +1131,7 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
   Btun->SetAllStats(FULLUP);
   Btun->SetIndepIters();
   
-  Split *splitC = new Split(tri==LOWER ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitC = new SplitSingleIter(tri==LOWER ? PARTUPWARD : PARTDOWN, POSSTUNIN, true);
   splitC->AddInput(Cin, Cnum);
   if (tri==LOWER)
     splitC->SetUpStats(NOTUP, NOTUP,

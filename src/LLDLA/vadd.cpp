@@ -176,10 +176,10 @@ void VAddLoopRef::Apply(Node *node) const
 {
   VAdd *vadd = (VAdd*) node;
 
-  Split *split1 = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split1 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split1->AddInput(vadd->Input(1), vadd->InputConnNum(1));
 
-  Split *split0 = new Split(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter *split0 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
   split0->AddInput(vadd->Input(0), vadd->InputConnNum(0));
 
   split0->SetAllStats(FULLUP);

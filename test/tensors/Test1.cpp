@@ -330,7 +330,8 @@ DistTensorTest( const Grid& g )
     // C[D10,D2,D3] <- C[D10,D2,*,D3] (with SumScatter on D3)
     C__D_1_0__D_2__D_3.ReduceScatterRedistFrom( C__D_1_0__D_2__S__D_3, 3, 2 );
     // C[D01,D2,D3] <- C[D10,D2,D3]
-    C__D_0_1__D_2__D_3.PermutationRedistFrom( C__D_1_0__D_2__D_3, 0, modes_1_0 );
+    C__D_0_1__D_2__D_3_temp.PermutationRedistFrom( C__D_1_0__D_2__D_3, 0, modes_1_0 );
+    C__D_0_1__D_2__D_3= beta*C__D_0_1__D_2__D_3 + C__D_0_1__D_2__D_3_temp;
 
     //------------------------------------//
 

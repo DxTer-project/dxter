@@ -26,4 +26,6 @@
 #include "loop.h"
 #include "loopTunnel.h"
 #include "combine.h"
+#include "splitBase.h"
 #include "split.h"
+#include "splitUnrolled.h"

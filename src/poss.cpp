@@ -672,7 +672,9 @@ void Poss::ExpandTunnels()
   }
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
     Node *tunIn = InTun(i);
-    while (tunIn->m_inputs.size() > 1 && tunIn->GetNodeClass() != Split::GetClass()) {
+    while ((tunIn->m_inputs.size() > 1)
+	   && (tunIn->GetNodeClass() != SplitUnrolled::GetClass())
+	   && (tunIn->GetNodeClass() != SplitSingleIter::GetClass())) {
       cout << "splitting in\n";
       PossTunnel *tun = (PossTunnel*)(tunIn->GetNewInst());
       tun->m_tunType = POSSTUNIN;
@@ -1983,8 +1985,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
       }
       ClassType rightInputType = rightSetInput->GetNodeClass();
       ClassType leftOutputType = leftSetOutput->GetNodeClass();
-      if ((rightInputType == Split::GetClass() && leftOutputType != Combine::GetClass())
-          || (leftOutputType == Combine::GetClass() && rightInputType != Split::GetClass()))
+      if ((rightInputType == SplitSingleIter::GetClass() && leftOutputType != Combine::GetClass())
+          || (leftOutputType == Combine::GetClass() && rightInputType != SplitSingleIter::GetClass()))
 	{
 	  LoopTunnel *inTun = (LoopTunnel*)leftSetOutput->GetMatchingInTun();
 	  rightSetInput->ChangeInput1Way(leftSetOutput,0,inTun->Input(0),inTun->InputConnNum(0));
@@ -2086,8 +2088,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   for(; tunIter != newSet->m_inTuns.end(); ++tunIter) {
     Node *tun = *tunIter;
     AddNode(tun);
-    if (tun->GetNodeClass() == Split::GetClass()) {
-      Split *split = (Split*)tun;
+    if (tun->GetNodeClass() == SplitSingleIter::GetClass()) {
+      SplitSingleIter *split = (SplitSingleIter*)tun;
       if (split->m_isControlTun) {
         if (foundControl)
           split->m_isControlTun = false;
@@ -2106,15 +2108,15 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   
   for(unsigned int i = 0; i < newSet->m_inTuns.size(); ++i) {
     Node *tun = newSet->m_inTuns[i];
-    if (tun->GetNodeClass() == Split::GetClass()) {
+    if (tun->GetNodeClass() == SplitSingleIter::GetClass()) {
       for(unsigned int j = i+1; j < newSet->m_inTuns.size(); ++j) {
         Node *tun2 = newSet->m_inTuns[j];
-        if (tun2->GetNodeClass() == Split::GetClass()) {
+        if (tun2->GetNodeClass() == SplitSingleIter::GetClass()) {
           NodeConn *conn1 = tun->m_inputs[0];
           NodeConn *conn2 = tun2->m_inputs[0];
           if (conn1->m_n == conn2->m_n && conn1->m_num == conn2->m_num) {
-            Split *split1 = (Split*)tun;
-            Split *split2 = (Split*)tun2;
+            SplitSingleIter *split1 = (SplitSingleIter*)tun;
+            SplitSingleIter *split2 = (SplitSingleIter*)tun2;
 #if TWOD
             if (split1->m_dir == split2->m_dir)
 #else

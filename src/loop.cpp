@@ -189,9 +189,11 @@ Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
 {
   unsigned int i;
   for(i = 0; i < poss->m_inTuns.size(); ++i) {
-    if (poss->m_inTuns[i]->GetNodeClass() == Split::GetClass()) {
-      if (((Split*)(poss->m_inTuns[i]))->m_isControlTun)
-        ((Split*)(m_inTuns[i]))->m_isControlTun = true;
+    LoopTunnel *tun = (LoopTunnel*)(poss->m_inTuns[i]);
+    if (tun->IsSplit()) {
+      SplitBase *split = (SplitBase*)tun;
+      if (split->m_isControlTun)
+        split->m_isControlTun = true;
     }
   }
   AssignNewLabel();
@@ -204,9 +206,9 @@ Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
       cout << "non loop tunnel on loop!\n";
       throw;
     }
-    if (in->GetNodeClass() == Split::GetClass())
+    if (((LoopTunnel*)in)->IsSplit())
     {
-      Split *split = (Split*)in;
+      SplitBase *split = (SplitBase*)in;
       
       if (split->m_isControlTun) {
         if (foundControl)
@@ -234,8 +236,8 @@ void Loop::Prop()
       cout << "non loop tunnel on loop!\n";
       throw;
     }
-    if (in->GetNodeClass() == Split::GetClass()) {
-      Split *split = (Split*)in;
+    if (((LoopTunnel*)in)->IsSplit()) {
+      SplitBase *split = (SplitBase*)in;
       if (split->m_isControlTun) {
         if (foundControl)
           throw;
@@ -267,10 +269,16 @@ bool Loop::CanMerge(PSet *pset) const
 #endif
   if (m_type != loop->m_type)
     return false;
-  const Split *split1 = GetControl();
-  const Split *split2 = loop->GetControl();
+  const SplitBase *splitBase1 = GetControl();
+  const SplitBase *splitBase2 = loop->GetControl();
+  if (splitBase1->GetNodeClass() != SplitSingleIter::GetClass() ||
+      splitBase2->GetNodeClass() != SplitSingleIter::GetClass())
+    return false;
+  const SplitSingleIter *split1 = (SplitSingleIter*)splitBase1;
+  const SplitSingleIter *split2 = (SplitSingleIter*)splitBase2;
   if (split1->NumberOfLoopExecs() != split2->NumberOfLoopExecs())
     return false;
+
   for(unsigned int i = 0; i < split1->NumberOfLoopExecs(); ++i) {
     if (split1->NumIters(i) != split2->NumIters(i))
       return false;
@@ -359,11 +367,11 @@ bool Loop::CanMerge(PSet *pset) const
           //Check if the way the inputs/outputs are split are ok
           // for fusion
           if (leftOutTun->GetNodeClass() == Combine::GetClass()) {
-            if (rightInTun->GetNodeClass() == Split::GetClass()) {
+            if (rightInTun->GetNodeClass() == SplitSingleIter::GetClass()) {
 #if TWOD
-              if (((Combine*)leftOutTun)->m_dir != ((Split*)rightInTun)->m_dir) {
+              if (((Combine*)leftOutTun)->m_dir != ((SplitSingleIter*)rightInTun)->m_dir) {
 #else
-              if (((Combine*)leftOutTun)->m_partDim != ((Split*)rightInTun)->m_partDim) {
+              if (((Combine*)leftOutTun)->m_partDim != ((SplitSingleIter*)rightInTun)->m_partDim) {
 #endif
                 if (!leftOutTun->IsConst() || !rightInTun->IsConst())
                   return false;
@@ -379,7 +387,7 @@ bool Loop::CanMerge(PSet *pset) const
             }
           }
           else {
-            if (rightInTun->GetNodeClass() == Split::GetClass()) {
+            if (rightInTun->GetNodeClass() == SplitSingleIter::GetClass()) {
               if (!leftOutTun->IsConst() || !rightInTun->IsConst()) {
                 return false;
               }
@@ -558,8 +566,8 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   Poss *poss = GetCurrPoss();
   NodeVecIter iter = poss->m_inTuns.begin();
   for(; iter != poss->m_inTuns.end(); ++iter) {
-    if ((*iter)->GetNodeClass() == Split::GetClass()) {
-      ((Split*)(*iter))->PrintVarDeclarations(out);
+    if (((LoopTunnel*)(*iter))->IsSplit()) {
+      ((SplitBase*)(*iter))->PrintVarDeclarations(out);
     }
   }
 
@@ -588,7 +596,10 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     string dimLen = "dimLen" + loopLevel;
     string bs = "bs" + loopLevel;
     
-    Split *split = GetControl();
+    SplitBase *splitBase = GetControl();
+    if (splitBase->GetNodeClass() != SplitSingeIter::GetClass())
+      throw;
+    SplitSingleIter *split = (SplitSingleIter*)splitBase;
     
     string inputName = split->Input(0)->GetName(split->InputConnNum(0)).str();
     
@@ -690,7 +701,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     throw;
   if (m_bsSize != USELLDLAMU)
     throw;
-  Split *split = GetControl();
+  SplitBase *split = GetControl();
   switch(m_dim) 
     {
     case (DIMM):
@@ -724,9 +735,9 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
 
   iter = poss->m_inTuns.begin();
   for(; iter != poss->m_inTuns.end(); ++iter) {
-    Node *node = *iter;
-    if (node->GetNodeClass() == Split::GetClass()) {
-      Split *split = (Split*)node;
+    LoopTunnel *tun = (LoopTunnel*)(*iter);
+    if (tun->IsSplit()) {
+      SplitBase *split = (SplitBase*)tun;
       split->PrintIncrementAtEndOfLoop(out);
     }
   }
@@ -837,14 +848,14 @@ int Loop::GetBS() const
   return (int)(BSSizeToSize(m_bsSize));
 }
 
-Split* Loop::GetControl() const
+SplitBase* Loop::GetControl() const
 {
-  Split *control = NULL;
+  SplitBase *control = NULL;
   NodeVecConstIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
-    Node *node = *iter;
-    if (node->GetNodeClass() == Split::GetClass()) {
-      Split *split = (Split*)node;
+    LoopTunnel *node = (LoopTunnel*)(*iter);
+    if (node->IsSplit()) {
+      SplitBase *split = (SplitBase*)node;
       if (split->m_isControlTun) {
         control = split;
       }
@@ -904,7 +915,7 @@ void Loop::UnflattenStatic(ifstream &in)
 
 void Loop::FillTunnelSizes()
 {
-  Split *control = GetControl();
+  SplitBase *control = GetControl();
   if (!control)
     throw;
   bool upToDate = true;
@@ -1107,8 +1118,11 @@ void Loop::Parallelize(Comm comm)
           throw;
         found = true;
         unsigned int numOut = tun->NumOutputs();
-        if (tun->GetNodeClass() == Split::GetClass())
-          --numOut;
+        if (tun->IsSplit()) {
+	  if (tun->GetNodeClass() != SplitSingleIter::GetClass())
+	    throw;
+	  --numOut;
+	}
         int i;
         for(i = 0; i < (int)(tun->m_children.size()); ++i) {
           Node *possTun = (tun->m_children[i])->m_n;
@@ -1214,8 +1228,11 @@ bool Loop::OnlyParallelizedOnNonIndependentData() const
     const LoopTunnel *tun = (LoopTunnel*)(*iter);
     if (!tun->IndepIters() && !tun->InputIsTemp()) {
       unsigned int numOut = tun->NumOutputs();
-      if (tun->GetNodeClass() == Split::GetClass())
-        --numOut;
+      if (tun->IsSplit()) {
+	if (tun->GetNodeClass() != SplitSingleIter::GetClass())
+	  throw;
+	--numOut;
+      }
       bool foundNonPar = false;
       NodeConnVecConstIter connIter = tun->m_children.begin();
       for( ; !foundNonPar && connIter != tun->m_children.end(); ++ connIter) {

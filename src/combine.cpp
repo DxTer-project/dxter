@@ -77,10 +77,10 @@ void Combine::Prop()
 #endif
 	    throw;
 	  }
-	  else if (conn->m_n->GetNodeClass() != Split::GetClass())
+	  else if (conn->m_n->GetNodeClass() != SplitSingleIter::GetClass())
 	    throw;
 	
-	if (Input(m_inputs.size()-1)->GetNodeClass() != Split::GetClass()) {
+	if (Input(m_inputs.size()-1)->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  cout << "Last input isn't the right size\n";
 	}
 	for (unsigned int i = 0; i < m_children.size(); ++i) {
@@ -244,7 +244,7 @@ Name Combine::GetName(unsigned int num) const
   if (num > 0)
     throw;
   if (m_tunType == POSSTUNOUT)
-    return ((Split*)Input(m_inputs.size()-1))->GetOrigName();
+    return ((SplitSingleIter*)Input(m_inputs.size()-1))->GetOrigName();
   else
     return Input(0)->GetName(0);
 }

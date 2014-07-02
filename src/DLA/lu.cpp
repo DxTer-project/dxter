@@ -111,12 +111,12 @@ Loop* LUVar5Loop(Node *Ain, unsigned int Anum,
 		 Node *Pin, unsigned int Pnum,
 		 Layer BLASLayer, Layer LAPACKLayer)
 {
-  Split *splitA = new Split(PARTDIAG, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(Ain, Anum);
   splitA->SetUpStats(FULLUP, FULLUP,
 		     PARTUP, PARTUP);
   
-  Split *splitP = new Split(PARTDOWN, POSSTUNIN);
+  SplitSingleIter *splitP = new SplitSingleIter(PARTDOWN, POSSTUNIN);
   splitP->AddInput(Pin, Pnum);
   splitP->SetUpStats(FULLUP, FULLUP,
                      NOTUP, NOTUP);
