@@ -1264,6 +1264,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     }
     throw;
   }
+  bool foundOne = false;
   for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
     bool found = false;
     NodeConnVecIter tunIter = m_children.begin();
@@ -1278,6 +1279,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
 	if (childConn->m_num == subMat) {
 	  if (!(childConn->m_n->IsPossTunnel(POSSTUNOUT))) {
 	    found = true;
+	    foundOne = true;
 	    GetSizes(subMat, numIters,
 		     bs, parFactor,
 		     m, n,
@@ -1287,6 +1289,8 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
       }
     }
   }
+  if (!foundOne)
+    throw;
 }
 #else
 void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
