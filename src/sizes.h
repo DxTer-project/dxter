@@ -59,15 +59,18 @@ class SizesIter
   int m_valC;
   SizesType m_type;
   double m_coeff;
+  int m_repeatNum;
+  int m_repeats;
   //negative for round-robin
   //positive for blocks
   int m_parFactor;
  SizesIter() : m_currPos(-1) {}
-  SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int parFactor);
+  SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int parFactor, int repeats);
   void operator++();
   Size operator*() const;
   void operator=(const SizesIter &rhs);
   bool AtEnd() const;
+  bool AtCurrRepeatEnd() const;
 };
 
 class SizeEntry
@@ -79,6 +82,7 @@ class SizeEntry
   //negative for round-robin
   //positive for blocks
   int m_parFactor;
+  int m_repeats;
   SizeEntry();
   void SetRepeatedSizes(Size size, int repeats, int parFactor);
   void SetSizeRange(Size start, int stride, Size end, int parFactor);
@@ -92,6 +96,7 @@ class SizeEntry
   bool operator<= (const Size &rhs) const;
   void Print() const;
   void Print(IndStream &out) const;
+  unsigned int NumSizesPerRepeat() const;
   unsigned int NumSizes() const;
   bool IsZero() const;
   SizesIter GetIter(double coeff) const;

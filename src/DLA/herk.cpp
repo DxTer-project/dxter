@@ -775,9 +775,9 @@ Loop* HerkLoopVar1(Node *Ain, unsigned int Anum,
   herk->AddInputs(4, splitA, 1,
                   splitC, 4);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comC;
+  CombineSingleIter *comC;
   if (tri == LOWER)
     comC = splitC->CreateMatchingCombine(2,
                                          1, gemm, 0,
@@ -845,9 +845,9 @@ Loop* HerkLoopVar2(Node *Ain, unsigned int Anum,
   herk->AddInputs(4, splitA, 1,
                   splitC, 4);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comC;
+  CombineSingleIter *comC;
   if (tri == LOWER)
     comC = splitC->CreateMatchingCombine(2,
                                          4, herk, 0,
@@ -894,7 +894,7 @@ Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
   herk->AddInputs(4, splitA, 1,
                   Ctun, 0);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
   LoopTunnel *CtunOut = new LoopTunnel(POSSTUNOUT);
   CtunOut->AddInput(herk,0);
@@ -946,9 +946,9 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
 #if DOELEM
     throw;
 #else  
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
   LoopTunnel *CtunOut = new LoopTunnel(POSSTUNOUT);
   CtunOut->AddInput(herk,0);
@@ -1020,9 +1020,9 @@ Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum,
   AtunOut->AddInput(Atun,0);
   AtunOut->CopyTunnelInfo(Atun);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC = splitC->CreateMatchingCombine(1,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
                                                 1, trirk, 0);
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
@@ -1180,14 +1180,14 @@ Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
    splitC, 1);
    */
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
   LoopTunnel *BtunOut = new LoopTunnel(POSSTUNOUT);
   BtunOut->AddInput(Btun, 0);
   BtunOut->AddInput(Btun, 0);
   BtunOut->CopyTunnelInfo(Btun);
   
-  Combine *comC = splitC->CreateMatchingCombine(1,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
                                                 1, herkbp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);

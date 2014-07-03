@@ -328,6 +328,10 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
   out.Indent();
 
   if (m_srcType.m_notReped != m_destType.m_notReped) {
+    if (m_coef != COEFZERO) {
+      throw;
+      //need to use an ReduceScatterUpdateRedistFrom flavor
+    }
     *out << outName << ".ReduceToOneRedistFrom( "
 	 << inName << ", ";
     bool found = false;
@@ -345,9 +349,18 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
     if (srcNumDims != (m_destType.m_numDims+1))
       throw;
 
-    //    *out << "ReduceScatterRedist( " << outName << ", " << inName << ", ";
-    *out << outName << ".ReduceScatterRedistFrom( " 
-	 << inName << ", ";
+    *out << outName;
+    if (m_coef == COEFZERO) 
+      *out << ".ReduceScatterRedistFrom( ";
+    else
+      *out << ".ReduceScatterUpdateRedistFrom( ";
+
+    *out << inName << ", ";
+    
+    if (m_coef != COEFZERO) {
+      out << m_coef;
+      *out << ", ";
+    }
 
     DimVec scatDims = sumDims.DistEntryDims();
 
@@ -659,7 +672,7 @@ void SplitSumScatter::Apply(Node *node) const
     EntrySet set;
     set.insert(inEntry);
     
-    SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFONE, set);
+    SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFZERO, set);
     newSum->AddInput(node->Input(0), node->InputConnNum(0));
     newSum->AddInput(temp, 0);
     node->m_poss->AddNode(newSum);
@@ -670,7 +683,6 @@ void SplitSumScatter::Apply(Node *node) const
 
     //    cout << "new sum scatter " << newSum->InputDataType(0).m_dist.PrettyStr() << " -> "
     //	 <<  newSum->GetDistType(0).PrettyStr() << endl;
-
 
 
     if (sums.empty()) {
@@ -766,7 +778,7 @@ void SplitSumScatter::Apply(Node *node) const
 	  EntrySet set;
 	  set.insert(*iter);
 
-	  SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFONE, set);
+	  SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFZERO, set);
 	  newSum->AddInput(node->Input(0), node->InputConnNum(0));
 	  newSum->AddInput(temp, 0);
 	  node->m_poss->AddNode(newSum);
@@ -917,23 +929,23 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
     }
   }
 
-  TempVarNode *temp = new TempVarNode(outTypeInt, node->GetInputName(0).m_name);
-  temp->AddInput(node->Input(1), node->InputConnNum(1));
-  node->m_poss->AddNode(temp);
+  RedistNode *redist = new RedistNode(outTypeInt);
+  redist->AddInput(node->Input(1), node->InputConnNum(1));
+  node->m_poss->AddNode(redist);
 
   SumScatterUpdateNode *newSum = new SumScatterUpdateNode(sum->m_coef, sum->m_sumDims);
   newSum->AddInput(node->Input(0), node->InputConnNum(0));
-  newSum->AddInput(temp, 0);
+  newSum->AddInput(redist, 0);
   node->m_poss->AddNode(newSum);
 
 
-  RedistNode *redist = new RedistNode(outType);
-  redist->AddInput(newSum, 0);
-  node->m_poss->AddNode(redist);
-
-
-  sum->RedirectChildren(redist, 0);
-	    node->m_poss->DeleteChildAndCleanUp(node);
+  RedistNode *redist2 = new RedistNode(outType);
+  redist2->AddInput(newSum, 0);
+  node->m_poss->AddNode(redist2);
+  
+  
+  sum->RedirectChildren(redist2, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 #endif

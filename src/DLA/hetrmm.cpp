@@ -232,7 +232,7 @@ Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num)
   PSet *set8 = new PSet(poss8);
 
 
-  Combine *comA3 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA3->AddInput(set8->OutTun(0),0);
   comA3->AddInput(set9->OutTun(0),0);
   comA3->AddInput(split,2);
@@ -282,7 +282,7 @@ Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num)
   Poss *poss10 = new Poss(hetrmm,false);
   PSet *set10 = new PSet(poss10);
 
-  Combine *comA3 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA3->AddInput(set8->OutTun(0),0);
   comA3->AddInput(split,1);
   comA3->AddInput(split,2);
@@ -338,7 +338,7 @@ Loop* HetrmmAlgVar2Lower(Node *in, unsigned int num)
   Poss *poss8 = new Poss(tri2,false);
   PSet *set8 = new PSet(poss8);
 
-  Combine *comA3 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA3->AddInput(split,0);
   comA3->AddInput(set7->OutTun(0),0);
   comA3->AddInput(split,2);
@@ -391,7 +391,7 @@ Loop* HetrmmAlgVar2Upper(Node *in, unsigned int num)
   PSet *set8 = new PSet(poss8);
 
 
-  Combine *comA3 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA3->AddInput(split,0);
   comA3->AddInput(split,1);
   comA3->AddInput(split,2);
@@ -443,7 +443,7 @@ Loop* HetrmmAlgVar3Lower(Node *in, unsigned int num)
 
 
 
-  Combine *comA3 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA3->AddInput(split,0);
   comA3->AddInput(split,1);
   comA3->AddInput(split,2);
@@ -493,7 +493,7 @@ Loop* HetrmmAlgVar3Upper(Node *in, unsigned int num)
   Poss *poss9 = new Poss(trmm,false);
   PSet *set9 = new PSet(poss9);
 
-  Combine *comA3 = new Combine(PARTDIAG, POSSTUNOUT);
+  CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA3->AddInput(split,0);
   comA3->AddInput(split,1);
   comA3->AddInput(split,2);

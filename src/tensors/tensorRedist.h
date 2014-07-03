@@ -35,7 +35,6 @@ class RedistNode : public DLANode
 {
  public:
   DataTypeInfo m_info;
-  DistType m_destType;
   SizesArray m_lsizes;
   bool m_isArray;
   string m_name;

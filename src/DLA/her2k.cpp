@@ -853,11 +853,11 @@ Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum,
                    splitB, 1,
                    splitC, 4);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC;
+  CombineSingleIter *comC;
   if (tri == LOWER)
     comC = splitC->CreateMatchingCombine(2,
                                          1, gemm2, 0,
@@ -954,11 +954,11 @@ Loop* Her2kLoopVar2(Node *Ain, unsigned int Anum,
                    splitB, 1,
                    splitC, 4);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC;
+  CombineSingleIter *comC;
   if (tri == LOWER)
     comC = splitC->CreateMatchingCombine(3,
                                          1, gemm1, 0,
@@ -1056,11 +1056,11 @@ Loop* Her2kLoopVar3(Node *Ain, unsigned int Anum,
                    splitB, 1,
                    splitC, 4);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC;
+  CombineSingleIter *comC;
   if (tri == LOWER)
     comC = splitC->CreateMatchingCombine(3,
                                          1, gemm1, 0,
@@ -1161,11 +1161,11 @@ Loop* Her2kLoopVar4(Node *Ain, unsigned int Anum,
                    splitB, 1,
                    splitC, 4);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
-  Combine *comC;
+  CombineSingleIter *comC;
   if (tri == LOWER)
     comC = splitC->CreateMatchingCombine(2,
                                          4, her2k, 0,
@@ -1222,9 +1222,9 @@ Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
                    splitB, 1,
                    CTun, 0);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
   LoopTunnel *CtunOut = new LoopTunnel(POSSTUNOUT);
   CtunOut->AddInput(her2k,0);
@@ -1313,16 +1313,16 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
   AtunOut->AddInput(Atun,0);
   AtunOut->CopyTunnelInfo(Atun);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
   LoopTunnel *CtunOut = new LoopTunnel(POSSTUNOUT);
   CtunOut->AddInput(Ctun,0);
   CtunOut->AddInput(Ctun,0);
   CtunOut->CopyTunnelInfo(Ctun);
   
-  Combine *comD = splitD->CreateMatchingCombine(0);
+  CombineSingleIter *comD = splitD->CreateMatchingCombine(0);
   
-  Combine *comE = splitE->CreateMatchingCombine(1,
+  CombineSingleIter *comE = splitE->CreateMatchingCombine(1,
                                                 1, tri2k, 0);
   
   Poss *loopPoss = new Poss(5, AtunOut, comB, CtunOut, comD, comE);
@@ -1391,13 +1391,13 @@ Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
 #if DOELEM
     throw;
 #elif DOBLIS  
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
-  Combine *comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
 
-  Combine *comC = splitC->CreateMatchingCombine(0);
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(0);
   
-  Combine *comD = splitD->CreateMatchingCombine(0);
+  CombineSingleIter *comD = splitD->CreateMatchingCombine(0);
   
   LoopTunnel *EtunOut = new LoopTunnel(POSSTUNOUT);
   EtunOut->AddInput(tri2k,0);

@@ -1264,18 +1264,33 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     }
     throw;
   }
+  bool foundOne = false;
   for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
-    GetSizes(subMat, numIters,
-             bs, parFactor,
-             m, n,
-             m_msizes[subMat], m_nsizes[subMat]);
-    /*
-    if (m_msizes[subMat].NumSizes() != m_nsizes[subMat].NumSizes()) {
-    cout << m_msizes[subMat].NumSizes() << endl;
-    cout << m_nsizes[subMat].NumSizes() << endl;
-      throw;
-      }*/
+    bool found = false;
+    NodeConnVecIter tunIter = m_children.begin();
+    for(; tunIter != m_children.end() && !found; ++tunIter) {
+      NodeConn *conn = *tunIter;
+      Node *tun = conn->m_n;
+      if (!tun->IsPossTunnel(POSSTUNIN))
+	throw;
+      NodeConnVecIter iter = tun->m_children.begin();
+      for(; iter != tun->m_children.end() && !found; ++iter) {
+	NodeConn *childConn = *iter;
+	if (childConn->m_num == subMat) {
+	  if (!(childConn->m_n->IsPossTunnel(POSSTUNOUT))) {
+	    found = true;
+	    foundOne = true;
+	    GetSizes(subMat, numIters,
+		     bs, parFactor,
+		     m, n,
+		     m_msizes[subMat], m_nsizes[subMat]);
+	  }
+	}
+      }
+    }
   }
+  if (!foundOne)
+    throw;
 }
 #else
 void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
