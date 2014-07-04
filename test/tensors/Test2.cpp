@@ -442,7 +442,7 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 
 	//****
 	   // 1.0 * U[D0,D1,*,*]_abcd * T1[*,*,D2,D3]_cdij + 0.0 * Accum[D0,D1,D2,D3]_abij
-	LocalContract(1.0, U__D_0__D_1__S__S.LockedTensor(), indices_abcd,
+		LocalContractAndLocalEliminate(1.0, U__D_0__D_1__S__S.LockedTensor(), indices_abcd,
 		T1__S__S__D_2__D_3.LockedTensor(), indices_cdij,
 		0.0, Accum__D_0__D_1__D_2__D_3.Tensor(), indices_abij);
 	tempShape = Accum__D_0__D_1__D_2__D_3.Shape();
