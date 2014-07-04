@@ -66,16 +66,20 @@ void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
     }
   }
 
-  if (!tmp)
-    throw;
-  if (TensorDistToString(B.TensorDist()) != TensorDistToString(tmp->TensorDist())) {
-    cout << TensorDistToString(B.TensorDist()) << endl;
-    cout << TensorDistToString(tmp->TensorDist()) << endl;
-    throw;
-  }
+  if (tmp) {
+    
+    if (TensorDistToString(B.TensorDist()) != TensorDistToString(tmp->TensorDist())) {
+      cout << TensorDistToString(B.TensorDist()) << endl;
+      cout << TensorDistToString(tmp->TensorDist()) << endl;
+      throw;
+    }
 
-  B = *tmp;
-  delete tmp;
+    B = *tmp;
+    delete tmp;
+  }
+  else {
+    B = A;
+  }
 }
 
 void Usage(){
@@ -130,6 +134,9 @@ Set(DistTensor<T>& A)
 
     while(!stop){
         A.Set(loc, counter);
+	if (loc.size() == 0)
+	  break;
+	
 
         //Update
         counter++;

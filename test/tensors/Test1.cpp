@@ -130,6 +130,8 @@ Set(DistTensor<T>& A)
 
     while(!stop){
         A.Set(loc, counter);
+	if (loc.size() == 0)
+	  break;
 
         //Update
         counter++;
