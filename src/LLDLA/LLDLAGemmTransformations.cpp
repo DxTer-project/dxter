@@ -51,6 +51,10 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   case (0):
     {
       //DIMM
+      if (m_bsSize == USELLDLA2MU) {
+	if (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLA3MU))
+	  return false;
+      }
       if (*(gemm->GetInputM(2)) <= BSSizeToSize(m_bsSize))
 	return false;
       //if this blocks greater than MU, another loop will have to 
@@ -71,10 +75,20 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
     {
       //DIMK
       if (gemm->m_transA == NORMAL) {
+	if (m_bsSize == USELLDLA2MU) {
+	  if (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLA3MU))
+	    return false;
+	}
+
 	if (*(gemm->GetInputN(0)) <= BSSizeToSize(m_bsSize))
 	  return false;
       }
       else if (gemm->m_transA != CONJ) {
+	if (m_bsSize == USELLDLA2MU) {
+	  if (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLA3MU))
+	    return false;
+	}
+
 	if (*(gemm->GetInputM(0)) <= BSSizeToSize(m_bsSize))
 	  return false;
       }
@@ -92,6 +106,11 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   case (2):
     {
       //DIMN
+      if (m_bsSize == USELLDLA2MU) {
+	if (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLA3MU))
+	  return false;
+      }
+
       if (*(gemm->GetInputN(2)) <= BSSizeToSize(m_bsSize))
 	return false;
       if ((m_bsSize != USELLDLAMU)
