@@ -103,7 +103,6 @@ unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes,
       if (actualFLOPS > bestFLOPS) {
 	bestFLOPS = actualFLOPS;
 	bestImpNum = mit->first;
-	cout << "this is a new best\n";
       }
       cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
     }
@@ -287,8 +286,6 @@ int main(int argc, const char* argv[])
   std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
   cout << "Done evaluating\n";
   unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
-  cout << "should print best\n";
-
 #endif //DOEMPIRICALEVAL
 
 #if 1
