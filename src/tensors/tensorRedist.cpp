@@ -361,7 +361,10 @@ Phase RedistNode::MaxPhase() const
     if (srcDistEntry != destDistEntry) {
       DimVec srcDims = srcDistEntry.DistEntryDims();
       DimVec destDims = destDistEntry.DistEntryDims();
-      if (diffs.size() == 1) {
+      if (diffs.size() > 1) {
+	return ROTENSORPHASE;
+      }
+      else if (diffs.size() == 1) {
 	foundAllToAll = true;
 	diffs.insert(dim);
 	Dim otherDim = *(diffs.begin());
