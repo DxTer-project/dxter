@@ -83,12 +83,14 @@ void PrintImpMap(std::map<unsigned int, vector<double>> impTimes)
   }
 }
 
-void PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double flopCost, int chunkSize) {
+unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double flopCost, int chunkSize) {
   /***************************************************************************
    * WARNING: These numbers are processor specific to Dillon's machine in GDC
    ***************************************************************************/
   double ticksPerSec = 1.0e6;
   double peakFLOPS = 30e9;
+  unsigned int bestImpNum = 0;
+  double bestFLOPS = 0;
   std::map<unsigned int, vector<double>>::iterator mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     std::vector<double>::iterator vit;
@@ -98,10 +100,15 @@ void PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double 
       double totalTimeInSecs = *vit / ticksPerSec;
       double actualFLOPS = totalFlops / totalTimeInSecs;
       double pctPeak = (actualFLOPS / peakFLOPS) * 100;
+      if (actualFLOPS > bestFLOPS) {
+	bestFLOPS = actualFLOPS;
+	bestImpNum = (*mit).first;
+      }
       cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
     }
     cout << endl;
   }
+  return bestImpNum;
 }
 
 void AddTrans()
@@ -271,19 +278,19 @@ int main(int argc, const char* argv[])
   cout << "Writing all implementations to runtime eval files\n";
 
   int chunkSize = 500;
-  int numIterations = 10;
+  int numIterations = 3;
   RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
   std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
   cout << "Done evaluating\n";
-  PrintImpMapInFlops(impMap, flopCost, chunkSize);
+  unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
 
 #endif //DOEMPIRICALEVAL
 
 #if 1
-  uni.PrintAll(algNum);
+  uni.PrintAll(best);
 #else
   uni.PrintBest();
 #endif
