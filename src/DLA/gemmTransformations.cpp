@@ -92,8 +92,13 @@ bool GemmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     const Gemm *gemm = (Gemm*)node;
-    if (gemm->GetLayer() == m_fromLayer)
-      return true;
+    if (gemm->GetLayer() == m_fromLayer) {
+      const Loop *loop = gemm->FindClosestLoop();
+      if (!loop)
+	return true;
+      else
+	return loop->GetDimName() != m_dim;
+    }
   }
   return false;
 }
