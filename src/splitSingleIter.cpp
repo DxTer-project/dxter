@@ -1178,6 +1178,22 @@ void SplitSingleIter::StartFillingSizes()
   m_mlsizes = new Sizes[numElems];
   m_nlsizes = new Sizes[numElems];
 #endif
+
+#if DOLLDLA
+  if (m_tunType == SETTUNIN) {
+    m_info = InputDataType(0);
+    switch (m_dir) {
+    case (PARTDOWN):
+      m_info.m_numRowsVar = "numRows" + GetLoopLevel();
+      break;
+    case (PARTRIGHT):
+      m_info.m_numColsVar = "numCols" + GetLoopLevel();
+      break;
+    default:
+      throw;
+    }
+  }
+#endif
 }
 #else
 void SplitSingleIter::StartFillingSizes()
@@ -1436,4 +1452,12 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
     throw;
 
 #endif
+}
+
+const DataTypeInfo& SplitSingleIter::DataType(unsigned int num) const
+{
+  if (m_tunType == SETTUNIN)
+    return m_info;
+  else
+    return InputDataType(0);
 }

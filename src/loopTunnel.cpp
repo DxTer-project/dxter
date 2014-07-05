@@ -755,3 +755,23 @@ bool LoopTunnel::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int
     return false;
   }
 }
+
+string LoopTunnel::GetLoopLevel() const
+{
+  int level = 0;
+  Poss *poss = m_poss;
+  if (!poss)
+    throw;
+  PSet *set = poss->m_pset;
+  while (set) {
+    if (set->IsLoop()) {
+      ++level;
+    }
+    poss = set->m_ownerPoss;
+    if (!poss)
+      return std::to_string(level);
+    set = poss->m_pset;
+  }
+  return std::to_string(level);
+
+}

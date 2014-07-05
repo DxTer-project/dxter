@@ -26,6 +26,8 @@
 #include "loop.h"
 #include "loopTunnel.h"
 #include "splitBase.h"
+#include "LLDLA.h"
+
 
 class CombineSingleIter;
 
@@ -34,6 +36,9 @@ class SplitSingleIter : public SplitBase
 {
  public:
   bool m_addDir;
+#if DOLLDLA
+  DataTypeInfo m_info;
+#endif
   SplitSingleIter();
 #if TWOD
   SplitSingleIter(PartDir dir, PossTunType type, bool isControl = false);
@@ -97,4 +102,7 @@ class SplitSingleIter : public SplitBase
   virtual void AddVariables(VarSet &set) const;
 
   virtual void PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const;
+
+  virtual const DataTypeInfo& DataType(unsigned int num) const;
 };
+
