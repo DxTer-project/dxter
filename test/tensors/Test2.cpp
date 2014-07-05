@@ -383,7 +383,7 @@ epsilon____N_D_0_1_2_3.ResizeTo( epsilon____N_D_0_1_2_3_tempShape );
 Set( epsilon____N_D_0_1_2_3 );
 DistTensor<T> epsilon_local( tmen::StringToTensorDist("[]|(0,1,2,3)"), g );
 GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
-//**** (out of 300)
+//**** (out of 27)
 	//------------------------------------//
 
 	tempShape = epsilon____N_D_0_1_2_3.Shape();
@@ -392,19 +392,7 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	tempShape.push_back( g.Shape()[2] );
 	tempShape.push_back( g.Shape()[3] );
 	epsilon__D_0__D_1__D_2__D_3.ResizeTo( tempShape );
-	tempShape = epsilon____N_D_0_1_2_3.Shape();
-	tempShape.push_back( g.Shape()[1] );
-	tempShape.push_back( g.Shape()[2] );
-	tempShape.push_back( g.Shape()[3] );
-	epsilon__D_1__D_2__D_3__N_D_0.ResizeTo( tempShape );
-	tempShape = epsilon____N_D_0_1_2_3.Shape();
-	tempShape.push_back( g.Shape()[2] );
-	tempShape.push_back( g.Shape()[3] );
-	epsilon__D_2__D_3__N_D_0_1.ResizeTo( tempShape );
-	tempShape = epsilon____N_D_0_1_2_3.Shape();
-	tempShape.push_back( g.Shape()[3] );
-	epsilon__D_3__N_D_0_1_2.ResizeTo( tempShape );
-	//**** (out of 2)
+	//**** (out of 8)
 		//------------------------------------//
 
 		   // U[D0,D1,D2,*] <- U[D0,D1,D2,D3]
@@ -415,7 +403,7 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 		//------------------------------------//
 
 	//****
-	//**** (out of 2)
+	//**** (out of 8)
 		//------------------------------------//
 
 		   // T1[*,D1,D2,D3] <- T1[D0,D1,D2,D3]
@@ -426,7 +414,7 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 		//------------------------------------//
 
 	//****
-	//**** (out of 2)
+	//**** (out of 8)
 		//------------------------------------//
 
 		   // T2[*,D1,D2,D3] <- T2[D0,D1,D2,D3]
@@ -437,7 +425,7 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 		//------------------------------------//
 
 	//****
-	//**** (out of 2)
+	//**** (out of 8)
 		//------------------------------------//
 
 		   // W[*,D1,D2,D3] <- W[D0,D1,D2,D3]
@@ -449,7 +437,7 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 
 	//****
 	   // 1.0 * U[D0,D1,*,*]_abcd * T1[*,*,D2,D3]_cdij + 0.0 * Accum[D0,D1,D2,D3]_abij
-		LocalContractAndLocalEliminate(1.0, U__D_0__D_1__S__S.LockedTensor(), indices_abcd,
+	LocalContractAndLocalEliminate(1.0, U__D_0__D_1__S__S.LockedTensor(), indices_abcd,
 		T1__S__S__D_2__D_3.LockedTensor(), indices_cdij,
 		0.0, Accum__D_0__D_1__D_2__D_3.Tensor(), indices_abij);
 	tempShape = Accum__D_0__D_1__D_2__D_3.Shape();
@@ -460,13 +448,20 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	LocalContract(1.0, V__D_0__D_1__D_2__D_3.LockedTensor(), indices_acik,
 		T2__S__D_1__S__D_3.LockedTensor(), indices_bcjk,
 		0.0, Accum__D_0__S__D_2__S__D_1__D_3.Tensor(), indices_abijck);
-	tempShape = Accum__D_0__D_1__D_2__D_3.Shape();
-	tempShape.push_back( g.Shape()[3] );
-	Accum__D_0__D_1__D_2__S__D_3.ResizeTo( tempShape );
-	   // Accum[D0,D1,D2,*,D3] <- Accum[D0,*,D2,*,D1,D3] (with SumScatter on D1)
-	Accum__D_0__D_1__D_2__S__D_3.ReduceScatterRedistFrom( Accum__D_0__S__D_2__S__D_1__D_3, 4, 1 );
-	   // Accum[D0,D1,D2,D3] <- Accum[D0,D1,D2,*,D3] (with SumScatter on D3)
-	Accum__D_0__D_1__D_2__D_3.ReduceScatterUpdateRedistFrom( Accum__D_0__D_1__D_2__S__D_3, 1.0, 4, 3 );
+	//**** (out of 1)
+		//------------------------------------//
+
+		tempShape = Accum__D_0__D_1__D_2__D_3.Shape();
+		tempShape.push_back( g.Shape()[3] );
+		Accum__D_0__D_1__D_2__S__D_3.ResizeTo( tempShape );
+		   // Accum[D0,D1,D2,*,D3] <- Accum[D0,*,D2,*,D1,D3] (with SumScatter on D1)
+		Accum__D_0__D_1__D_2__S__D_3.ReduceScatterRedistFrom( Accum__D_0__S__D_2__S__D_1__D_3, 4, 1 );
+		   // Accum[D0,D1,D2,D3] <- Accum[D0,D1,D2,*,D3] (with SumScatter on D3)
+		Accum__D_0__D_1__D_2__D_3.ReduceScatterUpdateRedistFrom( Accum__D_0__D_1__D_2__S__D_3, 1.0, 4, 3 );
+
+		//------------------------------------//
+
+	//****
 	tempShape = Accum__D_0__D_1__D_2__D_3.Shape();
 	tempShape.push_back( g.Shape()[2] );
 	tempShape.push_back( g.Shape()[3] );
@@ -475,27 +470,53 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	LocalContract(1.0, W__S__S__D_2__D_3.LockedTensor(), indices_ijkl,
 		T3__D_0__D_1__D_2__D_3.LockedTensor(), indices_abkl,
 		0.0, Accum__D_0__D_1__S__S__D_2__D_3.Tensor(), indices_abijkl);
-	tempShape = Accum__D_0__D_1__D_2__D_3.Shape();
-	tempShape.push_back( g.Shape()[3] );
-	Accum__D_0__D_1__D_2__S__D_3.ResizeTo( tempShape );
-	   // Accum[D0,D1,D2,*,D3] <- Accum[D0,D1,*,*,D2,D3] (with SumScatter on D2)
-	Accum__D_0__D_1__D_2__S__D_3.ReduceScatterRedistFrom( Accum__D_0__D_1__S__S__D_2__D_3, 4, 2 );
-	   // Accum[D0,D1,D2,D3] <- Accum[D0,D1,D2,*,D3] (with SumScatter on D3)
-	Accum__D_0__D_1__D_2__D_3.ReduceScatterUpdateRedistFrom( Accum__D_0__D_1__D_2__S__D_3, 1.0, 4, 3 );
+	//**** (out of 1)
+		//------------------------------------//
+
+		tempShape = Accum__D_0__D_1__D_2__D_3.Shape();
+		tempShape.push_back( g.Shape()[3] );
+		Accum__D_0__D_1__D_2__S__D_3.ResizeTo( tempShape );
+		   // Accum[D0,D1,D2,*,D3] <- Accum[D0,D1,*,*,D2,D3] (with SumScatter on D2)
+		Accum__D_0__D_1__D_2__S__D_3.ReduceScatterRedistFrom( Accum__D_0__D_1__S__S__D_2__D_3, 4, 2 );
+		   // Accum[D0,D1,D2,D3] <- Accum[D0,D1,D2,*,D3] (with SumScatter on D3)
+		Accum__D_0__D_1__D_2__D_3.ReduceScatterUpdateRedistFrom( Accum__D_0__D_1__D_2__S__D_3, 1.0, 4, 3 );
+
+		//------------------------------------//
+
+	//****
 	   // 1.0 * T4[D0,D1,D2,D3]_abij * Accum[D0,D1,D2,D3]_abij + 0.0 * epsilon[D0,D1,D2,D3]_abij
 	LocalContract(1.0, T4__D_0__D_1__D_2__D_3.LockedTensor(), indices_abij,
 		Accum__D_0__D_1__D_2__D_3.LockedTensor(), indices_abij,
 		0.0, epsilon__D_0__D_1__D_2__D_3.Tensor(), indices_abij);
-	   // epsilon[D1,D2,D3] | {0} <- epsilon[D0,D1,D2,D3] (with SumScatter on D0)
-	epsilon__D_1__D_2__D_3__N_D_0.ReduceToOneRedistFrom( epsilon__D_0__D_1__D_2__D_3, 0 );
-	   // epsilon[D2,D3] | {0,1} <- epsilon[D1,D2,D3] | {0} (with SumScatter on D1)
-	epsilon__D_2__D_3__N_D_0_1.ReduceToOneRedistFrom( epsilon__D_1__D_2__D_3__N_D_0, 0 );
-	   // epsilon[D3] | {0,1,2} <- epsilon[D2,D3] | {0,1} (with SumScatter on D2)
-	epsilon__D_3__N_D_0_1_2.ReduceToOneRedistFrom( epsilon__D_2__D_3__N_D_0_1, 0 );
-	   // epsilon[] | {0,1,2,3} <- epsilon[D3] | {0,1,2} (with SumScatter on D3)
-	epsilon____N_D_0_1_2_3.ReduceToOneRedistFrom( epsilon__D_3__N_D_0_1_2, 0 );
+	//**** (out of 1)
+		//------------------------------------//
 
-	//------------------------------------//
+		tempShape = epsilon____N_D_0_1_2_3.Shape();
+		tempShape.push_back( g.Shape()[1] );
+		tempShape.push_back( g.Shape()[2] );
+		tempShape.push_back( g.Shape()[3] );
+		epsilon__D_1__D_2__D_3__N_D_0.ResizeTo( tempShape );
+		   // epsilon[D1,D2,D3] | {0} <- epsilon[D0,D1,D2,D3] (with SumScatter on D0)
+		epsilon__D_1__D_2__D_3__N_D_0.ReduceToOneRedistFrom( epsilon__D_0__D_1__D_2__D_3, 0 );
+		tempShape = epsilon____N_D_0_1_2_3.Shape();
+		tempShape.push_back( g.Shape()[2] );
+		tempShape.push_back( g.Shape()[3] );
+		epsilon__D_2__D_3__N_D_0_1.ResizeTo( tempShape );
+		   // epsilon[D2,D3] | {0,1} <- epsilon[D1,D2,D3] | {0} (with SumScatter on D1)
+		epsilon__D_2__D_3__N_D_0_1.ReduceToOneRedistFrom( epsilon__D_1__D_2__D_3__N_D_0, 0 );
+		tempShape = epsilon____N_D_0_1_2_3.Shape();
+		tempShape.push_back( g.Shape()[3] );
+		epsilon__D_3__N_D_0_1_2.ResizeTo( tempShape );
+		   // epsilon[D3] | {0,1,2} <- epsilon[D2,D3] | {0,1} (with SumScatter on D2)
+		epsilon__D_3__N_D_0_1_2.ReduceToOneRedistFrom( epsilon__D_2__D_3__N_D_0_1, 0 );
+		   // epsilon[] | {0,1,2,3} <- epsilon[D3] | {0,1,2} (with SumScatter on D3)
+		epsilon____N_D_0_1_2_3.ReduceToOneRedistFrom( epsilon__D_3__N_D_0_1_2, 0 );
+
+		//------------------------------------//
+
+
+
+
 
 
 	LocalContractAndLocalEliminate(1.0, U_local.LockedTensor(), indices_abcd,
