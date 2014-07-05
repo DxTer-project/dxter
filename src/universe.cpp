@@ -361,11 +361,10 @@ void Universe::Cull()
   m_pset->Cull(CurrPhase);
 }
 
-void Universe::PrintAll(int algNum)
+void Universe::PrintAll(int algNum, unsigned int optGraph)
 {
   time_t start,end;
   ofstream out;
-  unsigned int optGraph = 0;
 
   //  cout << "Printing costOutput.txt\n";
   //  out.open("costOutput.txt");
@@ -373,20 +372,24 @@ void Universe::PrintAll(int algNum)
   //  out.close();
 
 
+  if (!optGraph) {
 #ifdef MATLAB
-  out.open("totalCostOutput.m");
+    out.open("totalCostOutput.m");
 #else
-  out.open("totalCostOutput.r");
+    out.open("totalCostOutput.r");
 #endif
-  IndStream costOut(&out, OTHERSTREAM);
-  optGraph = 0;
-  time(&start);
-  EvalCosts(costOut, optGraph);
-  out.close();
-  time(&end);
-  cout << "\tCost eval took " << difftime(end,start) << " seconds\n";
-  cout << "Done printing\n";
-  cout.flush();
+    IndStream costOut(&out, OTHERSTREAM);
+    optGraph = 0;
+    time(&start);
+    EvalCosts(costOut, optGraph);
+    out.close();
+    time(&end);
+    cout << "\tCost eval took " << difftime(end,start) << " seconds\n";
+    cout << "Done printing\n";
+    cout.flush();
+  }
+
+
   if (optGraph > 0) {
     cout << "\tOptimal graph ( " << optGraph << " ) :\n";
 #if DOELEM

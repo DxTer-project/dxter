@@ -102,7 +102,8 @@ unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes,
       double pctPeak = (actualFLOPS / peakFLOPS) * 100;
       if (actualFLOPS > bestFLOPS) {
 	bestFLOPS = actualFLOPS;
-	bestImpNum = (*mit).first;
+	bestImpNum = mit->first;
+	cout << "this is a new best\n";
       }
       cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
     }
@@ -286,11 +287,12 @@ int main(int argc, const char* argv[])
   std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
   cout << "Done evaluating\n";
   unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
+  cout << "should print best\n";
 
 #endif //DOEMPIRICALEVAL
 
 #if 1
-  uni.PrintAll(best);
+  uni.PrintAll(algNum, best);
 #else
   uni.PrintBest();
 #endif
@@ -305,16 +307,16 @@ int main(int argc, const char* argv[])
 
 PSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", bigSize, 2, "A", 
-				 bigSize, 1,
+  InputNode *Ain = new InputNode("A input", medSize, medSize, "A", 
+				 medSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", 2, bigSize, "B", 
-				 2, 1,
+  InputNode *Bin = new InputNode("B input", medSize, medSize, "B", 
+				 medSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  bigSize, bigSize, "C", 
-				 bigSize, 1,
+  InputNode *Cin = new InputNode("C input",  medSize, medSize, "C", 
+				 medSize, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 

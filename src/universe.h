@@ -71,7 +71,7 @@ class Universe
   static void AddToMaps(Transformation *trans);
   void Cull();
   void Prop();
-  void PrintAll(int algNum);
+  void PrintAll(int algNum, unsigned int optGraph = 0);
   void PrintBest();
   unsigned int TotalCount() const;
   void ClearFullyExpanded();
