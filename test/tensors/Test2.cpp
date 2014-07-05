@@ -498,18 +498,32 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	//------------------------------------//
 
 
-    IndexArray blank_indices;
+	LocalContractAndLocalEliminate(1.0, U_local.LockedTensor(), indices_abcd,
+				       T1_local.LockedTensor(), indices_cdij,
+				       0.0, Accum_local.Tensor(), indices_abij);
 
-    LocalContractAndLocalEliminate(1.0, T4_local.LockedTensor(), indices_abij,
-				   Accum_local.LockedTensor(), indices_abij,
-				   1.0, epsilon_local.Tensor(), blank_indices);
+	LocalContractAndLocalEliminate(1.0, V_local.LockedTensor(), indices_acik,
+				       T2_local.LockedTensor(), indices_bcjk,
+				       1.0, Accum_local.Tensor(), indices_abij);
 
-    DistTensor<T> epsilon_local_comparison( tmen::StringToTensorDist("[]|(0,1,2,3)"), g );    
-    GatherAllModes(epsilon____N_D_0_1_2_3, epsilon_local_comparison);
+	LocalContractAndLocalEliminate(1.0, W_local.LockedTensor(), indices_ijkl,
+				       T3_local.LockedTensor(), indices_abkl,
+				       1.0, Accum_local.Tensor(), indices_abij);
 
-    DistTensor<T> diffTensor( tmen::StringToTensorDist("[]|(0,1,2,3)"), g );    
-    diffTensor.ResizeTo(epsilon_local_comparison);
-    Diff( epsilon_local_comparison.LockedTensor(), epsilon_local.LockedTensor(), diffTensor.Tensor() );
+
+	IndexArray blank_indices;
+
+	LocalContractAndLocalEliminate(1.0, T4_local.LockedTensor(), indices_abij,
+				       Accum_local.LockedTensor(), indices_abij,
+				       0.0, epsilon_local.Tensor(), blank_indices);
+
+	DistTensor<T> epsilon_local_comparison( tmen::StringToTensorDist("[]|(0,1,2,3)"), g );    
+	GatherAllModes(epsilon____N_D_0_1_2_3, epsilon_local_comparison);
+
+	DistTensor<T> diffTensor( tmen::StringToTensorDist("[]|(0,1,2,3)"), g );    
+	diffTensor.ResizeTo(epsilon_local_comparison);
+	Diff( epsilon_local_comparison.LockedTensor(), epsilon_local.LockedTensor(), diffTensor.Tensor() );
+
 
     if (commRank == 0) {
       cout << "Norm of distributed is " << Norm(epsilon_local_comparison.LockedTensor()) << endl;
