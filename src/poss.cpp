@@ -1674,6 +1674,55 @@ void Poss::FormSets(unsigned int phase)
 	i = -1;
       }
     }
+
+    for(i=0; i < (int)(m_possNodes.size()); ++i) {
+      Node *node = m_possNodes[i];
+      if (!node->IsPossTunnel() 
+	  && node->GetNodeClass() == SumScatterUpdateNode::GetClass()) 
+	{
+	  //Found a node that isn't a poss tunnel
+	  //Let's form a new set!
+	  NodeSet possNodes;
+	  NodeVec outputTuns;
+
+	  for(unsigned int i = 0; i < node->m_inputs.size(); ++i) {
+	    PossTunnel *tun = new PossTunnel(POSSTUNIN);
+	    NodeConn *conn = node->m_inputs[i];
+	    tun->AddInput(conn->m_n, conn->m_num);
+	    node->ChangeInput2Way(conn->m_n, conn->m_num, tun, 0);
+	  }
+
+	  if (node->NumOutputs() != 1)
+	    throw;
+
+	  PossTunnel *tun = new PossTunnel(POSSTUNOUT);
+	  node->RedirectAllChildren(tun);
+	  tun->AddInput(node, 0);
+
+	  outputTuns.push_back(tun);
+   
+	  Poss *newPoss = new Poss(outputTuns, true, true);
+	  PSet *set = new PSet(newPoss);
+   
+	  AddPSet(set, true);
+   
+	  for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
+	    Node *tun = set->m_inTuns[j];
+	    if (!AddElemToVec(m_possNodes, tun, false))
+	      throw;
+	    tun->SetPoss(this);
+	  }
+   
+	  for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
+	    Node *tun = set->m_outTuns[j];
+	    if (!AddElemToVec(m_possNodes, tun, false))
+	      throw;
+	    tun->SetPoss(this);
+	  }
+   
+	  i = -1;
+	}
+    }
    
     
 //     for(i=0; i < (int)(m_possNodes.size()); ++i) {
