@@ -129,17 +129,15 @@ Set(DistTensor<T>& A)
     Location loc(order);
     std::fill(loc.begin(), loc.end(), 0);
     Unsigned ptr = 0;
-    Unsigned counter = 0;
     bool stop = false;
 
     while(!stop){
-        A.Set(loc, counter);
+      A.Set(loc, rand());
 	if (loc.size() == 0)
 	  break;
 	
 
         //Update
-        counter++;
         loc[ptr]++;
         while(loc[ptr] == A.Dimension(ptr)){
             loc[ptr] = 0;
