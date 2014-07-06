@@ -742,11 +742,16 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   if (split->GetNodeClass() != SplitSingleIter::GetClass())
     throw;
 
+  bool needMin = false;
   if (split->m_dir == PARTDOWN) {
     *out << split->InputDataType(0).m_numRowsVar;
+    if (!split->GetInputM(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
+      needMin = true;
   }
   else if (split->m_dir == PARTRIGHT) {
     *out << split->InputDataType(0).m_numColsVar;
+    if (!split->GetInputN(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
+      needMin = true;
   }
   else
     throw;
@@ -761,7 +766,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     *out << "3 * " << MU_VAR_NAME << ") ) {\n";
 
   out.Indent(1);
-  *out << "unsigned int num";
+  *out << "const unsigned int num";
   if (split->m_dir == PARTDOWN) {
     *out << "Rows";
   }
@@ -771,7 +776,10 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   else
     throw;
 
-  *out << loopLevel << " = min( " << lcv << ", ";
+  if (needMin)
+    *out << loopLevel << " = min( " << lcv << ", ";
+  else
+    *out << loopLevel << " = (";
 
   if (m_bsSize == USELLDLAMU)
     *out << MU_VAR_NAME;
