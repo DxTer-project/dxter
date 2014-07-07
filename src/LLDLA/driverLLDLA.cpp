@@ -270,7 +270,7 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 500;
+  int chunkSize = 5;
   int numIterations = 10;
   RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
@@ -298,12 +298,12 @@ int main(int argc, const char* argv[])
 
 PSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", bigSize, 2, "A", 
-				 bigSize, 1,
+  InputNode *Ain = new InputNode("A input", bigSize, medSize, "A", 
+				 medSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", 2, bigSize, "B", 
-				 2, 1,
+  InputNode *Bin = new InputNode("B input", medSize, bigSize, "B", 
+				 bigSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
   InputNode *Cin = new InputNode("C input",  bigSize, bigSize, "C", 
