@@ -41,28 +41,85 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   if (!GemmLoopExp::CanApply(node))
     return false;
   const Gemm *gemm = (Gemm*)node;
+
+  const Loop *loop = gemm->FindClosestLoop();
+  if (loop && loop->GetDimName() == m_dim)
+    return false;
+
+
   switch (m_dim) {
   case (0):
     {
-      return !(*(gemm->GetInputM(2)) <= BSSizeToSize(m_bsSize));
       //DIMM
+      if (m_bsSize == USELLDLA2MU) {
+	if (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLA3MU))
+	  return false;
+      }
+      if (*(gemm->GetInputM(2)) <= BSSizeToSize(m_bsSize))
+	return false;
+      //if this blocks greater than MU, another loop will have to 
+      //block on the same dimension with MU, 
+      //but a loop immediately within another loop cannot split the
+      //same dimension, so checking here to make sure other dimensions
+      //will be split with a loop
+      if ((m_bsSize != USELLDLAMU)
+	  && (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLAMU))
+	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLAMU)))
+	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLAMU)))))
+	return false;
+      else
+	return true;
       break;
     }
   case (1):
     {
-      if (gemm->m_transA == NORMAL)
-	return !(*(gemm->GetInputN(0)) <= BSSizeToSize(m_bsSize));
-      else if (gemm->m_transA != CONJ)
-	return !(*(gemm->GetInputM(0)) <= BSSizeToSize(m_bsSize));
+      //DIMK
+      if (gemm->m_transA == NORMAL) {
+	if (m_bsSize == USELLDLA2MU) {
+	  if (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLA3MU))
+	    return false;
+	}
+
+	if (*(gemm->GetInputN(0)) <= BSSizeToSize(m_bsSize))
+	  return false;
+      }
+      else if (gemm->m_transA != CONJ) {
+	if (m_bsSize == USELLDLA2MU) {
+	  if (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLA3MU))
+	    return false;
+	}
+
+	if (*(gemm->GetInputM(0)) <= BSSizeToSize(m_bsSize))
+	  return false;
+      }
       else
 	throw;
-      //DIMK
+      if ((m_bsSize != USELLDLAMU)
+	  && (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLAMU))
+	  && (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLAMU)))
+	return false;
+      else
+	return true;
+
       break;
     }
   case (2):
     {
-      return !(*(gemm->GetInputN(2)) <= BSSizeToSize(m_bsSize));
       //DIMN
+      if (m_bsSize == USELLDLA2MU) {
+	if (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLA3MU))
+	  return false;
+      }
+
+      if (*(gemm->GetInputN(2)) <= BSSizeToSize(m_bsSize))
+	return false;
+      if ((m_bsSize != USELLDLAMU)
+	  && (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLAMU))
+	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLAMU)))
+	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLAMU)))))
+	return false;
+      else
+	return true;
     }
   default:
     throw;

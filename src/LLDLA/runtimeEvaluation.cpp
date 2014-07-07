@@ -42,6 +42,7 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_defines.push_back("#define NUM_ITERATIONS " + std::to_string(m_numIterations));
   m_defines.push_back("#define CHUNK_SIZE " + std::to_string(m_chunkSize));
   m_defines.push_back("#define MUVALUE 2");
+  m_defines.push_back("#define min(a,b) ((a) < (b) ? (a) : (b))");
 }
 
 string RuntimeTest::MakeTestCode(ImplementationMap imps)

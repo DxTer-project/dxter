@@ -57,6 +57,7 @@ typedef unsigned int Flags;
 #define HASREFINEDFLAG (1L<<3)
 
 class DataTypeInfo;
+class Loop;
 
 class Node
 {
@@ -182,6 +183,7 @@ class Node
   virtual bool IsPossTunnel(PossTunType type) const {return false;}
   virtual bool IsLoopTunnel() const {return false;}
   virtual bool IsParallel() const {return false;}
+  const Loop* FindClosestLoop() const;
 
 #if DOBLIS
   virtual Comm ParallelComm() const {throw;}

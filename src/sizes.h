@@ -94,6 +94,7 @@ class SizeEntry
   bool operator==(const Size &rhs) const;
   bool operator!=(const Size &rhs) const;
   bool operator<= (const Size &rhs) const;
+  bool EvenlyDivisibleBy(const Size &size) const;
   void Print() const;
   void Print(IndStream &out) const;
   unsigned int NumSizesPerRepeat() const;
@@ -140,6 +141,7 @@ class Sizes
   bool operator== (const Size &rhs) const;
   bool operator!= (const Size &rhs) const;
   bool operator<= (const Size &rhs) const;
+  bool EvenlyDivisibleBy(const Size &size) const;
   Cost Sum() const;
   Cost SumSquares() const;
   Cost SumCubes() const;

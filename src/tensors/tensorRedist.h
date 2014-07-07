@@ -125,12 +125,60 @@ class SplitRedistribs : public SingleTrans
 };
 
 
+
+class CombineDisappearingModes : public SingleTrans
+{
+ public:
+  Dim m_srcDim, m_destDim;
+ CombineDisappearingModes(Dim srcDim, Dim destDim) : m_srcDim(srcDim), m_destDim(destDim) {}
+  virtual string GetType() const { return (string)"CombineDisappearingModes " + (char)(m_srcDim+48) + (char)(m_destDim+48); }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 class SingleIndexAllToAll : public SingleTrans
 {
  public:
   Dim m_dim;
  SingleIndexAllToAll(Dim dim) : m_dim(dim) {}
   virtual string GetType() const { return (string)"SingleIndexAllToAll" + (char)(m_dim+48); }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+
+//Separating legal AllToAll like the following
+//[(x|_|y),(z|_|w)] <- [(x|_|w),(z|_|y)]
+class DoubleIndexAllToAll : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ DoubleIndexAllToAll(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"DoubleIndexAllToAll" + (char)(m_dim+48); }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+/*
+[([x|_|p(y)|_|z),(w)]
+[([x|_|z),(w|_|y)]
+
+into
+
+[([x|_|p(y)|_|z),(w)]
+[([x|_|z|_|y),(w)]
+[([x|_|z),(w|_|y)]
+*/
+class PermuteDistribution : public SingleTrans
+{
+ public:
+  Dim m_srcDim;
+  Dim m_destDim;
+ PermuteDistribution(Dim srcDim, Dim destDim) : m_srcDim(srcDim), m_destDim(destDim) {}
+  virtual string GetType() const { return (string)"PermuteDistribution " + (char)(m_srcDim+48) + (char)(m_destDim+48); }
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}

@@ -253,7 +253,11 @@ void Contraction::PrintCode(IndStream &out)
        << endl;
 
   out.Indent();
-  *out << "LocalContract(";
+
+  if (m_CIndices.find(m_contIndices[0]) == string::npos) 
+    *out << "LocalContractAndLocalEliminate(";
+  else
+    *out << "LocalContract(";
   out << m_alpha;
   *out << ", " << in0.str()
        << ".LockedTensor(), " 

@@ -731,10 +731,64 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     default:
       break;
     }
+
+  string loopLevel = split->GetLoopLevel();
   out.Indent();
-  *out << "while ( " << LLDLAPartVarName(split->GetInputNameStr(0),1) 
-       << " < " 
-       << split->LoopBound() << " )  {\n";
+  string lcv = "lcv" + loopLevel;
+  *out << "int " << lcv << ";\n";
+  out.Indent();
+  *out << "for( " << lcv << " = ";
+  
+  if (split->GetNodeClass() != SplitSingleIter::GetClass())
+    throw;
+
+  bool needMin = false;
+  if (split->m_dir == PARTDOWN) {
+    *out << split->InputDataType(0).m_numRowsVar;
+    if (!split->GetInputM(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
+      needMin = true;
+  }
+  else if (split->m_dir == PARTRIGHT) {
+    *out << split->InputDataType(0).m_numColsVar;
+    if (!split->GetInputN(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
+      needMin = true;
+  }
+  else
+    throw;
+  
+  *out << "; " << lcv << " > 0; " << lcv << " -= (";
+
+  if (m_bsSize == USELLDLAMU)
+    *out << MU_VAR_NAME << ") ) {\n";
+  else if (m_bsSize == USELLDLA2MU)
+    *out << "2 * " << MU_VAR_NAME << ") ) {\n";
+  else if (m_bsSize == USELLDLA3MU)
+    *out << "3 * " << MU_VAR_NAME << ") ) {\n";
+
+  out.Indent(1);
+  *out << "const unsigned int num";
+  if (split->m_dir == PARTDOWN) {
+    *out << "Rows";
+  }
+  else if (split->m_dir == PARTRIGHT) {
+    *out << "Cols";
+  }
+  else
+    throw;
+
+  if (needMin)
+    *out << loopLevel << " = min( " << lcv << ", ";
+  else
+    *out << loopLevel << " = (";
+
+  if (m_bsSize == USELLDLAMU)
+    *out << MU_VAR_NAME;
+  else if (m_bsSize == USELLDLA2MU)
+    *out << "2 * " << MU_VAR_NAME;
+  else if (m_bsSize == USELLDLA3MU)
+    *out << "3 * " << MU_VAR_NAME;
+
+  *out << ");\n";
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);

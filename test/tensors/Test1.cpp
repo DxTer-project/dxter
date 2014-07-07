@@ -36,6 +36,7 @@ void PrintLocalSizes(const DistTensor<T>& A)
   }
 }
 
+
 template <typename T>
 void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
 {
@@ -66,17 +67,22 @@ void GatherAllModes(const DistTensor<T>& A, DistTensor<T>& B)
     }
   }
 
-  if (!tmp)
-    throw;
-  if (TensorDistToString(B.TensorDist()) != TensorDistToString(tmp->TensorDist())) {
-    cout << TensorDistToString(B.TensorDist()) << endl;
-    cout << TensorDistToString(tmp->TensorDist()) << endl;
-    throw;
-  }
+  if (tmp) {
+    
+    if (TensorDistToString(B.TensorDist()) != TensorDistToString(tmp->TensorDist())) {
+      cout << TensorDistToString(B.TensorDist()) << endl;
+      cout << TensorDistToString(tmp->TensorDist()) << endl;
+      throw;
+    }
 
-  B = *tmp;
-  delete tmp;
+    B = *tmp;
+    delete tmp;
+  }
+  else {
+    B = A;
+  }
 }
+
 
 void Usage(){
   std::cout << "./DistTensor <gridDim0> <gridDim1> ... \n";
@@ -125,14 +131,14 @@ Set(DistTensor<T>& A)
     Location loc(order);
     std::fill(loc.begin(), loc.end(), 0);
     Unsigned ptr = 0;
-    Unsigned counter = 0;
     bool stop = false;
 
     while(!stop){
-        A.Set(loc, counter);
+      A.Set(loc, rand());
+	if (loc.size() == 0)
+	  break;
 
         //Update
-        counter++;
         loc[ptr]++;
         while(loc[ptr] == A.Dimension(ptr)){
             loc[ptr] = 0;

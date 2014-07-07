@@ -362,6 +362,31 @@ bool SizeEntry::operator==(const Size &rhs) const
     }
 }
 
+bool SizeEntry::EvenlyDivisibleBy(const Size &size) const
+{
+  switch(m_type)
+    {
+    case (MIDSIZES):
+      {
+	if (!fmod(m_valA,size))
+	  return false;
+	return (fmod(m_valB, m_valA) == 0);
+      }
+    case (REPEATEDSIZES):
+      {
+	return !fmod(m_valA,size);
+      }
+    case (RANGESIZES):
+      {
+	return !fmod(m_valA, size) 
+	  && !fmod(m_valC, size);
+	break;
+      }
+    default:
+      throw;
+    }
+}
+
 
 bool SizeEntry::operator!=(const Size &rhs) const
 {
@@ -725,6 +750,19 @@ bool Sizes::operator==(const Size &rhs) const
       return false;
   }
   return true;
+}
+
+bool Sizes::EvenlyDivisibleBy(const Size &size) const
+{
+  if (!std::isnan((double)m_constVal))
+    return !(fmod(m_constVal,size));
+  EntryVecConstIter iter = m_entries.begin();
+  for(; iter != m_entries.end(); ++iter) {
+    if (!(*iter)->EvenlyDivisibleBy(size))
+      return false;
+  }
+  return true;
+
 }
 
 

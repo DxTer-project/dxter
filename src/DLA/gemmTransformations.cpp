@@ -92,8 +92,9 @@ bool GemmLoopExp::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     const Gemm *gemm = (Gemm*)node;
-    if (gemm->GetLayer() == m_fromLayer)
+    if (gemm->GetLayer() == m_fromLayer) {
       return true;
+    }
   }
   return false;
 }

@@ -939,3 +939,20 @@ string Node::GetFunctionalityString() const
   }
   return str;
 }
+
+const Loop* Node::FindClosestLoop() const
+{
+  Poss *poss = m_poss;
+  if (!poss)
+    return NULL;
+  PSet *set = poss->m_pset;
+  while (set) {
+    if (set->IsLoop())
+      return (Loop*)set;
+    poss = set->m_ownerPoss;
+    if (!poss)
+      return NULL;
+    set = poss->m_pset;
+  }
+  return NULL;
+}
