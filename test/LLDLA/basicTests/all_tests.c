@@ -3,7 +3,7 @@
 #include "utils.h"
 
 int main()	{
-	general_stride_tests();
+  	general_stride_tests();
 	row_stride_tests();
 	return 0;
 }
