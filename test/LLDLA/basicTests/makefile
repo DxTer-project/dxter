@@ -3,8 +3,8 @@ CC         := gcc
 LINKER     := $(CC)
 CFLAGS	   := -O3 -msse3 -mfpmath=sse -Wall -I../kernels
 
-HEADERS = row_stride_tests.h ../kernels/utils.h gen_stride_tests.h
-SOURCES = all_tests.c row_stride_tests.c ../kernels/utils.c gen_stride_tests.c
+HEADERS = row_stride_tests.h gen_stride_tests.h ../kernels/utils.h ../kernels/col_stride_lldla_primitives.h col_stride_tests.h
+SOURCES = all_tests.c row_stride_tests.c ../kernels/utils.c ../kernels/col_stride_lldla_primitives.c gen_stride_tests.c col_stride_tests.c
 #HEADERS +=  $(shell find ../kernels -type f -name '*.h')
 #SOURCES +=  $(shell find ../kernels -type f -name '*.c')
 
