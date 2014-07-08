@@ -53,5 +53,36 @@ void column_stride_tests()	{
        	col_stride_smul_2x2(&alpha, c_copy, 8);
        	test_buffer_diff(size, c, c_copy, "col_stride_smul_2x2");
 
+	reset_values(size, a, b, c, c_copy);
+
+	simple_mmul(1, 1, 2, a, 1, 2, b, 1, 2, c, 1, 2);
+       	col_stride_mmul_1x2_2x1(a, 2, b, 2, c_copy, 2);
+       	test_buffer_diff(size, c, c_copy, "col_stride_mmul_1x2_2x1");
+
+	reset_values(size, a, b, c, c_copy);
+
+	simple_mmul(1, 2, 2, a, 1, 2, b, 1, 4, c, 1, 8);
+       	col_stride_mmul_1x2_2x2(a, 2, b, 4, c_copy, 8);
+       	test_buffer_diff(size, c, c_copy, "col_stride_mmul_1x2_2x2");
+
+	reset_values(size, a, b, c, c_copy);
+
+	simple_mmul(2, 1, 2, a, 1, 2, b, 1, 4, c, 1, 8);
+       	col_stride_mmul_2x2_2x1(a, 2, b, 4, c_copy, 8);
+       	test_buffer_diff(size, c, c_copy, "col_stride_mmul_2x2_2x1");
+
+	reset_values(size, a, b, c, c_copy);
+
+	simple_mmul(2, 2, 1, a, 1, 2, b, 1, 4, c, 1, 8);
+       	col_stride_mmul_2x1_1x2(a, 2, b, 4, c_copy, 8);
+       	test_buffer_diff(size, c, c_copy, "col_stride_mmul_2x1_1x2");
+
+	reset_values(size, a, b, c, c_copy);
+
+	simple_mmul(2, 2, 2, a, 1, 2, b, 1, 4, c, 1, 8);
+       	col_stride_mmul_2x2_2x2(a, 2, b, 4, c_copy, 8);
+       	test_buffer_diff(size, c, c_copy, "col_stride_mmul_2x2_2x2");
+
+
 	printf("\n\n---------- END COLUMN STRIDE TESTS ----------\n\n");
 }
