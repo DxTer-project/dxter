@@ -10,7 +10,7 @@
 // Add operations
 
 inline void row_stride_add_2x1(
-	double *a, int a_row_stride,
+	const double *a, int a_row_stride,
 	double *b, int b_row_stride)	{
 
 	v2df_t
@@ -26,7 +26,7 @@ inline void row_stride_add_2x1(
 }
 
 inline void row_stride_add_1x2(
-	double *a, int a_row_stride,
+	const double *a, int a_row_stride,
 	double *b, int b_row_stride)	{
 
 	v2df_t
@@ -38,7 +38,7 @@ inline void row_stride_add_1x2(
 }
 
 inline void row_stride_add_2x2(
-	double *a, int a_row_stride,
+	const double *a, int a_row_stride,
 	double *b, int b_row_stride)	{
 
 	row_stride_add_1x2(
@@ -53,8 +53,8 @@ inline void row_stride_add_2x2(
 // Matrix multiply operations
 
 inline void row_stride_mmul_1x2_2x1(
-	double *a, int a_row_stride,
-	double *b, int b_row_stride,
+	const double *a, int a_row_stride,
+	const double *b, int b_row_stride,
 	double *c, int c_row_stride)	{
 
 	v2df_t
@@ -70,8 +70,8 @@ inline void row_stride_mmul_1x2_2x1(
 }
 
 inline void row_stride_mmul_1x2_2x2(
-	double *a, int a_row_stride,
-	double *b, int b_row_stride,
+	const double *a, int a_row_stride,
+	const double *b, int b_row_stride,
 	double *c, int c_row_stride)	{
 
 	v2df_t
@@ -95,8 +95,8 @@ inline void row_stride_mmul_1x2_2x2(
 }
 
 inline void row_stride_mmul_2x1_1x2(
-	double *a, int a_row_stride,
-	double *b, int b_row_stride,
+	const double *a, int a_row_stride,
+	const double *b, int b_row_stride,
 	double *c, int c_row_stride)	{
 
 	v2df_t
@@ -120,8 +120,8 @@ inline void row_stride_mmul_2x1_1x2(
 }
 
 inline void row_stride_mmul_2x2_2x1(
-	double *a, int a_row_stride,
-	double *b, int b_row_stride,
+	const double *a, int a_row_stride,
+	const double *b, int b_row_stride,
 	double *c, int c_row_stride)	{
 
 	v2df_t
@@ -141,8 +141,8 @@ inline void row_stride_mmul_2x2_2x1(
 }
 
 inline void row_stride_mmul_2x2_2x2(
-	double *a, int a_row_stride,
-	double *b, int b_row_stride,
+	const double *a, int a_row_stride,
+	const double *b, int b_row_stride,
 	double *c, int c_row_stride)	{
 
 	v2df_t
@@ -170,14 +170,14 @@ inline void row_stride_mmul_2x2_2x2(
 // Scalar multiply operations
 
 inline void row_stride_smul_1x1(
-	double *scalar,
+	const double *scalar,
 	double *a, int a_row_stride)	{
 
 	A(0, 0) =  A(0, 0) * *scalar;
 }
 
 inline void row_stride_smul_2x1(
-	double *scalar,
+	const double *scalar,
 	double *a, int a_row_stride)	{
 
 	v2df_t
@@ -194,7 +194,7 @@ inline void row_stride_smul_2x1(
 }
 
 inline void row_stride_smul_1x2(
-	double *scalar,
+	const double *scalar,
 	double *a, int a_row_stride)	{
 
 	v2df_t
@@ -210,7 +210,7 @@ inline void row_stride_smul_1x2(
 }
 
 inline void row_stride_smul_2x2(
-	double *scalar,
+	const double *scalar,
 	double *a, int a_row_stride)	{
 
 	v2df_t
