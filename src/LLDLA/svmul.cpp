@@ -70,7 +70,16 @@ void SVMul::PrintRowStride(IndStream &out)
 
 void SVMul::PrintColStride(IndStream &out)
 {
-  *out << "COL STRIDE not yet implemented\n";
+  if (m_vecType == COLVECTOR) {
+    *out << "col_stride_smul_2x1( " <<
+      GetInputName(0).str() << ", " <<
+      GetInputName(1).str() << ");\n";
+  } else {
+    *out << "col_stride_smul_1x2( " <<
+      GetInputName(0).str() << ", " <<
+      GetInputName(1).str() << ");\n";
+  }
+
 }
 
 void SVMul::PrintGeneralStride(IndStream &out)

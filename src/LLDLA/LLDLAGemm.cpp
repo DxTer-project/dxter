@@ -66,7 +66,17 @@ void LLDLAGemm::PrintRowStride(IndStream &out)
 
 void LLDLAGemm::PrintColStride(IndStream &out)
 {
-  *out << "COL STRIDE not yet implemented\n";
+  if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
+    *out << "col_stride_mmul_2x2_2x2( " <<
+      GetInputName(0).str() << ", " <<
+      InputDataType(0).m_rowStrideVar << ", " << 
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      GetInputName(2).str() << ", " <<
+      InputDataType(2).m_rowStrideVar << ");\n";
+  }
+  else
+    throw;
 }
 
 // Currently only handles the case where alpha = beta = 1.0

@@ -62,7 +62,9 @@ void MAdd::PrintRowStride(IndStream &out)
 
 void MAdd::PrintColStride(IndStream &out)
 {
-  *out << "COL STRIDE not yet implemented\n";
+  *out << "col_stride_add_2x2( " <<
+    GetInputName(0).str() << ", " <<
+    GetInputName(1).str() << ");\n";
 }
 
 void MAdd::PrintGeneralStride(IndStream &out)

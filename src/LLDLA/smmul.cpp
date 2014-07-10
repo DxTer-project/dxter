@@ -62,7 +62,11 @@ void SMMul::PrintRowStride(IndStream &out)
 
 void SMMul::PrintColStride(IndStream &out)
 {
-  *out << "COL STRIDE not yet implemented\n";
+  *out << "col_stride_smul_2x2( " <<
+    GetInputName(0).str() << ", " <<
+    GetInputName(1).str() << ", " <<
+    InputDataType(1).m_rowStrideVar << ");\n";
+
 }
 
 void SMMul::PrintGeneralStride(IndStream &out)

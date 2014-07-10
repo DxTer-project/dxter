@@ -69,7 +69,16 @@ void VAdd::PrintRowStride(IndStream &out)
 
 void VAdd::PrintColStride(IndStream &out)
 {
-  *out << "COL STRIDE not yet implemented\n";
+  if (m_vecType == COLVECTOR) {
+    *out << "col_stride_add_2x1( " <<
+      GetInputName(0).str() << ", " <<
+      GetInputName(1).str() << ");\n";
+  } else {
+    *out << "col_stride_add_1x2( " <<
+      GetInputName(0).str() << ", " <<
+      GetInputName(1).str() << ");\n";
+  }
+
 }
 
 void VAdd::PrintGeneralStride(IndStream &out)

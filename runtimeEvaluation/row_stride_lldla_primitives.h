@@ -157,19 +157,14 @@ inline void row_stride_mmul_2x2_2x2(
 	b_10_11_vreg.v = VEC_PD_LOAD(&B(1, 0));
 
 	c_00_01_vreg.v = VEC_PD_LOAD(&C(0, 0));
-	// Change to fused multiply adds
-	c_00_01_vreg.v = _mm_macc_pd(a_00_vreg.v, b_00_10_vreg.v, c_00_01_vreg.v);
-	c_00_01_vreg.v = _mm_macc_pd(a_01_vreg.v, b_10_11_vreg.v, c_00_01_vreg.v);
-	//c_00_01_vreg.v += a_00_vreg.v * b_00_10_vreg.v + a_01_vreg.v * b_10_11_vreg.v;
+	c_00_01_vreg.v += a_00_vreg.v * b_00_10_vreg.v + a_01_vreg.v * b_10_11_vreg.v;
 	VEC_PD_STORE(&C(0, 0), c_00_01_vreg.v);
 
 	a_10_vreg.v = VEC_DUP_LOAD(&A(1, 0));
 	a_11_vreg.v = VEC_DUP_LOAD(&A(1, 1));
 
 	c_10_11_vreg.v = VEC_PD_LOAD(&C(1, 0));
-	c_10_11_vreg.v = _mm_macc_pd(a_10_vreg.v, b_00_10_vreg.v, c_10_11_vreg.v);
-	c_10_11_vreg.v = _mm_macc_pd(a_11_vreg.v, b_10_11_vreg.v, c_10_11_vreg.v);
-	//c_10_11_vreg.v += a_10_vreg.v * b_00_10_vreg.v + a_11_vreg.v * b_10_11_vreg.v;
+	c_10_11_vreg.v += a_10_vreg.v * b_00_10_vreg.v + a_11_vreg.v * b_10_11_vreg.v;
 	VEC_PD_STORE(&C(1, 0), c_10_11_vreg.v);
 }
 
