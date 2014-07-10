@@ -1482,9 +1482,17 @@ void SplitSingleIter::BuildDataTypeCache()
 
 const DataTypeInfo& SplitSingleIter::DataType(unsigned int num) const
 {
-  if (m_tunType == SETTUNIN)
-    return m_info;
+  if (m_tunType == SETTUNIN) {
+    unsigned int numElems = GetNumElems(m_dir);
+    if (num < numElems) {
+      return m_info;
+    }
+    else if (num == numElems)
+      return InputDataType(0);
+    else
+      throw;
+  }
   else
-    return InputDataType(0);
+    return Input(0)->InputDataType(0);
 }
 #endif
