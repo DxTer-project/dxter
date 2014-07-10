@@ -74,6 +74,7 @@ enum BSSize {
 };
 
 Size BSSizeToSize(BSSize size);	      
+string BSSizeToVarName(BSSize size);
 string BSSizeToSubSizeStr(BSSize size);
 
 unsigned int GetNumElems(PartDir dir);

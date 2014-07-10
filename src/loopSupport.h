@@ -32,3 +32,4 @@
 #include "splitBase.h"
 #include "splitSingleIter.h"
 #include "splitUnrolled.h"
+#include "loopUnrolling.h"

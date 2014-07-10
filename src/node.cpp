@@ -167,6 +167,30 @@ void Node::RemoveInput(Node *node, unsigned int num)
   throw;
 }
 
+void Node::RemoveAllInputs2Way()
+{
+  NodeConnVecIter inputsIter = m_inputs.begin();
+  for(; inputsIter != m_inputs.end(); ++inputsIter) {
+    NodeConn *conn = *inputsIter;
+    conn->m_n->RemoveChild(this, conn->m_num);
+    delete conn;
+  }
+  m_inputs.clear();
+}
+
+//Notice that this leaves the inputs to children nodes in a new order
+//since 1+ inputs are removed
+void Node::RemoveAllChildren2Way()
+{
+  NodeConnVecIter childIter = m_children.begin();
+  for(; childIter != m_children.end(); ++childIter) {
+    NodeConn *conn = *childIter;
+    conn->m_n->RemoveInput(this, conn->m_num);
+    delete conn;
+  }
+  m_children.clear();
+}
+
 bool Node::operator==(const Node &rhs) const
 {
   if (GetType() != rhs.GetType())
@@ -242,35 +266,54 @@ void Node::Duplicate(const Node *orig, bool shallow, bool possMerging)
   }
 }
 
-void Node::PatchAfterDuplicate(NodeMap &map)
+void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound)
 {
-  for(unsigned int i = 0; i < m_inputs.size(); ++i) {
+  for(int i = 0; i < m_inputs.size(); ++i) {
     if (!Input(i)) {
       cout<<"!m_inputs[i]->m_n\n";
       throw;
     }
-    if (!map[Input(i)]) {
-      cout << "map[m_inputs[i]->m_n] size = " << map.size() << endl;
-      cout << "Input's poss = " << Input(i)->m_poss << endl;
-      cout << "my poss = " << m_poss << endl;
-      printf("didn't find input %s, %p for %s, %p\n", Input(i)->GetType().c_str(), Input(i), GetType().c_str(), this);
-      throw;
+    NodeMapIter find = map.find(Input(i));
+    if (find == map.end()) {
+      if (deleteSetTunConnsIfMapNotFound && Input(i)->IsPossTunnel(SETTUNIN)) {
+	m_inputs.erase(m_inputs.begin()+i);
+	--i;
+      }
+      else {
+	cout << "map[m_inputs[i]->m_n] size = " << map.size() << endl;
+	cout << "Input's poss = " << Input(i)->m_poss << endl;
+	cout << "my poss = " << m_poss << endl;
+	printf("didn't find input %s, %p for %s, %p\n", Input(i)->GetType().c_str(), Input(i), GetType().c_str(), this);
+	throw;
+      }
     }
-    m_inputs[i]->SetNode(map[Input(i)]);
+    else {
+      m_inputs[i]->SetNode(find->second);
+    }
   }
-  for(unsigned int i = 0; i < m_children.size(); ++i) {
+  for(int i = 0; i < m_children.size(); ++i) {
     Node *child = m_children[i]->m_n;
-    Node *mapped = map[child];
-    if (!mapped) {
-      cout << "this " << this << " " << this->GetNodeClass() << endl;
-      cout << "child " << child << " " << child->GetNodeClass() << endl;
-      cout << "map[m_children[i]->m_n] size = " << map.size() << endl;
-      printf("didn't find child %p %s, %p %s\n", m_children[i]->m_n, m_children[i]->m_n->GetType().c_str(), this, GetType().c_str());
-      cout << "m_poss = " << m_poss << endl;
-      cout << "child's poss = " << m_children[i]->m_n->m_poss << endl;
-      throw;
+    NodeMapIter find = map.find(child);
+    if (find==map.end()) {
+      if (deleteSetTunConnsIfMapNotFound &&
+	  child->IsPossTunnel(SETTUNOUT)) 
+	{
+	  m_children.erase(m_children.begin()+i);
+	  --i;
+	}
+      else {
+	cout << "this " << this << " " << this->GetNodeClass() << endl;
+	cout << "child " << child << " " << child->GetNodeClass() << endl;
+	cout << "map[m_children[i]->m_n] size = " << map.size() << endl;
+	printf("didn't find child %p %s, %p %s\n", m_children[i]->m_n, m_children[i]->m_n->GetType().c_str(), this, GetType().c_str());
+	cout << "m_poss = " << m_poss << endl;
+	cout << "child's poss = " << m_children[i]->m_n->m_poss << endl;
+	throw;
+      }
     }
-    m_children[i]->SetNode(mapped);
+    else {
+      m_children[i]->SetNode(find->second);
+    }
   }
 }
 
@@ -494,7 +537,6 @@ void Node::RedirectChildren(unsigned int oldNum, Node *newInput, unsigned int ne
   for(unsigned int i = 0; i < m_children.size(); ++i) {
     NodeConn *output = m_children[i];
     if (output->m_num == oldNum) {
-      //      cout << "on " << GetType() << " redirecting output->m_n " << output->m_n->GetType() << endl;
       RedirectChild(i, newInput, newNum);
       --i;
       found = true;
@@ -844,6 +886,9 @@ void FullyUnflatten(NodeVec &vec, ifstream &in, SaveInfo &info)
 void Node::BuildDataTypeCacheRecursive()
 {
   if (!(m_flags & BUILDFLAG)) {
+    //    cout << this << endl;
+    //    cout << "This is a " << GetNodeClass() << endl;
+    //    cout << "This is a " << GetType() << endl;
     NodeConnVecIter iter = m_inputs.begin();
     for(; iter != m_inputs.end(); ++iter) {
       Node *node = (*iter)->m_n;

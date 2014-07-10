@@ -63,7 +63,7 @@ class Poss
   Poss(const NodeVec &nodes, bool outTuns, bool disconnectFromOwner);
   void InitHelper(const NodeVec &nodes, bool outTuns, bool disconnectFromOwner);
   void MarkInsane(bool wrongPhase = false);
-  void PatchAfterDuplicate(NodeMap &map);
+  void PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound = false);
   void DeleteChildAndCleanUp(Node *output, bool GoThroughTunnels=false, bool handleTunnelsAsNormalNodes=false);
   virtual void DeleteNode(Node *node);
   virtual Cost EvalCurr(TransConstVec &transList);
@@ -79,10 +79,12 @@ class Poss
   bool operator!=(Poss &rhs) {return !(*this == rhs);}
   virtual bool IsSane() const {return m_isSane;}
   void AddNode(Node *node);
+  void TakeOverNode(Node *node);
   void AddNodes(int numNodes, ...);
   virtual void AddPSet(PSet *pset, bool expectToBeNew);
   virtual void AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner);
   virtual void AddLoop(Loop *loop);
+  virtual void AddPSet(PSet *pset);
   bool Simplify(const TransMap &simplifiers);
   void PrintTransVec();
   void RemoveConnectionToSet();

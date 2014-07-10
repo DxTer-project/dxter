@@ -65,6 +65,23 @@ Size BSSizeToSize(BSSize size)
   }
 }
 
+string BSSizeToVarName(BSSize size)
+{
+  switch(size)
+    {
+#if DOLLDLA
+    case (USELLDLAMU):
+      return MU_VAR_NAME;
+    case (USELLDLA2MU):
+      return "(2*" + (string)(MU_VAR_NAME) + ")";
+    case (USELLDLA3MU):
+      return "(3*" + (string)(MU_VAR_NAME) + ")";
+#endif
+    default:
+      throw;
+    }
+}
+
 
 
 string BSSizeToStr(BSSize size)
@@ -756,14 +773,10 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   else
     throw;
   
-  *out << "; " << lcv << " > 0; " << lcv << " -= (";
+  *out << "; " << lcv << " > 0; " << lcv << " -= ";
 
-  if (m_bsSize == USELLDLAMU)
-    *out << MU_VAR_NAME << ") ) {\n";
-  else if (m_bsSize == USELLDLA2MU)
-    *out << "2 * " << MU_VAR_NAME << ") ) {\n";
-  else if (m_bsSize == USELLDLA3MU)
-    *out << "3 * " << MU_VAR_NAME << ") ) {\n";
+  
+  *out << BSSizeToVarName(m_bsSize) << " ) {\n";
 
   out.Indent(1);
   *out << "const unsigned int num";
@@ -779,16 +792,8 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   if (needMin)
     *out << loopLevel << " = min( " << lcv << ", ";
   else
-    *out << loopLevel << " = (";
-
-  if (m_bsSize == USELLDLAMU)
-    *out << MU_VAR_NAME;
-  else if (m_bsSize == USELLDLA2MU)
-    *out << "2 * " << MU_VAR_NAME;
-  else if (m_bsSize == USELLDLA3MU)
-    *out << "3 * " << MU_VAR_NAME;
-
-  *out << ");\n";
+    *out << loopLevel << " = ( " 
+	 << BSSizeToVarName(m_bsSize) << " );\n";
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);
