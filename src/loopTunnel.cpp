@@ -144,7 +144,7 @@ void LoopTunnel::Prop()
       throw;
       Input(1)->Prop();
     }
-    else if (m_tunType == POSSTUNIN) {
+    else if (m_tunType == POSSTUNIN && !IsSplit()) {
       if (Input(0)->GetNodeClass() != LoopTunnel::GetClass()) {
         cout << Input(0)->GetNodeClass() << endl;
         throw;

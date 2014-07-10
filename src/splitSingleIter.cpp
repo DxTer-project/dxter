@@ -206,7 +206,7 @@ Name SplitSingleIter::GetName(unsigned int num, LoopType type) const
 void SplitSingleIter::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    PossTunnel::Prop();
+    LoopTunnel::Prop();
 
 #if TWOD
     if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
