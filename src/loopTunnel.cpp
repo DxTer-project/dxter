@@ -756,7 +756,7 @@ bool LoopTunnel::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int
   }
 }
 
-string LoopTunnel::GetLoopLevel() const
+string LoopTunnel::GetLoopLevel(int offset) const
 {
   int level = 0;
   Poss *poss = m_poss;
@@ -769,9 +769,9 @@ string LoopTunnel::GetLoopLevel() const
     }
     poss = set->m_ownerPoss;
     if (!poss)
-      return std::to_string(level);
+      return std::to_string(level+offset);
     set = poss->m_pset;
   }
-  return std::to_string(level);
+  return std::to_string(level+offset);
 
 }

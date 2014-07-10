@@ -37,6 +37,10 @@
 
 #define DOEMPIRICALEVAL 1
 
+#define DOLOOPUNROLLING 0
+#define DO2MUTRANSFORMATIONS 0
+#define DO3MUTRANSFORMATIONS 0
+
 #include <sstream>
 
 #include "driverUtils.h"
@@ -44,9 +48,10 @@
 #include "LLDLAGemmTransformations.h"
 #include "smmul.h"
 #include "runtimeEvaluation.h"
+#include "loopUnrolling.h"
 
 Size one = 1;
-Size smallSize = 10;
+Size smallSize = 12;
 Size medSize = 100;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
@@ -83,12 +88,14 @@ void PrintImpMap(std::map<unsigned int, vector<double>> impTimes)
   }
 }
 
-void PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double flopCost, int chunkSize) {
+unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double flopCost, int chunkSize) {
   /***************************************************************************
    * WARNING: These numbers are processor specific to Dillon's machine in GDC
    ***************************************************************************/
   double ticksPerSec = 1.0e6;
   double peakFLOPS = 30e9;
+  unsigned int bestImpNum = 0;
+  double bestFLOPS = 0;
   std::map<unsigned int, vector<double>>::iterator mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     std::vector<double>::iterator vit;
@@ -98,10 +105,15 @@ void PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double 
       double totalTimeInSecs = *vit / ticksPerSec;
       double actualFLOPS = totalFlops / totalTimeInSecs;
       double pctPeak = (actualFLOPS / peakFLOPS) * 100;
+      if (actualFLOPS > bestFLOPS) {
+	bestFLOPS = actualFLOPS;
+	bestImpNum = mit->first;
+      }
       cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
     }
     cout << endl;
   }
+  return bestImpNum;      
 }
 
 void AddTrans()
@@ -111,11 +123,13 @@ void AddTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLAMU), LLDLALOOPPHASE);
 
-#if 0
+#if DO2MUTRANSFORMATIONS
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLA2MU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLA2MU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLA2MU), LLDLALOOPPHASE);
+#endif 
 
+#if DO3MUTRANSFORMATIONS
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLA3MU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLA3MU), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLA3MU), LLDLALOOPPHASE);
@@ -142,6 +156,11 @@ void AddTrans()
 
   //Lowers the layer tag of a SMMul node that is LLDLA_MU in both dimensions
   Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLA_MU), LLDLAPRIMPHASE);
+
+#if DOLOOPUNROLLING
+  Universe::AddTrans(SplitSingleIter::GetClass(), 
+  		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
+#endif
 }
 
 void AddSimplifiers()
@@ -245,6 +264,22 @@ int main(int argc, const char* argv[])
   }
 #endif
 
+
+#if DOLLDLALOOPUNROLLPHASE
+  if (CurrPhase == LLDLALOOPUNROLLPHASE) {
+    cout << "LLDLALOOPUNROLL phase\n";
+    uni.Expand(-1, LLDLALOOPUNROLLPHASE, LLDLACull);
+    time(&end);
+    cout << "LLDLALOOPUNROLL phase took " << difftime(end,start) << " seconds\n";
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
 #if DOLLDLAPRIMPHASE
   if (CurrPhase == LLDLAPRIMPHASE) {
     cout << "Expanding LL DLA prim phase\n";
@@ -278,12 +313,12 @@ int main(int argc, const char* argv[])
   cout << "About to evaluate\n";
   std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
   cout << "Done evaluating\n";
-  PrintImpMapInFlops(impMap, flopCost, chunkSize);
+  unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
 
 #endif //DOEMPIRICALEVAL
 
 #if 1
-  uni.PrintAll(algNum);
+  uni.PrintAll(algNum, best);
 #else
   uni.PrintBest();
 #endif
@@ -298,16 +333,16 @@ int main(int argc, const char* argv[])
 
 PSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", bigSize, medSize, "A", 
+  InputNode *Ain = new InputNode("A input", medSize, medSize, "A", 
 				 medSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", medSize, bigSize, "B", 
-				 bigSize, 1,
+  InputNode *Bin = new InputNode("B input", medSize, medSize, "B", 
+				 medSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  bigSize, bigSize, "C", 
-				 bigSize, 1,
+  InputNode *Cin = new InputNode("C input",  medSize, medSize, "C", 
+				 medSize, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 

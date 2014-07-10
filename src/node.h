@@ -138,9 +138,11 @@ class Node
   void AddChild(Node *node, unsigned int num);
   void RemoveChild(Node *node, unsigned int num);
   void RemoveInput(Node *node, unsigned int num);
+  void RemoveAllInputs2Way();
+  void RemoveAllChildren2Way();
   virtual bool operator==(const Node &rhs) const;
   virtual bool operator!=(const Node &rhs) const {return !(*this == rhs);}
-  void PatchAfterDuplicate(NodeMap &map);
+  void PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound = false);
   virtual void Print(IndStream &out, unsigned int graphNum);
   bool CanPrintCode() const;
   void AddInput(Node *node);

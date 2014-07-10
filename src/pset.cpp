@@ -108,6 +108,11 @@ void PSet::AddPossesOrDispose(PossMMap &mmap, PossMMap *added)
   for( ; newIter != mmap.end(); ++newIter) {
     Poss *poss = (*newIter).second;
     poss->RemoveConnectionToSet();
+
+    if (poss->m_inTuns.size() != m_inTuns.size()) {
+      cout << "wrong number\n";
+      throw;
+    }
     
     for(unsigned int i = 0; i < poss->m_inTuns.size(); ++i) {
       NodeConn *conn = new NodeConn(InTun(i),0);
@@ -439,8 +444,10 @@ void PSet::Cull(Phase phase)
 
 Node* PSet::InTun(unsigned int num) const
 {
-  if (num >= m_inTuns.size())
+  if (num >= m_inTuns.size()) {
+    cout << num << " >= " << m_inTuns.size() << endl;
     throw;
+  }
   return m_inTuns[num];
 }
 

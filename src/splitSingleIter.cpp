@@ -864,6 +864,7 @@ void SplitSingleIter::Duplicate(const Node *orig, bool shallow, bool possMerging
   SplitBase::Duplicate(orig, shallow, possMerging);
   const SplitSingleIter *split = (SplitSingleIter*)orig;
   m_addDir = split->m_addDir;
+  m_info = split->m_info;
 }
 
 NodeType SplitSingleIter::GetType() const
@@ -1029,6 +1030,12 @@ void SplitSingleIter::AddVariables(VarSet &set) const
   }
   else
     throw;
+
+  if (m_isControlTun) {
+    string loopLevel = GetLoopLevel(-1);
+    Var var(DirectVarDeclType, "int lcv"+loopLevel+";\n");
+    set.insert(var);
+  }
 #endif
 }
 
@@ -1163,7 +1170,6 @@ unsigned int SplitSingleIter::NumberOfLoopExecs() const
   return InputLen(0,0)->NumSizes();
 #endif
 }
-
 #if TWOD
 void SplitSingleIter::StartFillingSizes()
 {
@@ -1454,10 +1460,39 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 #endif
 }
 
+#if DOLLDLA
+void SplitSingleIter::BuildDataTypeCache()
+{
+  SplitBase::BuildDataTypeCache();
+  if (m_tunType == SETTUNIN) {
+    m_info = InputDataType(0);
+    switch (m_dir) {
+    case (PARTDOWN):
+      m_info.m_numRowsVar = "numRows" + GetLoopLevel();
+      break;
+    case (PARTRIGHT):
+      m_info.m_numColsVar = "numCols" + GetLoopLevel();
+      break;
+    default:
+      throw;
+    }
+  }
+}
+
+
 const DataTypeInfo& SplitSingleIter::DataType(unsigned int num) const
 {
-  if (m_tunType == SETTUNIN)
-    return m_info;
+  if (m_tunType == SETTUNIN) {
+    unsigned int numElems = GetNumElems(m_dir);
+    if (num < numElems) {
+      return m_info;
+    }
+    else if (num == numElems)
+      return InputDataType(0);
+    else
+      throw;
+  }
   else
-    return InputDataType(0);
+    return Input(0)->InputDataType(0);
 }
+#endif

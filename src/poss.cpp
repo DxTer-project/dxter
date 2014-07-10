@@ -323,6 +323,26 @@ void Poss::AddNode(Node *node)
   m_possNodes.push_back(node);
 }
 
+void Poss::TakeOverNode(Node *node)
+{
+  Poss *oldOwner = node->m_poss;
+  if (!oldOwner)
+    throw;
+
+  bool found = false;
+  NodeVecIter iter = oldOwner->m_possNodes.begin();
+  for(; !found && iter != oldOwner->m_possNodes.end(); ++iter) {
+    if (*iter == node) {
+      oldOwner->m_possNodes.erase(iter);
+      found = true;
+    }
+  }
+  if (!found)
+    throw;
+  node->m_poss = NULL;
+  AddNode(node);
+}
+
 void Poss::AddNodes(int numNodes, ...)
 {
   va_list listPointer;
@@ -523,8 +543,13 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
 
 void Poss::AddLoop(Loop *loop)
 {
-  NodeVecIter iter = loop->m_outTuns.begin();
-  for(; iter != loop->m_outTuns.end(); ++iter) {
+  AddPSet(loop);
+}
+
+void Poss::AddPSet(PSet *pset)
+{
+  NodeVecIter iter = pset->m_outTuns.begin();
+  for(; iter != pset->m_outTuns.end(); ++iter) {
     AddUp(m_possNodes, *iter, true, false);
   }
 }
@@ -563,11 +588,11 @@ void Poss::ClearNodesPrinted()
 }
 
 
-void Poss::PatchAfterDuplicate(NodeMap &map)
+void Poss::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound)
 {
   NodeVecIter iter = m_possNodes.begin();
   for( ; iter != m_possNodes.end(); ++iter) {
-    (*iter)->PatchAfterDuplicate(map);
+    (*iter)->PatchAfterDuplicate(map, deleteSetTunConnsIfMapNotFound);
   }
 }
 

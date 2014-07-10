@@ -103,6 +103,9 @@ class SplitSingleIter : public SplitBase
 
   virtual void PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const;
 
+#if DOLLDLA
+  virtual void BuildDataTypeCache();
   virtual const DataTypeInfo& DataType(unsigned int num) const;
+#endif
 };
 

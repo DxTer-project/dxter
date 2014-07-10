@@ -166,6 +166,7 @@ Var::Var(VarType type, const string &str)
 	m_type = DirectVarDeclType;
 	m_varDecl = new string(str);
 	m_compStr = "a " + str;
+	break;
       }      
 #if DOTENSORS
     case (IndexArrayType):

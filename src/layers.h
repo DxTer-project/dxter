@@ -144,7 +144,8 @@ enum Layers {
 #elif DOLLDLA
 // Layering for LLDLA operations
 #define LLDLALOOPPHASE 0
-#define LLDLAPRIMPHASE 1
+#define LLDLALOOPUNROLLPHASE 1
+#define LLDLAPRIMPHASE 2
 
 #define FIRSTPHASE LLDLALOOPPHASE
 
@@ -153,6 +154,7 @@ enum Layers {
 #define NUMPHASES (MAXPHASE+1)
 
 #define DOLLDLALOOPPHASE 1
+#define DOLLDLALOOPUNROLLPHASE 1
 #define DOLLDLAPRIMPHASE 1
 
 //Software layers
