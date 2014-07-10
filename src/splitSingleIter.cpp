@@ -864,6 +864,7 @@ void SplitSingleIter::Duplicate(const Node *orig, bool shallow, bool possMerging
   SplitBase::Duplicate(orig, shallow, possMerging);
   const SplitSingleIter *split = (SplitSingleIter*)orig;
   m_addDir = split->m_addDir;
+  m_info = split->m_info;
 }
 
 NodeType SplitSingleIter::GetType() const
@@ -1163,7 +1164,6 @@ unsigned int SplitSingleIter::NumberOfLoopExecs() const
   return InputLen(0,0)->NumSizes();
 #endif
 }
-
 #if TWOD
 void SplitSingleIter::StartFillingSizes()
 {
@@ -1454,6 +1454,26 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 #endif
 }
 
+#if DOLLDLA
+void SplitSingleIter::BuildDataTypeCache()
+{
+  SplitBase::BuildDataTypeCache();
+  if (m_tunType == SETTUNIN) {
+    m_info = InputDataType(0);
+    switch (m_dir) {
+    case (PARTDOWN):
+      m_info.m_numRowsVar = "numRows" + GetLoopLevel();
+      break;
+    case (PARTRIGHT):
+      m_info.m_numColsVar = "numCols" + GetLoopLevel();
+      break;
+    default:
+      throw;
+    }
+  }
+}
+
+
 const DataTypeInfo& SplitSingleIter::DataType(unsigned int num) const
 {
   if (m_tunType == SETTUNIN)
@@ -1461,3 +1481,4 @@ const DataTypeInfo& SplitSingleIter::DataType(unsigned int num) const
   else
     return InputDataType(0);
 }
+#endif
