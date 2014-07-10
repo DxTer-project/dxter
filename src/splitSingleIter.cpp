@@ -1492,7 +1492,8 @@ const DataTypeInfo& SplitSingleIter::DataType(unsigned int num) const
     else
       throw;
   }
-  else
-    return Input(0)->InputDataType(0);
+  else {
+    return Input(0)->DataType(num);
+  }
 }
 #endif
