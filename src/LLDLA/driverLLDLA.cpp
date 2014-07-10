@@ -88,14 +88,12 @@ void PrintImpMap(std::map<unsigned int, vector<double>> impTimes)
   }
 }
 
-unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double flopCost, int chunkSize) {
+void PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double flopCost, int chunkSize) {
   /***************************************************************************
    * WARNING: These numbers are processor specific to Dillon's machine in GDC
    ***************************************************************************/
   double ticksPerSec = 1.0e6;
   double peakFLOPS = 30e9;
-  unsigned int bestImpNum = 0;
-  double bestFLOPS = 0;
   std::map<unsigned int, vector<double>>::iterator mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     std::vector<double>::iterator vit;
@@ -105,15 +103,10 @@ unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes,
       double totalTimeInSecs = *vit / ticksPerSec;
       double actualFLOPS = totalFlops / totalTimeInSecs;
       double pctPeak = (actualFLOPS / peakFLOPS) * 100;
-      if (actualFLOPS > bestFLOPS) {
-	bestFLOPS = actualFLOPS;
-	bestImpNum = mit->first;
-      }
       cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
     }
     cout << endl;
   }
-  return bestImpNum;
 }
 
 void AddTrans()
@@ -305,19 +298,20 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 500;
-  int numIterations = 3;
+  int chunkSize = 5;
+  int numIterations = 10;
   RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
   std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
   cout << "Done evaluating\n";
-  unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
+  PrintImpMapInFlops(impMap, flopCost, chunkSize);
+
 #endif //DOEMPIRICALEVAL
 
 #if 1
-  uni.PrintAll(algNum, best);
+  uni.PrintAll(algNum);
 #else
   uni.PrintBest();
 #endif
@@ -332,16 +326,16 @@ int main(int argc, const char* argv[])
 
 PSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", smallSize, smallSize, "A", 
-				 smallSize, 1,
+  InputNode *Ain = new InputNode("A input", medSize, medSize, "A", 
+				 medSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", smallSize, smallSize, "B", 
-				 smallSize, 1,
+  InputNode *Bin = new InputNode("B input", medSize, medSize, "B", 
+				 medSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", 
-				 smallSize, 1,
+  InputNode *Cin = new InputNode("C input",  medSize, medSize, "C", 
+				 medSize, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 

@@ -153,7 +153,7 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations
   outStream.close(); 
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
-  string compileStr = "gcc -O3 -funroll-loops -mfpmath=sse -msse3 -o " +  executableName;
+  string compileStr = "gcc -O3 -mfpmath=sse -msse3 -finline-functions -o " +  executableName;
   compileStr += " " + testFileName + " utils.c";
   system(compileStr.c_str());
   string runStr = "./" + executableName + " > " + m_dataFileName;

@@ -1,4 +1,5 @@
-#include "gen_stride_tests.h"
+#include "gen_stride_lldla_primitives.h"
+#include "utils.h"
 
 void general_stride_tests()	{
 	int size = 50;
@@ -16,8 +17,8 @@ void general_stride_tests()	{
 	// General stride add tests
 
 	simple_add(2, 1, a, 1, 4, c, 1, 4);
-	gen_stride_add_2x1(a, 1, 4, c_copy, 1, 4);
-	test_buffer_diff(size, c, c_copy, "gen_stride_add_2x1 same row and col stride");
+       	gen_stride_add_2x1(a, 1, 4, c_copy, 1, 4);
+       	test_buffer_diff(size, c, c_copy, "gen_stride_add_2x1 same row and col stride");
 
 	reset_values(size, a, b, c, c_copy);
 
