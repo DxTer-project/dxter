@@ -101,5 +101,5 @@ class LoopTunnel : public PossTunnel
   virtual bool Overwrites(const Node *input, unsigned int num) const;
   virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
 
-  string GetLoopLevel() const;
+  string GetLoopLevel(int offset=0) const;
 };

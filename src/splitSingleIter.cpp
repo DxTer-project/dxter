@@ -1030,6 +1030,12 @@ void SplitSingleIter::AddVariables(VarSet &set) const
   }
   else
     throw;
+
+  if (m_isControlTun) {
+    string loopLevel = GetLoopLevel(-1);
+    Var var(DirectVarDeclType, "int lcv"+loopLevel+";\n");
+    set.insert(var);
+  }
 #endif
 }
 

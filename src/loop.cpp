@@ -750,9 +750,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     }
 
   string loopLevel = split->GetLoopLevel();
-  out.Indent();
   string lcv = "lcv" + loopLevel;
-  *out << "int " << lcv << ";\n";
   out.Indent();
   *out << "for( " << lcv << " = ";
   
