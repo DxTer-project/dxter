@@ -52,8 +52,11 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
   PossMMapConstIter iter = loop->m_posses.begin();
   for(; iter != loop->m_posses.end(); ++iter) {
     const Poss *poss = iter->second;
-    if (!poss->m_sets.empty())
-      return false;
+    PSetVecConstIter iter2 = poss->m_sets.begin();
+    for( ; iter2 != poss->m_sets.end(); ++iter2) {
+      if ((*iter2)->IsLoop())
+	return false;
+    }
   }
   
   unsigned int numExecs = split->NumberOfLoopExecs();
