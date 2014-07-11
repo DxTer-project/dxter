@@ -162,7 +162,7 @@ void AddTrans()
   Universe::AddTrans(SplitSingleIter::GetClass(), 
   		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
 #endif
-
+  
   // Vector dot product transform
   Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, USELLDLAMU), LLDLALOOPPHASE);
   
