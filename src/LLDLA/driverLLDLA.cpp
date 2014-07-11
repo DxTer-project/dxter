@@ -53,7 +53,7 @@
 #include "loopUnrolling.h"
 
 Size one = 1;
-Size smallSize = 12;
+Size smallSize = 10;
 Size medSize = 100;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
@@ -143,7 +143,7 @@ void AddTrans()
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
 
   //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
-  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, BSSizeToSize(USELLDLAMU)), LLDLALOOPPHASE);
 
 
   //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
