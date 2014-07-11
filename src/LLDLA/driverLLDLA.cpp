@@ -34,6 +34,7 @@
 #include "LLDLAGemm.h"
 #include "vvdot.h"
 
+
 #if DOLLDLA
 
 #define DOEMPIRICALEVAL 1
