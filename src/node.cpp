@@ -637,6 +637,12 @@ void Node::CheckConnections()
       }
       if (!found) {
         cout << "Output not in Alg's list\n";
+	cout << "I'm a " << GetType() << endl;
+	cout << "I'm " << this << endl;
+	cout << "I'm  on " << this->m_poss << endl;
+	cout << "child is connected to my " << (*iter2)->m_num << endl;
+	cout << "child is " << (*iter2)->m_n << endl;
+	cout << "child is a " << (*iter2)->m_n->GetType() << endl;
         throw;
       }
     }
@@ -647,8 +653,10 @@ void Node::CheckConnections()
     for(; iter != m_children.end(); ++iter) {
       Node *child = (*iter)->m_n;
       if (!child->InInputs(this,(*iter)->m_num)) {
+	cout << "on " << m_poss << endl;
         cout << "Didn't find " << this << " " << GetType() << " as input to child " << child << endl;
         cout << "Didn't find " << this << " " << GetType() << " as input to child " << child << " " << child->GetType() << " input list\n";
+	m_poss->PrintTransVec();
         throw;
       }
     }
@@ -973,6 +981,8 @@ string Node::GetFunctionalityString() const
     }
     else if (in->IsPossTunnel(SETTUNOUT)) {
       const PSet *set = ((PossTunnel*)in)->m_pset;
+      if (!set)
+	throw;
       str += "(";
       str += set->GetFunctionalityString();
       str += ")";
