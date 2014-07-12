@@ -55,7 +55,7 @@ class ViewMultipleIters : public DLANode
   virtual ~ViewMultipleIters();
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  virtual unsigned int NumOutputs() const {return m_numIters;}
+  virtual unsigned int NumOutputs() const {return m_numIters+1;}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual const Sizes* GetM(unsigned int num) const;
