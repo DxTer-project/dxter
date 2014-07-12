@@ -148,6 +148,8 @@ void PSet::AddPoss(Poss *poss)
 	Loop *loop = (Loop*)this;
 	m_functionality += (char)(loop->m_bsSize);
       }
+      if (m_functionality.empty())
+	throw;
     }
   }
   if (m_inTuns.size() != poss->m_inTuns.size()) {
@@ -605,6 +607,8 @@ void PSet::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
 {
   m_isTopLevel = orig->m_isTopLevel;
   m_functionality = orig->m_functionality;
+  if (m_functionality.empty())
+    throw;
   NodeVecConstIter iter  = orig->m_inTuns.begin();
   for (; iter != orig->m_inTuns.end(); ++iter) {
     PossTunnel *tun = (PossTunnel*)(map[*iter]);
@@ -1128,11 +1132,11 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
         {
           InlinePoss(poss, newPosses);
 	  m_posses.erase(iter);
-	  iter = m_posses.begin();
           PossMMapIter mapIter = newPosses.begin();
           for(; mapIter != newPosses.end(); ++mapIter)
             (*mapIter).second->BuildDataTypeCache();
           AddPossesOrDispose(newPosses);
+	  iter = m_posses.begin();
         }
       else {
 	++iter;
@@ -1141,6 +1145,7 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
   }
   return didMerge;
 }
+
 
 void PSet::FormSets(unsigned int phase)
 {
@@ -1815,8 +1820,10 @@ Comm PSet::ParallelismWithinCurrentPosses() const
 
 const string& PSet::GetFunctionalityString() const
 {
-  if (m_functionality.empty())
+  if (m_functionality.empty()) {
+    cout << m_posses.size() << endl;
     throw;
+  }
   else
     return m_functionality;
 }
