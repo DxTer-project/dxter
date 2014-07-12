@@ -215,7 +215,7 @@ void SMulLoopRef::Apply(Node *node) const
   // and the second is to the input tunnel to which this one
   // should match
   scalarTunOut->AddInput(scalarTun, 0);
-  scalarTunOut->AddInput(scalarTun, 0);
+  scalarTunOut->AddInput(scalarTun, 1);
   scalarTunOut->CopyTunnelInfo(scalarTun);
 
   

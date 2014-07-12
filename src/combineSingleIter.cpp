@@ -133,11 +133,16 @@ void CombineSingleIter::Prop()
     m_cost = ZERO;
   }
 }
-
-    const DataTypeInfo& CombineSingleIter::DataType(unsigned int num) const
-    {
-      return InputDataType(0);
-    }
+    
+const DataTypeInfo& CombineSingleIter::DataType(unsigned int num) const
+{
+  if (m_tunType == POSSTUNOUT)
+    return InputDataType(m_inputs.size()-1);
+  else if (m_tunType == SETTUNOUT)
+    return InputDataType(0);
+  else
+    throw;
+}
 
 #if TWOD
 const Sizes* CombineSingleIter::GetM(unsigned int num) const

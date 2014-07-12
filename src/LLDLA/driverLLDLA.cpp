@@ -32,6 +32,7 @@
 #include <omp.h>
 #endif
 #include "LLDLAGemm.h"
+#include "vvdot.h"
 
 #if DOLLDLA
 
@@ -51,7 +52,7 @@
 #include "loopUnrolling.h"
 
 Size one = 1;
-Size smallSize = 12;
+Size smallSize = 10;
 Size medSize = 100;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
@@ -140,12 +141,12 @@ void AddTrans()
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
 
-  //Lowers the layer tag of a Gemm node that is LLDLA_MU in all three dimensions
-  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
+  //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
+  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, BSSizeToSize(USELLDLAMU)), LLDLALOOPPHASE);
 
 
-  //Lowers the layer tag of a SMMul node that is LLDLA_MU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLA_MU), LLDLALOOPPHASE);
+  //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
+  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, USELLDLAMU), LLDLALOOPPHASE);
 
 
   //Changes Gemm with transposition to non-transposed version use Transpose nodes
@@ -154,13 +155,18 @@ void AddTrans()
   //Replaces a Gemm node with a LLDLAGemm node
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLAPRIMPHASE);
 
-  //Lowers the layer tag of a SMMul node that is LLDLA_MU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLA_MU), LLDLAPRIMPHASE);
+  //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
+  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, USELLDLAMU), LLDLAPRIMPHASE);
 
 #if DOLOOPUNROLLING
   Universe::AddTrans(SplitSingleIter::GetClass(), 
   		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
 #endif
+
+  // Vector dot product transform
+  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, USELLDLAMU), LLDLALOOPPHASE);
+  
+  Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER, USELLDLAMU), LLDLALOOPPHASE);
 }
 
 void AddSimplifiers()
