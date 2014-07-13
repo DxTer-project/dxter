@@ -105,44 +105,55 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
   
   Poss *rootPoss = newPosses[0];
 
+
   unsigned int numIn = poss->m_inTuns.size();
   //  cout << "orig numIn " << numIn << endl;
   for(unsigned int tunNum = 0; tunNum < numIn; ++tunNum) {
     //    cout << "***Working on tunNum " << tunNum << endl;
     LoopTunnel *possTunIn = (LoopTunnel*)(poss->m_inTuns[tunNum]);
+    //    cout << possTunIn << endl;
+
     PossTunnel *newTun = NULL;
-    PossTunnel *newOutTun = NULL;
-    PossTunnel *outTun = NULL;
+
+    NodeVec newOutTuns;
+    NodeVec outTuns;
+
+    NodeConnVecIter childIter = possTunIn->m_children.begin();
+    for(; childIter != possTunIn->m_children.end(); ++childIter) {
+      Node *child = (*childIter)->m_n;
+      if (child->IsPossTunnel(POSSTUNOUT)
+	  && !FoundInNodeVec(outTuns, child)) {
+	outTuns.push_back(child);
+      }
+    }
 
     if (!possTunIn->IsSplit()) {
       newTun = new PossTunnel(POSSTUNIN);
 
       Node *prev = NULL;
-      Node *inputToOutTun = NULL;
-      unsigned int inputNumToOutTun = 99999;
+      NodeVec inputToOutTuns;
+      vector<unsigned int> inputNumToOutTuns;
+      bool allInputsAreTunnel = true;
       
-      outTun = possTunIn->GetMatchingOutTun();
-      if (outTun) {
-	if (!outTun->IsPossTunnel(POSSTUNOUT))
-	  throw;
-	if (outTun->IsCombine())
-	  throw;
+      if (!outTuns.empty()) {
+	NodeVecIter outIter = outTuns.begin();
+	for(; outIter != outTuns.end(); ++outIter) {
+	  PossTunnel *outTun = (PossTunnel*)(*outIter);
+	  if (!outTun->IsPossTunnel(POSSTUNOUT))
+	    throw;
+	  if (outTun->IsCombine())
+	    throw;
+	  
+	  Node *input = outTun->Input(0);
+	  inputToOutTuns.push_back(input);
+	  if (input != possTunIn)
+	    allInputsAreTunnel = false;
 
-	inputToOutTun = outTun->Input(0);
-	inputNumToOutTun = outTun->InputConnNum(0);
-	//	cout << "tunNum " << tunNum << endl;
-	//	cout << "matching outTun on rootPoss " << (*(map[0]))[outTun] << endl;
-	//	cout << "input is " << inputToOutTun->GetNodeClass() << endl;
-	//	cout << "input is " << inputToOutTun->GetType() << endl;
-	/*
-	if (inputToOutTun == possTunIn)
-	  cout << "is same\n";
-	else
-	  cout << "is not same\n";
-	*/
+	  inputNumToOutTuns.push_back(outTun->InputConnNum(0));
+	}
       }
 
-      if (!outTun || (inputToOutTun == possTunIn)) {
+      if (outTuns.empty() || allInputsAreTunnel) {
 	for(int dupNum = 0; dupNum < numIters; ++dupNum) {
 	  Poss *dup = newPosses[dupNum];
 	  LoopTunnel *possTunIn = (LoopTunnel*)(dup->m_inTuns[tunNum]);
@@ -151,7 +162,11 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 	}
       }
       else {
+	if (outTuns.size() > 1)
+	  throw;
 	prev = NULL;
+	unsigned int inputNumToOutTun = inputNumToOutTuns[0];
+	Node *inputToOutTun = inputToOutTuns[0];
 	for(int dupNum = 0; dupNum < numIters; ++dupNum) {
 	  Poss *dup = newPosses[dupNum];
 	  LoopTunnel *possTunIn = (LoopTunnel*)(dup->m_inTuns[tunNum]);
@@ -171,12 +186,22 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 	}
       }
       
-      if (outTun) {
-	newOutTun = new PossTunnel (POSSTUNOUT);
-	if (prev)
-	  newOutTun->AddInput(prev, inputNumToOutTun);
-	else
-	  newOutTun->AddInput(newTun, 0);
+      if (!outTuns.empty()) {
+	if (prev) {
+	  if (outTuns.size() > 1)
+	    throw;
+	  Node *newOutTun = new PossTunnel (POSSTUNOUT);
+	  newOutTuns.push_back(newOutTun);
+	  newOutTun->AddInput(prev, inputNumToOutTuns[0]);
+	}
+	else {
+	  NodeVecIter outTunsIter = outTuns.begin();
+	  for(; outTunsIter != outTuns.end(); ++outTunsIter) {
+	    Node *newOutTun = new PossTunnel (POSSTUNOUT);
+	    newOutTuns.push_back(newOutTun);
+	    newOutTun->AddInput(newTun, 0);
+	  }
+	}
       }
     }
     else { // tunnel is a split
@@ -205,9 +230,11 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
       Node *inputToOutTun = NULL;
       unsigned int inputNumToOutTun = 99999;
 
-      outTun = split->GetMatchingOutTun();
-      if (!outTun)
+      if (outTuns.empty())
 	throw;
+      if (outTuns.size() > 1)
+	throw;
+      PossTunnel *outTun = (PossTunnel*)(outTuns[0]);
       if (outTun->GetNodeClass() != CombineSingleIter::GetClass())
 	throw;
       if (!outTun->IsPossTunnel(POSSTUNOUT))
@@ -271,47 +298,55 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 	com->AddInput(view, numIters);
       }
 
-      newOutTun = new PossTunnel (POSSTUNOUT);
+      Node *newOutTun = new PossTunnel (POSSTUNOUT);
+      newOutTuns.push_back(newOutTun);
       newOutTun->AddInput(com, 0);
     }
 
     rootPoss->AddNode(newTun);
     rootPoss->m_inTuns.push_back(newTun);
 
-    if (newOutTun) {
-      rootPoss->AddNode(newOutTun);
-      NodeVecIter outIter = rootPoss->m_outTuns.begin();
-      Node *mappedOutTun = (*(map[0]))[outTun];
-      if (!mappedOutTun)
+    if (!newOutTuns.empty()) {
+      if (newOutTuns.size() != outTuns.size())
 	throw;
-      mappedOutTun->RemoveAllInputs2Way();
-      for(; outIter != rootPoss->m_outTuns.end(); ++outIter) {
-	if (*outIter == mappedOutTun)
-	  break;
-      }
-      if (outIter == rootPoss->m_outTuns.end())
-	throw;
-      NodeVecIter inserted = rootPoss->m_outTuns.insert(outIter, newOutTun);
-      inserted++;
-      if (*inserted != mappedOutTun)
-	throw;
-      rootPoss->m_outTuns.erase(inserted);
-      rootPoss->DeleteNode(mappedOutTun);
-      //      newOutTun->AddInput(newTun, 1);
-      for(int dupNum = 1; dupNum < numIters; ++dupNum) {
-	NodeMapIter find = map[dupNum]->find(outTun);
-	if (find == map[dupNum]->end())
+      NodeVecIter newOutIter = newOutTuns.begin();
+      NodeVecIter outIter = outTuns.begin();
+      for(; outIter != outTuns.end(); ++outIter,++newOutIter) {
+	Node *newOutTun = *newOutIter;
+	Node *outTun = *outIter;
+	rootPoss->AddNode(newOutTun);
+	NodeVecIter outIter = rootPoss->m_outTuns.begin();
+	Node *mappedOutTun = (*(map[0]))[outTun];
+	if (!mappedOutTun)
 	  throw;
-	else {
-	  Node *possOutTun = find->second;
-	  possOutTun->RemoveAllInputs2Way();
-	  newPosses[dupNum]->DeleteNode(possOutTun);
+	mappedOutTun->RemoveAllInputs2Way();
+	for(; outIter != rootPoss->m_outTuns.end(); ++outIter) {
+	  if (*outIter == mappedOutTun)
+	    break;
+	}
+	if (outIter == rootPoss->m_outTuns.end())
+	  throw;
+	NodeVecIter inserted = rootPoss->m_outTuns.insert(outIter, newOutTun);
+	inserted++;
+	if (*inserted != mappedOutTun)
+	  throw;
+	rootPoss->m_outTuns.erase(inserted);
+	rootPoss->DeleteNode(mappedOutTun);
+	//      newOutTun->AddInput(newTun, 1);
+	for(int dupNum = 1; dupNum < numIters; ++dupNum) {
+	  NodeMapIter find = map[dupNum]->find(outTun);
+	  if (find == map[dupNum]->end())
+	    throw;
+	  else {
+	    Node *possOutTun = find->second;
+	    possOutTun->RemoveAllInputs2Way();
+	    newPosses[dupNum]->DeleteNode(possOutTun);
+	  }
 	}
       }
     }
-    else if (outTun)
+    else if (!outTuns.empty())
       throw;
-
   }
 
   for(int dupNum = 0; dupNum < numIters; ++dupNum) {
@@ -351,9 +386,14 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
   for(; outIter != rootPoss->m_outTuns.end(); ++outIter) {
     PossTunnel *outTun = (PossTunnel*)(*outIter);
     if (outTun->IsLoopTunnel()) {
-      cout << "outTun " << outTun << endl;
+      cout << "found outTun " << outTun << endl;
       cout << outTun->GetNodeClass() << endl;
       cout << outTun->GetType() << endl;
+      cout << "has " << outTun->m_inputs.size() << endl;
+      for(int i = 0; i < outTun->m_inputs.size(); ++i) {
+	cout << "input is " << outTun->m_inputs[i]->m_n << endl;
+	cout << outTun->m_inputs[i]->m_n->GetType() << endl;
+      }
       throw;
     }
   }    
@@ -396,6 +436,10 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
     delete dup;
   }
 
+  if (rootPoss->m_outTuns.size() != poss->m_outTuns.size()) {
+    cout << "bad size\n";
+    throw;
+  }
 
   delete [] newPosses;
   delete [] map;
