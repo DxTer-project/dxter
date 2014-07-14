@@ -208,6 +208,21 @@ void SplitSingleIter::Prop()
   if (!IsValidCost(m_cost)) {
     LoopTunnel::Prop();
 
+    if (m_tunType == POSSTUNIN 
+	&& !IsSplit()) 
+      {
+	Node *found = NULL;
+	NodeConnVecIter iter = m_children.begin();
+	for( ; iter != m_children.end(); ++iter) {
+	  if ((*iter)->m_num == (NumOutputs()-1)) {
+	    if (found)
+	      throw;
+	    else
+	      found = (*iter)->m_n;
+	  }
+	}
+      }
+
 #if TWOD
     if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
 	&& (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR))) 
