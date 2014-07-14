@@ -64,7 +64,7 @@ class Poss
   void InitHelper(const NodeVec &nodes, bool outTuns, bool disconnectFromOwner);
   void MarkInsane(bool wrongPhase = false);
   void PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound = false);
-  void DeleteChildAndCleanUp(Node *output, bool GoThroughTunnels=false, bool handleTunnelsAsNormalNodes=false);
+  void DeleteChildAndCleanUp(Node *output, bool GoThroughTunnels=false, bool handleTunnelsAsNormalNodes=false, bool stopAtPossTunnels=false);
   virtual void DeleteNode(Node *node);
   virtual Cost EvalCurr(TransConstVec &transList);
   virtual Cost EvalAndSetBest();
