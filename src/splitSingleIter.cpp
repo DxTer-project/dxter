@@ -206,7 +206,7 @@ Name SplitSingleIter::GetName(unsigned int num, LoopType type) const
 void SplitSingleIter::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    PossTunnel::Prop();
+    LoopTunnel::Prop();
 
 #if TWOD
     if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
@@ -864,7 +864,9 @@ void SplitSingleIter::Duplicate(const Node *orig, bool shallow, bool possMerging
   SplitBase::Duplicate(orig, shallow, possMerging);
   const SplitSingleIter *split = (SplitSingleIter*)orig;
   m_addDir = split->m_addDir;
+#if DOLLDLA
   m_info = split->m_info;
+#endif
 }
 
 NodeType SplitSingleIter::GetType() const

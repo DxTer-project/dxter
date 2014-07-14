@@ -3081,3 +3081,60 @@ void Poss::AddCurrPossVars(VarSet &set) const
     (*iter2)->AddVariables(set);
   }
 }
+
+bool Poss::ContainsNonLoopCode() const
+{
+  PSetVecConstIter iter = m_sets.begin();
+  for(; iter != m_sets.end(); ++iter) {
+    const PSet *set = *iter;
+    if (set->IsLoop())
+      return false;
+    bool foundAPoss = false;
+    PossMMapConstIter iter2 = set->m_posses.begin();
+    for(; !foundAPoss && iter2 != set->m_posses.end(); ++iter2) {
+      const Poss *poss = iter2->second;
+      if (poss->ContainsNonLoopCode())
+	foundAPoss = true;
+    }
+    if (!foundAPoss)
+      return false;
+  }
+  return true;      
+}
+
+
+bool Poss::RemoveLoops(bool *doneSomething)
+{
+  PSetVecIter iter = m_sets.begin();
+  for(; iter != m_sets.end(); ++iter) {
+    PSet *set = *iter;
+    if (set->IsLoop())
+      return true;
+    PossMMapIter iter2 = set->m_posses.begin();
+    while (iter2 != set->m_posses.end()) {
+      Poss *poss = iter2->second;
+      bool doneSomething2 = false;
+      if (poss->RemoveLoops(&doneSomething2)) {
+	*doneSomething = true;
+	set->RemoveAndDeletePoss(poss, true);
+	iter2 = set->m_posses.begin();
+      }
+      else if (doneSomething2) {
+	*doneSomething = true;
+	if (poss->GetHash() != iter2->first) {
+	  set->m_posses.erase(iter2);
+	  set->m_posses.insert(PossMMapPair(poss->GetHash(),poss));
+	  iter2 = set->m_posses.begin();
+	}
+	else
+	  ++iter2;
+      }
+      else {
+	++iter2;
+      }
+    }
+    if (set->m_posses.empty())
+      return true;
+  }
+  return false;  
+}

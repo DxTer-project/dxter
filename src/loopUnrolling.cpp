@@ -49,15 +49,6 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
 
   const Loop *loop = split->GetMyLoop();
 
-  PossMMapConstIter iter = loop->m_posses.begin();
-  for(; iter != loop->m_posses.end(); ++iter) {
-    const Poss *poss = iter->second;
-    PSetVecConstIter iter2 = poss->m_sets.begin();
-    for( ; iter2 != poss->m_sets.end(); ++iter2) {
-      if ((*iter2)->IsLoop())
-	return false;
-    }
-  }
   
   unsigned int numExecs = split->NumberOfLoopExecs();
   if (!numExecs)
@@ -67,18 +58,26 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
     if (numIters != m_numIters)
       return false;
   }
-  return true;
+
+  PossMMapConstIter iter = loop->m_posses.begin();
+  for(; iter != loop->m_posses.end(); ++iter) {
+    const Poss *poss = iter->second;
+    if (poss->ContainsNonLoopCode())
+      return true;
+  }
+  return false;
 }
 
 void RedirectChildrenThatArentPossTuns(Node *input, 
 					  unsigned int num,
 					  Node *newInput,
-					  unsigned int newNum)
+				       unsigned int newNum,
+				       PossTunType type)
 {
   for(unsigned int i = 0; i < input->m_children.size(); ++i) {
     NodeConn *output = input->m_children[i];
     if (output->m_num == num &&
-	!output->m_n->IsPossTunnel()) 
+	!output->m_n->IsPossTunnel(type)) 
       {
 	//	cout << "redirecting child " << output->m_n->GetType() 
 	//	     << " of " << input->GetType() << " to "
@@ -94,10 +93,14 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
   NodeMap** map = new NodeMap*[numIters];
   Poss** newPosses = new Poss*[numIters];
   for (int dupNum = 0; dupNum < numIters; ++dupNum) {
-    newPosses[dupNum] = new Poss;
+    Poss *newPoss = new Poss;
+    newPosses[dupNum] = newPoss;
     map[dupNum] = new NodeMap;
-    newPosses[dupNum]->Duplicate(poss, *(map[dupNum]), true);
-    newPosses[dupNum]->PatchAfterDuplicate(*(map[dupNum]), true);
+    newPoss->Duplicate(poss, *(map[dupNum]), true);
+    newPoss->PatchAfterDuplicate(*(map[dupNum]), true);
+    bool trash;
+    if (newPoss->RemoveLoops(&trash))
+      throw;
   }
   
   Poss *rootPoss = newPosses[0];
@@ -143,7 +146,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 	for(int dupNum = 0; dupNum < numIters; ++dupNum) {
 	  Poss *dup = newPosses[dupNum];
 	  LoopTunnel *possTunIn = (LoopTunnel*)(dup->m_inTuns[tunNum]);
-	  RedirectChildrenThatArentPossTuns(possTunIn, 0, newTun, 0);
+	  RedirectChildrenThatArentPossTuns(possTunIn, 0, newTun, 0, POSSTUNOUT);
 	  possTunIn->RemoveAllChildren2Way();
 	}
       }
@@ -153,10 +156,10 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 	  Poss *dup = newPosses[dupNum];
 	  LoopTunnel *possTunIn = (LoopTunnel*)(dup->m_inTuns[tunNum]);
 	  if (dupNum) {
-	    RedirectChildrenThatArentPossTuns(possTunIn, 0, prev, inputNumToOutTun);
+	    RedirectChildrenThatArentPossTuns(possTunIn, 0, prev, inputNumToOutTun, POSSTUNOUT);
 	  }
 	  else {
-	    RedirectChildrenThatArentPossTuns(possTunIn, 0, newTun, 0);
+	    RedirectChildrenThatArentPossTuns(possTunIn, 0, newTun, 0, POSSTUNOUT);
 	  }
 	  //	  RedirectChildrenThatArentPossTuns(possTunIn, 0, newTun, 0);
 	  NodeMapIter find = map[dupNum]->find(inputToOutTun);
@@ -230,7 +233,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 	*/
 
 
-	RedirectChildrenThatArentPossTuns(possTunIn, 1, view, dupNum);
+	RedirectChildrenThatArentPossTuns(possTunIn, 1, view, dupNum, POSSTUNOUT);
 
 
 
@@ -308,6 +311,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
     }
     else if (outTun)
       throw;
+
   }
 
   for(int dupNum = 0; dupNum < numIters; ++dupNum) {
@@ -340,6 +344,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
       dup->DeleteNode(tun);
     }
   }
+
   
   //Just a sanity check
   NodeVecIter outIter = rootPoss->m_outTuns.begin();
@@ -355,6 +360,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 
   delete map[0];
 
+
   for(int dupNum = 1; dupNum < numIters; ++dupNum) {
     delete map[dupNum];
     Poss *dup = newPosses[dupNum];
@@ -362,18 +368,38 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
     for(; iter != dup->m_possNodes.end(); ++iter) {
       Node *node = *iter;
       //Sanity check
-      if (node->IsPossTunnel())
-	throw;
+      if (node->IsPossTunnel()) {
+	PossTunnel *tun = (PossTunnel*)node;
+	if (tun->m_tunType == POSSTUNIN ||
+	    tun->m_tunType == POSSTUNOUT)
+	  throw;
+      }
       node->m_poss = NULL;
       rootPoss->AddNode(node);
+      NodeConnVecIter iter2 = node->m_children.begin();
+      for(; iter2 != node->m_children.end(); ++iter2) {
+	NodeConn *conn = *iter2;
+	if (conn->m_n->IsLoopTunnel())
+	  throw;
+      }
     }
     dup->m_possNodes.clear();
+
+    PSetVecIter iter2 = dup->m_sets.begin();
+    for(; iter2 != dup->m_sets.end(); ++iter2) {
+      PSet *set = *iter2;
+      set->m_ownerPoss = NULL;
+      rootPoss->AddPSet(set, true);
+    }
+    dup->m_sets.clear();
     
     delete dup;
   }
 
+
   delete [] newPosses;
   delete [] map;
+
 
   return rootPoss;
 }
@@ -389,9 +415,14 @@ void FullyUnrollLoop::Apply(Node *node) const
   Loop *loop = split->GetMyLoop();
 
   PossMMapIter possIter = loop->m_posses.begin();
+  while (!possIter->second->ContainsNonLoopCode())
+    ++possIter;
 
   Poss *rootPoss = UnrollPoss(possIter->second, loop, m_numIters);
   ++possIter;
+
+  if (rootPoss->m_inTuns.size() != loop->m_inTuns.size())
+    throw;
 
   for (unsigned int i = 0; i < rootPoss->m_inTuns.size(); ++i) {
     Node *possInTun = rootPoss->m_inTuns[i];
@@ -420,11 +451,11 @@ void FullyUnrollLoop::Apply(Node *node) const
 
   for(; possIter != loop->m_posses.end(); ++possIter) {
     Poss *poss = possIter->second;
-    Poss *newPoss = UnrollPoss(poss, loop, m_numIters);
-    newSet->AddPoss(newPoss);
+    if (poss->ContainsNonLoopCode()) {
+      Poss *newPoss = UnrollPoss(poss, loop, m_numIters);
+      newSet->AddPoss(newPoss);
+    }
   }
-
-  
 
   NodeVecIter inIter = loop->m_inTuns.begin();
   for( ; inIter != loop->m_inTuns.end(); ++inIter) {
@@ -433,6 +464,8 @@ void FullyUnrollLoop::Apply(Node *node) const
     loop->m_ownerPoss->DeleteNode(in);
   }
   loop->m_inTuns.clear();
+
+
 
   for(unsigned int i = 0; i < loop->m_outTuns.size(); ++i) {
     PossTunnel *loopTun = (PossTunnel*)(loop->m_outTuns[i]);

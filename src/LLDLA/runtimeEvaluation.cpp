@@ -38,6 +38,7 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_headers.push_back("#include \"gen_stride_lldla_primitives.h\"");
   m_headers.push_back("#include \"utils.h\"");
   m_headers.push_back("#include <string.h>");
+  m_headers.push_back("#include <unistd.h>");
   m_defines.push_back("#define BUF_SIZE 1000000");
   m_defines.push_back("#define NUM_ITERATIONS " + std::to_string(m_numIterations));
   m_defines.push_back("#define CHUNK_SIZE " + std::to_string(m_chunkSize));
@@ -81,7 +82,7 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
     loopBody += "\t\texec_time = (double) (end - begin);\n";
     loopBody += "\t\tchar exec_time_str[100];\n";
     loopBody += "\t\tsprintf(exec_time_str, \"%f\\n\", exec_time);\n";
-    loopBody += "\t\twrite(1, exec_time_str, strlen(exec_time_str));\n";
+    loopBody += "\t\tsize_t trash = write(1, exec_time_str, strlen(exec_time_str));\n";
     loopBody += "\t}\n";
   }
   return loopBody;
