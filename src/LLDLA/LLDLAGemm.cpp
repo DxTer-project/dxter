@@ -33,11 +33,16 @@ LLDLAGemm::LLDLAGemm(Coef alpha, Coef beta, Type type, Layer layer)
 
 void LLDLAGemm::PrintCode(IndStream &out)
 {
+  /*  if (m_layer != LLDLAPRIMITIVELAYER) {
+    cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
+    throw;
+    }*/
   const DataTypeInfo &inInfo = InputDataType(2);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;
   
   out.Indent();
+
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
     PrintGeneralStride(out);
   } else if (rowStride == UNITSTRIDE && colStride == NONUNITSTRIDE) {

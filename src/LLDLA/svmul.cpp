@@ -33,10 +33,10 @@ SVMul::SVMul(VecType vecType, Layer layer, Type type)
 
 void SVMul::PrintCode(IndStream &out)
 {
-  if (m_layer != LLDLAPRIMITIVELAYER) {
+  /*  if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
     throw;
-  }
+    }*/
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;

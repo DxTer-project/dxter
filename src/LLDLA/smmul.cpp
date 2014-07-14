@@ -32,8 +32,8 @@ SMMul::SMMul(Type type, Layer layer)
 
 void SMMul::PrintCode(IndStream &out)
 {
-  if (GetLayer() != LLDLAPRIMITIVELAYER)
-    throw;
+  /*  if (GetLayer() != LLDLAPRIMITIVELAYER)
+      throw;*/
 
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
