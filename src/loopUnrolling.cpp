@@ -126,6 +126,8 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 	outTuns.push_back(child);
       }
     }
+    if (outTuns.size() > 1)
+      throw;
 
     if (!possTunIn->IsSplit()) {
       newTun = new PossTunnel(POSSTUNIN);
@@ -472,6 +474,8 @@ void FullyUnrollLoop::Apply(Node *node) const
     Node *possInTun = rootPoss->m_inTuns[i];
     Node *loopInTun = loop->m_inTuns[i];
 
+    //    cout << "adding input of " << loopInTun->Input(0) << " to " << possInTun << endl;
+
     possInTun->AddInput(loopInTun->Input(0), loopInTun->InputConnNum(0));
   }
 
@@ -523,6 +527,10 @@ void FullyUnrollLoop::Apply(Node *node) const
   loop->m_ownerPoss->RemoveFromSets(loop);
 
   delete loop;
+
+  if (newSet->m_posses.empty()) {
+    throw;
+  }
 }
 
 
