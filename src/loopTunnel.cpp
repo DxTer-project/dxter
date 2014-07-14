@@ -114,6 +114,21 @@ void LoopTunnel::Prop()
   if (!IsValidCost(m_cost)) {
     PossTunnel::Prop();
 
+    if (m_tunType == POSSTUNIN 
+	&& !IsSplit()) 
+      {
+	Node *found = NULL;
+	NodeConnVecIter iter = m_children.begin();
+	for( ; iter != m_children.end(); ++iter) {
+	  if ((*iter)->m_num == 1) {
+	    if (found)
+	      throw;
+	    else
+	      found = (*iter)->m_n;
+	  }
+	}
+      }
+
     if (m_statTL == BADUP || m_statTR == BADUP
 	|| m_statBL == BADUP || m_statBR == BADUP)
       {
