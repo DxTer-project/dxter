@@ -32,9 +32,19 @@ SMMul::SMMul(Type type, Layer layer)
 
 void SMMul::PrintCode(IndStream &out)
 {
-  /*  if (GetLayer() != LLDLAPRIMITIVELAYER)
-      throw;*/
-
+  if (GetLayer() == ABSLAYER) {
+    *out << "simple_smul( " <<
+      InputDataType(0).m_numRowsVar << ", " <<
+      InputDataType(0).m_numColsVar << ", " <<
+      GetInputName(0).str() << ", " <<
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << ");\n";
+    return;
+  }
+  if (GetLayer() != LLDLAPRIMITIVELAYER) {
+    throw;
+  }
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;

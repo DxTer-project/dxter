@@ -234,6 +234,7 @@ int main(int argc, const char* argv[])
   time_t start, start2, end;
   uni.PrintStats();
   Cost flopCost;
+  string absImpStr;
   if (algNum==0) {
     time(&start);
     uni.Init(fileName);
@@ -251,6 +252,19 @@ int main(int argc, const char* argv[])
     uni.Init(startSet);
     uni.Prop();
     flopCost = startSet->EvalAndSetBest();
+    // Print abstract implementation to string for use in testing
+    // EXTREMELY HACKY, I could not figure out how to redirect an
+    // ostream to a string
+    /*    std::filebuf fb;
+    fb.open("dummyBest.txt", std::ios::out);
+    std::ostream bestOStream(&fb);*/
+    IndStream optOut(&cout, LLDLASTREAM);
+    cout << "TEST\n";
+    startSet->GetCurrPoss()->PrintRoot(optOut, 0, true);
+    /*    std::stringstream ss;
+    ss << optOut.o->rdbuf();
+    absImpStr = ss.str();
+    cout << "Abs Implementation\n" << absImpStr << "\n";*/
     cout << "Flops for operation = " << std::to_string(flopCost) << endl;
     time(&start);
   }
@@ -258,7 +272,7 @@ int main(int argc, const char* argv[])
 
 #if DOLLDLALOOPPHASE
   if (CurrPhase == LLDLALOOPPHASE) {
-    cout << "Expanding LL DLA loop phase\n";
+    cout << "Expanding LLDLA loop phase\n";
     uni.Expand(-1, LLDLALOOPPHASE, LLDLACull);
     time(&end);
     cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
@@ -295,7 +309,7 @@ int main(int argc, const char* argv[])
     uni.Expand(numIters, LLDLAPRIMPHASE, LLDLACull);
     time(&end);
     cout << "LLDLAPRIM phase took " << difftime(end,start2) << " seconds\n";
-    
+
     cout << "Propagating\n";
     cout.flush();
     time(&start2);

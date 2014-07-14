@@ -32,10 +32,23 @@ MAdd::MAdd(Type type, Layer layer)
 
 void MAdd::PrintCode(IndStream &out)
 {
-  /*  if (m_layer != LLDLAPRIMITIVELAYER) {
+  if (m_layer == ABSLAYER) {
+    *out << "simple_add( " <<
+      InputDataType(0).m_numRowsVar << ", " <<
+      InputDataType(0).m_numColsVar << ", " <<
+      GetInputName(0).str() << ", " <<
+      InputDataType(0).m_rowStrideVar << ", " <<
+      InputDataType(0).m_colStrideVar << ", " <<
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << ");\n";
+    
+    return;
+  }
+  if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
     throw;
-    }*/
+  }
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;

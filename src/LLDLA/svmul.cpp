@@ -33,10 +33,31 @@ SVMul::SVMul(VecType vecType, Layer layer, Type type)
 
 void SVMul::PrintCode(IndStream &out)
 {
-  /*  if (m_layer != LLDLAPRIMITIVELAYER) {
+  if (m_layer == ABSLAYER) {
+    if (m_vecType == COLVECTOR) {
+      *out << "simple_smul( " <<
+	InputDataType(1).m_numRowsVar << ", " <<
+	" 1, " <<
+	GetInputName(0).str() << ", " <<
+	GetInputName(1).str() << ", " <<
+	InputDataType(1).m_rowStrideVar << ", " <<
+	InputDataType(1).m_colStrideVar << ");\n";
+    } else {
+      *out << "simple_smul( " <<
+	" 1, " <<
+	InputDataType(1).m_numColsVar << ", " <<
+	GetInputName(0).str() << ", " <<
+	GetInputName(1).str() << ", " <<
+	InputDataType(1).m_rowStrideVar << ", " <<
+	InputDataType(1).m_colStrideVar << ");\n";
+    }
+
+    return;
+  }
+  if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
     throw;
-    }*/
+  }
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;
