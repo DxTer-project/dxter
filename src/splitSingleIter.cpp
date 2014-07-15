@@ -879,7 +879,9 @@ void SplitSingleIter::Duplicate(const Node *orig, bool shallow, bool possMerging
   SplitBase::Duplicate(orig, shallow, possMerging);
   const SplitSingleIter *split = (SplitSingleIter*)orig;
   m_addDir = split->m_addDir;
+#if DOLLDLA
   m_info = split->m_info;
+#endif
 }
 
 NodeType SplitSingleIter::GetType() const

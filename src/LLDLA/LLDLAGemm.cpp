@@ -33,11 +33,37 @@ LLDLAGemm::LLDLAGemm(Coef alpha, Coef beta, Type type, Layer layer)
 
 void LLDLAGemm::PrintCode(IndStream &out)
 {
+  if (m_layer == ABSLAYER) {
+
+    if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
+      *out << "simple_mmul( " <<
+	InputDataType(2).m_numRowsVar << ", " <<
+	InputDataType(2).m_numColsVar << ", " <<
+	InputDataType(0).m_numColsVar << ", " <<
+	GetInputName(0).str() << ", " <<
+	InputDataType(0).m_rowStrideVar << ", " <<
+	InputDataType(0).m_colStrideVar << ", " <<
+	GetInputName(1).str() << ", " <<
+	InputDataType(1).m_rowStrideVar << ", " <<
+	InputDataType(1).m_colStrideVar << ", " <<
+	GetInputName(2).str() << ", " <<
+	InputDataType(2).m_rowStrideVar << ", " <<
+	InputDataType(2).m_colStrideVar << ");\n";
+      return;
+    }
+    else
+      throw;
+  }
+  if (m_layer != LLDLAPRIMITIVELAYER) {
+    cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
+    throw;
+  }
   const DataTypeInfo &inInfo = InputDataType(2);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;
   
   out.Indent();
+
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
     PrintGeneralStride(out);
   } else if (rowStride == UNITSTRIDE && colStride == NONUNITSTRIDE) {

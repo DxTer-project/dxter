@@ -33,6 +33,27 @@ VAdd::VAdd(VecType vecType, Layer layer, Type type)
 
 void VAdd::PrintCode(IndStream &out)
 {
+  if (m_layer == ABSLAYER) {
+    if (m_vecType == COLVECTOR) {
+      *out << "simple_add( " <<
+	InputDataType(1).m_numRowsVar << ", " <<
+	" 1, " <<
+	GetInputName(0).str() << ", " <<
+	GetInputName(1).str() << ", " <<
+	InputDataType(1).m_rowStrideVar << ", " <<
+	InputDataType(1).m_colStrideVar << ");\n";
+    } else {
+      *out << "simple_add( " <<
+	" 1, " <<
+	InputDataType(1).m_numColsVar << ", " <<
+	GetInputName(0).str() << ", " <<
+	GetInputName(1).str() << ", " <<
+	InputDataType(1).m_rowStrideVar << ", " <<
+	InputDataType(1).m_colStrideVar << ");\n";
+    }
+
+    return;
+  }
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
     throw;
