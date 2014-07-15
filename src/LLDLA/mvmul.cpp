@@ -308,7 +308,7 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
   outY->CopyTunnelInfo(tunY);
 
   // Create the poss
-  Poss *loopPoss = new Poss(3, splitA, splitX, outY);
+  Poss *loopPoss = new Poss(3, comA, comX, outY);
   Loop *loop = new Loop(LLDLALOOP, loopPoss, m_bs);
   loop->SetDimName(m_dim);
 

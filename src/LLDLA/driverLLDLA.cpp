@@ -255,12 +255,12 @@ int main(int argc, const char* argv[])
     // Print abstract implementation to string for use in testing
     // EXTREMELY HACKY, I could not figure out how to redirect an
     // ostream to a string
-    /*    std::filebuf fb;
-    fb.open("dummyBest.txt", std::ios::out);
-    std::ostream bestOStream(&fb);*/
-    IndStream optOut(&cout, LLDLASTREAM);
+    std::stringstream ss;
+    IndStream optOut(&ss, LLDLASTREAM);
     cout << "TEST\n";
     startSet->GetCurrPoss()->PrintRoot(optOut, 0, true);
+    absImpStr = ss.str();
+    //    absImpStr = ss.rdbuf();
     /*    std::stringstream ss;
     ss << optOut.o->rdbuf();
     absImpStr = ss.str();
@@ -332,7 +332,7 @@ int main(int argc, const char* argv[])
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
-  std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
+  std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
   cout << "Done evaluating\n";
   unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
 

@@ -57,15 +57,83 @@ string RuntimeTest::MakeTestCode(ImplementationMap imps)
   return testCode;
 }
 
+string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImp)
+{
+  int numImplementations = imps.size();
+  m_defines.push_back("#define NUM_ALGS " + std::to_string(numImplementations));
+  string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
+  string refFuncName = m_operationName + "_test";
+  string implementationFunctions = MakeImpFuncs(imps) + MakeFunc(refFuncName, referenceImp);
+  string driverCode = MainFuncCodeWithCorrectnessCheck(imps, m_operationName + "_test");
+  string testCode = headersAndDefines + "\n" + implementationFunctions + "\n" + driverCode;
+  return testCode;
+}
+
 string RuntimeTest::MainFuncCode(ImplementationMap imps)
 {
   string prototype = "int main() {\n";
-  string argBufferAllocation = AllocateArgBuffers();
+  string argBufferAllocation = AllocateArgBuffers("");
   string timingSetup = "\tint i, j, k;\n\tclock_t begin, end;\n\tdouble exec_time;\n";    
   string mainFunc = prototype + argBufferAllocation + "\n" + timingSetup;
   string timingLoop = TimingLoop(imps);
   mainFunc = mainFunc + "\n" + timingLoop + "\n}";
   return mainFunc;
+}
+
+string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImpName)
+{
+  string prototype = "int main() {\n";
+  string argBufferAllocation = AllocateArgBuffers("") + "\n";
+  argBufferAllocation += AllocateArgBuffers("_ref") + "\n";
+  argBufferAllocation += AllocateArgBuffers("_test") + "\n";
+  argBufferAllocation += FillBuffersWithRandValues("") + "\n";
+  string correctnessCheck = argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
+  correctnessCheck += CorrectnessCheck(imps, referenceImpName);
+  string timingSetup = "\tint i, j, k;\n\tclock_t begin, end;\n\tdouble exec_time;\n";
+  string mainFunc = prototype + correctnessCheck + "\n" + timingSetup;
+  string timingLoop = TimingLoop(imps);
+  mainFunc = mainFunc + "\n" + timingLoop + "\n}";
+  return mainFunc;
+}
+
+string RuntimeTest::CorrectnessCheck(ImplementationMap imps, string referenceImpName)
+{
+  int i;
+  string correctnessCheck = "";
+  vector<string> argBuffers = ArgBuffers("_ref");
+  vector<string> testBuffers = ArgBuffers("_test");
+  string callRefImp = "\t" + referenceImpName + "(" + CArgList(argBuffers) + ");\n\n";
+  correctnessCheck += callRefImp;
+  for (i = 1; i <= imps.size(); i++) {
+    correctnessCheck += CopyArgBuffersTo("_test") + "\n\t";
+    correctnessCheck += m_operationName + "_" + std::to_string(i) + "(" + CArgList(testBuffers) + ");\n";
+    correctnessCheck += CheckArgBufferDiffs("_ref", "_test") + "\n";
+  }
+  return correctnessCheck;
+}
+
+string RuntimeTest::CheckArgBufferDiffs(string refPostfix, string testPostfix)
+{
+  vector<string>::iterator argIter;
+  vector<string> diffChecks;
+  for (argIter = m_argNames.begin(); argIter != m_argNames.end(); ++argIter) {
+    string refBuf = *argIter + refPostfix;
+    string testBuf = *argIter + testPostfix;
+    string diffCheck = "\ttest_buffer_diff(BUF_SIZE, " + refBuf + ", " + testBuf + ", \"Sanity Check\");";
+    diffChecks.push_back(diffCheck);
+  }
+  return ToCStatements(diffChecks);
+}
+
+vector<string> RuntimeTest::ArgBuffers(string postfix)
+{
+  vector<string> argBufs;
+  vector<string>::iterator argIter;
+  for (argIter = m_argNames.begin(); argIter != m_argNames.end(); ++argIter) {
+    string name = *argIter;
+    argBufs.push_back(name + postfix);
+  }
+  return argBufs;
 }
 
 string RuntimeTest::TimingLoop(ImplementationMap imps)
@@ -88,12 +156,37 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
   return loopBody;
 }
 
-string RuntimeTest::AllocateArgBuffers()
+
+string RuntimeTest::FillBuffersWithRandValues(string postfix)
+{
+  std::vector<string> bufferFills;
+  std::vector<string>::iterator argIter;
+  for (argIter = m_argNames.begin(); argIter != m_argNames.end(); ++argIter) {
+    string bufName = *argIter;
+    bufferFills.push_back("\trand_doubles(BUF_SIZE, " + bufName + ");");
+  }
+  return ToCStatements(bufferFills);
+}
+
+string RuntimeTest::CopyArgBuffersTo(string postfix)
+{
+  std::vector<string> bufferFills;
+  std::vector<string>::iterator argIter;
+  for (argIter = m_argNames.begin(); argIter != m_argNames.end(); ++argIter) {
+    string srcBuffer = *argIter;
+    string destBuffer = *argIter + postfix;
+    bufferFills.push_back("\tcopy_buffer(BUF_SIZE, " + srcBuffer + ", " + destBuffer + ");");
+  }
+  return ToCStatements(bufferFills);
+}
+
+string RuntimeTest::AllocateArgBuffers(string postfix)
 {
   std::vector<string> argAllocs;
   std::vector<string>::iterator argIter;
   for (argIter = m_argDeclarations.begin(); argIter != m_argDeclarations.end(); ++argIter) {
-    argAllocs.push_back("\t" + *argIter + " = alloc_aligned_16(BUF_SIZE * sizeof(double));");
+    string bufName = *argIter + postfix;
+    argAllocs.push_back("\t" + bufName + " = alloc_aligned_16(BUF_SIZE * sizeof(double));");
   }
   return ToCStatements(argAllocs);
 }
@@ -128,13 +221,19 @@ string RuntimeTest::MakeImpFuncs(ImplementationMap imps)
   string allImplementationFuncs = "";
   ImplementationMap::iterator impIt;
   for (impIt = imps.begin(); impIt != imps.end(); ++impIt) {
-    string funcDec = "void " + m_operationName + "_" + std::to_string(impIt->first);
-    funcDec = funcDec + endOfFuncDec + " {\n";
-    funcDec = funcDec + impIt->second;
-    funcDec = funcDec + "return;\n}\n";
+    string funcName = m_operationName + "_" + std::to_string(impIt->first);
+    string funcBody = impIt->second;
+    string funcDec = MakeFunc(funcName, funcBody);
     allImplementationFuncs = allImplementationFuncs + funcDec;
   }
   return allImplementationFuncs;
+}
+
+string RuntimeTest::MakeFunc(string funcName, string funcBody) {
+  string funcDec = "void " + funcName;
+  funcDec = funcDec + "(" + CArgList(m_argDeclarations) + ")" + "{\n";
+  funcDec = funcDec + funcBody + "return;\n}\n";
+  return funcDec;
 }
 
 RuntimeEvaluator::RuntimeEvaluator(string evalDirName)
@@ -160,6 +259,24 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations
   string runStr = "./" + executableName + " > " + m_dataFileName;
   system(runStr.c_str());
   return ReadTimeDataFromFile(imps.size());
+}
+
+std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap imps, string referenceImp)
+{
+  m_numIterations = test.m_numIterations;
+  string executableName = test.m_operationName;
+  string testFileName = executableName + ".c";
+  std::ofstream outStream(m_evalDirName + "/" + testFileName);
+  outStream << test.MakeTestCodeWithCorrectnessCheck(imps, referenceImp);
+  outStream.close(); 
+  const char *evalDir = (m_evalDirName + "/").c_str();
+  chdir(evalDir);
+  string compileStr = "gcc -O3 -mfpmath=sse -msse3 -finline-functions -o " +  executableName;
+  compileStr += " " + testFileName + " utils.c";
+  system(compileStr.c_str());
+  string runStr = "./" + executableName + " > " + m_dataFileName;
+  system(runStr.c_str());
+  return ReadTimeDataFromFile(imps.size());  
 }
 
 std::map<unsigned int, vector<double>> RuntimeEvaluator::ReadTimeDataFromFile(int numImpls)

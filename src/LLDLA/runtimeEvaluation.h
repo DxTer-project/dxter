@@ -44,11 +44,19 @@ class RuntimeTest
 
   RuntimeTest(string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize);
   string MakeTestCode(ImplementationMap imps);
+  string MakeTestCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImp);
   string ToCStatements(vector<string> lines);
   string CArgList(vector<string> args);
   string MakeImpFuncs(ImplementationMap imps);
+  string MakeFunc(string funcName, string funcBody);
   string MainFuncCode(ImplementationMap imps);
-  string AllocateArgBuffers();
+  string MainFuncCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImpName);
+  string CorrectnessCheck(ImplementationMap imps, string referenceImpName);
+  string AllocateArgBuffers(string postfix);
+  string FillBuffersWithRandValues(string postfix);
+  string CopyArgBuffersTo(string postfix);
+  vector<string> ArgBuffers(string postfix);
+  string CheckArgBufferDiffs(string refPostfix, string testPostfix);
   string TimingLoop(ImplementationMap imps);
 };
 
@@ -62,6 +70,7 @@ class RuntimeEvaluator
 
   RuntimeEvaluator(string evalDirName);
   std::map<unsigned int, vector<double>> EvaluateImplementations(RuntimeTest test, ImplementationMap imps);
+  std::map<unsigned int, vector<double>> EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap imps, string referenceImp);
   std::map<unsigned int, vector<double>> ReadTimeDataFromFile(int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
 };
