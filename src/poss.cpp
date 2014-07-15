@@ -407,10 +407,13 @@ void Poss::DeleteNode(Node *node)
 }
 
 void Poss::DeleteChildAndCleanUp(Node *output,
-                                 bool goThroughTunnels, bool handleTunnelsAsNormalNodes)
+                                 bool goThroughTunnels, bool handleTunnelsAsNormalNodes,
+				 bool stopAtPossTunnels)
 {
   InvalidateHash();
   bool found = false;
+  if (stopAtPossTunnels && output->IsPossTunnel())
+    return;
   NodeVecConstIter tmp = m_possNodes.begin();
   for(; !found && tmp != m_possNodes.end(); ++tmp)
     if (*tmp == output) {
@@ -446,7 +449,7 @@ void Poss::DeleteChildAndCleanUp(Node *output,
       }
     input->RemoveChild(output,(*iter)->m_num);
     if(input->m_children.empty()) {
-      input->m_poss->DeleteChildAndCleanUp(input);
+      input->m_poss->DeleteChildAndCleanUp(input, goThroughTunnels, handleTunnelsAsNormalNodes, stopAtPossTunnels);
     }
     delete *iter;
   }

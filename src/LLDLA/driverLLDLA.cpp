@@ -112,6 +112,10 @@ unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes,
 	bestImpNum = mit->first;
       }
       cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
+      if (pctPeak > 100) {
+	cout << "pctPeak > 100\n";
+	throw;
+      }
     }
     cout << endl;
   }

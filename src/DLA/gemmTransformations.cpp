@@ -830,7 +830,7 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
   
   LoopTunnel *BtunOut = new LoopTunnel(POSSTUNOUT);
   BtunOut->AddInput(Btun, 0);
-  BtunOut->AddInput(Btun, 0);
+  BtunOut->AddInput(Btun, 1);
   BtunOut->CopyTunnelInfo(Btun);
   
   CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
@@ -1015,7 +1015,7 @@ Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
   CombineSingleIter *comB = splitB->CreateMatchingCombine(0);
   
   CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
-                                                1, gepp, 0);
+							  1, gepp, 0);
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
   Loop *loop = NULL;
@@ -1130,7 +1130,7 @@ void BLISGemmLoopExp::Apply(Node *node) const
   
   LoopTunnel *BtunOut = new LoopTunnel(POSSTUNOUT);
   BtunOut->AddInput(Btun, 0);
-  BtunOut->AddInput(Btun, 0);
+  BtunOut->AddInput(Btun, 1);
   BtunOut->CopyTunnelInfo(Btun);
   
   Combine *comC = splitC->CreateMatchingCombine(1,

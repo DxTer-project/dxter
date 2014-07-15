@@ -157,26 +157,9 @@ void PossTunnel::Prop()
 
 const DataTypeInfo& PossTunnel::DataType(unsigned int num) const
 {
-
-  if (m_tunType == SETTUNIN || m_tunType == POSSTUNOUT) {
-    if (num >= m_inputs.size()) {
-      if (m_tunType == SETTUNIN)
-	cout << "SETTUNIN\n";
-      else
-	cout << "POSSTUNOUT\n";
-      cout << "num >= m_inputs.size()\n";
-      cout << "num = " << num << " and m_inputs.size() = " << m_inputs.size() << endl;
-      throw;
-    }
-    return InputDataType(num); 
-  }
-  else if (m_tunType == POSSTUNIN || m_tunType == SETTUNOUT) {
-    return Input(0)->DataType(num);
-  }
-  else {
-    cout << "bad tun type\n";
+  if (num != 0)
     throw;
-  }
+  return InputDataType(0);
 }
 
 #if TWOD

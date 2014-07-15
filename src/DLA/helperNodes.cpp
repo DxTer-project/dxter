@@ -276,7 +276,10 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   }
 #endif
   m_varName = node->m_varName;
-  m_dataTypeInfo = node->m_dataTypeInfo;
+#if DOLLDLA
+  m_rowStrideVal = node->m_rowStrideVal;
+  m_colStrideVal = node->m_colStrideVal;
+#endif
 }
 
 void InputNode::Prop()

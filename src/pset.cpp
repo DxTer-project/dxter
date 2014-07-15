@@ -272,6 +272,11 @@ void PSet::Prop()
   if(m_hasProped)
     return;
 
+  if (m_posses.empty()) {
+    cout << "I'm empty\n";
+    throw;
+  }
+
   if (m_functionality.empty()) {
     cout << m_posses.size() << endl;
     (*(m_posses.begin())).second->PrintSetConnections();
@@ -1130,7 +1135,7 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 	  && m_ownerPoss
 	  && m_ownerPoss->m_sets.size() > 1)
         {
-          InlinePoss(poss, newPosses);
+	  InlinePoss(poss, newPosses);
 	  m_posses.erase(iter);
           PossMMapIter mapIter = newPosses.begin();
           for(; mapIter != newPosses.end(); ++mapIter)
@@ -1178,8 +1183,6 @@ void PSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 {
   PSet *pset = inliningPoss->m_sets[0];
   
-  //  cout << "inlining " << inliningPoss << endl;
-  
   NodeIntMap tunnelNumMap;
   
   NodeMap setTunnels;
@@ -1210,7 +1213,6 @@ void PSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
   PossMMapIter setIter = pset->m_posses.begin();
   for (; setIter != pset->m_posses.end(); ++setIter) {
     Poss *currPoss = (*setIter).second;
-    //    cout << "currPoss " << currPoss << endl;
     NodeMap map = setTunnels;
     
     //create a new poss for this that has the same poss nodes as poss and currPoss
@@ -1254,8 +1256,7 @@ void PSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
         //        cout << *iter << " is poss tunnel on inlining poss\n";
       }
     }
-    
-    
+
     {
       PSetVecIter setIter = currPoss->m_sets.begin();
       for(; setIter != currPoss->m_sets.end(); ++setIter) {
@@ -1271,31 +1272,46 @@ void PSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     }
     
     newPoss->PatchAfterDuplicate(map);
+
+
+    NodeSet cleanupNodes;
     
     iter = newPoss->m_possNodes.begin();
     for(; iter != newPoss->m_possNodes.end(); ++iter) {
       
       Node *node = *iter;
+
       NodeConnVecIter connIter = node->m_inputs.begin();
       for(; connIter != node->m_inputs.end(); ++connIter) {
         NodeConn *conn = *connIter;
         NodeIntMapIter mapIter = tunnelNumMap.find(conn->m_n);
         if (mapIter != tunnelNumMap.end()) {
+	  if (!conn->m_n->IsPossTunnel(SETTUNOUT))
+	    throw;
           Node *newParent = map[currPoss->OutTun(mapIter->second)->Input(conn->m_num)];
           unsigned int newNum = currPoss->OutTun(mapIter->second)->InputConnNum(conn->m_num);
-          for(unsigned int i = 0; i < newParent->m_children.size(); ++i) {
-            if (newParent->Child(i)->IsPossTunnel(POSSTUNOUT)) {
-              delete newParent->m_children[i];
-              newParent->m_children.erase(newParent->m_children.begin()+i);
-              --i;
-            }
-          }
+	  if (newParent->IsPossTunnel(POSSTUNIN)) {
+	    newParent = newParent->Input(0); // SetTunIn;
+	    newNum = newParent->InputConnNum(0);
+	    newParent = map[newParent->Input(0)];
+	    if (!newParent)
+	      throw;
+	  }
+	  else {
+	    for(unsigned int i = 0; i < newParent->m_children.size(); ++i) {
+	      if (newParent->Child(i)->IsPossTunnel(POSSTUNOUT)) {
+		delete newParent->m_children[i];
+		newParent->m_children.erase(newParent->m_children.begin()+i);
+		--i;
+	      }
+	    }
+	  }
           newParent->AddChild(node, newNum);
           conn->m_num = newNum;
           conn->m_n = newParent;
         }
       }
-      
+
       unsigned int size = node->m_children.size();
       for (unsigned int i = 0; i < size; ++i) {
         NodeConn *conn = node->m_children[i];
@@ -1320,21 +1336,50 @@ void PSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
             cout <<"inTun->Input(0) != setInput\n";
             throw;
           }
-          
-          
+
           connIter = inTun->m_children.begin();
           for(; connIter != inTun->m_children.end(); ++connIter) {
             if ((*connIter)->m_num == setInputNum) {
-              Node *child = map[(*connIter)->m_n];
-              child->ChangeInput1Way(inTun, setInputNum, node, conn->m_num);
+	      if (!(*connIter)->m_n->IsPossTunnel(POSSTUNOUT)) {
+		Node *child = map[(*connIter)->m_n];
+		child->ChangeInput1Way(inTun, setInputNum, node, conn->m_num);
+	      }
             }
           }
           
           delete conn;
         }
+	else if (conn->m_n->IsPossTunnel(POSSTUNOUT) &&
+		 conn->m_n->m_poss == currPoss) {
+	  if (conn->m_n->Child(0)->m_children.empty()) {
+	    node->m_children.erase(node->m_children.begin()+i);
+	    --i;
+	    --size;
+	    delete conn;
+	    if (node->m_children.empty())
+	      cleanupNodes.insert(node);
+	  }
+	  //else handled in above code when updating inputs that are set tun out
+	}
+	else {
+	  if (node->IsPossTunnel(POSSTUNIN) &&
+	      conn->m_n->IsPossTunnel(SETTUNIN)) {
+	    throw;
+	  }
+	}
       }
     }
     
+
+
+    NodeSetIter cleanupIter = cleanupNodes.begin();
+    for(; cleanupIter != cleanupNodes.end(); ++cleanupIter) {
+      Node *node = *cleanupIter;
+      if (!node->m_children.empty())
+	throw;
+      newPoss->DeleteChildAndCleanUp(node,false,false,true);
+    }
+
     iter = inliningPoss->m_inTuns.begin();
     for(; iter != inliningPoss->m_inTuns.end(); ++iter)  {
       Node *node = map[*iter];
@@ -1361,6 +1406,40 @@ void PSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
         throw;
       }
       newPoss->m_outTuns.push_back(node);
+    }
+
+    iter = newPoss->m_outTuns.begin();
+    for(; iter != newPoss->m_outTuns.end(); ++iter) {
+      Node *node = *iter;
+      for(int i = 0; i < node->m_inputs.size(); ++i) {
+	Node *in = node->Input(i);
+	if (tunnelNumMap.find(in) != tunnelNumMap.end())
+	  throw;
+	else if (in->m_poss != node->m_poss)
+	  throw;	  
+      }
+    }
+
+    iter = newPoss->m_possNodes.begin();
+    for(; iter != newPoss->m_possNodes.end(); ++iter) {
+      Node *node = *iter;
+      for(int i = 0; i < node->m_children.size(); ++i) {
+	Node *child = node->Child(i);
+	if (node->m_poss != child->m_poss) {
+	  if (node->IsPossTunnel() && child->IsPossTunnel()) {
+	    PossTunnel *nodeTun = (PossTunnel*)node;
+	    PossTunnel *childTun = (PossTunnel*)child;
+	    if ((nodeTun->m_tunType == POSSTUNOUT && childTun->m_tunType == SETTUNOUT))
+	      continue;
+	    //the following can happen if currPoss has a set
+	    if ((nodeTun->m_tunType == SETTUNIN && childTun->m_tunType == POSSTUNIN))
+	      continue;
+	  }
+	  cout << node << " " << node->GetType() << endl;
+	  cout << "child " << i << " is " << child << " " << child->GetType() << endl;
+	  throw;
+	}
+      }
     }
     
     newPoss->m_transVec = inliningPoss->m_transVec;
@@ -1479,6 +1558,10 @@ void PSet::Cull(CullFunction cullFunc)
 {
   PossMMapIter iter = m_posses.begin();
   unsigned int i = 0;
+  if (iter == m_posses.end()){
+    cout << "starting with nothing\n";
+    throw;
+  }
   while (iter != m_posses.end()) {
     Poss *poss = (*iter).second;
     bool cullIfPossible, doNotCull;
