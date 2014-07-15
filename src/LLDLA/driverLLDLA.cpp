@@ -258,13 +258,9 @@ int main(int argc, const char* argv[])
     std::stringstream ss;
     IndStream optOut(&ss, LLDLASTREAM);
     cout << "TEST\n";
-    startSet->GetCurrPoss()->PrintRoot(optOut, 0, true);
+    startSet->GetCurrPoss()->PrintRoot(optOut, 0, false);
     absImpStr = ss.str();
-    //    absImpStr = ss.rdbuf();
-    /*    std::stringstream ss;
-    ss << optOut.o->rdbuf();
-    absImpStr = ss.str();
-    cout << "Abs Implementation\n" << absImpStr << "\n";*/
+    cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
     cout << "Flops for operation = " << std::to_string(flopCost) << endl;
     time(&start);
   }
