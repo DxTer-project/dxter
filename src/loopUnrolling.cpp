@@ -577,7 +577,7 @@ void ViewMultipleIters::BuildDataTypeCache()
   m_sizes = new Sizes;
 
   m_info = InputDataType(0);
-
+  
   switch (m_partDir) {
   case (PARTDOWN):
     {
@@ -741,7 +741,13 @@ void ViewMultipleIters::UnflattenCore(ifstream &in, SaveInfo &info)
 
 const DataTypeInfo& ViewMultipleIters::DataType(unsigned int num) const
 {
-  return m_info;
+  if (num < m_numIters) {
+    if (!m_sizes)
+      throw;
+    return m_info;
+  }
+  else
+    return InputDataType(0);
 }
 
 
