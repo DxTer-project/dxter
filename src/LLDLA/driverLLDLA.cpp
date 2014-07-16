@@ -1,5 +1,5 @@
 /*
-n    This file is part of DxTer.
+    This file is part of DxTer.
     DxTer is a prototype using the Design by Transformation (DxT)
     approach to program generation.
 
@@ -17,7 +17,7 @@ n    This file is part of DxTer.
 
     You should have received a copy of the GNU General Public License
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
-*/
+n*/
 
 #include "base.h"
 #include "costs.h"
@@ -119,6 +119,8 @@ unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes,
     }
     cout << endl;
   }
+  cout << "Best flops achieved: " << std::to_string(bestFLOPS) << endl;
+  cout << "Best percent of peak: " << std::to_string((bestFLOPS / peakFLOPS) * 100) << endl;
   return bestImpNum;      
 }
 
@@ -317,23 +319,23 @@ int main(int argc, const char* argv[])
   }
 #endif
 
-
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 1;
+  int chunkSize = 3000;
   int numIterations = 1;
   RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
-  std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
+  std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
   cout << "Done evaluating\n";
   unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
   cout << "All implementations printed\n";
+  cout << "Best times";
 
 #endif //DOEMPIRICALEVAL
 

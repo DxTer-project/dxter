@@ -34,6 +34,8 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_defines = defines;
   m_numIterations = numIterations;
   m_chunkSize = chunkSize;
+  m_dataFileName = m_operationName + "_time_data";
+  m_correctTestFileName = m_operationName + "_correctness_test_results";
   m_headers.push_back("#include \"row_stride_lldla_primitives.h\"");
   m_headers.push_back("#include \"gen_stride_lldla_primitives.h\"");
   m_headers.push_back("#include \"utils.h\"");
@@ -72,10 +74,14 @@ string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap imps, str
 string RuntimeTest::MainFuncCode(ImplementationMap imps)
 {
   string prototype = "int main() {\n";
-  string argBufferAllocation = AllocateArgBuffers("");
+  string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
+  argBufferAllocation += AllocateArgBuffers("");
+  argBufferAllocation += "FILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
+  argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
   string timingSetup = "\tint i, j, k;\n\tclock_t begin, end;\n\tdouble exec_time;\n";    
   string mainFunc = prototype + argBufferAllocation + "\n" + timingSetup;
   string timingLoop = TimingLoop(imps);
+  timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
   mainFunc = mainFunc + "\n" + timingLoop + "\n}";
   return mainFunc;
 }
@@ -83,15 +89,19 @@ string RuntimeTest::MainFuncCode(ImplementationMap imps)
 string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImpName)
 {
   string prototype = "int main() {\n";
-  string argBufferAllocation = AllocateArgBuffers("") + "\n";
+  string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
+  argBufferAllocation += AllocateArgBuffers("") + "\n";
   argBufferAllocation += AllocateArgBuffers("_ref") + "\n";
   argBufferAllocation += AllocateArgBuffers("_test") + "\n";
   argBufferAllocation += FillBuffersWithRandValues("") + "\n";
+  argBufferAllocation += "\tFILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
+  argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
   string correctnessCheck = argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
   correctnessCheck += CorrectnessCheck(imps, referenceImpName);
   string timingSetup = "\tint i, j, k;\n\tclock_t begin, end;\n\tdouble exec_time;\n";
   string mainFunc = prototype + correctnessCheck + "\n" + timingSetup;
   string timingLoop = TimingLoop(imps);
+  timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
   mainFunc = mainFunc + "\n" + timingLoop + "\n}";
   return mainFunc;
 }
@@ -142,7 +152,6 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
   string loopBody = "";
   for (i = 1; i <= imps.size(); i++) {
     string opName = m_operationName + "_" + std::to_string(i);
-    //    loopBody += "\tprintf(\"Starting test of " + opName + "\\n\");\n";
     loopBody += "\tfor (j = 0; j < NUM_ITERATIONS; j++) {\n";
     loopBody += "\t\tbegin = clock();\n";
     loopBody += "\t\tfor (k = 0; k < CHUNK_SIZE; k++) {\n";
@@ -152,7 +161,8 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
     loopBody += "\t\texec_time = (double) (end - begin);\n";
     loopBody += "\t\tchar exec_time_str[100];\n";
     loopBody += "\t\tsprintf(exec_time_str, \"%f\\n\", exec_time);\n";
-    loopBody += "\t\tsize_t trash = write(1, exec_time_str, strlen(exec_time_str));\n";
+    loopBody += "\t\tsize_t trash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
+    loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";
     loopBody += "\t}\n";
   }
   return loopBody;
@@ -242,7 +252,6 @@ RuntimeEvaluator::RuntimeEvaluator(string evalDirName)
 {
   m_evalDirName = evalDirName;
   m_numIterations = 0;
-  m_dataFileName = "time_data.txt";
 }
 
 std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations(RuntimeTest test, ImplementationMap imps)
@@ -252,15 +261,16 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations
   string testFileName = executableName + ".c";
   std::ofstream outStream(m_evalDirName + "/" + testFileName);
   outStream << test.MakeTestCode(imps);
-  outStream.close(); 
+  outStream.close();
+  cout << "All implementations written to files\n";
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
   string compileStr = "gcc -O3 -mfpmath=sse -msse3 -finline-functions -o " +  executableName;
   compileStr += " " + testFileName + " utils.c";
   system(compileStr.c_str());
-  string runStr = "./" + executableName + " > " + m_dataFileName;
+  string runStr = "./" + executableName;
   system(runStr.c_str());
-  return ReadTimeDataFromFile(imps.size());
+  return ReadTimeDataFromFile(test.m_dataFileName, imps.size());
 }
 
 std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap imps, string referenceImp)
@@ -271,19 +281,20 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations
   std::ofstream outStream(m_evalDirName + "/" + testFileName);
   outStream << test.MakeTestCodeWithCorrectnessCheck(imps, referenceImp);
   outStream.close(); 
+  cout << "All implementations written to files\n";
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
   string compileStr = "gcc -O3 -mfpmath=sse -msse3 -finline-functions -o " +  executableName;
   compileStr += " " + testFileName + " utils.c";
   system(compileStr.c_str());
-  string runStr = "./" + executableName + " > " + m_dataFileName;
+  string runStr = "./" + executableName;
   system(runStr.c_str());
-  return ReadTimeDataFromFile(imps.size());  
+  return ReadTimeDataFromFile(test.m_dataFileName, imps.size());  
 }
 
-std::map<unsigned int, vector<double>> RuntimeEvaluator::ReadTimeDataFromFile(int numImpls)
+std::map<unsigned int, vector<double>> RuntimeEvaluator::ReadTimeDataFromFile(string fileName, int numImpls)
 {
-  std::ifstream dataStream(m_dataFileName);
+  std::ifstream dataStream(fileName);
   std::stringstream buffer;
   buffer << dataStream.rdbuf();
   string timeData = buffer.str();

@@ -37,6 +37,8 @@ class RuntimeTest
   vector<string> m_argNames;
   vector<string> m_headers;
   string m_operationName;
+  string m_dataFileName;
+  string m_correctTestFileName;
   vector<string> m_operationArgs;
   vector<string> m_argDeclarations;
   int m_numIterations;
@@ -65,12 +67,11 @@ class RuntimeEvaluator
 {
  public:
   string m_evalDirName;
-  string m_dataFileName;
   int m_numIterations;
 
   RuntimeEvaluator(string evalDirName);
   std::map<unsigned int, vector<double>> EvaluateImplementations(RuntimeTest test, ImplementationMap imps);
   std::map<unsigned int, vector<double>> EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap imps, string referenceImp);
-  std::map<unsigned int, vector<double>> ReadTimeDataFromFile(int numImpls);
+  std::map<unsigned int, vector<double>> ReadTimeDataFromFile(string fileName, int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
 };
