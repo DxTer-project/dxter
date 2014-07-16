@@ -1,5 +1,5 @@
 /*
-    This file is part of DxTer.
+n    This file is part of DxTer.
     DxTer is a prototype using the Design by Transformation (DxT)
     approach to program generation.
 
@@ -112,10 +112,10 @@ unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes,
 	bestImpNum = mit->first;
       }
       cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
-      if (pctPeak > 100) {
+      /*      if (pctPeak > 100) {
 	cout << "pctPeak > 100\n";
 	throw;
-      }
+	}*/
     }
     cout << endl;
   }
@@ -335,6 +335,7 @@ int main(int argc, const char* argv[])
   std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
   cout << "Done evaluating\n";
   unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
+  cout << "All implementations printed\n";
 
 #endif //DOEMPIRICALEVAL
 
