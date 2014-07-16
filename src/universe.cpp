@@ -188,6 +188,8 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
     cout << "\t\t\t" << TotalCount() << " impl's\n";
   }
 #endif
+
+  CurrPhase = phase;
   
   ClearFullyExpanded();
 
@@ -197,7 +199,6 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
   unsigned int count = 0;
   double prevAlgs = TotalCount();
   bool foundNew = true;
-  CurrPhase = phase;
   while ( foundNew ) {
     time_t start, end;
     time(&start);
