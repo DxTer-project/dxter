@@ -834,7 +834,7 @@ void PSet::CombineAndRemoveTunnels()
   
 }
 
-void PSet::Simplify(const TransMap &simplifiers)
+void PSet::Simplify(const TransMap &simplifiers, bool recursive)
 {
   //BAM par
   PossMMapIter iter;
@@ -852,7 +852,7 @@ void PSet::Simplify(const TransMap &simplifiers)
 	++j;
       }
       Poss *poss = (*iter).second;
-      poss->Simplify(simplifiers);
+      poss->Simplify(simplifiers, recursive);
     }
   }
   iter = m_posses.begin();

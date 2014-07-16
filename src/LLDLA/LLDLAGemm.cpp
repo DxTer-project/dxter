@@ -174,21 +174,23 @@ string LLDLAGemmToPrim::GetType() const
 
 bool LLDLAGemmToPrim::CanApply(const Node *node) const
 {
-  if (node->GetNodeClass() == Gemm::GetClass()) {
-    const Gemm *gemm = (Gemm*)node;
-    if (gemm->m_transA != NORMAL || gemm->m_transB != NORMAL)
-      return false;
-    if (gemm->GetLayer() != m_fromLayer)
-      return false;
-
-    if ((*(gemm->GetInputM(2)) <= LLDLA_MU) &&
-	(*(gemm->GetInputN(2)) <= LLDLA_MU) &&
-	(*(gemm->GetInputN(0)) <= LLDLA_MU))
-      {
-	return true;
-      }
-    else
-      return false;
+  if (CurrPhase == LLDLAPRIMPHASE) {
+    if (node->GetNodeClass() == Gemm::GetClass()) {
+      const Gemm *gemm = (Gemm*)node;
+      if (gemm->m_transA != NORMAL || gemm->m_transB != NORMAL)
+	return false;
+      if (gemm->GetLayer() != m_fromLayer)
+	return false;
+      
+      if ((*(gemm->GetInputM(2)) <= LLDLA_MU) &&
+	  (*(gemm->GetInputN(2)) <= LLDLA_MU) &&
+	  (*(gemm->GetInputN(0)) <= LLDLA_MU))
+	{
+	  return true;
+	}
+      else
+	return false;
+    }
   }
   return false;
 }
