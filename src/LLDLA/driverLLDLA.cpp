@@ -39,9 +39,9 @@ n    This file is part of DxTer.
 
 #define DOEMPIRICALEVAL 1
 
-#define DOLOOPUNROLLING 0
-#define DO2MUTRANSFORMATIONS 0
-#define DO3MUTRANSFORMATIONS 0
+#define DOLOOPUNROLLING 1
+#define DO2MUTRANSFORMATIONS 1
+#define DO3MUTRANSFORMATIONS 1
 
 #include <sstream>
 
@@ -324,13 +324,13 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 5;
-  int numIterations = 10;
+  int chunkSize = 1;
+  int numIterations = 1;
   RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
-  std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
+  std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementations(rtest, ImpStrMap(&uni));
   cout << "Done evaluating\n";
   unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
   cout << "All implementations printed\n";

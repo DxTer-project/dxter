@@ -141,10 +141,12 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
   int i;
   string loopBody = "";
   for (i = 1; i <= imps.size(); i++) {
+    string opName = m_operationName + "_" + std::to_string(i);
+    //    loopBody += "\tprintf(\"Starting test of " + opName + "\\n\");\n";
     loopBody += "\tfor (j = 0; j < NUM_ITERATIONS; j++) {\n";
     loopBody += "\t\tbegin = clock();\n";
     loopBody += "\t\tfor (k = 0; k < CHUNK_SIZE; k++) {\n";
-    loopBody += "\t\t\t" + m_operationName + "_" + std::to_string(i) + "(" + CArgList(m_argNames) + ");\n";
+    loopBody += "\t\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
     loopBody += "\t\t}\n";
     loopBody += "\t\tend = clock();\n";
     loopBody += "\t\texec_time = (double) (end - begin);\n";
