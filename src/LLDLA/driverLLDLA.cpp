@@ -53,8 +53,8 @@
 #include "loopUnrolling.h"
 
 Size one = 1;
-Size smallSize = 10;
-Size medSize = 100;
+Size smallSize = 12;
+Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
@@ -394,16 +394,16 @@ PSet* GemmExample()
 
 PSet* DoubleGemmExample()
 {
-  InputNode *Ain = new InputNode("A input",  smallSize, smallSize, "A", 
+  InputNode *Ain = new InputNode("A input",  medSize, smallSize, "A", 
 				 smallSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", smallSize, smallSize, "B", 
-				 smallSize, 1,
+  InputNode *Bin = new InputNode("B input", smallSize, medSize, "B", 
+				 medSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  smallSize, smallSize, "C", 
-				 smallSize, 1,
+  InputNode *Cin = new InputNode("C input",  medSize, medSize, "C", 
+				 medSize, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
@@ -442,3 +442,5 @@ PSet* DoubleGemmExample()
 
 
 #endif //DOLLDLA
+
+//  LocalWords:  DoubleGemmExample
