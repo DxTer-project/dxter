@@ -59,7 +59,7 @@ class PSet
   void PatchAfterDuplicate(NodeMap &map);
   void CombineAndRemoveTunnels();
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
-  void Simplify(const TransMap &simplifiers);
+  void Simplify(const TransMap &simplifiers, bool recursive = false);
   //  void RemoveDups();
   void ClearFullyExpanded();
   virtual bool CanMerge(PSet *pset) const;

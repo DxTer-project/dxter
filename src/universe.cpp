@@ -195,6 +195,11 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
 
   if (m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers))
     m_pset->BuildDataTypeCache();
+  else if (M_globSimplifiers.empty() && !M_simplifiers.empty()) {
+    if (CurrPhase == LLDLAPRIMPHASE) {
+      m_pset->Simplify(M_simplifiers, true);
+    }
+  }
 
   unsigned int count = 0;
   double prevAlgs = TotalCount();

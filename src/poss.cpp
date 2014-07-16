@@ -557,7 +557,7 @@ void Poss::AddPSet(PSet *pset)
   }
 }
 
-bool Poss::Simplify(const TransMap &simplifiers)
+bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
 {
   bool didSomething = false;
   for(unsigned int nodeIdx = 0; nodeIdx < m_possNodes.size(); ++nodeIdx) {
@@ -578,6 +578,12 @@ bool Poss::Simplify(const TransMap &simplifiers)
           break;
         }
       }
+    }
+  }
+  if (recursive) {
+    PSetVecIter iter = m_sets.begin();
+    for(; iter != m_sets.end(); ++iter) {
+      (*iter)->Simplify(simplifiers, recursive);
     }
   }
   return didSomething;

@@ -87,7 +87,7 @@ class Poss
   virtual void AddPSet(PSet *pset);
   bool ContainsNonLoopCode() const;
   bool RemoveLoops(bool *doneSomething);
-  bool Simplify(const TransMap &simplifiers);
+  bool Simplify(const TransMap &simplifiers, bool recursive = false);
   void PrintTransVec();
   void RemoveConnectionToSet();
   void ExpandTunnels();

@@ -153,16 +153,6 @@ void AddTrans()
   //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
   Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, USELLDLAMU), LLDLALOOPPHASE);
 
-
-  //Changes Gemm with transposition to non-transposed version use Transpose nodes
-  Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(LLDLAMIDLAYER), LLDLAPRIMPHASE);
-
-  //Replaces a Gemm node with a LLDLAGemm node
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLAPRIMPHASE);
-
-  //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, USELLDLAMU), LLDLAPRIMPHASE);
-
 #if DOLOOPUNROLLING
   Universe::AddTrans(SplitSingleIter::GetClass(), 
   		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
@@ -176,6 +166,14 @@ void AddTrans()
 
 void AddSimplifiers()
 { 
+  //Replaces a Gemm node with a LLDLAGemm node
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), SIMP);
+
+  //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
+  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, USELLDLAMU), SIMP);
+
+  //Changes Gemm with transposition to non-transposed version use Transpose nodes
+  Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(LLDLAMIDLAYER), SIMP);
 }
 
 void Usage()
