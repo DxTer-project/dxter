@@ -169,12 +169,13 @@ string PartDirToStr(PartDir dir)
 }
 
 Loop::Loop()
-: PSet(), m_type(UNKNOWNLOOP)
+: PSet(), 
+#if TWOD
+ m_dim(BADDIM),
+#endif
+  m_type(UNKNOWNLOOP)
 #if DOBLIS
 , m_comm(CORECOMM)
-#endif
-#if TWOD
-, m_dim(BADDIM)
 #endif
 {
   AssignNewLabel();
@@ -182,13 +183,15 @@ Loop::Loop()
 }
 
 Loop::Loop(LoopType type)
-: m_type(type)
+: 
+#if TWOD
+  m_dim(BADDIM),
+#endif
+  m_type(type)
 #if DOBLIS
 , m_comm(CORECOMM)
 #endif
-#if TWOD
-, m_dim(BADDIM)
-#endif
+
 {
 #if DOELEM
   if (m_type == ELEMLOOP)
@@ -200,13 +203,15 @@ Loop::Loop(LoopType type)
 }
 
 Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
-: PSet(poss), m_type(type), m_bsSize(bsSize)
-#if DOBLIS
-, m_comm(CORECOMM)
-#endif
+: PSet(poss)
 #if TWOD
 , m_dim(BADDIM)
 #endif
+, m_type(type), m_bsSize(bsSize)
+#if DOBLIS
+, m_comm(CORECOMM)
+#endif
+
 {
   unsigned int i;
   for(i = 0; i < poss->m_inTuns.size(); ++i) {
@@ -618,7 +623,7 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
     string bs = "bs" + loopLevel;
     
     SplitBase *splitBase = GetControl();
-    if (splitBase->GetNodeClass() != SplitSingeIter::GetClass())
+    if (splitBase->GetNodeClass() != SplitSingleIter::GetClass())
       throw;
     SplitSingleIter *split = (SplitSingleIter*)splitBase;
     

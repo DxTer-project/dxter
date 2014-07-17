@@ -370,7 +370,7 @@ void Universe::Cull()
   m_pset->Cull(CurrPhase);
 }
 
-void Universe::PrintCosts(const ImpMap &impTimes)
+void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
 {
   time_t start,end;
   ofstream out;
@@ -410,7 +410,7 @@ void Universe::PrintCosts(const ImpMap &impTimes)
       while (keepGoing) {
 	TransConstVec transList;
 	poss->GetCurrTransList(transList);
-	ImpMapConstIter found = impTimes.find(graphNum);
+	ImplementationRuntimeMapConstIter found = impTimes.find(graphNum);
 	if (found == impTimes.end())
 	  throw;
 	Cost tot = (Cost)MinTime(found->second);

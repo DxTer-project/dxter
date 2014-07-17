@@ -1429,8 +1429,11 @@ PSet* HegstL5Example()
   return outerSet;
 #else
   throw;
+  return NULL
 #endif
 #endif
+    throw;
+  return NULL;
 }
 
 PSet* GemmExample()

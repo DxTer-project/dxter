@@ -231,7 +231,7 @@ Cost GetRedistCost<D_VC_STAR>(DistType srcType, Size m, Size n)
   case (D_STAR_MC_H):
     return INFINITY;
   case (D_MR_STAR):
-      return CopyCost(ceil((double)m/P), n, R, ONE); + GetRedistCost<D_VC_STAR>(D_VR_STAR,m,n);
+      return CopyCost(ceil((double)m/P), n, R, ONE) + GetRedistCost<D_VC_STAR>(D_VR_STAR,m,n);
     default:
       throw;
   }

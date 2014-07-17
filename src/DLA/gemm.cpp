@@ -212,7 +212,6 @@ void Gemm::Prop()
       }
     }
 #endif
-    double m, n, p;
     switch(GetLayer()) {
       case(ABSLAYER):
 	m_cost = 2 * GetInputM(0)->SumProds111(*GetInputN(1), *GetInputM(1));
@@ -319,7 +318,7 @@ void LocalGemmTransUpdate(DistType t0, DistType t1, Trans &transA, Trans &transB
     throw;
   }
   if (t0 == D_STAR_STAR) {
-    transB = transB;
+    //    transB = transB;
   }
   else if (t0 == D_MC_MR) {
     if (transB == NORMAL) {

@@ -44,7 +44,7 @@ Her2kProps::Her2kProps(Tri tri, Trans trans, Coef alpha, Coef beta, Type type)
   
 }
 
-void Her2kProps::Duplicate(const Her2kProps *her2k)
+void Her2kProps::DuplicateProps(const Her2kProps *her2k)
 {
   m_tri = her2k->m_tri;
   m_trans = her2k->m_trans;
@@ -170,7 +170,7 @@ void Her2k::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   const Her2k *her2k = (Her2k*)orig;
   DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
-  Her2kProps::Duplicate(her2k);
+  Her2kProps::DuplicateProps(her2k);
 }
 
 NodeType Her2k::GetType() const
@@ -405,7 +405,7 @@ Phase Tri2k::MaxPhase() const
 void Tri2k::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   const Tri2k *tri2k = (Tri2k*)orig;
-  Her2kProps::Duplicate(tri2k);
+  Her2kProps::DuplicateProps(tri2k);
   DLAOp<5,1>::Duplicate(orig,shallow,possMerging);
 }
 

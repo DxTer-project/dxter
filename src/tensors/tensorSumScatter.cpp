@@ -366,7 +366,7 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 
 
     Dim redDim = srcNumDims;
-    for (Dim dim = srcNumDims-1; dim >= 0; --dim) {
+    for (int dim = srcNumDims-1; dim >= 0; --dim) {
       if (m_srcType.m_dists[dim] == sumDims) {
 	redDim = dim;
 	break;

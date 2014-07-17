@@ -126,11 +126,11 @@ m_msize(NAN), m_nsize(NAN)
 #if (DODM&&TWOD)
 InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 : m_type(type),
-  m_msize(NAN), m_nsize(NAN), 
+  m_dataTypeInfo(dist),
+  m_msize(NAN), m_nsize(NAN)
 #if DODM
-  m_mlsize(NULL), m_nlsize(NULL),
+, m_mlsize(NULL), m_nlsize(NULL)
 #endif
-  m_dataTypeInfo(dist)
 {
   m_msize.AddRepeatedSizes(m,1,1);
   m_nsize.AddRepeatedSizes(n,1,1);

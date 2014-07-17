@@ -896,7 +896,7 @@ bool ReuseTrsmPacking::CanApply(const Node *node) const
   if (setTun->m_inputs.size() > 1)
     return false;
   PossTunnel *possTun = (PossTunnel*)(setTun->Input(0));
-  if (possTun->GetNodeClass() != Combine::GetClass())
+  if (possTun->GetNodeClass() != CombineSingleIter::GetClass())
     return false;
   //possTun should be a combine of X in some direction and X_1 should be attached to TrsmBP's
   Node *source = possTun->Input(1);

@@ -78,9 +78,9 @@ ImplementationMap ImpStrMap(Universe *uni)
   return impMap;
 }
 
-void PrintImpMap(ImpMap &impTimes)
+void PrintImpMap(ImplementationRuntimeMap &impTimes)
 {
-  ImpMapIter mit;
+  ImplementationRuntimeMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     TimeVecIter vit;
     cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
@@ -91,7 +91,7 @@ void PrintImpMap(ImpMap &impTimes)
   }
 }
 
-unsigned int PrintImpMapInFlops(ImpMap &impTimes, double flopCost, int chunkSize) {
+unsigned int PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost, int chunkSize) {
   /***************************************************************************
    * WARNING: These numbers are processor specific to Dillon's machine in GDC
    ***************************************************************************/
@@ -99,7 +99,7 @@ unsigned int PrintImpMapInFlops(ImpMap &impTimes, double flopCost, int chunkSize
   double peakFLOPS = 30e9;
   unsigned int bestImpNum = 0;
   double bestFLOPS = 0;
-  ImpMapIter mit;
+  ImplementationRuntimeMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     TimeVecIter vit;
     cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
@@ -245,7 +245,7 @@ int main(int argc, const char* argv[])
   Universe uni;
   time_t start, start2, end;
   uni.PrintStats();
-  Cost flopCost;
+  Cost flopCost = 0;
   string absImpStr;
   if (algNum==0) {
     time(&start);
@@ -339,7 +339,7 @@ int main(int argc, const char* argv[])
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
-  ImpMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
+  ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
   cout << "Done evaluating\n";
   unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
   cout << "All implementations printed\n";

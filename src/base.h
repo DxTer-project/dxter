@@ -364,9 +364,9 @@ typedef CostVec::iterator CostVecIter;
 typedef vector<double> TimeVec;
 typedef TimeVec::iterator TimeVecIter;
 typedef TimeVec::const_iterator TimeVecConstIter;
-typedef map<unsigned int, TimeVec> ImpMap;
-typedef ImpMap::iterator ImpMapIter;
-typedef ImpMap::const_iterator ImpMapConstIter;
+typedef map<unsigned int, TimeVec> ImplementationRuntimeMap;
+typedef ImplementationRuntimeMap::iterator ImplementationRuntimeMapIter;
+typedef ImplementationRuntimeMap::const_iterator ImplementationRuntimeMapConstIter;
 
 double MinTime(const TimeVec &times);
 

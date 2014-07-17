@@ -73,7 +73,7 @@ class Universe
   void Prop();
   void PrintAll(int algNum, unsigned int optGraph = 0);
   void PrintBest();
-  void PrintCosts(const ImpMap &impTimes);
+  void PrintCosts(const ImplementationRuntimeMap &impTimes);
   unsigned int TotalCount() const;
   void ClearFullyExpanded();
   void PrintStats();

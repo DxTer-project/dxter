@@ -1126,18 +1126,18 @@ void BLISGemmLoopExp::Apply(Node *node) const
   gebp->AddInput(Btun, 0);
   gebp->AddInput(splitC, 1);
   
-  Combine *comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter *comA = splitA->CreateMatchingCombine(0);
   
   LoopTunnel *BtunOut = new LoopTunnel(POSSTUNOUT);
   BtunOut->AddInput(Btun, 0);
   BtunOut->AddInput(Btun, 1);
   BtunOut->CopyTunnelInfo(Btun);
   
-  Combine *comC = splitC->CreateMatchingCombine(1,
+  CombineSingleIter *comC = splitC->CreateMatchingCombine(1,
                                                 1, gebp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
-  Loop *loop = new Loop(BLISLOOP, loopPoss, bs);
+  Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
 
   loop->SetDimName(DIMM);
   

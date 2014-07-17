@@ -1623,22 +1623,23 @@ Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
   AtunOut->AddInput(Atun, 0);
   AtunOut->CopyTunnelInfo(Atun);
   
+#if DOELEM
   CombineSingleIter *comB = splitB->CreateMatchingCombine(1,
                                                 1, trxm, 0);
   
   Poss *loopPoss = new Poss(2, AtunOut, comB);
   Loop *loop;
-#if DOELEM
   if (layer == DMLAYER)
     loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
+  return loop;
 #else
   throw;
 #endif
   //    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
   
-  return loop;
+
 }
 
 Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,

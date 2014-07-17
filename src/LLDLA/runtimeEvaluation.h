@@ -26,7 +26,6 @@
 using namespace std;
 
 typedef std::map<unsigned int, string> ImplementationMap;
-typedef std::map<unsigned int, vector<double>> ImplementationRuntimeMap;
 typedef std::pair<unsigned int, string> NumImplementationPair;
 typedef std::pair<unsigned int, vector<double>> NumRuntimePair;
 
