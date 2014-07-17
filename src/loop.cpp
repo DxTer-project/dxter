@@ -790,8 +790,8 @@ void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
   if (needMin)
     *out << loopLevel << " = min( " << lcv << ", ";
   else
-    *out << loopLevel << " = ( " 
-	 << BSSizeToVarName(m_bsSize) << " );\n";
+    *out << loopLevel << " = ( ";
+  *out << BSSizeToVarName(m_bsSize) << " );\n";
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);
