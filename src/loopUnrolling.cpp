@@ -675,33 +675,19 @@ void ViewMultipleIters::PrintCode(IndStream &out)
     *out << i << " = " << inName;
 
     if (i) {
-      *out << " + ";
+      *out << " + " << std::to_string(i) << " * ";
       if (m_partDir == PARTDOWN) {
 	if (!IsUnitStride(type.m_rowStride))
 	  *out << type.m_rowStrideVar << " * ";
-	if (m_bs == USELLDLAMU)
-	  *out << MU_VAR_NAME << ";\n";
-	else if (m_bs == USELLDLA2MU)
-	  *out << "2 * " << MU_VAR_NAME << ";\n";
-	else if (m_bs == USELLDLA3MU)
-	  *out << "3 * " << MU_VAR_NAME << ";\n";
-	else
-	  throw;
       }
       else if (m_partDir == PARTRIGHT) {
 	if (!IsUnitStride(type.m_colStride))
 	  *out << type.m_colStrideVar << " * ";
-	if (m_bs == USELLDLAMU)
-	  *out << MU_VAR_NAME << ";\n";
-	else if (m_bs == USELLDLA2MU)
-	  *out << "2 * " << MU_VAR_NAME << ";\n";
-	else if (m_bs == USELLDLA3MU)
-	  *out << "3 * " << MU_VAR_NAME << ";\n";
-	else
-	  throw;
       }
       else
 	throw;
+      *out << BSSizeToVarName(m_bs);
+
     }
     *out << ";\n";
   }
