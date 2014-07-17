@@ -51,9 +51,9 @@ m_valB(valB),
 m_valC(valC),
 m_type(type),
  m_coeff(coeff),
- m_parFactor(parFactor),
  m_repeatNum(0),
- m_repeats(repeats)
+ m_repeats(repeats),
+ m_parFactor(parFactor)
 {
   if (m_parFactor == 0)
     throw;
