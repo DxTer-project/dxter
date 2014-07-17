@@ -2242,6 +2242,18 @@ void Poss::ClearFullyExpanded()
   m_fullyExpanded = false;
 }
 
+void Poss::GetCurrTransList(TransConstVec &transList)
+{
+  TransVecIter iter = m_transVec.begin();
+  for(; iter != m_transVec.end(); ++iter) {
+    transList.push_back(*iter);
+  }
+  PSetVecIter iter2 = m_sets.begin();
+  for(; iter2 != m_sets.end(); ++iter2) {
+    (*iter2)->GetCurrPoss()->GetCurrTransList(transList);
+  }
+}
+
 Cost Poss::EvalCurr(TransConstVec &transList)
 {
   unsigned int numPSets = m_sets.size();
@@ -2258,6 +2270,7 @@ Cost Poss::EvalCurr(TransConstVec &transList)
     double cost = node->GetCost();
     tot += cost;
   }
+
   for(unsigned int i = 0; i < numPSets; ++i) {
     tot += m_sets[i]->EvalCurrPoss(transList);
   }

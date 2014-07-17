@@ -68,6 +68,7 @@ class Poss
   virtual void DeleteNode(Node *node);
   virtual Cost EvalCurr(TransConstVec &transList);
   virtual Cost EvalAndSetBest();
+  void GetCurrTransList(TransConstVec &transList);
   virtual void Print(IndStream &out, unsigned int &graphNum);
   virtual void EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph, unsigned int &optGraph, Cost &optCost);
   virtual void PrintRoot(IndStream &out, unsigned int whichGraph, bool currOnly);

@@ -27,6 +27,7 @@
 #include "helperNodes.h"
 #include "loop.h"
 #include "critSect.h"
+#include <iomanip>
 
 //Print out code for all generated implementations
 // This takes a while for large search spaces
@@ -365,6 +366,77 @@ void Universe::Prop()
 void Universe::Cull()
 {
   m_pset->Cull(CurrPhase);
+}
+
+void Universe::PrintCosts(const ImpMap &impTimes)
+{
+  time_t start,end;
+  ofstream out;
+
+#ifdef MATLAB
+    out.open("totalCostOutput.m");
+#else
+    throw;
+    out.open("totalCostOutput.r");
+#endif
+    IndStream costOut(&out, OTHERSTREAM);
+    time(&start);
+
+#ifdef MATLAB
+    *costOut << "transMap = containers.Map('KeyType','uint64','ValueType','char');\n";
+    TransPtrMapIter iter2 = M_transNames.begin();
+    for(; iter2 != M_transNames.end(); ++iter2) {
+      *costOut << "transMap(" << (size_t)(iter2->first) << ") = '" << iter2->second << "';\n";
+    }
+    
+    *costOut << "cost = zeros(" << TotalCount() << ",1);\n";
+    *costOut << "refs = cell( [" << TotalCount() << " 1]);\n";
+#else
+    *costOut << "cost = array(0,dim=c(" << TotalCount() << ",1));\n";
+#endif
+    
+    unsigned int graphNum = 0;
+    ++graphNum;
+    PossMMapIter iter = m_pset->m_posses.begin();
+    for(; iter != m_pset->m_posses.end(); ++iter) {
+      Poss *poss = (*iter).second;
+
+      bool keepGoing = true;
+  
+      poss->ClearCurrPoss();
+  
+      while (keepGoing) {
+	TransConstVec transList;
+	poss->GetCurrTransList(transList);
+	ImpMapConstIter found = impTimes.find(graphNum);
+	if (found == impTimes.end())
+	  throw;
+	Cost tot = (Cost)MinTime(found->second);
+	
+	*costOut << "cost(" << graphNum << ") = "
+		 << setprecision(15) << tot << ";\n";
+	
+	*costOut << "refs(" << graphNum << ") = {[ ";
+	TransConstVecIter iter = transList.begin();
+	for(; iter != transList.end(); ++iter) {
+	  *costOut << (size_t)(*iter) << " ";
+	}
+	*costOut << "]};\n";
+	if (!(graphNum % 1000)) {
+	  *costOut << "'loaded " << graphNum << "'\n";
+	}
+	++graphNum;
+	keepGoing = !poss->IncrementCurrPoss();
+      }      
+    }
+    
+    *costOut << "numAlgs = " << TotalCount() << endl;
+
+    out.close();
+    time(&end);
+    cout << "\tCost printing took " << difftime(end,start) << " seconds\n";
+    cout << "Done printing\n";
+    cout.flush();
 }
 
 void Universe::PrintAll(int algNum, unsigned int optGraph)
