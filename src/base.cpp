@@ -1017,4 +1017,5 @@ double MinTime(const TimeVec &times)
     else if (minVal > *iter)
       minVal = *iter;
   }
+  return minVal;
 }
