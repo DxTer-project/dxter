@@ -361,6 +361,16 @@ typedef PtrMap::const_iterator PtrMapConstIter;
 //typedef vector<Size> Sizes;
 typedef vector<Cost> CostVec;
 typedef CostVec::iterator CostVecIter;
+typedef vector<double> TimeVec;
+typedef TimeVec::iterator TimeVecIter;
+typedef TimeVec::const_iterator TimeVecConstIter;
+typedef map<unsigned int, TimeVec> ImpMap;
+typedef ImpMap::iterator ImpMapIter;
+typedef ImpMap::const_iterator ImpMapConstIter;
+
+double MinTime(const TimeVec &times);
+
+
 
 #if DOTENSORS
 typedef vector<DistType*> DistTypeVec;

@@ -38,6 +38,7 @@ n*/
 #if DOLLDLA
 
 #define DOEMPIRICALEVAL 1
+#define PRINTCOSTS 1
 
 #define DOLOOPUNROLLING 1
 #define DO2MUTRANSFORMATIONS 1
@@ -77,11 +78,11 @@ ImplementationMap ImpStrMap(Universe *uni)
   return impMap;
 }
 
-void PrintImpMap(std::map<unsigned int, vector<double>> impTimes)
+void PrintImpMap(ImpMap &impTimes)
 {
-  std::map<unsigned int, vector<double>>::iterator mit;
+  ImpMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
-    std::vector<double>::iterator vit;
+    TimeVecIter vit;
     cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
     for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
       cout << std::to_string(*vit) << endl;
@@ -90,7 +91,7 @@ void PrintImpMap(std::map<unsigned int, vector<double>> impTimes)
   }
 }
 
-unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes, double flopCost, int chunkSize) {
+unsigned int PrintImpMapInFlops(ImpMap &impTimes, double flopCost, int chunkSize) {
   /***************************************************************************
    * WARNING: These numbers are processor specific to Dillon's machine in GDC
    ***************************************************************************/
@@ -98,9 +99,9 @@ unsigned int PrintImpMapInFlops(std::map<unsigned int, vector<double>> impTimes,
   double peakFLOPS = 30e9;
   unsigned int bestImpNum = 0;
   double bestFLOPS = 0;
-  std::map<unsigned int, vector<double>>::iterator mit;
+  ImpMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
-    std::vector<double>::iterator vit;
+    TimeVecIter vit;
     cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
     for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
       double totalFlops = flopCost * chunkSize;
@@ -156,8 +157,15 @@ void AddTrans()
   Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, USELLDLAMU), LLDLALOOPPHASE);
 
 #if DOLOOPUNROLLING
+#if DO2MUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(), 
   		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
+#endif //DO2MUTRANSFORMATIONS
+
+#if DO3MUTRANSFORMATIONS
+  Universe::AddTrans(SplitSingleIter::GetClass(), 
+  		     new FullyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
+#endif //DO3MUTRANSFORMATIONS
 #endif
   
   // Vector dot product transform
@@ -331,7 +339,7 @@ int main(int argc, const char* argv[])
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
-  std::map<unsigned int, vector<double>> impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
+  ImpMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
   cout << "Done evaluating\n";
   unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
   cout << "All implementations printed\n";
@@ -343,6 +351,10 @@ int main(int argc, const char* argv[])
   uni.PrintAll(algNum, best);
 #else
   uni.PrintBest();
+#endif
+
+#if PRINTCOSTS  
+  uni.PrintCosts(impMap);
 #endif
 
   /*  if (whichGraph <= 0)

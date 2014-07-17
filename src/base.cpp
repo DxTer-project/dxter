@@ -1005,3 +1005,16 @@ void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM,
   }
 }
 #endif
+
+
+double MinTime(const TimeVec &times)
+{
+  double minVal = -1;
+  TimeVecConstIter iter = times.begin();
+  for(; iter != times.end(); ++iter) {
+    if (minVal < 0)
+      minVal = *iter;
+    else if (minVal > *iter)
+      minVal = *iter;
+  }
+}
