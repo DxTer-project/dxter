@@ -117,19 +117,19 @@ string RuntimeTest::CorrectnessCheck(ImplementationMap imps, string referenceImp
   for (i = 1; i <= imps.size(); i++) {
     correctnessCheck += CopyArgBuffersTo("_test") + "\n\t";
     correctnessCheck += m_operationName + "_" + std::to_string(i) + "(" + CArgList(testBuffers) + ");\n";
-    correctnessCheck += CheckArgBufferDiffs("_ref", "_test") + "\n";
+    correctnessCheck += CheckArgBufferDiffs("_ref", "_test",std::to_string(i)) + "\n";
   }
   return correctnessCheck;
 }
 
-string RuntimeTest::CheckArgBufferDiffs(string refPostfix, string testPostfix)
+string RuntimeTest::CheckArgBufferDiffs(string refPostfix, string testPostfix, string testName)
 {
   vector<string>::iterator argIter;
   vector<string> diffChecks;
   for (argIter = m_argNames.begin(); argIter != m_argNames.end(); ++argIter) {
     string refBuf = *argIter + refPostfix;
     string testBuf = *argIter + testPostfix;
-    string diffCheck = "\ttest_buffer_diff(BUF_SIZE, " + refBuf + ", " + testBuf + ", \"Sanity Check\");";
+    string diffCheck = "\ttest_buffer_diff(BUF_SIZE, " + refBuf + ", " + testBuf + ", \"Sanity Check " + testName + "\");";
     diffChecks.push_back(diffCheck);
   }
   return ToCStatements(diffChecks);

@@ -58,7 +58,7 @@ class RuntimeTest
   string FillBuffersWithRandValues(string postfix);
   string CopyArgBuffersTo(string postfix);
   vector<string> ArgBuffers(string postfix);
-  string CheckArgBufferDiffs(string refPostfix, string testPostfix);
+  string CheckArgBufferDiffs(string refPostfix, string testPostfix, string testName);
   string TimingLoop(ImplementationMap imps);
 };
 
