@@ -173,7 +173,6 @@ class RedistNode : public DLANode
   bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  virtual bool IsRedistNode() const {return true;}
   virtual NodeType GetType() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);

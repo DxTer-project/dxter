@@ -885,26 +885,6 @@ bool FoundInNodeVec(const NodeVec &vec, const Node *node)
 }
 
 
-string LayerNumToStr(Layer layer)
-{
-  switch(layer) {
-  case(0):
-    return "0";
-  case(1):
-    return "1";
-  case(2):
-    return "2";
-  case(3):
-    return "3";
-  case(4):
-    return "4";
-    case (5):
-    return "5";
-  default:
-    throw;
-  }
-}
-
 #if DOELEM
 void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN)
 {

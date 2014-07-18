@@ -458,7 +458,10 @@ inline void Swap(Node **ptr, NodeMap *map)
 }
 
 
-string LayerNumToStr(Layer layer);
+inline string LayerNumToStr(Layer layer) 
+{ 
+  return std::to_string(layer); 
+}
 
 #define SIMP -1
 #define GLOBSIMP -2

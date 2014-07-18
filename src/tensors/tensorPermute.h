@@ -30,58 +30,41 @@
 #include "transform.h"
 #include "DLAOp.h"
 
-class SumScatterUpdateNode : public DLAOp<2,1>
+class Permute : public DLANode
 {
  public:
-  Coef m_coef;
-  EntrySet m_sumDims;
- SumScatterUpdateNode() : DLAOp<2,1>(), m_coef(COEFVALZERO) {}
-  SumScatterUpdateNode(Coef coeff, const EntrySet &sumDims);
-  static Node* BlankInst() { return  new SumScatterUpdateNode; }
+  DataTypeInfo m_info;
+  DimVec m_permutation;
+  Permute(string start, string end, Layer layer);
+  Permute(const DimVec &permutation, Layer layer);
+  virtual const DataTypeInfo& DataType(unsigned int num) const {return m_info;}
+  static Node* BlankInst() { return new Permute("","",ABSLAYER); }
+  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
-  virtual Phase MaxPhase() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  Dim MySumDim() const;
-  //  RedistNode* CreateTrans(Trans trans);
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "sumScatter";}
+  static ClassType GetClass() {return "permute";}
+  virtual void BuildDataTypeCache();
+  virtual const Dim NumDims(unsigned int num) const;
+  virtual const Sizes* Len(unsigned int num, Dim dim) const;
+  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
+  virtual Name GetName(unsigned int num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  void CheckSumDimsInOutput() const;
+  virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+  virtual Phase MaxPhase() const;
+  virtual void AddVariables(VarSet &set) const;
 };
 
-class SeparateRedistFromSumScatter : public SingleTrans
+class LowerPermute : public SingleTrans
 {
  public:
-  virtual string GetType() const { return "SeparateRedistFromSumScatter"; }
+  virtual string GetType() const { return "LowerPermute"; }
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
 };
 
-class SplitSumScatter : public SingleTrans
-{
- public:
-  Dim m_dim;
- SplitSumScatter(Dim dim) : m_dim(dim) {}
-  virtual string GetType() const { return (string)"SplitSumScatter" + (char)(m_dim+48); }
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-
-
-class MoveSumScatterRedistAfter : public SingleTrans
-{
- public:
-  virtual string GetType() const { return "MoveSumScatterRedistAfter"; }
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-
-
-#endif
+#endif //DOTENSORS
