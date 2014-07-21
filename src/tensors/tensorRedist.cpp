@@ -21,6 +21,7 @@
 #include "tensorRedist.h"
 #include <ostream>
 #include <sstream>
+#include <algorithm>
 
 #if DOTENSORS
 
