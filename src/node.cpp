@@ -36,13 +36,9 @@
 
 //#define PRINTCOSTS
 
-static unsigned int currNum = 0;
-
 Node::Node()
   :m_flags(0), m_poss(NULL) 
 {
-  m_num = currNum;
-  ++currNum;
 #ifdef TRACKORIG
   m_orig = NULL;
 #endif
@@ -317,7 +313,7 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
   }
 }
 
-void Node::Print(IndStream &out, unsigned int graphNum)
+void Node::Print(IndStream &out, GraphNum graphNum)
 {
   if (!HasPrinted()) {
     if(CanPrintCode()) {

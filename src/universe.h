@@ -63,18 +63,18 @@ class Universe
   vector<string> m_argNames;
 #endif //DOLLDLA
 
-  unsigned int Expand(unsigned int numIters, unsigned int phase, CullFunction Cull);
-  void EvalCosts(IndStream &out, unsigned int &graphNum);
+  GraphNum Expand(unsigned int numIters, unsigned int phase, CullFunction Cull);
+  void EvalCosts(IndStream &out, GraphNum &graphNum);
   void EvalCostsAndSetBest();
-  void Print(IndStream &out, unsigned int &graphNum, bool currOnly = false);
+  void Print(IndStream &out, GraphNum &graphNum, bool currOnly = false);
   static void AddTrans(const ClassType &classType, Transformation *trans, int phase);
   static void AddToMaps(Transformation *trans);
   void Cull();
   void Prop();
-  void PrintAll(int algNum, unsigned int optGraph = 0);
+  void PrintAll(int algNum, GraphNum optGraph = 0);
   void PrintBest();
   void PrintCosts(const ImplementationRuntimeMap &impTimes);
-  unsigned int TotalCount() const;
+  GraphNum TotalCount() const;
   void ClearFullyExpanded();
   void PrintStats();
 

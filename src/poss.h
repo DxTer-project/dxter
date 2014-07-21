@@ -39,15 +39,15 @@ class Loop;
 
 class Poss
 {
-  static unsigned int M_count;
+  static GraphNum M_count;
   size_t m_hash;
   bool m_hashValid;
  public:
   bool m_hasPrinted;
   NodeVec m_possNodes;
   bool m_isSane;
-  unsigned int m_parent;
-  unsigned int m_num;
+  GraphNum m_parent;
+  GraphNum m_num;
   NodeVec m_inTuns;
   NodeVec m_outTuns;
   PSet *m_pset;
@@ -69,9 +69,9 @@ class Poss
   virtual Cost EvalCurr(TransConstVec &transList);
   virtual Cost EvalAndSetBest();
   void GetCurrTransList(TransConstVec &transList);
-  virtual void Print(IndStream &out, unsigned int &graphNum);
-  virtual void EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph, unsigned int &optGraph, Cost &optCost);
-  virtual void PrintRoot(IndStream &out, unsigned int whichGraph, bool currOnly);
+  virtual void Print(IndStream &out, GraphNum &graphNum);
+  virtual void EvalRoot(IndStream &out, GraphNum &graphNum, GraphNum whichGraph, GraphNum &optGraph, Cost &optCost);
+  virtual void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly);
   void ForcePrint();
   bool CanPrint() const;
   virtual bool IsBoundary(Node *node) {return node->IsPossTunnel();}
@@ -107,7 +107,7 @@ class Poss
   string GetFunctionalityString() const;
   void GetTransVec(TransVec &transVec) const;
   void GetCurrTransVec(TransVec &transVec) const;
-  unsigned int TotalCount() const;
+  GraphNum TotalCount() const;
   bool TakeIter(const TransMap &transMap, const TransMap &simplifiers, 
 		PossMMap &newPosses);
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);

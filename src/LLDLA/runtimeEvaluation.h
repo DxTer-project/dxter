@@ -20,14 +20,15 @@
 */
 
 #include "LLDLA.h"
+#include "base.h"
 #include <map>
 #include <vector>
 
 using namespace std;
 
-typedef std::map<unsigned int, string> ImplementationMap;
-typedef std::pair<unsigned int, string> NumImplementationPair;
-typedef std::pair<unsigned int, vector<double>> NumRuntimePair;
+typedef std::map<GraphNum, string> ImplementationMap;
+typedef std::pair<GraphNum, string> NumImplementationPair;
+typedef std::pair<GraphNum, vector<double>> NumRuntimePair;
 
 class RuntimeTest
 {
@@ -69,8 +70,8 @@ class RuntimeEvaluator
   int m_numIterations;
 
   RuntimeEvaluator(string evalDirName);
-  std::map<unsigned int, vector<double>> EvaluateImplementations(RuntimeTest test, ImplementationMap imps);
-  std::map<unsigned int, vector<double>> EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap imps, string referenceImp);
-  std::map<unsigned int, vector<double>> ReadTimeDataFromFile(string fileName, int numImpls);
+ImplementationRuntimeMap EvaluateImplementations(RuntimeTest test, ImplementationMap imps);
+ImplementationRuntimeMap EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap imps, string referenceImp);
+ImplementationRuntimeMap ReadTimeDataFromFile(string fileName, int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
 };

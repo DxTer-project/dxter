@@ -587,7 +587,7 @@ bool Loop::CanMerge(PSet *pset) const
   return true;
 }
 
-void Loop::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
+void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
 {
   Poss *poss = GetCurrPoss();
   NodeVecIter iter = poss->m_inTuns.begin();

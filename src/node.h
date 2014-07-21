@@ -61,9 +61,6 @@ class Loop;
 
 class Node
 {
- private:
-  unsigned int m_num;
-
  public:
   Flags m_flags;
   TransSet m_applications; //Don't duplicate!
@@ -143,7 +140,7 @@ class Node
   virtual bool operator==(const Node &rhs) const;
   virtual bool operator!=(const Node &rhs) const {return !(*this == rhs);}
   void PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound = false);
-  virtual void Print(IndStream &out, unsigned int graphNum);
+  virtual void Print(IndStream &out, GraphNum graphNum);
   bool CanPrintCode() const;
   void AddInput(Node *node);
   void AddInputs(int numArgs, ...);

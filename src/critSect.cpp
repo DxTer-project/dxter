@@ -23,7 +23,7 @@
 #include "critSect.h"
 #include "loopSupport.h"
 
-void CritSect::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
+void CritSect::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
 {
   if (!m_ownerPoss->m_pset->IsLoop())
     throw;

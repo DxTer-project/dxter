@@ -895,9 +895,9 @@ void PSet::Simplify(const TransMap &simplifiers, bool recursive)
 //   }
 // #endif
   
-//   for (unsigned int i = 0; i < m_posses.size(); ++i) {
+//   for (GraphNum i = 0; i < m_posses.size(); ++i) {
 //     Poss *poss = m_posses[i];
-//     std::set<unsigned int> dups;
+//     std::set<GraphNum> dups;
 //     int size = m_posses.size();
 // #pragma omp parallel
 //     {
@@ -914,8 +914,8 @@ void PSet::Simplify(const TransMap &simplifiers, bool recursive)
 //         }
 //       }
 //     }
-//     unsigned int count = 0;
-//     std::set<unsigned int>::iterator iter = dups.begin();
+//     GraphNum count = 0;
+//     std::set<GraphNum>::iterator iter = dups.begin();
 //     for(; iter != dups.end(); ++iter, ++count) {
 //       RemoveAndDeletePoss(m_posses[*iter - count], false);
 //       m_posses.erase(m_posses.begin() + *iter - count);
@@ -1170,9 +1170,9 @@ void PSet::ClearPrinted()
   (*m_currPoss).second->ClearPrinted();
 }
 
-unsigned int PSet::TotalCount() const
+GraphNum PSet::TotalCount() const
 {
-  unsigned int tot = 0;
+  GraphNum tot = 0;
   PossMMapConstIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter)
     tot += (*iter).second->TotalCount();
@@ -1529,7 +1529,7 @@ Cost PSet::EvalAndSetBest()
   return optCost;
 }
 
-void PSet::PrintCurrPoss(IndStream &out, unsigned int &graphNum)
+void PSet::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
 {
   out.Indent();
   *out << "//**** (out of " << m_posses.size() << ")\n";
@@ -1557,7 +1557,7 @@ Poss* PSet::GetCurrPoss() const
 void PSet::Cull(CullFunction cullFunc)
 {
   PossMMapIter iter = m_posses.begin();
-  unsigned int i = 0;
+  GraphNum i = 0;
   if (iter == m_posses.end()){
     cout << "starting with nothing\n";
     throw;
@@ -1570,7 +1570,7 @@ void PSet::Cull(CullFunction cullFunc)
       RemoveAndDeletePoss(poss, false);
       m_posses.erase(iter);
       iter = m_posses.begin();
-      for (unsigned int j = 0; j < i; ++j)
+      for (GraphNum j = 0; j < i; ++j)
 	++iter;
     }
     else {
@@ -1674,7 +1674,7 @@ void PSet::Flatten(ofstream &out) const
   WRITE(START);
   WRITE(m_isTopLevel);
   FlattenCore(out);
-  unsigned int size;
+  GraphNum size;
   if (m_isTopLevel) {
     FullyFlatten(m_inTuns, out);
     FullyFlatten(m_outTuns, out);
@@ -1717,14 +1717,14 @@ void PSet::Unflatten(ifstream &in, SaveInfo &info)
     throw;
   READ(m_isTopLevel);
   UnflattenCore(in,info);
-  unsigned int size;
+  GraphNum size;
   if (m_isTopLevel) {
     FullyUnflatten(m_inTuns, in, info);
     FullyUnflatten(m_outTuns, in, info);
   }
   else {
     READ(size);
-    for(unsigned int i = 0; i < size; ++i) {
+    for(GraphNum i = 0; i < size; ++i) {
       Node *tun;
       READ(tun);
       Swap(&tun,info.nodeMap);
@@ -1734,7 +1734,7 @@ void PSet::Unflatten(ifstream &in, SaveInfo &info)
     if (tmp != END)
       throw;
     READ(size);
-    for(unsigned int i = 0; i < size; ++i) {
+    for(GraphNum i = 0; i < size; ++i) {
       Node *tun;
       READ(tun);
       Swap(&tun,info.nodeMap);
@@ -1751,7 +1751,7 @@ void PSet::Unflatten(ifstream &in, SaveInfo &info)
   if (!m_isTopLevel)
     Swap(&m_ownerPoss, info.possMap);
   READ(size);
-  for(unsigned int i = 0; i < size; ++i) {
+  for(GraphNum i = 0; i < size; ++i) {
     Poss *newPoss = new Poss;
     Poss *oldPoss;
     size_t hash;
@@ -1831,7 +1831,7 @@ bool PSet::RemoveParallelization(Comm comm)
   }
 #endif
   
-  unsigned int i = 0;
+  GraphNum i = 0;
   PossMMapIter iter = m_posses.begin();
   while (iter != m_posses.end()) {
     bool found = false;
@@ -1861,7 +1861,7 @@ bool PSet::RemoveParallelization(Comm comm)
       }
       RemoveAndDeletePoss(poss, true);
       iter = m_posses.begin();
-      for(unsigned int j = 0; j < i; ++j)
+      for(GraphNum j = 0; j < i; ++j)
 	++iter;
     }
     else {

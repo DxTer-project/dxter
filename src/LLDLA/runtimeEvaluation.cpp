@@ -16,7 +16,7 @@
     GNU General Public License for more details.               
 
     You should have received a copy of the GNU General Public License
-nnn    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <unistd.h>
@@ -254,7 +254,7 @@ RuntimeEvaluator::RuntimeEvaluator(string evalDirName)
   m_numIterations = 0;
 }
 
-std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations(RuntimeTest test, ImplementationMap imps)
+ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest test, ImplementationMap imps)
 {
   m_numIterations = test.m_numIterations;
   string executableName = test.m_operationName;
@@ -273,7 +273,7 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations
   return ReadTimeDataFromFile(test.m_dataFileName, imps.size());
 }
 
-std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap imps, string referenceImp)
+ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap imps, string referenceImp)
 {
   m_numIterations = test.m_numIterations;
   string executableName = test.m_operationName;
@@ -292,19 +292,19 @@ std::map<unsigned int, vector<double>> RuntimeEvaluator::EvaluateImplementations
   return ReadTimeDataFromFile(test.m_dataFileName, imps.size());  
 }
 
-std::map<unsigned int, vector<double>> RuntimeEvaluator::ReadTimeDataFromFile(string fileName, int numImpls)
+ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName, int numImpls)
 {
   std::ifstream dataStream(fileName);
   std::stringstream buffer;
   buffer << dataStream.rdbuf();
   string timeData = buffer.str();
-  std::map<unsigned int, vector<double>> runtimeMap;
+  ImplementationRuntimeMap runtimeMap;
   std::vector<string> runtimeStrings;
   Tokenize(timeData, runtimeStrings, "\n");
   std::vector<string>::iterator it = runtimeStrings.begin();
   int i, j;
   for (i = 1; i <= numImpls; i++) {
-    vector<double> impTimes;
+    TimeVec impTimes;
     for (j = 0; j < m_numIterations; j++) {
       impTimes.push_back(std::stod(*it));
       it++;

@@ -170,7 +170,7 @@ bool Universe::TakeIter(unsigned int phase)
   return newOne;
 }
 
-unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFunction cullFunc)
+GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunction cullFunc)
 {
   /*
   if (phase == ROPHASE || phase == SR1PHASE) {
@@ -204,7 +204,7 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
   }
 #endif
 
-  unsigned int count = 0;
+  GraphNum count = 0;
   double prevAlgs = TotalCount();
   bool foundNew = true;
   while ( foundNew ) {
@@ -214,7 +214,7 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
 
 #if OUTPUTCODEATEACHITER
     stringstream str;
-    unsigned int optGraph = 0;
+    GraphNum optGraph = 0;
     str << "codeOutput" << count << ".txt";
     ofstream out;
     out.open(str.str());
@@ -223,12 +223,15 @@ unsigned int Universe::Expand(unsigned int numIters, unsigned int phase, CullFun
     out.close();
 #endif //OUTPUTCODEATEACHITER
     
-    unsigned int total = TotalCount();
+    GraphNum total = TotalCount();
     ++count;
     time(&end);
     cout << "//Done iteration " << count << " with " 
 	 << total << " algorithms";
-    cout << ";   increase of " << 100.0 * (total / prevAlgs - 1 )<< "%";
+    double percent = 100.0 * (total / prevAlgs - 1 );
+    if (percent < 0)
+      throw;
+    cout << ";   increase of " << percent << "%";
     cout << ";   took " << difftime(end,start) << " seconds";
     cout << endl;
     cout.flush();
@@ -397,7 +400,7 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
     *costOut << "cost = array(0,dim=c(" << TotalCount() << ",1));\n";
 #endif
     
-    unsigned int graphNum = 0;
+    GraphNum graphNum = 0;
     ++graphNum;
     PossMMapIter iter = m_pset->m_posses.begin();
     for(; iter != m_pset->m_posses.end(); ++iter) {
@@ -441,7 +444,7 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
     cout.flush();
 }
 
-void Universe::PrintAll(int algNum, unsigned int optGraph)
+void Universe::PrintAll(int algNum, GraphNum optGraph)
 {
   time_t start,end;
   ofstream out;
@@ -544,7 +547,7 @@ void Universe::PrintBest()
     m_pset->GetCurrPoss()->PrintRoot(optOut, 0, true);
 }
 
-void Universe::Print(IndStream &out, unsigned int &whichGraph, bool currOnly)
+void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
 {
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
@@ -555,9 +558,9 @@ void Universe::Print(IndStream &out, unsigned int &whichGraph, bool currOnly)
   *out << "// numAlgs = " << TotalCount() << endl;
 }
 
-void Universe::EvalCosts(IndStream &out, unsigned int &whichGraph)
+void Universe::EvalCosts(IndStream &out, GraphNum &whichGraph)
 {
-  unsigned int optGraph;
+  GraphNum optGraph;
   double optCost;
 
 #ifdef MATLAB
@@ -575,7 +578,7 @@ void Universe::EvalCosts(IndStream &out, unsigned int &whichGraph)
 
   Prop();
   optCost = -1;
-  unsigned int graphNum = 0;
+  GraphNum graphNum = 0;
   ++graphNum;
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
@@ -598,7 +601,7 @@ void Universe::EvalCostsAndSetBest()
   m_pset->EvalAndSetBest();
 }
 
-unsigned int Universe::TotalCount() const
+GraphNum Universe::TotalCount() const
 {
   return m_pset->TotalCount();
 }

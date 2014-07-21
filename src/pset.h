@@ -43,7 +43,7 @@ class PSet
   virtual ~PSet();
   void AddPoss(Poss *poss);
   void AddPossesOrDispose(PossMMap &mmap, PossMMap *added = NULL);
-  unsigned int NumPosses() {return m_posses.size();}
+  GraphNum NumPosses() {return m_posses.size();}
   bool operator==(const Poss &rhs) const;
   bool operator==(const PSet &rhs) const;
   virtual void Prop();
@@ -53,7 +53,6 @@ class PSet
   void ClearBeforeProp();
   bool TakeIter(const TransMap &trans, const TransMap &simplifiers);
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
-  unsigned int Size() { return m_posses.size();} 
   virtual void Duplicate(const PSet *orig, NodeMap &map, bool possMerging);
   virtual PSet* GetNewInst() {return new PSet;}
   void PatchAfterDuplicate(NodeMap &map);
@@ -66,7 +65,7 @@ class PSet
   virtual bool IsTransparent() const {return true;}
   bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
-  unsigned int TotalCount() const;
+  GraphNum TotalCount() const;
   void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
   virtual void ClearPrinted();
   virtual bool IsLoop() const {return false;}
@@ -78,7 +77,7 @@ class PSet
   bool IncrementCurrPoss();
   Cost EvalCurrPoss(TransConstVec &transList);
   Cost EvalAndSetBest();
-  virtual void PrintCurrPoss(IndStream &out, unsigned int &graphNum);
+  virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
   bool CanPrint() const;
   Poss* GetCurrPoss() const;
   void GetCurrTransVec(TransVec &transVec) const;

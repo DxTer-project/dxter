@@ -17,7 +17,7 @@
 
     You should have received a copy of the GNU General Public License
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
-n*/
+*/
 
 #include "base.h"
 #include "costs.h"
@@ -33,6 +33,7 @@ n*/
 #endif
 #include "LLDLAGemm.h"
 #include "vvdot.h"
+#include <climits>
 
 
 #if DOLLDLA
@@ -67,7 +68,7 @@ Trans transA, transB;
 ImplementationMap ImpStrMap(Universe *uni)
 {
   ImplementationMap impMap;
-  unsigned int i;
+  GraphNum i;
   for (i = 1; i <= uni->TotalCount(); i++) {
     std::stringbuf sbuf;
     std::ostream out(&sbuf);
@@ -91,13 +92,13 @@ void PrintImpMap(ImplementationRuntimeMap &impTimes)
   }
 }
 
-unsigned int PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost, int chunkSize) {
+GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost, int chunkSize) {
   /***************************************************************************
    * WARNING: These numbers are processor specific to Dillon's machine in GDC
    ***************************************************************************/
   double ticksPerSec = 1.0e6;
   double peakFLOPS = 30e9;
-  unsigned int bestImpNum = 0;
+  GraphNum bestImpNum = 0;
   double bestFLOPS = 0;
   ImplementationRuntimeMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
@@ -200,10 +201,11 @@ int main(int argc, const char* argv[])
   omp_set_num_threads(1);
   omp_set_nested(true);
 #endif
+
   //  PrintType printType = CODE;
   int numIters = -1;
   PSet* (*algFunc)();
-  //  unsigned int whichGraph = 0;
+  //  GraphNum whichGraph = 0;
   int algNum;
   string fileName;
 
@@ -341,7 +343,7 @@ int main(int argc, const char* argv[])
   cout << "About to evaluate\n";
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
   cout << "Done evaluating\n";
-  unsigned int best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
+  GraphNum best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
   cout << "All implementations printed\n";
   cout << "Best times";
 

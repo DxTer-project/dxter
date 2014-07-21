@@ -107,7 +107,7 @@ int main(int argc, const char* argv[])
   //  PrintType printType = CODE;
   int numIters = -1;
   PSet* (*algFunc)();
-  //  unsigned int whichGraph = 0;
+  //  GraphNum whichGraph = 0;
   int algNum;
   string fileName;
 

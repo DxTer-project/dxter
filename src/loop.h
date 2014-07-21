@@ -109,7 +109,7 @@ class Loop : public PSet
   virtual bool IsTransparent() const {return false;}
   virtual bool CanMerge(PSet *pset) const;
   virtual bool WorthFusing(Loop *loop);
-  virtual void PrintCurrPoss(IndStream &out, unsigned int &graphNum);
+  virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
   LoopType GetType() const {return m_type;}
   virtual void Duplicate(const PSet *orig, NodeMap &map, bool possMerging);
   void AssignNewLabel();

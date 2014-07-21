@@ -32,7 +32,7 @@ class CritSect : public PSet
  CritSect() : PSet() {}
  CritSect(Poss *poss) : PSet(poss) {}
   virtual PSet* GetNewInst() {return new CritSect;}
-  virtual void PrintCurrPoss(IndStream &out, unsigned int &graphNum);
+  virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
   virtual bool IsCritSect() const {return true;}
   virtual bool IsTransparent() const {return false;}
   virtual bool CanMerge(PSet *pset) const {return false;}

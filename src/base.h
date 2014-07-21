@@ -295,6 +295,7 @@ class Poss;
 class NodeConn;
 class PSet;
 class InputNode;
+typedef unsigned long int GraphNum;
 typedef string ClassType;
 typedef vector<Node*> NodeVec;
 typedef NodeVec::iterator NodeVecIter;
@@ -364,7 +365,7 @@ typedef CostVec::iterator CostVecIter;
 typedef vector<double> TimeVec;
 typedef TimeVec::iterator TimeVecIter;
 typedef TimeVec::const_iterator TimeVecConstIter;
-typedef map<unsigned int, TimeVec> ImplementationRuntimeMap;
+typedef map<GraphNum, TimeVec> ImplementationRuntimeMap;
 typedef ImplementationRuntimeMap::iterator ImplementationRuntimeMapIter;
 typedef ImplementationRuntimeMap::const_iterator ImplementationRuntimeMapConstIter;
 

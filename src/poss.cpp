@@ -39,7 +39,7 @@
 
 StrSet Poss::M_fusedSets;
 
-unsigned int Poss::M_count = 1;
+GraphNum Poss::M_count = 1;
 
 Poss::Poss()
 {
@@ -1854,7 +1854,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   Loop *rightSet = (Loop*)(m_sets[right]);
   leftSet->Cull(cullFunc);
   rightSet->Cull(cullFunc);
-  if (!leftSet->Size() || !rightSet->Size())
+  if (!leftSet->NumPosses() || !rightSet->NumPosses())
     throw;
   
   
@@ -2297,7 +2297,7 @@ Cost Poss::EvalAndSetBest()
   return tot;
 }
 
-void Poss::Print(IndStream &out, unsigned int &graphNum)
+void Poss::Print(IndStream &out, GraphNum &graphNum)
 {
   unsigned int numPSets = m_sets.size();
   
@@ -2407,7 +2407,7 @@ void Poss::Print(IndStream &out, unsigned int &graphNum)
   m_hasPrinted = true;
 }
 
-void Poss::EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGraph, unsigned int &optGraphs, double &optCosts)
+void Poss::EvalRoot(IndStream &out, GraphNum &graphNum, GraphNum whichGraph, GraphNum &optGraphs, double &optCosts)
 {
   bool keepGoing = true;
   
@@ -2447,7 +2447,7 @@ void Poss::EvalRoot(IndStream &out, unsigned int &graphNum, unsigned int whichGr
   }
 }
 
-void Poss::PrintRoot(IndStream &out, unsigned int whichGraph, bool currOnly)
+void Poss::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly)
 {
   if (!currOnly)
     ClearCurrPoss();
@@ -2455,7 +2455,7 @@ void Poss::PrintRoot(IndStream &out, unsigned int whichGraph, bool currOnly)
   unsigned int numPSets = m_sets.size();
 
   bool keepGoing = true;
-  unsigned int graphNum = 1;
+  GraphNum graphNum = 1;
 
   while (keepGoing) {
     if (currOnly || whichGraph == 0 || whichGraph == graphNum) {
@@ -2566,9 +2566,9 @@ void Poss::ClearPrinted()
   m_hasPrinted = false;
 }
 
-unsigned int Poss::TotalCount() const
+GraphNum Poss::TotalCount() const
 {
-  unsigned int tot = 1;
+  GraphNum tot = 1;
   PSetVecConstIter iter = m_sets.begin();
   for(; iter != m_sets.end(); ++iter)
     tot *= (*iter)->TotalCount();
