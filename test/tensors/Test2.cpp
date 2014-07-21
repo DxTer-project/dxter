@@ -189,22 +189,14 @@ DistTensor<double> Accum__D_0__D_1__D_2__S__D_3( dist__D_0__D_1__D_2__S__D_3, g 
 DistTensor<double> Accum__D_0__D_1__S__S__D_2__D_3( dist__D_0__D_1__S__S__D_2__D_3, g );
 	//Accum[D0,*,D2,*,D1,D3]
 DistTensor<double> Accum__D_0__S__D_2__S__D_1__D_3( dist__D_0__S__D_2__S__D_1__D_3, g );
-	//T1[D0,D1,D2,D3]
-DistTensor<double> T1__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
-	//T1[*,D1,D2,D3]
-DistTensor<double> T1__S__D_1__D_2__D_3( dist__S__D_1__D_2__D_3, g );
-	//T1[*,*,D2,D3]
-DistTensor<double> T1__S__S__D_2__D_3( dist__S__S__D_2__D_3, g );
-	//T2[D0,D1,D2,D3]
-DistTensor<double> T2__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
-	//T2[*,D1,D2,D3]
-DistTensor<double> T2__S__D_1__D_2__D_3( dist__S__D_1__D_2__D_3, g );
-	//T2[*,D1,*,D3]
-DistTensor<double> T2__S__D_1__S__D_3( dist__S__D_1__S__D_3, g );
-	//T3[D0,D1,D2,D3]
-DistTensor<double> T3__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
-	//T4[D0,D1,D2,D3]
-DistTensor<double> T4__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
+	//T[D0,D1,D2,D3]
+DistTensor<double> T__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
+	//T[*,D1,D2,D3]
+DistTensor<double> T__S__D_1__D_2__D_3( dist__S__D_1__D_2__D_3, g );
+	//T[*,D1,*,D3]
+DistTensor<double> T__S__D_1__S__D_3( dist__S__D_1__S__D_3, g );
+	//T[*,*,D2,D3]
+DistTensor<double> T__S__S__D_2__D_3( dist__S__S__D_2__D_3, g );
 	//U[D0,D1,D2,D3]
 DistTensor<double> U__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
 	//U[D0,D1,D2,*]
@@ -286,17 +278,17 @@ indices_ijkl[0] = 'i';
 indices_ijkl[1] = 'j';
 indices_ijkl[2] = 'k';
 indices_ijkl[3] = 'l';
-// T4 input has 4 dims
+// T input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
-ObjShape T4__D_0__D_1__D_2__D_3_tempShape;
-T4__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T4__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T4__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T4__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T4__D_0__D_1__D_2__D_3.ResizeTo( T4__D_0__D_1__D_2__D_3_tempShape );
-Set( T4__D_0__D_1__D_2__D_3 );
-DistTensor<T> T4_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
-GatherAllModes( T4__D_0__D_1__D_2__D_3, T4_local );
+ObjShape T__D_0__D_1__D_2__D_3_tempShape;
+T__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+T__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+T__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+T__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+T__D_0__D_1__D_2__D_3.ResizeTo( T__D_0__D_1__D_2__D_3_tempShape );
+Set( T__D_0__D_1__D_2__D_3 );
+DistTensor<T> T_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
+GatherAllModes( T__D_0__D_1__D_2__D_3, T_local );
 // W input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
 ObjShape W__D_0__D_1__D_2__D_3_tempShape;
@@ -308,17 +300,6 @@ W__D_0__D_1__D_2__D_3.ResizeTo( W__D_0__D_1__D_2__D_3_tempShape );
 Set( W__D_0__D_1__D_2__D_3 );
 DistTensor<T> W_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
 GatherAllModes( W__D_0__D_1__D_2__D_3, W_local );
-// T3 input has 4 dims
-//	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
-ObjShape T3__D_0__D_1__D_2__D_3_tempShape;
-T3__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T3__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T3__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T3__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T3__D_0__D_1__D_2__D_3.ResizeTo( T3__D_0__D_1__D_2__D_3_tempShape );
-Set( T3__D_0__D_1__D_2__D_3 );
-DistTensor<T> T3_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
-GatherAllModes( T3__D_0__D_1__D_2__D_3, T3_local );
 // V input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
 ObjShape V__D_0__D_1__D_2__D_3_tempShape;
@@ -330,17 +311,6 @@ V__D_0__D_1__D_2__D_3.ResizeTo( V__D_0__D_1__D_2__D_3_tempShape );
 Set( V__D_0__D_1__D_2__D_3 );
 DistTensor<T> V_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
 GatherAllModes( V__D_0__D_1__D_2__D_3, V_local );
-// T2 input has 4 dims
-//	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
-ObjShape T2__D_0__D_1__D_2__D_3_tempShape;
-T2__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T2__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T2__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T2__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T2__D_0__D_1__D_2__D_3.ResizeTo( T2__D_0__D_1__D_2__D_3_tempShape );
-Set( T2__D_0__D_1__D_2__D_3 );
-DistTensor<T> T2_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
-GatherAllModes( T2__D_0__D_1__D_2__D_3, T2_local );
 // U input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
 ObjShape U__D_0__D_1__D_2__D_3_tempShape;
@@ -352,17 +322,6 @@ U__D_0__D_1__D_2__D_3.ResizeTo( U__D_0__D_1__D_2__D_3_tempShape );
 Set( U__D_0__D_1__D_2__D_3 );
 DistTensor<T> U_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
 GatherAllModes( U__D_0__D_1__D_2__D_3, U_local );
-// T1 input has 4 dims
-//	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
-ObjShape T1__D_0__D_1__D_2__D_3_tempShape;
-T1__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T1__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T1__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T1__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
-T1__D_0__D_1__D_2__D_3.ResizeTo( T1__D_0__D_1__D_2__D_3_tempShape );
-Set( T1__D_0__D_1__D_2__D_3 );
-DistTensor<T> T1_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
-GatherAllModes( T1__D_0__D_1__D_2__D_3, T1_local );
 // Temp input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
 ObjShape Accum__D_0__D_1__D_2__D_3_tempShape;
@@ -404,10 +363,10 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	//**** (out of 8)
 		//------------------------------------//
 
-		   // T1[*,D1,D2,D3] <- T1[D0,D1,D2,D3]
-		T1__S__D_1__D_2__D_3.AllGatherRedistFrom( T1__D_0__D_1__D_2__D_3, 0, modes_0 );
-		   // T1[*,*,D2,D3] <- T1[*,D1,D2,D3]
-		T1__S__S__D_2__D_3.AllGatherRedistFrom( T1__S__D_1__D_2__D_3, 1, modes_1 );
+		   // T[*,D1,D2,D3] <- T[D0,D1,D2,D3]
+		T__S__D_1__D_2__D_3.AllGatherRedistFrom( T__D_0__D_1__D_2__D_3, 0, modes_0 );
+		   // T[*,*,D2,D3] <- T[*,D1,D2,D3]
+		T__S__S__D_2__D_3.AllGatherRedistFrom( T__S__D_1__D_2__D_3, 1, modes_1 );
 
 		//------------------------------------//
 
@@ -415,10 +374,10 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	//**** (out of 8)
 		//------------------------------------//
 
-		   // T2[*,D1,D2,D3] <- T2[D0,D1,D2,D3]
-		T2__S__D_1__D_2__D_3.AllGatherRedistFrom( T2__D_0__D_1__D_2__D_3, 0, modes_0 );
-		   // T2[*,D1,*,D3] <- T2[*,D1,D2,D3]
-		T2__S__D_1__S__D_3.AllGatherRedistFrom( T2__S__D_1__D_2__D_3, 2, modes_2 );
+		   // T[*,D1,D2,D3] <- T[D0,D1,D2,D3]
+		T__S__D_1__D_2__D_3.AllGatherRedistFrom( T__D_0__D_1__D_2__D_3, 0, modes_0 );
+		   // T[*,D1,*,D3] <- T[*,D1,D2,D3]
+		T__S__D_1__S__D_3.AllGatherRedistFrom( T__S__D_1__D_2__D_3, 2, modes_2 );
 
 		//------------------------------------//
 
@@ -434,17 +393,17 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 		//------------------------------------//
 
 	//****
-	   // 1.0 * U[D0,D1,*,*]_abcd * T1[*,*,D2,D3]_cdij + 0.0 * Accum[D0,D1,D2,D3]_abij
+	   // 1.0 * U[D0,D1,*,*]_abcd * T[*,*,D2,D3]_cdij + 0.0 * Accum[D0,D1,D2,D3]_abij
 	LocalContractAndLocalEliminate(1.0, U__D_0__D_1__S__S.LockedTensor(), indices_abcd,
-		T1__S__S__D_2__D_3.LockedTensor(), indices_cdij,
+		T__S__S__D_2__D_3.LockedTensor(), indices_cdij,
 		0.0, Accum__D_0__D_1__D_2__D_3.Tensor(), indices_abij);
 	tempShape = Accum__D_0__D_1__D_2__D_3.Shape();
 	tempShape.push_back( g.Shape()[1] );
 	tempShape.push_back( g.Shape()[3] );
 	Accum__D_0__S__D_2__S__D_1__D_3.ResizeTo( tempShape );
-	   // 1.0 * V[D0,D1,D2,D3]_acik * T2[*,D1,*,D3]_bcjk + 0.0 * Accum[D0,*,D2,*,D1,D3]_abijck
+	   // 1.0 * V[D0,D1,D2,D3]_acik * T[*,D1,*,D3]_bcjk + 0.0 * Accum[D0,*,D2,*,D1,D3]_abijck
 	LocalContract(1.0, V__D_0__D_1__D_2__D_3.LockedTensor(), indices_acik,
-		T2__S__D_1__S__D_3.LockedTensor(), indices_bcjk,
+		T__S__D_1__S__D_3.LockedTensor(), indices_bcjk,
 		0.0, Accum__D_0__S__D_2__S__D_1__D_3.Tensor(), indices_abijck);
 	//**** (out of 1)
 		//------------------------------------//
@@ -464,9 +423,9 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	tempShape.push_back( g.Shape()[2] );
 	tempShape.push_back( g.Shape()[3] );
 	Accum__D_0__D_1__S__S__D_2__D_3.ResizeTo( tempShape );
-	   // 1.0 * W[*,*,D2,D3]_ijkl * T3[D0,D1,D2,D3]_abkl + 0.0 * Accum[D0,D1,*,*,D2,D3]_abijkl
+	   // 1.0 * W[*,*,D2,D3]_ijkl * T[D0,D1,D2,D3]_abkl + 0.0 * Accum[D0,D1,*,*,D2,D3]_abijkl
 	LocalContract(1.0, W__S__S__D_2__D_3.LockedTensor(), indices_ijkl,
-		T3__D_0__D_1__D_2__D_3.LockedTensor(), indices_abkl,
+		T__D_0__D_1__D_2__D_3.LockedTensor(), indices_abkl,
 		0.0, Accum__D_0__D_1__S__S__D_2__D_3.Tensor(), indices_abijkl);
 	//**** (out of 1)
 		//------------------------------------//
@@ -482,8 +441,8 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 		//------------------------------------//
 
 	//****
-	   // 1.0 * T4[D0,D1,D2,D3]_abij * Accum[D0,D1,D2,D3]_abij + 0.0 * epsilon[D0,D1,D2,D3]_abij
-	LocalContract(1.0, T4__D_0__D_1__D_2__D_3.LockedTensor(), indices_abij,
+	   // 1.0 * T[D0,D1,D2,D3]_abij * Accum[D0,D1,D2,D3]_abij + 0.0 * epsilon[D0,D1,D2,D3]_abij
+	LocalContract(1.0, T__D_0__D_1__D_2__D_3.LockedTensor(), indices_abij,
 		Accum__D_0__D_1__D_2__D_3.LockedTensor(), indices_abij,
 		0.0, epsilon__D_0__D_1__D_2__D_3.Tensor(), indices_abij);
 	//**** (out of 1)
@@ -512,27 +471,27 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 
 		//------------------------------------//
 
+	//****
 
-
-
+	//------------------------------------//
 
 
 	LocalContractAndLocalEliminate(1.0, U_local.LockedTensor(), indices_abcd,
-				       T1_local.LockedTensor(), indices_cdij,
+				       T_local.LockedTensor(), indices_cdij,
 				       0.0, Accum_local.Tensor(), indices_abij);
 
 	LocalContractAndLocalEliminate(1.0, V_local.LockedTensor(), indices_acik,
-				       T2_local.LockedTensor(), indices_bcjk,
+				       T_local.LockedTensor(), indices_bcjk,
 				       1.0, Accum_local.Tensor(), indices_abij);
 
 	LocalContractAndLocalEliminate(1.0, W_local.LockedTensor(), indices_ijkl,
-				       T3_local.LockedTensor(), indices_abkl,
+				       T_local.LockedTensor(), indices_abkl,
 				       1.0, Accum_local.Tensor(), indices_abij);
 
 
 	IndexArray blank_indices;
 
-	LocalContractAndLocalEliminate(1.0, T4_local.LockedTensor(), indices_abij,
+	LocalContractAndLocalEliminate(1.0, T_local.LockedTensor(), indices_abij,
 				       Accum_local.LockedTensor(), indices_abij,
 				       0.0, epsilon_local.Tensor(), blank_indices);
 
