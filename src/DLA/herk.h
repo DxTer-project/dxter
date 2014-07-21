@@ -30,45 +30,45 @@
 #include "elemRedist.h"
 #include "lowerLayer.h"
 
-Loop* HerkLoopVar1(Node *Ain, unsigned int Anum, 
-		   Node *Cin, unsigned int Cnum,
+Loop* HerkLoopVar1(Node *Ain, ConnNum Anum, 
+		   Node *Cin, ConnNum Cnum,
 		   Tri tri,
 		   Trans trans,
 		   Coef alpha, Coef beta, Type type,
 		   Layer layer);
 
-Loop* HerkLoopVar2(Node *Ain, unsigned int Anum, 
-		   Node *Cin, unsigned int Cnum,
+Loop* HerkLoopVar2(Node *Ain, ConnNum Anum, 
+		   Node *Cin, ConnNum Cnum,
 		   Tri tri,
 		   Trans trans,
 		   Coef alpha, Coef beta, Type type,
 		   Layer layer);
 
-Loop* HerkLoopVar5(Node *Ain, unsigned int Anum, 
-		   Node *Cin, unsigned int Cnum,
+Loop* HerkLoopVar5(Node *Ain, ConnNum Anum, 
+		   Node *Cin, ConnNum Cnum,
 		   Tri tri,
 		   Trans trans,
 		   Coef alpha, Coef beta, Type type,
 		   Layer layer);
 
-Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum, 
-		    Node *Bin, unsigned int Bnum, 
-		    Node *Cin, unsigned int Cnum,
+Loop* TriRKLoopVar5(Node *Ain, ConnNum Anum, 
+		    Node *Bin, ConnNum Bnum, 
+		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
-Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum, 
-		    Node *Bin, unsigned int Bnum, 
-		    Node *Cin, unsigned int Cnum,
+Loop* TriRKLoopVar7(Node *Ain, ConnNum Anum, 
+		    Node *Bin, ConnNum Bnum, 
+		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
 #if DOBLIS
-Loop* BLISHerkLoop(Node *Ain, unsigned int Anum, 
-		   Node *Bin, unsigned int Bnum,
-		   Node *Cin, unsigned int Cnum,
+Loop* BLISHerkLoop(Node *Ain, ConnNum Anum, 
+		   Node *Bin, ConnNum Bnum,
+		   Node *Cin, ConnNum Cnum,
 		   Tri tri,
 		   Coef alpha, Type type,
 		   Layer layer);
@@ -171,7 +171,7 @@ class TriRK : public DLAOp<3,1>, public HerkProps
 class TriRKTrans : public TransTransformation
 {
  public:
-  TriRKTrans(unsigned int argNum, Trans trans) : TransTransformation(argNum, trans) {}
+  TriRKTrans(ConnNum argNum, Trans trans) : TransTransformation(argNum, trans) {}
   virtual string GetTransType() const;
   virtual bool CanApply(const Node *node) const;
 };

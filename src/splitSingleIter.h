@@ -59,23 +59,23 @@ class SplitSingleIter : public SplitBase
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "split";}
 #if TWOD
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
 #endif
-  void GetSizes(unsigned int num, unsigned int numIters,
+  void GetSizes(ConnNum num, unsigned int numIters,
 		Size bs, unsigned int parFactor,
 		   Size m, Size n,
 		   Sizes &ms, Sizes &ns);
 #else
-  virtual const Dim NumDims(unsigned int num) const;
-  virtual const Sizes* Len(unsigned int num, Dim dim) const;
-  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
+  virtual const Dim NumDims(ConnNum num) const;
+  virtual const Sizes* Len(ConnNum num, Dim dim) const;
+  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
 #endif
-  virtual Name GetName(unsigned int num) const;
-  virtual Name GetName(unsigned int num, LoopType type) const;
+  virtual Name GetName(ConnNum num) const;
+  virtual Name GetName(ConnNum num, LoopType type) const;
   virtual void PrintVarDeclarations(IndStream &out) const;
   CombineSingleIter* CreateMatchingCombine(int numArgs, ...);
   bool ValidIter() const;
@@ -105,7 +105,7 @@ class SplitSingleIter : public SplitBase
 
 #if DOLLDLA
   virtual void BuildDataTypeCache();
-  virtual const DataTypeInfo& DataType(unsigned int num) const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
 #endif
 };
 

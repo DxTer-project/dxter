@@ -132,7 +132,7 @@ void SVMul::Prop()
   }
 }
 
-void SVMul::VectorOpInputDimensionCheck(unsigned int inputNum)
+void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
 {
   if (m_vecType == ROWVECTOR && *GetInputM(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum << " has more than 1 row\n";

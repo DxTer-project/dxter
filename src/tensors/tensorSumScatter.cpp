@@ -157,7 +157,7 @@ void SumScatterUpdateNode::Prop()
       }
 
       DLANode *input = (DLANode*)(Input(1));
-      unsigned int num = InputConnNum(1);
+      ConnNum num = InputConnNum(1);
       const Dim numDims = input->NumDims(num);
 
       if (inType.m_notReped != outType.m_notReped) {

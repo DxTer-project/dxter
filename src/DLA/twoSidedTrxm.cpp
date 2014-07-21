@@ -249,8 +249,8 @@ void TwoSidedTrxmLoopExp::Apply(Node *node) const
 
 
 Loop* TwoSidedTrsmLowerVar1Alg(
-			     Node *Lin, unsigned int Lnum,
-			     Node *Ain, unsigned int Anum,
+			     Node *Lin, ConnNum Lnum,
+			     Node *Ain, ConnNum Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -337,8 +337,8 @@ Loop* TwoSidedTrsmLowerVar1Alg(
 }
 
 Loop* TwoSidedTrsmLowerVar2Alg(
-			     Node *Lin, unsigned int Lnum,
-			     Node *Ain, unsigned int Anum,
+			     Node *Lin, ConnNum Lnum,
+			     Node *Ain, ConnNum Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -432,8 +432,8 @@ Loop* TwoSidedTrsmLowerVar2Alg(
 
 
 Loop* TwoSidedTrsmLowerVar4Alg(
-			     Node *Lin, unsigned int Lnum,
-			     Node *Ain, unsigned int Anum,
+			     Node *Lin, ConnNum Lnum,
+			     Node *Ain, ConnNum Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -530,8 +530,8 @@ Loop* TwoSidedTrsmLowerVar4Alg(
 }
 
 Loop* TwoSidedTrmmLowerVar1Alg(
-			     Node *Lin, unsigned int Lnum,
-			     Node *Ain, unsigned int Anum,
+			     Node *Lin, ConnNum Lnum,
+			     Node *Ain, ConnNum Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -618,8 +618,8 @@ Loop* TwoSidedTrmmLowerVar1Alg(
 }
 
 Loop* TwoSidedTrmmLowerVar2Alg(
-			     Node *Lin, unsigned int Lnum,
-			     Node *Ain, unsigned int Anum,
+			     Node *Lin, ConnNum Lnum,
+			     Node *Ain, ConnNum Anum,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -698,8 +698,8 @@ Loop* TwoSidedTrmmLowerVar2Alg(
 }
 
 Loop* TwoSidedTrmmLowerVar4Alg(
-			    Node *Lin, unsigned int Lnum,
-			    Node *Ain, unsigned int Anum,
+			    Node *Lin, ConnNum Lnum,
+			    Node *Ain, ConnNum Anum,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);

@@ -31,17 +31,17 @@
 #include "blis.h"
 #include "lowerLayer.h"
 
-Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
-		   Node *Bin, unsigned int Bnum,
-		   Node *Cin, unsigned int Cnum,
+Loop* HemmLoopVar4(Node *Ain, ConnNum Anum,
+		   Node *Bin, ConnNum Bnum,
+		   Node *Cin, ConnNum Cnum,
 		   Side side, Tri tri,
 		   Coef alpha, Coef beta,
 		   Type type,
 		   Layer layer);
 
-Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
-		   Node *Bin, unsigned int Bnum,
-		   Node *Cin, unsigned int Cnum,
+Loop* HemmLoopVar8(Node *Ain, ConnNum Anum,
+		   Node *Bin, ConnNum Bnum,
+		   Node *Cin, ConnNum Cnum,
 		   Side side, Tri tri,
 		   Coef alpha, Coef beta,
 		   Type type,
@@ -51,9 +51,9 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
 //This has an optimization found in Elemental hardcoded
 // into the algorithm.  Think about it as a simplifier
 // I manually applied.
-Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
-			  Node *Bin, unsigned int Bnum,
-			  Node *Cin, unsigned int Cnum,
+Loop* HemmLoopVar8Altered(Node *Ain, ConnNum Anum,
+			  Node *Bin, ConnNum Bnum,
+			  Node *Cin, ConnNum Cnum,
 			  Side side, Tri tri,
 			  Coef alpha, Coef beta,
 			  Type type,

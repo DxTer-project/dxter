@@ -69,9 +69,9 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
 }
 
 void RedirectChildrenThatArentPossTuns(Node *input, 
-					  unsigned int num,
+					  ConnNum num,
 					  Node *newInput,
-				       unsigned int newNum,
+				       ConnNum newNum,
 				       PossTunType type)
 {
   for(unsigned int i = 0; i < input->m_children.size(); ++i) {
@@ -134,7 +134,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 
       Node *prev = NULL;
       NodeVec inputToOutTuns;
-      vector<unsigned int> inputNumToOutTuns;
+      vector<ConnNum> inputNumToOutTuns;
       bool allInputsAreTunnel = true;
       
       if (!outTuns.empty()) {
@@ -167,7 +167,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 	if (outTuns.size() > 1)
 	  throw;
 	prev = NULL;
-	unsigned int inputNumToOutTun = inputNumToOutTuns[0];
+	ConnNum inputNumToOutTun = inputNumToOutTuns[0];
 	Node *inputToOutTun = inputToOutTuns[0];
 	for(int dupNum = 0; dupNum < numIters; ++dupNum) {
 	  Poss *dup = newPosses[dupNum];
@@ -230,7 +230,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
       rootPoss->AddNode(com);
 
       Node *inputToOutTun = NULL;
-      unsigned int inputNumToOutTun = 99999;
+      ConnNum inputNumToOutTun = 99999;
 
       if (outTuns.empty())
 	throw;
@@ -596,7 +596,7 @@ void ViewMultipleIters::BuildDataTypeCache()
   }
 }
 
-const Sizes* ViewMultipleIters::GetM(unsigned int num) const
+const Sizes* ViewMultipleIters::GetM(ConnNum num) const
 {
   if (num > m_numIters) 
     throw;
@@ -614,7 +614,7 @@ const Sizes* ViewMultipleIters::GetM(unsigned int num) const
     throw;
 }
 
-const Sizes* ViewMultipleIters::GetN(unsigned int num) const
+const Sizes* ViewMultipleIters::GetN(ConnNum num) const
 {
   if (num > m_numIters)
     throw;
@@ -633,7 +633,7 @@ const Sizes* ViewMultipleIters::GetN(unsigned int num) const
     throw;
 }
 
-Name ViewMultipleIters::GetName(unsigned int num) const
+Name ViewMultipleIters::GetName(ConnNum num) const
 {
   if (num > m_numIters)
     throw;
@@ -725,7 +725,7 @@ void ViewMultipleIters::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 
-const DataTypeInfo& ViewMultipleIters::DataType(unsigned int num) const
+const DataTypeInfo& ViewMultipleIters::DataType(ConnNum num) const
 {
   if (num < m_numIters) {
     if (!m_sizes)
@@ -794,21 +794,21 @@ void CombineMultipleIters::Duplicate(const Node *orig, bool shallow, bool possMe
 }
 
 
-const Sizes* CombineMultipleIters::GetM(unsigned int num) const
+const Sizes* CombineMultipleIters::GetM(ConnNum num) const
 {
   if (num > 0) 
     throw;
   return GetInputM(m_numIters);
 }
 
-const Sizes* CombineMultipleIters::GetN(unsigned int num) const
+const Sizes* CombineMultipleIters::GetN(ConnNum num) const
 {
   if (num > 0) 
     throw;
   return GetInputN(m_numIters);
 }
 
-Name CombineMultipleIters::GetName(unsigned int num) const
+Name CombineMultipleIters::GetName(ConnNum num) const
 {
   if (num > 0) 
     throw;
@@ -836,7 +836,7 @@ void CombineMultipleIters::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_numIters);
 }
 
-const DataTypeInfo& CombineMultipleIters::DataType(unsigned int num) const
+const DataTypeInfo& CombineMultipleIters::DataType(ConnNum num) const
 {
   return InputDataType(m_numIters);
 }

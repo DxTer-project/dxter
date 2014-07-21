@@ -223,9 +223,9 @@ void Gemm::Prop()
       case (SMLAYER):
       {
         DLANode *in0 = (DLANode*)Input(0);
-        unsigned int num0 = InputConnNum(0);
+        ConnNum num0 = InputConnNum(0);
         DLANode *in2 = (DLANode*)Input(2);
-        unsigned int num2 = InputConnNum(2);
+        ConnNum num2 = InputConnNum(2);
         const Sizes *size1 = in0->LocalM(num0);
         const Sizes *size2 = in0->LocalN(num0);
         const Sizes *size3 = in2->LocalN(num2);
@@ -238,9 +238,9 @@ void Gemm::Prop()
       case (S3LAYER): 
 	{
 	  DLANode *in0 = (DLANode*)Input(0);
-	  unsigned int num0 = InputConnNum(0);
+	  ConnNum num0 = InputConnNum(0);
 	  DLANode *in2 = (DLANode*)Input(2);
-	  unsigned int num2 = InputConnNum(2);
+	  ConnNum num2 = InputConnNum(2);
 	  const Sizes *size1 = in0->GetM(num0);
 	  const Sizes *size2 = in0->GetN(num0);
 	  const Sizes *size3 = in2->GetN(num2);

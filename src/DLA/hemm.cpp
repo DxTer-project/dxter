@@ -337,9 +337,9 @@ Cost DistHemmToLocalHemm::RHSCostEstimate(const Node *node) const
 #endif
 
 
-Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
-		   Node *Bin, unsigned int Bnum,
-		   Node *Cin, unsigned int Cnum,
+Loop* HemmLoopVar4(Node *Ain, ConnNum Anum,
+		   Node *Bin, ConnNum Bnum,
+		   Node *Cin, ConnNum Cnum,
 		   Side side, Tri tri,
 		   Coef alpha, Coef beta,
 		   Type type,
@@ -403,9 +403,9 @@ Loop* HemmLoopVar4(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
-		   Node *Bin, unsigned int Bnum,
-		   Node *Cin, unsigned int Cnum,
+Loop* HemmLoopVar8(Node *Ain, ConnNum Anum,
+		   Node *Bin, ConnNum Bnum,
+		   Node *Cin, ConnNum Cnum,
 		   Side side, Tri tri,
 		   Coef alpha, Coef beta,
 		   Type type,
@@ -530,9 +530,9 @@ Loop* HemmLoopVar8(Node *Ain, unsigned int Anum,
 
 
 #if DOELEM
-Loop* HemmLoopVar8Altered(Node *Ain, unsigned int Anum,
-		   Node *Bin, unsigned int Bnum,
-		   Node *Cin, unsigned int Cnum,
+Loop* HemmLoopVar8Altered(Node *Ain, ConnNum Anum,
+		   Node *Bin, ConnNum Bnum,
+		   Node *Cin, ConnNum Cnum,
 		   Side side, Tri tri,
 		   Coef alpha, Coef beta,
 		   Type type,
@@ -786,7 +786,7 @@ void LocalSymmAcc::PrintCode(IndStream &out)
  
   out << m_alpha;
 
-  for (unsigned int i = 0; i < 5; ++i)
+  for (ConnNum i = 0; i < 5; ++i)
     *out << ", " << GetInputNameStr(i);
 
   *out << " );\n";
@@ -1013,11 +1013,11 @@ void BLISHemmLoopExp::Apply(Node *node) const
   connC = hemm->m_inputs[2];
   
   Node *Ain = connA->m_n;
-  unsigned int Anum = connA->m_num;
+  ConnNum Anum = connA->m_num;
   Node *Bin = connB->m_n;
-  unsigned int Bnum = connB->m_num;
+  ConnNum Bnum = connB->m_num;
   Node *Cin = connC->m_n;
-  unsigned int Cnum = connC->m_num;
+  ConnNum Cnum = connC->m_num;
 
   if (hemm->m_side == RIGHT) {
     throw;

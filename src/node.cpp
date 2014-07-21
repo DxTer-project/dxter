@@ -92,7 +92,7 @@ void Node::Cull(Phase phase)
       }
 
 #endif
-      for (unsigned int i = 0; i < m_inputs.size(); ++i) {
+      for (ConnNum i = 0; i < m_inputs.size(); ++i) {
         DLANode *in = (DLANode*)Input(i);
         cout << "Input " << i 
 #if DOELEM
@@ -115,13 +115,13 @@ void Node::Cull(Phase phase)
   }
 }
 
-void Node::AddChild(Node *node, unsigned int num)
+void Node::AddChild(Node *node, ConnNum num)
 {
   NodeConn *conn = new NodeConn(node,num);
   m_children.push_back(conn);
 }
 
-void Node::RemoveChild(Node *node, unsigned int num)
+void Node::RemoveChild(Node *node, ConnNum num)
 {
   NodeConnVecIter iter = m_children.begin();
   for( ; iter != m_children.end(); ++iter) {
@@ -142,7 +142,7 @@ void Node::RemoveChild(Node *node, unsigned int num)
   throw;
 }
 
-void Node::RemoveInput(Node *node, unsigned int num)
+void Node::RemoveInput(Node *node, ConnNum num)
 {
   /*****
    Notice that this invalidates/makes insane the node
@@ -371,7 +371,7 @@ bool Node::CanPrintCode() const
   for( ; iter != m_inputs.end(); ++iter) {
     const NodeConn *conn = *iter;
     const Node *input = conn->m_n;
-    unsigned int num = conn->m_num;
+    ConnNum num = conn->m_num;
     if (!input->HasPrinted()) {
       return false;
     }
@@ -384,7 +384,7 @@ bool Node::CanPrintCode() const
       for(; childIter != input->m_children.end(); ++childIter) {
         const NodeConn *childConn = *childIter;
         const Node *child = childConn->m_n;
-        unsigned int childNum = childConn->m_num;
+        ConnNum childNum = childConn->m_num;
         if (childNum == num && child != this && !child->IsPossTunnel(POSSTUNOUT)) {
           if (child->Overwrites(input, num)) {
             cout << "two children of " << input->GetNodeClass() << " overwrite output " << childNum << "\n";
@@ -436,7 +436,7 @@ void Node::AddInput(Node *node)
   }
 }
 
-void Node::AddInput(Node *node, unsigned int num)
+void Node::AddInput(Node *node, ConnNum num)
 {
   //  cout << "adding input " << node << " to " << this << endl;
   NodeConn *conn = new NodeConn(node, num);
@@ -455,12 +455,12 @@ void Node::AddInputs(int numArgs, ...)
   }
 }
 
-void Node::ChangeInput1Way(Node *oldInput, unsigned int oldNum, Node *newInput, unsigned int newNum)
+void Node::ChangeInput1Way(Node *oldInput, ConnNum oldNum, Node *newInput, ConnNum newNum)
 {
   //Reflect in 2Way
   if (oldInput == newInput && oldNum == newNum)
     throw;
-  unsigned int i = 0;
+  ConnNum i = 0;
   NodeConnVecIter iter = m_inputs.begin();
   for ( ; iter != m_inputs.end(); ++iter) {
     if ((*iter)->m_n == oldInput && (*iter)->m_num == oldNum) {
@@ -473,17 +473,17 @@ void Node::ChangeInput1Way(Node *oldInput, unsigned int oldNum, Node *newInput, 
   }
   cout << "Didn't find oldInput " << oldInput->GetType() << " " << oldInput << " to " <<
   GetType() << " " << this << "!\n";
-  for (unsigned int i = 0; i < m_inputs.size(); ++i)
+  for (ConnNum i = 0; i < m_inputs.size(); ++i)
     cout << "input " << i << " is " << m_inputs[i]->m_n->GetType() << " " <<  m_inputs[i] << " on " << m_inputs[i]->m_n->m_poss << endl;
   throw;
 }
 
-void Node::ChangeInput2Way(Node *oldInput, unsigned int oldNum, Node *newInput, unsigned int newNum)
+void Node::ChangeInput2Way(Node *oldInput, ConnNum oldNum, Node *newInput, ConnNum newNum)
 {
   //Reflect in 1Way
   if (oldInput == newInput && oldNum == newNum)
     throw;
-  unsigned int i = 0;
+  ConnNum i = 0;
   NodeConnVecIter iter = m_inputs.begin();
   for ( ; iter != m_inputs.end(); ++iter) {
     if ((*iter)->m_n == oldInput && (*iter)->m_num == oldNum) {
@@ -498,7 +498,7 @@ void Node::ChangeInput2Way(Node *oldInput, unsigned int oldNum, Node *newInput, 
   }
   cout << "Didn't find oldInput " << oldInput->GetType() << " " << oldInput << " to " <<
   GetType() << " " << this << "!\n";
-  for (unsigned int i = 0; i < m_inputs.size(); ++i)
+  for (ConnNum i = 0; i < m_inputs.size(); ++i)
     cout << "input " << i << " is " << m_inputs[i]->m_n->GetType() << " " <<  m_inputs[i] << " on " << m_inputs[i]->m_n->m_poss << endl;
   throw;
 }
@@ -513,7 +513,7 @@ void Node::RedirectChildren(Node *newInput)
     RedirectChildren(newInput, 0);
 }
 
-void Node::RedirectChildren(Node *newInput, unsigned int newNum)
+void Node::RedirectChildren(Node *newInput, ConnNum newNum)
 {
   if (NumOutputs() != 1) {
     cout << "Bad call to RedirectChildren 2\n";
@@ -523,7 +523,7 @@ void Node::RedirectChildren(Node *newInput, unsigned int newNum)
     RedirectChildren(0, newInput, newNum);
 }
 
-void Node::RedirectChildren(unsigned int oldNum, Node *newInput, unsigned int newNum)
+void Node::RedirectChildren(ConnNum oldNum, Node *newInput, ConnNum newNum)
 {
   bool found = false;
   if (!m_children.size()) {
@@ -551,7 +551,7 @@ void Node::RedirectAllChildren(Node *newInput)
   }
 }
 
-void Node::RedirectChild(unsigned int childNum, Node *newInput, unsigned int newNum)
+void Node::RedirectChild(unsigned int childNum, Node *newInput, ConnNum newNum)
 {
   NodeConn *conn = m_children[childNum];
   conn->m_n->ChangeInput1Way(this, conn->m_num, newInput, newNum);
@@ -680,7 +680,7 @@ NodeType Node::GetType() const
   throw;
 }
 
-Name Node::GetInputName(unsigned int num) const
+Name Node::GetInputName(ConnNum num) const
 {
   if (num >= m_inputs.size()) {
     cout << "num too big " << GetType() << "\n";
@@ -694,7 +694,7 @@ void Node::AddToPoss(Poss *poss)
   poss->m_possNodes.push_back(this);
 }
 
-Node* Node::Input(unsigned int num) const
+Node* Node::Input(ConnNum num) const
 {
   if (num >= m_inputs.size()) {
     cout << "num bad size on " << GetType() << "\n";
@@ -709,7 +709,7 @@ Node* Node::Input(unsigned int num) const
   return conn->m_n;
 }
 
-NodeConn* Node::InputConn(unsigned int num) const
+NodeConn* Node::InputConn(ConnNum num) const
 {
   if (num >= m_inputs.size()) {
     cout << "num bad size on " << GetType() << "\n";
@@ -723,7 +723,7 @@ NodeConn* Node::InputConn(unsigned int num) const
   return m_inputs[num];
 }
 
-unsigned int Node::InputConnNum(unsigned int num) const
+ConnNum Node::InputConnNum(ConnNum num) const
 {
   if (m_inputs.size() <= num)
     throw;
@@ -735,12 +735,12 @@ Node* Node::Child(unsigned int num) const
   return m_children[num]->m_n;
 }
 
-unsigned int Node::ChildConnNum(unsigned int num) const
+ConnNum Node::ChildConnNum(unsigned int num) const
 {
   return m_children[num]->m_num;
 }
 
-unsigned int Node::NumChildrenOfOutput(unsigned int num) const
+unsigned int Node::NumChildrenOfOutput(ConnNum num) const
 {
   unsigned int count = 0;
   NodeConnVecConstIter iter = m_children.begin();
@@ -750,7 +750,7 @@ unsigned int Node::NumChildrenOfOutput(unsigned int num) const
   return count;
 }
 
-bool Node::InChildren(Node *node, unsigned int num) const
+bool Node::InChildren(Node *node, ConnNum num) const
 {
   NodeConnVecConstIter iter = m_children.begin();
   for(; iter != m_children.end(); ++iter) {
@@ -760,7 +760,7 @@ bool Node::InChildren(Node *node, unsigned int num) const
   return false;
 }
 
-bool Node::InInputs(Node *node, unsigned int num) const
+bool Node::InInputs(Node *node, ConnNum num) const
 {
   NodeConnVecConstIter iter = m_inputs.begin();
   for(; iter != m_inputs.end(); ++iter)
@@ -777,7 +777,7 @@ void Node::PrintChildren()
 
 void Node::PrintInputs()
 {
-  for (unsigned int i = 0; i < m_inputs.size(); ++i) {
+  for (ConnNum i = 0; i < m_inputs.size(); ++i) {
     const Node *node = Input(i);
     cout << "Input " << i << " " << node->GetType() << " " << node << endl;
   }
@@ -954,7 +954,7 @@ void Node::AddVariables(VarSet &set) const
 #endif
 }
 
-const DataTypeInfo& Node::InputDataType(unsigned int num) const
+const DataTypeInfo& Node::InputDataType(ConnNum num) const
 {
   const NodeConn *conn = m_inputs[num];
   return conn->m_n->DataType(conn->m_num);

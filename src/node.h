@@ -36,14 +36,16 @@ void PrintSetOrNodeInputs(Node *node);
 
 //#define TRACKORIG
 
+typedef unsigned int ConnNum;
+
 //Keeps track of child/parent node and the
 // input/output number
 class NodeConn {
  public:
   Node *m_n;
-  unsigned int m_num;
+  ConnNum m_num;
  NodeConn() : m_n(NULL) {}
-  NodeConn(Node *n, unsigned int num);
+  NodeConn(Node *n, ConnNum num);
   NodeConn(const NodeConn *conn);
   bool operator==(const NodeConn &rhs) const;
   void SetNode(Node *node);
@@ -105,13 +107,13 @@ class Node
   //Static class type
   static ClassType GetClass() {return "node";}
   //Get the name of the output variable
-  virtual Name GetName(unsigned int num) const = 0;
+  virtual Name GetName(ConnNum num) const = 0;
   //Returns true if the node overwrites the variable passed in by Node input
-  virtual bool Overwrites(const Node *input, unsigned int num) const = 0;
+  virtual bool Overwrites(const Node *input, ConnNum num) const = 0;
   //Returns true if the variable passed in by Node input is also passed
   // out of the node
-  virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, 
-				 unsigned int &numOut) const = 0;
+  virtual bool KeepsInputVarLive(Node *input, ConnNum numIn, 
+				 ConnNum &numOut) const = 0;
   //Add any variable declarations for this node (e.g., new
   // variables that are used as temporaries)
   //Should super message
@@ -132,9 +134,9 @@ class Node
   virtual ~Node();
   void Cull(Phase phase);
   void CheckConnections();
-  void AddChild(Node *node, unsigned int num);
-  void RemoveChild(Node *node, unsigned int num);
-  void RemoveInput(Node *node, unsigned int num);
+  void AddChild(Node *node, ConnNum num);
+  void RemoveChild(Node *node, ConnNum num);
+  void RemoveInput(Node *node, ConnNum num);
   void RemoveAllInputs2Way();
   void RemoveAllChildren2Way();
   virtual bool operator==(const Node &rhs) const;
@@ -146,37 +148,37 @@ class Node
   void AddInputs(int numArgs, ...);
 
   //num is the output number of the input that this is taking as input
-  void AddInput(Node *node, unsigned int num);
-  void ChangeInput1Way(Node *oldInput, unsigned int oldNum, Node *newInput, unsigned int newNum);
-  void ChangeInput2Way(Node *oldInput, unsigned int oldNum, Node *newInput, unsigned int newNum);
+  void AddInput(Node *node, ConnNum num);
+  void ChangeInput1Way(Node *oldInput, ConnNum oldNum, Node *newInput, ConnNum newNum);
+  void ChangeInput2Way(Node *oldInput, ConnNum oldNum, Node *newInput, ConnNum newNum);
   void RedirectChildren(Node *newInput);
-  void RedirectChildren(Node *newInput, unsigned int newNum);
-  void RedirectChildren(unsigned int oldNum, Node *newInput, unsigned int newNum);
+  void RedirectChildren(Node *newInput, ConnNum newNum);
+  void RedirectChildren(ConnNum oldNum, Node *newInput, ConnNum newNum);
   void RedirectAllChildren(Node *newInput);
-  void RedirectChild(unsigned int childNum, Node *newInput, unsigned int newNum);
+  void RedirectChild(unsigned int childNum, Node *newInput, ConnNum newNum);
   bool HasApplied(const Transformation*) const;
   bool Applied(const Transformation*);
   void SetPoss(Poss *poss) {m_poss=poss;}
-  string GetNameStr(unsigned int num) const {return GetName(num).str();}
-  Name GetInputName(unsigned int num) const;
-  string GetInputNameStr(unsigned int num) const {return GetInputName(num).str();}
+  string GetNameStr(ConnNum num) const {return GetName(num).str();}
+  Name GetInputName(ConnNum num) const;
+  string GetInputNameStr(ConnNum num) const {return GetInputName(num).str();}
   inline void ClearPrinted() {m_flags &= ~PRINTEDFLAG;}
   inline void SetPrinted() {m_flags |= PRINTEDFLAG;} 
   inline bool HasPrinted() const {return m_flags & PRINTEDFLAG;}
   inline void ClearHasRefined() {m_flags &= ~HASREFINEDFLAG;}
   inline void SetHasRefined() {m_flags |= HASREFINEDFLAG;} 
   inline bool HasRefined() const {return m_flags & HASREFINEDFLAG;}
-  Node* Input(unsigned int num) const;
-  NodeConn* InputConn(unsigned int num) const;
+  Node* Input(ConnNum num) const;
+  NodeConn* InputConn(ConnNum num) const;
   //output number of the input taken as input
-  unsigned int InputConnNum(unsigned int num) const;
+  ConnNum InputConnNum(ConnNum num) const;
   Node* Child(unsigned int num) const;
   //child of my output number num
-  unsigned int ChildConnNum(unsigned int num) const;
+  ConnNum ChildConnNum(ConnNum num) const;
   void AddToPoss(Poss *poss);
-  unsigned int NumChildrenOfOutput(unsigned int num) const;
-  bool InChildren(Node *node, unsigned int num) const;
-  bool InInputs(Node *node, unsigned int num) const;
+  unsigned int NumChildrenOfOutput(ConnNum num) const;
+  bool InChildren(Node *node, ConnNum num) const;
+  bool InInputs(Node *node, ConnNum num) const;
   virtual bool IsDLA() const {return false;}
   virtual bool IsPossTunnel() const {return false;}
   virtual bool IsPossTunnel(PossTunType type) const {return false;}
@@ -204,8 +206,8 @@ class Node
   void Unflatten(ifstream &in, SaveInfo &info);
   virtual void UnflattenCore(ifstream &in, SaveInfo &info) = 0;
 
-  virtual const DataTypeInfo& DataType(unsigned int num) const = 0;
-  virtual const DataTypeInfo& InputDataType(unsigned int num) const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const = 0;
+  virtual const DataTypeInfo& InputDataType(ConnNum num) const;
 
   string GetFunctionalityString() const;
 };

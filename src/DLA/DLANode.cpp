@@ -69,7 +69,7 @@ void DLANode::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 #if TWOD
-const Sizes* DLANode::GetInputM(unsigned int num) const
+const Sizes* DLANode::GetInputM(ConnNum num) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -77,11 +77,11 @@ const Sizes* DLANode::GetInputM(unsigned int num) const
     throw;
   }
   const DLANode *in = (DLANode*)Input(num);
-  unsigned int inNum = InputConnNum(num);
+  ConnNum inNum = InputConnNum(num);
   return in->GetM(inNum);
 }
 
-const Sizes* DLANode::GetInputN(unsigned int num) const 
+const Sizes* DLANode::GetInputN(ConnNum num) const 
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 4\n";
@@ -89,12 +89,12 @@ const Sizes* DLANode::GetInputN(unsigned int num) const
   }
   const NodeConn *conn = m_inputs[num];
   const DLANode *in = (DLANode*)(conn->m_n);
-  unsigned int inNum = conn->m_num;
+  ConnNum inNum = conn->m_num;
   return in->GetN(inNum);
 }
 
 #if DODM
-const Sizes* DLANode::InputLocalM(unsigned int num) const
+const Sizes* DLANode::InputLocalM(ConnNum num) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -102,24 +102,24 @@ const Sizes* DLANode::InputLocalM(unsigned int num) const
     throw;
   }
   DLANode *in = (DLANode*)Input(num);
-  unsigned int inNum = InputConnNum(num);
+  ConnNum inNum = InputConnNum(num);
   return in->LocalM(inNum);
 }
 
-const Sizes* DLANode::InputLocalN(unsigned int num) const 
+const Sizes* DLANode::InputLocalN(ConnNum num) const 
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 4\n";
     throw;
   }
   DLANode *in = (DLANode*)Input(num);
-  unsigned int inNum = InputConnNum(num);
+  ConnNum inNum = InputConnNum(num);
   return in->LocalN(inNum);
 }
 #endif //DODM
 
 #else
-const Sizes* DLANode::InputLen(unsigned int num, Dim dim) const
+const Sizes* DLANode::InputLen(ConnNum num, Dim dim) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -127,12 +127,12 @@ const Sizes* DLANode::InputLen(unsigned int num, Dim dim) const
     throw;
   }
   const DLANode *in = (DLANode*)Input(num);
-  unsigned int inNum = InputConnNum(num);
+  ConnNum inNum = InputConnNum(num);
   return in->Len(inNum, dim);
 }
 
 
-const Sizes* DLANode::InputLocalLen(unsigned int num, Dim dim) const
+const Sizes* DLANode::InputLocalLen(ConnNum num, Dim dim) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -140,12 +140,12 @@ const Sizes* DLANode::InputLocalLen(unsigned int num, Dim dim) const
     throw;
   }
   DLANode *in = (DLANode*)Input(num);
-  unsigned int inNum = InputConnNum(num);
+  ConnNum inNum = InputConnNum(num);
   return in->LocalLen(inNum, dim);
 }
 
 
-const Dim DLANode::InputNumDims(unsigned int num) const
+const Dim DLANode::InputNumDims(ConnNum num) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -153,7 +153,7 @@ const Dim DLANode::InputNumDims(unsigned int num) const
     throw;
   }
   DLANode *in = (DLANode*)Input(num);
-  unsigned int inNum = InputConnNum(num);
+  ConnNum inNum = InputConnNum(num);
   return in->NumDims(inNum);
 }
 
@@ -161,13 +161,13 @@ const Dim DLANode::InputNumDims(unsigned int num) const
 #endif
 
 #if DOELEM
-DLANode* DLANode::FindNonRedistParent(unsigned int num)
+DLANode* DLANode::FindNonRedistParent(ConnNum num)
 {
-  unsigned int trash;
+  ConnNum trash;
   return FindNonRedistParent(num, trash);
 }
 
-DLANode* DLANode::FindNonRedistParent(unsigned int num, unsigned int &parentNum)
+DLANode* DLANode::FindNonRedistParent(ConnNum num, ConnNum &parentNum)
 {
   Node *parent = Input(num);
   parentNum = InputConnNum(num);
@@ -185,13 +185,13 @@ DLANode* DLANode::FindNonRedistParent(unsigned int num, unsigned int &parentNum)
 #endif
 
 #if TWOD
-bool DLANode::IsScalar(unsigned int num) const
+bool DLANode::IsScalar(ConnNum num) const
 {
   return GetM(num)->AllOnes() && GetN(num)->AllOnes();
 }
 #endif
 
-DLANode* DLANode::FindSideEffectingUser(unsigned int num)
+DLANode* DLANode::FindSideEffectingUser(ConnNum num)
 {
   NodeConnVecIter iter = m_children.begin();
   for(; iter != m_children.end(); ++iter) {
@@ -221,7 +221,7 @@ void DLANode::UpdateInnerPackingMultiple(PackSize size)
 {
   cout << GetNodeClass() << endl;
   cout << endl;
-  for(unsigned int i = 0; i < m_inputs.size(); ++i)
+  for(ConnNum i = 0; i < m_inputs.size(); ++i)
     cout << i << " " << Input(i)->GetNodeClass() << endl;
   cout << endl;
   for(unsigned int i = 0; i < m_children.size(); ++i)

@@ -193,7 +193,7 @@ Cost DistGemmToLocalGemmStatC::RHSCostEstimate(const Node *node) const
   bool normB = orig->m_transB==NORMAL;
   
   const DLANode *input = (DLANode*)(orig->Input(0));
-  unsigned int inputNum = orig->InputConnNum(0);
+  ConnNum inputNum = orig->InputConnNum(0);
   
   const Sizes *A1 = input->GetM(inputNum);
   const Sizes *A2 = input->GetN(inputNum);
@@ -611,7 +611,7 @@ bool GemmInputReordering::CanApply(const Node *node) const
   Gemm *gemm = (Gemm*)node;
   if (gemm->GetLayer() != DMLAYER)
     return false;
-  unsigned int Anum, Bnum;
+  ConnNum Anum, Bnum;
   DLANode *A = gemm->FindNonRedistParent(0, Anum);
   DLANode *B = gemm->FindNonRedistParent(1, Bnum);
   
@@ -726,7 +726,7 @@ void GemmInputReordering::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
   gemm->m_inverseOps.insert(m_inverse);
-  unsigned int Anum, Bnum;
+  ConnNum Anum, Bnum;
   DLANode *A = gemm->FindNonRedistParent(0, Anum);
   DLANode *B = gemm->FindNonRedistParent(1, Bnum);
   
@@ -794,9 +794,9 @@ void GemmInputReordering::Apply(Node *node) const
 }
 #endif
 
-Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
-                   Node *Bin, unsigned int Bnum,
-                   Node *Cin, unsigned int Cnum,
+Loop* GemmVar1Loop(Node *Ain, ConnNum Anum,
+                   Node *Bin, ConnNum Bnum,
+                   Node *Cin, ConnNum Cnum,
 		   BSSize bs,
                    Trans transA, Trans transB,
                    Coef alpha, Coef beta,
@@ -855,9 +855,9 @@ Loop* GemmVar1Loop(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
-                   Node *Bin, unsigned int Bnum,
-                   Node *Cin, unsigned int Cnum,
+Loop* GemmVar3Loop(Node *Ain, ConnNum Anum,
+                   Node *Bin, ConnNum Bnum,
+                   Node *Cin, ConnNum Cnum,
 		   BSSize bs,
                    Trans transA, Trans transB,
                    bool reverse,
@@ -975,9 +975,9 @@ Loop* GemmVar3Loop(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* GemmVar2Loop(Node *Ain, unsigned int Anum,
-                   Node *Bin, unsigned int Bnum,
-                   Node *Cin, unsigned int Cnum,
+Loop* GemmVar2Loop(Node *Ain, ConnNum Anum,
+                   Node *Bin, ConnNum Bnum,
+                   Node *Cin, ConnNum Cnum,
 		   BSSize bs,
                    Trans transA, Trans transB,
                    Coef alpha, Coef beta,
@@ -1061,9 +1061,9 @@ void BLISGemmLoopExp::Apply(Node *node) const
   connC = gemm->m_inputs[2];
   
   Node *Bin = connB->m_n;
-  unsigned int Bnum = connB->m_num;
+  ConnNum Bnum = connB->m_num;
   Node *Cin = connC->m_n;
-  unsigned int Cnum = connC->m_num;
+  ConnNum Cnum = connC->m_num;
   
   SplitSingleIter *splitA = new SplitSingleIter(gemm->m_transA == NORMAL ? PARTDOWN : PARTRIGHT, POSSTUNIN);
   splitA->AddInput(connA->m_n, connA->m_num);
@@ -1098,7 +1098,7 @@ void BLISGemmLoopExp::Apply(Node *node) const
   splitC->SetIndepIters();
   
   Node *Ain = splitA;
-  unsigned int Anum = 1;
+  ConnNum Anum = 1;
   string name;
   
   if (gemm->m_transA != NORMAL) {
@@ -1221,7 +1221,7 @@ void SplitGemm::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
   Node *Cin = gemm->Input(2);
-  unsigned int Cnum = gemm->InputConnNum(2);
+  ConnNum Cnum = gemm->InputConnNum(2);
 
 #if DOELEM
   TempVarNode *CTmp = new TempVarNode(D_MC_MR, "CTemp");

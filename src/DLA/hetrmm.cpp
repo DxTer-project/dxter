@@ -204,7 +204,7 @@ void DistHetrmmToLocalHetrmm::Apply(Node *node) const
 }
 #endif
 
-Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num)
+Loop* HetrmmAlgVar1Lower(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
@@ -258,7 +258,7 @@ Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num)
 
 
 
-Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num)
+Loop* HetrmmAlgVar1Upper(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
@@ -305,7 +305,7 @@ Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num)
 #endif
 }
 
-Loop* HetrmmAlgVar2Lower(Node *in, unsigned int num)
+Loop* HetrmmAlgVar2Lower(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
@@ -361,7 +361,7 @@ Loop* HetrmmAlgVar2Lower(Node *in, unsigned int num)
 #endif
 }
 
-Loop* HetrmmAlgVar2Upper(Node *in, unsigned int num)
+Loop* HetrmmAlgVar2Upper(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
@@ -414,7 +414,7 @@ Loop* HetrmmAlgVar2Upper(Node *in, unsigned int num)
 #endif
 }
 
-Loop* HetrmmAlgVar3Lower(Node *in, unsigned int num)
+Loop* HetrmmAlgVar3Lower(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
@@ -468,7 +468,7 @@ Loop* HetrmmAlgVar3Lower(Node *in, unsigned int num)
 }
 
 
-Loop* HetrmmAlgVar3Upper(Node *in, unsigned int num)
+Loop* HetrmmAlgVar3Upper(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);

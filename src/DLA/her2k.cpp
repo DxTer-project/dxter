@@ -784,9 +784,9 @@ bool Tri2kTrans::CanApply(const Node *node) const
 }
 #endif
 
-Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum,
-                    Node *Bin, unsigned int Bnum,
-                    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar1(Node *Ain, ConnNum Anum,
+                    Node *Bin, ConnNum Bnum,
+                    Node *Cin, ConnNum Cnum,
                     Tri tri,
                     Trans trans,
                     Coef alpha, Coef beta, Type type,
@@ -882,9 +882,9 @@ Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* Her2kLoopVar2(Node *Ain, unsigned int Anum,
-                    Node *Bin, unsigned int Bnum,
-                    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar2(Node *Ain, ConnNum Anum,
+                    Node *Bin, ConnNum Bnum,
+                    Node *Cin, ConnNum Cnum,
                     Tri tri,
                     Trans trans,
                     Coef alpha, Coef beta, Type type,
@@ -984,9 +984,9 @@ Loop* Her2kLoopVar2(Node *Ain, unsigned int Anum,
   return loop;
 }
 
-Loop* Her2kLoopVar3(Node *Ain, unsigned int Anum,
-                    Node *Bin, unsigned int Bnum,
-                    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar3(Node *Ain, ConnNum Anum,
+                    Node *Bin, ConnNum Bnum,
+                    Node *Cin, ConnNum Cnum,
                     Tri tri,
                     Trans trans,
                     Coef alpha, Coef beta, Type type,
@@ -1088,9 +1088,9 @@ Loop* Her2kLoopVar3(Node *Ain, unsigned int Anum,
 
 
 
-Loop* Her2kLoopVar4(Node *Ain, unsigned int Anum,
-                    Node *Bin, unsigned int Bnum,
-                    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar4(Node *Ain, ConnNum Anum,
+                    Node *Bin, ConnNum Bnum,
+                    Node *Cin, ConnNum Cnum,
                     Tri tri,
                     Trans trans,
                     Coef alpha, Coef beta, Type type,
@@ -1190,9 +1190,9 @@ Loop* Her2kLoopVar4(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
-                    Node *Bin, unsigned int Bnum,
-                    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar9(Node *Ain, ConnNum Anum,
+                    Node *Bin, ConnNum Bnum,
+                    Node *Cin, ConnNum Cnum,
                     Tri tri,
                     Trans trans,
                     Coef alpha, Coef beta, Type type,
@@ -1245,11 +1245,11 @@ Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum,
   return loop;
 }
 
-Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
-                     Node *Bin, unsigned int Bnum,
-                     Node *Cin, unsigned int Cnum,
-                     Node *Din, unsigned int Dnum,
-                     Node *Ein, unsigned int Enum,
+Loop* Tri2kLoopVar10(Node *Ain, ConnNum Anum,
+                     Node *Bin, ConnNum Bnum,
+                     Node *Cin, ConnNum Cnum,
+                     Node *Din, ConnNum Dnum,
+                     Node *Ein, ConnNum Enum,
                      Tri tri,
                      Coef alpha, Coef beta, Type type,
                      Layer layer)
@@ -1344,11 +1344,11 @@ Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum,
 }
 #endif
 
-Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
-                     Node *Bin, unsigned int Bnum,
-                     Node *Cin, unsigned int Cnum,
-                     Node *Din, unsigned int Dnum,
-                     Node *Ein, unsigned int Enum,
+Loop* Tri2kLoopVar9(Node *Ain, ConnNum Anum,
+                     Node *Bin, ConnNum Bnum,
+                     Node *Cin, ConnNum Cnum,
+                     Node *Din, ConnNum Dnum,
+                     Node *Ein, ConnNum Enum,
                      Tri tri,
                      Coef alpha, Coef beta, Type type,
                      Layer layer)
@@ -1506,10 +1506,10 @@ void Her2kToTri2K::Apply(Node *node) const
   Her2k *her2k = (Her2k*)node;
   
   Node *Ain = her2k->Input(0);
-  unsigned int Anum = her2k->InputConnNum(0);
+  ConnNum Anum = her2k->InputConnNum(0);
   
   Node *Bin = her2k->Input(1);
-  unsigned int Bnum = her2k->InputConnNum(1);
+  ConnNum Bnum = her2k->InputConnNum(1);
   
   Transpose *Atrans = new Transpose(her2k->m_type == REAL ? 
                                     TRANS : CONJTRANS,

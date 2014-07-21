@@ -200,7 +200,7 @@ void Pack::PrintCode(IndStream &out)
   
 }
 
-Name Pack::GetName(unsigned int num) const
+Name Pack::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -454,7 +454,7 @@ PackBuff::PackBuff(string name,
   m_n = nSize;
 }
 
-Name PackBuff::GetName(unsigned int num) const
+Name PackBuff::GetName(ConnNum num) const
 {
   return m_name;
 }
@@ -615,7 +615,7 @@ bool CombinePacking::CanApply(const Node *node) const
   if (node->GetNodeClass() != Pack::GetClass())
     throw;
   const Node *par = node->Input(0);
-  unsigned int num = node->InputConnNum(0);
+  ConnNum num = node->InputConnNum(0);
   NodeConnVecConstIter iter = par->m_children.begin();
   for(; iter != par->m_children.end(); ++iter) {
     const NodeConn *conn = *iter;
@@ -650,7 +650,7 @@ void CombinePacking::Apply(Node *node) const
 {
   Pack *pack = (Pack*)node;
   Node *par = node->Input(0);
-  unsigned int num = node->InputConnNum(0);
+  ConnNum num = node->InputConnNum(0);
   NodeConnVecIter iter = par->m_children.begin();
   for(; iter != par->m_children.end(); ++iter) {
     NodeConn *conn = *iter;
@@ -905,7 +905,7 @@ bool ReuseTrsmPacking::CanApply(const Node *node) const
     return false;
   if (((DLANode*)source)->GetLayer() != m_layer)
     return false;
-  unsigned int num = possTun->InputConnNum(1);
+  ConnNum num = possTun->InputConnNum(1);
   if (num != 1)
     return false;
   else

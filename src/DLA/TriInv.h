@@ -27,16 +27,16 @@
 #include "transform.h"
 #include "DLAOp.h"
 
-Loop* TriInvAlgVar1Lower(Node *in, unsigned int num);
-Loop* TriInvAlgVar1Upper(Node *in, unsigned int num);
+Loop* TriInvAlgVar1Lower(Node *in, ConnNum num);
+Loop* TriInvAlgVar1Upper(Node *in, ConnNum num);
 
-Loop* TriInvAlgVar2Lower(Node *in, unsigned int num);
-Loop* TriInvAlgVar2Upper(Node *in, unsigned int num);
+Loop* TriInvAlgVar2Lower(Node *in, ConnNum num);
+Loop* TriInvAlgVar2Upper(Node *in, ConnNum num);
 
-Loop* TriInvAlgVar3Lower(Node *in, unsigned int num);
-Loop* TriInvAlgVar3Upper(Node *in, unsigned int num);
+Loop* TriInvAlgVar3Lower(Node *in, ConnNum num);
+Loop* TriInvAlgVar3Upper(Node *in, ConnNum num);
 
-Loop* TriInvAlgVar8Lower(Node *in, unsigned int num);
+Loop* TriInvAlgVar8Lower(Node *in, ConnNum num);
 
 class TriInv : public DLAOp<1,1>
 {

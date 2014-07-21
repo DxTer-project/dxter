@@ -972,7 +972,7 @@ FindMidDistributions::FindMidDistributions(DistType srcType, DistType midType, D
 }
 
 
-DLANode* FindRedistribution(DLANode *root, unsigned int num, DLANode *ignore, DistType type, bool goUp, unsigned int &outNum)
+DLANode* FindRedistribution(DLANode *root, ConnNum num, DLANode *ignore, DistType type, bool goUp, ConnNum &outNum)
 {
   if (!root)
     return NULL;
@@ -1024,7 +1024,7 @@ bool FindMidDistributions::CanApply(const Node *node) const
       }
     }
   }
-  unsigned int num;
+  ConnNum num;
   return FindRedistribution(parent, ddla->InputConnNum(0), ddla, m_midType, true, num) != NULL;
 }
 
@@ -1044,11 +1044,11 @@ void FindMidDistributions::Apply(Node *node) const
       }
     }
   }
-  unsigned int num;
+  ConnNum num;
   DLANode *newParent = FindRedistribution(parent, ddla->InputConnNum(0), ddla, m_midType, true, num);
   if (!newParent)
     throw;
-  unsigned int oldNum = node->InputConnNum(0);
+  ConnNum oldNum = node->InputConnNum(0);
   node->ChangeInput1Way(parent, oldNum, newParent, num);
   parent->RemoveChild(node, oldNum);
   if (parent->m_children.empty()) {
@@ -1309,21 +1309,21 @@ Cost RedistNode::GetCost(DistType srcType, DistType destType, const Sizes *m, co
   return cost;
 }
 
-const Sizes* RedistNode::GetM(unsigned int num) const
+const Sizes* RedistNode::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputM(0);
 }
 
-const Sizes* RedistNode::GetN(unsigned int num) const
+const Sizes* RedistNode::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputN(0);
 }
 
-Name RedistNode::GetName(unsigned int num) const
+Name RedistNode::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -1452,7 +1452,7 @@ void SumScatterNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
   m_coeff = origNode->m_coeff;
 }
 
-bool SumScatterNode::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const
+bool SumScatterNode::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(1) == input && InputConnNum(1) == numIn) {
     numOut = 0;
@@ -1462,7 +1462,7 @@ bool SumScatterNode::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned
     return false;
 }
 
-bool SumScatterNode::Overwrites(const Node *input, unsigned int num) const
+bool SumScatterNode::Overwrites(const Node *input, ConnNum num) const
 {
   const NodeConn *conn = m_inputs[1];
   return conn->m_n == input && conn->m_num == num;
@@ -1569,35 +1569,35 @@ Cost SumScatterNode::GetCost(const Sizes *localMs, const Sizes *localNs, DistTyp
   return cost;
 }
 
-const Sizes* SumScatterNode::GetM(unsigned int num) const
+const Sizes* SumScatterNode::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputM(1);
 }
 
-const Sizes* SumScatterNode::GetN(unsigned int num) const
+const Sizes* SumScatterNode::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputN(1);
 }
 
-const Sizes* SumScatterNode::LocalM(unsigned int num) const
+const Sizes* SumScatterNode::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputLocalM(1);
 }
 
-const Sizes* SumScatterNode::LocalN(unsigned int num) const
+const Sizes* SumScatterNode::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputLocalN(1);
 }
 
-Name SumScatterNode::GetName(unsigned int num) const
+Name SumScatterNode::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -1681,13 +1681,13 @@ void SumScatterFrom::Prop()
   }
 }
 
-bool SumScatterFrom::Overwrites(const Node *input, unsigned int num) const
+bool SumScatterFrom::Overwrites(const Node *input, ConnNum num) const
 {
   const NodeConn *conn = m_inputs[1];
   return conn->m_n == input && conn->m_num == num;
 }
 
-bool SumScatterFrom::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const
+bool SumScatterFrom::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(1) == input && InputConnNum(1) == numIn) {
     numOut = 0;
@@ -1743,35 +1743,35 @@ Cost SumScatterFrom::GetCost(DistType destType, DistType srcType, const Sizes *l
   return cost;
 }
 
-const Sizes* SumScatterFrom::GetM(unsigned int num) const
+const Sizes* SumScatterFrom::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputM(1);
 }
 
-const Sizes* SumScatterFrom::GetN(unsigned int num) const
+const Sizes* SumScatterFrom::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputN(1);
 }
 
-const Sizes* SumScatterFrom::LocalM(unsigned int num) const
+const Sizes* SumScatterFrom::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputLocalM(1);
 }
 
-const Sizes* SumScatterFrom::LocalN(unsigned int num) const
+const Sizes* SumScatterFrom::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputLocalN(1);
 }
 
-Name SumScatterFrom::GetName(unsigned int num) const
+Name SumScatterFrom::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -1794,7 +1794,7 @@ void SumOverCommNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
   DLANode::Duplicate(orig, shallow, possMerging);
 }
 
-bool SumOverCommNode::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const
+bool SumOverCommNode::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(0) == input && InputConnNum(0) == numIn) {
     numOut = numIn;
@@ -1804,7 +1804,7 @@ bool SumOverCommNode::KeepsInputVarLive(Node *input, unsigned int numIn, unsigne
     throw;
 }
 
-bool SumOverCommNode::Overwrites(const Node *input, unsigned int num) const
+bool SumOverCommNode::Overwrites(const Node *input, ConnNum num) const
 {
   const NodeConn *conn = m_inputs[0];
   return conn->m_n == input && conn->m_num == num;
@@ -1863,14 +1863,14 @@ Cost SumOverCommNode::GetCost(DistType destType, const Sizes *localMs, const Siz
   return cost;
 }
 
-const Sizes* SumOverCommNode::GetM(unsigned int num) const
+const Sizes* SumOverCommNode::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputM(0);
 }
 
-const Sizes* SumOverCommNode::GetN(unsigned int num) const
+const Sizes* SumOverCommNode::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -1879,21 +1879,21 @@ const Sizes* SumOverCommNode::GetN(unsigned int num) const
 
 
 
-const Sizes* SumOverCommNode::LocalM(unsigned int num) const
+const Sizes* SumOverCommNode::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputLocalM(0);
 }
 
-const Sizes* SumOverCommNode::LocalN(unsigned int num) const
+const Sizes* SumOverCommNode::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputLocalN(0);
 }
 
-Name SumOverCommNode::GetName(unsigned int num) const
+Name SumOverCommNode::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -1931,7 +1931,7 @@ void RedistNode::BuildDataTypeCache()
   if (m_mSizes)
     return;
   DLANode *in = (DLANode*)Input(0);
-  unsigned int num = InputConnNum(0);
+  ConnNum num = InputConnNum(0);
   const Sizes *ms = in->GetM(num);
   const Sizes *ns = in->GetN(num);
   if (ms->NumSizes() != ns->NumSizes()) {
@@ -1944,7 +1944,7 @@ void RedistNode::BuildDataTypeCache()
   GetLocalSizes(m_info.m_dist, ms, ns, *m_mSizes, *m_nSizes);
 }
 
-const Sizes* RedistNode::LocalM(unsigned int num) const
+const Sizes* RedistNode::LocalM(ConnNum num) const
 {
   if (m_mSizes)
     return m_mSizes;
@@ -1954,7 +1954,7 @@ const Sizes* RedistNode::LocalM(unsigned int num) const
   }
 }
 
-const Sizes* RedistNode::LocalN(unsigned int num) const
+const Sizes* RedistNode::LocalN(ConnNum num) const
 {
   if (m_nSizes)
     return m_nSizes;
@@ -1979,7 +1979,7 @@ bool CanUseUp(const Node *root)
       return true;
     const DLANode *prev = (DLANode*)root;
     const DLANode *curr = (DLANode*)root;
-    unsigned int outputNum = root->InputConnNum(0);
+    ConnNum outputNum = root->InputConnNum(0);
     while (curr->GetNodeClass() == RedistNode::GetClass()) {
       for (unsigned int i = 0; i < curr->m_children.size(); ++i) {
         const Node *child = curr->Child(i);
@@ -2005,7 +2005,7 @@ bool UniqueTransTrans::CanApply(const Node *node) const
   RedistNode *redist = (RedistNode*)node;
   if (redist->m_info.m_dist == D_STAR_MC) {
     const DLANode *par = (DLANode*)(redist->Input(0));
-    unsigned int num = redist->InputConnNum(0);
+    ConnNum num = redist->InputConnNum(0);
     NodeConnVecConstIter iter = par->m_children.begin();
     for(; iter != par->m_children.end(); ++iter) {
       if ((*iter)->m_num == num) {
@@ -2028,7 +2028,7 @@ void UniqueTransTrans::Apply(Node *node) const
   RedistNode *redist = (RedistNode*)node;
   if (redist->m_info.m_dist == D_STAR_MC) {
     DLANode *par = (DLANode*)(redist->Input(0));
-    unsigned int num = redist->InputConnNum(0);
+    ConnNum num = redist->InputConnNum(0);
     NodeConnVecIter iter = par->m_children.begin();
     for(; iter != par->m_children.end(); ++iter) {
       if ((*iter)->m_num == num) {
@@ -2076,7 +2076,7 @@ bool UseTransposedRedist::CanApply(const Node *node) const
       redist->InputDataType(0).m_dist == m_srcType2)
     return false;
   DLANode *parent = (DLANode*)(redist->Input(0));
-  unsigned int outNum;
+  ConnNum outNum;
   if (FindRedistribution(parent, redist->InputConnNum(0), redist,
 			 m_srcType1, true, outNum)) {
     return true;
@@ -2096,7 +2096,7 @@ void UseTransposedRedist::Apply(Node *node) const
   if (redist->m_info.m_dist != m_destType)
     throw;
   DLANode *parent = (DLANode*)(redist->Input(0));
-  unsigned int outNum;
+  ConnNum outNum;
   DLANode *newParent = NULL;
   newParent = FindRedistribution(parent, redist->InputConnNum(0), redist,
 			    m_srcType1, true, outNum);

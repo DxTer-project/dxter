@@ -238,7 +238,7 @@ bool FindDistDown(const Node *node, DistType type)
 }
 
 
-bool CheckInput(const Node *node, unsigned int inNum, DistType type, bool skipFirstRedist) 
+bool CheckInput(const Node *node, ConnNum inNum, DistType type, bool skipFirstRedist) 
 {
   const Node *in = node->Input(inNum);
   if (skipFirstRedist && in->GetNodeClass() == RedistNode::GetClass()) {

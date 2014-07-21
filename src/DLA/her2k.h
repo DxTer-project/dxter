@@ -32,63 +32,63 @@
 #include "DLAOp.h"
 #include "lowerLayer.h"
 
-Loop* Her2kLoopVar1(Node *Ain, unsigned int Anum, 
-		    Node *Bin, unsigned int Bnum, 
-		    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar1(Node *Ain, ConnNum Anum, 
+		    Node *Bin, ConnNum Bnum, 
+		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
 		    Trans trans,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
 
-Loop* Her2kLoopVar2(Node *Ain, unsigned int Anum, 
-		    Node *Bin, unsigned int Bnum, 
-		    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar2(Node *Ain, ConnNum Anum, 
+		    Node *Bin, ConnNum Bnum, 
+		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
 		    Trans trans,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
 
-Loop* Her2kLoopVar3(Node *Ain, unsigned int Anum, 
-		    Node *Bin, unsigned int Bnum, 
-		    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar3(Node *Ain, ConnNum Anum, 
+		    Node *Bin, ConnNum Bnum, 
+		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
 		    Trans trans,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
-Loop* Her2kLoopVar4(Node *Ain, unsigned int Anum, 
-		    Node *Bin, unsigned int Bnum, 
-		    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar4(Node *Ain, ConnNum Anum, 
+		    Node *Bin, ConnNum Bnum, 
+		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
 		    Trans trans,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
 
-Loop* Her2kLoopVar9(Node *Ain, unsigned int Anum, 
-		    Node *Bin, unsigned int Bnum, 
-		    Node *Cin, unsigned int Cnum,
+Loop* Her2kLoopVar9(Node *Ain, ConnNum Anum, 
+		    Node *Bin, ConnNum Bnum, 
+		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
 		    Trans trans,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
-Loop* Tri2kLoopVar9(Node *Ain, unsigned int Anum,
-                     Node *Bin, unsigned int Bnum,
-                     Node *Cin, unsigned int Cnum,
-                     Node *Din, unsigned int Dnum,
-                     Node *Ein, unsigned int Enum,
+Loop* Tri2kLoopVar9(Node *Ain, ConnNum Anum,
+                     Node *Bin, ConnNum Bnum,
+                     Node *Cin, ConnNum Cnum,
+                     Node *Din, ConnNum Dnum,
+                     Node *Ein, ConnNum Enum,
                      Tri tri,
                      Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
-Loop* Tri2kLoopVar10(Node *Ain, unsigned int Anum, 
-		     Node *Bin, unsigned int Bnum, 
-		     Node *Cin, unsigned int Cnum,
-		     Node *Din, unsigned int Dnum,
-		     Node *Ein, unsigned int Enum,
+Loop* Tri2kLoopVar10(Node *Ain, ConnNum Anum, 
+		     Node *Bin, ConnNum Bnum, 
+		     Node *Cin, ConnNum Cnum,
+		     Node *Din, ConnNum Dnum,
+		     Node *Ein, ConnNum Enum,
 		     Tri tri,
 		     Coef alpha, Coef beta, Type type,
 		     Layer layer);
@@ -191,7 +191,7 @@ class DistHer2kToLocalHer2kContrib : public SingleTrans
 class Tri2kTrans : public TransTransformation
 {
  public:
-  Tri2kTrans(unsigned int argNum, Trans trans) : TransTransformation(argNum,trans) {}
+  Tri2kTrans(ConnNum argNum, Trans trans) : TransTransformation(argNum,trans) {}
   virtual string GetTransType() const;
   virtual bool CanApply(const Node *node) const;
 };

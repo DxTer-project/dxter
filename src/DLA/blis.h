@@ -43,9 +43,9 @@ class GetUpToDiag : public DLANode
   Tri m_tri;
   Sizes *m_sizes;
   GetUpToDiag(Tri tri, PartDir dir);
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
-  virtual Name GetName(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual void Prop();
   virtual unsigned int NumOutputs() const;
   virtual void ClearDataTypeCache();
@@ -55,8 +55,8 @@ class GetUpToDiag : public DLANode
 
   virtual void PrintCode(IndStream &out);
   static Node* BlankInst() {return new GetUpToDiag(NOTTRI,PARTDOWN); }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {throw;}
-  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
+  virtual const DataTypeInfo& DataType(ConnNum num) const {throw;}
+  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "GetUpToDiag";}
@@ -64,7 +64,7 @@ class GetUpToDiag : public DLANode
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   void Flatten(ofstream &out) const;
   void Unflatten(ifstream &in, SaveInfo &info);
-  virtual bool Overwrites(const Node *input, unsigned int num) const { return false;}
+  virtual bool Overwrites(const Node *input, ConnNum num) const { return false;}
 };
 
 class CombineDiag : public DLAOp<2,1>
@@ -77,7 +77,7 @@ class CombineDiag : public DLAOp<2,1>
   virtual NodeType GetType() const {return "CombineDiag";}
   virtual void Prop();
   virtual void PrintCode(IndStream &out) {}
-  virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
 
 
@@ -169,8 +169,8 @@ class IncreaseParallelizedLoop : public SingleTrans
 bool LegalParallelizationNestingUp(const Node *node, Comm comm);
 bool LegalParallelizationNestingDown(const PSet *pset, Comm comm);
 
-bool FoundBarrier(const Node *node, unsigned int input, Comm comm);
+bool FoundBarrier(const Node *node, ConnNum input, Comm comm);
 
-Cost AdditionalCostForBringingIntoL2(Node *node, unsigned int num, Size numAElems, Comm comm);
+Cost AdditionalCostForBringingIntoL2(Node *node, ConnNum num, Size numAElems, Comm comm);
 Cost AdditionalCostOfBarrier(Comm comm, unsigned int numHits);
 #endif

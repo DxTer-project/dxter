@@ -424,21 +424,21 @@ Phase RedistNode::MaxPhase() const
   return NUMPHASES;
 }
 
-const Dim RedistNode::NumDims(unsigned int num) const
+const Dim RedistNode::NumDims(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputNumDims(0);
 }
 
-const Sizes* RedistNode::Len(unsigned int num, Dim dim) const
+const Sizes* RedistNode::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
   return InputLen(0,dim);
 }
 
-const Sizes* RedistNode::LocalLen(unsigned int num, Dim dim) const
+const Sizes* RedistNode::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -468,7 +468,7 @@ void RedistNode::BuildDataTypeCache()
     return;
 
   DLANode *in = (DLANode*)Input(0);
-  unsigned int num = InputConnNum(0);
+  ConnNum num = InputConnNum(0);
   Dim numDims = in->NumDims(num);
   if (numDims) {
     m_isArray = true;
@@ -494,7 +494,7 @@ void RedistNode::UnflattenCore(ifstream &in, SaveInfo &info)
   throw;
 }
 
-Name RedistNode::GetName(unsigned int num) const
+Name RedistNode::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -739,7 +739,7 @@ void AllReduceNode::Prop()
     }
       
     DLANode *input = (DLANode*)(Input(0));
-    unsigned int num = InputConnNum(0);
+    ConnNum num = InputConnNum(0);
 
     const unsigned int totNumIters = input->LocalLen(num,0)->NumSizes();
     const Dim numDims = input->NumDims(num);
@@ -793,7 +793,7 @@ bool RemoveWastedRedist::CanApply(const Node *node) const
       redistNode = (RedistNode*)redistNode->Input(0);
       if (DistTypeEqual(redistNode->m_info.m_dist,*type))
 	return true;
-      for(unsigned int i = 0; i < redistNode->m_children.size(); ++i) {
+      for(ConnNum i = 0; i < redistNode->m_children.size(); ++i) {
 	Node *tmp = redistNode->Child(i);
 	if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
 	  if (DistTypeEqual(((RedistNode*)tmp)->m_info.m_dist, *type))
@@ -820,7 +820,7 @@ void RemoveWastedRedist::Apply(Node *node) const
 	node->m_poss->DeleteChildAndCleanUp(node);
 	return;
       }
-      for(unsigned int i = 0; i < redistNode->m_children.size(); ++i) {
+      for(ConnNum i = 0; i < redistNode->m_children.size(); ++i) {
 	Node *tmp = redistNode->Child(i);
 	if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
 	  if (DistTypeEqual(((RedistNode*)tmp)->m_info.m_dist,*type)) {

@@ -149,7 +149,7 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, string name, Dim num
     throw;
   if (m_numDims) {
     m_sizes = new Sizes[m_numDims];
-    for(unsigned int i = 0; i < m_numDims; ++i)
+    for(Dim i = 0; i < m_numDims; ++i)
       m_sizes[i] = sizes[i];
   }
   else {
@@ -171,7 +171,7 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist
     throw;
   if (m_numDims) {
     m_sizes = new Sizes[dist.m_numDims];
-    for(unsigned int i = 0; i < m_numDims; ++i)
+    for(Dim i = 0; i < m_numDims; ++i)
       m_sizes[i] = sizes[i];
   }
   else {
@@ -207,7 +207,7 @@ InputNode::~InputNode()
 #endif
 }
 
-const DataTypeInfo& InputNode::DataType(unsigned int num) const
+const DataTypeInfo& InputNode::DataType(ConnNum num) const
 {
   return m_dataTypeInfo;
 }
@@ -258,11 +258,11 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_numDims = node->m_numDims;
   if (m_numDims) {
     m_sizes = new Sizes[m_numDims];
-    for (unsigned int i = 0; i < m_numDims; ++i)
+    for (Dim i = 0; i < m_numDims; ++i)
       m_sizes[i] = node->m_sizes[i];
     if(node->m_lsizes) {
       m_lsizes = new Sizes[m_numDims];
-      for (unsigned int i = 0; i < m_numDims; ++i)
+      for (Dim i = 0; i < m_numDims; ++i)
 	m_lsizes[i] = node->m_lsizes[i];
     }
   }
@@ -296,14 +296,14 @@ void InputNode::Prop()
 }
 
 #if TWOD
-const Sizes* InputNode::GetM(unsigned int num) const
+const Sizes* InputNode::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return &m_msize;
 }
 
-const Sizes* InputNode::GetN(unsigned int num) const
+const Sizes* InputNode::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -312,14 +312,14 @@ const Sizes* InputNode::GetN(unsigned int num) const
 
 
 #if DODM
-const Sizes* InputNode::LocalM(unsigned int num) const
+const Sizes* InputNode::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return m_mlsize;
 }
 
-const Sizes* InputNode::LocalN(unsigned int num) const
+const Sizes* InputNode::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -328,7 +328,7 @@ const Sizes* InputNode::LocalN(unsigned int num) const
 #endif //DODM
 #else
 
-const Dim InputNode::NumDims(unsigned int num) const
+const Dim InputNode::NumDims(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -336,7 +336,7 @@ const Dim InputNode::NumDims(unsigned int num) const
 }
 
 
-const Sizes* InputNode::Len(unsigned int num,Dim dim) const
+const Sizes* InputNode::Len(ConnNum num,Dim dim) const
 {
   if (num > 0)
     throw;
@@ -348,7 +348,7 @@ const Sizes* InputNode::Len(unsigned int num,Dim dim) const
 }
 
 
-const Sizes* InputNode::LocalLen(unsigned int num,Dim dim) const
+const Sizes* InputNode::LocalLen(ConnNum num,Dim dim) const
 {
   if (num > 0)
     throw;
@@ -363,7 +363,7 @@ const Sizes* InputNode::LocalLen(unsigned int num,Dim dim) const
 #endif
 
 
-Name InputNode::GetName(unsigned int num) const
+Name InputNode::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -485,20 +485,20 @@ void OutputNode::Prop()
   }
 }
 
-const DataTypeInfo& OutputNode::DataType(unsigned int num) const
+const DataTypeInfo& OutputNode::DataType(ConnNum num) const
 {
   return InputDataType(0);
 }
 
 #if TWOD
-const Sizes* OutputNode::GetM(unsigned int num) const
+const Sizes* OutputNode::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputM(0);
 }
 
-const Sizes* OutputNode::GetN(unsigned int num) const
+const Sizes* OutputNode::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -507,14 +507,14 @@ const Sizes* OutputNode::GetN(unsigned int num) const
 
 
 #if DODM
-const Sizes* OutputNode::LocalM(unsigned int num) const
+const Sizes* OutputNode::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputLocalM(0);
 }
 
-const Sizes* OutputNode::LocalN(unsigned int num) const
+const Sizes* OutputNode::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -527,13 +527,13 @@ const Sizes* OutputNode::LocalN(unsigned int num) const
 
 #else
 
-const Dim OutputNode::NumDims(unsigned int num) const
+const Dim OutputNode::NumDims(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputNumDims(0);
 }
-const Sizes* OutputNode::Len(unsigned int num, Dim dim) const
+const Sizes* OutputNode::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -541,7 +541,7 @@ const Sizes* OutputNode::Len(unsigned int num, Dim dim) const
 }
 
 
-const Sizes* OutputNode::LocalLen(unsigned int num, Dim dim) const
+const Sizes* OutputNode::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -549,7 +549,7 @@ const Sizes* OutputNode::LocalLen(unsigned int num, Dim dim) const
 }
 #endif
 
-Name OutputNode::GetName(unsigned int num) const
+Name OutputNode::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -611,7 +611,7 @@ void ConstVal::Prop()
   }
 }
 
-Name ConstVal::GetName(unsigned int num) const
+Name ConstVal::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -642,12 +642,12 @@ void ConstVal::BuildDataTypeCache()
 }
 
 #if TWOD
-const Sizes* ConstVal::GetM(unsigned int num) const
+const Sizes* ConstVal::GetM(ConnNum num) const
 {
   return m_sizes;
 }
 
-const Sizes* ConstVal::GetN(unsigned int num) const
+const Sizes* ConstVal::GetN(ConnNum num) const
 {
   return m_sizes;
 }
@@ -856,20 +856,20 @@ void TempVarNode::Prop()
   }
 }
 
-const DataTypeInfo& TempVarNode::DataType(unsigned int num) const
+const DataTypeInfo& TempVarNode::DataType(ConnNum num) const
 {
   return m_info;
 }
 
 #if TWOD
-const Sizes* TempVarNode::GetM(unsigned int num) const
+const Sizes* TempVarNode::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputM(0);
 }
 
-const Sizes* TempVarNode::GetN(unsigned int num) const
+const Sizes* TempVarNode::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -877,14 +877,14 @@ const Sizes* TempVarNode::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* TempVarNode::LocalM(unsigned int num) const
+const Sizes* TempVarNode::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return m_mlsize;
 }
 
-const Sizes* TempVarNode::LocalN(unsigned int num) const
+const Sizes* TempVarNode::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -893,12 +893,12 @@ const Sizes* TempVarNode::LocalN(unsigned int num) const
 #endif //DODM
 
 #elif DOTENSORS
-const Dim TempVarNode::NumDims(unsigned int num) const
+const Dim TempVarNode::NumDims(ConnNum num) const
 {
   return InputNumDims(0) + m_sumDims.size();
 }
 
-const Sizes* TempVarNode::Len(unsigned int num, Dim dim) const
+const Sizes* TempVarNode::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -913,7 +913,7 @@ const Sizes* TempVarNode::Len(unsigned int num, Dim dim) const
     return InputLen(0, dim);
 }
 
-const Sizes* TempVarNode::LocalLen(unsigned int num, Dim dim) const
+const Sizes* TempVarNode::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -929,7 +929,7 @@ const Sizes* TempVarNode::LocalLen(unsigned int num, Dim dim) const
 }
 #endif
 
-Name TempVarNode::GetName(unsigned int num) const
+Name TempVarNode::GetName(ConnNum num) const
 {
   if (num > 0)
     throw; 
@@ -1333,7 +1333,7 @@ void ViewPan::BuildDataTypeCache()
   }
 }
 
-const Sizes* ViewPan::GetM(unsigned int num) const
+const Sizes* ViewPan::GetM(ConnNum num) const
 {
   if (num >  0) 
     throw;
@@ -1343,7 +1343,7 @@ const Sizes* ViewPan::GetM(unsigned int num) const
     return GetInputM(0);
 }
 
-const Sizes* ViewPan::GetN(unsigned int num) const
+const Sizes* ViewPan::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -1354,7 +1354,7 @@ const Sizes* ViewPan::GetN(unsigned int num) const
 }
 
 
-const Sizes* ViewPan::LocalM(unsigned int num) const
+const Sizes* ViewPan::LocalM(ConnNum num) const
 {
   if (num >  0) 
     throw;
@@ -1364,7 +1364,7 @@ const Sizes* ViewPan::LocalM(unsigned int num) const
     return InputLocalM(0);
 }
 
-const Sizes* ViewPan::LocalN(unsigned int num) const
+const Sizes* ViewPan::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -1374,7 +1374,7 @@ const Sizes* ViewPan::LocalN(unsigned int num) const
     return m_lsizes;
 }
 
-Name ViewPan::GetName(unsigned int num) const
+Name ViewPan::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -1505,7 +1505,7 @@ void ViewAroundDiag::BuildDataTypeCache()
   }
 }
 
-const Sizes* ViewAroundDiag::GetM(unsigned int num) const
+const Sizes* ViewAroundDiag::GetM(ConnNum num) const
 {
   if (num >  1) 
     throw;
@@ -1519,7 +1519,7 @@ const Sizes* ViewAroundDiag::GetM(unsigned int num) const
     return GetInputM(0);
 }
 
-const Sizes* ViewAroundDiag::GetN(unsigned int num) const
+const Sizes* ViewAroundDiag::GetN(ConnNum num) const
 {
   if (num > 1)
     throw;
@@ -1534,7 +1534,7 @@ const Sizes* ViewAroundDiag::GetN(unsigned int num) const
 }
 
 
-const Sizes* ViewAroundDiag::LocalM(unsigned int num) const
+const Sizes* ViewAroundDiag::LocalM(ConnNum num) const
 {
   if (num >  1) 
     throw;
@@ -1548,7 +1548,7 @@ const Sizes* ViewAroundDiag::LocalM(unsigned int num) const
     return InputLocalM(0);
 }
 
-const Sizes* ViewAroundDiag::LocalN(unsigned int num) const
+const Sizes* ViewAroundDiag::LocalN(ConnNum num) const
 {
   if (num > 1)
     throw;
@@ -1562,7 +1562,7 @@ const Sizes* ViewAroundDiag::LocalN(unsigned int num) const
   }
 }
 
-Name ViewAroundDiag::GetName(unsigned int num) const
+Name ViewAroundDiag::GetName(ConnNum num) const
 {
   if (num > 1)
     throw;
@@ -1660,7 +1660,7 @@ void ViewAroundDiagCombine::UnflattenCore(ifstream &in, SaveInfo &info)
 #endif
 
 #if DOELEM||DOBLIS
-Name ViewTL::GetName(unsigned int num) const
+Name ViewTL::GetName(ConnNum num) const
 {
   Name name = GetInputName(0);
   name.m_name += "TL";

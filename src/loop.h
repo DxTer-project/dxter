@@ -119,7 +119,7 @@ class Loop : public PSet
   virtual void Prop();
   //  unsigned int NumIters() const;
   bool ValidIter() const;
-  LoopTunnel* CreateNewLoopTunnels(Node *input, unsigned int num, Poss *possToCareAbout, UpStat stat);
+  LoopTunnel* CreateNewLoopTunnels(Node *input, ConnNum num, Poss *possToCareAbout, UpStat stat);
   void TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun);
 #if TWOD
   void SetDimName(DimName dim);

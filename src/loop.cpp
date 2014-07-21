@@ -349,7 +349,7 @@ bool Loop::CanMerge(PSet *pset) const
   NodeVecConstIter iter = pset->m_inTuns.begin();
   for(; iter != pset->m_inTuns.end() && !left; ++iter) {
     const Node *inTun = *iter;
-    for (unsigned int i = 0; i < inTun->m_inputs.size() && !left; ++i) {
+    for (ConnNum i = 0; i < inTun->m_inputs.size() && !left; ++i) {
       if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) &&
           ((PossTunnel*)inTun->Input(i))->m_pset == this) {
         right = (Loop*)pset;
@@ -361,7 +361,7 @@ bool Loop::CanMerge(PSet *pset) const
     iter = m_inTuns.begin();
     for(; iter != m_inTuns.end() && !left; ++iter) {
       const Node *inTun = *iter;
-      for (unsigned int i = 0; i < inTun->m_inputs.size() && !left; ++i) {
+      for (ConnNum i = 0; i < inTun->m_inputs.size() && !left; ++i) {
         if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) &&
             ((PossTunnel*)inTun->Input(i))->m_pset == pset) {
           left = (Loop*)pset;
@@ -451,7 +451,7 @@ bool Loop::CanMerge(PSet *pset) const
         throw;
       }
       const LoopTunnel *rightInTun = (LoopTunnel*)*iter;
-      for (unsigned int i = 0; i < rightInTun->m_inputs.size() && left; ++i) {
+      for (ConnNum i = 0; i < rightInTun->m_inputs.size() && left; ++i) {
         if (rightInTun->Input(0)->IsLoopTunnel() && rightInTun->Input(0)->IsPossTunnel(SETTUNOUT)) {
           const LoopTunnel *leftOutTun = (LoopTunnel*)(rightInTun->Input(0));
           if (((PossTunnel*)leftOutTun)->m_pset == left) {
@@ -500,7 +500,7 @@ bool Loop::CanMerge(PSet *pset) const
     for (; iter != pset->m_inTuns.end(); ++iter) {
       LoopTunnel *tun1 = (LoopTunnel*)(*iter);
       Node *input = tun1->Input(0);
-      unsigned int inNum = tun1->InputConnNum(0);
+      ConnNum inNum = tun1->InputConnNum(0);
       NodeConnVecIter childIter = input->m_children.begin();
       for(; childIter != input->m_children.end(); ++childIter) {
         if ((*childIter)->m_num == inNum) {
@@ -890,7 +890,7 @@ bool Loop::WorthFusing(Loop *loop)
         if (((PossTunnel*)input)->m_pset == loop)
           return true;
       }
-      unsigned int num = (*iter2)->m_num;
+      ConnNum num = (*iter2)->m_num;
       NodeConnVecIter iter3 = input->m_children.begin();
       for(; iter3 != input->m_children.end(); ++iter3) {
         if ((*iter3)->m_num == num) {
@@ -1044,7 +1044,7 @@ void Loop::BuildDataTypeCache()
 }
 
 LoopTunnel* Loop::CreateNewLoopTunnels(Node *input,
-                                       unsigned int num, Poss *possToCareAbout, UpStat stat)
+                                       ConnNum num, Poss *possToCareAbout, UpStat stat)
 {
   /*
   LoopTunnel *newTunIn = new LoopTunnel(SETTUNIN);

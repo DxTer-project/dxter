@@ -75,13 +75,13 @@ void CombineUnrolled::Prop()
   }
 }
 
-const DataTypeInfo& CombineUnrolled::DataType(unsigned int num) const
+const DataTypeInfo& CombineUnrolled::DataType(ConnNum num) const
 {
   return InputDataType(0);
 }
 
 #if TWOD
-const Sizes* CombineUnrolled::GetM(unsigned int num) const
+const Sizes* CombineUnrolled::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -96,7 +96,7 @@ const Sizes* CombineUnrolled::GetM(unsigned int num) const
   }
 }
 
-const Sizes* CombineUnrolled::GetN(unsigned int num) const
+const Sizes* CombineUnrolled::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -112,7 +112,7 @@ const Sizes* CombineUnrolled::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* CombineUnrolled::LocalM(unsigned int num) const
+const Sizes* CombineUnrolled::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -130,7 +130,7 @@ const Sizes* CombineUnrolled::LocalM(unsigned int num) const
   }
 }
 
-const Sizes* CombineUnrolled::LocalN(unsigned int num) const
+const Sizes* CombineUnrolled::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -149,7 +149,7 @@ const Sizes* CombineUnrolled::LocalN(unsigned int num) const
 
 
 #else
-const Dim CombineUnrolled::NumDims(unsigned int num) const
+const Dim CombineUnrolled::NumDims(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -164,7 +164,7 @@ const Dim CombineUnrolled::NumDims(unsigned int num) const
   }
 }
 
-const Sizes* CombineUnrolled::Len(unsigned int num, Dim dim) const
+const Sizes* CombineUnrolled::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -179,7 +179,7 @@ const Sizes* CombineUnrolled::Len(unsigned int num, Dim dim) const
   }
 }
 
-const Sizes* CombineUnrolled::LocalLen(unsigned int num, Dim dim) const
+const Sizes* CombineUnrolled::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -200,7 +200,7 @@ const Sizes* CombineUnrolled::LocalLen(unsigned int num, Dim dim) const
 
 #endif
 
-Name CombineUnrolled::GetName(unsigned int num) const
+Name CombineUnrolled::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;

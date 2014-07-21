@@ -79,12 +79,12 @@ Node* SplitSingleIter::BlankInst()
 #endif
 }
 
-Name SplitSingleIter::GetName(unsigned int num) const 
+Name SplitSingleIter::GetName(ConnNum num) const 
 {
   return GetName(num, GetLoopType());
 }
 
-Name SplitSingleIter::GetName(unsigned int num, LoopType type) const 
+Name SplitSingleIter::GetName(ConnNum num, LoopType type) const 
 {
   Name name;
   if (type == BLISLOOP) {
@@ -240,7 +240,7 @@ void SplitSingleIter::Prop()
     throw;
 #endif  
     if (m_tunType == POSSTUNIN) {
-      for(unsigned int i = 0; i < m_inputs.size(); ++i) {
+      for(ConnNum i = 0; i < m_inputs.size(); ++i) {
 	if (Input(i)->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  throw;
 	}
@@ -305,7 +305,7 @@ void SplitSingleIter::Prop()
 }
 
 #if TWOD
-const Sizes* SplitSingleIter::GetM(unsigned int num) const
+const Sizes* SplitSingleIter::GetM(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -332,7 +332,7 @@ const Sizes* SplitSingleIter::GetM(unsigned int num) const
     }
 }
 
-const Sizes* SplitSingleIter::GetN(unsigned int num) const
+const Sizes* SplitSingleIter::GetN(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -360,7 +360,7 @@ const Sizes* SplitSingleIter::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* SplitSingleIter::LocalM(unsigned int num) const
+const Sizes* SplitSingleIter::LocalM(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -387,7 +387,7 @@ const Sizes* SplitSingleIter::LocalM(unsigned int num) const
     }
 }
 
-const Sizes* SplitSingleIter::LocalN(unsigned int num) const
+const Sizes* SplitSingleIter::LocalN(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -416,7 +416,7 @@ const Sizes* SplitSingleIter::LocalN(unsigned int num) const
 #endif
 
 
-void SplitSingleIter::GetSizes(unsigned int num, unsigned int numIters,
+void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
 		     Size bs, unsigned int parFactor,
 		     Size m, Size n,
 		     Sizes &ms, Sizes &ns)
@@ -588,7 +588,7 @@ void SplitSingleIter::GetSizes(unsigned int num, unsigned int numIters,
     }
 }
 #else
- const Dim SplitSingleIter::NumDims(unsigned int num) const
+ const Dim SplitSingleIter::NumDims(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -607,7 +607,7 @@ void SplitSingleIter::GetSizes(unsigned int num, unsigned int numIters,
     }
 }
 
-const Sizes* SplitSingleIter::Len(unsigned int num, Dim dim) const
+const Sizes* SplitSingleIter::Len(ConnNum num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -639,7 +639,7 @@ const Sizes* SplitSingleIter::Len(unsigned int num, Dim dim) const
     }
 }
 
-const Sizes* SplitSingleIter::LocalLen(unsigned int num, Dim dim) const
+const Sizes* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -917,7 +917,7 @@ bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
     NodeConnVecConstIter iter = m_children.begin();
     for( ; iter != m_children.end(); ++iter) {
       bool check = false;
-      unsigned int num = (*iter)->m_num;
+      ConnNum num = (*iter)->m_num;
       switch (m_dir) {
       case (PARTDOWN):
 	if ((quad == TL || quad == TR) && ((!atEnd && num == 0) || (atEnd && (num == 0 || num == 1))))
@@ -1497,7 +1497,7 @@ void SplitSingleIter::BuildDataTypeCache()
 }
 
 
-const DataTypeInfo& SplitSingleIter::DataType(unsigned int num) const
+const DataTypeInfo& SplitSingleIter::DataType(ConnNum num) const
 {
   if (m_tunType == SETTUNIN) {
     unsigned int numElems = GetNumElems(m_dir);

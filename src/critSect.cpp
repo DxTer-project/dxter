@@ -146,7 +146,7 @@ CritSectTunnel::~CritSectTunnel()
   }
 }
 
-const Sizes* CritSectTunnel::GetM(unsigned int num) const
+const Sizes* CritSectTunnel::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -166,7 +166,7 @@ const Sizes* CritSectTunnel::GetM(unsigned int num) const
 }
 
 
-const Sizes* CritSectTunnel::GetN(unsigned int num) const
+const Sizes* CritSectTunnel::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -185,7 +185,7 @@ const Sizes* CritSectTunnel::GetN(unsigned int num) const
   }
 }
 
-const Sizes* CritSectTunnel::LocalM(unsigned int num) const
+const Sizes* CritSectTunnel::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -204,7 +204,7 @@ const Sizes* CritSectTunnel::LocalM(unsigned int num) const
   }
 }
 
-const Sizes* CritSectTunnel::LocalN(unsigned int num) const
+const Sizes* CritSectTunnel::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;

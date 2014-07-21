@@ -66,7 +66,7 @@ void PossTunnel::SetPSet(PSet *set)
   m_pset = set;
 }
 
-bool PossTunnel::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const
+bool PossTunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(0) == input && InputConnNum(0) == numIn) {
     numOut = numIn;
@@ -148,14 +148,14 @@ void PossTunnel::Prop()
       m_pset->Prop();
     }
     else if (m_tunType == POSSTUNOUT || m_tunType == SETTUNIN) {
-      for (unsigned int i = 0; i < m_inputs.size(); ++i) {
+      for (ConnNum i = 0; i < m_inputs.size(); ++i) {
 	Input(i)->Prop();
       }
     }
   }
 }
 
-const DataTypeInfo& PossTunnel::DataType(unsigned int num) const
+const DataTypeInfo& PossTunnel::DataType(ConnNum num) const
 {
   if (num != 0)
     throw;
@@ -163,7 +163,7 @@ const DataTypeInfo& PossTunnel::DataType(unsigned int num) const
 }
 
 #if TWOD
-const Sizes* PossTunnel::GetM(unsigned int num) const
+const Sizes* PossTunnel::GetM(ConnNum num) const
 {
   if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
     return GetInputM(num);
@@ -173,7 +173,7 @@ const Sizes* PossTunnel::GetM(unsigned int num) const
   }
 }
 
-const Sizes* PossTunnel::GetN(unsigned int num) const
+const Sizes* PossTunnel::GetN(ConnNum num) const
 {
   if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
     return GetInputN(num);
@@ -184,7 +184,7 @@ const Sizes* PossTunnel::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* PossTunnel::LocalM(unsigned int num) const
+const Sizes* PossTunnel::LocalM(ConnNum num) const
 {
   const NodeConn *conn = m_inputs[0];
   const DLANode *input = (DLANode*)(conn->m_n);
@@ -192,7 +192,7 @@ const Sizes* PossTunnel::LocalM(unsigned int num) const
   return input->LocalM(conn->m_num);
 }
 
-const Sizes* PossTunnel::LocalN(unsigned int num) const
+const Sizes* PossTunnel::LocalN(ConnNum num) const
 {
   const NodeConn *conn = m_inputs[0];
   const DLANode *input = (DLANode*)(conn->m_n);
@@ -202,7 +202,7 @@ const Sizes* PossTunnel::LocalN(unsigned int num) const
 #endif
 
 #else
-const Dim PossTunnel::NumDims(unsigned int num) const
+const Dim PossTunnel::NumDims(ConnNum num) const
 {
   if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
     return InputNumDims(num);
@@ -212,7 +212,7 @@ const Dim PossTunnel::NumDims(unsigned int num) const
   }
 }
 
-const Sizes* PossTunnel::Len(unsigned int num,Dim dim) const
+const Sizes* PossTunnel::Len(ConnNum num,Dim dim) const
 {
   if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
     return InputLen(num,dim);
@@ -222,7 +222,7 @@ const Sizes* PossTunnel::Len(unsigned int num,Dim dim) const
   }
 }
 
-const Sizes* PossTunnel::LocalLen(unsigned int num,Dim dim) const
+const Sizes* PossTunnel::LocalLen(ConnNum num,Dim dim) const
 {
   const NodeConn *conn = m_inputs[0];
   const DLANode *input = (DLANode*)(conn->m_n);
@@ -232,7 +232,7 @@ const Sizes* PossTunnel::LocalLen(unsigned int num,Dim dim) const
 
 #endif
 
-Name PossTunnel::GetName(unsigned int num) const 
+Name PossTunnel::GetName(ConnNum num) const 
 {
   if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
     return GetInputName(num);
@@ -304,7 +304,7 @@ void PossTunnel::UnflattenCore(ifstream &in, SaveInfo &info)
   Swap(&m_pset,info.psetMap);
 }
 
-bool PossTunnel::Overwrites(const Node *input, unsigned int num) const
+bool PossTunnel::Overwrites(const Node *input, ConnNum num) const
 {
   if (m_tunType == SETTUNIN) {
     if (!m_children.size())

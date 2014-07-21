@@ -68,7 +68,7 @@ void Transpose::Unflatten(ifstream &in, SaveInfo &info)
 }
 
 
-const Sizes* Transpose::GetM(unsigned int num) const
+const Sizes* Transpose::GetM(ConnNum num) const
 {
   if (m_trans == NORMAL || m_trans == CONJ)
     return GetInputM(0);
@@ -76,7 +76,7 @@ const Sizes* Transpose::GetM(unsigned int num) const
     return GetInputN(0);
 }
 
-const Sizes* Transpose::GetN(unsigned int num) const
+const Sizes* Transpose::GetN(ConnNum num) const
 {
   if (m_trans == NORMAL || m_trans == CONJ)
     return GetInputN(0);
@@ -85,7 +85,7 @@ const Sizes* Transpose::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* Transpose::LocalM(unsigned int num) const
+const Sizes* Transpose::LocalM(ConnNum num) const
 {
   if (m_trans == NORMAL || m_trans == CONJ)
     return InputLocalM(0);
@@ -93,7 +93,7 @@ const Sizes* Transpose::LocalM(unsigned int num) const
     return InputLocalN(0);
 }
 
-const Sizes* Transpose::LocalN(unsigned int num) const
+const Sizes* Transpose::LocalN(ConnNum num) const
 {
   if (m_trans == NORMAL || m_trans == CONJ)
     return InputLocalN(0);
@@ -113,7 +113,7 @@ void Transpose::PrintCode(IndStream &out)
 #if DOSMPPHASE
     bool barrierBack = false;
     Node *in = this->Input(0);
-    unsigned int num = this->InputConnNum(0);
+    ConnNum num = this->InputConnNum(0);
     while (true) {
       if (in->GetNodeClass() == InputNode::GetClass()) {
         barrierBack = true;
@@ -189,7 +189,7 @@ void Transpose::PrintCode(IndStream &out)
 #endif
 }
 
-bool Transpose::Overwrites(const Node *input, unsigned int num) const
+bool Transpose::Overwrites(const Node *input, ConnNum num) const
 {
 #if DOBLIS
   if (m_objTrans)
@@ -204,7 +204,7 @@ bool Transpose::Overwrites(const Node *input, unsigned int num) const
 #endif
 }
 
-bool Transpose::KeepsInputVarLive(Node *input, unsigned int numInArg, unsigned int &numOutArg) const
+bool Transpose::KeepsInputVarLive(Node *input, ConnNum numInArg, ConnNum &numOutArg) const
 {
 #if DOBLIS
   if (Overwrites(input, numInArg)) {
@@ -218,7 +218,7 @@ bool Transpose::KeepsInputVarLive(Node *input, unsigned int numInArg, unsigned i
 #endif
 }
 
-Name Transpose::GetName(unsigned int num) const
+Name Transpose::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -262,7 +262,7 @@ void Transpose::Prop()
 }
 
 #if DOLLDLA
-const DataTypeInfo& Transpose::DataType(unsigned int num) const
+const DataTypeInfo& Transpose::DataType(ConnNum num) const
 {
   return m_info;
 }
@@ -294,7 +294,7 @@ Transpose* AddTranspose(Trans transVal,
 #if DOBLIS
 			bool objTrans,
 #endif
-			Node *input, unsigned int num, bool addToPoss)
+			Node *input, ConnNum num, bool addToPoss)
 {
 #if DOBLIS
   Transpose *trans = new Transpose(transVal, objTrans);
@@ -315,7 +315,7 @@ bool CombineTranspose::CanApply(const Node *node) const
   NodeConnVecConstIter iter = trans->m_inputs.begin();
   for(; iter != trans->m_inputs.end(); ++iter) {
     const Node *input = (*iter)->m_n;
-    unsigned int inputNum = (*iter)->m_num;
+    ConnNum inputNum = (*iter)->m_num;
     NodeConnVecConstIter iter2 = input->m_children.end();
     for(; iter2 != input->m_children.end(); ++iter2) {
       if ((*iter2)->m_n == node)
@@ -337,7 +337,7 @@ void CombineTranspose::Apply(Node *node) const
   NodeConnVecConstIter iter = trans->m_inputs.begin();
   for(; iter != trans->m_inputs.end(); ++iter) {
     Node *input = (*iter)->m_n;
-    unsigned int inputNum = (*iter)->m_num;
+    ConnNum inputNum = (*iter)->m_num;
     NodeConnVecConstIter iter2 = input->m_children.end();
     for(; iter2 != input->m_children.end(); ++iter2) {
       if ((*iter2)->m_n == node)
@@ -362,10 +362,10 @@ Transpose* InsertTranspose(Trans trans,
 #if DOBLIS
 			   bool objTrans,
 #endif
-                           Node *node, unsigned int inNum, bool addToPoss)
+                           Node *node, ConnNum inNum, bool addToPoss)
 {
   Node *input = node->Input(inNum);
-  unsigned int num = node->InputConnNum(inNum);
+  ConnNum num = node->InputConnNum(inNum);
   Transpose *newTrans = AddTranspose(trans, 
 #if DOBLIS
 				     objTrans, 

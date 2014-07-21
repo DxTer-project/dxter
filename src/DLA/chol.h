@@ -29,13 +29,13 @@
 #include "transform.h"
 #include "DLAOp.h"
 
-Loop* Chol1LowerAlg(Node *in, unsigned int num, bool dist);
+Loop* Chol1LowerAlg(Node *in, ConnNum num, bool dist);
 
-Loop* Chol2LowerAlg(Node *in, unsigned int num, bool dist);
-Loop* Chol2UpperAlg(Node *in, unsigned int num, bool dist);
+Loop* Chol2LowerAlg(Node *in, ConnNum num, bool dist);
+Loop* Chol2UpperAlg(Node *in, ConnNum num, bool dist);
 
-Loop* Chol3LowerAlg(Node *in, unsigned int num, bool dist);
-Loop* Chol3UpperAlg(Node *in, unsigned int num, bool dist);
+Loop* Chol3LowerAlg(Node *in, ConnNum num, bool dist);
+Loop* Chol3UpperAlg(Node *in, ConnNum num, bool dist);
 
 class Chol : public DLAOp<1,1>
 {

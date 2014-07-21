@@ -730,8 +730,8 @@ void DistHerkToLocalTriRK::Apply(Node *node) const
 }
 #endif
 
-Loop* HerkLoopVar1(Node *Ain, unsigned int Anum,
-                   Node *Cin, unsigned int Cnum,
+Loop* HerkLoopVar1(Node *Ain, ConnNum Anum,
+                   Node *Cin, ConnNum Cnum,
                    Tri tri,
                    Trans trans,
                    Coef alpha, Coef beta, Type type,
@@ -801,8 +801,8 @@ Loop* HerkLoopVar1(Node *Ain, unsigned int Anum,
   return loop;
 }
 
-Loop* HerkLoopVar2(Node *Ain, unsigned int Anum,
-                   Node *Cin, unsigned int Cnum,
+Loop* HerkLoopVar2(Node *Ain, ConnNum Anum,
+                   Node *Cin, ConnNum Cnum,
                    Tri tri,
                    Trans trans,
                    Coef alpha, Coef beta, Type type,
@@ -870,8 +870,8 @@ Loop* HerkLoopVar2(Node *Ain, unsigned int Anum,
   return loop;
 }
 
-Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
-                   Node *Cin, unsigned int Cnum,
+Loop* HerkLoopVar5(Node *Ain, ConnNum Anum,
+                   Node *Cin, ConnNum Cnum,
                    Tri tri,
                    Trans trans,
                    Coef alpha, Coef beta, Type type,
@@ -912,9 +912,9 @@ Loop* HerkLoopVar5(Node *Ain, unsigned int Anum,
   return loop;
 }
 
-Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
-                    Node *Bin, unsigned int Bnum,
-                    Node *Cin, unsigned int Cnum,
+Loop* TriRKLoopVar5(Node *Ain, ConnNum Anum,
+                    Node *Bin, ConnNum Bnum,
+                    Node *Cin, ConnNum Cnum,
                     Tri tri,
                     Coef alpha, Coef beta, Type type,
                     Layer layer)
@@ -968,9 +968,9 @@ Loop* TriRKLoopVar5(Node *Ain, unsigned int Anum,
 
 
 
-Loop* TriRKLoopVar7(Node *Ain, unsigned int Anum,
-                    Node *Bin, unsigned int Bnum,
-                    Node *Cin, unsigned int Cnum,
+Loop* TriRKLoopVar7(Node *Ain, ConnNum Anum,
+                    Node *Bin, ConnNum Bnum,
+                    Node *Cin, ConnNum Cnum,
                     Tri tri,
                     Coef alpha, Coef beta, Type type,
                     Layer layer)
@@ -1071,7 +1071,7 @@ void BLISTriRKLoopExp::Apply(Node *node) const
   
   
   Node *aSrc = node->Input(0);
-  unsigned int aSrcNum = node->InputConnNum(0);
+  ConnNum aSrcNum = node->InputConnNum(0);
   if (orig->m_transA != NORMAL) {
     throw;
     //    aSrc = AddTranspose(orig->m_transA, true, aSrc, aSrcNum, true);
@@ -1079,7 +1079,7 @@ void BLISTriRKLoopExp::Apply(Node *node) const
   }
   
   Node *bSrc = node->Input(1);
-  unsigned int bSrcNum = node->InputConnNum(1);
+  ConnNum bSrcNum = node->InputConnNum(1);
   if (orig->m_transB != NORMAL) {
     throw;
     //    bSrc = AddTranspose(orig->m_transB, true, bSrc, bSrcNum, true);
@@ -1087,7 +1087,7 @@ void BLISTriRKLoopExp::Apply(Node *node) const
   }
   
   Node *cSrc = node->Input(2);
-  unsigned int cSrcNum = node->InputConnNum(2);
+  ConnNum cSrcNum = node->InputConnNum(2);
   
   Loop *loop = BLISHerkLoop(aSrc, aSrcNum,
                             bSrc, bSrcNum,
@@ -1103,9 +1103,9 @@ void BLISTriRKLoopExp::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-Loop* BLISHerkLoop(Node *Ain, unsigned int Anum,
-                   Node *Bin, unsigned int Bnum,
-                   Node *Cin, unsigned int Cnum,
+Loop* BLISHerkLoop(Node *Ain, ConnNum Anum,
+                   Node *Bin, ConnNum Bnum,
+                   Node *Cin, ConnNum Cnum,
                    Tri tri,
                    Coef alpha, Type type,
                    Layer layer)
@@ -1253,7 +1253,7 @@ void HerkToTriRK::Apply(Node *node) const
                                     TRANS : CONJTRANS,
                                     true);
   Node *Ain = herk->Input(0);
-  unsigned int Anum = herk->InputConnNum(0);
+  ConnNum Anum = herk->InputConnNum(0);
   Atrans->AddInput(Ain, Anum);
   
   TriRK *trirk = new TriRK(m_layer,

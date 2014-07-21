@@ -139,9 +139,9 @@ class UseTransposedRedist : public SingleTrans
 class TransTransformation : public SingleTrans
 {
  public:
-  unsigned int m_argNum;
+  ConnNum m_argNum;
   Trans m_trans;
-  TransTransformation(unsigned int argNum, Trans trans) : m_argNum(argNum), m_trans(trans) {}
+  TransTransformation(ConnNum argNum, Trans trans) : m_argNum(argNum), m_trans(trans) {}
   void Apply(Node *node) const;
   virtual void PreApply(Node *node) const {}
   virtual void PostApply(Node *node) const {}
@@ -169,8 +169,8 @@ class RedistNode : public DLANode
   RedistNode(DistType destType);
   virtual ~RedistNode();
   static Node* BlankInst() { return  new RedistNode; }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {return m_info;}
-  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
+  virtual const DataTypeInfo& DataType(ConnNum num) const {return m_info;}
+  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
@@ -182,15 +182,15 @@ class RedistNode : public DLANode
   static ClassType GetClass() {return "redist";}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
-  virtual Name GetName(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   static Cost GetCost(DistType srcType, DistType destType, const Sizes *ms, const Sizes *ns);
-  virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
 
 class SumScatterNode : public DLANode
@@ -200,8 +200,8 @@ class SumScatterNode : public DLANode
  SumScatterNode() : m_coeff(COEFZERO) {}
  SumScatterNode(Coef coeff) : m_coeff(coeff) {}
   static Node* BlankInst() { return  new SumScatterNode; }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {return InputDataType(1);}
-  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(1);}
+  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
@@ -209,15 +209,15 @@ class SumScatterNode : public DLANode
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "SumScatter";}
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
-  virtual Name GetName(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   static Cost GetCost(const Sizes *localM, const Sizes *localN, DistType destType, DistType srcType);
-  virtual bool Overwrites(const Node *input, unsigned int num) const;
+  virtual bool Overwrites(const Node *input, ConnNum num) const;
 };
 
 class SumScatterFrom : public DLANode
@@ -225,21 +225,21 @@ class SumScatterFrom : public DLANode
  public:
   SumScatterFrom() {}
   static Node* BlankInst() { return  new SumScatterFrom; }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {return InputDataType(1);}
-  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(1);}
+  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual NodeType GetType() const {return "sumScatterFrom";}
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "SumScatterFrom";}
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
-  virtual Name GetName(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual Name GetName(ConnNum num) const;
   static Cost GetCost(DistType destType, DistType srcType, const Sizes *localMs, const Sizes *localNs);
-  virtual bool Overwrites(const Node *input, unsigned int num) const;
+  virtual bool Overwrites(const Node *input, ConnNum num) const;
 };
 
 
@@ -248,8 +248,8 @@ class SumOverCommNode : public DLANode
  public:
   SumOverCommNode() {}
   static Node* BlankInst() { return  new SumOverCommNode; }
-  virtual const DataTypeInfo& DataType(unsigned int num) const {return InputDataType(0);}
-  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(0);}
+  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const;
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
@@ -257,13 +257,13 @@ class SumOverCommNode : public DLANode
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "SumOverComm";}
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
-  virtual Name GetName(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual Name GetName(ConnNum num) const;
   static Cost GetCost(DistType destType, const Sizes *localMs, const Sizes *localNs);
-  virtual bool Overwrites(const Node *input, unsigned int num) const;
+  virtual bool Overwrites(const Node *input, ConnNum num) const;
 };
 
 class UniqueTransTrans : public SingleTrans

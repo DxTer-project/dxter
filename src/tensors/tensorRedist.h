@@ -41,9 +41,9 @@ class RedistNode : public DLANode
   RedistNode();
   RedistNode(const DistType &destType);
   virtual ~RedistNode();
-  virtual const DataTypeInfo& DataType(unsigned int num) const {return m_info; }
+  virtual const DataTypeInfo& DataType(ConnNum num) const {return m_info; }
   static Node* BlankInst() { return  new RedistNode; }
-  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
+  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
@@ -53,13 +53,13 @@ class RedistNode : public DLANode
   static ClassType GetClass() {return "redist";}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
-  virtual const Dim NumDims(unsigned int num) const;
-  virtual const Sizes* Len(unsigned int num, Dim dim) const;
-  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
-  virtual Name GetName(unsigned int num) const;
+  virtual const Dim NumDims(ConnNum num) const;
+  virtual const Sizes* Len(ConnNum num, Dim dim) const;
+  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual Name GetName(ConnNum num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual Phase MaxPhase() const;
   virtual void AddVariables(VarSet &set) const;
 };
@@ -82,7 +82,7 @@ class AllReduceNode : public DLAOp<1,1>
   static ClassType GetClass() {return "AllGather";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual const DataTypeInfo& DataType(unsigned int num) const {return InputDataType(0); }
+  virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(0); }
 };
 
 

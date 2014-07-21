@@ -65,20 +65,20 @@ class LoopTunnel : public PossTunnel
   virtual bool IsLoopTunnel() const {return true;}
   virtual LoopTunnel* GetMatchingOutTun() const;
   virtual LoopTunnel* GetMatchingInTun() const;
-  virtual const DataTypeInfo& DataType(unsigned int num) const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
 #if TWOD
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
 #endif
 #else
-  virtual const Dim NumDims(unsigned int num) const;
-  virtual const Sizes* Len(unsigned int num, Dim dim) const;
-  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
+  virtual const Dim NumDims(ConnNum num) const;
+  virtual const Sizes* Len(ConnNum num, Dim dim) const;
+  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
 #endif
-  virtual Name GetName(unsigned int num) const;
+  virtual Name GetName(ConnNum num) const;
  Name GetOrigName() const;
   Loop* GetMyLoop() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -98,8 +98,8 @@ class LoopTunnel : public PossTunnel
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
 
-  virtual bool Overwrites(const Node *input, unsigned int num) const;
-  virtual bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const;
+  virtual bool Overwrites(const Node *input, ConnNum num) const;
+  virtual bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const;
 
   string GetLoopLevel(int offset=0) const;
 };

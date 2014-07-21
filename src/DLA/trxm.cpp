@@ -35,76 +35,76 @@
 using namespace std;
 
 
-Loop* TrmmLoopLeftVar1(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrmmLoopLeftVar1(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
                        Layer layer);
 
-Loop* TrmmLoopLeftVar2(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrmmLoopLeftVar2(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
                        Layer layer);
 
-Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrxmLoopLeftVar3(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        bool invert,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
                        Layer layer);
 
-Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrmmLoopRightVar1(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer);
 
-Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrmmLoopRightVar2(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer);
 
-Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         bool invert,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer);
 
 
-Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrsmLoopLeftVar1(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Layer layer, Type type);
 
-Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrsmLoopLeftVar2(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Layer layer, Type type);
 
-Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrsmLoopRightVar1(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer);
 
-Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrsmLoopRightVar2(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Layer layer, Type type);
 
-Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
-                        Node *Cin, unsigned int Cnum,
+Loop* Trmm3LoopLeftVar2(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
+                        Node *Cin, ConnNum Cnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Coef beta, Type type,
                         Layer layer);
 
-Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
-                        Node *Cin, unsigned int Cnum,
+Loop* Trmm3LoopLeftVar3(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
+                        Node *Cin, ConnNum Cnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Coef beta, Type type, Layer layer);
 
@@ -924,9 +924,9 @@ void DistTrmmToLocalTrmmStatA::Apply(Node *node) const
   Trxm *trmm = (Trxm*)node;
   
   Node *Ain = trmm->Input(0);
-  unsigned int Anum = trmm->InputConnNum(0);
+  ConnNum Anum = trmm->InputConnNum(0);
   Node *Bin = trmm->Input(1);
-  unsigned int Bnum = trmm->InputConnNum(1);
+  ConnNum Bnum = trmm->InputConnNum(1);
   
   
   if (trmm->m_side == LEFT) {
@@ -1147,7 +1147,7 @@ bool TrxmTrans::CanApply(const Node *node) const
   DLANode *source = (DLANode*)node->Input(1);
   if (!source->CanTrans())
     return false;
-  for(unsigned int i = 0; i < node->m_children.size(); ++i) {
+  for(ConnNum i = 0; i < node->m_children.size(); ++i) {
     DLANode *child = (DLANode*)(node->Child(i));
     if (child->GetNodeClass() != RedistNode::GetClass()) {
       if (!child->CanTransposeInputs())
@@ -1258,8 +1258,8 @@ void LTrmmToTrsm::Apply(Node *node) const
 #endif
 
 
-Loop* TrmmLoopLeftVar1(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrmmLoopLeftVar1(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
                        Layer layer)
@@ -1338,8 +1338,8 @@ Loop* TrmmLoopLeftVar1(Node *Ain, unsigned int Anum,
   return loop;
 }
 
-Loop* TrmmLoopLeftVar2(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrmmLoopLeftVar2(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
                        Layer layer)
@@ -1426,8 +1426,8 @@ Loop* TrmmLoopLeftVar2(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrmmLoopRightVar1(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer)
@@ -1505,8 +1505,8 @@ Loop* TrmmLoopRightVar1(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrmmLoopRightVar2(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer)
@@ -1593,8 +1593,8 @@ Loop* TrmmLoopRightVar2(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         bool invert,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
@@ -1642,8 +1642,8 @@ Loop* TrxmLoopRightVar3(Node *Ain, unsigned int Anum,
 
 }
 
-Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrsmLoopLeftVar1(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Layer layer,
                        Type type)
@@ -1703,8 +1703,8 @@ Loop* TrsmLoopLeftVar1(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrsmLoopRightVar1(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer)
@@ -1781,8 +1781,8 @@ Loop* TrsmLoopRightVar1(Node *Ain, unsigned int Anum,
 }
 
 
-Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrsmLoopLeftVar2(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Layer layer,
                        Type type)
@@ -1874,8 +1874,8 @@ Loop* TrsmLoopLeftVar2(Node *Ain, unsigned int Anum,
   return loop;
 }
 
-Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
-                       Node *Bin, unsigned int Bnum,
+Loop* TrxmLoopLeftVar3(Node *Ain, ConnNum Anum,
+                       Node *Bin, ConnNum Bnum,
                        bool invert,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type, Layer layer)
@@ -1919,8 +1919,8 @@ Loop* TrxmLoopLeftVar3(Node *Ain, unsigned int Anum,
   return loop;
 }
 
-Loop* TrsmLoopRightVar2(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
+Loop* TrsmLoopRightVar2(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Layer layer,
                         Type type)
@@ -2241,7 +2241,7 @@ void BLISTrxmLoopExp::Apply(Node *node) const
   //Not independent
   
   Node *rhsSrc;
-  unsigned int rhsSrcNum;
+  ConnNum rhsSrcNum;
   if (isLeft) {
     rhsSrc = node->Input(1);
     rhsSrcNum = node->InputConnNum(1);
@@ -2293,7 +2293,7 @@ void BLISTrxmLoopExp::Apply(Node *node) const
     packTun->SetIndepIters();
   
   Node *lhsSrc = splitLHS;
-  unsigned int lhsSrcNum = 1;
+  ConnNum lhsSrcNum = 1;
   
   if (isLeft && trxm->m_trans != NORMAL) {
     lhsSrc = AddTranspose(trxm->m_trans, true, lhsSrc, lhsSrcNum, false);
@@ -2357,9 +2357,9 @@ void BLISTrxmLoopExp::Apply(Node *node) const
 }
 #endif //DOBLIS
 
-Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
-                        Node *Cin, unsigned int Cnum,
+Loop* Trmm3LoopLeftVar2(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
+                        Node *Cin, ConnNum Cnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Coef beta, Type type,
                         Layer layer)
@@ -2455,9 +2455,9 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, unsigned int Anum,
 
 }
 
-Loop* Trmm3LoopLeftVar3(Node *Ain, unsigned int Anum,
-                        Node *Bin, unsigned int Bnum,
-                        Node *Cin, unsigned int Cnum,
+Loop* Trmm3LoopLeftVar3(Node *Ain, ConnNum Anum,
+                        Node *Bin, ConnNum Bnum,
+                        Node *Cin, ConnNum Cnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Coef beta, Type type, Layer layer)
 {
@@ -2694,7 +2694,7 @@ void BLISTrmm3LoopExp::Apply(Node *node) const
                      NOTUP, NOTUP);
   
   Node *bSrc = node->Input(1);
-  unsigned int bSrcNum = node->InputConnNum(1);
+  ConnNum bSrcNum = node->InputConnNum(1);
   
   if (transB != NORMAL) {
     bSrc = AddTranspose(transB, false, bSrc, bSrcNum, true);
@@ -2718,7 +2718,7 @@ void BLISTrmm3LoopExp::Apply(Node *node) const
   packTun->SetAllStats(FULLUP);
   
   Node *aSrc = splitA;
-  unsigned int aSrcNum = 1;
+  ConnNum aSrcNum = 1;
   
   if (transA != NORMAL) {
     aSrc = AddTranspose(transA, true, aSrc, aSrcNum, false);

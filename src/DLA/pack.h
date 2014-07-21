@@ -66,7 +66,7 @@ class Pack : public DLAOp<2,1>
   virtual Phase MaxPhase() const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Name GetName(unsigned int num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual unsigned int NumOutputs() const {return 1;}
   inline void Parallelize(Comm comm) {m_comm=comm;}
   virtual Comm HasBarrier() const {return m_comm;}
@@ -105,10 +105,10 @@ class PackBuff : public DLAOp<1,1>
   virtual Phase MaxPhase() const { return NUMPHASES;}
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
-  virtual Name GetName(unsigned int num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual unsigned int NumOutputs() const {return 1;}
   void UpdateChildrensInnerMultiple(PackSize size);
-  virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   inline void Parallelize(Comm comm) {m_comm=comm;}
   virtual bool IsParallel() const {return true;}
   virtual Comm ParallelComm() const {return m_comm;}

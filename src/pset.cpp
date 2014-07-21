@@ -62,7 +62,7 @@ PSet::PSet(Poss *poss)
       throw;
     }
     PossTunnel *setTun = possTun->GetSetTunnel();
-    for(unsigned int j = 0; j < possTun->m_inputs.size(); ++j) {
+    for(ConnNum j = 0; j < possTun->m_inputs.size(); ++j) {
       NodeConn *conn = possTun->InputConn(j);
       setTun->AddInput(conn->m_n, conn->m_num);
     }

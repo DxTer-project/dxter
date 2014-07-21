@@ -47,7 +47,7 @@ unsigned int GetUpToDiag::NumOutputs() const
     throw;
 }
 
-const Sizes* GetUpToDiag::GetM(unsigned int num) const
+const Sizes* GetUpToDiag::GetM(ConnNum num) const
 {
   if (m_dir == PARTDOWN)
     return GetInputM(num+1);
@@ -55,7 +55,7 @@ const Sizes* GetUpToDiag::GetM(unsigned int num) const
     return m_sizes;
 }
 
-const Sizes* GetUpToDiag::GetN(unsigned int num) const
+const Sizes* GetUpToDiag::GetN(ConnNum num) const
 {
   if (m_dir == PARTDOWN)
     return m_sizes;
@@ -88,7 +88,7 @@ void GetUpToDiag::BuildDataTypeCache()
   }
 }
 
-Name GetUpToDiag::GetName(unsigned int num) const
+Name GetUpToDiag::GetName(ConnNum num) const
 {
   Name name = GetInputName(num+1);
   if (m_dir == PARTDOWN) {
@@ -122,7 +122,7 @@ void GetUpToDiag::Prop()
     const unsigned int numIn = m_inputs.size();
     if (numIn != 3 && numIn != 4)
       throw;
-    for (unsigned int i = 0; i < numIn; ++i)
+    for (ConnNum i = 0; i < numIn; ++i)
       Input(i)->Prop();
     
     m_cost = ZERO;
@@ -652,7 +652,7 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
  }
  */
 
-bool FoundBarrier(const Node *node, unsigned int input, Comm comm)
+bool FoundBarrier(const Node *node, ConnNum input, Comm comm)
 {
   NodeConnVecConstIter iter = node->m_inputs.begin();
   for(; iter != node->m_inputs.end(); ++iter) {
@@ -674,7 +674,7 @@ bool FoundBarrier(const Node *node, unsigned int input, Comm comm)
   return true;
 }
 
-Cost AdditionalCostForBringingIntoL2(Node *node, unsigned int num, Size numAElems, Comm comm)
+Cost AdditionalCostForBringingIntoL2(Node *node, ConnNum num, Size numAElems, Comm comm)
 {
 #if DOSM
   DLANode *input = (DLANode*)(node->Input(num));

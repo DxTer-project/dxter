@@ -53,11 +53,11 @@ class CritSectTunnel : public PossTunnel
   virtual unsigned int NumOutputs() const {return 1;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "CritSectTunnel";}
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
 #endif
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();

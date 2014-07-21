@@ -51,7 +51,7 @@ class VVDot : public DLAOp<3, 1>
   void PrintRowStride(IndStream &out);
   void PrintColStride(IndStream &out);
   void PrintGeneralStride(IndStream &out);
-  void VectorOpInputDimensionCheck(unsigned int inputNum);
+  void VectorOpInputDimensionCheck(ConnNum inputNum);
 
 };
 

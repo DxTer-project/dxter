@@ -201,7 +201,7 @@ void DistTriInvToLocalTriInv::Apply(Node *node) const
 }
 #endif
 
-Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
+Loop* TriInvAlgVar1Lower(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -247,7 +247,7 @@ Loop* TriInvAlgVar1Lower(Node *in, unsigned int num)
 #endif
 }
 
-Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
+Loop* TriInvAlgVar1Upper(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -294,7 +294,7 @@ Loop* TriInvAlgVar1Upper(Node *in, unsigned int num)
 #endif
 }
 
-Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
+Loop* TriInvAlgVar2Lower(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -342,7 +342,7 @@ Loop* TriInvAlgVar2Lower(Node *in, unsigned int num)
 }
 
 
-Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
+Loop* TriInvAlgVar2Upper(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -391,7 +391,7 @@ Loop* TriInvAlgVar2Upper(Node *in, unsigned int num)
 #endif
 }
 
-Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
+Loop* TriInvAlgVar8Lower(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAGBACK, POSSTUNIN, true);
@@ -444,7 +444,7 @@ Loop* TriInvAlgVar8Lower(Node *in, unsigned int num)
 
 
 
-Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
+Loop* TriInvAlgVar3Lower(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -497,7 +497,7 @@ Loop* TriInvAlgVar3Lower(Node *in, unsigned int num)
 }
 
 
-Loop* TriInvAlgVar3Upper(Node *in, unsigned int num)
+Loop* TriInvAlgVar3Upper(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);

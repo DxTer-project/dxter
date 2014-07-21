@@ -202,7 +202,7 @@ void DistType::SetToScalarNoRep()
   }
   m_notReped.SetToStar();
   DimVec vec;
-  for (unsigned int j = 0; j < NUM_GRID_DIMS; ++j)  {
+  for (Dim j = 0; j < NUM_GRID_DIMS; ++j)  {
       vec.push_back(j);
   }
     m_notReped.DimsToDistEntry(vec);
@@ -363,7 +363,7 @@ void DistEntry::DimsToDistEntry(DimVec dims)
 string DistType::str() const
 {
   string out = "_";
-  for (unsigned int i = 0; i < m_numDims; ++i) {
+  for (Dim i = 0; i < m_numDims; ++i) {
     out += m_dists[i].str();
     if (i+1 < m_numDims)
       out += "__";
@@ -379,7 +379,7 @@ string DistType::PrettyStr() const
 {
   std::stringstream out;
   out << "[";
-  for (unsigned int i = 0; i < m_numDims; ++i) {
+  for (Dim i = 0; i < m_numDims; ++i) {
     out << m_dists[i].PrettyStr();
     if (i+1 < m_numDims)
       out << ",";
@@ -829,7 +829,7 @@ void Name::Unflatten(ifstream &in)
   getline(in, m_name);
 }
 
-NodeConn::NodeConn(Node *n, unsigned int num)
+NodeConn::NodeConn(Node *n, ConnNum num)
 : m_n(n), m_num(num)
 {
   if (!n)

@@ -147,7 +147,7 @@ void LoopTunnel::Prop()
 
     if (m_tunType == SETTUNIN && m_inputs.size() != 1) {
       cout << "1 m_inputs.size() = " << m_inputs.size() << endl;
-      for(unsigned int i = 0; i < m_inputs.size(); ++i) {
+      for(ConnNum i = 0; i < m_inputs.size(); ++i) {
         cout << Input(i)->GetType() << " " << Input(i)->GetNameStr(0) << endl;
       }
       throw;
@@ -169,13 +169,13 @@ void LoopTunnel::Prop()
   }
 }
 
-const DataTypeInfo& LoopTunnel::DataType(unsigned int num) const
+const DataTypeInfo& LoopTunnel::DataType(ConnNum num) const
 {
   return InputDataType(0);
 }
 
 #if TWOD
-const Sizes* LoopTunnel::GetM(unsigned int num) const
+const Sizes* LoopTunnel::GetM(ConnNum num) const
 {
   switch(m_tunType) 
   {
@@ -203,7 +203,7 @@ const Sizes* LoopTunnel::GetM(unsigned int num) const
   }
 }
 
-const Sizes* LoopTunnel::GetN(unsigned int num) const
+const Sizes* LoopTunnel::GetN(ConnNum num) const
 {
   switch(m_tunType) 
   {
@@ -232,7 +232,7 @@ const Sizes* LoopTunnel::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* LoopTunnel::LocalM(unsigned int num) const
+const Sizes* LoopTunnel::LocalM(ConnNum num) const
 {
   switch(m_tunType) 
   {
@@ -260,7 +260,7 @@ const Sizes* LoopTunnel::LocalM(unsigned int num) const
   }
 }
 
-const Sizes* LoopTunnel::LocalN(unsigned int num) const
+const Sizes* LoopTunnel::LocalN(ConnNum num) const
 {
   switch(m_tunType) 
   {
@@ -290,7 +290,7 @@ const Sizes* LoopTunnel::LocalN(unsigned int num) const
 #endif
 
 #else
-const Sizes* LoopTunnel::Len(unsigned int num,Dim dim) const
+const Sizes* LoopTunnel::Len(ConnNum num,Dim dim) const
 {
   switch(m_tunType) 
   {
@@ -318,7 +318,7 @@ const Sizes* LoopTunnel::Len(unsigned int num,Dim dim) const
   }
 }
 
-const Dim LoopTunnel::NumDims(unsigned int num) const
+const Dim LoopTunnel::NumDims(ConnNum num) const
 {
   switch(m_tunType) 
   {
@@ -346,7 +346,7 @@ const Dim LoopTunnel::NumDims(unsigned int num) const
   }
 }
 
-const Sizes* LoopTunnel::LocalLen(unsigned int num,Dim dim) const
+const Sizes* LoopTunnel::LocalLen(ConnNum num,Dim dim) const
 {
   switch(m_tunType) 
   {
@@ -388,7 +388,7 @@ unsigned int LoopTunnel::NumOutputs() const
   } 
 }
 
-Name LoopTunnel::GetName(unsigned int num) const
+Name LoopTunnel::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -643,7 +643,7 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
   if (!m_msizes)
     throw;
   const DLANode *input = (DLANode*)Input(0);
-  unsigned int num = InputConnNum(0);
+  ConnNum num = InputConnNum(0);
   const Sizes *ms = input->GetM(num);
   if (!ms) {
     cout << "!ms\n";
@@ -692,9 +692,9 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
   if (!m_sizes)
     throw;
   const DLANode *input = (DLANode*)Input(0);
-  unsigned int num = InputConnNum(0);
-  unsigned int numDims = input->NumDims(num);
-  for (unsigned int i = 0; i < numDims; ++i) {
+  ConnNum num = InputConnNum(0);
+  Dim numDims = input->NumDims(num);
+  for (Dim i = 0; i < numDims; ++i) {
     const Sizes *sizes = input->Len(num,i);
     if (!sizes) {
       cout << "!sizes\n";
@@ -752,7 +752,7 @@ void LoopTunnel::ClearDataTypeCache()
 }
 #endif
 
-bool LoopTunnel::Overwrites(const Node *input, unsigned int num) const
+bool LoopTunnel::Overwrites(const Node *input, ConnNum num) const
 {
   if (m_tunType == POSSTUNIN || m_tunType == SETTUNIN)
     return !IsConst();
@@ -760,7 +760,7 @@ bool LoopTunnel::Overwrites(const Node *input, unsigned int num) const
     return false;
 }
 
-bool LoopTunnel::KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const
+bool LoopTunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(m_inputs.size()-1) == input && InputConnNum(m_inputs.size()-1) == numIn) {
     numOut = numIn;

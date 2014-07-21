@@ -30,14 +30,14 @@
 
 #if DOELEM
 
-Loop* HetrmmAlgVar1Lower(Node *in, unsigned int num);
-Loop* HetrmmAlgVar1Upper(Node *in, unsigned int num);
+Loop* HetrmmAlgVar1Lower(Node *in, ConnNum num);
+Loop* HetrmmAlgVar1Upper(Node *in, ConnNum num);
 
-Loop* HetrmmAlgVar2Lower(Node *in, unsigned int num);
-Loop* HetrmmAlgVar2Upper(Node *in, unsigned int num);
+Loop* HetrmmAlgVar2Lower(Node *in, ConnNum num);
+Loop* HetrmmAlgVar2Upper(Node *in, ConnNum num);
 
-Loop* HetrmmAlgVar3Lower(Node *in, unsigned int num);
-Loop* HetrmmAlgVar3Upper(Node *in, unsigned int num);
+Loop* HetrmmAlgVar3Lower(Node *in, ConnNum num);
+Loop* HetrmmAlgVar3Upper(Node *in, ConnNum num);
 
 
 class Hetrmm : public DLAOp<1,1>

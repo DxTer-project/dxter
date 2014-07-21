@@ -33,26 +33,26 @@
 #include "lowerLayer.h"
 #include "loop.h"
 
-Loop* GemmVar1Loop(Node *Ain, unsigned int Anum, 
-		Node *Bin, unsigned int Bnum, 
-		Node *Cin, unsigned int Cnum,
+Loop* GemmVar1Loop(Node *Ain, ConnNum Anum, 
+		Node *Bin, ConnNum Bnum, 
+		Node *Cin, ConnNum Cnum,
 		   BSSize bs,
 		Trans transA, Trans transB,
 		Coef alpha, Coef beta, 
 		Layer layer, Type type);
 
-Loop* GemmVar3Loop(Node *Ain, unsigned int Anum, 
-		    Node *Bin, unsigned int Bnum, 
-		      Node *Cin, unsigned int Cnum,
+Loop* GemmVar3Loop(Node *Ain, ConnNum Anum, 
+		    Node *Bin, ConnNum Bnum, 
+		      Node *Cin, ConnNum Cnum,
 		   BSSize bs,
 		      Trans transA, Trans transB,
 		   bool reverse,
 		      Coef alpha, Coef beta, 
 		   Layer layer, Type type);
 
-Loop* GemmVar2Loop(Node *Ain, unsigned int Anum, 
-		    Node *Bin, unsigned int Bnum, 
-		      Node *Cin, unsigned int Cnum,
+Loop* GemmVar2Loop(Node *Ain, ConnNum Anum, 
+		    Node *Bin, ConnNum Bnum, 
+		      Node *Cin, ConnNum Cnum,
 		   BSSize bs,
 		      Trans transA, Trans transB,
 		      Coef alpha, Coef beta, 
@@ -131,7 +131,7 @@ class DistGemmToContribLocalGemmStatATrans : public SingleTrans
 class GemmTrans : public TransTransformation
 {
  public:
-  GemmTrans(unsigned int argNum, Trans trans) : TransTransformation(argNum,trans) {}
+  GemmTrans(ConnNum argNum, Trans trans) : TransTransformation(argNum,trans) {}
   virtual string GetTransType() const;
   virtual bool CanApply(const Node *node) const;
 };

@@ -113,14 +113,14 @@ Phase Permute::MaxPhase() const
     }
 }
 
-const Dim Permute::NumDims(unsigned int num) const
+const Dim Permute::NumDims(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputNumDims(0);
 }
 
-const Sizes* Permute::Len(unsigned int num, Dim dim) const
+const Sizes* Permute::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -129,7 +129,7 @@ const Sizes* Permute::Len(unsigned int num, Dim dim) const
   return InputLen(0,m_permutation[dim]);
 }
 
-const Sizes* Permute::LocalLen(unsigned int num, Dim dim) const
+const Sizes* Permute::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -165,7 +165,7 @@ void Permute::UnflattenCore(ifstream &in, SaveInfo &info)
   //  getline(in, m_permutation);
 }
 
-Name Permute::GetName(unsigned int num) const
+Name Permute::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;

@@ -49,7 +49,7 @@ class VAdd : public DLAOp<2, 1>
   void PrintRowStride(IndStream &out);
   void PrintColStride(IndStream &out);
   void PrintGeneralStride(IndStream &out);
-  void VectorOpInputDimensionCheck(unsigned int inputNum);
+  void VectorOpInputDimensionCheck(ConnNum inputNum);
 };
 
 

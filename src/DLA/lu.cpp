@@ -107,8 +107,8 @@ void LULoopExp::Apply(Node *node) const
 }
 
 
-Loop* LUVar5Loop(Node *Ain, unsigned int Anum,
-		 Node *Pin, unsigned int Pnum,
+Loop* LUVar5Loop(Node *Ain, ConnNum Anum,
+		 Node *Pin, ConnNum Pnum,
 		 Layer BLASLayer, Layer LAPACKLayer)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);

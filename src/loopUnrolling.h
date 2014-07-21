@@ -58,21 +58,21 @@ class ViewMultipleIters : public DLANode
   virtual unsigned int NumOutputs() const {return m_numIters+1;}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
-  virtual Name GetName(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual void AddVariables(VarSet &set) const;
   virtual NodeType GetType() const {return "ViewMultipleIters";}
   static Node* BlankInst() { return  new ViewMultipleIters(LASTPARTDIR, BADBSSIZE, -1); }
-  virtual const DataTypeInfo& DataType(unsigned int num) const;
-  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
+  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "ViewMultipleIters";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
 
 class CombineMultipleIters : public DLANode
@@ -87,20 +87,20 @@ class CombineMultipleIters : public DLANode
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual unsigned int NumOutputs() const {return 1;}
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
-  virtual Name GetName(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual NodeType GetType() const {return "CombineMultipleIters";}
   static Node* BlankInst() { return  new CombineMultipleIters(LASTPARTDIR, BADBSSIZE, -1); }
-  virtual const DataTypeInfo& DataType(unsigned int num) const;
-  bool KeepsInputVarLive(Node *input, unsigned int numIn, unsigned int &numOut) const {return false;}
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
+  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "CombineMultipleIters";}
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual bool Overwrites(const Node *input, unsigned int num) const {return false;}
+  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
 
 

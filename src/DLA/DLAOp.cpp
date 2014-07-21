@@ -23,8 +23,8 @@
 
 #include "DLAOp.h"
 
-template<unsigned int numIn, unsigned int numOut>
-const DataTypeInfo& DLAOp<numIn, numOut>::DataType(unsigned int num) const
+template<ConnNum numIn, ConnNum numOut>
+const DataTypeInfo& DLAOp<numIn, numOut>::DataType(ConnNum num) const
 {
   if (num >= numOut)
     throw;
@@ -32,16 +32,16 @@ const DataTypeInfo& DLAOp<numIn, numOut>::DataType(unsigned int num) const
 }
 
 #if TWOD
-template<unsigned int numIn, unsigned int numOut>
-const Sizes* DLAOp<numIn, numOut>::GetM(unsigned int num) const
+template<ConnNum numIn, ConnNum numOut>
+const Sizes* DLAOp<numIn, numOut>::GetM(ConnNum num) const
 {
   if (num >= numOut)
     throw;
   return GetInputM(numIn - numOut + num);  
 }
 
-template<unsigned int numIn, unsigned int numOut>
-   const Sizes* DLAOp<numIn, numOut>::GetN(unsigned int num) const
+template<ConnNum numIn, ConnNum numOut>
+   const Sizes* DLAOp<numIn, numOut>::GetN(ConnNum num) const
 {
   if (num >= numOut)
     throw;
@@ -49,16 +49,16 @@ template<unsigned int numIn, unsigned int numOut>
 }
 
 #if DODM
-template<unsigned int numIn, unsigned int numOut>
-   const Sizes* DLAOp<numIn, numOut>::LocalM(unsigned int num) const
+template<ConnNum numIn, ConnNum numOut>
+   const Sizes* DLAOp<numIn, numOut>::LocalM(ConnNum num) const
 {
   if (num >= numOut)
     throw;
   return InputLocalM(numIn - numOut + num);  
 }
 
-template<unsigned int numIn, unsigned int numOut>
-   const Sizes* DLAOp<numIn, numOut>::LocalN(unsigned int num) const
+template<ConnNum numIn, ConnNum numOut>
+   const Sizes* DLAOp<numIn, numOut>::LocalN(ConnNum num) const
 {
   if (num >= numOut)
     throw;
@@ -68,24 +68,24 @@ template<unsigned int numIn, unsigned int numOut>
 
 
 #else
-template<unsigned int numIn, unsigned int numOut>
-const Sizes* DLAOp<numIn, numOut>::Len(unsigned int num, Dim dim) const
+template<ConnNum numIn, ConnNum numOut>
+const Sizes* DLAOp<numIn, numOut>::Len(ConnNum num, Dim dim) const
 {
   if (num >= numOut)
     throw;
   return InputLen(numIn - numOut + num,dim);  
 }
 
-template<unsigned int numIn, unsigned int numOut>
-   const Dim DLAOp<numIn, numOut>::NumDims(unsigned int num) const
+template<ConnNum numIn, ConnNum numOut>
+   const Dim DLAOp<numIn, numOut>::NumDims(ConnNum num) const
 {
   if (num >= numOut)
     throw;
   return InputNumDims(numIn - numOut + num);  
 }
 
-template<unsigned int numIn, unsigned int numOut>
-const Sizes* DLAOp<numIn, numOut>::LocalLen(unsigned int num, Dim dim) const
+template<ConnNum numIn, ConnNum numOut>
+const Sizes* DLAOp<numIn, numOut>::LocalLen(ConnNum num, Dim dim) const
 {
   if (num >= numOut)
     throw;
@@ -94,19 +94,19 @@ const Sizes* DLAOp<numIn, numOut>::LocalLen(unsigned int num, Dim dim) const
 
 #endif
 
-template<unsigned int numIn, unsigned int numOut>
-   Name DLAOp<numIn, numOut>::GetName(unsigned int num) const
+template<ConnNum numIn, ConnNum numOut>
+   Name DLAOp<numIn, numOut>::GetName(ConnNum num) const
 {
   if (num >= numOut)
     throw;
   return GetInputName(numIn - numOut + num);  
 }
 
-template<unsigned int numIn, unsigned int numOut>
+template<ConnNum numIn, ConnNum numOut>
    void DLAOp<numIn, numOut>::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    for(unsigned int i = 0; i < numIn; ++i)
+    for(ConnNum i = 0; i < numIn; ++i)
       Input(i)->Prop();
 
     if (m_inputs.size() != numIn) {
@@ -117,16 +117,16 @@ template<unsigned int numIn, unsigned int numOut>
   }
 }
 
-template<unsigned int numIn, unsigned int numOut>
+template<ConnNum numIn, ConnNum numOut>
    unsigned int DLAOp<numIn, numOut>::NumOutputs() const
 {
   return numOut;
 }
 
-template<unsigned int numIn, unsigned int numOut>
-bool DLAOp<numIn, numOut>::Overwrites(const Node *input, unsigned int num) const
+template<ConnNum numIn, ConnNum numOut>
+bool DLAOp<numIn, numOut>::Overwrites(const Node *input, ConnNum num) const
 {
-  for(unsigned int i = (numIn-numOut); i < numIn; ++i) {
+  for(ConnNum i = (numIn-numOut); i < numIn; ++i) {
     const NodeConn *conn = m_inputs[i];
     if (conn->m_n == input && conn->m_num == num)
       return true;
@@ -134,10 +134,10 @@ bool DLAOp<numIn, numOut>::Overwrites(const Node *input, unsigned int num) const
   return false;
 }
 
-template<unsigned int numIn, unsigned int numOut>
-bool DLAOp<numIn, numOut>::KeepsInputVarLive(Node *input, unsigned int numInArg, unsigned int &numOutArg) const
+template<ConnNum numIn, ConnNum numOut>
+bool DLAOp<numIn, numOut>::KeepsInputVarLive(Node *input, ConnNum numInArg, ConnNum &numOutArg) const
 {
-  for(unsigned int i = (numIn-numOut); i < numIn; ++i) {
+  for(ConnNum i = (numIn-numOut); i < numIn; ++i) {
     const NodeConn *conn = m_inputs[i];
     if (conn->m_n == input && conn->m_num == numInArg) {
       numOutArg = i-(numIn-numOut);

@@ -29,26 +29,26 @@
 #include "transform.h"
 #include "DLANode.h"
 
-template<unsigned int numIn, unsigned int numOut>
+template<ConnNum numIn, ConnNum numOut>
 class DLAOp : public DLANode
 {
  public:
 #if TWOD
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
 #endif
 #else
-  virtual const Dim NumDims(unsigned int num) const;
-  virtual const Sizes* Len(unsigned int num, Dim dim) const;
-  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
+  virtual const Dim NumDims(ConnNum num) const;
+  virtual const Sizes* Len(ConnNum num, Dim dim) const;
+  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
 #endif
-  virtual const DataTypeInfo& DataType(unsigned int num) const;
-  virtual Name GetName(unsigned int num) const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual void Prop();
-  virtual unsigned int NumOutputs() const;
-  virtual bool Overwrites(const Node *input, unsigned int num) const;
-  virtual bool KeepsInputVarLive(Node *input, unsigned int numInArg, unsigned int &numOutArg) const;
+  virtual ConnNum NumOutputs() const;
+  virtual bool Overwrites(const Node *input, ConnNum num) const;
+  virtual bool KeepsInputVarLive(Node *input, ConnNum numInArg, ConnNum &numOutArg) const;
 };

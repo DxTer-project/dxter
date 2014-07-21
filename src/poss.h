@@ -140,4 +140,4 @@ class Poss
   void PrintSetConnections();
 };
 
-void AddUsersOfLiveOutput(Node *node, unsigned int connNum, NodeSet &set);
+void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set);

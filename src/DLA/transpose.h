@@ -59,19 +59,19 @@ class Transpose : public DLAOp<1,1>
   virtual NodeType GetType() const {return "Transpose";}
   void Flatten(ofstream &out) const;
   void Unflatten(ifstream &in, SaveInfo &info);
-  virtual Name GetName(unsigned int num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual void Prop();
   virtual unsigned int NumOutputs() const {return 1;}
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
 #endif
-  virtual bool Overwrites(const Node *input, unsigned int num) const;
-  virtual bool KeepsInputVarLive(Node *input, unsigned int numInArg, unsigned int &numOutArg) const;
+  virtual bool Overwrites(const Node *input, ConnNum num) const;
+  virtual bool KeepsInputVarLive(Node *input, ConnNum numInArg, ConnNum &numOutArg) const;
 #if DOLLDLA
-  virtual const DataTypeInfo& DataType(unsigned int num) const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual void AddVariables(VarSet &set) const;
@@ -87,13 +87,13 @@ class CombineTranspose : public SingleTrans
 };
 
 #if DOBLIS
-Transpose* AddTranspose(Trans trans, bool objTrans, Node *input, unsigned int num, bool addToPoss);
-//Node* AddTrans(Trans trans, bool objTrans, Node *input, unsigned int num, bool addToPoss);
-Transpose* InsertTranspose(Trans trans, bool objTrans, Node *node, unsigned int inNum, bool addToPoss);
+Transpose* AddTranspose(Trans trans, bool objTrans, Node *input, ConnNum num, bool addToPoss);
+//Node* AddTrans(Trans trans, bool objTrans, Node *input, ConnNum num, bool addToPoss);
+Transpose* InsertTranspose(Trans trans, bool objTrans, Node *node, ConnNum inNum, bool addToPoss);
 #elif DOLLDLA
-Transpose* AddTranspose(Trans trans, Node *input, unsigned int num, bool addToPoss);
-//Node* AddTrans(Trans trans, Node *input, unsigned int num, bool addToPoss);
-Transpose* InsertTranspose(Trans trans, Node *node, unsigned int inNum, bool addToPoss);
+Transpose* AddTranspose(Trans trans, Node *input, ConnNum num, bool addToPoss);
+//Node* AddTrans(Trans trans, Node *input, ConnNum num, bool addToPoss);
+Transpose* InsertTranspose(Trans trans, Node *node, ConnNum inNum, bool addToPoss);
 #endif
 
 #endif

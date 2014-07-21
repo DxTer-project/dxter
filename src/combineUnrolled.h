@@ -48,20 +48,20 @@ class CombineUnrolled : public CombineBase
   virtual unsigned int NumOutputs() const {return 1;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "combineUnrolled";}
-  virtual const DataTypeInfo& DataType(unsigned int num) const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
 #if TWOD
-  virtual const Sizes* GetM(unsigned int num) const;
-  virtual const Sizes* GetN(unsigned int num) const;
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(unsigned int num) const;
-  virtual const Sizes* LocalN(unsigned int num) const;
+  virtual const Sizes* LocalM(ConnNum num) const;
+  virtual const Sizes* LocalN(ConnNum num) const;
 #endif
 #else
-  virtual const Dim NumDims(unsigned int num) const;
-  virtual const Sizes* Len(unsigned int num, Dim dim) const;
-  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const;
+  virtual const Dim NumDims(ConnNum num) const;
+  virtual const Sizes* Len(ConnNum num, Dim dim) const;
+  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
 #endif
-  virtual Name GetName(unsigned int num) const;
+  virtual Name GetName(ConnNum num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool IsCombine() const {throw;return true;}

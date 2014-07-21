@@ -51,39 +51,39 @@ class DLANode : public Node
   //BAMTODO: eventually use DataTypeInfo to pass around data sizes
 
 #if TWOD
-  virtual const Sizes* GetM(unsigned int num) const = 0;
-  virtual const Sizes* GetN(unsigned int num) const = 0;
+  virtual const Sizes* GetM(ConnNum num) const = 0;
+  virtual const Sizes* GetN(ConnNum num) const = 0;
 #if DODM
-  virtual const Sizes* LocalM(unsigned int num) const = 0;
-  virtual const Sizes* LocalN(unsigned int num) const = 0;
+  virtual const Sizes* LocalM(ConnNum num) const = 0;
+  virtual const Sizes* LocalN(ConnNum num) const = 0;
 #endif
-  const Sizes* GetInputM(unsigned int num) const;
-  const Sizes* GetInputN(unsigned int num) const;
+  const Sizes* GetInputM(ConnNum num) const;
+  const Sizes* GetInputN(ConnNum num) const;
 #if DODM
-  const Sizes* InputLocalM(unsigned int num) const;
-  const Sizes* InputLocalN(unsigned int num) const;
+  const Sizes* InputLocalM(ConnNum num) const;
+  const Sizes* InputLocalN(ConnNum num) const;
 #endif
 #elif DOTENSORS
-  virtual const Dim NumDims(unsigned int num) const = 0;
-  virtual const Sizes* Len(unsigned int num, Dim dim) const = 0;
-  virtual const Sizes* LocalLen(unsigned int num, Dim dim) const = 0;  
-  virtual const Dim InputNumDims(unsigned int num) const;
-  const Sizes* InputLen(unsigned int num, Dim dim) const;
-  const Sizes* InputLocalLen(unsigned int num, Dim dim) const;
+  virtual const Dim NumDims(ConnNum num) const = 0;
+  virtual const Sizes* Len(ConnNum num, Dim dim) const = 0;
+  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const = 0;  
+  virtual const Dim InputNumDims(ConnNum num) const;
+  const Sizes* InputLen(ConnNum num, Dim dim) const;
+  const Sizes* InputLocalLen(ConnNum num, Dim dim) const;
 #endif
   virtual void ClearBeforeProp();
   virtual bool IsDLA() const {return true;}
   virtual Cost GetCost() {return m_cost;}
 #if DOELEM
-  DLANode* FindNonRedistParent(unsigned int num);
-  DLANode* FindNonRedistParent(unsigned int num, unsigned int &parentNum);
+  DLANode* FindNonRedistParent(ConnNum num);
+  DLANode* FindNonRedistParent(ConnNum num, ConnNum &parentNum);
   virtual bool CanTransposeInputs() const {return false;} 
   virtual bool ShouldCullDP() const {return false;}
   virtual bool DoNotCullDP() const {return false;}
 #endif
-  DLANode* FindSideEffectingUser(unsigned int num);
+  DLANode* FindSideEffectingUser(ConnNum num);
 #if TWOD
-  bool IsScalar(unsigned int num) const;
+  bool IsScalar(ConnNum num) const;
 #endif
 #if DOBLIS
   virtual void UpdateInnerPackingMultiple(PackSize size);

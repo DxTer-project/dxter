@@ -76,7 +76,7 @@ void CombineSingleIter::Prop()
       if (!m_pset->IsLoop())
 	throw;
 
-      for(unsigned int i = 0; i < m_inputs.size(); ++i) {
+      for(ConnNum i = 0; i < m_inputs.size(); ++i) {
 	if (Input(i)->GetNodeClass() != CombineSingleIter::GetClass()) {
 	  throw;
 	}
@@ -119,7 +119,7 @@ void CombineSingleIter::Prop()
 
 #if DODM
 	DistType type = this->InputDataType(0).m_dist;
-    for(unsigned int i = 0; i < m_inputs.size(); ++i) {
+    for(ConnNum i = 0; i < m_inputs.size(); ++i) {
       if (DistTypeNotEqual(type, InputDataType(i).m_dist)) {
         cout << "Bad input types\n";
         cout << DistTypeToStr(type) << endl;
@@ -134,7 +134,7 @@ void CombineSingleIter::Prop()
   }
 }
     
-const DataTypeInfo& CombineSingleIter::DataType(unsigned int num) const
+const DataTypeInfo& CombineSingleIter::DataType(ConnNum num) const
 {
   if (m_tunType == POSSTUNOUT)
     return InputDataType(m_inputs.size()-1);
@@ -145,7 +145,7 @@ const DataTypeInfo& CombineSingleIter::DataType(unsigned int num) const
 }
 
 #if TWOD
-const Sizes* CombineSingleIter::GetM(unsigned int num) const
+const Sizes* CombineSingleIter::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -160,7 +160,7 @@ const Sizes* CombineSingleIter::GetM(unsigned int num) const
   }
 }
 
-const Sizes* CombineSingleIter::GetN(unsigned int num) const
+const Sizes* CombineSingleIter::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -176,7 +176,7 @@ const Sizes* CombineSingleIter::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* CombineSingleIter::LocalM(unsigned int num) const
+const Sizes* CombineSingleIter::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -194,7 +194,7 @@ const Sizes* CombineSingleIter::LocalM(unsigned int num) const
   }
 }
 
-const Sizes* CombineSingleIter::LocalN(unsigned int num) const
+const Sizes* CombineSingleIter::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -213,7 +213,7 @@ const Sizes* CombineSingleIter::LocalN(unsigned int num) const
 
 
 #else
-const Dim CombineSingleIter::NumDims(unsigned int num) const
+const Dim CombineSingleIter::NumDims(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -228,7 +228,7 @@ const Dim CombineSingleIter::NumDims(unsigned int num) const
   }
 }
 
-const Sizes* CombineSingleIter::Len(unsigned int num, Dim dim) const
+const Sizes* CombineSingleIter::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -243,7 +243,7 @@ const Sizes* CombineSingleIter::Len(unsigned int num, Dim dim) const
   }
 }
 
-const Sizes* CombineSingleIter::LocalLen(unsigned int num, Dim dim) const
+const Sizes* CombineSingleIter::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -268,7 +268,7 @@ const Sizes* CombineSingleIter::LocalLen(unsigned int num, Dim dim) const
 
 #endif
 
-Name CombineSingleIter::GetName(unsigned int num) const
+Name CombineSingleIter::GetName(ConnNum num) const
 {
   if (num > 0)
     throw;

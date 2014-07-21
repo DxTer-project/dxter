@@ -53,12 +53,12 @@ Node* SplitUnrolled::BlankInst()
 #endif
 }
 
-Name SplitUnrolled::GetName(unsigned int num) const 
+Name SplitUnrolled::GetName(ConnNum num) const 
 {
   return GetName(num, GetLoopType());
 }
 
-Name SplitUnrolled::GetName(unsigned int num, LoopType type) const 
+Name SplitUnrolled::GetName(ConnNum num, LoopType type) const 
 {
   Name name;
   if (type == BLISLOOP) {
@@ -106,7 +106,7 @@ void SplitUnrolled::Prop()
 }
 
 #if TWOD
-const Sizes* SplitUnrolled::GetM(unsigned int num) const
+const Sizes* SplitUnrolled::GetM(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -133,7 +133,7 @@ const Sizes* SplitUnrolled::GetM(unsigned int num) const
     }
 }
 
-const Sizes* SplitUnrolled::GetN(unsigned int num) const
+const Sizes* SplitUnrolled::GetN(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -161,7 +161,7 @@ const Sizes* SplitUnrolled::GetN(unsigned int num) const
 }
 
 #if DODM
-const Sizes* SplitUnrolled::LocalM(unsigned int num) const
+const Sizes* SplitUnrolled::LocalM(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -188,7 +188,7 @@ const Sizes* SplitUnrolled::LocalM(unsigned int num) const
     }
 }
 
-const Sizes* SplitUnrolled::LocalN(unsigned int num) const
+const Sizes* SplitUnrolled::LocalN(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -219,7 +219,7 @@ const Sizes* SplitUnrolled::LocalN(unsigned int num) const
 
 
 #else
- const Dim SplitUnrolled::NumDims(unsigned int num) const
+ const Dim SplitUnrolled::NumDims(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -238,7 +238,7 @@ const Sizes* SplitUnrolled::LocalN(unsigned int num) const
     }
 }
 
-const Sizes* SplitUnrolled::Len(unsigned int num, Dim dim) const
+const Sizes* SplitUnrolled::Len(ConnNum num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -266,7 +266,7 @@ const Sizes* SplitUnrolled::Len(unsigned int num, Dim dim) const
     }
 }
 
-const Sizes* SplitUnrolled::LocalLen(unsigned int num, Dim dim) const
+const Sizes* SplitUnrolled::LocalLen(ConnNum num, Dim dim) const
 {
   switch(m_tunType) 
     {
