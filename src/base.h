@@ -96,8 +96,10 @@ enum Dir { HORIZONTAL,
 enum PossTunType {
   POSSTUNIN,
   POSSTUNOUT,
-  SETTUNIN,
-  SETTUNOUT,
+  REALSETTUNIN,
+  REALSETTUNOUT,
+  SHADOWSETTUNIN,
+  SHADOWSETTUNOUT,
   LASTTUNNEL
 };
 
@@ -293,7 +295,7 @@ class Name;
 class Transformation;
 class Poss;
 class NodeConn;
-class PSet;
+class BasePSet;
 class InputNode;
 typedef unsigned long int GraphNum;
 typedef string ClassType;
@@ -312,7 +314,7 @@ typedef PossMMap::iterator PossMMapIter;
 typedef PossMMap::const_iterator PossMMapConstIter;
 typedef std::pair<size_t,Poss*> PossMMapPair;
 typedef std::pair<PossMMapIter,PossMMapIter> PossMMapRangePair;
-typedef vector<PSet*> PSetVec;
+typedef vector<BasePSet*> PSetVec;
 typedef PSetVec::iterator PSetVecIter;
 typedef PSetVec::const_iterator PSetVecConstIter;
 typedef vector<Name> NameVec;
@@ -328,7 +330,7 @@ typedef TransConstVec::const_iterator TransConstVecIter;
 typedef set<const Transformation*> TransSet;
 typedef TransSet::iterator TransSetIter;
 typedef TransSet::const_iterator TransSetConstIter;
-typedef set<const PSet*> PSetSet;
+typedef set<const BasePSet*> PSetSet;
 typedef PSetSet::iterator PSetSetIter;
 typedef PSetSet::const_iterator PSetSetConstIter;
 typedef map<ClassType,TransVec*> TransMap;

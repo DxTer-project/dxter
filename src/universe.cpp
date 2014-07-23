@@ -408,11 +408,11 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
 
       bool keepGoing = true;
   
-      poss->ClearCurrPoss();
+      GraphIter graphIter(poss);
   
       while (keepGoing) {
 	TransConstVec transList;
-	poss->GetCurrTransList(transList);
+	graphIter.GetCurrTransVec(transList);
 	ImplementationRuntimeMapConstIter found = impTimes.find(graphNum);
 	if (found == impTimes.end())
 	  throw;
@@ -431,12 +431,12 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
 	  *costOut << "'loaded " << graphNum << "'\n";
 	}
 	++graphNum;
-	keepGoing = !poss->IncrementCurrPoss();
-      }      
+	keepGoing = !graphIter->Increment();
+      }
     }
     
     *costOut << "numAlgs = " << TotalCount() << endl;
-
+    
     out.close();
     time(&end);
     cout << "\tCost printing took " << difftime(end,start) << " seconds\n";

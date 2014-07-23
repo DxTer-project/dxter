@@ -2574,23 +2574,6 @@ GraphNum Poss::TotalCount() const
   return tot;
 }
 
-void Poss::GetTransVec(TransVec &transVec) const
-{
-  transVec.insert(transVec.end(),m_transVec.begin(), m_transVec.end());
-  if (m_sets.size()) {
-    cout << "not supported for hierarchical posses\n";
-    throw;
-  }
-}
-
-void Poss::GetCurrTransVec(TransVec &transVec) const
-{
-  transVec.insert(transVec.end(),m_transVec.begin(), m_transVec.end());
-  for(unsigned int i = 0; i < m_sets.size(); ++i) {
-    m_sets[i]->GetCurrTransVec(transVec);
-  }
-}
-
 bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
                     PossMMap &newPosses)
 {
@@ -2742,23 +2725,6 @@ void Poss::SetFused(const Loop *left, const Loop *right)
 }
 
 
-void Poss::ClearCurrPoss()
-{
-  PSetVecIter iter = m_sets.begin();
-  for(; iter != m_sets.end(); ++iter) {
-    (*iter)->ClearCurrPoss();
-  }
-}
-
-bool Poss::IncrementCurrPoss()
-{
-  unsigned int i;
-  for (i = 0; i < m_sets.size(); ++i) {
-    if (!m_sets[i]->IncrementCurrPoss())
-      return false;
-  }
-  return true;
-}
 
 string Poss::GetFunctionalityString() const
 {
@@ -3097,19 +3063,6 @@ void Poss::PrintSetConnections()
     throw;
   if (nodeSet.size() != m_possNodes.size())
     throw;
-}
-
-void Poss::AddCurrPossVars(VarSet &set) const
-{
-  PSetVecConstIter iter = m_sets.begin();
-  for(; iter != m_sets.end(); ++iter) {
-    (*iter)->AddCurrPossVars(set);
-  }
-
-  NodeVecConstIter iter2 = m_possNodes.begin();
-  for(; iter2 != m_possNodes.end(); ++iter2) {
-    (*iter2)->AddVariables(set);
-  }
 }
 
 bool Poss::ContainsNonLoopCode() const

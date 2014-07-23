@@ -27,7 +27,7 @@
 #include "node.h"
 #include "universe.h"
 #include "poss.h"
-#include "pset.h"
+#include "basePSet.h"
 
 //Main Transformation class
 class Transformation

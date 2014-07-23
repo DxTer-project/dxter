@@ -285,6 +285,8 @@ void PSet::Prop()
   //BAM Par + check for > 1
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
     Node *in = InTun(i);
+    if (!in->IsPossTunnel(REALSETTUNIN))
+      throw;
     for (unsigned int j = 0; j < in->m_children.size(); ++j) {
       Node *child = in->m_children[j]->m_n;
       if (child->m_inputs.size() != 1) {
@@ -300,6 +302,8 @@ void PSet::Prop()
   
   for (unsigned int i = 0; i < m_outTuns.size(); ++i) {
     Node *out = m_outTuns[i];
+    if (!out->IsPossTunnel(REALSETTUNOUT))
+      throw;
     for (unsigned int j = 0; j < out->m_inputs.size(); ++j) {
       Node *parent = out->Input(j);
       if (parent->m_children.size() != 1) {
@@ -1476,8 +1480,6 @@ void PSet::GetCurrTransVec(TransVec &transVec) const
   }
   (*m_currPoss).second->GetCurrTransVec(transVec);
 }
-
-
 
 void RealPSet::FlattenCore(ofstream &out) const
 {

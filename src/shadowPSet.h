@@ -33,11 +33,11 @@ class ShadowPSet : public BasePSet
  public:
   RealPSet *m_realPSet;
   ShadowPSet();
-  GraphNum NumPosses() {return m_realPSet->NumPosses();}
-  bool operator==(const PSet &rhs) const;
+  virtual GraphNum NumPosses() const {return m_realPSet->NumPosses();}
+  bool operator==(const BasePSet &rhs) const;
   virtual void Prop();
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
-  virtual PSet* GetNewInst() {return new ShadowPSet;}
+  virtual ShadowPSet* GetNewInst() {return new ShadowPSet;}
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
   virtual bool IsTransparent() const {return true;}
   virtual GraphNum TotalCount() const;

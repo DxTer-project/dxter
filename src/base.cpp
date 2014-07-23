@@ -633,11 +633,11 @@ bool AddPossToMMap(PossMMap &mmap, Poss *elem, size_t hash, bool deep)
 }
 
 template<>
-bool AddElemToVec(std::vector<PSet*> &vec, PSet *elem, bool deep)
+bool AddElemToVec(std::vector<BasePSet*> &vec, BasePSet *elem, bool deep)
 {
   if (deep)
     throw;
-  std::vector<PSet*>::iterator iter = vec.begin();
+  std::vector<BasePSet*>::iterator iter = vec.begin();
   for( ; iter != vec.end(); ++iter) {
     if (*iter == elem) {
       return false;

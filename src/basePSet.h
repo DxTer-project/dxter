@@ -37,14 +37,14 @@ class BasePSet
   bool m_hasProped;
   bool m_isTopLevel;
   BasePSet();
-  GraphNum NumPosses() {return m_posses.size();}
-  virtual bool operator==(const PSet &rhs) const = 0;
+  virtual GraphNum NumPosses() const = 0;
+  virtual bool operator==(const BasePSet &rhs) const = 0;
   virtual void Prop() = 0;
   virtual void ClearBeforeProp();
   Node* InTun(unsigned int num) const;
   Node* OutTun(unsigned int num) const;
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
-  virtual bool CanMerge(PSet *pset) const;
+  virtual bool CanMerge(BasePSet *pset) const;
   virtual bool IsTransparent() const {return true;}
   virtual GraphNum TotalCount() const = 0;
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
@@ -57,8 +57,6 @@ class BasePSet
   Cost EvalAndSetBest();
   virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
   bool CanPrint() const;
-  virtual void GetCurrTransVec(TransVec &transVec) const;
-  void AddCurrPossVars(VarSet &set) const;
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}

@@ -25,7 +25,7 @@
 
 #include "base.h"
 #include "transform.h"
-#include "pset.h"
+#include "basePSet.h"
 #include "comm.h"
 
 enum PartDir { PARTDOWN,

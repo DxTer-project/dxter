@@ -26,16 +26,16 @@
 #include "base.h"
 #include "DLANode.h"
 
-class PSet;
+class BasePSet;
 
 class PossTunnel : public DLANode
 {
  public:
   PossTunType m_tunType;
-  PSet *m_pset;
+  BasePSet *m_pset;
   PossTunnel();
   PossTunnel(PossTunType type);
-  void SetPSet(PSet *set);
+  void SetPSet(BasePSet *set);
   static Node* BlankInst() { return new PossTunnel;}
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual PossTunnel* GetSetTunnel();

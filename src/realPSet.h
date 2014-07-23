@@ -33,19 +33,19 @@ class RealPSet : public BasePSet
  public:
   PossMMap m_posses;
   string m_functionality;
-  PSet();
-  PSet(Poss *poss);
-  virtual ~PSet();
+  RealPSet();
+  RealPSet(Poss *poss);
+  virtual ~RealPSet();
   void AddPoss(Poss *poss);
   void AddPossesOrDispose(PossMMap &mmap, PossMMap *added = NULL);
-  GraphNum NumPosses() {return m_posses.size();}
-  bool operator==(const PSet &rhs) const;
+  virtual GraphNum NumPosses() const {return m_posses.size();}
+  bool operator==(const BasePSet &rhs) const;
   virtual void Prop();
   virtual bool TakeIter(const TransMap &trans, const TransMap &simplifiers);
   virtual void ClearBeforeProp();
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
-  virtual PSet* GetNewInst() {return new RealPSet;}
+  virtual RealPSet* GetNewInst() {return new RealPSet;}
   void PatchAfterDuplicate(NodeMap &map);
   void CombineAndRemoveTunnels();
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);

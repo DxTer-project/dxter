@@ -26,15 +26,16 @@
 #include "base.h"
 #include "node.h"
 #include "DLANode.h"
-#include "pset.h"
+#include "basePSet.h"
 #include "possTunnel.h"
 #include <stdarg.h>
 #include <unordered_set>
+#include "realPSet.h"
 
 //using namespace __gnu_cxx;
 
 class Node;
-
+class RealPSet;
 class Loop;
 
 class Poss
@@ -49,7 +50,7 @@ class Poss
   GraphNum m_num;
   NodeVec m_inTuns;
   NodeVec m_outTuns;
-  PSet *m_pset;
+  RealPSet *m_pset;
   TransVec m_transVec;
   bool m_fullyExpanded;
   PSetVec m_sets;
@@ -67,7 +68,6 @@ class Poss
   virtual void DeleteNode(Node *node);
   virtual Cost EvalCurr(TransConstVec &transList);
   virtual Cost EvalAndSetBest();
-  void GetCurrTransList(TransConstVec &transList);
   virtual void Print(IndStream &out, GraphNum &graphNum);
   virtual void EvalRoot(IndStream &out, GraphNum &graphNum, GraphNum whichGraph, GraphNum &optGraph, Cost &optCost);
   virtual void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly);
@@ -81,10 +81,10 @@ class Poss
   void AddNode(Node *node);
   void TakeOverNode(Node *node);
   void AddNodes(int numNodes, ...);
-  virtual void AddPSet(PSet *pset, bool expectToBeNew);
+  virtual void AddPSet(BasePSet *pset, bool expectToBeNew);
   virtual void AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner);
   virtual void AddLoop(Loop *loop);
-  virtual void AddPSet(PSet *pset);
+  virtual void AddPSet(BasePSet *pset);
   bool ContainsNonLoopCode() const;
   bool RemoveLoops(bool *doneSomething);
   bool Simplify(const TransMap &simplifiers, bool recursive = false);
@@ -104,8 +104,6 @@ class Poss
   void ClearFullyExpanded();
   virtual void ClearPrintedFromGraph();
   string GetFunctionalityString() const;
-  void GetTransVec(TransVec &transVec) const;
-  void GetCurrTransVec(TransVec &transVec) const;
   GraphNum TotalCount() const;
   bool TakeIter(const TransMap &transMap, const TransMap &simplifiers, 
 		PossMMap &newPosses);
@@ -113,16 +111,11 @@ class Poss
   bool HasFused(const Loop *left, const Loop *right) const;
   void SetFused(const Loop *left, const Loop *right);
   void RemoveFromGraphNodes(Node *node);
-  void RemoveFromSets(PSet *set);
+  void RemoveFromSets(BasePSet *set);
   void PrintNodeAddresses() const;
-  PSet* FormSubPSet(NodeVec &outputTuns, bool isCritSect);
+  BasePSet* FormSubPSet(NodeVec &outputTuns, bool isCritSect);
   void FillClique(NodeSet &set);
-  PSet* FormSetForClique(NodeSet &set, bool isCritSect);
-
-  void AddCurrPossVars(VarSet &set) const;
-
-  void ClearCurrPoss();
-  bool IncrementCurrPoss();
+  BasePSet* FormSetForClique(NodeSet &set, bool isCritSect);
 
   static size_t Hash(const string &str);
   size_t GetHash();

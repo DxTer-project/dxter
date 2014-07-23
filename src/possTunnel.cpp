@@ -43,10 +43,14 @@ NodeType PossTunnel::GetType() const
       return "Poss input";
     case(POSSTUNOUT):
       return "Poss output";
-    case(SETTUNIN):
-      return "PSet input";
-    case(SETTUNOUT):
-      return "PSet output";
+    case(REALSETTUNIN):
+      return "Real PSet input";
+    case(REALSETTUNOUT):
+      return "Real PSet output";
+    case(SHADOWSETTUNIN):
+      return "Shadow PSet input";
+    case(SHADOWSETTUNOUT):
+      return "Shadow PSet output";
     default:
       return "PossTunnel type unknown";
     }
@@ -59,7 +63,7 @@ bool PossTunnel::IsPossTunnel(PossTunType type) const
 
 
 
-void PossTunnel::SetPSet(PSet *set)
+void PossTunnel::SetPSet(BasePSet *set)
 {
   if (m_tunType != SETTUNIN && m_tunType != SETTUNOUT)
     cout << "bad set\n";

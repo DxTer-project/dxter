@@ -25,6 +25,7 @@
 
 #include <vector>
 #include "base.h"
+#include "RealPSet.h"
 
 typedef Node* (*ConstructorFunc)();
 typedef map<ClassType,ConstructorFunc> ConsFuncMap;
@@ -44,13 +45,13 @@ class Universe
   static TransPtrMap M_transNames;
   static TransNameMap M_transPtrs;
   bool TakeIter(unsigned int phase);
-  PSet *m_pset;
+  RealPSet *m_pset;
   static unsigned int M_transCount[NUMPHASES+2];
   static ConsFuncMap M_consFuncMap;
 
  public:
   Universe();
-  void Init(PSet *seed);
+  void Init(RealPSet *seed);
   void Init(string fileName);
   virtual ~Universe();
 #if DOTENSORS

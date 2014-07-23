@@ -23,7 +23,7 @@
 
 #include "base.h"
 #include "transform.h"
-#include "pset.h"
+#include "basePSet.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -106,7 +106,7 @@ void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging)
 
 
 
-bool FoundPossUp(Node *node, const PSet *set, NodeVec &queue)
+bool FoundPossUp(Node *node, const BasePSet *set, NodeVec &queue)
 {
   NodeVecIter checkIter = queue.begin();
   for(; checkIter != queue.end(); ++checkIter) {
@@ -127,7 +127,7 @@ bool FoundPossUp(Node *node, const PSet *set, NodeVec &queue)
       return true;
     }
     else {
-      const PSet *foundSet = tunOut->m_pset;
+      const BasePSet *foundSet = tunOut->m_pset;
       NodeVecConstIter iter = foundSet->m_inTuns.begin();
       for(; iter != foundSet->m_inTuns.end(); ++iter) {
         if (FoundPossUp(*iter, set, queue)) {
@@ -150,7 +150,7 @@ bool FoundPossUp(Node *node, const PSet *set, NodeVec &queue)
   return false;
 }
 
-bool NothingBetween(const PSet *left, const PSet *right)
+bool NothingBetween(const BasePSet *left, const BasePSet *right)
 {
   NodeVecConstIter iter = right->m_inTuns.begin();
   for(; iter != right->m_inTuns.end(); ++iter) {
@@ -183,7 +183,7 @@ bool NothingBetween(const PSet *left, const PSet *right)
   return true;
 }
 
-bool ShouldMerge(const PSet *set1, const PSet *set2)
+bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 {
   unsigned int i, j, k;
   for(i = 0; i < set1->m_inTuns.size(); ++i) {
@@ -216,7 +216,7 @@ bool ShouldMerge(const PSet *set1, const PSet *set2)
   return false;
 }
 
-bool BasePSet::CanMerge(PSet *pset) const
+bool BasePSet::CanMerge(BasePSet *pset) const
 {
   bool nothingBetween = NothingBetween(this, pset) && NothingBetween(pset, this);
   if (!nothingBetween)
@@ -229,7 +229,7 @@ void BasePSet::ClearPrinted()
   m_currHasPrinted = false;
 }
 
-void PSet::RemoveInTun(Node *tun)
+void BasePSet::RemoveInTun(Node *tun)
 {
   NodeVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
@@ -241,7 +241,7 @@ void PSet::RemoveInTun(Node *tun)
   throw;
 }
 
-void PSet::RemoveOutTun(Node *tun)
+void BasePSet::RemoveOutTun(Node *tun)
 {
   NodeVecIter iter = m_outTuns.begin();
   for(; iter != m_outTuns.end(); ++iter) {
@@ -300,15 +300,6 @@ void PSet::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
 
   m_currHasPrinted = true;
 }
-
-void PSet::GetCurrTransVec(TransVec &transVec) const
-{
-  if (m_currPoss == m_posses.end()) {
-    throw;
-  }
-  (*m_currPoss).second->GetCurrTransVec(transVec);
-}
-
 
 void BasePSet::FormSetAround()
 {
@@ -468,10 +459,6 @@ void PSet::Unflatten(ifstream &in, SaveInfo &info)
   }
 }
 
-void PSet::AddCurrPossVars(VarSet &set) const
-{
-  GetCurrPoss()->AddCurrPossVars(set);
-}
 
 void PSet::BuildDataTypeCache()
 {
