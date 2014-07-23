@@ -28,6 +28,7 @@
 #include "loop.h"
 #include "critSect.h"
 #include <iomanip>
+#include "graphIter.h"
 
 //Print out code for all generated implementations
 // This takes a while for large search spaces
@@ -57,7 +58,7 @@ Universe::Universe() {
   m_pset = NULL;
 }
 
-void Universe::Init(PSet *seed)
+void Universe::Init(RealPSet *seed)
 {
   m_pset = seed;
   m_pset->m_isTopLevel = true;
@@ -718,14 +719,8 @@ void Universe::Unflatten(ifstream &in)
   READ(isCrit);
   if (isLoop)
     m_pset = new Loop;
-
-  else if (isCrit)
-    throw;
-#if 0
-    m_pset = new CritSect;
-#endif
   else
-    m_pset = new PSet;
+    m_pset = new RealPSet;
   psetMap[oldPset] = m_pset;
 
   PtrMap possMap;

@@ -251,7 +251,6 @@ Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
 void Loop::Prop()
 {
   PSet::Prop();
-
   
   bool foundControl = false;
   NodeVecIter iter = m_inTuns.begin();

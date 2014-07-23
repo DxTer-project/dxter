@@ -23,7 +23,7 @@
 
 #include "transform.h"
 #include "poss.h"
-#include "pset.h"
+#include "basePSet.h"
 #include "loopSupport.h"
 #include <sstream>
 #include "elemRedist.h"
@@ -2410,8 +2410,6 @@ void Poss::Print(IndStream &out, GraphNum &graphNum)
 void Poss::EvalRoot(IndStream &out, GraphNum &graphNum, GraphNum whichGraph, GraphNum &optGraphs, double &optCosts)
 {
   bool keepGoing = true;
-  
-  ClearCurrPoss();
   
   while (keepGoing) {
     if (whichGraph <= 0 || whichGraph == graphNum) {

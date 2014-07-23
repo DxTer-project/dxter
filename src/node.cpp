@@ -211,8 +211,8 @@ bool Node::operator==(const Node &rhs) const
       if (node1->IsPossTunnel(SETTUNOUT)) {
         PossTunnel *tun1 = (PossTunnel*)node1;
         PossTunnel *tun2 = (PossTunnel*)node2;
-        PSet *set1 = tun1->m_pset;
-        PSet *set2 = tun2->m_pset;
+        BasePSet *set1 = tun1->m_pset;
+        BasePSet *set2 = tun2->m_pset;
         if (!(*set1 == *set2))
           return false;
         for(unsigned int i = 0; i < set1->m_inTuns.size(); ++i) {
@@ -405,7 +405,7 @@ bool Node::CanPrintCode() const
             }
             else if (child->IsPossTunnel(SETTUNIN)) {
               const PossTunnel *tun2 = (PossTunnel*)child;
-              const PSet *set = tun2->m_pset;
+              const BasePSet *set = tun2->m_pset;
               if (this->IsPossTunnel(SETTUNIN)) {
                 if (set == ((PossTunnel*)this)->m_pset)
                   continue;
@@ -911,7 +911,7 @@ bool Node::InCriticalSection() const
 {
   Poss *poss = m_poss;
   while (poss && poss->m_pset) {
-    PSet *set = poss->m_pset;
+    BasePSet *set = poss->m_pset;
     if (set->IsCritSect()) {
       return true;
     }
@@ -924,7 +924,7 @@ Comm Node::WithinParallelism() const
 {
   const Poss *poss = m_poss;
   while (poss && poss->m_pset) {
-    const PSet *set = poss->m_pset;
+    const BasePSet *set = poss->m_pset;
     if (set->IsCritSect()) {
       return CORECOMM;
     }
@@ -976,7 +976,7 @@ string Node::GetFunctionalityString() const
       str += in->GetFunctionalityString();
     }
     else if (in->IsPossTunnel(SETTUNOUT)) {
-      const PSet *set = ((PossTunnel*)in)->m_pset;
+      const BasePSet *set = ((PossTunnel*)in)->m_pset;
       if (!set)
 	throw;
       str += "(";
@@ -996,7 +996,7 @@ const Loop* Node::FindClosestLoop() const
   Poss *poss = m_poss;
   if (!poss)
     return NULL;
-  PSet *set = poss->m_pset;
+  BasePSet *set = poss->m_pset;
   while (set) {
     if (set->IsLoop())
       return (Loop*)set;

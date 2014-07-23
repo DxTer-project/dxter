@@ -422,7 +422,7 @@ Name LoopTunnel::GetOrigName() const
 
 Loop* LoopTunnel::GetMyLoop() const
 {
-  PSet *set = NULL;
+  BasePSet *set = NULL;
   if (m_tunType == SETTUNIN)
     set = m_pset;
   else if (m_tunType == SETTUNOUT)
@@ -777,7 +777,7 @@ string LoopTunnel::GetLoopLevel(int offset) const
   Poss *poss = m_poss;
   if (!poss)
     throw;
-  PSet *set = poss->m_pset;
+  BasePSet *set = poss->m_pset;
   while (set) {
     if (set->IsLoop()) {
       ++level;

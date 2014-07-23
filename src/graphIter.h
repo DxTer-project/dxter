@@ -37,8 +37,8 @@ class GraphIter
 {
  public:
   Poss *m_poss;
-  PossMMapIter m_setIters[];
-  GraphIterPtr m_subIters[];
+  PossMMapIter *m_setIters;
+  GraphIterPtr *m_subIters;
 
   GraphIter(Poss *poss);
   GraphIter(const GraphIter &iter);
@@ -46,6 +46,6 @@ class GraphIter
   bool Increment();
   GraphIter& operator=(const GraphIter &rhs);
 
-  void GetCurrTransVec(TransConstVec &transVec);
+  void GetCurrTransVec(TransVec &transVec);
   void AddCurrPossVars(VarSet &set) const;
 };

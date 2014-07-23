@@ -29,7 +29,7 @@ GraphIter::GraphIter(Poss *poss)
   m_setIters = new PossMMapIter[poss->m_sets.size()];
   m_subIters = new GraphIterPtr[poss->m_sets.size()];
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
-    m_setIters[i] = m_poss->m_sets[i]->m_posses.begin();
+    m_setIters[i] = m_poss->m_sets[i]->GetPosses().begin();
     m_subIters[i] = new GraphIter(m_setIters[i]->second);
   }
 }
@@ -64,8 +64,9 @@ GraphIter& GraphIter::operator=(const GraphIter &rhs)
   m_subIters = new GraphIterPtr[m_poss->m_sets.size()];
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
     m_setIters[i] = rhs.m_setIters[i];
-    m_subIters[i] = new GraphIter(rhs.m_subIters[i]);
+    m_subIters[i] = new GraphIter(*(rhs.m_subIters[i]));
   }
+  return *this;
 }
 
 bool GraphIter::Increment()
@@ -75,16 +76,17 @@ bool GraphIter::Increment()
     if (!ret) 
       return false;
     else {
-      PSet *set = m_poss->m_sets[i];
+      BasePSet *set = m_poss->m_sets[i];
       set->m_currHasPrinted = false;
       delete m_subIters[i];
       ++(m_setIters[i]);
-      if (m_setIters[i] == set->m_posses.end()) {
-	m_setIters[i] = set->m_posses.begin();
-	m_subIters[i] = new GraphIter(m_setIters[i]->second());
+      PossMMap &map = set->GetPosses();
+      if (m_setIters[i] == map.end()) {
+	m_setIters[i] = map.begin();
+	m_subIters[i] = new GraphIter(m_setIters[i]->second);
       }
       else {
-	m_subIters[i] = new GraphIter(m_setIters[i]->second());
+	m_subIters[i] = new GraphIter(m_setIters[i]->second);
 	return false;
       }
     }
@@ -109,6 +111,6 @@ void GraphIter::AddCurrPossVars(VarSet &set) const
     (*iter)->AddVariables(set);
   }
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
-    m_subIters[i]->GetCurrTransVec(transVec);
+    m_subIters[i]->AddCurrPossVars(set);
   }
 }

@@ -57,6 +57,7 @@ class BasePSet
   Cost EvalAndSetBest();
   virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
   bool CanPrint() const;
+  virtual BasePSet* GetNewInst() = 0;
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}
@@ -65,6 +66,8 @@ class BasePSet
 
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();
+
+  virtual PossMMap& GetPosses() = 0;
 
 #if DOBLIS
   virtual bool IsCritSect() const {return false;}

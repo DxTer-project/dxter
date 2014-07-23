@@ -23,7 +23,7 @@
 
 #include "base.h"
 #include "transform.h"
-#include "pset.h"
+#include "shadowPSet.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -94,6 +94,7 @@ PSet::PSet(Poss *poss)
 
 bool PSet::operator==(const PSet &rhs) const
 {
+asdlfjasdflkj
   if (m_inTuns.size() != rhs.m_inTuns.size()
       || m_outTuns.size() != rhs.m_outTuns.size())
     return false;

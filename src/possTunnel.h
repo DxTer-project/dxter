@@ -45,6 +45,8 @@ class PossTunnel : public DLANode
   virtual NodeType GetType() const;
   virtual bool IsPossTunnel() const {return true;}
   virtual bool IsPossTunnel(PossTunType type) const;
+  virtual bool IsSetOutTunnel() const;
+  virtual bool IsSetInTunnel() const;
   virtual unsigned int NumOutputs() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "PossTunnel";}

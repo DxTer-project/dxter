@@ -104,14 +104,14 @@ class Loop : public PSet
   Loop();
   Loop(LoopType type);
   Loop(LoopType type, Poss *poss, BSSize bsSize);
-  virtual PSet* GetNewInst() {return new Loop(m_type);}
+  virtual BasePSet* GetNewInst() {return new Loop(m_type);}
   virtual bool IsLoop() const {return true;}
   virtual bool IsTransparent() const {return false;}
-  virtual bool CanMerge(PSet *pset) const;
+  virtual bool CanMerge(BasePSet *pset) const;
   virtual bool WorthFusing(Loop *loop);
   virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
   LoopType GetType() const {return m_type;}
-  virtual void Duplicate(const PSet *orig, NodeMap &map, bool possMerging);
+  virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
   void AssignNewLabel();
   void SetBS(BSSize size);
   int GetBS() const;

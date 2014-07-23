@@ -45,7 +45,8 @@ class RealPSet : public BasePSet
   virtual void ClearBeforeProp();
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
-  virtual RealPSet* GetNewInst() {return new RealPSet;}
+  virtual BasePSet* GetNewInst() {return new RealPSet;}
+  virtual PossMMap& GetPosses() {return m_posses;}
   void PatchAfterDuplicate(NodeMap &map);
   void CombineAndRemoveTunnels();
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);

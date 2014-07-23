@@ -60,8 +60,8 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
-PSet* GemmExample();
-PSet* DoubleGemmExample();
+RealPSet* GemmExample();
+RealPSet* DoubleGemmExample();
 
 Trans transA, transB;
 
@@ -204,7 +204,7 @@ int main(int argc, const char* argv[])
 
   //  PrintType printType = CODE;
   int numIters = -1;
-  PSet* (*algFunc)();
+  RealPSet* (*algFunc)();
   //  GraphNum whichGraph = 0;
   int algNum;
   string fileName;
@@ -262,7 +262,7 @@ int main(int argc, const char* argv[])
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
   else {
-    PSet *startSet = algFunc();
+    RealPSet *startSet = algFunc();
     uni.Init(startSet);
     uni.Prop();
     flopCost = startSet->EvalAndSetBest();
@@ -367,7 +367,7 @@ int main(int argc, const char* argv[])
   return 0;
 }
 
-PSet* GemmExample()
+RealPSet* GemmExample()
 {
   InputNode *Ain = new InputNode("A input", medSize, medSize, "A", 
 				 medSize, 1,
@@ -398,18 +398,18 @@ PSet* GemmExample()
 		  tunC,0);
 
   Poss *innerPoss = new Poss(gemm,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Cout = new OutputNode("C output");
   Cout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Cout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
 
-PSet* DoubleGemmExample()
+RealPSet* DoubleGemmExample()
 {
   InputNode *Ain = new InputNode("A input",  medSize, smallSize, "A", 
 				 smallSize, 1,
@@ -446,13 +446,13 @@ PSet* DoubleGemmExample()
 		  gemm1,0);
 
   Poss *innerPoss = new Poss(gemm2,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Cout = new OutputNode("C output");
   Cout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Cout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }

@@ -21,7 +21,7 @@
 
 
 
-#include "pset.h"
+#include "basePSet.h"
 
 PossTunnel::PossTunnel() 
  :m_tunType(LASTTUNNEL),
@@ -60,7 +60,6 @@ bool PossTunnel::IsPossTunnel(PossTunType type) const
 {
   return m_tunType == type;
 }
-
 
 
 void PossTunnel::SetPSet(BasePSet *set)

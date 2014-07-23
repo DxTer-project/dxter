@@ -304,7 +304,7 @@ void PSet::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
 void BasePSet::FormSetAround()
 {
   Poss *owner = m_ownerPoss;
-  PSet *newSet = new PSet;
+  RealPSet *newSet = new RealPSet;
   Poss *newPoss = new Poss;
   
   newPoss->m_pset = newSet;
@@ -376,7 +376,7 @@ void BasePSet::FormSetAround()
   }
 }
 
-void PSet::Flatten(ofstream &out) const
+void BasePSet::Flatten(ofstream &out) const
 {
   WRITE(START);
   WRITE(m_isTopLevel);
@@ -407,7 +407,7 @@ void PSet::Flatten(ofstream &out) const
 
 }
 
-void PSet::Unflatten(ifstream &in, SaveInfo &info)
+void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
 {
   char tmp;
   READ(tmp);
@@ -474,7 +474,7 @@ void PSet::ClearDataTypeCache()
     (*iter).second->ClearDataTypeCache();
 }
 
-bool PSet::CanPrint() const
+bool BasePSet::CanPrint() const
 {
   if (m_currHasPrinted)
     return false;
