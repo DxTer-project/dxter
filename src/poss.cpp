@@ -2844,7 +2844,11 @@ void Poss::Flatten(ofstream &out) const
   PSetVecConstIter iter4 = m_sets.begin();
   for(; iter4 != m_sets.end(); ++iter4) {
     bool isLoop = (*iter4)->IsLoop();
-    WRITE(isLoop);
+    WRITE(isLoop); 
+    if (!isLoop) {
+      bool isReal = (*iter4)->IsReal();
+      WRITE(isReal);
+    }
     WRITE(*iter4);
   }
   FullyFlatten(m_possNodes, out);
@@ -2898,8 +2902,13 @@ void Poss::Unflatten(ifstream &in, SaveInfo &info)
     PSet *newSet;
     if (isLoop)
       newSet = new Loop;
-    else
-      newSet = new PSet;
+    else {
+      bool isReal;
+      if (isReal)
+	newSet = new RealPSet;
+      else
+	newSet = new ShadowPSet;
+    }
     PSet *oldSet;
     READ(oldSet);
     (*(info.psetMap))[oldSet] = newSet;

@@ -796,7 +796,7 @@ void PSet::CombineAndRemoveTunnels()
   
 }
 
-void PSet::Simplify(const TransMap &simplifiers, bool recursive)
+void RealPSet::Simplify(const TransMap &simplifiers, bool recursive)
 {
   //BAM par
   PossMMapIter iter;
@@ -969,7 +969,7 @@ bool NothingBetween(const PSet *left, const PSet *right)
   return true;
 }
 
-bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
+bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 {
   /*
     Here's the idea:
@@ -1073,7 +1073,7 @@ bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 }
 
 
-void PSet::FormSets(unsigned int phase)
+void RealPSet::FormSets(unsigned int phase)
 {
   PossMMap temp = m_posses;
   m_posses.clear();
@@ -1086,10 +1086,6 @@ void PSet::FormSets(unsigned int phase)
   }
 }
 
-void PSet::ClearPrinted()
-{
-  (*m_currPoss).second->ClearPrinted();
-}
 
 GraphNum PSet::TotalCount() const
 {
@@ -1401,29 +1397,6 @@ void PSet::RemoveOutTun(Node *tun)
   throw;
 }
 
-void PSet::ClearCurrPoss()
-{
-  m_currPoss = m_posses.begin();
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter) {
-    (*iter).second->ClearCurrPoss();
-  }
-}
-
-bool PSet::IncrementCurrPoss()
-{
-  if (m_currPoss == m_posses.end())
-    throw;
-  if ((*m_currPoss).second->IncrementCurrPoss()) {
-    m_currPoss++;
-    if (m_currPoss == m_posses.end()) {
-      m_currPoss = m_posses.begin();
-      return true;
-    }
-  }
-  return false;
-}
-
 Cost PSet::EvalCurrPoss(TransConstVec &transList)
 {
   //Any changes should be reflected in Loop::EvalCurrPoss()
@@ -1466,15 +1439,6 @@ void PSet::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
   *out << "//****\n";
 }
 
-Poss* RealPSet::GetCurrPoss() const
-{
-  if (m_currPoss == m_posses.end()) {
-    throw;
-  }
-  return (*m_currPoss).second;
-}
-
-
 void PSet::Cull(CullFunction cullFunc)
 {
   PossMMapIter iter = m_posses.begin();
@@ -1514,109 +1478,9 @@ void PSet::GetCurrTransVec(TransVec &transVec) const
 }
 
 
-void PSet::FormSetAround()
-{
-  Poss *owner = m_ownerPoss;
-  PSet *newSet = new PSet;
-  Poss *newPoss = new Poss;
-  
-  newPoss->m_pset = newSet;
-  newSet->m_posses.insert(PossMMapPair(newPoss->GetHash(),newPoss));
-  
-  newSet->m_ownerPoss = owner;
-  owner->m_sets.push_back(newSet);
-  
-  
-  
-  NodeVecIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(*iter);
-    PossTunnel *newSetTun = new PossTunnel(SETTUNIN);
-    PossTunnel *newPossTun = new PossTunnel (POSSTUNIN);
-    newPoss->AddNode(newPossTun);
-    newPoss->m_inTuns.push_back(newPossTun);
-    newPossTun->AddInput(newSetTun,0);
-    if (tun->m_inputs.size() != 1) {
-      throw;
-    }
-    NodeConn *in = tun->m_inputs[0];
-    newSetTun->AddInput(in->m_n, in->m_num);
-    tun->ChangeInput2Way(in->m_n, in->m_num, newPossTun, 0);
-    newSet->m_inTuns.push_back(newSetTun);
-    newSetTun->m_pset = newSet;
-    owner->AddNode(newSetTun);
-    owner->RemoveFromGraphNodes(tun);
-    tun->m_poss=NULL;
-    newPoss->AddNode(tun);
-  }
-  
-  
-  iter = m_outTuns.begin();
-  for(; iter != m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(*iter);
-    PossTunnel *newSetTun = new PossTunnel(SETTUNOUT);
-    PossTunnel *newPossTun = new PossTunnel (POSSTUNOUT);
-    newPoss->m_outTuns.push_back(newPossTun);
-    newPoss->AddNode(newPossTun);
-    newSetTun->AddInput(newPossTun,0);
-    tun->RedirectAllChildren(newSetTun);
-    newPossTun->AddInput(tun,0);
-    
-    newSet->m_outTuns.push_back(newSetTun);
-    newSetTun->m_pset = newSet;
-    owner->AddNode(newSetTun);
-    owner->RemoveFromGraphNodes(tun);
-    tun->m_poss=NULL;
-    newPoss->AddNode(tun);
-  }
-  
-  bool found = false;
-  PSetVecIter iter2 = owner->m_sets.begin();
-  for(; !found && iter2 != owner->m_sets.end(); ++iter2) {
-    if (*iter2 == this) {
-      owner->m_sets.erase(iter2);
-      found = true;
-    }
-  }
-  if (!found)
-    throw;
-  newPoss->m_sets.push_back(this);
-  m_ownerPoss = newPoss;
-  newSet->m_functionality = newPoss->GetFunctionalityString();
-  if (newSet->IsLoop()) {
-    Loop *loop = (Loop*)(newSet);
-    newSet->m_functionality += (char)(loop->m_bsSize);
-  }
-}
 
-
-void PSet::Flatten(ofstream &out) const
+void RealPSet::FlattenCore(ofstream &out) const
 {
-  WRITE(START);
-  WRITE(m_isTopLevel);
-  FlattenCore(out);
-  GraphNum size;
-  if (m_isTopLevel) {
-    FullyFlatten(m_inTuns, out);
-    FullyFlatten(m_outTuns, out);
-  }
-  else {
-    size = m_inTuns.size();
-    WRITE(size);
-    NodeVecConstIter iter = m_inTuns.begin();
-    for(; iter != m_inTuns.end(); ++iter)
-      WRITE(*iter);
-    WRITE(END);
-    size = m_outTuns.size();
-    WRITE(size);
-    iter = m_outTuns.begin();
-    for(; iter != m_outTuns.end(); ++iter) {
-      WRITE(*iter);
-    }
-  }
-  WRITE(END);
-  WRITE(END);
-  WRITE(m_ownerPoss);
   size = m_posses.size();
   WRITE(size);
   PossMMapConstIter iter2 = m_posses.begin();
@@ -1630,47 +1494,8 @@ void PSet::Flatten(ofstream &out) const
   WRITE(END);
 }
 
-void PSet::Unflatten(ifstream &in, SaveInfo &info)
+void RealPSet::UnflattenCore(ifstream &in, SaveInfo &info)
 {
-  char tmp;
-  READ(tmp);
-  if (tmp != START)
-    throw;
-  READ(m_isTopLevel);
-  UnflattenCore(in,info);
-  GraphNum size;
-  if (m_isTopLevel) {
-    FullyUnflatten(m_inTuns, in, info);
-    FullyUnflatten(m_outTuns, in, info);
-  }
-  else {
-    READ(size);
-    for(GraphNum i = 0; i < size; ++i) {
-      Node *tun;
-      READ(tun);
-      Swap(&tun,info.nodeMap);
-      m_inTuns.push_back(tun);
-    }
-    READ(tmp);
-    if (tmp != END)
-      throw;
-    READ(size);
-    for(GraphNum i = 0; i < size; ++i) {
-      Node *tun;
-      READ(tun);
-      Swap(&tun,info.nodeMap);
-      m_outTuns.push_back(tun);
-    }
-  }
-  READ(tmp);
-  if (tmp != END)
-    throw;
-  READ(tmp);
-  if (tmp != END)
-    throw;
-  READ(m_ownerPoss);
-  if (!m_isTopLevel)
-    Swap(&m_ownerPoss, info.possMap);
   READ(size);
   for(GraphNum i = 0; i < size; ++i) {
     Poss *newPoss = new Poss;
@@ -1688,14 +1513,6 @@ void PSet::Unflatten(ifstream &in, SaveInfo &info)
   READ(tmp);
   if (tmp != END)
     throw;
-  if (m_isTopLevel) {
-    NodeVecIter iter2 = m_inTuns.begin();
-    for(; iter2 != m_inTuns.end(); ++iter2)
-      (*iter2)->PatchAfterDuplicate(*(info.nodeMap));
-    iter2 = m_outTuns.begin();
-    for(; iter2 != m_outTuns.end(); ++iter2)
-      (*iter2)->PatchAfterDuplicate(*(info.nodeMap));
-  }
   iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter) {
     if ((*iter).second->GetHash() != (*iter).first) {
@@ -1724,19 +1541,9 @@ void PSet::ClearDataTypeCache()
     (*iter).second->ClearDataTypeCache();
 }
 
-bool PSet::CanPrint() const
-{
-  NodeVecConstIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
-    const Node *in = *iter;
-    if (!in->CanPrintCode())
-      return false;
-  }
-  return true;
-}
 
 #if DOBLIS
-bool PSet::RemoveParallelization(Comm comm)
+bool RealPSet::RemoveParallelization(Comm comm)
 {
 #if DOBLIS
   if (IsLoop()) {

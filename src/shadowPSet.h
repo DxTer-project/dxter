@@ -31,44 +31,29 @@
 class ShadowPSet : public BasePSet
 {
  public:
-  NodeVec m_inTuns;
-  NodeVec m_outTuns;
-  Poss *m_ownerPoss;
-  PossMMapIter m_currPoss;
   RealPSet *m_realPSet;
   ShadowPSet();
   GraphNum NumPosses() {return m_realPSet->NumPosses();}
   bool operator==(const PSet &rhs) const;
   virtual void Prop();
-  virtual bool TakeIter(const TransMap &trans, const TransMap &simplifiers);
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   virtual PSet* GetNewInst() {return new ShadowPSet;}
-  void CombineAndRemoveTunnels();
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
-  void Simplify(const TransMap &simplifiers, bool recursive = false);
-  void ClearFullyExpanded();
   virtual bool IsTransparent() const {return true;}
-  bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   virtual GraphNum TotalCount() const;
-  virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses) = 0;
-  virtual void FormSetAround();
-  virtual Poss* GetCurrPoss() const;
 
-  void Flatten(ofstream &out) const;
-  virtual void FlattenCore(ofstream &out) const {}
-  void Unflatten(ifstream &in, SaveInfo &info);
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info) {}
+
+  //  virtual void FlattenCore(ofstream &out) const {}
+  //  virtual void UnflattenCore(ifstream &in, SaveInfo &info) {}
 
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();
 
 #if DOBLIS
-  virtual bool IsCritSect() const {return false;}
   Comm ParallelismWithinCurrentPosses() const;
-  bool RemoveParallelization(Comm comm);
-  void ReplaceAllComms(Comm comm1, Comm comm2);
+  virtual bool RemoveParallelization(Comm comm);
 #endif //DOBLIS
 
-  const string& GetFunctionalityString() const;
+  virtual const string& GetFunctionalityString() const;
 };
 

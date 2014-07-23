@@ -33,7 +33,6 @@ class BasePSet
   NodeVec m_inTuns;
   NodeVec m_outTuns;
   Poss *m_ownerPoss;
-  PossMMapIter m_currPoss;
   bool m_currHasPrinted;
   bool m_hasProped;
   bool m_isTopLevel;
@@ -47,24 +46,18 @@ class BasePSet
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   virtual bool CanMerge(PSet *pset) const;
   virtual bool IsTransparent() const {return true;}
-  bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   virtual GraphNum TotalCount() const = 0;
-  virtual bool TakeIter(const TransMap &trans, const TransMap &simplifiers) = 0;
-  virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses) = 0;
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
   virtual void ClearPrinted();
   virtual bool IsLoop() const {return false;}
   void RemoveInTun(Node *tun);
   void RemoveOutTun(Node *tun);
-  virtual void FormSetAround() = 0;
-  void ClearCurrPoss();
-  bool IncrementCurrPoss();
+  void FormSetAround();
   Cost EvalCurrPoss(TransConstVec &transList);
   Cost EvalAndSetBest();
   virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
   bool CanPrint() const;
-  virtual Poss* GetCurrPoss() const = 0;
-  void GetCurrTransVec(TransVec &transVec) const;
+  virtual void GetCurrTransVec(TransVec &transVec) const;
   void AddCurrPossVars(VarSet &set) const;
 
   void Flatten(ofstream &out) const;
@@ -78,10 +71,9 @@ class BasePSet
 #if DOBLIS
   virtual bool IsCritSect() const {return false;}
   Comm ParallelismWithinCurrentPosses() const;
-  bool RemoveParallelization(Comm comm);
-  void ReplaceAllComms(Comm comm1, Comm comm2);
+  virtual bool RemoveParallelization(Comm comm) = 0;
 #endif //DOBLIS
 
-  const string& GetFunctionalityString() const;
+  virtual const string& GetFunctionalityString() const = 0;
 };
 

@@ -32,8 +32,6 @@ class RealPSet : public BasePSet
 {
  public:
   PossMMap m_posses;
-  NodeVec m_inTuns;
-  NodeVec m_outTuns;
   string m_functionality;
   PSet();
   PSet(Poss *poss);
@@ -52,32 +50,25 @@ class RealPSet : public BasePSet
   void CombineAndRemoveTunnels();
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
   void Simplify(const TransMap &simplifiers, bool recursive = false);
-  //  void RemoveDups();
   void ClearFullyExpanded();
   virtual bool IsTransparent() const {return true;}
   void Cull(Phase phase);
   bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   virtual GraphNum TotalCount() const;
-  virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses) = 0;
-  virtual void FormSetAround();
-  virtual Poss* GetCurrPoss() const;
+  virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
 
-  void Flatten(ofstream &out) const;
-  virtual void FlattenCore(ofstream &out) const {}
-  void Unflatten(ifstream &in, SaveInfo &info);
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info) {}
+  virtual void FlattenCore(ofstream &out) const;
+  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
 
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();
 
 #if DOBLIS
-  virtual bool IsCritSect() const {return false;}
   Comm ParallelismWithinCurrentPosses() const;
-  bool RemoveParallelization(Comm comm);
-  void ReplaceAllComms(Comm comm1, Comm comm2);
+  virtual bool RemoveParallelization(Comm comm);
 #endif //DOBLIS
 
-  const string& GetFunctionalityString() const;
+  virtual const string& GetFunctionalityString() const;
 };
 
