@@ -56,5 +56,6 @@ class ShadowPSet : public BasePSet
 #endif //DOBLIS
 
   virtual const string& GetFunctionalityString() const;
+  virtual bool IsShadow() const {return true;}
 };
 

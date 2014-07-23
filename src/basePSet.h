@@ -73,5 +73,7 @@ class BasePSet
 #endif //DOBLIS
 
   virtual const string& GetFunctionalityString() const = 0;
+  virtual bool IsReal() const {return false;}
+  virtual bool IsShadow() const {return false;}
 };
 

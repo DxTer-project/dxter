@@ -23,7 +23,7 @@
 
 #include "graphIter.h"
 #include <iomanip>
-#include "transformation.h"
+#include "transform.h"
 
 GraphIter::GraphIter(Poss *poss)
 {

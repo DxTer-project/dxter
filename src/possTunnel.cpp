@@ -43,14 +43,10 @@ NodeType PossTunnel::GetType() const
       return "Poss input";
     case(POSSTUNOUT):
       return "Poss output";
-    case(REALSETTUNIN):
-      return "Real PSet input";
-    case(REALSETTUNOUT):
-      return "Real PSet output";
-    case(SHADOWSETTUNIN):
-      return "Shadow PSet input";
-    case(SHADOWSETTUNOUT):
-      return "Shadow PSet output";
+    case(SETTUNIN):
+      return "PSet input";
+    case(SETTUNOUT):
+      return "PSet output";
     default:
       return "PossTunnel type unknown";
     }

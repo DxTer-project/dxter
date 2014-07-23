@@ -33,6 +33,7 @@ class RealPSet : public BasePSet
  public:
   PossMMap m_posses;
   string m_functionality;
+  PSetVec m_shadows;
   RealPSet();
   RealPSet(Poss *poss);
   virtual ~RealPSet();
@@ -45,7 +46,7 @@ class RealPSet : public BasePSet
   virtual void ClearBeforeProp();
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
-  virtual BasePSet* GetNewInst() {return new RealPSet;}
+  virtual BasePSet* GetNewInst() {return (BasePSet*)(new RealPSet);}
   virtual PossMMap& GetPosses() {return m_posses;}
   void PatchAfterDuplicate(NodeMap &map);
   void CombineAndRemoveTunnels();
@@ -71,5 +72,6 @@ class RealPSet : public BasePSet
 #endif //DOBLIS
 
   virtual const string& GetFunctionalityString() const;
+  virtual bool IsReal() const {return true;}
 };
 

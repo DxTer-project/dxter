@@ -26,6 +26,7 @@
 #include <vector>
 #include "base.h"
 #include "RealPSet.h"
+#include "graphIter.h"
 
 typedef Node* (*ConstructorFunc)();
 typedef map<ClassType,ConstructorFunc> ConsFuncMap;
@@ -66,7 +67,7 @@ class Universe
 
   GraphNum Expand(unsigned int numIters, unsigned int phase, CullFunction Cull);
   void EvalCosts(IndStream &out, GraphNum &graphNum);
-  void EvalCostsAndSetBest();
+  GraphIter EvalCostsAndSetBest(Cost &best);
   void Print(IndStream &out, GraphNum &graphNum, bool currOnly = false);
   static void AddTrans(const ClassType &classType, Transformation *trans, int phase);
   static void AddToMaps(Transformation *trans);

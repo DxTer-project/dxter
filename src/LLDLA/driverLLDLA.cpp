@@ -265,14 +265,15 @@ int main(int argc, const char* argv[])
     RealPSet *startSet = algFunc();
     uni.Init(startSet);
     uni.Prop();
-    flopCost = startSet->EvalAndSetBest();
+    GraphIter graphIter(startSet->m_posses.begin()->second);
+    graphIter->EvalAndSetBest(flopCost);
     // Print abstract implementation to string for use in testing
     // EXTREMELY HACKY, I could not figure out how to redirect an
     // ostream to a string
     std::stringstream ss;
     IndStream optOut(&ss, LLDLASTREAM);
     cout << "TEST\n";
-    startSet->GetCurrPoss()->PrintRoot(optOut, 0, false);
+    graphIter.PrintRoot(optOut, 0, true);
     absImpStr = ss.str();
     cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
     cout << "Flops for operation = " << std::to_string(flopCost) << endl;

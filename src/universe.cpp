@@ -412,7 +412,7 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
       GraphIter graphIter(poss);
   
       while (keepGoing) {
-	TransConstVec transList;
+	TransVec transList;
 	graphIter.GetCurrTransVec(transList);
 	ImplementationRuntimeMapConstIter found = impTimes.find(graphNum);
 	if (found == impTimes.end())
@@ -432,7 +432,7 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
 	  *costOut << "'loaded " << graphNum << "'\n";
 	}
 	++graphNum;
-	keepGoing = !graphIter->Increment();
+	keepGoing = !graphIter.Increment();
       }
     }
     
@@ -531,7 +531,8 @@ void Universe::PrintBest()
   time_t start,end;
 
   time(&start);
-  GraphIter iter = EvalCostsAndSetBest();
+  Cost trash;
+  GraphIter iter = EvalCostsAndSetBest(trash);
   time(&end);
   cout << "\tCost eval took " << difftime(end,start) << " seconds\n";
   cout.flush();
@@ -545,7 +546,7 @@ void Universe::PrintBest()
     IndStream optOut(&cout,LLDLASTREAM);
 #endif
 
-    iter.Print(optOut, 0, true);
+    iter.PrintRoot(optOut, 0, true);
 }
 
 void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
@@ -554,7 +555,7 @@ void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
     GraphIter graphIter(poss);
-    graphIter.print(out, whichGraph, currOnly);
+    graphIter.PrintRoot(out, whichGraph, currOnly);
   }
 
   *out << "// numAlgs = " << TotalCount() << endl;
@@ -598,12 +599,12 @@ void Universe::EvalCosts(IndStream &out, GraphNum &whichGraph)
   *out << "numAlgs = " << TotalCount() << endl;
 }
 
-GraphIter Universe::EvalCostsAndGetBest()
+GraphIter Universe::EvalCostsAndSetBest(Cost &best)
 {
   Prop();
   PossMMapIter iter = m_pset->m_posses.begin();
   GraphIter graphIter(iter->second);
-  Cost best = graphIter.EvalAndSetBest();
+  best = graphIter.EvalAndSetBest();
   ++iter;
   for(; iter != m_pset->m_posses.end(); ++iter) {
     GraphIter compIter(iter->second);
@@ -613,7 +614,7 @@ GraphIter Universe::EvalCostsAndGetBest()
       graphIter = compIter;
     }
   }
-  return GraphIter;
+  return graphIter;
 }
 
 GraphNum Universe::TotalCount() const
@@ -725,7 +726,7 @@ void Universe::Unflatten(ifstream &in)
   Poss::UnflattenStatic(in);
   Loop::UnflattenStatic(in);
   PtrMap psetMap;
-  PSet *oldPset;
+  BasePSet *oldPset;
   READ(oldPset);
   bool isLoop;
   READ(isLoop);  

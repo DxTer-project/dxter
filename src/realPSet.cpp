@@ -31,12 +31,12 @@
 
 extern unsigned int M_phase;
 
-PSet::PSet()
+RealPSet::RealPSet()
   : m_functionality()
 {
 }
 
-PSet::PSet(Poss *poss)
+RealPSet::RealPSet(Poss *poss)
 {
   m_functionality = poss->GetFunctionalityString();
 
@@ -91,7 +91,7 @@ PSet::PSet(Poss *poss)
   AddPoss(poss);
 }
 
-PSet::~PSet()
+RealPSet::~RealPSet()
 {
   PossMMapIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter) {
@@ -99,7 +99,7 @@ PSet::~PSet()
   }
 }
 
-void PSet::AddPossesOrDispose(PossMMap &mmap, PossMMap *added)
+void RealPSet::AddPossesOrDispose(PossMMap &mmap, PossMMap *added)
 {
   if (m_functionality.empty())
     throw;
@@ -136,7 +136,7 @@ void PSet::AddPossesOrDispose(PossMMap &mmap, PossMMap *added)
   }
 }
 
-void PSet::AddPoss(Poss *poss)
+void RealPSet::AddPoss(Poss *poss)
 {
   if (m_functionality.empty()) {
     if (m_posses.size())
@@ -190,25 +190,23 @@ void PSet::AddPoss(Poss *poss)
   poss->m_pset = this;
 }
 
-
-bool PSet::operator==(const Poss &rhs) const
+bool RealPSet::operator==(const BasePSet &rhs) const
 {
-  cout << "PSet::operator==(const Poss &rhs) const Not defined\n";
-  return false;
-}
-
-bool PSet::operator==(const PSet &rhs) const
-{
-laskdjflakjsdf 
-  if (m_inTuns.size() != rhs.m_inTuns.size()
-      || m_outTuns.size() != rhs.m_outTuns.size())
+  if (rhs.IsShadow()) {
+    return (*this)==(*(((ShadowPSet)rhs).m_realPSet));
+  }
+  if (!rhs.IsReal())
+    throw;
+  const RealPSet &realRhs = (RealPSet)rhs;
+  if (m_inTuns.size() != realRhs.m_inTuns.size()
+      || m_outTuns.size() != realRhs.m_outTuns.size())
     return false;
-  if (GetFunctionalityString() != rhs.GetFunctionalityString()) {
+  if (GetFunctionalityString() != realRhs.GetFunctionalityString()) {
     return false;
   }
   else {
     if (IsLoop()) {
-      if (!rhs.IsLoop())
+      if (!realRhs.IsLoop())
         return false;
       else {
 #if TWOD
@@ -224,7 +222,7 @@ laskdjflakjsdf
 	}
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
           const LoopTunnel *tun1 = (LoopTunnel*)(m_inTuns[i]);
-          const LoopTunnel *tun2 = (LoopTunnel*)(rhs.m_inTuns[i]);
+          const LoopTunnel *tun2 = (LoopTunnel*)(realRhs.m_inTuns[i]);
 #if DOBLIS
           if (((Loop*)(tun1->m_pset))->m_comm != ((Loop*)(tun2->m_pset))->m_comm)
             return false;
@@ -259,7 +257,7 @@ laskdjflakjsdf
     }
 #if DOBLIS
     else if (IsCritSect()) {
-      if (!rhs.IsCritSect())
+      if (!realRhs.IsCritSect())
 	return false;
     }
 #endif
@@ -267,7 +265,7 @@ laskdjflakjsdf
   }
 }
 
-void PSet::Prop()
+void RealPSet::Prop()
 {
   if(m_hasProped)
     return;
@@ -286,8 +284,6 @@ void PSet::Prop()
   //BAM Par + check for > 1
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
     Node *in = InTun(i);
-    if (!in->IsPossTunnel(REALSETTUNIN))
-      throw;
     for (unsigned int j = 0; j < in->m_children.size(); ++j) {
       Node *child = in->m_children[j]->m_n;
       if (child->m_inputs.size() != 1) {
@@ -303,8 +299,6 @@ void PSet::Prop()
   
   for (unsigned int i = 0; i < m_outTuns.size(); ++i) {
     Node *out = m_outTuns[i];
-    if (!out->IsPossTunnel(REALSETTUNOUT))
-      throw;
     for (unsigned int j = 0; j < out->m_inputs.size(); ++j) {
       Node *parent = out->Input(j);
       if (parent->m_children.size() != 1) {
@@ -322,8 +316,6 @@ void PSet::Prop()
     cout << "no owner\n";
     throw;
   }
-
-
 
 
   for(unsigned int i = 0; i < m_inTuns.size(); ++i) {
@@ -398,10 +390,17 @@ void PSet::Prop()
       ++iter;
     }
   }
+
+  PSetVecIter shadowIter = m_shadows.begin();
+  for(; shadowIter != m_shadows.end(); ++shadowIter) {
+    if ((*shadowIter)->m_realPSet != this)
+      throw;
+  }
+  
   m_hasProped = true;
 }
 
-void PSet::Cull(Phase phase)
+void RealPSet::Cull(Phase phase)
 {
   PossMMapIter iter2 = m_posses.begin();
   for(; iter2 != m_posses.end(); ++iter2) 
@@ -453,9 +452,7 @@ void PSet::Cull(Phase phase)
   }
 }
 
-
-
-void PSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
+void RealPSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
 {
   if (removeFromMyList && m_posses.size() <= 1) {
     if (m_posses.size()) {
@@ -506,7 +503,7 @@ void RealPSet::ClearBeforeProp()
 }
 
 
-bool PSet::TakeIter(const TransMap &transMap,
+bool RealPSet::TakeIter(const TransMap &transMap,
                     const TransMap &simplifiers)
 {
   bool newOne = false;
@@ -593,8 +590,7 @@ bool PSet::GlobalSimplification(const TransMap &globalSimplifiers, const TransMa
   return didSomething;
 }
 
-
-void RealPSet::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
+void RealPSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging)
 {
   BasePSet::Duplicate(orig, map, possMerging);
   m_functionality = orig->m_functionality;
@@ -611,7 +607,7 @@ void RealPSet::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
   
 }
 
-void PSet::PatchAfterDuplicate(NodeMap &map)
+void RealPSet::PatchAfterDuplicate(NodeMap &map)
 {
   PossMMapIter iter2 = m_posses.begin();
   for( ; iter2 != m_posses.end(); ++iter2) {
