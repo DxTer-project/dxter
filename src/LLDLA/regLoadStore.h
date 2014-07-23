@@ -27,7 +27,7 @@
 #include "DLAOp.h"
 #include "LLDLA.h"
 
-#define NUMREGSPERLOAD 4
+#define NUMREGSPERLOAD 2
 
 #if DOLLDLA
 

@@ -19,9 +19,7 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "regLoadStore.h"
-
 
 void LoadToRegs::Prop()
 {
@@ -48,9 +46,12 @@ void LoadToRegs::Prop()
 
 void LoadToRegs::PrintCode(IndStream &out)
 {
-  //The variable for which 
+  out.Indent();
+  string toLoadName = GetInputNameStr(0);
+  string loadStr = GetNameStr(0);
+  *out << loadStr << " = VEC_PD_LOAD( " << toLoadName << " );\n";
+  return;
 }
-
 
 const Sizes* LoadToRegs::GetM(ConnNum num) const
 {
@@ -77,12 +78,10 @@ Name LoadToRegs::GetName(ConnNum num) const
 
 void LoadToRegs::AddVariables(VarSet &set) const
 {
-  string varDecl = "TypeOfRegisters " + GetInputNameStr(0)+ "_regs";
+  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regs";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
-
-
 
 void StoreFromRegs::Prop()
 {
@@ -111,6 +110,9 @@ void StoreFromRegs::Prop()
 
 void StoreFromRegs::PrintCode(IndStream &out)
 {
+  out.Indent();
   string regVarName = GetInputNameStr(0);
   string memoryVarName = GetInputNameStr(1);
+  *out << "VEC_PD_STORE( " << memoryVarName << ", " << regVarName << " );\n";
+  return;
 }
