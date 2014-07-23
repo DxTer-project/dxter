@@ -253,53 +253,6 @@ void BasePSet::RemoveOutTun(Node *tun)
   throw;
 }
 
-Cost PSet::EvalCurrPoss(TransConstVec &transList)
-{
-  //Any changes should be reflected in Loop::EvalCurrPoss()
-  if (m_currPoss == m_posses.end()) {
-    throw;
-  }
-  return (*m_currPoss).second->EvalCurr(transList);
-}
-
-Cost PSet::EvalAndSetBest()
-{
-  Cost optCost = -1;
-  PossMMapIter best;
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter) {
-    Poss *poss = (*iter).second;
-    Cost tmp = poss->EvalAndSetBest();
-    if (optCost < 0 || tmp < optCost) {
-      optCost = tmp;
-      best = iter;
-    }
-  }
-  m_currPoss = best;
-  return optCost;
-}
-
-void PSet::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
-{
-  if (m_currHasPrinted)
-    throw;
-
-  Poss *poss = GetCurrPoss();
-
-  poss->ClearPrintedFromGraph();
-
-  out.Indent();
-  *out << "//**** (out of " << m_posses.size() << ")\n";
-  
-  ++out;
-  poss->Print(out, graphNum);
-  --out;
-  
-  out.Indent();
-  *out << "//****\n";
-
-  m_currHasPrinted = true;
-}
 
 void BasePSet::FormSetAround()
 {
@@ -476,8 +429,6 @@ void PSet::ClearDataTypeCache()
 
 bool BasePSet::CanPrint() const
 {
-  if (m_currHasPrinted)
-    return false;
   NodeVecConstIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
     const Node *in = *iter;

@@ -66,11 +66,6 @@ class Poss
   void PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound = false);
   void DeleteChildAndCleanUp(Node *output, bool GoThroughTunnels=false, bool handleTunnelsAsNormalNodes=false, bool stopAtPossTunnels=false);
   virtual void DeleteNode(Node *node);
-  virtual Cost EvalCurr(TransConstVec &transList);
-  virtual Cost EvalAndSetBest();
-  virtual void Print(IndStream &out, GraphNum &graphNum);
-  virtual void EvalRoot(IndStream &out, GraphNum &graphNum, GraphNum whichGraph, GraphNum &optGraph, Cost &optCost);
-  virtual void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly);
   void ForcePrint();
   bool CanPrint() const;
   virtual bool IsBoundary(Node *node) {return node->IsPossTunnel();}

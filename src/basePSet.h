@@ -53,9 +53,6 @@ class BasePSet
   void RemoveInTun(Node *tun);
   void RemoveOutTun(Node *tun);
   void FormSetAround();
-  Cost EvalCurrPoss(TransConstVec &transList);
-  Cost EvalAndSetBest();
-  virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
   bool CanPrint() const;
   virtual BasePSet* GetNewInst() = 0;
 

@@ -39,13 +39,22 @@ class GraphIter
   Poss *m_poss;
   PossMMapIter *m_setIters;
   GraphIterPtr *m_subIters;
+  bool m_hasPrinted;
 
   GraphIter(Poss *poss);
   GraphIter(const GraphIter &iter);
   ~GraphIter();
+  void Init(Poss *poss);
   bool Increment();
   GraphIter& operator=(const GraphIter &rhs);
 
   void GetCurrTransVec(TransVec &transVec);
   void AddCurrPossVars(VarSet &set) const;
+
+  void EvalRoot(IndStream &out, GraphNum &graphNum, GraphNum whichGraph, GraphNum &optGraph, Cost &optCost);
+  Cost Eval(TransConstVec &transList);
+  Cost EvalAndSetBest();
+
+  void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly);
+  void Print(IndStream &out, GraphNum &graphNum);
 };

@@ -531,7 +531,7 @@ void Universe::PrintBest()
   time_t start,end;
 
   time(&start);
-  EvalCostsAndSetBest();
+  GraphIter iter = EvalCostsAndSetBest();
   time(&end);
   cout << "\tCost eval took " << difftime(end,start) << " seconds\n";
   cout.flush();
@@ -545,7 +545,7 @@ void Universe::PrintBest()
     IndStream optOut(&cout,LLDLASTREAM);
 #endif
 
-    m_pset->GetCurrPoss()->PrintRoot(optOut, 0, true);
+    iter.Print(optOut, 0, true);
 }
 
 void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
@@ -553,7 +553,8 @@ void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
-    poss->PrintRoot(out, whichGraph, currOnly);
+    GraphIter graphIter(poss);
+    graphIter.print(out, whichGraph, currOnly);
   }
 
   *out << "// numAlgs = " << TotalCount() << endl;
@@ -584,7 +585,8 @@ void Universe::EvalCosts(IndStream &out, GraphNum &whichGraph)
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
-    poss->EvalRoot(out, graphNum, whichGraph, optGraph, optCost);
+    GraphIter graphIter(poss);
+    graphIter.EvalRoot(out, graphNum, whichGraph, optGraph, optCost);
   }
     
   cout << "Opt is graph " << optGraph << endl;
@@ -596,10 +598,22 @@ void Universe::EvalCosts(IndStream &out, GraphNum &whichGraph)
   *out << "numAlgs = " << TotalCount() << endl;
 }
 
-void Universe::EvalCostsAndSetBest()
+GraphIter Universe::EvalCostsAndGetBest()
 {
   Prop();
-  m_pset->EvalAndSetBest();
+  PossMMapIter iter = m_pset->m_posses.begin();
+  GraphIter graphIter(iter->second);
+  Cost best = graphIter.EvalAndSetBest();
+  ++iter;
+  for(; iter != m_pset->m_posses.end(); ++iter) {
+    GraphIter compIter(iter->second);
+    Cost cost = compIter.EvalAndSetBest();
+    if (cost < best) {
+      best = cost;
+      graphIter = compIter;
+    }
+  }
+  return GraphIter;
 }
 
 GraphNum Universe::TotalCount() const
