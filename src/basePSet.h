@@ -27,59 +27,43 @@
 #include "poss.h"
 #include "possTunnel.h"
 
-class PSet
+class BasePSet
 {
  public:
-  PossMMap m_posses;
   NodeVec m_inTuns;
   NodeVec m_outTuns;
-  bool m_hasProped;
-  bool m_isTopLevel;
   Poss *m_ownerPoss;
   PossMMapIter m_currPoss;
-  string m_functionality;
-  PSet();
-  PSet(Poss *poss);
-  virtual ~PSet();
-  void AddPoss(Poss *poss);
-  void AddPossesOrDispose(PossMMap &mmap, PossMMap *added = NULL);
+  bool m_currHasPrinted;
+  bool m_hasProped;
+  bool m_isTopLevel;
+  BasePSet();
   GraphNum NumPosses() {return m_posses.size();}
-  bool operator==(const Poss &rhs) const;
-  bool operator==(const PSet &rhs) const;
-  virtual void Prop();
-  void Cull(Phase phase);
+  virtual bool operator==(const PSet &rhs) const = 0;
+  virtual void Prop() = 0;
+  virtual void ClearBeforeProp();
   Node* InTun(unsigned int num) const;
   Node* OutTun(unsigned int num) const;
-  void ClearBeforeProp();
-  bool TakeIter(const TransMap &trans, const TransMap &simplifiers);
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
-  virtual void Duplicate(const PSet *orig, NodeMap &map, bool possMerging);
-  virtual PSet* GetNewInst() {return new PSet;}
-  void PatchAfterDuplicate(NodeMap &map);
-  void CombineAndRemoveTunnels();
-  void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
-  void Simplify(const TransMap &simplifiers, bool recursive = false);
-  //  void RemoveDups();
-  void ClearFullyExpanded();
   virtual bool CanMerge(PSet *pset) const;
   virtual bool IsTransparent() const {return true;}
   bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
-  void FormSets(unsigned int phase);
-  GraphNum TotalCount() const;
-  void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
+  virtual GraphNum TotalCount() const = 0;
+  virtual bool TakeIter(const TransMap &trans, const TransMap &simplifiers) = 0;
+  virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses) = 0;
+  virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
   virtual void ClearPrinted();
   virtual bool IsLoop() const {return false;}
   void RemoveInTun(Node *tun);
   void RemoveOutTun(Node *tun);
-  void Cull(CullFunction cullFunc);
-  void FormSetAround();
+  virtual void FormSetAround() = 0;
   void ClearCurrPoss();
   bool IncrementCurrPoss();
   Cost EvalCurrPoss(TransConstVec &transList);
   Cost EvalAndSetBest();
   virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
   bool CanPrint() const;
-  Poss* GetCurrPoss() const;
+  virtual Poss* GetCurrPoss() const = 0;
   void GetCurrTransVec(TransVec &transVec) const;
   void AddCurrPossVars(VarSet &set) const;
 

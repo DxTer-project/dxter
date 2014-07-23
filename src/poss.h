@@ -43,7 +43,6 @@ class Poss
   size_t m_hash;
   bool m_hashValid;
  public:
-  bool m_hasPrinted;
   NodeVec m_possNodes;
   bool m_isSane;
   GraphNum m_parent;
@@ -103,7 +102,7 @@ class Poss
   virtual void ClearBeforeProp();
   virtual void ClearNodesPrinted();
   void ClearFullyExpanded();
-  virtual void ClearPrinted();
+  virtual void ClearPrintedFromGraph();
   string GetFunctionalityString() const;
   void GetTransVec(TransVec &transVec) const;
   void GetCurrTransVec(TransVec &transVec) const;

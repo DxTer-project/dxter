@@ -2336,7 +2336,7 @@ void Poss::Print(IndStream &out, GraphNum &graphNum)
 	}
     }
     for(unsigned int i = 0; i < numPSets; ++i) {
-      if (m_sets[i]->GetCurrPoss()->CanPrint()) {
+      if (m_sets[i]->CanPrint()) {
         m_sets[i]->PrintCurrPoss(out, graphNum);
         hasPrinted = true;
       }
@@ -2555,7 +2555,7 @@ void Poss::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly)
   m_hasPrinted = true;
 }
 
-void Poss::ClearPrinted()
+void Poss::ClearPrintedFromGraph()
 {
   NodeVecConstIter nodeIter = m_possNodes.begin();
   for( ; nodeIter != m_possNodes.end(); ++nodeIter)
@@ -2563,7 +2563,6 @@ void Poss::ClearPrinted()
   PSetVecIter iter = m_sets.begin();
   for(; iter != m_sets.end(); ++iter)
     (*iter)->ClearPrinted();
-  m_hasPrinted = false;
 }
 
 GraphNum Poss::TotalCount() const

@@ -272,20 +272,14 @@ void PSet::Prop()
   if(m_hasProped)
     return;
 
-  if (m_posses.empty()) {
-    cout << "I'm empty\n";
+  if (!m_realPSet)
     throw;
-  }
-
-  if (m_functionality.empty()) {
-    cout << m_posses.size() << endl;
-    (*(m_posses.begin())).second->PrintSetConnections();
-    throw;
-  }
 
   //BAM Par + check for > 1
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
     Node *in = InTun(i);
+    if (!in->IsPossTunnel(SHADOWTUNIN))
+      throw;
     for (unsigned int j = 0; j < in->m_children.size(); ++j) {
       Node *child = in->m_children[j]->m_n;
       if (child->m_inputs.size() != 1) {
@@ -301,6 +295,8 @@ void PSet::Prop()
   
   for (unsigned int i = 0; i < m_outTuns.size(); ++i) {
     Node *out = m_outTuns[i];
+    if (!out->IsPossTunnel(SHADOWTUNOUT))
+      throw;
     for (unsigned int j = 0; j < out->m_inputs.size(); ++j) {
       Node *parent = out->Input(j);
       if (parent->m_children.size() != 1) {
@@ -319,150 +315,13 @@ void PSet::Prop()
     throw;
   }
 
-
-
-
   for(unsigned int i = 0; i < m_inTuns.size(); ++i) {
     InTun(i)->Prop();
   }
-  PossMMapIter iter;
-  int j = 0;
-#pragma omp parallel private(j,iter)
-  {
-    iter = m_posses.begin();
-    j = 0;
-    int size = m_posses.size();
-    //BAM par
-#pragma omp for schedule(static) 
-    for (int i = 0; i < size; ++i) {
-      if (j > i) {
-	cout << "uhoh\n";
-	throw;
-      }
-      while (j < i) {
-	++iter;
-	++j;
-      }
 
-//       if ((*iter).first != (*iter).second->GetHash()) {
-// 	cout << "Bad hash in prop\n";
-// 	throw;
-//       }
+  m_realPSet->Prop();
 
-      (*iter).second->Prop();
-    }
-  }
-
-  iter = m_posses.begin();
-  do {
-    Poss *poss = (*iter).second;
-    if (poss->GetHash() != (*iter).first) {
-      m_posses.erase(iter);
-	  
-      bool existing = false;
-      PossMMapRangePair pair = m_posses.equal_range(poss->GetHash());
-      for( ; !existing && pair.first != pair.second; ++pair.first) {
-	if (*((*(pair.first)).second) == *poss) {
-	  RemoveAndDeletePoss(poss, false);
-	  existing = true;
-	}
-      }
-    
-      if (!existing)
-	m_posses.insert(PossMMapPair(poss->GetHash(),poss));
-      
-      iter = m_posses.begin();
-    }
-    else {
-      ++iter;
-    }
-  } while (iter != m_posses.end());
-
-  iter = m_posses.begin();
-  while (iter != m_posses.end()) {
-    Poss *poss = (*iter).second;
-    if (!poss->IsSane()) {
-      RemoveAndDeletePoss(poss, false);
-      m_posses.erase(iter);
-      iter = m_posses.begin();
-      if (!m_posses.size()) {
-	cout << "Ran out of posses in set " << this << endl;
-	throw;
-      }
-    }
-    else {
-      ++iter;
-    }
-  }
   m_hasProped = true;
-}
-
-void PSet::Cull(Phase phase)
-{
-  PossMMapIter iter2 = m_posses.begin();
-  for(; iter2 != m_posses.end(); ++iter2) 
-    (*iter2).second->m_isSane = false;
-
-  int j;
-  PossMMapIter iter;
-  
-#pragma omp parallel private(j,iter)
-  {
-    iter = m_posses.begin();
-    j = 0;
-    int size = m_posses.size();
-    //BAM par
-#pragma omp for schedule(static) 
-    for (int i = 0; i < size; ++i) {
-      if (i < j) {
-	cout << "uhoh";
-	cout.flush();
-	throw;
-      }
-      while (j < i) {
-	++iter;
-	++j;
-      }
-      Poss *poss = (*iter).second;
-      if (poss->m_isSane)
-	throw;
-      poss->m_isSane = true;
-      poss->Cull(phase);
-    }
-  }
-
-  iter = m_posses.begin();
-  while (iter != m_posses.end()) {
-    Poss *poss = (*iter).second;
-    if (!poss->IsSane()) {
-      RemoveAndDeletePoss(poss, false);
-      m_posses.erase(iter);
-      iter = m_posses.begin();
-      if (!m_posses.size()) {
-        cout << "Ran out of posses in set " << this << endl;
-        throw;
-      }
-    }
-    else {
-      ++iter;
-    }
-  }
-}
-
-Node* PSet::InTun(unsigned int num) const
-{
-  if (num >= m_inTuns.size()) {
-    cout << num << " >= " << m_inTuns.size() << endl;
-    throw;
-  }
-  return m_inTuns[num];
-}
-
-Node* PSet::OutTun(unsigned int num) const
-{
-  if (num >= m_outTuns.size())
-    throw;
-  return m_outTuns[num];
 }
 
 void PSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
@@ -506,88 +365,10 @@ void PSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
   delete poss;
 }
 
-void PSet::ClearBeforeProp()
-{
-  m_hasProped = false;
-  for (unsigned int i = 0; i < m_inTuns.size(); ++i)
-    InTun(i)->ClearBeforeProp();
-  for (unsigned int i = 0; i < m_outTuns.size(); ++i)
-    OutTun(i)->ClearBeforeProp();
-  
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter)
-    (*iter).second->ClearBeforeProp();
-}
-
-
 bool PSet::TakeIter(const TransMap &transMap,
                     const TransMap &simplifiers)
 {
-  bool newOne = false;
-  PossMMap actuallyAdded;
-  
-#ifdef _OPENMP
-  static omp_lock_t lock;
-  static bool inited = false;
-  if (!inited) {
-    omp_init_lock(&lock);
-    inited = true;
-  }
-#endif
-  
-  PossMMap mmap;
-  PossMMapIter iter;
-  int j = 0;
-
-#pragma omp parallel private(j,iter)
-  {
-    iter = m_posses.begin();
-    j = 0;
-    int size = m_posses.size();
-    //BAM par
-#pragma omp for schedule(static) 
-    for (int i = 0; i < size; ++i) {
-      while (j < i) {
-	++iter;
-	++j;
-      }
-      Poss *poss = (*iter).second;
-      if (!poss->m_fullyExpanded) {
-	bool didSomething;
-	PossMMap newPosses;
-	didSomething = poss->TakeIter(transMap, simplifiers, newPosses);
-	if (didSomething && (!newOne || newPosses.size() > 0)) {
-#ifdef _OPENMP
-	  omp_set_lock(&lock);
-#endif
-	  newOne = true;
-	  PossMMapIter newPossesIter = newPosses.begin();
-	  for(; newPossesIter != newPosses.end(); ++newPossesIter) {
-	    if (!AddPossToMMap(mmap, (*newPossesIter).second, (*newPossesIter).second->GetHash()))
-	      delete (*newPossesIter).second;
-	  }
-#ifdef _OPENMP
-	  omp_unset_lock(&lock);
-#endif
-	}
-      }
-    }
-  }
-  //have to add these at the end or we'd be adding posses while iterating
-  // over the posses
-  // BAM: Or do I?
-  if (mmap.size()) {
-    if (mmap.size() > 100)
-      cout << "\t\tAdding " << mmap.size() << " posses\n";
-    AddPossesOrDispose(mmap, &actuallyAdded);
-    if (mmap.size() > 100)
-      cout << "\t\tDone adding ( " << actuallyAdded.size() << " actually added )\n";
-    PossMMapIter added = actuallyAdded.begin();
-    for(; added != actuallyAdded.end(); ++added) {
-      (*added).second->BuildDataTypeCache();
-    }
-  }
-  return newOne;
+  //let the real one do this when it's time
 }
 
 bool PSet::GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers)
@@ -605,43 +386,6 @@ bool PSet::GlobalSimplification(const TransMap &globalSimplifiers, const TransMa
     }
   }
   return didSomething;
-}
-
-
-void PSet::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
-{
-  m_isTopLevel = orig->m_isTopLevel;
-  m_functionality = orig->m_functionality;
-  if (m_functionality.empty())
-    throw;
-  NodeVecConstIter iter  = orig->m_inTuns.begin();
-  for (; iter != orig->m_inTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(map[*iter]);
-    //expect set tunnel for this set to be duplicated
-    // as part of the owning poss's duplication
-    if (!tun)
-      throw;
-    m_inTuns.push_back(tun);
-    tun->m_pset = this;
-  }
-  iter  = orig->m_outTuns.begin();
-  for (; iter != orig->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(map[*iter]);
-    if (!tun)
-      throw;
-    m_outTuns.push_back(tun);
-    tun->m_pset = this;
-  }
-  
-  PossMMapConstIter iter2 = orig->m_posses.begin();
-  for( ; iter2 != orig->m_posses.end(); ++iter2) {
-    const Poss *oldPoss = (*iter2).second;
-    Poss *newPoss = new Poss;
-    newPoss->Duplicate(oldPoss, map, possMerging);
-    m_posses.insert(PossMMapPair(newPoss->GetHash(),newPoss));
-    newPoss->m_pset = this;
-  }
-  
 }
 
 void PSet::PatchAfterDuplicate(NodeMap &map)
@@ -1007,46 +751,7 @@ bool NothingBetween(const PSet *left, const PSet *right)
   return true;
 }
 
-bool ShouldMerge(const PSet *set1, const PSet *set2)
-{
-  unsigned int i, j, k;
-  for(i = 0; i < set1->m_inTuns.size(); ++i) {
-    const Node *in = set1->m_inTuns[i];
-    for(j = 0; j < in->m_inputs.size(); ++j) {
-      const Node *inInput = in->Input(j);
-      if (inInput->IsPossTunnel()) {
-        if (((PossTunnel*)inInput)->m_pset == set2)
-          return true;
-      }
-      for(k = 0; k < inInput->m_children.size(); ++k) {
-        const Node *child = inInput->Child(k);
-        if (child->IsPossTunnel()) {
-          if (((PossTunnel*)child)->m_pset == set2)
-            return true;
-        }
-      }
-    }
-  }
-  for(i = 0; i < set1->m_outTuns.size(); ++i) {
-    const Node *out = set1->m_outTuns[i];
-    for(j = 0; j < out->m_children.size(); ++j) {
-      const Node *child = out->Child(j);
-      if (child->IsPossTunnel()) {
-        if (((PossTunnel*)child)->m_pset == set2)
-          return true;
-      }
-    }
-  }
-  return false;
-}
 
-bool PSet::CanMerge(PSet *pset) const
-{
-  bool nothingBetween = NothingBetween(this, pset) && NothingBetween(pset, this);
-  if (!nothingBetween)
-    return false;
-  return ShouldMerge(this, pset);
-}
 
 bool PSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 {
