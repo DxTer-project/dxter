@@ -42,7 +42,6 @@ class BasePSet
   virtual void ClearBeforeProp();
   Node* InTun(unsigned int num) const;
   Node* OutTun(unsigned int num) const;
-  bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   virtual bool CanMerge(BasePSet *pset) const;
   virtual bool IsTransparent() const {return true;}
   virtual GraphNum TotalCount() const = 0;

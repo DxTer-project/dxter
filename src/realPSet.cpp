@@ -580,23 +580,6 @@ bool RealPSet::TakeIter(const TransMap &transMap,
   return newOne;
 }
 
-bool PSet::GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers)
-{
-  bool didSomething = false;
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter) {
-    if ((*iter).second->GlobalSimplification(globalSimplifiers, simplifiers)) {
-      didSomething = true;
-      if ((*iter).first != (*iter).second->GetHash()) {
-	cout << "GlobalSimplification different hash\n";
-	cout << (*iter).first  << " vs " << (*iter).second->GetHash() << endl;
-	throw;
-      }
-    }
-  }
-  return didSomething;
-}
-
 void RealPSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging)
 {
   BasePSet::Duplicate(orig, map, possMerging);

@@ -459,7 +459,6 @@ inline string LayerNumToStr(Layer layer)
 }
 
 #define SIMP -1
-#define GLOBSIMP -2
 
 
 

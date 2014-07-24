@@ -103,23 +103,6 @@ void ShadowPSet::Prop()
   m_hasProped = true;
 }
 
-bool PSet::GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers)
-{
-  bool didSomething = false;
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter) {
-    if ((*iter).second->GlobalSimplification(globalSimplifiers, simplifiers)) {
-      didSomething = true;
-      if ((*iter).first != (*iter).second->GetHash()) {
-	cout << "GlobalSimplification different hash\n";
-	cout << (*iter).first  << " vs " << (*iter).second->GetHash() << endl;
-	throw;
-      }
-    }
-  }
-  return didSomething;
-}
-
 GraphNum ShadowPSet::TotalCount() const
 {
   return m_realPSet->TotalCount();

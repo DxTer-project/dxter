@@ -42,7 +42,6 @@ class Universe
  protected:
   static TransMap M_trans[NUMPHASES];
   static TransMap M_simplifiers;
-  static TransMap M_globSimplifiers;
   static TransPtrMap M_transNames;
   static TransNameMap M_transPtrs;
   bool TakeIter(unsigned int phase);

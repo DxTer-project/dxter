@@ -48,7 +48,6 @@ unsigned int CurrPhase = -1;
 
 TransMap Universe::M_trans[NUMPHASES];
 TransMap Universe::M_simplifiers;
-TransMap Universe::M_globSimplifiers;
 TransPtrMap Universe::M_transNames;
 TransNameMap Universe::M_transPtrs;
 unsigned int Universe::M_transCount[NUMPHASES+2];
@@ -63,7 +62,7 @@ void Universe::Init(RealPSet *seed)
   m_pset = seed;
   m_pset->m_isTopLevel = true;
   CurrPhase = FIRSTPHASE;
-  m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers);
+  m_pset->Simplify(M_simplifiers);
   m_pset->BuildDataTypeCache();
 
 #if DOTENSORS
@@ -112,9 +111,6 @@ Universe::~Universe()
   TransMapIter iter3 = M_simplifiers.begin();
   for(; iter3 != M_simplifiers.end(); ++iter3)
     delete iter3->second;
-  iter3 = M_globSimplifiers.begin();
-  for(; iter3 != M_globSimplifiers.end(); ++iter3)
-    delete iter3->second;
   for(int i = 0; i < NUMPHASES; ++i) {
     iter3 = M_trans[i].begin();
     for(; iter3 != M_trans[i].end(); ++iter3)
@@ -161,10 +157,6 @@ bool Universe::TakeIter(unsigned int phase)
   
   newOne = m_pset->TakeIter(M_trans[phase], M_simplifiers);
 
-  if (newOne && !M_globSimplifiers.empty())
-    if (m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers))
-      m_pset->BuildDataTypeCache();
-  
   cout << "\tFinishing iteration\n";
   cout.flush();
 
@@ -195,10 +187,8 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
   
   ClearFullyExpanded();
 
-  if (m_pset->GlobalSimplification(M_globSimplifiers, M_simplifiers))
-    m_pset->BuildDataTypeCache();
 #if DOLLDLA
-  else if (M_globSimplifiers.empty() && !M_simplifiers.empty()) {
+  if (!M_simplifiers.empty()) {
     if (CurrPhase == LLDLAPRIMPHASE) {
       m_pset->Simplify(M_simplifiers, true);
     }
@@ -327,21 +317,6 @@ void Universe::AddTrans(const ClassType &classType, Transformation *trans, int p
       TransVec *vec = new TransVec;
       vec->push_back(trans);
       M_simplifiers[classType] = vec;
-    }
-  }
-  else if (phase == GLOBSIMP) {
-    if (trans->IsSingle()) 
-      M_transCount[NUMPHASES+1]++;
-    else 
-      M_transCount[NUMPHASES+1] += ((MultiTrans*)trans)->NumTransformations();
-    TransMapIter mapIter = M_globSimplifiers.find(classType);
-    if (mapIter != M_globSimplifiers.end()) {
-      mapIter->second->push_back(trans);
-    }
-    else {
-      TransVec *vec = new TransVec;
-      vec->push_back(trans);
-      M_globSimplifiers[classType] = vec;
     }
   }
   else if (phase < 0 || phase >= NUMPHASES) 
@@ -633,7 +608,6 @@ void Universe::PrintStats()
   for (unsigned int i = 0; i < NUMPHASES; ++i)
     cout << "\t" << M_transCount[i] << " in phase " << i << endl;
   cout << "\t" << M_transCount[NUMPHASES] << " simplifiers\n";
-  cout << "\t" << M_transCount[NUMPHASES+1] << " global simplifiers\n";
 }
 
 void Universe::RegCons(ClassType type, ConstructorFunc func)

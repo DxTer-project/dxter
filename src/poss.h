@@ -100,7 +100,6 @@ class Poss
   GraphNum TotalCount() const;
   bool TakeIter(const TransMap &transMap, const TransMap &simplifiers, 
 		PossMMap &newPosses);
-  bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   bool HasFused(const BasePSet *left, const BasePSet *right) const;
   void SetFused(const BasePSet *left, const BasePSet *right);
   void RemoveFromGraphNodes(Node *node);

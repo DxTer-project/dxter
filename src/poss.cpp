@@ -2491,23 +2491,6 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
   return didSomething;
 }
 
-bool Poss::GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers)
-{
-  if (!globalSimplifiers.empty()) {
-    //recurse first since a global simplifier could affect this poss's nodes
-    // (that also means this can't be easily parallelized)
-    bool didSomething = false;
-    PSetVecIter iter = m_sets.begin();
-    for(; iter != m_sets.end(); ++iter) {
-      didSomething |= (*iter)->GlobalSimplification(globalSimplifiers, simplifiers);
-    }
-    didSomething |= Simplify(globalSimplifiers);
-    didSomething |= Simplify(simplifiers);
-    return didSomething;
-  }
-  else
-    return false;
-}
 
 string GetFusedString(const IntSet *set)
 {

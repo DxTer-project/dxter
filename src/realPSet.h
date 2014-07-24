@@ -49,7 +49,6 @@ class RealPSet : public BasePSet
   virtual void Prop();
   virtual bool TakeIter(const TransMap &trans, const TransMap &simplifiers);
   virtual void ClearBeforeProp();
-  bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
   virtual BasePSet* GetNewInst() {return (BasePSet*)(new RealPSet);}
   virtual const PossMMap& GetPosses() const {return m_posses;}
