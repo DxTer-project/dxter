@@ -44,7 +44,6 @@ class ShadowPSet : public BasePSet
   virtual const PossMMap& GetPosses() const {return m_realPSet->m_posses;}
   virtual PossMMap& GetPosses() {return m_realPSet->m_posses;}
   virtual void PatchAfterDuplicate(NodeMap &map) {}
-  virtual BasePSet* GetShadow();
 
   //  virtual void FlattenCore(ofstream &out) const {}
   //  virtual void UnflattenCore(ifstream &in, SaveInfo &info) {}
@@ -59,5 +58,7 @@ class ShadowPSet : public BasePSet
 
   virtual const string& GetFunctionalityString() const;
   virtual bool IsShadow() const {return true;}
+  virtual RealPSet* GetReal() {return m_realPSet;}
+  virtual BasePSet* GetNewShadow();
 };
 

@@ -24,7 +24,7 @@
 #pragma once
 
 #include "base.h"
-#include "poss.h"
+//#include "poss.h"
 //#include "possTunnel.h"
 #include "basePSet.h"
 
@@ -65,7 +65,7 @@ class RealPSet : public BasePSet
   void FormSets(unsigned int phase);
   virtual GraphNum TotalCount() const;
   virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
-  virtual BasePSet* GetShadow();
+  virtual BasePSet* GetNewShadow();
 
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
@@ -80,5 +80,6 @@ class RealPSet : public BasePSet
 
   virtual const string& GetFunctionalityString() const;
   virtual bool IsReal() const {return true;}
+  virtual RealPSet* GetReal() {return this;}
 };
 

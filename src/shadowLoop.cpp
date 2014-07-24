@@ -80,3 +80,7 @@ bool IsParallel() const
 
 
 
+const IntSet& ShadowLoop::GetLabel() const
+{
+  return ((RealLoop*)m_realPSet)->GetLabel();
+}

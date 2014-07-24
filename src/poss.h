@@ -31,6 +31,7 @@
 #include <stdarg.h>
 #include <unordered_set>
 #include "realPSet.h"
+#include "basePSet.h"
 
 //using namespace __gnu_cxx;
 
@@ -87,15 +88,16 @@ class Poss
   Node* InTun(unsigned int num) const {return m_inTuns[num];}
   Node* OutTun(unsigned int num) const {return m_outTuns[num];}
   void MergePart1(unsigned int left, unsigned int right, 
-		  BasePSet **leftSet, BasePSet **rightSet,
-		  CullFunction cullFunc);
-  void MergePart2(BasePSet *newSet, unsigned int left, NodeMap &map);
-  void MergePart4(BasePSet *newSet, 
+		  BasePSet **leftSet, BasePSet **rightSet);
+  void MergePart2(RealPSet *newSet, 
+		  BasePSet *leftSet, BasePSet *rightSet,
+		  unsigned int left, NodeMap &map);
+  void MergePart4(RealPSet *newSet, 
 		  BasePSet *leftSet, 
 		  BasePSet *rightSet, 
 		  NodeMap &map,
 		  NodeVec &newInputTunnelsToFix);
-  void MergePart6(BasePSet *newSet, BasePSet *leftSet, 
+  void MergePart6(RealPSet *newSet, BasePSet *leftSet, 
 		  BasePSet *rightSet, NodeMap &map);
   bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
@@ -116,9 +118,9 @@ class Poss
   void RemoveFromGraphNodes(Node *node);
   void RemoveFromSets(BasePSet *set);
   void PrintNodeAddresses() const;
-  BasePSet* FormSubPSet(NodeVec &outputTuns, bool isCritSect);
+  RealPSet* FormSubPSet(NodeVec &outputTuns, bool isCritSect);
   void FillClique(NodeSet &set);
-  BasePSet* FormSetForClique(NodeSet &set, bool isCritSect);
+  RealPSet* FormSetForClique(NodeSet &set, bool isCritSect);
 
   static size_t Hash(const string &str);
   size_t GetHash();

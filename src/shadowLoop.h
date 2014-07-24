@@ -45,4 +45,6 @@ class ShadowLoop : public IntLoop<ShadowPSet>
   bool HasIndepIters() const;
   bool IsParallel() const {return m_comm!=CORECOMM;}
 #endif
+
+  virtual const IntSet& GetLabel() const;
 };

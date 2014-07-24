@@ -92,8 +92,7 @@ class LoopInterface
 #if TWOD
   virtual DimName GetDimName() const = 0;
 #endif
-  virtual bool IsLoop() const {return true;}
-  virtual bool IsTransparent() const {return false;}
+  virtual const IntSet& GetLabel() const = 0;
   virtual SplitBase* GetControl() const = 0;
   virtual bool CanMerge(BasePSet *pset) const = 0;
   virtual bool WorthFusing(BasePSet *pset) = 0;
@@ -114,4 +113,6 @@ class IntLoop : public PSetType, public LoopInterface
   virtual unsigned int LoopLevel() const;
   virtual void PrePrint(IndStream &out, Poss *poss);
   virtual void PostPrint(IndStream &out, Poss *poss);
+  virtual bool IsLoop() const {return true;}
+  virtual bool IsTransparent() const {return false;}
 };

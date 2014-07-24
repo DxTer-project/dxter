@@ -828,3 +828,5 @@ bool IntLoop<PSetType>::WorthFusing(BasePSet *pset)
 }
 
 
+template class IntLoop<RealPSet>;
+template class IntLoop<ShadowPSet>;

@@ -22,8 +22,10 @@
 #pragma once
 
 #include "base.h"
-#include "poss.h"
-#include "possTunnel.h"
+//#include "poss.h"
+//#include "possTunnel.h"
+
+class RealPSet;
 
 class BasePSet
 {
@@ -34,7 +36,7 @@ class BasePSet
   bool m_hasProped;
   bool m_isTopLevel;
   BasePSet();
-  virtual ~BasePSet() = 0;
+  virtual ~BasePSet() {}
   virtual GraphNum NumPosses() const = 0;
   virtual bool operator==(const BasePSet &rhs) const = 0;
   virtual void Prop() = 0;
@@ -51,7 +53,7 @@ class BasePSet
   void FormSetAround();
   bool CanPrint() const;
   virtual BasePSet* GetNewInst() = 0;
-  virtual BasePSet* GetShadow();
+  virtual BasePSet* GetNewShadow() = 0;
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}
@@ -77,12 +79,8 @@ class BasePSet
   virtual const string& GetFunctionalityString() const = 0;
   virtual bool IsReal() const {return false;}
   virtual bool IsShadow() const {return false;}
+  virtual RealPSet* GetReal() = 0;
 };
 
 
-typedef vector<BasePSet*> PSetVec;
-typedef PSetVec::iterator PSetVecIter;
-typedef PSetVec::const_iterator PSetVecConstIter;
-typedef set<const BasePSet*> PSetSet;
-typedef PSetSet::iterator PSetSetIter;
-typedef PSetSet::const_iterator PSetSetConstIter;
+

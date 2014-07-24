@@ -1258,30 +1258,6 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
   delete inliningPoss;
 }
 
-void BasePSet::RemoveInTun(Node *tun)
-{
-  NodeVecIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
-    if (*iter == tun) {
-      m_inTuns.erase(iter);
-      return;
-    }
-  }
-  throw;
-}
-
-void BasePSet::RemoveOutTun(Node *tun)
-{
-  NodeVecIter iter = m_outTuns.begin();
-  for(; iter != m_outTuns.end(); ++iter) {
-    if (*iter == tun) {
-      m_outTuns.erase(iter);
-      return;
-    }
-  }
-  throw;
-}
-
 void RealPSet::Cull(CullFunction cullFunc)
 {
   PossMMapIter iter = m_posses.begin();
@@ -1472,7 +1448,7 @@ const string& RealPSet::GetFunctionalityString() const
 }
 
 
-BasePSet* RealPSet::GetShadow()
+BasePSet* RealPSet::GetNewShadow()
 {
   ShadowPSet *shadow = new ShadowPSet;
   shadow->m_realPSet = this;
