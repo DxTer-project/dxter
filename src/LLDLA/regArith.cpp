@@ -28,6 +28,9 @@ void FMAdd::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3, 1>::Prop();
 
+// TODO: Delete shape checks and instead check that operands
+// are registers
+
     if (*GetInputM(0) != *GetInputM(1) || *GetInputM(0) != *GetInputM(2)) {
       throw;
     }
@@ -55,6 +58,9 @@ void Add::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
 
+// TODO: Delete shape checks and instead check that
+// inputs are registers
+
     if (*GetInputM(0) != *GetInputM(1)) {
       throw;
     }
@@ -81,6 +87,9 @@ void Mul::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
 
+// TODO: Delete shape checks and instead check that
+// inputs are registers
+
     if (*GetInputM(0) != *GetInputM(1)) {
       throw;
     }
@@ -104,7 +113,7 @@ void Mul::PrintCode(IndStream &out)
 
 void ZeroReg::Prop()
 {
-// TODO: create check that input is a vector register
+// TODO: Add full prop method with register checks
   return;
 }
 
@@ -118,7 +127,7 @@ void ZeroReg::PrintCode(IndStream &out)
 
 void AccumReg::Prop()
 {
-// TODO: Add full prop method
+// TODO: Add full prop method with register checks
   return;
 }
 

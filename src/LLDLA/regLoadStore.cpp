@@ -27,7 +27,7 @@ void LoadToRegs::Prop()
     DLANode::Prop();
     if (m_inputs.size() != 1)
       throw;
-    
+
     if (*(GetInputM(0)) != NUMREGSPERLOAD) {
       // this isn't 1 x NUMREGSPERLOAD
       if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != NUMREGSPERLOAD)
@@ -87,6 +87,8 @@ void StoreFromRegs::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
+
+    // TODO: Check that the correct input # is a register
     
     if (*(GetInputM(0)) != NUMREGSPERLOAD) {
       // this isn't 1 x NUMREGSPERLOAD
