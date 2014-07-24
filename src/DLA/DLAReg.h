@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "loop.h"
+#include "loopSupport.h"
 #include "TriInv.h"
 #include "blas.h"
 #include "chol.h"

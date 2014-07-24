@@ -23,7 +23,8 @@
 
 #pragma once
 
-#include "loop.h"
+#include "realLoop.h"
+#include "shadowLoop.h"
 #include "loopTunnel.h"
 #include "combineBase.h"
 

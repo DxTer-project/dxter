@@ -420,7 +420,7 @@ Name LoopTunnel::GetOrigName() const
     throw;
 }
 
-Loop* LoopTunnel::GetMyLoop() const
+BasePSet* LoopTunnel::GetMyLoop() const
 {
   BasePSet *set = NULL;
   if (m_tunType == SETTUNIN)
@@ -437,7 +437,7 @@ Loop* LoopTunnel::GetMyLoop() const
     cout << "Loop Tunnel doesn't have Loop as PSet\n";
     throw;
   }
-  return (Loop*)set;
+  return set;
 }
 
 
@@ -590,7 +590,7 @@ LoopType LoopTunnel::GetLoopType() const
   if (!m_pset) {
     throw;
   }
-  return ((Loop*)m_pset)->GetType();
+  return (dynamic_cast<LoopInterface*>(m_pset))->GetType();
 }
 
 void LoopTunnel::FlattenCore(ofstream &out) const
@@ -668,7 +668,7 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     cout << lms->NumSizes() << endl;
     cout << lns->NumSizes() << endl;
 #endif
-    (*(((Loop*)m_pset)->m_posses.begin())).second->ForcePrint();
+    //    (*(((Loop*)m_pset)->m_posses.begin())).second->ForcePrint();
     throw;
   }
   const Size m = (*ms)[execNum];

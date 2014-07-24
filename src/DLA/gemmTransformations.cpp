@@ -102,7 +102,7 @@ bool GemmLoopExp::CanApply(const Node *node) const
 void GemmLoopExp::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
-  Loop *loop;
+  RealLoop *loop;
   
   NodeConn *connA, *connB, *connC;
   connA = gemm->m_inputs[0];
@@ -153,7 +153,7 @@ void GemmLoopExp::Apply(Node *node) const
   if (!(loop->GetBS()))
     throw;
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -794,7 +794,7 @@ void GemmInputReordering::Apply(Node *node) const
 }
 #endif
 
-Loop* GemmVar1Loop(Node *Ain, ConnNum Anum,
+RealLoop* GemmVar1Loop(Node *Ain, ConnNum Anum,
                    Node *Bin, ConnNum Bnum,
                    Node *Cin, ConnNum Cnum,
 		   BSSize bs,
@@ -837,16 +837,16 @@ Loop* GemmVar1Loop(Node *Ain, ConnNum Anum,
                                                 1, gepp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
-  Loop *loop = NULL;
+  RealLoop *loop = NULL;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, bs);
+    loop = new RealLoop(ELEMLOOP, loopPoss, bs);
   else
     throw;
 #elif DOBLIS
-  loop = new Loop(BLISLOOP, loopPoss, bs);
+  loop = new RealLoop(BLISLOOP, loopPoss, bs);
 #elif DOLLDLA
-    loop = new Loop(LLDLALOOP, loopPoss, bs);
+    loop = new RealLoop(LLDLALOOP, loopPoss, bs);
 #endif
 
   loop->SetDimName(DIMM);
@@ -855,7 +855,7 @@ Loop* GemmVar1Loop(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* GemmVar3Loop(Node *Ain, ConnNum Anum,
+RealLoop* GemmVar3Loop(Node *Ain, ConnNum Anum,
                    Node *Bin, ConnNum Bnum,
                    Node *Cin, ConnNum Cnum,
 		   BSSize bs,
@@ -957,16 +957,16 @@ Loop* GemmVar3Loop(Node *Ain, ConnNum Anum,
   CtunOut->CopyTunnelInfo(Ctun);
   
   Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, bs);
+    loop = new RealLoop(ELEMLOOP, loopPoss, bs);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, bs);
+    loop = new RealLoop(BLISLOOP, loopPoss, bs);
 #elif DOLLDLA
-    loop = new Loop(LLDLALOOP, loopPoss, bs);
+    loop = new RealLoop(LLDLALOOP, loopPoss, bs);
 #endif
 
   loop->SetDimName(DIMK);
@@ -975,7 +975,7 @@ Loop* GemmVar3Loop(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* GemmVar2Loop(Node *Ain, ConnNum Anum,
+RealLoop* GemmVar2Loop(Node *Ain, ConnNum Anum,
                    Node *Bin, ConnNum Bnum,
                    Node *Cin, ConnNum Cnum,
 		   BSSize bs,
@@ -1018,16 +1018,16 @@ Loop* GemmVar2Loop(Node *Ain, ConnNum Anum,
 							  1, gepp, 0);
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
-  Loop *loop = NULL;
+  RealLoop *loop = NULL;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, bs);
+    loop = new RealLoop(ELEMLOOP, loopPoss, bs);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, bs);
+    loop = new RealLoop(BLISLOOP, loopPoss, bs);
 #else
-    loop = new Loop(LLDLALOOP, loopPoss, bs);
+    loop = new RealLoop(LLDLALOOP, loopPoss, bs);
 #endif
 
   loop->SetDimName(DIMN);
@@ -1137,13 +1137,11 @@ void BLISGemmLoopExp::Apply(Node *node) const
                                                 1, gebp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
-  Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, USEBLISMC);
 
   loop->SetDimName(DIMM);
   
-  
-  
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(2), 0);
   

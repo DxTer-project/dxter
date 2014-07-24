@@ -240,13 +240,13 @@ void SMulLoopRef::Apply(Node *node) const
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
   //Put that poss into a loop - it's LLDLALOOP type and
   // uses the LLDLA_MU blocksize
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, USELLDLAMU);
 
   //Set the dimension over which this loop iterates
   loop->SetDimName(m_dim);
   
   //Add the loop to the node's owning Poss
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   //Redirect children of the node to use the loop's output
   // (it's the 1st (0-base) output since the 0th is the scalar)
   node->RedirectChildren(loop->OutTun(1), 0);

@@ -31,9 +31,9 @@
 #include "transform.h"
 #include "elemRedist.h"
 #include "lowerLayer.h"
-#include "loop.h"
+#include "realLoop.h"
 
-Loop* GemmVar1Loop(Node *Ain, ConnNum Anum, 
+RealLoop* GemmVar1Loop(Node *Ain, ConnNum Anum, 
 		Node *Bin, ConnNum Bnum, 
 		Node *Cin, ConnNum Cnum,
 		   BSSize bs,
@@ -41,7 +41,7 @@ Loop* GemmVar1Loop(Node *Ain, ConnNum Anum,
 		Coef alpha, Coef beta, 
 		Layer layer, Type type);
 
-Loop* GemmVar3Loop(Node *Ain, ConnNum Anum, 
+RealLoop* GemmVar3Loop(Node *Ain, ConnNum Anum, 
 		    Node *Bin, ConnNum Bnum, 
 		      Node *Cin, ConnNum Cnum,
 		   BSSize bs,
@@ -50,7 +50,7 @@ Loop* GemmVar3Loop(Node *Ain, ConnNum Anum,
 		      Coef alpha, Coef beta, 
 		   Layer layer, Type type);
 
-Loop* GemmVar2Loop(Node *Ain, ConnNum Anum, 
+RealLoop* GemmVar2Loop(Node *Ain, ConnNum Anum, 
 		    Node *Bin, ConnNum Bnum, 
 		      Node *Cin, ConnNum Cnum,
 		   BSSize bs,

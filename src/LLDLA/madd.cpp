@@ -184,10 +184,10 @@ void MAddLoopRef::Apply(Node *node) const
 
   Poss *loopPoss = new Poss(2, com0, com1);
 
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, USELLDLAMU);
   loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
 
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -246,10 +246,10 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   
   Poss *loopPoss = new Poss(2, com0, com1);
 
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USEUNITBS);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, USEUNITBS);
   loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
 
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }

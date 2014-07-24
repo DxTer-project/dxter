@@ -99,7 +99,7 @@ void LULoopExp::Apply(Node *node) const
     throw;
   }
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(0, loop->OutTun(0), 0);
   node->RedirectChildren(1, loop->OutTun(1), 0);
@@ -156,14 +156,14 @@ Loop* LUVar5Loop(Node *Ain, ConnNum Anum,
                                                 1, lu, 6);
   
   Poss *loopPoss = new Poss(2, comA, comP);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (BLASLayer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISMC);
 #endif
   
   return loop;  

@@ -542,11 +542,6 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
   }
 }
 
-void Poss::AddLoop(Loop *loop)
-{
-  AddPSet(loop);
-}
-
 void Poss::AddPSet(PSet *pset)
 {
   NodeVecIter iter = pset->m_outTuns.begin();
@@ -779,7 +774,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
               if (!((Loop*)(m_sets[left]))->WorthFusing((Loop*)(m_sets[right]))) {
                 continue;
               }
-              if (HasFused((Loop*)(m_sets[left]),(Loop*)(m_sets[right]))) {
+              if (HasFused(m_sets[left],m_sets[right])) {
                 //		cout << "has fused\n\n";
                 continue;
               }
@@ -2517,16 +2512,21 @@ string GetFusedString(const IntSet *set)
   return str.str();
 }
 
-bool Poss::HasFused(const Loop *left, const Loop *right) const
+bool Poss::HasFused(const BasePSet *left, const BasePSet *right) const
 {
+  //Only mantain list for loops
+  if (!left->IsLoop() || !right->IsLoop())
+    throw;
   IntSet fusedSet(left->m_label.begin(),left->m_label.end());
   fusedSet.insert(right->m_label.begin(),right->m_label.end());
   string str = GetFusedString(&fusedSet);
   return M_fusedSets.find(str) != M_fusedSets.end();
 }
 
-void Poss::SetFused(const Loop *left, const Loop *right)
+void Poss::SetFused(const BasePSet *left, const BasePSet *right)
 {
+  if (!left->IsLoop() || !right->IsLoop())
+    throw;
   IntSet fusedSet(left->m_label.begin(),left->m_label.end());
   fusedSet.insert(right->m_label.begin(),right->m_label.end());
   string str = GetFusedString(&fusedSet);
@@ -2620,10 +2620,8 @@ void Poss::Flatten(ofstream &out) const
   for(; iter4 != m_sets.end(); ++iter4) {
     bool isLoop = (*iter4)->IsLoop();
     WRITE(isLoop); 
-    if (!isLoop) {
-      bool isReal = (*iter4)->IsReal();
-      WRITE(isReal);
-    }
+    bool isReal = (*iter4)->IsReal();
+    WRITE(isReal);
     WRITE(*iter4);
   }
   FullyFlatten(m_possNodes, out);
@@ -2674,11 +2672,16 @@ void Poss::Unflatten(ifstream &in, SaveInfo &info)
   for(unsigned int i = 0; i < size; ++i) {
     bool isLoop;
     READ(isLoop);
+    bool isReal;
+    READ(isReal);
     PSet *newSet;
-    if (isLoop)
-      newSet = new Loop;
+    if (isLoop) {
+      if (isReal)
+	newSet = new RealLoop;
+      else
+	newSet = new ShadowLoop;
+    }
     else {
-      bool isReal;
       if (isReal)
 	newSet = new RealPSet;
       else

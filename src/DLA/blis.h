@@ -149,15 +149,6 @@ class ParallelizeOuterNDim : public ParallelizeTrans
   virtual void Apply(Node *node) const;
 };
 
-class ParallelizeK : public ParallelizeTrans
-{
- public:
-  ParallelizeK(Comm comm)
-    : ParallelizeTrans(comm) {}
-  virtual string GetType() const {return "ParallelizeK"+CommToStr(m_comm);}
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-};
 /*
 class IncreaseParallelizedLoop : public SingleTrans
 {

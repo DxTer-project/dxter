@@ -259,11 +259,11 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
 
   // Create poss
   Poss *loopPoss = new Poss(3, comA, xTun, comY);
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, m_bs);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, m_bs);
   loop->SetDimName(m_dim);
 
   // Set up graph to correctly incorporate this loop
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(2), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -309,10 +309,10 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
 
   // Create the poss
   Poss *loopPoss = new Poss(3, comA, comX, outY);
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, m_bs);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, m_bs);
   loop->SetDimName(m_dim);
 
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(2), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 

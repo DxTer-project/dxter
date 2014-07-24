@@ -1181,7 +1181,7 @@ PSet* HegstR2Example()
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
 
-  Loop *loop = TwoSidedTrsmLowerVar2Alg(Lin, 0,
+  RealLoop *loop = TwoSidedTrsmLowerVar2Alg(Lin, 0,
 					Ain, 0,
 					TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
 
@@ -1269,7 +1269,7 @@ PSet* HegstL1Example()
 			    comA,
 			    comL);
 
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(loop->OutTun(0),0);
@@ -1291,7 +1291,7 @@ PSet* HegstL2Example()
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
 
-  Loop *loop = TwoSidedTrmmLowerVar2Alg(Lin, 0,
+  RealLoop *loop = TwoSidedTrmmLowerVar2Alg(Lin, 0,
 					    Ain, 0,
 					    TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
 
@@ -1311,7 +1311,7 @@ PSet* HegstL4Example()
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
 
-  Loop *loop = TwoSidedTrmmLowerVar4Alg(Lin, 0, Ain, 0,
+  RealLoop *loop = TwoSidedTrmmLowerVar4Alg(Lin, 0, Ain, 0,
 				     TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
 
   OutputNode *Aout = new OutputNode("A output");
@@ -1418,7 +1418,7 @@ PSet* HegstL5Example()
 			    comA,
 			    comL);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(loop->OutTun(0),0);
@@ -1860,7 +1860,7 @@ PSet* Test()
   comY->CopyUpStats(splitY);
 
   Poss *loopPoss = new Poss(3, comA, comU, comY);
-  Loop *loop = new Loop(ELEMLOOP, loopPoss);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(loop->OutTun(0),0);
@@ -2199,7 +2199,7 @@ PSet* CholHegstExample()
 			      comA,
 			      comL);
 #if DOELEM
-    Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
 
     OutputNode *Aout = new OutputNode("A output");
     Aout->AddInput(loop->OutTun(0),0);
@@ -2298,7 +2298,7 @@ PSet* CholHegstExample()
 			      comA,
 			      comL);
 #if DOELEM
-    Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
 
     OutputNode *Aout = new OutputNode("A output");
     Aout->AddInput(loop->OutTun(0),0);
@@ -2426,7 +2426,7 @@ PSet* AppBlkHouseExample()
   CombineSingleIter *comT = splitT->CreateMatchingCombine(0);
   
   Poss *loopPoss = new Poss(3, comB, comU, comT);
-  Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 
   OutputNode *Bout = new OutputNode("B output");
   Bout->AddInput(loop->OutTun(0),0);

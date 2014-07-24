@@ -36,7 +36,6 @@
 
 class Node;
 class RealPSet;
-class Loop;
 
 class Poss
 {
@@ -78,7 +77,6 @@ class Poss
   void AddNodes(int numNodes, ...);
   virtual void AddPSet(BasePSet *pset, bool expectToBeNew);
   virtual void AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner);
-  virtual void AddLoop(Loop *loop);
   virtual void AddPSet(BasePSet *pset);
   bool ContainsNonLoopCode() const;
   bool RemoveLoops(bool *doneSomething);
@@ -103,8 +101,8 @@ class Poss
   bool TakeIter(const TransMap &transMap, const TransMap &simplifiers, 
 		PossMMap &newPosses);
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
-  bool HasFused(const Loop *left, const Loop *right) const;
-  void SetFused(const Loop *left, const Loop *right);
+  bool HasFused(const BasePSet *left, const BasePSet *right) const;
+  void SetFused(const BasePSet *left, const BasePSet *right);
   void RemoveFromGraphNodes(Node *node);
   void RemoveFromSets(BasePSet *set);
   void PrintNodeAddresses() const;

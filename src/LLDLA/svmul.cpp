@@ -255,11 +255,11 @@ void SVMulLoopRef::Apply(Node *node) const
   
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
   
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, USELLDLAMU);
   // Row vectors are partitioned in the N dimension, column vectors in the M dimension
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 

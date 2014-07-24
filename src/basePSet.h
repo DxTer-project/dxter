@@ -37,6 +37,7 @@ class BasePSet
   bool m_hasProped;
   bool m_isTopLevel;
   BasePSet();
+  virtual ~BasePSet() = 0;
   virtual GraphNum NumPosses() const = 0;
   virtual bool operator==(const BasePSet &rhs) const = 0;
   virtual void Prop() = 0;
@@ -60,6 +61,9 @@ class BasePSet
   virtual void FlattenCore(ofstream &out) const {}
   void Unflatten(ifstream &in, SaveInfo &info);
   virtual void UnflattenCore(ifstream &in, SaveInfo &info) {}
+
+  virtual void PrePrint(IndStream &out, Poss *poss) {}
+  virtual void PostPrint(IndStream &out, Poss *poss) {}
 
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();

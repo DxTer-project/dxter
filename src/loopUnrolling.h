@@ -27,7 +27,8 @@
 
 #if DOLLDLA
 
-#include "loop.h"
+#include "realLoop.h"
+#include "shadowLoop.h"
 
 class FullyUnrollLoop : public SingleTrans
 {

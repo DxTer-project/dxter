@@ -274,7 +274,7 @@ void HemmLoopExp::Apply(Node *node) const
       throw;
   }
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -387,14 +387,14 @@ Loop* HemmLoopVar4(Node *Ain, ConnNum Anum,
                                                 1, hemm, 0);
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
 
   loop->SetDimName(DIMN);
@@ -513,14 +513,14 @@ Loop* HemmLoopVar8(Node *Ain, ConnNum Anum,
 						2, gemm2, 0);
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
 
   loop->SetDimName(DIMK);
@@ -680,14 +680,14 @@ Loop* HemmLoopVar8Altered(Node *Ain, ConnNum Anum,
 						2, com, 2);
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -1085,11 +1085,11 @@ void BLISHemmLoopExp::Apply(Node *node) const
                                                 1, gebp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
-  Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, USEBLISMC);
 
   loop->SetDimName(DIMM);
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
 
   node->RedirectChildren(loop->OutTun(2), 0);
 

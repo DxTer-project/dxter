@@ -152,7 +152,7 @@ bool CholLoopExp::CanApply(const Node *node) const
 void CholLoopExp::Apply(Node *node) const
 {
   Chol *chol = (Chol*)node;
-  Loop *loop;
+  RealLoop *loop;
   if (chol->m_tri == LOWER) {
     if (m_varNum == 3)
       loop = Chol3LowerAlg(chol->Input(0), chol->InputConnNum(0), true);
@@ -172,7 +172,7 @@ void CholLoopExp::Apply(Node *node) const
       throw;
   }
 
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(0),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -248,10 +248,10 @@ Loop* Chol1LowerAlg(Node *in, ConnNum num, bool dist)
   
 #if DOELEM
   Poss *loopPoss = new Poss(1, comA);
-  Loop *loop;
+  RealLoop *loop;
 
   if (dist)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else 
     throw;
 
@@ -317,16 +317,16 @@ Loop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
 						5, set4->OutTun(0), 0);
   
   Poss *loopPoss = new Poss(1, comA);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
    if (dist)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #else
    throw;
 #endif
-  //    loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
+  //    loop = new RealLoop(BLISLOOP, loopPoss, FLAME_BS);
 
   return loop;
 }
@@ -385,16 +385,16 @@ Loop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
 						7, set4->OutTun(0), 0);
   
   Poss *loopPoss = new Poss(1, comA);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (dist)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #else
   throw;
 #endif
-    //loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
+    //loop = new RealLoop(BLISLOOP, loopPoss, FLAME_BS);
 
   return loop;
 }
@@ -448,16 +448,16 @@ Loop* Chol3LowerAlg(Node *in, ConnNum num, bool dist)
 						8, set3->OutTun(0), 0);
 
   Poss *loopPoss = new Poss(1, comA);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (dist)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #else
   throw;
 #endif
-  //    loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
+  //    loop = new RealLoop(BLISLOOP, loopPoss, FLAME_BS);
 
   return loop;
 }
@@ -520,16 +520,16 @@ Loop* Chol3UpperAlg(Node *in, ConnNum num, bool dist)
     comA->CopyTunnelInfo(splitA);
     
     Poss *loopPoss = new Poss(1, comA);
-    Loop *loop;
+    RealLoop *loop;
 #if DOELEM
     if (dist)
-      loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+      loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
     else
       throw;
 #else
     throw;
 #endif
-      //loop = new Loop(BLISLOOP, loopPoss, FLAME_BS);
+      //loop = new RealLoop(BLISLOOP, loopPoss, FLAME_BS);
     
     return loop;
 }

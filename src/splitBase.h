@@ -24,7 +24,8 @@
 
 #pragma once
 
-#include "loop.h"
+#include "realLoop.h"
+#include "shadowLoop.h"
 #include "loopTunnel.h"
 
 //LoopTunnel for spliting/indxing into a matrix

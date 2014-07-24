@@ -55,6 +55,6 @@ class GraphIter
   Cost Eval(TransConstVec &transList);
   Cost EvalAndSetBest();
 
-  void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly);
-  void Print(IndStream &out, GraphNum &graphNum);
+  void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, BasePSet *owner);
+  void Print(IndStream &out, GraphNum &graphNum, BasePSet *owner);
 };

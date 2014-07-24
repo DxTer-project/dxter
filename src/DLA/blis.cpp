@@ -510,41 +510,6 @@ void ParallelizeOuterNDim::Apply(Node *node) const
 }
 
 
-bool ParallelizeK::CanApply(const Node *node) const
-{
-  if (node->GetNodeClass() != LoopTunnel::GetClass())
-    throw;
-  const LoopTunnel *tun = (LoopTunnel*)node;
-  if (tun->m_tunType != SETTUNIN)
-    return false;
-  if (!LegalParallelizationNestingUp(tun, m_comm))
-    return false;
-  const Loop *loop = (Loop*)(tun->m_pset);
-  if (loop->m_comm == m_comm)
-    return false;
-  if (loop->GetDimName() != DIMK)
-    return false;
-  if (!LegalParallelizationNestingDown(loop, m_comm))
-    return false;
-  if (loop->m_comm != CORECOMM) {
-    //Need to handle multiple par factors on loop
-    throw;
-  }
-  if (loop->HasIndepIters())
-    throw;
-  if (loop->OnlyParallelizedOnNonIndependentData())
-    return false;
-  else {
-    return true;
-  }
-}
-
-void ParallelizeK::Apply(Node *node) const
-{
-  LoopTunnel *tun = (LoopTunnel*)node;
-  Loop *loop = (Loop*)(tun->m_pset);
-  loop->Parallelize(m_comm);
-}
 
 bool LegalParallelizationNestingUp(const Node *node, Comm comm)
 {

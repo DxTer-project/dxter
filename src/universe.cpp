@@ -25,7 +25,7 @@
 #include <sstream>
 #include <time.h>
 #include "helperNodes.h"
-#include "loop.h"
+#include "realLoop.h"
 #include "critSect.h"
 #include <iomanip>
 #include "graphIter.h"

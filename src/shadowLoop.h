@@ -23,14 +23,21 @@
 
 #pragma once
 
-#include "realLoop.h"
-#include "shadowLoop.h"
-#include "loopTunnel.h"
-#include "combineSingleIter.h"
-#include "combineUnrolled.h"
-#include "combineBase.h"
-//#include "combineSingleIter.h"
-#include "splitBase.h"
-#include "splitSingleIter.h"
-#include "splitUnrolled.h"
-#include "loopUnrolling.h"
+#include "base.h"
+#include "transform.h"
+#include "basePSet.h"
+#include "comm.h"
+#include "intLoop.h"
+#include "shadowPSet.h"
+
+class ShadowLoop : public IntLoop<ShadowPSet>
+{
+  virtual BasePSet* GetNewInst() {return (BasePSet*)(new ShadowLoop);}
+  virtual int GetBS() const;
+  virtual void Prop();
+  virtual LoopType GetType() const;
+#if DOBLIS
+  bool HasIndepIters() const;
+  bool IsParallel() const {return m_comm!=CORECOMM;}
+#endif
+};

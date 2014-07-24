@@ -210,10 +210,10 @@ void VVDotLoopRef::Apply(Node *node) const
 
   // Create the poss
   Poss *loopPoss = new Poss(3, rowCom, colCom, scalarTunOut);
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, m_bs);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, m_bs);
   loop->SetDimName(DIMK);
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(2), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }

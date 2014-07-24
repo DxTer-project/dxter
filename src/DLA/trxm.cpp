@@ -683,7 +683,7 @@ void TrxmLoopExp::Apply(Node *node) const
     }
   }
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(1),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -732,7 +732,7 @@ void Trmm3LoopExp::Apply(Node *node) const
                              trmm3->m_coeff, trmm3->m_beta, trmm3->m_type,
                              m_toLayer);
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -1325,14 +1325,14 @@ Loop* TrmmLoopLeftVar1(Node *Ain, ConnNum Anum,
                                                 1, gemm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -1412,14 +1412,14 @@ Loop* TrmmLoopLeftVar2(Node *Ain, ConnNum Anum,
                                          1, trmm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -1491,14 +1491,14 @@ Loop* TrmmLoopRightVar1(Node *Ain, ConnNum Anum,
                                                 1, gemm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
   
   return loop;
@@ -1579,14 +1579,14 @@ Loop* TrmmLoopRightVar2(Node *Ain, ConnNum Anum,
                                          1, trmm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -1628,16 +1628,16 @@ Loop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
                                                 1, trxm, 0);
   
   Poss *loopPoss = new Poss(2, AtunOut, comB);
-  Loop *loop;
+  RealLoop *loop;
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
   return loop;
 #else
   throw;
 #endif
-  //    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+  //    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
   
 
 }
@@ -1689,14 +1689,14 @@ Loop* TrsmLoopLeftVar1(Node *Ain, ConnNum Anum,
                                        1, trsm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -1770,11 +1770,11 @@ Loop* TrsmLoopRightVar1(Node *Ain, ConnNum Anum,
                                                 1, trmm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
   
   return loop;
@@ -1862,11 +1862,11 @@ Loop* TrsmLoopLeftVar2(Node *Ain, ConnNum Anum,
                                          2, gemm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   loop->SetDimName(DIMK);
@@ -1907,11 +1907,11 @@ Loop* TrxmLoopLeftVar3(Node *Ain, ConnNum Anum,
                                                 1, trxm, 0);
   
   Poss *loopPoss = new Poss(2, AtunOut, comB);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
   
   loop->SetDimName(DIMN);
@@ -1992,14 +1992,14 @@ Loop* TrsmLoopRightVar2(Node *Ain, ConnNum Anum,
                                          2, gemm, 0);
   
   Poss *loopPoss = new Poss(2, comA, comB);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer==DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -2346,11 +2346,11 @@ void BLISTrxmLoopExp::Apply(Node *node) const
   packTunOut->CopyTunnelInfo(packTun);
   
   Poss *loopPoss = new Poss(3, comA, comB, packTunOut);
-  Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, USEBLISMC);
   
   loop->SetDimName(DIMM);
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -2445,10 +2445,10 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, ConnNum Anum,
                                          1, trmm3, 0);
   
 
-  Loop *loop;
+  RealLoop *loop;
 
   Poss *loopPoss = new Poss(3, comA, comB, comC);
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
   
   return loop;
 #endif
@@ -2497,11 +2497,11 @@ Loop* Trmm3LoopLeftVar3(Node *Ain, ConnNum Anum,
                                                 1, trmm3, 0);
   
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
   
   return loop;
@@ -2762,11 +2762,11 @@ void BLISTrmm3LoopExp::Apply(Node *node) const
   packTunOut->CopyTunnelInfo(packTun);
   
   Poss *loopPoss = new Poss(4, comA, comB, packTunOut, comC);
-  Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, USEBLISMC);
   
   loop->SetDimName(DIMM);
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(3), 0);
   node->m_poss->DeleteChildAndCleanUp(node);

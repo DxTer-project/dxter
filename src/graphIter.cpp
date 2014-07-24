@@ -220,7 +220,7 @@ Cost GraphIter::EvalAndSetBest()
       GraphIter tmp(iter->second);
       Cost tmpCost = tmp.EvalAndSetBest();
       if (tmpCost < optCost)  {
-	m_subIters[i] = tmp;
+	*(m_subIters[i]) = tmp;
 	m_setIters[i] = iter;
 	optCost = tmpCost;
       }
@@ -231,7 +231,7 @@ Cost GraphIter::EvalAndSetBest()
 
 }
 
-void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly)
+void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, BasePSet *owner)
 {
   if (!currOnly)
     Init(m_poss);
@@ -307,10 +307,12 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly)
 	      m_setIters[i]->second->CanPrint()) 
 	    {
 	      out.Indent();
-	      *out << "//**** (out of " << m_poss->m_sets[i]->m_posses.size() << ")\n";
+	      *out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
+	      m_poss->m_sets[i]->PrePrint(out,m_setIters[i]->second);
 	      ++out;
-	      m_subIters[i]->Print(out, whichGraph);
+	      m_subIters[i]->Print(out, whichGraph, m_poss->m_sets[i]);
 	      --out;
+	      m_poss->m_sets[i]->PostPrint(out,m_setIters[i]->second);
 	      out.Indent();
 	      *out << "//****\n";
 	      hasPrinted = true;
@@ -318,14 +320,14 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly)
 	}
       }
       
-      nodeIter = m_outTuns.begin();
-      for(; nodeIter != m_outTuns.end(); ++nodeIter) {
+      nodeIter = m_poss->m_outTuns.begin();
+      for(; nodeIter != m_poss->m_outTuns.end(); ++nodeIter) {
 	(*nodeIter)->Print(out, whichGraph);
 	(*nodeIter)->SetPrinted();
       }
       
-      nodeIter = m_pset->m_outTuns.begin();
-      for(; nodeIter != m_pset->m_outTuns.end(); ++nodeIter) {
+      nodeIter = owner->m_outTuns.begin();
+      for(; nodeIter != owner->m_outTuns.end(); ++nodeIter) {
 	(*nodeIter)->Print(out, whichGraph);
 	(*nodeIter)->SetPrinted();
       }
@@ -340,12 +342,12 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly)
 
     ++graphNum;
     if (keepGoing)
-      keepGoing = !IncrementCurrPoss();
+      keepGoing = !Increment();
   }
   m_hasPrinted = true;
 }
 
-void GraphIter::Print(IndStream &out, GraphNum &graphNum)
+void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 {
   m_hasPrinted = true;
   m_poss->ClearPrintedFromGraph();
@@ -381,10 +383,12 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum)
     for(unsigned int i = 0; i < numPSets; ++i) {
       if (!m_subIters[i]->m_hasPrinted && m_poss->m_sets[i]->CanPrint()) {
 	out.Indent();
-	*out << "//**** (out of " << m_poss->m_sets[i]->m_posses.size() << ")\n";
+	*out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
+	m_poss->m_sets[i]->PrePrint(out,m_setIters[i]->second);
 	++out;
-	m_subIters[i]->Print(out, whichGraph);
+	m_subIters[i]->Print(out, graphNum, m_poss->m_sets[i]);
 	--out;
+	m_poss->m_sets[i]->PostPrint(out,m_setIters[i]->second);
 	out.Indent();
 	*out << "//****\n";
         hasPrinted = true;
@@ -403,8 +407,8 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum)
     (*nodeIter)->SetPrinted();
   }
   
-  nodeIter = m_poss->m_pset->m_outTuns.begin();
-  for(; nodeIter != m_poss->m_pset->m_outTuns.end(); ++nodeIter) {
+  nodeIter = owner->m_outTuns.begin();
+  for(; nodeIter != owner->m_outTuns.end(); ++nodeIter) {
     (*nodeIter)->Print(out, graphNum);
     (*nodeIter)->SetPrinted();
   }
@@ -429,8 +433,8 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum)
         if (!tun->CanPrintCode())
           tun->CanPrintCode();
       }
-      m_poss->m_sets[i]->GetCurrPoss()->CanPrint();
-      m_poss->m_sets[i]->GetCurrPoss()->ForcePrint();
+      m_subIters[i]->m_poss->CanPrint();
+      m_subIters[i]->m_poss->ForcePrint();
       bad = true;
     }
   }
@@ -449,7 +453,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum)
   
   if (bad) {
     cout << this << " is bad\n";
-    cout << "contains " << m_sets.size() << " posses\n";
+    cout << "contains " << m_poss->m_sets.size() << " posses\n";
     throw;
   }
 }

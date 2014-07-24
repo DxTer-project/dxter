@@ -24,7 +24,8 @@
 #include "transform.h"
 #include "poss.h"
 #include "elemRedist.h"
-#include "loop.h"
+#include "realLoop.h"
+#include "shadowLoop.h"
 #include "gemm.h"
 #include "trxm.h"
 #include "chol.h"
@@ -999,7 +1000,7 @@ const Loop* Node::FindClosestLoop() const
   BasePSet *set = poss->m_pset;
   while (set) {
     if (set->IsLoop())
-      return (Loop*)set;
+      return set;
     poss = set->m_ownerPoss;
     if (!poss)
       return NULL;

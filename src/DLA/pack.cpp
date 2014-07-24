@@ -545,8 +545,9 @@ void LoopInvariantPackBuffMotion::Apply(Node *node) const
                                    buff->m_m, buff->m_n);
   owningPoss->AddNode(newBuff);
   newBuff->AddInput(setTunIn->Input(0), setTunIn->InputConnNum(0));
-  
-  Node *newTun = loop->CreateNewLoopTunnels(newBuff, 0, node->m_poss, FULLUP);
+    
+  throw;
+  Node *newTun = NULL; ///loop->CreateNewLoopTunnels(newBuff, 0, node->m_poss, FULLUP);
   
   buff->RedirectChildren(newTun, 0);
   node->m_poss->DeleteChildAndCleanUp(buff, true);

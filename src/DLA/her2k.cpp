@@ -358,7 +358,7 @@ void Her2kLoopExp::Apply(Node *node) const
       throw;
   }
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -868,14 +868,14 @@ Loop* Her2kLoopVar1(Node *Ain, ConnNum Anum,
                                          7, gemm2, 0);
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -971,14 +971,14 @@ Loop* Her2kLoopVar2(Node *Ain, ConnNum Anum,
                                          7, gemm2, 0);
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -1073,14 +1073,14 @@ Loop* Her2kLoopVar3(Node *Ain, ConnNum Anum,
                                          7, gemm2, 0);
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer==DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -1176,14 +1176,14 @@ Loop* Her2kLoopVar4(Node *Ain, ConnNum Anum,
                                          4, her2k, 0);
   
   Poss *loopPoss = new Poss(3, comA, comB, comC);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -1232,14 +1232,14 @@ Loop* Her2kLoopVar9(Node *Ain, ConnNum Anum,
   CtunOut->CopyTunnelInfo(CTun);
   
   Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
   
   return loop;
@@ -1326,13 +1326,13 @@ Loop* Tri2kLoopVar10(Node *Ain, ConnNum Anum,
                                                 1, tri2k, 0);
   
   Poss *loopPoss = new Poss(5, AtunOut, comB, CtunOut, comD, comE);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
     throw;
   else
 #endif
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
 
   loop->SetDimName(DIMN);
   
@@ -1404,10 +1404,10 @@ Loop* Tri2kLoopVar9(Node *Ain, ConnNum Anum,
   EtunOut->AddInput(ETun,0);
   EtunOut->CopyTunnelInfo(ETun);
   
-  Loop *loop;
+  RealLoop *loop;
 
   Poss *loopPoss = new Poss(5, comA, comB, comC, comD, EtunOut);
-  loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+  loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
   loop->SetDimName(DIMK);
   
   return loop;
@@ -1630,7 +1630,7 @@ void Tri2kLoopExp::Apply(Node *node) const
       throw;
   }
   
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);

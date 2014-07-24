@@ -174,7 +174,7 @@ void HetrmmLoopExp::Apply(Node *node) const
     throw;
   }
 
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(0),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -249,7 +249,7 @@ Loop* HetrmmAlgVar1Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
 #else
   throw;
@@ -298,7 +298,7 @@ Loop* HetrmmAlgVar1Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
 #else
   throw;
@@ -354,7 +354,7 @@ Loop* HetrmmAlgVar2Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
 #else
   throw;
@@ -407,7 +407,7 @@ Loop* HetrmmAlgVar2Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
 #else
   throw;
@@ -460,7 +460,7 @@ Loop* HetrmmAlgVar3Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
 #else
   throw;
@@ -509,7 +509,7 @@ Loop* HetrmmAlgVar3Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   return loop;
 #else
   throw;

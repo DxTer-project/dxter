@@ -20,7 +20,7 @@
 */
 
 #include "LLDLAGemmTransformations.h"
-#include "loop.h"
+#include "realLoop.h"
 #include "transpose.h"
 
 #if DOLLDLA

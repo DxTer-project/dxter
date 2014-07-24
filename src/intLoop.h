@@ -83,63 +83,31 @@ string PartDirToStr(PartDir dir);
 class SplitBase;
 class LoopTunnel;
 
-class Loop : public PSet
+class LoopInterface
 {
- private:
-#if TWOD
-  DimName m_dim;
-#endif
-
  public:
-  //  typedef int Size;
-  LoopType m_type;
-  static int M_currLabel;
- public:
-  IntSet m_label;
-  BSSize m_bsSize;
-#if DOBLIS
-  Comm m_comm;
-#endif
-  
-  Loop();
-  Loop(LoopType type);
-  Loop(LoopType type, Poss *poss, BSSize bsSize);
-  virtual BasePSet* GetNewInst() {return new Loop(m_type);}
+  virtual int GetBS() const = 0;
+  virtual LoopType GetType() const = 0;
   virtual bool IsLoop() const {return true;}
   virtual bool IsTransparent() const {return false;}
+  virtual SplitBase* GetControl() const = 0;
+  virtual bool CanMerge(BasePSet *pset) const = 0;
+  virtual bool WorthFusing(BasePSet *pset) = 0;
+  virtual unsigned int LoopLevel() const = 0;
+#if DOBLIS
+  virtual bool HasIndepIters() const = 0;
+#endif
+};
+
+template <class PSetType>
+class IntLoop : public PSetType, public LoopInterface
+{
+ public:
   virtual bool CanMerge(BasePSet *pset) const;
-  virtual bool WorthFusing(Loop *loop);
-  virtual void PrintCurrPoss(IndStream &out, GraphNum &graphNum);
-  LoopType GetType() const {return m_type;}
-  virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
-  void AssignNewLabel();
-  void SetBS(BSSize size);
-  int GetBS() const;
+  virtual bool WorthFusing(BasePSet *pset);
   SplitBase* GetControl() const;
   virtual void Prop();
-  //  unsigned int NumIters() const;
-  bool ValidIter() const;
-  LoopTunnel* CreateNewLoopTunnels(Node *input, ConnNum num, Poss *possToCareAbout, UpStat stat);
-  void TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun);
-#if TWOD
-  void SetDimName(DimName dim);
-  DimName GetDimName() const {return m_dim;}
-#endif
-  unsigned int LoopLevel() const;
-
-  void FillTunnelSizes();
-  virtual void BuildDataTypeCache();
-
-  virtual void FlattenCore(ofstream &out) const;
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  static void FlattenStatic(ofstream &out);
-  static void UnflattenStatic(ifstream &in);
-
-#if DOBLIS
-  void Parallelize(Comm comm);
-  bool HasIndepIters() const;
-  bool IsParallel() const {return m_comm!=CORECOMM;}
-  bool OnlyParallelizedOnNonIndependentData() const;
-#endif
-
+  virtual unsigned int LoopLevel() const;
+  virtual void PrePrint(IndStream &out, Poss *poss);
+  virtual void PostPrint(IndStream &out, Poss *poss);
 };

@@ -240,7 +240,7 @@ void TwoSidedTrxmLoopExp::Apply(Node *node) const
       throw;
   }
 
-  node->m_poss->AddLoop(loop);
+  node->m_poss->AddPSet(loop);
   
   node->RedirectChildren(loop->OutTun(0),0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -326,11 +326,11 @@ Loop* TwoSidedTrsmLowerVar1Alg(
   Poss *loopPoss = new Poss(2,
 			    comA,
 			    comL);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
 
   return loop;
@@ -420,11 +420,11 @@ Loop* TwoSidedTrsmLowerVar2Alg(
   Poss *loopPoss = new Poss(2,
 			    comA,
 			    comL);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
 
   return loop;
@@ -519,11 +519,11 @@ Loop* TwoSidedTrsmLowerVar4Alg(
   Poss *loopPoss = new Poss(2,
 			    comA,
 			    comL);
-  Loop *loop;
+  RealLoop *loop;
   #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
 
   return loop;
@@ -607,11 +607,11 @@ Loop* TwoSidedTrmmLowerVar1Alg(
   Poss *loopPoss = new Poss(2,
 			    comA,
 			    comL);
-  Loop *loop;
+  RealLoop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
 
   return loop;
@@ -687,11 +687,11 @@ Loop* TwoSidedTrmmLowerVar2Alg(
   Poss *loopPoss = new Poss(2,
 			    comA,
 			    comL);
-  Loop *loop;
+  RealLoop *loop;
   #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
 
   return loop;
@@ -770,11 +770,11 @@ Loop* TwoSidedTrmmLowerVar4Alg(
   Poss *loopPoss = new Poss(2,
 			    comA,
 			    comL);
-  Loop *loop;
+  RealLoop *loop;
   #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
   return loop;
 }
