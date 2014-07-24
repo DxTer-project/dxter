@@ -47,7 +47,7 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
   if (!split->m_isControlTun)
     return false;
 
-  const BasePSet *loop = split->GetMyLoop();
+  const BasePSet *loop = dynamic_cast<const BasePSet*>(split->GetMyLoop());
 
   
   unsigned int numExecs = split->NumberOfLoopExecs();
@@ -219,11 +219,11 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 	throw;
       
       ViewMultipleIters *view = new ViewMultipleIters(split->m_dir,
-						      split->GetMyLoop()->m_bsSize,
+						      split->GetMyLoop()->GetBSSize(),
 						      numIters);
 
       CombineMultipleIters *com = new CombineMultipleIters(split->m_dir,
-							   split->GetMyLoop()->m_bsSize,
+							   split->GetMyLoop()->GetBSSize(),
 							   numIters);
 
       view->AddInput(newTun, 0);

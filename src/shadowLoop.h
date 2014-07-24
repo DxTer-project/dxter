@@ -33,6 +33,7 @@
 class ShadowLoop : public IntLoop<ShadowPSet>
 {
   virtual BasePSet* GetNewInst() {return (BasePSet*)(new ShadowLoop);}
+  virtual BasePSet* GetShadow();
   virtual int GetBS() const;
   virtual BSSize GetBSSize() const;
 #if TWOD

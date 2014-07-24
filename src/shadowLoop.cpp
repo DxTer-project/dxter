@@ -67,6 +67,11 @@ LoopType ShadowLoop::GetType() const
   return ((RealLoop*)m_realPSet)->GetType();
 }
 
+BasePSet* ShadowLoop::GetShadow()
+{
+  return ((RealLoop*)m_realPSet)->GetShadow();
+}
+
 
 #if DOBLIS
 bool ShadowLoop::HasIndepIters() const

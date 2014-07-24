@@ -29,6 +29,7 @@
 #include "basePSet.h"
 
 class PossTunnel;
+class ShadowPSet;
 
 class RealPSet : public BasePSet
 {
@@ -40,6 +41,7 @@ class RealPSet : public BasePSet
   RealPSet(Poss *poss);
   void Init(Poss *poss);
   virtual ~RealPSet();
+  void RemoveShadow(ShadowPSet *shadow);
   void AddPoss(Poss *poss);
   void AddPossesOrDispose(PossMMap &mmap, PossMMap *added = NULL);
   virtual GraphNum NumPosses() const {return m_posses.size();}
@@ -52,17 +54,19 @@ class RealPSet : public BasePSet
   virtual BasePSet* GetNewInst() {return (BasePSet*)(new RealPSet);}
   virtual const PossMMap& GetPosses() const {return m_posses;}
   virtual PossMMap& GetPosses() {return m_posses;}
-  void PatchAfterDuplicate(NodeMap &map);
+  virtual void PatchAfterDuplicate(NodeMap &map);
   void CombineAndRemoveTunnels();
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
   void Simplify(const TransMap &simplifiers, bool recursive = false);
   void ClearFullyExpanded();
   virtual bool IsTransparent() const {return true;}
   void Cull(Phase phase);
+  void Cull(CullFunction cullFunc);
   bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   virtual GraphNum TotalCount() const;
   virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
+  virtual BasePSet* GetShadow();
 
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);

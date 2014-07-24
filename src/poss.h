@@ -68,7 +68,7 @@ class Poss
   void ForcePrint();
   bool CanPrint() const;
   virtual bool IsBoundary(Node *node) {return node->IsPossTunnel();}
-  virtual void Duplicate(const Poss *orig, NodeMap &map, bool possMerging);
+  virtual void Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useShadows);
   bool operator==(Poss &rhs);
   bool operator!=(Poss &rhs) {return !(*this == rhs);}
   virtual bool IsSane() const {return m_isSane;}

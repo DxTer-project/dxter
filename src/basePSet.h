@@ -54,6 +54,7 @@ class BasePSet
   void FormSetAround();
   bool CanPrint() const;
   virtual BasePSet* GetNewInst() = 0;
+  virtual BasePSet* GetShadow();
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}
@@ -75,6 +76,7 @@ class BasePSet
   virtual bool RemoveParallelization(Comm comm) = 0;
 #endif //DOBLIS
 
+  virtual void PatchAfterDuplicate(NodeMap &map) = 0;
   virtual const string& GetFunctionalityString() const = 0;
   virtual bool IsReal() const {return false;}
   virtual bool IsShadow() const {return false;}

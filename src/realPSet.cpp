@@ -630,8 +630,10 @@ void RealPSet::PatchAfterDuplicate(NodeMap &map)
   }
 }
 
-void PSet::CombineAndRemoveTunnels()
+void RealPSet::CombineAndRemoveTunnels()
 {
+  if (!m_shadows.empty())
+    throw;
   for(unsigned int inIdx1 = 0; inIdx1 < m_inTuns.size(); ++inIdx1) {
     for(unsigned int inIdx2 = inIdx1+1; inIdx2 < m_inTuns.size(); ++inIdx2) {
       Node *setInput1 = InTun(inIdx1);
@@ -864,82 +866,6 @@ void RealPSet::ClearFullyExpanded()
     (*iter).second->ClearFullyExpanded();
 }
 
-bool FoundPossUp(Node *node, const PSet *set, NodeVec &queue)
-{
-  NodeVecIter checkIter = queue.begin();
-  for(; checkIter != queue.end(); ++checkIter) {
-    if (*checkIter == node) {
-      cout << "recursion on node " << node << " " << node->GetNodeClass() << endl;
-      throw;
-    }
-  }
-  queue.push_back(node);
-  if (node->IsPossTunnel(POSSTUNOUT) || node->IsPossTunnel(POSSTUNIN)) {
-    queue.pop_back();
-    return false;
-  }
-  else if (node->IsPossTunnel(SETTUNOUT)) {
-    const PossTunnel *tunOut = (PossTunnel*)node;
-    if (tunOut->m_pset == set) {
-      queue.pop_back();
-      return true;
-    }
-    else {
-      const PSet *foundSet = tunOut->m_pset;
-      NodeVecConstIter iter = foundSet->m_inTuns.begin();
-      for(; iter != foundSet->m_inTuns.end(); ++iter) {
-        if (FoundPossUp(*iter, set, queue)) {
-          queue.pop_back();
-          return true;
-        }
-      }
-    }
-  }
-  else {
-    NodeConnVecConstIter iter = node->m_inputs.begin();
-    for (; iter != node->m_inputs.end(); ++iter) {
-      if (FoundPossUp((*iter)->m_n, set, queue)) {
-        queue.pop_back();
-        return true;
-      }
-    }
-  }
-  queue.pop_back();
-  return false;
-}
-
-bool NothingBetween(const PSet *left, const PSet *right)
-{
-  NodeVecConstIter iter = right->m_inTuns.begin();
-  for(; iter != right->m_inTuns.end(); ++iter) {
-    Node *input = *iter;
-    NodeConnVecConstIter iter2 = input->m_inputs.begin();
-    for (; iter2 != input->m_inputs.end(); ++iter2) {
-      if ((*iter2)->m_n->IsPossTunnel(SETTUNOUT)) {
-        PossTunnel *tunOut = (PossTunnel*)((*iter2)->m_n);
-        if (tunOut->m_pset != left) {
-          NodeVec queue;
-          if (FoundPossUp(tunOut,left,queue))
-            return false;
-          if (!queue.empty()) {
-            cout << "queue not empty!\n";
-            throw;
-          }
-        }
-      }
-      else {
-        NodeVec queue;
-        if (FoundPossUp((*iter2)->m_n,left, queue))
-          return false;
-        if (!queue.empty()) {
-          cout << "queue not empty!\n";
-          throw;
-        }
-      }
-    }
-  }
-  return true;
-}
 
 bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 {
@@ -950,6 +876,7 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
     the posses in that set can be inlined), then do it now.  We want
     to do this from the bottom-up, though.
   */
+
 #ifdef _OPENMP
   static omp_lock_t lock;
   static bool inited = false;
@@ -1059,7 +986,7 @@ void RealPSet::FormSets(unsigned int phase)
 }
 
 
-GraphNum PSet::TotalCount() const
+GraphNum RealPSet::TotalCount() const
 {
   GraphNum tot = 0;
   PossMMapConstIter iter = m_posses.begin();
@@ -1068,9 +995,12 @@ GraphNum PSet::TotalCount() const
   return tot;
 }
 
-void PSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
+void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 {
-  PSet *pset = inliningPoss->m_sets[0];
+  if (inliningPoss->m_sets[0]->IsShadow())
+    throw;
+
+  RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[0]);
   
   NodeIntMap tunnelNumMap;
   
@@ -1149,7 +1079,7 @@ void PSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     {
       PSetVecIter setIter = currPoss->m_sets.begin();
       for(; setIter != currPoss->m_sets.end(); ++setIter) {
-        PSet *newSet = (*setIter)->GetNewInst();
+        BasePSet *newSet = (*setIter)->GetNewInst();
         newSet->Duplicate(*setIter, map, true);
         newPoss->m_sets.push_back(newSet);
         newSet->m_ownerPoss = newPoss;
@@ -1369,48 +1299,6 @@ void BasePSet::RemoveOutTun(Node *tun)
   throw;
 }
 
-Cost PSet::EvalCurrPoss(TransConstVec &transList)
-{
-  //Any changes should be reflected in Loop::EvalCurrPoss()
-  if (m_currPoss == m_posses.end()) {
-    throw;
-  }
-  return (*m_currPoss).second->EvalCurr(transList);
-}
-
-Cost PSet::EvalAndSetBest()
-{
-  Cost optCost = -1;
-  PossMMapIter best;
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter) {
-    Poss *poss = (*iter).second;
-    Cost tmp = poss->EvalAndSetBest();
-    if (optCost < 0 || tmp < optCost) {
-      optCost = tmp;
-      best = iter;
-    }
-  }
-  m_currPoss = best;
-  return optCost;
-}
-
-void PSet::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
-{
-  out.Indent();
-  *out << "//**** (out of " << m_posses.size() << ")\n";
-  
-  if (m_currPoss == m_posses.end()) {
-    throw;
-  }
-  ++out;
-  (*m_currPoss).second->Print(out, graphNum);
-  --out;
-  
-  out.Indent();
-  *out << "//****\n";
-}
-
 void RealPSet::Cull(CullFunction cullFunc)
 {
   PossMMapIter iter = m_posses.begin();
@@ -1487,10 +1375,6 @@ void RealPSet::UnflattenCore(ifstream &in, SaveInfo &info)
   }
 }
 
-void PSet::AddCurrPossVars(VarSet &set) const
-{
-  GetCurrPoss()->AddCurrPossVars(set);
-}
 
 void PSet::BuildDataTypeCache()
 {
@@ -1594,7 +1478,7 @@ Comm PSet::ParallelismWithinCurrentPosses() const
 }
 #endif //DOBLIS
 
-const string& PSet::GetFunctionalityString() const
+const string& RealPSet::GetFunctionalityString() const
 {
   if (m_functionality.empty()) {
     cout << m_posses.size() << endl;
@@ -1602,4 +1486,25 @@ const string& PSet::GetFunctionalityString() const
   }
   else
     return m_functionality;
+}
+
+
+BasePSet* RealPSet::GetShadow()
+{
+  ShadowPSet *shadow = new ShadowPSet;
+  shadow->m_realPSet = this;
+  m_shadows.push_back(shadow);
+  return shadow;
+}
+
+void RealPSet::RemoveShadow(ShadowPSet *shadow)
+{
+  PSetVecIter iter = m_shadows.begin();
+  for (; iter != m_shadows.end(); ++iter) {
+    if (*iter == shadow) {
+      m_shadows.erase(iter);
+      return;
+    }
+  }
+  throw;
 }

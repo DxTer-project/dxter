@@ -36,6 +36,12 @@ ShadowPSet::ShadowPSet()
 {
 }
 
+ShadowPSet::~ShadowPSet()
+{
+  m_realPSet->RemoveShadow(this);
+  m_realPSet = NULL;
+}
+
 bool ShadowPSet::operator==(const BasePSet &rhs) const
 {
   return *m_realPSet == rhs;
@@ -173,4 +179,10 @@ Comm PSet::ParallelismWithinCurrentPosses() const
 const string& ShadowPSet::GetFunctionalityString() const
 {
   return m_realPSet->GetFunctionalityString();
+}
+
+
+BasePSet* ShadowPSet::GetShadow()
+{
+  return m_realPSet->GetShadow();
 }

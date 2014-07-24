@@ -225,7 +225,7 @@ bool Poss::CanPrint() const
   return true;
 }
 
-void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging)
+void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useShadows)
 {
   /**********
 	     Any changes to this function should be reflected
@@ -247,8 +247,13 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging)
   }
   PSetVecIter setIter = poss->m_sets.begin();
   for(; setIter != poss->m_sets.end(); ++setIter) {
-    PSet *newSet = (*setIter)->GetNewInst();
-    newSet->Duplicate(*setIter, map,possMerging);
+    BasePSet *newSet;
+    if (useShadows)
+      newSet = (*setIter)->GetShadow();
+    else {
+      newSet = (*setIter)->GetNewInst();
+    }
+    newSet->Duplicate(*setIter, map, possMerging);
     AddPSet(newSet, true);
   }
   setIter = m_sets.begin();
@@ -428,7 +433,9 @@ void Poss::DeleteChildAndCleanUp(Node *output,
         throw;
       }
       else if (output->GetNodeClass() == LoopTunnel::GetClass()){
-        ((Loop*)((LoopTunnel*)output)->m_pset)->TryToDeleteLoopTunnelSetAndCleanUp((LoopTunnel*)output);
+	if (!((LoopTunnel*)output)->m_pset->IsReal())
+	  throw;
+        ((RealLoop*)((LoopTunnel*)output)->m_pset)->TryToDeleteLoopTunnelSetAndCleanUp((LoopTunnel*)output);
       }
       else
         throw;
@@ -484,7 +491,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
       // add the output tunnels of the set, add the
       // set to my set list, and add the input set
       // tunnels and everything preceeding them
-      PSet *pset = ((PossTunnel*)node)->m_pset;
+      BasePSet *pset = ((PossTunnel*)node)->m_pset;
       if (pset->m_ownerPoss && pset->m_ownerPoss != this && disconnectFromOwner)
         pset->m_ownerPoss->RemoveFromSets(pset);
       AddPSet(pset, false);
@@ -576,7 +583,8 @@ bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
   if (recursive) {
     PSetVecIter iter = m_sets.begin();
     for(; iter != m_sets.end(); ++iter) {
-      (*iter)->Simplify(simplifiers, recursive);
+      if ((*iter)->IsReal()) 
+	((RealPSet*)(*iter))->Simplify(simplifiers, recursive);
     }
   }
   return didSomething;
@@ -614,7 +622,7 @@ void Poss::Prop()
   }
   PSetVecIter setIter = m_sets.begin();
   for( ; setIter != m_sets.end(); ++setIter) {
-    PSet *set = *setIter;
+    BasePSet *set = *setIter;
     set->Prop();
   }
 
@@ -655,7 +663,8 @@ void Poss::Cull(Phase phase)
   }
   PSetVecIter possIter = m_sets.begin();
   for( ; possIter != m_sets.end(); ++possIter) {
-    (*possIter)->Cull(phase);
+    if ((*possIter)->IsReal())
+      ((RealPSet*)(*possIter))->Cull(phase);
   }
 }
 

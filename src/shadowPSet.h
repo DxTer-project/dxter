@@ -33,6 +33,7 @@ class ShadowPSet : public BasePSet
  public:
   RealPSet *m_realPSet;
   ShadowPSet();
+  virtual ~ShadowPSet();
   virtual GraphNum NumPosses() const {return m_realPSet->NumPosses();}
   bool operator==(const BasePSet &rhs) const;
   virtual void Prop();
@@ -43,7 +44,8 @@ class ShadowPSet : public BasePSet
   virtual GraphNum TotalCount() const;
   virtual const PossMMap& GetPosses() const {return m_realPSet->m_posses;}
   virtual PossMMap& GetPosses() {return m_realPSet->m_posses;}
-
+  virtual void PatchAfterDuplicate(NodeMap &map) {}
+  virtual BasePSet* GetShadow();
 
   //  virtual void FlattenCore(ofstream &out) const {}
   //  virtual void UnflattenCore(ifstream &in, SaveInfo &info) {}
