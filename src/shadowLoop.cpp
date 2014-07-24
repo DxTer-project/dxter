@@ -55,14 +55,14 @@ DimName ShadowLoop::GetDimName() const
 
 void ShadowLoop::Prop()
 {
-  if (!CostIsValid(BasePSet::m_cost)) {
-    if (!m_realPSet || !m_realPset->IsLoop())
+  if (!BasePSet::m_hasProped) {
+    if (!m_realPSet || !m_realPSet->IsLoop())
       throw;
     IntLoop<ShadowPSet>::Prop();
   }
 }
 
-LoopType GetType() const
+LoopType ShadowLoop::GetType() const
 {
   return ((RealLoop*)m_realPSet)->GetType();
 }

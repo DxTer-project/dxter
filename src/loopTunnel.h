@@ -81,7 +81,7 @@ class LoopTunnel : public PossTunnel
 #endif
   virtual Name GetName(ConnNum num) const;
  Name GetOrigName() const;
- BasePSet* GetMyLoop() const;
+ LoopInterface* GetMyLoop() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "LoopTunnel";}
   

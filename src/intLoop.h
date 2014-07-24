@@ -104,7 +104,7 @@ class LoopInterface
 };
 
 template <class PSetType>
-class IntLoop : virtual public PSetType, public LoopInterface
+class IntLoop : public PSetType, public LoopInterface
 {
  public:
   virtual bool CanMerge(BasePSet *pset) const;

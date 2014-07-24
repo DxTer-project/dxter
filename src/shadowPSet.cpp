@@ -170,7 +170,7 @@ Comm PSet::ParallelismWithinCurrentPosses() const
 }
 #endif //DOBLIS
 
-const string& PSet::GetFunctionalityString() const
+const string& ShadowPSet::GetFunctionalityString() const
 {
   return m_realPSet->GetFunctionalityString();
 }

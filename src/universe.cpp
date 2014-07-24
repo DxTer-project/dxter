@@ -546,7 +546,7 @@ void Universe::PrintBest()
     IndStream optOut(&cout,LLDLASTREAM);
 #endif
 
-    iter.PrintRoot(optOut, 0, true);
+    iter.PrintRoot(optOut, 0, true, m_pset);
 }
 
 void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
@@ -555,7 +555,7 @@ void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
     GraphIter graphIter(poss);
-    graphIter.PrintRoot(out, whichGraph, currOnly);
+    graphIter.PrintRoot(out, whichGraph, currOnly, m_pset);
   }
 
   *out << "// numAlgs = " << TotalCount() << endl;
@@ -677,7 +677,7 @@ void Universe::Flatten(ofstream &out) const
   }
   WRITE(CurrPhase);
   Poss::FlattenStatic(out);
-  Loop::FlattenStatic(out);
+  RealLoop::FlattenStatic(out);
   WRITE(m_pset);
   bool isLoop = m_pset->IsLoop();
   WRITE(isLoop);
@@ -724,7 +724,7 @@ void Universe::Unflatten(ifstream &in)
   }
   READ(CurrPhase);
   Poss::UnflattenStatic(in);
-  Loop::UnflattenStatic(in);
+  RealLoop::UnflattenStatic(in);
   PtrMap psetMap;
   BasePSet *oldPset;
   READ(oldPset);
@@ -733,7 +733,7 @@ void Universe::Unflatten(ifstream &in)
   bool isCrit;
   READ(isCrit);
   if (isLoop)
-    m_pset = new Loop;
+    m_pset = new RealLoop;
   else
     m_pset = new RealPSet;
   psetMap[oldPset] = m_pset;

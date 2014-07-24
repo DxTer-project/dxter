@@ -38,6 +38,11 @@ RealPSet::RealPSet()
 
 RealPSet::RealPSet(Poss *poss)
 {
+  Init(poss);
+}
+
+void RealPSet::Init(Poss *poss)
+{
   m_functionality = poss->GetFunctionalityString();
 
   if (m_functionality.empty()) {
@@ -46,7 +51,7 @@ RealPSet::RealPSet(Poss *poss)
   }
   if (IsLoop()) {
     //    Loop *loop = (Loop*)this;
-    m_functionality += (char)(m_bsSize);
+    m_functionality += (char)(((LoopInterface*)this)->GetBSSize());
   }
   //Make single tunnels with multiple inputs/outputs into individual tunnels
   //Poss mergin with multiple intput/output tunnels is very buggy
@@ -144,8 +149,8 @@ void RealPSet::AddPoss(Poss *poss)
     else {
       m_functionality = poss->GetFunctionalityString();
       if (IsLoop()) {
-	Loop *loop = (Loop*)this;
-	m_functionality += (char)(loop->m_bsSize);
+	//	Loop *loop = (Loop*)this;
+	m_functionality += (char)(((LoopInterface*)this)->GetBSSize());
       }
       if (m_functionality.empty())
 	throw;
@@ -193,11 +198,11 @@ void RealPSet::AddPoss(Poss *poss)
 bool RealPSet::operator==(const BasePSet &rhs) const
 {
   if (rhs.IsShadow()) {
-    return (*this)==(*(((ShadowPSet)rhs).m_realPSet));
+    return (*this)==(*(((ShadowPSet&)rhs).m_realPSet));
   }
   if (!rhs.IsReal())
     throw;
-  const RealPSet &realRhs = (RealPSet)rhs;
+  const RealPSet &realRhs = (RealPSet&)rhs;
   if (m_inTuns.size() != realRhs.m_inTuns.size()
       || m_outTuns.size() != realRhs.m_outTuns.size())
     return false;
@@ -209,15 +214,17 @@ bool RealPSet::operator==(const BasePSet &rhs) const
       if (!realRhs.IsLoop())
         return false;
       else {
+	const LoopInterface *loop1 = (LoopInterface*)this;
+	const LoopInterface *loop2 = (LoopInterface*)(&rhs);
 #if TWOD
-	if (((Loop*)this)->GetDimName() != ((Loop*)(&rhs))->GetDimName())
+	if (loop1->GetDimName() != loop2->GetDimName())
 	  return false;
 #endif
-	if (((Loop*)this)->m_bsSize != ((Loop*)(&rhs))->m_bsSize)
+	if (loop1->GetBSSize() != loop2->GetBSSize())
 	  return false;
-	if (BSSizeToSize(((Loop*)this)->m_bsSize) == 0) {
+	if (loop1->GetBS() == 0) {
 	  cout << "BS bs\n";
-	  cout << ((Loop*)this)->m_bsSize << endl;
+	  cout << loop1->GetBSSize() << endl;
 	  throw;
 	}
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
@@ -393,7 +400,7 @@ void RealPSet::Prop()
 
   PSetVecIter shadowIter = m_shadows.begin();
   for(; shadowIter != m_shadows.end(); ++shadowIter) {
-    if ((*shadowIter)->m_realPSet != this)
+    if (((ShadowPSet*)(*shadowIter))->m_realPSet != this)
       throw;
   }
   
@@ -489,7 +496,7 @@ void RealPSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
   }
   for (unsigned int i = 0; i < m_outTuns.size(); ++i)
     OutTun(i)->RemoveInput(poss->OutTun(i),0);
-  poss->m_pset = (PSet*)(0xDEADBEEF);
+  poss->m_pset = (RealPSet*)(0xDEADBEEF);
   delete poss;
 }
 
@@ -593,11 +600,14 @@ bool PSet::GlobalSimplification(const TransMap &globalSimplifiers, const TransMa
 void RealPSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging)
 {
   BasePSet::Duplicate(orig, map, possMerging);
-  m_functionality = orig->m_functionality;
+  if (!orig->IsReal())
+    throw;
+  const RealPSet *real = (RealPSet*)orig;
+  m_functionality = real->m_functionality;
   if (m_functionality.empty())
     throw;
-  PossMMapConstIter iter2 = orig->m_posses.begin();
-  for( ; iter2 != orig->m_posses.end(); ++iter2) {
+  PossMMapConstIter iter2 = real->m_posses.begin();
+  for( ; iter2 != real->m_posses.end(); ++iter2) {
     const Poss *oldPoss = (*iter2).second;
     Poss *newPoss = new Poss;
     newPoss->Duplicate(oldPoss, map, possMerging);
@@ -847,46 +857,7 @@ void RealPSet::Simplify(const TransMap &simplifiers, bool recursive)
   } while (iter != m_posses.end());
 }
 
-// void PSet::RemoveDups()
-// {
-// #ifdef _OPENMP
-//   static omp_lock_t lock;
-//   static bool inited = false;
-//   if (!inited) {
-//     omp_init_lock(&lock);
-//     inited = true;
-//   }
-// #endif
-  
-//   for (GraphNum i = 0; i < m_posses.size(); ++i) {
-//     Poss *poss = m_posses[i];
-//     std::set<GraphNum> dups;
-//     int size = m_posses.size();
-// #pragma omp parallel
-//     {
-// #pragma omp for
-//       for (int j = i+1; j < size; ++j) {
-//         if (*poss == *m_posses[j]) {
-// #ifdef _OPENMP
-//           omp_set_lock(&lock);
-// #endif
-//           dups.insert(j);
-// #ifdef _OPENMP
-//           omp_unset_lock(&lock);
-// #endif
-//         }
-//       }
-//     }
-//     GraphNum count = 0;
-//     std::set<GraphNum>::iterator iter = dups.begin();
-//     for(; iter != dups.end(); ++iter, ++count) {
-//       RemoveAndDeletePoss(m_posses[*iter - count], false);
-//       m_posses.erase(m_posses.begin() + *iter - count);
-//     }
-//   }
-// }
-
-void PSet::ClearFullyExpanded()
+void RealPSet::ClearFullyExpanded()
 {
   PossMMapIter iter = m_posses.begin();
   for( ;iter != m_posses.end(); ++iter)
@@ -1374,7 +1345,7 @@ void PSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
   delete inliningPoss;
 }
 
-void PSet::RemoveInTun(Node *tun)
+void BasePSet::RemoveInTun(Node *tun)
 {
   NodeVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
@@ -1386,7 +1357,7 @@ void PSet::RemoveInTun(Node *tun)
   throw;
 }
 
-void PSet::RemoveOutTun(Node *tun)
+void BasePSet::RemoveOutTun(Node *tun)
 {
   NodeVecIter iter = m_outTuns.begin();
   for(; iter != m_outTuns.end(); ++iter) {
@@ -1440,7 +1411,7 @@ void PSet::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
   *out << "//****\n";
 }
 
-void PSet::Cull(CullFunction cullFunc)
+void RealPSet::Cull(CullFunction cullFunc)
 {
   PossMMapIter iter = m_posses.begin();
   GraphNum i = 0;
@@ -1470,17 +1441,10 @@ void PSet::Cull(CullFunction cullFunc)
   }
 }
 
-void PSet::GetCurrTransVec(TransVec &transVec) const
-{
-  if (m_currPoss == m_posses.end()) {
-    throw;
-  }
-  (*m_currPoss).second->GetCurrTransVec(transVec);
-}
 
 void RealPSet::FlattenCore(ofstream &out) const
 {
-  size = m_posses.size();
+  unsigned int size = m_posses.size();
   WRITE(size);
   PossMMapConstIter iter2 = m_posses.begin();
   for(; iter2 != m_posses.end(); ++iter2) {
@@ -1495,6 +1459,7 @@ void RealPSet::FlattenCore(ofstream &out) const
 
 void RealPSet::UnflattenCore(ifstream &in, SaveInfo &info)
 {
+  unsigned int size;
   READ(size);
   for(GraphNum i = 0; i < size; ++i) {
     Poss *newPoss = new Poss;
@@ -1509,6 +1474,7 @@ void RealPSet::UnflattenCore(ifstream &in, SaveInfo &info)
   for(; iter != m_posses.end(); ++iter) {
     (*iter).second->Unflatten(in, info);
   }
+  char tmp;
   READ(tmp);
   if (tmp != END)
     throw;

@@ -38,6 +38,7 @@ class RealPSet : public BasePSet
   PSetVec m_shadows;
   RealPSet();
   RealPSet(Poss *poss);
+  void Init(Poss *poss);
   virtual ~RealPSet();
   void AddPoss(Poss *poss);
   void AddPossesOrDispose(PossMMap &mmap, PossMMap *added = NULL);

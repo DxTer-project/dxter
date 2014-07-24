@@ -351,7 +351,7 @@ void Poss::AddNodes(int numNodes, ...)
   }
 }
 
-void Poss::AddPSet(PSet *pset, bool expectToBeNew)
+void Poss::AddPSet(BasePSet *pset, bool expectToBeNew)
 {
   bool isNew = AddElemToVec(m_sets,pset,false);
   if (!isNew && expectToBeNew) {

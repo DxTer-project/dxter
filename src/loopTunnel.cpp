@@ -420,7 +420,7 @@ Name LoopTunnel::GetOrigName() const
     throw;
 }
 
-BasePSet* LoopTunnel::GetMyLoop() const
+LoopInterface* LoopTunnel::GetMyLoop() const
 {
   BasePSet *set = NULL;
   if (m_tunType == SETTUNIN)
@@ -437,7 +437,7 @@ BasePSet* LoopTunnel::GetMyLoop() const
     cout << "Loop Tunnel doesn't have Loop as PSet\n";
     throw;
   }
-  return set;
+  return (LoopInterface*)set;
 }
 
 
