@@ -759,12 +759,13 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
   bool didMerge = false;
   PSetVecIter iter = m_sets.begin();
   for(; iter != m_sets.end(); ++iter) {
-    PSet *pset = *iter;
+    BasePSet *pset = *iter;
     if (pset->m_ownerPoss != this) {
       cout << "bad owner\n";
       throw;
     }
-    didMerge |= pset->MergePosses(simplifiers, cullFunc);
+    if (pset->IsReal())
+      didMerge |= ((RealPSet*)pset)->MergePosses(simplifiers, cullFunc);
   }
   if (!didMerge) {
     //Didn't make any changes in the recursion
@@ -848,10 +849,14 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
   return didMerge;
 }
 
-void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc)
+void Poss::MergePart1(unsigned int left, unsigned int right, 
+		      BasePSet **leftSet, BasePSet **rightSet,
+		      CullFunction cullFunc)
 {
   InvalidateHash();
-  if (left >= m_sets.size() || right >= m_sets.size()) {
+  
+  unsigned int size = m_sets.size();
+  if (left >= size || right >= size) {
     cout << "left or right is too big\n";
     throw;
   }
@@ -859,31 +864,30 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
     cout << "left >= right\n";
     throw;
   }
-  PSet *leftSet = m_sets[left];
-  PSet *rightSet = m_sets[right];
-  leftSet->Cull(cullFunc);
-  rightSet->Cull(cullFunc);
-  if (leftSet->m_ownerPoss != this ||
-      rightSet->m_ownerPoss != this) {
+  *leftSet = m_sets[left];
+  *rightSet = m_sets[right];
+  *leftSet->Cull(cullFunc);
+  *rightSet->Cull(cullFunc);
+  if (!(*leftSet)->NumPosses() || !(*rightSet)->NumPosses())
+    throw;
+  if ((*leftSet)->m_ownerPoss != this ||
+      (*rightSet)->m_ownerPoss != this) {
     cout << "Bad owner\n";
     throw;
   }
-  
-  NodeMap map;
-  PSet *newSet = leftSet->GetNewInst();
-
-  newSet->m_functionality = leftSet->m_functionality+rightSet->m_functionality;
-  
   m_sets.erase(m_sets.begin()+left);
-  if (*(m_sets.begin()+right-1) != rightSet) {
+  if (*(m_sets.begin()+right-1) != *rightSet) {
     cout << "error;";
     throw;
   }
   m_sets.erase(m_sets.begin()+right-1);
-  
+}
+
+void Poss::MergePart2(BasePSet *newSet, unsigned int left, NodeMap &map)
+{
   newSet->m_ownerPoss = this;
   m_sets.insert(m_sets.begin()+left,newSet);
-  
+
   NodeVecConstIter iter;
   
   //Create output set tunnels on the new set to match
@@ -897,7 +901,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
     map[*iter] = tun;
     RemoveFromGraphNodes(*iter);
   }
-  
+
   iter  = rightSet->m_outTuns.begin();
   for (; iter != rightSet->m_outTuns.end(); ++iter) {
     PossTunnel *tun = (PossTunnel*)((*iter)->GetNewInst());
@@ -907,7 +911,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
     map[*iter] = tun;
     RemoveFromGraphNodes(*iter);
   }
-  
+
   //Create input set tunnels from left set
   iter = leftSet->m_inTuns.begin();
   for (; iter != leftSet->m_inTuns.end(); ++iter) {
@@ -928,7 +932,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
     }
     RemoveFromGraphNodes(*iter);
   }
-  
+
   //Create input set tunnels from right set
   iter  = rightSet->m_inTuns.begin();
   for (; iter != rightSet->m_inTuns.end(); ++iter) {
@@ -949,6 +953,117 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
     }
     RemoveFromGraphNodes(*iter);
   }
+}
+
+void Poss::MergePart4(BasePSet *newSet, 
+		      BasePSet *leftSet, 
+		      BasePSet *rightSet, 
+		      NodeMap &map,
+		      NodeVec &newInputTunnelsToFix)
+{
+  NodeVecConstIter iter  = leftSet->m_outTuns.begin();
+  for (; iter != leftSet->m_outTuns.end(); ++iter) {
+    PossTunnel *tun = (PossTunnel*)(map[*iter]);
+    for(unsigned int i = 0; i < (*iter)->m_children.size(); ++i) {
+      Node *child = (*iter)->m_children[i]->m_n;
+      if (map[child] != NULL)  {
+        if (!map[child]->IsPossTunnel() ||
+            ((PossTunnel*)map[child])->m_tunType != SETTUNIN) {
+          cout << "mapped child not of expected type\n";
+          throw;
+        }
+        newInputTunnelsToFix.push_back(map[child]);
+      }
+      else {
+        child->ChangeInput1Way(*iter, (*iter)->m_children[i]->m_num, tun, (*iter)->m_children[i]->m_num);
+      }
+      delete (*iter)->m_children[i];
+      (*iter)->m_children.erase((*iter)->m_children.begin()+i);
+      --i;
+    }
+    if (!(*iter)->m_children.empty()) {
+      cout << "!(*iter)->m_children.empty() 1\n";
+      cout << (*iter)->m_children.size() << endl;
+      throw;
+    }
+  }
+
+  iter  = rightSet->m_outTuns.begin();
+  for (; iter != rightSet->m_outTuns.end(); ++iter) {
+    PossTunnel *tun = (PossTunnel*)(map[*iter]);
+    for(unsigned int i = 0; i < (*iter)->m_children.size(); ++i) {
+      Node *child = (*iter)->m_children[i]->m_n;
+      if (map[child] != NULL)  {
+        if (!map[child]->IsPossTunnel() ||
+            ((PossTunnel*)map[child])->m_tunType != SETTUNIN) {
+          cout << "mapped child not of expected type\n";
+          throw;
+        }
+        newInputTunnelsToFix.push_back(map[child]);
+      }
+      else {
+        child->ChangeInput1Way(*iter, (*iter)->m_children[i]->m_num, tun, (*iter)->m_children[i]->m_num);
+      }
+      delete (*iter)->m_children[i];
+      (*iter)->m_children.erase((*iter)->m_children.begin()+i);
+      --i;
+    }
+    if (!(*iter)->m_children.empty()) {
+      cout << "!(*iter)->m_children.empty() 1\n";
+      cout << (*iter)->m_children.size() << endl;
+      throw;
+    }
+  }
+}
+
+void Poss::MergePart6(BasePSet *newSet, BasePSet *leftSet, 
+		      BasePSet *rightSet, NodeMap &map)
+{
+
+  for(unsigned int i = 0; i < leftSet->m_inTuns.size(); ++i) {
+    Node *node = leftSet->m_inTuns[i];
+    for(unsigned int j = 0; j < node->m_inputs.size(); ++j) {
+      NodeConn *conn = node->m_inputs[j];
+      if (!map[conn->m_n])
+        conn->m_n->RemoveChild(node,conn->m_num);
+      delete conn;
+    }
+    node->m_inputs.clear();
+  }
+  
+  for(unsigned int i = 0; i < rightSet->m_inTuns.size(); ++i) {
+    Node *node = rightSet->m_inTuns[i];
+    for(unsigned int j = 0; j < node->m_inputs.size(); ++j) {
+      NodeConn *conn = node->m_inputs[j];
+      if (!map[conn->m_n])
+        conn->m_n->RemoveChild(node,conn->m_num);
+      delete conn;
+    }
+    node->m_inputs.clear();
+  }
+  delete leftSet;
+  delete rightSet;
+  
+  newSet->CombineAndRemoveTunnels();
+}
+
+void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc)
+{
+  BasePSet *leftSet;
+  BasePSet *rightSet;
+  MergePart1(left, right, &leftSet, &rightSet, cullFunc);
+
+  
+  NodeMap map;
+  RealPSet *newSet = new RealPSet;
+  newSet->m_functionality = leftSet->m_functionality+rightSet->m_functionality;
+
+  NodeVecConstIter iter;
+
+  MergePart2(newSet, left, map);
+
+  MergePart3(newSet, leftSet, rightSet, tunMap);
+  
   
   for (PossMMapIter leftIter = leftSet->m_posses.begin(); leftIter != leftSet->m_posses.end(); ++leftIter) {
     for (PossMMapIter rightIter = rightSet->m_posses.begin(); rightIter != rightSet->m_posses.end(); ++rightIter) {
@@ -1003,60 +1118,10 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
   
   NodeVec newInputTunnelsToFix;
   
-  iter  = leftSet->m_outTuns.begin();
-  for (; iter != leftSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(map[*iter]);
-    for(unsigned int i = 0; i < (*iter)->m_children.size(); ++i) {
-      Node *child = (*iter)->m_children[i]->m_n;
-      if (map[child] != NULL)  {
-        if (!map[child]->IsPossTunnel() ||
-            ((PossTunnel*)map[child])->m_tunType != SETTUNIN) {
-          cout << "mapped child not of expected type\n";
-          throw;
-        }
-        newInputTunnelsToFix.push_back(map[child]);
-      }
-      else {
-        child->ChangeInput1Way(*iter, (*iter)->m_children[i]->m_num, tun, (*iter)->m_children[i]->m_num);
-      }
-      delete (*iter)->m_children[i];
-      (*iter)->m_children.erase((*iter)->m_children.begin()+i);
-      --i;
-    }
-    if (!(*iter)->m_children.empty()) {
-      cout << "!(*iter)->m_children.empty() 1\n";
-      cout << (*iter)->m_children.size() << endl;
-      throw;
-    }
-  }
+  MergePart4(newSet, leftSet, rightSet,
+	     map, newInputTunnelsToFix);
+
   
-  
-  iter  = rightSet->m_outTuns.begin();
-  for (; iter != rightSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(map[*iter]);
-    for(unsigned int i = 0; i < (*iter)->m_children.size(); ++i) {
-      Node *child = (*iter)->m_children[i]->m_n;
-      if (map[child] != NULL)  {
-        if (!map[child]->IsPossTunnel() ||
-            ((PossTunnel*)map[child])->m_tunType != SETTUNIN) {
-          cout << "mapped child not of expected type\n";
-          throw;
-        }
-        newInputTunnelsToFix.push_back(map[child]);
-      }
-      else {
-        child->ChangeInput1Way(*iter, (*iter)->m_children[i]->m_num, tun, (*iter)->m_children[i]->m_num);
-      }
-      delete (*iter)->m_children[i];
-      (*iter)->m_children.erase((*iter)->m_children.begin()+i);
-      --i;
-    }
-    if (!(*iter)->m_children.empty()) {
-      cout << "!(*iter)->m_children.empty() 1\n";
-      cout << (*iter)->m_children.size() << endl;
-      throw;
-    }
-  }
   
   
   NodeVecIter setTunInIter = newInputTunnelsToFix.begin();
@@ -1139,32 +1204,8 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
       }
     }
   }
-  
-  for(unsigned int i = 0; i < leftSet->m_inTuns.size(); ++i) {
-    Node *node = leftSet->m_inTuns[i];
-    for(unsigned int j = 0; j < node->m_inputs.size(); ++j) {
-      NodeConn *conn = node->m_inputs[j];
-      if (!map[conn->m_n])
-        conn->m_n->RemoveChild(node,conn->m_num);
-      delete conn;
-    }
-    node->m_inputs.clear();
-  }
-  
-  for(unsigned int i = 0; i < rightSet->m_inTuns.size(); ++i) {
-    Node *node = rightSet->m_inTuns[i];
-    for(unsigned int j = 0; j < node->m_inputs.size(); ++j) {
-      NodeConn *conn = node->m_inputs[j];
-      if (!map[conn->m_n])
-        conn->m_n->RemoveChild(node,conn->m_num);
-      delete conn;
-    }
-    node->m_inputs.clear();
-  }
-  delete leftSet;
-  delete rightSet;
-  
-  newSet->CombineAndRemoveTunnels();
+
+  MergePart6(newSet, leftSet, rightSet, map);
   
   NodeVecIter tunIter = newSet->m_inTuns.begin();
   for(; tunIter != newSet->m_inTuns.end(); ++tunIter) {
@@ -1837,31 +1878,14 @@ void Poss::FormSets(unsigned int phase)
 
 void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc)
 {
-  InvalidateHash();
-  
-  unsigned int size = m_sets.size();
-  if (left >= size || right >= size) {
-    cout << "left or right is too big\n";
+  BasePSet *leftSet;
+  BasePSet *rightSet;
+  MergePart1(left, right, &leftSet, &rightSet, cullFunc);
+  if (!leftSet->IsLoop() || !rightSet->IsLoop())
     throw;
-  }
-  if (left >= right) {
-    cout << "left >= right\n";
-    throw;
-  }
-  
-  
-  if (!m_sets[left]->IsLoop() || !m_sets[right]->IsLoop())
-    throw;
-  Loop *leftSet = (Loop*)(m_sets[left]);
-  Loop *rightSet = (Loop*)(m_sets[right]);
-  leftSet->Cull(cullFunc);
-  rightSet->Cull(cullFunc);
-  if (!leftSet->NumPosses() || !rightSet->NumPosses())
-    throw;
-  
   
   NodeMap tunMap;
-  Loop *newSet = (Loop*)leftSet->GetNewInst();
+  RealLoop *newSet = new RealLoop();
   newSet->m_functionality = leftSet->m_functionality + rightSet->m_functionality;
 #if TWOD
   if (leftSet->GetDimName() == rightSet->GetDimName())
@@ -1872,76 +1896,12 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   newSet->m_label.insert(leftSet->m_label.begin(),leftSet->m_label.end());
   newSet->m_label.insert(rightSet->m_label.begin(),rightSet->m_label.end());
   
-  m_sets.erase(m_sets.begin()+left);
-  m_sets.erase(m_sets.begin()+right-1);
-  
-  newSet->m_ownerPoss = this;
-  m_sets.insert(m_sets.begin()+left,newSet);
-  
   NodeVecConstIter iter;
-  
-  //Create output set tunnels on the new set to match
-  // those on the old sets
-  iter  = leftSet->m_outTuns.begin();
-  for (; iter != leftSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)((*iter)->GetNewInst());
-    tun->Duplicate(*iter,true,true);
-    newSet->m_outTuns.push_back(tun);
-    tun->m_pset = newSet;
-    tunMap[*iter] = tun;
-    RemoveFromGraphNodes(*iter);
-  }
-  
-  iter  = rightSet->m_outTuns.begin();
-  for (; iter != rightSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)((*iter)->GetNewInst());
-    tun->Duplicate(*iter,true,true);
-    newSet->m_outTuns.push_back(tun);
-    tun->m_pset = newSet;
-    tunMap[*iter] = tun;
-    RemoveFromGraphNodes(*iter);
-  }
-  
-  //Create input set tunnels from left set
-  iter = leftSet->m_inTuns.begin();
-  for (; iter != leftSet->m_inTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)((*iter)->GetNewInst());
-    tun->Duplicate(*iter,true,true);
-    newSet->m_inTuns.push_back(tun);
-    tun->m_pset =  newSet;
-    tunMap[*iter] = tun;
-    for (unsigned int i = 0; i < (*iter)->m_inputs.size(); ++i) {
-      Node *input = (*iter)->Input(i);
-      if (tunMap[input]) {
-        tun->AddInput(tunMap[input],(*iter)->InputConnNum(i));
-      }
-      else {
-        tun->AddInput((*iter)->Input(i),(*iter)->InputConnNum(i));
-      }
-    }
-    RemoveFromGraphNodes(*iter);
-  }
-  
-  //Create input set tunnels from right set
-  iter  = rightSet->m_inTuns.begin();
-  for (; iter != rightSet->m_inTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)((*iter)->GetNewInst());
-    tun->Duplicate(*iter,true,true);
-    newSet->m_inTuns.push_back(tun);
-    tun->m_pset = newSet;
-    tunMap[*iter] = tun;
-    for (unsigned int i = 0; i < (*iter)->m_inputs.size(); ++i) {
-      Node *input = (*iter)->Input(i);
-      if (tunMap[input]) {
-        tun->AddInput(tunMap[input],(*iter)->InputConnNum(i));
-      }
-      else {
-        tun->AddInput((*iter)->Input(i),(*iter)->InputConnNum(i));
-      }
-    }
-    RemoveFromGraphNodes(*iter);
-  }
-  
+
+  MergePart2(newSet, left, tunMap);
+
+  MergePart3(newSet, leftSet, rightSet, tunMap);
+
   for (PossMMapIter leftIter = leftSet->m_posses.begin(); leftIter != leftSet->m_posses.end(); ++leftIter) {
     for (PossMMapIter rightIter = rightSet->m_posses.begin(); rightIter != rightSet->m_posses.end(); ++rightIter) {
       Poss *newLeft = new Poss;
@@ -1978,7 +1938,6 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
       newLeft->m_inTuns.insert(newLeft->m_inTuns.end(),newRight->m_inTuns.begin(),newRight->m_inTuns.end());
       newLeft->m_outTuns.insert(newLeft->m_outTuns.end(),newRight->m_outTuns.begin(),newRight->m_outTuns.end());
       newLeft->m_transVec.insert(newLeft->m_transVec.end(),newRight->m_transVec.begin(),newRight->m_transVec.end());
-      //      newLeft->m_transVec.push_back("Fused loops");
       newLeft->PatchAfterDuplicate(map);
       newRight->m_possNodes.clear();
       newRight->m_inTuns.clear();
@@ -1991,61 +1950,11 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   }
   
   NodeVec newInputTunnelsToFix;
+
+  MergePart4(newSet, leftSet, rightSet,
+	     tunMap, newInputTunnelsToFix);
+    
   
-  iter  = leftSet->m_outTuns.begin();
-  for (; iter != leftSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(tunMap[*iter]);
-    for(unsigned int i = 0; i < (*iter)->m_children.size(); ++i) {
-      Node *child = (*iter)->m_children[i]->m_n;
-      if (tunMap[child] != NULL)  {
-        if (!tunMap[child]->IsLoopTunnel() ||
-            ((PossTunnel*)tunMap[child])->m_tunType != SETTUNIN) {
-          cout << "tunMapped child not of expected type\n";
-          throw;
-        }
-        newInputTunnelsToFix.push_back(tunMap[child]);
-      }
-      else {
-        child->ChangeInput1Way(*iter, (*iter)->m_children[i]->m_num, tun, (*iter)->m_children[i]->m_num);
-      }
-      delete (*iter)->m_children[i];
-      (*iter)->m_children.erase((*iter)->m_children.begin()+i);
-      --i;
-    }
-    if (!(*iter)->m_children.empty()) {
-      cout << "!(*iter)->m_children.empty() 1\n";
-      cout << (*iter)->m_children.size() << endl;
-      throw;
-    }
-  }
-  
-  
-  iter  = rightSet->m_outTuns.begin();
-  for (; iter != rightSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(tunMap[*iter]);
-    for(unsigned int i = 0; i < (*iter)->m_children.size(); ++i) {
-      Node *child = (*iter)->m_children[i]->m_n;
-      if (tunMap[child] != NULL)  {
-        if (!tunMap[child]->IsPossTunnel() ||
-            ((PossTunnel*)tunMap[child])->m_tunType != SETTUNIN) {
-          cout << "tunMapped child not of expected type\n";
-          throw;
-        }
-        newInputTunnelsToFix.push_back(tunMap[child]);
-      }
-      else {
-        child->ChangeInput1Way(*iter, (*iter)->m_children[i]->m_num, tun, (*iter)->m_children[i]->m_num);
-      }
-      delete (*iter)->m_children[i];
-      (*iter)->m_children.erase((*iter)->m_children.begin()+i);
-      --i;
-    }
-    if (!(*iter)->m_children.empty()) {
-      cout << "!(*iter)->m_children.empty() 1\n";
-      cout << (*iter)->m_children.size() << endl;
-      throw;
-    }
-  }
   
   NodeVecIter setTunInIter = newInputTunnelsToFix.begin();
   for(; setTunInIter != newInputTunnelsToFix.end(); ++setTunInIter) {
@@ -2141,33 +2050,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
     }
   }
   
-  for(unsigned int i = 0; i < leftSet->m_inTuns.size(); ++i) {
-    Node *node = leftSet->m_inTuns[i];
-    for(unsigned int j = 0; j < node->m_inputs.size(); ++j) {
-      NodeConn *conn = node->m_inputs[j];
-      if (!tunMap[conn->m_n])
-        conn->m_n->RemoveChild(node,conn->m_num);
-      delete conn;
-    }
-    node->m_inputs.clear();
-  }
-  
-  for(unsigned int i = 0; i < rightSet->m_inTuns.size(); ++i) {
-    Node *node = rightSet->m_inTuns[i];
-    for(unsigned int j = 0; j < node->m_inputs.size(); ++j) {
-      NodeConn *conn = node->m_inputs[j];
-      if (!tunMap[conn->m_n])
-        conn->m_n->RemoveChild(node,conn->m_num);
-      delete conn;
-    }
-    node->m_inputs.clear();
-  }
-  
-  delete leftSet;
-  delete rightSet;
-  
-  newSet->CombineAndRemoveTunnels();
-  
+  MergePart6(newSet, leftSet, rightSet, tunMap);
+
   NodeVecIter tunIter = newSet->m_inTuns.begin();
   bool foundControl = false;
   for(; tunIter != newSet->m_inTuns.end(); ++tunIter) {

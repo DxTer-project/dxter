@@ -86,6 +86,17 @@ class Poss
   void ExpandTunnels();
   Node* InTun(unsigned int num) const {return m_inTuns[num];}
   Node* OutTun(unsigned int num) const {return m_outTuns[num];}
+  void MergePart1(unsigned int left, unsigned int right, 
+		  BasePSet **leftSet, BasePSet **rightSet,
+		  CullFunction cullFunc);
+  void MergePart2(BasePSet *newSet, unsigned int left, NodeMap &map);
+  void MergePart4(BasePSet *newSet, 
+		  BasePSet *leftSet, 
+		  BasePSet *rightSet, 
+		  NodeMap &map,
+		  NodeVec &newInputTunnelsToFix);
+  void MergePart6(BasePSet *newSet, BasePSet *leftSet, 
+		  BasePSet *rightSet, NodeMap &map);
   bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
