@@ -68,6 +68,7 @@ class BasePSet
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();
 
+  virtual const PossMMap& GetPosses() const = 0;
   virtual PossMMap& GetPosses() = 0;
 
 #if DOBLIS
@@ -81,3 +82,10 @@ class BasePSet
   virtual bool IsShadow() const {return false;}
 };
 
+
+typedef vector<BasePSet*> PSetVec;
+typedef PSetVec::iterator PSetVecIter;
+typedef PSetVec::const_iterator PSetVecConstIter;
+typedef set<const BasePSet*> PSetSet;
+typedef PSetSet::iterator PSetSetIter;
+typedef PSetSet::const_iterator PSetSetConstIter;

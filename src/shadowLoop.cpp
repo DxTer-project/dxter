@@ -41,6 +41,18 @@ int ShadowLoop::GetBS() const
   return ((RealLoop*)m_realPSet)->GetBS();
 }
 
+BSSize ShadowLoop::GetBSSize() const
+{
+  return ((RealLoop*)m_realPSet)->GetBSSize();
+}
+
+#if TWOD
+DimName ShadowLoop::GetDimName() const
+{
+  return ((RealLoop*)m_realPSet)->GetDimName();
+}
+#endif
+
 void ShadowLoop::Prop()
 {
   if (!CostIsValid(BasePSet::m_cost)) {

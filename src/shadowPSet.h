@@ -41,6 +41,7 @@ class ShadowPSet : public BasePSet
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
   virtual bool IsTransparent() const {return true;}
   virtual GraphNum TotalCount() const;
+  virtual const PossMMap& GetPosses() const {return m_realPSet->m_posses;}
   virtual PossMMap& GetPosses() {return m_realPSet->m_posses;}
 
 

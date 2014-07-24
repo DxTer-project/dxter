@@ -87,7 +87,11 @@ class LoopInterface
 {
  public:
   virtual int GetBS() const = 0;
+  virtual BSSize GetBSSize() const = 0;
   virtual LoopType GetType() const = 0;
+#if TWOD
+  virtual DimName GetDimName() const = 0;
+#endif
   virtual bool IsLoop() const {return true;}
   virtual bool IsTransparent() const {return false;}
   virtual SplitBase* GetControl() const = 0;
@@ -100,7 +104,7 @@ class LoopInterface
 };
 
 template <class PSetType>
-class IntLoop : public PSetType, public LoopInterface
+class IntLoop : virtual public PSetType, public LoopInterface
 {
  public:
   virtual bool CanMerge(BasePSet *pset) const;

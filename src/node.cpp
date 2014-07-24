@@ -404,6 +404,7 @@ bool Node::CanPrintCode() const
               else
                 return false;
             }
+	    /*
             else if (child->IsPossTunnel(SETTUNIN)) {
               const PossTunnel *tun2 = (PossTunnel*)child;
               const BasePSet *set = tun2->m_pset;
@@ -411,9 +412,10 @@ bool Node::CanPrintCode() const
                 if (set == ((PossTunnel*)this)->m_pset)
                   continue;
               }
-              if (!set->GetCurrPoss()->m_hasPrinted)
-                return false;
+	      if (!set->GetCurrPoss()->m_hasPrinted)
+	      return false;
             }
+	    */
           }
         }
       }
@@ -992,7 +994,7 @@ string Node::GetFunctionalityString() const
   return str;
 }
 
-const Loop* Node::FindClosestLoop() const
+const BasePSet* Node::FindClosestLoop() const
 {
   Poss *poss = m_poss;
   if (!poss)

@@ -47,7 +47,7 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
   if (!split->m_isControlTun)
     return false;
 
-  const Loop *loop = split->GetMyLoop();
+  const BasePSet *loop = split->GetMyLoop();
 
   
   unsigned int numExecs = split->NumberOfLoopExecs();
@@ -59,8 +59,9 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
       return false;
   }
 
-  PossMMapConstIter iter = loop->m_posses.begin();
-  for(; iter != loop->m_posses.end(); ++iter) {
+  const PossMMap &map = loop->GetPosses();
+  PossMMapConstIter iter = map.begin();
+  for(; iter != map.end(); ++iter) {
     const Poss *poss = iter->second;
     if (poss->ContainsNonLoopCode())
       return true;

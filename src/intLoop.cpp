@@ -262,7 +262,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
   if (!PSetType::CanMerge(pset))
     return false;
   
-  const Loop *left=NULL, *right=NULL;
+  const BasePSet *left=NULL, *right=NULL;
   //this is true if the left loop is actually on the left
   //otherwise, the order doesn't matter
   NodeVecConstIter iter = pset->m_inTuns.begin();
@@ -271,7 +271,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
     for (ConnNum i = 0; i < inTun->m_inputs.size() && !left; ++i) {
       if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) &&
           ((PossTunnel*)inTun->Input(i))->m_pset == this) {
-        right = (Loop*)pset;
+        right = pset;
         left = this;
       }
     }
@@ -283,7 +283,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
       for (ConnNum i = 0; i < inTun->m_inputs.size() && !left; ++i) {
         if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) &&
             ((PossTunnel*)inTun->Input(i))->m_pset == pset) {
-          left = (Loop*)pset;
+          left = pset;
           right = this;
         }
       }
@@ -413,7 +413,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
     }
   }
   else {
-    const PSet *leftSet = NULL;
+    const BasePSet *leftSet = NULL;
     bool foundConnection = false;
     iter = pset->m_inTuns.begin();
     for (; iter != pset->m_inTuns.end(); ++iter) {
@@ -428,8 +428,6 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
             LoopTunnel *tun2 = (LoopTunnel*)child;
             foundConnection = true;
             if (!tun1->IsConst() || !tun2->IsConst()) {
-              
-              
               if (tun1->IsConst()) {
                 if (leftSet) {
                   if (leftSet != pset) {
@@ -505,12 +503,11 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
   }
   return true;
 }
-
-  template<class PSetType>
-    void IntLoop<PSetType>::PrePrint(IndStream &out, Poss *poss)
+  
+template<class PSetType>
+  void IntLoop<PSetType>::PrePrint(IndStream &out, Poss *poss)
 {
   PSetType::PrePrint(out, poss);
-  Poss *poss = GetCurrPoss();
   NodeVecIter iter = poss->m_inTuns.begin();
   for(; iter != poss->m_inTuns.end(); ++iter) {
     if (((LoopTunnel*)(*iter))->IsSplit()) {
@@ -521,7 +518,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
 #if DOBLIS
   string loopLevel = out.LoopLevel(1);
   
-  if (m_type == BLISLOOP) {
+  if (GetType() == BLISLOOP) {
     if (m_comm != CORECOMM) {
       bool barrier = false;
       iter = m_inTuns.begin();
@@ -583,7 +580,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
       *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", "
       << CommToStr(GetSubComm(m_comm)) << ", "
       << "bli_blksz_for_obj( &" << split->GetInputNameStr(0)
-      << ", " << BSSizeToSubSizeStr(m_bsSize) << "));\n";
+      << ", " << BSSizeToSubSizeStr(GetBSSize) << "));\n";
       out.Indent();
       *out << "for ( ; " << idx << " < " << dimLen << "; "
       << idx << " += " << bs <<" ) {\n";
@@ -634,7 +631,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
     }
     
     *out << idx << ", " << dimLen
-    << ", &" << inputName << ", " << BSSizeToStr(m_bsSize) << " );\n";
+    << ", &" << inputName << ", " << BSSizeToStr(GetBSSize) << " );\n";
     
     loopLevel = out.LoopLevel(2);
     idx = "idx" + loopLevel;
@@ -644,14 +641,14 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
     *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
   }
 #elif DOLLDLA
-  if (m_type != LLDLALOOP)
+  if (GetType() != LLDLALOOP)
     throw;
-  if (m_bsSize != USELLDLAMU &&
-      m_bsSize != USELLDLA2MU &&
-      m_bsSize != USELLDLA3MU)
+  if (GetBSSize() != USELLDLAMU &&
+      GetBSSize() != USELLDLA2MU &&
+      GetBSSize() != USELLDLA3MU)
     throw;
   SplitBase *split = GetControl();
-  switch(m_dim) 
+  switch(GetDimName()) 
     {
     case (DIMM):
       {
@@ -686,12 +683,12 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
   bool needMin = false;
   if (split->m_dir == PARTDOWN) {
     *out << split->InputDataType(0).m_numRowsVar;
-    if (!split->GetInputM(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
+    if (!split->GetInputM(0)->EvenlyDivisibleBy(GetBS()))
       needMin = true;
   }
   else if (split->m_dir == PARTRIGHT) {
     *out << split->InputDataType(0).m_numColsVar;
-    if (!split->GetInputN(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
+    if (!split->GetInputN(0)->EvenlyDivisibleBy(GetBS()))
       needMin = true;
   }
   else
@@ -700,7 +697,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
   *out << "; " << lcv << " > 0; " << lcv << " -= ";
 
   
-  *out << BSSizeToVarName(m_bsSize) << " ) {\n";
+  *out << BSSizeToVarName(GetBSSize()) << " ) {\n";
 
   out.Indent(1);
   *out << "const unsigned int num";
@@ -717,255 +714,27 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
     *out << loopLevel << " = min( " << lcv << ", ";
   else
     *out << loopLevel << " = ( ";
-  *out << BSSizeToVarName(m_bsSize) << " );\n";
+  *out << BSSizeToVarName(GetBSSize()) << " );\n";
 #endif
-  
-  PSet::PrintCurrPoss(out, graphNum);
-
-  iter = poss->m_inTuns.begin();
-  for(; iter != poss->m_inTuns.end(); ++iter) {
-    LoopTunnel *tun = (LoopTunnel*)(*iter);
-    if (tun->IsSplit()) {
-      SplitBase *split = (SplitBase*)tun;
-      split->PrintIncrementAtEndOfLoop(m_bsSize, out);
-    }
-  }
-
-#if DOBLIS||DOLLDLA
-  if (m_type == BLISLOOP || m_type == LLDLALOOP) {
-    out.Indent();
-    *out << "}\n";
-  }
-#endif //DOBLIS||DOLLDLA
 }
 
 
-  template<class PSetType>
-    void IntLoop<PSetType>::PostPrint(IndStream &out, Poss *poss)
-  {
+template<class PSetType>
+  void IntLoop<PSetType>::PostPrint(IndStream &out, Poss *poss)
+{
   PSetType::PostPrint(out, poss);
+
   NodeVecIter iter = poss->m_inTuns.begin();
-  for(; iter != poss->m_inTuns.end(); ++iter) {
-    if (((LoopTunnel*)(*iter))->IsSplit()) {
-      ((SplitBase*)(*iter))->PrintVarDeclarations(out);
-    }
-  }
-
-#if DOBLIS
-  string loopLevel = out.LoopLevel(1);
-  
-  if (m_type == BLISLOOP) {
-    if (m_comm != CORECOMM) {
-      bool barrier = false;
-      iter = m_inTuns.begin();
-      for(; iter != m_inTuns.end() && !barrier; ++iter) {
-	if (!FoundBarrier(*iter, 0, m_comm))
-	  barrier = true;
-      }
-      if (barrier) {
-	out.Indent();
-	*out << "th_barrier( " << CommToStr(m_comm) << " );"
-	     << "\t //barrier for dependency\n";
-
-      }
-      out.Indent();
-      *out << "//// ***Parallelized with communicator "
-	   << CommToStr(m_comm) << endl;
-    }
-    string idx = "idx" + loopLevel;
-    string dimLen = "dimLen" + loopLevel;
-    string bs = "bs" + loopLevel;
-    
-    SplitBase *splitBase = GetControl();
-    if (splitBase->GetNodeClass() != SplitSingleIter::GetClass())
-      throw;
-    SplitSingleIter *split = (SplitSingleIter*)splitBase;
-    
-    string inputName = split->Input(0)->GetName(split->InputConnNum(0)).str();
-    
-    if (loopLevel == "1") {
-      out.Indent();
-      *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
-    }
-    
-    
-    switch(split->m_dir) {
-      case(PARTDIAGBACK):
-      case(PARTDIAG):
-        out.Indent();
-        *out << dimLen << " = min( bli_obj_length_after_trans( " << inputName << " ), "
-        << "bli_obj_width_after_trans( " << inputName << " ) );\n";
-        break;
-      case(PARTDOWN):
-      case(PARTUPWARD):
-        out.Indent();
-        *out << dimLen << " = bli_obj_length_after_trans( " << inputName << " );\n";
-        break;
-      case (PARTRIGHT):
-      case (PARTLEFT):
-        out.Indent();
-        *out << dimLen << " = bli_obj_width_after_trans( " << inputName << " );\n";
-        break;
-      default:
-        throw;
-    }
-    out.Indent();
-    if (m_comm != CORECOMM) {
-      *out << idx << " = 0;\n";
-      out.Indent();
-      *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", "
-      << CommToStr(GetSubComm(m_comm)) << ", "
-      << "bli_blksz_for_obj( &" << split->GetInputNameStr(0)
-      << ", " << BSSizeToSubSizeStr(m_bsSize) << "));\n";
-      out.Indent();
-      *out << "for ( ; " << idx << " < " << dimLen << "; "
-      << idx << " += " << bs <<" ) {\n";
-    }
-    else {
-#if DOSM
-      Comm outerComm = split->WithinParallelism();
-      Comm innerComm = ParallelismWithinCurrentPosses();
-      if ((innerComm != ALLPROCCOMM && innerComm != ALLL2COMM) &&
-	  (outerComm == CORECOMM || innerComm != GetSubComm(outerComm))) {
-        if (innerComm == CORECOMM) {
-          if (outerComm == CORECOMM)
-            *out << "if (th_global_thread_id() != 0)\n";
-          else
-            *out << "if (th_thread_id( " << CommToStr(GetSubComm(outerComm)) << " ) != 0)\n";
-        }
-        else if (outerComm != CORECOMM && innerComm != GetSubComm(GetSubComm(outerComm))) {
-          outerComm = split->WithinParallelism();
-          innerComm = ParallelismWithinCurrentPosses();
-          throw;
-        }
-        else {  
-          *out << "if (th_group_id( " << CommToStr(innerComm) << " ) != 0)\n";
-        }
-        out.Indent(1);
-        *out << dimLen << " = 0;\n";
-        out.Indent();
-      }
-#endif // DOSM
-      *out << "for ( " << idx << " = 0; " << idx << " < " << dimLen << "; "
-      << idx << " += " << bs <<" ) {\n";
-    }
-    out.Indent(1);
-    *out << bs;
-    switch(split->m_dir) {
-      case(PARTDOWN):
-      case(PARTDIAG):
-      case (PARTRIGHT):
-        *out << " = bli_determine_blocksize_f( " ;
-        break;
-      case (PARTLEFT):
-      case(PARTUPWARD):
-      case(PARTDIAGBACK):
-        *out << " = bli_determine_blocksize_b( " ;
-        break;
-      default:
-        throw;
-    }
-    
-    *out << idx << ", " << dimLen
-    << ", &" << inputName << ", " << BSSizeToStr(m_bsSize) << " );\n";
-    
-    loopLevel = out.LoopLevel(2);
-    idx = "idx" + loopLevel;
-    dimLen = "dimLen" + loopLevel;
-    bs = "bs" + loopLevel;
-    out.Indent(1);
-    *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
-  }
-#elif DOLLDLA
-  if (m_type != LLDLALOOP)
-    throw;
-  if (m_bsSize != USELLDLAMU &&
-      m_bsSize != USELLDLA2MU &&
-      m_bsSize != USELLDLA3MU)
-    throw;
-  SplitBase *split = GetControl();
-  switch(m_dim) 
-    {
-    case (DIMM):
-      {
-	out.Indent();
-	*out << "//Dim-m loop\n";;
-	break;
-      }
-    case (DIMN):
-      {
-	out.Indent();
-	*out << "//Dim-n loop\n";
-	break;
-      }
-    case (DIMK):
-      {
-	out.Indent();
-	*out << "//Dim-k loop\n";
-	break;
-    }
-    default:
-      break;
-    }
-
-  string loopLevel = split->GetLoopLevel();
-  string lcv = "lcv" + loopLevel;
-  out.Indent();
-  *out << "for( " << lcv << " = ";
-  
-  if (split->GetNodeClass() != SplitSingleIter::GetClass())
-    throw;
-
-  bool needMin = false;
-  if (split->m_dir == PARTDOWN) {
-    *out << split->InputDataType(0).m_numRowsVar;
-    if (!split->GetInputM(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
-      needMin = true;
-  }
-  else if (split->m_dir == PARTRIGHT) {
-    *out << split->InputDataType(0).m_numColsVar;
-    if (!split->GetInputN(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
-      needMin = true;
-  }
-  else
-    throw;
-  
-  *out << "; " << lcv << " > 0; " << lcv << " -= ";
-
-  
-  *out << BSSizeToVarName(m_bsSize) << " ) {\n";
-
-  out.Indent(1);
-  *out << "const unsigned int num";
-  if (split->m_dir == PARTDOWN) {
-    *out << "Rows";
-  }
-  else if (split->m_dir == PARTRIGHT) {
-    *out << "Cols";
-  }
-  else
-    throw;
-
-  if (needMin)
-    *out << loopLevel << " = min( " << lcv << ", ";
-  else
-    *out << loopLevel << " = ( ";
-  *out << BSSizeToVarName(m_bsSize) << " );\n";
-#endif
-  
-  PSet::PrintCurrPoss(out, graphNum);
-
-  iter = poss->m_inTuns.begin();
   for(; iter != poss->m_inTuns.end(); ++iter) {
     LoopTunnel *tun = (LoopTunnel*)(*iter);
     if (tun->IsSplit()) {
       SplitBase *split = (SplitBase*)tun;
-      split->PrintIncrementAtEndOfLoop(m_bsSize, out);
+      split->PrintIncrementAtEndOfLoop(GetBSSize(), out);
     }
   }
 
 #if DOBLIS||DOLLDLA
-  if (m_type == BLISLOOP || m_type == LLDLALOOP) {
+  if (GetType() == BLISLOOP || GetType() == LLDLALOOP) {
     out.Indent();
     *out << "}\n";
   }
@@ -976,7 +745,7 @@ template <class PSetType>
 unsigned int IntLoop<PSetType>::LoopLevel() const
 {
   unsigned int level = 0;
-  Poss *poss = m_ownerPoss;
+  Poss *poss = BasePSet::m_ownerPoss;
   while (poss) {
     if (!poss->m_pset)
       throw;
@@ -987,8 +756,8 @@ unsigned int IntLoop<PSetType>::LoopLevel() const
   return level;
 }
  
-
-bool Loop::WorthFusing(PSet *pset)
+template<class PSetType>
+bool IntLoop<PSetType>::WorthFusing(BasePSet *pset)
 {
   //If we fuse two inner-most BLIS loops, there
   // could be two packed BPANEL buffers input into the same
@@ -996,31 +765,31 @@ bool Loop::WorthFusing(PSet *pset)
   //Therefore, prohibit such fusion to allow for the same
   // buffer to be reused.
 #if DOBLIS
-  if (FindOtherPackBuffs((*(m_posses.begin())).second, PACKABLOCK, NULL)) {
+  if (FindOtherPackBuffs((*(GetPosses().begin())).second, PACKABLOCK, NULL)) {
     return false;
   }
 #endif
   
-  NodeVecIter iter = m_outTuns.begin();
-  for(; iter != m_outTuns.end(); ++iter) {
+  NodeVecIter iter = PSetType::m_outTuns.begin();
+  for(; iter != PSetType::m_outTuns.end(); ++iter) {
     Node *out = *iter;
     NodeConnVecIter iter2 = out->m_children.begin();
     for(; iter2 != out->m_children.end(); ++iter2) {
       Node *child = (*iter2)->m_n;
       if (child->IsPossTunnel(SETTUNIN)) {
-        if (((PossTunnel*)child)->m_pset == loop)
+        if (((PossTunnel*)child)->m_pset == pset)
           return true;
       }
     }
   }
-  iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
+  iter = PSetType::m_inTuns.begin();
+  for(; iter != PSetType::m_inTuns.end(); ++iter) {
     Node *in = *iter;
     NodeConnVecIter iter2 = in->m_inputs.begin();
     for(; iter2 != in->m_inputs.end(); ++iter2) {
       Node *input = (*iter2)->m_n;
       if (input->IsPossTunnel(SETTUNOUT)) {
-        if (((PossTunnel*)input)->m_pset == loop)
+        if (((PossTunnel*)input)->m_pset == pset)
           return true;
       }
       ConnNum num = (*iter2)->m_num;
@@ -1029,7 +798,7 @@ bool Loop::WorthFusing(PSet *pset)
         if ((*iter3)->m_num == num) {
           Node *otherChild = (*iter3)->m_n;
           if (otherChild->IsPossTunnel(SETTUNIN)) {
-            if (((PossTunnel*)otherChild)->m_pset == loop)
+            if (((PossTunnel*)otherChild)->m_pset == pset)
               return true;
           }
         }
@@ -1039,11 +808,12 @@ bool Loop::WorthFusing(PSet *pset)
   return false;
 }
 
-SplitBase* Loop::GetControl() const
+ template<class PSetType>
+ SplitBase* IntLoop<PSetType>::GetControl() const
 {
   SplitBase *control = NULL;
-  NodeVecConstIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
+  NodeVecConstIter iter = PSetType::m_inTuns.begin();
+  for(; iter != PSetType::m_inTuns.end(); ++iter) {
     LoopTunnel *node = (LoopTunnel*)(*iter);
     if (node->IsSplit()) {
       SplitBase *split = (SplitBase*)node;

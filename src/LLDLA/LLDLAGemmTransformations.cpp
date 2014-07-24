@@ -42,9 +42,11 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
     return false;
   const Gemm *gemm = (Gemm*)node;
 
-  const Loop *loop = gemm->FindClosestLoop();
-  if (loop && loop->GetDimName() == m_dim)
-    return false;
+  const BasePSet *loop = gemm->FindClosestLoop();
+  if (loop) {
+    if (dynamic_cast<const LoopInterface*>(loop)->GetDimName() == m_dim)
+      return false;
+  }
 
 
   switch (m_dim) {

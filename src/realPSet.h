@@ -25,8 +25,10 @@
 
 #include "base.h"
 #include "poss.h"
-#include "possTunnel.h"
+//#include "possTunnel.h"
 #include "basePSet.h"
+
+class PossTunnel;
 
 class RealPSet : public BasePSet
 {
@@ -47,6 +49,7 @@ class RealPSet : public BasePSet
   bool GlobalSimplification(const TransMap &globalSimplifiers, const TransMap &simplifiers);
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
   virtual BasePSet* GetNewInst() {return (BasePSet*)(new RealPSet);}
+  virtual const PossMMap& GetPosses() const {return m_posses;}
   virtual PossMMap& GetPosses() {return m_posses;}
   void PatchAfterDuplicate(NodeMap &map);
   void CombineAndRemoveTunnels();

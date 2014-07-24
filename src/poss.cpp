@@ -542,7 +542,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
   }
 }
 
-void Poss::AddPSet(PSet *pset)
+void Poss::AddPSet(BasePSet *pset)
 {
   NodeVecIter iter = pset->m_outTuns.begin();
   for(; iter != pset->m_outTuns.end(); ++iter) {

@@ -61,6 +61,7 @@ typedef unsigned int Flags;
 class DataTypeInfo;
 class RealLoop;
 class ShadowLoop;
+class BasePSet;
 
 class Node
 {

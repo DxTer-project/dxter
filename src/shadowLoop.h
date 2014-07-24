@@ -34,6 +34,10 @@ class ShadowLoop : public IntLoop<ShadowPSet>
 {
   virtual BasePSet* GetNewInst() {return (BasePSet*)(new ShadowLoop);}
   virtual int GetBS() const;
+  virtual BSSize GetBSSize() const;
+#if TWOD
+  virtual DimName GetDimName() const;
+#endif
   virtual void Prop();
   virtual LoopType GetType() const;
 #if DOBLIS

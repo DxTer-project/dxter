@@ -45,8 +45,8 @@ RealPSet::RealPSet(Poss *poss)
     throw;
   }
   if (IsLoop()) {
-    Loop *loop = (Loop*)this;
-    m_functionality += (char)(loop->m_bsSize);
+    //    Loop *loop = (Loop*)this;
+    m_functionality += (char)(m_bsSize);
   }
   //Make single tunnels with multiple inputs/outputs into individual tunnels
   //Poss mergin with multiple intput/output tunnels is very buggy
