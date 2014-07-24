@@ -31,7 +31,6 @@ class BasePSet
   NodeVec m_inTuns;
   NodeVec m_outTuns;
   Poss *m_ownerPoss;
-  bool m_currHasPrinted;
   bool m_hasProped;
   bool m_isTopLevel;
   BasePSet();
@@ -45,8 +44,7 @@ class BasePSet
   virtual bool CanMerge(BasePSet *pset) const;
   virtual bool IsTransparent() const {return true;}
   virtual GraphNum TotalCount() const = 0;
-  virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging);
-  virtual void ClearPrinted();
+  virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows);
   virtual bool IsLoop() const {return false;}
   void RemoveInTun(Node *tun);
   void RemoveOutTun(Node *tun);
@@ -63,8 +61,8 @@ class BasePSet
   virtual void PrePrint(IndStream &out, Poss *poss) {}
   virtual void PostPrint(IndStream &out, Poss *poss) {}
 
-  virtual void BuildDataTypeCache();
-  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache() = 0;
+  virtual void ClearDataTypeCache() = 0;
 
   virtual const PossMMap& GetPosses() const = 0;
   virtual PossMMap& GetPosses() = 0;

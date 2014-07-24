@@ -28,12 +28,14 @@
 GraphIter::GraphIter(Poss *poss)
 {
   m_poss = NULL;
+  m_hasPrinted = false;
   Init(poss);
 }
 
 GraphIter::GraphIter(const GraphIter &iter) 
 {
   m_poss = NULL;
+  m_hasPrinted = false;
   *this = iter;
 }
 
@@ -95,7 +97,6 @@ bool GraphIter::Increment()
       return false;
     else {
       BasePSet *set = m_poss->m_sets[i];
-      set->m_currHasPrinted = false;
       delete m_subIters[i];
       ++(m_setIters[i]);
       PossMMap &map = set->GetPosses();

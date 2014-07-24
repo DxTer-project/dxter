@@ -29,13 +29,6 @@
 #include "critSect.h"
 #include "blis.h"
 
-
-void ShadowLoop::BuildDataTypeCache()
-{
-  FillTunnelSizes();
-  PSet::BuildDataTypeCache();
-}
-
 int ShadowLoop::GetBS() const
 {
   return ((RealLoop*)m_realPSet)->GetBS();

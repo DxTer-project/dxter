@@ -580,9 +580,9 @@ bool RealPSet::TakeIter(const TransMap &transMap,
   return newOne;
 }
 
-void RealPSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging)
+void RealPSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows)
 {
-  BasePSet::Duplicate(orig, map, possMerging);
+  BasePSet::Duplicate(orig, map, possMerging,useShadows);
   if (!orig->IsReal())
     throw;
   const RealPSet *real = (RealPSet*)orig;
@@ -593,7 +593,7 @@ void RealPSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging)
   for( ; iter2 != real->m_posses.end(); ++iter2) {
     const Poss *oldPoss = (*iter2).second;
     Poss *newPoss = new Poss;
-    newPoss->Duplicate(oldPoss, map, possMerging);
+    newPoss->Duplicate(oldPoss, map, possMerging, useShadows);
     m_posses.insert(PossMMapPair(newPoss->GetHash(),newPoss));
     newPoss->m_pset = this;
   }
@@ -1063,7 +1063,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
       PSetVecIter setIter = currPoss->m_sets.begin();
       for(; setIter != currPoss->m_sets.end(); ++setIter) {
         BasePSet *newSet = (*setIter)->GetNewInst();
-        newSet->Duplicate(*setIter, map, true);
+        newSet->Duplicate(*setIter, map, true, true);
         newPoss->m_sets.push_back(newSet);
         newSet->m_ownerPoss = newPoss;
       }
@@ -1359,14 +1359,14 @@ void RealPSet::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 
-void PSet::BuildDataTypeCache()
+void RealPSet::BuildDataTypeCache()
 {
   PossMMapIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter)
     (*iter).second->BuildDataTypeCache();
 }
 
-void PSet::ClearDataTypeCache()
+void RealPSet::ClearDataTypeCache()
 {
   PossMMapIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter)

@@ -253,7 +253,7 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
     else {
       newSet = (*setIter)->GetNewInst();
     }
-    newSet->Duplicate(*setIter, map, possMerging);
+    newSet->Duplicate(*setIter, map, possMerging, useShadows);
     AddPSet(newSet, true);
   }
   setIter = m_sets.begin();

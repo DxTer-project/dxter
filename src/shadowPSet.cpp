@@ -109,18 +109,14 @@ GraphNum ShadowPSet::TotalCount() const
 }
 
 
-void PSet::BuildDataTypeCache()
+void ShadowPSet::BuildDataTypeCache()
 {
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter)
-    (*iter).second->BuildDataTypeCache();
+
 }
 
-void PSet::ClearDataTypeCache()
+void ShadowPSet::ClearDataTypeCache()
 {
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter)
-    (*iter).second->ClearDataTypeCache();
+
 }
 
 

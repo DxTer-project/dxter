@@ -89,7 +89,7 @@ void RedirectChildrenThatArentPossTuns(Node *input,
   }
 }
 
-Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
+Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 {
   NodeMap** map = new NodeMap*[numIters];
   Poss** newPosses = new Poss*[numIters];
@@ -97,7 +97,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
     Poss *newPoss = new Poss;
     newPosses[dupNum] = newPoss;
     map[dupNum] = new NodeMap;
-    newPoss->Duplicate(poss, *(map[dupNum]), true);
+    newPoss->Duplicate(poss, *(map[dupNum]), true, true);
     newPoss->PatchAfterDuplicate(*(map[dupNum]), true);
     bool trash;
     if (newPoss->RemoveLoops(&trash))
@@ -430,7 +430,7 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
 
     PSetVecIter iter2 = dup->m_sets.begin();
     for(; iter2 != dup->m_sets.end(); ++iter2) {
-      PSet *set = *iter2;
+      BasePSet *set = *iter2;
       set->m_ownerPoss = NULL;
       rootPoss->AddPSet(set, true);
     }
@@ -451,7 +451,6 @@ Poss* UnrollPoss(Poss *poss, Loop *loop, int numIters)
   return rootPoss;
 }
 
-
 void FullyUnrollLoop::Apply(Node *node) const
 {
   if (node->GetNodeClass() != SplitSingleIter::GetClass())
@@ -459,46 +458,46 @@ void FullyUnrollLoop::Apply(Node *node) const
   
   SplitSingleIter *split = (SplitSingleIter*)node;
   
-  Loop *loop = split->GetMyLoop();
+  LoopInterface *loop = split->GetMyLoop();
+  BasePSet *base = dynamic_cast<BasePSet*>(loop);
 
-  PossMMapIter possIter = loop->m_posses.begin();
+  PossMMap &posses = base->GetPosses();
+
+  PossMMapIter possIter = posses.begin();
   while (!possIter->second->ContainsNonLoopCode())
     ++possIter;
 
   Poss *rootPoss = UnrollPoss(possIter->second, loop, m_numIters);
   ++possIter;
 
-  if (rootPoss->m_inTuns.size() != loop->m_inTuns.size())
+  if (rootPoss->m_inTuns.size() != base->m_inTuns.size())
     throw;
 
   for (unsigned int i = 0; i < rootPoss->m_inTuns.size(); ++i) {
     Node *possInTun = rootPoss->m_inTuns[i];
-    Node *loopInTun = loop->m_inTuns[i];
-
-    //    cout << "adding input of " << loopInTun->Input(0) << " to " << possInTun << endl;
-
+    Node *loopInTun = base->m_inTuns[i];
     possInTun->AddInput(loopInTun->Input(0), loopInTun->InputConnNum(0));
   }
 
-  PSet *newSet = new PSet(rootPoss);
-  loop->m_ownerPoss->AddPSet(newSet);
+  RealPSet *newSet = new RealPSet(rootPoss);
+  base->m_ownerPoss->AddPSet(newSet);
 
-  if (newSet->m_outTuns.size() != loop->m_outTuns.size()) {
+  if (newSet->m_outTuns.size() != base->m_outTuns.size()) {
     cout << newSet->m_outTuns.size() << endl;
-    cout << loop->m_outTuns.size() << endl;
+    cout << base->m_outTuns.size() << endl;
     cout << rootPoss->m_outTuns.size() << endl;
     throw;
   }
 
-  for(unsigned int i = 0; i < loop->m_outTuns.size(); ++i) {
-    PossTunnel *loopTun = (PossTunnel*)(loop->m_outTuns[i]);
+  for(unsigned int i = 0; i < base->m_outTuns.size(); ++i) {
+    PossTunnel *loopTun = (PossTunnel*)(base->m_outTuns[i]);
     if (!loopTun->m_children.empty()) {
       PossTunnel *setTun = (PossTunnel*)(newSet->m_outTuns[i]);
       loopTun->RedirectChildren(setTun);
     }
   }
 
-  for(; possIter != loop->m_posses.end(); ++possIter) {
+  for(; possIter != posses.end(); ++possIter) {
     Poss *poss = possIter->second;
     if (poss->ContainsNonLoopCode()) {
       Poss *newPoss = UnrollPoss(poss, loop, m_numIters);
@@ -506,28 +505,27 @@ void FullyUnrollLoop::Apply(Node *node) const
     }
   }
 
-  NodeVecIter inIter = loop->m_inTuns.begin();
-  for( ; inIter != loop->m_inTuns.end(); ++inIter) {
+  NodeVecIter inIter = base->m_inTuns.begin();
+  for( ; inIter != base->m_inTuns.end(); ++inIter) {
     Node *in = *inIter;
     in->RemoveAllInputs2Way();
-    loop->m_ownerPoss->DeleteNode(in);
+    base->m_ownerPoss->DeleteNode(in);
   }
-  loop->m_inTuns.clear();
+  base->m_inTuns.clear();
 
 
 
-  for(unsigned int i = 0; i < loop->m_outTuns.size(); ++i) {
-    PossTunnel *loopTun = (PossTunnel*)(loop->m_outTuns[i]);
+  for(unsigned int i = 0; i < base->m_outTuns.size(); ++i) {
+    PossTunnel *loopTun = (PossTunnel*)(base->m_outTuns[i]);
     if (!loopTun->m_children.empty())
       throw;
-    loop->m_ownerPoss->DeleteNode(loopTun);
-    
+    base->m_ownerPoss->DeleteNode(loopTun);
   }
-  loop->m_outTuns.clear();
+  base->m_outTuns.clear();
 
-  loop->m_ownerPoss->RemoveFromSets(loop);
+  base->m_ownerPoss->RemoveFromSets(base);
 
-  delete loop;
+  delete base;
 
   if (newSet->m_posses.empty()) {
     throw;

@@ -32,7 +32,7 @@
 extern unsigned int M_phase;
 
 BasePSet::BasePSet()
-  : m_isTopLevel(false), m_ownerPoss(NULL), m_hasProped(false)
+  : m_ownerPoss(NULL), m_hasProped(false), m_isTopLevel(false)
 {
 }
 
@@ -62,7 +62,7 @@ void BasePSet::ClearBeforeProp()
 }
 
 
-void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging)
+void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows)
 {
   m_isTopLevel = orig->m_isTopLevel;
   NodeVecConstIter iter  = orig->m_inTuns.begin();
@@ -205,11 +205,6 @@ bool BasePSet::CanMerge(BasePSet *pset) const
   if (!nothingBetween)
     return false;
   return ShouldMerge(this, pset);
-}
-
-void BasePSet::ClearPrinted()
-{
-  m_currHasPrinted = false;
 }
 
 void BasePSet::RemoveInTun(Node *tun)
@@ -393,21 +388,6 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
     for(; iter2 != m_outTuns.end(); ++iter2)
       (*iter2)->PatchAfterDuplicate(*(info.nodeMap));
   }
-}
-
-
-void PSet::BuildDataTypeCache()
-{
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter)
-    (*iter).second->BuildDataTypeCache();
-}
-
-void PSet::ClearDataTypeCache()
-{
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter)
-    (*iter).second->ClearDataTypeCache();
 }
 
 bool BasePSet::CanPrint() const
