@@ -75,4 +75,36 @@ public:
  virtual bool IsDataDependencyOfInput() const { return true; }
 };
 
+class ZeroReg : public DLAOp<1, 1>
+{
+public:
+ virtual NodeType GetType() const { return "ZeroReg"; }
+ static Node* BlankInst() { return new ZeroReg; }
+ virtual Node* GetNewInst() { return BlankInst(); }
+ 
+ virtual void Prop();
+ virtual void PrintCode(IndStream &out);
+ virtual ClassType GetNodeClass() const { return GetClass(); }
+ static ClassType GetClass() { return "ZeroReg"; }
+
+ virtual bool IsReadOnly() const { return false; }
+ virtual bool IsDataDependencyOfInput() const { return true; } 
+};
+
+class AccumReg : public DLAOp<2, 1>
+{
+public:
+ virtual NodeType GetType() const { return "AccumReg"; }
+ static Node* BlankInst() { return new AccumReg; }
+ virtual Node* GetNewInst() { return BlankInst(); }
+ 
+ virtual void Prop();
+ virtual void PrintCode(IndStream &out);
+ virtual ClassType GetNodeClass() const { return GetClass(); }
+ static ClassType GetClass() { return "AccumReg"; }
+
+ virtual bool IsReadOnly() const { return false; }
+ virtual bool IsDataDependencyOfInput() const { return true; } 
+};
+
 #endif // DOLLDLA

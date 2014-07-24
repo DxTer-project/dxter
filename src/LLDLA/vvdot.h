@@ -68,6 +68,18 @@ class VVDotLoopRef : public SingleTrans
   virtual bool IsRef() const { return true; }
 };
 
+class VVDotToRegArith : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  VVDotToRegArith(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const { return true; }
+};
+
 class VVDotLowerLayer : public SingleTrans
 {
  public:

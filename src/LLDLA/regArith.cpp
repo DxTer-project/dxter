@@ -102,4 +102,33 @@ void Mul::PrintCode(IndStream &out)
   return;
 }
 
+void ZeroReg::Prop()
+{
+// TODO: create check that input is a vector register
+  return;
+}
+
+void ZeroReg::PrintCode(IndStream &out)
+{
+  out.Indent();
+  string aStr = GetInputNameStr(0);
+  *out << "VEC_SET_ZERO( " << aStr << " );\n";
+  return;
+}
+
+void AccumReg::Prop()
+{
+// TODO: Add full prop method
+  return;
+}
+
+void AccumReg::PrintCode(IndStream &out)
+{
+  out.Indent();
+  string vecStr = GetInputNameStr(0);
+  string accStr = GetInputNameStr(1);
+  *out << "VEC_ACCUM( " << vecStr << ", " << accStr << " );\n";
+  return;
+}
+
 #endif // DOLLDLA

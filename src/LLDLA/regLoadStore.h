@@ -34,7 +34,7 @@
 class LoadToRegs : public DLANode
 {
  public:
-  virtual NodeType GetType() const {return "LoadToRegs";}
+  virtual NodeType GetType() const { return "LoadToRegs"; }
   static Node* BlankInst() { return  new LoadToRegs; }
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }

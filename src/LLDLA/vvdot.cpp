@@ -21,6 +21,9 @@
 
 #include "LLDLA.h"
 #include "vvdot.h"
+#include "DLAReg.h"
+#include "regArith.h"
+#include "regLoadStore.h"
 
 #if DOLLDLA
 
@@ -32,15 +35,28 @@ VVDot::VVDot(Layer layer, Type type)
 
 void VVDot::PrintCode(IndStream &out)
 {
-  if (m_layer != LLDLAPRIMITIVELAYER) {
-    cout << "ERROR: Attempt to generate code from non-primitive dot product\n";
-    throw;
-  }
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;
-  
+
   out.Indent();
+
+  if (m_layer == ABSLAYER) {
+    *out << "simple_mmul(" <<
+      "1, " <<
+      "1, " <<
+      InputDataType(0).m_numColsVar << ", " <<
+      GetInputName(0).str() << ", " <<
+      InputDataType(0).m_rowStrideVar << ", " <<
+      InputDataType(0).m_colStrideVar << ", " <<
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << ", " <<
+      GetInputName(2).str() << ", " <<
+      InputDataType(2).m_rowStrideVar << ", " <<
+      InputDataType(2).m_colStrideVar << ");\n";
+  }
+
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
     PrintGeneralStride(out);
   } else if (rowStride == UNITSTRIDE && colStride == NONUNITSTRIDE) {
@@ -51,7 +67,6 @@ void VVDot::PrintCode(IndStream &out)
     *out << "ERROR: BAD STRIDE\n";
   }
 }
-
 
 void VVDot::PrintRowStride(IndStream &out)
 {
@@ -247,6 +262,97 @@ void VVDotLowerLayer::Apply(Node *node) const
 string VVDotLowerLayer::GetType() const
 {
   return "VVDot lower layer " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool VVDotToRegArith::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == VVDot::GetClass()) {
+    const VVDot* vvdot = (VVDot*) node;
+    if (vvdot->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if (!(*(vvdot->GetInputN(0)) <= LLDLA_MU) &&
+	!(*(vvdot->GetInputM(1)) <= LLDLA_MU)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  return false;
+}
+
+void VVDotToRegArith::Apply(Node *node) const
+{
+  VVDot* vvdot = (VVDot*) node;
+  // Split A on N dimension
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  splitA->AddInput(vvdot->Input(0), vvdot->InputConnNum(0));
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+  
+  // Split B on M dimension
+  SplitSingleIter* splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  splitB->AddInput(vvdot->Input(1), vvdot->InputConnNum(1));
+  splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
+  
+  // Create new node to accumulate data in the loop
+  InputNode* Accum = new InputNode("Dot prod accum", 2, 1, "Accum",
+				   1, 2,
+				   "AccNumRows", "AccNumCols",
+				   "AccRowStride", "AccColStride");
+
+  // Create node to zero the contents of the accumulate register
+  ZeroReg* zeroReg = new ZeroReg();
+  zeroReg->AddInput(Accum, 0);
+
+  // Create tunnel for accumulator
+  LoopTunnel* accTun = new LoopTunnel(POSSTUNIN);
+  accTun->AddInput(zeroReg, 0);
+  accTun->SetAllStats(PARTUP);
+
+  // Create loads for A and B
+  LoadToRegs* loadA = new LoadToRegs();
+  loadA->AddInput(splitA, 1);
+
+  LoadToRegs* loadB = new LoadToRegs();
+  loadB->AddInput(splitB, 1);
+
+  // Create FMA operation that updates accum
+  FMAdd* fmadd = new FMAdd();
+  fmadd->AddInput(loadA, 0);
+  fmadd->AddInput(loadB, 0);
+  fmadd->AddInput(accTun, 0);
+
+  // Create output tunnel for accumulate result
+  LoopTunnel* accOut = new LoopTunnel(POSSTUNOUT);
+  accOut->AddInput(fmadd, 0);
+  accOut->AddInput(accTun, 1);
+  accOut->CopyTunnelInfo(accTun);
+
+  // Create combine outputs for A and B
+  CombineSingleIter* comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter* comB = splitB->CreateMatchingCombine(0);
+
+  // Create the poss
+  Poss* loopPoss = new Poss(3, comA, comB, accOut);
+  Loop* loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+
+  // Accumulate result of operation in C
+  AccumReg* accumInC = new AccumReg();
+  accumInC->AddInput(accOut, 0);
+  accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
+
+  node->m_poss->AddLoop(loop);
+  node->RedirectChildren(accumInC, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+}
+
+string VVDotToRegArith::GetType() const
+{
+  return "VVDot register arith " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
 }
 
