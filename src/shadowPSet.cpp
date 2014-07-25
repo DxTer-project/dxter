@@ -119,12 +119,18 @@ void ShadowPSet::ClearDataTypeCache()
 
 }
 
+void ShadowPSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows)
+{
+  BasePSet::Duplicate(orig, map, possMerging,useShadows);
+}
+
 
 #if DOBLIS
 bool PSet::RemoveParallelization(Comm comm)
 {
   throw;
 }
+
 
 Comm PSet::ParallelismWithinCurrentPosses() const
 {

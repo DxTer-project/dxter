@@ -1064,7 +1064,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     {
       PSetVecIter setIter = currPoss->m_sets.begin();
       for(; setIter != currPoss->m_sets.end(); ++setIter) {
-        BasePSet *newSet = (*setIter)->GetNewInst();
+        BasePSet *newSet = (*setIter)->GetNewShadow();
         newSet->Duplicate(*setIter, map, true, true);
         newPoss->m_sets.push_back(newSet);
         newSet->m_ownerPoss = newPoss;
