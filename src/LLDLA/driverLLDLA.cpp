@@ -32,6 +32,7 @@
 #include <omp.h>
 #endif
 #include "LLDLAGemm.h"
+#include "madd.h"
 #include "vvdot.h"
 #include <climits>
 
@@ -60,6 +61,8 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+PSet* MAddExample();
+PSet* DotExample();
 PSet* GemmExample();
 PSet* DoubleGemmExample();
 
@@ -145,7 +148,6 @@ void AddTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLA3MU), LLDLALOOPPHASE);
 #endif
 
-
   //Introduces loops in the m and n dimension for SMMul
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
@@ -169,10 +171,19 @@ void AddTrans()
 #endif //DO3MUTRANSFORMATIONS
 #endif
   
-  // Vector dot product transform
-  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, USELLDLAMU), LLDLALOOPPHASE);
+  // Vector dot product transforms
+  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, BSSizeToSize(USELLDLAMU)), LLDLALOOPPHASE);
   
   Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER, USELLDLAMU), LLDLALOOPPHASE);
+
+  // Transformers for Matrix Matrix add
+  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, BSSizeToSize(USELLDLAMU)), LLDLALOOPPHASE);
+
+  // Introduce loop in M dimension
+  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
+
+  // Introduce loop in N dimension
+  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
 }
 
 void AddSimplifiers()
@@ -185,6 +196,12 @@ void AddSimplifiers()
 
   //Changes Gemm with transposition to non-transposed version use Transpose nodes
   Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(LLDLAMIDLAYER), SIMP);
+
+  // Lowers the layer tag of a VVDot node
+  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, BSSizeToSize(USELLDLAMU)), SIMP);
+
+  // Lowers the layer tag of a MAdd node
+  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, BSSizeToSize(USELLDLAMU)), SIMP);
 }
 
 void Usage()
@@ -193,6 +210,8 @@ void Usage()
   cout <<" arg1 == 0  -> Load from file arg1\n";
   cout <<"         1  -> Gemm Example N/T N/T\n";
   cout <<"         2  -> Double Gemm Example N/T N/T\n";
+  cout <<"         3  -> Dot prod example\n";
+  cout <<"         4  -> Matrix add example\n";
 }
 
 int main(int argc, const char* argv[])
@@ -208,6 +227,7 @@ int main(int argc, const char* argv[])
   //  GraphNum whichGraph = 0;
   int algNum;
   string fileName;
+  string opName;
 
   if(argc < 2) {
     Usage();
@@ -221,18 +241,36 @@ int main(int argc, const char* argv[])
 	Usage();
 	return 0;
       }
+      opName = "dxt_gemm";
       algFunc = GemmExample;
       transA = CharToTrans(*argv[2]);
       transB = CharToTrans(*argv[3]);
       break;
     case(2):
-      if (argc != 4) {
+      if (argc != 2) {
 	Usage();
 	return 0;
       }
+      opName = "dxt_double_gemm";
       algFunc = DoubleGemmExample;
       transA = CharToTrans(*argv[2]);
       transB = CharToTrans(*argv[3]);
+      break;
+    case(3):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_dot";
+      algFunc = DotExample;
+      break;
+    case(4):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_madd";
+      algFunc = MAddExample;
       break;
     default:
       Usage();
@@ -262,16 +300,19 @@ int main(int argc, const char* argv[])
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
   else {
+    cout << "Creating startSet\n";
     PSet *startSet = algFunc();
+    cout << "Created startSet\n";
     uni.Init(startSet);
+    cout << "Initialized universe\n";
     uni.Prop();
+    cout << "Printing evaluation code\n";
     flopCost = startSet->EvalAndSetBest();
     // Print abstract implementation to string for use in testing
     // EXTREMELY HACKY, I could not figure out how to redirect an
     // ostream to a string
     std::stringstream ss;
     IndStream optOut(&ss, LLDLASTREAM);
-    cout << "TEST\n";
     startSet->GetCurrPoss()->PrintRoot(optOut, 0, false);
     absImpStr = ss.str();
     cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
@@ -337,7 +378,7 @@ int main(int argc, const char* argv[])
 
   int chunkSize = 3000;
   int numIterations = 1;
-  RuntimeTest rtest("dxt_gemm", uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
+  RuntimeTest rtest(opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
@@ -365,6 +406,81 @@ int main(int argc, const char* argv[])
       uni.Print(cout, CODE, whichGraph); */
 
   return 0;
+}
+
+PSet* MAddExample()
+{
+  InputNode* Ain = new InputNode("A input", medSize, medSize, "A", 
+				 medSize, 1,
+				 "ANumRows","ANumCols",
+				 "ARowStride","AColStride");
+  InputNode* Bin = new InputNode("B input", medSize, medSize, "B", 
+				 medSize, 1,
+				 "BNumRows","BNumCols",
+				 "BRowStride","BColStride");
+  PossTunnel* tunA = new PossTunnel(POSSTUNIN);
+  tunA->AddInput(Ain, 0);
+
+  PossTunnel* tunB = new PossTunnel(POSSTUNIN);
+  tunB->AddInput(Bin, 0);
+
+  MAdd* madd = new MAdd(ABSLAYER, REAL);
+  madd->AddInputs(4,
+		 tunA, 0,
+		 tunB, 0);
+
+  Poss *innerPoss = new Poss(madd, true);
+  PSet *innerSet = new PSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
+}
+
+PSet* DotExample()
+{
+  InputNode* Ain = new InputNode("A input", 1, medSize, "A", 
+				 medSize, 1,
+				 "ANumRows","ANumCols",
+				 "ARowStride","AColStride");
+  InputNode* Bin = new InputNode("B input", medSize, 1, "B", 
+				 medSize, 1,
+				 "BNumRows","BNumCols",
+				 "BRowStride","BColStride");
+  InputNode* Cin = new InputNode("C input", 1, 1, "C", 
+				 medSize, 1,
+				 "CNumRows","CNumCols",
+				 "CRowStride","CColStride");
+
+  PossTunnel* tunA = new PossTunnel(POSSTUNIN);
+  tunA->AddInput(Ain,0);
+
+  PossTunnel* tunB = new PossTunnel(POSSTUNIN);
+  tunB->AddInput(Bin,0);
+
+  PossTunnel* tunC = new PossTunnel(POSSTUNIN);
+  tunC->AddInput(Cin,0);
+
+  VVDot* dot = new VVDot(ABSLAYER, REAL);
+  dot->AddInputs(6,
+		 tunA, 0,
+		 tunB, 0,
+		 tunC, 0);
+
+  Poss *innerPoss = new Poss(dot, true);
+  PSet *innerSet = new PSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
 }
 
 PSet* GemmExample()
@@ -459,5 +575,3 @@ PSet* DoubleGemmExample()
 
 
 #endif //DOLLDLA
-
-//  LocalWords:  DoubleGemmExample

@@ -55,6 +55,7 @@ void VVDot::PrintCode(IndStream &out)
       GetInputName(2).str() << ", " <<
       InputDataType(2).m_rowStrideVar << ", " <<
       InputDataType(2).m_colStrideVar << ");\n";
+    return;
   }
 
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
@@ -72,8 +73,11 @@ void VVDot::PrintRowStride(IndStream &out)
 {
   *out << "row_stride_mmul_1x2_2x1( " <<
     GetInputName(0).str() << ", " <<
+    InputDataType(0).m_rowStrideVar << ", " <<
     GetInputName(1).str() << ", " <<
-    GetInputName(2).str() << ");\n";
+    InputDataType(1).m_rowStrideVar << ", " <<
+    GetInputName(2).str() << ", " <<
+    InputDataType(2).m_rowStrideVar << ");\n";
 }
 
 void VVDot::PrintColStride(IndStream &out)
@@ -96,7 +100,6 @@ void VVDot::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<3, 1>::Prop();
-
     if (*GetInputM(2) != 1 || *GetInputN(2) != 1) {
       cout << "ERROR: Result of dot product must be a scalar\n";
     }
@@ -106,13 +109,13 @@ void VVDot::Prop()
     }
 
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if (*GetInputN(0) != LLDLA_MU) {
-	cout << "ERROR: First argument to primitive dot prod must be 1x2\n";
-	throw;
-      } else if (*GetInputN(1) != 1) {
-	cout << "ERROR: Second argument to primitive dot prod must be 2x1\n";
-	throw;
-      }
+      //      if (*GetInputN(0) != LLDLA_MU) {
+      //cout << "ERROR: First argument to primitive dot prod must be 1x2\n";
+      //throw;
+      //      } else if (*GetInputN(1) != 1) {
+      //cout << "ERROR: Second argument to primitive dot prod must be 2x1\n";
+      //throw;
+      //      }
     } else {
       if (*GetInputM(0) != 1) {
 	cout << "ERROR: First argument to dot prod must be a row vector\n";
@@ -124,6 +127,7 @@ void VVDot::Prop()
     }
     m_cost = ZERO;
   }
+  return;
 }
 
 Node* VVDot::BlankInst()
@@ -186,19 +190,13 @@ void VVDotLoopRef::Apply(Node *node) const
   // Split for row vector
   SplitSingleIter *splitRow = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitRow->AddInput(dot->Input(0), dot->InputConnNum(0));
-  
-  splitRow->SetUpStats(FULLUP, FULLUP,
-		       FULLUP, FULLUP);
-
+  splitRow->SetAllStats(FULLUP);
   splitRow->SetIndepIters();
 
   // Split for col vector
   SplitSingleIter *splitCol = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitCol->AddInput(dot->Input(1), dot->InputConnNum(1));
-  
-  splitCol->SetUpStats(FULLUP, FULLUP,
-		       FULLUP, FULLUP);
-
+  splitCol->SetAllStats(FULLUP);
   splitCol->SetIndepIters();
 
   LoopTunnel *scalarTun = new LoopTunnel(POSSTUNIN);
@@ -231,6 +229,7 @@ void VVDotLoopRef::Apply(Node *node) const
   node->m_poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(2), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
+  return;
 }
 
 bool VVDotLowerLayer::CanApply(const Node *node) const
@@ -240,8 +239,8 @@ bool VVDotLowerLayer::CanApply(const Node *node) const
     if (vvdot->GetLayer() != m_fromLayer) {
       return false;
     }
-    if (*(vvdot->GetInputM(0)) <= m_bs &&
-	*(vvdot->GetInputN(0)) <= m_bs &&
+
+    if (*(vvdot->GetInputN(0)) <= m_bs &&
 	*(vvdot->GetInputM(1)) <= m_bs) {
       return true;
     } else {
@@ -335,17 +334,17 @@ void VVDotToRegArith::Apply(Node *node) const
   CombineSingleIter* comA = splitA->CreateMatchingCombine(0);
   CombineSingleIter* comB = splitB->CreateMatchingCombine(0);
 
+  /*  // Accumulate result of operation in C
+  AccumReg* accumInC = new AccumReg();
+  accumInC->AddInput(accOut, 0);
+  accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));*/
+
   // Create the poss
   Poss* loopPoss = new Poss(3, comA, comB, accOut);
   Loop* loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
 
-  // Accumulate result of operation in C
-  AccumReg* accumInC = new AccumReg();
-  accumInC->AddInput(accOut, 0);
-  accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
-
   node->m_poss->AddLoop(loop);
-  node->RedirectChildren(accumInC, 0);
+  node->RedirectChildren(loop->OutTun(2), 0); // WRONG, but I did this to check what was wrong in poss error
   node->m_poss->DeleteChildAndCleanUp(node);
   return;
 }

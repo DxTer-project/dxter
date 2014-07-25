@@ -24,7 +24,7 @@
 
 #if DOLLDLA
 
-MAdd::MAdd(Type type, Layer layer)
+MAdd::MAdd(Layer layer, Type type)
 {
   m_type = type;
   m_layer = layer;
@@ -110,7 +110,7 @@ void MAdd::Prop()
 
 Node* MAdd::BlankInst()
 {
-  return new MAdd(REAL, LLDLAPRIMITIVELAYER);
+  return new MAdd(LLDLAPRIMITIVELAYER, REAL);
 }
 
 NodeType MAdd::GetType() const
@@ -135,6 +135,14 @@ Phase MAdd::MaxPhase() const
 
 string MAddLoopRef::GetType() const
 {
+  switch (m_dim) {
+  case (DIMM):
+    return "MAddMDimension";
+  case(DIMN):
+    return "MAddNDimension";
+  default:
+    return "ERROR: Bad dimension in MAddLoopRef transform";
+  }
   return "MAdd";
 }
 
@@ -175,7 +183,7 @@ void MAddLoopRef::Apply(Node *node) const
   split0->SetIndepIters();
   split1->SetIndepIters();
 
-  MAdd *newMAdd = new MAdd(madd->m_type, m_toLayer);
+  MAdd *newMAdd = new MAdd(m_toLayer, madd->m_type);
   newMAdd->AddInput(split0, 1);
   newMAdd->AddInput(split1, 1);
 
@@ -183,13 +191,13 @@ void MAddLoopRef::Apply(Node *node) const
   CombineSingleIter *com1 = split1->CreateMatchingCombine(1, 1, newMAdd, 0);
 
   Poss *loopPoss = new Poss(2, com0, com1);
-
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, m_bs);
   loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
 
   node->m_poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
+  return;
 }
 
 string MAddToVAddLoopRef::GetType() const
@@ -252,6 +260,7 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   node->m_poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
+  return;
 }
 
 bool MAddLowerLayer::CanApply(const Node *node) const
@@ -262,7 +271,9 @@ bool MAddLowerLayer::CanApply(const Node *node) const
       return false;
     }
     if (*(madd->GetInputM(1)) <= m_bs &&
-	*(madd->GetInputN(1)) <= m_bs) {
+	*(madd->GetInputN(1)) <= m_bs &&
+	*(madd->GetInputM(0)) <= m_bs &&
+	*(madd->GetInputN(0)) <= m_bs) {
       return true;
     } else {
       return false;
