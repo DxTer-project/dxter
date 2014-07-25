@@ -51,8 +51,9 @@ void RealPSet::Init(Poss *poss)
   }
   if (IsLoop()) {
     //    Loop *loop = (Loop*)this;
-    m_functionality += (char)(((LoopInterface*)this)->GetBSSize());
+    m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize());
   }
+
   //Make single tunnels with multiple inputs/outputs into individual tunnels
   //Poss mergin with multiple intput/output tunnels is very buggy
   poss->ExpandTunnels();
@@ -150,7 +151,7 @@ void RealPSet::AddPoss(Poss *poss)
       m_functionality = poss->GetFunctionalityString();
       if (IsLoop()) {
 	//	Loop *loop = (Loop*)this;
-	m_functionality += (char)(((LoopInterface*)this)->GetBSSize());
+	m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize());
       }
       if (m_functionality.empty())
 	throw;
@@ -198,7 +199,8 @@ void RealPSet::AddPoss(Poss *poss)
 bool RealPSet::operator==(const BasePSet &rhs) const
 {
   if (rhs.IsShadow()) {
-    return (*this)==(*(((ShadowPSet&)rhs).m_realPSet));
+    return *this == *(rhs.GetReal());
+    //    return (*this)==(*(((ShadowPSet&)rhs).m_realPSet));
   }
   if (!rhs.IsReal())
     throw;
@@ -214,8 +216,8 @@ bool RealPSet::operator==(const BasePSet &rhs) const
       if (!realRhs.IsLoop())
         return false;
       else {
-	const LoopInterface *loop1 = (LoopInterface*)this;
-	const LoopInterface *loop2 = (LoopInterface*)(&rhs);
+	const LoopInterface *loop1 = dynamic_cast<const LoopInterface*>(this);
+	const LoopInterface *loop2 = dynamic_cast<const LoopInterface*>(&rhs);
 #if TWOD
 	if (loop1->GetDimName() != loop2->GetDimName())
 	  return false;

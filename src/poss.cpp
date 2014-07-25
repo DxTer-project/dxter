@@ -117,6 +117,7 @@ Poss::Poss(Node *node, bool goUp)
 
 Poss::Poss(int numArgs, ...)
 {
+  m_pset = NULL;
   NodeVec nodes;
   va_list listPointer;
   va_start (listPointer, numArgs);
@@ -704,6 +705,7 @@ void Poss::ExpandTunnels()
   InvalidateHash();
   if (m_pset) {
     cout << "m_pset is set\n";
+    cout << m_pset << endl;
     throw;
   }
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
@@ -781,7 +783,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
           for (unsigned int right = left + 1; right < m_sets.size(); ++right) {
             BasePSet *rightSet = m_sets[right];
             if (rightSet->IsLoop()) {
-	      //              if (!((LoopInterface*)(leftSet))->WorthFusing((LoopInterface*)(rightSet))) {
+	      //              if (!(dynamic_cast<const LoopInterface*>(leftSet))->WorthFusing(dynamic_cast<const LoopInterface*>(rightSet))) {
               if (!(dynamic_cast<LoopInterface*>(leftSet))->WorthFusing(rightSet)) {
                 continue;
               }
@@ -2269,8 +2271,8 @@ bool Poss::HasFused(const BasePSet *left, const BasePSet *right) const
   //Only mantain list for loops
   if (!left->IsLoop() || !right->IsLoop())
     throw;
-  const IntSet &label1 = ((LoopInterface*)left)->GetLabel();
-  const IntSet &label2 = ((LoopInterface*)right)->GetLabel();
+  const IntSet &label1 = (dynamic_cast<const LoopInterface*>(left))->GetLabel();
+  const IntSet &label2 = (dynamic_cast<const LoopInterface*>(right))->GetLabel();
   IntSet fusedSet(label1.begin(), label1.end());
   fusedSet.insert(label2.begin(), label2.end());
   string str = GetFusedString(&fusedSet);
@@ -2281,8 +2283,8 @@ void Poss::SetFused(const BasePSet *left, const BasePSet *right)
 {
   if (!left->IsLoop() || !right->IsLoop())
     throw;
-  const IntSet &label1 = ((LoopInterface*)left)->GetLabel();
-  const IntSet &label2 = ((LoopInterface*)right)->GetLabel();
+  const IntSet &label1 = (dynamic_cast<const LoopInterface*>(left))->GetLabel();
+  const IntSet &label2 = (dynamic_cast<const LoopInterface*>(right))->GetLabel();
   IntSet fusedSet(label1.begin(), label1.end());
   fusedSet.insert(label2.begin(), label2.end());
   string str = GetFusedString(&fusedSet);

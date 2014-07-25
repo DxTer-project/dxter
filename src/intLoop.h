@@ -106,6 +106,8 @@ template <class PSetType>
 class IntLoop : public PSetType, public LoopInterface
 {
  public:
+  IntLoop() {}
+ IntLoop(Poss *poss) : PSetType(poss) {}
   virtual bool CanMerge(BasePSet *pset) const;
   virtual bool WorthFusing(BasePSet *pset);
   SplitBase* GetControl() const;

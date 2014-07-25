@@ -33,6 +33,7 @@ class ShadowPSet : public BasePSet
  public:
   RealPSet *m_realPSet;
   ShadowPSet();
+  ShadowPSet(Poss *poss) {throw;}
   virtual ~ShadowPSet();
   virtual GraphNum NumPosses() const {return m_realPSet->NumPosses();}
   bool operator==(const BasePSet &rhs) const;
@@ -58,6 +59,7 @@ class ShadowPSet : public BasePSet
 
   virtual const string& GetFunctionalityString() const;
   virtual bool IsShadow() const {return true;}
+  virtual const RealPSet* GetReal() const {return m_realPSet;}
   virtual RealPSet* GetReal() {return m_realPSet;}
   virtual BasePSet* GetNewShadow();
 };

@@ -846,7 +846,7 @@ RealLoop* GemmVar1Loop(Node *Ain, ConnNum Anum,
 #elif DOBLIS
   loop = new RealLoop(BLISLOOP, loopPoss, bs);
 #elif DOLLDLA
-    loop = new RealLoop(LLDLALOOP, loopPoss, bs);
+  loop = new RealLoop(LLDLALOOP, loopPoss, bs);
 #endif
 
   loop->SetDimName(DIMM);

@@ -80,6 +80,7 @@ class RealPSet : public BasePSet
 
   virtual const string& GetFunctionalityString() const;
   virtual bool IsReal() const {return true;}
+  virtual const RealPSet* GetReal() const {return this;}
   virtual RealPSet* GetReal() {return this;}
 };
 

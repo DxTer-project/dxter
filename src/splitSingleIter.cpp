@@ -265,7 +265,7 @@ void SplitSingleIter::Prop()
     }
 
     m_cost = ZERO;
-    if (((LoopInterface*)GetMyLoop())->GetBS() == ZERO)
+    if ((dynamic_cast<const LoopInterface*>(GetMyLoop()))->GetBS() == ZERO)
       throw;
     if (m_tunType == POSSTUNIN) {
       if (Input(0)->GetNodeClass() != SplitSingleIter::GetClass())

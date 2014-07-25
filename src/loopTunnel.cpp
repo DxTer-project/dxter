@@ -437,7 +437,7 @@ LoopInterface* LoopTunnel::GetMyLoop() const
     cout << "Loop Tunnel doesn't have Loop as PSet\n";
     throw;
   }
-  return (LoopInterface*)set;
+  return dynamic_cast<LoopInterface*>(set);
 }
 
 

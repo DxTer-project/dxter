@@ -79,6 +79,7 @@ class BasePSet
   virtual const string& GetFunctionalityString() const = 0;
   virtual bool IsReal() const {return false;}
   virtual bool IsShadow() const {return false;}
+  virtual const RealPSet* GetReal() const = 0;
   virtual RealPSet* GetReal() = 0;
 };
 
