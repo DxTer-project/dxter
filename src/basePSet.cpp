@@ -74,6 +74,12 @@ void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, b
       throw;
     m_inTuns.push_back(tun);
     tun->m_pset = this;
+    if (useShadows) {
+      while (!tun->m_children.empty()) {
+	delete tun->m_children[0];
+	tun->m_children.erase(tun->m_children.begin());
+      }
+    }
   }
   iter  = orig->m_outTuns.begin();
   for (; iter != orig->m_outTuns.end(); ++iter) {
@@ -82,6 +88,13 @@ void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, b
       throw;
     m_outTuns.push_back(tun);
     tun->m_pset = this;
+    if (useShadows) {
+      while (!tun->m_inputs.empty()) {
+	delete tun->m_inputs[0];
+	tun->m_inputs.erase(tun->m_inputs.begin());
+      }
+    }
+
   }
 }
 

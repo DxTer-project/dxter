@@ -80,6 +80,7 @@ class Poss
   virtual void AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner);
   virtual void AddPSet(BasePSet *pset);
   bool ContainsNonLoopCode() const;
+  bool ContainsLoops() const;
   bool RemoveLoops(bool *doneSomething);
   bool Simplify(const TransMap &simplifiers, bool recursive = false);
   void PrintTransVec();

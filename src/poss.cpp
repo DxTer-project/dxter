@@ -886,73 +886,97 @@ void Poss::MergePart2(RealPSet *newSet,
 		      BasePSet *leftSet, BasePSet *rightSet,
 		      unsigned int left, NodeMap &map)
 {
+  const bool leftIsReal = leftSet->IsReal();
+  const bool rightIsReal = rightSet->IsReal();
+
   newSet->m_ownerPoss = this;
   m_sets.insert(m_sets.begin()+left,newSet);
 
   NodeVecConstIter iter;
   
+  NodeVec &realLeftOut = (leftIsReal ? leftSet->m_outTuns : leftSet->GetReal()->m_outTuns);
+  
   //Create output set tunnels on the new set to match
   // those on the old sets
-  iter  = leftSet->m_outTuns.begin();
-  for (; iter != leftSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)((*iter)->GetNewInst());
-    tun->Duplicate(*iter,true,true);
+  NodeVecConstIter leftIter = leftSet->m_outTuns.begin();
+  NodeVecConstIter realIter = realLeftOut.begin();
+  for (; leftIter != leftSet->m_outTuns.end(); ++leftIter,++realIter) {
+    PossTunnel *tun = (PossTunnel*)((*realIter)->GetNewInst());
+    tun->Duplicate(*realIter,true,true);
     newSet->m_outTuns.push_back(tun);
     tun->m_pset = newSet;
-    map[*iter] = tun;
-    RemoveFromGraphNodes(*iter);
+    map[*leftIter] = tun;
+    if (!leftIsReal)
+      map[*realIter] = tun;
+    RemoveFromGraphNodes(*leftIter);
   }
 
-  iter  = rightSet->m_outTuns.begin();
-  for (; iter != rightSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)((*iter)->GetNewInst());
-    tun->Duplicate(*iter,true,true);
+
+  NodeVec &realRightOut = (rightIsReal ? rightSet->m_outTuns : rightSet->GetReal()->m_outTuns);
+
+  NodeVecConstIter rightIter  = rightSet->m_outTuns.begin();
+  realIter = realRightOut.begin();
+  for (; rightIter != rightSet->m_outTuns.end(); ++rightIter,++realIter) {
+    PossTunnel *tun = (PossTunnel*)((*realIter)->GetNewInst());
+    tun->Duplicate(*realIter,true,true);
     newSet->m_outTuns.push_back(tun);
     tun->m_pset = newSet;
-    map[*iter] = tun;
-    RemoveFromGraphNodes(*iter);
+    map[*rightIter] = tun;
+    if (!rightIsReal)
+      map[*realIter] = tun;
+    RemoveFromGraphNodes(*rightIter);
   }
+
+  NodeVec &realLeftIn = (leftIsReal ? leftSet->m_inTuns : leftSet->GetReal()->m_inTuns);
 
   //Create input set tunnels from left set
-  iter = leftSet->m_inTuns.begin();
-  for (; iter != leftSet->m_inTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)((*iter)->GetNewInst());
-    tun->Duplicate(*iter,true,true);
+  leftIter = leftSet->m_inTuns.begin();
+  realIter = realLeftIn.begin();
+  for (; leftIter != leftSet->m_inTuns.end(); ++leftIter,++realIter) {
+    PossTunnel *tun = (PossTunnel*)((*realIter)->GetNewInst());
+    tun->Duplicate(*realIter,true,true);
     newSet->m_inTuns.push_back(tun);
     tun->m_pset =  newSet;
-    map[*iter] = tun;
-    for (unsigned int i = 0; i < (*iter)->m_inputs.size(); ++i) {
-      Node *input = (*iter)->Input(i);
+    map[*leftIter] = tun;
+    if (!leftIsReal)
+      map[*realIter] = tun;
+    for (unsigned int i = 0; i < (*leftIter)->m_inputs.size(); ++i) {
+      Node *input = (*leftIter)->Input(i);
       if (map[input]) {
-        NodeConn *conn = new NodeConn(map[input],(*iter)->InputConnNum(i));
+        NodeConn *conn = new NodeConn(map[input],(*leftIter)->InputConnNum(i));
         tun->m_inputs.push_back(conn);
       }
       else {
-        tun->AddInput((*iter)->Input(i),(*iter)->InputConnNum(i));
+        tun->AddInput((*leftIter)->Input(i),(*leftIter)->InputConnNum(i));
       }
     }
-    RemoveFromGraphNodes(*iter);
+    RemoveFromGraphNodes(*leftIter);
   }
 
+  NodeVec &realRightIn = (rightIsReal ? rightSet->m_inTuns : rightSet->GetReal()->m_inTuns);
+
   //Create input set tunnels from right set
-  iter  = rightSet->m_inTuns.begin();
+  rightIter  = rightSet->m_inTuns.begin();
+  realIter = realRightIn.begin();
   for (; iter != rightSet->m_inTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)((*iter)->GetNewInst());
-    tun->Duplicate(*iter,true,true);
+    PossTunnel *tun = (PossTunnel*)((*realIter)->GetNewInst());
+    tun->Duplicate(*realIter,true,true);
     newSet->m_inTuns.push_back(tun);
     tun->m_pset = newSet;
-    map[*iter] = tun;
-    for (unsigned int i = 0; i < (*iter)->m_inputs.size(); ++i) {
-      Node *input = (*iter)->Input(i);
+    map[*rightIter] = tun;
+    if (!rightIsReal)
+      map[*realIter] = tun;
+    for (unsigned int i = 0; i < (*rightIter)->m_inputs.size(); ++i) {
+      Node *input = (*rightIter)->Input(i);
       if (map[input]) {
-        NodeConn *conn = new NodeConn(map[input],(*iter)->InputConnNum(i));
+        NodeConn *conn = new NodeConn(map[input],(*rightIter)->InputConnNum(i));
         tun->m_inputs.push_back(conn);
       }
       else {
-        tun->AddInput((*iter)->Input(i),(*iter)->InputConnNum(i));
+        tun->AddInput((*rightIter)->Input(i),(*rightIter)->InputConnNum(i));
       }
     }
-    RemoveFromGraphNodes(*iter);
+    RemoveFromGraphNodes(*rightIter);
   }
 }
 
@@ -2660,6 +2684,24 @@ bool Poss::ContainsNonLoopCode() const
   return true;      
 }
 
+bool Poss::ContainsLoops() const
+{
+  PSetVecConstIter iter = m_sets.begin();
+  for(; iter != m_sets.end(); ++iter) {
+    const BasePSet *set = *iter;
+    if (set->IsLoop())
+      return true;
+    const PossMMap posses = set->GetPosses();
+    PossMMapConstIter iter2 = posses.begin();
+    for(; iter2 != posses.end(); ++iter2) {
+      const Poss *poss = iter2->second;
+      if (poss->ContainsLoops())
+	return true;
+    }
+  }
+  return false;
+}
+
 
 bool Poss::RemoveLoops(bool *doneSomething)
 {
@@ -2668,8 +2710,14 @@ bool Poss::RemoveLoops(bool *doneSomething)
     BasePSet *set = *iter;
     if (set->IsLoop())
       return true;
-    if (!set->IsReal())
-      throw;
+    if (!set->IsReal()) {
+      if (ContainsLoops())
+	throw;
+      else {
+	*doneSomething = false;
+	return false;
+      }
+    }
     RealPSet *real = (RealPSet*)set;
     PossMMapIter iter2 = real->m_posses.begin();
     while (iter2 != real->m_posses.end()) {

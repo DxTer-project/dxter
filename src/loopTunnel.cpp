@@ -435,6 +435,11 @@ LoopInterface* LoopTunnel::GetMyLoop() const
     throw;
   if (!set->IsLoop()) {
     cout << "Loop Tunnel doesn't have Loop as PSet\n";
+    if ( set->IsReal())
+      cout << "is real\n";
+    if ( set->IsShadow())
+      cout << "is shadow\n";
+    cout << TunTypeToStr(m_tunType) << endl;
     throw;
   }
   return dynamic_cast<LoopInterface*>(set);
