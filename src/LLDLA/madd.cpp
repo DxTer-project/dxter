@@ -115,7 +115,7 @@ Node* MAdd::BlankInst()
 
 NodeType MAdd::GetType() const
 {
-  return "MAdd" + LayerNumToStr(GetLayer());
+  return "MAdd" + LayerNumToStr(GetLayer()) + (char)m_type;
 }
 
 Phase MAdd::MaxPhase() const
@@ -153,9 +153,9 @@ bool MAddLoopRef::CanApply(const Node *node) const
     return false;
   }
   if (m_dim == DIMM) {
-    return !(*(madd->GetInputM(0)) <= m_bs) && !(*(madd->GetInputM(1)) <= m_bs);
+    return !(*(madd->GetInputM(0)) <= BSSizeToSize(m_bs)) && !(*(madd->GetInputM(1)) <= BSSizeToSize(m_bs));
   } else if (m_dim == DIMN) {
-    return !(*(madd->GetInputN(0)) <= m_bs) && !(*(madd->GetInputN(1)) <= m_bs);
+    return !(*(madd->GetInputN(0)) <= BSSizeToSize(m_bs)) && !(*(madd->GetInputN(1)) <= BSSizeToSize(m_bs));
   } else {
     return false;
   }

@@ -160,7 +160,7 @@ Node* VAdd::BlankInst()
 
 NodeType VAdd::GetType() const
 {
-  return "VADD" + LayerNumToStr(GetLayer());
+  return "VADD" + LayerNumToStr(GetLayer()) + (char)m_type + (char)m_vecType;
 }
 
 string VAddLoopRef::GetType() const
