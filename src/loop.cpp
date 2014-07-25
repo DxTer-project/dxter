@@ -31,9 +31,20 @@
 
 int Loop::M_currLabel = 0;
 
+#if DOELEM
+BSSize ElemBS(USEELEMBS);
+#elif DOBLIS
+BSSize BlisMC(USEBLISMC);
+BSSize BlisKC(USEBLISKC);
+BSSize BlisNC(USEBLISNC);
+BSSize BlisOuter(USEBLISOUTERBS);
+#elif DOTENSORS
+BSSize TensorBS(USETENSORBS);
+#elif DOLLDLA
 BSSize LLDLAMu(USELLDLAMU);
 BSSize LLDLA2Mu(USELLDLA2MU);
 BSSize LLDLA3Mu(USELLDLA3MU);
+#endif
 BSSize BadBS(BADBSSIZE);
 BSSize UnitBS(USEUNITBS);
 
@@ -165,7 +176,7 @@ Loop::Loop(LoopType type)
 {
 #if DOELEM
   if (m_type == ELEMLOOP)
-    m_bsSize = USEELEMBS;
+    m_bsSize = ElemBS;
   else
 #endif
     m_bsSize = BadBS;
@@ -632,7 +643,7 @@ void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
       *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", "
       << CommToStr(GetSubComm(m_comm)) << ", "
       << "bli_blksz_for_obj( &" << split->GetInputNameStr(0)
-      << ", " << BSSizeToSubSizeStr(m_bsSize) << "));\n";
+	   << ", " << m_bsSize.SubSizeStr() << "));\n";
       out.Indent();
       *out << "for ( ; " << idx << " < " << dimLen << "; "
       << idx << " += " << bs <<" ) {\n";
@@ -683,7 +694,7 @@ void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
     }
     
     *out << idx << ", " << dimLen
-    << ", &" << inputName << ", " << BSSizeToStr(m_bsSize) << " );\n";
+	 << ", &" << inputName << ", " << m_bsSize.Str() << " );\n";
     
     loopLevel = out.LoopLevel(2);
     idx = "idx" + loopLevel;

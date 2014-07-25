@@ -159,11 +159,11 @@ Loop* LUVar5Loop(Node *Ain, ConnNum Anum,
   Loop *loop;
 #if DOELEM
   if (BLASLayer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+    loop = new Loop(BLISLOOP, loopPoss, BlisMC);
 #endif
   
   return loop;  

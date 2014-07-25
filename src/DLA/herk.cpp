@@ -791,11 +791,11 @@ Loop* HerkLoopVar1(Node *Ain, ConnNum Anum,
   Loop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+    loop = new Loop(BLISLOOP, loopPoss, BlisMC);
 #endif
   
   return loop;
@@ -861,11 +861,11 @@ Loop* HerkLoopVar2(Node *Ain, ConnNum Anum,
   Loop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new Loop(BLISLOOP, loopPoss, BlisKC);
 #endif
   return loop;
 }
@@ -904,9 +904,9 @@ Loop* HerkLoopVar5(Node *Ain, ConnNum Anum,
   Poss *loopPoss = new Poss(2, comA, CtunOut);
   Loop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new Loop(BLISLOOP, loopPoss, BlisKC);
 #endif
   
   return loop;
@@ -958,7 +958,7 @@ Loop* TriRKLoopVar5(Node *Ain, ConnNum Anum,
   Loop *loop;
 
     Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new Loop(BLISLOOP, loopPoss, BlisKC);
   
   loop->SetDimName(DIMK);
   
@@ -1032,7 +1032,7 @@ Loop* TriRKLoopVar7(Node *Ain, ConnNum Anum,
     throw;
   else
 #endif
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new Loop(BLISLOOP, loopPoss, BlisNC);
 
   loop->SetDimName(DIMN);
   
@@ -1197,7 +1197,7 @@ Loop* BLISHerkLoop(Node *Ain, ConnNum Anum,
     throw;
   else
 #endif
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+    loop = new Loop(BLISLOOP, loopPoss, BlisMC);
 
   loop->SetDimName(DIMM);
   

@@ -328,9 +328,9 @@ Loop* TwoSidedTrsmLowerVar1Alg(
 			    comL);
   Loop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new Loop(BLISLOOP, loopPoss, BlisOuter);
 #endif
 
   return loop;
@@ -422,9 +422,9 @@ Loop* TwoSidedTrsmLowerVar2Alg(
 			    comL);
   Loop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new Loop(BLISLOOP, loopPoss, BlisOuter);
 #endif
 
   return loop;
@@ -521,9 +521,9 @@ Loop* TwoSidedTrsmLowerVar4Alg(
 			    comL);
   Loop *loop;
   #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new Loop(BLISLOOP, loopPoss, BlisOuter);
 #endif
 
   return loop;
@@ -609,9 +609,9 @@ Loop* TwoSidedTrmmLowerVar1Alg(
 			    comL);
   Loop *loop;
 #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new Loop(BLISLOOP, loopPoss, BlisOuter);
 #endif
 
   return loop;
@@ -689,9 +689,9 @@ Loop* TwoSidedTrmmLowerVar2Alg(
 			    comL);
   Loop *loop;
   #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new Loop(BLISLOOP, loopPoss, BlisOuter);
 #endif
 
   return loop;
@@ -772,9 +772,9 @@ Loop* TwoSidedTrmmLowerVar4Alg(
 			    comL);
   Loop *loop;
   #if DOELEM
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   #else
-    loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+    loop = new Loop(BLISLOOP, loopPoss, BlisOuter);
 #endif
   return loop;
 }

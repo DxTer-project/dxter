@@ -1269,7 +1269,7 @@ PSet* HegstL1Example()
 			    comA,
 			    comL);
 
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(loop->OutTun(0),0);
@@ -1418,7 +1418,7 @@ PSet* HegstL5Example()
 			    comA,
 			    comL);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(loop->OutTun(0),0);
@@ -2199,7 +2199,7 @@ PSet* CholHegstExample()
 			      comA,
 			      comL);
 #if DOELEM
-    Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
 
     OutputNode *Aout = new OutputNode("A output");
     Aout->AddInput(loop->OutTun(0),0);
@@ -2298,7 +2298,7 @@ PSet* CholHegstExample()
 			      comA,
 			      comL);
 #if DOELEM
-    Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
 
     OutputNode *Aout = new OutputNode("A output");
     Aout->AddInput(loop->OutTun(0),0);
@@ -2426,7 +2426,7 @@ PSet* AppBlkHouseExample()
   CombineSingleIter *comT = splitT->CreateMatchingCombine(0);
   
   Poss *loopPoss = new Poss(3, comB, comU, comT);
-  Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+  Loop *loop = new Loop(BLISLOOP, loopPoss, BlisOuter);
 
   OutputNode *Bout = new OutputNode("B output");
   Bout->AddInput(loop->OutTun(0),0);

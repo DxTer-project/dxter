@@ -249,7 +249,7 @@ Loop* HetrmmAlgVar1Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -298,7 +298,7 @@ Loop* HetrmmAlgVar1Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -354,7 +354,7 @@ Loop* HetrmmAlgVar2Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -407,7 +407,7 @@ Loop* HetrmmAlgVar2Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -460,7 +460,7 @@ Loop* HetrmmAlgVar3Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -509,7 +509,7 @@ Loop* HetrmmAlgVar3Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  Loop *loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+  Loop *loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;

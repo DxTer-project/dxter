@@ -251,7 +251,7 @@ Loop* Chol1LowerAlg(Node *in, ConnNum num, bool dist)
   Loop *loop;
 
   if (dist)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   else 
     throw;
 
@@ -320,7 +320,7 @@ Loop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
   Loop *loop;
 #if DOELEM
    if (dist)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #else
@@ -388,7 +388,7 @@ Loop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
   Loop *loop;
 #if DOELEM
   if (dist)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #else
@@ -451,7 +451,7 @@ Loop* Chol3LowerAlg(Node *in, ConnNum num, bool dist)
   Loop *loop;
 #if DOELEM
   if (dist)
-    loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #else
@@ -523,7 +523,7 @@ Loop* Chol3UpperAlg(Node *in, ConnNum num, bool dist)
     Loop *loop;
 #if DOELEM
     if (dist)
-      loop = new Loop(ELEMLOOP, loopPoss, USEELEMBS);
+      loop = new Loop(ELEMLOOP, loopPoss, ElemBS);
     else
       throw;
 #else

@@ -21,6 +21,7 @@
 
 #include "regLoadStore.h"
 
+#if DOLLDLA
 void LoadToRegs::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -118,3 +119,5 @@ void StoreFromRegs::PrintCode(IndStream &out)
   *out << "VEC_PD_STORE( " << memoryVarName << ", " << regVarName << " );\n";
   return;
 }
+
+#endif //DOLLDLA

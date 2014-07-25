@@ -40,17 +40,17 @@ GemmLoopExp::GemmLoopExp(Layer fromLayer, Layer toLayer, int dim)
   m_dim(dim) 
 {
 #if DOELEM
-  m_bsSize = USEELEMBS;
+  m_bsSize = ElemBS;
 #elif DOBLIS
   switch(dim) {
   case (0) :
-    m_bsSize = USEBLISMC;
+    m_bsSize = BlisMC;
       break;
   case (1) :
-    m_bsSize = USEBLISKC;
+    m_bsSize = BlisKC;
       break;
   case (2) : 
-    m_bsSize = USEBLISNC;
+    m_bsSize = BlisNC;
   }
 #elif DOLLDLA
   throw;
@@ -1137,7 +1137,7 @@ void BLISGemmLoopExp::Apply(Node *node) const
                                                 1, gebp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
-  Loop *loop = new Loop(BLISLOOP, loopPoss, USEBLISMC);
+  Loop *loop = new Loop(BLISLOOP, loopPoss, BlisMC);
 
   loop->SetDimName(DIMM);
   

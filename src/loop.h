@@ -124,9 +124,20 @@ class BSSize
   }
 };
 
+#if DOELEM
+extern BSSize ElemBS;
+#elif DOBLIS
+extern BSSize BlisMC;
+extern BSSize BlisKC;
+extern BSSize BlisNC;
+extern BSSize BlisOuter;
+#elif DOTENSORS
+extern BSSize TensorBS;
+#elif DOLLDLA
 extern BSSize LLDLAMu;
 extern BSSize LLDLA2Mu;
 extern BSSize LLDLA3Mu;
+#endif
 extern BSSize BadBS;
 extern BSSize UnitBS;
 
