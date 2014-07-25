@@ -183,15 +183,15 @@ bool VAddLoopRef::CanApply(const Node *node) const
     return false;
   }
   if (m_vtype == ROWVECTOR) {
-    if (!(*(vadd->GetInputN(0)) <= BSSizeToSize(m_bs))
-	&& !(*(vadd->GetInputN(1)) <= BSSizeToSize(m_bs))) {
+    if (!(*(vadd->GetInputN(0)) <= m_bs.Size())
+	&& !(*(vadd->GetInputN(1)) <= m_bs.Size())) {
       return true;
     } else {
       return false;
     }
   } else if (m_vtype == COLVECTOR) {
-    if (!(*(vadd->GetInputM(0)) <= BSSizeToSize(m_bs))
-	&& !(*(vadd->GetInputM(1)) <= BSSizeToSize(m_bs))) {
+    if (!(*(vadd->GetInputM(0)) <= m_bs.Size())
+	&& !(*(vadd->GetInputM(1)) <= m_bs.Size())) {
       return true;
     } else {
       return false;
@@ -235,7 +235,7 @@ void VAddLoopRef::Apply(Node *node) const
 
   Poss *loopPoss = new Poss(2, com0, com1);
 
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, LLDLAMu);
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
   
   node->m_poss->AddLoop(loop);

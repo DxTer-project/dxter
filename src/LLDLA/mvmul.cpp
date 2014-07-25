@@ -199,9 +199,9 @@ bool MVMulLoopRef::CanApply(const Node *node) const
   }
 
   if (m_dim == DIMM) {
-    return !(*(mul->GetInputM(0)) <= BSSizeToSize(m_bs));
+    return !(*(mul->GetInputM(0)) <= m_bs.Size());
   } else {
-    return !(*(mul->GetInputN(0)) <= BSSizeToSize(m_bs));
+    return !(*(mul->GetInputN(0)) <= m_bs.Size());
   }
   return false;
 }

@@ -156,13 +156,13 @@ bool SMulLoopRef::CanApply(const Node *node) const
     return false;
   
   if (m_dim == DIMM) {
-    if (*(mul->GetInputM(1)) <= BSSizeToSize(m_bs))
+    if (*(mul->GetInputM(1)) <= m_bs.Size())
       return false;
     else
       return true;
   }
   else if (m_dim == DIMN) {
-    if (*(mul->GetInputN(1)) <= BSSizeToSize(m_bs))
+    if (*(mul->GetInputN(1)) <= m_bs.Size())
       return false;
     else
       return true;
@@ -240,7 +240,7 @@ void SMulLoopRef::Apply(Node *node) const
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
   //Put that poss into a loop - it's LLDLALOOP type and
   // uses the LLDLA_MU blocksize
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, LLDLAMu);
 
   //Set the dimension over which this loop iterates
   loop->SetDimName(m_dim);

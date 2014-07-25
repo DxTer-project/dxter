@@ -153,9 +153,9 @@ bool MAddLoopRef::CanApply(const Node *node) const
     return false;
   }
   if (m_dim == DIMM) {
-    return !(*(madd->GetInputM(0)) <= BSSizeToSize(m_bs)) && !(*(madd->GetInputM(1)) <= BSSizeToSize(m_bs));
+    return !(*(madd->GetInputM(0)) <= m_bs.Size()) && !(*(madd->GetInputM(1)) <= m_bs.Size());
   } else if (m_dim == DIMN) {
-    return !(*(madd->GetInputN(0)) <= BSSizeToSize(m_bs)) && !(*(madd->GetInputN(1)) <= BSSizeToSize(m_bs));
+    return !(*(madd->GetInputN(0)) <= m_bs.Size()) && !(*(madd->GetInputN(1)) <= m_bs.Size());
   } else {
     return false;
   }
@@ -254,7 +254,7 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   
   Poss *loopPoss = new Poss(2, com0, com1);
 
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USEUNITBS);
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, UnitBS);
   loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
 
   node->m_poss->AddLoop(loop);

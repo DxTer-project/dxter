@@ -31,43 +31,15 @@
 
 int Loop::M_currLabel = 0;
 
-Size BSSizeToSize(BSSize size)
-{
-  switch(size)
-  {
-#if DOELEM
-    case (USEELEMBS):
-      return ELEM_BS;
-#elif DOBLIS
-    case (USEBLISMC):
-      return BLIS_MC_BS;
-    case (USEBLISKC):
-      return BLIS_KC_BS;
-    case (USEBLISNC):
-      return BLIS_NC_BS;
-    case (USEBLISOUTERBS):
-      return BLIS_OUTER_BS;
-#elif DOTENSORS
-  case (USETENSORBS):
-    return TENSOR_BS;
-#elif DOLLDLA
-  case (USELLDLAMU):
-    return LLDLA_MU;
-  case (USELLDLA2MU):
-    return 2*LLDLA_MU;
-  case (USELLDLA3MU):
-    return 3*LLDLA_MU;
-#endif
-  case (USEUNITBS):
-    return ONE;
-    default:
-      throw;
-  }
-}
+BSSize LLDLAMu(USELLDLAMU);
+BSSize LLDLA2Mu(USELLDLA2MU);
+BSSize LLDLA3Mu(USELLDLA3MU);
+BSSize BadBS(BADBSSIZE);
+BSSize UnitBS(USEUNITBS);
 
 string BSSizeToVarName(BSSize size)
 {
-  switch(size)
+  switch(size.m_val)
     {
 #if DOLLDLA
     case (USELLDLAMU):
@@ -86,7 +58,7 @@ string BSSizeToVarName(BSSize size)
 
 string BSSizeToStr(BSSize size)
 {
-  switch(size)
+  switch(size.m_val)
   {
 #if DOELEM
     case (USEELEMBS):
@@ -108,7 +80,7 @@ string BSSizeToStr(BSSize size)
 
 string BSSizeToSubSizeStr(BSSize size)
 {
-  switch(size)
+  switch(size.m_val)
   {
 #if DOELEM
     case (USEELEMBS):
@@ -179,7 +151,7 @@ Loop::Loop()
 #endif
 {
   AssignNewLabel();
-  m_bsSize = BADBSSIZE;
+  m_bsSize = BadBS;
 }
 
 Loop::Loop(LoopType type)
@@ -198,7 +170,7 @@ Loop::Loop(LoopType type)
     m_bsSize = USEELEMBS;
   else
 #endif
-    m_bsSize = BADBSSIZE;
+    m_bsSize = BadBS;
   AssignNewLabel();
 }
 
@@ -725,9 +697,9 @@ void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
 #elif DOLLDLA
   if (m_type != LLDLALOOP)
     throw;
-  if (m_bsSize != USELLDLAMU &&
-      m_bsSize != USELLDLA2MU &&
-      m_bsSize != USELLDLA3MU)
+  if (m_bsSize != LLDLAMu &&
+      m_bsSize != LLDLA2Mu &&
+      m_bsSize != LLDLA3Mu)
     throw;
   SplitBase *split = GetControl();
   switch(m_dim) 
@@ -765,12 +737,12 @@ void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
   bool needMin = false;
   if (split->m_dir == PARTDOWN) {
     *out << split->InputDataType(0).m_numRowsVar;
-    if (!split->GetInputM(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
+    if (!split->GetInputM(0)->EvenlyDivisibleBy(m_bsSize.Size()))
       needMin = true;
   }
   else if (split->m_dir == PARTRIGHT) {
     *out << split->InputDataType(0).m_numColsVar;
-    if (!split->GetInputN(0)->EvenlyDivisibleBy(BSSizeToSize(m_bsSize)))
+    if (!split->GetInputN(0)->EvenlyDivisibleBy(m_bsSize.Size()))
       needMin = true;
   }
   else
@@ -844,10 +816,6 @@ void Loop::Duplicate(const PSet *orig, NodeMap &map, bool possMerging)
 #if TWOD
   m_dim = loop->m_dim;
 #endif
-  if (loop->m_bsSize >= BADBSSIZE) {
-    cout << "duplicating a loop with zero blocksize\n";
-    throw;
-  }
 }
 
 void Loop::AssignNewLabel()
@@ -913,7 +881,7 @@ void Loop::SetBS(BSSize size)
 
 int Loop::GetBS() const
 {
-  return (int)(BSSizeToSize(m_bsSize));
+  return (int)(m_bsSize.Size());
 }
 
 SplitBase* Loop::GetControl() const

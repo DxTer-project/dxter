@@ -1452,21 +1452,21 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
   if (m_dir == PARTDOWN) {
     if (!IsUnitStride(type.m_rowStride))
       *out << type.m_rowStrideVar << " * ";
-    if (bs == USELLDLAMU)
+    if (bs == LLDLAMu)
       *out << MU_VAR_NAME << ";\n";
-    else if (bs == USELLDLA2MU)
+    else if (bs == LLDLA2Mu)
       *out << "2 * " << MU_VAR_NAME << ";\n";
-    else if (bs == USELLDLA3MU)
+    else if (bs == LLDLA3Mu)
       *out << "3 * " << MU_VAR_NAME << ";\n";
   }
   else if (m_dir == PARTRIGHT) {
     if (!IsUnitStride(type.m_colStride))
       *out << type.m_colStrideVar << " * ";
-    if (bs == USELLDLAMU)
+    if (bs == LLDLAMu)
       *out << MU_VAR_NAME << ";\n";
-    else if (bs == USELLDLA2MU)
+    else if (bs == LLDLA2Mu)
       *out << "2 * " << MU_VAR_NAME << ";\n";
-    else if (bs == USELLDLA3MU)
+    else if (bs == LLDLA3Mu)
       *out << "3 * " << MU_VAR_NAME << ";\n";
   }
   else

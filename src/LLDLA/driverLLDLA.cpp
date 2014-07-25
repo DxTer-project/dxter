@@ -132,32 +132,32 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 void AddTrans()
 {
   //Introduces loops in the m, n, and k dimensions, respectively
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMu), LLDLALOOPPHASE);
 
 #if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLA2MU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLA2MU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLA2MU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2Mu), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2Mu), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2Mu), LLDLALOOPPHASE);
 #endif 
 
 #if DO3MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, USELLDLA3MU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, USELLDLA3MU), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, USELLDLA3MU), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3Mu), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3Mu), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3Mu), LLDLALOOPPHASE);
 #endif
 
   //Introduces loops in the m and n dimension for SMMul
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
   //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
-  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, BSSizeToSize(USELLDLAMU)), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
 
 
   //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
 
 #if DOLOOPUNROLLING
 #if DO2MUTRANSFORMATIONS
@@ -172,18 +172,18 @@ void AddTrans()
 #endif
   
   // Vector dot product transforms
-  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, BSSizeToSize(USELLDLAMU)), LLDLALOOPPHASE);
+  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
   
-  Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER, LLDLAMu), LLDLALOOPPHASE);
 
   // Transformers for Matrix Matrix add
-  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, BSSizeToSize(USELLDLAMU)), LLDLALOOPPHASE);
+  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
 
   // Introduce loop in M dimension
-  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
 
   // Introduce loop in N dimension
-  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, USELLDLAMU), LLDLALOOPPHASE);
+  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 }
 
 void AddSimplifiers()
@@ -192,16 +192,16 @@ void AddSimplifiers()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), SIMP);
 
   //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, USELLDLAMU), SIMP);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
 
   //Changes Gemm with transposition to non-transposed version use Transpose nodes
   Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(LLDLAMIDLAYER), SIMP);
 
   // Lowers the layer tag of a VVDot node
-  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, BSSizeToSize(USELLDLAMU)), SIMP);
+  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
 
   // Lowers the layer tag of a MAdd node
-  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, BSSizeToSize(USELLDLAMU)), SIMP);
+  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
 }
 
 void Usage()

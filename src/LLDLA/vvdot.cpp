@@ -174,9 +174,9 @@ bool VVDotLoopRef::CanApply(const Node *node) const
   if (dot->GetLayer() != m_fromLayer) {
     return false;
   }
-  if (*(dot->GetInputN(0)) <= BSSizeToSize(m_bs)) {
+  if (*(dot->GetInputN(0)) <= m_bs.Size()) {
     return false;
-  } else if (*(dot->GetInputM(1)) <= BSSizeToSize(m_bs)) {
+  } else if (*(dot->GetInputM(1)) <= m_bs.Size()) {
     return false;
   } else {
     return true;
@@ -341,7 +341,7 @@ void VVDotToRegArith::Apply(Node *node) const
 
   // Create the poss
   Poss* loopPoss = new Poss(3, comA, comB, accOut);
-  Loop* loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  Loop* loop = new Loop(LLDLALOOP, loopPoss, LLDLAMu);
 
   node->m_poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(2), 0); // WRONG, but I did this to check what was wrong in poss error

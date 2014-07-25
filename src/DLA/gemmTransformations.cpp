@@ -73,7 +73,7 @@ string GemmLoopExp::GetType() const
     + LayerNumToStr(m_fromLayer)
     + " + " 
     + LayerNumToStr(m_toLayer)
-    + " bs:" + std::to_string(BSSizeToSize(m_bsSize));
+    + " bs:" + std::to_string(m_bsSize.Size());
   switch(m_dim) {
     case(0):
       return str + " - m";

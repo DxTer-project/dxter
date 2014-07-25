@@ -63,7 +63,7 @@ class ViewMultipleIters : public DLANode
   virtual Name GetName(ConnNum num) const;
   virtual void AddVariables(VarSet &set) const;
   virtual NodeType GetType() const {return "ViewMultipleIters";}
-  static Node* BlankInst() { return  new ViewMultipleIters(LASTPARTDIR, BADBSSIZE, -1); }
+  static Node* BlankInst() { return  new ViewMultipleIters(LASTPARTDIR, (BSSize)BADBSSIZE, -1); }
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -91,7 +91,7 @@ class CombineMultipleIters : public DLANode
   virtual const Sizes* GetN(ConnNum num) const;
   virtual Name GetName(ConnNum num) const;
   virtual NodeType GetType() const {return "CombineMultipleIters";}
-  static Node* BlankInst() { return  new CombineMultipleIters(LASTPARTDIR, BADBSSIZE, -1); }
+  static Node* BlankInst() { return  new CombineMultipleIters(LASTPARTDIR, (BSSize)BADBSSIZE, -1); }
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }

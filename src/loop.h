@@ -54,7 +54,7 @@ enum Quad { TL, TR,
 	     BL, BR,
 	     LASTQUAD };
 
-enum BSSize { 
+enum BSSizeEnum { 
 #if DOELEM
   USEELEMBS,
 #elif DOBLIS
@@ -73,7 +73,60 @@ enum BSSize {
   BADBSSIZE 
 };
 
-Size BSSizeToSize(BSSize size);	      
+class BSSize
+{
+ public:
+  BSSizeEnum m_val;
+
+ BSSize() : m_val(BADBSSIZE) {}
+
+  explicit BSSize(BSSizeEnum val)
+   : m_val(val) {}
+
+  bool operator==(const BSSize &rhs) const {return m_val == rhs.m_val;}
+  bool operator!=(const BSSize &rhs) const {return m_val != rhs.m_val;}
+  
+  inline Size Size() const {
+    switch(m_val)
+      {
+#if DOELEM
+      case (USEELEMBS):
+	return ELEM_BS;
+#elif DOBLIS
+      case (USEBLISMC):
+	return BLIS_MC_BS;
+      case (USEBLISKC):
+	return BLIS_KC_BS;
+      case (USEBLISNC):
+	return BLIS_NC_BS;
+      case (USEBLISOUTERBS):
+	return BLIS_OUTER_BS;
+#elif DOTENSORS
+      case (USETENSORBS):
+	return TENSOR_BS;
+#elif DOLLDLA
+      case (USELLDLAMU):
+	return LLDLA_MU;
+      case (USELLDLA2MU):
+	return 2*LLDLA_MU;
+      case (USELLDLA3MU):
+	return 3*LLDLA_MU;
+#endif
+      case (USEUNITBS):
+	return ONE;
+      default:
+	throw;
+      }
+  }
+};
+
+extern BSSize LLDLAMu;
+extern BSSize LLDLA2Mu;
+extern BSSize LLDLA3Mu;
+extern BSSize BadBS;
+extern BSSize UnitBS;
+
+
 string BSSizeToVarName(BSSize size);
 string BSSizeToSubSizeStr(BSSize size);
 

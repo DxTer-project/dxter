@@ -206,10 +206,10 @@ bool SVMulLoopRef::CanApply(const Node *node) const
     return false;
   }
   if (m_vtype == ROWVECTOR) {
-    return !(*(svmul->GetInputN(1)) <= BSSizeToSize(m_bs));
+    return !(*(svmul->GetInputN(1)) <= m_bs.Size());
   } 
   else if (m_vtype == COLVECTOR) {
-    return !(*(svmul->GetInputM(1)) <= BSSizeToSize(m_bs));
+    return !(*(svmul->GetInputM(1)) <= m_bs.Size());
   } 
   else {
     throw;
@@ -255,7 +255,7 @@ void SVMulLoopRef::Apply(Node *node) const
   
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
   
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, USELLDLAMU);
+  Loop *loop = new Loop(LLDLALOOP, loopPoss, LLDLAMu);
   // Row vectors are partitioned in the N dimension, column vectors in the M dimension
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
   

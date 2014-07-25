@@ -51,21 +51,21 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   case (0):
     {
       //DIMM
-      if (m_bsSize == USELLDLA2MU) {
-	if (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLA3MU))
+      if (m_bsSize == LLDLA2Mu) {
+	if (*(gemm->GetInputM(2)) <= LLDLA3Mu.Size())
 	  return false;
       }
-      if (*(gemm->GetInputM(2)) <= BSSizeToSize(m_bsSize))
+      if (*(gemm->GetInputM(2)) <= m_bsSize.Size())
 	return false;
       //if this blocks greater than MU, another loop will have to 
       //block on the same dimension with MU, 
       //but a loop immediately within another loop cannot split the
       //same dimension, so checking here to make sure other dimensions
       //will be split with a loop
-      if ((m_bsSize != USELLDLAMU)
-	  && (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLAMU))
-	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLAMU)))
-	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLAMU)))))
+      if ((m_bsSize != LLDLAMu)
+	  && (*(gemm->GetInputN(2)) <= LLDLAMu.Size())
+	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= LLDLAMu.Size()))
+	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= LLDLAMu.Size()))))
 	return false;
       else
 	return true;
@@ -75,28 +75,28 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
     {
       //DIMK
       if (gemm->m_transA == NORMAL) {
-	if (m_bsSize == USELLDLA2MU) {
-	  if (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLA3MU))
+	if (m_bsSize == LLDLA2Mu) {
+	  if (*(gemm->GetInputN(0)) <= LLDLA3Mu.Size())
 	    return false;
 	}
 
-	if (*(gemm->GetInputN(0)) <= BSSizeToSize(m_bsSize))
+	if (*(gemm->GetInputN(0)) <= m_bsSize.Size())
 	  return false;
       }
       else if (gemm->m_transA != CONJ) {
-	if (m_bsSize == USELLDLA2MU) {
-	  if (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLA3MU))
+	if (m_bsSize == LLDLA2Mu) {
+	  if (*(gemm->GetInputM(0)) <= LLDLA3Mu.Size())
 	    return false;
 	}
 
-	if (*(gemm->GetInputM(0)) <= BSSizeToSize(m_bsSize))
+	if (*(gemm->GetInputM(0)) <= m_bsSize.Size())
 	  return false;
       }
       else
 	throw;
-      if ((m_bsSize != USELLDLAMU)
-	  && (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLAMU))
-	  && (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLAMU)))
+      if ((m_bsSize != LLDLAMu)
+	  && (*(gemm->GetInputN(2)) <= LLDLAMu.Size())
+	  && (*(gemm->GetInputM(2)) <= LLDLAMu.Size()))
 	return false;
       else
 	return true;
@@ -106,17 +106,17 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   case (2):
     {
       //DIMN
-      if (m_bsSize == USELLDLA2MU) {
-	if (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLA3MU))
+      if (m_bsSize == LLDLA2Mu) {
+	if (*(gemm->GetInputN(2)) <= LLDLA3Mu.Size())
 	  return false;
       }
 
-      if (*(gemm->GetInputN(2)) <= BSSizeToSize(m_bsSize))
+      if (*(gemm->GetInputN(2)) <= m_bsSize.Size())
 	return false;
-      if ((m_bsSize != USELLDLAMU)
-	  && (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLAMU))
-	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLAMU)))
-	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLAMU)))))
+      if ((m_bsSize != LLDLAMu)
+	  && (*(gemm->GetInputM(2)) <= LLDLAMu.Size())
+	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= LLDLAMu.Size()))
+	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= LLDLAMu.Size()))))
 	return false;
       else
 	return true;
