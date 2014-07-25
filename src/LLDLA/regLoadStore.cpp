@@ -120,4 +120,70 @@ void StoreFromRegs::PrintCode(IndStream &out)
   return;
 }
 
+void TempVecReg::Prop()
+{
+  if (!IsValidCost(m_cost)) {
+    if (m_inputs.size() != 1)
+      throw;
+    if ((*(GetInputM(0)) != 1) ||
+	(*(GetInputN(0)) != 1))
+      throw;
+    Input(0)->Prop();
+    m_cost = 0;
+  }
+}
+
+void TempVecReg::PrintCode(IndStream &out)
+{
+  *out << "print code for TempVecReg\n";
+}
+
+void TempVecReg::ClearDataTypeCache()
+{
+  m_mSizes.ClearSizes();
+  m_nSizes.ClearSizes();
+}
+
+void TempVecReg::BuildDataTypeCache()
+{
+  if (m_mSizes.m_entries.empty()) {
+    m_info = InputDataType(0);
+    m_info.m_numRowsVar = "vector register size";
+    unsigned int num = GetInputM(0)->NumSizes();
+    m_mSizes.AddRepeatedSizes(NUMREGSPERLOAD, num, 1);
+    m_nSizes.AddRepeatedSizes(1, num, 1);
+  }
+}
+
+const Sizes* TempVecReg::GetM(ConnNum num) const
+{
+  if (num != 0)
+    throw;
+  return &m_mSizes;
+}
+
+const Sizes* TempVecReg::GetN(ConnNum num) const
+{
+  if (num != 0)
+    throw;
+  return &m_nSizes;
+}
+
+Name TempVecReg::GetName(ConnNum num) const
+{
+  if (num != 0)
+    throw;
+  Name name = GetInputName(0);
+  name.m_name += "_regTemp";
+  return name;
+}
+
+void TempVecReg::AddVariables(VarSet &set) const
+{
+  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regTemp";
+  Var var(DirectVarDeclType, varDecl);
+  set.insert(var);
+}
+
+
 #endif //DOLLDLA
