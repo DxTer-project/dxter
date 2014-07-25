@@ -297,18 +297,14 @@ void VVDotToRegArith::Apply(Node *node) const
   splitB->SetIndepIters();
   
   // Create new node to accumulate data in the loop
-  InputNode* accum = new InputNode("Dot prod accum", 2, 1, "Accum",
-  				   1, 2,
-				   "AccNumRows", "AccNumCols",
-  				   "AccRowStride", "AccColStride");
+  TempVecReg* accum = new TempVecReg();
+  accum->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
 
-  // Create node to zero the contents of the accumulate register
-  ZeroReg* zeroReg = new ZeroReg();
-  zeroReg->AddInput(accum, 0);
+  node->m_poss->AddNode(accum);
 
   // Create tunnel for accumulator
   LoopTunnel* accTun = new LoopTunnel(POSSTUNIN);
-  accTun->AddInput(zeroReg, 0);
+  accTun->AddInput(accum, 0);
   accTun->SetAllStats(PARTUP);
 
   // Create loads for A and B
@@ -334,20 +330,19 @@ void VVDotToRegArith::Apply(Node *node) const
   CombineSingleIter* comA = splitA->CreateMatchingCombine(0);
   CombineSingleIter* comB = splitB->CreateMatchingCombine(0);
 
-  // Accumulate result of operation in C
-  AccumReg* accumInC = new AccumReg();
-  accumInC->AddInput(accOut, 0);
-  accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
-
   // Create the poss
   Poss* loopPoss = new Poss(3, comA, comB, accOut);
   Loop* loop = new Loop(LLDLALOOP, loopPoss, LLDLAMu);
 
   // Add needed components to poss
   node->m_poss->AddLoop(loop);
-  node->m_poss->AddNode(zeroReg);
+
+  // Accumulate result of operation in C
+  AccumReg* accumInC = new AccumReg();
+  accumInC->AddInput(loop->OutTun(2), 0);
+  accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
+
   node->m_poss->AddNode(accumInC);
-  node->m_poss->AddNode(accum);
   node->RedirectChildren(loop->OutTun(2), 0); // WRONG, but I did this to check what was wrong in poss error
   node->m_poss->DeleteChildAndCleanUp(node);
   return;

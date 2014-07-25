@@ -49,8 +49,37 @@ void LoadToRegs::PrintCode(IndStream &out)
 {
   out.Indent();
   string toLoadName = GetInputNameStr(0);
+  string toLoadName2, toLoadPair;
   string loadStr = GetNameStr(0);
-  *out << loadStr << " = VEC_PD_LOAD( " << toLoadName << " );\n";
+  // Decide which load instruction is needed based on
+  // dimension and stride of input vector
+  Stride inputRowStride = InputDataType(0).m_rowStride;
+  Stride inputColStride = InputDataType(0).m_colStride;
+
+  if (IsInputColVector(0)) {
+    if (IsUnitStride(inputRowStride)) {
+      *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
+      return;
+    } else {
+      toLoadName2 = toLoadName + " + " + InputDataType(0).m_rowStrideVar;
+      toLoadPair = toLoadName + ", " + toLoadName2;
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoadPair << " );\n";
+      return;
+    }
+  } else if (IsInputRowVector(0)) {
+    if (IsUnitStride(inputColStride)) {
+      *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
+      return;
+    } else {
+      toLoadName2 = toLoadName + " + " + InputDataType(0).m_colStrideVar;
+      toLoadPair = toLoadName + ", " + toLoadName2;
+      *out << "VEC_PPTR_LOAD( " << loadStr << ", " << toLoadPair << " );\n";
+      return;
+    }
+  } else {
+    cout << "ERROR: Input to vector register load is neither row nor column vector\n";
+    throw;
+  }
   return;
 }
 
@@ -79,7 +108,7 @@ Name LoadToRegs::GetName(ConnNum num) const
 
 void LoadToRegs::AddVariables(VarSet &set) const
 {
-  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regs";
+  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regs;\n";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
@@ -135,7 +164,8 @@ void TempVecReg::Prop()
 
 void TempVecReg::PrintCode(IndStream &out)
 {
-  *out << "print code for TempVecReg\n";
+  out.Indent();
+  *out << "VEC_SET_ZERO( " << GetNameStr(0) << " );\n";
 }
 
 void TempVecReg::ClearDataTypeCache()
@@ -180,7 +210,7 @@ Name TempVecReg::GetName(ConnNum num) const
 
 void TempVecReg::AddVariables(VarSet &set) const
 {
-  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regTemp";
+  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regTemp;";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }

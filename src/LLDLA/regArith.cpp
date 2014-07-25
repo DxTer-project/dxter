@@ -31,13 +31,13 @@ void FMAdd::Prop()
 // TODO: Delete shape checks and instead check that operands
 // are registers
 
-    if (*GetInputM(0) != *GetInputM(1) || *GetInputM(0) != *GetInputM(2)) {
+/*    if (*GetInputM(0) != *GetInputM(1) || *GetInputM(0) != *GetInputM(2)) {
       throw;
     }
 
     if (*GetInputN(0) != *GetInputN(1) || *GetInputN(0) != *GetInputN(2)) {
       throw;
-    }
+      }*/
 
     m_cost = 0;
   }

@@ -41,6 +41,12 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_headers.push_back("#include \"utils.h\"");
   m_headers.push_back("#include <string.h>");
   m_headers.push_back("#include <unistd.h>");
+  m_defines.push_back("#define VEC_SET_ZERO(vreg) (vreg).v = _mm_setzero_pd()");
+  m_defines.push_back("#define VEC_PD_FMA(a, b, c) (c).v += (a).v * (b).v");
+  m_defines.push_back("#define VEC_ACCUM(c, ptr) *(ptr) += (c).d[0] + (c).d[1]");
+  m_defines.push_back("#define VEC_PTR_PD_LOAD(vec, ptr) (vec).v = _mm_load_pd((ptr))");
+  m_defines.push_back("#define VEC_2D_LOAD(p1, p2) _mm_loadh_pd(_mm_load_sd((p1)), (p2))");
+  m_defines.push_back("#define VEC_PPTR_PD_LOAD(vec, p1, p2) (vec).v = VEC_2D_LOAD(p1, p2)");
   m_defines.push_back("#define BUF_SIZE 1000000");
   m_defines.push_back("#define NUM_ITERATIONS " + std::to_string(m_numIterations));
   m_defines.push_back("#define CHUNK_SIZE " + std::to_string(m_chunkSize));
