@@ -56,6 +56,36 @@ class LoadToRegs : public DLANode
   virtual void AddVariables(VarSet &set) const;
 };
 
+class TempVecReg : public DLANode
+{
+ public:
+  Sizes m_mSizes;
+  Sizes m_nSizes;
+  DataTypeInfo m_info;
+  virtual NodeType GetType() const { return "TempVecReg"; }
+  static Node* BlankInst() { return  new TempVecReg; }
+  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
+  virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual void Prop();
+  virtual void PrintCode(IndStream &out);
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "TempVecReg";}
+  virtual const DataTypeInfo& DataType(ConnNum num) const {return m_info;}
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
+
+  virtual Name GetName(ConnNum num) const;
+
+  virtual bool IsReadOnly() const {return true;}
+  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+  virtual bool IsDataDependencyOfInput() const {return false;}
+
+  virtual void AddVariables(VarSet &set) const;
+  virtual void BuildDataTypeCache();
+  virtual void ClearDataTypeCache();
+};
+
 class StoreFromRegs : public DLAOp<2,1>
 {
  public:
