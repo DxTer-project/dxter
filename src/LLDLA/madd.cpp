@@ -70,7 +70,9 @@ void MAdd::PrintRowStride(IndStream &out)
 {
   *out << "row_stride_add_2x2( " <<
     GetInputName(0).str() << ", " <<
-    GetInputName(1).str() << ");\n";
+    InputDataType(0).m_rowStrideVar << ", " <<
+    GetInputName(1).str() << ", " <<
+    InputDataType(1).m_rowStrideVar << ");\n";
 }
 
 void MAdd::PrintColStride(IndStream &out)

@@ -61,6 +61,7 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+PSet* MVMulExample();
 PSet* MAddExample();
 PSet* DotExample();
 PSet* GemmExample();
@@ -77,7 +78,7 @@ ImplementationMap ImpStrMap(Universe *uni)
     std::ostream out(&sbuf);
     IndStream istream = IndStream(&out, LLDLASTREAM);
     uni->Print(istream, i);
-    impMap.insert(NumImplementationPair(i, sbuf.str()));    
+    impMap.insert(NumImplementationPair(i, sbuf.str()));
   }
   return impMap;
 }
@@ -178,6 +179,8 @@ void AddTrans()
 
   // Transformers for Matrix Matrix add
   Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Introduce loop in M dimension
   Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
