@@ -582,13 +582,13 @@ void ViewMultipleIters::BuildDataTypeCache()
   case (PARTDOWN):
     {
       m_sizes->AddRepeatedSizes(m_bs.Size(), GetInputM(0)->NumSizes(), 1);
-      m_info.m_numRowsVar = BSSizeToVarName(m_bs);
+      m_info.m_numRowsVar = m_bs.VarName();
       break;
     }
   case (PARTRIGHT):
     {
       m_sizes->AddRepeatedSizes(m_bs.Size(), GetInputN(0)->NumSizes(), 1);
-      m_info.m_numColsVar = BSSizeToVarName(m_bs);
+      m_info.m_numColsVar = m_bs.VarName();
       break;
     }
   default:
@@ -686,7 +686,7 @@ void ViewMultipleIters::PrintCode(IndStream &out)
       }
       else
 	throw;
-      *out << BSSizeToVarName(m_bs);
+      *out << m_bs.VarName();
 
     }
     *out << ";\n";

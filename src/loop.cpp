@@ -37,9 +37,9 @@ BSSize LLDLA3Mu(USELLDLA3MU);
 BSSize BadBS(BADBSSIZE);
 BSSize UnitBS(USEUNITBS);
 
-string BSSizeToVarName(BSSize size)
+string BSSize::VarName() const
 {
-  switch(size.m_val)
+  switch(m_val)
     {
 #if DOLLDLA
     case (USELLDLAMU):
@@ -54,11 +54,9 @@ string BSSizeToVarName(BSSize size)
     }
 }
 
-
-
-string BSSizeToStr(BSSize size)
+string BSSize::Str() const
 {
-  switch(size.m_val)
+  switch(m_val)
   {
 #if DOELEM
     case (USEELEMBS):
@@ -78,9 +76,9 @@ string BSSizeToStr(BSSize size)
   }
 }
 
-string BSSizeToSubSizeStr(BSSize size)
+string BSSize::SubSizeStr() const
 {
-  switch(size.m_val)
+  switch(m_val)
   {
 #if DOELEM
     case (USEELEMBS):
@@ -751,7 +749,7 @@ void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
   *out << "; " << lcv << " > 0; " << lcv << " -= ";
 
   
-  *out << BSSizeToVarName(m_bsSize) << " ) {\n";
+  *out << m_bsSize.VarName() << " ) {\n";
 
   out.Indent(1);
   *out << "const unsigned int num";
@@ -768,7 +766,7 @@ void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
     *out << loopLevel << " = min( " << lcv << ", ";
   else
     *out << loopLevel << " = ( ";
-  *out << BSSizeToVarName(m_bsSize) << " );\n";
+  *out << m_bsSize.VarName() << " );\n";
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);

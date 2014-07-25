@@ -85,7 +85,11 @@ class BSSize
 
   bool operator==(const BSSize &rhs) const {return m_val == rhs.m_val;}
   bool operator!=(const BSSize &rhs) const {return m_val != rhs.m_val;}
-  
+
+  string VarName() const;
+  string SubSizeStr() const;
+  string Str() const;
+
   inline Size Size() const {
     switch(m_val)
       {
@@ -126,9 +130,6 @@ extern BSSize LLDLA3Mu;
 extern BSSize BadBS;
 extern BSSize UnitBS;
 
-
-string BSSizeToVarName(BSSize size);
-string BSSizeToSubSizeStr(BSSize size);
 
 unsigned int GetNumElems(PartDir dir);
 string PartDirToStr(PartDir dir);
