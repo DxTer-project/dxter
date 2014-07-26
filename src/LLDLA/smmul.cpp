@@ -24,7 +24,7 @@
 
 #if DOLLDLA
 
-SMMul::SMMul(Type type, Layer layer)
+SMMul::SMMul(Layer layer, Type type)
 {
   m_type = type;
   SetLayer(layer);
@@ -128,7 +128,7 @@ Phase SMMul::MaxPhase() const
 
 Node* SMMul::BlankInst()
 {
-  return new SMMul(REAL, ABSLAYER);
+  return new SMMul(ABSLAYER, REAL);
 }
 
 NodeType SMMul::GetType() const
@@ -151,24 +151,26 @@ string SMulLoopRef::GetType() const
 
 bool SMulLoopRef::CanApply(const Node *node) const
 {
-  const SMMul *mul = (SMMul*)node;
-  if (mul->GetLayer() != m_fromLayer)
-    return false;
+  if (node->GetNodeClass() == SMMul::GetClass()) {
+    const SMMul *mul = (SMMul*)node;
+    if (mul->GetLayer() != m_fromLayer)
+      return false;
   
-  if (m_dim == DIMM) {
-    if (*(mul->GetInputM(1)) <= m_bs.Size())
-      return false;
+    if (m_dim == DIMM) {
+      if (*(mul->GetInputM(1)) <= m_bs.Size())
+	return false;
+      else
+	return true;
+    }
+    else if (m_dim == DIMN) {
+      if (*(mul->GetInputN(1)) <= m_bs.Size())
+	return false;
+      else
+	return true;
+    }
     else
-      return true;
+      throw;
   }
-  else if (m_dim == DIMN) {
-    if (*(mul->GetInputN(1)) <= m_bs.Size())
-      return false;
-    else
-      return true;
-  }
-  else
-    throw;
   return false;
 }
 
@@ -211,7 +213,7 @@ void SMulLoopRef::Apply(Node *node) const
   
 
   //Create a new SMul or the same type and in my m_toLayer layer
-  SMMul *newMul = new SMMul(mul->m_type, m_toLayer);
+  SMMul *newMul = new SMMul(m_toLayer, mul->m_type);
   newMul->SetLayer(m_toLayer);
 
   //Wire inputs - the scalar loop tunnel and 

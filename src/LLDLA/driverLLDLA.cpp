@@ -33,6 +33,7 @@
 #endif
 #include "LLDLAGemm.h"
 #include "madd.h"
+#include "mvmul.h"
 #include "vvdot.h"
 #include <climits>
 
@@ -52,6 +53,7 @@
 #include "debug.h"
 #include "LLDLAGemmTransformations.h"
 #include "smmul.h"
+#include "svmul.h"
 #include "runtimeEvaluation.h"
 #include "loopUnrolling.h"
 
@@ -61,6 +63,8 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+PSet* SVMulRowExample();
+PSet* SVMulColExample();
 PSet* MVMulExample();
 PSet* MAddExample();
 PSet* DotExample();
@@ -150,15 +154,15 @@ void AddTrans()
 #endif
 
   //Introduces loops in the m and n dimension for SMMul
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
   //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
   Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
 
 
   //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
+  //Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
 
 #if DOLOOPUNROLLING
 #if DO2MUTRANSFORMATIONS
@@ -187,6 +191,27 @@ void AddTrans()
 
   // Introduce loop in N dimension
   Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
+
+  // Transformers for matrix vector multiply
+  // Introduce loop in M dimension
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
+
+  // Introduce loop in N dimension
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
+
+  // Lower layer tag
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
+
+  // Transformers for scalar vector multiply
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
+
 }
 
 void AddSimplifiers()
@@ -195,7 +220,7 @@ void AddSimplifiers()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), SIMP);
 
   //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
+  //  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
 
   //Changes Gemm with transposition to non-transposed version use Transpose nodes
   Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(LLDLAMIDLAYER), SIMP);
@@ -205,6 +230,12 @@ void AddSimplifiers()
 
   // Lowers the layer tag of a MAdd node
   Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
+
+  // Lowers the layer tag of a MVMul node
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
+
+  // Lowers the tag of an SVMul node
+  Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
 }
 
 void Usage()
@@ -215,6 +246,9 @@ void Usage()
   cout <<"         2  -> Double Gemm Example N/T N/T\n";
   cout <<"         3  -> Dot prod example\n";
   cout <<"         4  -> Matrix add example\n";
+  cout <<"         5  -> Matrix vector multiply example\n";
+  cout <<"         6  -> Scalar column vector multiply example\n";
+  cout <<"         7  -> Scalar row vector multiply example\n";
 }
 
 int main(int argc, const char* argv[])
@@ -274,6 +308,30 @@ int main(int argc, const char* argv[])
       }
       opName = "dxt_madd";
       algFunc = MAddExample;
+      break;
+    case(5):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_mvmul";
+      algFunc = MVMulExample;
+      break;
+    case(6):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_sv_col_mul";
+      algFunc = SVMulColExample;
+      break;
+    case(7):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_sv_row_mul";
+      algFunc = SVMulRowExample;
       break;
     default:
       Usage();
@@ -409,6 +467,116 @@ int main(int argc, const char* argv[])
       uni.Print(cout, CODE, whichGraph); */
 
   return 0;
+}
+
+PSet* SVMulRowExample()
+{
+  InputNode* Ain = new InputNode("A input", 1, medSize, "A",
+				 medSize, 1,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride");
+  InputNode* xIn = new InputNode("x input", 1, 1, "X",
+				 medSize, 1,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  PossTunnel* tunA = new PossTunnel(POSSTUNIN);
+  tunA->AddInput(Ain, 0);
+
+  PossTunnel* tunX = new PossTunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  SVMul* svmul = new SVMul(ROWVECTOR, ABSLAYER, REAL);
+  svmul->AddInputs(4,
+		   tunX, 0,
+		   tunA, 0);
+
+  Poss *innerPoss = new Poss(svmul, true);
+  PSet *innerSet = new PSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
+}
+
+PSet* SVMulColExample()
+{
+  InputNode* Ain = new InputNode("A input", medSize, 1, "A",
+				 medSize, 1,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride");
+  InputNode* xIn = new InputNode("x input", 1, 1, "X",
+				 medSize, 1,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  PossTunnel* tunA = new PossTunnel(POSSTUNIN);
+  tunA->AddInput(Ain, 0);
+
+  PossTunnel* tunX = new PossTunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  SVMul* svmul = new SVMul(COLVECTOR, ABSLAYER, REAL);
+  svmul->AddInputs(4,
+		   tunX, 0,
+		   tunA, 0);
+
+  Poss *innerPoss = new Poss(svmul, true);
+  PSet *innerSet = new PSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
+}
+
+PSet* MVMulExample()
+{
+  InputNode* Ain = new InputNode("A input", medSize, medSize, "A",
+				 medSize, 1,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride");
+  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
+				 medSize, 1,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+  InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
+				 medSize, 1,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride");
+
+  PossTunnel* tunA = new PossTunnel(POSSTUNIN);
+  tunA->AddInput(Ain, 0);
+
+  PossTunnel* tunX = new PossTunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  PossTunnel* tunY = new PossTunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  MVMul* mvmul = new MVMul(ABSLAYER, REAL);
+  mvmul->AddInputs(6,
+		   tunA, 0,
+		   tunX, 0,
+		   tunY, 0);
+
+  Poss *innerPoss = new Poss(mvmul, true);
+  PSet *innerSet = new PSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
 }
 
 PSet* MAddExample()

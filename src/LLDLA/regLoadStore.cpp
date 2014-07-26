@@ -149,6 +149,73 @@ void StoreFromRegs::PrintCode(IndStream &out)
   return;
 }
 
+void DuplicateRegLoad::Prop()
+{
+  if (!IsValidCost(m_cost)) {
+    if (m_inputs.size() != 1)
+      throw;
+    if ((*(GetInputM(0)) != 1) ||
+	(*(GetInputN(0)) != 1))
+      throw;
+    Input(0)->Prop();
+    m_cost = 0;
+  }
+}
+
+void DuplicateRegLoad::PrintCode(IndStream &out)
+{
+  out.Indent();
+  *out << "VEC_DUP_LOAD( " << GetNameStr(0) << ", " << GetInputNameStr(0) << " );\n";
+}
+
+void DuplicateRegLoad::ClearDataTypeCache()
+{
+  m_mSizes.ClearSizes();
+  m_nSizes.ClearSizes();
+}
+
+void DuplicateRegLoad::BuildDataTypeCache()
+{
+  if (m_mSizes.m_entries.empty()) {
+    m_info = InputDataType(0);
+    m_info.m_numRowsVar = "vector register size";
+    unsigned int num = GetInputM(0)->NumSizes();
+    m_mSizes.AddRepeatedSizes(NUMREGSPERLOAD, num, 1);
+    m_nSizes.AddRepeatedSizes(1, num, 1);
+  }
+}
+
+const Sizes* DuplicateRegLoad::GetM(ConnNum num) const
+{
+  if (num != 0)
+    throw;
+  return &m_mSizes;
+}
+
+const Sizes* DuplicateRegLoad::GetN(ConnNum num) const
+{
+  if (num != 0)
+    throw;
+  return &m_nSizes;
+}
+
+Name DuplicateRegLoad::GetName(ConnNum num) const
+{
+  if (num != 0)
+    throw;
+  Name name = GetInputName(0);
+  name.m_name += "_regDup";
+  return name;
+}
+
+void DuplicateRegLoad::AddVariables(VarSet &set) const
+{
+  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regDup;";
+  Var var(DirectVarDeclType, varDecl);
+  set.insert(var);
+}
+
+
 void TempVecReg::Prop()
 {
   if (!IsValidCost(m_cost)) {

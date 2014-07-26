@@ -21,12 +21,13 @@
 
 #include "DLAOp.h"
 #include "mvmul.h"
+#include "svmul.h"
 #include "loopSupport.h"
 #include "LLDLA.h"
 
 #if DOLLDLA
 
-MVMul::MVMul(Type type, Layer layer)
+MVMul::MVMul(Layer layer, Type type)
 {
   m_type = type;
   m_layer = layer;
@@ -34,15 +35,30 @@ MVMul::MVMul(Type type, Layer layer)
 
 void MVMul::PrintCode(IndStream &out)
 {
-  if (m_layer != LLDLAPRIMITIVELAYER) {
-    cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
-    throw;
-  }
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;
   
   out.Indent();
+
+  if (m_layer == ABSLAYER) {
+    *out << "simple_mmul( " <<
+      InputDataType(0).m_numRowsVar << ", " <<
+      "1, " <<
+      InputDataType(0).m_numColsVar << ", " <<
+      GetInputName(0).str() << ", " <<
+      InputDataType(0).m_rowStrideVar << ", " <<
+      InputDataType(0).m_colStrideVar << ", " <<
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << ", " <<
+      GetInputName(2).str() << ", " <<
+      InputDataType(2).m_rowStrideVar << ", " <<
+      InputDataType(2).m_colStrideVar << " );\n";
+    return;
+  }
+
+
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
     PrintGeneralStride(out);
   } else if (rowStride == UNITSTRIDE && colStride == NONUNITSTRIDE) {
@@ -81,7 +97,7 @@ void MVMul::PrintGeneralStride(IndStream &out)
 
 Node* MVMul::BlankInst()
 {
-  return new MVMul(REAL, LLDLAPRIMITIVELAYER);
+  return new MVMul(LLDLAPRIMITIVELAYER, REAL);
 }
 
 Phase MVMul::MaxPhase() const 
@@ -193,15 +209,17 @@ string MVMulLoopRef::GetType() const
 
 bool MVMulLoopRef::CanApply(const Node *node) const
 {
-  const MVMul *mul = (MVMul*) node;
-  if (mul->GetLayer() != m_fromLayer) {
-    return false;
-  }
+  if (node->GetNodeClass() == MVMul::GetClass()) {  
+    const MVMul *mul = (MVMul*) node;
+    if (mul->GetLayer() != m_fromLayer) {
+      return false;
+    }
 
-  if (m_dim == DIMM) {
-    return !(*(mul->GetInputM(0)) <= m_bs.Size());
-  } else {
-    return !(*(mul->GetInputN(0)) <= m_bs.Size());
+    if (m_dim == DIMM) {
+      return !(*(mul->GetInputM(0)) <= m_bs.Size());
+    } else {
+      return !(*(mul->GetInputN(0)) <= m_bs.Size());
+    }
   }
   return false;
 }
@@ -233,6 +251,7 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
   splitY->AddInput(mul->Input(2), mul->InputConnNum(2));
   splitY->SetUpStats(FULLUP, FULLUP,
 		     NOTUP, NOTUP);
+  splitY->SetIndepIters();
 
   // Create tunnel for x
   LoopTunnel *xTun = new LoopTunnel(POSSTUNIN);
@@ -240,7 +259,7 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
   xTun->SetAllStats(FULLUP);
 
   // Create new mvmul for loop body
-  MVMul *newMul = new MVMul(mul->m_type, m_toLayer);
+  MVMul *newMul = new MVMul(m_toLayer, mul->m_type);
   newMul->SetLayer(m_toLayer);
 
   // Attach the new multiply to arguments
@@ -254,11 +273,11 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
   
   LoopTunnel *xOut = new LoopTunnel(POSSTUNOUT);
   xOut->AddInput(xTun, 0);
-  xOut->AddInput(xTun, 1);
+  xOut->AddInput(mul->Input(1), 1);
   xOut->CopyTunnelInfo(xTun);
 
   // Create poss
-  Poss *loopPoss = new Poss(3, comA, xTun, comY);
+  Poss *loopPoss = new Poss(3, comA, xOut, comY);
   Loop *loop = new Loop(LLDLALOOP, loopPoss, m_bs);
   loop->SetDimName(m_dim);
 
@@ -289,8 +308,8 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
   tunY->AddInput(mul->Input(2), mul->InputConnNum(2));
   tunY->SetAllStats(PARTUP);
 
-  // Create new mvmul for loop body
-  MVMul *newMul = new MVMul(mul->m_type, m_toLayer);
+  // Create new svmul for loop body
+  MVMul *newMul = new MVMul(m_toLayer, mul->m_type);
   newMul->SetLayer(m_toLayer);
 
   // Attach to arguments

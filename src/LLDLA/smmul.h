@@ -28,7 +28,7 @@ class SMMul : public DLAOp<2, 1>
 {
  public:
   Type m_type;
-  SMMul(Type type, Layer layer);
+  SMMul(Layer layer, Type type);
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();

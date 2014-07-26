@@ -31,7 +31,7 @@ class MVMul : public DLAOp<3, 1>
 {
  public:
   Type m_type;
-  MVMul(Type type, Layer layer);
+  MVMul(Layer layer, Type type);
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();

@@ -20,6 +20,8 @@
 */
 
 #include "LLDLA.h"
+#include "regArith.h"
+#include "regLoadStore.h"
 #include "svmul.h"
 
 #if DOLLDLA
@@ -81,12 +83,15 @@ void SVMul::PrintRowStride(IndStream &out)
   if (m_vecType == COLVECTOR) {
     *out << "row_stride_smul_2x1( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << " );\n";
   } else {
     *out << "row_stride_smul_1x2( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << " );\n";
   }
+  return;
 }
 
 void SVMul::PrintColStride(IndStream &out)
@@ -100,7 +105,6 @@ void SVMul::PrintColStride(IndStream &out)
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ");\n";
   }
-
 }
 
 void SVMul::PrintGeneralStride(IndStream &out)
@@ -149,7 +153,7 @@ void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have LLDLA_MU rows\n";
       throw;
     }
-  }
+    }
 }
 
 Node* SVMul::BlankInst()
@@ -201,18 +205,20 @@ string SVMulLoopRef::GetType() const
 
 bool SVMulLoopRef::CanApply(const Node *node) const
 {
-  const SVMul *svmul = (SVMul*) node;
-  if (svmul->GetLayer() != m_fromLayer) {
-    return false;
-  }
-  if (m_vtype == ROWVECTOR) {
-    return !(*(svmul->GetInputN(1)) <= m_bs.Size());
-  } 
-  else if (m_vtype == COLVECTOR) {
-    return !(*(svmul->GetInputM(1)) <= m_bs.Size());
-  } 
-  else {
-    throw;
+  if (node->GetNodeClass() == SVMul::GetClass()) {
+    const SVMul *svmul = (SVMul*) node;
+    if (svmul->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if (m_vtype == ROWVECTOR) {
+      return !(*(svmul->GetInputN(1)) <= m_bs.Size());
+    } 
+    else if (m_vtype == COLVECTOR) {
+      return !(*(svmul->GetInputM(1)) <= m_bs.Size());
+    } 
+    else {
+      throw;
+    }
   }
   return false;
 }
@@ -229,7 +235,7 @@ void SVMulLoopRef::Apply(Node *node) const
 		      NOTUP, NOTUP);		     
   } else {
     split->SetUpStats(FULLUP, NOTUP,
-		       FULLUP, NOTUP);
+		      FULLUP, NOTUP);
   }
 
   split->SetIndepIters();
@@ -278,6 +284,7 @@ bool SVMulLowerLayer::CanApply(const Node *node) const
     } else {
       return false;
     }
+    return true;
   }
   else {
     throw;
@@ -294,6 +301,91 @@ string SVMulLowerLayer::GetType() const
 {
   return "SVMul lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool SVMulToRegArith::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == SVMul::GetClass()) {
+    SVMul* svmul = (SVMul*) node;
+    if (svmul->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if ((!(*(svmul->GetInputM(1)) <= LLDLA_MU) &&
+	 m_vType == COLVECTOR) ||
+	(!(*(svmul->GetInputN(1)) <= LLDLA_MU) &&
+	 m_vType == ROWVECTOR)) {
+      return true;
+    }
+    return false;
+  }
+  return false;
+}
+
+void SVMulToRegArith::Apply(Node* node) const
+{
+  SVMul* svmul = (SVMul*) node;
+
+  // Split up the input vector
+  SplitSingleIter* splitVec;
+  if (m_vType == ROWVECTOR) {
+    splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  } else {
+    splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+  }
+
+  splitVec->AddInput(svmul->Input(1), svmul->InputConnNum(1));
+
+  if (m_vType == ROWVECTOR) {
+    splitVec->SetUpStats(FULLUP, NOTUP,
+			  FULLUP, NOTUP);
+  } else {
+    splitVec->SetUpStats(FULLUP, FULLUP,
+			  NOTUP, NOTUP);
+  }
+
+  // Duplicate the value of C into the temp register
+  DuplicateRegLoad* dup = new DuplicateRegLoad();
+  dup->AddInput(svmul->Input(0), svmul->InputConnNum(0));
+  node->m_poss->AddNode(dup);
+
+  // Create tunnel for duplicated scalar
+  LoopTunnel* scalarTun = new LoopTunnel(POSSTUNIN);
+  scalarTun->AddInput(dup, 0);
+  scalarTun->SetAllStats(FULLUP);
+
+  // Create register for vector elements
+  LoadToRegs* loadA = new LoadToRegs();
+  loadA->AddInput(splitVec, 1);
+
+  // Create inner multiply operation
+  Mul* mul = new Mul();
+  mul->AddInput(scalarTun, 0);
+  mul->AddInput(loadA, 0);
+
+  // Create output tunnel for scalar
+  LoopTunnel* scalarOut = new LoopTunnel(POSSTUNOUT);
+  scalarOut->AddInput(scalarTun->Input(0), 0);
+  scalarOut->AddInput(scalarTun->Input(0), 0);
+  scalarOut->CopyTunnelInfo(scalarTun);
+
+  // Combine resulting vector
+  CombineSingleIter* combineVec = splitVec->CreateMatchingCombine(1, 1, mul, 0);
+
+  // Create poss
+  Poss* loopPoss = new Poss(2, combineVec, scalarOut);
+  Loop* loop = new Loop(LLDLALOOP, loopPoss, LLDLAMu);
+  
+  // Adding loop to poss and cleanup
+  node->m_poss->AddLoop(loop);
+  node->RedirectChildren(loop->OutTun(0), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+}
+
+string SVMulToRegArith::GetType() const
+{
+  return "SVMul register arith " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_fromLayer);
 }
 
 #endif // DOLLDLA
