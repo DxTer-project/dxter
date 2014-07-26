@@ -61,15 +61,7 @@ void Add::Prop()
 // TODO: Delete shape checks and instead check that
 // inputs are registers
 
-    if (*GetInputM(0) != *GetInputM(1)) {
-      throw;
-    }
-
-    if (*GetInputN(0) != *GetInputN(1)) {
-      throw;
-    }
-
-    m_cost = 0;
+     m_cost = 0;
   }
 }
 
@@ -89,14 +81,6 @@ void Mul::Prop()
 
 // TODO: Delete shape checks and instead check that
 // inputs are registers
-
-    if (*GetInputM(0) != *GetInputM(1)) {
-      throw;
-    }
-
-    if (*GetInputN(0) != *GetInputN(1)) {
-      throw;
-    }
 
     m_cost = 0;
   }

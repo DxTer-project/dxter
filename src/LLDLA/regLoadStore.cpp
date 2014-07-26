@@ -145,7 +145,7 @@ void StoreFromRegs::PrintCode(IndStream &out)
   out.Indent();
   string regVarName = GetInputNameStr(0);
   string memoryVarName = GetInputNameStr(1);
-  *out << "VEC_PD_STORE( " << memoryVarName << ", " << regVarName << " );\n";
+  *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << memoryVarName << " );\n";
   return;
 }
 
@@ -165,7 +165,7 @@ void DuplicateRegLoad::Prop()
 void DuplicateRegLoad::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << "VEC_DUP_LOAD( " << GetNameStr(0) << ", " << GetInputNameStr(0) << " );\n";
+  *out << "VEC_PTR_DUP_LOAD( " << GetNameStr(0) << ", " << GetInputNameStr(0) << " );\n";
 }
 
 void DuplicateRegLoad::ClearDataTypeCache()

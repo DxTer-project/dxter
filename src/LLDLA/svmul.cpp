@@ -346,6 +346,7 @@ void SVMulToRegArith::Apply(Node* node) const
   // Duplicate the value of C into the temp register
   DuplicateRegLoad* dup = new DuplicateRegLoad();
   dup->AddInput(svmul->Input(0), svmul->InputConnNum(0));
+  
   node->m_poss->AddNode(dup);
 
   // Create tunnel for duplicated scalar
@@ -362,14 +363,19 @@ void SVMulToRegArith::Apply(Node* node) const
   mul->AddInput(scalarTun, 0);
   mul->AddInput(loadA, 0);
 
+  // Create store node to save newly computed elements of x * A
+  StoreFromRegs* storeVec = new StoreFromRegs();
+  storeVec->AddInput(mul, 0);
+  storeVec->AddInput(splitVec, 1);
+
   // Create output tunnel for scalar
   LoopTunnel* scalarOut = new LoopTunnel(POSSTUNOUT);
-  scalarOut->AddInput(scalarTun->Input(0), 0);
-  scalarOut->AddInput(scalarTun->Input(0), 0);
+  scalarOut->AddInput(scalarTun, 0);
+  scalarOut->AddInput(scalarTun, 1);
   scalarOut->CopyTunnelInfo(scalarTun);
 
   // Combine resulting vector
-  CombineSingleIter* combineVec = splitVec->CreateMatchingCombine(1, 1, mul, 0);
+  CombineSingleIter* combineVec = splitVec->CreateMatchingCombine(1, 1, storeVec, 0);
 
   // Create poss
   Poss* loopPoss = new Poss(2, combineVec, scalarOut);
@@ -384,8 +390,13 @@ void SVMulToRegArith::Apply(Node* node) const
 
 string SVMulToRegArith::GetType() const
 {
-  return "SVMul register arith " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_fromLayer);
+  if (m_vType == ROWVECTOR) {
+    return "SVMul register arith - Row vector " + LayerNumToStr(m_fromLayer)
+      + " to " + LayerNumToStr(m_fromLayer);
+  } else {
+    return "SVMul register arith - Col vector " + LayerNumToStr(m_fromLayer)
+      + " to " + LayerNumToStr(m_fromLayer);
+  }
 }
 
 #endif // DOLLDLA

@@ -210,6 +210,8 @@ void AddTrans()
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+
   Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
 
 }

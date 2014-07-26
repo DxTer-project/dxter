@@ -482,7 +482,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
   }
   else if (AddElemToVec(vec, node, false)) {
     if (node->IsPossTunnel(SETTUNOUT)) {
-      //Found a PSet to be added to this poss
+      // Found a PSet to be added to this poss
       // add the output tunnels of the set, add the
       // set to my set list, and add the input set
       // tunnels and everything preceeding them
