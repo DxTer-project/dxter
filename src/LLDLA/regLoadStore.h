@@ -79,7 +79,7 @@ class DuplicateRegLoad : public DLANode
 
   virtual bool IsReadOnly() const {return true;}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
-  virtual bool IsDataDependencyOfInput() const {return false;}
+  virtual bool IsDataDependencyOfInput() const {return true;}
 
   virtual void AddVariables(VarSet &set) const;
   virtual void BuildDataTypeCache();
