@@ -50,6 +50,7 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_defines.push_back("#define VEC_PPTR_PD_LOAD(vec, p1, p2) (vec).v = VEC_2D_LOAD(p1, p2)");
   m_defines.push_back("#define VEC_PTR_DUP_LOAD(vec, ptr) (vec).v = _mm_loaddup_pd((ptr))");
   m_defines.push_back("#define VEC_PTR_PD_STORE(vec, ptr) _mm_store_pd((ptr), (vec).v)");
+  m_defines.push_back("#define VEC_PTR_PD_SET(n, vec, ptr) *(ptr) = (vec).d[(n)]");
   m_defines.push_back("#define BUF_SIZE 1000000");
   m_defines.push_back("#define NUM_ITERATIONS " + std::to_string(m_numIterations));
   m_defines.push_back("#define CHUNK_SIZE " + std::to_string(m_chunkSize));

@@ -202,7 +202,6 @@ string SVMulLoopRef::GetType() const
     }
 }
 
-
 bool SVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
@@ -232,7 +231,7 @@ void SVMulLoopRef::Apply(Node *node) const
 
   if (m_vtype == COLVECTOR) {
     split->SetUpStats(FULLUP, FULLUP,
-		      NOTUP, NOTUP);		     
+		      NOTUP, NOTUP);
   } else {
     split->SetUpStats(FULLUP, NOTUP,
 		      FULLUP, NOTUP);
@@ -260,11 +259,11 @@ void SVMulLoopRef::Apply(Node *node) const
 					      1, newMul, 0);
   
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
-  
+
   Loop *loop = new Loop(LLDLALOOP, loopPoss, LLDLAMu);
   // Row vectors are partitioned in the N dimension, column vectors in the M dimension
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
-  
+
   node->m_poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);

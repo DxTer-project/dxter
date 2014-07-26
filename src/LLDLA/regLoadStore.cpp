@@ -144,8 +144,39 @@ void StoreFromRegs::PrintCode(IndStream &out)
 {
   out.Indent();
   string regVarName = GetInputNameStr(0);
-  string memoryVarName = GetInputNameStr(1);
-  *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << memoryVarName << " );\n";
+  string storeLocation1 = GetInputNameStr(1);
+  string storeLocation2;
+  // Decide which load instruction is needed based on
+  // dimension and stride of input vector
+  Stride inputRowStride = InputDataType(1).m_rowStride;
+  Stride inputColStride = InputDataType(1).m_colStride;
+
+  if (IsInputColVector(1)) {
+    if (IsUnitStride(inputRowStride)) {
+      *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << storeLocation1 << " );\n";
+      return;
+    } else {
+      storeLocation2 = storeLocation1 + " + " + InputDataType(1).m_rowStrideVar;
+      *out << "VEC_PTR_PD_SET( 0, " << regVarName << ", " << storeLocation1 << " );\n";
+      out.Indent();
+      *out << "VEC_PTR_PD_SET( 1, " << regVarName << ", " << storeLocation2 << " );\n";
+      return;
+    }
+  } else if (IsInputRowVector(1)) {
+    if (IsUnitStride(inputColStride)) {
+      *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << storeLocation1 << " );\n";
+      return;
+    } else {
+      storeLocation2 = storeLocation1 + " + " + InputDataType(1).m_colStrideVar;
+      *out << "VEC_PTR_PD_SET( 0, " << regVarName << ", " << storeLocation1 << " );\n";
+      out.Indent();
+      *out << "VEC_PTR_PD_SET( 1, " << regVarName << ", " << storeLocation2 << " );\n";
+      return;
+    }
+  } else {
+    cout << "ERROR: Input to vector register store is neither row nor column vector\n";
+    throw;
+  }
   return;
 }
 
