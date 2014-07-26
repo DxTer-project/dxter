@@ -146,7 +146,7 @@ void StoreFromRegs::PrintCode(IndStream &out)
   string regVarName = GetInputNameStr(0);
   string storeLocation1 = GetInputNameStr(1);
   string storeLocation2;
-  // Decide which load instruction is needed based on
+  // Decide which store instruction is needed based on
   // dimension and stride of input vector
   Stride inputRowStride = InputDataType(1).m_rowStride;
   Stride inputColStride = InputDataType(1).m_colStride;

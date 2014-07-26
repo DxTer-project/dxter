@@ -75,8 +75,12 @@ void MVMul::PrintRowStride(IndStream &out)
 {
   *out << "row_stride_mmul_2x2_2x1( " <<
     GetInputName(0).str() << ", " <<
+    InputDataType(0).m_rowStrideVar << ", " <<
     GetInputName(1).str() << ", " <<
-    GetInputName(2).str() << ");\n";
+    InputDataType(1).m_rowStrideVar << ", " <<
+    GetInputName(2).str() << ", " <<
+    InputDataType(2).m_rowStrideVar << ");\n";
+  return;
 }
 
 void MVMul::PrintColStride(IndStream &out)
@@ -273,7 +277,7 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
   
   LoopTunnel *xOut = new LoopTunnel(POSSTUNOUT);
   xOut->AddInput(xTun, 0);
-  xOut->AddInput(mul->Input(1), 1);
+  xOut->AddInput(xTun, 1);
   xOut->CopyTunnelInfo(xTun);
 
   // Create poss
