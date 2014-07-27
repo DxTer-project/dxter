@@ -41,9 +41,9 @@ class SplitBase : public LoopTunnel
   bool m_isControlTun;
   SplitBase();
 #if TWOD
-  SplitBase(PartDir dir, PossTunType type, bool isControl);
+  SplitBase(PartDir dir, TunType type, bool isControl);
 #else
-  SplitBase(unsigned int partDim, PossTunType type, bool isControl);
+  SplitBase(unsigned int partDim, TunType type, bool isControl);
 #endif
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;

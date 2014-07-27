@@ -35,12 +35,12 @@ m_partDim(99)
 }
 
 #if TWOD
-SplitBase::SplitBase(PartDir dir, PossTunType type, bool isControl) 
+SplitBase::SplitBase(PartDir dir, TunType type, bool isControl) 
   : LoopTunnel(type), m_dir(dir), m_isControlTun(isControl)
 {
 }
 #else
-SplitBase::SplitBase(unsigned int partDim, PossTunType type, bool isControl) 
+SplitBase::SplitBase(unsigned int partDim, TunType type, bool isControl) 
   : LoopTunnel(type), m_partDim(partDim), m_isControlTun(isControl)
 {
 }

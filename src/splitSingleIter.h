@@ -42,14 +42,14 @@ class SplitSingleIter : public SplitBase
 #endif
   SplitSingleIter();
 #if TWOD
-  SplitSingleIter(PartDir dir, PossTunType type, bool isControl = false);
+  SplitSingleIter(PartDir dir, TunType type, bool isControl = false);
 #else
-  SplitSingleIter(unsigned int partDim, PossTunType type, bool isControl = false);
+  SplitSingleIter(unsigned int partDim, TunType type, bool isControl = false);
 #endif
   virtual ~SplitSingleIter();
   static Node* BlankInst();
   virtual Node* GetNewInst() {return BlankInst(); }
-  virtual PossTunnel* GetSetTunnel();
+  virtual Tunnel* GetSetTunnel();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

@@ -121,11 +121,11 @@ void Transpose::PrintCode(IndStream &out)
       }
       else if (in->IsLoopTunnel())
         break;
-      else if (in->IsPossTunnel(POSSTUNIN)) {
+      else if (in->IsTunnel(POSSTUNIN)) {
         num = in->InputConnNum(0);
         in = in->Input(0);
       }
-      else if (in->IsPossTunnel(SETTUNIN)) {
+      else if (in->IsTunnel(SETTUNIN)) {
         num = in->InputConnNum(0);
         in = in->Input(0);
       }

@@ -28,26 +28,26 @@
 
 class BasePSet;
 
-class PossTunnel : public DLANode
+class Tunnel : public DLANode
 {
  public:
-  PossTunType m_tunType;
+  TunType m_tunType;
   BasePSet *m_pset;
-  PossTunnel();
-  PossTunnel(PossTunType type);
+  Tunnel();
+  Tunnel(TunType type);
   void SetPSet(BasePSet *set);
-  static Node* BlankInst() { return new PossTunnel;}
+  static Node* BlankInst() { return new Tunnel;}
   virtual Node* GetNewInst() {return BlankInst(); }
-  virtual PossTunnel* GetSetTunnel();
+  virtual Tunnel* GetSetTunnel();
   virtual void Prop();
   virtual void PrintCode(IndStream &out) {};
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
-  virtual bool IsPossTunnel() const {return true;}
-  virtual bool IsPossTunnel(PossTunType type) const;
+  virtual bool IsTunnel() const {return true;}
+  virtual bool IsTunnel(TunType type) const;
   virtual unsigned int NumOutputs() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "PossTunnel";}
+  static ClassType GetClass() {return "Tunnel";}
   virtual const DataTypeInfo& DataType(ConnNum num) const;
 #if TWOD
   virtual const Sizes* GetM(ConnNum num) const;
@@ -67,6 +67,8 @@ class PossTunnel : public DLANode
   virtual bool Overwrites(const Node *input, ConnNum num) const;
   virtual bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const;
   virtual bool IsCombine() const {return false;}
+  Tunnel* GetRealTunnel();
+  const Tunnel* GetRealTunnel() const;
 };
 
-string TunTypeToStr(PossTunType type);
+string TunTypeToStr(TunType type);

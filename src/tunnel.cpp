@@ -23,19 +23,19 @@
 #include "possTunnel.h"
 #include "basePSet.h"
 
-PossTunnel::PossTunnel() 
+Tunnel::Tunnel() 
  :m_tunType(LASTTUNNEL),
   m_pset(NULL)
 {
 }
 
-PossTunnel::PossTunnel(PossTunType type) 
+Tunnel::Tunnel(TunType type) 
  :m_tunType(type),
   m_pset(NULL)
 {
 }
 
-NodeType PossTunnel::GetType() const 
+NodeType Tunnel::GetType() const 
 {
   switch(m_tunType)
     {
@@ -48,24 +48,24 @@ NodeType PossTunnel::GetType() const
     case(SETTUNOUT):
       return "PSet output";
     default:
-      return "PossTunnel type unknown";
+      return "Tunnel type unknown";
     }
 }
 
-bool PossTunnel::IsPossTunnel(PossTunType type) const
+bool Tunnel::IsTunnel(TunType type) const
 {
   return m_tunType == type;
 }
 
 
-void PossTunnel::SetPSet(BasePSet *set)
+void Tunnel::SetPSet(BasePSet *set)
 {
   if (m_tunType != SETTUNIN && m_tunType != SETTUNOUT)
     cout << "bad set\n";
   m_pset = set;
 }
 
-bool PossTunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
+bool Tunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(0) == input && InputConnNum(0) == numIn) {
     numOut = numIn;
@@ -75,15 +75,15 @@ bool PossTunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) 
     throw;
 }
 
-PossTunnel* PossTunnel::GetSetTunnel()
+Tunnel* Tunnel::GetSetTunnel()
 {
   if (m_tunType == POSSTUNIN) {
-    PossTunnel *tun = (PossTunnel*)GetNewInst();
+    Tunnel *tun = (Tunnel*)GetNewInst();
     tun->m_tunType = SETTUNIN;
     return tun;
   }
   else if (m_tunType == POSSTUNOUT) {
-    PossTunnel *tun = (PossTunnel*)GetNewInst();
+    Tunnel *tun = (Tunnel*)GetNewInst();
     tun->m_tunType = SETTUNOUT;
     return tun;
   }
@@ -93,7 +93,7 @@ PossTunnel* PossTunnel::GetSetTunnel()
   }
 }
 
-void PossTunnel::Prop()
+void Tunnel::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLANode::Prop();
@@ -154,17 +154,29 @@ void PossTunnel::Prop()
   }
 }
 
-const DataTypeInfo& PossTunnel::DataType(ConnNum num) const
+const DataTypeInfo& Tunnel::DataType(ConnNum num) const
 {
   if (num != 0)
     throw;
-  return InputDataType(0);
+  if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
+    GetRealTunnel()->DataType(num);
+  }
+  else {
+    return InputDataType(0);
+  }
 }
 
 #if TWOD
 const Sizes* PossTunnel::GetM(ConnNum num) const
 {
-  if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
+  if (m_tunType == SETTUNOUT) {
+    if (m_pset->IsReal())
+      return ((DLANode*)Input(0))->GetM(num);
+    else {
+      GetRealTunnel()->GetM(num);
+    }
+  }
+  else if (m_tunType != POSSTUNIN) {
     return GetInputM(num);
   }
   else {
@@ -174,8 +186,15 @@ const Sizes* PossTunnel::GetM(ConnNum num) const
 
 const Sizes* PossTunnel::GetN(ConnNum num) const
 {
-  if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
-    return GetInputN(num);
+  if (m_tunType == SETTUNOUT) {
+    if (m_pset->IsReal())
+      return ((DLANode*)Input(0))->GetN(num);
+    else {
+      GetRealTunnel()->GetN(num);
+    }
+  }
+  else if (m_tunType != POSSTUNIN) {
+    return GetInputM(num);
   }
   else {
     return ((DLANode*)Input(0))->GetN(num);
@@ -185,35 +204,61 @@ const Sizes* PossTunnel::GetN(ConnNum num) const
 #if DODM
 const Sizes* PossTunnel::LocalM(ConnNum num) const
 {
-  const NodeConn *conn = m_inputs[0];
-  const DLANode *input = (DLANode*)(conn->m_n);
-  
-  return input->LocalM(conn->m_num);
+  if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
+    GetRealTunnel()->LocalM(num);
+  }
+  else {
+    const NodeConn *conn = m_inputs[0];
+    const DLANode *input = (DLANode*)(conn->m_n);
+    
+    return input->LocalM(conn->m_num);
+  }
 }
 
 const Sizes* PossTunnel::LocalN(ConnNum num) const
 {
-  const NodeConn *conn = m_inputs[0];
-  const DLANode *input = (DLANode*)(conn->m_n);
-  
-  return input->LocalN(conn->m_num);
+  if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
+    GetRealTunnel()->LocalN(num);
+  }
+  else {
+    const NodeConn *conn = m_inputs[0];
+    const DLANode *input = (DLANode*)(conn->m_n);
+    
+    return input->LocalN(conn->m_num);
+  }
 }
 #endif
 
 #else
 const Dim PossTunnel::NumDims(ConnNum num) const
 {
-  if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
+
+  if (m_tunType == SETTUNOUT) {
+    if (m_pset->IsReal())
+      return ((DLANode*)Input(0))->NumDims(num);
+    else {
+      GetRealTunnel->NumDims(num);
+    }
+  }
+  else if (m_tunType != POSSTUNIN) {
     return InputNumDims(num);
   }
   else {
-    return ((DLANode*)Input(0))->NumDims(num);
+    return ((DLANode*)Input(0))->InputNumDims(num);
   }
 }
 
 const Sizes* PossTunnel::Len(ConnNum num,Dim dim) const
 {
-  if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
+
+  if (m_tunType == SETTUNOUT) {
+    if (m_pset->IsReal())
+      return ((DLANode*)Input(0))->NumDims(num);
+    else {
+      GetRealTunnel()->Len(num,dim);
+    }
+  }
+  else if (m_tunType != POSSTUNIN) {
     return InputLen(num,dim);
   }
   else {
@@ -223,17 +268,29 @@ const Sizes* PossTunnel::Len(ConnNum num,Dim dim) const
 
 const Sizes* PossTunnel::LocalLen(ConnNum num,Dim dim) const
 {
-  const NodeConn *conn = m_inputs[0];
-  const DLANode *input = (DLANode*)(conn->m_n);
-  
-  return input->LocalLen(conn->m_num,dim);
+  if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
+    GetRealTunnel()->LocalLen(num,dim);
+  }
+  else {
+    const NodeConn *conn = m_inputs[0];
+    const DLANode *input = (DLANode*)(conn->m_n);
+    
+    return input->LocalLen(conn->m_num,dim);
+  }
 }
 
 #endif
 
 Name PossTunnel::GetName(ConnNum num) const 
 {
-  if (m_tunType != SETTUNOUT && m_tunType != POSSTUNIN) {
+  if (m_tunType == SETTUNOUT) {
+    if (m_pset->IsReal())
+      return GetInputName(0);
+    else {
+      GetRealTunnel()->GetName(num);
+    }
+  }
+  else if (m_tunType != POSSTUNIN) {
     return GetInputName(num);
   }
   else {
@@ -251,8 +308,13 @@ unsigned int PossTunnel::NumOutputs() const
     case (SETTUNIN) :
       return m_inputs.size();
     case (POSSTUNIN) :
-    case (SETTUNOUT) :
 	return Input(0)->NumOutputs();
+    case (SETTUNOUT) :
+      if (m_pset->IsReal())
+	return Input(0)->NumOutputs();
+      else {
+	GetRealTunnel()->NumOutputs();
+      }
     default:
       cout << "bad tunnel type\n";
       throw;
@@ -280,7 +342,6 @@ string TunTypeToStr(PossTunType type)
       return "set tun out";
     default:
       return "unknown tun type";
-      
     }
 }
 
@@ -306,10 +367,17 @@ void PossTunnel::UnflattenCore(ifstream &in, SaveInfo &info)
 bool PossTunnel::Overwrites(const Node *input, ConnNum num) const
 {
   if (m_tunType == SETTUNIN) {
-    if (!m_children.size())
-      throw;
-    const NodeConn *conn = m_children[0];
-    return conn->m_n->Overwrites(this, conn->m_num);
+    if (m_pset->IsReal()) {
+      if (!m_children.size())
+	throw;
+      const NodeConn *conn = m_children[0];
+      return conn->m_n->Overwrites(this, conn->m_num);
+    }
+    else {
+      const RealPSet *real = m_pset->GetReal();
+      unsigned int num = FindInNodeVec(m_pset->m_inTuns, this);
+      return real->m_inTuns[num]->m_children[0]->Overwrites(real->m_inTuns[num]->m_children[0],num);
+    }
   }
   else if (m_tunType == POSSTUNIN) {
     NodeConnVecConstIter iter = m_children.begin();
@@ -322,4 +390,39 @@ bool PossTunnel::Overwrites(const Node *input, ConnNum num) const
   }
   else
     return false;
+}
+
+Tunnel* Tunnel::GetRealTunnel() 
+{
+  if (m_pset->IsReal())
+    return this;
+  RealPSet *real = m_pset->GetReal();
+  if (m_tunType == SETTUNIN) {
+    unsigned int num = FindInNodeVec(m_pset->m_inTuns, this);
+    return real->m_inTuns[num];
+  }
+  else if (m_tunType == SETTUNOUT) {
+    unsigned int num = FindInNodeVec(m_pset->m_outTuns, this);
+    return real->m_outTuns[num];
+  }
+  else
+    throw;
+}
+
+
+const Tunnel* Tunnel::GetRealTunnel() const
+{
+  if (m_pset->IsReal())
+    return this;
+  const RealPSet *real = m_pset->GetReal();
+  if (m_tunType == SETTUNIN) {
+    unsigned int num = FindInNodeVec(m_pset->m_inTuns, this);
+    return real->m_inTuns[num];
+  }
+  else if (m_tunType == SETTUNOUT) {
+    unsigned int num = FindInNodeVec(m_pset->m_outTuns, this);
+    return real->m_outTuns[num];
+  }
+  else
+    throw;
 }

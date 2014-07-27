@@ -87,7 +87,7 @@ class Node
   // error conditions
   virtual void Prop() = 0;
   //The maximum phase in which this node should be found
-  // Going from that phase to the next, a Poss with this node
+  // Going from that phase to the next, a Poss; with this node
   // should be culled (but HasRefined will be checked
   // and an exception will be thrown if the node hasn't refined)
   //Should super message
@@ -182,8 +182,8 @@ class Node
   bool InChildren(Node *node, ConnNum num) const;
   bool InInputs(Node *node, ConnNum num) const;
   virtual bool IsDLA() const {return false;}
-  virtual bool IsPossTunnel() const {return false;}
-  virtual bool IsPossTunnel(PossTunType type) const {return false;}
+  virtual bool IsTunnel() const {return false;}
+  virtual bool IsTunnel(TunType type) const {return false;}
   virtual bool IsLoopTunnel() const {return false;}
   virtual bool IsParallel() const {return false;}
   const BasePSet* FindClosestLoop() const;

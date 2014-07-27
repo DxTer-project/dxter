@@ -28,7 +28,7 @@
 //#include "possTunnel.h"
 #include "basePSet.h"
 
-class PossTunnel;
+class Tunnel;
 class ShadowPSet;
 
 class RealPSet : public BasePSet

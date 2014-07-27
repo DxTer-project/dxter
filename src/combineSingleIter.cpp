@@ -32,7 +32,7 @@ CombineSingleIter::CombineSingleIter()
 {
 }
 
-CombineSingleIter::CombineSingleIter(PartDir dir, PossTunType type) 
+CombineSingleIter::CombineSingleIter(PartDir dir, TunType type) 
   : CombineBase(dir,type)
 {
 }
@@ -43,7 +43,7 @@ CombineSingleIter::CombineSingleIter()
 {
 }
 
-CombineSingleIter::CombineSingleIter(Dim partDim, PossTunType type) 
+CombineSingleIter::CombineSingleIter(Dim partDim, TunType type) 
   : CombineBase(partDim, type)
 {
 }
@@ -118,7 +118,7 @@ void CombineSingleIter::Prop()
 	throw;
 
 #if DODM
-	DistType type = this->InputDataType(0).m_dist;
+	DistType type = GetRealTunnel()->InputDataType(0).m_dist;
     for(ConnNum i = 0; i < m_inputs.size(); ++i) {
       if (DistTypeNotEqual(type, InputDataType(i).m_dist)) {
         cout << "Bad input types\n";
@@ -139,7 +139,7 @@ const DataTypeInfo& CombineSingleIter::DataType(ConnNum num) const
   if (m_tunType == POSSTUNOUT)
     return InputDataType(m_inputs.size()-1);
   else if (m_tunType == SETTUNOUT)
-    return InputDataType(0);
+    return GetRealTunnel()->InputDataType(0);
   else
     throw;
 }
@@ -150,7 +150,7 @@ const Sizes* CombineSingleIter::GetM(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(GetNumElems(m_dir))->Input(0)))->GetInputM(0);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(GetNumElems(m_dir))->Input(0)))->GetInputM(0);
   }
   else if (m_tunType == POSSTUNOUT) {
     return GetInputM(m_inputs.size()-1);
@@ -165,7 +165,7 @@ const Sizes* CombineSingleIter::GetN(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(GetNumElems(m_dir))->Input(0)))->GetInputN(0);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(GetNumElems(m_dir))->Input(0)))->GetInputN(0);
   }
   else if (m_tunType == POSSTUNOUT) {
     return GetInputN(m_inputs.size()-1);
@@ -181,7 +181,7 @@ const Sizes* CombineSingleIter::LocalM(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    DLANode *possTunOut = (DLANode*)Input(0);
+    DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
     DLANode *possTunIn = (DLANode*)(possTunOut->Input(GetNumElems(m_dir)));
     DLANode *setTunIn = (DLANode*)(possTunIn->Input(0));
     return setTunIn->InputLocalM(0);
@@ -199,7 +199,7 @@ const Sizes* CombineSingleIter::LocalN(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(GetNumElems(m_dir))->Input(0)))->InputLocalN(0);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(GetNumElems(m_dir))->Input(0)))->InputLocalN(0);
   }
   else if (m_tunType == POSSTUNOUT) {
     return InputLocalN(m_inputs.size()-1);
@@ -218,7 +218,7 @@ const Dim CombineSingleIter::NumDims(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(3)->Input(0)))->NumDims(0);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(3)->Input(0)))->NumDims(0);
   }
   else if (m_tunType == POSSTUNOUT) {
     return InputNumDims(m_inputs.size()-1);
@@ -233,7 +233,7 @@ const Sizes* CombineSingleIter::Len(ConnNum num, Dim dim) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(3)->Input(0)))->Len(0,dim);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(3)->Input(0)))->Len(0,dim);
   }
   else if (m_tunType == POSSTUNOUT) {
     return InputLen(m_inputs.size()-1,dim);
@@ -248,7 +248,7 @@ const Sizes* CombineSingleIter::LocalLen(ConnNum num, Dim dim) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    DLANode *possTunOut = (DLANode*)Input(0);
+    DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
 #if TWOD
     DLANode *possTunIn = (DLANode*)(possTunOut->Input(GetNumElems(m_dir)));
 #else
@@ -275,19 +275,21 @@ Name CombineSingleIter::GetName(ConnNum num) const
   if (m_tunType == POSSTUNOUT)
     return ((SplitSingleIter*)Input(m_inputs.size()-1))->GetOrigName();
   else
-    return Input(0)->GetName(0);
+    return GetRealTunnel()->Input(0)->GetName(0);
 }
 
-PossTunnel* CombineSingleIter::GetSetTunnel()
+Tunnel* CombineSingleIter::GetSetTunnel()
 {
   CombineSingleIter *tun;
+  /*
   if (m_tunType == POSSTUNIN)
 #if TWOD
     tun = new CombineSingleIter(m_dir, SETTUNIN);
 #else
     tun = new CombineSingleIter(m_partDim, SETTUNIN);
 #endif
-  else if (m_tunType == POSSTUNOUT)
+else*/
+  if (m_tunType == POSSTUNOUT)
 #if TWOD
     tun = new CombineSingleIter(m_dir, SETTUNOUT);
 #else
@@ -392,11 +394,11 @@ void CombineSingleIter::PrintCode(IndStream &out)
 NodeType CombineSingleIter::GetType() const
 {
 #if TWOD
-  return "Combine " + PartDirToStr(m_dir) + "( " + PossTunnel::GetType() + " )";
+  return "Combine " + PartDirToStr(m_dir) + "( " + Tunnel::GetType() + " )";
 #else
   string str = "Combine ";
   str += m_partDim;
-  return str + " ( " + PossTunnel::GetType() + " )";
+  return str + " ( " + Tunnel::GetType() + " )";
 #endif
 }
 

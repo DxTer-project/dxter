@@ -236,13 +236,13 @@ PSet* Cont1Example()
   InputNode *Bin = new InputNode("B input",  sizes, "B", 4);
   InputNode *Cin = new InputNode("C input",  sizes, "C", 3);
 
-  PossTunnel *tunA = new PossTunnel(POSSTUNIN);
+  Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);
 
-  PossTunnel *tunB = new PossTunnel(POSSTUNIN);
+  Tunnel *tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(Bin,0);
 
-  PossTunnel *tunC = new PossTunnel(POSSTUNIN);
+  Tunnel *tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
   Contraction *cont = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"acd", "cefd", "aef", (string)"cd");
@@ -309,31 +309,31 @@ PSet* MartinsExample()
 
   InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", 4);
 
-  PossTunnel *tunU = new PossTunnel(POSSTUNIN);
+  Tunnel *tunU = new Tunnel(POSSTUNIN);
   tunU->AddInput(Uin,0);
 
-  PossTunnel *tunV = new PossTunnel(POSSTUNIN);
+  Tunnel *tunV = new Tunnel(POSSTUNIN);
   tunV->AddInput(Vin,0);
 
-  PossTunnel *tunW = new PossTunnel(POSSTUNIN);
+  Tunnel *tunW = new Tunnel(POSSTUNIN);
   tunW->AddInput(Win,0);
 
-  PossTunnel *tunT1 = new PossTunnel(POSSTUNIN);
+  Tunnel *tunT1 = new Tunnel(POSSTUNIN);
   tunT1->AddInput(T1in,0);
 
-  PossTunnel *tunT2 = new PossTunnel(POSSTUNIN);
+  Tunnel *tunT2 = new Tunnel(POSSTUNIN);
   tunT2->AddInput(T2in,0);
 
-  PossTunnel *tunT3 = new PossTunnel(POSSTUNIN);
+  Tunnel *tunT3 = new Tunnel(POSSTUNIN);
   tunT3->AddInput(T3in,0);
 
-  PossTunnel *tunT4 = new PossTunnel(POSSTUNIN);
+  Tunnel *tunT4 = new Tunnel(POSSTUNIN);
   tunT4->AddInput(T4in,0);
 
-  PossTunnel *tunIn = new PossTunnel(POSSTUNIN);
+  Tunnel *tunIn = new Tunnel(POSSTUNIN);
   tunIn->AddInput(tempIn,0);
 
-  PossTunnel *tunOutVal = new PossTunnel(POSSTUNIN);
+  Tunnel *tunOutVal = new Tunnel(POSSTUNIN);
   tunOutVal->AddInput(epIn,0);
 
   Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abcd","cdij","abij",(string)"cd");

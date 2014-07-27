@@ -171,7 +171,10 @@ void LoopTunnel::Prop()
 
 const DataTypeInfo& LoopTunnel::DataType(ConnNum num) const
 {
-  return InputDataType(0);
+  if (m_tunType == SETTUNIN)
+    return GetRealTunnel()->InputDataType(0);
+  else
+    return InputDataType(0);
 }
 
 #if TWOD
@@ -179,7 +182,6 @@ const Sizes* LoopTunnel::GetM(ConnNum num) const
 {
   switch(m_tunType) 
   {
-      //    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
         throw;
@@ -187,7 +189,7 @@ const Sizes* LoopTunnel::GetM(ConnNum num) const
     case (SETTUNOUT):
       if (num > 0)
         throw;
-      return GetInputM(0);
+      return GetRealTunnel()->GetInputM(0);
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -215,7 +217,7 @@ const Sizes* LoopTunnel::GetN(ConnNum num) const
     case (SETTUNOUT):
       if (num > 0)
         throw;
-      return GetInputN(0);
+      return GetRealTunnel()->GetInputN(0);
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -244,7 +246,7 @@ const Sizes* LoopTunnel::LocalM(ConnNum num) const
     case (SETTUNOUT):
       if (num > 0)
         throw;
-      return InputLocalM(0);
+      return GetRealTunnel()->InputLocalM(0);
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -272,7 +274,7 @@ const Sizes* LoopTunnel::LocalN(ConnNum num) const
     case (SETTUNOUT):
       if (num > 0)
         throw;
-      return InputLocalN(0);
+      return GetRealTunnel()->InputLocalN(0);
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -302,7 +304,7 @@ const Sizes* LoopTunnel::Len(ConnNum num,Dim dim) const
     case (SETTUNOUT):
       if (num > 0)
         throw;
-      return InputLen(0,dim);
+      return GetRealTunnel()->InputLen(0,dim);
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -333,7 +335,7 @@ const Dim LoopTunnel::NumDims(ConnNum num) const
     case (SETTUNOUT):
       if (num > 0)
         throw;
-      return InputNumDims(0);
+      return GetRealTunnel()->InputNumDims(0);
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -357,7 +359,7 @@ const Sizes* LoopTunnel::LocalLen(ConnNum num,Dim dim) const
     case (SETTUNOUT):
       if (num > 0)
         throw;
-      return InputLocalLen(0,dim);
+      return GetRealTunnel()->InputLocalLen(0,dim);
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -395,7 +397,7 @@ Name LoopTunnel::GetName(ConnNum num) const
   Name name;
   if (GetLoopType() == BLISLOOP) {
     if (m_tunType == SETTUNOUT)
-      return ((LoopTunnel*)Input(0))->GetOrigName();
+      return ((LoopTunnel*)(GetRealTunnel()->Input(0)))->GetOrigName();
     else if (m_tunType == POSSTUNOUT)
       return ((LoopTunnel*)Input(1))->GetOrigName();
     else if (m_tunType == SETTUNIN) {
@@ -410,7 +412,9 @@ Name LoopTunnel::GetName(ConnNum num) const
 
 Name LoopTunnel::GetOrigName() const
 {
-  if (m_tunType == SETTUNOUT || m_tunType == POSSTUNIN)
+  if (m_tunType == SETTUNOUT)
+    return ((LoopTunnel*)(GetRealTunnel()->Input(0)))->GetOrigName();
+  if (m_tunType == POSSTUNIN)
     return ((LoopTunnel*)Input(0))->GetOrigName();
   else if (m_tunType == POSSTUNOUT)
     return ((LoopTunnel*)Input(m_inputs.size()-1))->GetOrigName();
@@ -496,7 +500,7 @@ bool LoopTunnel::AllFullyUpdated() const
 bool LoopTunnel::QuadInUse(Quad quad, bool atEnd) const
 {
   if (m_tunType == SETTUNIN) {
-    Node *child = Child(0);
+    Node *child = GetRealTunnel()->Child(0);
     if (!child->IsLoopTunnel())
       throw;
     return ((LoopTunnel*)child)->QuadInUse(quad, atEnd);
@@ -516,7 +520,13 @@ bool LoopTunnel::QuadInUse(Quad quad, bool atEnd) const
 LoopTunnel* LoopTunnel::GetMatchingOutTun() const
 {
   if (m_tunType == SETTUNIN)
-    return (LoopTunnel*)(((LoopTunnel*)Child(0))->GetMatchingOutTun()->Child(0));
+    if (m_pset->IsReal()) 
+      return (LoopTunnel*)(((LoopTunnel*)Child(0))->GetMatchingOutTun()->Child(0));
+    else {
+      LoopTunnel *possTunOut = ((LoopTunnel*)(GetRealTunnel()->Child(0)))->GetMatchingOutTun();
+      LoopTunnel *realSetTunOut = (LoopTunnel*)(possTunOut->Child(0));
+      return (LoopTunnel*)(m_pset->m_outTuns[FindInNodeVec(m_pset->GetReal()->m_outTuns, realSetTunOut)]);
+    }
   else if (m_tunType != POSSTUNIN) 
     throw;
   
@@ -536,7 +546,13 @@ LoopTunnel* LoopTunnel::GetMatchingOutTun() const
 LoopTunnel* LoopTunnel::GetMatchingInTun() const
 {
   if (m_tunType == SETTUNOUT)
-    return (LoopTunnel*)(((LoopTunnel*)Input(0))->GetMatchingInTun()->Input(0));
+    if (m_pset->IsReal())
+      return (LoopTunnel*)(((LoopTunnel*)Input(0))->GetMatchingInTun()->Input(0));
+    else {
+      LoopTunnel *possTunIn = ((LoopTunnel*)(GetRealTunnel()->Input(0)))->GetMatchingInTun();
+      LoopTunnel *realSetTunIn = (LoopTunnel*)(possTunIn->Input(0));
+      return (LoopTunnel*)(m_pset->m_inTuns[FindInNodeVec(m_pset->GetReal()->m_inTuns, realSetTunIn)]);
+    }
   else if (m_tunType != POSSTUNOUT)
     throw;
   
@@ -622,6 +638,8 @@ void LoopTunnel::StartFillingSizes()
 {
   if (m_tunType != SETTUNIN)
     return;
+  if (!m_pset->IsReal())
+    return;
 #if TWOD
   if (m_msizes)
     throw;
@@ -645,6 +663,9 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
 {
   if (m_tunType != SETTUNIN)
     return;
+  if (!m_pset->IsReal())
+    return;
+
   if (!m_msizes)
     throw;
   const DLANode *input = (DLANode*)Input(0);
@@ -694,6 +715,9 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
 {
   if (m_tunType != SETTUNIN)
     return;
+  if (!m_pset->IsReal())
+    return;
+
   if (!m_sizes)
     throw;
   const DLANode *input = (DLANode*)Input(0);
@@ -767,6 +791,8 @@ bool LoopTunnel::Overwrites(const Node *input, ConnNum num) const
 
 bool LoopTunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
+  if (m_inputs.empty())
+    throw;
   if (Input(m_inputs.size()-1) == input && InputConnNum(m_inputs.size()-1) == numIn) {
     numOut = numIn;
     return true;

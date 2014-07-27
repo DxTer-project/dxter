@@ -77,7 +77,7 @@ void RegAllDLANodes()
 #if 0
   Reg(CritSectTunnel);
 #endif
-  Reg(PossTunnel);
+  Reg(Tunnel);
   Reg(Trxm);
 #if DOBLIS
   Reg(Transpose);

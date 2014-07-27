@@ -33,17 +33,17 @@ class CombineSingleIter : public CombineBase
  public:
 #if TWOD
   CombineSingleIter();
-  CombineSingleIter(PartDir dir, PossTunType type);
+  CombineSingleIter(PartDir dir, TunType type);
 #else
   CombineSingleIter();
-  CombineSingleIter(Dim partDim, PossTunType type);
+  CombineSingleIter(Dim partDim, TunType type);
 #endif
   virtual void PrintCode(IndStream &out);
   static Node* BlankInst() { return new CombineSingleIter(LASTPARTDIR,LASTTUNNEL);}
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual NodeType GetType() const;
   virtual void Prop();
-  virtual PossTunnel* GetSetTunnel();
+  virtual Tunnel* GetSetTunnel();
   virtual unsigned int NumOutputs() const {return 1;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "combine";}

@@ -85,7 +85,7 @@ class Poss
   bool Simplify(const TransMap &simplifiers, bool recursive = false);
   void PrintTransVec();
   void RemoveConnectionToSet();
-  void ExpandTunnels();
+  //  void ExpandTunnels();
   Node* InTun(unsigned int num) const {return m_inTuns[num];}
   Node* OutTun(unsigned int num) const {return m_outTuns[num];}
   void MergePart1(unsigned int left, unsigned int right, 

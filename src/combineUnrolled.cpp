@@ -33,7 +33,7 @@ CombineUnrolled::CombineUnrolled()
 {
 }
 
-CombineUnrolled::CombineUnrolled(PartDir dir, unsigned int unrollFactor, PossTunType type) 
+CombineUnrolled::CombineUnrolled(PartDir dir, unsigned int unrollFactor, TunType type) 
   : CombineBase(dir,type), 
     m_unrollFactor(unrollFactor)
 {
@@ -47,7 +47,7 @@ CombineUnrolled::CombineUnrolled()
 }
 
 
-CombineUnrolled::CombineUnrolled(Dim partDim, unsigned int unrollFactor, PossTunType type) 
+CombineUnrolled::CombineUnrolled(Dim partDim, unsigned int unrollFactor, TunType type) 
   : CombineBase(partDim, type), 
     m_unrollFactor(unrollFactor)
 {
@@ -77,7 +77,7 @@ void CombineUnrolled::Prop()
 
 const DataTypeInfo& CombineUnrolled::DataType(ConnNum num) const
 {
-  return InputDataType(0);
+  return GetRealTunnel()->InputDataType(0);
 }
 
 #if TWOD
@@ -86,7 +86,7 @@ const Sizes* CombineUnrolled::GetM(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(m_unrollFactor)->Input(0)))->GetInputM(0);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->GetInputM(0);
   }
   else if (m_tunType == POSSTUNOUT) {
     return GetInputM(m_unrollFactor);
@@ -101,7 +101,7 @@ const Sizes* CombineUnrolled::GetN(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(m_unrollFactor)->Input(0)))->GetInputN(0);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->GetInputN(0);
   }
   else if (m_tunType == POSSTUNOUT) {
     return GetInputN(m_unrollFactor);
@@ -117,7 +117,7 @@ const Sizes* CombineUnrolled::LocalM(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    DLANode *possTunOut = (DLANode*)Input(0);
+    DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
     DLANode *possTunIn = (DLANode*)(possTunOut->Input(m_unrollFactor));
     DLANode *setTunIn = (DLANode*)(possTunIn->Input(0));
     return setTunIn->InputLocalM(0);
@@ -135,7 +135,7 @@ const Sizes* CombineUnrolled::LocalN(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(m_unrollFactor)->Input(0)))->InputLocalN(0);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->InputLocalN(0);
   }
   else if (m_tunType == POSSTUNOUT) {
     return InputLocalN(m_unrollFactor);
@@ -154,7 +154,7 @@ const Dim CombineUnrolled::NumDims(ConnNum num) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(m_unrollFactor)->Input(0)))->NumDims(0);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->NumDims(0);
   }
   else if (m_tunType == POSSTUNOUT) {
     return InputNumDims(m_inputs.size()-1);
@@ -169,7 +169,7 @@ const Sizes* CombineUnrolled::Len(ConnNum num, Dim dim) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    return ((DLANode*)(Input(0)->Input(m_unrollFactor)->Input(0)))->Len(0,dim);
+    return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->Len(0,dim);
   }
   else if (m_tunType == POSSTUNOUT) {
     return InputLen(m_unrollFactor,dim);
@@ -184,7 +184,7 @@ const Sizes* CombineUnrolled::LocalLen(ConnNum num, Dim dim) const
   if (num > 0)
     throw;
   if (m_tunType == SETTUNOUT) {
-    DLANode *possTunOut = (DLANode*)Input(0);
+    DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
     DLANode *possTunIn = (DLANode*)(possTunOut->Input(m_unrollFactor));
     DLANode *setTunIn = (DLANode*)(possTunIn->Input(0));
     return setTunIn->InputLocalLen(0,dim);
@@ -207,26 +207,27 @@ Name CombineUnrolled::GetName(ConnNum num) const
   if (m_tunType == POSSTUNOUT)
     return ((SplitUnrolled*)Input(m_unrollFactor))->GetOrigName();
   else
-    return Input(0)->GetName(0);
+    return GetRealTunnel()->Input(0)->GetName(0);
 }
 
-PossTunnel* CombineUnrolled::GetSetTunnel()
+Tunnel* CombineUnrolled::GetSetTunnel()
 {
   CombineUnrolled *tun;
-  if (m_tunType == POSSTUNIN)
+  /*  if (m_tunType == POSSTUNIN) {
 #if TWOD
     tun = new CombineUnrolled(m_dir, m_unrollFactor, SETTUNIN);
 #else
     tun = new CombineUnrolled(m_partDim, m_unrollFactor, SETTUNIN);
 #endif
-  else if (m_tunType == POSSTUNOUT)
+else */
+  if (m_tunType == POSSTUNOUT)
 #if TWOD
     tun = new CombineUnrolled(m_dir, m_unrollFactor, SETTUNOUT);
 #else
     tun = new CombineUnrolled(m_partDim, m_unrollFactor, SETTUNOUT);
 #endif
-  else
-    throw;
+    else
+      throw;
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -258,11 +259,11 @@ NodeType CombineUnrolled::GetType() const
 {
 #if TWOD
   return "CombineUnroled " + std::to_string(m_unrollFactor) 
-    + PartDirToStr(m_dir) + "( " + PossTunnel::GetType() + " )";
+    + PartDirToStr(m_dir) + "( " + Tunnel::GetType() + " )";
 #else
   string str = "CombineUnroled " + std::to_string(m_unrollFactor);
   str += m_partDim;
-  return str + " ( " + PossTunnel::GetType() + " )";
+  return str + " ( " + Tunnel::GetType() + " )";
 #endif
 }
 

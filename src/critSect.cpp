@@ -123,8 +123,8 @@ CritSectTunnel::CritSectTunnel()
   m_nlsizes = NULL;
 }
 
-CritSectTunnel::CritSectTunnel(PossTunType type) 
- : PossTunnel(type) 
+CritSectTunnel::CritSectTunnel(TunType type) 
+ : Tunnel(type) 
 {
   m_msizes = NULL;
   m_nsizes = NULL;
@@ -267,7 +267,7 @@ void CritSectTunnel::ClearDataTypeCache()
 
 void CritSectTunnel::SanityCheck()
 {
-  PossTunnel::SanityCheck();
+  Tunnel::SanityCheck();
   if (m_tunType == SETTUNIN || m_tunType == SETTUNOUT) {
     if (!m_pset->IsCritSect())
       throw;

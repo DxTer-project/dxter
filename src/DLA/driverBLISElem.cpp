@@ -1029,7 +1029,7 @@ PSet* CholExample()
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
-  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+  Tunnel *tun = new Tunnel(POSSTUNIN);
   tun->AddInput(Ain,0);
 
   Chol *loop = new Chol(ABSLAYER, tri);
@@ -1056,10 +1056,10 @@ PSet* CholTrsmExample()
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
   InputNode *Bin = new InputNode("B input", bigSize, bigSize, "B");
 
-  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+  Tunnel *tun = new Tunnel(POSSTUNIN);
   tun->AddInput(Ain,0);
 
-  PossTunnel *tun2 = new PossTunnel(POSSTUNIN);
+  Tunnel *tun2 = new Tunnel(POSSTUNIN);
   tun2->AddInput(Bin,0);
 
   Chol *loop = new Chol(ABSLAYER, tri);
@@ -1090,7 +1090,7 @@ PSet* CholTriInvExample()
 #if DOELEM
   InputNode *Ain = new InputNode("L input", bigSize, bigSize, "L");
 
-  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+  Tunnel *tun = new Tunnel(POSSTUNIN);
   tun->AddInput(Ain,0);
 
   Chol *loop = new Chol(ABSLAYER, LOWER);
@@ -1496,7 +1496,7 @@ PSet* TriInvExample()
 {
   InputNode *Ain = new InputNode("input", bigSize, bigSize, tri==LOWER ? "L" : "U");
 
-  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+  Tunnel *tun = new Tunnel(POSSTUNIN);
   tun->AddInput(Ain,0);
 
   TriInv *loop = new TriInv(ABSLAYER, tri);
@@ -1519,7 +1519,7 @@ PSet* HetrmmExample()
 #if DOELEM
   InputNode *Ain = new InputNode("input", bigSize, bigSize, tri == LOWER ? "L" : "U");
 
-  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+  Tunnel *tun = new Tunnel(POSSTUNIN);
   tun->AddInput(Ain,0);
 
   Hetrmm *loop = new Hetrmm(ABSLAYER, tri);
@@ -1545,7 +1545,7 @@ PSet* PartSPDInvLowerExample()
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
-  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+  Tunnel *tun = new Tunnel(POSSTUNIN);
   tun->AddInput(Ain,0);
 
   TriInv *loop2 = new TriInv(ABSLAYER, LOWER);
@@ -1574,7 +1574,7 @@ PSet* SPDInvLowerExample()
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
-  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+  Tunnel *tun = new Tunnel(POSSTUNIN);
   tun->AddInput(Ain,0);
 
   Chol *loop = new Chol(ABSLAYER, LOWER);
@@ -1606,7 +1606,7 @@ PSet* SPDInvUpperExample()
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
-  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+  Tunnel *tun = new Tunnel(POSSTUNIN);
   tun->AddInput(Ain,0);
 
   Chol *loop = new Chol(ABSLAYER, UPPER);

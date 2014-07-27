@@ -383,13 +383,13 @@ RealPSet* GemmExample()
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
-  PossTunnel *tunA = new PossTunnel(POSSTUNIN);
+  Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);
 
-  PossTunnel *tunB = new PossTunnel(POSSTUNIN);
+  Tunnel *tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(Bin,0);
 
-  PossTunnel *tunC = new PossTunnel(POSSTUNIN);
+  Tunnel *tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
   Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);
@@ -425,13 +425,13 @@ RealPSet* DoubleGemmExample()
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
-  PossTunnel *tunA = new PossTunnel(POSSTUNIN);
+  Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);
 
-  PossTunnel *tunB = new PossTunnel(POSSTUNIN);
+  Tunnel *tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(Bin,0);
 
-  PossTunnel *tunC = new PossTunnel(POSSTUNIN);
+  Tunnel *tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
   Gemm *gemm1 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL);

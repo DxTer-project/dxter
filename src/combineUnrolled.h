@@ -34,10 +34,10 @@ class CombineUnrolled : public CombineBase
   unsigned int m_unrollFactor;
 #if TWOD
   CombineUnrolled();
-  CombineUnrolled(PartDir dir, unsigned int unrollFactor, PossTunType type);
+  CombineUnrolled(PartDir dir, unsigned int unrollFactor, TunType type);
 #else
   CombineUnrolled();
-  CombineUnrolled(Dim partDim, unsigned int unrollFactor, PossTunType type);
+  CombineUnrolled(Dim partDim, unsigned int unrollFactor, TunType type);
 #endif
   virtual void PrintCode(IndStream &out);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -45,7 +45,7 @@ class CombineUnrolled : public CombineBase
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual NodeType GetType() const;
   virtual void Prop();
-  virtual PossTunnel* GetSetTunnel();
+  virtual Tunnel* GetSetTunnel();
   virtual unsigned int NumOutputs() const {return 1;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "combineUnrolled";}

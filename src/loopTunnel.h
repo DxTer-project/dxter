@@ -26,7 +26,7 @@
 #include "realLoop.h"
 #include "shadowLoop.h"
 
-class LoopTunnel : public PossTunnel
+class LoopTunnel : public Tunnel
 {
  public:
   UpStat 
@@ -42,7 +42,7 @@ class LoopTunnel : public PossTunnel
 #endif
   bool m_indepIters;
 
-  LoopTunnel(PossTunType type);
+  LoopTunnel(TunType type);
   virtual ~LoopTunnel();
   void SetUpStats( UpStat statTL, UpStat statTR,
 		   UpStat statBL, UpStat statBR );
@@ -59,7 +59,7 @@ class LoopTunnel : public PossTunnel
   virtual unsigned int NumOutputs() const;
   static Node* BlankInst() { return new LoopTunnel(LASTTUNNEL);}
   virtual Node* GetNewInst() {return BlankInst(); }
-  virtual PossTunnel* GetSetTunnel();
+  virtual Tunnel* GetSetTunnel();
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;

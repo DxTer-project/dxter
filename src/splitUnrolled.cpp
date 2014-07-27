@@ -32,12 +32,12 @@ SplitUnrolled::SplitUnrolled()
 }
 
 #if TWOD
-SplitUnrolled::SplitUnrolled(PartDir dir, unsigned int unrollFactor, PossTunType type, bool isControl) 
+SplitUnrolled::SplitUnrolled(PartDir dir, unsigned int unrollFactor, TunType type, bool isControl) 
   : SplitBase(dir, type, isControl), m_unrollFactor(unrollFactor)
 {
 }
 #else
-SplitUnrolled::SplitUnrolled(unsigned int partDim, unsigned int unrollFactor, PossTunType type, bool isControl) 
+SplitUnrolled::SplitUnrolled(unsigned int partDim, unsigned int unrollFactor, TunType type, bool isControl) 
   : SplitBase(partDim, type, isControl), m_unrollFactor(unrollFactor)
 {
 }
@@ -63,7 +63,10 @@ Name SplitUnrolled::GetName(ConnNum num, LoopType type) const
   Name name;
   if (type == BLISLOOP) {
     if (m_tunType == SETTUNOUT)
-      return ((LoopTunnel*)Input(0))->GetOrigName();
+      if (m_pset->IsReal())
+	return ((LoopTunnel*)Input(0))->GetOrigName();
+      else
+	return GetRealTunnel()->GetName(num, type);
     else if (m_tunType == POSSTUNOUT)
       return ((LoopTunnel*)Input(m_inputs.size()-1))->GetOrigName();
     else if (m_tunType == SETTUNIN) {
@@ -98,7 +101,7 @@ Name SplitUnrolled::GetName(ConnNum num, LoopType type) const
 void SplitUnrolled::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    PossTunnel::Prop();
+    Tunnel::Prop();
     if (!m_unrollFactor)
       throw;
     m_cost = ZERO;
@@ -112,10 +115,11 @@ const Sizes* SplitUnrolled::GetM(ConnNum num) const
     {
     case (SETTUNIN):
     case (POSSTUNOUT):
-    case (SETTUNOUT):
       if (num > 0)
         throw;
       return GetInputM(0);
+    case (SETTUNOUT):
+      return GetRealTunnel()->GetInputM(0);
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -139,10 +143,11 @@ const Sizes* SplitUnrolled::GetN(ConnNum num) const
     {
     case (SETTUNIN):
     case (POSSTUNOUT):
-    case (SETTUNOUT):
       if (num > 0)
         throw;
       return GetInputN(0);
+    case (SETTUNOUT):
+      return GetRealTunnel->GetInputN(0);
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -167,10 +172,11 @@ const Sizes* SplitUnrolled::LocalM(ConnNum num) const
     {
     case (SETTUNIN):
     case (POSSTUNOUT):
-    case (SETTUNOUT):
       if (num > 0)
         throw;
       return InputLocalM(0);
+    case (SETTUNOUT):
+      GetRealTunnel()->InputLocalM(0);
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -194,10 +200,11 @@ const Sizes* SplitUnrolled::LocalN(ConnNum num) const
     {
     case (SETTUNIN):
     case (POSSTUNOUT):
-    case (SETTUNOUT):
       if (num > 0)
         throw;
       return InputLocalN(0);
+    case (SETTUNOUT):
+      return GetRealTunnel()->InputLocalN(0);
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -225,10 +232,11 @@ const Sizes* SplitUnrolled::LocalN(ConnNum num) const
     {
     case (SETTUNIN):
     case (POSSTUNOUT):
-    case (SETTUNOUT):
       if (num > 0)
         throw;
       return InputNumDims(0);
+    case (SETTUNOUT):
+      GetRealTunnel()->InputNumDims(0);
     case (POSSTUNIN):
       if (num > m_unrollFactor)
 	throw;
@@ -244,10 +252,11 @@ const Sizes* SplitUnrolled::Len(ConnNum num, Dim dim) const
     {
     case (SETTUNIN):
     case (POSSTUNOUT):
-    case (SETTUNOUT):
       if (num > 0)
         throw;
       return InputLen(0,dim);
+    case (SETTUNOUT):
+      return GetRealTunnel()->InputLen(0,dim);
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -272,10 +281,11 @@ const Sizes* SplitUnrolled::LocalLen(ConnNum num, Dim dim) const
     {
     case (SETTUNIN):
     case (POSSTUNOUT):
-    case (SETTUNOUT):
       if (num > 0)
         throw;
       return InputLocalLen(0,dim);
+    case (SETTUNOUT):
+      GetRealTunnel()->InputLocalLen(0,dim);
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
@@ -295,7 +305,7 @@ const Sizes* SplitUnrolled::LocalLen(ConnNum num, Dim dim) const
 #endif
 
 #if TWOD
-PossTunnel* SplitUnrolled::GetSetTunnel()
+Tunnel* SplitUnrolled::GetSetTunnel()
 {
   SplitUnrolled *tun;
   if (m_tunType == POSSTUNIN)
@@ -308,7 +318,7 @@ PossTunnel* SplitUnrolled::GetSetTunnel()
   return tun;
 }
 #else
-PossTunnel* SplitUnrolled::GetSetTunnel()
+Tunnel* SplitUnrolled::GetSetTunnel()
 {
   SplitUnrolled *tun;
   if (m_tunType == POSSTUNIN)
@@ -357,12 +367,12 @@ NodeType SplitUnrolled::GetType() const
 {
 #if TWOD
   return "SplitUnrolled" + PartDirToStr(m_dir) + std::to_string(m_unrollFactor)
-    + "( " + PossTunnel::GetType() + " )";
+    + "( " + Tunnel::GetType() + " )";
 #else
   string tmp = "SplitUnrolled";
   tmp += m_partDim;
   tmp += std::to_string(m_unrollFactor);
-  return tmp  + "( " + PossTunnel::GetType() + " )";
+  return tmp  + "( " + Tunnel::GetType() + " )";
 #endif
 }
 
@@ -545,7 +555,6 @@ unsigned int SplitUnrolled::NumberOfLoopExecs() const
   if (!m_isControlTun)
     throw;
 #if TWOD
-  //  return min(GetInputM(0)->NumSizes(), GetInputN(0)->NumSizes());
   unsigned int one = GetInputM(0)->NumSizes();
   unsigned int two = GetInputN(0)->NumSizes();
   if (one != two) {
@@ -566,7 +575,8 @@ void SplitUnrolled::StartFillingSizes()
     throw;
   if (m_tunType != SETTUNIN)
     return;
-
+  if (!m_pset->IsReal())
+    return;
   m_msizes = new Sizes;
   m_nsizes = new Sizes;
 #if DODM
@@ -580,6 +590,8 @@ void SplitUnrolled::StartFillingSizes()
   if (m_sizes)
     throw;
   if (m_tunType != SETTUNIN)
+    return;
+  if (!m_pset->IsReal())
     return;
   unsigned int numDims = InputNumDims(0);
   //Num dims of sizes, but the m_partDim dimension has
@@ -618,6 +630,8 @@ void SplitUnrolled::ClearDataTypeCache()
 void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
 {
   if (m_tunType != SETTUNIN)
+    return;
+  if (!m_pset->IsReal())
     return;
   if (!m_msizes)
     throw;
@@ -662,6 +676,8 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, uns
 void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
 {
   if (m_tunType != SETTUNIN)
+    return;
+  if (!m_pset->IsReal())
     return;
   if (!m_sizes)
     throw;

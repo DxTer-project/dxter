@@ -298,7 +298,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	for( ; nodeIter != m_poss->m_possNodes.end(); ++nodeIter) {
 	  //Don't bring the poss out tunnels until the end
 	  // so the repartitioning code all goes after the loop body
-	  if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsPossTunnel(POSSTUNOUT)) {
+	  if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsTunnel(POSSTUNOUT)) {
 	    (*nodeIter)->Print(out, whichGraph);
 	    hasPrinted |= (*nodeIter)->HasPrinted();
 	  }
@@ -374,7 +374,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
       //Don't print the poss out tunnels until the end
       // so the repartitioning code all goes after the loop body
       if (!node->HasPrinted()
-          && !node->IsPossTunnel(POSSTUNOUT)
+          && !node->IsTunnel(POSSTUNOUT)
           && node->CanPrintCode())
 	{
 	  (*nodeIter)->Print(out, graphNum);

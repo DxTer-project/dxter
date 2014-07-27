@@ -395,8 +395,12 @@ void ParallelizeMDim::Apply(Node *node) const
       bool skip = false;
       while (!skip && !child2->IsLoopTunnel()) {
         if (child2->IsPossTunnel(SETTUNIN) ||
-            child2->IsPossTunnel(POSSTUNIN))
+            child2->IsPossTunnel(POSSTUNIN)) {
+	  if (!((Tunnel*)child)->m_pset->IsReal() ||
+	      !((Tunnel*)child)->m_pset->m_shadows.empty())
+	    throw;
           child2 = child2->m_children[0]->m_n;
+	}
         else
           skip = true;
       }
@@ -624,9 +628,9 @@ bool FoundBarrier(const Node *node, ConnNum input, Comm comm)
     const NodeConn *conn = *iter;
     const Node *in = conn->m_n;
     //Assume this was handles outside of the pset
-    if (in->IsPossTunnel(POSSTUNIN))
+    if (in->IsTunnel(POSSTUNIN))
       continue;
-    else if (in->IsPossTunnel(SETTUNOUT)) {
+    else if (in->IsTunnel(SETTUNOUT)) {
       return false;
     }
     else {

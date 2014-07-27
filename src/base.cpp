@@ -884,6 +884,16 @@ bool FoundInNodeVec(const NodeVec &vec, const Node *node)
   return false;
 }
 
+unsigned int FindInNodeVec(const NodeVec &vec, const Node *node)
+{
+  unsigned int i = 0;
+  NodeVecConstIter iter = vec.begin();
+  for(; iter != vec.end(); ++iter,++i)
+    if (*iter == node)
+      return i;
+  throw;
+}
+
 
 #if DOELEM
 void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN)

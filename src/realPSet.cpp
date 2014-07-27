@@ -53,20 +53,21 @@ void RealPSet::Init(Poss *poss)
     //    Loop *loop = (Loop*)this;
     m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize());
   }
-
+  /*
   //Make single tunnels with multiple inputs/outputs into individual tunnels
   //Poss mergin with multiple intput/output tunnels is very buggy
   poss->ExpandTunnels();
+  */
   
   //Go through the input tunnels of the poss, create a set tunnel,
   // change the inputs from connecting to poss tunnels to set tunnels
   for(unsigned int i = 0; i < poss->m_inTuns.size(); ++i) {
-    PossTunnel *possTun = (PossTunnel*)(poss->InTun(i));
-    if (!possTun->IsPossTunnel(POSSTUNIN)) {
+    Tunnel *possTun = (Tunnel*)(poss->InTun(i));
+    if (!possTun->IsTunnel(POSSTUNIN)) {
       cout << "bad poss tunnel\n";
       throw;
     }
-    PossTunnel *setTun = possTun->GetSetTunnel();
+    Tunnel *setTun = possTun->GetSetTunnel();
     for(ConnNum j = 0; j < possTun->m_inputs.size(); ++j) {
       NodeConn *conn = possTun->InputConn(j);
       setTun->AddInput(conn->m_n, conn->m_num);
@@ -82,8 +83,8 @@ void RealPSet::Init(Poss *poss)
   }
   
   for(unsigned int i = 0; i < poss->m_outTuns.size(); ++i) {
-    PossTunnel *possTun = (PossTunnel*)(poss->OutTun(i));
-    PossTunnel *setTun = possTun->GetSetTunnel();
+    Tunnel *possTun = (Tunnel*)(poss->OutTun(i));
+    Tunnel *setTun = possTun->GetSetTunnel();
     for(unsigned int j = 0; j < possTun->m_children.size(); ++j) {
       NodeConn *conn = possTun->m_children[j];
       conn->m_n->ChangeInput1Way(possTun,conn->m_num,setTun,conn->m_num);
@@ -169,18 +170,17 @@ void RealPSet::AddPoss(Poss *poss)
   
   for(unsigned int i = 0; i < m_inTuns.size(); ++i) {
     Node *setTun = InTun(i);
-    Node *possTun = (PossTunnel*)(poss->InTun(i));
+    Node *possTun = poss->InTun(i);
     if (!possTun->m_inputs.empty()) {
       cout << "(!possTun->m_inTuns.empty()\n";
       throw;
     }
-    possTun->m_inputs.clear();
     possTun->AddInput(setTun,0);
   }
   
   for(unsigned int i = 0; i < m_outTuns.size(); ++i) {
     Node *setTun = OutTun(i);
-    Node *possTun = (PossTunnel*)(poss->OutTun(i));
+    Node *possTun = poss->OutTun(i);
     if (!possTun->m_children.empty()) {
       cout << "!possTun->m_outTuns.empty()\n";
       cout << possTun->GetType() << " has child "
@@ -188,7 +188,6 @@ void RealPSet::AddPoss(Poss *poss)
       cout << possTun << endl;
       throw;
     }
-    possTun->m_children.clear();
     setTun->AddInput(possTun,0);
   }
   
@@ -690,7 +689,7 @@ void RealPSet::CombineAndRemoveTunnels()
           }
           //throw;
         }
-        if (!child->IsPossTunnel()) {
+        if (!child->IsTunnel()) {
           cout << "!child->IsPossTunnel()\n";
           throw;
         }
@@ -1031,7 +1030,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     
     NodeVecIter iter = inliningPoss->m_possNodes.begin();
     for( ; iter != inliningPoss->m_possNodes.end(); ++iter) {
-      if (!(*iter)->IsPossTunnel(SETTUNIN) && !(*iter)->IsPossTunnel(SETTUNOUT)) {
+      if (!(*iter)->IsTunnel(SETTUNIN) && !(*iter)->IsTunnel(SETTUNOUT)) {
         Node *newNode = (*iter)->GetNewInst();
         //        cout << "On outer poss, creating newNode " << newNode << " for " << *iter << endl;
         newNode->Duplicate(*iter, false,true);
@@ -1047,7 +1046,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     
     iter = currPoss->m_possNodes.begin();
     for( ; iter != currPoss->m_possNodes.end(); ++iter) {
-      if (!(*iter)->IsPossTunnel(POSSTUNIN) && !(*iter)->IsPossTunnel(POSSTUNOUT)) {
+      if (!(*iter)->IsTunnel(POSSTUNIN) && !(*iter)->IsTunnel(POSSTUNOUT)) {
         Node *newNode = (*iter)->GetNewInst();
         //        cout << "On inlining poss, creating newNode " << newNode << " for " << *iter << endl;
         newNode->Duplicate(*iter, false,true);
@@ -1090,11 +1089,11 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
         NodeConn *conn = *connIter;
         NodeIntMapIter mapIter = tunnelNumMap.find(conn->m_n);
         if (mapIter != tunnelNumMap.end()) {
-	  if (!conn->m_n->IsPossTunnel(SETTUNOUT))
+	  if (!conn->m_n->IsTunnel(SETTUNOUT))
 	    throw;
           Node *newParent = map[currPoss->OutTun(mapIter->second)->Input(conn->m_num)];
           unsigned int newNum = currPoss->OutTun(mapIter->second)->InputConnNum(conn->m_num);
-	  if (newParent->IsPossTunnel(POSSTUNIN)) {
+	  if (newParent->IsTunnel(POSSTUNIN)) {
 	    newParent = newParent->Input(0); // SetTunIn;
 	    newNum = newParent->InputConnNum(0);
 	    newParent = map[newParent->Input(0)];
@@ -1103,7 +1102,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 	  }
 	  else {
 	    for(unsigned int i = 0; i < newParent->m_children.size(); ++i) {
-	      if (newParent->Child(i)->IsPossTunnel(POSSTUNOUT)) {
+	      if (newParent->Child(i)->IsTunnel(POSSTUNOUT)) {
 		delete newParent->m_children[i];
 		newParent->m_children.erase(newParent->m_children.begin()+i);
 		--i;
@@ -1144,7 +1143,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
           connIter = inTun->m_children.begin();
           for(; connIter != inTun->m_children.end(); ++connIter) {
             if ((*connIter)->m_num == setInputNum) {
-	      if (!(*connIter)->m_n->IsPossTunnel(POSSTUNOUT)) {
+	      if (!(*connIter)->m_n->IsTunnel(POSSTUNOUT)) {
 		Node *child = map[(*connIter)->m_n];
 		child->ChangeInput1Way(inTun, setInputNum, node, conn->m_num);
 	      }
@@ -1153,7 +1152,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
           
           delete conn;
         }
-	else if (conn->m_n->IsPossTunnel(POSSTUNOUT) &&
+	else if (conn->m_n->IsTunnel(POSSTUNOUT) &&
 		 conn->m_n->m_poss == currPoss) {
 	  if (conn->m_n->Child(0)->m_children.empty()) {
 	    node->m_children.erase(node->m_children.begin()+i);
@@ -1166,8 +1165,8 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 	  //else handled in above code when updating inputs that are set tun out
 	}
 	else {
-	  if (node->IsPossTunnel(POSSTUNIN) &&
-	      conn->m_n->IsPossTunnel(SETTUNIN)) {
+	  if (node->IsTunnel(POSSTUNIN) &&
+	      conn->m_n->IsTunnel(SETTUNIN)) {
 	    throw;
 	  }
 	}
@@ -1230,9 +1229,9 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
       for(int i = 0; i < node->m_children.size(); ++i) {
 	Node *child = node->Child(i);
 	if (node->m_poss != child->m_poss) {
-	  if (node->IsPossTunnel() && child->IsPossTunnel()) {
-	    PossTunnel *nodeTun = (PossTunnel*)node;
-	    PossTunnel *childTun = (PossTunnel*)child;
+	  if (node->IsTunnel() && child->IsTunnel()) {
+	    Tunnel *nodeTun = (Tunnel*)node;
+	    Tunnel *childTun = (Tunnel*)child;
 	    if ((nodeTun->m_tunType == POSSTUNOUT && childTun->m_tunType == SETTUNOUT))
 	      continue;
 	    //the following can happen if currPoss has a set

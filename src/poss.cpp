@@ -52,7 +52,7 @@ Poss::Poss()
   m_isSane = true;
 }
 
-Poss::Poss(PossTunnel *tunn)
+Poss::Poss(Tunnel *tunn)
 {
   if (tunn->m_tunType != POSSTUNOUT) {
     cout << "tunn->m_tunType != POSSTUNOUT\n";
@@ -83,7 +83,7 @@ Poss::Poss(Node *node, bool goUp)
     m_possNodes.push_back(node);
     
     for (unsigned int i = 0; i < node->NumOutputs(); ++i) {
-      PossTunnel *out = new PossTunnel(POSSTUNOUT);
+      Tunnel *out = new Tunnel(POSSTUNOUT);
       out->AddInput(node, i);
       out->SetPoss(this);
       m_possNodes.push_back(out);
@@ -93,7 +93,7 @@ Poss::Poss(Node *node, bool goUp)
     
     for (ConnNum i = 0; i < node->m_inputs.size(); ++i) {
       NodeConn *conn = node->InputConn(i);
-      PossTunnel *in = new PossTunnel(POSSTUNIN);
+      Tunnel *in = new Tunnel(POSSTUNIN);
       in->AddInput(conn->m_n, conn->m_num);
       conn->m_n->RemoveChild(node, conn->m_num);
       conn->m_n = in;
@@ -107,7 +107,7 @@ Poss::Poss(Node *node, bool goUp)
   }
   else {
     for (unsigned int i = 0; i < node->NumOutputs(); ++i) {
-      PossTunnel *out = new PossTunnel(POSSTUNOUT);
+      Tunnel *out = new Tunnel(POSSTUNOUT);
       out->AddInput(node, i);
       AddUp(m_possNodes, out, true, false);
     }
@@ -159,8 +159,8 @@ void Poss::InitHelper(const NodeVec &vec, bool outTuns, bool disconnectFromOwner
   for(; iter != vec.end(); ++iter) {
     Node *node = *iter;
     if (outTuns) {
-      if (!node->IsPossTunnel()) {
-        PossTunnel *out = new PossTunnel(POSSTUNOUT);
+      if (!node->IsTunnel()) {
+        Tunnel *out = new Tunnel(POSSTUNOUT);
         out->AddInput(node);
         AddUp(m_possNodes, out, true, disconnectFromOwner);
       }
@@ -412,11 +412,11 @@ void Poss::DeleteNode(Node *node)
 
 void Poss::DeleteChildAndCleanUp(Node *output,
                                  bool goThroughTunnels, bool handleTunnelsAsNormalNodes,
-				 bool stopAtPossTunnels)
+				 bool stopAtTunnels)
 {
   InvalidateHash();
   bool found = false;
-  if (stopAtPossTunnels && output->IsPossTunnel())
+  if (stopAtTunnels && output->IsTunnel())
     return;
   NodeVecConstIter tmp = m_possNodes.begin();
   for(; !found && tmp != m_possNodes.end(); ++tmp)
@@ -428,9 +428,9 @@ void Poss::DeleteChildAndCleanUp(Node *output,
     throw;
   }
   if (output->IsLoopTunnel() && !handleTunnelsAsNormalNodes) {
-    if (!output->IsPossTunnel(SETTUNIN)) {
+    if (!output->IsTunnel(SETTUNIN)) {
       if (!goThroughTunnels) {
-        cout << "calling DeleteChildAndCleanUp on PossTunnel!\n";
+        cout << "calling DeleteChildAndCleanUp on Tunnel!\n";
         throw;
       }
       else if (output->GetNodeClass() == LoopTunnel::GetClass()){
@@ -447,15 +447,15 @@ void Poss::DeleteChildAndCleanUp(Node *output,
   for( ; iter != output->m_inputs.end(); ++iter) {
     Node *input = (*iter)->m_n;
     if ((input->m_poss != output->m_poss)
-        && !input->IsPossTunnel()
-        && !output->IsPossTunnel())
+        && !input->IsTunnel()
+        && !output->IsTunnel())
       {
 	throw;
 	cout << "input->m_poss != output->m_poss\n";
       }
     input->RemoveChild(output,(*iter)->m_num);
     if(input->m_children.empty()) {
-      input->m_poss->DeleteChildAndCleanUp(input, goThroughTunnels, handleTunnelsAsNormalNodes, stopAtPossTunnels);
+      input->m_poss->DeleteChildAndCleanUp(input, goThroughTunnels, handleTunnelsAsNormalNodes, stopAtTunnels);
     }
     delete *iter;
   }
@@ -469,7 +469,7 @@ void Poss::DeleteChildAndCleanUp(Node *output,
 void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
 {
   InvalidateHash();
-  if (node->IsPossTunnel(POSSTUNIN) && !start && !node->m_poss) {
+  if (node->IsTunnel(POSSTUNIN) && !start && !node->m_poss) {
     if (node->m_poss && node->m_poss != this) {
       cout << "node already on a poss\n";
       throw;
@@ -487,12 +487,12 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
     }
   }
   else if (AddElemToVec(vec, node, false)) {
-    if (node->IsPossTunnel(SETTUNOUT)) {
+    if (node->IsTunnel(SETTUNOUT)) {
       //Found a PSet to be added to this poss
       // add the output tunnels of the set, add the
       // set to my set list, and add the input set
       // tunnels and everything preceeding them
-      BasePSet *pset = ((PossTunnel*)node)->m_pset;
+      BasePSet *pset = ((Tunnel*)node)->m_pset;
       if (pset->m_ownerPoss && pset->m_ownerPoss != this && disconnectFromOwner)
         pset->m_ownerPoss->RemoveFromSets(pset);
       AddPSet(pset, false);
@@ -531,7 +531,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
       return;
     }
     else {
-      if (node->IsPossTunnel(POSSTUNOUT) && start) {
+      if (node->IsTunnel(POSSTUNOUT) && start) {
         m_outTuns.push_back(node);
       }
       if (node->m_poss && node->m_poss != this) {
@@ -699,7 +699,7 @@ void Poss::RemoveConnectionToSet()
     OutTun(i)->m_children.clear();
   }
 }
-
+/*
 void Poss::ExpandTunnels()
 {
   InvalidateHash();
@@ -713,7 +713,6 @@ void Poss::ExpandTunnels()
     while ((tunIn->m_inputs.size() > 1)
 	   && (tunIn->GetNodeClass() != SplitUnrolled::GetClass())
 	   && (tunIn->GetNodeClass() != SplitSingleIter::GetClass())) {
-      cout << "splitting in\n";
       PossTunnel *tun = (PossTunnel*)(tunIn->GetNewInst());
       tun->m_tunType = POSSTUNIN;
       ConnNum inNum = tunIn->m_inputs.size()-1;
@@ -749,6 +748,7 @@ void Poss::ExpandTunnels()
     }
   }
 }
+*/
 
 bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunction cullFunc)
 {
@@ -901,7 +901,7 @@ void Poss::MergePart2(RealPSet *newSet,
   NodeVecConstIter leftIter = leftSet->m_outTuns.begin();
   NodeVecConstIter realIter = realLeftOut.begin();
   for (; leftIter != leftSet->m_outTuns.end(); ++leftIter,++realIter) {
-    PossTunnel *tun = (PossTunnel*)((*realIter)->GetNewInst());
+    Tunnel *tun = (Tunnel*)((*realIter)->GetNewInst());
     tun->Duplicate(*realIter,true,true);
     newSet->m_outTuns.push_back(tun);
     tun->m_pset = newSet;
@@ -917,7 +917,7 @@ void Poss::MergePart2(RealPSet *newSet,
   NodeVecConstIter rightIter  = rightSet->m_outTuns.begin();
   realIter = realRightOut.begin();
   for (; rightIter != rightSet->m_outTuns.end(); ++rightIter,++realIter) {
-    PossTunnel *tun = (PossTunnel*)((*realIter)->GetNewInst());
+    Tunnel *tun = (Tunnel*)((*realIter)->GetNewInst());
     tun->Duplicate(*realIter,true,true);
     newSet->m_outTuns.push_back(tun);
     tun->m_pset = newSet;
@@ -933,7 +933,7 @@ void Poss::MergePart2(RealPSet *newSet,
   leftIter = leftSet->m_inTuns.begin();
   realIter = realLeftIn.begin();
   for (; leftIter != leftSet->m_inTuns.end(); ++leftIter,++realIter) {
-    PossTunnel *tun = (PossTunnel*)((*realIter)->GetNewInst());
+    Tunnel *tun = (Tunnel*)((*realIter)->GetNewInst());
     tun->Duplicate(*realIter,true,true);
     newSet->m_inTuns.push_back(tun);
     tun->m_pset =  newSet;
@@ -959,7 +959,7 @@ void Poss::MergePart2(RealPSet *newSet,
   rightIter  = rightSet->m_inTuns.begin();
   realIter = realRightIn.begin();
   for (; iter != rightSet->m_inTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)((*realIter)->GetNewInst());
+    Tunnel *tun = (Tunnel*)((*realIter)->GetNewInst());
     tun->Duplicate(*realIter,true,true);
     newSet->m_inTuns.push_back(tun);
     tun->m_pset = newSet;
@@ -988,12 +988,12 @@ void Poss::MergePart4(RealPSet *newSet,
 {
   NodeVecConstIter iter  = leftSet->m_outTuns.begin();
   for (; iter != leftSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(map[*iter]);
+    Tunnel *tun = (Tunnel*)(map[*iter]);
     for(unsigned int i = 0; i < (*iter)->m_children.size(); ++i) {
       Node *child = (*iter)->m_children[i]->m_n;
       if (map[child] != NULL)  {
-        if (!map[child]->IsPossTunnel() ||
-            ((PossTunnel*)map[child])->m_tunType != SETTUNIN) {
+        if (!map[child]->IsTunnel() ||
+            ((Tunnel*)map[child])->m_tunType != SETTUNIN) {
           cout << "mapped child not of expected type\n";
           throw;
         }
@@ -1015,12 +1015,12 @@ void Poss::MergePart4(RealPSet *newSet,
 
   iter  = rightSet->m_outTuns.begin();
   for (; iter != rightSet->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(map[*iter]);
+    Tunnel *tun = (Tunnel*)(map[*iter]);
     for(unsigned int i = 0; i < (*iter)->m_children.size(); ++i) {
       Node *child = (*iter)->m_children[i]->m_n;
       if (map[child] != NULL)  {
-        if (!map[child]->IsPossTunnel() ||
-            ((PossTunnel*)map[child])->m_tunType != SETTUNIN) {
+        if (!map[child]->IsTunnel() ||
+            ((Tunnel*)map[child])->m_tunType != SETTUNIN) {
           cout << "mapped child not of expected type\n";
           throw;
         }
@@ -1167,16 +1167,16 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
     NodeSet set;
     for(unsigned int i = 0; i < newSetInput->m_inputs.size(); ++i) {
       Node *newSetOutput = NULL;
-      if (newSetInput->Input(i)->IsPossTunnel() && ((PossTunnel*)((*inputInputConIter)->m_n))->m_pset == newSet)
+      if (newSetInput->Input(i)->IsTunnel() && ((Tunnel*)((*inputInputConIter)->m_n))->m_pset == newSet)
         newSetOutput = newSetInput->Input(i);
       ConnNum outputTunnelOutputNum = newSetInput->InputConnNum(i);
       if (newSetOutput) {
-        if (!newSetOutput->IsPossTunnel()) {
-          cout << "!newSetOutput->IsPossTunnel()\n";
+        if (!newSetOutput->IsTunnel()) {
+          cout << "!newSetOutput->IsTunnel()\n";
           throw;
         }
-        if (((PossTunnel*)newSetOutput)->m_tunType != SETTUNOUT) {
-          cout << "((PossTunnel*)newSetOutput)->m_tunType != SETTUNOUT\n";
+        if (((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT) {
+          cout << "((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT\n";
           throw;
         }
         NodeConnVecIter newSetInputChildIter = newSetInput->m_children.begin();
@@ -1267,13 +1267,13 @@ bool AddNodesDown(Node *edgeStart, ConnNum childNum, NodeVec &outputTuns, NodeSe
 #if DODM
       (child->GetNodeClass() == RedistNode::GetClass()) || 
 #endif
-      child->IsPossTunnel()) {
-    if (child->IsPossTunnel(POSSTUNIN)) {
+      child->IsTunnel()) {
+    if (child->IsTunnel(POSSTUNIN)) {
       cout << "Whoa!\n";
       throw;
     }
     //The child will be grouped with another poss set
-    PossTunnel *tun = new PossTunnel(POSSTUNOUT);
+    Tunnel *tun = new Tunnel(POSSTUNOUT);
     possNodes.insert(tun);
     outputTuns.push_back(tun);
     child->ChangeInput1Way(edgeStart, conn->m_num, tun, 0);
@@ -1303,7 +1303,7 @@ void AddTunnelDown(Node *edgeStart, unsigned int childNum, NodeVec &outputTuns, 
   Node *child = conn->m_n;
   if (possNodes.find(child) != possNodes.end())
     return;
-  PossTunnel *tun = new PossTunnel(POSSTUNOUT);
+  Tunnel *tun = new Tunnel(POSSTUNOUT);
   possNodes.insert(tun);
   outputTuns.push_back(tun);
   child->ChangeInput1Way(edgeStart, conn->m_num, tun, 0);
@@ -1311,7 +1311,7 @@ void AddTunnelDown(Node *edgeStart, unsigned int childNum, NodeVec &outputTuns, 
   tun->m_inputs.push_back(new NodeConn(edgeStart,conn->m_num));
 }
 
-void AddPossTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &possNodes)
+void AddTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &possNodes)
 {
   if (possNodes.find(node) != possNodes.end())
     return;
@@ -1324,12 +1324,12 @@ void AddPossTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &poss
     if (conn->m_n != ignore) {
 #if DODM
       if (conn->m_n->GetNodeClass() == RedistNode::GetClass()) {
-        AddPossTunnels(conn->m_n, node, outputTuns, possNodes);
+        AddTunnels(conn->m_n, node, outputTuns, possNodes);
       }
       else 
 #endif
 	{
-	  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+	  Tunnel *tun = new Tunnel(POSSTUNIN);
 	  possNodes.insert(tun);
 	  conn->m_n->RemoveChild(node, conn->m_num);
 	  tun->AddInput(conn->m_n, conn->m_num);
@@ -1345,7 +1345,7 @@ void AddPossTunnels(Node *node, Node *ignore, NodeVec &outputTuns, NodeSet &poss
     NodeConn *conn = node->m_children[i];
     if (conn->m_n != ignore) {
       if (conn->m_n->GetNodeClass() == RedistNode::GetClass()) {
-        AddPossTunnels(conn->m_n, node, outputTuns, possNodes);
+        AddTunnels(conn->m_n, node, outputTuns, possNodes);
       }
     }
   }
@@ -1364,12 +1364,12 @@ bool FoundLoop(Node *node, NodeVec &queue)
       return true;
     }
   }
-  if (node->IsPossTunnel(POSSTUNIN)) {
+  if (node->IsTunnel(POSSTUNIN)) {
     return false;
   }
   queue.push_back(node);
-  if (node->IsPossTunnel(SETTUNOUT)) {
-    const PossTunnel *tunOut = (PossTunnel*)node;
+  if (node->IsTunnel(SETTUNOUT)) {
+    const Tunnel *tunOut = (Tunnel*)node;
     const BasePSet *foundSet = tunOut->m_pset;
     NodeVecConstIter iter = foundSet->m_inTuns.begin();
     for(; iter != foundSet->m_inTuns.end(); ++iter) {
@@ -1431,7 +1431,7 @@ void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
     NodeConn *conn = *iter;
     if (conn->m_num == connNum) {
       Node *child = conn->m_n;
-      if (child->IsPossTunnel(SETTUNIN)) {
+      if (child->IsTunnel(SETTUNIN)) {
         if (set.insert(child).second) {
           PossTunnel *tun = (PossTunnel*)child;
           BasePSet *pset = tun->m_pset;
@@ -1526,7 +1526,7 @@ bool CheckPath(Node *node, NodeVec &vec, NodeSet &set)
   for(; iter != node->m_children.end(); ++iter) {
     NodeConn *conn = *iter;
     Node *child = conn->m_n;
-    if (child->IsPossTunnel(POSSTUNOUT)) {
+    if (child->IsTunnel(POSSTUNOUT)) {
       return false;
     }
     else if (set.find(child) != set.end()) {

@@ -67,7 +67,7 @@ void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, b
   m_isTopLevel = orig->m_isTopLevel;
   NodeVecConstIter iter  = orig->m_inTuns.begin();
   for (; iter != orig->m_inTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(map[*iter]);
+    Tunnel *tun = (Tunnel*)(map[*iter]);
     //expect set tunnel for this set to be duplicated
     // as part of the owning poss's duplication
     if (!tun)
@@ -83,7 +83,7 @@ void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, b
   }
   iter  = orig->m_outTuns.begin();
   for (; iter != orig->m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(map[*iter]);
+    Tunnel *tun = (Tunnel*)(map[*iter]);
     if (!tun)
       throw;
     m_outTuns.push_back(tun);
@@ -98,10 +98,6 @@ void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, b
   }
 }
 
-
-
-
-
 bool FoundPossUp(Node *node, const BasePSet *set, NodeVec &queue)
 {
   NodeVecIter checkIter = queue.begin();
@@ -112,12 +108,12 @@ bool FoundPossUp(Node *node, const BasePSet *set, NodeVec &queue)
     }
   }
   queue.push_back(node);
-  if (node->IsPossTunnel(POSSTUNOUT) || node->IsPossTunnel(POSSTUNIN)) {
+  if (node->IsTunnel(POSSTUNOUT) || node->IsTunnel(POSSTUNIN)) {
     queue.pop_back();
     return false;
   }
-  else if (node->IsPossTunnel(SETTUNOUT)) {
-    const PossTunnel *tunOut = (PossTunnel*)node;
+  else if (node->IsTunnel(SETTUNOUT)) {
+    const Tunnel *tunOut = (Tunnel*)node;
     if (tunOut->m_pset == set) {
       queue.pop_back();
       return true;
@@ -153,8 +149,8 @@ bool NothingBetween(const BasePSet *left, const BasePSet *right)
     Node *input = *iter;
     NodeConnVecConstIter iter2 = input->m_inputs.begin();
     for (; iter2 != input->m_inputs.end(); ++iter2) {
-      if ((*iter2)->m_n->IsPossTunnel(SETTUNOUT)) {
-        PossTunnel *tunOut = (PossTunnel*)((*iter2)->m_n);
+      if ((*iter2)->m_n->IsTunnel(SETTUNOUT)) {
+        Tunnel *tunOut = (Tunnel*)((*iter2)->m_n);
         if (tunOut->m_pset != left) {
           NodeVec queue;
           if (FoundPossUp(tunOut,left,queue))
@@ -186,14 +182,14 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
     const Node *in = set1->m_inTuns[i];
     for(j = 0; j < in->m_inputs.size(); ++j) {
       const Node *inInput = in->Input(j);
-      if (inInput->IsPossTunnel()) {
-        if (((PossTunnel*)inInput)->m_pset == set2)
+      if (inInput->IsTunnel()) {
+        if (((Tunnel*)inInput)->m_pset == set2)
           return true;
       }
       for(k = 0; k < inInput->m_children.size(); ++k) {
         const Node *child = inInput->Child(k);
-        if (child->IsPossTunnel()) {
-          if (((PossTunnel*)child)->m_pset == set2)
+        if (child->IsTunnel()) {
+          if (((Tunnel*)child)->m_pset == set2)
             return true;
         }
       }
@@ -203,8 +199,8 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
     const Node *out = set1->m_outTuns[i];
     for(j = 0; j < out->m_children.size(); ++j) {
       const Node *child = out->Child(j);
-      if (child->IsPossTunnel()) {
-        if (((PossTunnel*)child)->m_pset == set2)
+      if (child->IsTunnel()) {
+        if (((Tunnel*)child)->m_pset == set2)
           return true;
       }
     }
@@ -261,18 +257,18 @@ void BasePSet::FormSetAround()
   
   NodeVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(*iter);
-    PossTunnel *newSetTun = new PossTunnel(SETTUNIN);
-    PossTunnel *newPossTun = new PossTunnel (POSSTUNIN);
-    newPoss->AddNode(newPossTun);
-    newPoss->m_inTuns.push_back(newPossTun);
-    newPossTun->AddInput(newSetTun,0);
+    Tunnel *tun = (Tunnel*)(*iter);
+    Tunnel *newSetTun = new Tunnel(SETTUNIN);
+    Tunnel *newTun = new Tunnel (POSSTUNIN);
+    newPoss->AddNode(newTun);
+    newPoss->m_inTuns.push_back(newTun);
+    newTun->AddInput(newSetTun,0);
     if (tun->m_inputs.size() != 1) {
       throw;
     }
     NodeConn *in = tun->m_inputs[0];
     newSetTun->AddInput(in->m_n, in->m_num);
-    tun->ChangeInput2Way(in->m_n, in->m_num, newPossTun, 0);
+    tun->ChangeInput2Way(in->m_n, in->m_num, newTun, 0);
     newSet->m_inTuns.push_back(newSetTun);
     newSetTun->m_pset = newSet;
     owner->AddNode(newSetTun);
@@ -284,14 +280,14 @@ void BasePSet::FormSetAround()
   
   iter = m_outTuns.begin();
   for(; iter != m_outTuns.end(); ++iter) {
-    PossTunnel *tun = (PossTunnel*)(*iter);
-    PossTunnel *newSetTun = new PossTunnel(SETTUNOUT);
-    PossTunnel *newPossTun = new PossTunnel (POSSTUNOUT);
-    newPoss->m_outTuns.push_back(newPossTun);
-    newPoss->AddNode(newPossTun);
-    newSetTun->AddInput(newPossTun,0);
+    Tunnel *tun = (Tunnel*)(*iter);
+    Tunnel *newSetTun = new Tunnel(SETTUNOUT);
+    Tunnel *newTun = new Tunnel (POSSTUNOUT);
+    newPoss->m_outTuns.push_back(newTun);
+    newPoss->AddNode(newTun);
+    newSetTun->AddInput(newTun,0);
     tun->RedirectAllChildren(newSetTun);
-    newPossTun->AddInput(tun,0);
+    newTun->AddInput(tun,0);
     
     newSet->m_outTuns.push_back(newSetTun);
     newSetTun->m_pset = newSet;

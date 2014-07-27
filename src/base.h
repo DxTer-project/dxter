@@ -93,7 +93,7 @@ enum Type { REAL,
 enum Dir { HORIZONTAL,
 	   VERTICAL };
 
-enum PossTunType {
+enum TunType {
   POSSTUNIN,
   POSSTUNOUT,
   SETTUNIN,
@@ -410,6 +410,7 @@ class Name
 
 
 bool FoundInNodeVec(const NodeVec &vec, const Node *node);
+unsigned int FindInNodeVec(const NodeVec &vec, const Node *node);
 
 
 

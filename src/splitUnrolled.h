@@ -37,13 +37,13 @@ class SplitUnrolled : public SplitBase
   unsigned int m_unrollFactor;
   SplitUnrolled();
 #if TWOD
-  SplitUnrolled(PartDir dir, unsigned int unrollFactor, PossTunType type, bool isControl = false);
+  SplitUnrolled(PartDir dir, unsigned int unrollFactor, TunType type, bool isControl = false);
 #else
-  SplitUnrolled(unsigned int partDim, unsigned int unrollFactor, PossTunType type, bool isControl = false);
+  SplitUnrolled(unsigned int partDim, unsigned int unrollFactor, TunType type, bool isControl = false);
 #endif
   static Node* BlankInst();
   virtual Node* GetNewInst() {return BlankInst(); }
-  virtual PossTunnel* GetSetTunnel();
+  virtual Tunnel* GetSetTunnel();
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

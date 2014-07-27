@@ -39,13 +39,13 @@ class CritSect : public PSet
   virtual void BuildDataTypeCache();
 };
 
-class CritSectTunnel : public PossTunnel
+class CritSectTunnel : public Tunnel
 {
  public:
   Sizes *m_msizes, *m_nsizes;
   Sizes *m_mlsizes, *m_nlsizes;
   CritSectTunnel();
-  CritSectTunnel(PossTunType type);
+  CritSectTunnel(TunType type);
   virtual ~CritSectTunnel();
   static Node* BlankInst() { return new CritSectTunnel;}
   virtual Node* GetNewInst() {return BlankInst(); }
@@ -61,6 +61,5 @@ class CritSectTunnel : public PossTunnel
 #endif
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();
-  //  virtual PossTunnel* GetSetTunnel();
 };
 #endif

@@ -37,10 +37,10 @@ class CombineBase : public LoopTunnel
 #endif
 #if TWOD
  CombineBase() :LoopTunnel(LASTTUNNEL),m_dir(LASTPARTDIR) {}
- CombineBase(PartDir dir, PossTunType type) : LoopTunnel(type), m_dir(dir) {}
+ CombineBase(PartDir dir, TunType type) : LoopTunnel(type), m_dir(dir) {}
 #else
  CombineBase() :LoopTunnel(LASTTUNNEL),m_partDim(99) {}
-   CombineBase(Dim partDim, PossTunType type) : LoopTunnel(type), m_partDim(partDim) {}
+   CombineBase(Dim partDim, TunType type) : LoopTunnel(type), m_partDim(partDim) {}
 #endif
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;

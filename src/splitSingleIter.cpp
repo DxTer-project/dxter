@@ -32,13 +32,13 @@ SplitSingleIter::SplitSingleIter()
 }
 
 #if TWOD
-SplitSingleIter::SplitSingleIter(PartDir dir, PossTunType type, bool isControl) 
+SplitSingleIter::SplitSingleIter(PartDir dir, TunType type, bool isControl) 
   : SplitBase(dir, type, isControl)
 {
   m_addDir = false;
 }
 #else
-SplitSingleIter::SplitSingleIter(unsigned int partDim, PossTunType type, bool isControl) 
+SplitSingleIter::SplitSingleIter(unsigned int partDim, TunType type, bool isControl) 
   : SplitBase(partDim, type, isControl)
 {
   m_addDir = false;
@@ -673,9 +673,9 @@ const Sizes* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
 #endif
 
 #if TWOD
-PossTunnel* SplitSingleIter::GetSetTunnel()
+Tunnel* SplitSingleIter::GetSetTunnel()
 {
-  SplitSingleIter *tun;
+  SplitSingleIter *tun;v
   if (m_tunType == POSSTUNIN)
     tun = new SplitSingleIter(m_dir, SETTUNIN, m_isControlTun);
   else if (m_tunType == POSSTUNOUT)
@@ -686,7 +686,7 @@ PossTunnel* SplitSingleIter::GetSetTunnel()
   return tun;
 }
 #else
-PossTunnel* SplitSingleIter::GetSetTunnel()
+Tunnel* SplitSingleIter::GetSetTunnel()
 {
   SplitSingleIter *tun;
   if (m_tunType == POSSTUNIN)
@@ -793,7 +793,7 @@ void SplitSingleIter::PrintCode(IndStream &out)
 	if ((*iter)->m_num != num)
 	  continue;
 	Node *child = (*iter)->m_n;
-	if (!child->IsPossTunnel(POSSTUNOUT)) {
+	if (!child->IsTunnel(POSSTUNOUT)) {
 	  hasPrinted = true;
 	  out.Indent();
 	  *out << "obj_t " << GetNameStr(num) << ";\n";	
@@ -887,11 +887,11 @@ void SplitSingleIter::Duplicate(const Node *orig, bool shallow, bool possMerging
 NodeType SplitSingleIter::GetType() const
 {
 #if TWOD
-  return "SplitSingleIter " + PartDirToStr(m_dir)  + "( " + PossTunnel::GetType() + " )";
+  return "SplitSingleIter " + PartDirToStr(m_dir)  + "( " + Tunnel::GetType() + " )";
 #else
   string tmp = "SplitSingleIter";
   tmp += m_partDim;
-  return tmp  + "( " + PossTunnel::GetType() + " )";
+  return tmp  + "( " + Tunnel::GetType() + " )";
 #endif
 }
 
@@ -978,7 +978,7 @@ bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
       default:
 	throw;
       }
-      if (check && !(*iter)->m_n->IsPossTunnel(POSSTUNOUT))
+      if (check && !(*iter)->m_n->IsTunnel(POSSTUNOUT))
         return true;
     }
     return false;
@@ -1017,7 +1017,7 @@ bool SplitSingleIter::PartInUse(unsigned int partNum) const
   for(; iter != m_children.end(); ++iter) {
     const NodeConn *conn = *iter;
     if (conn->m_num == partNum) {
-      if (!conn->m_n->IsPossTunnel(POSSTUNOUT))
+      if (!conn->m_n->IsTunnel(POSSTUNOUT))
 	return true;
     }
   }
@@ -1194,6 +1194,8 @@ void SplitSingleIter::StartFillingSizes()
     throw;
   if (m_tunType != SETTUNIN)
     return;
+  if (!m_pset->IsReal())
+    return;
   unsigned int numElems = GetNumElems(m_dir);
   m_msizes = new Sizes[numElems];
   m_nsizes = new Sizes[numElems];
@@ -1224,6 +1226,8 @@ void SplitSingleIter::StartFillingSizes()
   if (m_sizes)
     throw;
   if (m_tunType != SETTUNIN)
+    return;
+  if (!m_pset->IsReal())
     return;
   unsigned int numDims = InputNumDims(0);
   //Num dims of sizes, but the m_partDim dimension has
@@ -1262,6 +1266,8 @@ void SplitSingleIter::ClearDataTypeCache()
 void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
 {
   if (m_tunType != SETTUNIN)
+    return;
+  if (!m_pset->IsReal())
     return;
   if (!m_msizes)
     throw;
@@ -1310,13 +1316,13 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     for(; tunIter != m_children.end() && !found; ++tunIter) {
       NodeConn *conn = *tunIter;
       Node *tun = conn->m_n;
-      if (!tun->IsPossTunnel(POSSTUNIN))
+      if (!tun->IsTunnel(POSSTUNIN))
 	throw;
       NodeConnVecIter iter = tun->m_children.begin();
       for(; iter != tun->m_children.end() && !found; ++iter) {
 	NodeConn *childConn = *iter;
 	if (childConn->m_num == subMat) {
-	  if (!(childConn->m_n->IsPossTunnel(POSSTUNOUT))) {
+	  if (!(childConn->m_n->IsTunnel(POSSTUNOUT))) {
 	    found = true;
 	    foundOne = true;
 	    GetSizes(subMat, numIters,
@@ -1335,6 +1341,8 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
 void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
 {
   if (m_tunType != SETTUNIN)
+    return;
+  if (!m_pset->IsReal())
     return;
   if (!m_sizes)
     throw;
@@ -1372,6 +1380,8 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
 #if TWOD&&DODM
 void SplitSingleIter::UpdateLocalSizes()
 {
+  if (!m_pset->IsReal())
+    return;
   const unsigned int numElems = GetNumElems(m_dir);
   const LoopType loopType = GetMyLoop()->GetType();
   if (loopType == ELEMLOOP) {
@@ -1388,6 +1398,8 @@ void SplitSingleIter::UpdateLocalSizes()
 #elif DOTENSORS
 void SplitSingleIter::UpdateLocalSizes()
 {
+  if (!m_pset->IsReal())
+    return;
   Dim numDims = InputNumDims(0);
   const DistType t = InputDataType(0).m_dist;
   for (Dim dim = 0; dim < numDims; ++ dim) {
@@ -1481,6 +1493,8 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 void SplitSingleIter::BuildDataTypeCache()
 {
   SplitBase::BuildDataTypeCache();
+  if (!m_pset->IsReal())
+    return;
   if (m_tunType == SETTUNIN) {
     m_info = InputDataType(0);
     switch (m_dir) {
@@ -1500,17 +1514,24 @@ void SplitSingleIter::BuildDataTypeCache()
 const DataTypeInfo& SplitSingleIter::DataType(ConnNum num) const
 {
   if (m_tunType == SETTUNIN) {
-    unsigned int numElems = GetNumElems(m_dir);
-    if (num < numElems) {
-      return m_info;
+    if (!m_pset->IsReal())
+      return GetRealTunnel()->DataType(num);
+    else {
+      unsigned int numElems = GetNumElems(m_dir);
+      if (num < numElems) {
+	return m_info;
+      }
+      else if (num == numElems)
+	return InputDataType(0);
+      else
+	throw;
     }
-    else if (num == numElems)
-      return InputDataType(0);
-    else
-      throw;
   }
   else {
-    return Input(0)->DataType(num);
+    if (m_pset->IsReal())
+      return Input(0)->DataType(num);
+    else
+      GetRealTunnel()->Input(0)->DataType(num);
   }
 }
 #endif

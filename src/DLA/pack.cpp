@@ -231,18 +231,20 @@ void PackBuff::UpdateChildrensInnerMultiple(PackSize size)
     NodeConnVecIter packChildIter = pack->m_children.begin();
     for( ; packChildIter != pack->m_children.end(); ++packChildIter) {
       DLANode *packChild = (DLANode*)((*packChildIter)->m_n);
-      if (packChild->IsPossTunnel()) {
-        if (!packChild->IsPossTunnel(SETTUNIN))
+      if (packChild->IsTunnel()) {
+        if (!packChild->IsTunnel(SETTUNIN))
           throw;
+	if (!((Tunnel*)packChild)->m_set->IsReal())
+	  throw;
         NodeConnVecIter possTunInIter = packChild->m_children.begin();
         for(; possTunInIter != packChild->m_children.end(); ++possTunInIter) {
           DLANode *possTunIn = (DLANode*)((*possTunInIter)->m_n);
-          if (!possTunIn->IsPossTunnel(POSSTUNIN))
+          if (!possTunIn->IsTunnel(POSSTUNIN))
             throw;
           NodeConnVecIter childIter = possTunIn->m_children.begin();
           for(; childIter != possTunIn->m_children.end(); ++childIter) {
             DLANode *child = (DLANode*)((*childIter)->m_n);
-            if (!child->IsPossTunnel(POSSTUNOUT))
+            if (!child->IsTunnel(POSSTUNOUT))
               child->UpdateInnerPackingMultiple(size);
           }
         }
@@ -525,6 +527,8 @@ bool LoopInvariantPackBuffMotion::CanApply(const Node *node) const
     return false;
   }
   const LoopTunnel *tun = (LoopTunnel*)(node->Input(0));
+  if (!tun->m_pset->m_shadows.empty())
+    throw;
   return tun->IsConst();
 }
 
@@ -562,6 +566,8 @@ bool LoopInvariantPackMotion::CanApply(const Node *node) const
     return false;
   const Node *inputInput = input->Input(0);
   if (inputInput->GetNodeClass() != LoopTunnel::GetClass() || !inputInput->IsPossTunnel(SETTUNIN))
+    throw;
+  if (!((Tunnel*)inputInput)->m_pset->m_shadows.empty())
     throw;
   return true;
 }
@@ -689,10 +695,10 @@ bool FoundNodeUp(const Node *node, const Node *find)
     return true;
   NodeConnVecConstIter iter = node->m_inputs.begin();
   for(; iter != node->m_inputs.end(); ++iter) {
-    if (node->IsPossTunnel(POSSTUNIN))
+    if (node->IsTunnels(POSSTUNIN))
       return false;
-    else if (node->IsPossTunnel(SETTUNOUT)) {
-      PSet *set = ((PossTunnel*)node)->m_pset;
+    else if (node->IsTunnel(SETTUNOUT)) {
+      PSet *set = ((Tunnel*)node)->m_pset;
       NodeVecConstIter iter2 = set->m_inTuns.begin();
       for(; iter2 != set->m_inTuns.end(); ++iter2) {
         if (FoundNodeUp(*iter2,find))
@@ -891,12 +897,14 @@ bool ReuseTrsmPacking::CanApply(const Node *node) const
   if (node->GetNodeClass() != Pack::GetClass())
     throw;
   Node *input = node->Input(0);
-  if (!input->IsPossTunnel(SETTUNOUT))
+  if (!input->IsTunnel(SETTUNOUT))
     return false;
-  PossTunnel *setTun = (PossTunnel*)input;
+  Tunnel *setTun = (Tunnel*)input;
+  if (!setTun->m_pset->IsReal())
+    throw;
   if (setTun->m_inputs.size() > 1)
     return false;
-  PossTunnel *possTun = (PossTunnel*)(setTun->Input(0));
+  Tunnel *possTun = (Tunnel*)(setTun->Input(0));
   if (possTun->GetNodeClass() != CombineSingleIter::GetClass())
     return false;
   //possTun should be a combine of X in some direction and X_1 should be attached to TrsmBP's
@@ -915,20 +923,20 @@ bool ReuseTrsmPacking::CanApply(const Node *node) const
 
 void ReuseTrsmPacking::Apply(Node *node) const
 {
-  PossTunnel *setTun = (PossTunnel*)(node->Input(0));
-  PossTunnel *possTun = (PossTunnel*)(setTun->Input(0));
+  Tunnel *setTun = (Tunnel*)(node->Input(0));
+  Tunnel *possTun = (Tunnel*)(setTun->Input(0));
   TrxmBP *trsm = (TrxmBP*)(possTun->Input(1));
   NodeConnVecIter iter = trsm->m_children.begin();
   for(; iter != trsm->m_children.end(); ++iter) {
     NodeConn *conn = *iter;
     if (conn->m_num == 0) {
-      if (conn->m_n->IsPossTunnel(POSSTUNOUT)) {
-        PossTunnel *possTunOut = (PossTunnel*)(conn->m_n);
+      if (conn->m_n->IsTunnel(POSSTUNOUT)) {
+        Tunnel *possTunOut = (Tunnel*)(conn->m_n);
         if (possTunOut->m_children.size() != 1)
           throw;
-        if (!possTunOut->m_children[0]->m_n->IsPossTunnel(SETTUNOUT))
+        if (!possTunOut->m_children[0]->m_n->IsTunnel(SETTUNOUT))
           throw;
-        PossTunnel *setTunOut = (PossTunnel*)(possTunOut->m_children[0]->m_n);
+        Tunnel *setTunOut = (Tunnel*)(possTunOut->m_children[0]->m_n);
         node->RedirectChildren(setTunOut,0);
         node->m_poss->DeleteChildAndCleanUp(node, false);
         return;

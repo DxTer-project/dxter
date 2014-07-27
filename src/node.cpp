@@ -204,14 +204,14 @@ bool Node::operator==(const Node &rhs) const
     Node *node2 = (*iter2)->m_n;
     if ((*iter1)->m_num != (*iter2)->m_num)
       return false;
-    if (node1->IsPossTunnel()) {
-      if (!node2->IsPossTunnel())
+    if (node1->IsTunnel()) {
+      if (!node2->IsTunnel())
         return false;
-      if (((PossTunnel*)node1)->m_tunType != ((PossTunnel*)node2)->m_tunType)
+      if (((Tunnel*)node1)->m_tunType != ((Tunnel*)node2)->m_tunType)
         return false;
-      if (node1->IsPossTunnel(SETTUNOUT)) {
-        PossTunnel *tun1 = (PossTunnel*)node1;
-        PossTunnel *tun2 = (PossTunnel*)node2;
+      if (node1->IsTunnel(SETTUNOUT)) {
+        Tunnel *tun1 = (Tunnel*)node1;
+        Tunnel *tun2 = (Tunnel*)node2;
         BasePSet *set1 = tun1->m_pset;
         BasePSet *set2 = tun2->m_pset;
         if (!(*set1 == *set2))
@@ -222,7 +222,7 @@ bool Node::operator==(const Node &rhs) const
         }
       }
     }
-    else if (node2->IsPossTunnel())
+    else if (node2->IsTunnel())
       return false;
     else if (!(**iter1 == **iter2))
       return false;
@@ -272,7 +272,7 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
     }
     NodeMapIter find = map.find(Input(i));
     if (find == map.end()) {
-      if (deleteSetTunConnsIfMapNotFound && Input(i)->IsPossTunnel(SETTUNIN)) {
+      if (deleteSetTunConnsIfMapNotFound && Input(i)->IsTunnel(SETTUNIN)) {
 	m_inputs.erase(m_inputs.begin()+i);
 	--i;
       }
@@ -293,7 +293,7 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
     NodeMapIter find = map.find(child);
     if (find==map.end()) {
       if (deleteSetTunConnsIfMapNotFound &&
-	  child->IsPossTunnel(SETTUNOUT)) 
+	  child->IsTunnel(SETTUNOUT)) 
 	{
 	  m_children.erase(m_children.begin()+i);
 	  --i;
@@ -327,7 +327,7 @@ void Node::Print(IndStream &out, GraphNum graphNum)
       }
 #endif
       
-      if (!IsPossTunnel()) {
+      if (!IsTunnel()) {
         //If there are redist nodes as my child, go ahead
         // and print them to make less likely a weird situation
         // that arrises from DAGs turned into code
@@ -355,7 +355,7 @@ void Node::Print(IndStream &out, GraphNum graphNum)
         childIter = m_children.begin();
         for( ; childIter != m_children.end(); ++childIter) {
           Node *child = (*childIter)->m_n;
-          if (!child->IsPossTunnel() &&
+          if (!child->IsTunnel() &&
               (child->Input(child->m_inputs.size()-1) != this))
           {
             child->Print(out, graphNum);
@@ -379,14 +379,14 @@ bool Node::CanPrintCode() const
     //If input is SETTUNIN, then this is a POSTUNIN
     // there will be other children of input that 
     // also overwrite just like this.
-    else if (!input->IsPossTunnel(SETTUNIN) && Overwrites(input, num))
+    else if (!input->IsTunnel(SETTUNIN) && Overwrites(input, num))
     {
       NodeConnVecConstIter childIter = input->m_children.begin();
       for(; childIter != input->m_children.end(); ++childIter) {
         const NodeConn *childConn = *childIter;
         const Node *child = childConn->m_n;
         ConnNum childNum = childConn->m_num;
-        if (childNum == num && child != this && !child->IsPossTunnel(POSSTUNOUT)) {
+        if (childNum == num && child != this && !child->IsTunnel(POSSTUNOUT)) {
           if (child->Overwrites(input, num)) {
             cout << "two children of " << input->GetNodeClass() << " overwrite output " << childNum << "\n";
             cout << GetNodeClass() << endl;
@@ -395,27 +395,15 @@ bool Node::CanPrintCode() const
           }
           else {
             if (!child->HasPrinted()) {
-              if (IsPossTunnel(SETTUNIN) && child->IsPossTunnel(SETTUNIN)) {
-                const PossTunnel *tun1 = (PossTunnel*)this;
-                const PossTunnel *tun2 = (PossTunnel*)child;
+              if (IsTunnel(SETTUNIN) && child->IsTunnel(SETTUNIN)) {
+                const Tunnel *tun1 = (Tunnel*)this;
+                const Tunnel *tun2 = (Tunnel*)child;
                 if (tun1->m_pset != tun2->m_pset)
                   return false;
               }
               else
                 return false;
             }
-	    /*
-            else if (child->IsPossTunnel(SETTUNIN)) {
-              const PossTunnel *tun2 = (PossTunnel*)child;
-              const BasePSet *set = tun2->m_pset;
-              if (this->IsPossTunnel(SETTUNIN)) {
-                if (set == ((PossTunnel*)this)->m_pset)
-                  continue;
-              }
-	      if (!set->GetCurrPoss()->m_hasPrinted)
-	      return false;
-            }
-	    */
           }
         }
       }
@@ -578,16 +566,16 @@ void Node::CheckConnections()
 {
   NodeConnVecIter iter1 = m_inputs.begin();
   for( ; iter1 != m_inputs.end(); ++iter1 ) {
-    //check that all inputs are either in the same poss or i'm a posstunnel
-    if (!IsPossTunnel(SETTUNOUT) && !IsPossTunnel(POSSTUNIN)) {
+    //check that all inputs are either in the same poss or i'm a tunnel
+    if (!IsTunnel(SETTUNOUT) && !IsTunnel(POSSTUNIN)) {
       if ((*iter1)->m_n->m_poss != m_poss) {
         cout << "Input to " << GetType() << " isn't in the same poss (" << (*iter1)->m_n->GetType() << ")\n";
         throw;
       }
     }
     
-    if ((*iter1)->m_n->IsPossTunnel(SETTUNOUT)) {
-      PossTunnel *tun = (PossTunnel*)((*iter1)->m_n);
+    if ((*iter1)->m_n->IsTunnel(SETTUNOUT)) {
+      Tunnel *tun = (Tunnel*)((*iter1)->m_n);
       PSetVecIter iter = m_poss->m_sets.begin();
       bool found = false;
       for(; iter != m_poss->m_sets.end() && !found; ++iter) {
@@ -661,9 +649,9 @@ void Node::CheckConnections()
     }
   }
   
-  if (!IsPossTunnel()
-      || ((PossTunnel*)this)->m_tunType == POSSTUNIN
-      || ((PossTunnel*)this)->m_tunType == POSSTUNOUT)
+  if (!IsTunnel()
+      || ((Tunnel*)this)->m_tunType == POSSTUNIN
+      || ((Tunnel*)this)->m_tunType == POSSTUNOUT)
   {
     bool found = false;
     NodeVecConstIter iter = m_poss->m_possNodes.begin();
@@ -965,21 +953,21 @@ const DataTypeInfo& Node::InputDataType(ConnNum num) const
 
 string Node::GetFunctionalityString() const
 {
-  if (IsPossTunnel(POSSTUNIN))
+  if (IsTunnel(POSSTUNIN))
     return "";
   string str;
-  if (!IsPossTunnel())
+  if (!IsTunnel())
     str = GetType();
   NodeConnVecConstIter iter = m_inputs.begin();
   for( ;iter != m_inputs.end(); ++iter) {
     const NodeConn *conn = *iter;
     const Node *in = conn->m_n;
-    if (!in->IsPossTunnel()) {
+    if (!in->IsTunnel()) {
       str += (char)(conn->m_num + 48);
       str += in->GetFunctionalityString();
     }
-    else if (in->IsPossTunnel(SETTUNOUT)) {
-      const BasePSet *set = ((PossTunnel*)in)->m_pset;
+    else if (in->IsTunnel(SETTUNOUT)) {
+      const BasePSet *set = ((Tunnel*)in)->m_pset;
       if (!set)
 	throw;
       str += "(";

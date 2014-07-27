@@ -269,8 +269,8 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
   for(; iter != pset->m_inTuns.end() && !left; ++iter) {
     const Node *inTun = *iter;
     for (ConnNum i = 0; i < inTun->m_inputs.size() && !left; ++i) {
-      if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) &&
-          ((PossTunnel*)inTun->Input(i))->m_pset == this) {
+      if (inTun->Input(i)->IsTunnel(SETTUNOUT) &&
+          ((Tunnel*)inTun->Input(i))->m_pset == this) {
         right = pset;
         left = this;
       }
@@ -281,8 +281,8 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
     for(; iter != PSetType::m_inTuns.end() && !left; ++iter) {
       const Node *inTun = *iter;
       for (ConnNum i = 0; i < inTun->m_inputs.size() && !left; ++i) {
-        if (inTun->Input(i)->IsPossTunnel(SETTUNOUT) &&
-            ((PossTunnel*)inTun->Input(i))->m_pset == pset) {
+        if (inTun->Input(i)->IsTunnel(SETTUNOUT) &&
+            ((Tunnel*)inTun->Input(i))->m_pset == pset) {
           left = pset;
           right = this;
         }
@@ -352,8 +352,8 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
     for(; iter != right->m_outTuns.end(); ++iter) {
       const Node *outTun = *iter;
       for (unsigned int i = 0; i < outTun->m_children.size(); ++i) {
-        if (outTun->Child(0)->IsPossTunnel(SETTUNIN) &&
-            ((PossTunnel*)outTun->Child(0))->m_pset == left) {
+        if (outTun->Child(0)->IsTunnel(SETTUNIN) &&
+            ((Tunnel*)outTun->Child(0))->m_pset == left) {
           cout << "found cycle\n";
           throw;
         }
@@ -371,9 +371,9 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
       }
       const LoopTunnel *rightInTun = (LoopTunnel*)*iter;
       for (ConnNum i = 0; i < rightInTun->m_inputs.size() && left; ++i) {
-        if (rightInTun->Input(0)->IsLoopTunnel() && rightInTun->Input(0)->IsPossTunnel(SETTUNOUT)) {
+        if (rightInTun->Input(0)->IsLoopTunnel() && rightInTun->Input(0)->IsTunnel(SETTUNOUT)) {
           const LoopTunnel *leftOutTun = (LoopTunnel*)(rightInTun->Input(0));
-          if (((PossTunnel*)leftOutTun)->m_pset == left) {
+          if (((Tunnel*)leftOutTun)->m_pset == left) {
             for(int quad = TL; quad < LASTQUAD; ++quad) {
               if (rightInTun->QuadInUse((Quad)quad, true)) {
                 if (leftOutTun->GetUpStat((Quad)quad) != FULLUP) {
@@ -776,8 +776,8 @@ bool IntLoop<PSetType>::WorthFusing(BasePSet *pset)
     NodeConnVecIter iter2 = out->m_children.begin();
     for(; iter2 != out->m_children.end(); ++iter2) {
       Node *child = (*iter2)->m_n;
-      if (child->IsPossTunnel(SETTUNIN)) {
-        if (((PossTunnel*)child)->m_pset == pset)
+      if (child->IsTunnel(SETTUNIN)) {
+        if (((Tunnel*)child)->m_pset == pset)
           return true;
       }
     }
@@ -788,8 +788,8 @@ bool IntLoop<PSetType>::WorthFusing(BasePSet *pset)
     NodeConnVecIter iter2 = in->m_inputs.begin();
     for(; iter2 != in->m_inputs.end(); ++iter2) {
       Node *input = (*iter2)->m_n;
-      if (input->IsPossTunnel(SETTUNOUT)) {
-        if (((PossTunnel*)input)->m_pset == pset)
+      if (input->IsTunnel(SETTUNOUT)) {
+        if (((Tunnel*)input)->m_pset == pset)
           return true;
       }
       ConnNum num = (*iter2)->m_num;
@@ -797,8 +797,8 @@ bool IntLoop<PSetType>::WorthFusing(BasePSet *pset)
       for(; iter3 != input->m_children.end(); ++iter3) {
         if ((*iter3)->m_num == num) {
           Node *otherChild = (*iter3)->m_n;
-          if (otherChild->IsPossTunnel(SETTUNIN)) {
-            if (((PossTunnel*)otherChild)->m_pset == pset)
+          if (otherChild->IsTunnel(SETTUNIN)) {
+            if (((Tunnel*)otherChild)->m_pset == pset)
               return true;
           }
         }
