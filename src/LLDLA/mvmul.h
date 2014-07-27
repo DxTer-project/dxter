@@ -72,6 +72,19 @@ class MVMulLoopRef : public SingleTrans
   void ApplyRowSplit(Node *node) const;
 };
 
+class MVMulToRegArith : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  MVMulToRegArith(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+  virtual bool IsRef() const { return true; }
+};
+
 class MVMulLowerLayer : public SingleTrans
 {
  public:

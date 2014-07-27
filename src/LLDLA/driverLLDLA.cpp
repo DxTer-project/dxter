@@ -166,13 +166,13 @@ void AddTrans()
 
 #if DOLOOPUNROLLING
 #if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(), 
-  		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
+  Universe::AddTrans(SplitSingleIter::GetClass(),
+		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
 #endif //DO2MUTRANSFORMATIONS
 
 #if DO3MUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(), 
-  		     new FullyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
+		     new FullyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
 #endif //DO3MUTRANSFORMATIONS
 #endif
   
@@ -198,6 +198,9 @@ void AddTrans()
 
   // Introduce loop in N dimension
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
+
+  // Convert mvmul to vector arithmetic
+  Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Lower layer tag
   Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
@@ -267,6 +270,7 @@ int main(int argc, const char* argv[])
   int algNum;
   string fileName;
   string opName;
+  Cost flopCost = 0;
 
   if(argc < 2) {
     Usage();
@@ -348,7 +352,6 @@ int main(int argc, const char* argv[])
   Universe uni;
   time_t start, start2, end;
   uni.PrintStats();
-  Cost flopCost = 0;
   string absImpStr;
   if (algNum==0) {
     time(&start);

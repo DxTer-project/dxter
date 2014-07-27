@@ -120,7 +120,7 @@ void StoreFromRegs::Prop()
 
     // TODO: Check that the correct input # is a register
     
-    if (*(GetInputM(0)) != NUMREGSPERLOAD) {
+    /*    if (*(GetInputM(0)) != NUMREGSPERLOAD) {
       // this isn't 1 x NUMREGSPERLOAD
       if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != NUMREGSPERLOAD)
 	throw;
@@ -134,7 +134,7 @@ void StoreFromRegs::Prop()
       throw;
 
     if (*GetInputN(0) != *GetInputN(1))
-      throw;
+    throw;*/
     
     m_cost = 0;
   }

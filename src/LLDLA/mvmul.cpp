@@ -23,6 +23,8 @@
 #include "mvmul.h"
 #include "svmul.h"
 #include "loopSupport.h"
+#include "regLoadStore.h"
+#include "regArith.h"
 #include "LLDLA.h"
 
 #if DOLLDLA
@@ -339,6 +341,90 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
   node->RedirectChildren(loop->OutTun(2), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 
+}
+
+string MVMulToRegArith::GetType() const
+{
+  return "MVMulToRegArith from " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool MVMulToRegArith::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == MVMul::GetClass()) {
+    MVMul* mvmul = (MVMul*) node;
+    return *mvmul->GetInputM(0) == LLDLA_MU;
+  }
+  return false;
+}
+
+void MVMulToRegArith::Apply(Node* node) const
+{
+  MVMul* mvmul = (MVMul*) node;
+  
+  // Split matrix A into mu x 1 column vectors
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  splitA->AddInput(mvmul->Input(0), mvmul->InputConnNum(0));
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+
+  // Split x into individual elements
+  SplitSingleIter* splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  splitX->AddInput(mvmul->Input(1), mvmul->InputConnNum(1));
+  splitX->SetAllStats(FULLUP);
+  splitX->SetIndepIters();
+
+  // Create vector register with elements of y
+  LoadToRegs* loadY = new LoadToRegs();
+  loadY->AddInput(mvmul->Input(2), mvmul->InputConnNum(2));
+  
+  node->m_poss->AddNode(loadY);
+  
+  // Create tunnel for y register
+  LoopTunnel* yTun = new LoopTunnel(POSSTUNIN);
+  yTun->AddInput(loadY, 0);
+  yTun->SetAllStats(PARTUP);
+  
+  // Create load for elements of A in loop body
+  LoadToRegs* loadA = new LoadToRegs();
+  loadA->AddInput(splitA, 1);
+
+  // Create duplicate load for x
+  DuplicateRegLoad* loadX = new DuplicateRegLoad();
+  loadX->AddInput(splitX, 1);
+
+  // Create new FMA instruction for loop body
+  FMAdd* fmadd = new FMAdd();
+  fmadd->AddInput(loadA, 0);
+  fmadd->AddInput(loadX, 0);
+  fmadd->AddInput(yTun, 0);
+
+  // Create output tunnel for FMA result
+  LoopTunnel* fmaOut = new LoopTunnel(POSSTUNOUT);
+  fmaOut->AddInput(fmadd, 0);
+  fmaOut->AddInput(yTun, 1);
+  fmaOut->CopyTunnelInfo(yTun);
+
+  // Create combines for A and x
+  CombineSingleIter* comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter* comX = splitX->CreateMatchingCombine(0);
+
+  // Create the poss
+  Poss* loopPoss = new Poss(3, comA, comX, fmaOut);
+  Loop* loop = new Loop(LLDLALOOP, loopPoss, UnitBS);
+
+  node->m_poss->AddLoop(loop);
+
+  // Store result of computation back to y
+  StoreFromRegs* storeToY = new StoreFromRegs();
+  storeToY->AddInput(loop->OutTun(2), 0);
+  storeToY->AddInput(mvmul->Input(2), mvmul->InputConnNum(2));
+
+  node->m_poss->AddNode(storeToY);
+  
+  node->RedirectChildren(storeToY);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
 }
 
 #endif // DOLLDLA

@@ -1452,6 +1452,8 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
   if (m_dir == PARTDOWN) {
     if (!IsUnitStride(type.m_rowStride))
       *out << type.m_rowStrideVar << " * ";
+    if (bs == UnitBS)
+      *out << "1" << ";\n";
     if (bs == LLDLAMu)
       *out << MU_VAR_NAME << ";\n";
     else if (bs == LLDLA2Mu)
@@ -1462,6 +1464,8 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
   else if (m_dir == PARTRIGHT) {
     if (!IsUnitStride(type.m_colStride))
       *out << type.m_colStrideVar << " * ";
+    if (bs == UnitBS)
+      *out << "1" << ";\n";
     if (bs == LLDLAMu)
       *out << MU_VAR_NAME << ";\n";
     else if (bs == LLDLA2Mu)

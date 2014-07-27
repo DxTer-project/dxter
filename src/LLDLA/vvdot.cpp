@@ -343,7 +343,7 @@ void VVDotToRegArith::Apply(Node *node) const
   accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
 
   node->m_poss->AddNode(accumInC);
-  node->RedirectChildren(loop->OutTun(2), 0);
+  node->RedirectChildren(accumInC, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
   return;
 }

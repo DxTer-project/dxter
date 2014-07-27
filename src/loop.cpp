@@ -53,6 +53,8 @@ string BSSize::VarName() const
   switch(m_val)
     {
 #if DOLLDLA
+    case (USEUNITBS):
+      return "1";
     case (USELLDLAMU):
       return MU_VAR_NAME;
     case (USELLDLA2MU):
@@ -706,7 +708,8 @@ void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
 #elif DOLLDLA
   if (m_type != LLDLALOOP)
     throw;
-  if (m_bsSize != LLDLAMu &&
+  if (m_bsSize != UnitBS &&
+      m_bsSize != LLDLAMu &&
       m_bsSize != LLDLA2Mu &&
       m_bsSize != LLDLA3Mu)
     throw;
