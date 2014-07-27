@@ -460,6 +460,11 @@ void FullyUnrollLoop::Apply(Node *node) const
   
   LoopInterface *loop = split->GetMyLoop();
   BasePSet *base = dynamic_cast<BasePSet*>(loop);
+  if ((void*)loop != (void*)base) {
+    cout << loop << endl;
+    cout << base << endl;
+    throw;
+  }
 
   PossMMap &posses = base->GetPosses();
 

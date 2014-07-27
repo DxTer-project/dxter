@@ -1681,7 +1681,10 @@ void Poss::FormSets(unsigned int phase)
    
     int i;
     for(i=0; i < (int)(m_sets.size()); ++i) {
-      (m_sets[i])->FormSets(phase);
+      BasePSet *set = m_sets[i];
+      if (set->IsReal()) {
+	((RealPSet*)set)->FormSets(phase);
+      }
     }
     
     if (m_pset->m_isTopLevel)
@@ -1740,7 +1743,7 @@ void Poss::FormSets(unsigned int phase)
 	}
    
 	Poss *newPoss = new Poss(outputTuns, true, true);
-	PSet *set = new PSet(newPoss);
+	RealPSet *set = new RealPSet(newPoss);
    
 	AddPSet(set, true);
    
@@ -1789,7 +1792,7 @@ void Poss::FormSets(unsigned int phase)
 	  outputTuns.push_back(tun);
    
 	  Poss *newPoss = new Poss(outputTuns, true, true);
-	  PSet *set = new PSet(newPoss);
+	  RealPSet *set = new RealPSet(newPoss);
    
 	  AddPSet(set, true);
    

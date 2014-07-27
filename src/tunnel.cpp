@@ -238,7 +238,7 @@ const Dim Tunnel::NumDims(ConnNum num) const
     if (m_pset->IsReal())
       return ((DLANode*)Input(0))->NumDims(num);
     else {
-      GetRealTunnel->NumDims(num);
+      GetRealTunnel()->NumDims(num);
     }
   }
   else if (m_tunType != POSSTUNIN) {
@@ -254,7 +254,7 @@ const Sizes* Tunnel::Len(ConnNum num,Dim dim) const
 
   if (m_tunType == SETTUNOUT) {
     if (m_pset->IsReal())
-      return ((DLANode*)Input(0))->NumDims(num);
+      return ((DLANode*)Input(0))->Len(num,dim);
     else {
       GetRealTunnel()->Len(num,dim);
     }

@@ -47,8 +47,8 @@ Size medSize = 100;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
-PSet* Cont1Example();
-PSet* MartinsExample();
+RealPSet* Cont1Example();
+RealPSet* MartinsExample();
 
 void AddTrans()
 {
@@ -106,7 +106,7 @@ int main(int argc, const char* argv[])
 #endif
   //  PrintType printType = CODE;
   int numIters = -1;
-  PSet* (*algFunc)();
+  RealPSet* (*algFunc)();
   //  GraphNum whichGraph = 0;
   int algNum;
   string fileName;
@@ -225,7 +225,7 @@ int main(int argc, const char* argv[])
   return 0;
 }
 
-PSet* Cont1Example()
+RealPSet* Cont1Example()
 {
   Sizes sizes[4];
 
@@ -252,19 +252,19 @@ PSet* Cont1Example()
 		  tunC,0);
 
   Poss *innerPoss = new Poss(cont,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Cout = new OutputNode("C output");
   Cout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Cout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 
 }
 
-PSet* MartinsExample()
+RealPSet* MartinsExample()
 {
   Sizes sizes[4];
 
@@ -363,13 +363,13 @@ PSet* MartinsExample()
 		   tunOutVal,0);
 
   Poss *innerPoss = new Poss(cont4,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *out = new OutputNode("output");
   out->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 
