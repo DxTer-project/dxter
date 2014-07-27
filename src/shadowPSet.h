@@ -25,7 +25,7 @@
 
 #include "base.h"
 #include "poss.h"
-#include "possTunnel.h"
+#include "tunnel.h"
 #include "basePSet.h"
 
 class ShadowPSet : public BasePSet

@@ -27,8 +27,8 @@
 #include "helperNodes.h"
 
 
-LoopTunnel::LoopTunnel(PossTunType type)
-: PossTunnel(type)
+LoopTunnel::LoopTunnel(TunType type)
+: Tunnel(type)
 {
   m_statTL = BADUP;
   m_statTR = BADUP;
@@ -96,7 +96,7 @@ void LoopTunnel::CopyTunnelInfo(const LoopTunnel *tun)
   m_indepIters = tun->m_indepIters;
 }
 
-PossTunnel* LoopTunnel::GetSetTunnel()
+Tunnel* LoopTunnel::GetSetTunnel()
 {
   LoopTunnel *tun;
   if (m_tunType == POSSTUNIN)
@@ -112,7 +112,7 @@ PossTunnel* LoopTunnel::GetSetTunnel()
 void LoopTunnel::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    PossTunnel::Prop();
+    Tunnel::Prop();
 
     if (m_tunType == POSSTUNIN 
 	&& !IsSplit()) 
@@ -432,9 +432,9 @@ LoopInterface* LoopTunnel::GetMyLoop() const
   else if (m_tunType == SETTUNOUT)
     set = m_pset;
   else if (m_tunType == POSSTUNIN)
-    set = ((PossTunnel*)Input(0))->m_pset;
+    set = ((Tunnel*)Input(0))->m_pset;
   else if (m_tunType == POSSTUNOUT)
-    set = ((PossTunnel*)Child(0))->m_pset;
+    set = ((Tunnel*)Child(0))->m_pset;
   else 
     throw;
   if (!set->IsLoop()) {
@@ -452,14 +452,14 @@ LoopInterface* LoopTunnel::GetMyLoop() const
 
 void LoopTunnel::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  PossTunnel::Duplicate(orig, shallow, possMerging);
+  Tunnel::Duplicate(orig, shallow, possMerging);
   const LoopTunnel *tun = (LoopTunnel*)orig;
   CopyTunnelInfo(tun);
 }
 
 NodeType LoopTunnel::GetType() const
 {
-  return "LoopTunnel (" + PossTunnel::GetType() + ")";
+  return "LoopTunnel (" + Tunnel::GetType() + ")";
 }
 
 UpStat LoopTunnel::GetUpStat(Quad quad) const
@@ -508,7 +508,7 @@ bool LoopTunnel::QuadInUse(Quad quad, bool atEnd) const
   else if (m_tunType == POSSTUNIN) {
     NodeConnVecConstIter iter = m_children.begin();
     for( ; iter != m_children.end(); ++iter) {
-      if (!(*iter)->m_n->IsPossTunnel(POSSTUNOUT))
+      if (!(*iter)->m_n->IsTunnel(POSSTUNOUT))
         return true;
     }
     return false;
@@ -534,7 +534,7 @@ LoopTunnel* LoopTunnel::GetMatchingOutTun() const
   for(; iter != m_children.end(); ++iter) {
     const NodeConn *con = *iter;
     const Node *child = con->m_n;
-    if (child->IsPossTunnel(POSSTUNOUT) &&
+    if (child->IsTunnel(POSSTUNOUT) &&
         child->IsLoopTunnel()) {
       return (LoopTunnel*)child;
     }
@@ -557,7 +557,7 @@ LoopTunnel* LoopTunnel::GetMatchingInTun() const
     throw;
   
   const Node *in = Input(1);
-  if (in->IsPossTunnel(POSSTUNIN) && in->IsLoopTunnel()) {
+  if (in->IsTunnel(POSSTUNIN) && in->IsLoopTunnel()) {
     return (LoopTunnel*)in;
   }
   else {
@@ -616,7 +616,7 @@ LoopType LoopTunnel::GetLoopType() const
 
 void LoopTunnel::FlattenCore(ofstream &out) const
 {
-  PossTunnel::FlattenCore(out);
+  Tunnel::FlattenCore(out);
   WRITE(m_statTL);
   WRITE(m_statTR);
   WRITE(m_statBL);
@@ -626,7 +626,7 @@ void LoopTunnel::FlattenCore(ofstream &out) const
 
 void LoopTunnel::UnflattenCore(ifstream &in, SaveInfo &info) 
 {
-  PossTunnel::UnflattenCore(in,info);
+  Tunnel::UnflattenCore(in,info);
   READ(m_statTL);
   READ(m_statTR);
   READ(m_statBL);

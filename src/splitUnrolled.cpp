@@ -66,7 +66,7 @@ Name SplitUnrolled::GetName(ConnNum num, LoopType type) const
       if (m_pset->IsReal())
 	return ((LoopTunnel*)Input(0))->GetOrigName();
       else
-	return GetRealTunnel()->GetName(num, type);
+	return ((LoopTunnel*)(GetRealTunnel()->Input(0)))->GetOrigName();
     else if (m_tunType == POSSTUNOUT)
       return ((LoopTunnel*)Input(m_inputs.size()-1))->GetOrigName();
     else if (m_tunType == SETTUNIN) {
@@ -147,7 +147,7 @@ const Sizes* SplitUnrolled::GetN(ConnNum num) const
         throw;
       return GetInputN(0);
     case (SETTUNOUT):
-      return GetRealTunnel->GetInputN(0);
+      return GetRealTunnel()->GetInputN(0);
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);

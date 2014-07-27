@@ -27,7 +27,7 @@
 #include "node.h"
 #include "DLANode.h"
 #include "basePSet.h"
-#include "possTunnel.h"
+#include "tunnel.h"
 #include <stdarg.h>
 #include <unordered_set>
 #include "realPSet.h"
@@ -57,18 +57,18 @@ class Poss
   static StrSet M_fusedSets;
   Poss();
   virtual ~Poss();
-  Poss(PossTunnel *tun);
+  Poss(Tunnel *tun);
   Poss(Node *node, bool goUp=false);
   Poss(int numArgs, ...);
   Poss(const NodeVec &nodes, bool outTuns, bool disconnectFromOwner);
   void InitHelper(const NodeVec &nodes, bool outTuns, bool disconnectFromOwner);
   void MarkInsane(bool wrongPhase = false);
   void PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound = false);
-  void DeleteChildAndCleanUp(Node *output, bool GoThroughTunnels=false, bool handleTunnelsAsNormalNodes=false, bool stopAtPossTunnels=false);
+  void DeleteChildAndCleanUp(Node *output, bool GoThroughTunnels=false, bool handleTunnelsAsNormalNodes=false, bool stopAtTunnels=false);
   virtual void DeleteNode(Node *node);
   void ForcePrint();
   bool CanPrint() const;
-  virtual bool IsBoundary(Node *node) {return node->IsPossTunnel();}
+  virtual bool IsBoundary(Node *node) {return node->IsTunnel();}
   virtual void Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useShadows);
   bool operator==(Poss &rhs);
   bool operator!=(Poss &rhs) {return !(*this == rhs);}

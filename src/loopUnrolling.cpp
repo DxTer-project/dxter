@@ -763,8 +763,10 @@ void CombineMultipleIters::Prop()
       {
 	Size bs = BSSizeToSize(m_bs);
 	for (int i = 0; i < m_numIters; ++i) {
-	  if (*GetInputM(i) != bs)
+	  if (*GetInputM(i) != bs) {
+	    (*GetInputM(i)).Print();
 	    throw;
+	  }
 	}	  
 	break;
       }
@@ -772,8 +774,11 @@ void CombineMultipleIters::Prop()
       {
 	Size bs = BSSizeToSize(m_bs);
 	for (int i = 0; i < m_numIters; ++i) {
-	  if (*GetInputN(i) != bs)
+	  if (*GetInputN(i) != bs) {
+	    (*GetInputN(i)).Print();
+	    cout << bs << endl;
 	    throw;
+	  }
 	}
 	break;
       }

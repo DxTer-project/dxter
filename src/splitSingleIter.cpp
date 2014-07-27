@@ -675,7 +675,7 @@ const Sizes* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
 #if TWOD
 Tunnel* SplitSingleIter::GetSetTunnel()
 {
-  SplitSingleIter *tun;v
+  SplitSingleIter *tun;
   if (m_tunType == POSSTUNIN)
     tun = new SplitSingleIter(m_dir, SETTUNIN, m_isControlTun);
   else if (m_tunType == POSSTUNOUT)
@@ -1194,7 +1194,7 @@ void SplitSingleIter::StartFillingSizes()
     throw;
   if (m_tunType != SETTUNIN)
     return;
-  if (!m_pset->IsReal())
+  if (m_pset && !m_pset->IsReal())
     return;
   unsigned int numElems = GetNumElems(m_dir);
   m_msizes = new Sizes[numElems];
@@ -1227,7 +1227,7 @@ void SplitSingleIter::StartFillingSizes()
     throw;
   if (m_tunType != SETTUNIN)
     return;
-  if (!m_pset->IsReal())
+  if (m_pset && !m_pset->IsReal())
     return;
   unsigned int numDims = InputNumDims(0);
   //Num dims of sizes, but the m_partDim dimension has
@@ -1267,7 +1267,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
 {
   if (m_tunType != SETTUNIN)
     return;
-  if (!m_pset->IsReal())
+  if (m_pset && !m_pset->IsReal())
     return;
   if (!m_msizes)
     throw;
@@ -1342,7 +1342,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
 {
   if (m_tunType != SETTUNIN)
     return;
-  if (!m_pset->IsReal())
+  if (m_pset && !m_pset->IsReal())
     return;
   if (!m_sizes)
     throw;
@@ -1380,7 +1380,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
 #if TWOD&&DODM
 void SplitSingleIter::UpdateLocalSizes()
 {
-  if (!m_pset->IsReal())
+  if (m_pset && !m_pset->IsReal())
     return;
   const unsigned int numElems = GetNumElems(m_dir);
   const LoopType loopType = GetMyLoop()->GetType();
@@ -1398,7 +1398,7 @@ void SplitSingleIter::UpdateLocalSizes()
 #elif DOTENSORS
 void SplitSingleIter::UpdateLocalSizes()
 {
-  if (!m_pset->IsReal())
+  if (m_pset && !m_pset->IsReal())
     return;
   Dim numDims = InputNumDims(0);
   const DistType t = InputDataType(0).m_dist;
@@ -1493,7 +1493,7 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 void SplitSingleIter::BuildDataTypeCache()
 {
   SplitBase::BuildDataTypeCache();
-  if (!m_pset->IsReal())
+  if (m_pset && !m_pset->IsReal())
     return;
   if (m_tunType == SETTUNIN) {
     m_info = InputDataType(0);
@@ -1514,7 +1514,7 @@ void SplitSingleIter::BuildDataTypeCache()
 const DataTypeInfo& SplitSingleIter::DataType(ConnNum num) const
 {
   if (m_tunType == SETTUNIN) {
-    if (!m_pset->IsReal())
+    if (m_pset && !m_pset->IsReal())
       return GetRealTunnel()->DataType(num);
     else {
       unsigned int numElems = GetNumElems(m_dir);
@@ -1528,10 +1528,10 @@ const DataTypeInfo& SplitSingleIter::DataType(ConnNum num) const
     }
   }
   else {
-    if (m_pset->IsReal())
+    if (m_pset && m_pset->IsReal())
       return Input(0)->DataType(num);
     else
-      GetRealTunnel()->Input(0)->DataType(num);
+      return GetRealTunnel()->Input(0)->DataType(num);
   }
 }
 #endif

@@ -20,8 +20,9 @@
 */
 
 
-#include "possTunnel.h"
+#include "tunnel.h"
 #include "basePSet.h"
+#include "realPSet.h"
 
 Tunnel::Tunnel() 
  :m_tunType(LASTTUNNEL),
@@ -159,7 +160,7 @@ const DataTypeInfo& Tunnel::DataType(ConnNum num) const
   if (num != 0)
     throw;
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
-    GetRealTunnel()->DataType(num);
+    return GetRealTunnel()->DataType(num);
   }
   else {
     return InputDataType(0);
@@ -167,13 +168,13 @@ const DataTypeInfo& Tunnel::DataType(ConnNum num) const
 }
 
 #if TWOD
-const Sizes* PossTunnel::GetM(ConnNum num) const
+const Sizes* Tunnel::GetM(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT) {
     if (m_pset->IsReal())
       return ((DLANode*)Input(0))->GetM(num);
     else {
-      GetRealTunnel()->GetM(num);
+      return GetRealTunnel()->GetM(num);
     }
   }
   else if (m_tunType != POSSTUNIN) {
@@ -184,13 +185,13 @@ const Sizes* PossTunnel::GetM(ConnNum num) const
   }
 }
 
-const Sizes* PossTunnel::GetN(ConnNum num) const
+const Sizes* Tunnel::GetN(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT) {
     if (m_pset->IsReal())
       return ((DLANode*)Input(0))->GetN(num);
     else {
-      GetRealTunnel()->GetN(num);
+      return GetRealTunnel()->GetN(num);
     }
   }
   else if (m_tunType != POSSTUNIN) {
@@ -202,7 +203,7 @@ const Sizes* PossTunnel::GetN(ConnNum num) const
 }
 
 #if DODM
-const Sizes* PossTunnel::LocalM(ConnNum num) const
+const Sizes* Tunnel::LocalM(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
     GetRealTunnel()->LocalM(num);
@@ -215,7 +216,7 @@ const Sizes* PossTunnel::LocalM(ConnNum num) const
   }
 }
 
-const Sizes* PossTunnel::LocalN(ConnNum num) const
+const Sizes* Tunnel::LocalN(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
     GetRealTunnel()->LocalN(num);
@@ -230,7 +231,7 @@ const Sizes* PossTunnel::LocalN(ConnNum num) const
 #endif
 
 #else
-const Dim PossTunnel::NumDims(ConnNum num) const
+const Dim Tunnel::NumDims(ConnNum num) const
 {
 
   if (m_tunType == SETTUNOUT) {
@@ -248,7 +249,7 @@ const Dim PossTunnel::NumDims(ConnNum num) const
   }
 }
 
-const Sizes* PossTunnel::Len(ConnNum num,Dim dim) const
+const Sizes* Tunnel::Len(ConnNum num,Dim dim) const
 {
 
   if (m_tunType == SETTUNOUT) {
@@ -266,7 +267,7 @@ const Sizes* PossTunnel::Len(ConnNum num,Dim dim) const
   }
 }
 
-const Sizes* PossTunnel::LocalLen(ConnNum num,Dim dim) const
+const Sizes* Tunnel::LocalLen(ConnNum num,Dim dim) const
 {
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
     GetRealTunnel()->LocalLen(num,dim);
@@ -281,13 +282,13 @@ const Sizes* PossTunnel::LocalLen(ConnNum num,Dim dim) const
 
 #endif
 
-Name PossTunnel::GetName(ConnNum num) const 
+Name Tunnel::GetName(ConnNum num) const 
 {
   if (m_tunType == SETTUNOUT) {
     if (m_pset->IsReal())
       return GetInputName(0);
     else {
-      GetRealTunnel()->GetName(num);
+      return GetRealTunnel()->GetName(num);
     }
   }
   else if (m_tunType != POSSTUNIN) {
@@ -300,7 +301,7 @@ Name PossTunnel::GetName(ConnNum num) const
   }
 }
 
-unsigned int PossTunnel::NumOutputs() const
+unsigned int Tunnel::NumOutputs() const
 {
   switch(m_tunType) 
     {
@@ -313,7 +314,7 @@ unsigned int PossTunnel::NumOutputs() const
       if (m_pset->IsReal())
 	return Input(0)->NumOutputs();
       else {
-	GetRealTunnel()->NumOutputs();
+	return GetRealTunnel()->NumOutputs();
       }
     default:
       cout << "bad tunnel type\n";
@@ -322,13 +323,13 @@ unsigned int PossTunnel::NumOutputs() const
   } 
 }
 
-void PossTunnel::Duplicate(const Node *node, bool shallow, bool possMerging)
+void Tunnel::Duplicate(const Node *node, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(node, shallow, possMerging);
-  m_tunType = ((PossTunnel*)node)->m_tunType;
+  m_tunType = ((Tunnel*)node)->m_tunType;
 }
 
-string TunTypeToStr(PossTunType type)
+string TunTypeToStr(TunType type)
 {
   switch(type)
     {
@@ -347,7 +348,7 @@ string TunTypeToStr(PossTunType type)
 
 
 
-void PossTunnel::FlattenCore(ofstream &out) const
+void Tunnel::FlattenCore(ofstream &out) const
 {
   DLANode::FlattenCore(out);
   WRITE(m_tunType);
@@ -356,7 +357,7 @@ void PossTunnel::FlattenCore(ofstream &out) const
 
 
 
-void PossTunnel::UnflattenCore(ifstream &in, SaveInfo &info) 
+void Tunnel::UnflattenCore(ifstream &in, SaveInfo &info) 
 {
   DLANode::UnflattenCore(in, info);
   READ(m_tunType);
@@ -364,7 +365,7 @@ void PossTunnel::UnflattenCore(ifstream &in, SaveInfo &info)
   Swap(&m_pset,info.psetMap);
 }
 
-bool PossTunnel::Overwrites(const Node *input, ConnNum num) const
+bool Tunnel::Overwrites(const Node *input, ConnNum num) const
 {
   if (m_tunType == SETTUNIN) {
     if (m_pset->IsReal()) {
@@ -376,7 +377,8 @@ bool PossTunnel::Overwrites(const Node *input, ConnNum num) const
     else {
       const RealPSet *real = m_pset->GetReal();
       unsigned int num = FindInNodeVec(m_pset->m_inTuns, this);
-      return real->m_inTuns[num]->m_children[0]->Overwrites(real->m_inTuns[num]->m_children[0],num);
+      const Node *realTun = real->m_inTuns[num];
+      return realTun->Overwrites(NULL,0);
     }
   }
   else if (m_tunType == POSSTUNIN) {
@@ -399,11 +401,11 @@ Tunnel* Tunnel::GetRealTunnel()
   RealPSet *real = m_pset->GetReal();
   if (m_tunType == SETTUNIN) {
     unsigned int num = FindInNodeVec(m_pset->m_inTuns, this);
-    return real->m_inTuns[num];
+    return (Tunnel*)(real->m_inTuns[num]);
   }
   else if (m_tunType == SETTUNOUT) {
     unsigned int num = FindInNodeVec(m_pset->m_outTuns, this);
-    return real->m_outTuns[num];
+    return (Tunnel*)(real->m_outTuns[num]);
   }
   else
     throw;
@@ -412,16 +414,18 @@ Tunnel* Tunnel::GetRealTunnel()
 
 const Tunnel* Tunnel::GetRealTunnel() const
 {
+  if (!m_pset)
+    return this;
   if (m_pset->IsReal())
     return this;
   const RealPSet *real = m_pset->GetReal();
   if (m_tunType == SETTUNIN) {
     unsigned int num = FindInNodeVec(m_pset->m_inTuns, this);
-    return real->m_inTuns[num];
+    return (Tunnel*)(real->m_inTuns[num]);
   }
   else if (m_tunType == SETTUNOUT) {
     unsigned int num = FindInNodeVec(m_pset->m_outTuns, this);
-    return real->m_outTuns[num];
+    return (Tunnel*)(real->m_outTuns[num]);
   }
   else
     throw;

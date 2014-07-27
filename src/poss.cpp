@@ -1433,7 +1433,7 @@ void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
       Node *child = conn->m_n;
       if (child->IsTunnel(SETTUNIN)) {
         if (set.insert(child).second) {
-          PossTunnel *tun = (PossTunnel*)child;
+          Tunnel *tun = (Tunnel*)child;
           BasePSet *pset = tun->m_pset;
           NodeVecIter iter2 = pset->m_inTuns.begin();
           for(; iter2 != pset->m_inTuns.end(); ++iter2)
@@ -1463,7 +1463,7 @@ void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
                 unsigned int tempOut;
                 if (childConn->m_n->KeepsInputVarLive(currNode, numIn, tempOut)) {
                   if (found) {
-                    if (!childConn->m_n->IsPossTunnel(POSSTUNOUT)) {
+                    if (!childConn->m_n->IsTunnel(POSSTUNOUT)) {
                       childConn->m_n->m_poss->PrintSetConnections();
                       throw;
                     }
@@ -1481,9 +1481,9 @@ void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
                 throw;
               currNode = nextNode;
               numIn = numOut;
-              if (currNode->IsPossTunnel(POSSTUNOUT))
+              if (currNode->IsTunnel(POSSTUNOUT))
                 found = false;
-              if (currNode->IsPossTunnel(SETTUNIN)) {
+              if (currNode->IsTunnel(SETTUNIN)) {
                 if (currNode->IsLoopTunnel()) {
                   nextNode = ((LoopTunnel*)currNode)->GetMatchingOutTun();
                   if (!nextNode)
@@ -1491,7 +1491,7 @@ void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
                   currNode = nextNode;
                   numIn = 0;
                 }
-                else if (currNode->GetNodeClass() == PossTunnel::GetClass()) {
+                else if (currNode->GetNodeClass() == Tunnel::GetClass()) {
                   nextNode = currNode->Child(0);
                   if (!nextNode)
                     throw;
@@ -1501,14 +1501,14 @@ void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
               }
             }
           }
-          if (currNode->IsPossTunnel(POSSTUNOUT)) {
+          if (currNode->IsTunnel(POSSTUNOUT)) {
             currNode = currNode->Child(0);
             AddUsersOfLiveOutput(currNode, 0, set);
           }
         }
       }
       else {
-        if (child->IsDataDependencyOfInput() && !child->IsPossTunnel(POSSTUNOUT)) {
+        if (child->IsDataDependencyOfInput() && !child->IsTunnel(POSSTUNOUT)) {
           set.insert(child);
           ConnNum num;
           if (conn->m_n->KeepsInputVarLive(node, connNum, num))
@@ -1563,18 +1563,18 @@ RealPSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
   NodeSetIter iter = set.begin();
   for(; iter != set.end(); ++iter) {
     Node *node = *iter;
-    if (!node->IsPossTunnel(SETTUNIN) && !node->IsPossTunnel(POSSTUNOUT)) {
+    if (!node->IsTunnel(SETTUNIN) && !node->IsTunnel(POSSTUNOUT)) {
       for(int i = 0; i < (int)(node->m_children.size()); ++i) {
         if (set.find(node->Child(i)) == set.end()) {
           ConnNum connNum = node->ChildConnNum(i);
-          PossTunnel *tun;
+          Tunnel *tun;
 	  if (isCritSect)
 	    throw;
 #if 0
 	  tun = new CritSectTunnel(POSSTUNOUT);
 #endif
 	  else
-	    tun = new PossTunnel(POSSTUNOUT);
+	    tun = new Tunnel(POSSTUNOUT);
           outputTuns.push_back(tun);
           set.insert(tun);
           for(int j = i; j < (int)(node->m_children.size()); ++j) {
@@ -1588,11 +1588,11 @@ RealPSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
         }
       }
     }
-    if (!node->IsPossTunnel(SETTUNOUT) && !node->IsPossTunnel(POSSTUNIN)) {
+    if (!node->IsTunnel(SETTUNOUT) && !node->IsTunnel(POSSTUNIN)) {
       for(int i = 0; i < (int)(node->m_inputs.size()); ++i) {
         Node *input = node->Input(i);
         ConnNum connNum = node->InputConnNum(i);
-        PossTunnel *tun = NULL;
+        Tunnel *tun = NULL;
         if (set.find(input) == set.end()) {
 	  if (isCritSect)
 	    throw;
@@ -1600,7 +1600,7 @@ RealPSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
 	  tun = new CritSectTunnel(POSSTUNIN);
 #endif
 	  else
-	    tun = new PossTunnel(POSSTUNIN);
+	    tun = new Tunnel(POSSTUNIN);
           //          cout << "creating input for child " << node->GetNodeClass() << endl;
           set.insert(tun);
           node->ChangeInput2Way(input, connNum, tun, 0);
@@ -1610,7 +1610,7 @@ RealPSet* Poss::FormSetForClique(NodeSet &set, bool isCritSect)
             NodeConn *conn = input->m_children[j];
             if (conn->m_num == connNum && conn->m_n != tun) {
               if (set.find(conn->m_n) != set.end()
-                  && !conn->m_n->IsPossTunnel(POSSTUNIN))
+                  && !conn->m_n->IsTunnel(POSSTUNIN))
 		{
 		  conn->m_n->ChangeInput2Way(input, connNum, tun, 0);
 		}
@@ -1697,12 +1697,12 @@ void Poss::FormSets(unsigned int phase)
    
     for(i=0; i < (int)(m_possNodes.size()); ++i) {
       Node *node = m_possNodes[i];
-      if (!node->IsPossTunnel() && node->GetNodeClass() == RedistNode::GetClass()) {
+      if (!node->IsTunnel() && node->GetNodeClass() == RedistNode::GetClass()) {
 	//Found a node that isn't a poss tunnel
 	//Let's form a new set!
 	NodeSet possNodes;
 	NodeVec outputTuns;
-	AddPossTunnels(node, NULL, outputTuns, possNodes);
+	AddTunnels(node, NULL, outputTuns, possNodes);
 	
 #if DOSUMSCATTERTENSORPHASE
        	if (false && phase == SUMSCATTERTENSORPHASE) {
@@ -1712,7 +1712,7 @@ void Poss::FormSets(unsigned int phase)
 	    NodeSetIter nodeIter = possNodes.begin();
 	    for(; nodeIter != possNodes.end(); ++nodeIter) {
 	      Node *currNode = *nodeIter;
-	      if (!currNode->IsPossTunnel()) {
+	      if (!currNode->IsTunnel()) {
 		bool ret = false;
 		for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
 		  ret |= AddNodesDown(currNode, j, outputTuns, possNodes);
@@ -1732,7 +1732,7 @@ void Poss::FormSets(unsigned int phase)
 	NodeSetIter nodeIter = possNodes.begin();
 	for(; nodeIter != possNodes.end(); ++nodeIter) {
 	  Node *currNode = *nodeIter;
-	  if (!currNode->IsPossTunnel()) {
+	  if (!currNode->IsTunnel()) {
 	    for (unsigned int j = 0; j < currNode->m_children.size(); ++j) {
 	      AddTunnelDown(currNode, j, outputTuns, possNodes);
 	    }
@@ -1764,7 +1764,7 @@ void Poss::FormSets(unsigned int phase)
 
     for(i=0; i < (int)(m_possNodes.size()); ++i) {
       Node *node = m_possNodes[i];
-      if (!node->IsPossTunnel() 
+      if (!node->IsTunnel() 
 	  && node->GetNodeClass() == SumScatterUpdateNode::GetClass()) 
 	{
 	  //Found a node that isn't a poss tunnel
@@ -1773,7 +1773,7 @@ void Poss::FormSets(unsigned int phase)
 	  NodeVec outputTuns;
 
 	  for(ConnNum i = 0; i < node->m_inputs.size(); ++i) {
-	    PossTunnel *tun = new PossTunnel(POSSTUNIN);
+	    Tunnel *tun = new Tunnel(POSSTUNIN);
 	    NodeConn *conn = node->m_inputs[i];
 	    tun->AddInput(conn->m_n, conn->m_num);
 	    node->ChangeInput2Way(conn->m_n, conn->m_num, tun, 0);
@@ -1782,7 +1782,7 @@ void Poss::FormSets(unsigned int phase)
 	  if (node->NumOutputs() != 1)
 	    throw;
 
-	  PossTunnel *tun = new PossTunnel(POSSTUNOUT);
+	  Tunnel *tun = new Tunnel(POSSTUNOUT);
 	  node->RedirectAllChildren(tun);
 	  tun->AddInput(node, 0);
 
@@ -1814,7 +1814,7 @@ void Poss::FormSets(unsigned int phase)
     
 //     for(i=0; i < (int)(m_possNodes.size()); ++i) {
 //       Node *node = m_possNodes[i];
-//       if (!node->IsPossTunnel()) {
+//       if (!node->IsTunnel()) {
 // 	//Found a node that isn't part of a poss set
 // 	//Let's form a new set!
    
@@ -1826,7 +1826,7 @@ void Poss::FormSets(unsigned int phase)
 // 	NodeConnVecIter iter = node->m_inputs.begin();
 // 	for(; iter != node->m_inputs.end(); ++iter) {
 // 	  NodeConn *conn = *iter;
-// 	  PossTunnel *tun = new PossTunnel(POSSTUNIN);
+// 	  Tunnel *tun = new Tunnel(POSSTUNIN);
 // 	  conn->m_n->RemoveChild(node, conn->m_num);
 // 	  tun->AddInput(conn->m_n, conn->m_num);
 // 	  conn->SetNode(tun);
@@ -1838,7 +1838,7 @@ void Poss::FormSets(unsigned int phase)
 // 	for(; iter != node->m_children.end(); ++iter) {
 // 	  NodeConn *conn = *iter;
 // 	  Node *child = conn->m_n;
-// 	  PossTunnel *tun = new PossTunnel(POSSTUNOUT);
+// 	  Tunnel *tun = new Tunnel(POSSTUNOUT);
 // 	  outputTuns.push_back(tun);
 // 	  child->ChangeInput1Way(node, conn->m_num, tun, 0);
 // 	  conn->SetNode(tun);
@@ -1988,7 +1988,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
     LoopTunnel *leftSetOutput = NULL;
     if (rightSetInput->m_inputs.size() != 1)
       throw;
-    if (rightSetInput->Input(0)->IsPossTunnel() && ((PossTunnel*)rightSetInput->Input(0))->m_pset == newSet) {
+    if (rightSetInput->Input(0)->IsTunnel() && ((Tunnel*)rightSetInput->Input(0))->m_pset == newSet) {
       LoopTunnel *newOutputToUse = ((LoopTunnel*)rightSetInput)->GetMatchingOutTun();
       if (rightSetInput->InputConnNum(0) > 0)
         throw;
@@ -1997,8 +1997,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
         cout << "!leftSetOutput->IsLoopTunnel()\n";
         throw;
       }
-      if (((PossTunnel*)leftSetOutput)->m_tunType != SETTUNOUT) {
-        cout << "((PossTunnel*)leftSetOutput)->m_tunType != SETTUNOUT\n";
+      if (((Tunnel*)leftSetOutput)->m_tunType != SETTUNOUT) {
+        cout << "((Tunnel*)leftSetOutput)->m_tunType != SETTUNOUT\n";
         throw;
       }
       ClassType rightInputType = rightSetInput->GetNodeClass();
@@ -2554,14 +2554,14 @@ void PrintSetOrNodeInputs(Node *node)
   NodeConnVecIter iter = node->m_inputs.begin();
   for(; iter != node->m_inputs.end(); ++iter) {
     Node *input = (*iter)->m_n;
-    if (input->IsPossTunnel(SETTUNOUT)) {
-      cout << "\tInput: Set " << ((PossTunnel*)input)->m_pset << endl;
+    if (input->IsTunnel(SETTUNOUT)) {
+      cout << "\tInput: Set " << ((Tunnel*)input)->m_pset << endl;
     }
-    else if (input->IsPossTunnel(POSSTUNIN)) {
-      cout << "\tInput: PossTunIn " << input << " ("
+    else if (input->IsTunnel(POSSTUNIN)) {
+      cout << "\tInput: TunIn " << input << " ("
 	   << (*iter)->m_num << ") " << input->GetNodeClass() << endl;
     }
-    else if (input->IsPossTunnel())
+    else if (input->IsTunnel())
       throw;
     else {
       cout << "\tInput: Node " << input << " ("
@@ -2575,14 +2575,14 @@ void PrintSetOrNodeChildren(Node *node)
   NodeConnVecIter iter = node->m_children.begin();
   for(; iter != node->m_children.end(); ++iter) {
     Node *child = (*iter)->m_n;
-    if (child->IsPossTunnel(POSSTUNOUT))
+    if (child->IsTunnel(POSSTUNOUT))
       continue;
-    else if (child->IsPossTunnel(SETTUNIN)) {
-      cout << "\tChild: Set " << ((PossTunnel*)child)->m_pset
+    else if (child->IsTunnel(SETTUNIN)) {
+      cout << "\tChild: Set " << ((Tunnel*)child)->m_pset
 	   << " (" << (*iter)->m_num << ")" << endl;
       cout << "\t\t" << node->GetNameStr((*iter)->m_num) << endl;
     }
-    else if (child->IsPossTunnel())
+    else if (child->IsTunnel())
       throw;
     else {
       cout << "\tChild: Node " << child << " ("
@@ -2602,8 +2602,8 @@ void Poss::PrintSetConnections()
     for(unsigned int i = 0; i < m_possNodes.size(); ++i) {
       Node *node = m_possNodes[i];
       if (nodeSet.find(node) == nodeSet.end()) {
-        if (node->IsPossTunnel()) {
-          PossTunnel *tun = (PossTunnel*)node;
+        if (node->IsTunnel()) {
+          Tunnel *tun = (Tunnel*)node;
           switch(tun->m_tunType)
           {
             case (POSSTUNIN):

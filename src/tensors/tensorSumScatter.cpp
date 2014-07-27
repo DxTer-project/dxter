@@ -23,7 +23,7 @@
 #include <sstream>
 #include <algorithm>
 #include "helperNodes.h"
-#include "possTunnel.h"
+#include "tunnel.h"
 
 #if DOTENSORS
 
