@@ -37,12 +37,14 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_dataFileName = m_operationName + "_time_data";
   m_correctTestFileName = m_operationName + "_correctness_test_results";
   m_headers.push_back("#include \"row_stride_lldla_primitives.h\"");
+  m_headers.push_back("#include \"col_stride_lldla_primitives.h\"");
   m_headers.push_back("#include \"gen_stride_lldla_primitives.h\"");
   m_headers.push_back("#include \"utils.h\"");
   m_headers.push_back("#include <string.h>");
   m_headers.push_back("#include <unistd.h>");
   m_defines.push_back("#define VEC_SET_ZERO(vreg) (vreg).v = _mm_setzero_pd()");
   m_defines.push_back("#define VEC_PD_FMA(a, b, c) (c).v += (a).v * (b).v");
+  m_defines.push_back("#define VEC_PD_ADD(a, b) (b).v = (b).v + (a).v");
   m_defines.push_back("#define VEC_PD_MUL(a, b) (b).v = (b).v * (a).v");
   m_defines.push_back("#define VEC_ACCUM(c, ptr) *(ptr) += (c).d[0] + (c).d[1]");
   m_defines.push_back("#define VEC_PTR_PD_LOAD(vec, ptr) (vec).v = _mm_load_pd((ptr))");

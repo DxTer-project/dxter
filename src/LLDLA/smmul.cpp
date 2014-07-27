@@ -176,7 +176,7 @@ bool SMulLoopRef::CanApply(const Node *node) const
 
 void SMulLoopRef::Apply(Node *node) const
 {
-  SMMul *mul = (SMMul*)node;
+  SMMul* mul = (SMMul*)node;
 
 
   //Create a split for the input matrix
@@ -184,7 +184,7 @@ void SMulLoopRef::Apply(Node *node) const
   //    (i.e., it's horizontal)
   // If we're splitting on the n dimension, then the split moves right
   //    (i.e., it's vertical)
-  SplitSingleIter *split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   // Add input, which is the matrix input to mul
   split->AddInput(mul->Input(1), mul->InputConnNum(1));
   //Set the update statuses
@@ -203,7 +203,7 @@ void SMulLoopRef::Apply(Node *node) const
   split->SetIndepIters();
 
   //Create a loop tunnel - the scalar is input to each iteration of the loop
-  LoopTunnel *scalarTun = new LoopTunnel(POSSTUNIN);
+  LoopTunnel* scalarTun = new LoopTunnel(POSSTUNIN);
   //Wire up the scalar input
   scalarTun->AddInput(mul->Input(0), mul->InputConnNum(0));
   //Always updated since it doesn't change
@@ -213,7 +213,7 @@ void SMulLoopRef::Apply(Node *node) const
   
 
   //Create a new SMul or the same type and in my m_toLayer layer
-  SMMul *newMul = new SMMul(m_toLayer, mul->m_type);
+  SMMul* newMul = new SMMul(m_toLayer, mul->m_type);
   newMul->SetLayer(m_toLayer);
 
   //Wire inputs - the scalar loop tunnel and 
@@ -222,7 +222,7 @@ void SMulLoopRef::Apply(Node *node) const
   newMul->AddInput(split, 1);
 
   //Create an output tunnel for the scalar just for consistency
-  LoopTunnel *scalarTunOut = new LoopTunnel(POSSTUNOUT);
+  LoopTunnel* scalarTunOut = new LoopTunnel(POSSTUNOUT);
   //Wire two inputs, the first is for the data that is passed out
   // and the second is to the input tunnel to which this one
   // should match
@@ -233,16 +233,16 @@ void SMulLoopRef::Apply(Node *node) const
   
   //Create an output tunnel for the matrix and overwrite
   // the 1st (0-based) partition of the output matrix
-  CombineSingleIter *com = split->CreateMatchingCombine(1,
+  CombineSingleIter* com = split->CreateMatchingCombine(1,
 							1, newMul, 0);
   
   //Put all of this into single poss (this constructor
   // will recursively move up the flow of data, adding
   // all nodes it finds
-  Poss *loopPoss = new Poss(2, scalarTunOut, com);
+  Poss* loopPoss = new Poss(2, scalarTunOut, com);
   //Put that poss into a loop - it's LLDLALOOP type and
   // uses the LLDLA_MU blocksize
-  Loop *loop = new Loop(LLDLALOOP, loopPoss, LLDLAMu);
+  Loop* loop = new Loop(LLDLALOOP, loopPoss, LLDLAMu);
 
   //Set the dimension over which this loop iterates
   loop->SetDimName(m_dim);

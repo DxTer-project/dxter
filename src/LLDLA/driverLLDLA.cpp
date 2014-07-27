@@ -192,6 +192,9 @@ void AddTrans()
   // Introduce loop in N dimension
   Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
+  // Convert to register arithmetic
+  Universe::AddTrans(MAdd::GetClass(), new MAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
   // Transformers for matrix vector multiply
   // Introduce loop in M dimension
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
@@ -545,15 +548,15 @@ PSet* SVMulColExample()
 PSet* MVMulExample()
 {
   InputNode* Ain = new InputNode("A input", medSize, medSize, "A",
-				 medSize, 1,
+				 1, medSize,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride");
   InputNode* xIn = new InputNode("x input", medSize, 1, "X",
-				 medSize, 1,
+				 1, medSize,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
   InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
-				 medSize, 1,
+				 1, medSize,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
 
