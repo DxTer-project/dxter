@@ -33,6 +33,7 @@ MVMul::MVMul(Layer layer, Type type)
 {
   m_type = type;
   m_layer = layer;
+  return;
 }
 
 void MVMul::PrintCode(IndStream &out)
@@ -218,7 +219,7 @@ string MVMulLoopRef::GetType() const
 
 bool MVMulLoopRef::CanApply(const Node *node) const
 {
-  if (node->GetNodeClass() == MVMul::GetClass()) {  
+  if (node->GetNodeClass() == MVMul::GetClass()) {
     const MVMul *mul = (MVMul*) node;
     if (mul->GetLayer() != m_fromLayer) {
       return false;
@@ -357,6 +358,7 @@ bool MVMulToRegArith::CanApply(const Node* node) const
   if (node->GetNodeClass() == MVMul::GetClass()) {
     MVMul* mvmul = (MVMul*) node;
     return *mvmul->GetInputM(0) == LLDLA_MU;
+    return true;
   }
   return false;
 }

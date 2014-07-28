@@ -21,6 +21,7 @@
 
 #include "LLDLAGemmTransformations.h"
 #include "loop.h"
+#include "mvmul.h"
 #include "transpose.h"
 
 #if DOLLDLA
@@ -171,7 +172,7 @@ bool LLDAGemmLowerLayer::CanApply(const Node *node) const
 
 void LLDAGemmLowerLayer::Apply(Node *node) const
 {
-  Gemm *gemm = (Gemm*)node;
+  Gemm *gemm = (Gemm*) node;
   gemm->SetLayer(m_toLayer);
 }
 
@@ -181,5 +182,65 @@ string LLDAGemmLowerLayer::GetType() const
   + " to " + LayerNumToStr(m_toLayer);
 }
 
+string LLDLAGemmToMVMul::GetType() const
+{
+  return "Gemm to MVMul from " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool LLDLAGemmToMVMul::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == Gemm::GetClass()) {
+    return true;
+  }
+  return false;
+}
+
+void LLDLAGemmToMVMul::Apply(Node* node) const
+{
+  Gemm* gemm = (Gemm*) node;
+
+  // Create tunnel for A
+  LoopTunnel* aTun = new LoopTunnel(POSSTUNIN);
+  aTun->AddInput(gemm->Input(0), gemm->InputConnNum(0));
+  aTun->SetAllStats(FULLUP);
+
+  // Create splits for B and C
+  SplitSingleIter* splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  splitB->AddInput(gemm->Input(1), gemm->InputConnNum(1));
+  splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
+
+  SplitSingleIter* splitC = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  splitC->AddInput(gemm->Input(2), gemm->InputConnNum(2));
+  splitC->SetUpStats(FULLUP, NOTUP,
+		     FULLUP, NOTUP);
+  splitC->SetIndepIters();
+
+  // Create inner MVMul
+  MVMul* mvmul = new MVMul(m_toLayer, gemm->m_type);
+  mvmul->AddInput(aTun, 0);
+  mvmul->AddInput(splitB, 1);
+  mvmul->AddInput(splitC, 1);
+
+  // Create output tunnel for A
+  LoopTunnel* aOut = new LoopTunnel(POSSTUNOUT);
+  aOut->AddInput(aTun, 0);
+  aOut->AddInput(aTun, 1);
+  aOut->CopyTunnelInfo(aTun);
+
+  // Create combines for B and C
+  CombineSingleIter* comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter* comC = splitC->CreateMatchingCombine(1, 1, mvmul, 0);
+
+  // Create poss and clean up
+  Poss* loopPoss = new Poss(3, aOut, comB, comC);
+  Loop* loop = new Loop(LLDLALOOP, loopPoss, UnitBS);
+  node->m_poss->AddLoop(loop);
+
+  node->RedirectChildren(loop->OutTun(2), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+}
 
 #endif
