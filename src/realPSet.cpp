@@ -100,6 +100,8 @@ void RealPSet::Init(Poss *poss)
 
 RealPSet::~RealPSet()
 {
+  if (!m_shadows.empty())
+    throw;
   PossMMapIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter) {
     delete (*iter).second;
@@ -655,6 +657,13 @@ void RealPSet::CombineAndRemoveTunnels()
 		continue;
 #endif
 	    }
+	  }
+	  if (setInput1->m_children.size() != setInput2->m_children.size()) {
+	    cout << setInput1->m_children.size() << " vs. " << setInput2->m_children.size() << endl;
+	    cout << setInput1 << endl;
+	    cout << setInput2 << endl;
+	    setInput2->PrintChildren();
+	    throw;
 	  }
 	  NodeConnVecIter connIter1 = setInput1->m_children.begin();
 	  NodeConnVecIter connIter2 = setInput2->m_children.begin();

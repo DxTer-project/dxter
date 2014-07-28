@@ -92,14 +92,14 @@ class Poss
 		  BasePSet **leftSet, BasePSet **rightSet);
   void MergePart2(RealPSet *newSet, 
 		  BasePSet *leftSet, BasePSet *rightSet,
-		  unsigned int left, NodeMap &map);
+		  unsigned int left, NodeMap &mapLeft, NodeMap &mapRight);
   void MergePart4(RealPSet *newSet, 
 		  BasePSet *leftSet, 
 		  BasePSet *rightSet, 
-		  NodeMap &map,
+		  NodeMap &mapLeft, NodeMap &mapRight,
 		  NodeVec &newInputTunnelsToFix);
   void MergePart6(RealPSet *newSet, BasePSet *leftSet, 
-		  BasePSet *rightSet, NodeMap &map);
+		  BasePSet *rightSet, NodeMap &mapLeft, NodeMap &mapRight);
   bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
