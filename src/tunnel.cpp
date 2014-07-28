@@ -195,7 +195,7 @@ const Sizes* Tunnel::GetN(ConnNum num) const
     }
   }
   else if (m_tunType != POSSTUNIN) {
-    return GetInputM(num);
+    return GetInputN(num);
   }
   else {
     return ((DLANode*)Input(0))->GetN(num);
