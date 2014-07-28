@@ -58,9 +58,24 @@ void ShadowPSet::Prop()
   if (!m_realPSet->IsReal())
     throw;
 
+  
+
+  if (m_inTuns.size() != m_realPSet->m_inTuns.size())
+    throw;
+
+
   //BAM Par + check for > 1
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
     Node *in = InTun(i);
+
+    if (in->GetInputNameStr(0) != m_realPSet->InTun(i)->GetInputNameStr(0)) {
+      cout << in->GetInputNameStr(0) << endl;
+      cout << m_realPSet->InTun(i)->GetInputNameStr(0) << endl;
+      
+      throw;
+    }
+    
+
     for (unsigned int j = 0; j < in->m_children.size(); ++j) {
       Node *child = in->m_children[j]->m_n;
       if (child->m_inputs.size() != 1) {

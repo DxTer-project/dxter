@@ -74,6 +74,8 @@ class RealPSet : public BasePSet
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();
 
+  void SetInTunsAsPrinted();
+
 #if DOBLIS
   Comm ParallelismWithinCurrentPosses() const;
   virtual bool RemoveParallelization(Comm comm);

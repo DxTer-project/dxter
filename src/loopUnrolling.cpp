@@ -97,7 +97,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
     Poss *newPoss = new Poss;
     newPosses[dupNum] = newPoss;
     map[dupNum] = new NodeMap;
-    newPoss->Duplicate(poss, *(map[dupNum]), true, true);
+    newPoss->Duplicate(poss, *(map[dupNum]), true, false);
     newPoss->PatchAfterDuplicate(*(map[dupNum]), true);
     bool trash;
     if (newPoss->RemoveLoops(&trash))
@@ -672,6 +672,7 @@ void ViewMultipleIters::PrintCode(IndStream &out)
     else
       throw;
     *out << i << " = " << inName;
+
 
     if (i) {
       *out << " + " << std::to_string(i) << " * ";

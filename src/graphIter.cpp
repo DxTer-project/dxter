@@ -246,6 +246,8 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
     if (currOnly || whichGraph == 0 || whichGraph == graphNum) {
       if (!currOnly)
 	*out << "/*** Algorithm " << graphNum << " ***" << endl;
+      else
+	*out << "/***\n";
       *out << "\tUnique Num: " << m_poss->m_num << endl;
       *out << "\tChild of: " << m_poss->m_parent << endl;
       *out << "\tResult of transformations:" << endl;
@@ -311,6 +313,8 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	      *out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
 	      m_poss->m_sets[i]->PrePrint(out,m_setIters[i]->second);
 	      ++out;
+	      RealPSet *real = m_poss->m_sets[i]->GetReal();
+	      real->SetInTunsAsPrinted();
 	      m_subIters[i]->Print(out, whichGraph, m_poss->m_sets[i]);
 	      --out;
 	      m_poss->m_sets[i]->PostPrint(out,m_setIters[i]->second);
@@ -385,11 +389,22 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
       if (!m_subIters[i]->m_hasPrinted && m_poss->m_sets[i]->CanPrint()) {
 	out.Indent();
 	*out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
-	m_poss->m_sets[i]->PrePrint(out,m_setIters[i]->second);
+	out.Indent();
+	*out << "//**** ";
+	if (m_poss->m_sets[i]->IsReal())
+	  *out << "Is real\n";
+	else
+	  *out << "Is a shadow\n";
+	RealPSet *real = m_poss->m_sets[i]->GetReal();
+	//	if (real->IsLoop())
+	//	  *out << "is loop\n";
+	//	*out << "real " << real << " instead of " << m_poss->m_sets[i] << endl;
+	real->PrePrint(out,m_setIters[i]->second);
 	++out;
+	real->SetInTunsAsPrinted();
 	m_subIters[i]->Print(out, graphNum, m_poss->m_sets[i]);
 	--out;
-	m_poss->m_sets[i]->PostPrint(out,m_setIters[i]->second);
+	real->PostPrint(out,m_setIters[i]->second);
 	out.Indent();
 	*out << "//****\n";
         hasPrinted = true;

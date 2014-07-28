@@ -1068,6 +1068,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     throw;
 
   RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[0]);
+  cout << "inlining " << pset << endl;
   
   NodeIntMap tunnelNumMap;
   
@@ -1550,4 +1551,11 @@ void RealPSet::RemoveShadow(ShadowPSet *shadow)
     }
   }
   throw;
+}
+
+void RealPSet::SetInTunsAsPrinted()
+{
+  NodeVecIter iter = m_inTuns.begin();
+  for(; iter != m_inTuns.end(); ++iter)
+    (*iter)->SetPrinted();  
 }
