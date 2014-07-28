@@ -98,8 +98,82 @@ void RealPSet::Init(Poss *poss)
   AddPoss(poss);
 }
 
+void RealPSet::Migrate()
+{
+  if (m_shadows.empty())
+    return;
+  ShadowPSet *shadowToReplace = (ShadowPSet*)(m_shadows[0]);
+  //  m_shadows.erase(m_shadows.begin());
+
+  RealPSet *newSet = new RealPSet;
+  newSet->m_functionality = m_functionality;
+  newSet->m_shadows.swap(m_shadows);
+
+  PSetVecIter iter = newSet->m_shadows.begin();
+  for(; iter != newSet->m_shadows.end(); ++iter)
+    ((ShadowPSet*)(*iter))->m_realPSet = newSet;
+
+  newSet->m_inTuns.swap(shadowToReplace->m_inTuns);
+  NodeVecIter nodeIter = newSet->m_inTuns.begin();
+  for( ; nodeIter != newSet->m_inTuns.end(); ++nodeIter) {
+    ((Tunnel*)(*nodeIter))->m_pset = newSet;
+  }
+
+  newSet->m_outTuns.swap(shadowToReplace->m_outTuns);
+  nodeIter = newSet->m_outTuns.begin();
+  for( ; nodeIter != newSet->m_outTuns.end(); ++nodeIter) {
+    ((Tunnel*)(*nodeIter))->m_pset = newSet;
+  }
+  
+  newSet->m_posses.swap(m_posses);
+  PossMMapIter possIter = newSet->m_posses.begin();
+  for( ; possIter != newSet->m_posses.end(); ++possIter) {
+    Poss *poss = possIter->second;
+    if (newSet->m_inTuns.size() != poss->m_inTuns.size())
+      throw;
+    for(unsigned int i = 0; i < newSet->m_inTuns.size(); ++i) {
+      Tunnel *setTun = (Tunnel*)(newSet->m_inTuns[i]);
+      Tunnel *possTun = (Tunnel*)(poss->m_inTuns[i]);
+      if (!possTun->m_inputs.empty()) {
+	cout << possTun << endl;
+	cout << possTun->m_inputs.size() << endl;
+	cout << possTun->m_inputs[0] << endl;
+	cout << possTun << endl;
+	cout << possTun->GetNodeClass() << endl;
+	cout << possTun->GetType() << endl;
+	cout.flush();
+	cout << "is " << possTun->Input(0)->GetNodeClass() << endl;
+	throw;
+      }
+      possTun->AddInput(setTun,0);
+    }
+    for(unsigned int i = 0; i < newSet->m_outTuns.size(); ++i) {
+      Tunnel *setTun = (Tunnel*)(newSet->m_outTuns[i]);
+      Tunnel *possTun = (Tunnel*)(poss->m_outTuns[i]);
+      if (!possTun->m_children.empty())
+	throw;
+      setTun->AddInput(possTun,0);
+    }
+    poss->m_pset = newSet;
+  }
+  shadowToReplace->m_ownerPoss->AddPSet(newSet, true);
+  PSetVecIter psetIter = shadowToReplace->m_ownerPoss->m_sets.begin();
+  for(; psetIter != shadowToReplace->m_ownerPoss->m_sets.end(); ++psetIter) {
+    if (*psetIter == shadowToReplace) {
+      shadowToReplace->m_ownerPoss->m_sets.erase(psetIter);
+      break;
+    }
+  }
+  delete shadowToReplace;
+}
+
 RealPSet::~RealPSet()
 {
+  Migrate();
+  if (!m_inTuns.empty())
+    throw;
+  if (!m_outTuns.empty())
+    throw;
   if (!m_shadows.empty())
     throw;
   PossMMapIter iter = m_posses.begin();
