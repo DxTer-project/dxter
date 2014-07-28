@@ -460,11 +460,6 @@ void FullyUnrollLoop::Apply(Node *node) const
   
   LoopInterface *loop = split->GetMyLoop();
   BasePSet *base = dynamic_cast<BasePSet*>(loop);
-  if ((void*)loop != (void*)base) {
-    cout << loop << endl;
-    cout << base << endl;
-    throw;
-  }
 
   PossMMap &posses = base->GetPosses();
 
@@ -780,6 +775,11 @@ void CombineMultipleIters::Prop()
 	Size bs = BSSizeToSize(m_bs);
 	for (int i = 0; i < m_numIters; ++i) {
 	  if (*GetInputN(i) != bs) {
+	    cout << "m_numIters " << m_numIters << endl;
+	    for (int j = 0; j <= m_numIters; ++j) {
+	      cout << "N for input j = " << j << endl;
+	      (*GetInputN(j)).Print();
+	    }
 	    (*GetInputN(i)).Print();
 	    cout << bs << endl;
 	    throw;
