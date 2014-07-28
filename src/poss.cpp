@@ -1078,17 +1078,7 @@ void Poss::MergePart6(RealPSet *newSet, BasePSet *leftSet,
       delete conn;
     }
     node->m_inputs.clear();
-    for(unsigned int j = 0; j < node->m_children.size(); ++j) {
-      NodeConn *conn = node->m_children[j];
-      conn->m_n->RemoveInput(node, conn->m_num);
-      if (conn->m_n->m_inputs.size()){
-	cout << "still has inputs\n";
-	throw;
-      }
-      delete conn;
-    }
-    node->m_children.clear();
-    //    node->RemoveAllChildren2Way();
+    node->RemoveAllChildren2Way();
     delete node;
   }
   leftSet->m_inTuns.clear();
@@ -1105,16 +1095,7 @@ void Poss::MergePart6(RealPSet *newSet, BasePSet *leftSet,
     }
     node->m_inputs.clear();
 
-    for(unsigned int j = 0; j < node->m_children.size(); ++j) {
-      NodeConn *conn = node->m_children[j];
-      conn->m_n->RemoveInput(node, conn->m_num);
-      if (conn->m_n->m_inputs.size()){
-	throw;
-      }
-      delete conn;
-    }
-    //    node->RemoveAllChildren2Way();
-    node->m_children.clear();
+    node->RemoveAllChildren2Way();
     delete node;
   }
   rightSet->m_inTuns.clear();
