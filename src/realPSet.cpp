@@ -1068,7 +1068,6 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     throw;
 
   RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[0]);
-  cout << "inlining " << pset << endl;
   
   NodeIntMap tunnelNumMap;
   
