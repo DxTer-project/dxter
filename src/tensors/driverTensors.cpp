@@ -172,7 +172,7 @@ int main(int argc, const char* argv[])
   }
 #endif
 
-#if DOROTENSORPHASE
+#if DOSUMSCATTERTENSORPHASE
   if (CurrPhase == SUMSCATTERTENSORPHASE) {
     cout << "SumScatterOpt phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
