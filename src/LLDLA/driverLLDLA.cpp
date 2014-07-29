@@ -137,9 +137,8 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
   return bestImpNum;      
 }
 
-void AddTrans()
+void AddGemmTrans()
 {
-
     // Convert gemm into loop over mvmul
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
@@ -160,37 +159,28 @@ void AddTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3Mu), LLDLALOOPPHASE);
 #endif
 
-  //Introduces loops in the m and n dimension for SMMul
-  //  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
-  //  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
-
   //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
   Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
-
-  //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  //  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
-
-#if DOLOOPUNROLLING
-#if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(),
-		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
-#endif //DO2MUTRANSFORMATIONS
-
-#if DO3MUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new FullyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
-#endif //DO3MUTRANSFORMATIONS
-#endif
   
+  return;
+}
+
+void AddVVDotTrans()
+{
   // Vector dot product transforms
   Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
   
   Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER, LLDLAMu), LLDLALOOPPHASE);
 
+  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
+  return;
+}
+
+void AddMAddTrans()
+{
   // Transformers for Matrix Matrix add
   Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
-
-  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Introduce loop in M dimension
   Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
@@ -201,12 +191,17 @@ void AddTrans()
   // Convert to register arithmetic
   Universe::AddTrans(MAdd::GetClass(), new MAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
+  return;
+}
+
+void AddMVMulTrans()
+{
   // Transformers for matrix vector multiply
   // Introduce loop in M dimension
-  //  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
+  //Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
 
   // Introduce loop in N dimension
-  //Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
+//  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
   // Convert mvmul to vector arithmetic
   Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
@@ -214,15 +209,41 @@ void AddTrans()
   // Lower layer tag
   Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
 
-  // Transformers for vector matrix multiply
-  Universe::AddTrans(VMMul::GetClass(), new VMMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  return;
+}
 
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, LLDLAMu), LLDLALOOPPHASE);
+void AddSMMulTrans()
+{
+  //Introduces loops in the m and n dimension for SMMul
+  //Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
+//Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
+  //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
+  //Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
+  return;
+}
 
+void AddUnrollingTrans()
+{
+
+#if DOLOOPUNROLLING
+#if DO2MUTRANSFORMATIONS
+  Universe::AddTrans(SplitSingleIter::GetClass(),
+		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
+#endif // DO2MUTRANSFORMATIONS
+
+#if DO3MUTRANSFORMATIONS
+  Universe::AddTrans(SplitSingleIter::GetClass(), 
+		     new FullyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
+#endif // DO3MUTRANSFORMATIONS
+#endif // DOLOOPUNROLLING
+
+  return;
+}
+
+void AddSVMulTrans()
+{
   // Transformers for scalar vector multiply
-
   Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
@@ -233,6 +254,33 @@ void AddTrans()
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
 
+  return;
+}
+
+void AddVMMulTrans()
+{
+  // Transformers for vector matrix multiply
+  Universe::AddTrans(VMMul::GetClass(), new VMMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, LLDLAMu), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
+
+  return;
+}
+
+void AddTrans()
+{
+  AddGemmTrans();
+  AddVVDotTrans();
+  AddMAddTrans();
+  AddMVMulTrans();
+  AddSMMulTrans();
+  AddSVMulTrans();
+  AddVMMulTrans();
+
+  AddUnrollingTrans();
+  
 }
 
 void AddSimplifiers()
@@ -502,15 +550,15 @@ int main(int argc, const char* argv[])
 PSet* VMMulExample()
 {
   InputNode* Ain = new InputNode("A input", medSize, medSize, "A",
-				 1, medSize,
+				 medSize, 1,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride");
   InputNode* xIn = new InputNode("x input", 1, medSize, "X",
-				 1, medSize,
+				 medSize, 1,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
   InputNode* yIn = new InputNode("y input", 1, medSize, "Y",
-				 1, medSize,
+				 medSize, 1,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
 

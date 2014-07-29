@@ -220,8 +220,10 @@ Loop::Loop(LoopType type, Poss *poss, BSSize bsSize)
       SplitBase *split = (SplitBase*)in;
       
       if (split->m_isControlTun) {
-        if (foundControl)
+        if (foundControl) {
+	  cout << "Multiple different control tunnels for the same loop\n";
           throw;
+	}
         else
           foundControl = true;
       }

@@ -73,7 +73,7 @@ void LoadToRegs::PrintCode(IndStream &out)
     } else {
       toLoadName2 = toLoadName + " + " + InputDataType(0).m_colStrideVar;
       toLoadPair = toLoadName + ", " + toLoadName2;
-      *out << "VEC_PPTR_LOAD( " << loadStr << ", " << toLoadPair << " );\n";
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoadPair << " );\n";
       return;
     }
   } else {
