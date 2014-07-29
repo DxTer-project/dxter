@@ -1514,24 +1514,23 @@ void SplitSingleIter::BuildDataTypeCache()
 const DataTypeInfo& SplitSingleIter::DataType(ConnNum num) const
 {
   if (m_tunType == SETTUNIN) {
-    if (m_pset && !m_pset->IsReal())
+    if (m_pset && !m_pset->IsReal()) {
       return GetRealTunnel()->DataType(num);
+    }
     else {
       unsigned int numElems = GetNumElems(m_dir);
       if (num < numElems) {
 	return m_info;
       }
-      else if (num == numElems)
+      else if (num == numElems) {
 	return InputDataType(0);
+      }
       else
 	throw;
     }
   }
   else {
-    if (m_pset && m_pset->IsReal())
-      return Input(0)->DataType(num);
-    else
-      return GetRealTunnel()->Input(0)->DataType(num);
+    return Input(0)->DataType(num);
   }
 }
 #endif
