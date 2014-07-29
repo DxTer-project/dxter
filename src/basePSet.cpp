@@ -24,6 +24,7 @@
 #include "base.h"
 #include "transform.h"
 #include "basePSet.h"
+#include "tensorRedist.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -177,6 +178,29 @@ bool NothingBetween(const BasePSet *left, const BasePSet *right)
 
 bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 {
+
+#if DOTENSORS
+  if (CurrPhase == ROTENSORPHASE) {
+    const Poss *poss1 = set1->GetPosses().begin()->second;
+    const Poss *poss2 = set2->GetPosses().begin()->second;
+    if (!poss1->m_sets.empty() || !poss2->m_sets.empty())
+      return false;
+    NodeVecConstIter iter = poss1->m_possNodes.begin();
+    for( ; iter != poss1->m_possNodes.end(); ++iter) {
+      const Node *node = *iter;
+      if (node->GetNodeClass() != RedistNode::GetClass())
+	if (!node->IsTunnel())
+	  return false;
+    }
+    iter = poss2->m_possNodes.begin();
+    for( ; iter != poss2->m_possNodes.end(); ++iter) {
+      const Node *node = *iter;
+      if (node->GetNodeClass() != RedistNode::GetClass())
+	if (!node->IsTunnel())
+	  return false;
+    }
+  }  
+#endif
   unsigned int i, j, k;
   for(i = 0; i < set1->m_inTuns.size(); ++i) {
     const Node *in = set1->m_inTuns[i];
