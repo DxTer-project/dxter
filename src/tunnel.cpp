@@ -372,7 +372,7 @@ bool Tunnel::Overwrites(const Node *input, ConnNum num) const
       if (!m_children.size())
 	throw;
       const NodeConn *conn = m_children[0];
-      return conn->m_n->Overwrites(this, conn->m_num);
+      return conn->m_n->Overwrites(this, 0);
     }
     else {
       const RealPSet *real = m_pset->GetReal();
