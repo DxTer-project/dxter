@@ -309,64 +309,46 @@ RealPSet* MartinsExample()
 
   InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", 4);
 
-  Tunnel *tunU = new Tunnel(POSSTUNIN);
-  tunU->AddInput(Uin,0);
-
-  Tunnel *tunV = new Tunnel(POSSTUNIN);
-  tunV->AddInput(Vin,0);
-
-  Tunnel *tunW = new Tunnel(POSSTUNIN);
-  tunW->AddInput(Win,0);
-
-  Tunnel *tunT1 = new Tunnel(POSSTUNIN);
-  tunT1->AddInput(T1in,0);
-
-  Tunnel *tunT2 = new Tunnel(POSSTUNIN);
-  tunT2->AddInput(T2in,0);
-
-  Tunnel *tunT3 = new Tunnel(POSSTUNIN);
-  tunT3->AddInput(T3in,0);
-
-  Tunnel *tunT4 = new Tunnel(POSSTUNIN);
-  tunT4->AddInput(T4in,0);
-
-  Tunnel *tunIn = new Tunnel(POSSTUNIN);
-  tunIn->AddInput(tempIn,0);
-
-  Tunnel *tunOutVal = new Tunnel(POSSTUNIN);
-  tunOutVal->AddInput(epIn,0);
-
   Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abcd","cdij","abij",(string)"cd");
   cont1->AddInputs(6,
-		  tunU,0,
-		  tunT1,0,
-		  tunIn,0);
+		  Uin,0,
+		  T1in,0,
+		  tempIn,0);
+
+  Poss *poss1 = new Poss(cont1);
+  RealPSet *set1 = new RealPSet(poss1);
 
 
   Contraction *cont2 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"acik","bcjk","abij",(string)"ck");
   cont2->AddInputs(6,
-		   tunV,0,
-		   tunT2,0,
-		   cont1,0);
+		   Vin,0,
+		   T2in,0,
+		   set1->OutTun(0),0);
+
+  Poss *poss2 = new Poss(cont2);
+  RealPSet *set2 = new RealPSet(poss2);
 
 
   Contraction *cont3 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"ijkl","abkl","abij",(string)"kl");
   cont3->AddInputs(6,
-		   tunW,0,
-		   tunT3,0,
-		   cont2,0);
+		   Win,0,
+		   T3in,0,
+		   set2->OutTun(0),0);
+
+  Poss *poss3 = new Poss(cont3);
+  RealPSet *set3 = new RealPSet(poss3);
 
   Contraction *cont4 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abij","abij","", (string)"abij");
   cont4->AddInputs(6,
-		   tunT4,0,
-		   cont3,0,
-		   tunOutVal,0);
+		   T4in,0,
+		   set3->OutTun(0),0,
+		   epIn,0);
 
-  Poss *innerPoss = new Poss(cont4,true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
+  Poss *poss4 = new Poss(cont4);
+  RealPSet *set4 = new RealPSet(poss4);
 
   OutputNode *out = new OutputNode("output");
-  out->AddInput(innerSet->OutTun(0),0);
+  out->AddInput(set4->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out,true);
   RealPSet *outerSet = new RealPSet(outerPoss);
