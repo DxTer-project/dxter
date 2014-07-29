@@ -173,6 +173,8 @@ const DataTypeInfo& LoopTunnel::DataType(ConnNum num) const
 {
   if (m_tunType == SETTUNIN)
     return GetRealTunnel()->InputDataType(0);
+  else if (m_tunType == SETTUNOUT)
+    return GetRealTunnel()->InputDataType(0);
   else
     return InputDataType(0);
 }
