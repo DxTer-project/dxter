@@ -241,7 +241,8 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
       //We don't want to now get rid of those sets
       if (phase < SOPHASE)
 #elif DOSUMSCATTERTENSORPHASE
-	if (phase < SUMSCATTERTENSORPHASE)
+	if (phase < SUMSCATTERTENSORPHASE ||
+	    phase == ROTENSORPHASE)
 #endif
 	  foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
       time(&end);
