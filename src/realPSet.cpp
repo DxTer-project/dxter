@@ -31,6 +31,8 @@
 
 extern unsigned int M_phase;
 
+#define FORMSETSEARLY 1
+
 RealPSet::RealPSet()
   : m_functionality()
 {
@@ -652,6 +654,10 @@ bool RealPSet::TakeIter(const TransMap &transMap,
     PossMMapIter added = actuallyAdded.begin();
     for(; added != actuallyAdded.end(); ++added) {
       (*added).second->BuildDataTypeCache();
+#if FORMSETSEARLY
+      if (CurrPhase == DPTENSORPHASE)
+	(*added).second->FormSets(SUMSCATTERTENSORPHASE);
+#endif
     }
   }
   return newOne;
