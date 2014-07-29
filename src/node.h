@@ -62,6 +62,7 @@ class DataTypeInfo;
 class RealLoop;
 class ShadowLoop;
 class BasePSet;
+class GraphIter;
 
 class Node
 {
@@ -144,8 +145,8 @@ class Node
   virtual bool operator==(const Node &rhs) const;
   virtual bool operator!=(const Node &rhs) const {return !(*this == rhs);}
   void PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound = false);
-  virtual void Print(IndStream &out, GraphNum graphNum);
-  bool CanPrintCode() const;
+  virtual void Print(IndStream &out, GraphNum graphNum, const GraphIter *graphIter);
+  bool CanPrintCode(const GraphIter *graphIter) const;
   void AddInput(Node *node);
   void AddInputs(int numArgs, ...);
 

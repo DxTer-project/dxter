@@ -219,7 +219,7 @@ void Poss::ForcePrint()
 #elif DOSQM
         IndStream out(&cout,BLISSTREAM);
 #endif
-        (*nodeIter)->Print(out, 1);
+        (*nodeIter)->Print(out, 1, NULL);
         hasPrinted |= (*nodeIter)->HasPrinted();
       }
     }
@@ -230,7 +230,7 @@ bool Poss::CanPrint() const
 {
   NodeVecConstIter iter = m_inTuns.begin();
   for( ; iter != m_inTuns.end(); ++iter) {
-    if (!(*iter)->CanPrintCode()) {
+    if (!(*iter)->CanPrintCode(NULL)) {
       return false;
     }
   }

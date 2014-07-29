@@ -51,7 +51,7 @@ class BasePSet
   void RemoveInTun(Node *tun);
   void RemoveOutTun(Node *tun);
   void FormSetAround();
-  bool CanPrint() const;
+  bool CanPrint(const GraphIter *graphIter) const;
   virtual BasePSet* GetNewInst() = 0;
   virtual BasePSet* GetNewShadow() = 0;
 

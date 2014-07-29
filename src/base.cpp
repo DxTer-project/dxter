@@ -894,6 +894,16 @@ unsigned int FindInNodeVec(const NodeVec &vec, const Node *node)
   throw;
 }
 
+unsigned int FindInSetVec(const PSetVec &vec, const BasePSet *set)
+{
+  unsigned int i = 0;
+  PSetVecConstIter iter = vec.begin();
+  for(; iter != vec.end(); ++iter,++i)
+    if (*iter == set)
+      return i;
+  throw;
+}
+
 
 #if DOELEM
 void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN)

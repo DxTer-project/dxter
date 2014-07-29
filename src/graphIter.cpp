@@ -24,6 +24,7 @@
 #include "graphIter.h"
 #include <iomanip>
 #include "transform.h"
+#include "contraction.h"
 
 GraphIter::GraphIter(Poss *poss)
 {
@@ -291,7 +292,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
       
       NodeVecConstIter nodeIter = m_poss->m_inTuns.begin();
       for(; nodeIter != m_poss->m_inTuns.end(); ++nodeIter) {
-	(*nodeIter)->Print(out, whichGraph);
+	(*nodeIter)->Print(out, whichGraph, this);
       }
       bool hasPrinted = true;
       while(hasPrinted) {
@@ -301,7 +302,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	  //Don't bring the poss out tunnels until the end
 	  // so the repartitioning code all goes after the loop body
 	  if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsTunnel(POSSTUNOUT)) {
-	    (*nodeIter)->Print(out, whichGraph);
+	    (*nodeIter)->Print(out, whichGraph, this);
 	    hasPrinted |= (*nodeIter)->HasPrinted();
 	  }
 	}
@@ -327,13 +328,13 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
       
       nodeIter = m_poss->m_outTuns.begin();
       for(; nodeIter != m_poss->m_outTuns.end(); ++nodeIter) {
-	(*nodeIter)->Print(out, whichGraph);
+	(*nodeIter)->Print(out, whichGraph, this);
 	(*nodeIter)->SetPrinted();
       }
       
       nodeIter = owner->m_outTuns.begin();
       for(; nodeIter != owner->m_outTuns.end(); ++nodeIter) {
-	(*nodeIter)->Print(out, whichGraph);
+	(*nodeIter)->Print(out, whichGraph, this);
 	(*nodeIter)->SetPrinted();
       }
       *out << endl;
@@ -360,7 +361,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
   
   NodeVecConstIter nodeIter = m_poss->m_inTuns.begin();
   for(; nodeIter != m_poss->m_inTuns.end(); ++nodeIter) {
-    (*nodeIter)->Print(out, graphNum);
+    (*nodeIter)->Print(out, graphNum, this);
 
     if (!(*nodeIter)->HasPrinted()) {
       cout << "tunnel input " << (*nodeIter)->GetType()
@@ -379,34 +380,37 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
       // so the repartitioning code all goes after the loop body
       if (!node->HasPrinted()
           && !node->IsTunnel(POSSTUNOUT)
-          && node->CanPrintCode())
+          && !node->IsTunnel(SETTUNOUT)
+          && node->CanPrintCode(this))
 	{
-	  (*nodeIter)->Print(out, graphNum);
+	  (*nodeIter)->Print(out, graphNum, this);
 	  hasPrinted |= (*nodeIter)->HasPrinted();
 	}
     }
     for(unsigned int i = 0; i < numPSets; ++i) {
-      if (!m_subIters[i]->m_hasPrinted && m_poss->m_sets[i]->CanPrint()) {
+      if (!m_subIters[i]->m_hasPrinted && m_poss->m_sets[i]->CanPrint(this)) {
+	BasePSet *set = m_poss->m_sets[i];
 	out.Indent();
 	*out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
 	out.Indent();
 	*out << "//**** ";
-	if (m_poss->m_sets[i]->IsReal())
+	if (set->IsReal())
 	  *out << "Is real\n";
 	else
 	  *out << "Is a shadow\n";
-	RealPSet *real = m_poss->m_sets[i]->GetReal();
+	RealPSet *real = set->GetReal();
 	//	if (real->IsLoop())
 	//	  *out << "is loop\n";
 	//	*out << "real " << real << " instead of " << m_poss->m_sets[i] << endl;
 	real->PrePrint(out,m_setIters[i]->second);
 	++out;
 	real->SetInTunsAsPrinted();
-	m_subIters[i]->Print(out, graphNum, m_poss->m_sets[i]);
+	m_subIters[i]->Print(out, graphNum, set);
 	--out;
 	real->PostPrint(out,m_setIters[i]->second);
 	out.Indent();
 	*out << "//****\n";
+
         hasPrinted = true;
       }
     }
@@ -419,13 +423,13 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
   
   nodeIter = m_poss->m_outTuns.begin();
   for(; nodeIter != m_poss->m_outTuns.end(); ++nodeIter) {
-    (*nodeIter)->Print(out, graphNum);
+    (*nodeIter)->Print(out, graphNum, this);
     (*nodeIter)->SetPrinted();
   }
   
   nodeIter = owner->m_outTuns.begin();
   for(; nodeIter != owner->m_outTuns.end(); ++nodeIter) {
-    (*nodeIter)->Print(out, graphNum);
+    (*nodeIter)->Print(out, graphNum, NULL);
     (*nodeIter)->SetPrinted();
   }
   *out << endl;
@@ -446,8 +450,8 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
       for(unsigned int j = 0; j < m_poss->m_sets[i]->m_inTuns.size(); ++j) {
         Node *tun = m_poss->m_sets[i]->m_inTuns[j];
         cout << "in tun " << tun << endl;
-        if (!tun->CanPrintCode())
-          tun->CanPrintCode();
+        if (!tun->CanPrintCode(this))
+          cout << "can't print\n";
       }
       m_subIters[i]->m_poss->CanPrint();
       m_subIters[i]->m_poss->ForcePrint();

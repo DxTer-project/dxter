@@ -314,10 +314,10 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
   }
 }
 
-void Node::Print(IndStream &out, GraphNum graphNum)
+void Node::Print(IndStream &out, GraphNum graphNum, const GraphIter *graphIter)
 {
   if (!HasPrinted()) {
-    if(CanPrintCode()) {
+    if(CanPrintCode(graphIter)) {
       SetPrinted();
       PrintCode(out);
 #ifdef PRINTCOSTS
@@ -358,7 +358,7 @@ void Node::Print(IndStream &out, GraphNum graphNum)
           if (!child->IsTunnel() &&
               (child->Input(child->m_inputs.size()-1) != this))
           {
-            child->Print(out, graphNum);
+            child->Print(out, graphNum, graphIter);
           }
         }
       }
@@ -366,7 +366,7 @@ void Node::Print(IndStream &out, GraphNum graphNum)
   }
 }
 
-bool Node::CanPrintCode() const
+bool Node::CanPrintCode(const GraphIter *graphIter) const
 {
   NodeConnVecConstIter iter = m_inputs.begin();
   for( ; iter != m_inputs.end(); ++iter) {
@@ -402,6 +402,18 @@ bool Node::CanPrintCode() const
                   return false;
               }
               else
+                return false;
+            }
+            else if (child->IsTunnel(SETTUNIN)) {
+              const Tunnel *tun2 = (Tunnel*)child;
+              const BasePSet *set = tun2->m_pset;
+              if (this->IsTunnel(SETTUNIN)) {
+                if (set == ((Tunnel*)this)->m_pset)
+                  continue;
+              }
+	      unsigned int found = FindInSetVec(graphIter->m_poss->m_sets, set);
+	      const GraphIterPtr subGraphIter = graphIter->m_subIters[found];
+              if (!subGraphIter->m_hasPrinted)
                 return false;
             }
           }
