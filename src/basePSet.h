@@ -26,6 +26,7 @@
 //#include "possTunnel.h"
 
 class RealPSet;
+class ShadowPSet;
 
 class BasePSet
 {
@@ -53,7 +54,7 @@ class BasePSet
   void FormSetAround();
   bool CanPrint(const GraphIter *graphIter) const;
   virtual BasePSet* GetNewInst() = 0;
-  virtual BasePSet* GetNewShadow() = 0;
+  virtual ShadowPSet* GetNewShadow() = 0;
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}

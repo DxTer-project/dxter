@@ -34,11 +34,12 @@ extern unsigned int M_phase;
 #define FORMSETSEARLY 1
 
 RealPSet::RealPSet()
-  : m_functionality()
+  : m_functionality(), m_mergeLeft(NULL), m_mergeRight(NULL)
 {
 }
 
 RealPSet::RealPSet(Poss *poss)
+: m_mergeLeft(NULL), m_mergeRight(NULL)
 {
   Init(poss);
 }
@@ -100,16 +101,98 @@ void RealPSet::Init(Poss *poss)
   AddPoss(poss);
 }
 
+void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
+{
+  if (m_mergeLeft == oldPtr) {
+    m_mergeLeft = newPtr;
+    if (newPtr == NULL) {
+      m_mergeRight = NULL;
+      m_leftInMap.clear();
+      m_rightInMap.clear();
+      m_leftOutMap.clear();
+      m_rightOutMap.clear();
+    }
+    return;
+  }
+  if (m_mergeRight == oldPtr) {
+    m_mergeRight = newPtr;
+    if (newPtr == NULL) {
+      m_mergeLeft = NULL;
+      m_leftInMap.clear();
+      m_rightInMap.clear();
+      m_leftOutMap.clear();
+      m_rightOutMap.clear();
+    }
+    return;
+  }
+
+  if (m_mergeMap.empty())
+    throw;
+  PSetMapIter setIter = m_mergeMap.begin();
+  for(; setIter != m_mergeMap.end(); ++setIter) {
+    if (setIter->first == oldPtr) {
+      if (newPtr == NULL) {
+	m_mergeMap.erase(setIter);	
+	return;
+      }
+      RealPSet *second = setIter->second;
+      m_mergeMap.erase(setIter);
+      m_mergeMap.insert(PSetMapPair(newPtr, second));
+      return;
+    }
+    if (setIter->second == oldPtr) {
+      if (newPtr == NULL) {
+	m_mergeMap.erase(setIter);	
+	return;
+      }
+      RealPSet *first = setIter->first;
+      m_mergeMap.erase(setIter);
+      m_mergeMap.insert(PSetMapPair(first, newPtr));
+      return;
+    }
+  }
+  throw;
+}
+
 void RealPSet::Migrate()
 {
-  if (m_shadows.empty())
+  if (m_shadows.empty()) {
+    if (m_mergeLeft)
+      m_mergeLeft->UpdateRealPSetPointers(this, NULL);
+    if (m_mergeRight)
+      m_mergeRight->UpdateRealPSetPointers(this, NULL);
+    PSetMapIter setIter = m_mergeMap.begin();
+    for(; setIter != m_mergeMap.end(); ++setIter) {
+      setIter->first->UpdateRealPSetPointers(this, NULL);
+      setIter->second->UpdateRealPSetPointers(this, NULL);
+    }
     return;
+  }
   ShadowPSet *shadowToReplace = (ShadowPSet*)(m_shadows[0]);
   //  m_shadows.erase(m_shadows.begin());
 
   RealPSet *newSet = new RealPSet;
   newSet->m_functionality = m_functionality;
   newSet->m_shadows.swap(m_shadows);
+
+  if (m_mergeLeft)
+    m_mergeLeft->UpdateRealPSetPointers(this, newSet);
+  if (m_mergeRight)
+    m_mergeRight->UpdateRealPSetPointers(this, newSet);
+  PSetMapIter setIter = m_mergeMap.begin();
+  for(; setIter != m_mergeMap.end(); ++setIter) {
+    setIter->first->UpdateRealPSetPointers(this, newSet);
+    setIter->second->UpdateRealPSetPointers(this, newSet);
+  }
+
+
+  newSet->m_leftInMap.swap(m_leftInMap);
+  newSet->m_rightInMap.swap(m_rightInMap);
+  newSet->m_leftOutMap.swap(m_leftOutMap);
+  newSet->m_rightOutMap.swap(m_rightOutMap);
+  newSet->m_mergeMap.swap(m_mergeMap);
+  newSet->m_mergeLeft = m_mergeLeft;
+  newSet->m_mergeRight = m_mergeRight;
 
   PSetVecIter iter = newSet->m_shadows.begin();
   for(; iter != newSet->m_shadows.end(); ++iter)
@@ -366,6 +449,52 @@ void RealPSet::Prop()
     (*(m_posses.begin())).second->PrintSetConnections();
     throw;
   }
+
+  if (m_mergeLeft && !m_mergeRight)
+    throw;
+  if (m_mergeRight && !m_mergeLeft)
+    throw;
+  if (m_mergeLeft) {
+    if (m_leftInMap.empty()
+	|| m_rightInMap.empty()
+	|| m_leftOutMap.empty()
+	|| m_rightOutMap.empty())
+      {
+	throw;
+      }
+
+    const int inSize = m_inTuns.size();
+    const int outSize = m_outTuns.size();
+    vector<int>::iterator mapIter;
+    for(mapIter = m_leftInMap.begin(); mapIter != m_leftInMap.end(); ++mapIter) {
+      if (*mapIter >= inSize)
+	throw;
+    }
+    for(mapIter = m_rightInMap.begin(); mapIter != m_rightInMap.end(); ++mapIter) {
+      if (*mapIter >= inSize) {
+	cout << "mapping to " << *mapIter << " out of " << inSize << endl;
+	throw;
+      }
+    }
+    for(mapIter = m_leftOutMap.begin(); mapIter != m_leftOutMap.end(); ++mapIter) {
+      if (*mapIter >= outSize)
+	throw;
+    }
+    for(mapIter = m_rightOutMap.begin(); mapIter != m_rightOutMap.end(); ++mapIter) {
+      if (*mapIter >= outSize)
+	throw;
+    }
+  }
+  else {
+    if (!m_leftInMap.empty()
+	|| !m_rightInMap.empty()
+	|| !m_leftOutMap.empty()
+	|| !m_rightOutMap.empty())
+      {
+	throw;
+      }
+  }
+
 
   //BAM Par + check for > 1
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
@@ -646,8 +775,10 @@ bool RealPSet::TakeIter(const TransMap &transMap,
   // over the posses
   // BAM: Or do I?
   if (mmap.size()) {
-    if (mmap.size() > 100)
+    if (mmap.size() > 100) {
       cout << "\t\tAdding " << mmap.size() << " posses\n";
+      //      cout << "\t\t" << m_functionality << endl;
+    }
     AddPossesOrDispose(mmap, &actuallyAdded);
     if (mmap.size() > 100)
       cout << "\t\tDone adding ( " << actuallyAdded.size() << " actually added )\n";
@@ -656,7 +787,7 @@ bool RealPSet::TakeIter(const TransMap &transMap,
       (*added).second->BuildDataTypeCache();
 #if FORMSETSEARLY
       if (CurrPhase == DPTENSORPHASE)
-	(*added).second->FormSets(SUMSCATTERTENSORPHASE);
+       	(*added).second->FormSets(SUMSCATTERTENSORPHASE);
 #endif
     }
   }
@@ -788,6 +919,20 @@ void RealPSet::CombineAndRemoveTunnels()
       tun->m_children.clear();
       delete tun;
       m_inTuns.erase(m_inTuns.begin()+i);
+      for (unsigned int j = 0; j < m_leftInMap.size(); ++j) {
+	int val = m_leftInMap[j];
+	if (val == i)
+	  m_leftInMap[j] = -1;
+	if (val > i)
+	  m_leftInMap[j] = val-1;
+      }
+      for (unsigned int j = 0; j < m_rightInMap.size(); ++j) {
+	int val = m_rightInMap[j];
+	if (val == i)
+	  m_rightInMap[j] = -1;
+	else if (val > i)
+	  m_rightInMap[j] = val-1;
+      }
       --i;
     }
   }
@@ -827,10 +972,28 @@ void RealPSet::CombineAndRemoveTunnels()
         tun->m_inputs.clear();
         delete tun;
         m_outTuns.erase(m_outTuns.begin()+i);
+	
+	for(unsigned int j = 0; j < m_leftOutMap.size(); ++j) {
+	  int val = m_leftOutMap[j];
+	  if (val == i)
+	    m_leftOutMap[j] = -1;
+	  else if (val > i)
+	    m_leftOutMap[j] = val-1;
+	}
+
+	for(unsigned int j = 0; j < m_rightOutMap.size(); ++j) {
+	  int val = m_rightOutMap[j];
+	  if (val == i)
+	    m_rightOutMap[j] = -1;
+	  else if (val > i)
+	    m_rightOutMap[j] = val-1;
+	}
+
         --i;
         continue;
       }
     }
+    /*
     if (tun->IsLoopTunnel() && (((LoopTunnel*)tun)->IsCombine())) {
       for(unsigned int j = i+1; j < m_outTuns.size(); ++j) {
         Node *tun2 = OutTun(j);
@@ -878,6 +1041,7 @@ void RealPSet::CombineAndRemoveTunnels()
         }
       }
     }
+    */
   }
   
 }
@@ -1538,7 +1702,7 @@ const string& RealPSet::GetFunctionalityString() const
 }
 
 
-BasePSet* RealPSet::GetNewShadow()
+ShadowPSet* RealPSet::GetNewShadow()
 {
   ShadowPSet *shadow = new ShadowPSet;
   shadow->m_realPSet = this;
@@ -1563,4 +1727,41 @@ void RealPSet::SetInTunsAsPrinted()
   NodeVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter)
     (*iter)->SetPrinted();  
+}
+
+
+ShadowPSet* RealPSet::GetNewShadowDup(Poss *poss)
+{
+  ShadowPSet *shadow = GetNewShadow();
+  poss->AddPSet(shadow, true);
+  NodeVecIter iter = m_inTuns.begin();
+  for( ; iter != m_inTuns.end(); ++iter) {
+    Tunnel *tun = (Tunnel*)((*iter)->GetNewInst());
+    tun->Duplicate(*iter,true,false);
+    tun->m_pset = shadow;
+    shadow->m_inTuns.push_back(tun);
+    poss->AddNode(tun);
+  }
+  iter = m_outTuns.begin();
+  for( ; iter != m_outTuns.end(); ++iter) {
+    Tunnel *tun = (Tunnel*)((*iter)->GetNewInst());
+    tun->Duplicate(*iter,true,false);
+    tun->m_pset = shadow;
+    shadow->m_outTuns.push_back(tun);
+    poss->AddNode(tun);
+  }
+  return shadow;
+}
+
+
+RealPSet* RealPSet::HasMergedWith(RealPSet *set, bool checkOtherOrder)
+{
+  PSetMapIter iter = m_mergeMap.find(set);
+  if (iter != m_mergeMap.end())
+    return iter->second;
+
+  if (checkOtherOrder)
+    return set->HasMergedWith(this,false);
+  else
+    return NULL;
 }

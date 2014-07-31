@@ -60,7 +60,7 @@ LoopType ShadowLoop::GetType() const
   return ((RealLoop*)m_realPSet)->GetType();
 }
 
-BasePSet* ShadowLoop::GetNewShadow()
+ShadowPSet* ShadowLoop::GetNewShadow()
 {
   return ((RealLoop*)m_realPSet)->GetNewShadow();
 }

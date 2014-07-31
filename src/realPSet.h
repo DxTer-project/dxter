@@ -40,7 +40,11 @@ class RealPSet : public BasePSet
   RealPSet();
   RealPSet(Poss *poss);
   void Init(Poss *poss);
+  PSetMap m_mergeMap;
+  RealPSet *m_mergeLeft, *m_mergeRight;
+  vector<int>  m_leftInMap, m_rightInMap, m_leftOutMap, m_rightOutMap;
   virtual ~RealPSet();
+  void UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr);
   void RemoveShadow(ShadowPSet *shadow);
   void AddPoss(Poss *poss);
   void AddPossesOrDispose(PossMMap &mmap, PossMMap *added = NULL);
@@ -66,7 +70,8 @@ class RealPSet : public BasePSet
   void FormSets(unsigned int phase);
   virtual GraphNum TotalCount() const;
   virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
-  virtual BasePSet* GetNewShadow();
+  virtual ShadowPSet* GetNewShadow();
+  virtual ShadowPSet* GetNewShadowDup(Poss *poss);
 
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
@@ -85,5 +90,7 @@ class RealPSet : public BasePSet
   virtual bool IsReal() const {return true;}
   virtual const RealPSet* GetReal() const {return this;}
   virtual RealPSet* GetReal() {return this;}
+
+  RealPSet* HasMergedWith(RealPSet *set, bool checkOtherOrder=true);
 };
 

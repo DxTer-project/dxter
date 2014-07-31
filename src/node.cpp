@@ -704,6 +704,7 @@ Node* Node::Input(ConnNum num) const
   if (num >= m_inputs.size()) {
     cout << "num bad size on " << GetType() << "\n";
     cout << num << " >= " << m_inputs.size() << endl;
+    cout << "node " << this << endl;
     throw;
   }
   if (!(m_inputs[num]->m_n)) {

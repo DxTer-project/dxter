@@ -62,6 +62,6 @@ class ShadowPSet : public BasePSet
   virtual bool IsShadow() const {return true;}
   virtual const RealPSet* GetReal() const {return m_realPSet;}
   virtual RealPSet* GetReal() {return m_realPSet;}
-  virtual BasePSet* GetNewShadow();
+  virtual ShadowPSet* GetNewShadow();
 };
 

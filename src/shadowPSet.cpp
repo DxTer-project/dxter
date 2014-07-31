@@ -182,7 +182,7 @@ const string& ShadowPSet::GetFunctionalityString() const
 }
 
 
-BasePSet* ShadowPSet::GetNewShadow()
+ShadowPSet* ShadowPSet::GetNewShadow()
 {
   return m_realPSet->GetNewShadow();
 }

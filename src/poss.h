@@ -76,7 +76,7 @@ class Poss
   void AddNode(Node *node);
   void TakeOverNode(Node *node);
   void AddNodes(int numNodes, ...);
-  virtual void AddPSet(BasePSet *pset, bool expectToBeNew);
+  virtual void AddPSet(BasePSet *pset, bool expectToBeNew, bool addTuns = false);
   virtual void AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner);
   virtual void AddPSet(BasePSet *pset);
   bool ContainsNonLoopCode() const;
@@ -88,7 +88,7 @@ class Poss
   //  void ExpandTunnels();
   Node* InTun(unsigned int num) const {return m_inTuns[num];}
   Node* OutTun(unsigned int num) const {return m_outTuns[num];}
-  void MergePart1(unsigned int left, unsigned int right, 
+  bool MergePart1(unsigned int left, unsigned int right, 
 		  BasePSet **leftSet, BasePSet **rightSet);
   void MergePart2(RealPSet *newSet, 
 		  BasePSet *leftSet, BasePSet *rightSet,

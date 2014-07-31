@@ -295,6 +295,7 @@ class Poss;
 class NodeConn;
 class BasePSet;
 class InputNode;
+class RealPSet;
 typedef unsigned long int GraphNum;
 typedef string ClassType;
 typedef vector<Node*> NodeVec;
@@ -310,6 +311,10 @@ typedef PSetVec::const_iterator PSetVecConstIter;
 typedef set<const BasePSet*> PSetSet;
 typedef PSetSet::iterator PSetSetIter;
 typedef PSetSet::const_iterator PSetSetConstIter;
+typedef map<RealPSet*, RealPSet*> PSetMap;
+typedef std::pair<RealPSet*, RealPSet*> PSetMapPair;
+typedef PSetMap::iterator PSetMapIter;
+typedef PSetMap::const_iterator PSetMapConstIter;
 //typedef vector<Symb> SymbVec;
 //typedef SymbVec::iterator SymbVecIter;
 //typedef SymbVec::const_iterator SymbVecConstIter;
@@ -368,6 +373,7 @@ typedef TimeVec::const_iterator TimeVecConstIter;
 typedef map<GraphNum, TimeVec> ImplementationRuntimeMap;
 typedef ImplementationRuntimeMap::iterator ImplementationRuntimeMapIter;
 typedef ImplementationRuntimeMap::const_iterator ImplementationRuntimeMapConstIter;
+
 
 double MinTime(const TimeVec &times);
 
