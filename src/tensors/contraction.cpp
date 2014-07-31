@@ -332,18 +332,15 @@ void DistContToLocalContStatC::Apply(Node *node) const
 
   RedistNode *node1 = new RedistNode(AType);
   RedistNode *node2 = new RedistNode(BType);
-  RedistNode *node3 = new RedistNode(CType);
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, 
 				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices, cont->m_contIndices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node->Input(1),node->InputConnNum(1));
-  node3->AddInput(node->Input(2),node->InputConnNum(2));
   LCont->AddInput(node1,0);
   LCont->AddInput(node2,0);
-  LCont->AddInput(node3,0);
+  LCont->AddInput(node->Input(2),node->InputConnNum(2));
   node->m_poss->AddNode(node1);
   node->m_poss->AddNode(node2);
-  node->m_poss->AddNode(node3);
   node->m_poss->AddNode(LCont);
 
   cont->RedirectChildren(LCont,0);
@@ -492,20 +489,18 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
 			      CType);
 
 
-  RedistNode *node1 = new RedistNode(AType);
+
   RedistNode *node2 = new RedistNode(BType);
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
 				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
-  node1->AddInput(node->Input(0),node->InputConnNum(0));
   node2->AddInput(node->Input(1),node->InputConnNum(1));
   temp->AddInput(node->Input(2),node->InputConnNum(2));
-  LCont->AddInput(node1,0);
+  LCont->AddInput(node->Input(0),node->InputConnNum(0));
   LCont->AddInput(node2,0);
   LCont->AddInput(temp,0);
-  node->m_poss->AddNode(node1);
   node->m_poss->AddNode(node2);
   node->m_poss->AddNode(temp);
   node->m_poss->AddNode(LCont);
@@ -668,20 +663,17 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
 
 
   RedistNode *node1 = new RedistNode(AType);
-  RedistNode *node2 = new RedistNode(BType);
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
 				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
-  node2->AddInput(node->Input(1),node->InputConnNum(1));
   temp->AddInput(node->Input(2),node->InputConnNum(2));
   LCont->AddInput(node1,0);
-  LCont->AddInput(node2,0);
+  LCont->AddInput(node->Input(1),node->InputConnNum(1));
   LCont->AddInput(temp,0);
   node->m_poss->AddNode(node1);
-  node->m_poss->AddNode(node2);
   node->m_poss->AddNode(temp);
   node->m_poss->AddNode(LCont);
 
