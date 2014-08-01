@@ -19,12 +19,14 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "LLDLAGemmTransformations.h"
 #include "loop.h"
-#include "mvmul.h"
 #include "transpose.h"
 
 #if DOLLDLA
+
+#include "LLDLAGemmTransformations.h"
+#include "mvmul.h"
+#include "vmmul.h"
 
 LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize)
   : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5))),bsSize)
@@ -240,6 +242,73 @@ void LLDLAGemmToMVMul::Apply(Node* node) const
 
   node->RedirectChildren(loop->OutTun(2), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+}
+
+string LLDLAGemmToVMMul::GetType() const
+{
+  return "Gemm to VMMul from " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool LLDLAGemmToVMMul::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == Gemm::GetClass()) {
+    Gemm* gemm = (Gemm*) node;
+    if (gemm->m_alpha == COEFONE && gemm->m_beta == COEFONE) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void LLDLAGemmToVMMul::Apply(Node* node) const
+{
+  Gemm* gemm = (Gemm*) node;
+
+  // Split A into row vectors
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+  splitA->AddInput(gemm->Input(0), gemm->InputConnNum(0));
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+
+  // Create tunnel for B
+  LoopTunnel* inB = new LoopTunnel(POSSTUNIN);
+  inB->AddInput(gemm->Input(1), gemm->InputConnNum(1));
+  inB->SetAllStats(FULLUP);
+  inB->SetIndepIters();
+
+  // Split C into rows
+  SplitSingleIter* splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  splitC->AddInput(gemm->Input(2), gemm->InputConnNum(2));
+  splitC->SetUpStats(FULLUP, FULLUP,
+		     NOTUP, NOTUP);
+  splitC->SetIndepIters();
+
+  // Create new inner vmmul for loop
+  VMMul* vmmul = new VMMul(m_toLayer, gemm->m_type);
+  vmmul->AddInput(splitA, 1);
+  vmmul->AddInput(inB, 0);
+  vmmul->AddInput(splitC, 1);
+
+  // Create outputs for A, B and C
+  CombineSingleIter* comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter* comC = splitC->CreateMatchingCombine(1, 1, vmmul, 0);
+
+  LoopTunnel* outB = new LoopTunnel(POSSTUNOUT);
+  outB->AddInput(inB, 0);
+  outB->AddInput(inB, 1);
+  outB->CopyTunnelInfo(inB);
+
+  // Create poss and loop
+  Poss* loopPoss = new Poss(3, comA, outB, comC);
+  Loop* loop = new Loop(LLDLALOOP, loopPoss, UnitBS);
+  node->m_poss->AddLoop(loop);
+
+  node->RedirectChildren(loop->OutTun(2), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+
   return;
 }
 

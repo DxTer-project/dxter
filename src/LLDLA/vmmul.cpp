@@ -97,12 +97,12 @@ void VMMul::Prop()
 	cout << "ERROR: Primitive vector for vmmul must be 1 x 2\n";
 	throw;
       }
-      if (*GetInputM(1) != LLDLA_MU) {
-	cout << "ERROR: Primitive vector must be 2 x 1\n";
+      if (*GetInputN(1) != LLDLA_MU) {
+	cout << "ERROR: Primitive matrix must be 2 x 2\n";
 	throw;
       }
-      if (*GetInputM(2) != LLDLA_MU) {
-	cout << "ERROR: Primitive vector must be 2 x 1\n";
+      if (*GetInputM(2) != 1) {
+	cout << "ERROR: Primitive vector must be 1 x 2\n";
 	throw;
       }
     }
@@ -194,7 +194,8 @@ bool VMMulLowerLayer::CanApply(const Node* node) const
       return false;
     }
     if (*(vmmul->GetInputM(0)) <= m_bs &&
-	*(vmmul->GetInputN(0)) <= m_bs) {
+	*(vmmul->GetInputN(0)) <= m_bs &&
+	*(vmmul->GetInputN(1)) <= m_bs) {
       return true;
     } else {
       return false;

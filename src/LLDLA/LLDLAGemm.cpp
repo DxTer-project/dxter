@@ -84,7 +84,7 @@ void LLDLAGemm::PrintRowStride(IndStream &out)
       GetInputName(1).str() << ", " <<
       InputDataType(1).m_rowStrideVar << ", " <<
       GetInputName(2).str() << ", " <<
-      InputDataType(2).m_rowStrideVar << ");\n";
+      InputDataType(2).m_rowStrideVar << " );\n";
   }
   else
     throw;
@@ -99,7 +99,7 @@ void LLDLAGemm::PrintColStride(IndStream &out)
       GetInputName(1).str() << ", " <<
       InputDataType(1).m_rowStrideVar << ", " <<
       GetInputName(2).str() << ", " <<
-      InputDataType(2).m_rowStrideVar << ");\n";
+      InputDataType(2).m_rowStrideVar << " );\n";
   }
   else
     throw;

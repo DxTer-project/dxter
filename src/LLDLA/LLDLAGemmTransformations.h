@@ -61,13 +61,26 @@ class LLDLAGemmToMVMul : public SingleTrans
   virtual bool IsRef() const {return true;}  
 };
 
+class LLDLAGemmToVMMul : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  Size m_bs;
+ LLDLAGemmToVMMul(Layer fromLayer, Layer toLayer)
+   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}  
+};
+
 class LLDAGemmLowerLayer : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
  LLDAGemmLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
-   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
