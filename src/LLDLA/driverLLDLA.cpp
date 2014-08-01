@@ -45,9 +45,9 @@
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
 
-#define DOLOOPUNROLLING 1
-#define DO2MUTRANSFORMATIONS 1
-#define DO3MUTRANSFORMATIONS 1
+#define DOLOOPUNROLLING 0
+#define DO2MUTRANSFORMATIONS 0
+#define DO3MUTRANSFORMATIONS 0
 
 #include <sstream>
 
@@ -141,7 +141,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
-  //Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Transform gemm into loop over vmmuls
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
