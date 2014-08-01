@@ -34,8 +34,8 @@ void SMMul::PrintCode(IndStream &out)
 {
   if (GetLayer() == ABSLAYER) {
     *out << "simple_smul( " <<
-      InputDataType(0).m_numRowsVar << ", " <<
-      InputDataType(0).m_numColsVar << ", " <<
+      InputDataType(1).m_numRowsVar << ", " <<
+      InputDataType(1).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ", " <<
       InputDataType(1).m_rowStrideVar << ", " <<

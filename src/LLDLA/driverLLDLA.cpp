@@ -294,7 +294,7 @@ void AddSimplifiers()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), SIMP);
 
   //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  //  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
 
   //Changes Gemm with transposition to non-transposed version use Transpose nodes
   Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(LLDLAMIDLAYER), SIMP);

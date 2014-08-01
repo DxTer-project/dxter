@@ -217,18 +217,18 @@ inline void row_stride_smul_2x2(
 	double *scalar,
 	double *a, int a_row_stride)	{
 
-	v2df_t
-		scalar_vreg,
-		a_00_10_vreg, a_10_11_vreg;
+  v2df_t
+    scalar_vreg,
+    a_00_01_vreg, a_10_11_vreg;
 
-	scalar_vreg.v = VEC_DUP_LOAD(scalar);
+  scalar_vreg.v = VEC_DUP_LOAD(scalar);
 
-	a_00_10_vreg.v = VEC_PD_LOAD(&A(0, 0));
-	a_10_11_vreg.v = VEC_PD_LOAD(&A(1, 0));
-	a_00_10_vreg.v *= scalar_vreg.v;
-	a_10_11_vreg.v *= scalar_vreg.v;
+  a_00_01_vreg.v = VEC_PD_LOAD(&A(0, 0));
+  a_10_11_vreg.v = VEC_PD_LOAD(&A(1, 0));
+  a_00_01_vreg.v = a_00_01_vreg.v * scalar_vreg.v;
+  a_10_11_vreg.v = a_10_11_vreg.v * scalar_vreg.v;
 
-	VEC_PD_STORE(&A(0, 0), a_00_10_vreg.v);
-	VEC_PD_STORE(&A(1, 0), a_10_11_vreg.v);
+  VEC_PD_STORE(&A(0, 0), a_00_01_vreg.v);
+  VEC_PD_STORE(&A(1, 0), a_10_11_vreg.v);
 }
 #endif
