@@ -38,7 +38,7 @@ class MAdd : public DLAOp<2, 1>
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  static ClassType GetClass() { return "LLDLAPrimGemm"; }
+  static ClassType GetClass() { return "LLDLAPrimMAdd"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
 
   virtual NodeType GetType() const;
