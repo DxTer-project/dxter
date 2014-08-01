@@ -136,13 +136,13 @@ void MVMul::Prop()
     } else if (*GetInputM(0) != *GetInputM(2)) {
       cout << "ERROR: Input dimensions don't match\n";
       throw;
-    } else if (*GetInputN(2) != 1 || *GetInputN(1) != 1) {
-      cout << "Error: Input vectors have more than 1 column\n";
+    } else if (!IsInputColVector(1) || !IsInputColVector(2)) {
+      cout << "Error: MVMul inputs that should be column vectors are not\n";
       throw;
     }
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if (*GetInputM(0) != LLDLA_MU || *GetInputN(0) != LLDLA_MU) {
+      if (!InputIsMuByMu(0)) {
 	cout << "ERROR: Primitive matrix must be 2 x 2\n";
 	throw;
       }

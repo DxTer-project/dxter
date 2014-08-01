@@ -267,7 +267,9 @@ void AddVMMulTrans()
   // Transformers for vector matrix multiply
   Universe::AddTrans(VMMul::GetClass(), new VMMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, LLDLAMu), LLDLALOOPPHASE);
+  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMK, LLDLAMu), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
   Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
 
@@ -307,6 +309,9 @@ void AddSimplifiers()
 
   // Lowers the layer tag of a MVMul node
   Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
+
+  // Lower layer tag on VMMul node
+  Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);
 
   // Lowers the tag of an SVMul node
   Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.Size()), SIMP);

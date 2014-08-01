@@ -36,6 +36,13 @@ VMMul::VMMul(Layer layer, Type type)
 }
 
 void VMMul::PrintCode(IndStream &out) {
+
+  const DataTypeInfo &inInfo = InputDataType(1);
+  const Stride rowStride = inInfo.m_rowStride;
+  const Stride colStride = inInfo.m_colStride;
+
+  out.Indent();
+
   if (m_layer == ABSLAYER) {
     *out << "simple_mmul( " <<
       "1, " <<
@@ -51,9 +58,49 @@ void VMMul::PrintCode(IndStream &out) {
       InputDataType(2).m_rowStrideVar << ", " <<
       InputDataType(2).m_colStrideVar << " );\n";
     return;
+  }
 
+  if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
+    PrintGeneralStride(out);
+  } else if (rowStride == UNITSTRIDE && colStride == NONUNITSTRIDE) {
+    PrintColStride(out);
+  } else if (rowStride == NONUNITSTRIDE && colStride == UNITSTRIDE) {
+    PrintRowStride(out);
+  } else {
+    *out << "ERROR: BAD STRIDE\n";
   }
   return;
+}
+
+void VMMul::PrintRowStride(IndStream &out)
+{
+  *out << "row_stride_mmul_1x2_2x2( " <<
+    GetInputName(0).str() << ", " <<
+    InputDataType(0).m_rowStrideVar << ", " <<
+    GetInputName(1).str() << ", " <<
+    InputDataType(1).m_rowStrideVar << ", " <<
+    GetInputName(2).str() << ", " <<
+    InputDataType(2).m_rowStrideVar << ");\n";
+  return;
+}
+
+void VMMul::PrintColStride(IndStream &out)
+{
+  *out << "col_stride_mmul_1x2_2x2( " <<
+    GetInputName(0).str() << ", " <<
+    InputDataType(0).m_colStrideVar << ", " <<
+    GetInputName(1).str() << ", " <<
+    InputDataType(1).m_colStrideVar << ", " <<
+    GetInputName(2).str() << ", " <<
+    InputDataType(2).m_colStrideVar << ");\n";
+}
+
+void VMMul::PrintGeneralStride(IndStream &out)
+{
+  *out << "gen_stride_mmul_1x2_2x2( " <<
+    GetInputName(0).str() << ", " <<
+    GetInputName(1).str() << ", " <<
+    GetInputName(2).str() << ");\n";
 }
 
 Node* VMMul::BlankInst()
@@ -127,7 +174,20 @@ void VMMul::Duplicate(const Node* orig, bool shallow, bool possMerging)
 
 string VMMulLoopRef::GetType() const
 {
-  return "VMMulLoopRef";
+  switch (m_dim) {
+  case(DIMN):
+    return "VMMulLoopRef N dim";
+  case(DIMM):
+    cout << "Error: DIMN is not valid dimension for  VMMulLoopRef\n";
+    throw;
+  case(DIMK):
+    return "VMMulLoopRef K dim";
+  case(BADDIM):
+    cout << "Error: VMMulLoopRef has BADDIM\n";
+    throw;
+  }
+  cout << "No matching dimension case for VMMulLoopRef\n";
+  throw;
 }
 
 bool VMMulLoopRef::CanApply(const Node* node) const
@@ -137,32 +197,90 @@ bool VMMulLoopRef::CanApply(const Node* node) const
     if (vmmul->GetLayer() != m_fromLayer) {
       return false;
     }
+    if (m_dim == DIMN) {
     return !(*(vmmul->GetInputN(1)) <= m_bs.Size());
+    } else if (m_dim == DIMK) {
+      return !((*vmmul->GetInputM(1)) <= m_bs.Size());
+    } else {
+      cout << "Error: No matching VMMulLoopRef for given dimension\n";
+      throw;
+    }
   }
   return false;
 }
 
 void VMMulLoopRef::Apply(Node* node) const
 {
+  if (m_dim == DIMN) {
+    ApplyDimN(node);
+  } else {
+    ApplyDimK(node);
+  }
+  return;
+}
+
+void VMMulLoopRef::ApplyDimK(Node* node) const
+{
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter *splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
-  LoopTunnel *tunX = new LoopTunnel(POSSTUNIN);
+  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  splitX->AddInput(vmmul->Input(0), vmmul->InputConnNum(0));
+  splitX->SetAllStats(FULLUP);
+  splitX->SetIndepIters();
+
+  LoopTunnel* inY = new LoopTunnel(POSSTUNIN);
+  inY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
+  inY->SetAllStats(PARTUP);
+  inY->SetIndepIters();
+
+  VMMul* newVMMul = new VMMul(m_toLayer, vmmul->m_type);
+  newVMMul->AddInput(splitX, 1);
+  newVMMul->AddInput(splitA, 1);
+  newVMMul->AddInput(inY, 0);
+
+  CombineSingleIter* comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter* comX = splitX->CreateMatchingCombine(0);
+
+  LoopTunnel* outY = new LoopTunnel(POSSTUNOUT);
+  outY->AddInput(newVMMul, 0);
+  outY->AddInput(inY, 1);
+  outY->CopyTunnelInfo(inY);
+
+  Poss* loopPoss = new Poss(3, comX, comA, outY);
+  Loop* loop = new Loop(LLDLALOOP, loopPoss, m_bs);
+
+  node->m_poss->AddLoop(loop);
+  node->RedirectChildren(loop->OutTun(2), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;  
+}
+
+void VMMulLoopRef::ApplyDimN(Node* node) const
+{
+  VMMul* vmmul = (VMMul*) node;
+
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+
+  LoopTunnel* tunX = new LoopTunnel(POSSTUNIN);
   tunX->AddInput(vmmul->Input(0), vmmul->InputConnNum(0));
   tunX->SetAllStats(FULLUP);
   tunX->SetIndepIters();
 
-  SplitSingleIter *splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter* splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
   splitY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
   splitY->SetUpStats(FULLUP, NOTUP,
 		     FULLUP, NOTUP);
   splitY->SetIndepIters();
 
-  VMMul *newMul = new VMMul(m_toLayer, vmmul->m_type);
+  VMMul* newMul = new VMMul(m_toLayer, vmmul->m_type);
 
   // Attach to arguments
   newMul->AddInput(tunX, 0);

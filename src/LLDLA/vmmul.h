@@ -48,21 +48,31 @@ class VMMul : public DLAOp<3, 1>
 
   virtual NodeType GetType() const;
 
+ private:
+  void PrintRowStride(IndStream &out);
+  void PrintColStride(IndStream &out);
+  void PrintGeneralStride(IndStream &out);
+
 };
 
 class VMMulLoopRef : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
+  DimName m_dim;
   BSSize m_bs;
 
-  VMMulLoopRef(Layer fromLayer, Layer toLayer, BSSize bs)
-    :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
+ VMMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs)
+   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
 
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const { return true; }
+
+ private:
+  void ApplyDimN(Node* node) const;
+  void ApplyDimK(Node* node) const;
 };
 
 class VMMulToRegArith : public SingleTrans

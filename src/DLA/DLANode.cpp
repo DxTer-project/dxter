@@ -382,4 +382,9 @@ bool DLANode::IsInputScalar(ConnNum num) const
   return *GetInputM(num) == 1 &&
     *GetInputN(num) == 1;
 }
+
+bool DLANode::InputIsMuByMu(ConnNum num) {
+  return *GetInputM(num) == LLDLA_MU &&
+    *GetInputN(num) == LLDLA_MU;
+}
 #endif //TWOD

@@ -153,7 +153,7 @@ void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have LLDLA_MU rows\n";
       throw;
     }
-    }
+  }
 }
 
 Node* SVMul::BlankInst()
