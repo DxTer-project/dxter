@@ -90,11 +90,11 @@ void MVMul::PrintColStride(IndStream &out)
 {
   *out << "col_stride_mmul_2x2_2x1( " <<
     GetInputName(0).str() << ", " <<
-    InputDataType(0).m_rowStrideVar << ", " <<
+    InputDataType(0).m_colStrideVar << ", " <<
     GetInputName(1).str() << ", " <<
-    InputDataType(1).m_rowStrideVar << ", " <<
+    InputDataType(1).m_colStrideVar << ", " <<
     GetInputName(2).str() << ", " <<
-    InputDataType(2).m_rowStrideVar << ");\n";
+    InputDataType(2).m_colStrideVar << ");\n";
 }
 
 void MVMul::PrintGeneralStride(IndStream &out)

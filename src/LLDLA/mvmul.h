@@ -41,7 +41,7 @@ class MVMul : public DLAOp<3, 1>
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 
-  static ClassType GetClass() { return "LLDLAPrimSMul"; }
+  static ClassType GetClass() { return "LLDLAPrimMVMul"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
 
   virtual NodeType GetType() const;

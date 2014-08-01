@@ -45,9 +45,9 @@
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
 
-#define DOLOOPUNROLLING 0
-#define DO2MUTRANSFORMATIONS 0
-#define DO3MUTRANSFORMATIONS 0
+#define DOLOOPUNROLLING 1
+#define DO2MUTRANSFORMATIONS 1
+#define DO3MUTRANSFORMATIONS 1
 
 #include <sstream>
 
@@ -65,6 +65,7 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+PSet* SMMulExample();
 PSet* VMMulExample();
 PSet* SVMulRowExample();
 PSet* SVMulColExample();
@@ -146,7 +147,7 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   //Introduces loops in the m, n, and k dimensions, respectively
-  /*Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMu), LLDLALOOPPHASE);
 
@@ -163,7 +164,7 @@ void AddGemmTrans()
 #endif
   
   //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
-  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);*/
+  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
   return;
 }
 
@@ -278,8 +279,8 @@ void AddTrans()
   AddGemmTrans();
   AddVVDotTrans();
   AddMAddTrans();
-  //  AddMVMulTrans();
-  //  AddSMMulTrans();
+  AddMVMulTrans();
+  AddSMMulTrans();
   AddSVMulTrans();
   AddVMMulTrans();
 
@@ -323,6 +324,7 @@ void Usage()
   cout <<"         6  -> Scalar column vector multiply example\n";
   cout <<"         7  -> Scalar row vector multiply example\n";
   cout <<"         8  -> Vector matrix multiply example\n";
+  cout <<"         9  -> Scalar matrix multiply example\n";
 }
 
 int main(int argc, const char* argv[])
@@ -415,6 +417,14 @@ int main(int argc, const char* argv[])
       }
       opName = "dxt_vmmul";
       algFunc = VMMulExample;
+      break;
+    case(9):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_smmul";
+      algFunc = SMMulExample;
       break;
     default:
       Usage();
@@ -549,6 +559,40 @@ int main(int argc, const char* argv[])
       uni.Print(cout, CODE, whichGraph); */
 
   return 0;
+}
+
+PSet* SMMulExample()
+{
+  InputNode* Ain = new InputNode("A input", medSize, medSize, "A",
+				 medSize, 1,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride");
+  InputNode* xIn = new InputNode("x input", 1, 1, "X",
+				 medSize, 1,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  PossTunnel* tunA = new PossTunnel(POSSTUNIN);
+  tunA->AddInput(Ain, 0);
+
+  PossTunnel* tunX = new PossTunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  SMMul* smmul = new SMMul(ABSLAYER, REAL);
+  smmul->AddInputs(4,
+		   tunX, 0,
+		   tunA, 0);
+
+  Poss *innerPoss = new Poss(smmul, true);
+  PSet *innerSet = new PSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  PSet *outerSet = new PSet(outerPoss);
+  
+  return outerSet;
 }
 
 PSet* VMMulExample()
