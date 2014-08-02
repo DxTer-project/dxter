@@ -767,22 +767,28 @@ void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
   
   *out << m_bsSize.VarName() << " ) {\n";
 
-  out.Indent(1);
-  *out << "const unsigned int num";
-  if (split->m_dir == PARTDOWN) {
-    *out << "Rows";
+  for (unsigned int i = 0; i < m_inTuns.size(); ++i) { 
+    PossTunnel *tun = (PossTunnel*)InTun(i);
+    if (tun->GetNodeClass() == SplitSingleIter::GetClass()) {
+      SplitSingleIter *splitTun = (SplitSingleIter*)tun;
+      out.Indent(1);
+      *out << "const unsigned int ";
+      if (splitTun->m_dir == PARTDOWN) {
+	*out << splitTun->DataType(1).m_numRowsVar;
+      }
+      else if (splitTun->m_dir == PARTRIGHT) {
+	*out << splitTun->DataType(1).m_numColsVar;
+      }
+      else
+	throw;
+      
+      if (needMin)
+	*out << " = min( " << lcv << ", ";
+      else
+	*out << " = ( ";
+      *out << m_bsSize.VarName() << " );\n";
+    }
   }
-  else if (split->m_dir == PARTRIGHT) {
-    *out << "Cols";
-  }
-  else
-    throw;
-
-  if (needMin)
-    *out << loopLevel << " = min( " << lcv << ", ";
-  else
-    *out << loopLevel << " = ( ";
-  *out << m_bsSize.VarName() << " );\n";
 #endif
   
   PSet::PrintCurrPoss(out, graphNum);
