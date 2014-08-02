@@ -180,6 +180,8 @@ void VMMulLoopRef::Apply(Node* node) const
   Poss* loopPoss = new Poss(3, comA, outX, comY);
   Loop* loop = new Loop(LLDLALOOP, loopPoss, m_bs);
 
+  loop->SetDimName(DIMN);
+
   node->m_poss->AddLoop(loop);
   node->RedirectChildren(loop->OutTun(2), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -277,6 +279,8 @@ void VMMulToRegArith::Apply(Node* node) const
 
   Poss* loopPoss = new Poss(3, comA, comX, fmaOut);
   Loop* loop = new Loop(LLDLALOOP, loopPoss, UnitBS);
+
+  loop->SetDimName(DIMM);
 
   node->m_poss->AddLoop(loop);
 

@@ -1201,7 +1201,7 @@ void SplitSingleIter::StartFillingSizes()
   m_mlsizes = new Sizes[numElems];
   m_nlsizes = new Sizes[numElems];
 #endif
-
+  /*
 #if DOLLDLA
   if (m_tunType == SETTUNIN) {
     m_info = InputDataType(0);
@@ -1217,6 +1217,7 @@ void SplitSingleIter::StartFillingSizes()
     }
   }
 #endif
+  */
 }
 #else
 void SplitSingleIter::StartFillingSizes()
@@ -1489,10 +1490,10 @@ void SplitSingleIter::BuildDataTypeCache()
     m_info = InputDataType(0);
     switch (m_dir) {
     case (PARTDOWN):
-      m_info.m_numRowsVar = "numRows" + GetLoopLevel();
+      m_info.m_numRowsVar = "numRows" + GetNameStr(1);
       break;
     case (PARTRIGHT):
-      m_info.m_numColsVar = "numCols" + GetLoopLevel();
+      m_info.m_numColsVar = "numCols" + GetNameStr(1);
       break;
     default:
       throw;
