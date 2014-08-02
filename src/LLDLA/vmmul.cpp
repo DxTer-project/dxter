@@ -355,12 +355,12 @@ void VMMulToRegArith::Apply(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
-  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitX->AddInput(vmmul->Input(0), vmmul->InputConnNum(0));
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();
@@ -381,8 +381,8 @@ void VMMulToRegArith::Apply(Node* node) const
   loadX->AddInput(splitX, 1);
 
   FMAdd* fmadd = new FMAdd();
-  fmadd->AddInput(loadA, 0);
   fmadd->AddInput(loadX, 0);
+  fmadd->AddInput(loadA, 0);
   fmadd->AddInput(yTun, 0);
 
   LoopTunnel* fmaOut = new LoopTunnel(POSSTUNOUT);
