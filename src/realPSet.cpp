@@ -33,6 +33,7 @@ extern unsigned int M_phase;
 
 #define FORMSETSEARLY 1
 
+
 RealPSet::RealPSet()
   : m_functionality(), m_mergeLeft(NULL), m_mergeRight(NULL)
 {
@@ -157,6 +158,9 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
 void RealPSet::Migrate()
 {
   if (m_shadows.empty()) {
+#if PRINTTRACKING
+    cout << "deleting, no shadows " << this << endl;
+#endif
     if (m_mergeLeft)
       m_mergeLeft->UpdateRealPSetPointers(this, NULL);
     if (m_mergeRight)
@@ -171,9 +175,15 @@ void RealPSet::Migrate()
   ShadowPSet *shadowToReplace = (ShadowPSet*)(m_shadows[0]);
   //  m_shadows.erase(m_shadows.begin());
 
+
   RealPSet *newSet = new RealPSet;
   newSet->m_functionality = m_functionality;
   newSet->m_shadows.swap(m_shadows);
+
+#if PRINTTRACKING
+  cout << "migrating " << this << " to shadow " << shadowToReplace << ", replaced with " << newSet << endl;
+#endif
+
 
   if (m_mergeLeft)
     m_mergeLeft->UpdateRealPSetPointers(this, newSet);
@@ -1234,6 +1244,9 @@ GraphNum RealPSet::TotalCount() const
 
 void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 {
+#if PRINTTRACKING
+  cout << "inlining " << this << endl;
+#endif
   if (inliningPoss->m_sets[0]->IsShadow())
     throw;
 

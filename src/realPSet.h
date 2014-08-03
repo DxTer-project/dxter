@@ -23,6 +23,8 @@
 
 #pragma once
 
+#define PRINTTRACKING 0
+
 #include "base.h"
 //#include "poss.h"
 //#include "possTunnel.h"

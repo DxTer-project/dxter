@@ -871,6 +871,8 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
   return didMerge;
 }
 
+
+
 bool Poss::MergePart1(unsigned int left, unsigned int right, 
 		      BasePSet **leftSet, BasePSet **rightSet)
 {
@@ -892,6 +894,11 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
     cout << "Bad owner\n";
     throw;
   }
+
+#if PRINTTRACKING
+  cout << "merging left " << *leftSet << " and right " << *rightSet << endl;
+  cout << "real: merging left " << (*leftSet)->GetReal() << " and right " << (*rightSet)->GetReal() << endl;
+#endif
   m_sets.erase(m_sets.begin()+left);
   if (*(m_sets.begin()+right-1) != *rightSet) {
     cout << "error;";
@@ -902,14 +909,28 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
   RealPSet *merged = (*leftSet)->GetReal()->HasMergedWith((*rightSet)->GetReal());
   if (merged) {
     ShadowPSet *shadow = merged->GetNewShadowDup(this);
-    cout << "reusing\n";
+#if PRINTTRACKING
+    cout << "reusing " << merged << endl;
+    cout << "forming shadow " << shadow << endl;
+#endif
+    if (merged->m_mergeLeft != (*leftSet)->GetReal()) {
+      if (merged->m_mergeRight != (*leftSet)->GetReal() ||
+	  merged->m_mergeLeft != (*rightSet)->GetReal())
+	throw;
+      BasePSet *tmp = *rightSet;
+      *rightSet = *leftSet;
+      *leftSet = tmp;
+    }
     if (merged->m_leftInMap.size() != (*leftSet)->m_inTuns.size()) {
       throw;
     }
     if (merged->m_rightInMap.size() != (*rightSet)->m_inTuns.size())
       throw;
-    if (merged->m_leftOutMap.size() != (*leftSet)->m_outTuns.size())
+    if (merged->m_leftOutMap.size() != (*leftSet)->m_outTuns.size()) {
+      cout << merged->m_leftOutMap.size() << endl;
+      cout << (*leftSet)->m_outTuns.size() << endl;
       throw;
+    }
     if (merged->m_rightOutMap.size() != (*rightSet)->m_outTuns.size())
       throw;
 
@@ -957,8 +978,15 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
       if (*mapIter >= 0) {
 	tun->RedirectAllChildren(shadow->m_outTuns[*mapIter]);
       }
-      else
-	throw;
+      else {
+	for(unsigned int j = 0; j < tun->m_children.size(); ++j) {
+	  if (!tun->Child(j)->IsTunnel(SETTUNIN)) {
+	    cout << "isn't set tun in\n";
+	    throw;
+	  }
+	}
+	tun->RemoveAllChildren2Way();
+      }
       tun->RemoveAllInputs2Way();
       DeleteNode(tun);
     }
@@ -971,8 +999,15 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
       if (*mapIter >= 0) {
 	tun->RedirectAllChildren(shadow->m_outTuns[*mapIter]);
       }
-      else
-	throw;
+      else {
+	for(unsigned int j = 0; j < tun->m_children.size(); ++j) {
+	  if (!tun->Child(j)->IsTunnel(SETTUNIN)) {
+	    cout << "isn't set tun in\n";
+	    throw;
+	  }
+	}
+	tun->RemoveAllChildren2Way();
+      }
       tun->RemoveAllInputs2Way();
       DeleteNode(tun);
     }
@@ -1104,6 +1139,11 @@ void Poss::MergePart2(RealPSet *newSet,
     }
     RemoveFromGraphNodes(*rightIter);
   }
+
+  if (newSet->m_leftOutMap.size() != leftSet->m_outTuns.size()) {
+    cout << "mismatch\n";
+    throw;
+  }
 }
 
 void Poss::MergePart4(RealPSet *newSet, 
@@ -1228,8 +1268,13 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
 
 
   NodeMap mapLeft, mapRight;
+
   RealPSet *newSet = new RealPSet;
   newSet->m_functionality = leftSet->GetFunctionalityString()+rightSet->GetFunctionalityString();
+
+#if PRINTTRACKING
+  cout << "newSet = " << newSet << endl;
+#endif
 
 
   NodeVecConstIter iter;
@@ -1254,7 +1299,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
 	  Poss *newRight = new Poss;
 	  newLeft->Duplicate((*leftIter).second,mapLeft,true, true);
 	  newRight->Duplicate((*rightIter).second,mapRight,true, true);
-      
+
 	  for(unsigned int i = 0; i < newLeft->m_inTuns.size(); ++i) {
 	    mapLeft[newLeft->m_inTuns[i]->Input(0)]->AddChild(newLeft->m_inTuns[i],0);
 	  }
