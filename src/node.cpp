@@ -616,8 +616,16 @@ void Node::CheckConnections()
       Node *input = (*iter1)->m_n;
       cout << "Input doesn't know about child\n";
       cout << "Input is " << (*iter1)->m_n << " " << (*iter1)->m_num << endl;
+      cout << "its on " << (*iter1)->m_n->m_poss << endl;
       cout << "Child is " << GetType() << " " << this << endl;
+      cout << "\t\tIt's on" << m_poss << endl;
       cout << input->GetType() << endl;
+
+      cout << input->m_children.size() << " children of input: \n";
+      for (unsigned int i = 0; i < input->m_children.size(); ++i) {
+	cout << i << ": " << input->Child(i)->GetType() << "\t" << input->Child(i) << endl;
+	cout << "\t\t\ton " << input->Child(i)->m_poss << endl;
+      }
       throw;
     }
   }
