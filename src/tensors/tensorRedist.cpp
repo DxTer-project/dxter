@@ -129,7 +129,6 @@ void RedistNode::Prop()
     }
 
     if (diffs.empty()) {
-      //      throw;
       m_cost = 0;
     }
     else if (diffs.size() == 1) {
@@ -509,6 +508,7 @@ void RedistNode::PrintCode(IndStream &out)
   //Reflect in AddVars
   out.Indent();
 
+
   const DistType &m_srcType = InputDataType(0).m_dist;
   const Dim numDims = m_info.m_dist.m_numDims;
 
@@ -518,6 +518,9 @@ void RedistNode::PrintCode(IndStream &out)
   *out << "   // " << GetName(0).PrettyStr() 
        << " <- " << GetInputName(0).PrettyStr() << endl;
   out.Indent();
+
+  if (CurrPhase <= ROTENSORPHASE)
+    return;
   
   if (m_srcType.m_numDims != numDims)
     throw;
@@ -622,6 +625,9 @@ void RedistNode::AddVariables(VarSet &set) const
 {
   //Reflect in PrintCode
   DLANode::AddVariables(set);
+
+  if (CurrPhase <= ROTENSORPHASE)
+    return;
   
   const DistType &m_srcType = InputDataType(0).m_dist;
   const Dim numDims = m_info.m_dist.m_numDims;

@@ -307,8 +307,6 @@ Phase SumScatterUpdateNode::MaxPhase() const
 
 void SumScatterUpdateNode::PrintCode(IndStream &out)
 {
-  if (m_sumDims.size() != 1)
-    throw;
   out.Indent();
 
   const DistType &m_srcType = InputDataType(0).m_dist;
@@ -324,6 +322,14 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
   *out << "   // " << GetName(0).PrettyStr() 
        << " <- " << GetInputName(0).PrettyStr() 
        << " (with SumScatter on " << sumDims.PrettyStr() << ")\n";
+
+  if (CurrPhase <= SUMSCATTERTENSORPHASE)
+    return;
+
+  if (m_sumDims.size() != 1)
+    throw;
+
+
 
   out.Indent();
 
