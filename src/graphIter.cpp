@@ -394,10 +394,19 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	*out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
 	out.Indent();
 	*out << "//**** ";
-	if (set->IsReal())
+	if (set->IsReal()) {
+	  out.Indent();
 	  *out << "Is real\n";
-	else
+	  //	  *out << set << endl;
+	}
+	else {
+	  out.Indent();
 	  *out << "Is a shadow\n";
+	  //	  *out << set << ", real is " << set->GetReal() << endl;
+	}
+	out.Indent();
+	*out << set->GetFunctionalityString() << endl;
+	
 	RealPSet *real = set->GetReal();
 	//	if (real->IsLoop())
 	//	  *out << "is loop\n";
