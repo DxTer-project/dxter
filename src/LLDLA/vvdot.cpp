@@ -125,7 +125,11 @@ void VVDot::Prop()
 	throw;
       }
     }
-    m_cost = ZERO;
+    if (m_layer == ABSLAYER) {
+      m_cost = TWO * GetInputN(0)->Sum() - 1;
+	} else {
+      m_cost = ZERO;
+    }
   }
   return;
 }

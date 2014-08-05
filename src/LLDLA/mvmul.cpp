@@ -155,7 +155,11 @@ void MVMul::Prop()
 	throw;
       }
     }
-    m_cost = ZERO;
+    if (m_layer == ABSLAYER) {
+      m_cost = TWO * GetInputM(0)->SumProds11(*GetInputN(0));
+    } else {
+      m_cost = ZERO;
+    }
   }
 }
 

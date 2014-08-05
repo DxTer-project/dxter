@@ -45,8 +45,8 @@
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
 
-#define DOLOOPUNROLLING 0
-#define DO2MUTRANSFORMATIONS 0
+#define DOLOOPUNROLLING 1
+#define DO2MUTRANSFORMATIONS 1
 #define DO3MUTRANSFORMATIONS 0
 
 #include <sstream>
@@ -141,7 +141,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Transform gemm into loop over vmmuls
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
@@ -164,7 +164,7 @@ void AddGemmTrans()
 #endif
   
   //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
-  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.Size()), LLDLALOOPPHASE);
   return;
 }
 
@@ -712,16 +712,16 @@ PSet* SVMulColExample()
 
 PSet* MVMulExample()
 {
-  InputNode* Ain = new InputNode("A input", medSize, medSize, "A",
-				 1, medSize,
+  InputNode* Ain = new InputNode("A input", 4, bigSize, "A",
+				 1, 4,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride");
-  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
-				 1, medSize,
+  InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
+				 1, bigSize,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
-  InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
-				 1, medSize,
+  InputNode* yIn = new InputNode("y input", 4, 1, "Y",
+				 1, 4,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
 
@@ -829,16 +829,16 @@ PSet* DotExample()
 
 PSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", medSize, medSize, "A",
-				 medSize, 1,
+  InputNode *Ain = new InputNode("A input", 4, 4, "A",
+				 4, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", medSize, medSize, "B",
-				 medSize, 1,
+  InputNode *Bin = new InputNode("B input", 4, 352, "B",
+				 352, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input", medSize, medSize, "C",
-				 medSize, 1,
+  InputNode *Cin = new InputNode("C input", 4, 352, "C",
+				 352, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
@@ -871,16 +871,16 @@ PSet* GemmExample()
 
 PSet* DoubleGemmExample()
 {
-  InputNode *Ain = new InputNode("A input",  medSize, smallSize, "A",
-				 smallSize, 1,
+  InputNode *Ain = new InputNode("A input",  4, bigSize, "A",
+				 bigSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", smallSize, medSize, "B",
-				 medSize, 1,
+  InputNode *Bin = new InputNode("B input", bigSize, 4, "B",
+				 4, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  medSize, medSize, "C",
-				 medSize, 1,
+  InputNode *Cin = new InputNode("C input",  4, 4, "C",
+				 4, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 

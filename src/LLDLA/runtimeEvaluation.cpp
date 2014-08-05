@@ -44,7 +44,7 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_headers.push_back("#include <string.h>");
   m_headers.push_back("#include <unistd.h>");
   m_defines.push_back("#define VEC_SET_ZERO(vreg) (vreg).v = _mm_setzero_pd()");
-  m_defines.push_back("#define VEC_PD_FMA(a, b, c) (c).v = (a).v * (b).v + (c).v");
+  m_defines.push_back("#define VEC_PD_FMA(a, b, c) (c).v = _mm_fmadd_pd((a).v, (b).v, (c).v)");
   m_defines.push_back("#define VEC_PD_ADD(a, b) (b).v = (b).v + (a).v");
   m_defines.push_back("#define VEC_PD_MUL(a, b) (b).v = (b).v * (a).v");
   m_defines.push_back("#define VEC_ACCUM(c, ptr) *(ptr) += (c).d[0] + (c).d[1]");

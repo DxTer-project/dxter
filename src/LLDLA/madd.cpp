@@ -108,7 +108,11 @@ void MAdd::Prop()
       }
     }
 
-    m_cost = ZERO;
+    if (m_layer == ABSLAYER) {
+      m_cost = GetInputM(0)->SumProds11(*GetInputN(0));
+    } else {
+      m_cost = ZERO;
+    }
   }
 }
 
