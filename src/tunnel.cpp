@@ -396,6 +396,8 @@ bool Tunnel::Overwrites(const Node *input, ConnNum num) const
 
 Tunnel* Tunnel::GetRealTunnel() 
 {
+  if (!m_pset)
+    return this;
   if (m_pset->IsReal())
     return this;
   RealPSet *real = m_pset->GetReal();
