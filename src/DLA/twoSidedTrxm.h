@@ -41,27 +41,27 @@ laksjdflkajsdf
 
 
 #ifndef SKIPTWOSIDED
-Loop* TwoSidedTrsmLowerVar1Alg(Node *in0, ConnNum num0,
+RealLoop* TwoSidedTrsmLowerVar1Alg(Node *in0, ConnNum num0,
 			     Node *in1, ConnNum num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);
 
-Loop* TwoSidedTrsmLowerVar2Alg(Node *in0, ConnNum num0,
+RealLoop* TwoSidedTrsmLowerVar2Alg(Node *in0, ConnNum num0,
 			     Node *in1, ConnNum num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);
 
-Loop* TwoSidedTrsmLowerVar4Alg(Node *in0, ConnNum num0,
+RealLoop* TwoSidedTrsmLowerVar4Alg(Node *in0, ConnNum num0,
 			     Node *in1, ConnNum num1,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm);
 
-Loop* TwoSidedTrmmLowerVar1Alg(Node *in0, ConnNum num0,
+RealLoop* TwoSidedTrmmLowerVar1Alg(Node *in0, ConnNum num0,
 			     Node *in1, ConnNum num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);
 
-Loop* TwoSidedTrmmLowerVar2Alg(Node *in0, ConnNum num0,
+RealLoop* TwoSidedTrmmLowerVar2Alg(Node *in0, ConnNum num0,
 			     Node *in1, ConnNum num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);
 
-Loop* TwoSidedTrmmLowerVar4Alg(Node *in0, ConnNum num0,
+RealLoop* TwoSidedTrmmLowerVar4Alg(Node *in0, ConnNum num0,
 			    Node *in1, ConnNum num1,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm);
 

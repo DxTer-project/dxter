@@ -30,7 +30,7 @@
 #include "DLAOp.h"
 #include "DLANode.h"
 
-Loop* LUVar5Loop(Node *Ain, ConnNum Anum,
+RealLoop* LUVar5Loop(Node *Ain, ConnNum Anum,
 		 Node *Pin, ConnNum Pnum,
 		 Layer BLASLayer, Layer LAPACKLayer);
 

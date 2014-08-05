@@ -150,7 +150,7 @@ bool HetrmmLoopExp::CanApply(const Node *node) const
 void HetrmmLoopExp::Apply(Node *node) const
 {
   Hetrmm *hetrmm = (Hetrmm*)node;
-  Loop *loop=NULL;
+  RealLoop *loop=NULL;
   switch(m_var) {
   case(1):
     if (hetrmm->m_tri == LOWER) 
@@ -204,7 +204,7 @@ void DistHetrmmToLocalHetrmm::Apply(Node *node) const
 }
 #endif
 
-Loop* HetrmmAlgVar1Lower(Node *in, ConnNum num)
+RealLoop* HetrmmAlgVar1Lower(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
@@ -215,13 +215,13 @@ Loop* HetrmmAlgVar1Lower(Node *in, ConnNum num)
   Trxm *trmm = new Trxm(false, DMLAYER, LEFT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
   trmm->AddInputs(4, split, 4, split, 1);
   Poss *poss9 = new Poss(trmm,false);
-  PSet *set9 = new PSet(poss9);
+  RealPSet *set9 = new RealPSet(poss9);
 
   // L_{11} = L_{11}^T L_{11}
   Hetrmm *hetrmm = new Hetrmm(DMLAYER, LOWER);
   hetrmm->AddInput(split, 4);
   Poss *poss10 = new Poss(hetrmm,false);
-  PSet *set10 = new PSet(poss10);
+  RealPSet *set10 = new RealPSet(poss10);
 
   // L_{00} = L_{10}^T L_{10} + L_{00}
   Herk *tri2 = new Herk(DMLAYER, LOWER, CONJTRANS, COEFONE, COEFONE, COMPLEX);
@@ -229,7 +229,7 @@ Loop* HetrmmAlgVar1Lower(Node *in, ConnNum num)
 		 split, 1,
 		 split, 0);
   Poss *poss8 = new Poss(tri2,false);
-  PSet *set8 = new PSet(poss8);
+  RealPSet *set8 = new RealPSet(poss8);
 
 
   CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
@@ -258,7 +258,7 @@ Loop* HetrmmAlgVar1Lower(Node *in, ConnNum num)
 
 
 
-Loop* HetrmmAlgVar1Upper(Node *in, ConnNum num)
+RealLoop* HetrmmAlgVar1Upper(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
@@ -270,17 +270,17 @@ Loop* HetrmmAlgVar1Upper(Node *in, ConnNum num)
 		 split, 3,
 		 split, 0);
   Poss *poss8 = new Poss(tri2,false);
-  PSet *set8 = new PSet(poss8);
+  RealPSet *set8 = new RealPSet(poss8);
 
   Trxm *trmm = new Trxm(false, DMLAYER, RIGHT, UPPER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
   trmm->AddInputs(4, split, 4, split, 3);
   Poss *poss9 = new Poss(trmm,false);
-  PSet *set9 = new PSet(poss9);
+  RealPSet *set9 = new RealPSet(poss9);
 
   Hetrmm *hetrmm = new Hetrmm(DMLAYER, UPPER);
   hetrmm->AddInput(split, 4);
   Poss *poss10 = new Poss(hetrmm,false);
-  PSet *set10 = new PSet(poss10);
+  RealPSet *set10 = new RealPSet(poss10);
 
   CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA3->AddInput(set8->OutTun(0),0);
@@ -305,7 +305,7 @@ Loop* HetrmmAlgVar1Upper(Node *in, ConnNum num)
 #endif
 }
 
-Loop* HetrmmAlgVar2Lower(Node *in, ConnNum num)
+RealLoop* HetrmmAlgVar2Lower(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
@@ -316,19 +316,19 @@ Loop* HetrmmAlgVar2Lower(Node *in, ConnNum num)
   Trxm *trmm = new Trxm(false, DMLAYER, LEFT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
   trmm->AddInputs(4, split, 4, split, 1);
   Poss *poss9 = new Poss(trmm,false);
-  PSet *set9 = new PSet(poss9);
+  RealPSet *set9 = new RealPSet(poss9);
 
   // L_{10} = L_{21}^T L_{20} + L_{10}
   Gemm *gemm = new Gemm(DMLAYER, TRANS, NORMAL, COEFONE, COEFONE, COMPLEX);
   gemm->AddInputs(6, split, 5, split, 2, set9->OutTun(0), 0);
   Poss *poss7 = new Poss(gemm,false);
-  PSet *set7 = new PSet(poss7);
+  RealPSet *set7 = new RealPSet(poss7);
 
   // L_{11} = L_{11}^T L_{11}
   Hetrmm *hetrmm = new Hetrmm(DMLAYER, LOWER);
   hetrmm->AddInput(split, 4);
   Poss *poss10 = new Poss(hetrmm,false);
-  PSet *set10 = new PSet(poss10);
+  RealPSet *set10 = new RealPSet(poss10);
 
   // L_{11} = L_{21}^L_{21} + L_{11}
   Herk *tri2 = new Herk(DMLAYER, LOWER, CONJTRANS, COEFONE, COEFONE, COMPLEX);
@@ -336,7 +336,7 @@ Loop* HetrmmAlgVar2Lower(Node *in, ConnNum num)
 		  split, 5,
 		  set10->OutTun(0), 0);
   Poss *poss8 = new Poss(tri2,false);
-  PSet *set8 = new PSet(poss8);
+  RealPSet *set8 = new RealPSet(poss8);
 
   CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA3->AddInput(split,0);
@@ -361,7 +361,7 @@ Loop* HetrmmAlgVar2Lower(Node *in, ConnNum num)
 #endif
 }
 
-Loop* HetrmmAlgVar2Upper(Node *in, ConnNum num)
+RealLoop* HetrmmAlgVar2Upper(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
@@ -371,24 +371,24 @@ Loop* HetrmmAlgVar2Upper(Node *in, ConnNum num)
   Trxm *trmm = new Trxm(false, DMLAYER, RIGHT, UPPER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
   trmm->AddInputs(4, split, 4, split, 3);
   Poss *poss9 = new Poss(trmm,false);
-  PSet *set9 = new PSet(poss9);
+  RealPSet *set9 = new RealPSet(poss9);
 
   Gemm *gemm = new Gemm(DMLAYER, NORMAL, CONJTRANS, COEFONE, COEFONE, COMPLEX);
   gemm->AddInputs(6, split, 6, split, 7, set9->OutTun(0), 0);
   Poss *poss1 = new Poss(gemm,false);
-  PSet *set1 = new PSet(poss1);
+  RealPSet *set1 = new RealPSet(poss1);
 
   Hetrmm *hetrmm = new Hetrmm(DMLAYER, UPPER);
   hetrmm->AddInput(split, 4);
   Poss *poss10 = new Poss(hetrmm,false);
-  PSet *set10 = new PSet(poss10);
+  RealPSet *set10 = new RealPSet(poss10);
 
   Herk *tri2 = new Herk(DMLAYER, UPPER, NORMAL, COEFONE, COEFONE, COMPLEX);
   tri2->AddInputs(4,
 		 split, 7,
 		  set10->OutTun(0), 0);
   Poss *poss8 = new Poss(tri2,false);
-  PSet *set8 = new PSet(poss8);
+  RealPSet *set8 = new RealPSet(poss8);
 
 
   CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
@@ -414,7 +414,7 @@ Loop* HetrmmAlgVar2Upper(Node *in, ConnNum num)
 #endif
 }
 
-Loop* HetrmmAlgVar3Lower(Node *in, ConnNum num)
+RealLoop* HetrmmAlgVar3Lower(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in,num);
@@ -425,13 +425,13 @@ Loop* HetrmmAlgVar3Lower(Node *in, ConnNum num)
   Trxm *trmm = new Trxm(false, DMLAYER, LEFT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
   trmm->AddInputs(4, split, 8, split, 5);
   Poss *poss9 = new Poss(trmm,false);
-  PSet *set9 = new PSet(poss9);
+  RealPSet *set9 = new RealPSet(poss9);
 
   // L_{11} = L_{11}^T L_{11}
   Hetrmm *hetrmm = new Hetrmm(DMLAYER, LOWER);
   hetrmm->AddInput(split, 4);
   Poss *poss10 = new Poss(hetrmm,false);
-  PSet *set10 = new PSet(poss10);
+  RealPSet *set10 = new RealPSet(poss10);
 
   // L_{11} = L_{21}^TL_{21} + L_{11}
   Herk *tri2 = new Herk(DMLAYER, LOWER, CONJTRANS, COEFONE, COEFONE, COMPLEX);
@@ -439,7 +439,7 @@ Loop* HetrmmAlgVar3Lower(Node *in, ConnNum num)
 		  split, 5,
 		  set10->OutTun(0), 0);
   Poss *poss8 = new Poss(tri2,false);
-  PSet *set8 = new PSet(poss8);
+  RealPSet *set8 = new RealPSet(poss8);
 
 
 
@@ -468,7 +468,7 @@ Loop* HetrmmAlgVar3Lower(Node *in, ConnNum num)
 }
 
 
-Loop* HetrmmAlgVar3Upper(Node *in, ConnNum num)
+RealLoop* HetrmmAlgVar3Upper(Node *in, ConnNum num)
 {
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   split->AddInput(in, num);
@@ -479,19 +479,19 @@ Loop* HetrmmAlgVar3Upper(Node *in, ConnNum num)
   Hetrmm *hetrmm = new Hetrmm(DMLAYER, UPPER);
   hetrmm->AddInput(split, 4);
   Poss *poss10 = new Poss(hetrmm,false);
-  PSet *set10 = new PSet(poss10);
+  RealPSet *set10 = new RealPSet(poss10);
 
   Herk *tri2 = new Herk(DMLAYER, UPPER, NORMAL, COEFONE, COEFONE, COMPLEX);
   tri2->AddInputs(4,
 		 split, 7,
 		  set10->OutTun(0), 0);
   Poss *poss8 = new Poss(tri2,false);
-  PSet *set8 = new PSet(poss8);
+  RealPSet *set8 = new RealPSet(poss8);
 
   Trxm *trmm = new Trxm(false, DMLAYER, RIGHT, UPPER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
   trmm->AddInputs(4, split, 8, split, 7);
   Poss *poss9 = new Poss(trmm,false);
-  PSet *set9 = new PSet(poss9);
+  RealPSet *set9 = new RealPSet(poss9);
 
   CombineSingleIter *comA3 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA3->AddInput(split,0);

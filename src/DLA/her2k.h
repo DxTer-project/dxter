@@ -32,7 +32,7 @@
 #include "DLAOp.h"
 #include "lowerLayer.h"
 
-Loop* Her2kLoopVar1(Node *Ain, ConnNum Anum, 
+RealLoop* Her2kLoopVar1(Node *Ain, ConnNum Anum, 
 		    Node *Bin, ConnNum Bnum, 
 		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
@@ -41,7 +41,7 @@ Loop* Her2kLoopVar1(Node *Ain, ConnNum Anum,
 		    Layer layer);
 
 
-Loop* Her2kLoopVar2(Node *Ain, ConnNum Anum, 
+RealLoop* Her2kLoopVar2(Node *Ain, ConnNum Anum, 
 		    Node *Bin, ConnNum Bnum, 
 		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
@@ -50,7 +50,7 @@ Loop* Her2kLoopVar2(Node *Ain, ConnNum Anum,
 		    Layer layer);
 
 
-Loop* Her2kLoopVar3(Node *Ain, ConnNum Anum, 
+RealLoop* Her2kLoopVar3(Node *Ain, ConnNum Anum, 
 		    Node *Bin, ConnNum Bnum, 
 		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
@@ -58,7 +58,7 @@ Loop* Her2kLoopVar3(Node *Ain, ConnNum Anum,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
-Loop* Her2kLoopVar4(Node *Ain, ConnNum Anum, 
+RealLoop* Her2kLoopVar4(Node *Ain, ConnNum Anum, 
 		    Node *Bin, ConnNum Bnum, 
 		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
@@ -67,7 +67,7 @@ Loop* Her2kLoopVar4(Node *Ain, ConnNum Anum,
 		    Layer layer);
 
 
-Loop* Her2kLoopVar9(Node *Ain, ConnNum Anum, 
+RealLoop* Her2kLoopVar9(Node *Ain, ConnNum Anum, 
 		    Node *Bin, ConnNum Bnum, 
 		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
@@ -75,7 +75,7 @@ Loop* Her2kLoopVar9(Node *Ain, ConnNum Anum,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
-Loop* Tri2kLoopVar9(Node *Ain, ConnNum Anum,
+RealLoop* Tri2kLoopVar9(Node *Ain, ConnNum Anum,
                      Node *Bin, ConnNum Bnum,
                      Node *Cin, ConnNum Cnum,
                      Node *Din, ConnNum Dnum,
@@ -84,7 +84,7 @@ Loop* Tri2kLoopVar9(Node *Ain, ConnNum Anum,
                      Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
-Loop* Tri2kLoopVar10(Node *Ain, ConnNum Anum, 
+RealLoop* Tri2kLoopVar10(Node *Ain, ConnNum Anum, 
 		     Node *Bin, ConnNum Bnum, 
 		     Node *Cin, ConnNum Cnum,
 		     Node *Din, ConnNum Dnum,

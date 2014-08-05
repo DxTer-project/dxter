@@ -83,7 +83,7 @@ bool LULoopExp::CanApply(const Node *node) const
 void LULoopExp::Apply(Node *node) const
 {
   LU *lu = (LU*)node;
-  Loop *loop;
+  RealLoop *loop;
   
   NodeConn *connA, *connB;
   connA = lu->m_inputs[0];
@@ -107,7 +107,7 @@ void LULoopExp::Apply(Node *node) const
 }
 
 
-Loop* LUVar5Loop(Node *Ain, ConnNum Anum,
+RealLoop* LUVar5Loop(Node *Ain, ConnNum Anum,
 		 Node *Pin, ConnNum Pnum,
 		 Layer BLASLayer, Layer LAPACKLayer)
 {

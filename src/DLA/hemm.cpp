@@ -233,7 +233,7 @@ bool HemmLoopExp::CanApply(const Node *node) const
 void HemmLoopExp::Apply(Node *node) const
 {
   Hemm *hemm = (Hemm*)node;
-  Loop *loop;
+  RealLoop *loop;
   
   NodeConn *connA, *connB, *connC;
   connA = hemm->m_inputs[0];
@@ -337,7 +337,7 @@ Cost DistHemmToLocalHemm::RHSCostEstimate(const Node *node) const
 #endif
 
 
-Loop* HemmLoopVar4(Node *Ain, ConnNum Anum,
+RealLoop* HemmLoopVar4(Node *Ain, ConnNum Anum,
 		   Node *Bin, ConnNum Bnum,
 		   Node *Cin, ConnNum Cnum,
 		   Side side, Tri tri,
@@ -403,7 +403,7 @@ Loop* HemmLoopVar4(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* HemmLoopVar8(Node *Ain, ConnNum Anum,
+RealLoop* HemmLoopVar8(Node *Ain, ConnNum Anum,
 		   Node *Bin, ConnNum Bnum,
 		   Node *Cin, ConnNum Cnum,
 		   Side side, Tri tri,
@@ -530,7 +530,7 @@ Loop* HemmLoopVar8(Node *Ain, ConnNum Anum,
 
 
 #if DOELEM
-Loop* HemmLoopVar8Altered(Node *Ain, ConnNum Anum,
+RealLoop* HemmLoopVar8Altered(Node *Ain, ConnNum Anum,
 		   Node *Bin, ConnNum Bnum,
 		   Node *Cin, ConnNum Cnum,
 		   Side side, Tri tri,

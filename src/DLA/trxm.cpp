@@ -35,38 +35,38 @@
 using namespace std;
 
 
-Loop* TrmmLoopLeftVar1(Node *Ain, ConnNum Anum,
+RealLoop* TrmmLoopLeftVar1(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
                        Layer layer);
 
-Loop* TrmmLoopLeftVar2(Node *Ain, ConnNum Anum,
+RealLoop* TrmmLoopLeftVar2(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
                        Layer layer);
 
-Loop* TrxmLoopLeftVar3(Node *Ain, ConnNum Anum,
+RealLoop* TrxmLoopLeftVar3(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        bool invert,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
                        Layer layer);
 
-Loop* TrmmLoopRightVar1(Node *Ain, ConnNum Anum,
+RealLoop* TrmmLoopRightVar1(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer);
 
-Loop* TrmmLoopRightVar2(Node *Ain, ConnNum Anum,
+RealLoop* TrmmLoopRightVar2(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer);
 
-Loop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
+RealLoop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         bool invert,
                         Tri tri, Diag diag, Trans trans,
@@ -74,35 +74,35 @@ Loop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
                         Layer layer);
 
 
-Loop* TrsmLoopLeftVar1(Node *Ain, ConnNum Anum,
+RealLoop* TrsmLoopLeftVar1(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Layer layer, Type type);
 
-Loop* TrsmLoopLeftVar2(Node *Ain, ConnNum Anum,
+RealLoop* TrsmLoopLeftVar2(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Layer layer, Type type);
 
-Loop* TrsmLoopRightVar1(Node *Ain, ConnNum Anum,
+RealLoop* TrsmLoopRightVar1(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
                         Layer layer);
 
-Loop* TrsmLoopRightVar2(Node *Ain, ConnNum Anum,
+RealLoop* TrsmLoopRightVar2(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Layer layer, Type type);
 
-Loop* Trmm3LoopLeftVar2(Node *Ain, ConnNum Anum,
+RealLoop* Trmm3LoopLeftVar2(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Node *Cin, ConnNum Cnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Coef beta, Type type,
                         Layer layer);
 
-Loop* Trmm3LoopLeftVar3(Node *Ain, ConnNum Anum,
+RealLoop* Trmm3LoopLeftVar3(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Node *Cin, ConnNum Cnum,
                         Tri tri, Diag diag, Trans trans,
@@ -576,7 +576,7 @@ bool TrxmLoopExp::CanApply(const Node *node) const
 void TrxmLoopExp::Apply(Node *node) const
 {
   Trxm *trxm = (Trxm*)node;
-  Loop *loop;
+  RealLoop *loop;
   
   NodeConn *connA, *connB;
   connA = trxm->m_inputs[0];
@@ -710,7 +710,7 @@ bool Trmm3LoopExp::CanApply(const Node *node) const
 void Trmm3LoopExp::Apply(Node *node) const
 {
   Trmm3 *trmm3 = (Trmm3*)node;
-  Loop *loop = NULL;
+  RealLoop *loop = NULL;
   
   NodeConn *connA, *connB, *connC;
   connA = trmm3->m_inputs[0];
@@ -1258,7 +1258,7 @@ void LTrmmToTrsm::Apply(Node *node) const
 #endif
 
 
-Loop* TrmmLoopLeftVar1(Node *Ain, ConnNum Anum,
+RealLoop* TrmmLoopLeftVar1(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
@@ -1338,7 +1338,7 @@ Loop* TrmmLoopLeftVar1(Node *Ain, ConnNum Anum,
   return loop;
 }
 
-Loop* TrmmLoopLeftVar2(Node *Ain, ConnNum Anum,
+RealLoop* TrmmLoopLeftVar2(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Type type,
@@ -1426,7 +1426,7 @@ Loop* TrmmLoopLeftVar2(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* TrmmLoopRightVar1(Node *Ain, ConnNum Anum,
+RealLoop* TrmmLoopRightVar1(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
@@ -1505,7 +1505,7 @@ Loop* TrmmLoopRightVar1(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* TrmmLoopRightVar2(Node *Ain, ConnNum Anum,
+RealLoop* TrmmLoopRightVar2(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
@@ -1593,7 +1593,7 @@ Loop* TrmmLoopRightVar2(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
+RealLoop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         bool invert,
                         Tri tri, Diag diag, Trans trans,
@@ -1642,7 +1642,7 @@ Loop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
 
 }
 
-Loop* TrsmLoopLeftVar1(Node *Ain, ConnNum Anum,
+RealLoop* TrsmLoopLeftVar1(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Layer layer,
@@ -1703,7 +1703,7 @@ Loop* TrsmLoopLeftVar1(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* TrsmLoopRightVar1(Node *Ain, ConnNum Anum,
+RealLoop* TrsmLoopRightVar1(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Type type,
@@ -1781,7 +1781,7 @@ Loop* TrsmLoopRightVar1(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* TrsmLoopLeftVar2(Node *Ain, ConnNum Anum,
+RealLoop* TrsmLoopLeftVar2(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        Tri tri, Diag diag, Trans trans,
                        Coef coeff, Layer layer,
@@ -1874,7 +1874,7 @@ Loop* TrsmLoopLeftVar2(Node *Ain, ConnNum Anum,
   return loop;
 }
 
-Loop* TrxmLoopLeftVar3(Node *Ain, ConnNum Anum,
+RealLoop* TrxmLoopLeftVar3(Node *Ain, ConnNum Anum,
                        Node *Bin, ConnNum Bnum,
                        bool invert,
                        Tri tri, Diag diag, Trans trans,
@@ -1919,7 +1919,7 @@ Loop* TrxmLoopLeftVar3(Node *Ain, ConnNum Anum,
   return loop;
 }
 
-Loop* TrsmLoopRightVar2(Node *Ain, ConnNum Anum,
+RealLoop* TrsmLoopRightVar2(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Tri tri, Diag diag, Trans trans,
                         Coef coeff, Layer layer,
@@ -2357,7 +2357,7 @@ void BLISTrxmLoopExp::Apply(Node *node) const
 }
 #endif //DOBLIS
 
-Loop* Trmm3LoopLeftVar2(Node *Ain, ConnNum Anum,
+RealLoop* Trmm3LoopLeftVar2(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Node *Cin, ConnNum Cnum,
                         Tri tri, Diag diag, Trans trans,
@@ -2455,7 +2455,7 @@ Loop* Trmm3LoopLeftVar2(Node *Ain, ConnNum Anum,
 
 }
 
-Loop* Trmm3LoopLeftVar3(Node *Ain, ConnNum Anum,
+RealLoop* Trmm3LoopLeftVar3(Node *Ain, ConnNum Anum,
                         Node *Bin, ConnNum Bnum,
                         Node *Cin, ConnNum Cnum,
                         Tri tri, Diag diag, Trans trans,

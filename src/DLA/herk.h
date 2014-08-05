@@ -30,35 +30,35 @@
 #include "elemRedist.h"
 #include "lowerLayer.h"
 
-Loop* HerkLoopVar1(Node *Ain, ConnNum Anum, 
+RealLoop* HerkLoopVar1(Node *Ain, ConnNum Anum, 
 		   Node *Cin, ConnNum Cnum,
 		   Tri tri,
 		   Trans trans,
 		   Coef alpha, Coef beta, Type type,
 		   Layer layer);
 
-Loop* HerkLoopVar2(Node *Ain, ConnNum Anum, 
+RealLoop* HerkLoopVar2(Node *Ain, ConnNum Anum, 
 		   Node *Cin, ConnNum Cnum,
 		   Tri tri,
 		   Trans trans,
 		   Coef alpha, Coef beta, Type type,
 		   Layer layer);
 
-Loop* HerkLoopVar5(Node *Ain, ConnNum Anum, 
+RealLoop* HerkLoopVar5(Node *Ain, ConnNum Anum, 
 		   Node *Cin, ConnNum Cnum,
 		   Tri tri,
 		   Trans trans,
 		   Coef alpha, Coef beta, Type type,
 		   Layer layer);
 
-Loop* TriRKLoopVar5(Node *Ain, ConnNum Anum, 
+RealLoop* TriRKLoopVar5(Node *Ain, ConnNum Anum, 
 		    Node *Bin, ConnNum Bnum, 
 		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
 		    Coef alpha, Coef beta, Type type,
 		    Layer layer);
 
-Loop* TriRKLoopVar7(Node *Ain, ConnNum Anum, 
+RealLoop* TriRKLoopVar7(Node *Ain, ConnNum Anum, 
 		    Node *Bin, ConnNum Bnum, 
 		    Node *Cin, ConnNum Cnum,
 		    Tri tri,
@@ -66,7 +66,7 @@ Loop* TriRKLoopVar7(Node *Ain, ConnNum Anum,
 		    Layer layer);
 
 #if DOBLIS
-Loop* BLISHerkLoop(Node *Ain, ConnNum Anum, 
+RealLoop* BLISHerkLoop(Node *Ain, ConnNum Anum, 
 		   Node *Bin, ConnNum Bnum,
 		   Node *Cin, ConnNum Cnum,
 		   Tri tri,

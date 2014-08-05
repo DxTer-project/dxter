@@ -206,7 +206,7 @@ const Sizes* Tunnel::GetN(ConnNum num) const
 const Sizes* Tunnel::LocalM(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
-    GetRealTunnel()->LocalM(num);
+    return GetRealTunnel()->LocalM(num);
   }
   else {
     const NodeConn *conn = m_inputs[0];
@@ -219,7 +219,7 @@ const Sizes* Tunnel::LocalM(ConnNum num) const
 const Sizes* Tunnel::LocalN(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
-    GetRealTunnel()->LocalN(num);
+    return GetRealTunnel()->LocalN(num);
   }
   else {
     const NodeConn *conn = m_inputs[0];

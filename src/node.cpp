@@ -348,7 +348,7 @@ void Node::Print(IndStream &out, GraphNum graphNum, const GraphIter *graphIter)
         for( ; childIter != m_children.end(); ++childIter) {
           Node *child = (*childIter)->m_n;
           if (child->GetNodeClass() == RedistNode::GetClass())
-            child->Print(out, graphNum);
+            child->Print(out, graphNum, graphIter);
         }
 #endif
         //Try to print the read-only users of this first

@@ -23,7 +23,7 @@
 #include "twoSidedTrxm.h"
 #ifndef SKIPTWOSIDED
 #include "elemRedist.h"
-#include "loop.h"
+#include "realLoop.h"
 #include "blas.h"
 #include <stdio.h>
 #include <string>
@@ -197,7 +197,7 @@ bool TwoSidedTrxmLoopExp::CanApply(const Node *node) const
 void TwoSidedTrxmLoopExp::Apply(Node *node) const
 {
   TwoSidedTrxm *hegst = (TwoSidedTrxm*)node;
-  Loop *loop;
+  RealLoop *loop;
   if (hegst->m_tri != LOWER)
     throw;
 
@@ -248,7 +248,7 @@ void TwoSidedTrxmLoopExp::Apply(Node *node) const
 
 
 
-Loop* TwoSidedTrsmLowerVar1Alg(
+RealLoop* TwoSidedTrsmLowerVar1Alg(
 			     Node *Lin, ConnNum Lnum,
 			     Node *Ain, ConnNum Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
@@ -336,7 +336,7 @@ Loop* TwoSidedTrsmLowerVar1Alg(
   return loop;
 }
 
-Loop* TwoSidedTrsmLowerVar2Alg(
+RealLoop* TwoSidedTrsmLowerVar2Alg(
 			     Node *Lin, ConnNum Lnum,
 			     Node *Ain, ConnNum Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
@@ -431,7 +431,7 @@ Loop* TwoSidedTrsmLowerVar2Alg(
 }
 
 
-Loop* TwoSidedTrsmLowerVar4Alg(
+RealLoop* TwoSidedTrsmLowerVar4Alg(
 			     Node *Lin, ConnNum Lnum,
 			     Node *Ain, ConnNum Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
@@ -529,7 +529,7 @@ Loop* TwoSidedTrsmLowerVar4Alg(
   return loop;
 }
 
-Loop* TwoSidedTrmmLowerVar1Alg(
+RealLoop* TwoSidedTrmmLowerVar1Alg(
 			     Node *Lin, ConnNum Lnum,
 			     Node *Ain, ConnNum Anum,
 			     Layer layerBLAS, Layer layerTwoSidedTrxm)
@@ -617,7 +617,7 @@ Loop* TwoSidedTrmmLowerVar1Alg(
   return loop;
 }
 
-Loop* TwoSidedTrmmLowerVar2Alg(
+RealLoop* TwoSidedTrmmLowerVar2Alg(
 			     Node *Lin, ConnNum Lnum,
 			     Node *Ain, ConnNum Anum,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm)
@@ -697,7 +697,7 @@ Loop* TwoSidedTrmmLowerVar2Alg(
   return loop;
 }
 
-Loop* TwoSidedTrmmLowerVar4Alg(
+RealLoop* TwoSidedTrmmLowerVar4Alg(
 			    Node *Lin, ConnNum Lnum,
 			    Node *Ain, ConnNum Anum,
 			    Layer layerBLAS, Layer layerTwoSidedTrxm)

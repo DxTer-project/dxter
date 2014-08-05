@@ -240,7 +240,7 @@ bool HerkLoopExp::CanApply(const Node *node) const
 void HerkLoopExp::Apply(Node *node) const
 {
   Herk *herk = (Herk*)node;
-  Loop *loop;
+  RealLoop *loop;
   
   NodeConn *connA, *connC;
   connA = herk->m_inputs[0];
@@ -307,7 +307,7 @@ bool TriRKLoopExp::CanApply(const Node *node) const
 void TriRKLoopExp::Apply(Node *node) const
 {
   TriRK *trirk = (TriRK*)node;
-  Loop *loop;
+  RealLoop *loop;
   
   NodeConn *connA, *connB, *connC;
   connA = trirk->m_inputs[0];
@@ -730,7 +730,7 @@ void DistHerkToLocalTriRK::Apply(Node *node) const
 }
 #endif
 
-Loop* HerkLoopVar1(Node *Ain, ConnNum Anum,
+RealLoop* HerkLoopVar1(Node *Ain, ConnNum Anum,
                    Node *Cin, ConnNum Cnum,
                    Tri tri,
                    Trans trans,
@@ -801,7 +801,7 @@ Loop* HerkLoopVar1(Node *Ain, ConnNum Anum,
   return loop;
 }
 
-Loop* HerkLoopVar2(Node *Ain, ConnNum Anum,
+RealLoop* HerkLoopVar2(Node *Ain, ConnNum Anum,
                    Node *Cin, ConnNum Cnum,
                    Tri tri,
                    Trans trans,
@@ -870,7 +870,7 @@ Loop* HerkLoopVar2(Node *Ain, ConnNum Anum,
   return loop;
 }
 
-Loop* HerkLoopVar5(Node *Ain, ConnNum Anum,
+RealLoop* HerkLoopVar5(Node *Ain, ConnNum Anum,
                    Node *Cin, ConnNum Cnum,
                    Tri tri,
                    Trans trans,
@@ -912,7 +912,7 @@ Loop* HerkLoopVar5(Node *Ain, ConnNum Anum,
   return loop;
 }
 
-Loop* TriRKLoopVar5(Node *Ain, ConnNum Anum,
+RealLoop* TriRKLoopVar5(Node *Ain, ConnNum Anum,
                     Node *Bin, ConnNum Bnum,
                     Node *Cin, ConnNum Cnum,
                     Tri tri,
@@ -968,7 +968,7 @@ Loop* TriRKLoopVar5(Node *Ain, ConnNum Anum,
 
 
 
-Loop* TriRKLoopVar7(Node *Ain, ConnNum Anum,
+RealLoop* TriRKLoopVar7(Node *Ain, ConnNum Anum,
                     Node *Bin, ConnNum Bnum,
                     Node *Cin, ConnNum Cnum,
                     Tri tri,
@@ -1103,7 +1103,7 @@ void BLISTriRKLoopExp::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-Loop* BLISHerkLoop(Node *Ain, ConnNum Anum,
+RealLoop* BLISHerkLoop(Node *Ain, ConnNum Anum,
                    Node *Bin, ConnNum Bnum,
                    Node *Cin, ConnNum Cnum,
                    Tri tri,

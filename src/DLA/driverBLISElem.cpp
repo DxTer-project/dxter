@@ -90,35 +90,35 @@ Type type;
 double size; 
 int variant;
 
-PSet* CholExample();
-PSet* CholTrsmExample();
-PSet* TrsmExample();
-PSet* TrmmExample();
-PSet* Trmm3Example();
-PSet* HegstR1Example();
-PSet* HegstR2Example();
-PSet* HegstR4Example();
-PSet* HegstL1Example();
-PSet* HegstL2Example();
-PSet* HegstL4Example();
-PSet* HegstL5Example();
-PSet* HegstLExample();
-PSet* HegstRExample();
-PSet* GemmExample();
-PSet* HemmExample();
-PSet* TriInvExample();
-PSet* HetrmmExample();
-PSet* SPDInvLowerExample();
-PSet* PartSPDInvLowerExample();
-PSet* SPDInvUpperExample();
-PSet* CholHegstExample();
-PSet* CholTriInvExample();
-//PSet* TriRed();
-PSet* Test();
-PSet* HerkExample();
-PSet* Her2kExample();
-PSet* LUExample();
-PSet* AppBlkHouseExample();
+RealPSet* CholExample();
+RealPSet* CholTrsmExample();
+RealPSet* TrsmExample();
+RealPSet* TrmmExample();
+RealPSet* Trmm3Example();
+RealPSet* HegstR1Example();
+RealPSet* HegstR2Example();
+RealPSet* HegstR4Example();
+RealPSet* HegstL1Example();
+RealPSet* HegstL2Example();
+RealPSet* HegstL4Example();
+RealPSet* HegstL5Example();
+RealPSet* HegstLExample();
+RealPSet* HegstRExample();
+RealPSet* GemmExample();
+RealPSet* HemmExample();
+RealPSet* TriInvExample();
+RealPSet* HetrmmExample();
+RealPSet* SPDInvLowerExample();
+RealPSet* PartSPDInvLowerExample();
+RealPSet* SPDInvUpperExample();
+RealPSet* CholHegstExample();
+RealPSet* CholTriInvExample();
+//RealPSet* TriRed();
+RealPSet* Test();
+RealPSet* HerkExample();
+RealPSet* Her2kExample();
+RealPSet* LUExample();
+RealPSet* AppBlkHouseExample();
 
 void AddTrans()
 {
@@ -653,7 +653,7 @@ int main(int argc, const char* argv[])
 #endif
   //  PrintType printType = CODE;
   int numIters = -1;
-  PSet* (*algFunc)();
+  RealPSet* (*algFunc)();
   //  GraphNum whichGraph = 0;
   int algNum;
   string fileName;
@@ -971,7 +971,7 @@ int main(int argc, const char* argv[])
 }
 
 
-PSet* TrsmExample()
+RealPSet* TrsmExample()
 {
   InputNode *Lin;
   InputNode *Xin;
@@ -1018,13 +1018,13 @@ PSet* TrsmExample()
   Bout->AddInput(loop,0);
 
   Poss *poss2 = new Poss(Bout,true);
-  PSet *set2 = new PSet (poss2);
+  RealPSet *set2 = new RealPSet (poss2);
 
   return set2;
 
 }
 
-PSet* CholExample()
+RealPSet* CholExample()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
@@ -1036,13 +1036,13 @@ PSet* CholExample()
   loop->AddInput(tun,0);
 
   Poss *innerPoss = new Poss(loop,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 #else
@@ -1050,7 +1050,7 @@ PSet* CholExample()
 #endif
 }
 
-PSet* CholTrsmExample()
+RealPSet* CholTrsmExample()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
@@ -1070,13 +1070,13 @@ PSet* CholTrsmExample()
   trsm->AddInput(tun2);
 
   Poss *innerPoss = new Poss(trsm,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 #else
@@ -1085,7 +1085,7 @@ PSet* CholTrsmExample()
   
 }
 
-PSet* CholTriInvExample()
+RealPSet* CholTriInvExample()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("L input", bigSize, bigSize, "L");
@@ -1100,13 +1100,13 @@ PSet* CholTriInvExample()
   loop2->AddInput(loop,0);
 
   Poss *innerPoss = new Poss(loop2,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 #else
@@ -1115,7 +1115,7 @@ PSet* CholTriInvExample()
 }
 
 
-PSet* HegstRExample()
+RealPSet* HegstRExample()
 {
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
@@ -1130,19 +1130,19 @@ PSet* HegstRExample()
   Aout->AddInput(hegst, 0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
 
 
-PSet* HegstR1Example()
+RealPSet* HegstR1Example()
 {
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
 
-  Loop *loop = TwoSidedTrsmLowerVar1Alg(Lin, 0,
+  RealLoop *loop = TwoSidedTrsmLowerVar1Alg(Lin, 0,
 				      Ain, 0,
 				      TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
 
@@ -1150,19 +1150,19 @@ PSet* HegstR1Example()
   Aout->AddInput(loop->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout, true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
 
 
-PSet* HegstR4Example()
+RealPSet* HegstR4Example()
 {
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
   InputNode *Lin = new InputNode("L input", bigSize, bigSize, "L");
 
-  Loop *loop = TwoSidedTrsmLowerVar4Alg(Lin, 0,
+  RealLoop *loop = TwoSidedTrsmLowerVar4Alg(Lin, 0,
 				      Ain, 0,
 				      TWOSIDEDTRXMCOMPONENTSLAYER, TWOSIDEDTRXMLAYER);
 
@@ -1170,12 +1170,12 @@ PSet* HegstR4Example()
   Aout->AddInput(loop->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout, true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
 
-PSet* HegstR2Example()
+RealPSet* HegstR2Example()
 {
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
@@ -1189,13 +1189,13 @@ PSet* HegstR2Example()
   Aout->AddInput(loop->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout, true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
 
 
-PSet* HegstL1Example()
+RealPSet* HegstL1Example()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
@@ -1222,40 +1222,40 @@ PSet* HegstL1Example()
   hemm->AddInput(splitA,8);
   hemm->AddInput(splitL,5);
   hemm->AddInput(Yin,0);
-  PSet *set1 = new PSet(new Poss(hemm,false));
+  RealPSet *set1 = new RealPSet(new Poss(hemm,false));
 
   Trxm *trmm = new Trxm(false, DMLAYER, LEFT, LOWER, NONUNIT, NORMAL, COEFONE, COMPLEX);
   trmm->AddInputs(4, splitL, 4, splitA, 5);
   Poss *poss2 = new Poss(trmm,false);
-  PSet *set2 = new PSet(poss2);
+  RealPSet *set2 = new RealPSet(poss2);
   Axpy *axpy1 = new Axpy(DMLAYER, COEFONEHALF);
   axpy1->AddInput(set1->OutTun(0),0);
   axpy1->AddInput(set2->OutTun(0),0);
-  PSet *set6 = new PSet(new Poss(axpy1,false));
+  RealPSet *set6 = new RealPSet(new Poss(axpy1,false));
 
 
   TwoSidedTrxm *hegst = new TwoSidedTrxm(DMLAYER, false, LOWER);
   hegst->AddInput(splitL,4);
   hegst->AddInput(splitA,4);
 
-  PSet *set4 = new PSet(new Poss(hegst,false));
+  RealPSet *set4 = new RealPSet(new Poss(hegst,false));
 
 
   Her2k *her2k = new Her2k(DMLAYER, LOWER, CONJTRANS, COEFONE, COEFONE, COMPLEX);
   her2k->AddInput(set6->OutTun(0),0);
   her2k->AddInput(splitL,5);
   her2k->AddInput(set4->OutTun(0),0);
-  PSet *set7 = new PSet(new Poss(her2k,false));
+  RealPSet *set7 = new RealPSet(new Poss(her2k,false));
 
   Axpy *axpy2 = new Axpy(DMLAYER, COEFONEHALF);
   axpy2->AddInput(set1->OutTun(0),0);
   axpy2->AddInput(set6->OutTun(0),0);
-  PSet *set8 = new PSet(new Poss(axpy2,false));
+  RealPSet *set8 = new RealPSet(new Poss(axpy2,false));
 
   Trxm *trmm2 = new Trxm(false, DMLAYER, LEFT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
   trmm2->AddInput(splitL,8);
   trmm2->AddInput(set8->OutTun(0),0);
-  PSet *set5 = new PSet(new Poss(trmm2,false));
+  RealPSet *set5 = new RealPSet(new Poss(trmm2,false));
 
   CombineSingleIter *comA;
   comA = splitA->CreateMatchingCombine(2, 
@@ -1275,7 +1275,7 @@ PSet* HegstL1Example()
   Aout->AddInput(loop->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 
@@ -1285,7 +1285,7 @@ PSet* HegstL1Example()
 }
 
 
-PSet* HegstL2Example()
+RealPSet* HegstL2Example()
 {
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
@@ -1299,13 +1299,13 @@ PSet* HegstL2Example()
   Aout->AddInput(loop->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
 
 
-PSet* HegstL4Example()
+RealPSet* HegstL4Example()
 {
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
@@ -1318,12 +1318,12 @@ PSet* HegstL4Example()
   Aout->AddInput(loop->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
 
-PSet* HegstLExample()
+RealPSet* HegstLExample()
 {
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
 
@@ -1338,13 +1338,13 @@ PSet* HegstLExample()
   Aout->AddInput(hegst, 0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
 
 
-PSet* HegstL5Example()
+RealPSet* HegstL5Example()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
@@ -1371,38 +1371,38 @@ PSet* HegstL5Example()
   hemm->AddInput(splitA,4);
   hemm->AddInput(splitL,1);
   hemm->AddInput(Yin,0);
-  PSet *set1 = new PSet(new Poss(hemm,false));
+  RealPSet *set1 = new RealPSet(new Poss(hemm,false));
 
   Trxm *trmm = new Trxm(false, DMLAYER, RIGHT, LOWER, NONUNIT, NORMAL, COEFONE, COMPLEX);
   trmm->AddInputs(4, splitL, 0, splitA, 1);
   Poss *poss2 = new Poss(trmm,false);
-  PSet *set2 = new PSet(poss2);
+  RealPSet *set2 = new RealPSet(poss2);
 
   Axpy *axpy1 = new Axpy(DMLAYER, COEFONEHALF);
   axpy1->AddInput(set1->OutTun(0),0);
   axpy1->AddInput(set2->OutTun(0),0);
-  PSet *set6 = new PSet(new Poss(axpy1,false));
+  RealPSet *set6 = new RealPSet(new Poss(axpy1,false));
 
   Her2k *her2k = new Her2k(DMLAYER, LOWER, CONJTRANS, COEFONE, COEFONE, COMPLEX);
   her2k->AddInput(splitL,1);
   her2k->AddInput(set6->OutTun(0),0);
   her2k->AddInput(splitA,0);
-  PSet *set7 = new PSet(new Poss(her2k,false));
+  RealPSet *set7 = new RealPSet(new Poss(her2k,false));
 
   Axpy *axpy2 = new Axpy(DMLAYER, COEFONEHALF);
   axpy2->AddInput(set1->OutTun(0),0);
   axpy2->AddInput(set6->OutTun(0),0);
-  PSet *set8 = new PSet(new Poss(axpy2,false));
+  RealPSet *set8 = new RealPSet(new Poss(axpy2,false));
   
   Trxm *trmm2 = new Trxm(false, DMLAYER, LEFT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
   trmm2->AddInput(splitL,4);
   trmm2->AddInput(set8->OutTun(0),0);
-  PSet *set5 = new PSet(new Poss(trmm2,false));
+  RealPSet *set5 = new RealPSet(new Poss(trmm2,false));
 
   TwoSidedTrxm *hegst = new TwoSidedTrxm(DMLAYER, false, LOWER);
   hegst->AddInput(splitL,4);
   hegst->AddInput(splitA,4);
-  PSet *set4 = new PSet(new Poss(hegst,false));
+  RealPSet *set4 = new RealPSet(new Poss(hegst,false));
 
   CombineSingleIter *comA;
   comA = splitA->CreateMatchingCombine(3,
@@ -1424,7 +1424,7 @@ PSet* HegstL5Example()
   Aout->AddInput(loop->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 #else
@@ -1436,7 +1436,7 @@ PSet* HegstL5Example()
   return NULL;
 }
 
-PSet* GemmExample()
+RealPSet* GemmExample()
 {
   InputNode *Ain;
   InputNode *Bin;
@@ -1485,14 +1485,14 @@ PSet* GemmExample()
   Cout->AddInput(loop,0);
 
   Poss *poss2 = new Poss(Cout,true);
-  PSet *set2 = new PSet (poss2);
+  RealPSet *set2 = new RealPSet (poss2);
 
   return set2;
 }
 
 
 
-PSet* TriInvExample()
+RealPSet* TriInvExample()
 {
   InputNode *Ain = new InputNode("input", bigSize, bigSize, tri==LOWER ? "L" : "U");
 
@@ -1503,18 +1503,18 @@ PSet* TriInvExample()
   loop->AddInput(tun,0);
 
   Poss *innerPoss = new Poss(loop,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
 
-PSet* HetrmmExample()
+RealPSet* HetrmmExample()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("input", bigSize, bigSize, tri == LOWER ? "L" : "U");
@@ -1526,13 +1526,13 @@ PSet* HetrmmExample()
   loop->AddInput(tun,0);
 
   Poss *innerPoss = new Poss(loop,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 #else
@@ -1540,7 +1540,7 @@ PSet* HetrmmExample()
 #endif
 }
 
-PSet* PartSPDInvLowerExample()
+RealPSet* PartSPDInvLowerExample()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
@@ -1555,13 +1555,13 @@ PSet* PartSPDInvLowerExample()
   loop3->AddInput(loop2,0);
 
   Poss *innerPoss = new Poss(loop3,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 #else
@@ -1569,7 +1569,7 @@ PSet* PartSPDInvLowerExample()
 #endif
 }
 
-PSet* SPDInvLowerExample()
+RealPSet* SPDInvLowerExample()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
@@ -1587,13 +1587,13 @@ PSet* SPDInvLowerExample()
   loop3->AddInput(loop2,0);
 
   Poss *innerPoss = new Poss(loop3,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 #else
@@ -1601,7 +1601,7 @@ PSet* SPDInvLowerExample()
 #endif
 }
 
-PSet* SPDInvUpperExample()
+RealPSet* SPDInvUpperExample()
 {
 #if DOELEM
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
@@ -1619,13 +1619,13 @@ PSet* SPDInvUpperExample()
   loop3->AddInput(loop2,0);
   
   Poss *innerPoss = new Poss(loop3,true);
-  PSet *innerSet = new PSet(innerPoss);
+  RealPSet *innerSet = new RealPSet(innerPoss);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 #else
@@ -1634,14 +1634,14 @@ PSet* SPDInvUpperExample()
 }
 
 
-PSet* Test()
+RealPSet* Test()
 {
   return NULL;
 }
 
 
 /*
-  PSet* TriRed()
+  RealPSet* TriRed()
   {
   InputNode *Ain = new InputNode("A input", bigSize, bigSize, "A");
   InputNode *Yin = new InputNode("Y input", bigSize, bigSize, "Y");
@@ -1672,7 +1672,7 @@ PSet* Test()
   splitY, 1,
   temp1, 0);
   Poss *poss1 = new Poss(dot1, false);
-  PSet *set1 = new PSet(poss1);
+  RealPSet *set1 = new RealPSet(poss1);
 
   ConstVal *const1 = new ConstVal("constVal", COEFONE);
 
@@ -1682,7 +1682,7 @@ PSet* Test()
   set1->OutTun(0), 0,
   splitA, 4);
   Poss *poss2 = new Poss(axpy1, false);
-  PSet *set2 = new PSet(poss2);
+  RealPSet *set2 = new RealPSet(poss2);
 
   //a21 := a21 - U20 * y10 - Y20 * u10
 
@@ -1692,7 +1692,7 @@ PSet* Test()
   splitY, 1,
   splitA, 5);
   Poss *poss3 = new Poss(gemv1, false);
-  PSet *set3 = new PSet(poss3);
+  RealPSet *set3 = new RealPSet(poss3);
 
   DistGemv *gemv2 = new DistGemv(NORMAL, -1, 1);
   gemv2->AddInputs(6,
@@ -1700,7 +1700,7 @@ PSet* Test()
   splitU, 1,
   set3->OutTun(0), 0);
   Poss *poss4 = new Poss(gemv2, false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
 
   //[u21, tau, a21] := HOUSEV( a21 )
 
@@ -1711,7 +1711,7 @@ PSet* Test()
   tau, 0,
   set4->OutTun(0), 0);
   Poss *poss5 = new Poss(house,false);
-  PSet *set5 = new PSet(poss5);
+  RealPSet *set5 = new RealPSet(poss5);
 
   //y21 := A22 * u21
   DistGemv *gemv3 = new DistGemv(NORMAL, 1, 0);
@@ -1720,7 +1720,7 @@ PSet* Test()
   set5->OutTun(0), 0,
   splitY, 5);
   Poss *poss6 = new Poss(gemv3,false);
-  PSet *set6 = new PSet(poss6);
+  RealPSet *set6 = new RealPSet(poss6);
 
   //temp2 := U20^T * u21
   InputNode *temp2 = new InputNode("temp2", ((DLANode*)set6->OutTun(0))->GetM(0), ONE, "temp2");
@@ -1730,7 +1730,7 @@ PSet* Test()
   set5->OutTun(0), 0,
   temp2, 0);
   Poss *poss7 = new Poss(gemv4, false);
-  PSet *set7 = new PSet(poss7);
+  RealPSet *set7 = new RealPSet(poss7);
 
   //y21 := y21 - Y20 * (U20^T * u21)
   DistGemv *gemv5 = new DistGemv(NORMAL, -1, 1);
@@ -1739,12 +1739,12 @@ PSet* Test()
   set7->OutTun(0), 0,
   set6->OutTun(0), 0);
   Poss *poss8 = new Poss(gemv5, false);
-  PSet *set8 = new PSet(poss8);
+  RealPSet *set8 = new RealPSet(poss8);
 
   //temp3 := Y20^T * u21
   InputNode *temp3 = new InputNode("temp3", ((DLANode*)set8->OutTun(0))->GetM(0), ONE, "temp3");
   Poss *tempPoss = new Poss(temp3, false);
-  PSet *tempSet = new PSet(tempPoss);
+  RealPSet *tempSet = new RealPSet(tempPoss);
 
   DistGemv *gemv6 = new DistGemv(TRANS, 1, 0);
   gemv6->AddInputs(6,
@@ -1752,7 +1752,7 @@ PSet* Test()
   set5->OutTun(0), 0,
   tempSet->OutTun(0), 0);
   Poss *poss9 = new Poss(gemv6, false);
-  PSet *set9 = new PSet(poss9);
+  RealPSet *set9 = new RealPSet(poss9);
 
   //y21 := y21 - Y20 * (U20^T * u21) - U20 * (Y20^T * u21)
   DistGemv *gemv7 = new DistGemv(NORMAL, -1, 1);
@@ -1761,13 +1761,13 @@ PSet* Test()
   set9->OutTun(0), 0,
   set8->OutTun(0), 0);
   Poss *poss10 = new Poss(gemv7, false);
-  PSet *set10 = new PSet(poss10);
+  RealPSet *set10 = new RealPSet(poss10);
   
 
   // beta := -1 * ut2^T * y21 / 2
   InputNode *beta = new InputNode("beta", ONE, ONE, "beta");
   tempPoss = new Poss(beta, false);
-  tempSet = new PSet(tempPoss);
+  tempSet = new RealPSet(tempPoss);
 
   DistDot *dot2 = new DistDot(COEFNEGONEHALF);
   dot2->AddInputs(6, 
@@ -1775,25 +1775,25 @@ PSet* Test()
   set10->OutTun(0), 0,
   tempSet->OutTun(0), 0);
   Poss *poss11 = new Poss(dot2, false);
-  PSet *set11 = new PSet(poss11);
+  RealPSet *set11 = new RealPSet(poss11);
 
   // beta := beta / tau
   ScalInvert *inver1 = new ScalInvert;
   inver1->AddInput( set5->OutTun(1), 0);
   Poss *invertPoss = new Poss(inver1, false);
-  PSet *invertSet = new PSet(invertPoss);
+  RealPSet *invertSet = new RealPSet(invertPoss);
 
   DistScal *scal1 = new DistScal;
   scal1->AddInputs(4,
   invertSet->OutTun(0), 0,
   set11->OutTun(0), 0);
   Poss *poss12 = new Poss(scal1, false);
-  PSet *set12 = new PSet(poss12);
+  RealPSet *set12 = new RealPSet(poss12);
 
   RedistNode *redist = new RedistNode(D_STAR_STAR);
   redist->AddInput(set12->OutTun(0), 0);
   tempPoss = new Poss(redist);
-  tempSet = new PSet(tempPoss);
+  tempSet = new RealPSet(tempPoss);
 
   //y21 := y21 - beta * u21 / tau
   Axpy *axpy2 = new Axpy(DMLAYER);
@@ -1802,7 +1802,7 @@ PSet* Test()
   set5->OutTun(0), 0,
   set10->OutTun(0), 0);
   Poss *poss13 = new Poss(axpy2, false);
-  PSet *set13 = new PSet(poss13);
+  RealPSet *set13 = new RealPSet(poss13);
 
   //y21 := y21 / tau
   DistScal *scal2 = new DistScal;
@@ -1810,7 +1810,7 @@ PSet* Test()
   invertSet->OutTun(0), 0,
   set13->OutTun(0), 0);
   Poss *poss14 = new Poss(scal2, false);
-  PSet *set14 = new PSet(poss14);		   
+  RealPSet *set14 = new RealPSet(poss14);		   
 
   CombineSingleIter *comA = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA->AddInput(splitA,0);
@@ -1872,12 +1872,12 @@ PSet* Test()
   Yout->AddInput(loop->OutTun(2),0);
    
   Poss *outerPoss = new Poss(Aout,true);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
 
   return outerSet;
   }*/
 
-PSet* HerkExample()
+RealPSet* HerkExample()
 {
   InputNode *Ain;
 #if DODM
@@ -1905,12 +1905,12 @@ PSet* HerkExample()
   Cout->AddInput(loop,0);
 
   Poss *poss = new Poss(Cout,true);
-  PSet *set = new PSet(poss);
+  RealPSet *set = new RealPSet(poss);
   
   return set;
 }
 
-PSet* Her2kExample()
+RealPSet* Her2kExample()
 {
   InputNode *Ain, *Bin;
 #if DOELEM
@@ -1947,13 +1947,13 @@ PSet* Her2kExample()
   Cout->AddInput(loop,0);
 
   Poss *poss = new Poss(Cout,true);
-  PSet *set = new PSet(poss);
+  RealPSet *set = new RealPSet(poss);
   
   return set;
 }
 
 
-PSet* HemmExample()
+RealPSet* HemmExample()
 {
   InputNode *Ain;
   InputNode *Bin;
@@ -1997,14 +1997,14 @@ PSet* HemmExample()
   Cout->AddInput(loop,0);
 
   Poss *poss2 = new Poss(Cout,true);
-  PSet *set2 = new PSet (poss2);
+  RealPSet *set2 = new RealPSet (poss2);
 
   return set2;
 }
 
 
 
-PSet* TrmmExample()
+RealPSet* TrmmExample()
 {
   InputNode *Lin;
   InputNode *Xin;
@@ -2049,13 +2049,13 @@ PSet* TrmmExample()
   Bout->AddInput(loop,0);
 
   Poss *poss2 = new Poss(Bout,true);
-  PSet *set2 = new PSet (poss2);
+  RealPSet *set2 = new RealPSet (poss2);
 
   return set2;
 
 }
 
-PSet* Trmm3Example()
+RealPSet* Trmm3Example()
 {
   InputNode *Lin;
   InputNode *Xin;
@@ -2107,12 +2107,12 @@ PSet* Trmm3Example()
   Cout->AddInput(loop,0);
 
   Poss *poss2 = new Poss(Cout,true);
-  PSet *set2 = new PSet (poss2);
+  RealPSet *set2 = new RealPSet (poss2);
 
   return set2;
 }
 
-PSet* CholHegstExample()
+RealPSet* CholHegstExample()
 {
 #if DOELEM
   if (side == RIGHT) {
@@ -2138,46 +2138,46 @@ PSet* CholHegstExample()
     Trxm *trsm = new Trxm(true, DMLAYER, LEFT, LOWER, NONUNIT, NORMAL, COEFONE,COMPLEX);
     trsm->AddInput(splitL,4);
     trsm->AddInput(splitA,1);
-    PSet *set1 = new PSet(new Poss(trsm,false));
+    RealPSet *set1 = new RealPSet(new Poss(trsm,false));
 
     TwoSidedTrxm *hegst = new TwoSidedTrxm(DMLAYER, true, LOWER);
     hegst->AddInput(splitL,4);
     hegst->AddInput(splitA,4);
-    PSet *set2 = new PSet(new Poss(hegst,false));
+    RealPSet *set2 = new RealPSet(new Poss(hegst,false));
 
     Gemm *gemm = new Gemm(DMLAYER, NORMAL, NORMAL, COEFNEGONE, COEFONE, COMPLEX);
     gemm->AddInput(splitL,5);
     gemm->AddInput(set1->OutTun(0),0);
     gemm->AddInput(splitA,2);
-    PSet *set3 = new PSet(new Poss(gemm,false));
+    RealPSet *set3 = new RealPSet(new Poss(gemm,false));
 
     Hemm *hemm = new Hemm(DMLAYER, RIGHT, LOWER, COEFONEHALF, COEFZERO, COMPLEX);
     hemm->AddInput(set2->OutTun(0),0);
     hemm->AddInput(splitL,5);
     hemm->AddInput(Yin,0);
-    PSet *set4 = new PSet(new Poss(hemm,false));
+    RealPSet *set4 = new RealPSet(new Poss(hemm,false));
 
     Trxm *Trsm2 = new Trxm(true, DMLAYER, RIGHT, LOWER, NONUNIT, CONJTRANS,COEFONE,COMPLEX);
     Trsm2->AddInput(splitL,4);
     Trsm2->AddInput(splitA,5);
-    PSet *set5 = new PSet(new Poss(Trsm2,false));
+    RealPSet *set5 = new RealPSet(new Poss(Trsm2,false));
 
 
     Axpy *axpy1 = new Axpy(DMLAYER, COEFONEHALF);
     axpy1->AddInput(set4->OutTun(0),0);
     axpy1->AddInput(set5->OutTun(0),0);
-    PSet *set6 = new PSet(new Poss(axpy1,false));
+    RealPSet *set6 = new RealPSet(new Poss(axpy1,false));
   
     Her2k *her2k = new Her2k(DMLAYER, LOWER, NORMAL, COEFNEGONE, COEFONE, COMPLEX);
     her2k->AddInput(splitL,5);
     her2k->AddInput(set6->OutTun(0),0);
     her2k->AddInput(splitA,8);
-    PSet *set7 = new PSet(new Poss(her2k,false));
+    RealPSet *set7 = new RealPSet(new Poss(her2k,false));
 
     Axpy *axpy2 = new Axpy(DMLAYER, COEFONEHALF);
     axpy2->AddInput(set4->OutTun(0),0);
     axpy2->AddInput(set6->OutTun(0),0);
-    PSet *set8 = new PSet(new Poss(axpy2,false));
+    RealPSet *set8 = new RealPSet(new Poss(axpy2,false));
 
     CombineSingleIter *comA = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
     comA->AddInput(splitA,0);
@@ -2209,7 +2209,7 @@ PSet* CholHegstExample()
 
 
     Poss *outerPoss = new Poss(2, Aout, Lout);
-    PSet *outerSet = new PSet(outerPoss);
+    RealPSet *outerSet = new RealPSet(outerPoss);
   
     return outerSet;
 #else
@@ -2245,44 +2245,44 @@ PSet* CholHegstExample()
     hemm->AddInput(splitA,4);
     hemm->AddInput(splitL,1);
     hemm->AddInput(Yin,0);
-    PSet *set1 = new PSet(new Poss(hemm,false));
+    RealPSet *set1 = new RealPSet(new Poss(hemm,false));
 
     Axpy *axpy1 = new Axpy(DMLAYER, COEFONEHALF);
     axpy1->AddInput(set1->OutTun(0),0);
     axpy1->AddInput(splitA,1);
-    PSet *set6 = new PSet(new Poss(axpy1,false));
+    RealPSet *set6 = new RealPSet(new Poss(axpy1,false));
 
     Her2k *her2k = new Her2k(DMLAYER, LOWER, CONJTRANS, COEFONE, COEFONE, COMPLEX);
     her2k->AddInput(set6->OutTun(0),0);
     her2k->AddInput(splitL,1);
     her2k->AddInput(splitA,0);
-    PSet *set7 = new PSet(new Poss(her2k,false));
+    RealPSet *set7 = new RealPSet(new Poss(her2k,false));
 
     Axpy *axpy2 = new Axpy(DMLAYER, COEFONEHALF);
     axpy2->AddInput(set1->OutTun(0),0);
     axpy2->AddInput(set6->OutTun(0),0);
-    PSet *set8 = new PSet(new Poss(axpy2,false));
+    RealPSet *set8 = new RealPSet(new Poss(axpy2,false));
 
     Trxm *trmm = new Trxm(false, DMLAYER, LEFT, LOWER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
     trmm->AddInputs(4, splitL, 4, set8->OutTun(0), 0);
     Poss *poss2 = new Poss(trmm,false);
-    PSet *set2 = new PSet(poss2);
+    RealPSet *set2 = new RealPSet(poss2);
   
     TwoSidedTrxm *hegst = new TwoSidedTrxm(DMLAYER, false, LOWER);
     hegst->AddInput(splitL,4);
     hegst->AddInput(splitA,4);
-    PSet *set4 = new PSet(new Poss(hegst,false));
+    RealPSet *set4 = new RealPSet(new Poss(hegst,false));
 
     Gemm *gemm = new Gemm(DMLAYER, NORMAL, NORMAL, COEFONE, COEFONE, COMPLEX);
     gemm->AddInput(splitA, 5);
     gemm->AddInput(splitL, 1);
     gemm->AddInput(splitA, 2);
-    PSet *set3 = new PSet(new Poss(gemm,false));
+    RealPSet *set3 = new RealPSet(new Poss(gemm,false));
 
     Trxm *trmm2 = new Trxm(false, DMLAYER, RIGHT, LOWER, NONUNIT, NORMAL, COEFONE, COMPLEX);
     trmm2->AddInput(splitL,4);
     trmm2->AddInput(splitA,5);
-    PSet *set5 = new PSet(new Poss(trmm2,false));
+    RealPSet *set5 = new RealPSet(new Poss(trmm2,false));
 
     CombineSingleIter *comA;
     comA = splitA->CreateMatchingCombine(5,
@@ -2307,7 +2307,7 @@ PSet* CholHegstExample()
     Lout->AddInput(cholloop,0);
 
     Poss *outerPoss = new Poss(2, Aout, Lout);
-    PSet *outerSet = new PSet(outerPoss);
+    RealPSet *outerSet = new RealPSet(outerPoss);
   
     return outerSet;
 #else
@@ -2319,7 +2319,7 @@ PSet* CholHegstExample()
 #endif
 }
 
-PSet* LUExample()
+RealPSet* LUExample()
 {
   InputNode *A = new InputNode("A input", bigSize, bigSize, "A");
   InputNode *P = new InputNode("P input", bigSize, 1, "P");
@@ -2336,12 +2336,12 @@ PSet* LUExample()
   Pout->AddInput(lu,1);
 
   Poss *poss2 = new Poss(2, Aout, Pout);
-  PSet *set2 = new PSet (poss2);
+  RealPSet *set2 = new RealPSet (poss2);
 
   return set2;
 }
 
-PSet* AppBlkHouseExample()
+RealPSet* AppBlkHouseExample()
 #if DOBLIS
 {
   InputNode *U = new InputNode("U input", BLIS_KC_BSVAL*10, BLIS_KC_BSVAL*10, "U");
@@ -2432,7 +2432,7 @@ PSet* AppBlkHouseExample()
   Bout->AddInput(loop->OutTun(0),0);
 
   Poss *outerPoss = new Poss(1, Bout);
-  PSet *outerSet = new PSet(outerPoss);
+  RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }

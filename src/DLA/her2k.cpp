@@ -300,7 +300,7 @@ bool Her2kLoopExp::CanApply(const Node *node) const
 void Her2kLoopExp::Apply(Node *node) const
 {
   Her2k *her2k = (Her2k*)node;
-  Loop *loop;
+  RealLoop *loop;
   
   NodeConn *connA, *connB, *connC;
   connA = her2k->m_inputs[0];
@@ -784,7 +784,7 @@ bool Tri2kTrans::CanApply(const Node *node) const
 }
 #endif
 
-Loop* Her2kLoopVar1(Node *Ain, ConnNum Anum,
+RealLoop* Her2kLoopVar1(Node *Ain, ConnNum Anum,
                     Node *Bin, ConnNum Bnum,
                     Node *Cin, ConnNum Cnum,
                     Tri tri,
@@ -882,7 +882,7 @@ Loop* Her2kLoopVar1(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* Her2kLoopVar2(Node *Ain, ConnNum Anum,
+RealLoop* Her2kLoopVar2(Node *Ain, ConnNum Anum,
                     Node *Bin, ConnNum Bnum,
                     Node *Cin, ConnNum Cnum,
                     Tri tri,
@@ -984,7 +984,7 @@ Loop* Her2kLoopVar2(Node *Ain, ConnNum Anum,
   return loop;
 }
 
-Loop* Her2kLoopVar3(Node *Ain, ConnNum Anum,
+RealLoop* Her2kLoopVar3(Node *Ain, ConnNum Anum,
                     Node *Bin, ConnNum Bnum,
                     Node *Cin, ConnNum Cnum,
                     Tri tri,
@@ -1088,7 +1088,7 @@ Loop* Her2kLoopVar3(Node *Ain, ConnNum Anum,
 
 
 
-Loop* Her2kLoopVar4(Node *Ain, ConnNum Anum,
+RealLoop* Her2kLoopVar4(Node *Ain, ConnNum Anum,
                     Node *Bin, ConnNum Bnum,
                     Node *Cin, ConnNum Cnum,
                     Tri tri,
@@ -1190,7 +1190,7 @@ Loop* Her2kLoopVar4(Node *Ain, ConnNum Anum,
 }
 
 
-Loop* Her2kLoopVar9(Node *Ain, ConnNum Anum,
+RealLoop* Her2kLoopVar9(Node *Ain, ConnNum Anum,
                     Node *Bin, ConnNum Bnum,
                     Node *Cin, ConnNum Cnum,
                     Tri tri,
@@ -1245,7 +1245,7 @@ Loop* Her2kLoopVar9(Node *Ain, ConnNum Anum,
   return loop;
 }
 
-Loop* Tri2kLoopVar10(Node *Ain, ConnNum Anum,
+RealLoop* Tri2kLoopVar10(Node *Ain, ConnNum Anum,
                      Node *Bin, ConnNum Bnum,
                      Node *Cin, ConnNum Cnum,
                      Node *Din, ConnNum Dnum,
@@ -1344,7 +1344,7 @@ Loop* Tri2kLoopVar10(Node *Ain, ConnNum Anum,
 }
 #endif
 
-Loop* Tri2kLoopVar9(Node *Ain, ConnNum Anum,
+RealLoop* Tri2kLoopVar9(Node *Ain, ConnNum Anum,
                      Node *Bin, ConnNum Bnum,
                      Node *Cin, ConnNum Cnum,
                      Node *Din, ConnNum Dnum,
@@ -1582,7 +1582,7 @@ bool Tri2kLoopExp::CanApply(const Node *node) const
 void Tri2kLoopExp::Apply(Node *node) const
 {
   Tri2k *trirk = (Tri2k*)node;
-  Loop *loop;
+  RealLoop *loop;
   
   NodeConn *connA, *connB, *connC, *connD, *connE;
   connA = trirk->m_inputs[0];

@@ -204,7 +204,7 @@ void DistCholToLocalChol::Apply(Node *node) const
 #endif
 
 
-Loop* Chol1LowerAlg(Node *in, ConnNum num, bool dist)
+RealLoop* Chol1LowerAlg(Node *in, ConnNum num, bool dist)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in, num);
@@ -220,7 +220,7 @@ Loop* Chol1LowerAlg(Node *in, ConnNum num, bool dist)
 		  splitA, 0,
 		  splitA, 1);
   Poss *poss4 = new Poss(trsm,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
   
   Node *tri;
   if (dist) {
@@ -231,7 +231,7 @@ Loop* Chol1LowerAlg(Node *in, ConnNum num, bool dist)
     throw;
   }
   Poss *poss1 = new Poss(tri,false);
-  PSet *set1 = new PSet(poss1);
+  RealPSet *set1 = new RealPSet(poss1);
   
   Chol *chol;
   if (dist)
@@ -240,7 +240,7 @@ Loop* Chol1LowerAlg(Node *in, ConnNum num, bool dist)
     throw;
   chol->AddInput(set1->OutTun(0),0);
   Poss *poss2 = new Poss(chol,false);
-  PSet *set2 = new PSet(poss2);
+  RealPSet *set2 = new RealPSet(poss2);
   
   CombineSingleIter *comA = splitA->CreateMatchingCombine(2, 
 						1, set4->OutTun(0), 0,
@@ -264,7 +264,7 @@ Loop* Chol1LowerAlg(Node *in, ConnNum num, bool dist)
 
 }
 
-Loop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
+RealLoop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in, num);
@@ -281,7 +281,7 @@ Loop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
     throw;
   }
   Poss *poss1 = new Poss(tri,false);
-  PSet *set1 = new PSet(poss1);
+  RealPSet *set1 = new RealPSet(poss1);
   
   Chol *chol;
   if (dist)
@@ -290,7 +290,7 @@ Loop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
     throw;
   chol->AddInput(set1->OutTun(0),0);
   Poss *poss2 = new Poss(chol,false);
-  PSet *set2 = new PSet(poss2);
+  RealPSet *set2 = new RealPSet(poss2);
   
   Gemm *gemm2;
   if (dist)
@@ -299,7 +299,7 @@ Loop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
     gemm2 = new Gemm(SMLAYER, NORMAL, CONJTRANS, COEFONE, COEFNEGONE, COMPLEX);
   gemm2->AddInputs(6,splitA,2,splitA,1,splitA,5);
   Poss *poss3 = new Poss(gemm2,false);
-  PSet *set3 = new PSet(poss3);
+  RealPSet *set3 = new RealPSet(poss3);
   
   Trxm *trsm;
   if (dist)
@@ -310,7 +310,7 @@ Loop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
 		  set2->OutTun(0), 0,
 		  set3->OutTun(0), 0);
   Poss *poss4 = new Poss(trsm,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
   
   CombineSingleIter *comA = splitA->CreateMatchingCombine(2, 
 						4, set2->OutTun(0), 0,
@@ -331,7 +331,7 @@ Loop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
   return loop;
 }
 
-Loop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
+RealLoop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in, num);
@@ -349,7 +349,7 @@ Loop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
   }
   tri->AddInputs(4, splitA, 3, splitA, 4);
   Poss *poss1 = new Poss(tri,false);
-  PSet *set1 = new PSet(poss1);
+  RealPSet *set1 = new RealPSet(poss1);
   
   Chol *chol;
   if (dist)
@@ -358,7 +358,7 @@ Loop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
     throw;
   chol->AddInput(set1->OutTun(0),0);
   Poss *poss3 = new Poss(chol,false);
-  PSet *set3 = new PSet(poss3);
+  RealPSet *set3 = new RealPSet(poss3);
 
   Gemm *gemm;
   if (dist)
@@ -367,7 +367,7 @@ Loop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
     gemm = new Gemm(SMLAYER, CONJTRANS, NORMAL, COEFNEGONE, COEFONE, COMPLEX);
   gemm->AddInputs(6,splitA,3,splitA,6,splitA,7);
   Poss *poss2 = new Poss(gemm,false);
-  PSet *set2 = new PSet(poss2);
+  RealPSet *set2 = new RealPSet(poss2);
   
   Trxm *trsm;
   if (dist)
@@ -378,7 +378,7 @@ Loop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
 		  set3->OutTun(0), 0,
 		  set2->OutTun(0), 0);
   Poss *poss4 = new Poss(trsm,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
   
   CombineSingleIter *comA = splitA->CreateMatchingCombine(2, 
 						4, set3->OutTun(0), 0,
@@ -399,7 +399,7 @@ Loop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
   return loop;
 }
 
-Loop* Chol3LowerAlg(Node *in, ConnNum num, bool dist)
+RealLoop* Chol3LowerAlg(Node *in, ConnNum num, bool dist)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in, num);
@@ -413,7 +413,7 @@ Loop* Chol3LowerAlg(Node *in, ConnNum num, bool dist)
     throw;
   chol->AddInput(splitA, 4);
   Poss *poss1 = new Poss(chol,false);
-  PSet *set1 = new PSet(poss1);
+  RealPSet *set1 = new RealPSet(poss1);
 
   Trxm *trsm;
   if (dist)
@@ -422,7 +422,7 @@ Loop* Chol3LowerAlg(Node *in, ConnNum num, bool dist)
     trsm = new Trxm(true, SMLAYER, RIGHT, LOWER, NONUNIT, CONJTRANS, COEFONE,COMPLEX);
   trsm->AddInputs(4, set1->OutTun(0), 0, splitA, 5);
   Poss *poss2 = new Poss(trsm,false);
-  PSet *set2 = new PSet(poss2);
+  RealPSet *set2 = new RealPSet(poss2);
 
 
   Node *tri;
@@ -440,7 +440,7 @@ Loop* Chol3LowerAlg(Node *in, ConnNum num, bool dist)
     //		   splitA, 8);
   }
   Poss *poss3 = new Poss(tri,false);
-  PSet *set3 = new PSet(poss3);
+  RealPSet *set3 = new RealPSet(poss3);
 
   CombineSingleIter *comA = splitA->CreateMatchingCombine(3,
 						4, set1->OutTun(0), 0,
@@ -463,7 +463,7 @@ Loop* Chol3LowerAlg(Node *in, ConnNum num, bool dist)
 }
 
 
-Loop* Chol3UpperAlg(Node *in, ConnNum num, bool dist)
+RealLoop* Chol3UpperAlg(Node *in, ConnNum num, bool dist)
 {
   SplitSingleIter *splitA = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
   splitA->AddInput(in,num);
@@ -477,7 +477,7 @@ Loop* Chol3UpperAlg(Node *in, ConnNum num, bool dist)
       throw;
     chol->AddInput(splitA, 4);
     Poss *poss1 = new Poss(chol,false);
-    PSet *set1 = new PSet(poss1);
+    RealPSet *set1 = new RealPSet(poss1);
     
     Trxm *trsm;
     if (dist)
@@ -486,7 +486,7 @@ Loop* Chol3UpperAlg(Node *in, ConnNum num, bool dist)
       trsm = new Trxm(true, SMLAYER, LEFT, UPPER, NONUNIT, CONJTRANS, COEFONE, COMPLEX);
     trsm->AddInputs(4, set1->OutTun(0), 0, splitA, 7);
     Poss *poss2 = new Poss(trsm,false);
-    PSet *set2 = new PSet(poss2);
+    RealPSet *set2 = new RealPSet(poss2);
     
     Node *tri;
     if (dist) {
@@ -503,7 +503,7 @@ Loop* Chol3UpperAlg(Node *in, ConnNum num, bool dist)
 		     splitA, 8);*/
     }
     Poss *poss3 = new Poss(tri,false);
-    PSet *set3 = new PSet(poss3);
+    RealPSet *set3 = new RealPSet(poss3);
     
     CombineSingleIter *comA = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
     comA->AddInput(splitA,0);

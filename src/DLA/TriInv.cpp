@@ -143,7 +143,7 @@ void TriInvLoopExp::Apply(Node *node) const
 {
   TriInv *triInv = (TriInv*)node;
   Tri tri = triInv->m_tri;
-  Loop *loop = NULL;
+  RealLoop *loop = NULL;
   switch(m_var) {
   case(1):
     if (tri == LOWER)
@@ -201,7 +201,7 @@ void DistTriInvToLocalTriInv::Apply(Node *node) const
 }
 #endif
 
-Loop* TriInvAlgVar1Lower(Node *in, ConnNum num)
+RealLoop* TriInvAlgVar1Lower(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -212,17 +212,17 @@ Loop* TriInvAlgVar1Lower(Node *in, ConnNum num)
   Trxm* trmm1 = new Trxm(false, DMLAYER, RIGHT, LOWER, NONUNIT, NORMAL, COEFONE, REAL);
   trmm1->AddInputs(4, split, 0, split, 1);
   Poss *poss5 = new Poss(trmm1,false);
-  PSet *set5 = new PSet(poss5);
+  RealPSet *set5 = new RealPSet(poss5);
 
   Trxm *trsm1 = new Trxm(true, DMLAYER, LEFT, LOWER, NONUNIT, NORMAL, COEFNEGONE, REAL);
   trsm1->AddInputs(4, split, 4, set5->OutTun(0), 0);
   Poss *poss7 = new Poss(trsm1,false);
-  PSet *set7 = new PSet(poss7);
+  RealPSet *set7 = new RealPSet(poss7);
 
   TriInv *triInv = new TriInv(DMLAYER, LOWER);
   triInv->AddInput(split, 4);
   Poss *poss4 = new Poss(triInv,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
 
   CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
@@ -247,7 +247,7 @@ Loop* TriInvAlgVar1Lower(Node *in, ConnNum num)
 #endif
 }
 
-Loop* TriInvAlgVar1Upper(Node *in, ConnNum num)
+RealLoop* TriInvAlgVar1Upper(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -258,17 +258,17 @@ Loop* TriInvAlgVar1Upper(Node *in, ConnNum num)
   Trxm* trmm = new Trxm(false, DMLAYER, LEFT, UPPER, NONUNIT, NORMAL, COEFNEGONE, REAL);
   trmm->AddInputs(4, split, 0, split, 3);
   Poss *poss5 = new Poss(trmm,false);
-  PSet *set5 = new PSet(poss5);
+  RealPSet *set5 = new RealPSet(poss5);
 
   Trxm *trsm = new Trxm(true, DMLAYER, RIGHT, UPPER, NONUNIT, NORMAL, COEFONE, REAL);
   trsm->AddInputs(4, split, 4, set5->OutTun(0), 0);
   Poss *poss7 = new Poss(trsm,false);
-  PSet *set7 = new PSet(poss7);
+  RealPSet *set7 = new RealPSet(poss7);
 
   TriInv *triInv = new TriInv(DMLAYER, UPPER);
   triInv->AddInput(split, 4);
   Poss *poss4 = new Poss(triInv,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
 
 
   CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
@@ -294,7 +294,7 @@ Loop* TriInvAlgVar1Upper(Node *in, ConnNum num)
 #endif
 }
 
-Loop* TriInvAlgVar2Lower(Node *in, ConnNum num)
+RealLoop* TriInvAlgVar2Lower(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -305,17 +305,17 @@ Loop* TriInvAlgVar2Lower(Node *in, ConnNum num)
   Trxm *trsm1 = new Trxm(true, DMLAYER, LEFT, LOWER, NONUNIT, NORMAL, COEFONE, REAL);
   trsm1->AddInputs(4, split, 8, split, 5);
   Poss *poss5 = new Poss(trsm1,false);
-  PSet *set5 = new PSet(poss5);
+  RealPSet *set5 = new RealPSet(poss5);
 
   Trxm *trsm2 = new Trxm(true, DMLAYER, RIGHT, LOWER, NONUNIT, NORMAL, COEFNEGONE, REAL);
   trsm2->AddInputs(4, split, 4, set5->OutTun(0), 0);
   Poss *poss7 = new Poss(trsm2,false);
-  PSet *set7 = new PSet(poss7);
+  RealPSet *set7 = new RealPSet(poss7);
 
   TriInv *triInv = new TriInv(DMLAYER, LOWER);
   triInv->AddInput(split, 4);
   Poss *poss4 = new Poss(triInv,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
 
   CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
@@ -342,7 +342,7 @@ Loop* TriInvAlgVar2Lower(Node *in, ConnNum num)
 }
 
 
-Loop* TriInvAlgVar2Upper(Node *in, ConnNum num)
+RealLoop* TriInvAlgVar2Upper(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -353,17 +353,17 @@ Loop* TriInvAlgVar2Upper(Node *in, ConnNum num)
   Trxm *Trsm1 = new Trxm(true, DMLAYER, RIGHT, UPPER, NONUNIT, NORMAL, COEFONE, REAL);
   Trsm1->AddInputs(4, split, 8, split, 7);
   Poss *poss5 = new Poss(Trsm1,false);
-  PSet *set5 = new PSet(poss5);
+  RealPSet *set5 = new RealPSet(poss5);
 
   Trxm *Trsm2 = new Trxm(true, DMLAYER, LEFT, UPPER, NONUNIT, NORMAL, COEFNEGONE, REAL);
   Trsm2->AddInputs(4, split, 4, set5->OutTun(0), 0);
   Poss *poss7 = new Poss(Trsm2,false);
-  PSet *set7 = new PSet(poss7);
+  RealPSet *set7 = new RealPSet(poss7);
 
   TriInv *triInv = new TriInv(DMLAYER, UPPER);
   triInv->AddInput(split, 4);
   Poss *poss4 = new Poss(triInv,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
 
 
   CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
@@ -391,7 +391,7 @@ Loop* TriInvAlgVar2Upper(Node *in, ConnNum num)
 #endif
 }
 
-Loop* TriInvAlgVar8Lower(Node *in, ConnNum num)
+RealLoop* TriInvAlgVar8Lower(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAGBACK, POSSTUNIN, true);
@@ -404,19 +404,19 @@ Loop* TriInvAlgVar8Lower(Node *in, ConnNum num)
   Trxm *trmm = new Trxm(false, DMLAYER, RIGHT, LOWER, NONUNIT, NORMAL, COEFONE, REAL);
   trmm->AddInputs(4, split, 8, split, 5);
   Poss *poss = new Poss(trmm,false);
-  PSet *set = new PSet(poss);
+  RealPSet *set = new RealPSet(poss);
 
   //L_{21} = - L_{11}^{-1} L_{21}
   Trxm *Trsm1 = new Trxm(true, DMLAYER, LEFT, LOWER, NONUNIT, NORMAL, COEFNEGONE, REAL);
   Trsm1->AddInputs(4, split, 4, set->OutTun(0), 0);
   Poss *poss5 = new Poss(Trsm1,false);
-  PSet *set5 = new PSet(poss5);
+  RealPSet *set5 = new RealPSet(poss5);
 
   //L_{11} = L_{11}^{-1}
   TriInv *triInv = new TriInv(DMLAYER, LOWER);
   triInv->AddInput(split, 4);
   Poss *poss4 = new Poss(triInv,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
 
   CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAGBACK, POSSTUNOUT);
   comA2->AddInput(split,0);
@@ -444,7 +444,7 @@ Loop* TriInvAlgVar8Lower(Node *in, ConnNum num)
 
 
 
-Loop* TriInvAlgVar3Lower(Node *in, ConnNum num)
+RealLoop* TriInvAlgVar3Lower(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -455,22 +455,22 @@ Loop* TriInvAlgVar3Lower(Node *in, ConnNum num)
   Trxm *trsm1 = new Trxm(true, DMLAYER, RIGHT, LOWER, NONUNIT, NORMAL, COEFNEGONE, REAL);
   trsm1->AddInputs(4, split, 4, split, 5);
   Poss *poss5 = new Poss(trsm1,false);
-  PSet *set5 = new PSet(poss5);
+  RealPSet *set5 = new RealPSet(poss5);
 
   Gemm *gemm = new Gemm(DMLAYER, NORMAL, NORMAL, COEFONE, COEFONE,REAL);
   gemm->AddInputs(6, set5->OutTun(0), 0, split, 1, split, 2);
   Poss *poss6 = new Poss(gemm,false);
-  PSet *set6 = new PSet(poss6);
+  RealPSet *set6 = new RealPSet(poss6);
 
   Trxm *trsm2 = new Trxm(true, DMLAYER, LEFT, LOWER, NONUNIT, NORMAL, COEFONE, REAL);
   trsm2->AddInputs(4, split, 4, split, 1);
   Poss *poss7 = new Poss(trsm2,false);
-  PSet *set7 = new PSet(poss7);
+  RealPSet *set7 = new RealPSet(poss7);
 
   TriInv *triInv = new TriInv(DMLAYER, LOWER);
   triInv->AddInput(split, 4);
   Poss *poss4 = new Poss(triInv,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
 
   CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
@@ -497,7 +497,7 @@ Loop* TriInvAlgVar3Lower(Node *in, ConnNum num)
 }
 
 
-Loop* TriInvAlgVar3Upper(Node *in, ConnNum num)
+RealLoop* TriInvAlgVar3Upper(Node *in, ConnNum num)
 {
 #if DOELEM
   SplitSingleIter *split = new SplitSingleIter(PARTDIAG, POSSTUNIN, true);
@@ -508,22 +508,22 @@ Loop* TriInvAlgVar3Upper(Node *in, ConnNum num)
   Trxm *Trsm1 = new Trxm(true, DMLAYER, LEFT, UPPER, NONUNIT, NORMAL, COEFNEGONE, REAL);
   Trsm1->AddInputs(4, split, 4, split, 7);
   Poss *poss5 = new Poss(Trsm1,false);
-  PSet *set5 = new PSet(poss5);
+  RealPSet *set5 = new RealPSet(poss5);
 
   Gemm *gemm = new Gemm(DMLAYER, NORMAL,NORMAL, COEFONE, COEFONE,REAL);
   gemm->AddInputs(6, split, 3, set5->OutTun(0), 0, split, 6);
   Poss *poss6 = new Poss(gemm,false);
-  PSet *set6 = new PSet(poss6);
+  RealPSet *set6 = new RealPSet(poss6);
 
   Trxm *Trsm2 = new Trxm(true, DMLAYER, RIGHT, UPPER, NONUNIT, NORMAL, COEFONE, REAL);
   Trsm2->AddInputs(4, split, 4, split, 3);
   Poss *poss7 = new Poss(Trsm2,false);
-  PSet *set7 = new PSet(poss7);
+  RealPSet *set7 = new RealPSet(poss7);
 
   TriInv *triInv = new TriInv(DMLAYER, UPPER);
   triInv->AddInput(split, 4);
   Poss *poss4 = new Poss(triInv,false);
-  PSet *set4 = new PSet(poss4);
+  RealPSet *set4 = new RealPSet(poss4);
 
   CombineSingleIter *comA2 = new CombineSingleIter(PARTDIAG, POSSTUNOUT);
   comA2->AddInput(split,0);
