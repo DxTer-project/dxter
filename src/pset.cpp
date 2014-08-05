@@ -47,7 +47,7 @@ PSet::PSet(Poss *poss)
   }
   if (IsLoop()) {
     Loop *loop = (Loop*)this;
-    m_functionality += (char)(loop->m_bsSize.Size());
+    m_functionality += (char)(loop->m_bsSize.GetSize());
   }
   //Make single tunnels with multiple inputs/outputs into individual tunnels
   //Poss mergin with multiple intput/output tunnels is very buggy
@@ -146,7 +146,7 @@ void PSet::AddPoss(Poss *poss)
       m_functionality = poss->GetFunctionalityString();
       if (IsLoop()) {
 	Loop *loop = (Loop*)this;
-	m_functionality += (char)(loop->m_bsSize.Size());
+	m_functionality += (char)(loop->m_bsSize.GetSize());
       }
       if (m_functionality.empty())
 	throw;
@@ -217,9 +217,9 @@ bool PSet::operator==(const PSet &rhs) const
 #endif
 	if (((Loop*)this)->m_bsSize != ((Loop*)(&rhs))->m_bsSize)
 	  return false;
-	if (((Loop*)this)->m_bsSize.Size() == 0) {
+	if (((Loop*)this)->m_bsSize.GetSize() == 0) {
 	  cout << "BS bs\n";
-	  cout << ((Loop*)this)->m_bsSize.Size() << endl;
+	  cout << ((Loop*)this)->m_bsSize.GetSize() << endl;
 	  throw;
 	}
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
@@ -1664,7 +1664,7 @@ void PSet::FormSetAround()
   newSet->m_functionality = newPoss->GetFunctionalityString();
   if (newSet->IsLoop()) {
     Loop *loop = (Loop*)(newSet);
-    newSet->m_functionality += (char)(loop->m_bsSize.Size());
+    newSet->m_functionality += (char)(loop->m_bsSize.GetSize());
   }
 }
 

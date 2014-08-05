@@ -121,6 +121,8 @@ string Coef::LLDLAStr() const
       return "&LLDLA_NEG_ONE";
     case(COEFVALNEGONEHALF):
       return "&LLDLA_NEG_ONE_HALF";
+    default:
+      throw;
     }
 }
 

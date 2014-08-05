@@ -90,7 +90,7 @@ class BSSize
   string SubSizeStr() const;
   string Str() const;
 
-  inline Size Size() const {
+  inline Size GetSize() const {
     switch(m_val)
       {
 #if DOELEM

@@ -901,7 +901,7 @@ void Loop::SetBS(BSSize size)
 
 int Loop::GetBS() const
 {
-  return (int)(m_bsSize.Size());
+  return (int)(m_bsSize.GetSize());
 }
 
 SplitBase* Loop::GetControl() const
