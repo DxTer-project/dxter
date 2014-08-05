@@ -515,8 +515,10 @@ bool LoopTunnel::QuadInUse(Quad quad, bool atEnd) const
     }
     return false;
   }
-  else
-    throw;
+  else {
+    cout << TunTypeToStr(m_tunType) << endl;
+    throw; 
+  }
 }
 
 LoopTunnel* LoopTunnel::GetMatchingOutTun() const

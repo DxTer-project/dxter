@@ -907,6 +907,8 @@ unsigned int SplitSingleIter::NumOutputs() const
 #if TWOD
 bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
 {
+  if (m_pset && !m_pset->IsReal())
+    return ((SplitSingleIter*)GetRealTunnel())->QuadInUse(quad,atEnd);
   if (m_tunType == SETTUNIN) {
     Node *child = Child(0);
     if (!child->IsLoopTunnel())

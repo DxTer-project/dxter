@@ -25,7 +25,7 @@
 
 #include <vector>
 #include "base.h"
-#include "RealPSet.h"
+#include "realPSet.h"
 #include "graphIter.h"
 
 typedef Node* (*ConstructorFunc)();

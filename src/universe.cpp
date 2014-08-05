@@ -405,7 +405,7 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
 		 << setprecision(15) << tot << ";\n";
 	
 	*costOut << "refs(" << graphNum << ") = {[ ";
-	TransConstVecIter iter = transList.begin();
+	TransVecConstIter iter = transList.begin();
 	for(; iter != transList.end(); ++iter) {
 	  *costOut << (size_t)(*iter) << " ";
 	}
