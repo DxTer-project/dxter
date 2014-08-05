@@ -31,7 +31,7 @@
 
 extern unsigned int M_phase;
 
-#define FORMSETSEARLY 1
+#define FORMSETSEARLY 0
 
 
 RealPSet::RealPSet()
