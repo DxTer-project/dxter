@@ -29,6 +29,7 @@
 #include <omp.h>
 #endif
 #include "loopSupport.h"
+#include "contraction.h"
 
 extern unsigned int M_phase;
 
@@ -178,9 +179,9 @@ bool NothingBetween(const BasePSet *left, const BasePSet *right)
 
 bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 {
-
+  bool onlyAllowParallelStreams = false;
 #if DOTENSORS
-  if (CurrPhase == ROTENSORPHASE) 
+  if (false && CurrPhase == ROTENSORPHASE) 
   {
     const Poss *poss1 = set1->GetPosses().begin()->second;
     const Poss *poss2 = set2->GetPosses().begin()->second;
@@ -203,6 +204,47 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 	  return false;
     }
   }
+  else// if (CurrPhase == DPTENSORPHASE) 
+  {
+    const Poss *poss1 = set1->GetPosses().begin()->second;
+    const Poss *poss2 = set2->GetPosses().begin()->second;
+    if (poss1->m_sets.empty() || poss2->m_sets.empty()) {
+      NodeVecConstIter iter = poss1->m_possNodes.begin();
+      for( ; iter != poss1->m_possNodes.end(); ++iter) {
+	const Node *node = *iter;
+	if (node->GetNodeClass() != RedistNode::GetClass() &&
+	    node->GetNodeClass() != SumScatterUpdateNode::GetClass() &&
+	    node->GetNodeClass() != AllReduceNode::GetClass()) 
+	  {
+	    if (node->GetNodeClass() == Contraction::GetClass()) {
+	      onlyAllowParallelStreams = true;
+	      break;
+	    }
+	    else if (!node->IsTunnel()) {
+	      //	      cout << "node is " << node->GetType() << endl;
+	      return false;
+	    }
+	  }
+      }
+      iter = poss2->m_possNodes.begin();
+      for( ; iter != poss2->m_possNodes.end(); ++iter) {
+	const Node *node = *iter;
+	if (node->GetNodeClass() != RedistNode::GetClass() &&
+	    node->GetNodeClass() != SumScatterUpdateNode::GetClass() &&
+	    node->GetNodeClass() != AllReduceNode::GetClass())
+	  {
+	    if (node->GetNodeClass() == Contraction::GetClass()) {
+	      onlyAllowParallelStreams = true;
+	      break;
+	    }
+	    else if (!node->IsTunnel()) {
+	      //	      cout << "node is " << node->GetType() << endl;
+	      return false;
+	    }
+	  }
+      }
+    }
+  }
   
 #endif
   unsigned int i, j, k;
@@ -210,7 +252,7 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
     const Node *in = set1->m_inTuns[i];
     for(j = 0; j < in->m_inputs.size(); ++j) {
       const Node *inInput = in->Input(j);
-      if (inInput->IsTunnel()) {
+      if (!onlyAllowParallelStreams && inInput->IsTunnel()) {
         if (((Tunnel*)inInput)->m_pset == set2)
           return true;
       }
@@ -223,13 +265,15 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
       }
     }
   }
-  for(i = 0; i < set1->m_outTuns.size(); ++i) {
-    const Node *out = set1->m_outTuns[i];
-    for(j = 0; j < out->m_children.size(); ++j) {
-      const Node *child = out->Child(j);
-      if (child->IsTunnel()) {
-        if (((Tunnel*)child)->m_pset == set2)
-          return true;
+  if (!onlyAllowParallelStreams) {
+    for(i = 0; i < set1->m_outTuns.size(); ++i) {
+      const Node *out = set1->m_outTuns[i];
+      for(j = 0; j < out->m_children.size(); ++j) {
+	const Node *child = out->Child(j);
+	if (child->IsTunnel()) {
+	  if (((Tunnel*)child)->m_pset == set2)
+	    return true;
+	}
       }
     }
   }
