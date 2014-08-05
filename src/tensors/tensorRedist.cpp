@@ -88,7 +88,7 @@ void RedistNode::Prop()
       cout << "m_inputs.size() != 1\n";
       throw;
     }
-    
+
     if (!m_children.size())
       throw;
   
@@ -98,6 +98,11 @@ void RedistNode::Prop()
     const DistType &m_srcType = parent->DataType(InputConnNum(0)).m_dist;
     parent->Prop();
     const Dim numDims = m_info.m_dist.m_numDims;
+
+    if (m_info.m_dist == m_srcType)
+      throw;
+    
+
     
     if (numDims != InputNumDims(0)) {
       cout << "numDims " << numDims << " " << InputNumDims(0) << endl;
@@ -647,6 +652,8 @@ void RedistNode::AddVariables(VarSet &set) const
   }
 
   if (diffs.empty()) {
+    cout << m_info.m_dist.PrettyStr() << " <- " << m_srcType.PrettyStr() << endl;
+    cout << inName << endl;
     throw;
   }
   else if (diffs.size() == 1) {
@@ -928,14 +935,14 @@ bool SplitRedistribs::CanApply(const Node *node) const
   else if (src.m_numDims <= m_dim)
     return false;
   else {
+    bool foundDiff = false;
     if (src.m_dists[m_dim] != dest->m_dists[m_dim]) {
-      //      cout << "src " << src.m_dists[m_dim] << endl;
-      //      cout << "dest " << dest->m_dists[m_dim] << endl;
       DimVec destDims =  dest->m_dists[m_dim].DistEntryDims();
       for (Dim dim = 0; dim < dest->m_numDims; ++dim) {
 	if (dim != m_dim) {
 	  DistEntry srcDistEntry = src.m_dists[dim];
-	  //	    unsigned int destDistEntry = dest->m_dists[dim];
+	  if (dest->m_dists[dim] != srcDistEntry)
+	    foundDiff = true;
 	  DimVec srcDims = srcDistEntry.DistEntryDims();
 	  DimVecIter iter = srcDims.begin();
 	  for(; iter != srcDims.end(); ++iter) {
@@ -945,18 +952,9 @@ bool SplitRedistribs::CanApply(const Node *node) const
 		return false;
 	    }
 	  }
-	  /*
-	    if (srcDistEntry != destDistEntry) {
-	    if (srcDistEntry && !IsPrefix(srcDims,
-	    DistType::DistEntryDims(destDistEntry)))
-	    {
-	    return true;
-	    }
-	    }
-	  */
 	}
       }
-      return true;//false;
+      return foundDiff;
     }
     else {
       return false;
@@ -986,9 +984,19 @@ void SplitRedistribs::Apply(Node *node) const
   newRedist->AddInput(orig->Input(0), orig->InputConnNum(0));
   node->m_poss->AddNode(newRedist);
 
+  if (one == newRedist->InputDataType(0).m_dist)
+    throw;
+
+
   RedistNode *newRedist2 = new RedistNode(*two);
   newRedist2->AddInput(newRedist, 0);
   node->m_poss->AddNode(newRedist2);
+
+  if (*two == newRedist2->InputDataType(0).m_dist) {
+    cout << newRedist2->GetInputNameStr(0) << endl;
+    throw;
+  }
+
 
   node->RedirectChildren(newRedist2, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -1068,6 +1076,9 @@ void SingleIndexAllToAll::Apply(Node *node) const
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
   node->m_poss->AddNode(redist1);
 
+  if (type1 == redist1->InputDataType(0).m_dist)
+    throw;
+
   DistType type2 = redist->m_info.m_dist;
   DistEntry entry2 = type2.m_dists[m_dim];
   DimVec vec2 = entry2.DistEntryDims();
@@ -1088,9 +1099,18 @@ void SingleIndexAllToAll::Apply(Node *node) const
   redist2->AddInput(redist1, 0);
   node->m_poss->AddNode(redist2);
 
+  if (type2 == redist2->InputDataType(0).m_dist)
+    throw;
+
+
+
   RedistNode *redist3 = new RedistNode(redist->m_info.m_dist);
   redist3->AddInput(redist2, 0);
   node->m_poss->AddNode(redist3);
+
+  if (redist->m_info.m_dist == redist3->InputDataType(0).m_dist)
+    throw;
+
 
   node->RedirectChildren(redist3, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -1284,7 +1304,10 @@ void DoubleIndexAllToAll::Apply(Node *node) const
 	      RedistNode *newRedist = new RedistNode(intType);
 	      newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
 	      node->m_poss->AddNode(newRedist);
-	    
+
+	      if (intType == newRedist->InputDataType(0).m_dist)
+		throw;
+	      
 	      redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0),
 				      newRedist, 0);    
 	  
@@ -1361,9 +1384,15 @@ void SplitAllGathers::Apply(Node *node) const
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
   node->m_poss->AddNode(redist1);
 
+  if (intType == redist1->InputDataType(0).m_dist)
+    throw;
+
   RedistNode *redist2 = new RedistNode(destType);
   redist2->AddInput(redist1, 0);
   node->m_poss->AddNode(redist2);
+
+  if (destType == redist2->InputDataType(0).m_dist)
+    throw;
 
   node->RedirectChildren(redist2, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -1419,6 +1448,9 @@ void CombineDisappearingModes::Apply(Node *node) const
   RedistNode *newRedist = new RedistNode(intType);
   newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   redist->m_poss->AddNode(newRedist);
+
+  if (intType == newRedist->InputDataType(0).m_dist)
+    throw;
   
   redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0),
 			  newRedist, 0);    
@@ -1528,6 +1560,9 @@ void PermuteDistribution::Apply(Node *node) const
   RedistNode *newRedist = new RedistNode(type);
   newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   redist->m_poss->AddNode(newRedist);
+
+  if (type == newRedist->InputDataType(0).m_dist)
+    throw;
   
   redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0),
 			  newRedist, 0);    

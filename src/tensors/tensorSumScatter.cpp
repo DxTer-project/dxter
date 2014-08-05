@@ -523,6 +523,9 @@ void SeparateRedistFromSumScatter::Apply(Node *node) const
 
   RedistNode *redist = new RedistNode(inTypeInt);
   redist->AddInput(sum->Input(0), sum->InputConnNum(0));
+
+  if (inTypeInt == sum->InputDataType(0).m_dist)
+    throw;
   
   node->m_poss->AddNode(redist);
 
@@ -793,6 +796,10 @@ void SplitSumScatter::Apply(Node *node) const
 	  if (needRedist) {
 	    newRedist = new RedistNode(newOutTypeFull);
 	    newRedist->AddInput(newSum, 0);
+
+	    if (newOutTypeFull == newSum->DataType(0).m_dist)
+	      throw;
+
 	    node->m_poss->AddNode(newRedist);
 
 	    if (!newOutTypeFull.IsSane()) {
@@ -939,6 +946,9 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
   redist->AddInput(node->Input(1), node->InputConnNum(1));
   node->m_poss->AddNode(redist);
 
+  if (outTypeInt == redist->InputDataType(0).m_dist)
+    throw;
+
   SumScatterUpdateNode *newSum = new SumScatterUpdateNode(sum->m_coef, sum->m_sumDims);
   newSum->AddInput(node->Input(0), node->InputConnNum(0));
   newSum->AddInput(redist, 0);
@@ -948,6 +958,9 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
   RedistNode *redist2 = new RedistNode(outType);
   redist2->AddInput(newSum, 0);
   node->m_poss->AddNode(redist2);
+
+  if (outType == redist2->InputDataType(0).m_dist)
+    throw;
   
   
   sum->RedirectChildren(redist2, 0);
