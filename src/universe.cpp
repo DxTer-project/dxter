@@ -35,6 +35,7 @@
 #if DOLLDLA
 #define PRINTCODE
 #endif
+//#define PRINTCODE
 
 #define OUTPUTCODEATEACHITER 0
 
@@ -180,11 +181,13 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
     m_pset->FormSets(phase);   
   }
 #elif DOSUMSCATTERTENSORPHASE
-  if (phase == SUMSCATTERTENSORPHASE) {
+
+  if (false && phase == SUMSCATTERTENSORPHASE) {
     m_pset->FormSets(phase);
     cout << "\t\tFormed set\n";
     cout << "\t\t\t" << TotalCount() << " impl's\n";
   }
+  
 #endif
 
   CurrPhase = phase;
@@ -241,8 +244,7 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
       //We don't want to now get rid of those sets
       if (phase < SOPHASE)
 #elif DOSUMSCATTERTENSORPHASE
-	if (phase < SUMSCATTERTENSORPHASE ||
-	    phase == ROTENSORPHASE)
+	if (phase == ROTENSORPHASE)
 #endif
 	  foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
       time(&end);
