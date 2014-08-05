@@ -73,6 +73,7 @@ class DistContToLocalContStatASumScatter : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
+  virtual Cost RHSCostEstimate(const Node *node) const;
 };
 
 
@@ -98,6 +99,7 @@ class DistContToLocalContStatBSumScatter : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
+  virtual Cost RHSCostEstimate(const Node *node) const;
 };
 
 class DistContToLocalContStatC : public SingleTrans
@@ -110,6 +112,7 @@ class DistContToLocalContStatC : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
+  virtual Cost RHSCostEstimate(const Node *node) const;
 };
 
 /*

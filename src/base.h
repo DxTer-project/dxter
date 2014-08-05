@@ -30,7 +30,11 @@
 //Maximum number of refinement to use
 // in a MultiTrans (set to something large
 // if you don't want to use this heuristic)
+#if DOTENSORS
+#define MAXNUMBEROFREFINEMENTS 1
+#else
 #define MAXNUMBEROFREFINEMENTS 2
+#endif
 
 //Output cost code for Matlab vs. R
 #define MATLAB
@@ -225,6 +229,9 @@ typedef set<DistEntry,DistEntryCompare> EntrySet;
 typedef EntrySet::iterator EntrySetIter;
 typedef EntrySet::const_iterator EntrySetConstIter;
 
+class DistType;
+inline bool DistTypeNotEqual(const DistType &one, const DistType &two);
+inline bool DistTypeEqual(const DistType &one, const DistType &two);
 
 class DistType
 {
@@ -249,6 +256,8 @@ class DistType
   void AddNotReped(Dim dim);
   void AddNotReped(DistEntry entry);
   DistType& operator=(const DistType &rhs);
+  bool operator==(const DistType &rhs) const {return DistTypeEqual(*this,rhs);}
+  bool operator!=(const DistType &rhs) const {return DistTypeNotEqual(*this,rhs);}
 };
 #endif
 

@@ -295,6 +295,20 @@ string DistContToLocalContStatC::GetType() const
   return "DistContToLocalContStatC";
 }
 
+Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
+{
+  const Contraction *cont = (Contraction*)node;
+  Cost cost1 = 1;
+  for (Dim dim = 0; dim < cont->InputNumDims(0); ++dim) {
+    cost1 *= (*(cont->InputLen(0, dim)))[0];
+  }
+  Cost cost2 = 1;
+  for (Dim dim = 0; dim < cont->InputNumDims(1); ++dim) {
+    cost2 *= (*(cont->InputLen(1, dim)))[0];
+  }
+  return cost1 + cost2;
+}
+
 bool DistContToLocalContStatC::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != Contraction::GetClass())
@@ -329,18 +343,32 @@ void DistContToLocalContStatC::Apply(Node *node) const
 			      CType, cont->m_CIndices,
 			      BType);
 
-
   RedistNode *node1 = new RedistNode(AType);
+  node1->AddInput(node->Input(0),node->InputConnNum(0));
+
+  if (AType == node1->InputDataType(0).m_dist)
+    throw;
+
+  Poss *APoss = new Poss(node1, false);
+  RealPSet *ASet = new RealPSet(APoss);
+  node->m_poss->AddPSet(ASet,true,true);
+
   RedistNode *node2 = new RedistNode(BType);
+  node2->AddInput(node->Input(1),node->InputConnNum(1));
+
+  if (BType == node2->InputDataType(0).m_dist)
+    throw;
+
+  Poss *BPoss = new Poss(node2, false);
+  RealPSet *BSet = new RealPSet(BPoss);
+  node->m_poss->AddPSet(BSet,true,true);
+
+
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, 
 				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices, cont->m_contIndices);
-  node1->AddInput(node->Input(0),node->InputConnNum(0));
-  node2->AddInput(node->Input(1),node->InputConnNum(1));
-  LCont->AddInput(node1,0);
-  LCont->AddInput(node2,0);
+  LCont->AddInput(ASet->OutTun(0),0);
+  LCont->AddInput(BSet->OutTun(0),0);
   LCont->AddInput(node->Input(2),node->InputConnNum(2));
-  node->m_poss->AddNode(node1);
-  node->m_poss->AddNode(node2);
   node->m_poss->AddNode(LCont);
 
   cont->RedirectChildren(LCont,0);
@@ -455,6 +483,20 @@ bool DistContToLocalContStatASumScatter::CanApply(const Node *node) const
   return (cont->GetLayer() == m_fromLayer);
 }
 
+Cost DistContToLocalContStatASumScatter::RHSCostEstimate(const Node *node) const
+{
+  const Contraction *cont = (Contraction*)node;
+  Cost cost1 = 1;
+  for (Dim dim = 0; dim < cont->InputNumDims(1); ++dim) {
+    cost1 *= (*(cont->InputLen(1, dim)))[0];
+  }
+  Cost cost2 = 1;
+  for (Dim dim = 0; dim < cont->InputNumDims(2); ++dim) {
+    cost2 *= (*(cont->InputLen(2, dim)))[0];
+  }
+  return cost1 + cost2;
+}
+
 void DistContToLocalContStatASumScatter::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
@@ -482,38 +524,52 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
   MatchDistsAndFillInWithStar(cont->m_BIndices,
 			      AType, cont->m_AIndices,
 			      BType);
+
+  RedistNode *node2 = NULL;
+  RealPSet *BSet = NULL;
+
+  if (BType != node->InputDataType(1).m_dist) {
+    node2 = new RedistNode(BType);
+    node2->AddInput(node->Input(1),node->InputConnNum(1));
+    Poss *BPoss = new Poss(node2, false);
+    BSet = new RealPSet(BPoss);
+    node->m_poss->AddPSet(BSet,true,true);
+  }
+
   
+
   DistType CType;
   MatchDistsAndFillInWithStar(cont->m_CIndices,
 			      AType, cont->m_AIndices, 
 			      CType);
 
 
-
-  RedistNode *node2 = new RedistNode(BType);
+  
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
 				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
-  node2->AddInput(node->Input(1),node->InputConnNum(1));
   temp->AddInput(node->Input(2),node->InputConnNum(2));
-  LCont->AddInput(node->Input(0),node->InputConnNum(0));
-  LCont->AddInput(node2,0);
+  LCont->AddInput(node->Input(0), node->InputConnNum(0));
+  if (BSet)
+    LCont->AddInput(BSet->OutTun(0),0);
+  else
+    LCont->AddInput(node->Input(1),node->InputConnNum(1));
   LCont->AddInput(temp,0);
-  node->m_poss->AddNode(node2);
   node->m_poss->AddNode(temp);
   node->m_poss->AddNode(LCont);
 
   SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta, sumDims);
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
-  node->m_poss->AddNode(sum);
+  
+  Poss *sumPoss = new Poss(sum, false);
+  RealPSet *sumSet = new RealPSet(sumPoss);
+  node->m_poss->AddPSet(sumSet,true,true);
+  
 
-
-  //  sum->CheckSumDimsInOutput();
-
-  cont->RedirectChildren(sum,0);
+  cont->RedirectChildren(sumSet->OutTun(0),0);
 
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -612,6 +668,20 @@ void DistContToLocalContStatBAllReduce::Apply(Node *node) const
 
 
 
+Cost DistContToLocalContStatBSumScatter::RHSCostEstimate(const Node *node) const
+{
+  const Contraction *cont = (Contraction*)node;
+  Cost cost1 = 1;
+  for (Dim dim = 0; dim < cont->InputNumDims(0); ++dim) {
+    cost1 *= (*(cont->InputLen(0, dim)))[0];
+  }
+  Cost cost2 = 1;
+  for (Dim dim = 0; dim < cont->InputNumDims(2); ++dim) {
+    cost2 *= (*(cont->InputLen(2, dim)))[0];
+  }
+  return cost1 + cost2;
+}
+
 
 string DistContToLocalContStatBSumScatter::GetType() const
 {
@@ -655,6 +725,19 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
   MatchDistsAndFillInWithStar(cont->m_AIndices,
 			      BType, cont->m_BIndices,
 			      AType);
+
+  RedistNode *node1 = NULL;
+  RealPSet *ASet = NULL;
+
+  if (AType != node->InputDataType(0).m_dist) {
+    node1 = new RedistNode(AType);
+    node1->AddInput(node->Input(0),node->InputConnNum(0));
+
+    Poss *APoss = new Poss(node1, false);
+    ASet = new RealPSet(APoss);
+    node->m_poss->AddPSet(ASet,true,true);
+  }
+
   
   DistType CType;
   MatchDistsAndFillInWithStar(cont->m_CIndices,
@@ -662,29 +745,32 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
 			      CType);
 
 
-  RedistNode *node1 = new RedistNode(AType);
+
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
 				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
-  node1->AddInput(node->Input(0),node->InputConnNum(0));
   temp->AddInput(node->Input(2),node->InputConnNum(2));
-  LCont->AddInput(node1,0);
+  if (ASet)
+    LCont->AddInput(ASet->OutTun(0),0);
+  else
+    LCont->AddInput(node->Input(0),node->InputConnNum(0));
   LCont->AddInput(node->Input(1),node->InputConnNum(1));
   LCont->AddInput(temp,0);
-  node->m_poss->AddNode(node1);
+
   node->m_poss->AddNode(temp);
   node->m_poss->AddNode(LCont);
 
   SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta, sumDims);
   sum->AddInput(LCont, 0);
   sum->AddInput(node->Input(2),node->InputConnNum(2));
-  node->m_poss->AddNode(sum);
 
-  //  sum->CheckSumDimsInOutput();
+  Poss *sumPoss = new Poss(sum, false);
+  RealPSet *sumSet = new RealPSet(sumPoss);
+  node->m_poss->AddPSet(sumSet,true,true);
 
-  cont->RedirectChildren(sum,0);
+  cont->RedirectChildren(sumSet->OutTun(0),0);
 
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -918,15 +1004,30 @@ void DistContToLocalContStatC::Apply(int num, Node *node, void **cache) const
 		      BType);
 
   RedistNode *node1 = new RedistNode(AType);
-  RedistNode *node2 = new RedistNode(BType);
-  RedistNode *node3 = new RedistNode(CType);
-  Contraction *LCont = new Contraction(SMLAYER,  cont->m_alpha, cont->m_beta, cont->m_type, cont->m_indices);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
+
+  Poss *APoss = new Poss(node1, false);
+  RealPSet *ASet = new RealPSet(APoss);
+  node->m_poss->AddPSet(ASet,true,true);
+
+  RedistNode *node2 = new RedistNode(BType);
   node2->AddInput(node->Input(1),node->InputConnNum(1));
+
+  Poss *BPoss = new Poss(node2, false);
+  RealPSet *BSet = new RealPSet(BPoss);
+  node->m_poss->AddPSet(BSet,true,true);
+
+  RedistNode *node3 = new RedistNode(CType);
   node3->AddInput(node->Input(2),node->InputConnNum(2));
-  LCont->AddInput(node1,0);
-  LCont->AddInput(node2,0);
-  LCont->AddInput(node3,0);
+
+  Poss *CPoss = new Poss(node3, false);
+  RealPSet *CSet = new RealPSet(CPoss);
+  node->m_poss->AddPSet(CSet,true,true);
+
+  Contraction *LCont = new Contraction(SMLAYER,  cont->m_alpha, cont->m_beta, cont->m_type, cont->m_indices);
+  LCont->AddInput(ASet->OutTun(0),0);
+  LCont->AddInput(BSet->OutTun(0),0);
+  LCont->AddInput(CSet->OutTun(0),0);
 
   bool sum = false;
   for (unsigned int i = 0; i < cont->m_indices.length() && !sum; ++i) {
@@ -940,15 +1041,15 @@ void DistContToLocalContStatC::Apply(int num, Node *node, void **cache) const
   //  else {
     node4 = new RedistNode(cont->InputDataType(2).m_dist);
     node4->AddInput(LCont, 0);
+
+    Poss *CAfterPoss = new Poss(node4, false);
+    RealPSet *CAfterSet = new RealPSet(CAfterPoss);
+    node->m_poss->AddPSet(CAfterSetSet,true,true);
     //  }
     
-  node->m_poss->AddNode(node1);
-  node->m_poss->AddNode(node2);
-  node->m_poss->AddNode(node3);
   node->m_poss->AddNode(LCont);
-  node->m_poss->AddNode(node4);
 
-  node->RedirectChildren(node4,0);
+  node->RedirectChildren(CAfterSet->OutTun(0),0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
