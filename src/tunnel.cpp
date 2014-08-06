@@ -105,6 +105,7 @@ void Tunnel::Prop()
 	|| (m_tunType == POSSTUNOUT && m_children.size() != 1))
       {
 	cout << "m_inputs.size() != 1\n";
+	cout << "it's " << m_inputs.size() << endl;
 	if (m_tunType == POSSTUNIN)
 	  cout << "m_tunType == POSSTUNIN\n";
 	else
