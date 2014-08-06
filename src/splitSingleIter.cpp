@@ -278,8 +278,13 @@ void SplitSingleIter::Prop()
 #else
         if (m_children[i]->m_num == 3) {
 #endif
-          if (child)
+          if (child) {
+	    cout << child << endl;
+	    cout << child->GetType() << endl;
+	    cout << m_children[i]->m_n->GetType() << endl;
+	    cout << m_children[i]->m_n << endl;
             throw;
+	  }
           else
             child = m_children[i]->m_n;
         }
@@ -1394,6 +1399,7 @@ void SplitSingleIter::UpdateLocalSizes()
     }
   }
   else {
+    cout << loopType << endl;
     throw;
   }
 }
