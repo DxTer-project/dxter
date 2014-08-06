@@ -178,9 +178,9 @@ bool VVDotLoopRef::CanApply(const Node *node) const
   if (dot->GetLayer() != m_fromLayer) {
     return false;
   }
-  if (*(dot->GetInputN(0)) <= m_bs.Size()) {
+  if (*(dot->GetInputN(0)) <= m_bs.GetSize()) {
     return false;
-  } else if (*(dot->GetInputM(1)) <= m_bs.Size()) {
+  } else if (*(dot->GetInputM(1)) <= m_bs.GetSize()) {
     return false;
   } else {
     return true;

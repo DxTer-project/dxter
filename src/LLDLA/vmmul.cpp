@@ -198,9 +198,9 @@ bool VMMulLoopRef::CanApply(const Node* node) const
       return false;
     }
     if (m_dim == DIMN) {
-    return !(*(vmmul->GetInputN(1)) <= m_bs.Size());
+    return !(*(vmmul->GetInputN(1)) <= m_bs.GetSize());
     } else if (m_dim == DIMK) {
-      return !((*vmmul->GetInputM(1)) <= m_bs.Size());
+      return !((*vmmul->GetInputM(1)) <= m_bs.GetSize());
     } else {
       cout << "Error: No matching VMMulLoopRef for given dimension\n";
       throw;

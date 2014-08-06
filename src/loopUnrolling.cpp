@@ -581,13 +581,13 @@ void ViewMultipleIters::BuildDataTypeCache()
   switch (m_partDir) {
   case (PARTDOWN):
     {
-      m_sizes->AddRepeatedSizes(m_bs.Size(), GetInputM(0)->NumSizes(), 1);
+      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputM(0)->NumSizes(), 1);
       m_info.m_numRowsVar = m_bs.VarName();
       break;
     }
   case (PARTRIGHT):
     {
-      m_sizes->AddRepeatedSizes(m_bs.Size(), GetInputN(0)->NumSizes(), 1);
+      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputN(0)->NumSizes(), 1);
       m_info.m_numColsVar = m_bs.VarName();
       break;
     }
@@ -762,7 +762,7 @@ void CombineMultipleIters::Prop()
     switch (m_partDir) {
     case(PARTDOWN):
       {
-	Size bs = m_bs.Size();
+	Size bs = m_bs.GetSize();
 	for (int i = 0; i < m_numIters; ++i) {
 	  if (*GetInputM(i) != bs)
 	    throw;
@@ -771,7 +771,7 @@ void CombineMultipleIters::Prop()
       }
     case(PARTRIGHT):
       {
-	Size bs = m_bs.Size();
+	Size bs = m_bs.GetSize();
 	for (int i = 0; i < m_numIters; ++i) {
 	  if (*GetInputN(i) != bs)
 	    throw;

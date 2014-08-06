@@ -157,13 +157,13 @@ bool SMulLoopRef::CanApply(const Node *node) const
       return false;
   
     if (m_dim == DIMM) {
-      if (*(mul->GetInputM(1)) <= m_bs.Size())
+      if (*(mul->GetInputM(1)) <= m_bs.GetSize())
 	return false;
       else
 	return true;
     }
     else if (m_dim == DIMN) {
-      if (*(mul->GetInputN(1)) <= m_bs.Size())
+      if (*(mul->GetInputN(1)) <= m_bs.GetSize())
 	return false;
       else
 	return true;

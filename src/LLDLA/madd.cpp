@@ -162,9 +162,9 @@ bool MAddLoopRef::CanApply(const Node *node) const
       return false;
     }
     if (m_dim == DIMM) {
-      return !(*(madd->GetInputM(0)) <= m_bs.Size()) && !(*(madd->GetInputM(1)) <= m_bs.Size());
+      return !(*(madd->GetInputM(0)) <= m_bs.GetSize()) && !(*(madd->GetInputM(1)) <= m_bs.GetSize());
     } else if (m_dim == DIMN) {
-      return !(*(madd->GetInputN(0)) <= m_bs.Size()) && !(*(madd->GetInputN(1)) <= m_bs.Size());
+      return !(*(madd->GetInputN(0)) <= m_bs.GetSize()) && !(*(madd->GetInputN(1)) <= m_bs.GetSize());
     } else {
       return false;
     }

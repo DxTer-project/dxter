@@ -210,10 +210,10 @@ bool SVMulLoopRef::CanApply(const Node *node) const
       return false;
     }
     if (m_vtype == ROWVECTOR) {
-      return !(*(svmul->GetInputN(1)) <= m_bs.Size());
+      return !(*(svmul->GetInputN(1)) <= m_bs.GetSize());
     } 
     else if (m_vtype == COLVECTOR) {
-      return !(*(svmul->GetInputM(1)) <= m_bs.Size());
+      return !(*(svmul->GetInputM(1)) <= m_bs.GetSize());
     } 
     else {
       throw;

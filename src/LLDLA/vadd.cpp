@@ -183,15 +183,15 @@ bool VAddLoopRef::CanApply(const Node *node) const
     return false;
   }
   if (m_vtype == ROWVECTOR) {
-    if (!(*(vadd->GetInputN(0)) <= m_bs.Size())
-	&& !(*(vadd->GetInputN(1)) <= m_bs.Size())) {
+    if (!(*(vadd->GetInputN(0)) <= m_bs.GetSize())
+	&& !(*(vadd->GetInputN(1)) <= m_bs.GetSize())) {
       return true;
     } else {
       return false;
     }
   } else if (m_vtype == COLVECTOR) {
-    if (!(*(vadd->GetInputM(0)) <= m_bs.Size())
-	&& !(*(vadd->GetInputM(1)) <= m_bs.Size())) {
+    if (!(*(vadd->GetInputM(0)) <= m_bs.GetSize())
+	&& !(*(vadd->GetInputM(1)) <= m_bs.GetSize())) {
       return true;
     } else {
       return false;

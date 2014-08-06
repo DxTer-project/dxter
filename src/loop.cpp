@@ -751,12 +751,12 @@ void Loop::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
   bool needMin = false;
   if (split->m_dir == PARTDOWN) {
     *out << split->InputDataType(0).m_numRowsVar;
-    if (!split->GetInputM(0)->EvenlyDivisibleBy(m_bsSize.Size()))
+    if (!split->GetInputM(0)->EvenlyDivisibleBy(m_bsSize.GetSize()))
       needMin = true;
   }
   else if (split->m_dir == PARTRIGHT) {
     *out << split->InputDataType(0).m_numColsVar;
-    if (!split->GetInputN(0)->EvenlyDivisibleBy(m_bsSize.Size()))
+    if (!split->GetInputN(0)->EvenlyDivisibleBy(m_bsSize.GetSize()))
       needMin = true;
   }
   else
