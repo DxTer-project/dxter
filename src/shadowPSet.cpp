@@ -34,6 +34,9 @@ extern unsigned int M_phase;
 ShadowPSet::ShadowPSet()
   : m_realPSet(NULL)
 {
+#if !USESHADOWS
+  throw;
+#endif
 }
 
 ShadowPSet::~ShadowPSet()

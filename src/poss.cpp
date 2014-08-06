@@ -260,8 +260,13 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
   PSetVecIter setIter = poss->m_sets.begin();
   for(; setIter != poss->m_sets.end(); ++setIter) {
     BasePSet *newSet;
-    if (useShadows)
+    if (useShadows) {
+#if USESHADOWS
       newSet = (*setIter)->GetNewShadow();
+#else
+      throw;
+#endif
+    }
     else {
       newSet = (*setIter)->GetNewInst();
     }
@@ -906,6 +911,7 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
   }
   m_sets.erase(m_sets.begin()+right-1);
 
+#if USESHAODWS
   RealPSet *merged = (*leftSet)->GetReal()->HasMergedWith((*rightSet)->GetReal());
   if (merged) {
     ShadowPSet *shadow = merged->GetNewShadowDup(this);
@@ -1016,6 +1022,7 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
     delete *rightSet;
     return true;
   }
+#endif //USESHADOWS
   return false;
 }
 
@@ -1297,8 +1304,13 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
 	if (!cullIfPossible || doNotCull) {
 	  Poss *newLeft = new Poss;
 	  Poss *newRight = new Poss;
+#if USESHADOWS
 	  newLeft->Duplicate((*leftIter).second,mapLeft,true, true);
 	  newRight->Duplicate((*rightIter).second,mapRight,true, true);
+#else
+	  newLeft->Duplicate((*leftIter).second,mapLeft,true, false);
+	  newRight->Duplicate((*rightIter).second,mapRight,true, false);
+#endif
 
 	  for(unsigned int i = 0; i < newLeft->m_inTuns.size(); ++i) {
 	    mapLeft[newLeft->m_inTuns[i]->Input(0)]->AddChild(newLeft->m_inTuns[i],0);
@@ -2356,7 +2368,11 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 		node->SetHasRefined();
 	      Poss *newPoss = new Poss;
 	      NodeMap nodeMap = setTunnels;
+#if USESHADOWS
 	      newPoss->Duplicate(this,nodeMap,false,true);
+#else
+	      newPoss->Duplicate(this,nodeMap,false,false);
+#endif
 	      newPoss->PatchAfterDuplicate(nodeMap);
 	      Node *newNode = nodeMap[node];
 	      single->Apply(newNode);
@@ -2393,7 +2409,11 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      
 		Poss *newPoss = new Poss;
 		NodeMap nodeMap = setTunnels;
+#if USESHADOWS
 		newPoss->Duplicate(this,nodeMap,false,true);
+#else
+		newPoss->Duplicate(this,nodeMap,false,false);
+#endif
 		newPoss->PatchAfterDuplicate(nodeMap);
 		Node *newNode = nodeMap[node];
 		var->Apply(i, newNode, &cache);

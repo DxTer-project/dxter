@@ -25,6 +25,8 @@
 //#include "poss.h"
 //#include "possTunnel.h"
 
+#define USESHADOWS 1
+
 class RealPSet;
 class ShadowPSet;
 
