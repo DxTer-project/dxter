@@ -66,6 +66,7 @@ class Tunnel : public DLANode
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, ConnNum num) const;
   virtual bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const;
+  virtual bool IsSplit() const {return false;}
   virtual bool IsCombine() const {return false;}
   Tunnel* GetRealTunnel();
   const Tunnel* GetRealTunnel() const;
