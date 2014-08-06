@@ -2061,6 +2061,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
     newSet->SetDimName(realLeft->GetDimName());
 #endif
   newSet->m_bsSize = (realLeft->GetBSSize());
+  newSet->m_type = realLeft->m_type;
   newSet->m_label.clear();
   newSet->m_label.insert(realLeft->m_label.begin(),realLeft->m_label.end());
   newSet->m_label.insert(realRight->m_label.begin(),realRight->m_label.end());
@@ -2139,97 +2140,146 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 	     tunMapLeft, tunMapRight, newInputTunnelsToFix);
     
   
-  
   NodeVecIter setTunInIter = newInputTunnelsToFix.begin();
   for(; setTunInIter != newInputTunnelsToFix.end(); ++setTunInIter) {
-    if (!(*setTunInIter)->IsLoopTunnel())
-      throw;
-    LoopTunnel *rightSetInput = (LoopTunnel*)(*setTunInIter);
-    LoopTunnel *leftSetOutput = NULL;
-    if (rightSetInput->m_inputs.size() != 1)
-      throw;
-    if (rightSetInput->Input(0)->IsTunnel() && ((Tunnel*)rightSetInput->Input(0))->m_pset == newSet) {
-      LoopTunnel *newOutputToUse = ((LoopTunnel*)rightSetInput)->GetMatchingOutTun();
-      if (rightSetInput->InputConnNum(0) > 0)
-        throw;
-      leftSetOutput = (LoopTunnel*)(rightSetInput->Input(0));
-      if (!leftSetOutput->IsLoopTunnel()) {
-        cout << "!leftSetOutput->IsLoopTunnel()\n";
-        throw;
-      }
-      if (((Tunnel*)leftSetOutput)->m_tunType != SETTUNOUT) {
-        cout << "((Tunnel*)leftSetOutput)->m_tunType != SETTUNOUT\n";
-        throw;
-      }
-      ClassType rightInputType = rightSetInput->GetNodeClass();
-      ClassType leftOutputType = leftSetOutput->GetNodeClass();
-      if ((rightInputType == SplitSingleIter::GetClass() && leftOutputType != CombineSingleIter::GetClass())
-          || (leftOutputType == CombineSingleIter::GetClass() && rightInputType != SplitSingleIter::GetClass()))
-	{
-	  LoopTunnel *inTun = (LoopTunnel*)leftSetOutput->GetMatchingInTun();
-	  rightSetInput->ChangeInput1Way(leftSetOutput,0,inTun->Input(0),inTun->InputConnNum(0));
-	  leftSetOutput->RemoveChild(rightSetInput,0);
-	  leftSetOutput->CopyTunnelInfo(rightSetInput);
-	  leftSetOutput->GetMatchingInTun()->CopyTunnelInfo(rightSetInput);
-	}
-      else {
-        NodeConnVecIter rightSetInputChildIter = rightSetInput->m_children.begin();
-        NodeConnVecIter leftSetOutputInputIter = leftSetOutput->m_inputs.begin();
-        //	jth input to the children should be wired to outputTunnelOutputNum input to input
-        for(; rightSetInputChildIter != rightSetInput->m_children.end()
-	      && leftSetOutputInputIter != leftSetOutput->m_inputs.end();
-            ++rightSetInputChildIter, ++leftSetOutputInputIter)
-	  {
-	    Node *rightPossInput = (*rightSetInputChildIter)->m_n;
-	    Node *leftPossOutput = (*leftSetOutputInputIter)->m_n;
-	    Poss *poss = (Poss*)rightPossInput->m_poss;
-	    if (rightPossInput->m_poss != leftPossOutput->m_poss) {
-	      cout << "(rightPossInput->m_poss != leftPossOutput->m_poss)\n";
-	      cout << rightPossInput->m_poss << " != " << leftPossOutput->m_poss << endl;
-	      throw;
-	    }
-	    while (rightPossInput->m_children.size()) {
-	      NodeConn *childConn = rightPossInput->m_children[0];
-	      Node *inputToPossOutput = leftPossOutput->Input(childConn->m_num);
-	      ConnNum inputToPossOutputNum = leftPossOutput->InputConnNum(childConn->m_num);
-	      Node *userOfInput = childConn->m_n;
-	      if (userOfInput->m_poss != inputToPossOutput->m_poss) {
-		cout << "userOfInput->m_poss != inputToPossOutput->m_poss\n";
-		throw;
-	      }
-	      userOfInput->ChangeInput1Way(rightPossInput, childConn->m_num, inputToPossOutput, inputToPossOutputNum);
-	      delete childConn;
-	      rightPossInput->m_children.erase(rightPossInput->m_children.begin());
-	    }
-	    delete leftPossOutput->m_children[0];
-	    leftPossOutput->m_children.erase(leftPossOutput->m_children.begin());
-	    poss->DeleteChildAndCleanUp(leftPossOutput, false, true);
-	    if (leftPossOutput->m_children.size() || leftPossOutput->m_inputs.size())
-	      throw;
-          
-	    if (rightPossInput->m_children.size())
-	      throw;
-	    poss->DeleteNode(rightPossInput);
-	  }
-        
-        if (rightSetInputChildIter != rightSetInput->m_children.end()
-            || leftSetOutputInputIter != leftSetOutput->m_inputs.end())
-	  {
-	    cout << "unbalanced posses\n";
-	    throw;
-	  }
-        leftSetOutput->RemoveChild(rightSetInput,0);
-        if (leftSetOutput->m_children.size())
-          leftSetOutput->RedirectChildren(newOutputToUse);
-        delete leftSetOutput;
-        newSet->RemoveOutTun(leftSetOutput);
-        newSet->RemoveInTun(rightSetInput);
-        rightSetInput->m_inputs.erase(rightSetInput->m_inputs.begin());
-        if (rightSetInput->m_inputs.size()) {
-          //	rightSetInput->m_inputs.erase(rightSetInput->m_inputs.begin());
+    Tunnel *newSetInput = (Tunnel*)(*setTunInIter);
+    NodeConnVecIter inputInputConIter = newSetInput->m_inputs.begin();
+    NodeSet set;
+    for(unsigned int i = 0; i < newSetInput->m_inputs.size(); ++i) {
+      Tunnel *newSetOutput = NULL;
+      if (newSetInput->Input(i)->IsTunnel() && ((Tunnel*)((*inputInputConIter)->m_n))->m_pset == newSet)
+        newSetOutput = (Tunnel*)(newSetInput->Input(i));
+      if (newSetOutput) {
+	Tunnel *newOutputToUse = NULL;
+	if (newSetInput->IsLoopTunnel())
+	  newOutputToUse = ((LoopTunnel*)newSetInput)->GetMatchingOutTun();
+	if(newSetOutput->IsCombine() != newSetInput->IsSplit())
+	  throw;
+        if (!newSetOutput->IsTunnel()) {
+          cout << "!newSetOutput->IsTunnel()\n";
           throw;
         }
-        delete rightSetInput;
+        if (((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT) {
+          cout << "((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT\n";
+          throw;
+        }
+	if (newSetInput->m_children.size() != newSetOutput->m_inputs.size())
+	  throw;
+
+	while (!newSetInput->m_children.empty())
+	  {
+	    Node *possInput = newSetInput->m_children[0]->m_n;
+	    Node *possOutput = newSetOutput->m_inputs[0]->m_n;
+	    if (possInput->m_poss != possOutput->m_poss) {
+	      cout << "(possInput->m_poss != possOutput->m_poss)\n";
+	      cout << possInput->m_poss << " != " << possOutput->m_poss << endl;
+	      throw;
+	    }
+
+	    while (!possInput->m_children.empty()) {
+	      Node *userOfInput = possInput->m_children[0]->m_n;
+	      ConnNum inputUseNum = possInput->m_children[0]->m_num;
+	      /*
+	      if (userOfInput->IsTunnel(POSSTUNOUT)) {
+		cout << "user of input " << userOfInput << ", " << inputUseNum << endl;
+		cout << "changed to " << possOutput->Input(inputUseNum) << ", " << possOutput->InputConnNum(inputUseNum) << endl;
+		Node *in = possOutput->Input(inputUseNum);
+		for(int i = 0; i < in->m_children.size(); ++i) {
+		  if (in->m_children[i]->m_num == possOutput->InputConnNum(inputUseNum)) {
+		    cout << "\talready had a child with same connection: " << in->m_children[i]->m_n << endl;
+		  }
+		}
+	      }
+	      */
+	      if (userOfInput->m_poss != possInput->m_poss) {
+		cout << "userOfInput->m_poss != possInput->m_poss\n";
+		throw;
+	      }
+	      userOfInput->ChangeInput1Way(possInput, inputUseNum,
+					   possOutput->Input(inputUseNum), possOutput->InputConnNum(inputUseNum));
+
+	      delete possInput->m_children[0];
+	      possInput->m_children.erase(possInput->m_children.begin());
+	    }
+
+	    delete possInput->m_inputs[0];
+	    possInput->m_inputs.clear();
+	    delete newSetInput->m_children[0];
+	    newSetInput->m_children.erase(newSetInput->m_children.begin());
+
+	    delete newSetOutput->m_inputs[0];
+	    newSetOutput->m_inputs.erase(newSetOutput->m_inputs.begin());
+	    delete possOutput->m_children[0];
+	    possOutput->m_children.clear();
+	    possOutput->m_poss->DeleteChildAndCleanUp(possOutput,false,true,false);
+	    possInput->m_poss->DeleteNode(possInput);
+	  }
+        --i;
+
+        if (newSetOutput->m_children.size()) {
+	  if (!newOutputToUse)
+	    throw;
+	  newSetOutput->RedirectChildren(newOutputToUse);
+	}
+	unsigned int find = FindInNodeVec(newSet->m_outTuns, newSetOutput);
+
+	unsigned int newVal = (newSetOutput ? FindInNodeVec(newSet->m_outTuns, newSetOutput) : 999);
+	if (newVal > find)
+	  --newVal;
+	
+	for(unsigned int j = 0; j < newSet->m_leftOutMap.size(); ++j) {
+	  int val = newSet->m_leftOutMap[j];
+	  if (val == find) {
+	    if (newOutputToUse)
+	      newSet->m_leftOutMap[j] = newVal;
+	    else
+	      newSet->m_leftOutMap[j] = -1;
+	  }
+	  else if (val > find)
+	    newSet->m_leftOutMap[j] = val-1;
+	}
+
+	for(unsigned int j = 0; j < newSet->m_rightOutMap.size(); ++j) {
+	  int val = newSet->m_rightOutMap[j];
+	  if (val == find) {
+	    if (newOutputToUse)
+	      newSet->m_rightOutMap[j] = newVal;
+	    else
+	      newSet->m_rightOutMap[j] = -1;
+	  }
+	  else if (val > find)
+	    newSet->m_rightOutMap[j] = val-1;
+	}
+
+        newSet->RemoveOutTun(newSetOutput);
+        delete newSetOutput;
+
+	find = FindInNodeVec(newSet->m_inTuns, newSetInput);
+
+	for (unsigned int j = 0; j < newSet->m_leftInMap.size(); ++j) {
+	  int val = newSet->m_leftInMap[j];
+	  if (val == find)
+	    newSet->m_leftInMap[j] = -1;
+	  if (val > find)
+	    newSet->m_leftInMap[j] = val-1;
+	}
+	for (unsigned int j = 0; j < newSet->m_rightInMap.size(); ++j) {
+	  int val = newSet->m_rightInMap[j];
+	  if (val == find)
+	    newSet->m_rightInMap[j] = -1;
+	  else if (val > find)
+	    newSet->m_rightInMap[j] = val-1;
+	}
+
+
+        newSet->RemoveInTun(newSetInput);
+        if (newSetInput->m_inputs.size() > 1) {
+          throw;
+        }
+	delete newSetInput->m_inputs[0];
+        newSetInput->m_inputs.clear();
+        delete newSetInput;
+
       }
     }
   }
