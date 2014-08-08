@@ -266,6 +266,8 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
 #else
       throw;
 #endif
+      if ((*setIter)->IsLoop() != newSet->IsLoop())
+	throw;
     }
     else {
       newSet = (*setIter)->GetNewInst();
@@ -915,6 +917,8 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
   RealPSet *merged = (*leftSet)->GetReal()->HasMergedWith((*rightSet)->GetReal());
   if (merged) {
     ShadowPSet *shadow = merged->GetNewShadowDup(this);
+    if (shadow->IsLoop() != merged->IsLoop())
+      throw;
 #if PRINTTRACKING
     cout << "reusing " << merged << endl;
     cout << "forming shadow " << shadow << endl;
@@ -1281,6 +1285,8 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
   if (MergePart1(left, right, &leftSet, &rightSet))
     return;
 
+  if (leftSet->IsLoop() || rightSet->IsLoop())
+    throw;
 
   NodeMap mapLeft, mapRight;
 
@@ -2095,8 +2101,13 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 	  Poss *newRight = new Poss;
 	  NodeMap mapLeft = tunMapLeft;
 	  NodeMap mapRight = tunMapRight;
+#if USESHADOWS
 	  newLeft->Duplicate((*leftIter).second,mapLeft,true, true);
 	  newRight->Duplicate((*rightIter).second,mapRight,true, true);
+#else
+	  newLeft->Duplicate((*leftIter).second,mapLeft,true, false);
+	  newRight->Duplicate((*rightIter).second,mapRight,true, false);
+#endif
       
 	  for(unsigned int i = 0; i < newLeft->m_inTuns.size(); ++i) {
 	    mapLeft[newLeft->m_inTuns[i]->Input(0)]->AddChild(newLeft->m_inTuns[i],0);
