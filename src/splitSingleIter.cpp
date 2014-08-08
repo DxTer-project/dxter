@@ -247,8 +247,14 @@ void SplitSingleIter::Prop()
       }
     }
     else if (m_tunType == SETTUNIN) {
-      if (!m_pset->IsLoop())
+      if (!m_pset->IsLoop()) {
+	if (m_pset->IsReal())
+	  cout << "m_pset is real\n";
+	else
+	  cout << "m_pset is shadow\n";
+	cout << m_pset << endl;
 	throw;
+      }
       if (m_inputs.size() != 1) {
 	cout << "split has wrong number of inputs\n";
 	throw;
