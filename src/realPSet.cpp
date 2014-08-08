@@ -104,6 +104,7 @@ void RealPSet::Init(Poss *poss)
 
 void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
 {
+  //  cout << "updating " << this << endl;
   if (m_mergeLeft == oldPtr) {
     m_mergeLeft = newPtr;
     if (newPtr == NULL) {
@@ -127,8 +128,12 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
     return;
   }
 
-  if (m_mergeMap.empty())
-    throw;
+  if (m_mergeMap.empty()) {
+    if (!newPtr)
+      return;
+    else 
+      throw;
+  }
   PSetMapIter setIter = m_mergeMap.begin();
   for(; setIter != m_mergeMap.end(); ++setIter) {
     if (setIter->first == oldPtr) {
@@ -157,29 +162,60 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
 
 void RealPSet::Migrate()
 {
+  //  cout << "migrating " << this << endl;
   if (m_shadows.empty()) {
+    //    cout << "deleting, no shadows " << this << endl;
 #if PRINTTRACKING
     cout << "deleting, no shadows " << this << endl;
 #endif
-    if (m_mergeLeft)
-      m_mergeLeft->UpdateRealPSetPointers(this, NULL);
-    if (m_mergeRight)
+    if (m_mergeLeft) {
+      //      cout << "updating left\n";
+      m_mergeLeft->UpdateRealPSetPointers(this, NULL); 
+      m_mergeLeft = NULL;
+    }
+    if (m_mergeRight) {
+      //      cout << "updating right\n";
       m_mergeRight->UpdateRealPSetPointers(this, NULL);
+      m_mergeLeft = NULL;
+    }
+    //    cout << "map's size : " << m_mergeMap.size() << endl;
     PSetMapIter setIter = m_mergeMap.begin();
     for(; setIter != m_mergeMap.end(); ++setIter) {
+      //      cout << "updating first\n";
       setIter->first->UpdateRealPSetPointers(this, NULL);
+      //      cout << "updating second\n";
       setIter->second->UpdateRealPSetPointers(this, NULL);
     }
+    m_mergeMap.clear();
     return;
   }
   ShadowPSet *shadowToReplace = (ShadowPSet*)(m_shadows[0]);
   //  m_shadows.erase(m_shadows.begin());
 
 
-  RealPSet *newSet = new RealPSet;
+  BasePSet *newBase = GetNewInst();
+  if (!newBase->IsReal())
+    throw;
+
+  RealPSet *newSet = (RealPSet*)newBase;
+
+  //  cout << "migrating " << this << " to shadow " << shadowToReplace << ", replaced with " << newSet << endl;
+
+  if (shadowToReplace->IsLoop() != IsLoop())
+    throw;
+
+  if (shadowToReplace->m_realPSet != this) {
+    cout << "shadow doesn't point to me\n";
+    throw;
+  }
+
+
   newSet->m_functionality = m_functionality;
   newSet->m_shadows.swap(m_shadows);
 
+
+
+  
 #if PRINTTRACKING
   cout << "migrating " << this << " to shadow " << shadowToReplace << ", replaced with " << newSet << endl;
 #endif
@@ -205,8 +241,9 @@ void RealPSet::Migrate()
   newSet->m_mergeRight = m_mergeRight;
 
   PSetVecIter iter = newSet->m_shadows.begin();
-  for(; iter != newSet->m_shadows.end(); ++iter)
+  for(; iter != newSet->m_shadows.end(); ++iter) {
     ((ShadowPSet*)(*iter))->m_realPSet = newSet;
+  }
 
   newSet->m_inTuns.swap(shadowToReplace->m_inTuns);
   NodeVecIter nodeIter = newSet->m_inTuns.begin();
@@ -491,8 +528,10 @@ void RealPSet::Prop()
 	throw;
     }
     for(mapIter = m_rightOutMap.begin(); mapIter != m_rightOutMap.end(); ++mapIter) {
-      if (*mapIter >= outSize)
+      if (*mapIter >= outSize) {
+	cout << *mapIter << " >= " << outSize << endl;
 	throw;
+      }
     }
   }
   else {
@@ -620,6 +659,10 @@ void RealPSet::Prop()
   for(; shadowIter != m_shadows.end(); ++shadowIter) {
     if (((ShadowPSet*)(*shadowIter))->m_realPSet != this)
       throw;
+    if ((*shadowIter)->IsLoop() != IsLoop()) {
+      cout << "shadow and real loop satus don't agree\n";
+      throw;
+    }
   }
   
   m_hasProped = true;
@@ -1053,7 +1096,6 @@ void RealPSet::CombineAndRemoveTunnels()
     }
     */
   }
-  
 }
 
 void RealPSet::Simplify(const TransMap &simplifiers, bool recursive)
@@ -1330,6 +1372,8 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
       PSetVecIter setIter = currPoss->m_sets.begin();
       for(; setIter != currPoss->m_sets.end(); ++setIter) {
         BasePSet *newSet = (*setIter)->GetNewShadow();
+	if (newSet->IsLoop() != (*setIter)->IsLoop())
+	  throw;
         newSet->Duplicate(*setIter, map, true, true);
         newPoss->m_sets.push_back(newSet);
         newSet->m_ownerPoss = newPoss;
@@ -1719,6 +1763,8 @@ ShadowPSet* RealPSet::GetNewShadow()
 {
   ShadowPSet *shadow = new ShadowPSet;
   shadow->m_realPSet = this;
+  if (shadow->IsLoop() != IsLoop())
+    throw;
   m_shadows.push_back(shadow);
   return shadow;
 }
@@ -1746,6 +1792,9 @@ void RealPSet::SetInTunsAsPrinted()
 ShadowPSet* RealPSet::GetNewShadowDup(Poss *poss)
 {
   ShadowPSet *shadow = GetNewShadow();
+  if (IsLoop() != shadow->IsLoop())
+    throw;
+
   poss->AddPSet(shadow, true);
   NodeVecIter iter = m_inTuns.begin();
   for( ; iter != m_inTuns.end(); ++iter) {
