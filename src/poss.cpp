@@ -911,7 +911,7 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
   }
   m_sets.erase(m_sets.begin()+right-1);
 
-#if USESHAODWS
+#if USESHADOWS
   RealPSet *merged = (*leftSet)->GetReal()->HasMergedWith((*rightSet)->GetReal());
   if (merged) {
     ShadowPSet *shadow = merged->GetNewShadowDup(this);
@@ -1036,7 +1036,15 @@ void Poss::MergePart2(RealPSet *newSet,
   RealPSet *realLeft = leftSet->GetReal();
   RealPSet *realRight = rightSet->GetReal();
 
+#if PRINTTRACKING
+  cout << "realLeft: " << realLeft << endl;
+  cout << "realRight: " << realRight << endl;
+#endif
+  if (realLeft->m_mergeMap.find(realRight) != realLeft->m_mergeMap.end())
+    throw;
   realLeft->m_mergeMap.insert(PSetMapPair(realRight,newSet));
+  if (realRight->m_mergeMap.find(realLeft) != realRight->m_mergeMap.end())
+    throw;
   realRight->m_mergeMap.insert(PSetMapPair(realLeft,newSet));
   newSet->m_mergeLeft = realLeft;
   newSet->m_mergeRight = realRight;
