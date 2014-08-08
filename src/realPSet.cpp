@@ -248,13 +248,25 @@ void RealPSet::Migrate()
   newSet->m_inTuns.swap(shadowToReplace->m_inTuns);
   NodeVecIter nodeIter = newSet->m_inTuns.begin();
   for( ; nodeIter != newSet->m_inTuns.end(); ++nodeIter) {
-    ((Tunnel*)(*nodeIter))->m_pset = newSet;
+    Node *tun = *nodeIter;
+    ((Tunnel*)tun)->m_pset = newSet;
+    NodeConnVecIter connIter = tun->m_children.begin();
+    for(; connIter != tun->m_children.end(); ++connIter) {
+      Node *child = (*connIter)->m_n;
+      ((Tunnel*)child)->m_pset = newSet;
+    }
   }
 
   newSet->m_outTuns.swap(shadowToReplace->m_outTuns);
   nodeIter = newSet->m_outTuns.begin();
   for( ; nodeIter != newSet->m_outTuns.end(); ++nodeIter) {
-    ((Tunnel*)(*nodeIter))->m_pset = newSet;
+    Node *tun = *nodeIter;
+    ((Tunnel*)tun)->m_pset = newSet;
+    NodeConnVecIter connIter = tun->m_inputs.begin();
+    for(; connIter != tun->m_inputs.end(); ++connIter) {
+      Node *in = (*connIter)->m_n;
+      ((Tunnel*)in)->m_pset = newSet;
+    }
   }
   
   newSet->m_posses.swap(m_posses);
@@ -297,6 +309,7 @@ void RealPSet::Migrate()
     }
   }
   delete shadowToReplace;
+  newSet->m_ownerPoss->BuildDataTypeCache();
 }
 
 RealPSet::~RealPSet()
@@ -603,12 +616,7 @@ void RealPSet::Prop()
 	++iter;
 	++j;
       }
-
-//       if ((*iter).first != (*iter).second->GetHash()) {
-// 	cout << "Bad hash in prop\n";
-// 	throw;
-//       }
-
+      
       (*iter).second->Prop();
     }
   }
