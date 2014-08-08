@@ -2223,10 +2223,10 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 	}
 	unsigned int find = FindInNodeVec(newSet->m_outTuns, newSetOutput);
 
-	unsigned int newVal = (newSetOutput ? FindInNodeVec(newSet->m_outTuns, newSetOutput) : 999);
+	unsigned int newVal = (newOutputToUse ? FindInNodeVec(newSet->m_outTuns, newOutputToUse) : 999);
 	if (newVal > find)
 	  --newVal;
-	
+
 	for(unsigned int j = 0; j < newSet->m_leftOutMap.size(); ++j) {
 	  int val = newSet->m_leftOutMap[j];
 	  if (val == find) {
@@ -2253,6 +2253,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 
         newSet->RemoveOutTun(newSetOutput);
         delete newSetOutput;
+
 
 	find = FindInNodeVec(newSet->m_inTuns, newSetInput);
 
@@ -2335,7 +2336,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
       }
     }
   }
-  
+
   newSet->Simplify(simplifiers);
   //adding below.  Seems necessary
   newSet->BuildDataTypeCache();
