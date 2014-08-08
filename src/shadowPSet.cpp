@@ -61,6 +61,10 @@ void ShadowPSet::Prop()
   if (!m_realPSet->IsReal())
     throw;
 
+  if (m_realPSet->IsLoop() != IsLoop()) {
+    cout << "real and shadow loop status don't agree\n";
+    throw;
+  }
   
 
   if (m_inTuns.size() != m_realPSet->m_inTuns.size())
