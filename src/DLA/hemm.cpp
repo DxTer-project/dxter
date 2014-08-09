@@ -390,11 +390,11 @@ RealLoop* HemmLoopVar4(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisNC);
 #endif
 
   loop->SetDimName(DIMN);
@@ -516,11 +516,11 @@ RealLoop* HemmLoopVar8(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
 #endif
 
   loop->SetDimName(DIMK);
@@ -683,11 +683,11 @@ RealLoop* HemmLoopVar8Altered(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
 #endif
   
   return loop;
@@ -1085,7 +1085,7 @@ void BLISHemmLoopExp::Apply(Node *node) const
                                                 1, gebp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
-  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, USEBLISMC);
+  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, BlisMC);
 
   loop->SetDimName(DIMM);
   

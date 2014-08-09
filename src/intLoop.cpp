@@ -29,45 +29,30 @@
 #include "critSect.h"
 #include "blis.h"
 
-Size BSSizeToSize(BSSize size)
-{
-  switch(size)
-  {
 #if DOELEM
-    case (USEELEMBS):
-      return ELEM_BS;
+BSSize ElemBS(USEELEMBS);
 #elif DOBLIS
-    case (USEBLISMC):
-      return BLIS_MC_BS;
-    case (USEBLISKC):
-      return BLIS_KC_BS;
-    case (USEBLISNC):
-      return BLIS_NC_BS;
-    case (USEBLISOUTERBS):
-      return BLIS_OUTER_BS;
+BSSize BlisMC(USEBLISMC);
+BSSize BlisKC(USEBLISKC);
+BSSize BlisNC(USEBLISNC);
+BSSize BlisOuter(USEBLISOUTERBS);
 #elif DOTENSORS
-  case (USETENSORBS):
-    return TENSOR_BS;
+BSSize TensorBS(USETENSORBS);
 #elif DOLLDLA
-  case (USELLDLAMU):
-    return LLDLA_MU;
-  case (USELLDLA2MU):
-    return 2*LLDLA_MU;
-  case (USELLDLA3MU):
-    return 3*LLDLA_MU;
+BSSize LLDLAMu(USELLDLAMU);
+BSSize LLDLA2Mu(USELLDLA2MU);
+BSSize LLDLA3Mu(USELLDLA3MU);
 #endif
-  case (USEUNITBS):
-    return ONE;
-    default:
-      throw;
-  }
-}
+BSSize BadBS(BADBSSIZE);
+BSSize UnitBS(USEUNITBS);
 
-string BSSizeToVarName(BSSize size)
+string BSSize::VarName() const
 {
-  switch(size)
+  switch(m_val)
     {
 #if DOLLDLA
+    case (USEUNITBS):
+      return "1";
     case (USELLDLAMU):
       return MU_VAR_NAME;
     case (USELLDLA2MU):
@@ -80,11 +65,9 @@ string BSSizeToVarName(BSSize size)
     }
 }
 
-
-
-string BSSizeToStr(BSSize size)
+string BSSize::Str() const
 {
-  switch(size)
+  switch(m_val)
   {
 #if DOELEM
     case (USEELEMBS):
@@ -104,9 +87,9 @@ string BSSizeToStr(BSSize size)
   }
 }
 
-string BSSizeToSubSizeStr(BSSize size)
+string BSSize::SubSizeStr() const
 {
-  switch(size)
+  switch(m_val)
   {
 #if DOELEM
     case (USEELEMBS):
@@ -182,8 +165,10 @@ void IntLoop<PSetType>::Prop()
     if (((LoopTunnel*)in)->IsSplit()) {
       SplitBase *split = (SplitBase*)in;
       if (split->m_isControlTun) {
-        if (foundControl)
+        if (foundControl) {
+	  cout << "Multiple different control tunnels for the same loop\n";
           throw;
+	}
         else
           foundControl = true;
       }
@@ -580,7 +565,7 @@ template<class PSetType>
       *out << "th_shift_start_end(&" << idx << ", &" << dimLen << ", "
       << CommToStr(GetSubComm(m_comm)) << ", "
       << "bli_blksz_for_obj( &" << split->GetInputNameStr(0)
-      << ", " << BSSizeToSubSizeStr(GetBSSize) << "));\n";
+	   << ", " << GetBSSize().SubSizeStr() << "));\n";
       out.Indent();
       *out << "for ( ; " << idx << " < " << dimLen << "; "
       << idx << " += " << bs <<" ) {\n";
@@ -631,7 +616,7 @@ template<class PSetType>
     }
     
     *out << idx << ", " << dimLen
-    << ", &" << inputName << ", " << BSSizeToStr(GetBSSize) << " );\n";
+	 << ", &" << inputName << ", " << GetBSSize().Str() << " );\n";
     
     loopLevel = out.LoopLevel(2);
     idx = "idx" + loopLevel;
@@ -643,9 +628,10 @@ template<class PSetType>
 #elif DOLLDLA
   if (GetType() != LLDLALOOP)
     throw;
-  if (GetBSSize() != USELLDLAMU &&
-      GetBSSize() != USELLDLA2MU &&
-      GetBSSize() != USELLDLA3MU)
+  if (GetBSSize() != UnitBS &&
+      GetBSSize() != LLDLAMu &&
+      GetBSSize() != LLDLA2Mu &&
+      GetBSSize() != LLDLA3Mu)
     throw;
   SplitBase *split = GetControl();
   switch(GetDimName()) 
@@ -683,12 +669,12 @@ template<class PSetType>
   bool needMin = false;
   if (split->m_dir == PARTDOWN) {
     *out << split->InputDataType(0).m_numRowsVar;
-    if (!split->GetInputM(0)->EvenlyDivisibleBy(GetBS()))
+    if (!split->GetInputM(0)->EvenlyDivisibleBy(GetBSSize().GetSize()))
       needMin = true;
   }
   else if (split->m_dir == PARTRIGHT) {
     *out << split->InputDataType(0).m_numColsVar;
-    if (!split->GetInputN(0)->EvenlyDivisibleBy(GetBS()))
+    if (!split->GetInputN(0)->EvenlyDivisibleBy(GetBSSize().GetSize()))
       needMin = true;
   }
   else
@@ -697,24 +683,30 @@ template<class PSetType>
   *out << "; " << lcv << " > 0; " << lcv << " -= ";
 
   
-  *out << BSSizeToVarName(GetBSSize()) << " ) {\n";
+  *out << GetBSSize().VarName() << " ) {\n";
 
-  out.Indent(1);
-  *out << "const unsigned int num";
-  if (split->m_dir == PARTDOWN) {
-    *out << "Rows";
+  for (unsigned int i = 0; i < PSetType::m_inTuns.size(); ++i) { 
+    Tunnel *tun = (Tunnel*)PSetType::InTun(i);
+    if (tun->GetNodeClass() == SplitSingleIter::GetClass()) {
+      SplitSingleIter *splitTun = (SplitSingleIter*)tun;
+      out.Indent(1);
+      *out << "const unsigned int ";
+      if (splitTun->m_dir == PARTDOWN) {
+	*out << splitTun->DataType(1).m_numRowsVar;
+      }
+      else if (splitTun->m_dir == PARTRIGHT) {
+	*out << splitTun->DataType(1).m_numColsVar;
+      }
+      else
+	throw;
+      
+      if (needMin)
+	*out << " = min( " << lcv << ", ";
+      else
+	*out << " = ( ";
+      *out << GetBSSize().VarName() << " );\n";
+    }
   }
-  else if (split->m_dir == PARTRIGHT) {
-    *out << "Cols";
-  }
-  else
-    throw;
-
-  if (needMin)
-    *out << loopLevel << " = min( " << lcv << ", ";
-  else
-    *out << loopLevel << " = ( ";
-  *out << BSSizeToVarName(GetBSSize()) << " );\n";
 #endif
 }
 

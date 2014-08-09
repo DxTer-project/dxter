@@ -365,3 +365,28 @@ DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
 }
 
 #endif
+
+#if TWOD
+bool DLANode::IsInputRowVector(ConnNum num) const
+{
+  return *GetInputM(num) == 1;
+}
+
+bool DLANode::IsInputColVector(ConnNum num) const
+{
+  return *GetInputN(num) == 1;
+}
+
+bool DLANode::IsInputScalar(ConnNum num) const
+{
+  return *GetInputM(num) == 1 &&
+    *GetInputN(num) == 1;
+}
+
+#if DOLLDLA
+bool DLANode::InputIsMuByMu(ConnNum num) {
+  return *GetInputM(num) == LLDLA_MU &&
+    *GetInputN(num) == LLDLA_MU;
+}
+#endif //DOLLDLA
+#endif //TWOD

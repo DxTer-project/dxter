@@ -580,14 +580,14 @@ void ViewMultipleIters::BuildDataTypeCache()
   switch (m_partDir) {
   case (PARTDOWN):
     {
-      m_sizes->AddRepeatedSizes(BSSizeToSize(m_bs), GetInputM(0)->NumSizes(), 1);
-      m_info.m_numRowsVar = BSSizeToVarName(m_bs);
+      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputM(0)->NumSizes(), 1);
+      m_info.m_numRowsVar = m_bs.VarName();
       break;
     }
   case (PARTRIGHT):
     {
-      m_sizes->AddRepeatedSizes(BSSizeToSize(m_bs), GetInputN(0)->NumSizes(), 1);
-      m_info.m_numColsVar = BSSizeToVarName(m_bs);
+      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputN(0)->NumSizes(), 1);
+      m_info.m_numColsVar = m_bs.VarName();
       break;
     }
   default:
@@ -686,7 +686,7 @@ void ViewMultipleIters::PrintCode(IndStream &out)
       }
       else
 	throw;
-      *out << BSSizeToVarName(m_bs);
+      *out << m_bs.VarName();
 
     }
     *out << ";\n";
@@ -762,7 +762,7 @@ void CombineMultipleIters::Prop()
     switch (m_partDir) {
     case(PARTDOWN):
       {
-	Size bs = BSSizeToSize(m_bs);
+	Size bs = m_bs.GetSize();
 	for (int i = 0; i < m_numIters; ++i) {
 	  if (*GetInputM(i) != bs) {
 	    (*GetInputM(i)).Print();
@@ -773,7 +773,7 @@ void CombineMultipleIters::Prop()
       }
     case(PARTRIGHT):
       {
-	Size bs = BSSizeToSize(m_bs);
+	Size bs = m_bs.GetSize();
 	for (int i = 0; i < m_numIters; ++i) {
 	  if (*GetInputN(i) != bs) {
 	    cout << "m_numIters " << m_numIters << endl;

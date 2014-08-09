@@ -160,7 +160,7 @@ Node* VAdd::BlankInst()
 
 NodeType VAdd::GetType() const
 {
-  return "VADD" + LayerNumToStr(GetLayer());
+  return "VADD" + LayerNumToStr(GetLayer()) + (char)m_type + (char)m_vecType;
 }
 
 string VAddLoopRef::GetType() const
@@ -183,15 +183,15 @@ bool VAddLoopRef::CanApply(const Node *node) const
     return false;
   }
   if (m_vtype == ROWVECTOR) {
-    if (!(*(vadd->GetInputN(0)) <= BSSizeToSize(m_bs))
-	&& !(*(vadd->GetInputN(1)) <= BSSizeToSize(m_bs))) {
+    if (!(*(vadd->GetInputN(0)) <= m_bs.GetSize())
+	&& !(*(vadd->GetInputN(1)) <= m_bs.GetSize())) {
       return true;
     } else {
       return false;
     }
   } else if (m_vtype == COLVECTOR) {
-    if (!(*(vadd->GetInputM(0)) <= BSSizeToSize(m_bs))
-	&& !(*(vadd->GetInputM(1)) <= BSSizeToSize(m_bs))) {
+    if (!(*(vadd->GetInputM(0)) <= m_bs.GetSize())
+	&& !(*(vadd->GetInputM(1)) <= m_bs.GetSize())) {
       return true;
     } else {
       return false;
@@ -235,7 +235,7 @@ void VAddLoopRef::Apply(Node *node) const
 
   Poss *loopPoss = new Poss(2, com0, com1);
 
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, USELLDLAMU);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
   
   node->m_poss->AddPSet(loop);

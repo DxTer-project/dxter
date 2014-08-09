@@ -19,11 +19,14 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "LLDLAGemmTransformations.h"
 #include "realLoop.h"
 #include "transpose.h"
 
 #if DOLLDLA
+
+#include "LLDLAGemmTransformations.h"
+#include "mvmul.h"
+#include "vmmul.h"
 
 LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize)
   : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5))),bsSize)
@@ -53,21 +56,21 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   case (0):
     {
       //DIMM
-      if (m_bsSize == USELLDLA2MU) {
-	if (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLA3MU))
+      if (m_bsSize == LLDLA2Mu) {
+	if (*(gemm->GetInputM(2)) <= LLDLA3Mu.GetSize())
 	  return false;
       }
-      if (*(gemm->GetInputM(2)) <= BSSizeToSize(m_bsSize))
+      if (*(gemm->GetInputM(2)) <= m_bsSize.GetSize())
 	return false;
       //if this blocks greater than MU, another loop will have to 
       //block on the same dimension with MU, 
       //but a loop immediately within another loop cannot split the
       //same dimension, so checking here to make sure other dimensions
       //will be split with a loop
-      if ((m_bsSize != USELLDLAMU)
-	  && (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLAMU))
-	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLAMU)))
-	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLAMU)))))
+      if ((m_bsSize != LLDLAMu)
+	  && (*(gemm->GetInputN(2)) <= LLDLAMu.GetSize())
+	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= LLDLAMu.GetSize()))
+	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= LLDLAMu.GetSize()))))
 	return false;
       else
 	return true;
@@ -77,28 +80,28 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
     {
       //DIMK
       if (gemm->m_transA == NORMAL) {
-	if (m_bsSize == USELLDLA2MU) {
-	  if (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLA3MU))
+	if (m_bsSize == LLDLA2Mu) {
+	  if (*(gemm->GetInputN(0)) <= LLDLA3Mu.GetSize())
 	    return false;
 	}
 
-	if (*(gemm->GetInputN(0)) <= BSSizeToSize(m_bsSize))
+	if (*(gemm->GetInputN(0)) <= m_bsSize.GetSize())
 	  return false;
       }
       else if (gemm->m_transA != CONJ) {
-	if (m_bsSize == USELLDLA2MU) {
-	  if (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLA3MU))
+	if (m_bsSize == LLDLA2Mu) {
+	  if (*(gemm->GetInputM(0)) <= LLDLA3Mu.GetSize())
 	    return false;
 	}
 
-	if (*(gemm->GetInputM(0)) <= BSSizeToSize(m_bsSize))
+	if (*(gemm->GetInputM(0)) <= m_bsSize.GetSize())
 	  return false;
       }
       else
 	throw;
-      if ((m_bsSize != USELLDLAMU)
-	  && (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLAMU))
-	  && (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLAMU)))
+      if ((m_bsSize != LLDLAMu)
+	  && (*(gemm->GetInputN(2)) <= LLDLAMu.GetSize())
+	  && (*(gemm->GetInputM(2)) <= LLDLAMu.GetSize()))
 	return false;
       else
 	return true;
@@ -108,17 +111,17 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   case (2):
     {
       //DIMN
-      if (m_bsSize == USELLDLA2MU) {
-	if (*(gemm->GetInputN(2)) <= BSSizeToSize(USELLDLA3MU))
+      if (m_bsSize == LLDLA2Mu) {
+	if (*(gemm->GetInputN(2)) <= LLDLA3Mu.GetSize())
 	  return false;
       }
 
-      if (*(gemm->GetInputN(2)) <= BSSizeToSize(m_bsSize))
+      if (*(gemm->GetInputN(2)) <= m_bsSize.GetSize())
 	return false;
-      if ((m_bsSize != USELLDLAMU)
-	  && (*(gemm->GetInputM(2)) <= BSSizeToSize(USELLDLAMU))
-	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= BSSizeToSize(USELLDLAMU)))
-	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= BSSizeToSize(USELLDLAMU)))))
+      if ((m_bsSize != LLDLAMu)
+	  && (*(gemm->GetInputM(2)) <= LLDLAMu.GetSize())
+	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= LLDLAMu.GetSize()))
+	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= LLDLAMu.GetSize()))))
 	return false;
       else
 	return true;
@@ -173,7 +176,7 @@ bool LLDAGemmLowerLayer::CanApply(const Node *node) const
 
 void LLDAGemmLowerLayer::Apply(Node *node) const
 {
-  Gemm *gemm = (Gemm*)node;
+  Gemm *gemm = (Gemm*) node;
   gemm->SetLayer(m_toLayer);
 }
 
@@ -183,5 +186,132 @@ string LLDAGemmLowerLayer::GetType() const
   + " to " + LayerNumToStr(m_toLayer);
 }
 
+string LLDLAGemmToMVMul::GetType() const
+{
+  return "Gemm to MVMul from " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool LLDLAGemmToMVMul::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == Gemm::GetClass()) {
+    return true;
+  }
+  return false;
+}
+
+void LLDLAGemmToMVMul::Apply(Node* node) const
+{
+  Gemm* gemm = (Gemm*) node;
+
+  // Create tunnel for A
+  LoopTunnel* aTun = new LoopTunnel(POSSTUNIN);
+  aTun->AddInput(gemm->Input(0), gemm->InputConnNum(0));
+  aTun->SetAllStats(FULLUP);
+
+  // Create splits for B and C
+  SplitSingleIter* splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  splitB->AddInput(gemm->Input(1), gemm->InputConnNum(1));
+  splitB->SetAllStats(FULLUP);
+  splitB->SetIndepIters();
+
+  SplitSingleIter* splitC = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  splitC->AddInput(gemm->Input(2), gemm->InputConnNum(2));
+  splitC->SetUpStats(FULLUP, NOTUP,
+		     FULLUP, NOTUP);
+  splitC->SetIndepIters();
+
+  // Create inner MVMul
+  MVMul* mvmul = new MVMul(m_toLayer, gemm->m_type);
+  mvmul->AddInput(aTun, 0);
+  mvmul->AddInput(splitB, 1);
+  mvmul->AddInput(splitC, 1);
+
+  // Create output tunnel for A
+  LoopTunnel* aOut = new LoopTunnel(POSSTUNOUT);
+  aOut->AddInput(aTun, 0);
+  aOut->AddInput(aTun, 1);
+  aOut->CopyTunnelInfo(aTun);
+
+  // Create combines for B and C
+  CombineSingleIter* comB = splitB->CreateMatchingCombine(0);
+  CombineSingleIter* comC = splitC->CreateMatchingCombine(1, 1, mvmul, 0);
+
+  // Create poss and clean up
+  Poss* loopPoss = new Poss(3, aOut, comB, comC);
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
+  node->m_poss->AddPSet(loop);
+
+  node->RedirectChildren(loop->OutTun(2), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+}
+
+string LLDLAGemmToVMMul::GetType() const
+{
+  return "Gemm to VMMul from " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool LLDLAGemmToVMMul::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == Gemm::GetClass()) {
+    Gemm* gemm = (Gemm*) node;
+    if (gemm->m_alpha == COEFONE && gemm->m_beta == COEFONE) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void LLDLAGemmToVMMul::Apply(Node* node) const
+{
+  Gemm* gemm = (Gemm*) node;
+
+  // Split A into row vectors
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+  splitA->AddInput(gemm->Input(0), gemm->InputConnNum(0));
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+
+  // Create tunnel for B
+  LoopTunnel* inB = new LoopTunnel(POSSTUNIN);
+  inB->AddInput(gemm->Input(1), gemm->InputConnNum(1));
+  inB->SetAllStats(FULLUP);
+  inB->SetIndepIters();
+
+  // Split C into rows
+  SplitSingleIter* splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  splitC->AddInput(gemm->Input(2), gemm->InputConnNum(2));
+  splitC->SetUpStats(FULLUP, FULLUP,
+		     NOTUP, NOTUP);
+  splitC->SetIndepIters();
+
+  // Create new inner vmmul for loop
+  VMMul* vmmul = new VMMul(m_toLayer, gemm->m_type);
+  vmmul->AddInput(splitA, 1);
+  vmmul->AddInput(inB, 0);
+  vmmul->AddInput(splitC, 1);
+
+  // Create outputs for A, B and C
+  CombineSingleIter* comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter* comC = splitC->CreateMatchingCombine(1, 1, vmmul, 0);
+
+  LoopTunnel* outB = new LoopTunnel(POSSTUNOUT);
+  outB->AddInput(inB, 0);
+  outB->AddInput(inB, 1);
+  outB->CopyTunnelInfo(inB);
+
+  // Create poss and loop
+  Poss* loopPoss = new Poss(3, comA, outB, comC);
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
+  node->m_poss->AddPSet(loop);
+
+  node->RedirectChildren(loop->OutTun(2), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+
+  return;
+}
 
 #endif

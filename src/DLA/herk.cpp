@@ -791,11 +791,11 @@ RealLoop* HerkLoopVar1(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISMC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisMC);
 #endif
   
   return loop;
@@ -861,11 +861,11 @@ RealLoop* HerkLoopVar2(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
 #endif
   return loop;
 }
@@ -904,9 +904,9 @@ RealLoop* HerkLoopVar5(Node *Ain, ConnNum Anum,
   Poss *loopPoss = new Poss(2, comA, CtunOut);
   RealLoop *loop;
 #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
 #endif
   
   return loop;
@@ -958,7 +958,7 @@ RealLoop* TriRKLoopVar5(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 
     Poss *loopPoss = new Poss(3, comA, comB, CtunOut);
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
   
   loop->SetDimName(DIMK);
   
@@ -1032,7 +1032,7 @@ RealLoop* TriRKLoopVar7(Node *Ain, ConnNum Anum,
     throw;
   else
 #endif
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisNC);
 
   loop->SetDimName(DIMN);
   
@@ -1197,7 +1197,7 @@ RealLoop* BLISHerkLoop(Node *Ain, ConnNum Anum,
     throw;
   else
 #endif
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISMC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisMC);
 
   loop->SetDimName(DIMM);
   

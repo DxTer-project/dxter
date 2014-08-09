@@ -62,11 +62,25 @@ class SVMulLoopRef : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   VecType m_vtype;
   BSSize m_bs;
- SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vtype(vtype), m_bs(bs) {}
+ SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vType, BSSize bs) 
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vtype(vType), m_bs(bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
+  virtual bool IsRef() const { return true; }
+};
+
+class SVMulToRegArith : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  VecType m_vType;
+  SVMulToRegArith(Layer fromLayer, Layer toLayer, VecType vType)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vType(vType) {}
+
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
   virtual bool IsRef() const { return true; }
 };
 

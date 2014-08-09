@@ -21,28 +21,47 @@
 
 #include "DLAOp.h"
 #include "mvmul.h"
+#include "svmul.h"
 #include "loopSupport.h"
+#include "regLoadStore.h"
+#include "regArith.h"
 #include "LLDLA.h"
 
 #if DOLLDLA
 
-MVMul::MVMul(Type type, Layer layer)
+MVMul::MVMul(Layer layer, Type type)
 {
   m_type = type;
   m_layer = layer;
+  return;
 }
 
 void MVMul::PrintCode(IndStream &out)
 {
-  if (m_layer != LLDLAPRIMITIVELAYER) {
-    cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
-    throw;
-  }
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;
   
   out.Indent();
+
+  if (m_layer == ABSLAYER) {
+    *out << "simple_mmul( " <<
+      InputDataType(0).m_numRowsVar << ", " <<
+      "1, " <<
+      InputDataType(0).m_numColsVar << ", " <<
+      GetInputName(0).str() << ", " <<
+      InputDataType(0).m_rowStrideVar << ", " <<
+      InputDataType(0).m_colStrideVar << ", " <<
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << ", " <<
+      GetInputName(2).str() << ", " <<
+      InputDataType(2).m_rowStrideVar << ", " <<
+      InputDataType(2).m_colStrideVar << " );\n";
+    return;
+  }
+
+
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
     PrintGeneralStride(out);
   } else if (rowStride == UNITSTRIDE && colStride == NONUNITSTRIDE) {
@@ -59,16 +78,23 @@ void MVMul::PrintRowStride(IndStream &out)
 {
   *out << "row_stride_mmul_2x2_2x1( " <<
     GetInputName(0).str() << ", " <<
+    InputDataType(0).m_rowStrideVar << ", " <<
     GetInputName(1).str() << ", " <<
-    GetInputName(2).str() << ");\n";
+    InputDataType(1).m_rowStrideVar << ", " <<
+    GetInputName(2).str() << ", " <<
+    InputDataType(2).m_rowStrideVar << ");\n";
+  return;
 }
 
 void MVMul::PrintColStride(IndStream &out)
 {
   *out << "col_stride_mmul_2x2_2x1( " <<
     GetInputName(0).str() << ", " <<
+    InputDataType(0).m_colStrideVar << ", " <<
     GetInputName(1).str() << ", " <<
-    GetInputName(2).str() << ");\n";
+    InputDataType(1).m_colStrideVar << ", " <<
+    GetInputName(2).str() << ", " <<
+    InputDataType(2).m_colStrideVar << ");\n";
 }
 
 void MVMul::PrintGeneralStride(IndStream &out)
@@ -81,7 +107,7 @@ void MVMul::PrintGeneralStride(IndStream &out)
 
 Node* MVMul::BlankInst()
 {
-  return new MVMul(REAL, LLDLAPRIMITIVELAYER);
+  return new MVMul(LLDLAPRIMITIVELAYER, REAL);
 }
 
 Phase MVMul::MaxPhase() const 
@@ -110,13 +136,13 @@ void MVMul::Prop()
     } else if (*GetInputM(0) != *GetInputM(2)) {
       cout << "ERROR: Input dimensions don't match\n";
       throw;
-    } else if (*GetInputN(2) != 1 || *GetInputN(1) != 1) {
-      cout << "Error: Input vectors have more than 1 column\n";
+    } else if (!IsInputColVector(1) || !IsInputColVector(2)) {
+      cout << "Error: MVMul inputs that should be column vectors are not\n";
       throw;
     }
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if (*GetInputM(0) != LLDLA_MU || *GetInputN(0) != LLDLA_MU) {
+      if (!InputIsMuByMu(0)) {
 	cout << "ERROR: Primitive matrix must be 2 x 2\n";
 	throw;
       }
@@ -129,7 +155,11 @@ void MVMul::Prop()
 	throw;
       }
     }
-    m_cost = ZERO;
+    if (m_layer == ABSLAYER) {
+      m_cost = TWO * GetInputM(0)->SumProds11(*GetInputN(0));
+    } else {
+      m_cost = ZERO;
+    }
   }
 }
 
@@ -193,15 +223,17 @@ string MVMulLoopRef::GetType() const
 
 bool MVMulLoopRef::CanApply(const Node *node) const
 {
-  const MVMul *mul = (MVMul*) node;
-  if (mul->GetLayer() != m_fromLayer) {
-    return false;
-  }
+  if (node->GetNodeClass() == MVMul::GetClass()) {
+    const MVMul *mul = (MVMul*) node;
+    if (mul->GetLayer() != m_fromLayer) {
+      return false;
+    }
 
-  if (m_dim == DIMM) {
-    return !(*(mul->GetInputM(0)) <= BSSizeToSize(m_bs));
-  } else {
-    return !(*(mul->GetInputN(0)) <= BSSizeToSize(m_bs));
+    if (m_dim == DIMM) {
+      return !(*(mul->GetInputM(0)) <= m_bs.GetSize());
+    } else {
+      return !(*(mul->GetInputN(0)) <= m_bs.GetSize());
+    }
   }
   return false;
 }
@@ -233,6 +265,7 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
   splitY->AddInput(mul->Input(2), mul->InputConnNum(2));
   splitY->SetUpStats(FULLUP, FULLUP,
 		     NOTUP, NOTUP);
+  splitY->SetIndepIters();
 
   // Create tunnel for x
   LoopTunnel *xTun = new LoopTunnel(POSSTUNIN);
@@ -240,7 +273,7 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
   xTun->SetAllStats(FULLUP);
 
   // Create new mvmul for loop body
-  MVMul *newMul = new MVMul(mul->m_type, m_toLayer);
+  MVMul *newMul = new MVMul(m_toLayer, mul->m_type);
   newMul->SetLayer(m_toLayer);
 
   // Attach the new multiply to arguments
@@ -258,7 +291,7 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
   xOut->CopyTunnelInfo(xTun);
 
   // Create poss
-  Poss *loopPoss = new Poss(3, comA, xTun, comY);
+  Poss *loopPoss = new Poss(3, comA, xOut, comY);
   RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, m_bs);
   loop->SetDimName(m_dim);
 
@@ -289,8 +322,8 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
   tunY->AddInput(mul->Input(2), mul->InputConnNum(2));
   tunY->SetAllStats(PARTUP);
 
-  // Create new mvmul for loop body
-  MVMul *newMul = new MVMul(mul->m_type, m_toLayer);
+  // Create new svmul for loop body
+  MVMul *newMul = new MVMul(m_toLayer, mul->m_type);
   newMul->SetLayer(m_toLayer);
 
   // Attach to arguments
@@ -316,6 +349,91 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
   node->RedirectChildren(loop->OutTun(2), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 
+}
+
+string MVMulToRegArith::GetType() const
+{
+  return "MVMulToRegArith from " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool MVMulToRegArith::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == MVMul::GetClass()) {
+    MVMul* mvmul = (MVMul*) node;
+    return *mvmul->GetInputM(0) == LLDLA_MU;
+    return true;
+  }
+  return false;
+}
+
+void MVMulToRegArith::Apply(Node* node) const
+{
+  MVMul* mvmul = (MVMul*) node;
+  
+  // Split matrix A into mu x 1 column vectors
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  splitA->AddInput(mvmul->Input(0), mvmul->InputConnNum(0));
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+
+  // Split x into individual elements
+  SplitSingleIter* splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  splitX->AddInput(mvmul->Input(1), mvmul->InputConnNum(1));
+  splitX->SetAllStats(FULLUP);
+  splitX->SetIndepIters();
+
+  // Create vector register with elements of y
+  LoadToRegs* loadY = new LoadToRegs();
+  loadY->AddInput(mvmul->Input(2), mvmul->InputConnNum(2));
+  
+  node->m_poss->AddNode(loadY);
+  
+  // Create tunnel for y register
+  LoopTunnel* yTun = new LoopTunnel(POSSTUNIN);
+  yTun->AddInput(loadY, 0);
+  yTun->SetAllStats(PARTUP);
+  
+  // Create load for elements of A in loop body
+  LoadToRegs* loadA = new LoadToRegs();
+  loadA->AddInput(splitA, 1);
+
+  // Create duplicate load for x
+  DuplicateRegLoad* loadX = new DuplicateRegLoad();
+  loadX->AddInput(splitX, 1);
+
+  // Create new FMA instruction for loop body
+  FMAdd* fmadd = new FMAdd();
+  fmadd->AddInput(loadA, 0);
+  fmadd->AddInput(loadX, 0);
+  fmadd->AddInput(yTun, 0);
+
+  // Create output tunnel for FMA result
+  LoopTunnel* fmaOut = new LoopTunnel(POSSTUNOUT);
+  fmaOut->AddInput(fmadd, 0);
+  fmaOut->AddInput(yTun, 1);
+  fmaOut->CopyTunnelInfo(yTun);
+
+  // Create combines for A and x
+  CombineSingleIter* comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter* comX = splitX->CreateMatchingCombine(0);
+
+  // Create the poss
+  Poss* loopPoss = new Poss(3, comA, comX, fmaOut);
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
+
+  node->m_poss->AddPSet(loop);
+
+  // Store result of computation back to y
+  StoreFromRegs* storeToY = new StoreFromRegs();
+  storeToY->AddInput(loop->OutTun(2), 0);
+  storeToY->AddInput(mvmul->Input(2), mvmul->InputConnNum(2));
+
+  node->m_poss->AddNode(storeToY);
+  
+  node->RedirectChildren(storeToY);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
 }
 
 #endif // DOLLDLA

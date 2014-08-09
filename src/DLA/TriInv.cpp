@@ -239,7 +239,7 @@ RealLoop* TriInvAlgVar1Lower(Node *in, ConnNum num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
   return loop;
 #else
@@ -286,7 +286,7 @@ RealLoop* TriInvAlgVar1Upper(Node *in, ConnNum num)
   comA2->CopyTunnelInfo(split);
 
   Poss *loopPoss = new Poss(1, comA2);
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
   return loop;
 #else
@@ -333,7 +333,7 @@ RealLoop* TriInvAlgVar2Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA2);
 
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
   return loop;
 #else
@@ -383,7 +383,7 @@ RealLoop* TriInvAlgVar2Upper(Node *in, ConnNum num)
   Poss *loopPoss = new Poss(1, comA2);
 
 
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
   return loop;
 #else
@@ -434,7 +434,7 @@ RealLoop* TriInvAlgVar8Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA2);
 
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
   return loop;
 #else
@@ -488,7 +488,7 @@ RealLoop* TriInvAlgVar3Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA2);
 
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
   return loop;
 #else
@@ -541,7 +541,7 @@ RealLoop* TriInvAlgVar3Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA2);
 
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
   return loop;
 #else

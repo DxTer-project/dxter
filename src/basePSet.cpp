@@ -384,7 +384,7 @@ void BasePSet::FormSetAround()
   newSet->m_functionality = newPoss->GetFunctionalityString();
   if (newSet->IsLoop()) {
     LoopInterface *loop = dynamic_cast<LoopInterface*>(newSet);
-    newSet->m_functionality += (char)(loop->GetBSSize());
+    newSet->m_functionality += (char)(loop->GetBSSize().GetSize());
   }
 }
 

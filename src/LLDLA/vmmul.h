@@ -19,16 +19,21 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "DLAOp.h"
-#include "loopSupport.h"
+#pragma once
 
 #if DOLLDLA
 
-class SMMul : public DLAOp<2, 1>
+#include "DLAOp.h"
+#include "LLDLA.h"
+#include "loopSupport.h"
+#include "regArith.h"
+#include "regLoadStore.h"
+
+class VMMul : public DLAOp<3, 1>
 {
  public:
   Type m_type;
-  SMMul(Layer layer, Type type);
+  VMMul(Layer layer, Type type);
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
@@ -36,8 +41,9 @@ class SMMul : public DLAOp<2, 1>
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
+  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 
-  static ClassType GetClass() { return "LLDLAPrimSMul"; }
+  static ClassType GetClass() { return "LLDLAPrimVMMul"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
 
   virtual NodeType GetType() const;
@@ -46,33 +52,53 @@ class SMMul : public DLAOp<2, 1>
   void PrintRowStride(IndStream &out);
   void PrintColStride(IndStream &out);
   void PrintGeneralStride(IndStream &out);
+
 };
 
-class SMulLoopRef : public SingleTrans
+class VMMulLoopRef : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
   BSSize m_bs;
- SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
+
+ VMMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs)
+   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
+
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
+  virtual bool IsRef() const { return true; }
+
+ private:
+  void ApplyDimN(Node* node) const;
+  void ApplyDimK(Node* node) const;
 };
 
-class SMulLowerLayer : public SingleTrans
+class VMMulToRegArith : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  VMMulToRegArith(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+  virtual bool IsRef() const { return true; }
+};
+
+class VMMulLowerLayer : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- SMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
+ VMMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
    :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
+  virtual bool IsRef() const { return true; }
 };
 
 #endif // DOLLDLA

@@ -20,6 +20,8 @@
 */
 
 #include "LLDLA.h"
+#include "regArith.h"
+#include "regLoadStore.h"
 #include "svmul.h"
 
 #if DOLLDLA
@@ -81,12 +83,15 @@ void SVMul::PrintRowStride(IndStream &out)
   if (m_vecType == COLVECTOR) {
     *out << "row_stride_smul_2x1( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << " );\n";
   } else {
     *out << "row_stride_smul_1x2( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << " );\n";
   }
+  return;
 }
 
 void SVMul::PrintColStride(IndStream &out)
@@ -100,7 +105,6 @@ void SVMul::PrintColStride(IndStream &out)
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ");\n";
   }
-
 }
 
 void SVMul::PrintGeneralStride(IndStream &out)
@@ -198,21 +202,22 @@ string SVMulLoopRef::GetType() const
     }
 }
 
-
 bool SVMulLoopRef::CanApply(const Node *node) const
 {
-  const SVMul *svmul = (SVMul*) node;
-  if (svmul->GetLayer() != m_fromLayer) {
-    return false;
-  }
-  if (m_vtype == ROWVECTOR) {
-    return !(*(svmul->GetInputN(1)) <= BSSizeToSize(m_bs));
-  } 
-  else if (m_vtype == COLVECTOR) {
-    return !(*(svmul->GetInputM(1)) <= BSSizeToSize(m_bs));
-  } 
-  else {
-    throw;
+  if (node->GetNodeClass() == SVMul::GetClass()) {
+    const SVMul *svmul = (SVMul*) node;
+    if (svmul->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if (m_vtype == ROWVECTOR) {
+      return !(*(svmul->GetInputN(1)) <= m_bs.GetSize());
+    } 
+    else if (m_vtype == COLVECTOR) {
+      return !(*(svmul->GetInputM(1)) <= m_bs.GetSize());
+    } 
+    else {
+      throw;
+    }
   }
   return false;
 }
@@ -226,10 +231,10 @@ void SVMulLoopRef::Apply(Node *node) const
 
   if (m_vtype == COLVECTOR) {
     split->SetUpStats(FULLUP, FULLUP,
-		      NOTUP, NOTUP);		     
+		      NOTUP, NOTUP);
   } else {
     split->SetUpStats(FULLUP, NOTUP,
-		       FULLUP, NOTUP);
+		      FULLUP, NOTUP);
   }
 
   split->SetIndepIters();
@@ -254,11 +259,11 @@ void SVMulLoopRef::Apply(Node *node) const
 					      1, newMul, 0);
   
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
-  
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, USELLDLAMU);
+
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
   // Row vectors are partitioned in the N dimension, column vectors in the M dimension
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
-  
+
   node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
@@ -278,6 +283,7 @@ bool SVMulLowerLayer::CanApply(const Node *node) const
     } else {
       return false;
     }
+    return true;
   }
   else {
     throw;
@@ -294,6 +300,102 @@ string SVMulLowerLayer::GetType() const
 {
   return "SVMul lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool SVMulToRegArith::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == SVMul::GetClass()) {
+    SVMul* svmul = (SVMul*) node;
+    if (svmul->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if ((!(*(svmul->GetInputM(1)) <= LLDLA_MU) &&
+	 m_vType == COLVECTOR) ||
+	(!(*(svmul->GetInputN(1)) <= LLDLA_MU) &&
+	 m_vType == ROWVECTOR)) {
+      return true;
+    }
+    return false;
+  }
+  return false;
+}
+
+void SVMulToRegArith::Apply(Node* node) const
+{
+  SVMul* svmul = (SVMul*) node;
+
+  // Split up the input vector
+  SplitSingleIter* splitVec;
+  if (m_vType == ROWVECTOR) {
+    splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  } else {
+    splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+  }
+
+  splitVec->AddInput(svmul->Input(1), svmul->InputConnNum(1));
+
+  if (m_vType == ROWVECTOR) {
+    splitVec->SetUpStats(FULLUP, NOTUP,
+			  FULLUP, NOTUP);
+  } else {
+    splitVec->SetUpStats(FULLUP, FULLUP,
+			  NOTUP, NOTUP);
+  }
+
+  // Duplicate the value of C into the temp register
+  DuplicateRegLoad* dup = new DuplicateRegLoad();
+  dup->AddInput(svmul->Input(0), svmul->InputConnNum(0));
+  
+  node->m_poss->AddNode(dup);
+
+  // Create tunnel for duplicated scalar
+  LoopTunnel* scalarTun = new LoopTunnel(POSSTUNIN);
+  scalarTun->AddInput(dup, 0);
+  scalarTun->SetAllStats(FULLUP);
+
+  // Create register for vector elements
+  LoadToRegs* loadA = new LoadToRegs();
+  loadA->AddInput(splitVec, 1);
+
+  // Create inner multiply operation
+  Mul* mul = new Mul();
+  mul->AddInput(scalarTun, 0);
+  mul->AddInput(loadA, 0);
+
+  // Create store node to save newly computed elements of x * A
+  StoreFromRegs* storeVec = new StoreFromRegs();
+  storeVec->AddInput(mul, 0);
+  storeVec->AddInput(splitVec, 1);
+
+  // Create output tunnel for scalar
+  LoopTunnel* scalarOut = new LoopTunnel(POSSTUNOUT);
+  scalarOut->AddInput(scalarTun, 0);
+  scalarOut->AddInput(scalarTun, 1);
+  scalarOut->CopyTunnelInfo(scalarTun);
+
+  // Combine resulting vector
+  CombineSingleIter* combineVec = splitVec->CreateMatchingCombine(1, 1, storeVec, 0);
+
+  // Create poss
+  Poss* loopPoss = new Poss(2, combineVec, scalarOut);
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  
+  // Adding loop to poss and cleanup
+  node->m_poss->AddPSet(loop);
+  node->RedirectChildren(loop->OutTun(0), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+}
+
+string SVMulToRegArith::GetType() const
+{
+  if (m_vType == ROWVECTOR) {
+    return "SVMul register arith - Row vector " + LayerNumToStr(m_fromLayer)
+      + " to " + LayerNumToStr(m_fromLayer);
+  } else {
+    return "SVMul register arith - Col vector " + LayerNumToStr(m_fromLayer)
+      + " to " + LayerNumToStr(m_fromLayer);
+  }
 }
 
 #endif // DOLLDLA

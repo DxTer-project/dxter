@@ -394,8 +394,8 @@ void ParallelizeMDim::Apply(Node *node) const
       Node *child2 = (*iter2)->m_n;
       bool skip = false;
       while (!skip && !child2->IsLoopTunnel()) {
-        if (child2->IsPossTunnel(SETTUNIN) ||
-            child2->IsPossTunnel(POSSTUNIN)) {
+        if (child2->IsTunnel(SETTUNIN) ||
+            child2->IsTunnel(POSSTUNIN)) {
 	  if (!((Tunnel*)child)->m_pset->IsReal() ||
 	      !((Tunnel*)child)->m_pset->m_shadows.empty())
 	    throw;
@@ -585,7 +585,7 @@ bool LegalParallelizationNestingDown(const PSet *pset, Comm comm)
  if (node->GetNodeClass() != Split::GetClass())
  throw;
  const Split *split = (Split*)node;
- if (!split->IsPossTunnel(SETTUNIN))
+ if (!split->IsTunnel(SETTUNIN))
  return false;
  const Loop *loop = split->GetMyLoop();
  if (loop->m_comm == CORECOMM)

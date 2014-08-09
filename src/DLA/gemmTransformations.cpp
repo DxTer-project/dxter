@@ -40,17 +40,17 @@ GemmLoopExp::GemmLoopExp(Layer fromLayer, Layer toLayer, int dim)
   m_dim(dim) 
 {
 #if DOELEM
-  m_bsSize = USEELEMBS;
+  m_bsSize = ElemBS;
 #elif DOBLIS
   switch(dim) {
   case (0) :
-    m_bsSize = USEBLISMC;
+    m_bsSize = BlisMC;
       break;
   case (1) :
-    m_bsSize = USEBLISKC;
+    m_bsSize = BlisKC;
       break;
   case (2) : 
-    m_bsSize = USEBLISNC;
+    m_bsSize = BlisNC;
   }
 #elif DOLLDLA
   throw;
@@ -73,7 +73,7 @@ string GemmLoopExp::GetType() const
     + LayerNumToStr(m_fromLayer)
     + " + " 
     + LayerNumToStr(m_toLayer)
-    + " bs:" + std::to_string(BSSizeToSize(m_bsSize));
+    + " bs:" + std::to_string(m_bsSize.GetSize());
   switch(m_dim) {
     case(0):
       return str + " - m";
@@ -916,7 +916,7 @@ RealLoop* GemmVar3Loop(Node *Ain, ConnNum Anum,
     ConstVal *constVal = new ConstVal(beta.LLDLAStr(),beta);
     constVal->AddInput(Cin, Cnum);
     
-    scale = new SMMul(type, layer);
+    scale = new SMMul(layer, type);
     scale->SetLayer(layer);
     scale->AddInputs(4, 
 		     constVal, 0,
@@ -1137,7 +1137,7 @@ void BLISGemmLoopExp::Apply(Node *node) const
                                                 1, gebp, 0);
   
   Poss *loopPoss = new Poss(3, comA, BtunOut, comC);
-  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, USEBLISMC);
+  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, BlisMC);
 
   loop->SetDimName(DIMM);
   

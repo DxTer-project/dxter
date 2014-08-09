@@ -31,7 +31,7 @@
 
 int ShadowLoop::GetBS() const
 {
-  return ((RealLoop*)m_realPSet)->GetBS();
+  return GetBSSize().GetSize();
 }
 
 BSSize ShadowLoop::GetBSSize() const

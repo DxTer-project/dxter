@@ -1269,7 +1269,7 @@ RealPSet* HegstL1Example()
 			    comA,
 			    comL);
 
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(loop->OutTun(0),0);
@@ -1418,7 +1418,7 @@ RealPSet* HegstL5Example()
 			    comA,
 			    comL);
 #if DOELEM
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
   OutputNode *Aout = new OutputNode("A output");
   Aout->AddInput(loop->OutTun(0),0);
@@ -2199,7 +2199,7 @@ RealPSet* CholHegstExample()
 			      comA,
 			      comL);
 #if DOELEM
-    RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
     OutputNode *Aout = new OutputNode("A output");
     Aout->AddInput(loop->OutTun(0),0);
@@ -2298,7 +2298,7 @@ RealPSet* CholHegstExample()
 			      comA,
 			      comL);
 #if DOELEM
-    RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
 
     OutputNode *Aout = new OutputNode("A output");
     Aout->AddInput(loop->OutTun(0),0);
@@ -2426,7 +2426,7 @@ RealPSet* AppBlkHouseExample()
   CombineSingleIter *comT = splitT->CreateMatchingCombine(0);
   
   Poss *loopPoss = new Poss(3, comB, comU, comT);
-  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
+  RealLoop *loop = new RealLoop(BLISLOOP, loopPoss, BLISOuter);
 
   OutputNode *Bout = new OutputNode("B output");
   Bout->AddInput(loop->OutTun(0),0);

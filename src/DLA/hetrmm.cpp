@@ -249,7 +249,7 @@ RealLoop* HetrmmAlgVar1Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -298,7 +298,7 @@ RealLoop* HetrmmAlgVar1Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -354,7 +354,7 @@ RealLoop* HetrmmAlgVar2Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -407,7 +407,7 @@ RealLoop* HetrmmAlgVar2Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -460,7 +460,7 @@ RealLoop* HetrmmAlgVar3Lower(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;
@@ -509,7 +509,7 @@ RealLoop* HetrmmAlgVar3Upper(Node *in, ConnNum num)
 
   Poss *loopPoss = new Poss(1, comA3);
 #if DOELEM
-  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+  RealLoop *loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   return loop;
 #else
   throw;

@@ -251,7 +251,7 @@ RealLoop* Chol1LowerAlg(Node *in, ConnNum num, bool dist)
   RealLoop *loop;
 
   if (dist)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else 
     throw;
 
@@ -320,7 +320,7 @@ RealLoop* Chol2LowerAlg(Node *in, ConnNum num, bool dist)
   RealLoop *loop;
 #if DOELEM
    if (dist)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #else
@@ -388,7 +388,7 @@ RealLoop* Chol2UpperAlg(Node *in, ConnNum num, bool dist)
   RealLoop *loop;
 #if DOELEM
   if (dist)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #else
@@ -451,7 +451,7 @@ RealLoop* Chol3LowerAlg(Node *in, ConnNum num, bool dist)
   RealLoop *loop;
 #if DOELEM
   if (dist)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #else
@@ -523,7 +523,7 @@ RealLoop* Chol3UpperAlg(Node *in, ConnNum num, bool dist)
     RealLoop *loop;
 #if DOELEM
     if (dist)
-      loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+      loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
     else
       throw;
 #else

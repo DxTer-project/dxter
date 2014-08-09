@@ -21,10 +21,12 @@
 
 #include "madd.h"
 #include "vadd.h"
+#include "regArith.h"
+#include "regLoadStore.h"
 
 #if DOLLDLA
 
-MAdd::MAdd(Type type, Layer layer)
+MAdd::MAdd(Layer layer, Type type)
 {
   m_type = type;
   m_layer = layer;
@@ -70,7 +72,9 @@ void MAdd::PrintRowStride(IndStream &out)
 {
   *out << "row_stride_add_2x2( " <<
     GetInputName(0).str() << ", " <<
-    GetInputName(1).str() << ");\n";
+    InputDataType(0).m_rowStrideVar << ", " <<
+    GetInputName(1).str() << ", " <<
+    InputDataType(1).m_rowStrideVar << ");\n";
 }
 
 void MAdd::PrintColStride(IndStream &out)
@@ -104,18 +108,22 @@ void MAdd::Prop()
       }
     }
 
-    m_cost = ZERO;
+    if (m_layer == ABSLAYER) {
+      m_cost = GetInputM(0)->SumProds11(*GetInputN(0));
+    } else {
+      m_cost = ZERO;
+    }
   }
 }
 
 Node* MAdd::BlankInst()
 {
-  return new MAdd(REAL, LLDLAPRIMITIVELAYER);
+  return new MAdd(LLDLAPRIMITIVELAYER, REAL);
 }
 
 NodeType MAdd::GetType() const
 {
-  return "MAdd" + LayerNumToStr(GetLayer());
+  return "MAdd" + LayerNumToStr(GetLayer()) + (char)m_type;
 }
 
 Phase MAdd::MaxPhase() const
@@ -135,22 +143,33 @@ Phase MAdd::MaxPhase() const
 
 string MAddLoopRef::GetType() const
 {
+  switch (m_dim) {
+  case (DIMM):
+    return "MAddMDimension";
+  case(DIMN):
+    return "MAddNDimension";
+  default:
+    return "ERROR: Bad dimension in MAddLoopRef transform";
+  }
   return "MAdd";
 }
 
 bool MAddLoopRef::CanApply(const Node *node) const
 {
-  const MAdd *madd = (MAdd*) node;
-  if (madd->GetLayer() != m_fromLayer) {
-    return false;
+  if (node->GetNodeClass() == MAdd::GetClass()) {
+    const MAdd *madd = (MAdd*) node;
+    if (madd->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if (m_dim == DIMM) {
+      return !(*(madd->GetInputM(0)) <= m_bs.GetSize()) && !(*(madd->GetInputM(1)) <= m_bs.GetSize());
+    } else if (m_dim == DIMN) {
+      return !(*(madd->GetInputN(0)) <= m_bs.GetSize()) && !(*(madd->GetInputN(1)) <= m_bs.GetSize());
+    } else {
+      return false;
+    }
   }
-  if (m_dim == DIMM) {
-    return !(*(madd->GetInputM(0)) <= m_bs) && !(*(madd->GetInputM(1)) <= m_bs);
-  } else if (m_dim == DIMN) {
-    return !(*(madd->GetInputN(0)) <= m_bs) && !(*(madd->GetInputN(1)) <= m_bs);
-  } else {
-    return false;
-  }
+  return false;
 }
 
 void MAddLoopRef::Apply(Node *node) const
@@ -175,7 +194,7 @@ void MAddLoopRef::Apply(Node *node) const
   split0->SetIndepIters();
   split1->SetIndepIters();
 
-  MAdd *newMAdd = new MAdd(madd->m_type, m_toLayer);
+  MAdd *newMAdd = new MAdd(m_toLayer, madd->m_type);
   newMAdd->AddInput(split0, 1);
   newMAdd->AddInput(split1, 1);
 
@@ -183,13 +202,13 @@ void MAddLoopRef::Apply(Node *node) const
   CombineSingleIter *com1 = split1->CreateMatchingCombine(1, 1, newMAdd, 0);
 
   Poss *loopPoss = new Poss(2, com0, com1);
-
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, USELLDLAMU);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, m_bs);
   loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
 
   node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
+  return;
 }
 
 string MAddToVAddLoopRef::GetType() const
@@ -199,19 +218,22 @@ string MAddToVAddLoopRef::GetType() const
 
 bool MAddToVAddLoopRef::CanApply(const Node *node) const
 {
-  const MAdd *madd = (MAdd*) node;
-  if (madd->GetLayer() != m_fromLayer) {
-    return false;
+  if (node->GetClass() == MAdd::GetClass()) {
+    const MAdd *madd = (MAdd*) node;
+    if (madd->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if (m_dim == DIMM) {
+      return (*(madd->GetInputN(0)) == LLDLA_MU) && (*(madd->GetInputN(1)) == LLDLA_MU) &&
+	!(*(madd->GetInputM(0)) <= LLDLA_MU) && !(*(madd->GetInputM(1)) <= LLDLA_MU);
+    } else if (m_dim == DIMN) {
+      return (*(madd->GetInputM(0)) == LLDLA_MU) && (*(madd->GetInputM(0)) == LLDLA_MU) &&
+	!(*(madd->GetInputN(0)) <= LLDLA_MU) && !(*(madd->GetInputN(1)) <= LLDLA_MU);
+    } else {
+      return false;
+    }  
   }
-  if (m_dim == DIMM) {
-    return (*(madd->GetInputN(0)) == LLDLA_MU) && (*(madd->GetInputN(1)) == LLDLA_MU) &&
-      !(*(madd->GetInputM(0)) <= LLDLA_MU) && !(*(madd->GetInputM(1)) <= LLDLA_MU);
-  } else if (m_dim == DIMN) {
-    return (*(madd->GetInputM(0)) == LLDLA_MU) && (*(madd->GetInputM(0)) == LLDLA_MU) &&
-      !(*(madd->GetInputN(0)) <= LLDLA_MU) && !(*(madd->GetInputN(1)) <= LLDLA_MU);
-  } else {
-    return false;
-  }  
+  return false;
 }
 
 void MAddToVAddLoopRef::Apply(Node *node) const
@@ -246,12 +268,13 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   
   Poss *loopPoss = new Poss(2, com0, com1);
 
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, USEUNITBS);
+  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
   loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
 
   node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
+  return;
 }
 
 bool MAddLowerLayer::CanApply(const Node *node) const
@@ -262,7 +285,9 @@ bool MAddLowerLayer::CanApply(const Node *node) const
       return false;
     }
     if (*(madd->GetInputM(1)) <= m_bs &&
-	*(madd->GetInputN(1)) <= m_bs) {
+	*(madd->GetInputN(1)) <= m_bs &&
+	*(madd->GetInputM(0)) <= m_bs &&
+	*(madd->GetInputN(0)) <= m_bs) {
       return true;
     } else {
       return false;
@@ -283,6 +308,90 @@ string MAddLowerLayer::GetType() const
 {
   return "VAdd lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
+}
+
+string MAddToRegArith::GetType() const
+{
+  return "MAddToRegArith " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool MAddToRegArith::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == MAdd::GetClass()) {
+    MAdd* madd = (MAdd*) node;
+    if ((*(madd->GetInputM(0)) == LLDLA_MU) ||
+	(*(madd->GetInputN(0)) == LLDLA_MU)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  return false;
+}
+
+void MAddToRegArith::Apply(Node* node) const
+{
+  MAdd* madd = (MAdd*) node;
+
+  // Set direction of split
+  bool splitIntoRows = !(*(madd->GetInputM(0)) <= LLDLA_MU);
+
+  // Split matrices A and B
+  SplitSingleIter* splitA;
+  SplitSingleIter* splitB;
+  if (splitIntoRows) {
+    splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+    splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  } else {
+    splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+    splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  }
+
+  splitA->AddInput(madd->Input(0), madd->InputConnNum(0));
+  splitA->SetAllStats(FULLUP);
+  splitA->SetIndepIters();
+
+  splitB->AddInput(madd->Input(1), madd->InputConnNum(1));
+  if (splitIntoRows) {
+    splitB->SetUpStats(FULLUP, FULLUP,
+		       NOTUP, NOTUP);
+  } else {
+    splitB->SetUpStats(FULLUP, NOTUP,
+		       FULLUP, NOTUP);
+  }
+  splitB->SetIndepIters();
+
+  // Create loads for A and B
+  LoadToRegs* loadA = new LoadToRegs();
+  loadA->AddInput(splitA, 1);
+
+  LoadToRegs* loadB = new LoadToRegs();
+  loadB->AddInput(splitB, 1);
+
+  // Create new add node
+  Add* add = new Add();
+  add->AddInput(loadA, 0);
+  add->AddInput(loadB, 0);
+
+  // Create store to write back to B
+  StoreFromRegs* storeToB = new StoreFromRegs();
+  storeToB->AddInput(add, 0);
+  storeToB->AddInput(splitB, 1);
+
+  // Create combines for A and B
+  CombineSingleIter* comA = splitA->CreateMatchingCombine(0);
+  CombineSingleIter* comB = splitB->CreateMatchingCombine(1, 1, storeToB, 0);
+
+  Poss* loopPoss = new Poss(2, comA, comB);
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
+  loop->SetDimName(splitIntoRows ? DIMM : DIMN);
+
+  node->m_poss->AddPSet(loop);
+  node->RedirectChildren(loop->OutTun(1), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+
+  return;
 }
 
 #endif // DOLLDLA

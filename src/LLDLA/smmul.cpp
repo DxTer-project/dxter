@@ -24,7 +24,7 @@
 
 #if DOLLDLA
 
-SMMul::SMMul(Type type, Layer layer)
+SMMul::SMMul(Layer layer, Type type)
 {
   m_type = type;
   SetLayer(layer);
@@ -34,8 +34,8 @@ void SMMul::PrintCode(IndStream &out)
 {
   if (GetLayer() == ABSLAYER) {
     *out << "simple_smul( " <<
-      InputDataType(0).m_numRowsVar << ", " <<
-      InputDataType(0).m_numColsVar << ", " <<
+      InputDataType(1).m_numRowsVar << ", " <<
+      InputDataType(1).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ", " <<
       InputDataType(1).m_rowStrideVar << ", " <<
@@ -128,7 +128,7 @@ Phase SMMul::MaxPhase() const
 
 Node* SMMul::BlankInst()
 {
-  return new SMMul(REAL, ABSLAYER);
+  return new SMMul(ABSLAYER, REAL);
 }
 
 NodeType SMMul::GetType() const
@@ -151,30 +151,32 @@ string SMulLoopRef::GetType() const
 
 bool SMulLoopRef::CanApply(const Node *node) const
 {
-  const SMMul *mul = (SMMul*)node;
-  if (mul->GetLayer() != m_fromLayer)
-    return false;
+  if (node->GetNodeClass() == SMMul::GetClass()) {
+    const SMMul *mul = (SMMul*)node;
+    if (mul->GetLayer() != m_fromLayer)
+      return false;
   
-  if (m_dim == DIMM) {
-    if (*(mul->GetInputM(1)) <= BSSizeToSize(m_bs))
-      return false;
+    if (m_dim == DIMM) {
+      if (*(mul->GetInputM(1)) <= m_bs.GetSize())
+	return false;
+      else
+	return true;
+    }
+    else if (m_dim == DIMN) {
+      if (*(mul->GetInputN(1)) <= m_bs.GetSize())
+	return false;
+      else
+	return true;
+    }
     else
-      return true;
+      throw;
   }
-  else if (m_dim == DIMN) {
-    if (*(mul->GetInputN(1)) <= BSSizeToSize(m_bs))
-      return false;
-    else
-      return true;
-  }
-  else
-    throw;
   return false;
 }
 
 void SMulLoopRef::Apply(Node *node) const
 {
-  SMMul *mul = (SMMul*)node;
+  SMMul* mul = (SMMul*)node;
 
 
   //Create a split for the input matrix
@@ -182,7 +184,7 @@ void SMulLoopRef::Apply(Node *node) const
   //    (i.e., it's horizontal)
   // If we're splitting on the n dimension, then the split moves right
   //    (i.e., it's vertical)
-  SplitSingleIter *split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   // Add input, which is the matrix input to mul
   split->AddInput(mul->Input(1), mul->InputConnNum(1));
   //Set the update statuses
@@ -201,7 +203,7 @@ void SMulLoopRef::Apply(Node *node) const
   split->SetIndepIters();
 
   //Create a loop tunnel - the scalar is input to each iteration of the loop
-  LoopTunnel *scalarTun = new LoopTunnel(POSSTUNIN);
+  LoopTunnel* scalarTun = new LoopTunnel(POSSTUNIN);
   //Wire up the scalar input
   scalarTun->AddInput(mul->Input(0), mul->InputConnNum(0));
   //Always updated since it doesn't change
@@ -211,7 +213,7 @@ void SMulLoopRef::Apply(Node *node) const
   
 
   //Create a new SMul or the same type and in my m_toLayer layer
-  SMMul *newMul = new SMMul(mul->m_type, m_toLayer);
+  SMMul* newMul = new SMMul(m_toLayer, mul->m_type);
   newMul->SetLayer(m_toLayer);
 
   //Wire inputs - the scalar loop tunnel and 
@@ -220,7 +222,7 @@ void SMulLoopRef::Apply(Node *node) const
   newMul->AddInput(split, 1);
 
   //Create an output tunnel for the scalar just for consistency
-  LoopTunnel *scalarTunOut = new LoopTunnel(POSSTUNOUT);
+  LoopTunnel* scalarTunOut = new LoopTunnel(POSSTUNOUT);
   //Wire two inputs, the first is for the data that is passed out
   // and the second is to the input tunnel to which this one
   // should match
@@ -231,16 +233,16 @@ void SMulLoopRef::Apply(Node *node) const
   
   //Create an output tunnel for the matrix and overwrite
   // the 1st (0-based) partition of the output matrix
-  CombineSingleIter *com = split->CreateMatchingCombine(1,
+  CombineSingleIter* com = split->CreateMatchingCombine(1,
 							1, newMul, 0);
   
   //Put all of this into single poss (this constructor
   // will recursively move up the flow of data, adding
   // all nodes it finds
-  Poss *loopPoss = new Poss(2, scalarTunOut, com);
+  Poss* loopPoss = new Poss(2, scalarTunOut, com);
   //Put that poss into a loop - it's LLDLALOOP type and
   // uses the LLDLA_MU blocksize
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, USELLDLAMU);
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
 
   //Set the dimension over which this loop iterates
   loop->SetDimName(m_dim);

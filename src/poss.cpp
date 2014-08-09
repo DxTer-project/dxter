@@ -517,7 +517,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
   }
   else if (AddElemToVec(vec, node, false)) {
     if (node->IsTunnel(SETTUNOUT)) {
-      //Found a PSet to be added to this poss
+      // Found a PSet to be added to this poss
       // add the output tunnels of the set, add the
       // set to my set list, and add the input set
       // tunnels and everything preceeding them
@@ -742,7 +742,7 @@ void Poss::ExpandTunnels()
     while ((tunIn->m_inputs.size() > 1)
 	   && (tunIn->GetNodeClass() != SplitUnrolled::GetClass())
 	   && (tunIn->GetNodeClass() != SplitSingleIter::GetClass())) {
-      PossTunnel *tun = (PossTunnel*)(tunIn->GetNewInst());
+      Tunnel *tun = (Tunnel*)(tunIn->GetNewInst());
       tun->m_tunType = POSSTUNIN;
       ConnNum inNum = tunIn->m_inputs.size()-1;
       NodeConn *conn = tunIn->InputConn(inNum);
@@ -763,7 +763,7 @@ void Poss::ExpandTunnels()
         throw;
       }
       cout << "splitting out\n";
-      PossTunnel *tun = (PossTunnel*)(tunOut->GetNewInst());
+      Tunnel *tun = (Tunnel*)(tunOut->GetNewInst());
       tun->m_tunType = POSSTUNOUT;
       ConnNum inNum = tunOut->m_inputs.size()-1;
       NodeConn *conn = tunOut->InputConn(inNum);

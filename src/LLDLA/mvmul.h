@@ -31,7 +31,7 @@ class MVMul : public DLAOp<3, 1>
 {
  public:
   Type m_type;
-  MVMul(Type type, Layer layer);
+  MVMul(Layer layer, Type type);
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
@@ -41,7 +41,7 @@ class MVMul : public DLAOp<3, 1>
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 
-  static ClassType GetClass() { return "LLDLAPrimSMul"; }
+  static ClassType GetClass() { return "LLDLAPrimMVMul"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
 
   virtual NodeType GetType() const;
@@ -70,6 +70,19 @@ class MVMulLoopRef : public SingleTrans
  private:
   void ApplyColSplit(Node *node) const;
   void ApplyRowSplit(Node *node) const;
+};
+
+class MVMulToRegArith : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  MVMulToRegArith(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+  virtual bool IsRef() const { return true; }
 };
 
 class MVMulLowerLayer : public SingleTrans

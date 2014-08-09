@@ -871,11 +871,11 @@ RealLoop* Her2kLoopVar1(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
 #endif
   
   return loop;
@@ -974,11 +974,11 @@ RealLoop* Her2kLoopVar2(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
 #endif
   
   return loop;
@@ -1076,11 +1076,11 @@ RealLoop* Her2kLoopVar3(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer==DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
 #endif
   
   return loop;
@@ -1179,11 +1179,11 @@ RealLoop* Her2kLoopVar4(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
 #endif
   
   return loop;
@@ -1235,11 +1235,11 @@ RealLoop* Her2kLoopVar9(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
 #endif
   
   return loop;
@@ -1332,7 +1332,7 @@ RealLoop* Tri2kLoopVar10(Node *Ain, ConnNum Anum,
     throw;
   else
 #endif
-    loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
+    loop = new RealLoop(BLISLOOP, loopPoss, BlisNC);
 
   loop->SetDimName(DIMN);
   
@@ -1407,7 +1407,7 @@ RealLoop* Tri2kLoopVar9(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 
   Poss *loopPoss = new Poss(5, comA, comB, comC, comD, EtunOut);
-  loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
+  loop = new RealLoop(BLISLOOP, loopPoss, BlisKC);
   loop->SetDimName(DIMK);
   
   return loop;

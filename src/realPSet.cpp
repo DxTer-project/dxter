@@ -55,7 +55,7 @@ void RealPSet::Init(Poss *poss)
   }
   if (IsLoop()) {
     //    Loop *loop = (Loop*)this;
-    m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize());
+    m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize().GetSize());
   }
   /*
   //Make single tunnels with multiple inputs/outputs into individual tunnels
@@ -373,7 +373,7 @@ void RealPSet::AddPoss(Poss *poss)
       m_functionality = poss->GetFunctionalityString();
       if (IsLoop()) {
 	//	Loop *loop = (Loop*)this;
-	m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize());
+	m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize().GetSize());
       }
       if (m_functionality.empty())
 	throw;
@@ -446,7 +446,7 @@ bool RealPSet::operator==(const BasePSet &rhs) const
 	  return false;
 	if (loop1->GetBS() == 0) {
 	  cout << "BS bs\n";
-	  cout << loop1->GetBSSize() << endl;
+	  cout << loop1->GetBSSize().GetSize() << endl;
 	  throw;
 	}
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
@@ -971,7 +971,7 @@ void RealPSet::CombineAndRemoveTunnels()
           //throw;
         }
         if (!child->IsTunnel()) {
-          cout << "!child->IsPossTunnel()\n";
+          cout << "!child->IsTunnel()\n";
           throw;
         }
         child->m_poss->DeleteNode(child);

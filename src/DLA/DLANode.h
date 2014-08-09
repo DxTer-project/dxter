@@ -63,6 +63,12 @@ class DLANode : public Node
   const Sizes* InputLocalM(ConnNum num) const;
   const Sizes* InputLocalN(ConnNum num) const;
 #endif
+  bool IsInputRowVector(ConnNum num) const;
+  bool IsInputColVector(ConnNum num) const;
+  bool IsInputScalar(ConnNum num) const;
+#if DOLLDLA
+  bool InputIsMuByMu(ConnNum num);
+#endif//DOLLDLA
 #elif DOTENSORS
   virtual const Dim NumDims(ConnNum num) const = 0;
   virtual const Sizes* Len(ConnNum num, Dim dim) const = 0;

@@ -40,7 +40,7 @@ class VAdd : public DLAOp<2, 1>
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  static ClassType GetClass() { return "LLDLASVMul"; }
+  static ClassType GetClass() { return "LLDLAVAdd"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
 
   virtual NodeType GetType() const;

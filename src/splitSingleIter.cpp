@@ -1216,7 +1216,7 @@ void SplitSingleIter::StartFillingSizes()
   m_mlsizes = new Sizes[numElems];
   m_nlsizes = new Sizes[numElems];
 #endif
-
+  /*
 #if DOLLDLA
   if (m_tunType == SETTUNIN) {
     m_info = InputDataType(0);
@@ -1232,6 +1232,7 @@ void SplitSingleIter::StartFillingSizes()
     }
   }
 #endif
+  */
 }
 #else
 void SplitSingleIter::StartFillingSizes()
@@ -1478,21 +1479,25 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
   if (m_dir == PARTDOWN) {
     if (!IsUnitStride(type.m_rowStride))
       *out << type.m_rowStrideVar << " * ";
-    if (bs == USELLDLAMU)
+    if (bs == UnitBS)
+      *out << "1" << ";\n";
+    if (bs == LLDLAMu)
       *out << MU_VAR_NAME << ";\n";
-    else if (bs == USELLDLA2MU)
+    else if (bs == LLDLA2Mu)
       *out << "2 * " << MU_VAR_NAME << ";\n";
-    else if (bs == USELLDLA3MU)
+    else if (bs == LLDLA3Mu)
       *out << "3 * " << MU_VAR_NAME << ";\n";
   }
   else if (m_dir == PARTRIGHT) {
     if (!IsUnitStride(type.m_colStride))
       *out << type.m_colStrideVar << " * ";
-    if (bs == USELLDLAMU)
+    if (bs == UnitBS)
+      *out << "1" << ";\n";
+    if (bs == LLDLAMu)
       *out << MU_VAR_NAME << ";\n";
-    else if (bs == USELLDLA2MU)
+    else if (bs == LLDLA2Mu)
       *out << "2 * " << MU_VAR_NAME << ";\n";
-    else if (bs == USELLDLA3MU)
+    else if (bs == LLDLA3Mu)
       *out << "3 * " << MU_VAR_NAME << ";\n";
   }
   else
@@ -1513,10 +1518,10 @@ void SplitSingleIter::BuildDataTypeCache()
     m_info = InputDataType(0);
     switch (m_dir) {
     case (PARTDOWN):
-      m_info.m_numRowsVar = "numRows" + GetLoopLevel();
+      m_info.m_numRowsVar = "numRows" + GetNameStr(1);
       break;
     case (PARTRIGHT):
-      m_info.m_numColsVar = "numCols" + GetLoopLevel();
+      m_info.m_numColsVar = "numCols" + GetNameStr(1);
       break;
     default:
       throw;

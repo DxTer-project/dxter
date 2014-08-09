@@ -130,9 +130,6 @@ class Node
   virtual void BuildDataTypeCache() {}
   /*****************/
 
-
-
-
   Node();
   virtual ~Node();
   void Cull(Phase phase);

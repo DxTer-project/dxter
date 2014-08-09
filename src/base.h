@@ -475,7 +475,6 @@ inline void Swap(Node **ptr, NodeMap *map)
   *ptr = (Node*)(iter->second);  
 }
 
-
 inline string LayerNumToStr(Layer layer) 
 { 
   return std::to_string(layer); 

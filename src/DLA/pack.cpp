@@ -523,7 +523,7 @@ bool LoopInvariantPackBuffMotion::CanApply(const Node *node) const
     return false;
   const Node *input = node->Input(0);
   const Node *inputInput = input->Input(0);
-  if (!input->IsPossTunnel(POSSTUNIN) || !inputInput->IsPossTunnel(SETTUNIN)) {
+  if (!input->IsTunnel(POSSTUNIN) || !inputInput->IsTunnel(SETTUNIN)) {
     return false;
   }
   const LoopTunnel *tun = (LoopTunnel*)(node->Input(0));
@@ -562,10 +562,10 @@ bool LoopInvariantPackMotion::CanApply(const Node *node) const
   if (node->GetNodeClass() != Pack::GetClass())
     throw;
   const Node *input = node->Input(0);
-  if (input->GetNodeClass() != LoopTunnel::GetClass() || !input->IsPossTunnel(POSSTUNIN))
+  if (input->GetNodeClass() != LoopTunnel::GetClass() || !input->IsTunnel(POSSTUNIN))
     return false;
   const Node *inputInput = input->Input(0);
-  if (inputInput->GetNodeClass() != LoopTunnel::GetClass() || !inputInput->IsPossTunnel(SETTUNIN))
+  if (inputInput->GetNodeClass() != LoopTunnel::GetClass() || !inputInput->IsTunnel(SETTUNIN))
     throw;
   if (!((Tunnel*)inputInput)->m_pset->m_shadows.empty())
     throw;

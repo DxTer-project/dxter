@@ -2,6 +2,7 @@
 #define ROW_STRIDE_LLDLA_PRIMITIVES_H
 
 #include "utils.h"
+#include <immintrin.h>
 
 #define A(i,j) a[ (i)*a_row_stride + j ]
 #define B(i,j) b[ (i)*b_row_stride + j ]
@@ -85,11 +86,13 @@ inline void row_stride_mmul_1x2_2x2(
 	a_00_vreg.v = VEC_DUP_LOAD(&A(0, 0));
 	a_01_vreg.v = VEC_DUP_LOAD(&A(0, 1));
 
-	b_00_01_vreg.v *= a_00_vreg.v;
-	b_10_11_vreg.v *= a_01_vreg.v;
+	/*	b_00_01_vreg.v *= a_00_vreg.v;
+		b_10_11_vreg.v *= a_01_vreg.v;*/
 
 	c_00_01_vreg.v = VEC_PD_LOAD(&C(0, 0));
-	c_00_01_vreg.v += b_00_01_vreg.v + b_10_11_vreg.v;
+	c_00_01_vreg.v = _mm_fmadd_pd(a_00_vreg.v, b_00_01_vreg.v, c_00_01_vreg.v);
+	c_00_01_vreg.v = _mm_fmadd_pd(a_01_vreg.v, b_10_11_vreg.v, c_00_01_vreg.v);
+	//	c_00_01_vreg.v += b_00_01_vreg.v + b_10_11_vreg.v;
 
 	VEC_PD_STORE(&C(0, 0), c_00_01_vreg.v);
 }
@@ -214,18 +217,18 @@ inline void row_stride_smul_2x2(
 	double *scalar,
 	double *a, int a_row_stride)	{
 
-	v2df_t
-		scalar_vreg,
-		a_00_10_vreg, a_10_11_vreg;
+  v2df_t
+    scalar_vreg,
+    a_00_01_vreg, a_10_11_vreg;
 
-	scalar_vreg.v = VEC_DUP_LOAD(scalar);
+  scalar_vreg.v = VEC_DUP_LOAD(scalar);
 
-	a_00_10_vreg.v = VEC_PD_LOAD(&A(0, 0));
-	a_10_11_vreg.v = VEC_PD_LOAD(&A(1, 0));
-	a_00_10_vreg.v *= scalar_vreg.v;
-	a_10_11_vreg.v *= scalar_vreg.v;
+  a_00_01_vreg.v = VEC_PD_LOAD(&A(0, 0));
+  a_10_11_vreg.v = VEC_PD_LOAD(&A(1, 0));
+  a_00_01_vreg.v = a_00_01_vreg.v * scalar_vreg.v;
+  a_10_11_vreg.v = a_10_11_vreg.v * scalar_vreg.v;
 
-	VEC_PD_STORE(&A(0, 0), a_00_10_vreg.v);
-	VEC_PD_STORE(&A(1, 0), a_10_11_vreg.v);
+  VEC_PD_STORE(&A(0, 0), a_00_01_vreg.v);
+  VEC_PD_STORE(&A(1, 0), a_10_11_vreg.v);
 }
 #endif
