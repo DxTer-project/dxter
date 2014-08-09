@@ -1379,10 +1379,13 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     {
       PSetVecIter setIter = currPoss->m_sets.begin();
       for(; setIter != currPoss->m_sets.end(); ++setIter) {
+#if USESHADOWS
         BasePSet *newSet = (*setIter)->GetNewShadow();
-	if (newSet->IsLoop() != (*setIter)->IsLoop())
-	  throw;
         newSet->Duplicate(*setIter, map, true, true);
+#else
+        BasePSet *newSet = (*setIter)->GetNewInst();
+        newSet->Duplicate(*setIter, map, true, false);
+#endif
         newPoss->m_sets.push_back(newSet);
         newSet->m_ownerPoss = newPoss;
       }
