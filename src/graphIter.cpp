@@ -395,16 +395,11 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	out.Indent();
 	*out << "//**** ";
 	if (set->IsReal()) {
-	  out.Indent();
-	  *out << "Is real\n";
-	  //	  *out << set << endl;
+	  *out << "Is real\t";
 	}
 	else {
-	  out.Indent();
-	  *out << "Is a shadow\n";
-	  //	  *out << set << ", real is " << set->GetReal() << endl;
+	  *out << "Is a shadow\t";
 	}
-	out.Indent();
 	*out << set->GetFunctionalityString() << endl;
 	
 	RealPSet *real = set->GetReal();
