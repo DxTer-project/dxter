@@ -65,6 +65,7 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+RealPSet* VMVMulExample();
 RealPSet* SMMulExample();
 RealPSet* VMMulExample();
 RealPSet* SVMulRowExample();
@@ -330,6 +331,7 @@ void Usage()
   cout <<"         7  -> Scalar row vector multiply example\n";
   cout <<"         8  -> Vector matrix multiply example\n";
   cout <<"         9  -> Scalar matrix multiply example\n";
+  cout <<"        10  -> Vector matrix vector multiply example\n";
 }
 
 int main(int argc, const char* argv[])
@@ -432,6 +434,15 @@ int main(int argc, const char* argv[])
       algFunc = SMMulExample;
       break;
     default:
+    case(10):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_vmvmul";
+      algFunc = VMVMulExample;
+      break;
+
       Usage();
       return 0;
     }
@@ -565,6 +576,72 @@ int main(int argc, const char* argv[])
       uni.Print(cout, CODE, whichGraph); */
 
   return 0;
+}
+
+RealPSet* VMVMulExample()
+{
+  InputNode* Ain = new InputNode("A input", bigSize, 4, "A",
+				 1, 4,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride");
+
+  InputNode* xIn = new InputNode("x input", 4, 1, "X",
+				 1, 4,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  InputNode* zIn = new InputNode("z input", bigSize, 1, "Z",
+				 1, bigSize,
+				 "ZNumRows", "ZNumCols",
+				 "ZRowStride", "ZColStride");
+
+  InputNode* yIn = new InputNode("y input", 1, bigSize, "Y",
+				 1, 1,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride");
+
+  InputNode* wIn = new InputNode("w input", 1, 1, "W",
+				 1, 1,
+				 "WNumRows", "WNumCols",
+				 "WRowStride", "WColStride");
+
+  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(Ain, 0);
+
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  tunZ->AddInput(zIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  Tunnel* tunW = new Tunnel(POSSTUNIN);
+  tunW->AddInput(wIn, 0);
+
+  MVMul* mvmul = new MVMul(ABSLAYER, REAL);
+  mvmul->AddInputs(6,
+		   tunA, 0,
+		   tunX, 0,
+		   tunZ, 0);
+
+  VMMul* vmmul = new VMMul(ABSLAYER, REAL);
+  vmmul->AddInputs(6,
+		   tunY, 0,
+		   mvmul, 0,
+		   tunW, 0);
+
+  Poss* innerPoss = new Poss(vmmul, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
 }
 
 RealPSet* SMMulExample()

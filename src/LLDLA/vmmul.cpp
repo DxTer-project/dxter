@@ -313,12 +313,20 @@ bool VMMulLowerLayer::CanApply(const Node* node) const
     if (vmmul->GetLayer() != m_fromLayer) {
       return false;
     }
-    if (*(vmmul->GetInputM(0)) <= m_bs &&
-	*(vmmul->GetInputN(0)) <= m_bs &&
-	*(vmmul->GetInputN(1)) <= m_bs) {
-      return true;
+    if (m_toLayer == LLDLAPRIMITIVELAYER) {
+      if (*(vmmul->GetInputM(1)) == m_bs &&
+	  *(vmmul->GetInputN(1)) == m_bs) {
+	return true;
+      } else {
+	return false;
+      }
     } else {
-      return false;
+      if (*(vmmul->GetInputM(1)) <= m_bs &&
+	  *(vmmul->GetInputN(1)) <= m_bs) {
+	return true;
+      } else {
+	return false;
+      }
     }
   } else {
     throw;
