@@ -135,7 +135,10 @@ void VMMul::Prop()
       cout << "ERROR: Input dimensions don't match\n";
       throw;
     } else if (*GetInputM(2) != 1) {
-      cout << "Error: Input vectors have more than 1 row\n";
+      cout << "Error: VMMul result vector must have 1 row\n";
+      throw;
+    } else if (*GetInputM(0) != 1) {
+      cout << "Error: VMMul input vector must have 1 row\n";
       throw;
     }
     
@@ -144,7 +147,7 @@ void VMMul::Prop()
 	cout << "ERROR: Primitive vector for vmmul must be 1 x 2\n";
 	throw;
       }
-      if (*GetInputN(1) != LLDLA_MU) {
+      if (*GetInputN(1) != LLDLA_MU || *GetInputM(1) != LLDLA_MU) {
 	cout << "ERROR: Primitive matrix must be 2 x 2\n";
 	throw;
       }
