@@ -834,7 +834,11 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
                   nodeMap[*tunIter] = *tunIter;
                 }
                 Poss *newPoss = new Poss;
+#if USESHADOWS
                 newPoss->Duplicate(this,nodeMap,true,true);
+#else
+                newPoss->Duplicate(this,nodeMap,true,false);
+#endif
                 newPoss->PatchAfterDuplicate(nodeMap);
                 newPoss->FuseLoops(left,right,simplifiers,cullFunc);
                 SetFused(leftSet,rightSet);
