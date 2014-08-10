@@ -1328,7 +1328,7 @@ RealLoop* TrmmLoopLeftVar1(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
@@ -1415,7 +1415,7 @@ RealLoop* TrmmLoopLeftVar2(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
@@ -1494,7 +1494,7 @@ RealLoop* TrmmLoopRightVar1(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
@@ -1582,7 +1582,7 @@ RealLoop* TrmmLoopRightVar2(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
@@ -1630,7 +1630,7 @@ RealLoop* TrxmLoopRightVar3(Node *Ain, ConnNum Anum,
   Poss *loopPoss = new Poss(2, AtunOut, comB);
   RealLoop *loop;
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
   return loop;
@@ -1692,7 +1692,7 @@ RealLoop* TrsmLoopLeftVar1(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer == DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
@@ -1772,7 +1772,7 @@ RealLoop* TrsmLoopRightVar1(Node *Ain, ConnNum Anum,
   Poss *loopPoss = new Poss(2, comA, comB);
   RealLoop *loop;
 #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
@@ -1864,7 +1864,7 @@ RealLoop* TrsmLoopLeftVar2(Node *Ain, ConnNum Anum,
   Poss *loopPoss = new Poss(2, comA, comB);
   RealLoop *loop;
 #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISKC);
 #endif
@@ -1909,7 +1909,7 @@ RealLoop* TrxmLoopLeftVar3(Node *Ain, ConnNum Anum,
   Poss *loopPoss = new Poss(2, AtunOut, comB);
   RealLoop *loop;
 #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
 #endif
@@ -1995,7 +1995,7 @@ RealLoop* TrsmLoopRightVar2(Node *Ain, ConnNum Anum,
   RealLoop *loop;
 #if DOELEM
   if (layer==DMLAYER)
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   else
     throw;
 #elif DOBLIS
@@ -2499,7 +2499,7 @@ RealLoop* Trmm3LoopLeftVar3(Node *Ain, ConnNum Anum,
   Poss *loopPoss = new Poss(3, AtunOut, comB, comC);
   RealLoop *loop;
 #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISNC);
 #endif

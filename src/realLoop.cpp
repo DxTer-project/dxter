@@ -58,7 +58,7 @@ RealLoop::RealLoop(LoopType type)
 {
 #if DOELEM
   if (m_type == ELEMLOOP)
-    m_bsSize = USEELEMBS;
+    m_bsSize = ElemBS;
   else
 #endif
     m_bsSize = BadBS;
