@@ -1297,8 +1297,9 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 #if PRINTTRACKING
   cout << "inlining " << this << endl;
 #endif
-  if (inliningPoss->m_sets[0]->IsShadow())
-    throw;
+  if (inliningPoss->m_sets[0]->IsShadow()) {
+    inliningPoss->ReplaceShadowSetWithReal(0);
+  }
 
   RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[0]);
   

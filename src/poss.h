@@ -136,6 +136,7 @@ class Poss
   static void UnflattenStatic(ifstream &in);
 
   void PrintSetConnections();
+  void ReplaceShadowSetWithReal(unsigned int i);
 };
 
 void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set);

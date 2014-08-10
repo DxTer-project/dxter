@@ -328,7 +328,7 @@ RealLoop* TwoSidedTrsmLowerVar1Alg(
 			    comL);
   RealLoop *loop;
 #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
@@ -422,7 +422,7 @@ RealLoop* TwoSidedTrsmLowerVar2Alg(
 			    comL);
   RealLoop *loop;
 #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
@@ -521,7 +521,7 @@ RealLoop* TwoSidedTrsmLowerVar4Alg(
 			    comL);
   RealLoop *loop;
   #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
@@ -609,7 +609,7 @@ RealLoop* TwoSidedTrmmLowerVar1Alg(
 			    comL);
   RealLoop *loop;
 #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
@@ -689,7 +689,7 @@ RealLoop* TwoSidedTrmmLowerVar2Alg(
 			    comL);
   RealLoop *loop;
   #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
@@ -772,7 +772,7 @@ RealLoop* TwoSidedTrmmLowerVar4Alg(
 			    comL);
   RealLoop *loop;
   #if DOELEM
-    loop = new RealLoop(ELEMLOOP, loopPoss, USEELEMBS);
+    loop = new RealLoop(ELEMLOOP, loopPoss, ElemBS);
   #else
     loop = new RealLoop(BLISLOOP, loopPoss, USEBLISOUTERBS);
 #endif
