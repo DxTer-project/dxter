@@ -2989,3 +2989,51 @@ bool Poss::RemoveLoops(bool *doneSomething)
   }
   return false;  
 }
+
+void Poss::ReplaceShadowSetWithReal(unsigned int i)
+{
+  if (i >= m_sets.size())
+    throw;
+  BasePSet *set = m_sets[i];
+  if (!set->IsShadow())
+    throw;
+
+  ShadowPSet *shadow = (ShadowPSet*)set;
+  RealPSet *real = shadow->m_realPSet;
+  NodeMap map;
+  for (unsigned int i = 0; i < shadow->m_inTuns.size(); ++i)
+    map[real->InTun(i)] = shadow->InTun(i);
+
+  for (unsigned int i = 0; i < shadow->m_outTuns.size(); ++i)
+    map[real->OutTun(i)] = shadow->OutTun(i);
+
+  RealPSet *newSet = (RealPSet*)(real->GetNewInst());
+  newSet->Duplicate(real, map, false, true);
+  newSet->PatchAfterDuplicate(map);
+
+  for (unsigned int i = 0; i < shadow->m_inTuns.size(); ++i) {
+    Node *tun = shadow->m_inTuns[i];
+    PossMMapIter iter = newSet->m_posses.begin();
+    for(; iter != newSet->m_posses.end(); ++iter) {
+      Poss *poss = iter->second;
+      tun->AddChild(poss->InTun(i), 0);
+    }
+  }
+
+  for (unsigned int i = 0; i < shadow->m_outTuns.size(); ++i) {
+    Node *tun = shadow->m_outTuns[i];
+    PossMMapIter iter = newSet->m_posses.begin();
+    for(; iter != newSet->m_posses.end(); ++iter) {
+      Poss *poss = iter->second;
+      tun->m_inputs.push_back(new NodeConn(poss->OutTun(i), 0));
+    }
+  }
+  
+  shadow->m_inTuns.clear();
+  shadow->m_outTuns.clear();
+
+  m_sets[i] = newSet;
+  newSet->m_ownerPoss = this;
+
+  delete shadow;
+}
