@@ -329,8 +329,15 @@ const Sizes* SplitSingleIter::GetM(ConnNum num) const
     case (POSSTUNIN):
       if (num < GetNumElems(m_dir)) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_msizes)
+        if (!input->m_msizes) {
+	  cout << Input(0)->GetType() << endl;
+	  cout << GetMyLoop()->GetControl()->m_msizes << endl;
+	  cout << GetMyLoop()->GetControl()->m_nsizes << endl;
+	  cout << "loop " << m_pset << endl;
+	  cout << "loop " << input->m_pset << endl;
+	  
           throw;
+	}
         return &(input->m_msizes[num]);
       }
       else if (num == GetNumElems(m_dir)) {
