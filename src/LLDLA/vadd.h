@@ -52,8 +52,7 @@ class VAdd : public DLAOp<2, 1>
   void VectorOpInputDimensionCheck(ConnNum inputNum);
 };
 
-
-class VAddLoopRef : SingleTrans
+class VAddLoopRef : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;

@@ -38,6 +38,7 @@
 #include "LLDLAGemm.h"
 #include "DLAReg.h"
 #include "madd.h"
+#include "vadd.h"
 #include "vmmul.h"
 #include "mvmul.h"
 #include "vvdot.h"
@@ -65,6 +66,7 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+RealPSet* VAddExample();
 RealPSet* VMVMulExample();
 RealPSet* SMMulExample();
 RealPSet* VMMulExample();
@@ -142,7 +144,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
-  //  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Transform gemm into loop over vmmuls
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
@@ -165,7 +167,7 @@ void AddGemmTrans()
 #endif
   
   //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
-  //  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
   return;
 }
 
@@ -277,6 +279,17 @@ void AddVMMulTrans()
   return;
 }
 
+void AddVAddTrans()
+{
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
+
+  //Universe::AddTrans(VAdd::GetClass(), new VAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+
+  return;
+}
+
 void AddTrans()
 {
   AddGemmTrans();
@@ -286,6 +299,7 @@ void AddTrans()
   AddSMMulTrans();
   AddSVMulTrans();
   AddVMMulTrans();
+  AddVAddTrans();
 
   AddUnrollingTrans();
   
@@ -316,22 +330,26 @@ void AddSimplifiers()
 
   // Lowers the tag of an SVMul node
   Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
+
+  // Lowers the tag of a vadd node
+  Universe::AddTrans(VAdd::GetClass(), new VAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
 }
 
 void Usage()
 {
   cout << "./driver arg1 arg2 ...\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
-  cout <<"         1  -> Gemm Example N/T N/T\n";
-  cout <<"         2  -> Double Gemm Example N/T N/T\n";
-  cout <<"         3  -> Dot prod example\n";
-  cout <<"         4  -> Matrix add example\n";
-  cout <<"         5  -> Matrix vector multiply example\n";
-  cout <<"         6  -> Scalar column vector multiply example\n";
-  cout <<"         7  -> Scalar row vector multiply example\n";
-  cout <<"         8  -> Vector matrix multiply example\n";
-  cout <<"         9  -> Scalar matrix multiply example\n";
-  cout <<"        10  -> Vector matrix vector multiply example\n";
+  cout <<"         1  -> Gemm  N/T N/T\n";
+  cout <<"         2  -> Double Gemm  N/T N/T\n";
+  cout <<"         3  -> Dot prod\n";
+  cout <<"         4  -> Matrix add\n";
+  cout <<"         5  -> Matrix vector multiply\n";
+  cout <<"         6  -> Scalar column vector multiply\n";
+  cout <<"         7  -> Scalar row vector multiply\n";
+  cout <<"         8  -> Vector matrix multiply\n";
+  cout <<"         9  -> Scalar matrix multiply\n";
+  cout <<"        10  -> Vector add\n";
+  cout <<"        11  -> Vector matrix vector multiply\n";
 }
 
 int main(int argc, const char* argv[])
@@ -433,8 +451,15 @@ int main(int argc, const char* argv[])
       opName = "dxt_smmul";
       algFunc = SMMulExample;
       break;
-    default:
     case(10):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_vadd";
+      algFunc = VAddExample;
+      break;
+    case(11):
       if (argc != 2) {
 	Usage();
 	return 0;
@@ -442,7 +467,7 @@ int main(int argc, const char* argv[])
       opName = "dxt_vmvmul";
       algFunc = VMVMulExample;
       break;
-
+    default:
       Usage();
       return 0;
     }
@@ -578,6 +603,42 @@ int main(int argc, const char* argv[])
   return 0;
 }
 
+RealPSet* VAddExample()
+{
+  InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
+				 1, bigSize,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  InputNode* yIn = new InputNode("y input", bigSize, 1, "Y",
+				 1, bigSize,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride");
+  
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  VAdd* vadd = new VAdd(COLVECTOR, ABSLAYER, REAL);
+  vadd->AddInputs(4,
+		  tunX, 0,
+		  tunY, 0);
+
+  Poss* innerPoss = new Poss(vadd, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+
+}
+
 RealPSet* VMVMulExample()
 {
   InputNode* Ain = new InputNode("A input", bigSize, 4, "A",
@@ -626,13 +687,13 @@ RealPSet* VMVMulExample()
 		   tunX, 0,
 		   tunZ, 0);
 
-  VMMul* vmmul = new VMMul(ABSLAYER, REAL);
-  vmmul->AddInputs(6,
+  VVDot* vvdot = new VVDot(ABSLAYER, REAL);
+  vvdot->AddInputs(6,
 		   tunY, 0,
 		   mvmul, 0,
 		   tunW, 0);
 
-  Poss* innerPoss = new Poss(vmmul, true);
+  Poss* innerPoss = new Poss(vvdot, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
   OutputNode *Cout = new OutputNode("C output");

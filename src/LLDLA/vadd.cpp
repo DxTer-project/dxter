@@ -39,9 +39,12 @@ void VAdd::PrintCode(IndStream &out)
 	InputDataType(1).m_numRowsVar << ", " <<
 	" 1, " <<
 	GetInputName(0).str() << ", " <<
+	InputDataType(0).m_rowStrideVar << ", " <<
+	InputDataType(0).m_colStrideVar << ", " <<
 	GetInputName(1).str() << ", " <<
 	InputDataType(1).m_rowStrideVar << ", " <<
 	InputDataType(1).m_colStrideVar << ");\n";
+
     } else {
       *out << "simple_add( " <<
 	" 1, " <<

@@ -306,7 +306,7 @@ void MAddLowerLayer::Apply(Node *node) const
 
 string MAddLowerLayer::GetType() const
 {
-  return "VAdd lower layer " + LayerNumToStr(m_fromLayer)
+  return "MAdd lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
 }
 
