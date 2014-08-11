@@ -794,20 +794,21 @@ void SplitSumScatter::Apply(Node *node) const
 
 	  RedistNode *newRedist = NULL;
 	  if (needRedist) {
-	    newRedist = new RedistNode(newOutTypeFull);
-	    newRedist->AddInput(newSum, 0);
-
 	    if (newOutTypeFull == newSum->DataType(0).m_dist)
-	      throw;
-
-	    node->m_poss->AddNode(newRedist);
-
-	    if (!newOutTypeFull.IsSane()) {
-	      cout << "created new " << newSum->DataType(0).m_dist.str() << " -> " << newOutTypeFull.str() << endl;
-	      throw;
+	      needRedist = false;
+	    else {
+	      newRedist = new RedistNode(newOutTypeFull);
+	      newRedist->AddInput(newSum, 0);
+	      
+	      node->m_poss->AddNode(newRedist);
+	      
+	      if (!newOutTypeFull.IsSane()) {
+		cout << "created new " << newSum->DataType(0).m_dist.str() << " -> " << newOutTypeFull.str() << endl;
+		throw;
+	      }
+	      if (newSum->DataType(0).m_dist.m_numDims != newOutTypeFull.m_numDims)
+		throw;
 	    }
-	    if (newSum->DataType(0).m_dist.m_numDims != newOutTypeFull.m_numDims)
-	      throw;
 	  }
 
 	  if (DistTypeNotEqual(newOutTypeFull, outType)) {
