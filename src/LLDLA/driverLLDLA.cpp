@@ -285,7 +285,7 @@ void AddVAddTrans()
 
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
 
-  //Universe::AddTrans(VAdd::GetClass(), new VAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }

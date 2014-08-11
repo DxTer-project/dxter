@@ -33,8 +33,12 @@ VAdd::VAdd(VecType vecType, Layer layer, Type type)
 
 void VAdd::PrintCode(IndStream &out)
 {
+  out.Indent();
+
   if (m_layer == ABSLAYER) {
     if (m_vecType == COLVECTOR) {
+      *out << "// Printed ABSLAYER VAdd\n";
+      out.Indent();
       *out << "simple_add( " <<
 	InputDataType(1).m_numRowsVar << ", " <<
 	" 1, " <<
@@ -44,19 +48,21 @@ void VAdd::PrintCode(IndStream &out)
 	GetInputName(1).str() << ", " <<
 	InputDataType(1).m_rowStrideVar << ", " <<
 	InputDataType(1).m_colStrideVar << ");\n";
-
     } else {
+      *out << "// Printed ABSLAYER VAdd\n";
       *out << "simple_add( " <<
 	" 1, " <<
 	InputDataType(1).m_numColsVar << ", " <<
 	GetInputName(0).str() << ", " <<
+	InputDataType(0).m_rowStrideVar << ", " <<
+	InputDataType(0).m_colStrideVar << ", " <<
 	GetInputName(1).str() << ", " <<
 	InputDataType(1).m_rowStrideVar << ", " <<
 	InputDataType(1).m_colStrideVar << ");\n";
     }
-
     return;
   }
+
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
     throw;
@@ -64,8 +70,7 @@ void VAdd::PrintCode(IndStream &out)
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;
-  
-  out.Indent();
+
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
     PrintGeneralStride(out);
   } else if (rowStride == UNITSTRIDE && colStride == NONUNITSTRIDE) {
@@ -77,17 +82,20 @@ void VAdd::PrintCode(IndStream &out)
   }
 }
 
-
 void VAdd::PrintRowStride(IndStream &out)
 {
   if (m_vecType == COLVECTOR) {
     *out << "row_stride_add_2x1( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      InputDataType(0).m_rowStrideVar << ", " <<
+      GetInputName(1).str() << ", " <<
+      InputDataType(0).m_rowStrideVar << " );\n";
   } else {
     *out << "row_stride_add_1x2( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      InputDataType(0).m_rowStrideVar << ", " <<
+      GetInputName(1).str() << ", " <<
+      InputDataType(0).m_rowStrideVar << " );\n";
   }
 }
 
@@ -96,11 +104,15 @@ void VAdd::PrintColStride(IndStream &out)
   if (m_vecType == COLVECTOR) {
     *out << "col_stride_add_2x1( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      InputDataType(0).m_colStrideVar << ", " <<
+      GetInputName(1).str() << ", " <<
+      InputDataType(0).m_colStrideVar << " );\n";
   } else {
     *out << "col_stride_add_1x2( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      InputDataType(0).m_colStrideVar << ", " <<
+      GetInputName(1).str() << ", " <<
+      InputDataType(0).m_colStrideVar << " );\n";
   }
 
 }
@@ -158,7 +170,12 @@ void VAdd::VectorOpInputDimensionCheck(ConnNum inputNum)
 
 Node* VAdd::BlankInst()
 {
-  return new VAdd(ROWVECTOR, LLDLAPRIMITIVELAYER, REAL);
+  return new VAdd(COLVECTOR, LLDLAPRIMITIVELAYER, REAL);
+}
+
+Node* VAdd::GetNewInst()
+{
+  return new VAdd(m_vecType, m_layer, m_type);
 }
 
 NodeType VAdd::GetType() const
@@ -253,22 +270,52 @@ bool VAddLowerLayer::CanApply(const Node *node) const
     if (vadd->GetLayer() != m_fromLayer) {
       return false;
     }
-    if (*(vadd->GetInputM(1)) <= m_bs &&
-	*(vadd->GetInputN(1)) <= m_bs) {
-      return true;
-    } else {
-      return false;
+
+    if (vadd->m_vecType == ROWVECTOR) {
+      if (*vadd->GetInputN(0) <= m_bs ||
+	  *vadd->GetInputN(1) <= m_bs) {
+	return false;
+      } else {
+	if (m_toLayer == LLDLAPRIMITIVELAYER) {
+	  if (*vadd->GetInputN(0) != LLDLA_MU ||
+	      *vadd->GetInputN(1) != LLDLA_MU) {
+	    return false;
+	  } else {
+	    return true;
+	  }
+
+	} else {
+	  return true;
+	}
+      }
+    } else if (vadd->m_vecType == COLVECTOR) {
+      if (*vadd->GetInputM(0) <= m_bs ||
+	  *vadd->GetInputM(1) <= m_bs) {
+	return false;
+      } else {
+	if (m_toLayer == LLDLAPRIMITIVELAYER) {
+	  if (*vadd->GetInputM(0) != LLDLA_MU ||
+	      *vadd->GetInputM(1) != LLDLA_MU) {
+	    return false;
+	  } else {
+	    return true;
+	  }
+
+	} else {
+	  return true;
+	}
+      }
     }
   }
-  else {
-    throw;
-  }
+
+  return false;
 }
 
 void VAddLowerLayer::Apply(Node *node) const
 {
   VAdd *vadd = (VAdd*) node;
   vadd->SetLayer(m_toLayer);
+  return;
 }
 
 string VAddLowerLayer::GetType() const

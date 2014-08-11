@@ -260,6 +260,7 @@ void VVDotLowerLayer::Apply(Node *node) const
 {
  VVDot *svmul = (VVDot*) node;
   svmul->SetLayer(m_toLayer);
+  return;
 }
 
 string VVDotLowerLayer::GetType() const

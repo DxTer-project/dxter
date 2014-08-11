@@ -38,7 +38,7 @@ class VAdd : public DLAOp<2, 1>
   virtual Phase MaxPhase() const { return NUMPHASES; }
 
   static Node* BlankInst();
-  virtual Node* GetNewInst() { return BlankInst(); }
+  virtual Node* GetNewInst();
 
   static ClassType GetClass() { return "LLDLAVAdd"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
