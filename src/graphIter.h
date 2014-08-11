@@ -48,6 +48,8 @@ class GraphIter
   bool Increment();
   GraphIter& operator=(const GraphIter &rhs);
 
+  void ClearPrintedRecursively();
+
   void GetCurrTransVec(TransVec &transVec);
   void AddCurrPossVars(VarSet &set) const;
 
