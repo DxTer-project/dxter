@@ -82,15 +82,18 @@ void VVDot::PrintRowStride(IndStream &out)
     GetInputName(1).str() << ", " <<
     InputDataType(1).m_rowStrideVar << ", " <<
     GetInputName(2).str() << ", " <<
-    InputDataType(2).m_rowStrideVar << ");\n";
+    InputDataType(2).m_rowStrideVar << " );\n";
 }
 
 void VVDot::PrintColStride(IndStream &out)
 {
   *out << "col_stride_mmul_1x2_2x1( " <<
     GetInputName(0).str() << ", " <<
+    InputDataType(0).m_colStrideVar << ", " <<
     GetInputName(1).str() << ", " <<
-    GetInputName(2).str() << ");\n";
+    InputDataType(0).m_colStrideVar << ", " <<
+    GetInputName(2).str() << ", " <<
+    InputDataType(0).m_colStrideVar << " );\n";
 }
 
 void VVDot::PrintGeneralStride(IndStream &out)
@@ -98,7 +101,7 @@ void VVDot::PrintGeneralStride(IndStream &out)
   *out << "gen_stride_mmul_1x2_2x1( " <<
     GetInputName(0).str() << ", " <<
     GetInputName(1).str() << ", " <<
-    GetInputName(2).str() << ");\n";
+    GetInputName(2).str() << " );\n";
 }
 
 void VVDot::Prop()

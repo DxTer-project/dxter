@@ -470,6 +470,7 @@ int main(int argc, const char* argv[])
       }
       opName = "dxt_vadd2";
       algFunc = VAdd2Example;
+      break;
     case(12):
       if (argc != 2) {
 	Usage();

@@ -53,6 +53,7 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
   unsigned int numExecs = split->NumberOfLoopExecs();
   if (!numExecs)
     throw;
+
   for(unsigned int i = 0; i < numExecs; ++i) {
     unsigned int numIters = split->NumIters(i);
     if (numIters != m_numIters)

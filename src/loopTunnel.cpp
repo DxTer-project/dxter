@@ -669,7 +669,9 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     return;
   if (!m_pset->IsReal())
     return;
-
+  /*  if (!execNum) {
+    throw;
+    }*/
   if (!m_msizes)
     throw;
   const DLANode *input = (DLANode*)Input(0);
@@ -699,7 +701,12 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     cout << lns->NumSizes() << endl;
 #endif
     //    (*(((Loop*)m_pset)->m_posses.begin())).second->ForcePrint();
-    cout << "Error: Length of loop is " << std::to_string(length) << endl;
+    cout << "Error: Cannot append sizes\n";
+    cout << "length = " << std::to_string(length) << endl;
+    cout << "ns->NumSizes() = " << std::to_string(ns->NumSizes()) << endl;
+    cout << "execNum = " << std::to_string(execNum) << endl;
+    cout << "length != ns->NumSizes() ? " << (length != ns->NumSizes()) << endl;
+    cout << "length <= execNum ? " << (length <= execNum) << endl;
     throw;
   }
   const Size m = (*ms)[execNum];

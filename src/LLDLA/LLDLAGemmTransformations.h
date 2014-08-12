@@ -26,7 +26,7 @@
 #if DOLLDLA
 
 #include "gemmTransformations.h"
-#include "RealLoop.h"
+#include "realLoop.h"
 
 class LLDLAGemmLoopExp : public GemmLoopExp
 {

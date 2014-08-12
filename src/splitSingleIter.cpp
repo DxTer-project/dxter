@@ -1292,6 +1292,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     return;
   if (!m_msizes)
     throw;
+
   const Sizes *ms = GetInputM(0);
   const Sizes *ns = GetInputN(0);
   
@@ -1312,6 +1313,9 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
 
   if (length <= execNum || length2 <= execNum)
     {
+      cout << "length = " << std::to_string(length) << endl;
+      cout << "length2 = " << std::to_string(length2) << endl;
+      cout << "execNum = " << std::to_string(execNum) << endl;
       throw;
     }
   const Size m = (*ms)[execNum];
