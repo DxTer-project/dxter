@@ -2252,25 +2252,25 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 
 	for(unsigned int j = 0; j < newSet->m_leftOutMap.size(); ++j) {
 	  int val = newSet->m_leftOutMap[j];
-	  if (val == find) {
+	  if (val == (int)find) {
 	    if (newOutputToUse)
 	      newSet->m_leftOutMap[j] = newVal;
 	    else
 	      newSet->m_leftOutMap[j] = -1;
 	  }
-	  else if (val > find)
+	  else if (val > (int)find)
 	    newSet->m_leftOutMap[j] = val-1;
 	}
 
 	for(unsigned int j = 0; j < newSet->m_rightOutMap.size(); ++j) {
 	  int val = newSet->m_rightOutMap[j];
-	  if (val == find) {
+	  if (val == (int)find) {
 	    if (newOutputToUse)
 	      newSet->m_rightOutMap[j] = newVal;
 	    else
 	      newSet->m_rightOutMap[j] = -1;
 	  }
-	  else if (val > find)
+	  else if (val > (int)find)
 	    newSet->m_rightOutMap[j] = val-1;
 	}
 
@@ -2282,16 +2282,16 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 
 	for (unsigned int j = 0; j < newSet->m_leftInMap.size(); ++j) {
 	  int val = newSet->m_leftInMap[j];
-	  if (val == find)
+	  if (val == (int)find)
 	    newSet->m_leftInMap[j] = -1;
-	  if (val > find)
+	  if (val > (int)find)
 	    newSet->m_leftInMap[j] = val-1;
 	}
 	for (unsigned int j = 0; j < newSet->m_rightInMap.size(); ++j) {
 	  int val = newSet->m_rightInMap[j];
-	  if (val == find)
+	  if (val == (int)find)
 	    newSet->m_rightInMap[j] = -1;
-	  else if (val > find)
+	  else if (val > (int)find)
 	    newSet->m_rightInMap[j] = val-1;
 	}
 
@@ -2573,7 +2573,7 @@ size_t Poss::Hash(const string &str)
 {
   static std::hash<std::string> hasher;
   size_t tmp = 0;
-  for (int i = 0; i < str.size(); i+=10) {
+  for (unsigned int i = 0; i < str.size(); i+=10) {
     tmp += hasher(str.substr(i,10));
   }
   return tmp;

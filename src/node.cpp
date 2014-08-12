@@ -265,7 +265,7 @@ void Node::Duplicate(const Node *orig, bool shallow, bool possMerging)
 
 void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound)
 {
-  for(int i = 0; i < m_inputs.size(); ++i) {
+  for(int i = 0; i < (int)(m_inputs.size()); ++i) {
     if (!Input(i)) {
       cout<<"!m_inputs[i]->m_n\n";
       throw;
@@ -288,7 +288,7 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
       m_inputs[i]->SetNode(find->second);
     }
   }
-  for(int i = 0; i < m_children.size(); ++i) {
+  for(int i = 0; i < (int)(m_children.size()); ++i) {
     Node *child = m_children[i]->m_n;
     NodeMapIter find = map.find(child);
     if (find==map.end()) {
