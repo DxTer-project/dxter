@@ -43,7 +43,7 @@ void MAdd::PrintCode(IndStream &out)
       InputDataType(0).m_colStrideVar << ", " <<
       GetInputName(1).str() << ", " <<
       InputDataType(1).m_rowStrideVar << ", " <<
-      InputDataType(1).m_colStrideVar << ");\n";
+      InputDataType(1).m_colStrideVar << " );\n";
     
     return;
   }
@@ -74,21 +74,27 @@ void MAdd::PrintRowStride(IndStream &out)
     GetInputName(0).str() << ", " <<
     InputDataType(0).m_rowStrideVar << ", " <<
     GetInputName(1).str() << ", " <<
-    InputDataType(1).m_rowStrideVar << ");\n";
+    InputDataType(1).m_rowStrideVar << " );\n";
 }
 
 void MAdd::PrintColStride(IndStream &out)
 {
   *out << "col_stride_add_2x2( " <<
     GetInputName(0).str() << ", " <<
-    GetInputName(1).str() << ");\n";
+    InputDataType(0).m_colStrideVar << ", " <<
+    GetInputName(1).str() << ", " <<
+    InputDataType(1).m_colStrideVar << " );\n";
 }
 
 void MAdd::PrintGeneralStride(IndStream &out)
 {
   *out << "gen_stride_add_2x2( " <<
     GetInputName(0).str() << ", " <<
-    GetInputName(1).str() << ");\n";
+    InputDataType(0).m_rowStrideVar << ", " <<
+    InputDataType(0).m_colStrideVar << ", " <<
+    GetInputName(1).str() << ", " <<
+    InputDataType(0).m_rowStrideVar << ", " <<
+    InputDataType(0).m_colStrideVar << " );\n";
 }
 
 void MAdd::Prop()

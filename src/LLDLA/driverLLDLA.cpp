@@ -66,6 +66,7 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+RealPSet* MAdd2Example();
 RealPSet* VAdd2Example();
 RealPSet* VAddExample();
 RealPSet* VMVMulExample();
@@ -352,6 +353,7 @@ void Usage()
   cout <<"        10  -> Vector add\n";
   cout <<"        11  -> Vector add twice\n";
   cout <<"        12  -> Vector matrix vector multiply\n";
+  cout <<"        13  -> Matrix add twice\n";
 }
 
 int main(int argc, const char* argv[])
@@ -476,6 +478,14 @@ int main(int argc, const char* argv[])
       opName = "dxt_vmvmul";
       algFunc = VMVMulExample;
       break;
+    case(13):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_madd2";
+      algFunc = MAdd2Example;
+      break;
     default:
       Usage();
       return 0;
@@ -580,7 +590,7 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 3000;
+  int chunkSize = 30;
   int numIterations = 1;
   RuntimeTest rtest(opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
@@ -610,6 +620,55 @@ int main(int argc, const char* argv[])
       uni.Print(cout, CODE, whichGraph); */
 
   return 0;
+}
+
+RealPSet* MAdd2Example()
+{
+  InputNode* xIn = new InputNode("x input", bigSize, bigSize, "X",
+				 1, bigSize,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  InputNode* yIn = new InputNode("y input", bigSize, bigSize, "Y",
+				 1, bigSize,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride");
+
+  InputNode* zIn = new InputNode("z input", bigSize, bigSize, "Z",
+				 1, bigSize,
+				 "ZNumRows", "ZNumCols",
+				 "ZRowStride", "ZColStride");
+  
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  tunZ->AddInput(zIn, 0);
+
+  MAdd* madd1 = new MAdd(ABSLAYER, REAL);
+  madd1->AddInputs(4,
+		  tunX, 0,
+		  tunY, 0);
+
+  MAdd* madd2 = new MAdd(ABSLAYER, REAL);
+  madd2->AddInputs(4,
+		   tunZ, 0,
+		   madd1, 0);
+
+  Poss* innerPoss = new Poss(madd2, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+
 }
 
 RealPSet* VAdd2Example()
@@ -951,12 +1010,12 @@ RealPSet* MVMulExample()
 
 RealPSet* MAddExample()
 {
-  InputNode* Ain = new InputNode("A input", medSize, medSize, "A", 
-				 medSize, 1,
+  InputNode* Ain = new InputNode("A input", bigSize, bigSize, "A", 
+				 bigSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode* Bin = new InputNode("B input", medSize, medSize, "B", 
-				 medSize, 1,
+  InputNode* Bin = new InputNode("B input", bigSize, bigSize, "B", 
+				 bigSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
   Tunnel* tunA = new Tunnel(POSSTUNIN);

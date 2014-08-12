@@ -175,8 +175,8 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
     loopBody += "\t\tchar exec_time_str[100];\n";
     loopBody += "\t\tsprintf(exec_time_str, \"%f\\n\", exec_time);\n";
     loopBody += "\t\tsize_t trash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
-    loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";
     loopBody += "\t}\n";
+    loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";
   }
   return loopBody;
 }
