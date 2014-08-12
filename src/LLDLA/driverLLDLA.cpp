@@ -116,7 +116,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
    * WARNING: These numbers are processor specific to Dillon's machine in GDC
    ***************************************************************************/
   double ticksPerSec = 1.0e6;
-  double peakFLOPS = 2.7e9 * 8;//30e9;
+  double peakFLOPS = 3.7e9 * 8;//30e9;
   GraphNum bestImpNum = 0;
   double bestFLOPS = 0;
   ImplementationRuntimeMapIter mit;
@@ -148,10 +148,10 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
-  //  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Transform gemm into loop over vmmuls
-  //Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   //Introduces loops in the m, n, and k dimensions, respectively
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
