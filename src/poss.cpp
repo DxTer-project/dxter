@@ -840,6 +840,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
                 newPoss->Duplicate(this,nodeMap,true,false);
 #endif
                 newPoss->PatchAfterDuplicate(nodeMap);
+		newPoss->BuildDataTypeCache();
                 newPoss->FuseLoops(left,right,simplifiers,cullFunc);
                 SetFused(leftSet,rightSet);
                 if (AddPossToMMap(newPosses,newPoss,newPoss->GetHash()))
