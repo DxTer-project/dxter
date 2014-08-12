@@ -91,7 +91,6 @@ GraphIter& GraphIter::operator=(const GraphIter &rhs)
 
 bool GraphIter::Increment()
 {
-  m_hasPrinted = false;
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
     bool ret = m_subIters[i]->Increment();
     if (!ret) 
@@ -245,6 +244,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 
   while (keepGoing) {
     if (currOnly || whichGraph == 0 || whichGraph == graphNum) {
+      ClearPrintedRecursively();
       if (!currOnly)
 	*out << "/*** Algorithm " << graphNum << " ***" << endl;
       else
@@ -403,9 +403,6 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	*out << set->GetFunctionalityString() << endl;
 	
 	RealPSet *real = set->GetReal();
-	//	if (real->IsLoop())
-	//	  *out << "is loop\n";
-	//	*out << "real " << real << " instead of " << m_poss->m_sets[i] << endl;
 	real->PrePrint(out,m_setIters[i]->second);
 	++out;
 	real->SetInTunsAsPrinted();
@@ -437,7 +434,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
     (*nodeIter)->SetPrinted();
   }
   *out << endl;
-  
+
   bool bad = false;
   
   nodeIter = m_poss->m_inTuns.begin();
@@ -467,6 +464,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
   for(; nodeIter != m_poss->m_possNodes.end(); ++nodeIter) {
     if (!(*nodeIter)->HasPrinted()) {
       cout << (*nodeIter)->GetType() << " " << *nodeIter << " hasn't printed\n";
+      cout << "on " << (*nodeIter)->m_poss << endl;
       cout << "Inputs are\n";
       (*nodeIter)->PrintInputs();
       cout << "Is it possible that the node is read only but ReadOnly doesn't return true?\n\n";
@@ -479,5 +477,14 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
     cout << this << " is bad\n";
     cout << "contains " << m_poss->m_sets.size() << " posses\n";
     throw;
+  }
+}
+
+void GraphIter::ClearPrintedRecursively()
+{
+  m_hasPrinted = false;
+  unsigned int numPSets = m_poss->m_sets.size();
+  for(unsigned int i = 0; i < numPSets; ++i) {
+    m_subIters[i]->ClearPrintedRecursively();
   }
 }

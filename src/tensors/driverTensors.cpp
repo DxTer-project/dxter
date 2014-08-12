@@ -83,7 +83,7 @@ void AddTrans()
 
     for(Dim dim2 = 0; dim2 < NUM_GRID_DIMS; ++dim2) {
       if (dim2 != dim) {
-	Universe::AddTrans(RedistNode::GetClass(), new CombineDisappearingModes(dim, dim2), ROTENSORPHASE);
+	//	Universe::AddTrans(RedistNode::GetClass(), new CombineDisappearingModes(dim, dim2), ROTENSORPHASE);
 	Universe::AddTrans(RedistNode::GetClass(), new PermuteDistribution(dim, dim2), ROTENSORPHASE);
       }
     }
@@ -227,7 +227,7 @@ int main(int argc, const char* argv[])
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-#if 0
+#if 1
   uni.PrintAll(algNum);
 #else
   uni.PrintBest();
