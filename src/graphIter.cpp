@@ -225,7 +225,8 @@ Cost GraphIter::EvalAndSetBest()
 	m_setIters[i] = iter;
 	optCost = tmpCost;
       }
-    }    
+    }
+    tot += optCost;
   }
   
   return tot;
