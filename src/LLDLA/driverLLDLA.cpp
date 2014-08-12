@@ -66,6 +66,7 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+RealPSet* MVMul2Example();
 RealPSet* MAdd2Example();
 RealPSet* VAdd2Example();
 RealPSet* VAddExample();
@@ -354,6 +355,7 @@ void Usage()
   cout <<"        11  -> Vector add twice\n";
   cout <<"        12  -> Vector matrix vector multiply\n";
   cout <<"        13  -> Matrix add twice\n";
+  cout <<"        14  -> Matrix vector multiply twice\n";
 }
 
 int main(int argc, const char* argv[])
@@ -486,6 +488,14 @@ int main(int argc, const char* argv[])
       }
       opName = "dxt_madd2";
       algFunc = MAdd2Example;
+      break;
+    case(14):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_mvmul2";
+      algFunc = MVMul2Example;
       break;
     default:
       Usage();
@@ -623,6 +633,72 @@ int main(int argc, const char* argv[])
   return 0;
 }
 
+RealPSet* MVMul2Example()
+{
+  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
+				 1, medSize,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
+				 1, medSize,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride");
+
+  InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
+				 1, medSize,
+				 "ZNumRows", "ZNumCols",
+				 "ZRowStride", "ZColStride");
+
+  InputNode* AIn = new InputNode("a input", medSize, medSize, "A",
+				 1, medSize,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride");
+
+  InputNode* BIn = new InputNode("b input", medSize, medSize, "B",
+				 1, medSize,
+				 "BNumRows", "BNumCols",
+				 "BRowStride", "BColStride");
+  
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  tunZ->AddInput(zIn, 0);
+
+  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(AIn, 0);
+
+  Tunnel* tunB = new Tunnel(POSSTUNIN);
+  tunB->AddInput(BIn, 0);
+
+  MVMul* mvmul1 = new MVMul(ABSLAYER, REAL);
+  mvmul1->AddInputs(6,
+		    tunB, 0,
+		    tunX, 0,
+		    tunY, 0);
+
+  MVMul* mvmul2 = new MVMul(ABSLAYER, REAL);
+  mvmul2->AddInputs(6,
+		    tunA, 0,
+		    mvmul1, 0,
+		    tunZ, 0);
+
+  Poss* innerPoss = new Poss(mvmul2, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
 RealPSet* MAdd2Example()
 {
   InputNode* xIn = new InputNode("x input", bigSize, bigSize, "X",
@@ -669,7 +745,6 @@ RealPSet* MAdd2Example()
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
-
 }
 
 RealPSet* VAdd2Example()
