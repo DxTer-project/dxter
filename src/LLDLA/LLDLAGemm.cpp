@@ -54,10 +54,12 @@ void LLDLAGemm::PrintCode(IndStream &out)
     else
       throw;
   }
+
   if (m_layer != LLDLAPRIMITIVELAYER) {
-    cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
+    cout << "ERROR: Attempt to generate code from non-primitive LLDLAGemm\n";
     throw;
   }
+
   const DataTypeInfo &inInfo = InputDataType(2);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;

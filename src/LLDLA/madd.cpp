@@ -48,7 +48,7 @@ void MAdd::PrintCode(IndStream &out)
     return;
   }
   if (m_layer != LLDLAPRIMITIVELAYER) {
-    cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
+    cout << "ERROR: Attempt to generate code from non-primitive matrix add\n";
     throw;
   }
   const DataTypeInfo &inInfo = InputDataType(1);

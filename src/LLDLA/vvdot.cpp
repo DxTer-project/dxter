@@ -58,6 +58,11 @@ void VVDot::PrintCode(IndStream &out)
     return;
   }
 
+  if (m_layer != LLDLAPRIMITIVELAYER) {
+    cout << "ERROR: Attempt to generate code from non-primitive dot product\n";
+    throw;
+  }
+
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
     PrintGeneralStride(out);
   } else if (rowStride == UNITSTRIDE && colStride == NONUNITSTRIDE) {

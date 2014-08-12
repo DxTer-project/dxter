@@ -64,7 +64,7 @@ void VAdd::PrintCode(IndStream &out)
   }
 
   if (m_layer != LLDLAPRIMITIVELAYER) {
-    cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
+    cout << "ERROR: Attempt to generate code from non-primitive vector add\n";
     throw;
   }
   const DataTypeInfo &inInfo = InputDataType(1);
@@ -183,6 +183,21 @@ NodeType VAdd::GetType() const
   return "VADD" + LayerNumToStr(GetLayer()) + (char)m_type + (char)m_vecType;
 }
 
+Phase VAdd::MaxPhase() const
+{
+  switch (m_layer)
+    { 
+    case(ABSLAYER):
+      return LLDLALOOPPHASE;
+    case(LLDLAMIDLAYER):
+      return LLDLAPRIMPHASE;
+    case (LLDLAPRIMITIVELAYER):
+      return NUMPHASES; 
+    default:
+      throw;
+    }
+}
+
 string VAddLoopRef::GetType() const
 {
   switch(m_vtype)
@@ -272,43 +287,23 @@ bool VAddLowerLayer::CanApply(const Node *node) const
     }
 
     if (vadd->m_vecType == ROWVECTOR) {
-      if (*vadd->GetInputN(0) <= m_bs ||
+      if (*vadd->GetInputN(0) <= m_bs &&
 	  *vadd->GetInputN(1) <= m_bs) {
-	return false;
+	return true;
       } else {
-	if (m_toLayer == LLDLAPRIMITIVELAYER) {
-	  if (*vadd->GetInputN(0) != LLDLA_MU ||
-	      *vadd->GetInputN(1) != LLDLA_MU) {
-	    return false;
-	  } else {
-	    return true;
-	  }
-
-	} else {
-	  return true;
-	}
+	return false;
       }
     } else if (vadd->m_vecType == COLVECTOR) {
-      if (*vadd->GetInputM(0) <= m_bs ||
+      if (*vadd->GetInputM(0) <= m_bs &&
 	  *vadd->GetInputM(1) <= m_bs) {
-	return false;
+	return true;
       } else {
-	if (m_toLayer == LLDLAPRIMITIVELAYER) {
-	  if (*vadd->GetInputM(0) != LLDLA_MU ||
-	      *vadd->GetInputM(1) != LLDLA_MU) {
-	    return false;
-	  } else {
-	    return true;
-	  }
-
-	} else {
-	  return true;
-	}
+	return false;
       }
     }
   }
-
-  return false;
+  cout << "Error: Applying VAddLowerLayer to non-VAdd node\n";
+  throw;
 }
 
 void VAddLowerLayer::Apply(Node *node) const

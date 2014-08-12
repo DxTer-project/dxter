@@ -61,6 +61,10 @@ void MVMul::PrintCode(IndStream &out)
     return;
   }
 
+  if (m_layer != LLDLAPRIMITIVELAYER) {
+    cout << "ERROR: Attempt to generate code from non-primitive matrix vector multiply\n";
+    throw;
+  }
 
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
     PrintGeneralStride(out);

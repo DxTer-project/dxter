@@ -42,9 +42,12 @@ void SMMul::PrintCode(IndStream &out)
       InputDataType(1).m_colStrideVar << ");\n";
     return;
   }
-  if (GetLayer() != LLDLAPRIMITIVELAYER) {
+
+  if (m_layer != LLDLAPRIMITIVELAYER) {
+    cout << "ERROR: Attempt to generate code from non-primitive scalar matrix multiply\n";
     throw;
   }
+
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
   const Stride colStride = inInfo.m_colStride;

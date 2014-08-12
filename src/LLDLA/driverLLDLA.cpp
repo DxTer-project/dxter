@@ -66,6 +66,7 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+RealPSet* VAdd2Example();
 RealPSet* VAddExample();
 RealPSet* VMVMulExample();
 RealPSet* SMMulExample();
@@ -349,7 +350,8 @@ void Usage()
   cout <<"         8  -> Vector matrix multiply\n";
   cout <<"         9  -> Scalar matrix multiply\n";
   cout <<"        10  -> Vector add\n";
-  cout <<"        11  -> Vector matrix vector multiply\n";
+  cout <<"        11  -> Vector add twice\n";
+  cout <<"        12  -> Vector matrix vector multiply\n";
 }
 
 int main(int argc, const char* argv[])
@@ -460,6 +462,13 @@ int main(int argc, const char* argv[])
       algFunc = VAddExample;
       break;
     case(11):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_vadd2";
+      algFunc = VAdd2Example;
+    case(12):
       if (argc != 2) {
 	Usage();
 	return 0;
@@ -601,6 +610,55 @@ int main(int argc, const char* argv[])
       uni.Print(cout, CODE, whichGraph); */
 
   return 0;
+}
+
+RealPSet* VAdd2Example()
+{
+  InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
+				 1, bigSize,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  InputNode* yIn = new InputNode("y input", bigSize, 1, "Y",
+				 1, bigSize,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride");
+
+  InputNode* zIn = new InputNode("z input", bigSize, 1, "Z",
+				 1, bigSize,
+				 "ZNumRows", "ZNumCols",
+				 "ZRowStride", "ZColStride");
+  
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  tunZ->AddInput(zIn, 0);
+
+  VAdd* vadd1 = new VAdd(COLVECTOR, ABSLAYER, REAL);
+  vadd1->AddInputs(4,
+		  tunX, 0,
+		  tunY, 0);
+
+  VAdd* vadd2 = new VAdd(COLVECTOR, ABSLAYER, REAL);
+  vadd2->AddInputs(4,
+		   tunZ, 0,
+		   vadd1, 0);
+
+  Poss* innerPoss = new Poss(vadd2, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+
 }
 
 RealPSet* VAddExample()

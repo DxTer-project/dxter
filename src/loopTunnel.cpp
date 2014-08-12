@@ -699,6 +699,7 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     cout << lns->NumSizes() << endl;
 #endif
     //    (*(((Loop*)m_pset)->m_posses.begin())).second->ForcePrint();
+    cout << "Error: Length of loop is " << std::to_string(length) << endl;
     throw;
   }
   const Size m = (*ms)[execNum];
