@@ -66,6 +66,7 @@ Size medSize = 36;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
+RealPSet* GemvExample();
 RealPSet* MVMul2Example();
 RealPSet* MAdd2Example();
 RealPSet* VAdd2Example();
@@ -356,6 +357,7 @@ void Usage()
   cout <<"        12  -> Vector matrix vector multiply\n";
   cout <<"        13  -> Matrix add twice\n";
   cout <<"        14  -> Matrix vector multiply twice\n";
+  cout <<"        15  -> Gemv\n";
 }
 
 int main(int argc, const char* argv[])
@@ -497,6 +499,14 @@ int main(int argc, const char* argv[])
       opName = "dxt_mvmul2";
       algFunc = MVMul2Example;
       break;
+    case(15):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_gemv";
+      algFunc = GemvExample;
+      break;
     default:
       Usage();
       return 0;
@@ -631,6 +641,89 @@ int main(int argc, const char* argv[])
       uni.Print(cout, CODE, whichGraph); */
 
   return 0;
+}
+
+RealPSet* GemvExample()
+{
+  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
+				 1, medSize,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
+				 1, medSize,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride");
+
+  InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
+				 1, medSize,
+				 "ZNumRows", "ZNumCols",
+				 "ZRowStride", "ZColStride");
+
+  InputNode* AIn = new InputNode("a input", medSize, medSize, "A",
+				 1, medSize,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride");
+
+  InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
+				     1, medSize,
+				     "AlphaNumRows", "AlphaNumCols",
+				     "AlphaRowStride", "AlphaColStride");
+
+  InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
+				    1, medSize,
+				    "BetaNumRows", "BetaNumCols",
+				    "BetaRowStride", "BetaColStride");
+
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  tunZ->AddInput(zIn, 0);
+
+  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(AIn, 0);
+
+  Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
+  tunAlpha->AddInput(alphaIn, 0);
+
+  Tunnel* tunBeta = new Tunnel(POSSTUNIN);
+  tunBeta->AddInput(betaIn, 0);
+
+  SVMul* by = new SVMul(COLVECTOR, ABSLAYER, REAL);
+  by->AddInputs(4,
+		tunBeta, 0,
+		tunY, 0);
+
+  MVMul* axMul = new MVMul(ABSLAYER, REAL);
+  axMul->AddInputs(6,
+		   tunA, 0,
+		   tunX, 0,
+		   tunZ, 0);
+
+  SVMul* alphaAXMul = new SVMul(COLVECTOR, ABSLAYER, REAL);
+  alphaAXMul->AddInputs(4,
+			tunAlpha, 0,
+			axMul, 0);
+
+  VAdd* sumVecs = new VAdd(COLVECTOR, ABSLAYER, REAL);
+  sumVecs->AddInputs(4,
+		     alphaAXMul, 0,
+		     by, 0);
+
+  Poss* innerPoss = new Poss(sumVecs, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
 }
 
 RealPSet* MVMul2Example()

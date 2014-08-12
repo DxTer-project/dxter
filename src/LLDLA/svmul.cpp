@@ -99,11 +99,13 @@ void SVMul::PrintColStride(IndStream &out)
   if (m_vecType == COLVECTOR) {
     *out << "col_stride_smul_2x1( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_colStrideVar << " );\n";
   } else {
     *out << "col_stride_smul_1x2( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_colStrideVar << " );\n";
   }
 }
 
@@ -112,11 +114,15 @@ void SVMul::PrintGeneralStride(IndStream &out)
   if (m_vecType == COLVECTOR) {
     *out << "gen_stride_smul_2x1( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << " );\n";
   } else {
     *out << "gen_stride_smul_1x2( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << " );\n";
   }
 }
 

@@ -69,6 +69,20 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
   m_varName.m_name = name;
 }
 
+InputNode::InputNode(string name, Size m, Size n, Size rowStrideVal, Size colStrideVal)
+{
+  InputNode(name + " input",
+	    m,
+	    n,
+	    name,
+	    rowStrideVal,
+	    colStrideVal,
+	    name + "NumRows",
+	    name + "NumCols",
+	    name + "RowStride",
+	    name + "ColStride");
+}
+
 string InputNode::DataDeclaration()
 {
   // For now the only supported type is double
