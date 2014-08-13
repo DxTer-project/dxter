@@ -95,7 +95,7 @@ void SMMul::PrintGeneralStride(IndStream &out)
 void SMMul::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    DLAOp::Prop();
+    DLAOp<2, 1>::Prop();
 
     if (!((DLANode*) Input(0))->IsScalar(InputConnNum(0))) {
       cout << "ERROR: SMMul input 0 is not a scalar\n";

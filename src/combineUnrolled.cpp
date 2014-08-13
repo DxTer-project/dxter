@@ -258,7 +258,7 @@ void CombineUnrolled::Duplicate(const Node *orig, bool shallow, bool possMerging
 NodeType CombineUnrolled::GetType() const
 {
 #if TWOD
-  return "CombineUnroled " + std::to_string(m_unrollFactor) 
+  return "CombineUnroled " + std::to_string((long long int) m_unrollFactor) 
     + PartDirToStr(m_dir) + "( " + Tunnel::GetType() + " )";
 #else
   string str = "CombineUnroled " + std::to_string(m_unrollFactor);

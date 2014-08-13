@@ -100,7 +100,7 @@ void MAdd::PrintGeneralStride(IndStream &out)
 void MAdd::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    DLAOp::Prop();
+    DLAOp<2, 1>::Prop();
     
     if ((*GetInputM(0) != *GetInputM(1)) || (*GetInputN(0) != *GetInputN(1))) {
       cout << "ERROR: Cannot MAdd two matrices of different dimension\n";

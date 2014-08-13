@@ -103,9 +103,9 @@ void PrintImpMap(ImplementationRuntimeMap &impTimes)
   ImplementationRuntimeMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     TimeVecIter vit;
-    cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
+    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
     for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
-      cout << std::to_string(*vit) << endl;
+      cout << std::to_string((long double) *vit) << endl;
     }
     cout << endl;
   }
@@ -122,7 +122,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
   ImplementationRuntimeMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     TimeVecIter vit;
-    cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
+    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
     for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
       double totalFlops = flopCost * chunkSize;
       double totalTimeInSecs = *vit / ticksPerSec;
@@ -132,7 +132,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 	bestFLOPS = actualFLOPS;
 	bestImpNum = mit->first;
       }
-      cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
+      cout << "FLOPS = " << std::to_string((long double) actualFLOPS) << "\t%Peak = " << std::to_string((long double) pctPeak) << endl;
       /*      if (pctPeak > 100) {
 	cout << "pctPeak > 100\n";
 	throw;
@@ -140,8 +140,8 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
     }
     cout << endl;
   }
-  cout << "Best flops achieved: " << std::to_string(bestFLOPS) << endl;
-  cout << "Best percent of peak: " << std::to_string((bestFLOPS / peakFLOPS) * 100) << endl;
+  cout << "Best flops achieved: " << std::to_string((long double) bestFLOPS) << endl;
+  cout << "Best percent of peak: " << std::to_string((long double) (bestFLOPS / peakFLOPS) * 100) << endl;
   return bestImpNum;      
 }
 
@@ -551,7 +551,7 @@ int main(int argc, const char* argv[])
     graphIter.PrintRoot(optOut, 0, true, startSet);
     absImpStr = ss.str();
     cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
-    cout << "Flops for operation = " << std::to_string(flopCost) << endl;
+    cout << "Flops for operation = " << std::to_string((long double) flopCost) << endl;
     time(&start);
   }
 

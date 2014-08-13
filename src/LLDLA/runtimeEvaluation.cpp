@@ -55,8 +55,8 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_defines.push_back("#define VEC_PTR_PD_STORE(vec, ptr) _mm_store_pd((ptr), (vec).v)");
   m_defines.push_back("#define VEC_PTR_PD_SET(n, vec, ptr) *(ptr) = (vec).d[(n)]");
   m_defines.push_back("#define BUF_SIZE 1000000");
-  m_defines.push_back("#define NUM_ITERATIONS " + std::to_string(m_numIterations));
-  m_defines.push_back("#define CHUNK_SIZE " + std::to_string(m_chunkSize));
+  m_defines.push_back("#define NUM_ITERATIONS " + std::to_string((long long int) m_numIterations));
+  m_defines.push_back("#define CHUNK_SIZE " + std::to_string((long long int) m_chunkSize));
   m_defines.push_back("#define MUVALUE 2");
   m_defines.push_back("#define min(a,b) ((a) < (b) ? (a) : (b))");
 }
@@ -64,7 +64,7 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
 string RuntimeTest::MakeTestCode(ImplementationMap imps)
 {
   int numImplementations = imps.size();
-  m_defines.push_back("#define NUM_ALGS " + std::to_string(numImplementations));
+  m_defines.push_back("#define NUM_ALGS " + std::to_string((long long int) numImplementations));
   string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
   string implementationFunctions = MakeImpFuncs(imps);
   string driverCode = MainFuncCode(imps);
@@ -75,7 +75,7 @@ string RuntimeTest::MakeTestCode(ImplementationMap imps)
 string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImp)
 {
   int numImplementations = imps.size();
-  m_defines.push_back("#define NUM_ALGS " + std::to_string(numImplementations));
+  m_defines.push_back("#define NUM_ALGS " + std::to_string((long long int) numImplementations));
   string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
   string refFuncName = m_operationName + "_test";
   string implementationFunctions = MakeImpFuncs(imps) + MakeFunc(refFuncName, referenceImp);
@@ -129,8 +129,8 @@ string RuntimeTest::CorrectnessCheck(ImplementationMap imps, string referenceImp
   correctnessCheck += callRefImp;
   for (i = 1; i <= imps.size(); i++) {
     correctnessCheck += CopyArgBuffersTo("_test") + "\n\t";
-    correctnessCheck += m_operationName + "_" + std::to_string(i) + "(" + CArgList(testBuffers) + ");\n";
-    correctnessCheck += CheckArgBufferDiffs("_ref", "_test",std::to_string(i)) + "\n";
+    correctnessCheck += m_operationName + "_" + std::to_string((long long int) i) + "(" + CArgList(testBuffers) + ");\n";
+    correctnessCheck += CheckArgBufferDiffs("_ref", "_test",std::to_string((long long int) i)) + "\n";
   }
   return correctnessCheck;
 }
@@ -164,7 +164,7 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
   int i;
   string loopBody = "";
   for (i = 1; i <= imps.size(); i++) {
-    string opName = m_operationName + "_" + std::to_string(i);
+    string opName = m_operationName + "_" + std::to_string((long long int) i);
     loopBody += "\tfor (j = 0; j < NUM_ITERATIONS; j++) {\n";
     loopBody += "\t\tbegin = clock();\n";
     loopBody += "\t\tfor (k = 0; k < CHUNK_SIZE; k++) {\n";
@@ -246,7 +246,7 @@ string RuntimeTest::MakeImpFuncs(ImplementationMap imps)
   string allImplementationFuncs = "";
   ImplementationMap::iterator impIt;
   for (impIt = imps.begin(); impIt != imps.end(); ++impIt) {
-    string funcName = m_operationName + "_" + std::to_string(impIt->first);
+    string funcName = m_operationName + "_" + std::to_string((long long int) impIt->first);
     string funcBody = impIt->second;
     string funcDec = MakeFunc(funcName, funcBody);
     allImplementationFuncs = allImplementationFuncs + funcDec;

@@ -1313,9 +1313,9 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
 
   if (length <= execNum || length2 <= execNum)
     {
-      cout << "length = " << std::to_string(length) << endl;
-      cout << "length2 = " << std::to_string(length2) << endl;
-      cout << "execNum = " << std::to_string(execNum) << endl;
+      cout << "length = " << std::to_string((long long int) length) << endl;
+      cout << "length2 = " << std::to_string((long long int) length2) << endl;
+      cout << "execNum = " << std::to_string((long long int) execNum) << endl;
       throw;
     }
   const Size m = (*ms)[execNum];

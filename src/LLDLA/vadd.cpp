@@ -133,7 +133,7 @@ void VAdd::PrintGeneralStride(IndStream &out)
 void VAdd::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    DLAOp::Prop();
+    DLAOp<2, 1>::Prop();
     
     VectorOpInputDimensionCheck(0);
     VectorOpInputDimensionCheck(1);

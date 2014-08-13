@@ -655,7 +655,7 @@ Name ViewMultipleIters::GetName(ConnNum num) const
     default:
       throw;
     }
-  name.m_name += std::to_string(num);
+  name.m_name += std::to_string((long long int) num);
   return name;
 }
 
@@ -676,7 +676,7 @@ void ViewMultipleIters::PrintCode(IndStream &out)
 
 
     if (i) {
-      *out << " + " << std::to_string(i) << " * ";
+      *out << " + " << std::to_string((long long int) i) << " * ";
       if (m_partDir == PARTDOWN) {
 	if (!IsUnitStride(type.m_rowStride))
 	  *out << type.m_rowStrideVar << " * ";
