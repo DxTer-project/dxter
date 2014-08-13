@@ -27,6 +27,8 @@ void *alloc_aligned_16(size_t size);
 
 void rand_doubles(int size, double *rands);
 
+void rand_floats(int size, float *rands);
+
 void simple_add(int m, int n,
 	double *a, int a_row_stride, int a_col_stride,
 	double *b, int b_row_stride, int b_col_stride);
@@ -40,13 +42,32 @@ void simple_smul(int m, int n,
 	double *scalar,
 	double *a, int a_row_stride, int a_col_stride);
 
+void simple_add_float(int m, int n,
+	float *a, int a_row_stride, int a_col_stride,
+	float *b, int b_row_stride, int b_col_stride);
+
+void simple_mmul_float(int m, int n, int k,
+	float *a, int a_row_stride, int a_col_stride,
+	float *b, int b_row_stride, int b_col_stride,
+	float *c, int c_row_stride, int c_col_stride);
+
+void simple_smul_float(int m, int n,
+	float *scalar,
+	float *a, int a_row_stride, int a_col_stride);
+
 double diff_buffer(int size, double *buf1, double *buf2);
 
+float diff_buffer_float(int size, float *buf1, float *buf2);
+
 void copy_buffer(int size, double *src, double *dest);
+
+void copy_buffer_float(int size, float *src, float *dest);
 
 void print_buffer(int size, double *buf);
 
 void test_buffer_diff(int size, double *a, double *b, char *test_name);
+
+void test_buffer_diff_float(int size, float *a, float *b, char *test_name);
 
 void test_mats_diff(int m, int n, double *a, int a_row_stride, int a_col_stride, double *b, int b_row_stride, int b_col_stride, char *test_name);
 

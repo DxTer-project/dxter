@@ -27,8 +27,6 @@
 #include "DLAOp.h"
 #include "LLDLA.h"
 
-#define NUMREGSPERLOAD 2
-
 #if DOLLDLA
 
 class LoadToRegs : public DLANode

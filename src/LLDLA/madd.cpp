@@ -35,7 +35,11 @@ MAdd::MAdd(Layer layer, Type type)
 void MAdd::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
+#if USE_DOUBLE_PRECISION
     *out << "simple_add( " <<
+#else
+    *out << "simple_add_float( " <<
+#endif // USE_DOUBLE_PRECISION
       InputDataType(0).m_numRowsVar << ", " <<
       InputDataType(0).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<

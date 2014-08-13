@@ -37,7 +37,11 @@ void SVMul::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
     if (m_vecType == COLVECTOR) {
-      *out << "simple_smul( " <<
+#if USE_DOUBLE_PRECISION
+    *out << "simple_smul( " <<
+#else
+    *out << "simple_smul_float( " <<
+#endif // USE_DOUBLE_PRECISION
 	InputDataType(1).m_numRowsVar << ", " <<
 	" 1, " <<
 	GetInputName(0).str() << ", " <<
@@ -45,7 +49,11 @@ void SVMul::PrintCode(IndStream &out)
 	InputDataType(1).m_rowStrideVar << ", " <<
 	InputDataType(1).m_colStrideVar << ");\n";
     } else {
-      *out << "simple_smul( " <<
+#if USE_DOUBLE_PRECISION
+    *out << "simple_smul( " <<
+#else
+    *out << "simple_smul_float( " <<
+#endif // USE_DOUBLE_PRECISION
 	" 1, " <<
 	InputDataType(1).m_numColsVar << ", " <<
 	GetInputName(0).str() << ", " <<

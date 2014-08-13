@@ -60,6 +60,9 @@ class RuntimeTest
   vector<string> ArgBuffers(string postfix);
   string CheckArgBufferDiffs(string refPostfix, string testPostfix, string testName);
   string TimingLoop(ImplementationMap imps);
+  void AddIncludes();
+  void AddVectorRegisterArithmeticMacros();
+  void AddMiscellaneousDefines();
 };
 
 

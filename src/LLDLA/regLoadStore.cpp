@@ -29,13 +29,17 @@ void LoadToRegs::Prop()
     if (m_inputs.size() != 1)
       throw;
 
-    if (*(GetInputM(0)) != NUMREGSPERLOAD) {
-      // this isn't 1 x NUMREGSPERLOAD
-      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != NUMREGSPERLOAD)
+    if (*(GetInputM(0)) != LLDLA_MU) {
+      // this isn't 1 x LLDLA_MU
+      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != LLDLA_MU) {
+	cout << "Error: Incorrect dimensions for register load\n";
+	cout << "*GetInputM(0) != 1 ? " << std::to_string(*GetInputM(0) != 1) << endl;
+	cout << "*GetInputN(0) != LLDLA_MU ? " << std::to_string(*GetInputN(0) != LLDLA_MU) << endl;
 	throw;
+      }
     }
     else if (*(GetInputN(0)) != 1) {
-      // NUMREGSPERLOAD rows but not 1 column
+      // LLDLA_MU rows but not 1 column
       throw;
     }
 
@@ -49,7 +53,7 @@ void LoadToRegs::PrintCode(IndStream &out)
 {
   out.Indent();
   string toLoadName = GetInputNameStr(0);
-  string toLoadName2, toLoadPair;
+  string toLoad;
   string loadStr = GetNameStr(0);
   // Decide which load instruction is needed based on
   // dimension and stride of input vector
@@ -61,9 +65,11 @@ void LoadToRegs::PrintCode(IndStream &out)
       *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
       return;
     } else {
-      toLoadName2 = toLoadName + " + " + InputDataType(0).m_rowStrideVar;
-      toLoadPair = toLoadName + ", " + toLoadName2;
-      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoadPair << " );\n";
+      toLoad = toLoadName;
+      for (int i = 1; i < LLDLA_MU; i++) {
+	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
+      }
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
       return;
     }
   } else if (IsInputRowVector(0)) {
@@ -71,9 +77,12 @@ void LoadToRegs::PrintCode(IndStream &out)
       *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
       return;
     } else {
-      toLoadName2 = toLoadName + " + " + InputDataType(0).m_colStrideVar;
-      toLoadPair = toLoadName + ", " + toLoadName2;
-      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoadPair << " );\n";
+      toLoad = toLoadName;
+      for (int i = 1; i < LLDLA_MU; i++) {
+	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
+      }
+
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
       return;
     }
   } else {
@@ -108,7 +117,7 @@ Name LoadToRegs::GetName(ConnNum num) const
 
 void LoadToRegs::AddVariables(VarSet &set) const
 {
-  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regs;\n";
+  string varDecl = "vec_reg " + GetInputNameStr(0)+ "_regs;\n";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
@@ -120,13 +129,13 @@ void StoreFromRegs::Prop()
 
     // TODO: Check that the correct input # is a register
     
-    /*    if (*(GetInputM(0)) != NUMREGSPERLOAD) {
-      // this isn't 1 x NUMREGSPERLOAD
-      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != NUMREGSPERLOAD)
+    /*    if (*(GetInputM(0)) != LLDLA_MU) {
+      // this isn't 1 x LLDLA_MU
+      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != LLDLA_MU)
 	throw;
     }
     else if (*(GetInputN(0)) != 1) {
-      // NUMREGSPERLOAD rows but not 1 column
+      // LLDLA_MU rows but not 1 column
       throw;
     }
 
@@ -212,7 +221,7 @@ void DuplicateRegLoad::BuildDataTypeCache()
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "1";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(NUMREGSPERLOAD, num, 1);
+    m_mSizes.AddRepeatedSizes(LLDLA_MU, num, 1);
     m_nSizes.AddRepeatedSizes(1, num, 1);
   }
 }
@@ -242,7 +251,7 @@ Name DuplicateRegLoad::GetName(ConnNum num) const
 
 void DuplicateRegLoad::AddVariables(VarSet &set) const
 {
-  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regDup;";
+  string varDecl = "vec_reg " + GetInputNameStr(0)+ "_regDup;";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
@@ -278,9 +287,9 @@ void TempVecReg::BuildDataTypeCache()
   if (m_mSizes.m_entries.empty()) {
     m_info = InputDataType(0);
     m_info.m_numRowsVar = "vector register size";
-   m_info.m_numColsVar = "vector register size";
+    m_info.m_numColsVar = "vector register size";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(NUMREGSPERLOAD, num, 1);
+    m_mSizes.AddRepeatedSizes(LLDLA_MU, num, 1);
     m_nSizes.AddRepeatedSizes(1, num, 1);
   }
 }
@@ -310,10 +319,9 @@ Name TempVecReg::GetName(ConnNum num) const
 
 void TempVecReg::AddVariables(VarSet &set) const
 {
-  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regTemp;";
+  string varDecl = "vec_reg " + GetInputNameStr(0)+ "_regTemp;";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
-
 
 #endif //DOLLDLA

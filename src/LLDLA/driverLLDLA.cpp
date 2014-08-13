@@ -49,6 +49,7 @@
 #define DOLOOPUNROLLING 1
 #define DO2MUTRANSFORMATIONS 1
 #define DO3MUTRANSFORMATIONS 0
+#define DO16MUTRANSFORMATIONS 1
 
 #include <sstream>
 
@@ -63,7 +64,7 @@
 Size one = 1;
 Size smallSize = 12;
 Size medSize = 36;
-Size bigSize = 1000;
+Size bigSize = 1024;
 //Size bs = ELEM_BS;
 
 RealPSet* GemvExample();
@@ -116,7 +117,11 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
    * WARNING: These numbers are processor specific to Dillon's machine in GDC
    ***************************************************************************/
   double ticksPerSec = 1.0e6;
-  double peakFLOPS = 3.7e9 * 8;//30e9;
+#if USE_DOUBLE_PRECISION
+  double peakFLOPS = 3.7e9 * 8;
+#else
+  double peakFLOPS = 2 * 3.7e9 * 8;
+#endif // USE_DOUBLE_PRECISION
   GraphNum bestImpNum = 0;
   double bestFLOPS = 0;
   ImplementationRuntimeMapIter mit;
@@ -148,7 +153,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
-  //Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Transform gemm into loop over vmmuls
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
@@ -248,6 +253,12 @@ void AddUnrollingTrans()
   Universe::AddTrans(SplitSingleIter::GetClass(), 
 		     new FullyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
 #endif // DO3MUTRANSFORMATIONS
+
+#if DO16MUTRANSFORMATIONS
+  Universe::AddTrans(SplitSingleIter::GetClass(), 
+		     new FullyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
+#endif // DO3MUTRANSFORMATIONS
+
 #endif // DOLOOPUNROLLING
 
   return;
@@ -285,6 +296,8 @@ void AddVMMulTrans()
 
 void AddVAddTrans()
 {
+  //  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
@@ -324,10 +337,10 @@ void AddSimplifiers()
   Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
 
   // Lowers the layer tag of a MAdd node
-  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
+  //Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
 
   // Lowers the layer tag of a MVMul node
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
+  //  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
 
   // Lower layer tag on VMMul node
   Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
@@ -794,18 +807,18 @@ RealPSet* MVMul2Example()
 
 RealPSet* MAdd2Example()
 {
-  InputNode* xIn = new InputNode("x input", bigSize, bigSize, "X",
-				 1, bigSize,
+  InputNode* xIn = new InputNode("x input", medSize, medSize, "X",
+				 1, medSize,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
 
-  InputNode* yIn = new InputNode("y input", bigSize, bigSize, "Y",
-				 1, bigSize,
+  InputNode* yIn = new InputNode("y input", medSize, medSize, "Y",
+				 1, medSize,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
 
-  InputNode* zIn = new InputNode("z input", bigSize, bigSize, "Z",
-				 1, bigSize,
+  InputNode* zIn = new InputNode("z input", medSize, medSize, "Z",
+				 1, medSize,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride");
   
@@ -1179,12 +1192,12 @@ RealPSet* MVMulExample()
 
 RealPSet* MAddExample()
 {
-  InputNode* Ain = new InputNode("A input", bigSize, bigSize, "A", 
-				 bigSize, 1,
+  InputNode* Ain = new InputNode("A input", medSize, medSize, "A", 
+				 1, medSize,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode* Bin = new InputNode("B input", bigSize, bigSize, "B", 
-				 bigSize, 1,
+  InputNode* Bin = new InputNode("B input", medSize, medSize, "B", 
+				 1, medSize,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
   Tunnel* tunA = new Tunnel(POSSTUNIN);

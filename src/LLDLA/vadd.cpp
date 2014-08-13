@@ -20,9 +20,13 @@
 */
 
 #include "LLDLA.h"
-#include "vadd.h"
 
 #if DOLLDLA
+
+#include "LLDLA.h"
+#include "regArith.h"
+#include "regLoadStore.h"
+#include "vadd.h"
 
 VAdd::VAdd(VecType vecType, Layer layer, Type type)
 {
@@ -34,12 +38,13 @@ VAdd::VAdd(VecType vecType, Layer layer, Type type)
 void VAdd::PrintCode(IndStream &out)
 {
   out.Indent();
-
   if (m_layer == ABSLAYER) {
     if (m_vecType == COLVECTOR) {
-      *out << "// Printed ABSLAYER VAdd\n";
-      out.Indent();
+#if USE_DOUBLE_PRECISION
       *out << "simple_add( " <<
+#else
+	*out << "simple_add_float( " <<
+#endif // USE_DOUBLE_PRECISION
 	InputDataType(1).m_numRowsVar << ", " <<
 	" 1, " <<
 	GetInputName(0).str() << ", " <<
@@ -49,8 +54,11 @@ void VAdd::PrintCode(IndStream &out)
 	InputDataType(1).m_rowStrideVar << ", " <<
 	InputDataType(1).m_colStrideVar << ");\n";
     } else {
-      *out << "// Printed ABSLAYER VAdd\n";
+#if USE_DOUBLE_PRECISION
       *out << "simple_add( " <<
+#else
+	*out << "simple_add_float( " <<
+#endif // USE_DOUBLE_PRECISION
 	" 1, " <<
 	InputDataType(1).m_numColsVar << ", " <<
 	GetInputName(0).str() << ", " <<
@@ -317,6 +325,79 @@ string VAddLowerLayer::GetType() const
 {
   return "VAdd lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
+}
+
+bool VAddToRegArith::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == VAdd::GetClass()) {
+    return true;
+  }
+  return false;
+}
+
+void VAddToRegArith::Apply(Node* node) const
+{
+  VAdd* vadd = (VAdd*) node;
+
+  bool splitDown = *vadd->GetInputN(0) == 0;
+
+  SplitSingleIter* splitX;
+  SplitSingleIter* splitY;
+
+  if (splitDown) {
+    splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+    splitY = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  } else {
+    splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+    splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  }
+
+  splitX->AddInput(vadd->Input(0), vadd->InputConnNum(0));
+  splitX->SetAllStats(FULLUP);
+  splitX->SetIndepIters();
+
+  if (splitDown) {
+    splitY->SetUpStats(FULLUP, FULLUP,
+		       NOTUP, NOTUP);
+  } else {
+    splitY->SetUpStats(FULLUP, NOTUP,
+		       FULLUP, NOTUP);
+  }
+  splitY->AddInput(vadd->Input(1), vadd->InputConnNum(1));
+  splitY->SetIndepIters();
+
+  LoadToRegs* loadX = new LoadToRegs();
+  loadX->AddInput(splitX, 1);
+
+  LoadToRegs* loadY = new LoadToRegs();
+  loadY->AddInput(splitY, 1);
+
+  Add* add = new Add();
+  add->AddInput(loadX, 0);
+  add->AddInput(loadY, 0);
+
+  StoreFromRegs* storeToY = new StoreFromRegs();
+  storeToY->AddInput(add, 0);
+  storeToY->AddInput(splitY, 1);
+
+  CombineSingleIter* comX = splitX->CreateMatchingCombine(0);
+  CombineSingleIter* comY = splitY->CreateMatchingCombine(1, 1, storeToY, 0);
+  
+  Poss* loopPoss = new Poss(2, comX, comY);
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  loop->SetDimName(splitDown ? DIMM : DIMN);
+
+  node->m_poss->AddPSet(loop);
+  node->RedirectChildren(loop->OutTun(1), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+
+  return;
+}
+
+string VAddToRegArith::GetType() const
+{
+  return "VAddToRegArith " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_fromLayer);
 }
 
 #endif // DOLLDLA

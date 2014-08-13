@@ -42,7 +42,11 @@ void VVDot::PrintCode(IndStream &out)
   out.Indent();
 
   if (m_layer == ABSLAYER) {
-    *out << "simple_mmul( " <<
+#if USE_DOUBLE_PRECISION
+      *out << "simple_mmul( " <<
+#else
+      *out << "simple_mmul_float( " <<
+#endif // USE_DOUBLE_PRECISION
       "1, " <<
       "1, " <<
       InputDataType(0).m_numColsVar << ", " <<

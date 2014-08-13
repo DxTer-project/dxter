@@ -85,10 +85,13 @@ InputNode::InputNode(string name, Size m, Size n, Size rowStrideVal, Size colStr
 
 string InputNode::DataDeclaration()
 {
-  // For now the only supported type is double
+#if USE_DOUBLE_PRECISION
   string doubleStr = "double *";
   string varDecString = doubleStr + m_varName.str();
   return varDecString;
+#else
+  return "float *" + m_varName.str();
+#endif // USE_DOUBLE_PRECISION
 }
 
 string InputNode::RowStrideDefine()
