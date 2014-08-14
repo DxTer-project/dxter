@@ -46,7 +46,7 @@
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
 
-#define DOLOOPUNROLLING 1
+#define DOLOOPUNROLLING 0
 #define DO2MUTRANSFORMATIONS 1
 #define DO3MUTRANSFORMATIONS 0
 #define DO16MUTRANSFORMATIONS 1
@@ -153,7 +153,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
-  //  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Transform gemm into loop over vmmuls
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
@@ -176,14 +176,14 @@ void AddGemmTrans()
 #endif
   
   //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
-  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
   return;
 }
 
 void AddVVDotTrans()
 {
   // Vector dot product transforms
-  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
   
   Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER, LLDLAMu), LLDLALOOPPHASE);
 
@@ -195,7 +195,7 @@ void AddVVDotTrans()
 void AddMAddTrans()
 {
   // Transformers for Matrix Matrix add
-  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   // Introduce loop in M dimension
   Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
@@ -289,7 +289,7 @@ void AddVMMulTrans()
 
   Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -337,10 +337,10 @@ void AddSimplifiers()
   Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
 
   // Lowers the layer tag of a MAdd node
-  //Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
+  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
 
   // Lowers the layer tag of a MVMul node
-  //  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
 
   // Lower layer tag on VMMul node
   Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
@@ -528,7 +528,7 @@ int main(int argc, const char* argv[])
 
   RegAllLLDLANodes();
   AddTrans();
-  AddSimplifiers();
+  //  AddSimplifiers();
 
   Universe uni;
   time_t start, start2, end;

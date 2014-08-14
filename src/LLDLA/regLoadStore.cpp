@@ -65,11 +65,27 @@ void LoadToRegs::PrintCode(IndStream &out)
       *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
       return;
     } else {
+#if USE_DOUBLE_PRECISION
       toLoad = toLoadName;
+      *out << "tmp[0] = *" << toLoadName << endl;
       for (int i = 1; i < LLDLA_MU; i++) {
+	out.Indent();
 	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
       }
+      out.Indent();
       *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
+#else
+      toLoad = toLoadName;
+      *out << "tmp[0] = *" << toLoadName << ";\n";
+      for (int i = 1; i < LLDLA_MU; i++) {
+	string valToLoad = toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
+	out.Indent();
+	*out << "tmp[ " << std::to_string((long long int) i) << " ] = *(" << valToLoad << ");\n";
+	toLoad += ", " + valToLoad;
+      }
+      out.Indent();
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
+#endif // USE_DOUBLE PRECISION
       return;
     }
   } else if (IsInputRowVector(0)) {
@@ -77,12 +93,25 @@ void LoadToRegs::PrintCode(IndStream &out)
       *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
       return;
     } else {
+#if USE_DOUBLE_PRECISION
       toLoad = toLoadName;
       for (int i = 1; i < LLDLA_MU; i++) {
 	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
       }
 
       *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
+#else
+      toLoad = toLoadName;
+      *out << "tmp[0] = *" << toLoadName << ";\n";
+      for (int i = 1; i < LLDLA_MU; i++) {
+      string valToLoad = toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
+	*out << "tmp[ " << std::to_string((long long int) i) << " ] = *(" << valToLoad << ");\n";
+	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
+      }
+
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
+      
+#endif // USE_DOUBLE_PRECISION
       return;
     }
   } else {
