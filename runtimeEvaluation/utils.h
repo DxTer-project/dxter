@@ -9,7 +9,6 @@
 #include <time.h>
 #include <string.h>
 
-#define MUVALUE 4
 #define VEC_PD_LOAD(ptr) _mm_load_pd((ptr))									// Load array of 2 doubles to vector register
 #define VEC_DUP_LOAD(ptr) _mm_loaddup_pd((ptr))								// Load one double into upper and lower halves of vector register
 #define VEC_D_LOAD(ptr1, ptr2) _mm_loadh_pd(_mm_load_sd((ptr1)), (ptr2));	// Load 2 doubles at different memory locations into the 2 halves of a vector register

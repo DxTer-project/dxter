@@ -69,19 +69,17 @@ void LoadToRegs::PrintCode(IndStream &out)
     } else {
 #if USE_DOUBLE_PRECISION
       toLoad = toLoadName;
-      *out << "tmp[0] = *" << toLoadName << endl;
+      *out << "tmp[0] = *" << toLoadName << ";\n";
       for (int i = 1; i < LLDLA_MU; i++) {
 	out.Indent();
 	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
       }
-      out.Indent();
       *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
 #else
       toLoad = toLoadName;
       *out << "tmp[0] = *" << toLoadName << ";\n";
       for (int i = 1; i < LLDLA_MU; i++) {
 	string valToLoad = toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
-	out.Indent();
 	*out << "tmp[ " << std::to_string((long long int) i) << " ] = *(" << valToLoad << ");\n";
 	toLoad += ", " + valToLoad;
       }
