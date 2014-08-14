@@ -42,7 +42,7 @@ class BasePSet
   virtual ~BasePSet() {}
   virtual GraphNum NumPosses() const = 0;
   virtual bool operator==(const BasePSet &rhs) const = 0;
-  virtual void Prop() = 0;
+  virtual Cost Prop() = 0;
   virtual void ClearBeforeProp();
   Node* InTun(unsigned int num) const;
   Node* OutTun(unsigned int num) const;

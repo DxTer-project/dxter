@@ -37,7 +37,7 @@ class ShadowPSet : public BasePSet
   virtual ~ShadowPSet();
   virtual GraphNum NumPosses() const {return m_realPSet->NumPosses();}
   bool operator==(const BasePSet &rhs) const;
-  virtual void Prop();
+  virtual Cost Prop();
   virtual BasePSet* GetNewInst() {return new ShadowPSet;}
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
   virtual bool IsTransparent() const {return true;}

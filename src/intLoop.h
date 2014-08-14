@@ -176,7 +176,7 @@ class IntLoop : public PSetType, public LoopInterface
   virtual bool CanMerge(BasePSet *pset) const;
   virtual bool WorthFusing(BasePSet *pset);
   SplitBase* GetControl() const;
-  virtual void Prop();
+  virtual Cost Prop();
   virtual unsigned int LoopLevel() const;
   virtual void PrePrint(IndStream &out, Poss *poss);
   virtual void PostPrint(IndStream &out, Poss *poss);
