@@ -39,8 +39,8 @@ void LoadToRegs::Prop()
 	cout << "*GetInputN(0) != LLDLA_MU ? " << std::to_string(*GetInputN(0) != LLDLA_MU) << endl;
 	throw;
       }
-    }
-    else if (*(GetInputN(0)) != 1) {
+    } else if (*(GetInputN(0)) != 1) {
+      GetInputN(0)->Print();
       // LLDLA_MU rows but not 1 column
       throw;
     }

@@ -21,6 +21,7 @@
 
 #include "LLDLA.h"
 #include "smmul.h"
+#include "svmul.h"
 
 #if DOLLDLA
 
@@ -220,7 +221,12 @@ void SMulLoopRef::Apply(Node *node) const
   
 
   //Create a new SMul or the same type and in my m_toLayer layer
-  SMMul* newMul = new SMMul(m_toLayer, mul->m_type);
+  SVMul* newMul;
+  if (m_dim == DIMM) {
+    newMul = new SVMul(ROWVECTOR, m_toLayer, mul->m_type);
+  } else {
+    newMul = new SVMul(COLVECTOR, m_toLayer, mul->m_type);
+  }
   newMul->SetLayer(m_toLayer);
 
   //Wire inputs - the scalar loop tunnel and 
@@ -249,7 +255,7 @@ void SMulLoopRef::Apply(Node *node) const
   Poss* loopPoss = new Poss(2, scalarTunOut, com);
   //Put that poss into a loop - it's LLDLALOOP type and
   // uses the LLDLA_MU blocksize
-  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
 
   //Set the dimension over which this loop iterates
   loop->SetDimName(m_dim);
