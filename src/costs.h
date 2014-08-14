@@ -53,7 +53,7 @@ using namespace std;
 #elif DOLLDLA
 #define RVAL 40
 #define CVAL 40
-#define USE_DOUBLE_PRECISION 0
+#define USE_DOUBLE_PRECISION 1
 
 #if USE_DOUBLE_PRECISION
 #define LLDLA_MU 2

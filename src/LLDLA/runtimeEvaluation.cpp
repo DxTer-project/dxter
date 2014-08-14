@@ -66,7 +66,7 @@ void RuntimeTest::AddVectorRegisterArithmeticMacros()
   m_defines.push_back("#define VEC_ACCUM(c, ptr) *(ptr) += (c).d[0] + (c).d[1]");
   m_defines.push_back("#define VEC_PTR_PD_LOAD(vec, ptr) (vec).v = _mm_load_pd((ptr))");
   m_defines.push_back("#define VEC_2D_LOAD(p1, p2) _mm_loadh_pd(_mm_load_sd((p1)), (p2))");
-  m_defines.push_back("#define VEC_PPTR_PD_LOAD(vec, p1, p2) (vec).v = VEC_2D_LOAD(p1, p2)");
+  m_defines.push_back("#define VEC_PPTR_PD_LOAD(vec, p1, p2) (vec).v = _mm_loadh_pd(_mm_load_sd((p1)), (p2))");
   m_defines.push_back("#define VEC_PTR_DUP_LOAD(vec, ptr) (vec).v = _mm_loaddup_pd((ptr))");
   m_defines.push_back("#define VEC_PTR_PD_STORE(vec, ptr) _mm_store_pd((ptr), (vec).v)");
 #else
@@ -97,6 +97,7 @@ void RuntimeTest::AddMiscellaneousDefines()
   m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff((size), (b1), (b2), (test_name))");
   m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer((size), (b1), (b2))");
   m_defines.push_back("typedef union {\n\t__m128d v;\n\tdouble d[2];\n} vec_reg;");
+  m_defines.push_back("double tmp[2];\n");
 #else
   m_defines.push_back("#define MUVALUE 4");
   m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_floats((size), (buf))");
