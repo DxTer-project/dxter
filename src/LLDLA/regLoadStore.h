@@ -128,6 +128,8 @@ class StoreFromRegs : public DLAOp<2,1>
 
   virtual bool IsReadOnly() const {return false;}
   virtual bool IsDataDependencyOfInput() const {return true;}
+
+  void StoreNonContigLocations(IndStream &out, string regVarName, string storePtr, string strideVar);
 };
 
 

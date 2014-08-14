@@ -235,7 +235,7 @@ void AddSMMulTrans()
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
   //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -267,15 +267,15 @@ void AddUnrollingTrans()
 void AddSVMulTrans()
 {
   // Transformers for scalar vector multiply
-  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
