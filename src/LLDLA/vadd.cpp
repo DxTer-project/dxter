@@ -339,7 +339,7 @@ void VAddToRegArith::Apply(Node* node) const
 {
   VAdd* vadd = (VAdd*) node;
 
-  bool splitDown = *vadd->GetInputN(0) == 0;
+  bool splitDown = *vadd->GetInputN(0) == ONE;
 
   SplitSingleIter* splitX;
   SplitSingleIter* splitY;
@@ -356,6 +356,7 @@ void VAddToRegArith::Apply(Node* node) const
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();
 
+  splitY->AddInput(vadd->Input(1), vadd->InputConnNum(1));
   if (splitDown) {
     splitY->SetUpStats(FULLUP, FULLUP,
 		       NOTUP, NOTUP);
@@ -363,7 +364,6 @@ void VAddToRegArith::Apply(Node* node) const
     splitY->SetUpStats(FULLUP, NOTUP,
 		       FULLUP, NOTUP);
   }
-  splitY->AddInput(vadd->Input(1), vadd->InputConnNum(1));
   splitY->SetIndepIters();
 
   LoadToRegs* loadX = new LoadToRegs();

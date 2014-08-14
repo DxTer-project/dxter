@@ -31,6 +31,8 @@ void LoadToRegs::Prop()
 
     if (*(GetInputM(0)) != LLDLA_MU) {
       // this isn't 1 x LLDLA_MU
+      cout << "*GetInputM(0) = " << endl;
+      GetInputM(0)->Print();
       if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != LLDLA_MU) {
 	cout << "Error: Incorrect dimensions for register load\n";
 	cout << "*GetInputM(0) != 1 ? " << std::to_string(*GetInputM(0) != 1) << endl;
