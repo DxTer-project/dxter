@@ -46,7 +46,7 @@
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
 
-#define DOLOOPUNROLLING 0
+#define DOLOOPUNROLLING 1
 #define DO2MUTRANSFORMATIONS 1
 #define DO3MUTRANSFORMATIONS 0
 #define DO16MUTRANSFORMATIONS 1
@@ -167,7 +167,7 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2Mu), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2Mu), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2Mu), LLDLALOOPPHASE);
-#endif 
+#endif
 
 #if DO3MUTRANSFORMATIONS
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3Mu), LLDLALOOPPHASE);
@@ -624,7 +624,7 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 500;
+  int chunkSize = 3000;
   int numIterations = 1;
   RuntimeTest rtest(opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";

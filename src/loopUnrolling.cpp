@@ -36,8 +36,10 @@ FullyUnrollLoop::FullyUnrollLoop(int maxNumIters)
 
 bool FullyUnrollLoop::CanApply(const Node *node) const
 {
-  if (node->GetNodeClass() != SplitSingleIter::GetClass())
+  if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
+    cout << "Error: Attempted to apply FullyUnrollLoop to non SplitSingleIter node\n";
     throw;
+  }
 
   if (!node->IsTunnel(SETTUNIN))
     return false;
@@ -48,11 +50,12 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
     return false;
 
   const BasePSet *loop = dynamic_cast<const BasePSet*>(split->GetMyLoop());
-
   
   unsigned int numExecs = split->NumberOfLoopExecs();
-  if (!numExecs)
+  if (!numExecs) {
+    cout << "Error: Attempted to unroll loop with 0 executions\n";
     throw;
+  }
 
   for(unsigned int i = 0; i < numExecs; ++i) {
     unsigned int numIters = split->NumIters(i);
@@ -454,8 +457,10 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 
 void FullyUnrollLoop::Apply(Node *node) const
 {
-  if (node->GetNodeClass() != SplitSingleIter::GetClass())
+  if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
+    cout << "Error: Unrolling node other than SplitSingleIter\n";
     throw;
+  }
   
   SplitSingleIter *split = (SplitSingleIter*)node;
   
