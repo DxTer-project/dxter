@@ -36,7 +36,7 @@ class FullyUnrollLoop : public SingleTrans
   int m_numIters;
   FullyUnrollLoop(int numIters);
 
-  virtual string GetType() const {return "fullyUnrollLoop " + std::to_string(m_numIters);}
+  virtual string GetType() const {return "fullyUnrollLoop " + std::to_string((long long int) m_numIters);}
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };

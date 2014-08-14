@@ -408,23 +408,28 @@ void Gemm::PrintCode(IndStream &out)
 
 #if DOLLDLA
 
-  if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
-    *out << "simple_mmul( " <<
-      InputDataType(2).m_numRowsVar << ", " <<
-      InputDataType(2).m_numColsVar << ", " <<
-      InputDataType(0).m_numColsVar << ", " <<
-      GetInputName(0).str() << ", " <<
-      InputDataType(0).m_rowStrideVar << ", " <<
-      InputDataType(0).m_colStrideVar << ", " <<
-      GetInputName(1).str() << ", " <<
-      InputDataType(1).m_rowStrideVar << ", " <<
-      InputDataType(1).m_colStrideVar << ", " <<
-      GetInputName(2).str() << ", " <<
-      InputDataType(2).m_rowStrideVar << ", " <<
-      InputDataType(2).m_colStrideVar << ");\n";
-  }
-  else
-    throw;
+    if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
+#if USE_DOUBLE_PRECISION
+      *out << "simple_mmul( " <<
+#else
+	*out << "simple_mmul_float( " <<
+#endif // USE_DOUBLE_PRECISION
+	InputDataType(2).m_numRowsVar << ", " <<
+	InputDataType(2).m_numColsVar << ", " <<
+	InputDataType(0).m_numColsVar << ", " <<
+	GetInputName(0).str() << ", " <<
+	InputDataType(0).m_rowStrideVar << ", " <<
+	InputDataType(0).m_colStrideVar << ", " <<
+	GetInputName(1).str() << ", " <<
+	InputDataType(1).m_rowStrideVar << ", " <<
+	InputDataType(1).m_colStrideVar << ", " <<
+	GetInputName(2).str() << ", " <<
+	InputDataType(2).m_rowStrideVar << ", " <<
+	InputDataType(2).m_colStrideVar << ");\n";
+      return;
+    } else {
+      throw;
+    }
 
 #else
     *out << "AbsGemm( "

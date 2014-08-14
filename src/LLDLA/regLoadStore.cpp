@@ -29,13 +29,17 @@ void LoadToRegs::Prop()
     if (m_inputs.size() != 1)
       throw;
 
-    if (*(GetInputM(0)) != NUMREGSPERLOAD) {
-      // this isn't 1 x NUMREGSPERLOAD
-      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != NUMREGSPERLOAD)
+    if (*(GetInputM(0)) != LLDLA_MU) {
+      // this isn't 1 x LLDLA_MU
+      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != LLDLA_MU) {
+	cout << "Error: Incorrect dimensions for register load\n";
+	cout << "*GetInputM(0) != 1 ? " << std::to_string(*GetInputM(0) != 1) << endl;
+	cout << "*GetInputN(0) != LLDLA_MU ? " << std::to_string(*GetInputN(0) != LLDLA_MU) << endl;
 	throw;
-    }
-    else if (*(GetInputN(0)) != 1) {
-      // NUMREGSPERLOAD rows but not 1 column
+      }
+    } else if (*(GetInputN(0)) != 1) {
+      GetInputN(0)->Print();
+      // LLDLA_MU rows but not 1 column
       throw;
     }
 
@@ -49,7 +53,7 @@ void LoadToRegs::PrintCode(IndStream &out)
 {
   out.Indent();
   string toLoadName = GetInputNameStr(0);
-  string toLoadName2, toLoadPair;
+  string toLoad;
   string loadStr = GetNameStr(0);
   // Decide which load instruction is needed based on
   // dimension and stride of input vector
@@ -61,9 +65,25 @@ void LoadToRegs::PrintCode(IndStream &out)
       *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
       return;
     } else {
-      toLoadName2 = toLoadName + " + " + InputDataType(0).m_rowStrideVar;
-      toLoadPair = toLoadName + ", " + toLoadName2;
-      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoadPair << " );\n";
+#if USE_DOUBLE_PRECISION
+      toLoad = toLoadName;
+      *out << "tmp[0] = *" << toLoadName << ";\n";
+      for (int i = 1; i < LLDLA_MU; i++) {
+	out.Indent();
+	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
+      }
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
+#else
+      toLoad = toLoadName;
+      *out << "tmp[0] = *" << toLoadName << ";\n";
+      for (int i = 1; i < LLDLA_MU; i++) {
+	string valToLoad = toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
+	*out << "tmp[ " << std::to_string((long long int) i) << " ] = *(" << valToLoad << ");\n";
+	toLoad += ", " + valToLoad;
+      }
+      out.Indent();
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
+#endif // USE_DOUBLE PRECISION
       return;
     }
   } else if (IsInputRowVector(0)) {
@@ -71,9 +91,25 @@ void LoadToRegs::PrintCode(IndStream &out)
       *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
       return;
     } else {
-      toLoadName2 = toLoadName + " + " + InputDataType(0).m_colStrideVar;
-      toLoadPair = toLoadName + ", " + toLoadName2;
-      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoadPair << " );\n";
+#if USE_DOUBLE_PRECISION
+      toLoad = toLoadName;
+      for (int i = 1; i < LLDLA_MU; i++) {
+	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
+      }
+
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
+#else
+      toLoad = toLoadName;
+      *out << "tmp[0] = *" << toLoadName << ";\n";
+      for (int i = 1; i < LLDLA_MU; i++) {
+      string valToLoad = toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
+	*out << "tmp[ " << std::to_string((long long int) i) << " ] = *(" << valToLoad << ");\n";
+	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
+      }
+
+      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
+      
+#endif // USE_DOUBLE_PRECISION
       return;
     }
   } else {
@@ -108,7 +144,7 @@ Name LoadToRegs::GetName(ConnNum num) const
 
 void LoadToRegs::AddVariables(VarSet &set) const
 {
-  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regs;\n";
+  string varDecl = "vec_reg " + GetInputNameStr(0)+ "_regs;\n";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
@@ -120,13 +156,13 @@ void StoreFromRegs::Prop()
 
     // TODO: Check that the correct input # is a register
     
-    /*    if (*(GetInputM(0)) != NUMREGSPERLOAD) {
-      // this isn't 1 x NUMREGSPERLOAD
-      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != NUMREGSPERLOAD)
+    /*    if (*(GetInputM(0)) != LLDLA_MU) {
+      // this isn't 1 x LLDLA_MU
+      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != LLDLA_MU)
 	throw;
     }
     else if (*(GetInputN(0)) != 1) {
-      // NUMREGSPERLOAD rows but not 1 column
+      // LLDLA_MU rows but not 1 column
       throw;
     }
 
@@ -142,10 +178,8 @@ void StoreFromRegs::Prop()
 
 void StoreFromRegs::PrintCode(IndStream &out)
 {
-  out.Indent();
   string regVarName = GetInputNameStr(0);
-  string storeLocation1 = GetInputNameStr(1);
-  string storeLocation2;
+  string storeLocation = GetInputNameStr(1);
   // Decide which store instruction is needed based on
   // dimension and stride of input vector
   Stride inputRowStride = InputDataType(1).m_rowStride;
@@ -153,24 +187,20 @@ void StoreFromRegs::PrintCode(IndStream &out)
 
   if (IsInputColVector(1)) {
     if (IsUnitStride(inputRowStride)) {
-      *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << storeLocation1 << " );\n";
+      out.Indent();
+      *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << storeLocation << " );\n";
       return;
     } else {
-      storeLocation2 = storeLocation1 + " + " + InputDataType(1).m_rowStrideVar;
-      *out << "VEC_PTR_PD_SET( 0, " << regVarName << ", " << storeLocation1 << " );\n";
-      out.Indent();
-      *out << "VEC_PTR_PD_SET( 1, " << regVarName << ", " << storeLocation2 << " );\n";
+      StoreNonContigLocations(out, regVarName, storeLocation, InputDataType(1).m_rowStrideVar);
       return;
     }
   } else if (IsInputRowVector(1)) {
     if (IsUnitStride(inputColStride)) {
-      *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << storeLocation1 << " );\n";
+      out.Indent();
+      *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << storeLocation << " );\n";
       return;
     } else {
-      storeLocation2 = storeLocation1 + " + " + InputDataType(1).m_colStrideVar;
-      *out << "VEC_PTR_PD_SET( 0, " << regVarName << ", " << storeLocation1 << " );\n";
-      out.Indent();
-      *out << "VEC_PTR_PD_SET( 1, " << regVarName << ", " << storeLocation2 << " );\n";
+      StoreNonContigLocations(out, regVarName, storeLocation, InputDataType(1).m_colStrideVar);
       return;
     }
   } else {
@@ -178,6 +208,17 @@ void StoreFromRegs::PrintCode(IndStream &out)
     throw;
   }
   return;
+}
+
+void StoreFromRegs::StoreNonContigLocations(IndStream &out, string regVarName, string storePtr, string strideVar)
+{
+  out.Indent();
+  *out << "VEC_PTR_PD_SET( 0, " + regVarName + ", " + storePtr + " );\n";
+  for (int i = 1; i < LLDLA_MU; i++) {
+    out.Indent();
+    string storePtrStr = storePtr + " + " + std::to_string((long long int) i) + " * " + strideVar;
+    *out << "VEC_PTR_PD_SET( " + std::to_string((long long int) i) + ", " + regVarName + ", " + storePtrStr + " );\n";
+  }
 }
 
 void DuplicateRegLoad::Prop()
@@ -212,7 +253,7 @@ void DuplicateRegLoad::BuildDataTypeCache()
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "1";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(NUMREGSPERLOAD, num, 1);
+    m_mSizes.AddRepeatedSizes(LLDLA_MU, num, 1);
     m_nSizes.AddRepeatedSizes(1, num, 1);
   }
 }
@@ -242,7 +283,7 @@ Name DuplicateRegLoad::GetName(ConnNum num) const
 
 void DuplicateRegLoad::AddVariables(VarSet &set) const
 {
-  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regDup;";
+  string varDecl = "vec_reg " + GetInputNameStr(0)+ "_regDup;";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
@@ -278,9 +319,9 @@ void TempVecReg::BuildDataTypeCache()
   if (m_mSizes.m_entries.empty()) {
     m_info = InputDataType(0);
     m_info.m_numRowsVar = "vector register size";
-   m_info.m_numColsVar = "vector register size";
+    m_info.m_numColsVar = "vector register size";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(NUMREGSPERLOAD, num, 1);
+    m_mSizes.AddRepeatedSizes(LLDLA_MU, num, 1);
     m_nSizes.AddRepeatedSizes(1, num, 1);
   }
 }
@@ -310,10 +351,9 @@ Name TempVecReg::GetName(ConnNum num) const
 
 void TempVecReg::AddVariables(VarSet &set) const
 {
-  string varDecl = "v2df_t " + GetInputNameStr(0)+ "_regTemp;";
+  string varDecl = "vec_reg " + GetInputNameStr(0)+ "_regTemp;";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
-
 
 #endif //DOLLDLA

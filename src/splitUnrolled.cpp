@@ -89,7 +89,7 @@ Name SplitUnrolled::GetName(ConnNum num, LoopType type) const
 
   if (m_tunType == POSSTUNIN) {
     if (num < m_unrollFactor)
-      name.m_name += std::to_string(num);
+      name.m_name += std::to_string((long long int) num);
     else if (num != m_unrollFactor)
       throw;
     return name;
@@ -366,12 +366,12 @@ void SplitUnrolled::Duplicate(const Node *orig, bool shallow, bool possMerging)
 NodeType SplitUnrolled::GetType() const
 {
 #if TWOD
-  return "SplitUnrolled" + PartDirToStr(m_dir) + std::to_string(m_unrollFactor)
+  return "SplitUnrolled" + PartDirToStr(m_dir) + std::to_string((long long int) m_unrollFactor)
     + "( " + Tunnel::GetType() + " )";
 #else
   string tmp = "SplitUnrolled";
   tmp += m_partDim;
-  tmp += std::to_string(m_unrollFactor);
+  tmp += std::to_string((long long int) m_unrollFactor);
   return tmp  + "( " + Tunnel::GetType() + " )";
 #endif
 }

@@ -354,13 +354,21 @@ void Var::PrintDecl(IndStream &out) const
     case (VarPartType):
       {
 	out.Indent();
+#if USE_DOUBLE_PRECISION
 	*out << "double *" << *m_part << ";\n";
+#else
+	*out << "float *" << *m_part << ";\n";
+#endif // USE_DOUBLE_PRECISION
 	break;
       }
     case (VarTransType):
       {
 	out.Indent();
+#if USE_DOUBLE_PRECISION
 	*out << "double *" << *m_transVar << ";\n";
+#else
+	*out << "float *" << *m_transVar << ";\n";
+#endif // USE_DOUBLE_PRECISION
 	break;
       }
 #endif
