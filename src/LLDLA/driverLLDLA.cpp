@@ -1150,16 +1150,16 @@ RealPSet* SVMulColExample()
 
 RealPSet* MVMulExample()
 {
-  InputNode* Ain = new InputNode("A input", 4, bigSize, "A",
-				 1, 4,
+  InputNode* Ain = new InputNode("A input", 8, bigSize, "A",
+				 1, 8,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride");
   InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
 				 1, bigSize,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
-  InputNode* yIn = new InputNode("y input", 4, 1, "Y",
-				 1, 4,
+  InputNode* yIn = new InputNode("y input", 8, 1, "Y",
+				 1, 8,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
 
@@ -1267,16 +1267,16 @@ RealPSet* DotExample()
 
 RealPSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", 4, 4, "A",
-				 4, 1,
+  InputNode *Ain = new InputNode("A input", 8, 352, "A",
+				 352, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", 4, 352, "B",
-				 352, 1,
+  InputNode *Bin = new InputNode("B input", 352, 8, "B",
+				 8, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input", 4, 352, "C",
-				 352, 1,
+  InputNode *Cin = new InputNode("C input", 8, 8, "C",
+				 8, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
