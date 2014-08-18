@@ -600,12 +600,16 @@ void RealPSet::Prop()
   }
   PossMMapIter iter;
   int j = 0;
+#if !USESHADOWS
 #pragma omp parallel private(j,iter)
+#endif
   {
     iter = m_posses.begin();
     j = 0;
     int size = m_posses.size();
- #pragma omp for schedule(static) 
+#if !USESHADOWS
+#pragma omp for schedule(static) 
+#endif
     for (int i = 0; i < size; ++i) {
       if (j > i) {
 	cout << "uhoh\n";
@@ -1185,12 +1189,16 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
     PossMMap mmap;
     PossMMapIter iter;
     int j = 0;
+#if !USESHADOWS
 #pragma omp parallel private(j,iter)
+#endif
     {
       iter = m_posses.begin();
-	j = 0;
+      j = 0;
 	int size = m_posses.size();
+#if !USESHADOWS
 #pragma omp for schedule(static) 
+#endif
       for (int i = 0; i < size; ++i) {
 	while (j < i) {
 	  ++iter;
