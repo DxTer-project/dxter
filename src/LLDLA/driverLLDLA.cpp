@@ -145,7 +145,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
     }
     cout << endl;
   }
-  cout << "Best flops achieved: " << std::to_string((long double) bestFLOPS) << endl;
+  cout << "Best GFLOPS achieved: " << std::to_string((long double) bestFLOPS / 1.0e9) << endl;
   cout << "Best percent of peak: " << std::to_string((long double) (bestFLOPS / peakFLOPS) * 100) << endl;
   return bestImpNum;      
 }
