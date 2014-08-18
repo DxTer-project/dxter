@@ -735,3 +735,8 @@ void Universe::Unflatten(ifstream &in)
     throw;
   }
 }
+
+void Universe::CullWorstPerformers(double percentToCull, int ignoreThreshold)
+{
+  m_pset->CullWorstPerformers(percentToCull, ignoreThreshold);
+}
