@@ -63,7 +63,7 @@
 
 Size one = 1;
 Size smallSize = 12;
-Size medSize = 36;
+Size medSize = 256;
 Size bigSize = 1024;
 //Size bs = ELEM_BS;
 
@@ -130,7 +130,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
     cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
     for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
       double totalFlops = flopCost * chunkSize;
-      double totalTimeInSecs = *vit / ticksPerSec;
+      double totalTimeInSecs = *vit;
       double actualFLOPS = totalFlops / totalTimeInSecs;
       double pctPeak = (actualFLOPS / peakFLOPS) * 100;
       if (actualFLOPS > bestFLOPS) {
@@ -222,7 +222,7 @@ void AddMVMulTrans()
   Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Lower layer tag
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -256,7 +256,7 @@ void AddUnrollingTrans()
 
 #if DO16MUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new FullyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
+		     new FullyUnrollLoop(64), LLDLALOOPUNROLLPHASE);
 #endif // DO3MUTRANSFORMATIONS
 
 #endif // DOLOOPUNROLLING
@@ -658,8 +658,8 @@ int main(int argc, const char* argv[])
 
 RealPSet* GemvExample()
 {
-  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
-				 1, medSize,
+  InputNode* xIn = new InputNode("x input", 4, 1, "X",
+				 1, 4,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
 
@@ -673,7 +673,7 @@ RealPSet* GemvExample()
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride");
 
-  InputNode* AIn = new InputNode("a input", medSize, medSize, "A",
+  InputNode* AIn = new InputNode("a input", medSize, 4, "A",
 				 1, medSize,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride");
@@ -940,22 +940,22 @@ RealPSet* VAddExample()
 
 RealPSet* VMVMulExample()
 {
-  InputNode* Ain = new InputNode("A input", bigSize, 4, "A",
-				 1, 4,
+  InputNode* Ain = new InputNode("A input", medSize, 8, "A",
+				 1, 8,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride");
 
-  InputNode* xIn = new InputNode("x input", 4, 1, "X",
-				 1, 4,
+  InputNode* xIn = new InputNode("x input", 8, 1, "X",
+				 1, 8,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
 
-  InputNode* zIn = new InputNode("z input", bigSize, 1, "Z",
-				 1, bigSize,
+  InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
+				 1, medSize,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride");
 
-  InputNode* yIn = new InputNode("y input", 1, bigSize, "Y",
+  InputNode* yIn = new InputNode("y input", 1, medSize, "Y",
 				 1, 1,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
@@ -1150,16 +1150,16 @@ RealPSet* SVMulColExample()
 
 RealPSet* MVMulExample()
 {
-  InputNode* Ain = new InputNode("A input", 8, bigSize, "A",
-				 1, 8,
+  InputNode* Ain = new InputNode("A input", 16, medSize, "A",
+				 1, 16,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride");
-  InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
-				 1, bigSize,
+  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
+				 1, medSize,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
-  InputNode* yIn = new InputNode("y input", 8, 1, "Y",
-				 1, 8,
+  InputNode* yIn = new InputNode("y input", 16, 1, "Y",
+				 1, 16,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
 
@@ -1309,16 +1309,16 @@ RealPSet* GemmExample()
 
 RealPSet* DoubleGemmExample()
 {
-  InputNode *Ain = new InputNode("A input",  4, bigSize, "A",
+  InputNode *Ain = new InputNode("A input",  8, bigSize, "A",
 				 bigSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", bigSize, 4, "B",
-				 4, 1,
+  InputNode *Bin = new InputNode("B input", bigSize, 8, "B",
+				 8, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  4, 4, "C",
-				 4, 1,
+  InputNode *Cin = new InputNode("C input",  8, 8, "C",
+				 8, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 

@@ -139,7 +139,7 @@ string RuntimeTest::MainFuncCode(ImplementationMap imps)
   argBufferAllocation += AllocateArgBuffers("");
   argBufferAllocation += "FILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
   argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
-  string timingSetup = "\tint i, j, k;\n\tclock_t begin, end;\n\tdouble exec_time;\n";
+  string timingSetup = "\tint i, j, k;\n\tstruct timeval begin, end;\n\tdouble exec_time;\n";
   string mainFunc = prototype + argBufferAllocation + "\n" + timingSetup;
   string timingLoop = TimingLoop(imps);
   timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
@@ -159,7 +159,7 @@ string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap imps, str
   argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
   string correctnessCheck = argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
   correctnessCheck += CorrectnessCheck(imps, referenceImpName);
-  string timingSetup = "\tint i, j, k;\n\tclock_t begin, end;\n\tdouble exec_time;\n";
+  string timingSetup = "\tint i, j, k;\n\tstruct timeval begin, end;\n\tdouble exec_time;\n";
   string mainFunc = prototype + correctnessCheck + "\n" + timingSetup;
   string timingLoop = TimingLoop(imps);
   timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
@@ -214,12 +214,12 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
   for (i = 1; i <= imps.size(); i++) {
     string opName = m_operationName + "_" + std::to_string((long long int) i);
     loopBody += "\tfor (j = 0; j < NUM_ITERATIONS; j++) {\n";
-    loopBody += "\t\tbegin = clock();\n";
+    loopBody += "\t\tgettimeofday( &begin, NULL );\n";
     loopBody += "\t\tfor (k = 0; k < CHUNK_SIZE; k++) {\n";
     loopBody += "\t\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
     loopBody += "\t\t}\n";
-    loopBody += "\t\tend = clock();\n";
-    loopBody += "\t\texec_time = (double) (end - begin);\n";
+    loopBody += "\t\tgettimeofday( &end, NULL );\n";
+    loopBody += "\t\texec_time = (end.tv_usec - begin.tv_usec) * 1.0e-6;\n";
     loopBody += "\t\tchar exec_time_str[100];\n";
     loopBody += "\t\tsprintf(exec_time_str, \"%f\\n\", exec_time);\n";
     loopBody += "\t\tsize_t trash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
