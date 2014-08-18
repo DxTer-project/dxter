@@ -26,17 +26,18 @@
 #include "base.h"
 #include "node.h"
 #include "DLANode.h"
-#include "basePSet.h"
+//#include "basePSet.h"
 #include "tunnel.h"
 #include <stdarg.h>
 #include <unordered_set>
-#include "realPSet.h"
-#include "basePSet.h"
+//#include "realPSet.h"
+//#include "basePSet.h"
 
 //using namespace __gnu_cxx;
 
 class Node;
 class RealPSet;
+class BasePSet;
 
 class Poss
 {
@@ -55,6 +56,7 @@ class Poss
   bool m_fullyExpanded;
   PSetVec m_sets;
   static StrSet M_fusedSets;
+  Cost m_cost;
   Poss();
   virtual ~Poss();
   Poss(Tunnel *tun);
@@ -104,8 +106,9 @@ class Poss
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   void FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
-  virtual void Prop();
+  virtual Cost Prop();
   virtual void Cull(Phase phase);
+  void CullWorstPerformers(double percentToCull, int ignoreThreshold);
   virtual void ClearBeforeProp();
   virtual void ClearNodesPrinted();
   void ClearFullyExpanded();

@@ -45,7 +45,11 @@ void MVMul::PrintCode(IndStream &out)
   out.Indent();
 
   if (m_layer == ABSLAYER) {
+#if USE_DOUBLE_PRECISION
     *out << "simple_mmul( " <<
+#else
+    *out << "simple_mmul_float( " <<
+#endif // USE_DOUBLE_PRECISION
       InputDataType(0).m_numRowsVar << ", " <<
       "1, " <<
       InputDataType(0).m_numColsVar << ", " <<
@@ -111,7 +115,7 @@ void MVMul::PrintGeneralStride(IndStream &out)
 
 Node* MVMul::BlankInst()
 {
-  return new MVMul(LLDLAPRIMITIVELAYER, REAL);
+  return new MVMul(ABSLAYER, REAL);
 }
 
 Phase MVMul::MaxPhase() const 
@@ -147,18 +151,19 @@ void MVMul::Prop()
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
       if (!InputIsMuByMu(0)) {
-	cout << "ERROR: Primitive matrix must be 2 x 2\n";
+	cout << "ERROR: Primitive matrix must be 2 x 2 for MVMul\n";
 	throw;
       }
       if (*GetInputM(1) != LLDLA_MU) {
-	cout << "ERROR: Primitive vector must be 2 x 1\n";
+	cout << "ERROR: Primitive vector must be 2 x 1 MVMul\n";
 	throw;
       }
       if (*GetInputM(2) != LLDLA_MU) {
-	cout << "ERROR: Primitive vector must be 2 x 1\n";
+	cout << "ERROR: Primitive vector must be 2 x 1 MVMul\n";
 	throw;
       }
     }
+
     if (m_layer == ABSLAYER) {
       m_cost = TWO * GetInputM(0)->SumProds11(*GetInputN(0));
     } else {
@@ -188,16 +193,27 @@ bool MVMulLowerLayer::CanApply(const Node *node) const
     if (mvmul->GetLayer() != m_fromLayer) {
       return false;
     }
-    if (*(mvmul->GetInputM(0)) <= m_bs &&
-	*(mvmul->GetInputN(0)) <= m_bs) {
+
+    if (m_toLayer == LLDLAPRIMITIVELAYER) {
+      if (*mvmul->GetInputM(0) != LLDLA_MU ||
+	  *mvmul->GetInputN(0) != LLDLA_MU ||
+	  *mvmul->GetInputM(1) != LLDLA_MU ||
+	  *mvmul->GetInputN(1) != 1        ||
+	  *mvmul->GetInputM(2) != LLDLA_MU ||
+	  *mvmul->GetInputN(2) != 1) {
+	return false;
+      } else {
+	return true;
+      }
+    } else if (*mvmul->GetInputM(0) <= m_bs &&
+	       *mvmul->GetInputN(0) <= m_bs) {
       return true;
     } else {
       return false;
     }
   }
-  else {
-    throw;
-  }
+  cout << "Error: Applying MVMulLowerLayer to non-MVMul node\n";
+  throw;
 }
 
 void MVMulLowerLayer::Apply(Node *node) const

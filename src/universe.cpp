@@ -72,7 +72,7 @@ void Universe::Init(RealPSet *seed)
 
 #if DOLLDLA
   int pSize = seed->m_posses.size();
-  cout << std::to_string(pSize) << endl;
+  cout << std::to_string((long long int) pSize) << endl;
   Poss *poss = seed->m_posses.begin()->second;
   NodeVecIter nodeIter = poss->m_possNodes.begin();
   for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
@@ -734,4 +734,9 @@ void Universe::Unflatten(ifstream &in)
     cout << "Bad end!\n";
     throw;
   }
+}
+
+void Universe::CullWorstPerformers(double percentToCull, int ignoreThreshold)
+{
+  m_pset->CullWorstPerformers(percentToCull, ignoreThreshold);
 }

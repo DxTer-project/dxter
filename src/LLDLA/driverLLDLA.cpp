@@ -49,6 +49,7 @@
 #define DOLOOPUNROLLING 1
 #define DO2MUTRANSFORMATIONS 1
 #define DO3MUTRANSFORMATIONS 0
+#define DO16MUTRANSFORMATIONS 1
 
 #include <sstream>
 
@@ -62,10 +63,12 @@
 
 Size one = 1;
 Size smallSize = 12;
-Size medSize = 36;
-Size bigSize = 1000;
+Size medSize = 256;
+Size bigSize = 1024;
 //Size bs = ELEM_BS;
 
+RealPSet* GemvExample();
+RealPSet* MVMul2Example();
 RealPSet* MAdd2Example();
 RealPSet* VAdd2Example();
 RealPSet* VAddExample();
@@ -101,9 +104,9 @@ void PrintImpMap(ImplementationRuntimeMap &impTimes)
   ImplementationRuntimeMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     TimeVecIter vit;
-    cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
+    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
     for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
-      cout << std::to_string(*vit) << endl;
+      cout << std::to_string((long double) *vit) << endl;
     }
     cout << endl;
   }
@@ -114,23 +117,27 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
    * WARNING: These numbers are processor specific to Dillon's machine in GDC
    ***************************************************************************/
   double ticksPerSec = 1.0e6;
-  double peakFLOPS = 2.7e9 * 8;//30e9;
+#if USE_DOUBLE_PRECISION
+  double peakFLOPS = 3.7e9 * 8;
+#else
+  double peakFLOPS = 2 * 3.7e9 * 8;
+#endif // USE_DOUBLE_PRECISION
   GraphNum bestImpNum = 0;
   double bestFLOPS = 0;
   ImplementationRuntimeMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     TimeVecIter vit;
-    cout << "IMPLEMENTATION # " << std::to_string(mit->first) << endl;
+    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
     for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
       double totalFlops = flopCost * chunkSize;
-      double totalTimeInSecs = *vit / ticksPerSec;
+      double totalTimeInSecs = *vit;
       double actualFLOPS = totalFlops / totalTimeInSecs;
       double pctPeak = (actualFLOPS / peakFLOPS) * 100;
       if (actualFLOPS > bestFLOPS) {
 	bestFLOPS = actualFLOPS;
 	bestImpNum = mit->first;
       }
-      cout << "FLOPS = " << std::to_string(actualFLOPS) << "\t%Peak = " << std::to_string(pctPeak) << endl;
+      cout << "GFLOPS = " << std::to_string((long double) actualFLOPS / 1.0e9) << "\t%Peak = " << std::to_string((long double) pctPeak) << endl;
       /*      if (pctPeak > 100) {
 	cout << "pctPeak > 100\n";
 	throw;
@@ -138,8 +145,8 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
     }
     cout << endl;
   }
-  cout << "Best flops achieved: " << std::to_string(bestFLOPS) << endl;
-  cout << "Best percent of peak: " << std::to_string((bestFLOPS / peakFLOPS) * 100) << endl;
+  cout << "Best GFLOPS achieved: " << std::to_string((long double) bestFLOPS / 1.0e9) << endl;
+  cout << "Best percent of peak: " << std::to_string((long double) (bestFLOPS / peakFLOPS) * 100) << endl;
   return bestImpNum;      
 }
 
@@ -160,7 +167,7 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2Mu), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2Mu), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2Mu), LLDLALOOPPHASE);
-#endif 
+#endif
 
 #if DO3MUTRANSFORMATIONS
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3Mu), LLDLALOOPPHASE);
@@ -169,16 +176,16 @@ void AddGemmTrans()
 #endif
   
   //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
-  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
   return;
 }
 
 void AddVVDotTrans()
 {
   // Vector dot product transforms
-  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
   
-  Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER, LLDLAMu), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER, LLDLAMu), LLDLALOOPPHASE);
 
   Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
@@ -188,7 +195,7 @@ void AddVVDotTrans()
 void AddMAddTrans()
 {
   // Transformers for Matrix Matrix add
-  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   // Introduce loop in M dimension
   Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
@@ -215,7 +222,7 @@ void AddMVMulTrans()
   Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Lower layer tag
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -228,7 +235,7 @@ void AddSMMulTrans()
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
   //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -246,6 +253,12 @@ void AddUnrollingTrans()
   Universe::AddTrans(SplitSingleIter::GetClass(), 
 		     new FullyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
 #endif // DO3MUTRANSFORMATIONS
+
+#if DO16MUTRANSFORMATIONS
+  Universe::AddTrans(SplitSingleIter::GetClass(), 
+		     new FullyUnrollLoop(64), LLDLALOOPUNROLLPHASE);
+#endif // DO3MUTRANSFORMATIONS
+
 #endif // DOLOOPUNROLLING
 
   return;
@@ -254,15 +267,15 @@ void AddUnrollingTrans()
 void AddSVMulTrans()
 {
   // Transformers for scalar vector multiply
-  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -276,18 +289,20 @@ void AddVMMulTrans()
 
   Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
 
 void AddVAddTrans()
 {
-  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
+  //Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new VAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
+
+  //  Universe::AddTrans(VAdd::GetClass(), new VAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -354,6 +369,8 @@ void Usage()
   cout <<"        11  -> Vector add twice\n";
   cout <<"        12  -> Vector matrix vector multiply\n";
   cout <<"        13  -> Matrix add twice\n";
+  cout <<"        14  -> Matrix vector multiply twice\n";
+  cout <<"        15  -> Gemv\n";
 }
 
 int main(int argc, const char* argv[])
@@ -470,6 +487,7 @@ int main(int argc, const char* argv[])
       }
       opName = "dxt_vadd2";
       algFunc = VAdd2Example;
+      break;
     case(12):
       if (argc != 2) {
 	Usage();
@@ -486,6 +504,22 @@ int main(int argc, const char* argv[])
       opName = "dxt_madd2";
       algFunc = MAdd2Example;
       break;
+    case(14):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_mvmul2";
+      algFunc = MVMul2Example;
+      break;
+    case(15):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_gemv";
+      algFunc = GemvExample;
+      break;
     default:
       Usage();
       return 0;
@@ -494,7 +528,7 @@ int main(int argc, const char* argv[])
 
   RegAllLLDLANodes();
   AddTrans();
-  AddSimplifiers();
+  //  AddSimplifiers();
 
   Universe uni;
   time_t start, start2, end;
@@ -530,7 +564,7 @@ int main(int argc, const char* argv[])
     graphIter.PrintRoot(optOut, 0, true, startSet);
     absImpStr = ss.str();
     cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
-    cout << "Flops for operation = " << std::to_string(flopCost) << endl;
+    cout << "Flops for operation = " << std::to_string((long double) flopCost) << endl;
     time(&start);
   }
 
@@ -590,7 +624,7 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 30;
+  int chunkSize = 3000;
   int numIterations = 1;
   RuntimeTest rtest(opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
@@ -622,20 +656,169 @@ int main(int argc, const char* argv[])
   return 0;
 }
 
-RealPSet* MAdd2Example()
+RealPSet* GemvExample()
 {
-  InputNode* xIn = new InputNode("x input", bigSize, bigSize, "X",
-				 1, bigSize,
+  InputNode* xIn = new InputNode("x input", 4, 1, "X",
+				 1, 4,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
 
-  InputNode* yIn = new InputNode("y input", bigSize, bigSize, "Y",
-				 1, bigSize,
+  InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
+				 1, medSize,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
 
-  InputNode* zIn = new InputNode("z input", bigSize, bigSize, "Z",
-				 1, bigSize,
+  InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
+				 1, medSize,
+				 "ZNumRows", "ZNumCols",
+				 "ZRowStride", "ZColStride");
+
+  InputNode* AIn = new InputNode("a input", medSize, 4, "A",
+				 1, medSize,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride");
+
+  InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
+				     1, medSize,
+				     "AlphaNumRows", "AlphaNumCols",
+				     "AlphaRowStride", "AlphaColStride");
+
+  InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
+				    1, medSize,
+				    "BetaNumRows", "BetaNumCols",
+				    "BetaRowStride", "BetaColStride");
+
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  tunZ->AddInput(zIn, 0);
+
+  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(AIn, 0);
+
+  Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
+  tunAlpha->AddInput(alphaIn, 0);
+
+  Tunnel* tunBeta = new Tunnel(POSSTUNIN);
+  tunBeta->AddInput(betaIn, 0);
+
+  SVMul* by = new SVMul(COLVECTOR, ABSLAYER, REAL);
+  by->AddInputs(4,
+		tunBeta, 0,
+		tunY, 0);
+
+  MVMul* axMul = new MVMul(ABSLAYER, REAL);
+  axMul->AddInputs(6,
+		   tunA, 0,
+		   tunX, 0,
+		   tunZ, 0);
+
+  SVMul* alphaAXMul = new SVMul(COLVECTOR, ABSLAYER, REAL);
+  alphaAXMul->AddInputs(4,
+			tunAlpha, 0,
+			axMul, 0);
+
+  VAdd* sumVecs = new VAdd(COLVECTOR, ABSLAYER, REAL);
+  sumVecs->AddInputs(4,
+		     alphaAXMul, 0,
+		     by, 0);
+
+  Poss* innerPoss = new Poss(sumVecs, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* MVMul2Example()
+{
+  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
+				 1, medSize,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
+				 1, medSize,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride");
+
+  InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
+				 1, medSize,
+				 "ZNumRows", "ZNumCols",
+				 "ZRowStride", "ZColStride");
+
+  InputNode* AIn = new InputNode("a input", medSize, medSize, "A",
+				 1, medSize,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride");
+
+  InputNode* BIn = new InputNode("b input", medSize, medSize, "B",
+				 1, medSize,
+				 "BNumRows", "BNumCols",
+				 "BRowStride", "BColStride");
+  
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  tunZ->AddInput(zIn, 0);
+
+  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(AIn, 0);
+
+  Tunnel* tunB = new Tunnel(POSSTUNIN);
+  tunB->AddInput(BIn, 0);
+
+  MVMul* mvmul1 = new MVMul(ABSLAYER, REAL);
+  mvmul1->AddInputs(6,
+		    tunB, 0,
+		    tunX, 0,
+		    tunY, 0);
+
+  MVMul* mvmul2 = new MVMul(ABSLAYER, REAL);
+  mvmul2->AddInputs(6,
+		    tunA, 0,
+		    mvmul1, 0,
+		    tunZ, 0);
+
+  Poss* innerPoss = new Poss(mvmul2, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* MAdd2Example()
+{
+  InputNode* xIn = new InputNode("x input", medSize, medSize, "X",
+				 1, medSize,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride");
+
+  InputNode* yIn = new InputNode("y input", medSize, medSize, "Y",
+				 1, medSize,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride");
+
+  InputNode* zIn = new InputNode("z input", medSize, medSize, "Z",
+				 1, medSize,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride");
   
@@ -668,7 +851,6 @@ RealPSet* MAdd2Example()
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
-
 }
 
 RealPSet* VAdd2Example()
@@ -758,22 +940,22 @@ RealPSet* VAddExample()
 
 RealPSet* VMVMulExample()
 {
-  InputNode* Ain = new InputNode("A input", bigSize, 4, "A",
-				 1, 4,
+  InputNode* Ain = new InputNode("A input", medSize, 8, "A",
+				 1, 8,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride");
 
-  InputNode* xIn = new InputNode("x input", 4, 1, "X",
-				 1, 4,
+  InputNode* xIn = new InputNode("x input", 8, 1, "X",
+				 1, 8,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
 
-  InputNode* zIn = new InputNode("z input", bigSize, 1, "Z",
-				 1, bigSize,
+  InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
+				 1, medSize,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride");
 
-  InputNode* yIn = new InputNode("y input", 1, bigSize, "Y",
+  InputNode* yIn = new InputNode("y input", 1, medSize, "Y",
 				 1, 1,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
@@ -968,16 +1150,16 @@ RealPSet* SVMulColExample()
 
 RealPSet* MVMulExample()
 {
-  InputNode* Ain = new InputNode("A input", 4, bigSize, "A",
-				 1, 4,
+  InputNode* Ain = new InputNode("A input", 16, medSize, "A",
+				 1, 16,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride");
-  InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
-				 1, bigSize,
+  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
+				 1, medSize,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride");
-  InputNode* yIn = new InputNode("y input", 4, 1, "Y",
-				 1, 4,
+  InputNode* yIn = new InputNode("y input", 16, 1, "Y",
+				 1, 16,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride");
 
@@ -1010,12 +1192,12 @@ RealPSet* MVMulExample()
 
 RealPSet* MAddExample()
 {
-  InputNode* Ain = new InputNode("A input", bigSize, bigSize, "A", 
-				 bigSize, 1,
+  InputNode* Ain = new InputNode("A input", medSize, medSize, "A", 
+				 1, medSize,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode* Bin = new InputNode("B input", bigSize, bigSize, "B", 
-				 bigSize, 1,
+  InputNode* Bin = new InputNode("B input", medSize, medSize, "B", 
+				 1, medSize,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
   Tunnel* tunA = new Tunnel(POSSTUNIN);
@@ -1085,16 +1267,16 @@ RealPSet* DotExample()
 
 RealPSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", 4, 4, "A",
-				 4, 1,
+  InputNode *Ain = new InputNode("A input", 8, 352, "A",
+				 352, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", 4, 352, "B",
-				 352, 1,
+  InputNode *Bin = new InputNode("B input", 352, 8, "B",
+				 8, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input", 4, 352, "C",
-				 352, 1,
+  InputNode *Cin = new InputNode("C input", 8, 8, "C",
+				 8, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 
@@ -1127,16 +1309,16 @@ RealPSet* GemmExample()
 
 RealPSet* DoubleGemmExample()
 {
-  InputNode *Ain = new InputNode("A input",  4, bigSize, "A",
+  InputNode *Ain = new InputNode("A input",  8, bigSize, "A",
 				 bigSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", bigSize, 4, "B",
-				 4, 1,
+  InputNode *Bin = new InputNode("B input", bigSize, 8, "B",
+				 8, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input",  4, 4, "C",
-				 4, 1,
+  InputNode *Cin = new InputNode("C input",  8, 8, "C",
+				 8, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 

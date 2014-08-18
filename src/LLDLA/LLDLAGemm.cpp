@@ -36,7 +36,11 @@ void LLDLAGemm::PrintCode(IndStream &out)
   if (m_layer == ABSLAYER) {
 
     if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
+#if USE_DOUBLE_PRECISION
       *out << "simple_mmul( " <<
+#else
+      *out << "simple_mmul_float( " <<
+#endif // USE_DOUBLE_PRECISION
 	InputDataType(2).m_numRowsVar << ", " <<
 	InputDataType(2).m_numColsVar << ", " <<
 	InputDataType(0).m_numColsVar << ", " <<

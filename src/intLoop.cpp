@@ -150,38 +150,42 @@ string PartDirToStr(PartDir dir)
 }
 
 template <class PSetType>
-void IntLoop<PSetType>::Prop()
+Cost IntLoop<PSetType>::Prop()
 {
-  PSetType::Prop();
+  bool hasProped = BasePSet::m_hasProped;
+  Cost cost = PSetType::Prop();
   
-  bool foundControl = false;
-  NodeVecIter iter = PSetType::m_inTuns.begin();
-  for(; iter != PSetType::m_inTuns.end(); ++iter) {
-    Node *in = *iter;
-    if (!in->IsLoopTunnel()) {
-      cout << "non loop tunnel on loop!\n";
-      throw;
-    }
-    if (((LoopTunnel*)in)->IsSplit()) {
-      SplitBase *split = (SplitBase*)in;
-      if (split->m_isControlTun) {
-        if (foundControl) {
-	  cout << "Multiple different control tunnels for the same loop\n";
-          throw;
+  if (!hasProped) {
+    bool foundControl = false;
+    NodeVecIter iter = PSetType::m_inTuns.begin();
+    for(; iter != PSetType::m_inTuns.end(); ++iter) {
+      Node *in = *iter;
+      if (!in->IsLoopTunnel()) {
+	cout << "non loop tunnel on loop!\n";
+	throw;
+      }
+      if (((LoopTunnel*)in)->IsSplit()) {
+	SplitBase *split = (SplitBase*)in;
+	if (split->m_isControlTun) {
+	  if (foundControl) {
+	    cout << "Multiple different control tunnels for the same loop\n";
+	    throw;
+	  }
+	  else
+	    foundControl = true;
 	}
-        else
-          foundControl = true;
       }
     }
-  }
-  if (!foundControl)
-    throw;
-  iter = PSetType::m_outTuns.begin();
-  for(; iter != PSetType::m_outTuns.end(); ++iter)
-    if (!(*iter)->IsLoopTunnel()) {
-      cout << "non loop tunnel on loop!\n";
+    if (!foundControl)
       throw;
-    }
+    iter = PSetType::m_outTuns.begin();
+    for(; iter != PSetType::m_outTuns.end(); ++iter)
+      if (!(*iter)->IsLoopTunnel()) {
+	cout << "non loop tunnel on loop!\n";
+	throw;
+      }
+  }
+  return cost;
 }
 
 template <class PSetType>

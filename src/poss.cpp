@@ -50,6 +50,7 @@ Poss::Poss()
   m_pset = NULL;
   m_hashValid = false;
   m_isSane = true;
+  m_cost = -1;
 }
 
 Poss::Poss(Tunnel *tunn)
@@ -60,6 +61,7 @@ Poss::Poss(Tunnel *tunn)
   }
   m_num = M_count;
   m_parent = 0;
+  m_cost = -1;
   ++M_count;
   AddUp(m_possNodes, tunn, true, false);
   m_fullyExpanded = false;
@@ -77,6 +79,7 @@ Poss::Poss(Node *node, bool goUp)
   m_pset = NULL;
   m_hashValid = false;
   m_isSane = true;
+  m_cost = -1;
   
   if (!goUp) {
     node->SetPoss(this);
@@ -118,6 +121,7 @@ Poss::Poss(Node *node, bool goUp)
 Poss::Poss(int numArgs, ...)
 {
   m_pset = NULL;
+  m_cost = -1;
   NodeVec nodes;
   va_list listPointer;
   va_start (listPointer, numArgs);
@@ -130,6 +134,7 @@ Poss::Poss(int numArgs, ...)
 
 Poss::Poss(const NodeVec &nodes, bool outTuns, bool disconnectFromOwner)
 {
+  m_cost = -1;
   InitHelper(nodes, outTuns, disconnectFromOwner);
 }
 
@@ -637,12 +642,14 @@ void Poss::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
 }
 
 
-void Poss::Prop()
+Cost Poss::Prop()
 {
+  m_cost = 0;
   NodeVecIter nodeIter = m_possNodes.begin();
   for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
     Node *node = *nodeIter;
     node->Prop();
+    m_cost += node->GetCost();
     if (node->m_poss != this) {
       cout << node->GetType() << endl;
       cout << node->GetNameStr(0) << endl;
@@ -653,7 +660,7 @@ void Poss::Prop()
   PSetVecIter setIter = m_sets.begin();
   for( ; setIter != m_sets.end(); ++setIter) {
     BasePSet *set = *setIter;
-    set->Prop();
+    m_cost += set->Prop();
   }
 
   if (m_inTuns.size() != m_pset->m_inTuns.size()) {
@@ -681,6 +688,7 @@ void Poss::Prop()
       throw;
     }
   }
+  return m_cost;
 }
 
 void Poss::Cull(Phase phase)
@@ -840,6 +848,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
                 newPoss->Duplicate(this,nodeMap,true,false);
 #endif
                 newPoss->PatchAfterDuplicate(nodeMap);
+		newPoss->BuildDataTypeCache();
                 newPoss->FuseLoops(left,right,simplifiers,cullFunc);
                 SetFused(leftSet,rightSet);
                 if (AddPossToMMap(newPosses,newPoss,newPoss->GetHash()))
@@ -3035,4 +3044,15 @@ void Poss::ReplaceShadowSetWithReal(unsigned int i)
   newSet->m_ownerPoss = this;
 
   delete shadow;
+}
+
+void Poss::CullWorstPerformers(double percentToCull, int ignoreThreshold)
+{
+  PSetVecIter iter = m_sets.begin();
+  for( ; iter != m_sets.end(); ++iter) {
+    BasePSet *set = *iter;
+    if (set->IsReal()) {
+      ((RealPSet*)set)->CullWorstPerformers(percentToCull, ignoreThreshold);
+    }
+  }
 }

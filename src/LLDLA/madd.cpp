@@ -35,7 +35,11 @@ MAdd::MAdd(Layer layer, Type type)
 void MAdd::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
+#if USE_DOUBLE_PRECISION
     *out << "simple_add( " <<
+#else
+    *out << "simple_add_float( " <<
+#endif // USE_DOUBLE_PRECISION
       InputDataType(0).m_numRowsVar << ", " <<
       InputDataType(0).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<
@@ -100,7 +104,7 @@ void MAdd::PrintGeneralStride(IndStream &out)
 void MAdd::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    DLAOp::Prop();
+    DLAOp<2, 1>::Prop();
     
     if ((*GetInputM(0) != *GetInputM(1)) || (*GetInputN(0) != *GetInputN(1))) {
       cout << "ERROR: Cannot MAdd two matrices of different dimension\n";

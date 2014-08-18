@@ -36,8 +36,10 @@ FullyUnrollLoop::FullyUnrollLoop(int maxNumIters)
 
 bool FullyUnrollLoop::CanApply(const Node *node) const
 {
-  if (node->GetNodeClass() != SplitSingleIter::GetClass())
+  if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
+    cout << "Error: Attempted to apply FullyUnrollLoop to non SplitSingleIter node\n";
     throw;
+  }
 
   if (!node->IsTunnel(SETTUNIN))
     return false;
@@ -48,11 +50,13 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
     return false;
 
   const BasePSet *loop = dynamic_cast<const BasePSet*>(split->GetMyLoop());
-
   
   unsigned int numExecs = split->NumberOfLoopExecs();
-  if (!numExecs)
+  if (!numExecs) {
+    cout << "Error: Attempted to unroll loop with 0 executions\n";
     throw;
+  }
+
   for(unsigned int i = 0; i < numExecs; ++i) {
     unsigned int numIters = split->NumIters(i);
     if (numIters != m_numIters)
@@ -453,8 +457,10 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 
 void FullyUnrollLoop::Apply(Node *node) const
 {
-  if (node->GetNodeClass() != SplitSingleIter::GetClass())
+  if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
+    cout << "Error: Unrolling node other than SplitSingleIter\n";
     throw;
+  }
   
   SplitSingleIter *split = (SplitSingleIter*)node;
   
@@ -654,7 +660,7 @@ Name ViewMultipleIters::GetName(ConnNum num) const
     default:
       throw;
     }
-  name.m_name += std::to_string(num);
+  name.m_name += std::to_string((long long int) num);
   return name;
 }
 
@@ -675,7 +681,7 @@ void ViewMultipleIters::PrintCode(IndStream &out)
 
 
     if (i) {
-      *out << " + " << std::to_string(i) << " * ";
+      *out << " + " << std::to_string((long long int) i) << " * ";
       if (m_partDir == PARTDOWN) {
 	if (!IsUnitStride(type.m_rowStride))
 	  *out << type.m_rowStrideVar << " * ";

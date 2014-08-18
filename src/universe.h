@@ -86,5 +86,5 @@ class Universe
   void Flatten(ofstream &out) const;
   void LoadFromFile(string fileName);
   void Unflatten(ifstream &in);
-
+  void CullWorstPerformers(double percentToCull, int ignoreThreshold);
 };

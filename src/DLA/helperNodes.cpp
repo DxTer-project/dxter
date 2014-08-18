@@ -69,32 +69,49 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
   m_varName.m_name = name;
 }
 
+InputNode::InputNode(string name, Size m, Size n, Size rowStrideVal, Size colStrideVal)
+{
+  InputNode(name + " input",
+	    m,
+	    n,
+	    name,
+	    rowStrideVal,
+	    colStrideVal,
+	    name + "NumRows",
+	    name + "NumCols",
+	    name + "RowStride",
+	    name + "ColStride");
+}
+
 string InputNode::DataDeclaration()
 {
-  // For now the only supported type is double
+#if USE_DOUBLE_PRECISION
   string doubleStr = "double *";
   string varDecString = doubleStr + m_varName.str();
   return varDecString;
+#else
+  return "float *" + m_varName.str();
+#endif // USE_DOUBLE_PRECISION
 }
 
 string InputNode::RowStrideDefine()
 {
-  return "#define " + m_dataTypeInfo.m_rowStrideVar + " " + std::to_string((int)m_rowStrideVal);
+  return "#define " + m_dataTypeInfo.m_rowStrideVar + " " + std::to_string((long long int)m_rowStrideVal);
 }
 
 string InputNode::ColStrideDefine()
 {
-  return "#define " + m_dataTypeInfo.m_colStrideVar + " " + std::to_string((int)m_colStrideVal);
+  return "#define " + m_dataTypeInfo.m_colStrideVar + " " + std::to_string((long long int)m_colStrideVal);
 }
 
 string InputNode::NumRowsDefine()
 {
-  return "#define " + m_dataTypeInfo.m_numRowsVar + " " +  std::to_string((int)m_msize[0]);
+  return "#define " + m_dataTypeInfo.m_numRowsVar + " " +  std::to_string((long long int)m_msize[0]);
 }
 
 string InputNode::NumColsDefine()
 {
-  return "#define " + m_dataTypeInfo.m_numColsVar + " " +  std::to_string((int)m_nsize[0]);
+  return "#define " + m_dataTypeInfo.m_numColsVar + " " +  std::to_string((long long int)m_nsize[0]);
 }
 
 #endif //DOLLDLA

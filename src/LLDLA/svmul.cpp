@@ -37,7 +37,11 @@ void SVMul::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
     if (m_vecType == COLVECTOR) {
-      *out << "simple_smul( " <<
+#if USE_DOUBLE_PRECISION
+    *out << "simple_smul( " <<
+#else
+    *out << "simple_smul_float( " <<
+#endif // USE_DOUBLE_PRECISION
 	InputDataType(1).m_numRowsVar << ", " <<
 	" 1, " <<
 	GetInputName(0).str() << ", " <<
@@ -45,7 +49,11 @@ void SVMul::PrintCode(IndStream &out)
 	InputDataType(1).m_rowStrideVar << ", " <<
 	InputDataType(1).m_colStrideVar << ");\n";
     } else {
-      *out << "simple_smul( " <<
+#if USE_DOUBLE_PRECISION
+    *out << "simple_smul( " <<
+#else
+    *out << "simple_smul_float( " <<
+#endif // USE_DOUBLE_PRECISION
 	" 1, " <<
 	InputDataType(1).m_numColsVar << ", " <<
 	GetInputName(0).str() << ", " <<
@@ -99,11 +107,13 @@ void SVMul::PrintColStride(IndStream &out)
   if (m_vecType == COLVECTOR) {
     *out << "col_stride_smul_2x1( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_colStrideVar << " );\n";
   } else {
     *out << "col_stride_smul_1x2( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_colStrideVar << " );\n";
   }
 }
 
@@ -112,11 +122,15 @@ void SVMul::PrintGeneralStride(IndStream &out)
   if (m_vecType == COLVECTOR) {
     *out << "gen_stride_smul_2x1( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << " );\n";
   } else {
     *out << "gen_stride_smul_1x2( " <<
       GetInputName(0).str() << ", " <<
-      GetInputName(1).str() << ");\n";
+      GetInputName(1).str() << ", " <<
+      InputDataType(1).m_rowStrideVar << ", " <<
+      InputDataType(1).m_colStrideVar << " );\n";
   }
 }
 

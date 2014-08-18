@@ -669,7 +669,9 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     return;
   if (!m_pset->IsReal())
     return;
-
+  /*  if (!execNum) {
+    throw;
+    }*/
   if (!m_msizes)
     throw;
   const DLANode *input = (DLANode*)Input(0);
@@ -699,7 +701,12 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     cout << lns->NumSizes() << endl;
 #endif
     //    (*(((Loop*)m_pset)->m_posses.begin())).second->ForcePrint();
-    cout << "Error: Length of loop is " << std::to_string(length) << endl;
+    cout << "Error: Cannot append sizes\n";
+    cout << "length = " << std::to_string((long long int) length) << endl;
+    cout << "ns->NumSizes() = " << std::to_string((long long int) ns->NumSizes()) << endl;
+    cout << "execNum = " << std::to_string((long long int) execNum) << endl;
+    cout << "length != ns->NumSizes() ? " << (length != ns->NumSizes()) << endl;
+    cout << "length <= execNum ? " << (length <= execNum) << endl;
     throw;
   }
   const Size m = (*ms)[execNum];
@@ -820,9 +827,9 @@ string LoopTunnel::GetLoopLevel(int offset) const
     }
     poss = set->m_ownerPoss;
     if (!poss)
-      return std::to_string(level+offset);
+      return std::to_string((long long int) level+offset);
     set = poss->m_pset;
   }
-  return std::to_string(level+offset);
+  return std::to_string((long long int) level+offset);
 
 }
