@@ -50,10 +50,10 @@ bool ShadowPSet::operator==(const BasePSet &rhs) const
   return *m_realPSet == rhs;
 }
 
-void ShadowPSet::Prop()
+Cost ShadowPSet::Prop()
 {
   if(m_hasProped)
-    return;
+    return m_realPSet->m_cost;
 
   if (!m_realPSet)
     throw;
@@ -120,9 +120,8 @@ void ShadowPSet::Prop()
     InTun(i)->Prop();
   }
 
-  m_realPSet->Prop();
-
   m_hasProped = true;
+  return m_realPSet->Prop();
 }
 
 GraphNum ShadowPSet::TotalCount() const

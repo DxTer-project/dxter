@@ -494,10 +494,10 @@ bool RealPSet::operator==(const BasePSet &rhs) const
   }
 }
 
-void RealPSet::Prop()
+Cost RealPSet::Prop()
 {
   if(m_hasProped)
-    return;
+    return m_cost;
 
   if (m_posses.empty()) {
     cout << "I'm empty\n";
@@ -624,6 +624,10 @@ void RealPSet::Prop()
   iter = m_posses.begin();
   do {
     Poss *poss = (*iter).second;
+    if (m_cost <= 0)
+      m_cost = poss->m_cost;
+    else if (m_cost > poss->m_cost)
+      m_cost = poss->m_cost;
     if (poss->GetHash() != (*iter).first) {
       m_posses.erase(iter);
 	  
@@ -674,6 +678,7 @@ void RealPSet::Prop()
   }
   
   m_hasProped = true;
+  return m_cost;
 }
 
 void RealPSet::Cull(Phase phase)
@@ -725,6 +730,30 @@ void RealPSet::Cull(Phase phase)
     else {
       ++iter;
     }
+  }
+}
+
+void RealPSet::CullWorstPerformers(double percentToCull, int ignoreThreshold)
+{
+  if (m_posses.size() > ignoreThreshold) {
+    SortedPossQueue queue;
+    PossMMapIter iter = m_posses.begin();
+    for(; iter != m_posses.end(); ++iter) {
+      queue.push(iter->second);
+    }
+    if (queue.size() != m_posses.size())
+      throw;
+    int numToKeep = ceil((1.0-percentToCull) * m_posses.size());
+    for(; numToKeep > 0; --numToKeep)
+      queue.pop();
+    while(!queue.empty()) {
+      RemoveAndDeletePoss(queue.top(), true);
+      queue.pop();
+    }
+  }
+  PossMMapIter iter = m_posses.begin();
+  for(; iter != m_posses.end(); ++iter) {
+    iter->second->CullWorstPerformers(percentToCull, ignoreThreshold);
   }
 }
 

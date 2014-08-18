@@ -26,7 +26,8 @@
 #define PRINTTRACKING 0
 
 #include "base.h"
-//#include "poss.h"
+#include "poss.h"
+#include <queue>
 //#include "possTunnel.h"
 #include "basePSet.h"
 
@@ -44,6 +45,7 @@ class RealPSet : public BasePSet
   void Init(Poss *poss);
   PSetMap m_mergeMap;
   RealPSet *m_mergeLeft, *m_mergeRight;
+  Cost m_cost;
   vector<int>  m_leftInMap, m_rightInMap, m_leftOutMap, m_rightOutMap;
   virtual ~RealPSet();
   void UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr);
@@ -52,7 +54,7 @@ class RealPSet : public BasePSet
   void AddPossesOrDispose(PossMMap &mmap, PossMMap *added = NULL);
   virtual GraphNum NumPosses() const {return m_posses.size();}
   bool operator==(const BasePSet &rhs) const;
-  virtual void Prop();
+  virtual Cost Prop();
   virtual bool TakeIter(const TransMap &trans, const TransMap &simplifiers);
   virtual void ClearBeforeProp();
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows);
@@ -68,6 +70,7 @@ class RealPSet : public BasePSet
   virtual bool IsTransparent() const {return true;}
   void Cull(Phase phase);
   void Cull(CullFunction cullFunc);
+  void CullWorstPerformers(double percentToCull, int ignoreThreshold);
   bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   virtual GraphNum TotalCount() const;
@@ -96,3 +99,18 @@ class RealPSet : public BasePSet
   RealPSet* HasMergedWith(RealPSet *set, bool checkOtherOrder=true);
 };
 
+
+class PossCostComparison
+{
+ public:
+  bool operator() (const Poss* lhs, const Poss* rhs) const
+  {
+    if (lhs->m_cost < 0)
+      throw;
+    if (rhs->m_cost < 0)
+      throw;
+    return lhs->m_cost < rhs->m_cost;
+  }
+};
+
+typedef std::priority_queue<Poss*,std::vector<Poss*>,PossCostComparison> SortedPossQueue;

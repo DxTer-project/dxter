@@ -39,7 +39,7 @@ class ShadowLoop : public IntLoop<ShadowPSet>
 #if TWOD
   virtual DimName GetDimName() const;
 #endif
-  virtual void Prop();
+  virtual Cost Prop();
   virtual LoopType GetType() const;
 #if DOBLIS
   bool HasIndepIters() const;
