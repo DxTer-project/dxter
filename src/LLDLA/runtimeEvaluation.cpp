@@ -219,7 +219,8 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
     loopBody += "\t\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
     loopBody += "\t\t}\n";
     loopBody += "\t\tgettimeofday( &end, NULL );\n";
-    loopBody += "\t\texec_time = (end.tv_usec - begin.tv_usec) * 1.0e-6;\n";
+    loopBody += "\t\texec_time = end.tv_sec - begin.tv_sec;\n";
+    loopBody += "\t\texec_time += (end.tv_usec - begin.tv_usec) * 1.0e-6;\n";
     loopBody += "\t\tchar exec_time_str[100];\n";
     loopBody += "\t\tsprintf(exec_time_str, \"%f\\n\", exec_time);\n";
     loopBody += "\t\tsize_t trash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";

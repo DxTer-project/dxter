@@ -62,8 +62,8 @@
 #include "loopUnrolling.h"
 
 Size one = 1;
-Size smallSize = 12;
-Size medSize = 256;
+Size smallSize = 4;
+Size medSize = 32;
 Size bigSize = 1024;
 //Size bs = ELEM_BS;
 
@@ -175,18 +175,11 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3Mu), LLDLALOOPPHASE);
 #endif
   
-  //Lowers the layer tag of a Gemm node that is USELLDLAMU in all three dimensions
-  //  Universe::AddTrans(Gemm::GetClass(), new LLDAGemmLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
   return;
 }
 
 void AddVVDotTrans()
 {
-  // Vector dot product transforms
-  //  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
-  
-  //  Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER, LLDLAMu), LLDLALOOPPHASE);
-
   Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
@@ -194,9 +187,6 @@ void AddVVDotTrans()
 
 void AddMAddTrans()
 {
-  // Transformers for Matrix Matrix add
-  //  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
-
   // Introduce loop in M dimension
   Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
 
@@ -221,9 +211,6 @@ void AddMVMulTrans()
   // Convert mvmul to vector arithmetic
   Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  // Lower layer tag
-  //  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
-
   return;
 }
 
@@ -233,9 +220,6 @@ void AddSMMulTrans()
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMu), LLDLALOOPPHASE);
 
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
-
-  //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  //  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -256,7 +240,7 @@ void AddUnrollingTrans()
 
 #if DO16MUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new FullyUnrollLoop(64), LLDLALOOPUNROLLPHASE);
+		     new FullyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
 #endif // DO3MUTRANSFORMATIONS
 
 #endif // DOLOOPUNROLLING
@@ -266,16 +250,9 @@ void AddUnrollingTrans()
 
 void AddSVMulTrans()
 {
-  // Transformers for scalar vector multiply
-  //  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
-
-  //  Universe::AddTrans(SVMul::GetClass(), new SVMulLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
-
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-
-  //  Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -289,20 +266,12 @@ void AddVMMulTrans()
 
   Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMu), LLDLALOOPPHASE);
 
-  //  Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
-
   return;
 }
 
 void AddVAddTrans()
 {
   Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  //Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMu), LLDLALOOPPHASE);
-
-  //  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMu), LLDLALOOPPHASE);
-
-  //  Universe::AddTrans(VAdd::GetClass(), new VAddLowerLayer(ABSLAYER, LLDLAMIDLAYER, LLDLAMu.GetSize()), LLDLALOOPPHASE);
 
   return;
 }
@@ -320,36 +289,6 @@ void AddTrans()
 
   AddUnrollingTrans();
   
-}
-
-void AddSimplifiers()
-{ 
-  //Replaces a Gemm node with a LLDLAGemm node
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToPrim(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), SIMP);
-
-  //Lowers the layer tag of a SMMul node that is USELLDLAMU in both dimensions
-  Universe::AddTrans(SMMul::GetClass(), new SMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
-
-  //Changes Gemm with transposition to non-transposed version use Transpose nodes
-  Universe::AddTrans(Gemm::GetClass(), new GemmTransToNotTrans(LLDLAMIDLAYER), SIMP);
-
-  // Lowers the layer tag of a VVDot node
-  Universe::AddTrans(VVDot::GetClass(), new VVDotLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
-
-  // Lowers the layer tag of a MAdd node
-  Universe::AddTrans(MAdd::GetClass(), new MAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
-
-  // Lowers the layer tag of a MVMul node
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
-
-  // Lower layer tag on VMMul node
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
-
-  // Lowers the tag of an SVMul node
-  Universe::AddTrans(SVMul::GetClass(), new SVMulLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
-
-  // Lowers the tag of a vadd node
-  Universe::AddTrans(VAdd::GetClass(), new VAddLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER, LLDLAMu.GetSize()), SIMP);
 }
 
 void Usage()
@@ -528,7 +467,6 @@ int main(int argc, const char* argv[])
 
   RegAllLLDLANodes();
   AddTrans();
-  //  AddSimplifiers();
 
   Universe uni;
   time_t start, start2, end;
@@ -624,7 +562,7 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 3000;
+  int chunkSize = 300;
   int numIterations = 1;
   RuntimeTest rtest(opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
@@ -1267,16 +1205,16 @@ RealPSet* DotExample()
 
 RealPSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", 8, 352, "A",
-				 352, 1,
+  InputNode *Ain = new InputNode("A input", smallSize, bigSize, "A",
+				 bigSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride");
-  InputNode *Bin = new InputNode("B input", 352, 8, "B",
-				 8, 1,
+  InputNode *Bin = new InputNode("B input", bigSize, smallSize, "B",
+				 smallSize, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride");
-  InputNode *Cin = new InputNode("C input", 8, 8, "C",
-				 8, 1,
+  InputNode *Cin = new InputNode("C input", smallSize, smallSize, "C",
+				 smallSize, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride");
 

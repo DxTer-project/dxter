@@ -44,8 +44,19 @@ void LoadToRegs::Prop()
     }
 
     Input(0)->Prop();
-    
-    m_cost = 0;
+    if (IsInputColVector(0)) {
+      if (IsUnitStride(InputDataType(0).m_rowStride)) {
+	m_cost = CONTIG_VECTOR_LOAD_COST;
+      } else {
+	m_cost = LLDLA_MU * CONTIG_VECTOR_LOAD_COST;
+      }
+    } else {
+      if (IsUnitStride(InputDataType(0).m_colStride)) {
+	m_cost = CONTIG_VECTOR_LOAD_COST;
+      } else {
+	m_cost = LLDLA_MU * CONTIG_VECTOR_LOAD_COST;
+      }
+    }
   }
 }
 
@@ -154,23 +165,19 @@ void StoreFromRegs::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
 
-    // TODO: Check that the correct input # is a register
-    
-    /*    if (*(GetInputM(0)) != LLDLA_MU) {
-      // this isn't 1 x LLDLA_MU
-      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != LLDLA_MU)
-	throw;
+    if (IsInputColVector(1)) {
+      if (IsUnitStride(InputDataType(1).m_rowStride)) {
+	m_cost = CONTIG_VECTOR_STORE_COST;
+      } else {
+	m_cost = LLDLA_MU * CONTIG_VECTOR_STORE_COST;
+      }
+    } else {
+      if (IsUnitStride(InputDataType(1).m_colStride)) {
+	m_cost = CONTIG_VECTOR_STORE_COST;
+      } else {
+	m_cost = LLDLA_MU * CONTIG_VECTOR_STORE_COST;
+      }
     }
-    else if (*(GetInputN(0)) != 1) {
-      // LLDLA_MU rows but not 1 column
-      throw;
-    }
-
-    if (*GetInputM(0) != *GetInputM(1))
-      throw;
-
-    if (*GetInputN(0) != *GetInputN(1))
-    throw;*/
     
     m_cost = 0;
   }
