@@ -689,7 +689,7 @@ void RealPSet::Cull(Phase phase)
 {
   PossMMapIter iter2 = m_posses.begin();
   for(; iter2 != m_posses.end(); ++iter2) 
-    (*iter2).second->m_isSane = false;
+    (*iter2).second->m_flags &= ~POSSISSANEFLAG;
 
   int j;
   PossMMapIter iter;
@@ -711,9 +711,9 @@ void RealPSet::Cull(Phase phase)
 	++j;
       }
       Poss *poss = (*iter).second;
-      if (poss->m_isSane)
+      if (poss->IsSane())
 	throw;
-      poss->m_isSane = true;
+      poss->m_flags |= POSSISSANEFLAG;
       poss->Cull(phase);
     }
   }

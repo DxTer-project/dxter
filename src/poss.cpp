@@ -49,7 +49,7 @@ Poss::Poss()
   m_fullyExpanded = false;
   m_pset = NULL;
   m_hashValid = false;
-  m_isSane = true;
+  m_flags = POSSISSANEFLAG;
   m_cost = -1;
 }
 
@@ -67,7 +67,7 @@ Poss::Poss(Tunnel *tunn)
   m_fullyExpanded = false;
   m_pset = NULL;
   m_hashValid = false;
-  m_isSane = true;
+  m_flags = POSSISSANEFLAG;
 }
 
 Poss::Poss(Node *node, bool goUp)
@@ -78,7 +78,7 @@ Poss::Poss(Node *node, bool goUp)
   m_fullyExpanded = false;
   m_pset = NULL;
   m_hashValid = false;
-  m_isSane = true;
+  m_flags = POSSISSANEFLAG;
   m_cost = -1;
   
   if (!goUp) {
@@ -146,7 +146,7 @@ void Poss::MarkInsane(bool wrongPhase)
     this->PrintTransVec();
     throw;
   }
-  m_isSane=false;
+  m_flags &= ~POSSISSANEFLAG;
 }
 
 void Poss::InitHelper(const NodeVec &vec, bool outTuns, bool disconnectFromOwner)
@@ -157,7 +157,7 @@ void Poss::InitHelper(const NodeVec &vec, bool outTuns, bool disconnectFromOwner
   m_fullyExpanded = false;
   m_pset = NULL;
   m_hashValid = false;
-  m_isSane = true;
+  m_flags = POSSISSANEFLAG;
   
   
   NodeVecConstIter iter = vec.begin();
@@ -693,7 +693,7 @@ Cost Poss::Prop()
 
 void Poss::Cull(Phase phase)
 {
-  if (!m_isSane)
+  if (!IsSane())
     throw;
   NodeVecIter nodeIter = m_possNodes.begin();
   for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
@@ -2376,7 +2376,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 
 void Poss::ClearBeforeProp()
 {
-  m_isSane = true;
+  m_flags |= POSSISSANEFLAG;
   NodeVecIter nodeIter = m_possNodes.begin();
   for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
     (*nodeIter)->ClearBeforeProp();
