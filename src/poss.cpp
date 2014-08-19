@@ -787,7 +787,7 @@ void Poss::ExpandTunnels()
 }
 */
 
-bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunction cullFunc)
+bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunction cullFunc, bool &didSomethingInRecur)
 {
   /*
     First, recurse through my PSet's then check if
@@ -806,7 +806,10 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
     if (pset->IsReal())
       didMerge |= ((RealPSet*)pset)->MergePosses(simplifiers, cullFunc);
   }
-  if (!didMerge) {
+  if (didMerge) {
+    didSomethingInRecur = true;
+  }
+  else {
     //Didn't make any changes in the recursion
     //First see if there are any loops to fuse
     // (check that the fusion hasn't already been done)
@@ -866,6 +869,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
       }
     }
   }
+
   if (!didMerge) {
     if (m_sets.size() >= 2) {
       for (unsigned int left = 0; left < m_sets.size()-1 && !didMerge; ++left) {
@@ -2457,6 +2461,8 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 #endif
 	      newPoss->PatchAfterDuplicate(nodeMap);
 	      Node *newNode = nodeMap[node];
+	      //	      cout << "applying " << single->GetType() << endl;
+	      //	      cout.flush();
 	      single->Apply(newNode);
 	      newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
 	      newPoss->Simplify(simplifiers);
