@@ -1924,7 +1924,7 @@ void Poss::FormSets(unsigned int phase)
       }
     }
     
-    if (m_pset->m_isTopLevel)
+    if (m_pset->IsTopLevel())
       return;
     
     for(i=0; i < (int)(m_sets.size()); ++i) {
@@ -2773,7 +2773,7 @@ void Poss::BuildDataTypeCache()
   NodeVecIter iter1 = m_possNodes.begin();
   for(; iter1 != m_possNodes.end(); ++iter1) {
     Node *node = *iter1;
-    node->m_flags &= ~BUILDFLAG;
+    node->m_flags &= ~NODEBUILDFLAG;
   }
   iter1 = m_possNodes.begin();
   for(; iter1 != m_possNodes.end(); ++iter1) {

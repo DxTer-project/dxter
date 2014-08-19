@@ -61,7 +61,7 @@ Universe::Universe() {
 void Universe::Init(RealPSet *seed)
 {
   m_pset = seed;
-  m_pset->m_isTopLevel = true;
+  m_pset->m_flags |= SETTOPLEVELFLAG;
   CurrPhase = FIRSTPHASE;
   m_pset->Simplify(M_simplifiers);
   m_pset->BuildDataTypeCache();

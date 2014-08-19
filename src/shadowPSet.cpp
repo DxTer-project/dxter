@@ -52,7 +52,7 @@ bool ShadowPSet::operator==(const BasePSet &rhs) const
 
 Cost ShadowPSet::Prop()
 {
-  if(m_hasProped)
+  if(m_flags & SETHASPROPEDFLAG)
     return m_realPSet->m_cost;
 
   if (!m_realPSet)
@@ -111,7 +111,7 @@ Cost ShadowPSet::Prop()
     }
   }
   
-  if (!m_isTopLevel && !m_ownerPoss) {
+  if (!IsTopLevel() && !m_ownerPoss) {
     cout << "no owner\n";
     throw;
   }
@@ -120,7 +120,7 @@ Cost ShadowPSet::Prop()
     InTun(i)->Prop();
   }
 
-  m_hasProped = true;
+  m_flags |= SETHASPROPEDFLAG;
   return m_realPSet->Prop();
 }
 

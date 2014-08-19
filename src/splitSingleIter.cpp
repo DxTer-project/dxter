@@ -1145,7 +1145,7 @@ unsigned int SplitSingleIter::NumIters(unsigned int iterNum) const
   const Sizes *ms = GetInputM(0);
   const Sizes *ns = GetInputN(0);
   if (!ms || !ns) {
-    if (Input(0)->m_flags & BUILDFLAG)
+    if (Input(0)->m_flags & NODEBUILDFLAG)
       cout << "has built\n";
     else
       cout << "hasn't built\n";
@@ -1163,7 +1163,7 @@ unsigned int SplitSingleIter::NumIters(unsigned int iterNum) const
   Size bs = GetMyLoop()->GetBS();
   const Sizes *sizes = InputLen(0,m_partDim);
   if (!sizes) {
-    if (Input(0)->m_flags & BUILDFLAG)
+    if (Input(0)->m_flags & NODEBUILDFLAG)
       cout << "has built\n";
     else
       cout << "hasn't built\n";
@@ -1297,7 +1297,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
   const Sizes *ns = GetInputN(0);
   
   if (!ms || !ns) {
-    if (Input(0)->m_flags & BUILDFLAG)
+    if (Input(0)->m_flags & NODEBUILDFLAG)
       cout << "has built\n";
     else
       cout << "hasn't built\n";

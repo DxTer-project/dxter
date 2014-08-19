@@ -152,7 +152,7 @@ string PartDirToStr(PartDir dir)
 template <class PSetType>
 Cost IntLoop<PSetType>::Prop()
 {
-  bool hasProped = BasePSet::m_hasProped;
+  bool hasProped = BasePSet::m_flags & SETHASPROPEDFLAG;
   Cost cost = PSetType::Prop();
   
   if (!hasProped) {

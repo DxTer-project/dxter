@@ -309,6 +309,7 @@ void RealPSet::Migrate()
     }
   }
   delete shadowToReplace;
+  //  cout << "building on " << newSet->m_ownerPoss << endl;
   newSet->m_ownerPoss->BuildDataTypeCache();
 }
 
@@ -496,7 +497,7 @@ bool RealPSet::operator==(const BasePSet &rhs) const
 
 Cost RealPSet::Prop()
 {
-  if(m_hasProped)
+  if(m_flags & SETHASPROPEDFLAG)
     return m_cost;
 
   if (m_posses.empty()) {
@@ -589,7 +590,7 @@ Cost RealPSet::Prop()
     }
   }
   
-  if (!m_isTopLevel && !m_ownerPoss) {
+  if (!IsTopLevel() && !m_ownerPoss) {
     cout << "no owner\n";
     throw;
   }
@@ -680,7 +681,7 @@ Cost RealPSet::Prop()
     }
   }
   
-  m_hasProped = true;
+  m_flags |= SETHASPROPEDFLAG;
   return m_cost;
 }
 

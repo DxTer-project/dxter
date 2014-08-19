@@ -903,7 +903,7 @@ void FullyUnflatten(NodeVec &vec, ifstream &in, SaveInfo &info)
 
 void Node::BuildDataTypeCacheRecursive()
 {
-  if (!(m_flags & BUILDFLAG)) {
+  if (!(m_flags & NODEBUILDFLAG)) {
     //    cout << this << endl;
     //    cout << "This is a " << GetNodeClass() << endl;
     //    cout << "This is a " << GetType() << endl;
@@ -915,7 +915,7 @@ void Node::BuildDataTypeCacheRecursive()
 	  node->BuildDataTypeCacheRecursive();
 	}
     }
-    m_flags |= BUILDFLAG;
+    m_flags |= NODEBUILDFLAG;
     BuildDataTypeCache();
   }
 }

@@ -53,22 +53,23 @@ RealPSet* MartinsExample2();
 
 void AddTrans()
 {
+#if 0
   MultiTrans *trans = new MultiTrans;
   trans->AddTrans(new DistContToLocalContStatC(DMLAYER, SMLAYER));
   trans->AddTrans(new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER));
   trans->AddTrans(new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER));
   Universe::AddTrans(Contraction::GetClass(), trans, DPTENSORPHASE);
-  /*
+#else
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);  
-  */
+#endif
+
 #if 0
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
 #endif
 
-  
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
   

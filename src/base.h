@@ -305,6 +305,7 @@ class NodeConn;
 class BasePSet;
 class InputNode;
 class RealPSet;
+typedef unsigned int Flags;
 typedef unsigned long int GraphNum;
 typedef string ClassType;
 typedef vector<Node*> NodeVec;
