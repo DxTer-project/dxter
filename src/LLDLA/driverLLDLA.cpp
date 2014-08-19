@@ -48,8 +48,9 @@
 
 #define DOLOOPUNROLLING 1
 #define DO2MUTRANSFORMATIONS 1
-#define DO3MUTRANSFORMATIONS 0
+#define DO3MUTRANSFORMATIONS 1
 #define DO16MUTRANSFORMATIONS 1
+#define DOLARGEMUTRANSFORMATIONS 0
 
 #include <sstream>
 
@@ -242,6 +243,11 @@ void AddUnrollingTrans()
   Universe::AddTrans(SplitSingleIter::GetClass(), 
 		     new FullyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
 #endif // DO3MUTRANSFORMATIONS
+
+#if DOLARGEMUTRANSFORMATIONS
+  Universe::AddTrans(SplitSingleIter::GetClass(), 
+		     new FullyUnrollLoop(bigSize / LLDLA_MU), LLDLALOOPUNROLLPHASE);
+#endif // DOLARGEMUTRANSFORMATIONS
 
 #endif // DOLOOPUNROLLING
 
