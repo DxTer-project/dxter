@@ -53,10 +53,9 @@ class NodeConn {
   void Unflatten(ifstream &in);
 };
 
-typedef unsigned int Flags;
-#define BUILDFLAG (1L<<1)
-#define PRINTEDFLAG (1L<<2)
-#define HASREFINEDFLAG (1L<<3)
+#define NODEBUILDFLAG (1L<<1)
+#define NODEPRINTEDFLAG (1L<<2)
+#define NODEHASREFINEDFLAG (1L<<3)
 
 class DataTypeInfo;
 class RealLoop;
@@ -162,12 +161,12 @@ class Node
   string GetNameStr(ConnNum num) const {return GetName(num).str();}
   Name GetInputName(ConnNum num) const;
   string GetInputNameStr(ConnNum num) const {return GetInputName(num).str();}
-  inline void ClearPrinted() {m_flags &= ~PRINTEDFLAG;}
-  inline void SetPrinted() {m_flags |= PRINTEDFLAG;} 
-  inline bool HasPrinted() const {return m_flags & PRINTEDFLAG;}
-  inline void ClearHasRefined() {m_flags &= ~HASREFINEDFLAG;}
-  inline void SetHasRefined() {m_flags |= HASREFINEDFLAG;} 
-  inline bool HasRefined() const {return m_flags & HASREFINEDFLAG;}
+  inline void ClearPrinted() {m_flags &= ~NODEPRINTEDFLAG;}
+  inline void SetPrinted() {m_flags |= NODEPRINTEDFLAG;} 
+  inline bool HasPrinted() const {return m_flags & NODEPRINTEDFLAG;}
+  inline void ClearHasRefined() {m_flags &= ~NODEHASREFINEDFLAG;}
+  inline void SetHasRefined() {m_flags |= NODEHASREFINEDFLAG;} 
+  inline bool HasRefined() const {return m_flags & NODEHASREFINEDFLAG;}
   Node* Input(ConnNum num) const;
   NodeConn* InputConn(ConnNum num) const;
   //output number of the input taken as input

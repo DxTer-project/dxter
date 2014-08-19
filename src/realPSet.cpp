@@ -309,6 +309,7 @@ void RealPSet::Migrate()
     }
   }
   delete shadowToReplace;
+  //  cout << "building on " << newSet->m_ownerPoss << endl;
   newSet->m_ownerPoss->BuildDataTypeCache();
 }
 
@@ -496,7 +497,7 @@ bool RealPSet::operator==(const BasePSet &rhs) const
 
 Cost RealPSet::Prop()
 {
-  if(m_hasProped)
+  if(m_flags & SETHASPROPEDFLAG)
     return m_cost;
 
   if (m_posses.empty()) {
@@ -589,7 +590,7 @@ Cost RealPSet::Prop()
     }
   }
   
-  if (!m_isTopLevel && !m_ownerPoss) {
+  if (!IsTopLevel() && !m_ownerPoss) {
     cout << "no owner\n";
     throw;
   }
@@ -600,13 +601,16 @@ Cost RealPSet::Prop()
   }
   PossMMapIter iter;
   int j = 0;
+#if !USESHADOWS
 #pragma omp parallel private(j,iter)
+#endif
   {
     iter = m_posses.begin();
     j = 0;
     int size = m_posses.size();
-    //BAM par
+#if !USESHADOWS
 #pragma omp for schedule(static) 
+#endif
     for (int i = 0; i < size; ++i) {
       if (j > i) {
 	cout << "uhoh\n";
@@ -677,7 +681,7 @@ Cost RealPSet::Prop()
     }
   }
   
-  m_hasProped = true;
+  m_flags |= SETHASPROPEDFLAG;
   return m_cost;
 }
 
@@ -685,7 +689,7 @@ void RealPSet::Cull(Phase phase)
 {
   PossMMapIter iter2 = m_posses.begin();
   for(; iter2 != m_posses.end(); ++iter2) 
-    (*iter2).second->m_isSane = false;
+    (*iter2).second->m_flags &= ~POSSISSANEFLAG;
 
   int j;
   PossMMapIter iter;
@@ -695,7 +699,6 @@ void RealPSet::Cull(Phase phase)
     iter = m_posses.begin();
     j = 0;
     int size = m_posses.size();
-    //BAM par
 #pragma omp for schedule(static) 
     for (int i = 0; i < size; ++i) {
       if (i < j) {
@@ -708,9 +711,9 @@ void RealPSet::Cull(Phase phase)
 	++j;
       }
       Poss *poss = (*iter).second;
-      if (poss->m_isSane)
+      if (poss->IsSane())
 	throw;
-      poss->m_isSane = true;
+      poss->m_flags |= POSSISSANEFLAG;
       poss->Cull(phase);
     }
   }
@@ -751,9 +754,25 @@ void RealPSet::CullWorstPerformers(double percentToCull, int ignoreThreshold)
       queue.pop();
     }
   }
-  PossMMapIter iter = m_posses.begin();
-  for(; iter != m_posses.end(); ++iter) {
-    iter->second->CullWorstPerformers(percentToCull, ignoreThreshold);
+  PossMMapIter iter;
+  int j = 0;
+#pragma omp parallel private(j,iter)
+  {
+    iter = m_posses.begin();
+    j = 0;
+    int size = m_posses.size();
+#pragma omp for schedule(static) 
+    for (int i = 0; i < size; ++i) {
+      if (j > i) {
+	cout << "uhoh\n";
+	throw;
+      }
+      while (j < i) {
+	++iter;
+	++j;
+      }
+      iter->second->CullWorstPerformers(percentToCull, ignoreThreshold);
+    }
   }
 }
 
@@ -832,7 +851,6 @@ bool RealPSet::TakeIter(const TransMap &transMap,
     iter = m_posses.begin();
     j = 0;
     int size = m_posses.size();
-    //BAM par
 #pragma omp for schedule(static) 
     for (int i = 0; i < size; ++i) {
       while (j < i) {
@@ -1011,16 +1029,16 @@ void RealPSet::CombineAndRemoveTunnels()
       m_inTuns.erase(m_inTuns.begin()+i);
       for (unsigned int j = 0; j < m_leftInMap.size(); ++j) {
 	int val = m_leftInMap[j];
-	if (val == i)
+	if (val == (int)i)
 	  m_leftInMap[j] = -1;
-	if (val > i)
+	if (val > (int)i)
 	  m_leftInMap[j] = val-1;
       }
       for (unsigned int j = 0; j < m_rightInMap.size(); ++j) {
 	int val = m_rightInMap[j];
-	if (val == i)
+	if (val == (int)i)
 	  m_rightInMap[j] = -1;
-	else if (val > i)
+	else if (val > (int)i)
 	  m_rightInMap[j] = val-1;
       }
       --i;
@@ -1065,17 +1083,17 @@ void RealPSet::CombineAndRemoveTunnels()
 	
 	for(unsigned int j = 0; j < m_leftOutMap.size(); ++j) {
 	  int val = m_leftOutMap[j];
-	  if (val == i)
+	  if (val == (int)i)
 	    m_leftOutMap[j] = -1;
-	  else if (val > i)
+	  else if (val > (int)i)
 	    m_leftOutMap[j] = val-1;
 	}
 
 	for(unsigned int j = 0; j < m_rightOutMap.size(); ++j) {
 	  int val = m_rightOutMap[j];
-	  if (val == i)
+	  if (val == (int)i)
 	    m_rightOutMap[j] = -1;
-	  else if (val > i)
+	  else if (val > (int)i)
 	    m_rightOutMap[j] = val-1;
 	}
 
@@ -1145,7 +1163,6 @@ void RealPSet::Simplify(const TransMap &simplifiers, bool recursive)
     iter = m_posses.begin();
     j = 0;
     int size = m_posses.size();
-    //BAM par
 #pragma omp for schedule(static) 
     for (int i = 0; i < size; ++i) {
       while (j < i) {
@@ -1216,16 +1233,18 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
   
   if (numPosses > 1) {
     PossMMap mmap;
-    //BAM par
     PossMMapIter iter;
     int j = 0;
+#if !USESHADOWS
 #pragma omp parallel private(j,iter)
+#endif
     {
       iter = m_posses.begin();
-	j = 0;
+      j = 0;
 	int size = m_posses.size();
-	//BAM par
+#if !USESHADOWS
 #pragma omp for schedule(static) 
+#endif
       for (int i = 0; i < size; ++i) {
 	while (j < i) {
 	  ++iter;
@@ -1565,7 +1584,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     iter = newPoss->m_outTuns.begin();
     for(; iter != newPoss->m_outTuns.end(); ++iter) {
       Node *node = *iter;
-      for(int i = 0; i < node->m_inputs.size(); ++i) {
+      for(unsigned int i = 0; i < node->m_inputs.size(); ++i) {
 	Node *in = node->Input(i);
 	if (tunnelNumMap.find(in) != tunnelNumMap.end())
 	  throw;
@@ -1577,7 +1596,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
     iter = newPoss->m_possNodes.begin();
     for(; iter != newPoss->m_possNodes.end(); ++iter) {
       Node *node = *iter;
-      for(int i = 0; i < node->m_children.size(); ++i) {
+      for(unsigned int i = 0; i < node->m_children.size(); ++i) {
 	Node *child = node->Child(i);
 	if (node->m_poss != child->m_poss) {
 	  if (node->IsTunnel() && child->IsTunnel()) {

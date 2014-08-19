@@ -49,7 +49,7 @@ Poss::Poss()
   m_fullyExpanded = false;
   m_pset = NULL;
   m_hashValid = false;
-  m_isSane = true;
+  m_flags = POSSISSANEFLAG;
   m_cost = -1;
 }
 
@@ -67,7 +67,7 @@ Poss::Poss(Tunnel *tunn)
   m_fullyExpanded = false;
   m_pset = NULL;
   m_hashValid = false;
-  m_isSane = true;
+  m_flags = POSSISSANEFLAG;
 }
 
 Poss::Poss(Node *node, bool goUp)
@@ -78,7 +78,7 @@ Poss::Poss(Node *node, bool goUp)
   m_fullyExpanded = false;
   m_pset = NULL;
   m_hashValid = false;
-  m_isSane = true;
+  m_flags = POSSISSANEFLAG;
   m_cost = -1;
   
   if (!goUp) {
@@ -146,7 +146,7 @@ void Poss::MarkInsane(bool wrongPhase)
     this->PrintTransVec();
     throw;
   }
-  m_isSane=false;
+  m_flags &= ~POSSISSANEFLAG;
 }
 
 void Poss::InitHelper(const NodeVec &vec, bool outTuns, bool disconnectFromOwner)
@@ -157,7 +157,7 @@ void Poss::InitHelper(const NodeVec &vec, bool outTuns, bool disconnectFromOwner
   m_fullyExpanded = false;
   m_pset = NULL;
   m_hashValid = false;
-  m_isSane = true;
+  m_flags = POSSISSANEFLAG;
   
   
   NodeVecConstIter iter = vec.begin();
@@ -693,7 +693,7 @@ Cost Poss::Prop()
 
 void Poss::Cull(Phase phase)
 {
-  if (!m_isSane)
+  if (!IsSane())
     throw;
   NodeVecIter nodeIter = m_possNodes.begin();
   for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
@@ -1924,7 +1924,7 @@ void Poss::FormSets(unsigned int phase)
       }
     }
     
-    if (m_pset->m_isTopLevel)
+    if (m_pset->IsTopLevel())
       return;
     
     for(i=0; i < (int)(m_sets.size()); ++i) {
@@ -2261,25 +2261,25 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 
 	for(unsigned int j = 0; j < newSet->m_leftOutMap.size(); ++j) {
 	  int val = newSet->m_leftOutMap[j];
-	  if (val == find) {
+	  if (val == (int)find) {
 	    if (newOutputToUse)
 	      newSet->m_leftOutMap[j] = newVal;
 	    else
 	      newSet->m_leftOutMap[j] = -1;
 	  }
-	  else if (val > find)
+	  else if (val > (int)find)
 	    newSet->m_leftOutMap[j] = val-1;
 	}
 
 	for(unsigned int j = 0; j < newSet->m_rightOutMap.size(); ++j) {
 	  int val = newSet->m_rightOutMap[j];
-	  if (val == find) {
+	  if (val == (int)find) {
 	    if (newOutputToUse)
 	      newSet->m_rightOutMap[j] = newVal;
 	    else
 	      newSet->m_rightOutMap[j] = -1;
 	  }
-	  else if (val > find)
+	  else if (val > (int)find)
 	    newSet->m_rightOutMap[j] = val-1;
 	}
 
@@ -2291,16 +2291,16 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 
 	for (unsigned int j = 0; j < newSet->m_leftInMap.size(); ++j) {
 	  int val = newSet->m_leftInMap[j];
-	  if (val == find)
+	  if (val == (int)find)
 	    newSet->m_leftInMap[j] = -1;
-	  if (val > find)
+	  if (val > (int)find)
 	    newSet->m_leftInMap[j] = val-1;
 	}
 	for (unsigned int j = 0; j < newSet->m_rightInMap.size(); ++j) {
 	  int val = newSet->m_rightInMap[j];
-	  if (val == find)
+	  if (val == (int)find)
 	    newSet->m_rightInMap[j] = -1;
-	  else if (val > find)
+	  else if (val > (int)find)
 	    newSet->m_rightInMap[j] = val-1;
 	}
 
@@ -2376,7 +2376,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 
 void Poss::ClearBeforeProp()
 {
-  m_isSane = true;
+  m_flags |= POSSISSANEFLAG;
   NodeVecIter nodeIter = m_possNodes.begin();
   for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
     (*nodeIter)->ClearBeforeProp();
@@ -2582,7 +2582,7 @@ size_t Poss::Hash(const string &str)
 {
   static std::hash<std::string> hasher;
   size_t tmp = 0;
-  for (int i = 0; i < str.size(); i+=10) {
+  for (unsigned int i = 0; i < str.size(); i+=10) {
     tmp += hasher(str.substr(i,10));
   }
   return tmp;
@@ -2773,7 +2773,7 @@ void Poss::BuildDataTypeCache()
   NodeVecIter iter1 = m_possNodes.begin();
   for(; iter1 != m_possNodes.end(); ++iter1) {
     Node *node = *iter1;
-    node->m_flags &= ~BUILDFLAG;
+    node->m_flags &= ~NODEBUILDFLAG;
   }
   iter1 = m_possNodes.begin();
   for(; iter1 != m_possNodes.end(); ++iter1) {

@@ -50,26 +50,26 @@ Size bigSize = 1000;
 RealPSet* Cont1Example();
 RealPSet* MartinsExample();
 RealPSet* MartinsExample2();
-RealPSet* MartinsExample3();
 
 void AddTrans()
 {
+#if 0
   MultiTrans *trans = new MultiTrans;
   trans->AddTrans(new DistContToLocalContStatC(DMLAYER, SMLAYER));
   trans->AddTrans(new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER));
   trans->AddTrans(new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER));
   Universe::AddTrans(Contraction::GetClass(), trans, DPTENSORPHASE);
-  /*
+#else
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);  
-  */
+#endif
+
 #if 0
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
 #endif
 
-  
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
   
@@ -136,9 +136,6 @@ int main(int argc, const char* argv[])
       break;
     case(3):
       algFunc = MartinsExample2;
-      break;
-    case(4):
-      algFunc = MartinsExample3;
       break;
     default:
       Usage();
@@ -455,87 +452,6 @@ RealPSet* MartinsExample2()
 
   OutputNode *out = new OutputNode("output");
   out->AddInput(innerSet->OutTun(0),0);
-
-  Poss *outerPoss = new Poss(out,true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-
-}
-
-RealPSet* MartinsExample3()
-{
-  Sizes sizes[4];
-
-  //a-d = medium
-  //i-l = big
-
-  for (Dim dim = 0; dim < 4; ++dim)
-    sizes[dim].AddRepeatedSizes(medSize, 1, 1);
-
-  InputNode *Uin = new InputNode("U input",  sizes, "U", 4);
-
-  sizes[2].ClearSizes();
-  sizes[2].AddRepeatedSizes(bigSize,1,1);
-  sizes[3].ClearSizes();
-  sizes[3].AddRepeatedSizes(bigSize,1,1);
-  
-  InputNode *Vin = new InputNode("V input",  sizes, "V", 4);
-  InputNode *Tin = new InputNode("T input",  sizes, "T", 4);
-
-
-  sizes[0].ClearSizes();
-  sizes[0].AddRepeatedSizes(medSize,1,1);
-  sizes[1].ClearSizes();
-  sizes[1].AddRepeatedSizes(medSize,1,1);
-
-  InputNode *Win = new InputNode("W input",  sizes, "W", 4);
-  
-
-  Sizes ones[2];
-
-  for (Dim dim = 0; dim < 2; ++dim)
-    ones[dim].AddRepeatedSizes(one, 1, 1);
-
-  DistType epDist;
-  epDist.SetToScalarNoRep();
-
-  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", 0);
-  //InputNode *epIn = new InputNode("ep input",  ones, "epsilon", 0);
-
-  InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", 4);
-
-  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abcd","cdij","abij",(string)"cd");
-  cont1->AddInputs(6,
-		  Uin,0,
-		  Tin,0,
-		  tempIn,0);
-
-
-  Poss *poss1 = new Poss(cont1);
-  RealPSet *set1 = new RealPSet(poss1);
-
-  Contraction *cont2 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"acik","bcjk","abij",(string)"ck");
-  cont2->AddInputs(6,
-		   Vin,0,
-		   Tin,0,
-		   set1->OutTun(0),0);
-
-  Poss *poss2 = new Poss(cont2);
-  RealPSet *set2 = new RealPSet(poss2);
-
-
-  Contraction *cont3 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"ijkl","abkl","abij",(string)"kl");
-  cont3->AddInputs(6,
-		   Win,0,
-		   Tin,0,
-		   set2->OutTun(0),0);
-
-  Poss *poss3 = new Poss(cont3);
-  RealPSet *set3 = new RealPSet(poss3);
-
-  OutputNode *out = new OutputNode("output");
-  out->AddInput(set3->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out,true);
   RealPSet *outerSet = new RealPSet(outerPoss);

@@ -280,7 +280,7 @@ bool SizeEntry::operator==(const SizeEntry &rhs) const
 
 Size SizeEntry::operator[] (unsigned int n) const
 {
-  if (n / NumSizesPerRepeat() > m_repeats)
+  if ((int)(n / NumSizesPerRepeat()) > m_repeats)
     throw;
   n = n % NumSizesPerRepeat();
   unsigned int iter = n;

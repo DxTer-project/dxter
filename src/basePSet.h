@@ -30,14 +30,16 @@
 class RealPSet;
 class ShadowPSet;
 
+#define SETHASPROPEDFLAG     (1L<<1)
+#define SETTOPLEVELFLAG   (1L<<2)
+
 class BasePSet
 {
  public:
   NodeVec m_inTuns;
   NodeVec m_outTuns;
   Poss *m_ownerPoss;
-  bool m_hasProped;
-  bool m_isTopLevel;
+  Flags m_flags;
   BasePSet();
   virtual ~BasePSet() {}
   virtual GraphNum NumPosses() const = 0;
@@ -57,6 +59,7 @@ class BasePSet
   bool CanPrint(const GraphIter *graphIter) const;
   virtual BasePSet* GetNewInst() = 0;
   virtual ShadowPSet* GetNewShadow() = 0;
+  inline bool IsTopLevel() const { return m_flags & SETTOPLEVELFLAG; }
 
   void Flatten(ofstream &out) const;
   virtual void FlattenCore(ofstream &out) const {}

@@ -48,7 +48,7 @@ DimName ShadowLoop::GetDimName() const
 
 Cost ShadowLoop::Prop()
 {
-  if (!BasePSet::m_hasProped) {
+  if (!(BasePSet::m_flags & SETHASPROPEDFLAG)) {
     if (!m_realPSet || !m_realPSet->IsLoop())
       throw;
     return IntLoop<ShadowPSet>::Prop();

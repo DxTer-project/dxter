@@ -39,6 +39,8 @@ class Node;
 class RealPSet;
 class BasePSet;
 
+#define POSSISSANEFLAG (1L<<1)
+
 class Poss
 {
   static GraphNum M_count;
@@ -46,7 +48,7 @@ class Poss
   bool m_hashValid;
  public:
   NodeVec m_possNodes;
-  bool m_isSane;
+  Flags m_flags;
   GraphNum m_parent;
   GraphNum m_num;
   NodeVec m_inTuns;
@@ -74,7 +76,7 @@ class Poss
   virtual void Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useShadows);
   bool operator==(Poss &rhs);
   bool operator!=(Poss &rhs) {return !(*this == rhs);}
-  virtual bool IsSane() const {return m_isSane;}
+  inline bool IsSane() const {return m_flags & POSSISSANEFLAG; }
   void AddNode(Node *node);
   void TakeOverNode(Node *node);
   void AddNodes(int numNodes, ...);

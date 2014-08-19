@@ -137,7 +137,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 	bestFLOPS = actualFLOPS;
 	bestImpNum = mit->first;
       }
-      cout << "FLOPS = " << std::to_string((long double) actualFLOPS) << "\t%Peak = " << std::to_string((long double) pctPeak) << endl;
+      cout << "GFLOPS = " << std::to_string((long double) actualFLOPS / 1.0e9) << "\t%Peak = " << std::to_string((long double) pctPeak) << endl;
       /*      if (pctPeak > 100) {
 	cout << "pctPeak > 100\n";
 	throw;
@@ -145,7 +145,7 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
     }
     cout << endl;
   }
-  cout << "Best flops achieved: " << std::to_string((long double) bestFLOPS) << endl;
+  cout << "Best GFLOPS achieved: " << std::to_string((long double) bestFLOPS / 1.0e9) << endl;
   cout << "Best percent of peak: " << std::to_string((long double) (bestFLOPS / peakFLOPS) * 100) << endl;
   return bestImpNum;      
 }

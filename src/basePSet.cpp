@@ -34,7 +34,7 @@
 extern unsigned int M_phase;
 
 BasePSet::BasePSet()
-  : m_ownerPoss(NULL), m_hasProped(false), m_isTopLevel(false)
+  : m_ownerPoss(NULL), m_flags(0)
 {
 }
 
@@ -56,7 +56,7 @@ Node* BasePSet::OutTun(unsigned int num) const
 
 void BasePSet::ClearBeforeProp()
 {
-  m_hasProped = false;
+  m_flags = m_flags & ~SETHASPROPEDFLAG;
   for (unsigned int i = 0; i < m_inTuns.size(); ++i)
     InTun(i)->ClearBeforeProp();
   for (unsigned int i = 0; i < m_outTuns.size(); ++i)
@@ -66,7 +66,7 @@ void BasePSet::ClearBeforeProp()
 
 void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows)
 {
-  m_isTopLevel = orig->m_isTopLevel;
+  m_flags |= orig->m_flags & SETTOPLEVELFLAG;
   NodeVecConstIter iter  = orig->m_inTuns.begin();
   for (; iter != orig->m_inTuns.end(); ++iter) {
     Tunnel *tun = (Tunnel*)(map[*iter]);
@@ -391,10 +391,10 @@ void BasePSet::FormSetAround()
 void BasePSet::Flatten(ofstream &out) const
 {
   WRITE(START);
-  WRITE(m_isTopLevel);
+  WRITE(m_flags);
   FlattenCore(out);
   GraphNum size;
-  if (m_isTopLevel) {
+  if (IsTopLevel()) {
     FullyFlatten(m_inTuns, out);
     FullyFlatten(m_outTuns, out);
   }
@@ -425,10 +425,10 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
   READ(tmp);
   if (tmp != START)
     throw;
-  READ(m_isTopLevel);
+  READ(m_flags);
   UnflattenCore(in,info);
   GraphNum size;
-  if (m_isTopLevel) {
+  if (IsTopLevel()) {
     FullyUnflatten(m_inTuns, in, info);
     FullyUnflatten(m_outTuns, in, info);
   }
@@ -459,9 +459,9 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
   READ(tmp);
   if (tmp != END)
     throw;
-  if (!m_isTopLevel)
+  if (!IsTopLevel())
     Swap(&m_ownerPoss, info.possMap);
-  if (m_isTopLevel) {
+  if (IsTopLevel()) {
     NodeVecIter iter2 = m_inTuns.begin();
     for(; iter2 != m_inTuns.end(); ++iter2)
       (*iter2)->PatchAfterDuplicate(*(info.nodeMap));
