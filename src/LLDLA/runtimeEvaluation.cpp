@@ -332,6 +332,8 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest t
   system(compileStr.c_str());
   string runStr = "./" + executableName;
   system(runStr.c_str());
+  string removeExecutable = "rm -f " + executableName;
+  system(removeExecutable.c_str());
   return ReadTimeDataFromFile(test.m_dataFileName, imps.size());
 }
 
@@ -351,6 +353,8 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnes
   system(compileStr.c_str());
   string runStr = "./" + executableName;
   system(runStr.c_str());
+  string removeExecutable = "rm -f " + executableName;
+  system(removeExecutable.c_str());
   return ReadTimeDataFromFile(test.m_dataFileName, imps.size());  
 }
 
