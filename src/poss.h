@@ -104,7 +104,7 @@ class Poss
 		  NodeVec &newInputTunnelsToFix);
   void MergePart6(RealPSet *newSet, BasePSet *leftSet, 
 		  BasePSet *rightSet, NodeMap &mapLeft, NodeMap &mapRight);
-  bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
+  bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc, bool &didSomethingInRecur);
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   void FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);

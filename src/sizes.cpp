@@ -917,25 +917,23 @@ Cost Sizes::SumProds11(const Sizes &sizes) const
   if (!std::isnan((double)(sizes.m_constVal))) {
     return sizes.m_constVal * Sum();
   }
-  if (m_entries.size() != sizes.m_entries.size())
+  if (NumSizes() != sizes.NumSizes()) {
     throw;
+  }
   Cost cost = 0;
+  unsigned int j = 0;
+  SizesIter iter2 = sizes.GetIter(j);
   for(unsigned int i = 0; i < m_entries.size(); ++i) {
-    if (IsZero(i) || sizes.IsZero(i))
-      continue;
     SizesIter iter1 = GetIter(i);
-    SizesIter iter2 = sizes.GetIter(i);
     while (!iter1.AtEnd()) {
       if (iter2.AtEnd()) {
-        cout << "bad\n";
-        throw;
+	++j;
+	iter2 = sizes.GetIter(j);
       }
       cost += *iter1 * *iter2;
       ++iter1;
       ++iter2;
     }
-    if (!iter2.AtEnd())
-      throw;
   }
   return cost;
 }
