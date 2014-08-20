@@ -48,6 +48,7 @@ class RealLoop : public IntLoop<RealPSet>
 #if DOBLIS
   Comm m_comm;
 #endif
+  int m_currIter;
   
   RealLoop();
   RealLoop(LoopType type);
@@ -82,5 +83,8 @@ class RealLoop : public IntLoop<RealPSet>
   virtual bool HasIndepIters() const;
   bool IsParallel() const {return m_comm!=CORECOMM;}
 #endif
-
+  int GetCurrIter() const {return m_currIter;}
+  void SetCurrIter(int iter) {m_currIter = iter;}
+  inline bool IsUnrolled() const {return m_flags & SETLOOPISUNROLLED;}
+  
 };

@@ -388,7 +388,7 @@ bool SplitUnrolled::QuadInUse(Quad quad, bool atEnd) const
 }
 #endif
 
-void SplitUnrolled::PrintVarDeclarations(IndStream &out) const
+void SplitUnrolled::PrintVarDeclarations(BSSize bs, IndStream &out) const
 {
 #if DOLLDLA
   if (m_tunType != POSSTUNIN)

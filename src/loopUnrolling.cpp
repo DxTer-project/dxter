@@ -538,6 +538,84 @@ void FullyUnrollLoop::Apply(Node *node) const
   }
 }
 
+CompactlyUnrollLoop::CompactlyUnrollLoop(int maxNumIters) 
+  : m_numIters(maxNumIters) 
+{
+  if (m_numIters <= 0)
+    throw;
+}
+
+bool CompactlyUnrollLoop::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
+    cout << "Error: Attempted to apply FullyUnrollLoop to non SplitSingleIter node\n";
+    throw;
+  }
+
+  if (!node->IsTunnel(SETTUNIN))
+    return false;
+
+  const SplitSingleIter *split = (SplitSingleIter*)node;
+
+  if (!split->m_isControlTun)
+    return false;
+
+  const BasePSet *loop = dynamic_cast<const BasePSet*>(split->GetMyLoop());
+  if (!loop->IsReal()) {
+    cout << "might be able to apply, but this is a shadow\n";
+    throw;
+  }
+
+  if (loop->m_flags & SETLOOPISUNROLLED)
+    return false;
+  
+  unsigned int numExecs = split->NumberOfLoopExecs();
+  if (!numExecs) {
+    cout << "Error: Attempted to unroll loop with 0 executions\n";
+    throw;
+  }
+
+  for(unsigned int i = 0; i < numExecs; ++i) {
+    unsigned int numIters = split->NumIters(i);
+    if (numIters != m_numIters)
+      return false;
+  }
+
+  const PossMMap &map = loop->GetPosses();
+  PossMMapConstIter iter = map.begin();
+  for(; iter != map.end(); ++iter) {
+    const Poss *poss = iter->second;
+    if (poss->ContainsNonLoopCode()) {
+      //      static int count = 0;
+      //      if (count)
+      //	return false;
+      //      else
+      //	++count;
+      return true;
+    }
+  }
+  return false;
+}
+
+void CompactlyUnrollLoop::Apply(Node *node) const
+{
+  if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
+    cout << "Error: Unrolling node other than SplitSingleIter\n";
+    throw;
+  }
+  
+  SplitSingleIter *split = (SplitSingleIter*)node;
+  
+  LoopInterface *loop = split->GetMyLoop();
+  BasePSet *base = dynamic_cast<BasePSet*>(loop);
+  base->m_flags |= SETLOOPISUNROLLED;
+
+  ((RealPSet*)base)->m_functionality += "unrolled\n";
+
+  bool trash;
+  ((RealPSet*)base)->RemoveLoops(&trash);
+}
+
 
 ViewMultipleIters::~ViewMultipleIters()
 {

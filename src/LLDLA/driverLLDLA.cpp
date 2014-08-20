@@ -231,22 +231,22 @@ void AddUnrollingTrans()
 #if DOLOOPUNROLLING
 #if DO2MUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(),
-		     new FullyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
+		     new CompactlyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
 #endif // DO2MUTRANSFORMATIONS
 
 #if DO3MUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new FullyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
+		     new CompactlyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
 #endif // DO3MUTRANSFORMATIONS
 
 #if DO16MUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new FullyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
+		     new CompactlyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
 #endif // DO3MUTRANSFORMATIONS
 
 #if DOLARGEMUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new FullyUnrollLoop(bigSize / LLDLA_MU), LLDLALOOPUNROLLPHASE);
+		     new CompactlyUnrollLoop(bigSize / LLDLA_MU), LLDLALOOPUNROLLPHASE);
 #endif // DOLARGEMUTRANSFORMATIONS
 
 #endif // DOLOOPUNROLLING

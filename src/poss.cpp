@@ -2924,8 +2924,12 @@ bool Poss::ContainsNonLoopCode() const
   PSetVecConstIter iter = m_sets.begin();
   for(; iter != m_sets.end(); ++iter) {
     const BasePSet *set = *iter;
-    if (set->IsLoop())
-      return false;
+    if (set->IsLoop()) {
+      if (!(set->m_flags & SETLOOPISUNROLLED))
+	return false;
+      if (!(set->GetReal()->m_flags & SETLOOPISUNROLLED))
+	return false;
+    }
     bool foundAPoss = false;
     const PossMMap posses = set->GetPosses();
     PossMMapConstIter iter2 = posses.begin();
@@ -2945,8 +2949,12 @@ bool Poss::ContainsLoops() const
   PSetVecConstIter iter = m_sets.begin();
   for(; iter != m_sets.end(); ++iter) {
     const BasePSet *set = *iter;
-    if (set->IsLoop())
-      return true;
+    if (set->IsLoop()) {
+      if (!(set->m_flags & SETLOOPISUNROLLED))
+	return true;
+      if (!(set->GetReal()->m_flags & SETLOOPISUNROLLED))
+	return true;
+    }
     const PossMMap posses = set->GetPosses();
     PossMMapConstIter iter2 = posses.begin();
     for(; iter2 != posses.end(); ++iter2) {
@@ -2964,8 +2972,12 @@ bool Poss::RemoveLoops(bool *doneSomething)
   PSetVecIter iter = m_sets.begin();
   for(; iter != m_sets.end(); ++iter) {
     BasePSet *set = *iter;
-    if (set->IsLoop())
-      return true;
+    if (set->IsLoop())  {
+      if (!(set->m_flags & SETLOOPISUNROLLED))
+	return true;
+      if (!(set->GetReal()->m_flags & SETLOOPISUNROLLED))
+	return true;
+    }
     if (!set->IsReal()) {
       if (ContainsLoops())
 	throw;
@@ -2975,30 +2987,7 @@ bool Poss::RemoveLoops(bool *doneSomething)
       }
     }
     RealPSet *real = (RealPSet*)set;
-    PossMMapIter iter2 = real->m_posses.begin();
-    while (iter2 != real->m_posses.end()) {
-      Poss *poss = iter2->second;
-      bool doneSomething2 = false;
-      if (poss->RemoveLoops(&doneSomething2)) {
-	*doneSomething = true;
-	real->RemoveAndDeletePoss(poss, true);
-	iter2 = real->m_posses.begin();
-      }
-      else if (doneSomething2) {
-	*doneSomething = true;
-	if (poss->GetHash() != iter2->first) {
-	  real->m_posses.erase(iter2);
-	  real->m_posses.insert(PossMMapPair(poss->GetHash(),poss));
-	  iter2 = real->m_posses.begin();
-	}
-	else
-	  ++iter2;
-      }
-      else {
-	++iter2;
-      }
-    }
-    if (real->m_posses.empty())
+    if (real->RemoveLoops(doneSomething))
       return true;
   }
   return false;  

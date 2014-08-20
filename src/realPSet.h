@@ -85,6 +85,7 @@ class RealPSet : public BasePSet
   virtual void ClearDataTypeCache();
 
   void SetInTunsAsPrinted();
+  bool RemoveLoops(bool *doneSomething);
 
 #if DOBLIS
   Comm ParallelismWithinCurrentPosses() const;

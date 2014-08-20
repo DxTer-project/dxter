@@ -497,10 +497,11 @@ template<class PSetType>
   void IntLoop<PSetType>::PrePrint(IndStream &out, Poss *poss)
 {
   PSetType::PrePrint(out, poss);
+  BSSize size = GetBSSize();
   NodeVecIter iter = poss->m_inTuns.begin();
   for(; iter != poss->m_inTuns.end(); ++iter) {
     if (((LoopTunnel*)(*iter))->IsSplit()) {
-      ((SplitBase*)(*iter))->PrintVarDeclarations(out);
+      ((SplitBase*)(*iter))->PrintVarDeclarations(size, out);
     }
   }
 
@@ -637,78 +638,102 @@ template<class PSetType>
       GetBSSize() != LLDLA2Mu &&
       GetBSSize() != LLDLA3Mu)
     throw;
-  SplitBase *split = GetControl();
-  switch(GetDimName()) 
-    {
-    case (DIMM):
+  if (!PSetType::IsReal() || !((RealLoop*)this)->IsUnrolled()) {
+    SplitBase *split = GetControl();
+    switch(GetDimName()) 
       {
-	out.Indent();
-	*out << "//Dim-m loop\n";;
+      case (DIMM):
+	{
+	  out.Indent();
+	  *out << "//Dim-m loop\n";;
+	  break;
+	}
+      case (DIMN):
+	{
+	  out.Indent();
+	  *out << "//Dim-n loop\n";
+	  break;
+	}
+      case (DIMK):
+	{
+	  out.Indent();
+	  *out << "//Dim-k loop\n";
+	  break;
+	}
+      default:
 	break;
       }
-    case (DIMN):
-      {
-	out.Indent();
-	*out << "//Dim-n loop\n";
-	break;
-      }
-    case (DIMK):
-      {
-	out.Indent();
-	*out << "//Dim-k loop\n";
-	break;
+
+    string loopLevel = split->GetLoopLevel();
+    string lcv = "lcv" + loopLevel;
+    out.Indent();
+    *out << "for( " << lcv << " = ";
+  
+    if (split->GetNodeClass() != SplitSingleIter::GetClass())
+      throw;
+
+    bool needMin = false;
+    if (split->m_dir == PARTDOWN) {
+      *out << split->InputDataType(0).m_numRowsVar;
+      if (!split->GetInputM(0)->EvenlyDivisibleBy(GetBSSize().GetSize()))
+	needMin = true;
     }
-    default:
-      break;
+    else if (split->m_dir == PARTRIGHT) {
+      *out << split->InputDataType(0).m_numColsVar;
+      if (!split->GetInputN(0)->EvenlyDivisibleBy(GetBSSize().GetSize()))
+	needMin = true;
     }
-
-  string loopLevel = split->GetLoopLevel();
-  string lcv = "lcv" + loopLevel;
-  out.Indent();
-  *out << "for( " << lcv << " = ";
+    else
+      throw;
   
-  if (split->GetNodeClass() != SplitSingleIter::GetClass())
-    throw;
-
-  bool needMin = false;
-  if (split->m_dir == PARTDOWN) {
-    *out << split->InputDataType(0).m_numRowsVar;
-    if (!split->GetInputM(0)->EvenlyDivisibleBy(GetBSSize().GetSize()))
-      needMin = true;
-  }
-  else if (split->m_dir == PARTRIGHT) {
-    *out << split->InputDataType(0).m_numColsVar;
-    if (!split->GetInputN(0)->EvenlyDivisibleBy(GetBSSize().GetSize()))
-      needMin = true;
-  }
-  else
-    throw;
-  
-  *out << "; " << lcv << " > 0; " << lcv << " -= ";
+    *out << "; " << lcv << " > 0; " << lcv << " -= ";
 
   
-  *out << GetBSSize().VarName() << " ) {\n";
+    *out << GetBSSize().VarName() << " ) {\n";
 
-  for (unsigned int i = 0; i < PSetType::m_inTuns.size(); ++i) { 
-    Tunnel *tun = (Tunnel*)PSetType::InTun(i);
-    if (tun->GetNodeClass() == SplitSingleIter::GetClass()) {
-      SplitSingleIter *splitTun = (SplitSingleIter*)tun;
-      out.Indent(1);
-      *out << "const unsigned int ";
-      if (splitTun->m_dir == PARTDOWN) {
-	*out << splitTun->DataType(1).m_numRowsVar;
-      }
-      else if (splitTun->m_dir == PARTRIGHT) {
-	*out << splitTun->DataType(1).m_numColsVar;
-      }
-      else
-	throw;
+    for (unsigned int i = 0; i < PSetType::m_inTuns.size(); ++i) { 
+      Tunnel *tun = (Tunnel*)PSetType::InTun(i);
+      if (tun->GetNodeClass() == SplitSingleIter::GetClass()) {
+	SplitSingleIter *splitTun = (SplitSingleIter*)tun;
+	out.Indent(1);
+	*out << "const unsigned int ";
+	if (splitTun->m_dir == PARTDOWN) {
+	  *out << splitTun->DataType(1).m_numRowsVar;
+	}
+	else if (splitTun->m_dir == PARTRIGHT) {
+	  *out << splitTun->DataType(1).m_numColsVar;
+	}
+	else
+	  throw;
       
-      if (needMin)
-	*out << " = min( " << lcv << ", ";
-      else
-	*out << " = ( ";
-      *out << GetBSSize().VarName() << " );\n";
+	if (needMin)
+	  *out << " = min( " << lcv << ", ";
+	else
+	  *out << " = ( ";
+	*out << GetBSSize().VarName() << " );\n";
+      }
+    }
+  }
+  else {
+    if (((RealLoop*)this)->GetCurrIter() == 0) {
+      for (unsigned int i = 0; i < PSetType::m_inTuns.size(); ++i) { 
+	Tunnel *tun = (Tunnel*)PSetType::InTun(i);
+	if (tun->GetNodeClass() == SplitSingleIter::GetClass()) {
+	  SplitSingleIter *splitTun = (SplitSingleIter*)tun;
+	  out.Indent();
+	  *out << "const unsigned int ";
+	  if (splitTun->m_dir == PARTDOWN) {
+	    *out << splitTun->DataType(1).m_numRowsVar;
+	  }
+	  else if (splitTun->m_dir == PARTRIGHT) {
+	    *out << splitTun->DataType(1).m_numColsVar;
+	  }
+	  else
+	    throw;
+      
+	  *out << " = " << GetBSSize().VarName() << ";\n";
+	}
+      }
     }
   }
 #endif

@@ -158,7 +158,7 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
           break;
         else 
           throw;
-        return name;
+	break;
       case (PARTDIAG):
       case (PARTDIAGBACK):
         if (num == 0)
@@ -183,12 +183,19 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
           break;
         else
           throw;
-        return name;
+	break;
       default:
         cout << "bad dir\n";
         throw;
         break;
       }
+
+    RealLoop *loop = (RealLoop*)(((Tunnel*)Input(0))->m_pset);
+    if (loop->IsUnrolled())
+      name.m_name += "_iter" + std::to_string(loop->GetCurrIter());
+    return name;
+    
+
 #else
     if (m_partDim >= InputNumDims(0))
       throw;
@@ -1013,8 +1020,9 @@ bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
 }
 #endif
 
-void SplitSingleIter::PrintVarDeclarations(IndStream &out) const
+void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
 {
+  //update PrintIncrementAtEndOfLoop, too
 #if DOLLDLA
   if (m_tunType != POSSTUNIN)
     throw;
@@ -1024,8 +1032,35 @@ void SplitSingleIter::PrintVarDeclarations(IndStream &out) const
   if (PartInUse(0) || PartInUse(2))
     throw;
   out.Indent();
-  *out << LLDLAPartVarName(name, 1) << " = " 
-       << name << ";\n";
+
+  BasePSet *pset = ((Tunnel*)Input(0))->m_pset;
+  if (pset->IsReal() && ((RealLoop*)pset)->IsUnrolled()) {
+    unsigned int iter = ((RealLoop*)pset)->GetCurrIter();
+    *out << LLDLAPartVarName(name, 1) << "_iter"
+	 << iter
+	 << " = " << name;
+    
+    const DataTypeInfo &type = InputDataType(0);
+    *out << " + " << iter << " * (";
+    if (m_dir == PARTDOWN) {
+      if (!IsUnitStride(type.m_rowStride))
+	*out << type.m_rowStrideVar << " * ";
+      *out << bs.VarName();
+    }
+    else if (m_dir == PARTRIGHT) {
+      if (!IsUnitStride(type.m_colStride))
+	*out << type.m_colStrideVar << " * ";
+      *out << bs.VarName();
+    }
+    else
+      throw;
+
+    *out << ");\n";
+  }
+  else {
+    *out << LLDLAPartVarName(name, 1)
+	 << " = " << name << ";\n";
+  }
 #endif
 }
 
@@ -1049,10 +1084,15 @@ void SplitSingleIter::AddVariables(VarSet &set) const
 #if DOLLDLA
   if (m_tunType != POSSTUNIN)
     return;
-  if (GetLoopType() == LLDLALOOP) {
-    if (m_dir != PARTDOWN && m_dir != PARTRIGHT)
-      throw;
-    const string name = GetInputNameStr(0);
+  if (GetLoopType() != LLDLALOOP) 
+    throw;
+  if (m_dir != PARTDOWN && m_dir != PARTRIGHT)
+    throw;
+
+  const string name = GetInputNameStr(0);
+
+  BasePSet *pset = ((Tunnel*)Input(0))->m_pset;
+  if (!pset->IsReal() || !((RealLoop*)pset)->IsUnrolled()) {
     if (PartInUse(0)) {
       Var var(name, 0);
       set.insert(var);
@@ -1064,14 +1104,24 @@ void SplitSingleIter::AddVariables(VarSet &set) const
       set.insert(var);
     }
 
+    if (m_isControlTun) {
+      string loopLevel = GetLoopLevel(-1);
+      Var var(DirectVarDeclType, "int lcv"+loopLevel+";\n");
+      set.insert(var);
+    }
   }
-  else
-    throw;
-
-  if (m_isControlTun) {
-    string loopLevel = GetLoopLevel(-1);
-    Var var(DirectVarDeclType, "int lcv"+loopLevel+";\n");
-    set.insert(var);
+  else if (pset->IsReal()) {
+    if (PartInUse(0) || PartInUse(2))
+      throw;
+    unsigned int numIters = NumIters(0);
+    for(unsigned int i = 0; i < numIters; ++i) {
+#if USE_DOUBLE_PRECISION
+      Var var(DirectVarDeclType, "double *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string(i) + ";");
+#else
+      Var var(DirectVarDeclType, "float *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string(i) + ";");
+#endif
+      set.insert(var);
+    }
   }
 #endif
 }
@@ -1481,6 +1531,7 @@ string SplitSingleIter::LoopBound()
 
 void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 {
+  // Update PrintVarDeclarations, too
   if (m_tunType != POSSTUNIN)
     throw;
 #if DOLLDLA
@@ -1490,26 +1541,12 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
   if (m_dir == PARTDOWN) {
     if (!IsUnitStride(type.m_rowStride))
       *out << type.m_rowStrideVar << " * ";
-    if (bs == UnitBS)
-      *out << "1" << ";\n";
-    if (bs == LLDLAMu)
-      *out << MU_VAR_NAME << ";\n";
-    else if (bs == LLDLA2Mu)
-      *out << "2 * " << MU_VAR_NAME << ";\n";
-    else if (bs == LLDLA3Mu)
-      *out << "3 * " << MU_VAR_NAME << ";\n";
+    *out << bs.VarName() << ";\n";
   }
   else if (m_dir == PARTRIGHT) {
     if (!IsUnitStride(type.m_colStride))
       *out << type.m_colStrideVar << " * ";
-    if (bs == UnitBS)
-      *out << "1" << ";\n";
-    if (bs == LLDLAMu)
-      *out << MU_VAR_NAME << ";\n";
-    else if (bs == LLDLA2Mu)
-      *out << "2 * " << MU_VAR_NAME << ";\n";
-    else if (bs == LLDLA3Mu)
-      *out << "3 * " << MU_VAR_NAME << ";\n";
+    *out << bs.VarName() << ";\n";
   }
   else
     throw;

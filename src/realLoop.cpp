@@ -36,10 +36,11 @@ RealLoop::RealLoop()
 #if TWOD
  m_dim(BADDIM),
 #endif
-  m_type(UNKNOWNLOOP)
+  m_type(UNKNOWNLOOP),
 #if DOBLIS
-, m_comm(CORECOMM)
+ m_comm(CORECOMM),
 #endif
+  m_currIter(0)
 {
   AssignNewLabel();
   m_bsSize = BadBS;
@@ -54,6 +55,7 @@ RealLoop::RealLoop(LoopType type)
 #if DOBLIS
 , m_comm(CORECOMM)
 #endif
+  , m_currIter(0)
 
 {
 #if DOELEM
@@ -75,6 +77,7 @@ RealLoop::RealLoop(LoopType type, Poss *poss, BSSize bsSize)
 #if DOBLIS
 , m_comm(CORECOMM)
 #endif
+  , m_currIter(0)
 {
   unsigned int i;
   for(i = 0; i < poss->m_inTuns.size(); ++i) {

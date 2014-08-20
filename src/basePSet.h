@@ -32,6 +32,7 @@ class ShadowPSet;
 
 #define SETHASPROPEDFLAG     (1L<<1)
 #define SETTOPLEVELFLAG   (1L<<2)
+#define SETLOOPISUNROLLED (1L<<3)
 
 class BasePSet
 {

@@ -439,6 +439,8 @@ bool RealPSet::operator==(const BasePSet &rhs) const
       else {
 	const LoopInterface *loop1 = dynamic_cast<const LoopInterface*>(this);
 	const LoopInterface *loop2 = dynamic_cast<const LoopInterface*>(&rhs);
+	if (((RealLoop*)this)->IsUnrolled() != dynamic_cast<const RealLoop*>(&rhs)->IsUnrolled())
+	  return false;
 #if TWOD
 	if (loop1->GetDimName() != loop2->GetDimName())
 	  return false;
@@ -785,11 +787,9 @@ void RealPSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
     throw;
   }
   if (removeFromMyList) {
-    cout << "m_posses has " << m_posses.size() << endl;
     PossMMapIter possIter = m_posses.begin();
     bool found = false;
     for(; !found && possIter != m_posses.end(); ++possIter) {
-      cout << "another iteration\n";
       if ((*possIter).second == poss) {
         m_posses.erase(possIter);
         found = true;
@@ -1898,4 +1898,34 @@ RealPSet* RealPSet::HasMergedWith(RealPSet *set, bool checkOtherOrder)
     return set->HasMergedWith(this,false);
   else
     return NULL;
+}
+
+bool RealPSet::RemoveLoops(bool *doneSomething)
+{
+  PossMMapIter iter2 = m_posses.begin();
+  while (iter2 != m_posses.end()) {
+    Poss *poss = iter2->second;
+    bool doneSomething2 = false;
+    if (poss->RemoveLoops(&doneSomething2)) {
+      *doneSomething = true;
+      if (m_posses.size() == 1)
+	return true;
+      RemoveAndDeletePoss(poss, true);
+      iter2 = m_posses.begin();
+    }
+    else if (doneSomething2) {
+      *doneSomething = true;
+      if (poss->GetHash() != iter2->first) {
+	m_posses.erase(iter2);
+	m_posses.insert(PossMMapPair(poss->GetHash(),poss));
+	iter2 = m_posses.begin();
+      }
+      else
+	++iter2;
+    }
+    else {
+      ++iter2;
+    }
+  }
+  return m_posses.empty();
 }

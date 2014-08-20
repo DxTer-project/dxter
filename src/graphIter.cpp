@@ -25,6 +25,8 @@
 #include <iomanip>
 #include "transform.h"
 #include "contraction.h"
+#include "realLoop.h"
+#include "splitSingleIter.h"
 
 GraphIter::GraphIter(Poss *poss)
 {
@@ -130,7 +132,21 @@ void GraphIter::AddCurrPossVars(VarSet &set) const
     (*iter)->AddVariables(set);
   }
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
-    m_subIters[i]->AddCurrPossVars(set);
+    BasePSet *base = m_poss->m_sets[i];
+    RealPSet *real = base->GetReal();
+    if (!real->IsLoop() ||
+	!((RealLoop*)real)->IsUnrolled()) {
+      m_subIters[i]->AddCurrPossVars(set);
+    }
+    else {
+      RealLoop *loop = (RealLoop*)real;
+      SplitSingleIter *con = (SplitSingleIter*)(loop->GetControl());
+      int numIters = con->NumIters(0);
+      for(int j = 0; j < numIters; ++j) {
+	loop->SetCurrIter(j);
+	m_subIters[i]->AddCurrPossVars(set);
+      }
+    }
   }
 }
 
@@ -403,12 +419,34 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	}
 	
 	RealPSet *real = set->GetReal();
-	real->PrePrint(out,m_setIters[i]->second);
-	++out;
-	real->SetInTunsAsPrinted();
-	m_subIters[i]->Print(out, graphNum, set);
-	--out;
-	real->PostPrint(out,m_setIters[i]->second);
+	
+	if (!real->IsLoop() ||
+	    !((RealLoop*)real)->IsUnrolled()) {
+	  real->PrePrint(out,m_setIters[i]->second);
+	  ++out;
+	  real->SetInTunsAsPrinted();
+	  m_subIters[i]->Print(out, graphNum, set);
+	  --out;
+	  real->PostPrint(out,m_setIters[i]->second);
+	}
+	else {
+	  ++out;
+	  RealLoop *loop = (RealLoop*)real;
+	  SplitSingleIter *con = (SplitSingleIter*)(loop->GetControl());
+	  int numIters = con->NumIters(0);
+	  for(int j = 0; j < numIters; ++j) {
+	    loop->SetCurrIter(j);
+	    out.Indent();
+	    *out << "{\n";
+	    m_subIters[i]->ClearPrintedRecursively();
+	    real->PrePrint(out,m_setIters[i]->second);
+	    real->SetInTunsAsPrinted();
+	    m_subIters[i]->Print(out, graphNum, set);
+	    out.Indent();
+	    *out << "}\n";
+	  }
+	  --out;
+	}
 	out.Indent();
 	*out << "//****\n";
 

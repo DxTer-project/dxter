@@ -41,6 +41,18 @@ class FullyUnrollLoop : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+
+class CompactlyUnrollLoop : public SingleTrans
+{
+ public:
+  int m_numIters;
+  CompactlyUnrollLoop(int numIters);
+
+  virtual string GetType() const {return "compactlyUnrollLoop " + std::to_string((long long int) m_numIters);}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 class ViewMultipleIters : public DLANode
 {
  public:
