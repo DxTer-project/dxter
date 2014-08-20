@@ -30,6 +30,7 @@ MAdd::MAdd(Layer layer, Type type)
 {
   m_type = type;
   m_layer = layer;
+  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void MAdd::PrintCode(IndStream &out)
@@ -105,16 +106,16 @@ void MAdd::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
-    
+
     if ((*GetInputM(0) != *GetInputM(1)) || (*GetInputN(0) != *GetInputN(1))) {
       cout << "ERROR: Cannot MAdd two matrices of different dimension\n";
       throw;
     }
 
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if ((*GetInputM(0) != LLDLA_MU) || (*GetInputN(0) != LLDLA_MU)
-	  || (*GetInputM(1) != LLDLA_MU) || (*GetInputN(1) != LLDLA_MU)) {
-	cout << "ERROR: MAdd of matrices that do not have LLDLA_MU dimensions in LLDLAPRIMITIVELAYER\n";
+      if ((*GetInputM(0) != m_regWidth) || (*GetInputN(0) != m_regWidth)
+	  || (*GetInputM(1) != m_regWidth) || (*GetInputN(1) != m_regWidth)) {
+	cout << "ERROR: MAdd of matrices that do not have m_regWidth dimensions in LLDLAPRIMITIVELAYER\n";
       }
     }
 
@@ -149,6 +150,16 @@ Phase MAdd::MaxPhase() const
     default:
       throw;
     }
+}
+
+MAddLoopRef::MAddLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_dim = dim;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(type);
 }
 
 string MAddLoopRef::GetType() const
@@ -221,6 +232,16 @@ void MAddLoopRef::Apply(Node *node) const
   return;
 }
 
+MAddToVAddLoopRef::MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_vtype = vtype;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 string MAddToVAddLoopRef::GetType() const
 {
   return "MAddToVAddLoopRef";
@@ -234,11 +255,11 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
       return false;
     }
     if (m_dim == DIMM) {
-      return (*(madd->GetInputN(0)) == LLDLA_MU) && (*(madd->GetInputN(1)) == LLDLA_MU) &&
-	!(*(madd->GetInputM(0)) <= LLDLA_MU) && !(*(madd->GetInputM(1)) <= LLDLA_MU);
+      return (*(madd->GetInputN(0)) == m_regWidth) && (*(madd->GetInputN(1)) == m_regWidth) &&
+	!(*(madd->GetInputM(0)) <= m_regWidth) && !(*(madd->GetInputM(1)) <= m_regWidth);
     } else if (m_dim == DIMN) {
-      return (*(madd->GetInputM(0)) == LLDLA_MU) && (*(madd->GetInputM(0)) == LLDLA_MU) &&
-	!(*(madd->GetInputN(0)) <= LLDLA_MU) && !(*(madd->GetInputN(1)) <= LLDLA_MU);
+      return (*(madd->GetInputM(0)) == m_regWidth) && (*(madd->GetInputM(0)) == m_regWidth) &&
+	!(*(madd->GetInputN(0)) <= m_regWidth) && !(*(madd->GetInputN(1)) <= m_regWidth);
     } else {
       return false;
     }  
@@ -326,12 +347,20 @@ string MAddToRegArith::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
+MAddToRegArith::MAddToRegArith(Layer fromLayer, Layer toLayer, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 bool MAddToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
     MAdd* madd = (MAdd*) node;
-    if ((*(madd->GetInputM(0)) == LLDLA_MU) ||
-	(*(madd->GetInputN(0)) == LLDLA_MU)) {
+    if ((*(madd->GetInputM(0)) == m_regWidth) ||
+	(*(madd->GetInputN(0)) == m_regWidth)) {
       return true;
     } else {
       return false;
@@ -345,7 +374,7 @@ void MAddToRegArith::Apply(Node* node) const
   MAdd* madd = (MAdd*) node;
 
   // Set direction of split
-  bool splitIntoRows = !(*(madd->GetInputM(0)) <= LLDLA_MU);
+  bool splitIntoRows = !(*(madd->GetInputM(0)) <= m_regWidth);
 
   // Split matrices A and B
   SplitSingleIter* splitA;
@@ -373,10 +402,10 @@ void MAddToRegArith::Apply(Node* node) const
   splitB->SetIndepIters();
 
   // Create loads for A and B
-  LoadToRegs* loadA = new LoadToRegs();
+  LoadToRegs* loadA = new LoadToRegs(m_type);
   loadA->AddInput(splitA, 1);
 
-  LoadToRegs* loadB = new LoadToRegs();
+  LoadToRegs* loadB = new LoadToRegs(m_type);
   loadB->AddInput(splitB, 1);
 
   // Create new add node

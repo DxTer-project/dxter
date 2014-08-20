@@ -53,16 +53,9 @@ using namespace std;
 #elif DOLLDLA
 #define RVAL 40
 #define CVAL 40
-#define USE_DOUBLE_PRECISION 1
 
 #define CONTIG_VECTOR_LOAD_COST 20
 #define CONTIG_VECTOR_STORE_COST 200
-
-#if USE_DOUBLE_PRECISION
-#define LLDLA_MU 2
-#else  // Otherwise use single precision floats
-#define LLDLA_MU 4
-#endif // USE_DOUBLE_PRECISION
 
 #define MU_VAR_NAME "MUVALUE"
 #endif 

@@ -28,6 +28,7 @@ class SMMul : public DLAOp<2, 1>
 {
  public:
   Type m_type;
+  int m_regWidth;
   SMMul(Layer layer, Type type);
 
   virtual void PrintCode(IndStream &out);
@@ -54,8 +55,7 @@ class SMulLoopRef : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
   BSSize m_bs;
- SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
+  SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -67,8 +67,7 @@ class SMulLowerLayer : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- SMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
-   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
+  SMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

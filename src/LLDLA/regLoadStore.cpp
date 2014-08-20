@@ -22,6 +22,13 @@
 #include "regLoadStore.h"
 
 #if DOLLDLA
+
+LoadToRegs::LoadToRegs(Type type)
+{
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(type);
+}
+
 void LoadToRegs::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -29,17 +36,17 @@ void LoadToRegs::Prop()
     if (m_inputs.size() != 1)
       throw;
 
-    if (*(GetInputM(0)) != LLDLA_MU) {
-      // this isn't 1 x LLDLA_MU
-      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != LLDLA_MU) {
+    if (*(GetInputM(0)) != m_regWidth) {
+      // this isn't 1 x m_regWidth
+      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != m_regWidth) {
 	cout << "Error: Incorrect dimensions for register load\n";
 	cout << "*GetInputM(0) != 1 ? " << std::to_string(*GetInputM(0) != 1) << endl;
-	cout << "*GetInputN(0) != LLDLA_MU ? " << std::to_string(*GetInputN(0) != LLDLA_MU) << endl;
+	cout << "*GetInputN(0) != m_regWidth ? " << std::to_string(*GetInputN(0) != m_regWidth) << endl;
 	throw;
       }
     } else if (*(GetInputN(0)) != 1) {
       GetInputN(0)->Print();
-      // LLDLA_MU rows but not 1 column
+      // m_regWidth rows but not 1 column
       throw;
     }
 
@@ -48,13 +55,13 @@ void LoadToRegs::Prop()
       if (IsUnitStride(InputDataType(0).m_rowStride)) {
 	m_cost = CONTIG_VECTOR_LOAD_COST;
       } else {
-	m_cost = LLDLA_MU * CONTIG_VECTOR_LOAD_COST;
+	m_cost = m_regWidth * CONTIG_VECTOR_LOAD_COST;
       }
     } else {
       if (IsUnitStride(InputDataType(0).m_colStride)) {
 	m_cost = CONTIG_VECTOR_LOAD_COST;
       } else {
-	m_cost = LLDLA_MU * CONTIG_VECTOR_LOAD_COST;
+	m_cost = m_regWidth * CONTIG_VECTOR_LOAD_COST;
       }
     }
   }
@@ -79,7 +86,7 @@ void LoadToRegs::PrintCode(IndStream &out)
 #if USE_DOUBLE_PRECISION
       toLoad = toLoadName;
       *out << "tmp[0] = *" << toLoadName << ";\n";
-      for (int i = 1; i < LLDLA_MU; i++) {
+      for (int i = 1; i < m_regWidth; i++) {
 	out.Indent();
 	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
       }
@@ -87,7 +94,7 @@ void LoadToRegs::PrintCode(IndStream &out)
 #else
       toLoad = toLoadName;
       *out << "tmp[0] = *" << toLoadName << ";\n";
-      for (int i = 1; i < LLDLA_MU; i++) {
+      for (int i = 1; i < m_regWidth; i++) {
 	string valToLoad = toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
 	*out << "tmp[ " << std::to_string((long long int) i) << " ] = *(" << valToLoad << ");\n";
 	toLoad += ", " + valToLoad;
@@ -104,7 +111,7 @@ void LoadToRegs::PrintCode(IndStream &out)
     } else {
 #if USE_DOUBLE_PRECISION
       toLoad = toLoadName;
-      for (int i = 1; i < LLDLA_MU; i++) {
+      for (int i = 1; i < m_regWidth; i++) {
 	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
       }
 
@@ -112,7 +119,7 @@ void LoadToRegs::PrintCode(IndStream &out)
 #else
       toLoad = toLoadName;
       *out << "tmp[0] = *" << toLoadName << ";\n";
-      for (int i = 1; i < LLDLA_MU; i++) {
+      for (int i = 1; i < m_regWidth; i++) {
       string valToLoad = toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
 	*out << "tmp[ " << std::to_string((long long int) i) << " ] = *(" << valToLoad << ");\n";
 	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
@@ -169,13 +176,13 @@ void StoreFromRegs::Prop()
       if (IsUnitStride(InputDataType(1).m_rowStride)) {
 	m_cost = CONTIG_VECTOR_STORE_COST;
       } else {
-	m_cost = LLDLA_MU * CONTIG_VECTOR_STORE_COST;
+	m_cost = m_regWidth * CONTIG_VECTOR_STORE_COST;
       }
     } else {
       if (IsUnitStride(InputDataType(1).m_colStride)) {
 	m_cost = CONTIG_VECTOR_STORE_COST;
       } else {
-	m_cost = LLDLA_MU * CONTIG_VECTOR_STORE_COST;
+	m_cost = m_regWidth * CONTIG_VECTOR_STORE_COST;
       }
     }
     
@@ -221,7 +228,7 @@ void StoreFromRegs::StoreNonContigLocations(IndStream &out, string regVarName, s
 {
   out.Indent();
   *out << "VEC_PTR_PD_SET( 0, " + regVarName + ", " + storePtr + " );\n";
-  for (int i = 1; i < LLDLA_MU; i++) {
+  for (int i = 1; i < m_regWidth; i++) {
     out.Indent();
     string storePtrStr = storePtr + " + " + std::to_string((long long int) i) + " * " + strideVar;
     *out << "VEC_PTR_PD_SET( " + std::to_string((long long int) i) + ", " + regVarName + ", " + storePtrStr + " );\n";
@@ -260,7 +267,7 @@ void DuplicateRegLoad::BuildDataTypeCache()
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "1";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(LLDLA_MU, num, 1);
+    m_mSizes.AddRepeatedSizes(m_regWidth, num, 1);
     m_nSizes.AddRepeatedSizes(1, num, 1);
   }
 }
@@ -328,7 +335,7 @@ void TempVecReg::BuildDataTypeCache()
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "vector register size";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(LLDLA_MU, num, 1);
+    m_mSizes.AddRepeatedSizes(m_regWidth, num, 1);
     m_nSizes.AddRepeatedSizes(1, num, 1);
   }
 }

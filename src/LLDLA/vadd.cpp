@@ -366,10 +366,10 @@ void VAddToRegArith::Apply(Node* node) const
   }
   splitY->SetIndepIters();
 
-  LoadToRegs* loadX = new LoadToRegs();
+  LoadToRegs* loadX = new LoadToRegs(m_type);
   loadX->AddInput(splitX, 1);
 
-  LoadToRegs* loadY = new LoadToRegs();
+  LoadToRegs* loadY = new LoadToRegs(m_type);
   loadY->AddInput(splitY, 1);
 
   Add* add = new Add();

@@ -29,6 +29,7 @@ class MAdd : public DLAOp<2, 1>
 {
  public:
   Type m_type;
+  int m_regWidth;
 
   MAdd(Layer layer, Type type);
   virtual void PrintCode(IndStream &out);
@@ -56,9 +57,10 @@ class MAddLoopRef : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
   VecType m_vtype;
+  Type m_type;
   BSSize m_bs;
- MAddLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
+  int m_regWidth;
+  MAddLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -72,8 +74,9 @@ class MAddToVAddLoopRef : SingleTrans
   DimName m_dim;
   VecType m_vtype;
   BSSize m_bs;
- MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vtype(vtype), m_bs(bs) {}
+  Type m_type;
+  int m_regWidth;
+  MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -85,8 +88,9 @@ class MAddToRegArith : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
- MAddToRegArith(Layer fromLayer, Layer toLayer) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  Type m_type;
+  int m_regWidth;
+  MAddToRegArith(Layer fromLayer, Layer toLayer, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -98,13 +102,11 @@ class MAddLowerLayer : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
-   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
+  MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
-
 
 #endif //DOLLDLA

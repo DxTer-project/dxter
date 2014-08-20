@@ -33,6 +33,7 @@ class VMMul : public DLAOp<3, 1>
 {
  public:
   Type m_type;
+  int m_regWidth;
   VMMul(Layer layer, Type type);
 
   virtual void PrintCode(IndStream &out);
@@ -61,10 +62,10 @@ class VMMulLoopRef : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
   BSSize m_bs;
+  Type m_type;
+  int m_regWidth;
 
- VMMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs)
-   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
-
+  VMMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -79,9 +80,9 @@ class VMMulToRegArith : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  VMMulToRegArith(Layer fromLayer, Layer toLayer)
-    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
-
+  Type m_type;
+  int m_regWidth;
+  VMMulToRegArith(Layer fromLayer, Layer toLayer, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node* node) const;
   virtual void Apply(Node* node) const;
@@ -93,8 +94,9 @@ class VMMulLowerLayer : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- VMMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
-   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
+  Type m_type;
+  int m_regWidth;
+  VMMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

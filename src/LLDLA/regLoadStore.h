@@ -32,8 +32,11 @@
 class LoadToRegs : public DLANode
 {
  public:
+  Type m_type;
+  int m_regWidth;
+  LoadToRegs(Type type);
   virtual NodeType GetType() const { return "LoadToRegs"; }
-  static Node* BlankInst() { return  new LoadToRegs; }
+  static Node* BlankInst() { return  new LoadToRegs(REAL_SINGLE); }
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 

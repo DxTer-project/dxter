@@ -32,6 +32,8 @@ VMMul::VMMul(Layer layer, Type type)
 {
   m_type = type;
   m_layer = layer;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(type);
   return;
 }
 
@@ -152,11 +154,11 @@ void VMMul::Prop()
     }
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if (*GetInputM(0) != 1 || *GetInputN(0) != LLDLA_MU) {
+      if (*GetInputM(0) != 1 || *GetInputN(0) != m_regWidth) {
 	cout << "ERROR: Primitive vector for vmmul must be 1 x 2\n";
 	throw;
       }
-      if (*GetInputN(1) != LLDLA_MU || *GetInputM(1) != LLDLA_MU) {
+      if (*GetInputN(1) != m_regWidth || *GetInputM(1) != m_regWidth) {
 	cout << "ERROR: Primitive matrix must be 2 x 2\n";
 	throw;
       }
@@ -318,6 +320,15 @@ void VMMulLoopRef::ApplyDimN(Node* node) const
   return;
 }
 
+VMMulLowerLayer::VMMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 bool VMMulLowerLayer::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
@@ -358,6 +369,14 @@ string VMMulLowerLayer::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
+VMMulToRegArith::VMMulToRegArith(Layer fromLayer, Layer toLayer, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 string VMMulToRegArith::GetType() const
 {
   return "VMMulToRegArith from " + LayerNumToStr(m_fromLayer)
@@ -368,7 +387,7 @@ bool VMMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
     VMMul* vmmul = (VMMul*) node;
-    return *vmmul->GetInputN(1) == LLDLA_MU;
+    return *vmmul->GetInputN(1) == m_regWidth;
   }
   return false;
 }
@@ -387,7 +406,7 @@ void VMMulToRegArith::Apply(Node* node) const
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();
 
-  LoadToRegs* loadY = new LoadToRegs();
+  LoadToRegs* loadY = new LoadToRegs(m_type);
   loadY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
 
   node->m_poss->AddNode(loadY);
@@ -396,7 +415,7 @@ void VMMulToRegArith::Apply(Node* node) const
   yTun->AddInput(loadY, 0);
   yTun->SetAllStats(PARTUP);
 
-  LoadToRegs* loadA = new LoadToRegs();
+  LoadToRegs* loadA = new LoadToRegs(m_type);
   loadA->AddInput(splitA, 1);
 
   DuplicateRegLoad* loadX = new DuplicateRegLoad();

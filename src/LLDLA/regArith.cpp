@@ -39,7 +39,7 @@ void FMAdd::Prop()
       throw;
       }*/
 
-    m_cost = LLDLA_MU;
+    m_cost = 0;
   }
 }
 
@@ -61,7 +61,7 @@ void Add::Prop()
 // TODO: Delete shape checks and instead check that
 // inputs are registers
 
-     m_cost = LLDLA_MU;
+     m_cost = 0;
   }
 }
 
@@ -82,7 +82,7 @@ void Mul::Prop()
 // TODO: Delete shape checks and instead check that
 // inputs are registers
 
-    m_cost = LLDLA_MU;
+    m_cost = 0;
   }
 }
 

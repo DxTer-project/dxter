@@ -29,6 +29,7 @@ SMMul::SMMul(Layer layer, Type type)
 {
   m_type = type;
   SetLayer(layer);
+  m_regWidth = arch->VecRegWidth(type);
 }
 
 void SMMul::PrintCode(IndStream &out)
@@ -107,7 +108,7 @@ void SMMul::Prop()
     }
     
     if (GetLayer() == LLDLAPRIMITIVELAYER || GetLayer() == LLDLAMIDLAYER) {
-      if (*GetInputM(1) != LLDLA_MU || *GetInputN(1) != LLDLA_MU) {
+      if (*GetInputM(1) != m_regWidth || *GetInputN(1) != m_regWidth) {
 	GetInputM(1)->Print();
 	cout << endl;
 	GetInputN(1)->Print();
@@ -254,7 +255,7 @@ void SMulLoopRef::Apply(Node *node) const
   // all nodes it finds
   Poss* loopPoss = new Poss(2, scalarTunOut, com);
   //Put that poss into a loop - it's LLDLALOOP type and
-  // uses the LLDLA_MU blocksize
+  // uses the m_regWidth blocksize
   RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
 
   //Set the dimension over which this loop iterates
@@ -270,7 +271,12 @@ void SMulLoopRef::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-
+SMulLowerLayer::SMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_bs = bs;
+}
 
 bool SMulLowerLayer::CanApply(const Node *node) const
 {

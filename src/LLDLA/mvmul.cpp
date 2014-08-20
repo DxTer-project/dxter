@@ -33,6 +33,7 @@ MVMul::MVMul(Layer layer, Type type)
 {
   m_type = type;
   m_layer = layer;
+  m_regWidth = arch->VecRegWidth(m_type);
   return;
 }
 
@@ -154,11 +155,11 @@ void MVMul::Prop()
 	cout << "ERROR: Primitive matrix must be 2 x 2 for MVMul\n";
 	throw;
       }
-      if (*GetInputM(1) != LLDLA_MU) {
+      if (*GetInputM(1) != m_regWidth) {
 	cout << "ERROR: Primitive vector must be 2 x 1 MVMul\n";
 	throw;
       }
-      if (*GetInputM(2) != LLDLA_MU) {
+      if (*GetInputM(2) != m_regWidth) {
 	cout << "ERROR: Primitive vector must be 2 x 1 MVMul\n";
 	throw;
       }
@@ -186,6 +187,15 @@ void MVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
   return;
 }
 
+MVMulLowerLayer::MVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 bool MVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
@@ -195,11 +205,11 @@ bool MVMulLowerLayer::CanApply(const Node *node) const
     }
 
     if (m_toLayer == LLDLAPRIMITIVELAYER) {
-      if (*mvmul->GetInputM(0) != LLDLA_MU ||
-	  *mvmul->GetInputN(0) != LLDLA_MU ||
-	  *mvmul->GetInputM(1) != LLDLA_MU ||
+      if (*mvmul->GetInputM(0) != m_regWidth ||
+	  *mvmul->GetInputN(0) != m_regWidth ||
+	  *mvmul->GetInputM(1) != m_regWidth ||
 	  *mvmul->GetInputN(1) != 1        ||
-	  *mvmul->GetInputM(2) != LLDLA_MU ||
+	  *mvmul->GetInputM(2) != m_regWidth ||
 	  *mvmul->GetInputN(2) != 1) {
 	return false;
       } else {
@@ -226,6 +236,16 @@ string MVMulLowerLayer::GetType() const
 {
   return "MVMul lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
+}
+
+MVMulLoopRef::MVMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_dim = dim;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 string MVMulLoopRef::GetType() const
@@ -371,6 +391,14 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
 
 }
 
+MVMulToRegArith::MVMulToRegArith(Layer fromLayer, Layer toLayer, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 string MVMulToRegArith::GetType() const
 {
   return "MVMulToRegArith from " + LayerNumToStr(m_fromLayer)
@@ -381,7 +409,7 @@ bool MVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
     MVMul* mvmul = (MVMul*) node;
-    return *mvmul->GetInputM(0) == LLDLA_MU;
+    return *mvmul->GetInputM(0) == m_regWidth;
     return true;
   }
   return false;
@@ -404,7 +432,7 @@ void MVMulToRegArith::Apply(Node* node) const
   splitX->SetIndepIters();
 
   // Create vector register with elements of y
-  LoadToRegs* loadY = new LoadToRegs();
+  LoadToRegs* loadY = new LoadToRegs(m_type);
   loadY->AddInput(mvmul->Input(2), mvmul->InputConnNum(2));
   
   node->m_poss->AddNode(loadY);
@@ -415,7 +443,7 @@ void MVMulToRegArith::Apply(Node* node) const
   yTun->SetAllStats(PARTUP);
   
   // Create load for elements of A in loop body
-  LoadToRegs* loadA = new LoadToRegs();
+  LoadToRegs* loadA = new LoadToRegs(m_type);
   loadA->AddInput(splitA, 1);
 
   // Create duplicate load for x

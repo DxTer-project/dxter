@@ -325,10 +325,10 @@ void VVDotToRegArith::Apply(Node *node) const
   accTun->SetAllStats(PARTUP);
 
   // Create loads for A and B
-  LoadToRegs* loadA = new LoadToRegs();
+  LoadToRegs* loadA = new LoadToRegs(m_type);
   loadA->AddInput(splitA, 1);
 
-  LoadToRegs* loadB = new LoadToRegs();
+  LoadToRegs* loadB = new LoadToRegs(m_type);
   loadB->AddInput(splitB, 1);
 
   // Create FMA operation that updates accum

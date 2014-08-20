@@ -27,6 +27,7 @@
 #include "transform.h"
 #include "basePSet.h"
 #include "comm.h"
+#include "LLDLA.h"
 
 enum PartDir { PARTDOWN,
 	       PARTRIGHT,
@@ -65,9 +66,12 @@ enum BSSizeEnum {
 #elif DOTENSORS
   USETENSORBS,
 #elif DOLLDLA
-  USELLDLAMU,
-  USELLDLA2MU,
-  USELLDLA3MU,
+  USELLDLAMUSINGLE,
+  USELLDLA2MUSINGLE,
+  USELLDLA3MUSINGLE,
+  USELLDLAMUDOUBLE,
+  USELLDLA2MUDOUBLE,
+  USELLDLA3MUDOUBLE,
 #endif
   USEUNITBS,
   BADBSSIZE 
@@ -109,12 +113,18 @@ class BSSize
       case (USETENSORBS):
 	return TENSOR_BS;
 #elif DOLLDLA
-      case (USELLDLAMU):
-	return LLDLA_MU;
-      case (USELLDLA2MU):
-	return 2*LLDLA_MU;
-      case (USELLDLA3MU):
-	return 3*LLDLA_MU;
+      case (USELLDLAMUSINGLE):
+	return arch->SVecRegWidth();
+      case (USELLDLA2MUSINGLE):
+	return 2*arch->SVecRegWidth();
+      case (USELLDLA3MUSINGLE):
+	return 3*arch->SVecRegWidth();
+      case (USELLDLAMUDOUBLE):
+	return arch->DVecRegWidth();
+      case (USELLDLA2MUDOUBLE):
+	return 2*arch->DVecRegWidth();
+      case (USELLDLA3MUDOUBLE):
+	return 3*arch->DVecRegWidth();
 #endif
       case (USEUNITBS):
 	return ONE;
