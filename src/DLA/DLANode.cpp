@@ -384,9 +384,9 @@ bool DLANode::IsInputScalar(ConnNum num) const
 }
 
 #if DOLLDLA
-bool DLANode::InputIsMuByMu(ConnNum num) {
+/*bool DLANode::InputIsMuByMu(ConnNum num) {
   return *GetInputM(num) == LLDLA_MU &&
     *GetInputN(num) == LLDLA_MU;
-}
+    }*/
 #endif //DOLLDLA
 #endif //TWOD

@@ -167,6 +167,12 @@ void LoadToRegs::AddVariables(VarSet &set) const
   set.insert(var);
 }
 
+StoreFromRegs::StoreFromRegs(Type type)
+{
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 void StoreFromRegs::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -233,6 +239,12 @@ void StoreFromRegs::StoreNonContigLocations(IndStream &out, string regVarName, s
     string storePtrStr = storePtr + " + " + std::to_string((long long int) i) + " * " + strideVar;
     *out << "VEC_PTR_PD_SET( " + std::to_string((long long int) i) + ", " + regVarName + ", " + storePtrStr + " );\n";
   }
+}
+
+DuplicateRegLoad::DuplicateRegLoad(Type type)
+{
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void DuplicateRegLoad::Prop()
@@ -302,6 +314,11 @@ void DuplicateRegLoad::AddVariables(VarSet &set) const
   set.insert(var);
 }
 
+TempVecReg::TempVecReg(Type type)
+{
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(type);
+}
 
 void TempVecReg::Prop()
 {

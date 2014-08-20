@@ -39,9 +39,13 @@ BSSize BlisOuter(USEBLISOUTERBS);
 #elif DOTENSORS
 BSSize TensorBS(USETENSORBS);
 #elif DOLLDLA
-BSSize LLDLAMu(USELLDLAMU);
-BSSize LLDLA2Mu(USELLDLA2MU);
-BSSize LLDLA3Mu(USELLDLA3MU);
+BSSize LLDLAMuSingle(USELLDLAMUSINGLE);
+BSSize LLDLA2MuSingle(USELLDLA2MUSINGLE);
+BSSize LLDLA3MuSingle(USELLDLA3MUSINGLE);
+BSSize LLDLAMuDouble(USELLDLAMUDOUBLE);
+BSSize LLDLA2MuDouble(USELLDLA2MUDOUBLE);
+BSSize LLDLA3MuDouble(USELLDLA3MUDOUBLE);
+
 #endif
 BSSize BadBS(BADBSSIZE);
 BSSize UnitBS(USEUNITBS);
@@ -53,11 +57,11 @@ string BSSize::VarName() const
 #if DOLLDLA
     case (USEUNITBS):
       return "1";
-    case (USELLDLAMU):
+    case (USELLDLAMUSINGLE):
       return MU_VAR_NAME;
-    case (USELLDLA2MU):
+    case (USELLDLA2MUSINGLE):
       return "(2*" + (string)(MU_VAR_NAME) + ")";
-    case (USELLDLA3MU):
+    case (USELLDLA3MUSINGLE):
       return "(3*" + (string)(MU_VAR_NAME) + ")";
 #endif
     default:

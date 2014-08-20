@@ -86,6 +86,8 @@ RealPSet* DoubleGemmExample();
 
 Trans transA, transB;
 
+Architecture* arch;
+
 ImplementationMap ImpStrMap(Universe *uni)
 {
   ImplementationMap impMap;
@@ -180,8 +182,9 @@ void AddGemmTrans()
 
 void AddVVDotTrans()
 {
-  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
 
+  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
   return;
 }
 
@@ -260,9 +263,13 @@ void AddUnrollingTrans()
 
 void AddSVMulTrans()
 {
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR, REAL_SINGLE), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR, REAL_SINGLE), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR, REAL_DOUBLE), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR, REAL_DOUBLE), LLDLALOOPPHASE);
 
   return;
 }
@@ -287,7 +294,9 @@ void AddVMMulTrans()
 
 void AddVAddTrans()
 {
-  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
 
   return;
 }
@@ -334,6 +343,9 @@ int main(int argc, const char* argv[])
   omp_set_num_threads(1);
   omp_set_nested(true);
 #endif
+
+  // Set architecture
+  //  ar
 
   //  PrintType printType = CODE;
   int numIters = -1;

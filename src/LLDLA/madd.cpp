@@ -414,7 +414,7 @@ void MAddToRegArith::Apply(Node* node) const
   add->AddInput(loadB, 0);
 
   // Create store to write back to B
-  StoreFromRegs* storeToB = new StoreFromRegs();
+  StoreFromRegs* storeToB = new StoreFromRegs(m_type);
   storeToB->AddInput(add, 0);
   storeToB->AddInput(splitB, 1);
 

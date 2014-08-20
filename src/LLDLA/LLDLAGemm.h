@@ -41,6 +41,7 @@
 class LLDLAGemm : public Gemm
 {
  public:
+  int m_regWidth;
   LLDLAGemm(Coef alpha, Coef beta, Type type, Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
@@ -63,8 +64,9 @@ class LLDLAGemmToPrim : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
- LLDLAGemmToPrim(Layer fromLayer, Layer toLayer) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  Type m_type;
+  int m_regWidth;
+  LLDLAGemmToPrim(Layer fromLayer, Layer toLayer, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

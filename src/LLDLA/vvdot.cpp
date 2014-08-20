@@ -31,6 +31,7 @@ VVDot::VVDot(Layer layer, Type type)
 {
   m_layer = layer;
   m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void VVDot::PrintCode(IndStream &out)
@@ -121,7 +122,7 @@ void VVDot::Prop()
     }
 
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      //      if (*GetInputN(0) != LLDLA_MU) {
+      //      if (*GetInputN(0) != m_regWidth) {
       //cout << "ERROR: First argument to primitive dot prod must be 1x2\n";
       //throw;
       //      } else if (*GetInputN(1) != 1) {
@@ -177,6 +178,15 @@ void VVDot::Duplicate(const Node *orig, bool shallow, bool possMerging)
   const VVDot *rhs = (VVDot*)orig;
   m_type = rhs->m_type;
   return;
+}
+
+VVDotLoopRef::VVDotLoopRef(Layer fromLayer, Layer toLayer, BSSize bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 string VVDotLoopRef::GetType() const
@@ -248,6 +258,15 @@ void VVDotLoopRef::Apply(Node *node) const
   return;
 }
 
+VVDotLowerLayer::VVDotLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 bool VVDotLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
@@ -281,6 +300,14 @@ string VVDotLowerLayer::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
+VVDotToRegArith::VVDotToRegArith(Layer fromLayer, Layer toLayer, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 bool VVDotToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
@@ -288,8 +315,8 @@ bool VVDotToRegArith::CanApply(const Node* node) const
     if (vvdot->GetLayer() != m_fromLayer) {
       return false;
     }
-    if (!(*(vvdot->GetInputN(0)) <= LLDLA_MU) &&
-	!(*(vvdot->GetInputM(1)) <= LLDLA_MU)) {
+    if (!(*(vvdot->GetInputN(0)) <= m_regWidth) &&
+	!(*(vvdot->GetInputM(1)) <= m_regWidth)) {
       return true;
     } else {
       return false;
@@ -314,7 +341,7 @@ void VVDotToRegArith::Apply(Node *node) const
   splitB->SetIndepIters();
   
   // Create new node to accumulate data in the loop
-  TempVecReg* accum = new TempVecReg();
+  TempVecReg* accum = new TempVecReg(m_type);
   accum->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
 
   node->m_poss->AddNode(accum);

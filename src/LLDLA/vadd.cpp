@@ -33,6 +33,7 @@ VAdd::VAdd(VecType vecType, Layer layer, Type type)
   m_vecType = vecType;
   m_layer = layer;
   m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void VAdd::PrintCode(IndStream &out)
@@ -166,11 +167,11 @@ void VAdd::VectorOpInputDimensionCheck(ConnNum inputNum)
   }
   
   if (m_layer == LLDLAPRIMITIVELAYER) {
-    if (m_vecType == ROWVECTOR && *GetInputN(inputNum) != LLDLA_MU) {
-      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have LLDLA_MU columns\n";
+    if (m_vecType == ROWVECTOR && *GetInputN(inputNum) != m_regWidth) {
+      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth columns\n";
       throw;
-    } else if(m_vecType == COLVECTOR && *GetInputM(inputNum) != LLDLA_MU) {
-      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have LLDLA_MU rows\n";
+    } else if(m_vecType == COLVECTOR && *GetInputM(inputNum) != m_regWidth) {
+      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth rows\n";
       throw;
     }
   }
@@ -204,6 +205,15 @@ Phase VAdd::MaxPhase() const
     default:
       throw;
     }
+}
+
+VAddLoopRef::VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_vtype = vtype;
+  m_bs = bs;
+  m_type = type;
 }
 
 string VAddLoopRef::GetType() const
@@ -286,6 +296,15 @@ void VAddLoopRef::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+VAddLowerLayer::VAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 bool VAddLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == VAdd::GetClass()) {
@@ -326,6 +345,15 @@ string VAddLowerLayer::GetType() const
   return "VAdd lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
 }
+
+VAddToRegArith::VAddToRegArith(Layer fromLayer, Layer toLayer, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 
 bool VAddToRegArith::CanApply(const Node* node) const
 {
@@ -376,7 +404,7 @@ void VAddToRegArith::Apply(Node* node) const
   add->AddInput(loadX, 0);
   add->AddInput(loadY, 0);
 
-  StoreFromRegs* storeToY = new StoreFromRegs();
+  StoreFromRegs* storeToY = new StoreFromRegs(m_type);
   storeToY->AddInput(add, 0);
   storeToY->AddInput(splitY, 1);
 

@@ -31,6 +31,7 @@ SVMul::SVMul(VecType vecType, Layer layer, Type type)
   m_vecType = vecType;
   m_layer = layer;
   m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void SVMul::PrintCode(IndStream &out)
@@ -160,11 +161,11 @@ void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
   }
   
   if (m_layer == LLDLAPRIMITIVELAYER) {
-    if (m_vecType == ROWVECTOR && *GetInputN(inputNum) != LLDLA_MU) {
-      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have LLDLA_MU columns\n";
+    if (m_vecType == ROWVECTOR && *GetInputN(inputNum) != m_regWidth) {
+      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth columns\n";
       throw;
-    } else if(m_vecType == COLVECTOR && *GetInputM(inputNum) != LLDLA_MU) {
-      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have LLDLA_MU rows\n";
+    } else if(m_vecType == COLVECTOR && *GetInputM(inputNum) != m_regWidth) {
+      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth rows\n";
       throw;
     }
   }
@@ -201,6 +202,16 @@ Phase SVMul::MaxPhase() const
     default:
       throw;
     }
+}
+
+SVMulLoopRef::SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_vtype = vtype;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 string SVMulLoopRef::GetType() const
@@ -284,6 +295,15 @@ void SVMulLoopRef::Apply(Node *node) const
 
 }
 
+SVMulLowerLayer::SVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_bs = bs;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 bool SVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
@@ -316,6 +336,15 @@ string SVMulLowerLayer::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
+SVMulToRegArith::SVMulToRegArith(Layer fromLayer, Layer toLayer, VecType vtype, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_vType = vtype;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 bool SVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
@@ -323,9 +352,9 @@ bool SVMulToRegArith::CanApply(const Node* node) const
     if (svmul->GetLayer() != m_fromLayer) {
       return false;
     }
-    if ((!(*(svmul->GetInputM(1)) <= LLDLA_MU) &&
+    if ((!(*(svmul->GetInputM(1)) <= m_regWidth) &&
 	 m_vType == COLVECTOR) ||
-	(!(*(svmul->GetInputN(1)) <= LLDLA_MU) &&
+	(!(*(svmul->GetInputN(1)) <= m_regWidth) &&
 	 m_vType == ROWVECTOR)) {
       return true;
     }
@@ -357,7 +386,7 @@ void SVMulToRegArith::Apply(Node* node) const
   }
 
   // Duplicate the value of C into the temp register
-  DuplicateRegLoad* dup = new DuplicateRegLoad();
+  DuplicateRegLoad* dup = new DuplicateRegLoad(m_type);
   dup->AddInput(svmul->Input(0), svmul->InputConnNum(0));
   
   node->m_poss->AddNode(dup);
@@ -368,7 +397,7 @@ void SVMulToRegArith::Apply(Node* node) const
   scalarTun->SetAllStats(FULLUP);
 
   // Create register for vector elements
-  LoadToRegs* loadA = new LoadToRegs();
+  LoadToRegs* loadA = new LoadToRegs(m_type);
   loadA->AddInput(splitVec, 1);
 
   // Create inner multiply operation
@@ -377,7 +406,7 @@ void SVMulToRegArith::Apply(Node* node) const
   mul->AddInput(loadA, 0);
 
   // Create store node to save newly computed elements of x * A
-  StoreFromRegs* storeVec = new StoreFromRegs();
+  StoreFromRegs* storeVec = new StoreFromRegs(m_type);
   storeVec->AddInput(mul, 0);
   storeVec->AddInput(splitVec, 1);
 

@@ -29,6 +29,7 @@ class VAdd : public DLAOp<2, 1>
 {
  public:
   Type m_type;
+  int m_regWidth;
   VecType m_vecType;
 
   VAdd(VecType vecType, Layer layer, Type type);
@@ -58,8 +59,9 @@ class VAddLoopRef : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   VecType m_vtype;
   BSSize m_bs;
- VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs) 
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vtype(vtype), m_bs(bs) {}
+  Type m_type;
+  int m_regWidth;
+  VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs, Type type); 
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -72,8 +74,9 @@ class VAddLowerLayer : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- VAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
-   :m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
+  Type m_type;
+  int m_regWidth;
+  VAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -85,9 +88,9 @@ class VAddToRegArith : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
-
-  VAddToRegArith(Layer fromLayer, Layer toLayer)
-    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  Type m_type;
+  int m_regWidth;
+  VAddToRegArith(Layer fromLayer, Layer toLayer, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node* node) const;
   virtual void Apply(Node* node) const;

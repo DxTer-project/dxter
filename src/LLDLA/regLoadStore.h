@@ -34,6 +34,7 @@ class LoadToRegs : public DLANode
  public:
   Type m_type;
   int m_regWidth;
+
   LoadToRegs(Type type);
   virtual NodeType GetType() const { return "LoadToRegs"; }
   static Node* BlankInst() { return  new LoadToRegs(REAL_SINGLE); }
@@ -62,9 +63,13 @@ class DuplicateRegLoad : public DLANode
  public:
   Sizes m_mSizes;
   Sizes m_nSizes;
+  Type m_type;
+  int m_regWidth;
   DataTypeInfo m_info;
+
+  DuplicateRegLoad(Type type);
   virtual NodeType GetType() const { return "DuplicateRegLoad"; }
-  static Node* BlankInst() { return  new DuplicateRegLoad; }
+  static Node* BlankInst() { return  new DuplicateRegLoad(REAL_SINGLE); }
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 
@@ -92,9 +97,13 @@ class TempVecReg : public DLANode
  public:
   Sizes m_mSizes;
   Sizes m_nSizes;
+  Type m_type;
+  int m_regWidth;
+
+  TempVecReg(Type type);
   DataTypeInfo m_info;
   virtual NodeType GetType() const { return "TempVecReg"; }
-  static Node* BlankInst() { return  new TempVecReg; }
+  static Node* BlankInst() { return  new TempVecReg(REAL_SINGLE); }
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 
@@ -120,8 +129,12 @@ class TempVecReg : public DLANode
 class StoreFromRegs : public DLAOp<2,1>
 {
  public:
+  Type m_type;
+  int m_regWidth;
+
+  StoreFromRegs(Type type);
   virtual NodeType GetType() const {return "StoreFromRegs";}
-  static Node* BlankInst() { return  new StoreFromRegs; }
+  static Node* BlankInst() { return  new StoreFromRegs(REAL_SINGLE); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
   virtual void Prop();

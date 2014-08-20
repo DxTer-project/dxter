@@ -418,7 +418,7 @@ void VMMulToRegArith::Apply(Node* node) const
   LoadToRegs* loadA = new LoadToRegs(m_type);
   loadA->AddInput(splitA, 1);
 
-  DuplicateRegLoad* loadX = new DuplicateRegLoad();
+  DuplicateRegLoad* loadX = new DuplicateRegLoad(m_type);
   loadX->AddInput(splitX, 1);
 
   FMAdd* fmadd = new FMAdd();
@@ -441,7 +441,7 @@ void VMMulToRegArith::Apply(Node* node) const
 
   node->m_poss->AddPSet(loop);
 
-  StoreFromRegs* storeToY = new StoreFromRegs();
+  StoreFromRegs* storeToY = new StoreFromRegs(m_type);
   storeToY->AddInput(loop->OutTun(2), 0);
   storeToY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
 

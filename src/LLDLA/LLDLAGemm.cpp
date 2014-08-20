@@ -29,6 +29,7 @@
 LLDLAGemm::LLDLAGemm(Coef alpha, Coef beta, Type type, Layer layer)
   : Gemm(layer, NORMAL, NORMAL, alpha, beta, type)
 {
+  m_regWidth = arch->VecRegWidth(type);
 }
 
 void LLDLAGemm::PrintCode(IndStream &out)
@@ -140,18 +141,18 @@ void LLDLAGemm::Prop()
       throw;
     }
     
-    if (*GetInputM(0) != LLDLA_MU || *GetInputN(0) != LLDLA_MU) 
-      cout << "ERROR1: LLDLAGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
+    if (*GetInputM(0) != m_regWidth || *GetInputN(0) != m_regWidth) 
+      cout << "ERROR1: LLDLAGemm only operates on m_regWidth by m_regWidth inputs\n";
 
-    if (*GetInputM(1) != LLDLA_MU || *GetInputN(1) != LLDLA_MU) {
+    if (*GetInputM(1) != m_regWidth || *GetInputN(1) != m_regWidth) {
       GetInputM(1)->Print();
       cout << endl;
       GetInputN(1)->Print();
-      cout << "ERROR2: LLDLAGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
+      cout << "ERROR2: LLDLAGemm only operates on m_regWidth by m_regWidth inputs\n";
     }
 
-    if (*GetInputM(2) != LLDLA_MU || *GetInputN(2) != LLDLA_MU) 
-      cout << "ERROR3: LLDLAGemm only operates on LLDLA_MU by LLDLA_MU inputs\n";
+    if (*GetInputM(2) != m_regWidth || *GetInputN(2) != m_regWidth) 
+      cout << "ERROR3: LLDLAGemm only operates on m_regWidth by m_regWidth inputs\n";
 
     switch(m_layer) {
     case (ABSLAYER):
@@ -173,6 +174,14 @@ NodeType LLDLAGemm::GetType() const
   return "LLDLAGemm" + LayerNumToStr(GetLayer());
 }
 
+LLDLAGemmToPrim::LLDLAGemmToPrim(Layer fromLayer, Layer toLayer, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_type = type;
+  m_regWidth = arch->VecRegWidth(m_type);
+}
+
 string LLDLAGemmToPrim::GetType() const
 {
   return "LLDLAGemmToPrim";
@@ -188,9 +197,9 @@ bool LLDLAGemmToPrim::CanApply(const Node *node) const
       if (gemm->GetLayer() != m_fromLayer)
 	return false;
       
-      if ((*(gemm->GetInputM(2)) <= LLDLA_MU) &&
-	  (*(gemm->GetInputN(2)) <= LLDLA_MU) &&
-	  (*(gemm->GetInputN(0)) <= LLDLA_MU))
+      if ((*(gemm->GetInputM(2)) <= m_regWidth) &&
+	  (*(gemm->GetInputN(2)) <= m_regWidth) &&
+	  (*(gemm->GetInputN(0)) <= m_regWidth))
 	{
 	  return true;
 	}

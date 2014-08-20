@@ -447,7 +447,7 @@ void MVMulToRegArith::Apply(Node* node) const
   loadA->AddInput(splitA, 1);
 
   // Create duplicate load for x
-  DuplicateRegLoad* loadX = new DuplicateRegLoad();
+  DuplicateRegLoad* loadX = new DuplicateRegLoad(m_type);
   loadX->AddInput(splitX, 1);
 
   // Create new FMA instruction for loop body
@@ -473,7 +473,7 @@ void MVMulToRegArith::Apply(Node* node) const
   node->m_poss->AddPSet(loop);
 
   // Store result of computation back to y
-  StoreFromRegs* storeToY = new StoreFromRegs();
+  StoreFromRegs* storeToY = new StoreFromRegs(m_type);
   storeToY->AddInput(loop->OutTun(2), 0);
   storeToY->AddInput(mvmul->Input(2), mvmul->InputConnNum(2));
 
