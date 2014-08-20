@@ -144,9 +144,12 @@ extern BSSize BlisOuter;
 #elif DOTENSORS
 extern BSSize TensorBS;
 #elif DOLLDLA
-extern BSSize LLDLAMu;
-extern BSSize LLDLA2Mu;
-extern BSSize LLDLA3Mu;
+extern BSSize LLDLAMuSingle;
+extern BSSize LLDLA2MuSingle;
+extern BSSize LLDLA3MuSingle;
+extern BSSize LLDLAMuDouble;
+extern BSSize LLDLA2MuDouble;
+extern BSSize LLDLA3MuDouble;
 #endif
 extern BSSize BadBS;
 extern BSSize UnitBS;
