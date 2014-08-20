@@ -833,3 +833,34 @@ string LoopTunnel::GetLoopLevel(int offset) const
   return std::to_string((long long int) level+offset);
 
 }
+
+void LoopTunnel::MigrateFromOldTun(Tunnel *tunIn)
+{
+  if (!tunIn->IsLoopTunnel())
+    throw;
+  LoopTunnel *tun = (LoopTunnel*)tunIn;
+  Tunnel::MigrateFromOldTun(tun);
+  if (m_tunType != tun->m_tunType)
+    throw;
+#if TWOD
+  if (m_msizes)
+    throw;
+  m_msizes = tun->m_msizes;
+  tun->m_msizes = NULL;
+  m_nsizes = tun->m_nsizes;
+  tun->m_nsizes = NULL;
+#if DODM
+  m_mlsizes = tun->m_mlsizes;
+  tun->m_mlsizes = NULL;
+  m_nlsizes = tun->m_nlsizes;
+  tun->m_nlsizes = NULL;
+#endif
+#else
+  if (m_sizes)
+    throw;
+  m_sizes = tun->m_sizes;
+  tun->m_sizes = NULL;
+  m_lsizes = tun->m_lsizes;
+  tun->m_lsizes = NULL;
+#endif
+}

@@ -142,6 +142,7 @@ class Poss
 
   void PrintSetConnections();
   void ReplaceShadowSetWithReal(unsigned int i);
+  void RemoveAndDeleteNodes(NodeVec &vec);
 };
 
 void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set);

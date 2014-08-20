@@ -246,28 +246,42 @@ void RealPSet::Migrate()
   }
 
   newSet->m_inTuns.swap(shadowToReplace->m_inTuns);
+  if (newSet->m_inTuns.size() != m_inTuns.size())
+    throw;
+	
   NodeVecIter nodeIter = newSet->m_inTuns.begin();
-  for( ; nodeIter != newSet->m_inTuns.end(); ++nodeIter) {
-    Node *tun = *nodeIter;
-    ((Tunnel*)tun)->m_pset = newSet;
+  NodeVecIter oldSetNodeIter = m_inTuns.begin();
+  for( ; nodeIter != newSet->m_inTuns.end(); ++nodeIter, ++oldSetNodeIter) {
+    Tunnel *tun = (Tunnel*)(*nodeIter);
+    Tunnel *oldTun = (Tunnel*)(*oldSetNodeIter);
+    oldTun->RemoveAllChildren2Way();
+    tun->MigrateFromOldTun(oldTun);
+    tun->m_pset = newSet;
     NodeConnVecIter connIter = tun->m_children.begin();
     for(; connIter != tun->m_children.end(); ++connIter) {
       Node *child = (*connIter)->m_n;
       ((Tunnel*)child)->m_pset = newSet;
     }
   }
+  m_inTuns.clear();
 
   newSet->m_outTuns.swap(shadowToReplace->m_outTuns);
+  if (newSet->m_outTuns.size() != m_outTuns.size())
+    throw;
+
   nodeIter = newSet->m_outTuns.begin();
-  for( ; nodeIter != newSet->m_outTuns.end(); ++nodeIter) {
+  oldSetNodeIter = m_outTuns.begin();
+  for( ; nodeIter != newSet->m_outTuns.end(); ++nodeIter, ++oldSetNodeIter) {
     Node *tun = *nodeIter;
     ((Tunnel*)tun)->m_pset = newSet;
+    (*oldSetNodeIter)->RemoveAllInputs2Way();
     NodeConnVecIter connIter = tun->m_inputs.begin();
     for(; connIter != tun->m_inputs.end(); ++connIter) {
       Node *in = (*connIter)->m_n;
       ((Tunnel*)in)->m_pset = newSet;
     }
   }
+  m_outTuns.clear();
   
   newSet->m_posses.swap(m_posses);
   PossMMapIter possIter = newSet->m_posses.begin();
@@ -310,16 +324,32 @@ void RealPSet::Migrate()
   }
   delete shadowToReplace;
   //  cout << "building on " << newSet->m_ownerPoss << endl;
-  newSet->m_ownerPoss->BuildDataTypeCache();
+  //  newSet->m_ownerPoss->BuildDataTypeCache();
 }
 
 RealPSet::~RealPSet()
 {
+  if (!(m_flags & SETTOPLEVELFLAG) && (m_inTuns.empty() || m_outTuns.empty()))
+    throw;
   Migrate();
-  if (!m_inTuns.empty())
-    throw;
-  if (!m_outTuns.empty())
-    throw;
+  if (!m_inTuns.empty()) {
+    NodeVecIter iter = m_inTuns.begin();
+    for(; iter != m_inTuns.end(); ++iter) {
+      if (!(*iter)->m_inputs.empty())
+	throw;
+      (*iter)->RemoveAllChildren2Way();
+    }
+    m_inTuns.clear();
+  }
+  if (!m_outTuns.empty()) {
+    NodeVecIter iter = m_outTuns.begin();
+    for(; iter != m_outTuns.end(); ++iter) {
+      if (!(*iter)->m_children.empty())
+	throw;
+      (*iter)->RemoveAllInputs2Way();
+    }
+    m_outTuns.clear();
+  }
   if (!m_shadows.empty())
     throw;
   PossMMapIter iter = m_posses.begin();

@@ -1601,3 +1601,14 @@ const DataTypeInfo& SplitSingleIter::DataType(ConnNum num) const
   }
 }
 #endif
+
+
+#if DOLLDLA
+void SplitSingleIter::MigrateFromOldTun(Tunnel *tun)
+{
+  LoopTunnel::MigrateFromOldTun(tun);
+  if (!tun->IsSplit())
+    throw;
+  m_info = (SplitSingleIter*)(tun->m_info);
+}
+#endif

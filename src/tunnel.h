@@ -70,6 +70,7 @@ class Tunnel : public DLANode
   virtual bool IsCombine() const {return false;}
   Tunnel* GetRealTunnel();
   const Tunnel* GetRealTunnel() const;
+  virtual void MigrateFromOldTun(Tunnel *tun) {}
 };
 
 string TunTypeToStr(TunType type);
