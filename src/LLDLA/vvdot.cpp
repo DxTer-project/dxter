@@ -148,7 +148,7 @@ void VVDot::Prop()
 
 Node* VVDot::BlankInst()
 {
-  return new VVDot(LLDLAPRIMITIVELAYER, REAL);
+  return new VVDot(LLDLAPRIMITIVELAYER, REAL_SINGLE);
 }
 
 Phase VVDot::MaxPhase() const 

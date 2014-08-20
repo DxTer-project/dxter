@@ -91,8 +91,14 @@ enum TriStruct { HERM,
 		 TRI,
 		 GEN };
 
+#if DOLLDLA
+enum Type { REAL_SINGLE,
+	    REAL_DOUBLE,
+	    COMPLEX };
+#else
 enum Type { REAL,
 	    COMPLEX };
+#endif
 
 enum Dir { HORIZONTAL,
 	   VERTICAL };

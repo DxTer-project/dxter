@@ -43,9 +43,6 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
 
 void RuntimeTest::AddIncludes()
 {
-  m_headers.push_back("#include \"row_stride_lldla_primitives.h\"");
-  m_headers.push_back("#include \"col_stride_lldla_primitives.h\"");
-  m_headers.push_back("#include \"gen_stride_lldla_primitives.h\"");
   m_headers.push_back("#include <immintrin.h>");
   m_headers.push_back("#include \"utils.h\"");
   m_headers.push_back("#include <string.h>");

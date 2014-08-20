@@ -136,7 +136,7 @@ Phase SMMul::MaxPhase() const
 
 Node* SMMul::BlankInst()
 {
-  return new SMMul(ABSLAYER, REAL);
+  return new SMMul(ABSLAYER, REAL_SINGLE);
 }
 
 NodeType SMMul::GetType() const

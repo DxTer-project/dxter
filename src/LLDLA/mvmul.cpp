@@ -115,7 +115,7 @@ void MVMul::PrintGeneralStride(IndStream &out)
 
 Node* MVMul::BlankInst()
 {
-  return new MVMul(ABSLAYER, REAL);
+  return new MVMul(ABSLAYER, REAL_SINGLE);
 }
 
 Phase MVMul::MaxPhase() const 

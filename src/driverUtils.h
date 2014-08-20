@@ -65,8 +65,15 @@ Side CharToSide(char c)
 Type CharToType(char c)
 {
   switch(c) {
+#if DOLLDLA
+ case('F'):
+    return REAL_SINGLE;
+ case('D'):
+    return REAL_DOUBLE;
+#else
   case('R'):
     return REAL;
+#endif // DOLLDLA
   case('C'):
     return COMPLEX;
   default:

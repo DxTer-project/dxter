@@ -178,7 +178,7 @@ void VAdd::VectorOpInputDimensionCheck(ConnNum inputNum)
 
 Node* VAdd::BlankInst()
 {
-  return new VAdd(COLVECTOR, LLDLAPRIMITIVELAYER, REAL);
+  return new VAdd(COLVECTOR, LLDLAPRIMITIVELAYER, REAL_SINGLE);
 }
 
 Node* VAdd::GetNewInst()

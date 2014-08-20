@@ -165,7 +165,7 @@ void LLDLAGemm::Prop()
 
 Node* LLDLAGemm::BlankInst()
 {
-  return new LLDLAGemm(COEFONE, COEFONE, REAL, ABSLAYER);
+  return new LLDLAGemm(COEFONE, COEFONE, REAL_SINGLE, ABSLAYER);
 }
 
 NodeType LLDLAGemm::GetType() const

@@ -128,7 +128,7 @@ void MAdd::Prop()
 
 Node* MAdd::BlankInst()
 {
-  return new MAdd(LLDLAPRIMITIVELAYER, REAL);
+  return new MAdd(LLDLAPRIMITIVELAYER, REAL_SINGLE);
 }
 
 NodeType MAdd::GetType() const

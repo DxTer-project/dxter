@@ -114,7 +114,7 @@ void VMMul::PrintGeneralStride(IndStream &out)
 
 Node* VMMul::BlankInst()
 {
-  return new VMMul(LLDLAPRIMITIVELAYER, REAL);
+  return new VMMul(LLDLAPRIMITIVELAYER, REAL_SINGLE);
 }
 
 Phase VMMul::MaxPhase() const

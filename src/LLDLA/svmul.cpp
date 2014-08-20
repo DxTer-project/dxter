@@ -172,7 +172,7 @@ void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
 
 Node* SVMul::BlankInst()
 {
-  return new SVMul(ROWVECTOR, LLDLAPRIMITIVELAYER, REAL);
+  return new SVMul(ROWVECTOR, LLDLAPRIMITIVELAYER, REAL_SINGLE);
 }
 
 NodeType SVMul::GetType() const
