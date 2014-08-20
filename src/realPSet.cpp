@@ -1230,7 +1230,6 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 #endif
   bool didMerge = false;
   int numPosses = (int)(m_posses.size());
-  bool recur = false;
   
   if (numPosses > 1) {
     PossMMap mmap;
@@ -1253,48 +1252,44 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 	}
 	Poss *poss = (*iter).second;
         PossMMap newPosses;
-	bool didSomethingInRecur = false;
-	if (poss->MergePosses(newPosses, simplifiers, cullFunc, didSomethingInRecur)) {
+	if (poss->MergePosses(newPosses, simplifiers, cullFunc)) {
 #ifdef _OPENMP
-	    omp_set_lock(&lock);
+#pragma omp atomic write
 #endif
-	    recur |= didSomethingInRecur;
 	    didMerge = true;
-	    PossMMapIter newPossesIter = newPosses.begin();
-	    for(; newPossesIter != newPosses.end(); ++newPossesIter) {
-	      if (!AddPossToMMap(mmap, (*newPossesIter).second, (*newPossesIter).first))
-		delete (*newPossesIter).second;
-	    }
+
+	    if (!newPosses.empty()) {
 #ifdef _OPENMP
-	    omp_unset_lock(&lock);
+	      omp_set_lock(&lock);
 #endif
+	      PossMMapIter newPossesIter = newPosses.begin();
+	      for(; newPossesIter != newPosses.end(); ++newPossesIter) {
+		if (!AddPossToMMap(mmap, (*newPossesIter).second, (*newPossesIter).first))
+		  delete (*newPossesIter).second;
+	      }
+#ifdef _OPENMP
+	      omp_unset_lock(&lock);
+#endif
+	    }
 	}
       }
     }
     PossMMapIter mmapIter = mmap.begin();
     for(; mmapIter != mmap.end(); ++mmapIter)
       (*mmapIter).second->BuildDataTypeCache();
-    unsigned int tmp = m_posses.size();
     AddPossesOrDispose(mmap);
-    if (m_posses.size() == tmp) {
-      didMerge = recur;
-    }
   }
   else {
     PossMMapIter iter = m_posses.begin();
     for(; iter != m_posses.end() && !didMerge; ++iter) {
       PossMMap newPosses;
       Poss *poss = (*iter).second;
-      bool didSomethingInRecur = false;
-      if (poss->MergePosses(newPosses, simplifiers, cullFunc, didSomethingInRecur)) {
-        didMerge = true;
+      if (poss->MergePosses(newPosses, simplifiers, cullFunc)) {
+	didMerge = true;
         PossMMapIter mmapIter = newPosses.begin();
         for(; mmapIter != newPosses.end(); ++mmapIter)
           (*mmapIter).second->BuildDataTypeCache();
-	unsigned int tmp = m_posses.size();
         AddPossesOrDispose(newPosses);
-	if (tmp == m_posses.size()) 
-	  didMerge = didSomethingInRecur;
       }
     }
   }
@@ -1311,7 +1306,7 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 	  && m_ownerPoss
 	  && m_ownerPoss->m_sets.size() > 1)
         {
-	  didMerge = true;
+	  //	  didMerge = true;
 	  InlinePoss(poss, newPosses);
 	  m_posses.erase(iter);
           PossMMapIter mapIter = newPosses.begin();

@@ -787,7 +787,7 @@ void Poss::ExpandTunnels()
 }
 */
 
-bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunction cullFunc, bool &didSomethingInRecur)
+bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunction cullFunc)
 {
   /*
     First, recurse through my PSet's then check if
@@ -806,10 +806,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
     if (pset->IsReal())
       didMerge |= ((RealPSet*)pset)->MergePosses(simplifiers, cullFunc);
   }
-  if (didMerge) {
-    didSomethingInRecur = true;
-  }
-  else {
+  if (!didMerge) {
     //Didn't make any changes in the recursion
     //First see if there are any loops to fuse
     // (check that the fusion hasn't already been done)
