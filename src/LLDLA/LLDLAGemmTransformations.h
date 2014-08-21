@@ -28,20 +28,22 @@
 #include "gemmTransformations.h"
 #include "realLoop.h"
 
-class LLDLAGemmLoopExp : public GemmLoopExp
+/*class LLDLAGemmLoopExp : public GemmLoopExp
 {
  public:
   LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
-};
+  };*/
 
 class GemmTransToNotTrans : public SingleTrans
 {
  public:
   Layer m_layer;
- GemmTransToNotTrans(Layer layer) :m_layer(layer) {}
+  Type m_type;
+ GemmTransToNotTrans(Layer layer, Type type) :
+  m_layer(layer), m_type(type) {}
   virtual string GetType() const {return "GemmTransToNotTrans";}
   virtual bool IsRef() const {return true;}
   virtual bool CanApply(const Node *node) const;
@@ -53,8 +55,9 @@ class LLDLAGemmToMVMul : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- LLDLAGemmToMVMul(Layer fromLayer, Layer toLayer)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  Type m_type;
+ LLDLAGemmToMVMul(Layer fromLayer, Layer toLayer, Type type)
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_type(type) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -66,8 +69,9 @@ class LLDLAGemmToVMMul : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- LLDLAGemmToVMMul(Layer fromLayer, Layer toLayer)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  Type m_type;
+ LLDLAGemmToVMMul(Layer fromLayer, Layer toLayer, Type type)
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_type(type) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -79,8 +83,9 @@ class LLDAGemmLowerLayer : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
- LLDAGemmLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
+  Type m_type;
+ LLDAGemmLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs), m_type(type) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

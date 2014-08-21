@@ -231,7 +231,7 @@ bool SVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     const SVMul *svmul = (SVMul*) node;
-    if (svmul->GetLayer() != m_fromLayer) {
+    if (svmul->GetLayer() != m_fromLayer || m_type != svmul->m_type) {
       return false;
     }
     if (m_vtype == ROWVECTOR) {
@@ -285,7 +285,16 @@ void SVMulLoopRef::Apply(Node *node) const
   
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
 
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
+
   // Row vectors are partitioned in the N dimension, column vectors in the M dimension
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
 
@@ -307,12 +316,12 @@ SVMulLowerLayer::SVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type t
 bool SVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
-    const SVMul *smul = (SVMul*) node;
-    if (smul->GetLayer() != m_fromLayer) {
+    const SVMul *svmul = (SVMul*) node;
+    if (svmul->GetLayer() != m_fromLayer || m_type != svmul->m_type) {
       return false;
     }
-    if (*(smul->GetInputM(1)) <= m_bs &&
-	*(smul->GetInputN(1)) <= m_bs) {
+    if (*(svmul->GetInputM(1)) <= m_bs &&
+	*(svmul->GetInputN(1)) <= m_bs) {
       return true;
     } else {
       return false;
@@ -349,7 +358,7 @@ bool SVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     SVMul* svmul = (SVMul*) node;
-    if (svmul->GetLayer() != m_fromLayer) {
+    if (svmul->GetLayer() != m_fromLayer || m_type != svmul->m_type) {
       return false;
     }
     if ((!(*(svmul->GetInputM(1)) <= m_regWidth) &&
@@ -401,7 +410,7 @@ void SVMulToRegArith::Apply(Node* node) const
   loadA->AddInput(splitVec, 1);
 
   // Create inner multiply operation
-  Mul* mul = new Mul();
+  Mul* mul = new Mul(m_type);
   mul->AddInput(scalarTun, 0);
   mul->AddInput(loadA, 0);
 
@@ -421,7 +430,15 @@ void SVMulToRegArith::Apply(Node* node) const
 
   // Create poss
   Poss* loopPoss = new Poss(2, combineVec, scalarOut);
-  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
   
   // Adding loop to poss and cleanup
   node->m_poss->AddPSet(loop);
@@ -434,10 +451,10 @@ string SVMulToRegArith::GetType() const
 {
   if (m_vType == ROWVECTOR) {
     return "SVMul register arith - Row vector " + LayerNumToStr(m_fromLayer)
-      + " to " + LayerNumToStr(m_fromLayer);
+      + " to " + LayerNumToStr(m_fromLayer)  + " type " + std::to_string((long long int) m_type);
   } else {
     return "SVMul register arith - Col vector " + LayerNumToStr(m_fromLayer)
-      + " to " + LayerNumToStr(m_fromLayer);
+      + " to " + LayerNumToStr(m_fromLayer)  + " type " + std::to_string((long long int) m_type);
   }
 }
 

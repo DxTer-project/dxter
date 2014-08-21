@@ -63,6 +63,12 @@ string BSSize::VarName() const
       return "(2*" + (string)(MU_VAR_NAME) + ")";
     case (USELLDLA3MUSINGLE):
       return "(3*" + (string)(MU_VAR_NAME) + ")";
+    case (USELLDLAMUDOUBLE):
+      return MU_VAR_NAME;
+    case (USELLDLA2MUDOUBLE):
+      return "(2*" + (string)(MU_VAR_NAME) + ")";
+    case (USELLDLA3MUDOUBLE):
+      return "(3*" + (string)(MU_VAR_NAME) + ")";
 #endif
     default:
       throw;
@@ -638,9 +644,12 @@ template<class PSetType>
   if (GetType() != LLDLALOOP)
     throw;
   if (GetBSSize() != UnitBS &&
-      GetBSSize() != LLDLAMu &&
-      GetBSSize() != LLDLA2Mu &&
-      GetBSSize() != LLDLA3Mu)
+      GetBSSize() != LLDLAMuSingle &&
+      GetBSSize() != LLDLA2MuSingle &&
+      GetBSSize() != LLDLA3MuSingle &&
+      GetBSSize() != LLDLAMuDouble &&
+      GetBSSize() != LLDLA2MuDouble &&
+      GetBSSize() != LLDLA3MuDouble)
     throw;
   if (!PSetType::IsReal() || !((RealLoop*)this)->IsUnrolled()) {
     SplitBase *split = GetControl();

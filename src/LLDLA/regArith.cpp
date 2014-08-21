@@ -23,6 +23,11 @@
 
 #if DOLLDLA
 
+FMAdd::FMAdd(Type type)
+{
+  m_type = type;
+}
+
 void FMAdd::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -49,8 +54,13 @@ void FMAdd::PrintCode(IndStream &out)
   string aStr = GetInputNameStr(0);
   string bStr = GetInputNameStr(1);
   string cStr = GetInputNameStr(2);
-  *out << "VEC_PD_FMA( " << aStr << ", " << bStr << ", " << cStr << " );\n";
+  *out << arch->FMACode(m_type, aStr, bStr, cStr, cStr);
   return;
+}
+
+Add::Add(Type type)
+{
+  m_type = type;
 }
 
 void Add::Prop()
@@ -70,8 +80,13 @@ void Add::PrintCode(IndStream &out)
   out.Indent();
   string aStr = GetInputNameStr(0);
   string bStr = GetInputNameStr(1);
-  *out << "VEC_PD_ADD( " << aStr << ", " << bStr << " );\n";
+  *out << arch->AddCode(m_type, aStr, bStr, bStr);
   return;
+}
+
+Mul::Mul(Type type)
+{
+  m_type = type;
 }
 
 void Mul::Prop()
@@ -91,8 +106,13 @@ void Mul::PrintCode(IndStream &out)
   out.Indent();
   string aStr = GetInputNameStr(0);
   string bStr = GetInputNameStr(1);
-  *out << "VEC_PD_MUL( " << aStr << ", " << bStr << " );\n";
+  *out << arch->MulCode(m_type, aStr, bStr, bStr);
   return;
+}
+
+ZeroReg::ZeroReg(Type type)
+{
+  m_type = type;
 }
 
 void ZeroReg::Prop()
@@ -105,8 +125,13 @@ void ZeroReg::PrintCode(IndStream &out)
 {
   out.Indent();
   string aStr = GetInputNameStr(0);
-  *out << "VEC_SET_ZERO( " << aStr << " );\n";
+  *out << arch->ZeroVar(m_type, aStr);
   return;
+}
+
+AccumReg::AccumReg(Type type)
+{
+  m_type = type;
 }
 
 void AccumReg::Prop()
@@ -120,7 +145,7 @@ void AccumReg::PrintCode(IndStream &out)
   out.Indent();
   string vecStr = GetInputNameStr(0);
   string accStr = GetInputNameStr(1);
-  *out << "VEC_ACCUM( " << vecStr << ", " << accStr << " );\n";
+  *out << arch->AccumCode(m_type, accStr, vecStr);
   return;
 }
 
