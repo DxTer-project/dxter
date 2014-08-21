@@ -25,6 +25,7 @@
 #include <sstream>
 #include "runtimeEvaluation.h"
 
+#if DOLLDLA
 
 RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize)
 {
@@ -362,3 +363,5 @@ void RuntimeEvaluator::Tokenize(const string& str, vector<string>& tokens, const
       pos = str.find_first_of(delimiters, lastPos);
     }
 }
+
+#endif // DOLLDLA
