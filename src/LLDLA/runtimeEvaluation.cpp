@@ -60,7 +60,7 @@ void RuntimeTest::AddMiscellaneousDefines()
   m_defines.push_back("#define MUVALUE " + std::to_string(arch->VecRegWidth(m_type)) + "\n");
   if (m_type == REAL_SINGLE) {
     m_defines.push_back("#define NUM_SIZE sizeof(float)");
-
+    //  m_defines.push_back("#define MUVALUE 4");
     m_defines.push_back("float tmp[4];\n");
     m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_floats((size), (buf))");
     m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff_float((size), (b1), (b2), (test_name))");
@@ -68,6 +68,7 @@ void RuntimeTest::AddMiscellaneousDefines()
     m_defines.push_back("typedef union {\n\t__m128 v;\n\tfloat f[4];\n} vec_reg;");
   } else {
     m_defines.push_back("#define NUM_SIZE sizeof(double)");
+    //    m_defines.push_back("#define MUVALUE 2");
     m_defines.push_back("double tmp[2];\n");
     m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_doubles((size), (buf))");
     m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff((size), (b1), (b2), (test_name))");

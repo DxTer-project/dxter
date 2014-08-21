@@ -170,7 +170,7 @@ string Architecture::ZeroVar(Type type, string varName)
 
 int AMDEngSample::SVecRegWidth()
 {
-  return 2;
+  return 4;
 }
 
 string AMDEngSample::STypeName()
