@@ -3068,3 +3068,25 @@ void Poss::RemoveAndDeleteNodes(NodeVec &vec)
       throw;
   }
 }
+
+
+void Poss::SetDeletingRecursively()
+{
+  PSetVecIter iter = m_sets.begin();
+  for( ; iter != m_sets.end(); ++iter) {
+    BasePSet *set = *iter;
+    if (set->IsReal())
+      ((RealPSet*)set)->SetDeletingRecursively();
+  }
+
+}
+
+void Poss::ClearDeletingRecursively()
+{
+  PSetVecIter iter = m_sets.begin();
+  for( ; iter != m_sets.end(); ++iter) {
+    BasePSet *set = *iter;
+    if (set->IsReal())
+      ((RealPSet*)set)->ClearDeletingRecursively();
+  }
+}

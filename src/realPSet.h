@@ -98,6 +98,8 @@ class RealPSet : public BasePSet
   virtual RealPSet* GetReal() {return this;}
 
   RealPSet* HasMergedWith(RealPSet *set, bool checkOtherOrder=true);
+  void SetDeletingRecursively();
+  void ClearDeletingRecursively();
 };
 
 

@@ -162,8 +162,17 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
 
 void RealPSet::Migrate()
 {
+  ShadowPSet *shadowToReplace = NULL;
+  for(unsigned int shadowNum = 0; shadowNum < m_shadows.size(); ++shadowNum) {
+    BasePSet *tmp = m_shadows[shadowNum];
+    if (!(tmp->m_flags & SETISDELETINGFLAG)) {
+      shadowToReplace = (ShadowPSet*)tmp;
+      break;
+    }
+  }
+
   //  cout << "migrating " << this << endl;
-  if (m_shadows.empty()) {
+  if (!shadowToReplace) {
     //    cout << "deleting, no shadows " << this << endl;
 #if PRINTTRACKING
     cout << "deleting, no shadows " << this << endl;
@@ -189,7 +198,7 @@ void RealPSet::Migrate()
     m_mergeMap.clear();
     return;
   }
-  ShadowPSet *shadowToReplace = (ShadowPSet*)(m_shadows[0]);
+
   //  m_shadows.erase(m_shadows.begin());
 
 
@@ -322,6 +331,7 @@ void RealPSet::Migrate()
       break;
     }
   }
+  newSet->ClearDeletingRecursively();
   delete shadowToReplace;
   //  cout << "building on " << newSet->m_ownerPoss << endl;
   //  newSet->m_ownerPoss->BuildDataTypeCache();
@@ -331,6 +341,7 @@ RealPSet::~RealPSet()
 {
   if (!(m_flags & SETTOPLEVELFLAG) && (m_inTuns.empty() || m_outTuns.empty()))
     throw;
+  SetDeletingRecursively();
   Migrate();
   if (!m_inTuns.empty()) {
     NodeVecIter iter = m_inTuns.begin();
@@ -350,8 +361,13 @@ RealPSet::~RealPSet()
     }
     m_outTuns.clear();
   }
-  if (!m_shadows.empty())
-    throw;
+  if (!m_shadows.empty()) {
+    PSetVecIter iter = m_shadows.begin();
+    for( ; iter != m_shadows.end(); ++iter) {
+      ((ShadowPSet*)*iter)->m_realPSet = NULL;
+    }
+    m_shadows.clear();
+  }
   PossMMapIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter) {
     delete (*iter).second;
@@ -1953,4 +1969,23 @@ bool RealPSet::RemoveLoops(bool *doneSomething)
     }
   }
   return m_posses.empty();
+}
+
+void RealPSet::SetDeletingRecursively()
+{
+  m_flags |= SETISDELETINGFLAG;
+  PossMMapIter iter = m_posses.begin();
+  for( ; iter != m_posses.end(); ++iter) {
+    iter->second->SetDeletingRecursively();
+  }
+
+}
+
+void RealPSet::ClearDeletingRecursively()
+{
+  m_flags &= ~SETISDELETINGFLAG;
+  PossMMapIter iter = m_posses.begin();
+  for( ; iter != m_posses.end(); ++iter) {
+    iter->second->ClearDeletingRecursively();
+  }
 }
