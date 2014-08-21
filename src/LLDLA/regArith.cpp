@@ -58,6 +58,11 @@ void FMAdd::PrintCode(IndStream &out)
   return;
 }
 
+Add::Add(Type type)
+{
+  m_type = type;
+}
+
 void Add::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -75,8 +80,13 @@ void Add::PrintCode(IndStream &out)
   out.Indent();
   string aStr = GetInputNameStr(0);
   string bStr = GetInputNameStr(1);
-  *out << "VEC_PD_ADD( " << aStr << ", " << bStr << " );\n";
+  *out << arch->AddCode(m_type, aStr, bStr, bStr);
   return;
+}
+
+Mul::Mul(Type type)
+{
+  m_type = type;
 }
 
 void Mul::Prop()
@@ -96,7 +106,7 @@ void Mul::PrintCode(IndStream &out)
   out.Indent();
   string aStr = GetInputNameStr(0);
   string bStr = GetInputNameStr(1);
-  *out << "VEC_PD_MUL( " << aStr << ", " << bStr << " );\n";
+  *out << arch->MulCode(m_type, aStr, bStr, bStr);
   return;
 }
 

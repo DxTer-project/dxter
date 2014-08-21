@@ -200,7 +200,7 @@ bool MVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
     const MVMul *mvmul = (MVMul*) node;
-    if (mvmul->GetLayer() != m_fromLayer) {
+    if (mvmul->GetLayer() != m_fromLayer || m_type != mvmul->m_type) {
       return false;
     }
 
@@ -264,15 +264,15 @@ string MVMulLoopRef::GetType() const
 bool MVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
-    const MVMul *mul = (MVMul*) node;
-    if (mul->GetLayer() != m_fromLayer) {
+    const MVMul *mvmul = (MVMul*) node;
+    if (mvmul->GetLayer() != m_fromLayer || m_type != mvmul->m_type) {
       return false;
     }
 
     if (m_dim == DIMM) {
-      return !(*(mul->GetInputM(0)) <= m_bs.GetSize());
+      return !(*(mvmul->GetInputM(0)) <= m_bs.GetSize());
     } else {
-      return !(*(mul->GetInputN(0)) <= m_bs.GetSize());
+      return !(*(mvmul->GetInputN(0)) <= m_bs.GetSize());
     }
   }
   return false;
@@ -409,8 +409,9 @@ bool MVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
     MVMul* mvmul = (MVMul*) node;
-    return *mvmul->GetInputM(0) == m_regWidth;
-    return true;
+    if (m_type == mvmul->m_type) {
+      return *mvmul->GetInputM(0) == m_regWidth;
+    }
   }
   return false;
 }

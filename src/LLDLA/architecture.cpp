@@ -48,6 +48,30 @@ string Architecture::TypeName(Type type)
   }
 }
 
+string Architecture::AddCode(Type type, string operand1, string operand2, string result)
+{
+  if (type == REAL_SINGLE) {
+    return SAddCode(operand1, operand2, result);
+  } else if (type == REAL_DOUBLE) {
+    return DAddCode(operand1, operand2, result);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::MulCode(Type type, string operand1, string operand2, string result)
+{
+  if (type == REAL_SINGLE) {
+    return SMulCode(operand1, operand2, result);
+  } else if (type == REAL_DOUBLE) {
+    return DMulCode(operand1, operand2, result);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
 string Architecture::FMACode(Type type, string operand1, string operand2, string operand3, string result)
 {
   if (type == REAL_SINGLE) {
@@ -204,9 +228,9 @@ string AMDEngSample::SContiguousStore(string memPtr, string startingLoc)
 string AMDEngSample::SStridedStore(string memPtr, string startingLoc, string stride)
 {
   return "*" + memPtr + " = " + startingLoc + ".f[0];\n"
-    + "*(" + memPtr + " + stride) = " + startingLoc + ".f[1];\n"
-    + "*(" + memPtr + " + 2 * stride) = " + startingLoc + ".f[2];\n"
-    + "*(" + memPtr + " + 3 * stride) = " + startingLoc + ".f[3];\n";
+    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".f[1];\n"
+    + "*(" + memPtr + " + 2 * " + stride + ") = " + startingLoc + ".f[2];\n"
+    + "*(" + memPtr + " + 3 * " + stride + ") = " + startingLoc + ".f[3];\n";
 }
 
 string AMDEngSample::SZeroVar(string varName)

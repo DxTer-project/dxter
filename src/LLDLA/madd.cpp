@@ -410,7 +410,7 @@ void MAddToRegArith::Apply(Node* node) const
   loadB->AddInput(splitB, 1);
 
   // Create new add node
-  Add* add = new Add();
+  Add* add = new Add(m_type);
   add->AddInput(loadA, 0);
   add->AddInput(loadB, 0);
 

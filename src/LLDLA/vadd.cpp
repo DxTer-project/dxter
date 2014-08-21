@@ -232,7 +232,7 @@ string VAddLoopRef::GetType() const
 bool VAddLoopRef::CanApply(const Node *node) const
 {
   const VAdd *vadd = (VAdd*) node;
-  if (vadd->GetLayer() != m_fromLayer) {
+  if (vadd->GetLayer() != m_fromLayer || m_type != vadd->m_type) {
     return false;
   }
   if (m_vtype == ROWVECTOR) {
@@ -316,7 +316,7 @@ bool VAddLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == VAdd::GetClass()) {
     const VAdd *vadd = (VAdd*) node;
-    if (vadd->GetLayer() != m_fromLayer) {
+    if (vadd->GetLayer() != m_fromLayer || m_type != vadd->m_type) {
       return false;
     }
 
@@ -365,7 +365,8 @@ VAddToRegArith::VAddToRegArith(Layer fromLayer, Layer toLayer, Type type)
 bool VAddToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VAdd::GetClass()) {
-    return true;
+    VAdd* vadd = (VAdd*) node;
+    return m_type == vadd->m_type;
   }
   return false;
 }
@@ -407,7 +408,7 @@ void VAddToRegArith::Apply(Node* node) const
   LoadToRegs* loadY = new LoadToRegs(m_type);
   loadY->AddInput(splitY, 1);
 
-  Add* add = new Add();
+  Add* add = new Add(m_type);
   add->AddInput(loadX, 0);
   add->AddInput(loadY, 0);
 

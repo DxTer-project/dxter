@@ -231,7 +231,7 @@ bool SVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     const SVMul *svmul = (SVMul*) node;
-    if (svmul->GetLayer() != m_fromLayer) {
+    if (svmul->GetLayer() != m_fromLayer || m_type != svmul->m_type) {
       return false;
     }
     if (m_vtype == ROWVECTOR) {
@@ -316,12 +316,12 @@ SVMulLowerLayer::SVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type t
 bool SVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
-    const SVMul *smul = (SVMul*) node;
-    if (smul->GetLayer() != m_fromLayer) {
+    const SVMul *svmul = (SVMul*) node;
+    if (svmul->GetLayer() != m_fromLayer || m_type != svmul->m_type) {
       return false;
     }
-    if (*(smul->GetInputM(1)) <= m_bs &&
-	*(smul->GetInputN(1)) <= m_bs) {
+    if (*(svmul->GetInputM(1)) <= m_bs &&
+	*(svmul->GetInputN(1)) <= m_bs) {
       return true;
     } else {
       return false;
@@ -358,7 +358,7 @@ bool SVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     SVMul* svmul = (SVMul*) node;
-    if (svmul->GetLayer() != m_fromLayer) {
+    if (svmul->GetLayer() != m_fromLayer || m_type != svmul->m_type) {
       return false;
     }
     if ((!(*(svmul->GetInputM(1)) <= m_regWidth) &&
@@ -410,7 +410,7 @@ void SVMulToRegArith::Apply(Node* node) const
   loadA->AddInput(splitVec, 1);
 
   // Create inner multiply operation
-  Mul* mul = new Mul();
+  Mul* mul = new Mul(m_type);
   mul->AddInput(scalarTun, 0);
   mul->AddInput(loadA, 0);
 
