@@ -249,7 +249,15 @@ void VVDotLoopRef::Apply(Node *node) const
 
   // Create the poss
   Poss *loopPoss = new Poss(3, rowCom, colCom, scalarTunOut);
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, m_bs);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
   loop->SetDimName(DIMK);
   
   node->m_poss->AddPSet(loop);
@@ -297,7 +305,7 @@ void VVDotLowerLayer::Apply(Node *node) const
 string VVDotLowerLayer::GetType() const
 {
   return "VVDot lower layer " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
 }
 
 VVDotToRegArith::VVDotToRegArith(Layer fromLayer, Layer toLayer, Type type)
@@ -376,7 +384,15 @@ void VVDotToRegArith::Apply(Node *node) const
 
   // Create the poss
   Poss* loopPoss = new Poss(3, comA, comB, accOut);
-  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
 
   // Add needed components to poss
   node->m_poss->AddPSet(loop);
@@ -395,7 +411,7 @@ void VVDotToRegArith::Apply(Node *node) const
 string VVDotToRegArith::GetType() const
 {
   return "VVDot register arith " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
 }
 
 #endif // DOLLDLA

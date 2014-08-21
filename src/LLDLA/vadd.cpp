@@ -287,8 +287,15 @@ void VAddLoopRef::Apply(Node *node) const
   CombineSingleIter *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
 
   Poss *loopPoss = new Poss(2, com0, com1);
-
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
   
   node->m_poss->AddPSet(loop);
@@ -343,7 +350,7 @@ void VAddLowerLayer::Apply(Node *node) const
 string VAddLowerLayer::GetType() const
 {
   return "VAdd lower layer " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
 }
 
 VAddToRegArith::VAddToRegArith(Layer fromLayer, Layer toLayer, Type type)
@@ -412,7 +419,15 @@ void VAddToRegArith::Apply(Node* node) const
   CombineSingleIter* comY = splitY->CreateMatchingCombine(1, 1, storeToY, 0);
   
   Poss* loopPoss = new Poss(2, comX, comY);
-  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
   loop->SetDimName(splitDown ? DIMM : DIMN);
 
   node->m_poss->AddPSet(loop);
@@ -425,7 +440,7 @@ void VAddToRegArith::Apply(Node* node) const
 string VAddToRegArith::GetType() const
 {
   return "VAddToRegArith " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_fromLayer);
+    + " to " + LayerNumToStr(m_fromLayer) + " type " + std::to_string((long long int) m_type);
 }
 
 #endif // DOLLDLA

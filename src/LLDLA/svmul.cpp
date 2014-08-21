@@ -285,7 +285,16 @@ void SVMulLoopRef::Apply(Node *node) const
   
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
 
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
+
   // Row vectors are partitioned in the N dimension, column vectors in the M dimension
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
 
@@ -421,7 +430,15 @@ void SVMulToRegArith::Apply(Node* node) const
 
   // Create poss
   Poss* loopPoss = new Poss(2, combineVec, scalarOut);
-  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
   
   // Adding loop to poss and cleanup
   node->m_poss->AddPSet(loop);
@@ -434,10 +451,10 @@ string SVMulToRegArith::GetType() const
 {
   if (m_vType == ROWVECTOR) {
     return "SVMul register arith - Row vector " + LayerNumToStr(m_fromLayer)
-      + " to " + LayerNumToStr(m_fromLayer);
+      + " to " + LayerNumToStr(m_fromLayer)  + " type " + std::to_string((long long int) m_type);
   } else {
     return "SVMul register arith - Col vector " + LayerNumToStr(m_fromLayer)
-      + " to " + LayerNumToStr(m_fromLayer);
+      + " to " + LayerNumToStr(m_fromLayer)  + " type " + std::to_string((long long int) m_type);
   }
 }
 

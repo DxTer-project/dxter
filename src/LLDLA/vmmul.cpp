@@ -186,16 +186,25 @@ void VMMul::Duplicate(const Node* orig, bool shallow, bool possMerging)
   return;
 }
 
+VMMulLoopRef::VMMulLoopRef(Layer toLayer, Layer fromLayer, DimName dim, BSSize bs, Type type)
+{
+  m_toLayer = toLayer;
+  m_fromLayer = fromLayer;
+  m_dim = dim;
+  m_bs = bs;
+  m_type = type;
+}
+
 string VMMulLoopRef::GetType() const
 {
   switch (m_dim) {
   case(DIMN):
-    return "VMMulLoopRef N dim";
+    return "VMMulLoopRef N dim" + std::to_string((long long int) m_type);
   case(DIMM):
     cout << "Error: DIMN is not valid dimension for  VMMulLoopRef\n";
     throw;
   case(DIMK):
-    return "VMMulLoopRef K dim";
+    return "VMMulLoopRef K dim" + std::to_string((long long int) m_type);
   case(BADDIM):
     cout << "Error: VMMulLoopRef has BADDIM\n";
     throw;
@@ -380,7 +389,7 @@ VMMulToRegArith::VMMulToRegArith(Layer fromLayer, Layer toLayer, Type type)
 string VMMulToRegArith::GetType() const
 {
   return "VMMulToRegArith from " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer)  + " type " + std::to_string((long long int) m_type);
 }
 
 bool VMMulToRegArith::CanApply(const Node* node) const

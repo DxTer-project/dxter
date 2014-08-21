@@ -30,6 +30,7 @@ MAdd::MAdd(Layer layer, Type type)
 {
   m_type = type;
   m_layer = layer;
+  m_type = type;
   m_regWidth = arch->VecRegWidth(m_type);
 }
 
@@ -134,7 +135,7 @@ Node* MAdd::BlankInst()
 
 NodeType MAdd::GetType() const
 {
-  return "MAdd" + LayerNumToStr(GetLayer()) + (char)m_type;
+  return "MAdd" + LayerNumToStr(GetLayer()) + " type " + std::to_string((long long int) m_type);
 }
 
 Phase MAdd::MaxPhase() const
@@ -166,9 +167,9 @@ string MAddLoopRef::GetType() const
 {
   switch (m_dim) {
   case (DIMM):
-    return "MAddMDimension";
+    return "MAddM " + std::to_string((long long int) m_type);
   case(DIMN):
-    return "MAddNDimension";
+    return "MAddN " + std::to_string((long long int) m_type);
   default:
     return "ERROR: Bad dimension in MAddLoopRef transform";
   }
@@ -344,7 +345,7 @@ string MAddLowerLayer::GetType() const
 string MAddToRegArith::GetType() const
 {
   return "MAddToRegArith " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer)  + " type " + std::to_string((long long int) m_type);
 }
 
 MAddToRegArith::MAddToRegArith(Layer fromLayer, Layer toLayer, Type type)

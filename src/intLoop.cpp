@@ -638,9 +638,12 @@ template<class PSetType>
   if (GetType() != LLDLALOOP)
     throw;
   if (GetBSSize() != UnitBS &&
-      GetBSSize() != LLDLAMu &&
-      GetBSSize() != LLDLA2Mu &&
-      GetBSSize() != LLDLA3Mu)
+      GetBSSize() != LLDLAMuSingle &&
+      GetBSSize() != LLDLA2MuSingle &&
+      GetBSSize() != LLDLA3MuSingle &&
+      GetBSSize() != LLDLAMuDouble &&
+      GetBSSize() != LLDLA2MuDouble &&
+      GetBSSize() != LLDLA3MuDouble)
     throw;
   if (!PSetType::IsReal() || !((RealLoop*)this)->IsUnrolled()) {
     SplitBase *split = GetControl();

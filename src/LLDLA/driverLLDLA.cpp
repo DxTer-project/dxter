@@ -42,6 +42,13 @@
 #include "vmmul.h"
 #include "mvmul.h"
 #include "vvdot.h"
+#include "driverUtils.h"
+#include "debug.h"
+#include "LLDLAGemmTransformations.h"
+#include "smmul.h"
+#include "svmul.h"
+#include "runtimeEvaluation.h"
+#include "loopUnrolling.h"
 
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
@@ -53,14 +60,6 @@
 #define DOLARGEMUTRANSFORMATIONS 0
 
 #include <sstream>
-
-#include "driverUtils.h"
-#include "debug.h"
-#include "LLDLAGemmTransformations.h"
-#include "smmul.h"
-#include "svmul.h"
-#include "runtimeEvaluation.h"
-#include "loopUnrolling.h"
 
 Size one = 1;
 Size smallSize = 4;
@@ -161,7 +160,7 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   //Introduces loops in the m, n, and k dimensions, respectively
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
+  /*  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle), LLDLALOOPPHASE);
 
@@ -176,7 +175,7 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle), LLDLALOOPPHASE);
 #endif
-  
+  */
   return;
 }
 
@@ -227,7 +226,7 @@ void AddSMMulTrans()
   //Introduces loops in the m and n dimension for SMMul
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
 
   return;
 }
@@ -345,7 +344,7 @@ int main(int argc, const char* argv[])
 #endif
 
   // TODO: Set architecture
-
+  arch = new AMDEngSample();
   //  PrintType printType = CODE;
   int numIters = -1;
   RealPSet* (*algFunc)();

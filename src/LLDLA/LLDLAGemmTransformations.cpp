@@ -28,6 +28,7 @@
 #include "mvmul.h"
 #include "vmmul.h"
 
+/*
 LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize)
   : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5))),bsSize)
 {
@@ -135,7 +136,7 @@ void LLDLAGemmLoopExp::Apply(Node *node) const
 {
   GemmLoopExp::Apply(node);
 }
-
+*/
 bool GemmTransToNotTrans::CanApply(const Node *node) const
 {
   const Gemm *gemm = (Gemm*)node;

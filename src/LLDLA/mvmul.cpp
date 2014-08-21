@@ -151,7 +151,7 @@ void MVMul::Prop()
     }
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if (!InputIsMuByMu(0)) {
+      if (*GetInputM(0) != m_regWidth || *GetInputN(0) != m_regWidth) {
 	cout << "ERROR: Primitive matrix must be 2 x 2 for MVMul\n";
 	throw;
       }
@@ -253,9 +253,9 @@ string MVMulLoopRef::GetType() const
   switch (m_dim)
     {
     case (DIMM):
-      return "MVMulLoopRef - dim m";
+      return "MVMulLoopRef - dim m " + std::to_string((long long int) m_type);
     case (DIMN):
-      return "MVMulLoopRef - dim n";
+      return "MVMulLoopRef - dim n " + std::to_string((long long int) m_type);
     default:
       throw;
     }  
@@ -402,7 +402,7 @@ MVMulToRegArith::MVMulToRegArith(Layer fromLayer, Layer toLayer, Type type)
 string MVMulToRegArith::GetType() const
 {
   return "MVMulToRegArith from " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer)  + " type " + std::to_string((long long int) m_type);
 }
 
 bool MVMulToRegArith::CanApply(const Node* node) const
