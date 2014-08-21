@@ -28,6 +28,7 @@
 #include "mvmul.h"
 #include "vmmul.h"
 
+/*
 LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize)
   : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5))),bsSize)
 {
@@ -135,11 +136,11 @@ void LLDLAGemmLoopExp::Apply(Node *node) const
 {
   GemmLoopExp::Apply(node);
 }
-
+*/
 bool GemmTransToNotTrans::CanApply(const Node *node) const
 {
   const Gemm *gemm = (Gemm*)node;
-  if (gemm->GetLayer() == m_layer) {
+  if (gemm->GetLayer() == m_layer && m_type == gemm->m_type) {
     return gemm->m_transA != NORMAL || gemm->m_transB != NORMAL;
   }
   return false;
@@ -162,7 +163,7 @@ bool LLDAGemmLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     const Gemm *gemm = (Gemm*)node;
-    if (gemm->GetLayer() != m_fromLayer)
+    if (gemm->GetLayer() != m_fromLayer || m_type != gemm->m_type)
       return false;
     if (*(gemm->GetInputM(0)) <= m_bs &&
 	*(gemm->GetInputN(0)) <= m_bs &&
@@ -183,19 +184,20 @@ void LLDAGemmLowerLayer::Apply(Node *node) const
 string LLDAGemmLowerLayer::GetType() const
 { 
   return "Gemm lower layer " + LayerNumToStr(m_fromLayer) 
-  + " to " + LayerNumToStr(m_toLayer);
+  + " to " + LayerNumToStr(m_toLayer)  + " type " + std::to_string((long long int) m_type);
 }
 
 string LLDLAGemmToMVMul::GetType() const
 {
   return "Gemm to MVMul from " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
 }
 
 bool LLDLAGemmToMVMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
-    return true;
+    Gemm* gemm = (Gemm*) node;
+    return m_type == gemm->m_type;
   }
   return false;
 }
@@ -250,14 +252,14 @@ void LLDLAGemmToMVMul::Apply(Node* node) const
 string LLDLAGemmToVMMul::GetType() const
 {
   return "Gemm to VMMul from " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
 }
 
 bool LLDLAGemmToVMMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     Gemm* gemm = (Gemm*) node;
-    if (gemm->m_alpha == COEFONE && gemm->m_beta == COEFONE) {
+    if (gemm->m_alpha == COEFONE && gemm->m_beta == COEFONE && m_type == gemm->m_type) {
       return true;
     }
   }

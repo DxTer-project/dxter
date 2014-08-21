@@ -158,6 +158,14 @@ string SMulLoopRef::GetType() const
     }  
 }
 
+SMulLoopRef::SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_dim = dim;
+  m_bs = bs;
+}
+
 bool SMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SMMul::GetClass()) {

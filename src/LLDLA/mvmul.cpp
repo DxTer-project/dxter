@@ -151,7 +151,7 @@ void MVMul::Prop()
     }
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if (!InputIsMuByMu(0)) {
+      if (*GetInputM(0) != m_regWidth || *GetInputN(0) != m_regWidth) {
 	cout << "ERROR: Primitive matrix must be 2 x 2 for MVMul\n";
 	throw;
       }
@@ -200,7 +200,7 @@ bool MVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
     const MVMul *mvmul = (MVMul*) node;
-    if (mvmul->GetLayer() != m_fromLayer) {
+    if (mvmul->GetLayer() != m_fromLayer || m_type != mvmul->m_type) {
       return false;
     }
 
@@ -253,9 +253,9 @@ string MVMulLoopRef::GetType() const
   switch (m_dim)
     {
     case (DIMM):
-      return "MVMulLoopRef - dim m";
+      return "MVMulLoopRef - dim m " + std::to_string((long long int) m_type);
     case (DIMN):
-      return "MVMulLoopRef - dim n";
+      return "MVMulLoopRef - dim n " + std::to_string((long long int) m_type);
     default:
       throw;
     }  
@@ -264,15 +264,15 @@ string MVMulLoopRef::GetType() const
 bool MVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
-    const MVMul *mul = (MVMul*) node;
-    if (mul->GetLayer() != m_fromLayer) {
+    const MVMul *mvmul = (MVMul*) node;
+    if (mvmul->GetLayer() != m_fromLayer || m_type != mvmul->m_type) {
       return false;
     }
 
     if (m_dim == DIMM) {
-      return !(*(mul->GetInputM(0)) <= m_bs.GetSize());
+      return !(*(mvmul->GetInputM(0)) <= m_bs.GetSize());
     } else {
-      return !(*(mul->GetInputN(0)) <= m_bs.GetSize());
+      return !(*(mvmul->GetInputN(0)) <= m_bs.GetSize());
     }
   }
   return false;
@@ -402,15 +402,16 @@ MVMulToRegArith::MVMulToRegArith(Layer fromLayer, Layer toLayer, Type type)
 string MVMulToRegArith::GetType() const
 {
   return "MVMulToRegArith from " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer)  + " type " + std::to_string((long long int) m_type);
 }
 
 bool MVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
     MVMul* mvmul = (MVMul*) node;
-    return *mvmul->GetInputM(0) == m_regWidth;
-    return true;
+    if (m_type == mvmul->m_type) {
+      return *mvmul->GetInputM(0) == m_regWidth;
+    }
   }
   return false;
 }
@@ -451,7 +452,7 @@ void MVMulToRegArith::Apply(Node* node) const
   loadX->AddInput(splitX, 1);
 
   // Create new FMA instruction for loop body
-  FMAdd* fmadd = new FMAdd();
+  FMAdd* fmadd = new FMAdd(m_type);
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(loadX, 0);
   fmadd->AddInput(yTun, 0);

@@ -42,6 +42,13 @@
 #include "vmmul.h"
 #include "mvmul.h"
 #include "vvdot.h"
+#include "driverUtils.h"
+#include "debug.h"
+#include "LLDLAGemmTransformations.h"
+#include "smmul.h"
+#include "svmul.h"
+#include "runtimeEvaluation.h"
+#include "loopUnrolling.h"
 
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
@@ -53,14 +60,6 @@
 #define DOLARGEMUTRANSFORMATIONS 0
 
 #include <sstream>
-
-#include "driverUtils.h"
-#include "debug.h"
-#include "LLDLAGemmTransformations.h"
-#include "smmul.h"
-#include "svmul.h"
-#include "runtimeEvaluation.h"
-#include "loopUnrolling.h"
 
 Size one = 1;
 Size smallSize = 4;
@@ -87,6 +86,7 @@ RealPSet* DoubleGemmExample();
 Trans transA, transB;
 
 Architecture* arch;
+Type dataType = REAL_SINGLE;
 
 ImplementationMap ImpStrMap(Universe *uni)
 {
@@ -155,13 +155,19 @@ GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost,
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
 
   // Transform gemm into loop over vmmuls
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
+
+    // Convert gemm into loop over mvmul
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
+
+  // Transform gemm into loop over vmmuls
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
 
   //Introduces loops in the m, n, and k dimensions, respectively
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
+  /*  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle), LLDLALOOPPHASE);
 
@@ -176,7 +182,7 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle), LLDLALOOPPHASE);
 #endif
-  
+  */
   return;
 }
 
@@ -227,7 +233,7 @@ void AddSMMulTrans()
   //Introduces loops in the m and n dimension for SMMul
   Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
 
   return;
 }
@@ -344,8 +350,7 @@ int main(int argc, const char* argv[])
   omp_set_nested(true);
 #endif
 
-  // TODO: Set architecture
-
+  arch = new AMDEngSample();
   //  PrintType printType = CODE;
   int numIters = -1;
   RealPSet* (*algFunc)();
@@ -591,7 +596,7 @@ int main(int argc, const char* argv[])
 
   int chunkSize = 300;
   int numIterations = 1;
-  RuntimeTest rtest(opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
+  RuntimeTest rtest(dataType, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
@@ -671,23 +676,23 @@ RealPSet* GemvExample()
   Tunnel* tunBeta = new Tunnel(POSSTUNIN);
   tunBeta->AddInput(betaIn, 0);
 
-  SVMul* by = new SVMul(COLVECTOR, ABSLAYER, REAL_SINGLE);
+  SVMul* by = new SVMul(COLVECTOR, ABSLAYER, dataType);
   by->AddInputs(4,
 		tunBeta, 0,
 		tunY, 0);
 
-  MVMul* axMul = new MVMul(ABSLAYER, REAL_SINGLE);
+  MVMul* axMul = new MVMul(ABSLAYER, dataType);
   axMul->AddInputs(6,
 		   tunA, 0,
 		   tunX, 0,
 		   tunZ, 0);
 
-  SVMul* alphaAXMul = new SVMul(COLVECTOR, ABSLAYER, REAL_SINGLE);
+  SVMul* alphaAXMul = new SVMul(COLVECTOR, ABSLAYER, dataType);
   alphaAXMul->AddInputs(4,
 			tunAlpha, 0,
 			axMul, 0);
 
-  VAdd* sumVecs = new VAdd(COLVECTOR, ABSLAYER, REAL_SINGLE);
+  VAdd* sumVecs = new VAdd(COLVECTOR, ABSLAYER, dataType);
   sumVecs->AddInputs(4,
 		     alphaAXMul, 0,
 		     by, 0);
@@ -746,13 +751,13 @@ RealPSet* MVMul2Example()
   Tunnel* tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(BIn, 0);
 
-  MVMul* mvmul1 = new MVMul(ABSLAYER, REAL_SINGLE);
+  MVMul* mvmul1 = new MVMul(ABSLAYER, dataType);
   mvmul1->AddInputs(6,
 		    tunB, 0,
 		    tunX, 0,
 		    tunY, 0);
 
-  MVMul* mvmul2 = new MVMul(ABSLAYER, REAL_SINGLE);
+  MVMul* mvmul2 = new MVMul(ABSLAYER, dataType);
   mvmul2->AddInputs(6,
 		    tunA, 0,
 		    mvmul1, 0,
@@ -796,12 +801,12 @@ RealPSet* MAdd2Example()
   Tunnel* tunZ = new Tunnel(POSSTUNIN);
   tunZ->AddInput(zIn, 0);
 
-  MAdd* madd1 = new MAdd(ABSLAYER, REAL_SINGLE);
+  MAdd* madd1 = new MAdd(ABSLAYER, dataType);
   madd1->AddInputs(4,
 		  tunX, 0,
 		  tunY, 0);
 
-  MAdd* madd2 = new MAdd(ABSLAYER, REAL_SINGLE);
+  MAdd* madd2 = new MAdd(ABSLAYER, dataType);
   madd2->AddInputs(4,
 		   tunZ, 0,
 		   madd1, 0);
@@ -844,12 +849,12 @@ RealPSet* VAdd2Example()
   Tunnel* tunZ = new Tunnel(POSSTUNIN);
   tunZ->AddInput(zIn, 0);
 
-  VAdd* vadd1 = new VAdd(COLVECTOR, ABSLAYER, REAL_SINGLE);
+  VAdd* vadd1 = new VAdd(COLVECTOR, ABSLAYER, dataType);
   vadd1->AddInputs(4,
 		  tunX, 0,
 		  tunY, 0);
 
-  VAdd* vadd2 = new VAdd(COLVECTOR, ABSLAYER, REAL_SINGLE);
+  VAdd* vadd2 = new VAdd(COLVECTOR, ABSLAYER, dataType);
   vadd2->AddInputs(4,
 		   tunZ, 0,
 		   vadd1, 0);
@@ -885,7 +890,7 @@ RealPSet* VAddExample()
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  VAdd* vadd = new VAdd(COLVECTOR, ABSLAYER, REAL_SINGLE);
+  VAdd* vadd = new VAdd(COLVECTOR, ABSLAYER, dataType);
   vadd->AddInputs(4,
 		  tunX, 0,
 		  tunY, 0);
@@ -945,13 +950,13 @@ RealPSet* VMVMulExample()
   Tunnel* tunW = new Tunnel(POSSTUNIN);
   tunW->AddInput(wIn, 0);
 
-  MVMul* mvmul = new MVMul(ABSLAYER, REAL_SINGLE);
+  MVMul* mvmul = new MVMul(ABSLAYER, dataType);
   mvmul->AddInputs(6,
 		   tunA, 0,
 		   tunX, 0,
 		   tunZ, 0);
 
-  VVDot* vvdot = new VVDot(ABSLAYER, REAL_SINGLE);
+  VVDot* vvdot = new VVDot(ABSLAYER, dataType);
   vvdot->AddInputs(6,
 		   tunY, 0,
 		   mvmul, 0,
@@ -986,7 +991,7 @@ RealPSet* SMMulExample()
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  SMMul* smmul = new SMMul(ABSLAYER, REAL_SINGLE);
+  SMMul* smmul = new SMMul(ABSLAYER, dataType);
   smmul->AddInputs(4,
 		   tunX, 0,
 		   tunA, 0);
@@ -1027,7 +1032,7 @@ RealPSet* VMMulExample()
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  VMMul* vmmul = new VMMul(ABSLAYER, REAL_SINGLE);
+  VMMul* vmmul = new VMMul(ABSLAYER, dataType);
   vmmul->AddInputs(6,
 		   tunX, 0,
 		   tunA, 0,
@@ -1062,7 +1067,7 @@ RealPSet* SVMulRowExample()
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  SVMul* svmul = new SVMul(ROWVECTOR, ABSLAYER, REAL_SINGLE);
+  SVMul* svmul = new SVMul(ROWVECTOR, ABSLAYER, dataType);
   svmul->AddInputs(4,
 		   tunX, 0,
 		   tunA, 0);
@@ -1096,7 +1101,7 @@ RealPSet* SVMulColExample()
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  SVMul* svmul = new SVMul(COLVECTOR, ABSLAYER, REAL_SINGLE);
+  SVMul* svmul = new SVMul(COLVECTOR, ABSLAYER, dataType);
   svmul->AddInputs(4,
 		   tunX, 0,
 		   tunA, 0);
@@ -1137,7 +1142,7 @@ RealPSet* MVMulExample()
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  MVMul* mvmul = new MVMul(ABSLAYER, REAL_SINGLE);
+  MVMul* mvmul = new MVMul(ABSLAYER, dataType);
   mvmul->AddInputs(6,
 		   tunA, 0,
 		   tunX, 0,
@@ -1171,7 +1176,7 @@ RealPSet* MAddExample()
   Tunnel* tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(Bin, 0);
 
-  MAdd* madd = new MAdd(ABSLAYER, REAL_SINGLE);
+  MAdd* madd = new MAdd(ABSLAYER, dataType);
   madd->AddInputs(4,
 		 tunA, 0,
 		 tunB, 0);
@@ -1212,7 +1217,7 @@ RealPSet* DotExample()
   Tunnel *tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  VVDot* dot = new VVDot(ABSLAYER, REAL_SINGLE);
+  VVDot* dot = new VVDot(ABSLAYER, dataType);
   dot->AddInputs(6,
 		 tunA, 0,
 		 tunB, 0,
@@ -1254,7 +1259,7 @@ RealPSet* GemmExample()
   Tunnel *tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin, 0);
 
-  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL_SINGLE);
+  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
   gemm->AddInputs(6,
 		  tunA, 0,
 		  tunB, 0,
@@ -1296,13 +1301,13 @@ RealPSet* DoubleGemmExample()
   Tunnel *tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  Gemm *gemm1 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL_SINGLE);
+  Gemm *gemm1 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
   gemm1->AddInputs(6,
 		  tunA,0,
 		  tunB,0,
 		  tunC,0);
 
-  Gemm *gemm2 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, REAL_SINGLE);
+  Gemm *gemm2 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
   gemm2->AddInputs(6,
 		  tunA,0,
 		  tunB,0,

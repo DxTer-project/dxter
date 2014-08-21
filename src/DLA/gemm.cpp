@@ -91,7 +91,11 @@ void Gemm::Parallelize(Comm comm)
 Node* Gemm::BlankInst()
 {
   //These are default settings for a basic Gemm node
+#if DOLLDLA
   return new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, REAL_SINGLE);
+#else
+  return new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, REAL);
+#endif
 }
 
 NodeType Gemm::GetType() const

@@ -26,8 +26,9 @@
 #include "runtimeEvaluation.h"
 
 
-RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize)
+RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize)
 {
+  m_type = type;
   m_operationName = operationName;
   m_argNames = argNames;
   m_argDeclarations = argDeclarations;
@@ -37,7 +38,6 @@ RuntimeTest::RuntimeTest(string operationName, vector<string> argNames, vector<s
   m_dataFileName = m_operationName + "_time_data";
   m_correctTestFileName = m_operationName + "_correctness_test_results";
   AddIncludes();
-  AddVectorRegisterArithmeticMacros();
   AddMiscellaneousDefines();
 }
 
@@ -50,36 +50,6 @@ void RuntimeTest::AddIncludes()
   return;
 }
 
-void RuntimeTest::AddVectorRegisterArithmeticMacros()
-{
-  m_defines.push_back("#define VEC_PD_ADD(a, b) (b).v = (b).v + (a).v");
-  m_defines.push_back("#define VEC_PD_MUL(a, b) (b).v = (b).v * (a).v");
-  m_defines.push_back("#define VEC_PTR_PD_SET(n, vec, ptr) *(ptr) = (vec).d[(n)]");
-
-#if USE_DOUBLE_PRECISION
-  m_defines.push_back("#define VEC_SET_ZERO(vreg) (vreg).v = _mm_setzero_pd()");
-  m_defines.push_back("#define NUM_SIZE sizeof(double)");
-  m_defines.push_back("#define VEC_PD_FMA(a, b, c) (c).v = _mm_fmadd_pd((a).v, (b).v, (c).v)");
-  m_defines.push_back("#define VEC_ACCUM(c, ptr) *(ptr) += (c).d[0] + (c).d[1]");
-  m_defines.push_back("#define VEC_PTR_PD_LOAD(vec, ptr) (vec).v = _mm_load_pd((ptr))");
-  m_defines.push_back("#define VEC_2D_LOAD(p1, p2) _mm_loadh_pd(_mm_load_sd((p1)), (p2))");
-  m_defines.push_back("#define VEC_PPTR_PD_LOAD(vec, p1, p2) (vec).v = _mm_loadh_pd(_mm_load_sd((p1)), (p2))");
-  m_defines.push_back("#define VEC_PTR_DUP_LOAD(vec, ptr) (vec).v = _mm_loaddup_pd((ptr))");
-  m_defines.push_back("#define VEC_PTR_PD_STORE(vec, ptr) _mm_store_pd((ptr), (vec).v)");
-#else
-  m_defines.push_back("#define VEC_SET_ZERO(vreg) (vreg).v = _mm_setzero_ps()");
-  m_defines.push_back("#define NUM_SIZE sizeof(float)");
-  m_defines.push_back("#define VEC_PD_FMA(a, b, c) (c).v = _mm_fmadd_ps((a).v, (b).v, (c).v)");
-  m_defines.push_back("#define VEC_ACCUM(c, ptr) *(ptr) += (c).d[0] + (c).d[1] + (c).d[2] + (c).d[3]");
-  m_defines.push_back("#define VEC_PTR_PD_LOAD(vec, ptr) (vec).v = _mm_load_ps((ptr))");
-  m_defines.push_back("#define VEC_4D_LOAD(p1, p2, p3, p4) _mm_loadh_pd(_mm_load_sd((p1)), (p2))");
-  m_defines.push_back("#define VEC_PPTR_PD_LOAD(vec, p1, p2, p3, p4) VEC_PTR_PD_LOAD((vec), tmp)");
-  m_defines.push_back("#define VEC_PTR_DUP_LOAD(vec, ptr) (vec).v = _mm_load_ps1((ptr))");
-  m_defines.push_back("#define VEC_PTR_PD_STORE(vec, ptr) _mm_store_ps((ptr), (vec).v)");
-#endif // USE_DOUBLE_PRECISION
-  return;
-}
-
 void RuntimeTest::AddMiscellaneousDefines()
 {
   m_defines.push_back("#define BUF_SIZE 1000000");
@@ -87,22 +57,24 @@ void RuntimeTest::AddMiscellaneousDefines()
   m_defines.push_back("#define CHUNK_SIZE " + std::to_string((long long int) m_chunkSize));
   m_defines.push_back("#define min(a,b) ((a) < (b) ? (a) : (b))");
   m_defines.push_back("#define ALLOC_BUFFER(size) alloc_aligned_16((size))");
+  m_defines.push_back("#define MUVALUE " + std::to_string(arch->VecRegWidth(m_type)) + "\n");
+  if (m_type == REAL_SINGLE) {
+    m_defines.push_back("#define NUM_SIZE sizeof(float)");
 
-#if USE_DOUBLE_PRECISION
-  m_defines.push_back("#define MUVALUE 2");
-  m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_doubles((size), (buf))");
-  m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff((size), (b1), (b2), (test_name))");
-  m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer((size), (b1), (b2))");
-  m_defines.push_back("typedef union {\n\t__m128d v;\n\tdouble d[2];\n} vec_reg;");
-  m_defines.push_back("double tmp[2];\n");
-#else
-  m_defines.push_back("#define MUVALUE 4");
-  m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_floats((size), (buf))");
-  m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff_float((size), (b1), (b2), (test_name))");
-  m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer_float((size), (b1), (b2))");
-  m_defines.push_back("typedef union {\n\t__m128 v;\n\tfloat d[4];\n} vec_reg;");
-  m_defines.push_back("float tmp[4];\n");
-#endif // USE_DOUBLE_PRECISION
+    m_defines.push_back("float tmp[4];\n");
+    m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_floats((size), (buf))");
+    m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff_float((size), (b1), (b2), (test_name))");
+    m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer_float((size), (b1), (b2))");
+    m_defines.push_back("typedef union {\n\t__m128 v;\n\tfloat f[4];\n} vec_reg;");
+  } else {
+    m_defines.push_back("#define NUM_SIZE sizeof(double)");
+    m_defines.push_back("double tmp[2];\n");
+    m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_doubles((size), (buf))");
+    m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff((size), (b1), (b2), (test_name))");
+    m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer((size), (b1), (b2))");
+    m_defines.push_back("typedef union {\n\t__m128d v;\n\tdouble d[2];\n} vec_reg;");
+  }
+
   return;
 }
 

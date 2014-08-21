@@ -197,7 +197,7 @@ string VVDotLoopRef::GetType() const
 bool VVDotLoopRef::CanApply(const Node *node) const
 {
   const VVDot *dot = (VVDot*) node;
-  if (dot->GetLayer() != m_fromLayer) {
+  if (dot->GetLayer() != m_fromLayer || m_type != dot->m_type) {
     return false;
   }
   if (*(dot->GetInputN(0)) <= m_bs.GetSize()) {
@@ -249,7 +249,15 @@ void VVDotLoopRef::Apply(Node *node) const
 
   // Create the poss
   Poss *loopPoss = new Poss(3, rowCom, colCom, scalarTunOut);
-  RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, m_bs);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
   loop->SetDimName(DIMK);
   
   node->m_poss->AddPSet(loop);
@@ -271,7 +279,7 @@ bool VVDotLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
     const VVDot *vvdot = (VVDot*) node;
-    if (vvdot->GetLayer() != m_fromLayer) {
+    if (vvdot->GetLayer() != m_fromLayer || m_type != vvdot->m_type) {
       return false;
     }
 
@@ -297,7 +305,7 @@ void VVDotLowerLayer::Apply(Node *node) const
 string VVDotLowerLayer::GetType() const
 {
   return "VVDot lower layer " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
 }
 
 VVDotToRegArith::VVDotToRegArith(Layer fromLayer, Layer toLayer, Type type)
@@ -312,7 +320,7 @@ bool VVDotToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
     const VVDot* vvdot = (VVDot*) node;
-    if (vvdot->GetLayer() != m_fromLayer) {
+    if (vvdot->GetLayer() != m_fromLayer || m_type != vvdot->m_type) {
       return false;
     }
     if (!(*(vvdot->GetInputN(0)) <= m_regWidth) &&
@@ -359,7 +367,7 @@ void VVDotToRegArith::Apply(Node *node) const
   loadB->AddInput(splitB, 1);
 
   // Create FMA operation that updates accum
-  FMAdd* fmadd = new FMAdd();
+  FMAdd* fmadd = new FMAdd(m_type);
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(loadB, 0);
   fmadd->AddInput(accTun, 0);
@@ -376,13 +384,21 @@ void VVDotToRegArith::Apply(Node *node) const
 
   // Create the poss
   Poss* loopPoss = new Poss(3, comA, comB, accOut);
-  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMu);
+  RealLoop* loop;
+  if (m_type == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (m_type == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad m_type in vadd apply\n";
+    throw;
+  }
 
   // Add needed components to poss
   node->m_poss->AddPSet(loop);
 
   // Accumulate result of operation in C
-  AccumReg* accumInC = new AccumReg();
+  AccumReg* accumInC = new AccumReg(m_type);
   accumInC->AddInput(loop->OutTun(2), 0);
   accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
 
@@ -395,7 +411,7 @@ void VVDotToRegArith::Apply(Node *node) const
 string VVDotToRegArith::GetType() const
 {
   return "VVDot register arith " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer);
+    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
 }
 
 #endif // DOLLDLA
