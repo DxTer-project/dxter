@@ -99,9 +99,45 @@ string Architecture::DuplicateLoad(Type type, string memPtr, string receivingLoc
 string Architecture::AccumCode(Type type, string memPtr, string startingLoc)
 {
   if (type == REAL_SINGLE) {
-    return SContiguousLoad(memPtr, startingLoc);
+    return SAccumCode(memPtr, startingLoc);
   } else if (type == REAL_DOUBLE) {
-    return DContiguousLoad(memPtr, startingLoc);
+    return DAccumCode(memPtr, startingLoc);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::ContiguousStore(Type type, string memPtr, string startingLoc)
+{
+  if (type == REAL_SINGLE) {
+    return SContiguousStore(memPtr, startingLoc);
+  } else if (type == REAL_DOUBLE) {
+    return DContiguousStore(memPtr, startingLoc);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::StridedStore(Type type, string memPtr, string startingLoc, string stride)
+{
+  if (type == REAL_SINGLE) {
+    return SStridedStore(memPtr, startingLoc, stride);
+  } else if (type == REAL_DOUBLE) {
+    return DStridedStore(memPtr, startingLoc, stride);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::ZeroVar(Type type, string varName)
+{
+  if (type == REAL_SINGLE) {
+    return SZeroVar(varName);
+  } else if (type == REAL_DOUBLE) {
+    return DZeroVar(varName);
   } else {
     cout << "Error: VecRegWidth bad type\n";
     throw;
@@ -135,7 +171,7 @@ string AMDEngSample::SFMACode(string operand1, string operand2, string operand3,
 
 string AMDEngSample::SAccumCode(string memPtr, string startingLoc)
 {
-  return "*" + memPtr + " = "
+  return "*" + memPtr + " += "
     + startingLoc + ".f[0] + "
     + startingLoc + ".f[1] + "
     + startingLoc + ".f[2] + "
@@ -173,6 +209,11 @@ string AMDEngSample::SStridedStore(string memPtr, string startingLoc, string str
     + "*(" + memPtr + " + 3 * stride) = " + startingLoc + ".f[3];\n";
 }
 
+string AMDEngSample::SZeroVar(string varName)
+{
+  return varName + ".v = _mm_setzero_ps();\n";
+}
+
 int AMDEngSample::DVecRegWidth()
 {
   return 2;
@@ -200,7 +241,7 @@ string AMDEngSample::DFMACode(string operand1, string operand2, string operand3,
 
 string AMDEngSample::DAccumCode(string memPtr, string startingLoc)
 {
-  return "*" + memPtr + " = "
+  return "*" + memPtr + " += "
     + startingLoc + ".d[0] + "
     + startingLoc + ".d[1];\n";
 }
@@ -230,6 +271,11 @@ string AMDEngSample::DStridedStore(string memPtr, string startingLoc, string str
 {
   return "*" + memPtr + " = " + startingLoc + ".d[0];\n"
     + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".d[1];\n";
+}
+
+string AMDEngSample::DZeroVar(string varName)
+{
+  return varName + ".v = _mm_setzero_pd();\n";
 }
 
 #endif // DOLLDLA

@@ -100,6 +100,11 @@ void Mul::PrintCode(IndStream &out)
   return;
 }
 
+ZeroReg::ZeroReg(Type type)
+{
+  m_type = type;
+}
+
 void ZeroReg::Prop()
 {
 // TODO: Add full prop method with register checks
@@ -110,7 +115,7 @@ void ZeroReg::PrintCode(IndStream &out)
 {
   out.Indent();
   string aStr = GetInputNameStr(0);
-  *out << "VEC_SET_ZERO( " << aStr << " );\n";
+  *out << arch->ZeroVar(m_type, aStr);
   return;
 }
 
@@ -130,7 +135,7 @@ void AccumReg::PrintCode(IndStream &out)
   out.Indent();
   string vecStr = GetInputNameStr(0);
   string accStr = GetInputNameStr(1);
-  arch->AccumCode(m_type, accStr, vecStr);
+  *out << arch->AccumCode(m_type, accStr, vecStr);
   return;
 }
 

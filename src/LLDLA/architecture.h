@@ -39,6 +39,7 @@ class Architecture
   virtual string SDuplicateLoad(string memPtr, string receivingLoc) = 0;
   virtual string SContiguousStore(string memPtr, string startingLoc) = 0;
   virtual string SStridedStore(string memPtr, string startingLoc, string stride) = 0;
+  virtual string SZeroVar(string varName) = 0;
 
   // Double precision
   virtual int DVecRegWidth() = 0;
@@ -52,6 +53,7 @@ class Architecture
   virtual string DDuplicateLoad(string memPtr, string receivingLoc) = 0;
   virtual string DContiguousStore(string memPtr, string startingLoc) = 0;
   virtual string DStridedStore(string memPtr, string startingLoc, string stride) = 0;
+  virtual string DZeroVar(string varName) = 0;
 
   // General
   int VecRegWidth(Type type);
@@ -65,6 +67,7 @@ class Architecture
   string DuplicateLoad(Type type, string memPtr, string receivingLoc);
   string ContiguousStore(Type type, string memPtr, string startingLoc);
   string StridedStore(Type type, string memPtr, string startingLoc, string stride);
+  string ZeroVar(Type type, string varName);
 };
 
 class AMDEngSample : public Architecture
@@ -82,6 +85,7 @@ class AMDEngSample : public Architecture
   virtual string SDuplicateLoad(string memPtr, string receivingLoc);
   virtual string SContiguousStore(string memPtr, string startingLoc);
   virtual string SStridedStore(string memPtr, string startingLoc, string stride);
+  virtual string SZeroVar(string varName);
 
   // Double precision
   virtual int DVecRegWidth();
@@ -95,6 +99,7 @@ class AMDEngSample : public Architecture
   virtual string DDuplicateLoad(string memPtr, string receivingLoc);
   virtual string DContiguousStore(string memPtr, string startingLoc);
   virtual string DStridedStore(string memPtr, string startingLoc, string stride);
+  virtual string DZeroVar(string varName);
 
 };
 

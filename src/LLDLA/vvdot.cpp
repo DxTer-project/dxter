@@ -197,7 +197,7 @@ string VVDotLoopRef::GetType() const
 bool VVDotLoopRef::CanApply(const Node *node) const
 {
   const VVDot *dot = (VVDot*) node;
-  if (dot->GetLayer() != m_fromLayer) {
+  if (dot->GetLayer() != m_fromLayer || m_type != dot->m_type) {
     return false;
   }
   if (*(dot->GetInputN(0)) <= m_bs.GetSize()) {
@@ -279,7 +279,7 @@ bool VVDotLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
     const VVDot *vvdot = (VVDot*) node;
-    if (vvdot->GetLayer() != m_fromLayer) {
+    if (vvdot->GetLayer() != m_fromLayer || m_type != vvdot->m_type) {
       return false;
     }
 
@@ -320,7 +320,7 @@ bool VVDotToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
     const VVDot* vvdot = (VVDot*) node;
-    if (vvdot->GetLayer() != m_fromLayer) {
+    if (vvdot->GetLayer() != m_fromLayer || m_type != vvdot->m_type) {
       return false;
     }
     if (!(*(vvdot->GetInputN(0)) <= m_regWidth) &&

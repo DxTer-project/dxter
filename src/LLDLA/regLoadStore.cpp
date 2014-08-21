@@ -231,7 +231,33 @@ void StoreFromRegs::PrintCode(IndStream &out)
   Stride inputRowStride = InputDataType(1).m_rowStride;
   Stride inputColStride = InputDataType(1).m_colStride;
 
+  string strideVar = "ERROR: STRIDE NOT DEFINED\n";
+  bool isStridedLoad;
+
   if (IsInputColVector(1)) {
+    if (IsUnitStride(inputRowStride)) {
+      isStridedLoad = false;
+    } else {
+      isStridedLoad = true;
+      strideVar = InputDataType(1).m_rowStrideVar;
+    }
+  } else {
+    if (IsUnitStride(inputColStride)) {
+      isStridedLoad = false;
+    } else {
+      isStridedLoad = true;
+      strideVar = InputDataType(0).m_colStrideVar;
+    }    
+  }
+
+  if (isStridedLoad) {
+    *out << arch->StridedStore(m_type, storeLocation, regVarName, strideVar);
+  } else {
+    *out << arch->ContiguousStore(m_type, storeLocation, regVarName);
+  }
+
+
+  /*  if (IsInputColVector(1)) {
     if (IsUnitStride(inputRowStride)) {
       out.Indent();
       *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << storeLocation << " );\n";
@@ -252,7 +278,7 @@ void StoreFromRegs::PrintCode(IndStream &out)
   } else {
     cout << "ERROR: Input to vector register store is neither row nor column vector\n";
     throw;
-  }
+    }*/
   return;
 }
 
@@ -363,7 +389,8 @@ void TempVecReg::Prop()
 void TempVecReg::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << "VEC_SET_ZERO( " << GetNameStr(0) << " );\n";
+  *out << arch->ZeroVar(m_type, GetNameStr(0));
+  return;
 }
 
 void TempVecReg::ClearDataTypeCache()
