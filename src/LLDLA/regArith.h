@@ -29,18 +29,20 @@
 
 class FMAdd : public DLAOp<3, 1>
 {
-public:
- virtual NodeType GetType() const { return "FMAdd"; }
- static Node* BlankInst() { return new FMAdd; }
- virtual Node* GetNewInst() { return BlankInst(); }
+ public:
+  Type m_type;
+  FMAdd(Type type);
+  virtual NodeType GetType() const { return "FMAdd"; }
+  static Node* BlankInst() { return new FMAdd(REAL_SINGLE); }
+  virtual Node* GetNewInst() { return BlankInst(); }
  
- virtual void Prop();
- virtual void PrintCode(IndStream &out);
- virtual ClassType GetNodeClass() const { return GetClass(); }
- static ClassType GetClass() { return "FMAdd"; }
+  virtual void Prop();
+  virtual void PrintCode(IndStream &out);
+  virtual ClassType GetNodeClass() const { return GetClass(); }
+  static ClassType GetClass() { return "FMAdd"; }
 
- virtual bool IsReadOnly() const { return false; }
- virtual bool IsDataDependencyOfInput() const { return true; }
+  virtual bool IsReadOnly() const { return false; }
+  virtual bool IsDataDependencyOfInput() const { return true; }
 };
 
 class Add : public DLAOp<2, 1>
@@ -93,18 +95,20 @@ public:
 
 class AccumReg : public DLAOp<2, 1>
 {
-public:
- virtual NodeType GetType() const { return "AccumReg"; }
- static Node* BlankInst() { return new AccumReg; }
- virtual Node* GetNewInst() { return BlankInst(); }
+ public:
+  Type m_type;
+  AccumReg(Type type);
+  virtual NodeType GetType() const { return "AccumReg"; }
+  static Node* BlankInst() { return new AccumReg(REAL_SINGLE); }
+  virtual Node* GetNewInst() { return BlankInst(); }
  
- virtual void Prop();
- virtual void PrintCode(IndStream &out);
- virtual ClassType GetNodeClass() const { return GetClass(); }
- static ClassType GetClass() { return "AccumReg"; }
+  virtual void Prop();
+  virtual void PrintCode(IndStream &out);
+  virtual ClassType GetNodeClass() const { return GetClass(); }
+  static ClassType GetClass() { return "AccumReg"; }
 
- virtual bool IsReadOnly() const { return false; }
- virtual bool IsDataDependencyOfInput() const { return true; } 
+  virtual bool IsReadOnly() const { return false; }
+  virtual bool IsDataDependencyOfInput() const { return true; } 
 };
 
 #endif // DOLLDLA

@@ -23,6 +23,11 @@
 
 #if DOLLDLA
 
+FMAdd::FMAdd(Type type)
+{
+  m_type = type;
+}
+
 void FMAdd::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -49,7 +54,7 @@ void FMAdd::PrintCode(IndStream &out)
   string aStr = GetInputNameStr(0);
   string bStr = GetInputNameStr(1);
   string cStr = GetInputNameStr(2);
-  *out << "VEC_PD_FMA( " << aStr << ", " << bStr << ", " << cStr << " );\n";
+  *out << arch->FMACode(m_type, aStr, bStr, cStr, cStr);
   return;
 }
 
@@ -109,6 +114,11 @@ void ZeroReg::PrintCode(IndStream &out)
   return;
 }
 
+AccumReg::AccumReg(Type type)
+{
+  m_type = type;
+}
+
 void AccumReg::Prop()
 {
 // TODO: Add full prop method with register checks
@@ -120,7 +130,7 @@ void AccumReg::PrintCode(IndStream &out)
   out.Indent();
   string vecStr = GetInputNameStr(0);
   string accStr = GetInputNameStr(1);
-  *out << "VEC_ACCUM( " << vecStr << ", " << accStr << " );\n";
+  arch->AccumCode(m_type, accStr, vecStr);
   return;
 }
 

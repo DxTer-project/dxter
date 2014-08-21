@@ -148,5 +148,4 @@ class StoreFromRegs : public DLAOp<2,1>
   void StoreNonContigLocations(IndStream &out, string regVarName, string storePtr, string strideVar);
 };
 
-
 #endif //DOLLDLA

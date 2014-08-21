@@ -367,7 +367,7 @@ void VVDotToRegArith::Apply(Node *node) const
   loadB->AddInput(splitB, 1);
 
   // Create FMA operation that updates accum
-  FMAdd* fmadd = new FMAdd();
+  FMAdd* fmadd = new FMAdd(m_type);
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(loadB, 0);
   fmadd->AddInput(accTun, 0);
@@ -398,7 +398,7 @@ void VVDotToRegArith::Apply(Node *node) const
   node->m_poss->AddPSet(loop);
 
   // Accumulate result of operation in C
-  AccumReg* accumInC = new AccumReg();
+  AccumReg* accumInC = new AccumReg(m_type);
   accumInC->AddInput(loop->OutTun(2), 0);
   accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
 

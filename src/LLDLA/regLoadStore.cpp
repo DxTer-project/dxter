@@ -40,6 +40,8 @@ void LoadToRegs::Prop()
       // this isn't 1 x m_regWidth
       if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != m_regWidth) {
 	cout << "Error: Incorrect dimensions for register load\n";
+	GetInputN(0)->Print();
+	cout << "m_regWidth = " << std::to_string((long long int) m_regWidth) << endl;
 	cout << "*GetInputM(0) != 1 ? " << std::to_string(*GetInputM(0) != 1) << endl;
 	cout << "*GetInputN(0) != m_regWidth ? " << std::to_string(*GetInputN(0) != m_regWidth) << endl;
 	throw;
@@ -71,14 +73,38 @@ void LoadToRegs::PrintCode(IndStream &out)
 {
   out.Indent();
   string toLoadName = GetInputNameStr(0);
-  string toLoad;
   string loadStr = GetNameStr(0);
   // Decide which load instruction is needed based on
   // dimension and stride of input vector
   Stride inputRowStride = InputDataType(0).m_rowStride;
   Stride inputColStride = InputDataType(0).m_colStride;
+  
+  string strideVar = "ERROR: STRIDE NOT DEFINED\n";
+  bool isStridedLoad;
 
   if (IsInputColVector(0)) {
+    if (IsUnitStride(inputRowStride)) {
+      isStridedLoad = false;
+    } else {
+      isStridedLoad = true;
+      strideVar = InputDataType(0).m_rowStrideVar;
+    }
+  } else {
+    if (IsUnitStride(inputColStride)) {
+      isStridedLoad = false;
+    } else {
+      isStridedLoad = true;
+      strideVar = InputDataType(0).m_colStrideVar;
+    }    
+  }
+
+  if (isStridedLoad) {
+    *out << arch->StridedLoad(m_type, toLoadName, loadStr, strideVar);
+  } else {
+    *out << arch->ContiguousLoad(m_type, toLoadName, loadStr);
+  }
+
+  /*  if (IsInputColVector(0)) {
     if (IsUnitStride(inputRowStride)) {
       *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
       return;
@@ -133,7 +159,7 @@ void LoadToRegs::PrintCode(IndStream &out)
   } else {
     cout << "ERROR: Input to vector register load is neither row nor column vector\n";
     throw;
-  }
+    }*/
   return;
 }
 
@@ -263,7 +289,8 @@ void DuplicateRegLoad::Prop()
 void DuplicateRegLoad::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << "VEC_PTR_DUP_LOAD( " << GetNameStr(0) << ", " << GetInputNameStr(0) << " );\n";
+  *out << arch->DuplicateLoad(m_type, GetInputNameStr(0), GetNameStr(0));
+  return;
 }
 
 void DuplicateRegLoad::ClearDataTypeCache()

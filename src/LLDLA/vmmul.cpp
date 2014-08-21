@@ -430,7 +430,7 @@ void VMMulToRegArith::Apply(Node* node) const
   DuplicateRegLoad* loadX = new DuplicateRegLoad(m_type);
   loadX->AddInput(splitX, 1);
 
-  FMAdd* fmadd = new FMAdd();
+  FMAdd* fmadd = new FMAdd(m_type);
   fmadd->AddInput(loadX, 0);
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(yTun, 0);

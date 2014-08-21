@@ -63,6 +63,12 @@ string BSSize::VarName() const
       return "(2*" + (string)(MU_VAR_NAME) + ")";
     case (USELLDLA3MUSINGLE):
       return "(3*" + (string)(MU_VAR_NAME) + ")";
+    case (USELLDLAMUDOUBLE):
+      return MU_VAR_NAME;
+    case (USELLDLA2MUDOUBLE):
+      return "(2*" + (string)(MU_VAR_NAME) + ")";
+    case (USELLDLA3MUDOUBLE):
+      return "(3*" + (string)(MU_VAR_NAME) + ")";
 #endif
     default:
       throw;

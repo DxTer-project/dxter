@@ -43,8 +43,9 @@ class RuntimeTest
   vector<string> m_argDeclarations;
   int m_numIterations;
   int m_chunkSize;
+  Type m_type;
 
-  RuntimeTest(string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize);
+  RuntimeTest(Type m_type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize);
   string MakeTestCode(ImplementationMap imps);
   string MakeTestCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImp);
   string ToCStatements(vector<string> lines);
@@ -61,7 +62,6 @@ class RuntimeTest
   string CheckArgBufferDiffs(string refPostfix, string testPostfix, string testName);
   string TimingLoop(ImplementationMap imps);
   void AddIncludes();
-  void AddVectorRegisterArithmeticMacros();
   void AddMiscellaneousDefines();
 };
 

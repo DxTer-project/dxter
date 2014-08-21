@@ -24,9 +24,93 @@
 
 #if DOLLDLA
 
+int Architecture::VecRegWidth(Type type)
+{
+  if (type == REAL_SINGLE) {
+    return SVecRegWidth();
+  } else if (type == REAL_DOUBLE) {
+    return DVecRegWidth();
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::TypeName(Type type)
+{
+  if (type == REAL_SINGLE) {
+    return STypeName();
+  } else if (type == REAL_DOUBLE) {
+    return DTypeName();
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::FMACode(Type type, string operand1, string operand2, string operand3, string result)
+{
+  if (type == REAL_SINGLE) {
+    return SFMACode(operand1, operand2, operand3, result);
+  } else if (type == REAL_DOUBLE) {
+    return DFMACode(operand1, operand2, operand3, result);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::StridedLoad(Type type, string memPtr, string receivingLoc, string stride)
+{
+  if (type == REAL_SINGLE) {
+    return SStridedLoad(memPtr, receivingLoc, stride);
+  } else if (type == REAL_DOUBLE) {
+    return DStridedLoad(memPtr, receivingLoc, stride);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::ContiguousLoad(Type type, string memPtr, string receivingLoc)
+{
+  if (type == REAL_SINGLE) {
+    return SContiguousLoad(memPtr, receivingLoc);
+  } else if (type == REAL_DOUBLE) {
+    return DContiguousLoad(memPtr, receivingLoc);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::DuplicateLoad(Type type, string memPtr, string receivingLoc)
+{
+  if (type == REAL_SINGLE) {
+    return SDuplicateLoad(memPtr, receivingLoc);
+  } else if (type == REAL_DOUBLE) {
+    return DDuplicateLoad(memPtr, receivingLoc);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
+string Architecture::AccumCode(Type type, string memPtr, string startingLoc)
+{
+  if (type == REAL_SINGLE) {
+    return SContiguousLoad(memPtr, startingLoc);
+  } else if (type == REAL_DOUBLE) {
+    return DContiguousLoad(memPtr, startingLoc);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
 int AMDEngSample::SVecRegWidth()
 {
-  return 4;
+  return 2;
 }
 
 string AMDEngSample::STypeName()
@@ -70,10 +154,10 @@ string AMDEngSample::SDuplicateLoad(string memPtr, string receivingLoc)
 
 string AMDEngSample::SStridedLoad(string memPtr, string receivingLoc, string stride)
 {
-  return receivingLoc + ".f[0] = *(" + receivingLoc + ");\n"
-    + receivingLoc + ".f[1] = *(" + receivingLoc + " + stride);\n"
-    + receivingLoc + ".f[2] = *(" + receivingLoc + " + 2 * stride);\n"
-    + receivingLoc + ".f[3] = *(" + receivingLoc + " + 3 * stride);\n";
+  return receivingLoc + ".f[0] = *(" + memPtr + ");\n"
+    + receivingLoc + ".f[1] = *(" + memPtr + " + " + stride + " );\n"
+    + receivingLoc + ".f[2] = *(" + memPtr + " + 2 * " + stride + " );\n"
+    + receivingLoc + ".f[3] = *(" + memPtr + " + 3 * " + stride + " );\n";
 }
 
 string AMDEngSample::SContiguousStore(string memPtr, string startingLoc)
@@ -128,8 +212,8 @@ string AMDEngSample::DContiguousLoad(string memPtr, string receivingLoc)
 
 string AMDEngSample::DStridedLoad(string memPtr, string receivingLoc, string stride)
 {
-  return receivingLoc + ".d[0] = *(" + receivingLoc + ")"
-    + receivingLoc + ".d[1] = *(" + receivingLoc + " + stride)";
+  return receivingLoc + ".d[0] = *(" + memPtr + ");\n"
+    + receivingLoc + ".d[1] = *(" + memPtr + " + " + stride + " );\n";
 }
 
 string AMDEngSample::DDuplicateLoad(string memPtr, string receivingLoc)
@@ -145,20 +229,7 @@ string AMDEngSample::DContiguousStore(string memPtr, string startingLoc)
 string AMDEngSample::DStridedStore(string memPtr, string startingLoc, string stride)
 {
   return "*" + memPtr + " = " + startingLoc + ".d[0];\n"
-    + "*(" + memPtr + " + stride) = " + startingLoc + ".d[1];\n";
-}
-
-
-int AMDEngSample::VecRegWidth(Type type)
-{
-  if (type == REAL_SINGLE) {
-    return SVecRegWidth();
-  } else if (type == REAL_DOUBLE) {
-    return DVecRegWidth();
-  } else {
-    cout << "Error: AMDEngSample VecRegWidth bad type\n";
-    throw;
-  }
+    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".d[1];\n";
 }
 
 #endif // DOLLDLA

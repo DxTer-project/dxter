@@ -451,7 +451,7 @@ void MVMulToRegArith::Apply(Node* node) const
   loadX->AddInput(splitX, 1);
 
   // Create new FMA instruction for loop body
-  FMAdd* fmadd = new FMAdd();
+  FMAdd* fmadd = new FMAdd(m_type);
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(loadX, 0);
   fmadd->AddInput(yTun, 0);

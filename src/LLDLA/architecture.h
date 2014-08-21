@@ -54,7 +54,17 @@ class Architecture
   virtual string DStridedStore(string memPtr, string startingLoc, string stride) = 0;
 
   // General
-  virtual int VecRegWidth(Type type) = 0;
+  int VecRegWidth(Type type);
+  string TypeName(Type type);
+  string AddCode(Type type, string operand1, string operand2, string result);
+  string MulCode(Type type, string operand1, string operand2, string result);
+  string FMACode(Type type, string operand1, string operand2, string operand3, string result);
+  string AccumCode(Type type, string memPtr, string startingLoc);
+  string ContiguousLoad(Type type, string memPtr, string receivingLoc);
+  string StridedLoad(Type type, string memPtr, string receivingLoc, string stride);
+  string DuplicateLoad(Type type, string memPtr, string receivingLoc);
+  string ContiguousStore(Type type, string memPtr, string startingLoc);
+  string StridedStore(Type type, string memPtr, string startingLoc, string stride);
 };
 
 class AMDEngSample : public Architecture
@@ -86,8 +96,6 @@ class AMDEngSample : public Architecture
   virtual string DContiguousStore(string memPtr, string startingLoc);
   virtual string DStridedStore(string memPtr, string startingLoc, string stride);
 
-  // General
-  virtual int VecRegWidth(Type type);
 };
 
 extern Architecture* arch;
