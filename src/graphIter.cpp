@@ -228,7 +228,7 @@ Cost GraphIter::EvalAndSetBest()
 
   for(unsigned int i = 0; i < numPSets; ++i) {
     Cost optCost;
-    PossMMap map = m_poss->m_sets[i]->GetPosses();
+    PossMMap &map = m_poss->m_sets[i]->GetPosses();
     PossMMapIter iter = map.begin();
     m_subIters[i]->Init(iter->second);
     optCost = m_subIters[i]->EvalAndSetBest();

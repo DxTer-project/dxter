@@ -53,7 +53,7 @@ RealPSet* MartinsExample2();
 
 void AddTrans()
 {
-#if 1
+#if 0
   MultiTrans *trans = new MultiTrans;
   trans->AddTrans(new DistContToLocalContStatC(DMLAYER, SMLAYER));
   trans->AddTrans(new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER));

@@ -99,16 +99,6 @@ void Universe::Init(string fileName)
 Universe::~Universe()
 {
   NodeVecIter iter;
-  iter = m_pset->m_inTuns.begin();
-  for(; iter != m_pset->m_inTuns.end(); ++iter) {
-    delete *iter;
-  }
-  m_pset->m_inTuns.clear();
-  iter = m_pset->m_outTuns.begin();
-  for(; iter != m_pset->m_outTuns.end(); ++iter) {
-    delete *iter;
-  }
-  m_pset->m_outTuns.clear();
   TransPtrMapIter iter2 = M_transNames.begin();
   for(; iter2 != M_transNames.end(); ++iter2) {
     delete iter2->first;
@@ -121,7 +111,17 @@ Universe::~Universe()
     for(; iter3 != M_trans[i].end(); ++iter3)
       delete iter3->second;
   }
+  NodeVec in = m_pset->m_inTuns;
+  NodeVec out = m_pset->m_outTuns;
   delete m_pset;
+  iter = in.begin();
+  for(; iter != in.end(); ++iter) {
+    delete *iter;
+  }
+  iter = out.begin();
+  for(; iter != out.end(); ++iter) {
+    delete *iter;
+  }
 }
 
 #if DOTENSORS

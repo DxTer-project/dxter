@@ -181,27 +181,35 @@ void Poss::InitHelper(const NodeVec &vec, bool outTuns, bool disconnectFromOwner
 
 Poss::~Poss()
 {
+  PSetVecIter iter = m_sets.begin();
+  for(; iter != m_sets.end(); ++iter) {
+    BasePSet *set = *iter;
+    NodeVecIter tunIter = set->m_inTuns.begin();
+    for(; tunIter != set->m_inTuns.end(); ++tunIter) {
+      Node *tun =  *tunIter;
+      NodeConnVecIter connIter = tun->m_inputs.begin();
+      for(; connIter != tun->m_inputs.end(); ++connIter)
+	delete *connIter;
+      tun->m_inputs.clear();
+    }
+    tunIter = set->m_outTuns.begin();
+    for(; tunIter != set->m_outTuns.end(); ++tunIter) {
+      Node *tun =  *tunIter;
+      NodeConnVecIter connIter = tun->m_children.begin();
+      for(; connIter != tun->m_children.end(); ++connIter)
+	delete *connIter;
+      tun->m_children.clear();
+    }
+
+    delete *iter;
+  }
   {
     NodeVecIter iter = m_possNodes.begin();
     for( ; iter != m_possNodes.end(); ++iter) {
       Node *node = *iter;
-      if (node->IsTunnel()) {
-	Tunnel *tun = (Tunnel*)node;
-	if (tun->m_tunType == SETTUNIN)
-	  node->RemoveAllChildren2Way();
-	else if (tun->m_tunType == SETTUNOUT)
-	  node->RemoveAllInputs2Way();
-      }
       delete node;
     }
     m_possNodes.clear();
-  }
-  PSetVecIter iter = m_sets.begin();
-  for(; iter != m_sets.end(); ++iter) {
-    BasePSet *set = *iter;
-    set->m_inTuns.clear();
-    set->m_outTuns.clear();
-    delete *iter;
   }
 }
 
@@ -407,6 +415,7 @@ void Poss::AddPSet(BasePSet *pset, bool expectToBeNew, bool addTuns)
 
 void Poss::DeleteNode(Node *node)
 {
+  //update RemoveAndDeleteNodes
   InvalidateHash();
   NodeVecIter iter;
   if (node->IsTunnel()) {
@@ -431,11 +440,6 @@ void Poss::DeleteNode(Node *node)
     if (*iter == node) {
       m_possNodes.erase(iter);
       delete node;
-      for(iter = m_possNodes.begin(); iter != m_possNodes.end(); ++iter) {
-        if (*iter == node) {
-          cout << "found second instance of node!!!\n";
-        }
-      }
       return;
     }
     ++i;
@@ -1016,6 +1020,7 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
     }
     (*leftSet)->m_outTuns.clear();
 
+
     tunIter = (*rightSet)->m_outTuns.begin();
     mapIter = merged->m_rightOutMap.begin();
     for(; tunIter != (*rightSet)->m_outTuns.end(); ++tunIter, ++mapIter) {
@@ -1090,7 +1095,6 @@ void Poss::MergePart2(RealPSet *newSet,
     mapLeft[*leftIter] = tun;
     if (!leftIsReal)
       mapLeft[*realIter] = tun;
-    RemoveFromGraphNodes(*leftIter);
   }
 
 
@@ -1109,7 +1113,6 @@ void Poss::MergePart2(RealPSet *newSet,
     mapRight[*rightIter] = tun;
     if (!rightIsReal)
       mapRight[*realIter] = tun;
-    RemoveFromGraphNodes(*rightIter);
   }
 
   NodeVec &realLeftIn = realLeft->m_inTuns;
@@ -1140,7 +1143,6 @@ void Poss::MergePart2(RealPSet *newSet,
         tun->AddInput((*leftIter)->Input(i),(*leftIter)->InputConnNum(i));
       }
     }
-    RemoveFromGraphNodes(*leftIter);
   }
 
   j = 0;
@@ -1170,7 +1172,6 @@ void Poss::MergePart2(RealPSet *newSet,
         tun->AddInput((*rightIter)->Input(i),(*rightIter)->InputConnNum(i));
       }
     }
-    RemoveFromGraphNodes(*rightIter);
   }
 
   if (newSet->m_leftOutMap.size() != leftSet->m_outTuns.size()) {
@@ -1212,10 +1213,7 @@ void Poss::MergePart4(RealPSet *newSet,
       cout << (*iter)->m_children.size() << endl;
       throw;
     }
-    (*iter)->RemoveAllInputs2Way();
-    delete *iter;
   }
-  leftSet->m_outTuns.clear();
 
   k = 0;
   iter  = rightSet->m_outTuns.begin();
@@ -1243,10 +1241,7 @@ void Poss::MergePart4(RealPSet *newSet,
       cout << (*iter)->m_children.size() << endl;
       throw;
     }
-    (*iter)->RemoveAllInputs2Way();
-    delete *iter;
   }
-  rightSet->m_outTuns.clear();
 }
 
 void Poss::MergePart6(RealPSet *newSet, BasePSet *leftSet, 
@@ -1263,10 +1258,7 @@ void Poss::MergePart6(RealPSet *newSet, BasePSet *leftSet,
       delete conn;
     }
     node->m_inputs.clear();
-    node->RemoveAllChildren2Way();
-    delete node;
   }
-  leftSet->m_inTuns.clear();
 
   
   for(unsigned int i = 0; i < rightSet->m_inTuns.size(); ++i) {
@@ -1279,14 +1271,20 @@ void Poss::MergePart6(RealPSet *newSet, BasePSet *leftSet,
       delete conn;
     }
     node->m_inputs.clear();
-
-    node->RemoveAllChildren2Way();
-    delete node;
   }
-  rightSet->m_inTuns.clear();
 
+
+  NodeVec leftIn = leftSet->m_inTuns;
+  NodeVec rightIn = rightSet->m_inTuns;
+  NodeVec leftOut = leftSet->m_outTuns;
+  NodeVec rightOut = rightSet->m_outTuns;
   delete leftSet;
   delete rightSet;
+
+  RemoveAndDeleteNodes(leftIn);
+  RemoveAndDeleteNodes(rightIn);
+  RemoveAndDeleteNodes(leftOut);
+  RemoveAndDeleteNodes(rightOut);
   
   newSet->CombineAndRemoveTunnels();
 }
@@ -3046,5 +3044,49 @@ void Poss::CullWorstPerformers(double percentToCull, int ignoreThreshold)
     if (set->IsReal()) {
       ((RealPSet*)set)->CullWorstPerformers(percentToCull, ignoreThreshold);
     }
+  }
+}
+
+void Poss::RemoveAndDeleteNodes(NodeVec &vec)
+{
+  //Update DeleteNode
+  InvalidateHash();
+  NodeVecIter vecIter = vec.begin();
+  for(; vecIter != vec.end(); ++vecIter) {
+    Node *node = *vecIter;
+    bool found = false;
+    NodeVecIter iter = m_possNodes.begin();
+
+    for( ; !found && iter != m_possNodes.end(); ++iter) {
+      if (*iter == node) {
+	m_possNodes.erase(iter);
+	delete node;
+	found = true;
+      }
+    }
+    if (!found)
+      throw;
+  }
+}
+
+
+void Poss::SetDeletingRecursively()
+{
+  PSetVecIter iter = m_sets.begin();
+  for( ; iter != m_sets.end(); ++iter) {
+    BasePSet *set = *iter;
+    if (set->IsReal())
+      ((RealPSet*)set)->SetDeletingRecursively();
+  }
+
+}
+
+void Poss::ClearDeletingRecursively()
+{
+  PSetVecIter iter = m_sets.begin();
+  for( ; iter != m_sets.end(); ++iter) {
+    BasePSet *set = *iter;
+    if (set->IsReal())
+      ((RealPSet*)set)->ClearDeletingRecursively();
   }
 }

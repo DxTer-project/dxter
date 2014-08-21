@@ -108,5 +108,9 @@ class SplitSingleIter : public SplitBase
   virtual void BuildDataTypeCache();
   virtual const DataTypeInfo& DataType(ConnNum num) const;
 #endif
+
+#if DOLLDLA
+  virtual void MigrateFromOldTun(Tunnel *tun);
+#endif
 };
 

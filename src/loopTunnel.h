@@ -102,4 +102,5 @@ class LoopTunnel : public Tunnel
   virtual bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const;
 
   string GetLoopLevel(int offset=0) const;
+  virtual void MigrateFromOldTun(Tunnel *tun);
 };
