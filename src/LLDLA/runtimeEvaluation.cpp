@@ -58,7 +58,7 @@ void RuntimeTest::AddMiscellaneousDefines()
   m_defines.push_back("#define CHUNK_SIZE " + std::to_string((long long int) m_chunkSize));
   m_defines.push_back("#define min(a,b) ((a) < (b) ? (a) : (b))");
   m_defines.push_back("#define ALLOC_BUFFER(size) alloc_aligned_16((size))");
-  m_defines.push_back("#define MUVALUE " + std::to_string(arch->VecRegWidth(m_type)) + "\n");
+  m_defines.push_back("#define MUVALUE " + std::to_string((long long int) arch->VecRegWidth(m_type)) + "\n");
   if (m_type == REAL_SINGLE) {
     m_defines.push_back("#define NUM_SIZE sizeof(float)");
     //  m_defines.push_back("#define MUVALUE 4");
