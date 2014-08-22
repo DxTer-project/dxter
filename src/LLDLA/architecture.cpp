@@ -331,4 +331,175 @@ string AMDEngSample::DZeroVar(string varName)
   return varName + ".v = _mm_setzero_pd();\n";
 }
 
+string Stampede::CompileString(string executableName, string testFileName)
+{
+  string compileStr = "gcc -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o ";
+  compileStr += executableName + " " + testFileName + " utils.c";
+  return compileStr;
+}
+
+int Stampede::SVecRegWidth()
+{
+  return 8;
+}
+
+string Stampede::SVecRegTypeDec()
+{
+  return "typedef union {\n\t__m256 v;\n\tfloat f[8];\n} svec_reg;\n";
+}
+
+string Stampede::STypeName()
+{
+  return "svec_reg";
+}
+
+string Stampede::SAddCode(string operand1, string operand2, string result)
+{
+  return result + ".v = _mm256_add_ps( " + operand1 + ".v , " + operand2 + ".v );\n";
+}
+
+string Stampede::SMulCode(string operand1, string operand2, string result)
+{
+  return result + ".v = _mm256_mul_ps( " + operand1 + ".v , " + operand2 + ".v );\n";
+}
+
+string Stampede::SFMACode(string operand1, string operand2, string operand3, string result)
+{
+  return result + ".v = _mm256_add_ps( _mm256_mul_ps( " + operand1 + ".v, " + operand2 + ".v ), " + operand3 + ".v );\n";
+}
+
+string Stampede::SAccumCode(string memPtr, string startingLoc)
+{
+  return "*" + memPtr + " += "
+    + startingLoc + ".f[0] + "
+    + startingLoc + ".f[1] + "
+    + startingLoc + ".f[2] + "
+    + startingLoc + ".f[3] + "
+    + startingLoc + ".f[4] + "
+    + startingLoc + ".f[5] + "
+    + startingLoc + ".f[6] + "
+    + startingLoc + ".f[7];\n";
+
+}
+
+string Stampede::SContiguousLoad(string memPtr, string receivingLoc)
+{
+  return receivingLoc + ".v = _mm256_load_ps( " + memPtr + " );\n";
+}
+
+string Stampede::SDuplicateLoad(string memPtr, string receivingLoc)
+{
+  return receivingLoc + ".v = _mm256_broadcast_ss( " + memPtr + " );\n";
+}
+
+string Stampede::SStridedLoad(string memPtr, string receivingLoc, string stride)
+{
+  return receivingLoc + ".f[0] = *(" + memPtr + ");\n"
+    + receivingLoc + ".f[1] = *(" + memPtr + " + " + stride + " );\n"
+    + receivingLoc + ".f[2] = *(" + memPtr + " + 2 * " + stride + " );\n"
+    + receivingLoc + ".f[3] = *(" + memPtr + " + 3 * " + stride + " );\n"
+    + receivingLoc + ".f[4] = *(" + memPtr + " + 4 * " + stride + " );\n"
+    + receivingLoc + ".f[5] = *(" + memPtr + " + 5 * " + stride + " );\n"
+    + receivingLoc + ".f[6] = *(" + memPtr + " + 6 * " + stride + " );\n"
+    + receivingLoc + ".f[7] = *(" + memPtr + " + 7 * " + stride + " );\n";
+}
+
+string Stampede::SContiguousStore(string memPtr, string startingLoc)
+{
+  return "_mm256_store_ps( " + memPtr + ", " + startingLoc + ".v );\n";
+}
+
+string Stampede::SStridedStore(string memPtr, string startingLoc, string stride)
+{
+  return "*" + memPtr + " = " + startingLoc + ".f[0];\n"
+    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".f[1];\n"
+    + "*(" + memPtr + " + 2 * " + stride + ") = " + startingLoc + ".f[2];\n"
+    + "*(" + memPtr + " + 3 * " + stride + ") = " + startingLoc + ".f[3];\n"
+    + "*(" + memPtr + " + 4 * " + stride + ") = " + startingLoc + ".f[4];\n"
+    + "*(" + memPtr + " + 5 * " + stride + ") = " + startingLoc + ".f[5];\n"
+    + "*(" + memPtr + " + 6 * " + stride + ") = " + startingLoc + ".f[6];\n"
+    + "*(" + memPtr + " + 7 * " + stride + ") = " + startingLoc + ".f[7];\n";
+}
+
+string Stampede::SZeroVar(string varName)
+{
+  return varName + ".v = _mm256_setzero_ps();\n";
+}
+
+int Stampede::DVecRegWidth()
+{
+  return 4;
+}
+
+string Stampede::DVecRegTypeDec()
+{
+  return "typedef union {\n\t__m256d v;\n\tdouble d[4];\n} dvec_reg;\n";
+}
+
+string Stampede::DTypeName()
+{
+  return "dvec_reg";
+}
+
+string Stampede::DAddCode(string operand1, string operand2, string result)
+{
+  return result + ".v = _mm256_add_pd( " + operand1 + ".v , " + operand2 + ".v );\n";
+}
+
+string Stampede::DMulCode(string operand1, string operand2, string result)
+{
+  return result + ".v = _mm256_mul_pd( " + operand1 + ".v , " + operand2 + ".v );\n";
+}
+
+string Stampede::DFMACode(string operand1, string operand2, string operand3, string result)
+{
+  return result + ".v = _mm256_add_pd( _mm256_mul_pd( " + operand1 + ".v, " + operand2 + ".v ), " + operand3 + ".v );\n";
+}
+
+string Stampede::DAccumCode(string memPtr, string startingLoc)
+{
+  return "*" + memPtr + " += "
+    + startingLoc + ".d[0] + "
+    + startingLoc + ".d[1] + "
+    + startingLoc + ".d[2] + "
+    + startingLoc + ".d[3];\n";
+
+}
+
+string Stampede::DContiguousLoad(string memPtr, string receivingLoc)
+{
+  return receivingLoc + ".v = _mm256_load_pd( " + memPtr + " );\n";
+}
+
+string Stampede::DStridedLoad(string memPtr, string receivingLoc, string stride)
+{
+  return receivingLoc + ".d[0] = *(" + memPtr + ");\n"
+    + receivingLoc + ".d[1] = *(" + memPtr + " + " + stride + " );\n"
+    + receivingLoc + ".d[2] = *(" + memPtr + " + 2 * " + stride + " );\n"
+    + receivingLoc + ".d[3] = *(" + memPtr + " + 3 * " + stride + " );\n";
+}
+
+string Stampede::DDuplicateLoad(string memPtr, string receivingLoc)
+{
+  return receivingLoc + ".v = _mm256_broadcast_sd( " + memPtr + " );\n";
+}
+
+string Stampede::DContiguousStore(string memPtr, string startingLoc)
+{
+  return "_mm256_store_pd( " + memPtr + ", " + startingLoc + ".v );\n";
+}
+
+string Stampede::DStridedStore(string memPtr, string startingLoc, string stride)
+{
+  return "*" + memPtr + " = " + startingLoc + ".d[0];\n"
+    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".d[1];\n"
+    + "*(" + memPtr + " + 2 * " + stride + ") = " + startingLoc + ".d[2];\n"
+    + "*(" + memPtr + " + 3 * " + stride + ") = " + startingLoc + ".d[3];\n";
+}
+
+string Stampede::DZeroVar(string varName)
+{
+  return varName + ".v = _mm256_setzero_pd();\n";
+}
+
 #endif // DOLLDLA
