@@ -333,7 +333,7 @@ string AMDEngSample::DZeroVar(string varName)
 
 string Stampede::CompileString(string executableName, string testFileName)
 {
-  string compileStr = "gcc -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o ";
+  string compileStr = "icc -O3 -xhost -fno-alias -o ";
   compileStr += executableName + " " + testFileName + " utils.c";
   return compileStr;
 }
