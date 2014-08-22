@@ -180,7 +180,7 @@ bool MAddLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
     const MAdd *madd = (MAdd*) node;
-    if (madd->GetLayer() != m_fromLayer) {
+    if (madd->GetLayer() != m_fromLayer || m_type != madd->m_type) {
       return false;
     }
     if (m_dim == DIMM) {
@@ -252,7 +252,7 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
 {
   if (node->GetClass() == MAdd::GetClass()) {
     const MAdd *madd = (MAdd*) node;
-    if (madd->GetLayer() != m_fromLayer) {
+    if (madd->GetLayer() != m_fromLayer || m_type != madd->m_type) {
       return false;
     }
     if (m_dim == DIMM) {
@@ -309,11 +309,19 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   return;
 }
 
+MAddLowerLayer::MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_bs = bs;
+  m_type = type;
+}
+
 bool MAddLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
     const MAdd *madd = (MAdd*) node;
-    if (madd->GetLayer() != m_fromLayer) {
+    if (madd->GetLayer() != m_fromLayer || m_type != madd->m_type) {
       return false;
     }
     if (*(madd->GetInputM(1)) <= m_bs &&
@@ -362,7 +370,7 @@ bool MAddToRegArith::CanApply(const Node* node) const
     MAdd* madd = (MAdd*) node;
     if ((*(madd->GetInputM(0)) == m_regWidth) ||
 	(*(madd->GetInputN(0)) == m_regWidth)) {
-      return true;
+      return m_type == madd->m_type;
     } else {
       return false;
     }
