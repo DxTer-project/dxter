@@ -29,6 +29,7 @@ class Architecture
  public:
   // Single precision
   virtual int SVecRegWidth() = 0;
+  virtual string SVecRegTypeDec() = 0;
   virtual string STypeName() = 0;
   virtual string SAddCode(string operand1, string operand2, string result) = 0;
   virtual string SMulCode(string operand1, string operand2, string result) = 0;
@@ -43,6 +44,7 @@ class Architecture
 
   // Double precision
   virtual int DVecRegWidth() = 0;
+  virtual string DVecRegTypeDec() = 0;
   virtual string DTypeName() = 0;
   virtual string DAddCode(string operand1, string operand2, string result) = 0;
   virtual string DMulCode(string operand1, string operand2, string result) = 0;
@@ -58,6 +60,7 @@ class Architecture
   // General
   int VecRegWidth(Type type);
   string TypeName(Type type);
+  string VecRegTypeDec(Type type);
   string AddCode(Type type, string operand1, string operand2, string result);
   string MulCode(Type type, string operand1, string operand2, string result);
   string FMACode(Type type, string operand1, string operand2, string operand3, string result);
@@ -75,6 +78,7 @@ class AMDEngSample : public Architecture
  public:
   // Single precision
   virtual int SVecRegWidth();
+  virtual string SVecRegTypeDec();
   virtual string STypeName();
   virtual string SAddCode(string operand1, string operand2, string result);
   virtual string SMulCode(string operand1, string operand2, string result);
@@ -89,6 +93,7 @@ class AMDEngSample : public Architecture
 
   // Double precision
   virtual int DVecRegWidth();
+  virtual string DVecRegTypeDec();
   virtual string DTypeName();
   virtual string DAddCode(string operand1, string operand2, string result);
   virtual string DMulCode(string operand1, string operand2, string result);

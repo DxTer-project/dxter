@@ -36,6 +36,18 @@ int Architecture::VecRegWidth(Type type)
   }
 }
 
+string Architecture::VecRegTypeDec(Type type)
+{
+  if (type == REAL_SINGLE) {
+    return SVecRegTypeDec();
+  } else if (type == REAL_DOUBLE) {
+    return DVecRegTypeDec();
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
 string Architecture::TypeName(Type type)
 {
   if (type == REAL_SINGLE) {
@@ -173,6 +185,11 @@ int AMDEngSample::SVecRegWidth()
   return 4;
 }
 
+string AMDEngSample::SVecRegTypeDec()
+{
+  return "typedef union {\n\t__m128 v;\n\tfloat f[4];\n} svec_reg;\n";
+}
+
 string AMDEngSample::STypeName()
 {
   return "svec_reg";
@@ -241,6 +258,11 @@ string AMDEngSample::SZeroVar(string varName)
 int AMDEngSample::DVecRegWidth()
 {
   return 2;
+}
+
+string AMDEngSample::DVecRegTypeDec()
+{
+  return "typedef union {\n\t__m128d v;\n\tdouble d[2];\n} dvec_reg;\n";
 }
 
 string AMDEngSample::DTypeName()
