@@ -180,6 +180,13 @@ string Architecture::ZeroVar(Type type, string varName)
   }
 }
 
+string AMDEngSample::CompileString(string executableName, string testFileName)
+{
+  string compileStr = "gcc -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o ";
+  compileStr += executableName + " " + testFileName + " utils.c";
+  return compileStr;
+}
+
 int AMDEngSample::SVecRegWidth()
 {
   return 4;

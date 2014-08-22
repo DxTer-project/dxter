@@ -295,7 +295,7 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest t
   chdir(evalDir);
   string compileStr = "gcc -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o " +  executableName;
   compileStr += " " + testFileName + " utils.c";
-  system(compileStr.c_str());
+  system(arch->CompileString(executableName, testFileName).c_str());
   string runStr = "./" + executableName;
   system(runStr.c_str());
   string removeExecutable = "rm -f " + executableName;

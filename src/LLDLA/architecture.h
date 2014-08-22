@@ -57,6 +57,9 @@ class Architecture
   virtual string DStridedStore(string memPtr, string startingLoc, string stride) = 0;
   virtual string DZeroVar(string varName) = 0;
 
+  // Compilation
+  virtual string CompileString(string executableName, string testFileName) = 0;
+
   // General
   int VecRegWidth(Type type);
   string TypeName(Type type);
@@ -105,6 +108,9 @@ class AMDEngSample : public Architecture
   virtual string DContiguousStore(string memPtr, string startingLoc);
   virtual string DStridedStore(string memPtr, string startingLoc, string stride);
   virtual string DZeroVar(string varName);
+
+  // Compilation
+  virtual string CompileString(string executableName, string testFileName);
 
 };
 
