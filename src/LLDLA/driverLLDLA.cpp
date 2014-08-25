@@ -115,15 +115,8 @@ void PrintImpMap(ImplementationRuntimeMap &impTimes)
   }
 }
 
-GraphNum PrintImpMapInFlops(ImplementationRuntimeMap &impTimes, double flopCost, int chunkSize) {
-  /***************************************************************************
-   * WARNING: These numbers are processor specific to Dillon's machine in GDC
-   ***************************************************************************/
-#if USE_DOUBLE_PRECISION
-  double peakFLOPS = 3.7e9 * 8;
-#else
-  double peakFLOPS = 2 * 3.7e9 * 8;
-#endif // USE_DOUBLE_PRECISION
+GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, double flopCost, int chunkSize) {
+  double peakFLOPS = arch->FlopsPerCycle(type) * arch->CyclesPerSecond();
   GraphNum bestImpNum = 0;
   double bestFLOPS = 0;
   ImplementationRuntimeMapIter mit;
@@ -602,7 +595,7 @@ int main(int argc, const char* argv[])
   cout << "About to evaluate\n";
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
   cout << "Done evaluating\n";
-  GraphNum best = PrintImpMapInFlops(impMap, flopCost, chunkSize);
+  GraphNum best = PrintImpMapInFlops(dataType, impMap, flopCost, chunkSize);
   cout << "All implementations printed\n";
   cout << "Best times";
 

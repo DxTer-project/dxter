@@ -41,6 +41,7 @@ class Architecture
   virtual string SContiguousStore(string memPtr, string startingLoc) = 0;
   virtual string SStridedStore(string memPtr, string startingLoc, string stride) = 0;
   virtual string SZeroVar(string varName) = 0;
+  virtual double SFlopsPerCycle() = 0;
 
   // Double precision
   virtual int DVecRegWidth() = 0;
@@ -56,9 +57,13 @@ class Architecture
   virtual string DContiguousStore(string memPtr, string startingLoc) = 0;
   virtual string DStridedStore(string memPtr, string startingLoc, string stride) = 0;
   virtual string DZeroVar(string varName) = 0;
+  virtual double DFlopsPerCycle() = 0;
 
   // Compilation
   virtual string CompileString(string executableName, string testFileName) = 0;
+
+  // Performance
+  virtual double CyclesPerSecond() = 0;
 
   // General
   int VecRegWidth(Type type);
@@ -74,6 +79,7 @@ class Architecture
   string ContiguousStore(Type type, string memPtr, string startingLoc);
   string StridedStore(Type type, string memPtr, string startingLoc, string stride);
   string ZeroVar(Type type, string varName);
+  double FlopsPerCycle(Type type);
 };
 
 class AMDEngSample : public Architecture
@@ -93,6 +99,7 @@ class AMDEngSample : public Architecture
   virtual string SContiguousStore(string memPtr, string startingLoc);
   virtual string SStridedStore(string memPtr, string startingLoc, string stride);
   virtual string SZeroVar(string varName);
+  virtual double SFlopsPerCycle();
 
   // Double precision
   virtual int DVecRegWidth();
@@ -108,9 +115,10 @@ class AMDEngSample : public Architecture
   virtual string DContiguousStore(string memPtr, string startingLoc);
   virtual string DStridedStore(string memPtr, string startingLoc, string stride);
   virtual string DZeroVar(string varName);
+  virtual double DFlopsPerCycle();
 
-  // Compilation
   virtual string CompileString(string executableName, string testFileName);
+  virtual double CyclesPerSecond();
 
 };
 
@@ -131,6 +139,7 @@ class Stampede : public Architecture
   virtual string SContiguousStore(string memPtr, string startingLoc);
   virtual string SStridedStore(string memPtr, string startingLoc, string stride);
   virtual string SZeroVar(string varName);
+  virtual double SFlopsPerCycle();
 
   // Double precision
   virtual int DVecRegWidth();
@@ -146,9 +155,11 @@ class Stampede : public Architecture
   virtual string DContiguousStore(string memPtr, string startingLoc);
   virtual string DStridedStore(string memPtr, string startingLoc, string stride);
   virtual string DZeroVar(string varName);
+  virtual double DFlopsPerCycle();
 
   // Compilation
   virtual string CompileString(string executableName, string testFileName);
+  virtual double CyclesPerSecond();
 
 };
 

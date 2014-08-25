@@ -180,11 +180,38 @@ string Architecture::ZeroVar(Type type, string varName)
   }
 }
 
+double Architecture::FlopsPerCycle(Type type)
+{
+  if (type == REAL_SINGLE) {
+    return SFlopsPerCycle();
+  } else if (type == REAL_DOUBLE) {
+    return DFlopsPerCycle();
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    throw;
+  }
+}
+
 string AMDEngSample::CompileString(string executableName, string testFileName)
 {
   string compileStr = "gcc -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o ";
   compileStr += executableName + " " + testFileName + " utils.c";
   return compileStr;
+}
+
+double AMDEngSample::SFlopsPerCycle()
+{
+  return 16.0;
+}
+
+double AMDEngSample::DFlopsPerCycle()
+{
+  return 8.0;
+}
+
+double AMDEngSample::CyclesPerSecond()
+{
+  return 3.7e9;
 }
 
 int AMDEngSample::SVecRegWidth()
@@ -336,6 +363,21 @@ string Stampede::CompileString(string executableName, string testFileName)
   string compileStr = "icc -O3 -xhost -fno-alias -o ";
   compileStr += executableName + " " + testFileName + " utils.c";
   return compileStr;
+}
+
+double Stampede::CyclesPerSecond()
+{
+  return 2.7e9;
+}
+
+double Stampede::DFlopsPerCycle()
+{
+  return 8.0;
+}
+
+double Stampede::SFlopsPerCycle()
+{
+  return 16.0;
 }
 
 int Stampede::SVecRegWidth()
