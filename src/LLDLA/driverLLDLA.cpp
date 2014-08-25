@@ -350,7 +350,7 @@ int main(int argc, const char* argv[])
   omp_set_nested(true);
 #endif
 
-  arch = new Stampede();
+  arch = new AMDEngSample();
   //  PrintType printType = CODE;
   int numIters = -1;
   RealPSet* (*algFunc)();

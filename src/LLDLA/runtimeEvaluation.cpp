@@ -293,8 +293,6 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest t
   cout << "All implementations written to files\n";
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
-  string compileStr = "gcc -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o " +  executableName;
-  compileStr += " " + testFileName + " utils.c";
   system(arch->CompileString(executableName, testFileName).c_str());
   cout << "Compiled\n";
   string runStr = "./" + executableName;
@@ -315,9 +313,7 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnes
   cout << "All implementations written to files\n";
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
-  string compileStr = "gcc -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o " +  executableName;
-  compileStr += " " + testFileName + " utils.c";
-  system(compileStr.c_str());
+  system(arch->CompileString(executableName, testFileName).c_str());
   string runStr = "./" + executableName;
   system(runStr.c_str());
   string removeExecutable = "rm -f " + executableName;
