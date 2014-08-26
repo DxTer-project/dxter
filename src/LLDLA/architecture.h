@@ -167,35 +167,11 @@ class HaswellMacbook : public Stampede
 {
  public:
   // Single precision
-  virtual int SVecRegWidth();
-  virtual string SVecRegTypeDec();
-  virtual string STypeName();
-  virtual string SAddCode(string operand1, string operand2, string result);
-  virtual string SMulCode(string operand1, string operand2, string result);
   virtual string SFMACode(string operand1, string operand2, string operand3, string result);
-  virtual string SAccumCode(string memPtr, string startingLoc);
-  virtual string SContiguousLoad(string memPtr, string receivingLoc);
-  virtual string SStridedLoad(string memPtr, string receivingLoc, string stride);
-  virtual string SDuplicateLoad(string memPtr, string receivingLoc);
-  virtual string SContiguousStore(string memPtr, string startingLoc);
-  virtual string SStridedStore(string memPtr, string startingLoc, string stride);
-  virtual string SZeroVar(string varName);
   virtual double SFlopsPerCycle();
 
   // Double precision
-  virtual int DVecRegWidth();
-  virtual string DVecRegTypeDec();
-  virtual string DTypeName();
-  virtual string DAddCode(string operand1, string operand2, string result);
-  virtual string DMulCode(string operand1, string operand2, string result);
   virtual string DFMACode(string operand1, string operand2, string operand3, string result);
-  virtual string DAccumCode(string memPtr, string startinLoc);
-  virtual string DContiguousLoad(string memPtr, string receivingLoc);
-  virtual string DStridedLoad(string memPtr, string receivingLoc, string stride);
-  virtual string DDuplicateLoad(string memPtr, string receivingLoc);
-  virtual string DContiguousStore(string memPtr, string startingLoc);
-  virtual string DStridedStore(string memPtr, string startingLoc, string stride);
-  virtual string DZeroVar(string varName);
   virtual double DFlopsPerCycle();
 
   // Compilation
