@@ -568,7 +568,7 @@ double HaswellMacbook::SFlopsPerCycle()
 
 string HaswellMacbook::SFMACode(string operand1, string operand2, string operand3, string result)
 {
-  return result + ".v = _mm256_fmadd( " + operand1 + ".v, " + operand2 + ".v, " + operand3 + ".v );\n";
+  return result + ".v = _mm256_fmadd_ps( " + operand1 + ".v, " + operand2 + ".v, " + operand3 + ".v );\n";
 }
 string HaswellMacbook::DFMACode(string operand1, string operand2, string operand3, string result)
 {
