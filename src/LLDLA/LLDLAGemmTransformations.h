@@ -28,14 +28,15 @@
 #include "gemmTransformations.h"
 #include "realLoop.h"
 
-/*class LLDLAGemmLoopExp : public GemmLoopExp
+class LLDLAGemmLoopExp : public GemmLoopExp
 {
  public:
-  LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize);
+  Type m_type;
+  LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
-  };*/
+};
 
 class GemmTransToNotTrans : public SingleTrans
 {

@@ -28,16 +28,17 @@
 #include "mvmul.h"
 #include "vmmul.h"
 
-/*
-LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize)
+
+LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize, Type type)
   : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5))),bsSize)
 {
+  m_type = type;
 }
 
 
 string LLDLAGemmLoopExp::GetType() const
 {
-  return "LLDLA " + GemmLoopExp::GetType();
+  return "LLDLA " + GemmLoopExp::GetType() + ", " + std::to_string((long long int) m_type);
 }
   
 bool LLDLAGemmLoopExp::CanApply(const Node *node) const
@@ -52,13 +53,23 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
       return false;
   }
 
+  BSSize mu, mu2, mu3;
+  if (m_type == REAL_SINGLE) {
+    mu = LLDLAMuSingle;
+    mu2 = LLDLA2MuSingle;
+    mu3 = LLDLA3MuSingle;
+  } else if (m_type == REAL_DOUBLE) {
+    mu = LLDLAMuDouble;
+    mu2 = LLDLA2MuDouble;
+    mu3 = LLDLA3MuDouble;
+  }
 
   switch (m_dim) {
   case (0):
     {
       //DIMM
-      if (m_bsSize == LLDLA2Mu) {
-	if (*(gemm->GetInputM(2)) <= LLDLA3Mu.GetSize())
+      if (m_bsSize == mu2) {
+	if (*(gemm->GetInputM(2)) <= mu3.GetSize())
 	  return false;
       }
       if (*(gemm->GetInputM(2)) <= m_bsSize.GetSize())
@@ -68,10 +79,10 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
       //but a loop immediately within another loop cannot split the
       //same dimension, so checking here to make sure other dimensions
       //will be split with a loop
-      if ((m_bsSize != LLDLAMu)
-	  && (*(gemm->GetInputN(2)) <= LLDLAMu.GetSize())
-	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= LLDLAMu.GetSize()))
-	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= LLDLAMu.GetSize()))))
+      if ((m_bsSize != mu)
+	  && (*(gemm->GetInputN(2)) <= mu.GetSize())
+	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= mu.GetSize()))
+	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= mu.GetSize()))))
 	return false;
       else
 	return true;
@@ -81,8 +92,8 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
     {
       //DIMK
       if (gemm->m_transA == NORMAL) {
-	if (m_bsSize == LLDLA2Mu) {
-	  if (*(gemm->GetInputN(0)) <= LLDLA3Mu.GetSize())
+	if (m_bsSize == mu2) {
+	  if (*(gemm->GetInputN(0)) <= mu3.GetSize())
 	    return false;
 	}
 
@@ -90,8 +101,8 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
 	  return false;
       }
       else if (gemm->m_transA != CONJ) {
-	if (m_bsSize == LLDLA2Mu) {
-	  if (*(gemm->GetInputM(0)) <= LLDLA3Mu.GetSize())
+	if (m_bsSize == mu2) {
+	  if (*(gemm->GetInputM(0)) <= mu3.GetSize())
 	    return false;
 	}
 
@@ -100,9 +111,9 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
       }
       else
 	throw;
-      if ((m_bsSize != LLDLAMu)
-	  && (*(gemm->GetInputN(2)) <= LLDLAMu.GetSize())
-	  && (*(gemm->GetInputM(2)) <= LLDLAMu.GetSize()))
+      if ((m_bsSize != mu)
+	  && (*(gemm->GetInputN(2)) <= mu.GetSize())
+	  && (*(gemm->GetInputM(2)) <= mu.GetSize()))
 	return false;
       else
 	return true;
@@ -112,17 +123,17 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   case (2):
     {
       //DIMN
-      if (m_bsSize == LLDLA2Mu) {
-	if (*(gemm->GetInputN(2)) <= LLDLA3Mu.GetSize())
+      if (m_bsSize == mu2) {
+	if (*(gemm->GetInputN(2)) <= mu3.GetSize())
 	  return false;
       }
 
       if (*(gemm->GetInputN(2)) <= m_bsSize.GetSize())
 	return false;
-      if ((m_bsSize != LLDLAMu)
-	  && (*(gemm->GetInputM(2)) <= LLDLAMu.GetSize())
-	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= LLDLAMu.GetSize()))
-	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= LLDLAMu.GetSize()))))
+      if ((m_bsSize != mu)
+	  && (*(gemm->GetInputM(2)) <= mu.GetSize())
+	  && (((gemm->m_transA == NORMAL)  && (*(gemm->GetInputN(0)) <= mu.GetSize()))
+	      || ((gemm->m_transA != CONJ)  && (*(gemm->GetInputM(0)) <= mu.GetSize()))))
 	return false;
       else
 	return true;
@@ -136,7 +147,7 @@ void LLDLAGemmLoopExp::Apply(Node *node) const
 {
   GemmLoopExp::Apply(node);
 }
-*/
+
 bool GemmTransToNotTrans::CanApply(const Node *node) const
 {
   const Gemm *gemm = (Gemm*)node;
