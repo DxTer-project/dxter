@@ -544,4 +544,35 @@ string Stampede::DZeroVar(string varName)
   return varName + ".v = _mm256_setzero_pd();\n";
 }
 
+string HaswellMacbook::CompileString(string executableName, string testFileName)
+{
+  string compileStr = "icc -O3 -xhost -fno-alias -o ";
+  compileStr += executableName + " " + testFileName + " utils.c";
+  return compileStr;
+}
+
+double HaswellMacbook::CyclesPerSecond()
+{
+  return 2.8e9;
+}
+
+double HaswellMacbook::DFlopsPerCycle()
+{
+  return 16.0;
+}
+
+double HaswellMacbook::SFlopsPerCycle()
+{
+  return 32.0;
+}
+
+string HaswellMacbook::SFMACode(string operand1, string operand2, string operand3, string result)
+{
+  return result + ".v = _mm256_fmadd( " + operand1 + ".v, " + operand2 + ".v, " + operand3 + ".v );\n";
+}
+string HaswellMacbook::DFMACode(string operand1, string operand2, string operand3, string result)
+{
+  return result + ".v = _mm256_fmadd_pd( " + operand1 + ".v, " + operand2 + ".v, " + operand3 + ". );\n";
+}
+
 #endif // DOLLDLA
