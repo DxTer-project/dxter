@@ -86,7 +86,7 @@ RealPSet* DoubleGemmExample();
 Trans transA, transB;
 
 Architecture* arch;
-Type dataType = REAL_SINGLE;
+Type dataType = REAL_DOUBLE;
 
 ImplementationMap ImpStrMap(Universe *uni)
 {
@@ -197,7 +197,7 @@ void AddGemmTrans()
 
 void AddVVDotTrans()
 {
-  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
 
   Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
   return;
@@ -368,6 +368,8 @@ int main(int argc, const char* argv[])
   string fileName;
   string opName;
   Cost flopCost = 0;
+  printf("dataType == REAL_DOUBLE ? %d\n", dataType == REAL_DOUBLE);
+  printf("dataType == REAL_SINGLE ? %d\n", dataType == REAL_SINGLE);
 
   if(argc < 2) {
     Usage();

@@ -26,7 +26,7 @@
 LoadToRegs::LoadToRegs(Type type)
 {
   m_type = type;
-  m_regWidth = arch->VecRegWidth(type);
+  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void LoadToRegs::Prop()
@@ -42,6 +42,7 @@ void LoadToRegs::Prop()
 	cout << "Error: Incorrect dimensions for register load\n";
 	GetInputN(0)->Print();
 	cout << "m_regWidth = " << std::to_string((long long int) m_regWidth) << endl;
+	cout << "m_type == REAL_DOUBLE ? " << std::to_string((long long int) m_type == REAL_DOUBLE) << endl;
 	cout << "*GetInputM(0) != 1 ? " << std::to_string((long long int) (*GetInputM(0) != 1)) << endl;
 	cout << "*GetInputN(0) != m_regWidth ? " << std::to_string((long long int) (*GetInputN(0) != m_regWidth)) << endl;
 	throw;
