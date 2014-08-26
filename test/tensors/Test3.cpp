@@ -266,10 +266,10 @@ DistTensorTest( const Grid& g )
   // T input has 4 dims
   //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
   ObjShape T__D_0__D_1__D_2__D_3_tempShape;
-  T__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-  T__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
   T__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
   T__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
+  T__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+  T__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
   T__D_0__D_1__D_2__D_3.ResizeTo( T__D_0__D_1__D_2__D_3_tempShape );
   MakeUniform( T__D_0__D_1__D_2__D_3 );
   DistTensor<T> T_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
@@ -277,10 +277,10 @@ DistTensorTest( const Grid& g )
   // W input has 4 dims
   //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
   ObjShape W__D_0__D_1__D_2__D_3_tempShape;
-  W__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-  W__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-  W__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-  W__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
+  W__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+  W__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+  W__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+  W__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
   W__D_0__D_1__D_2__D_3.ResizeTo( W__D_0__D_1__D_2__D_3_tempShape );
   MakeUniform( W__D_0__D_1__D_2__D_3 );
   DistTensor<T> W_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
@@ -288,10 +288,10 @@ DistTensorTest( const Grid& g )
   // V input has 4 dims
   //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
   ObjShape V__D_0__D_1__D_2__D_3_tempShape;
-  V__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-  V__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
   V__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
   V__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
+  V__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+  V__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
   V__D_0__D_1__D_2__D_3.ResizeTo( V__D_0__D_1__D_2__D_3_tempShape );
   MakeUniform( V__D_0__D_1__D_2__D_3 );
   DistTensor<T> V_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
@@ -299,10 +299,10 @@ DistTensorTest( const Grid& g )
   // U input has 4 dims
   //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
   ObjShape U__D_0__D_1__D_2__D_3_tempShape;
-  U__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-  U__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-  U__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-  U__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
+  U__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
+  U__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
+  U__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
+  U__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
   U__D_0__D_1__D_2__D_3.ResizeTo( U__D_0__D_1__D_2__D_3_tempShape );
   MakeUniform( U__D_0__D_1__D_2__D_3 );
   DistTensor<T> U_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
@@ -310,10 +310,10 @@ DistTensorTest( const Grid& g )
   // Temp input has 4 dims
   //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
   ObjShape Accum__D_0__D_1__D_2__D_3_tempShape;
-  Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-  Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
   Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
   Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
+  Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+  Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
   Accum__D_0__D_1__D_2__D_3.ResizeTo( Accum__D_0__D_1__D_2__D_3_tempShape );
   MakeUniform( Accum__D_0__D_1__D_2__D_3 );
   DistTensor<T> Accum_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
