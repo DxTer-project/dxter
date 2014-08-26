@@ -278,10 +278,10 @@ indices_ijkl[3] = 'l';
 // T input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
 ObjShape T__D_0__D_1__D_2__D_3_tempShape;
+T__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+T__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
 T__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
 T__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-T__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-T__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
 T__D_0__D_1__D_2__D_3.ResizeTo( T__D_0__D_1__D_2__D_3_tempShape );
 MakeUniform( T__D_0__D_1__D_2__D_3 );
 DistTensor<T> T_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
@@ -289,10 +289,10 @@ GatherAllModes( T__D_0__D_1__D_2__D_3, T_local );
 // W input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
 ObjShape W__D_0__D_1__D_2__D_3_tempShape;
+W__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+W__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
 W__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
 W__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-W__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-W__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
 W__D_0__D_1__D_2__D_3.ResizeTo( W__D_0__D_1__D_2__D_3_tempShape );
 MakeUniform( W__D_0__D_1__D_2__D_3 );
 DistTensor<T> W_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
@@ -300,10 +300,10 @@ GatherAllModes( W__D_0__D_1__D_2__D_3, W_local );
 // V input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
 ObjShape V__D_0__D_1__D_2__D_3_tempShape;
+V__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+V__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
 V__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
 V__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-V__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-V__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
 V__D_0__D_1__D_2__D_3.ResizeTo( V__D_0__D_1__D_2__D_3_tempShape );
 MakeUniform( V__D_0__D_1__D_2__D_3 );
 DistTensor<T> V_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
@@ -311,10 +311,10 @@ GatherAllModes( V__D_0__D_1__D_2__D_3, V_local );
 // U input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
 ObjShape U__D_0__D_1__D_2__D_3_tempShape;
-U__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-U__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-U__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-U__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
+U__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+U__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+U__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+U__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
 U__D_0__D_1__D_2__D_3.ResizeTo( U__D_0__D_1__D_2__D_3_tempShape );
 MakeUniform( U__D_0__D_1__D_2__D_3 );
 DistTensor<T> U_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
@@ -322,10 +322,10 @@ GatherAllModes( U__D_0__D_1__D_2__D_3, U_local );
 // Temp input has 4 dims
 //	Starting distribution: [D0,D1,D2,D3] or _D_0__D_1__D_2__D_3
 ObjShape Accum__D_0__D_1__D_2__D_3_tempShape;
+Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
+Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 10 );
 Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
 Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 100 );
-Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
-Accum__D_0__D_1__D_2__D_3_tempShape.push_back( 1000 );
 Accum__D_0__D_1__D_2__D_3.ResizeTo( Accum__D_0__D_1__D_2__D_3_tempShape );
 MakeUniform( Accum__D_0__D_1__D_2__D_3 );
 DistTensor<T> Accum_local( tmen::StringToTensorDist("[(),(),(),()]|(0,1,2,3)"), g );
@@ -378,6 +378,8 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 		//------------------------------------//
 
 	//****
+		cout << "one\n";
+		cout.flush();
 	   // 1.0 * U[D0,D1,*,*]_abcd * T[*,*,D2,D3]_cdij + 0.0 * Accum[D0,D1,D2,D3]_abij
 	LocalContractAndLocalEliminate(1.0, U__D_0__D_1__S__S.LockedTensor(), indices_abcd,
 		T__S__S__D_2__D_3.LockedTensor(), indices_cdij,
@@ -387,6 +389,8 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	tempShape.push_back( g.Shape()[3] );
 	Accum__D_0__S__D_2__S__D_1__D_3.ResizeTo( tempShape );
 	   // 1.0 * V[D0,D1,D2,D3]_acik * T[*,D1,*,D3]_bcjk + 0.0 * Accum[D0,*,D2,*,D1,D3]_abijck
+		cout << "two\n";
+		cout.flush();
 	LocalContract(1.0, V__D_0__D_1__D_2__D_3.LockedTensor(), indices_acik,
 		T__S__D_1__S__D_3.LockedTensor(), indices_bcjk,
 		0.0, Accum__D_0__S__D_2__S__D_1__D_3.Tensor(), indices_abijck);
@@ -410,6 +414,8 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	tempShape.push_back( g.Shape()[3] );
 	Accum__D_0__D_1__S__S__D_2__D_3.ResizeTo( tempShape );
 	   // 1.0 * W[*,*,D2,D3]_ijkl * T[D0,D1,D2,D3]_abkl + 0.0 * Accum[D0,D1,*,*,D2,D3]_abijkl
+		cout << "three\n";
+		cout.flush();
 	LocalContract(1.0, W__S__S__D_2__D_3.LockedTensor(), indices_ijkl,
 		T__D_0__D_1__D_2__D_3.LockedTensor(), indices_abkl,
 		0.0, Accum__D_0__D_1__S__S__D_2__D_3.Tensor(), indices_abijkl);
@@ -442,6 +448,8 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 	tempShape.push_back( g.Shape()[3] );
 	epsilon__D_0__D_1__D_2__D_3.ResizeTo( tempShape );
 	   // 1.0 * T[D0,D1,D2,D3]_abij * Accum[D0,D1,D2,D3]_abij + 0.0 * epsilon[D0,D1,D2,D3]_abij
+		cout << "four\n";
+		cout.flush();
 	LocalContract(1.0, T__D_0__D_1__D_2__D_3.LockedTensor(), indices_abij,
 		Accum__D_0__D_1__D_2__D_3.LockedTensor(), indices_abij,
 		0.0, epsilon__D_0__D_1__D_2__D_3.Tensor(), indices_abij);
@@ -468,20 +476,30 @@ GatherAllModes( epsilon____N_D_0_1_2_3, epsilon_local );
 
 	//------------------------------------//
 
-
+		cout << "five\n";
+		cout.flush();
 
 
 	LocalContractAndLocalEliminate(1.0, U_local.LockedTensor(), indices_abcd,
 				       T_local.LockedTensor(), indices_cdij,
 				       0.0, Accum_local.Tensor(), indices_abij);
 
+		cout << "six\n";
+		cout.flush();
+
 	LocalContractAndLocalEliminate(1.0, V_local.LockedTensor(), indices_acik,
 				       T_local.LockedTensor(), indices_bcjk,
 				       1.0, Accum_local.Tensor(), indices_abij);
 
+		cout << "seven\n";
+		cout.flush();
+
 	LocalContractAndLocalEliminate(1.0, W_local.LockedTensor(), indices_ijkl,
 				       T_local.LockedTensor(), indices_abkl,
 				       1.0, Accum_local.Tensor(), indices_abij);
+
+		cout << "eight\n";
+		cout.flush();
 
 
 	IndexArray blank_indices;
