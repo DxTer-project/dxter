@@ -102,7 +102,8 @@ class MAddLowerLayer : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
-  MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs);
+  Type m_type;
+  MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

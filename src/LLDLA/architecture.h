@@ -29,6 +29,7 @@ class Architecture
  public:
   // Single precision
   virtual int SVecRegWidth() = 0;
+  virtual string SVecRegTypeDec() = 0;
   virtual string STypeName() = 0;
   virtual string SAddCode(string operand1, string operand2, string result) = 0;
   virtual string SMulCode(string operand1, string operand2, string result) = 0;
@@ -40,9 +41,11 @@ class Architecture
   virtual string SContiguousStore(string memPtr, string startingLoc) = 0;
   virtual string SStridedStore(string memPtr, string startingLoc, string stride) = 0;
   virtual string SZeroVar(string varName) = 0;
+  virtual double SFlopsPerCycle() = 0;
 
   // Double precision
   virtual int DVecRegWidth() = 0;
+  virtual string DVecRegTypeDec() = 0;
   virtual string DTypeName() = 0;
   virtual string DAddCode(string operand1, string operand2, string result) = 0;
   virtual string DMulCode(string operand1, string operand2, string result) = 0;
@@ -54,10 +57,18 @@ class Architecture
   virtual string DContiguousStore(string memPtr, string startingLoc) = 0;
   virtual string DStridedStore(string memPtr, string startingLoc, string stride) = 0;
   virtual string DZeroVar(string varName) = 0;
+  virtual double DFlopsPerCycle() = 0;
+
+  // Compilation
+  virtual string CompileString(string executableName, string testFileName) = 0;
+
+  // Performance
+  virtual double CyclesPerSecond() = 0;
 
   // General
   int VecRegWidth(Type type);
   string TypeName(Type type);
+  string VecRegTypeDec(Type type);
   string AddCode(Type type, string operand1, string operand2, string result);
   string MulCode(Type type, string operand1, string operand2, string result);
   string FMACode(Type type, string operand1, string operand2, string operand3, string result);
@@ -68,6 +79,7 @@ class Architecture
   string ContiguousStore(Type type, string memPtr, string startingLoc);
   string StridedStore(Type type, string memPtr, string startingLoc, string stride);
   string ZeroVar(Type type, string varName);
+  double FlopsPerCycle(Type type);
 };
 
 class AMDEngSample : public Architecture
@@ -75,6 +87,7 @@ class AMDEngSample : public Architecture
  public:
   // Single precision
   virtual int SVecRegWidth();
+  virtual string SVecRegTypeDec();
   virtual string STypeName();
   virtual string SAddCode(string operand1, string operand2, string result);
   virtual string SMulCode(string operand1, string operand2, string result);
@@ -86,9 +99,11 @@ class AMDEngSample : public Architecture
   virtual string SContiguousStore(string memPtr, string startingLoc);
   virtual string SStridedStore(string memPtr, string startingLoc, string stride);
   virtual string SZeroVar(string varName);
+  virtual double SFlopsPerCycle();
 
   // Double precision
   virtual int DVecRegWidth();
+  virtual string DVecRegTypeDec();
   virtual string DTypeName();
   virtual string DAddCode(string operand1, string operand2, string result);
   virtual string DMulCode(string operand1, string operand2, string result);
@@ -100,6 +115,51 @@ class AMDEngSample : public Architecture
   virtual string DContiguousStore(string memPtr, string startingLoc);
   virtual string DStridedStore(string memPtr, string startingLoc, string stride);
   virtual string DZeroVar(string varName);
+  virtual double DFlopsPerCycle();
+
+  virtual string CompileString(string executableName, string testFileName);
+  virtual double CyclesPerSecond();
+
+};
+
+class Stampede : public Architecture
+{
+ public:
+  // Single precision
+  virtual int SVecRegWidth();
+  virtual string SVecRegTypeDec();
+  virtual string STypeName();
+  virtual string SAddCode(string operand1, string operand2, string result);
+  virtual string SMulCode(string operand1, string operand2, string result);
+  virtual string SFMACode(string operand1, string operand2, string operand3, string result);
+  virtual string SAccumCode(string memPtr, string startingLoc);
+  virtual string SContiguousLoad(string memPtr, string receivingLoc);
+  virtual string SStridedLoad(string memPtr, string receivingLoc, string stride);
+  virtual string SDuplicateLoad(string memPtr, string receivingLoc);
+  virtual string SContiguousStore(string memPtr, string startingLoc);
+  virtual string SStridedStore(string memPtr, string startingLoc, string stride);
+  virtual string SZeroVar(string varName);
+  virtual double SFlopsPerCycle();
+
+  // Double precision
+  virtual int DVecRegWidth();
+  virtual string DVecRegTypeDec();
+  virtual string DTypeName();
+  virtual string DAddCode(string operand1, string operand2, string result);
+  virtual string DMulCode(string operand1, string operand2, string result);
+  virtual string DFMACode(string operand1, string operand2, string operand3, string result);
+  virtual string DAccumCode(string memPtr, string startinLoc);
+  virtual string DContiguousLoad(string memPtr, string receivingLoc);
+  virtual string DStridedLoad(string memPtr, string receivingLoc, string stride);
+  virtual string DDuplicateLoad(string memPtr, string receivingLoc);
+  virtual string DContiguousStore(string memPtr, string startingLoc);
+  virtual string DStridedStore(string memPtr, string startingLoc, string stride);
+  virtual string DZeroVar(string varName);
+  virtual double DFlopsPerCycle();
+
+  // Compilation
+  virtual string CompileString(string executableName, string testFileName);
+  virtual double CyclesPerSecond();
 
 };
 

@@ -42,8 +42,8 @@ void LoadToRegs::Prop()
 	cout << "Error: Incorrect dimensions for register load\n";
 	GetInputN(0)->Print();
 	cout << "m_regWidth = " << std::to_string((long long int) m_regWidth) << endl;
-	cout << "*GetInputM(0) != 1 ? " << std::to_string(*GetInputM(0) != 1) << endl;
-	cout << "*GetInputN(0) != m_regWidth ? " << std::to_string(*GetInputN(0) != m_regWidth) << endl;
+	cout << "*GetInputM(0) != 1 ? " << std::to_string((long long int) (*GetInputM(0) != 1)) << endl;
+	cout << "*GetInputN(0) != m_regWidth ? " << std::to_string((long long int) (*GetInputN(0) != m_regWidth)) << endl;
 	throw;
       }
     } else if (*(GetInputN(0)) != 1) {
@@ -188,7 +188,7 @@ Name LoadToRegs::GetName(ConnNum num) const
 
 void LoadToRegs::AddVariables(VarSet &set) const
 {
-  string varDecl = "vec_reg " + GetInputNameStr(0)+ "_regs;\n";
+  string varDecl = arch->TypeName(m_type) + " " + GetInputNameStr(0)+ "_regs;\n";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
@@ -362,7 +362,7 @@ Name DuplicateRegLoad::GetName(ConnNum num) const
 
 void DuplicateRegLoad::AddVariables(VarSet &set) const
 {
-  string varDecl = "vec_reg " + GetInputNameStr(0)+ "_regDup;";
+  string varDecl = arch->TypeName(m_type) + " " + GetInputNameStr(0)+ "_regDup;";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }
@@ -436,7 +436,7 @@ Name TempVecReg::GetName(ConnNum num) const
 
 void TempVecReg::AddVariables(VarSet &set) const
 {
-  string varDecl = "vec_reg " + GetInputNameStr(0)+ "_regTemp;";
+  string varDecl = arch->TypeName(m_type) + " " +  GetInputNameStr(0)+ "_regTemp;";
   Var var(DirectVarDeclType, varDecl);
   set.insert(var);
 }

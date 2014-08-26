@@ -6,7 +6,7 @@
     Copyright (C) 2014, The University of Texas and Bryan Marker
 
     DxTer is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
+n    it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
@@ -58,23 +58,18 @@ void RuntimeTest::AddMiscellaneousDefines()
   m_defines.push_back("#define CHUNK_SIZE " + std::to_string((long long int) m_chunkSize));
   m_defines.push_back("#define min(a,b) ((a) < (b) ? (a) : (b))");
   m_defines.push_back("#define ALLOC_BUFFER(size) alloc_aligned_16((size))");
-  m_defines.push_back("#define MUVALUE " + std::to_string(arch->VecRegWidth(m_type)) + "\n");
+  m_defines.push_back("#define MUVALUE " + std::to_string((long long int) arch->VecRegWidth(m_type)) + "\n");
+  m_defines.push_back(arch->VecRegTypeDec(m_type));
   if (m_type == REAL_SINGLE) {
     m_defines.push_back("#define NUM_SIZE sizeof(float)");
-    //  m_defines.push_back("#define MUVALUE 4");
-    m_defines.push_back("float tmp[4];\n");
     m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_floats((size), (buf))");
     m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff_float((size), (b1), (b2), (test_name))");
     m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer_float((size), (b1), (b2))");
-    m_defines.push_back("typedef union {\n\t__m128 v;\n\tfloat f[4];\n} vec_reg;");
   } else {
     m_defines.push_back("#define NUM_SIZE sizeof(double)");
-    //    m_defines.push_back("#define MUVALUE 2");
-    m_defines.push_back("double tmp[2];\n");
     m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_doubles((size), (buf))");
     m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff((size), (b1), (b2), (test_name))");
     m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer((size), (b1), (b2))");
-    m_defines.push_back("typedef union {\n\t__m128d v;\n\tdouble d[2];\n} vec_reg;");
   }
 
   return;
@@ -298,9 +293,8 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest t
   cout << "All implementations written to files\n";
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
-  string compileStr = "gcc -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o " +  executableName;
-  compileStr += " " + testFileName + " utils.c";
-  system(compileStr.c_str());
+  system(arch->CompileString(executableName, testFileName).c_str());
+  cout << "Compiled\n";
   string runStr = "./" + executableName;
   system(runStr.c_str());
   string removeExecutable = "rm -f " + executableName;
@@ -319,9 +313,7 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnes
   cout << "All implementations written to files\n";
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
-  string compileStr = "gcc -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o " +  executableName;
-  compileStr += " " + testFileName + " utils.c";
-  system(compileStr.c_str());
+  system(arch->CompileString(executableName, testFileName).c_str());
   string runStr = "./" + executableName;
   system(runStr.c_str());
   string removeExecutable = "rm -f " + executableName;

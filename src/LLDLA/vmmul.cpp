@@ -217,7 +217,7 @@ bool VMMulLoopRef::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
     const VMMul* vmmul = (VMMul*) node;
-    if (vmmul->GetLayer() != m_fromLayer) {
+    if (vmmul->GetLayer() != m_fromLayer || m_type != vmmul->m_type) {
       return false;
     }
     if (m_dim == DIMN) {
@@ -342,7 +342,7 @@ bool VMMulLowerLayer::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
     const VMMul* vmmul = (VMMul*) node;
-    if (vmmul->GetLayer() != m_fromLayer) {
+    if (vmmul->GetLayer() != m_fromLayer || m_type != vmmul->m_type) {
       return false;
     }
     if (m_toLayer == LLDLAPRIMITIVELAYER) {
@@ -396,7 +396,7 @@ bool VMMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
     VMMul* vmmul = (VMMul*) node;
-    return *vmmul->GetInputN(1) == m_regWidth;
+    return (*vmmul->GetInputN(1) == m_regWidth) && (m_type == vmmul->m_type);
   }
   return false;
 }

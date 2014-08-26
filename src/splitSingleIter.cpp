@@ -192,7 +192,7 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
 
     RealLoop *loop = (RealLoop*)(((Tunnel*)Input(0))->m_pset);
     if (loop->IsUnrolled())
-      name.m_name += "_iter" + std::to_string(loop->GetCurrIter());
+      name.m_name += "_iter" + std::to_string((long long int) loop->GetCurrIter());
     return name;
     
 
@@ -1116,9 +1116,9 @@ void SplitSingleIter::AddVariables(VarSet &set) const
     unsigned int numIters = NumIters(0);
     for(unsigned int i = 0; i < numIters; ++i) {
 #if USE_DOUBLE_PRECISION
-      Var var(DirectVarDeclType, "double *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string(i) + ";");
+      Var var(DirectVarDeclType, "double *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";");
 #else
-      Var var(DirectVarDeclType, "float *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string(i) + ";");
+      Var var(DirectVarDeclType, "float *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";");
 #endif
       set.insert(var);
     }
