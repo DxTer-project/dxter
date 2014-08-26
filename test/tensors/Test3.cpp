@@ -121,37 +121,6 @@ void ProcessInput(int argc,  char** const argv, Params& args){
     }
 }
 
-template<typename T>
-void
-Set(DistTensor<T>& A)
-{
-    Unsigned order = A.Order();
-    Location loc(order);
-    std::fill(loc.begin(), loc.end(), 0);
-    Unsigned ptr = 0;
-    bool stop = false;
-
-    while(!stop){
-      A.Set(loc, rand());
-	if (loc.size() == 0)
-	  break;
-	
-
-        //Update
-        loc[ptr]++;
-        while(loc[ptr] == A.Dimension(ptr)){
-            loc[ptr] = 0;
-            ptr++;
-            if(ptr == order){
-                stop = true;
-                break;
-            }else{
-                loc[ptr]++;
-            }
-        }
-        ptr = 0;
-    }
-}
 
 template<typename T>
 void
