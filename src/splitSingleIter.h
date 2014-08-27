@@ -37,15 +37,17 @@ class SplitSingleIter : public SplitBase
 {
  public:
   bool m_addDir;
-#if DOLLDLA
   DataTypeInfo m_info;
-#endif
+#if DOLLDLA
+  Type m_dataType;
+  SplitSingleIter(PartDir dir, TunType type, Type dataType, bool isControl = false);
+#elif (DOBLIS||DOELEM)
   SplitSingleIter();
-#if TWOD
   SplitSingleIter(PartDir dir, TunType type, bool isControl = false);
 #else
   SplitSingleIter(unsigned int partDim, TunType type, bool isControl = false);
 #endif
+
   virtual ~SplitSingleIter();
   static Node* BlankInst();
   virtual Node* GetNewInst() {return BlankInst(); }

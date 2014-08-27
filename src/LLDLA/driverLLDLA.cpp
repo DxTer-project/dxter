@@ -240,9 +240,9 @@ void AddMVMulTrans()
 void AddSMMulTrans()
 {
   //Introduces loops in the m and n dimension for SMMul
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble, REAL_DOUBLE), LLDLALOOPPHASE);
 
   return;
 }
@@ -318,16 +318,16 @@ void AddVAddTrans()
 
 void AddTrans()
 {
-  AddGemmTrans();
+  //  AddGemmTrans();
   AddVVDotTrans();
-  AddMAddTrans();
-  AddMVMulTrans();
-  AddSMMulTrans();
-  AddSVMulTrans();
-  AddVMMulTrans();
-  AddVAddTrans();
+  //  AddMAddTrans();
+  //  AddMVMulTrans();
+  //  AddSMMulTrans();
+  //  AddSVMulTrans();
+  //  AddVMMulTrans();
+  //  AddVAddTrans();
 
-  AddUnrollingTrans();
+  //  AddUnrollingTrans();
   
 }
 
@@ -642,32 +642,32 @@ RealPSet* GemvExample()
   InputNode* xIn = new InputNode("x input", 4, 1, "X",
 				 1, 4,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
 
   InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
 				 1, medSize,
 				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride");
+				 "YRowStride", "YColStride", dataType);
 
   InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
 				 1, medSize,
 				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride");
+				 "ZRowStride", "ZColStride", dataType);
 
   InputNode* AIn = new InputNode("a input", medSize, 4, "A",
 				 1, medSize,
 				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride");
+				 "ARowStride", "AColStride", dataType);
 
   InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
 				     1, medSize,
 				     "AlphaNumRows", "AlphaNumCols",
-				     "AlphaRowStride", "AlphaColStride");
+				     "AlphaRowStride", "AlphaColStride", dataType);
 
   InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
 				    1, medSize,
 				    "BetaNumRows", "BetaNumCols",
-				    "BetaRowStride", "BetaColStride");
+				    "BetaRowStride", "BetaColStride", dataType);
 
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
@@ -725,27 +725,27 @@ RealPSet* MVMul2Example()
   InputNode* xIn = new InputNode("x input", medSize, 1, "X",
 				 1, medSize,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
 
   InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
 				 1, medSize,
 				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride");
+				 "YRowStride", "YColStride", dataType);
 
   InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
 				 1, medSize,
 				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride");
+				 "ZRowStride", "ZColStride", dataType);
 
   InputNode* AIn = new InputNode("a input", medSize, medSize, "A",
 				 1, medSize,
 				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride");
+				 "ARowStride", "AColStride", dataType);
 
   InputNode* BIn = new InputNode("b input", medSize, medSize, "B",
 				 1, medSize,
 				 "BNumRows", "BNumCols",
-				 "BRowStride", "BColStride");
+				 "BRowStride", "BColStride", dataType);
   
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
@@ -791,17 +791,17 @@ RealPSet* MAdd2Example()
   InputNode* xIn = new InputNode("x input", medSize, medSize, "X",
 				 1, medSize,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
 
   InputNode* yIn = new InputNode("y input", medSize, medSize, "Y",
 				 1, medSize,
 				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride");
+				 "YRowStride", "YColStride", dataType);
 
   InputNode* zIn = new InputNode("z input", medSize, medSize, "Z",
 				 1, medSize,
 				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride");
+				 "ZRowStride", "ZColStride", dataType);
   
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
@@ -839,17 +839,17 @@ RealPSet* VAdd2Example()
   InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
 				 1, bigSize,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
 
   InputNode* yIn = new InputNode("y input", bigSize, 1, "Y",
 				 1, bigSize,
 				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride");
+				 "YRowStride", "YColStride", dataType);
 
   InputNode* zIn = new InputNode("z input", bigSize, 1, "Z",
 				 1, bigSize,
 				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride");
+				 "ZRowStride", "ZColStride", dataType);
   
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
@@ -888,12 +888,12 @@ RealPSet* VAddExample()
   InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
 				 1, bigSize,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
 
   InputNode* yIn = new InputNode("y input", bigSize, 1, "Y",
 				 1, bigSize,
 				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride");
+				 "YRowStride", "YColStride", dataType);
   
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
@@ -924,27 +924,27 @@ RealPSet* VMVMulExample()
   InputNode* Ain = new InputNode("A input", medSize, 8, "A",
 				 1, 8,
 				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride");
+				 "ARowStride", "AColStride", dataType);
 
   InputNode* xIn = new InputNode("x input", 8, 1, "X",
 				 1, 8,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
 
   InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
 				 1, medSize,
 				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride");
+				 "ZRowStride", "ZColStride", dataType);
 
   InputNode* yIn = new InputNode("y input", 1, medSize, "Y",
 				 1, 1,
 				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride");
+				 "YRowStride", "YColStride", dataType);
 
   InputNode* wIn = new InputNode("w input", 1, 1, "W",
 				 1, 1,
 				 "WNumRows", "WNumCols",
-				 "WRowStride", "WColStride");
+				 "WRowStride", "WColStride", dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -990,11 +990,11 @@ RealPSet* SMMulExample()
   InputNode* Ain = new InputNode("A input", medSize, medSize, "A",
 				 medSize, 1,
 				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride");
+				 "ARowStride", "AColStride", dataType);
   InputNode* xIn = new InputNode("x input", 1, 1, "X",
 				 medSize, 1,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -1024,15 +1024,16 @@ RealPSet* VMMulExample()
   InputNode* Ain = new InputNode("A input", medSize, medSize, "A",
 				 medSize, 1,
 				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride");
+				 "ARowStride", "AColStride", dataType);
   InputNode* xIn = new InputNode("x input", 1, medSize, "X",
 				 medSize, 1,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
+
   InputNode* yIn = new InputNode("y input", 1, medSize, "Y",
 				 medSize, 1,
 				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride");
+				 "YRowStride", "YColStride", dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -1066,11 +1067,12 @@ RealPSet* SVMulRowExample()
   InputNode* Ain = new InputNode("A input", 1, medSize, "A",
 				 medSize, 1,
 				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride");
+				 "ARowStride", "AColStride", dataType);
+
   InputNode* xIn = new InputNode("x input", 1, 1, "X",
 				 medSize, 1,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -1100,11 +1102,12 @@ RealPSet* SVMulColExample()
   InputNode* Ain = new InputNode("A input", medSize, 1, "A",
 				 medSize, 1,
 				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride");
+				 "ARowStride", "AColStride", dataType);
+
   InputNode* xIn = new InputNode("x input", 1, 1, "X",
 				 medSize, 1,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -1134,15 +1137,16 @@ RealPSet* MVMulExample()
   InputNode* Ain = new InputNode("A input", 16, medSize, "A",
 				 1, 16,
 				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride");
+				 "ARowStride", "AColStride", dataType);
+
   InputNode* xIn = new InputNode("x input", medSize, 1, "X",
 				 1, medSize,
 				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride");
+				 "XRowStride", "XColStride", dataType);
   InputNode* yIn = new InputNode("y input", 16, 1, "Y",
 				 1, 16,
 				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride");
+				 "YRowStride", "YColStride", dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -1176,11 +1180,13 @@ RealPSet* MAddExample()
   InputNode* Ain = new InputNode("A input", medSize, medSize, "A", 
 				 1, medSize,
 				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride");
+				 "ARowStride","AColStride", dataType);
+
   InputNode* Bin = new InputNode("B input", medSize, medSize, "B", 
 				 1, medSize,
 				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride");
+				 "BRowStride","BColStride", dataType);
+
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
 
@@ -1209,15 +1215,17 @@ RealPSet* DotExample()
   InputNode* Ain = new InputNode("A input", 1, medSize, "A", 
 				 medSize, 1,
 				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride");
+				 "ARowStride","AColStride", dataType);
+
   InputNode* Bin = new InputNode("B input", medSize, 1, "B", 
 				 medSize, 1,
 				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride");
+				 "BRowStride","BColStride", dataType);
+
   InputNode* Cin = new InputNode("C input", 1, 1, "C", 
 				 medSize, 1,
 				 "CNumRows","CNumCols",
-				 "CRowStride","CColStride");
+				 "CRowStride","CColStride", dataType);
 
   Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);
@@ -1251,15 +1259,17 @@ RealPSet* GemmExample()
   InputNode *Ain = new InputNode("A input", smallSize, bigSize, "A",
 				 bigSize, 1,
 				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride");
+				 "ARowStride","AColStride", dataType);
+
   InputNode *Bin = new InputNode("B input", bigSize, smallSize, "B",
 				 smallSize, 1,
 				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride");
+				 "BRowStride","BColStride", dataType);
+
   InputNode *Cin = new InputNode("C input", smallSize, smallSize, "C",
 				 smallSize, 1,
 				 "CNumRows","CNumCols",
-				 "CRowStride","CColStride");
+				 "CRowStride","CColStride", dataType);
 
   Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -1293,15 +1303,17 @@ RealPSet* DoubleGemmExample()
   InputNode *Ain = new InputNode("A input",  8, bigSize, "A",
 				 bigSize, 1,
 				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride");
+				 "ARowStride","AColStride", dataType);
+
   InputNode *Bin = new InputNode("B input", bigSize, 8, "B",
 				 8, 1,
 				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride");
+				 "BRowStride","BColStride", dataType);
+
   InputNode *Cin = new InputNode("C input",  8, 8, "C",
 				 8, 1,
 				 "CNumRows","CNumCols",
-				 "CRowStride","CColStride");
+				 "CRowStride","CColStride", dataType);
 
   Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);

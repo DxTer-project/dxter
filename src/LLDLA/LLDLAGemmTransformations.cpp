@@ -223,12 +223,12 @@ void LLDLAGemmToMVMul::Apply(Node* node) const
   aTun->SetAllStats(FULLUP);
 
   // Create splits for B and C
-  SplitSingleIter* splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
   splitB->AddInput(gemm->Input(1), gemm->InputConnNum(1));
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
 
-  SplitSingleIter* splitC = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter* splitC = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
   splitC->AddInput(gemm->Input(2), gemm->InputConnNum(2));
   splitC->SetUpStats(FULLUP, NOTUP,
 		     FULLUP, NOTUP);
@@ -282,7 +282,7 @@ void LLDLAGemmToVMMul::Apply(Node* node) const
   Gemm* gemm = (Gemm*) node;
 
   // Split A into row vectors
-  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
   splitA->AddInput(gemm->Input(0), gemm->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -294,7 +294,7 @@ void LLDLAGemmToVMMul::Apply(Node* node) const
   inB->SetIndepIters();
 
   // Split C into rows
-  SplitSingleIter* splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  SplitSingleIter* splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
   splitC->AddInput(gemm->Input(2), gemm->InputConnNum(2));
   splitC->SetUpStats(FULLUP, FULLUP,
 		     NOTUP, NOTUP);

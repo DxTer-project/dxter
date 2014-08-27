@@ -43,12 +43,12 @@ void VVDot::PrintCode(IndStream &out)
   out.Indent();
 
   if (m_layer == ABSLAYER) {
-#if USE_DOUBLE_PRECISION
-      *out << "simple_mmul( " <<
-#else
-      *out << "simple_mmul_float( " <<
-#endif // USE_DOUBLE_PRECISION
-      "1, " <<
+    if (m_type == REAL_DOUBLE) {
+      *out << "simple_mmul( ";
+    } else if (m_type == REAL_SINGLE) {
+      *out << "simple_mmul_float( ";
+    }
+    *out << "1, " <<
       "1, " <<
       InputDataType(0).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<
@@ -214,13 +214,13 @@ void VVDotLoopRef::Apply(Node *node) const
   VVDot *dot = (VVDot*) node;
 
   // Split for row vector
-  SplitSingleIter *splitRow = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitRow = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
   splitRow->AddInput(dot->Input(0), dot->InputConnNum(0));
   splitRow->SetAllStats(FULLUP);
   splitRow->SetIndepIters();
 
   // Split for col vector
-  SplitSingleIter *splitCol = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  SplitSingleIter *splitCol = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
   splitCol->AddInput(dot->Input(1), dot->InputConnNum(1));
   splitCol->SetAllStats(FULLUP);
   splitCol->SetIndepIters();
@@ -337,13 +337,13 @@ void VVDotToRegArith::Apply(Node *node) const
 {
   VVDot* vvdot = (VVDot*) node;
   // Split A on N dimension
-  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
   splitA->AddInput(vvdot->Input(0), vvdot->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
   // Split B on M dimension
-  SplitSingleIter* splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  SplitSingleIter* splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
   splitB->AddInput(vvdot->Input(1), vvdot->InputConnNum(1));
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();

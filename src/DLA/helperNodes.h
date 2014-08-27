@@ -53,8 +53,9 @@ class InputNode : public DLANode
 	    string name, 
 	    Size rowStrideVal, Size colStrideVal,
 	    string numRowsVar, string numColsVar,
-	    string rowStrideVar, string colStrideVar);
-  InputNode(string name, Size m, Size n, Size rowStrideVal, Size colStrideVal);
+	    string rowStrideVar, string colStrideVar,
+	    Type dataType);
+
   string DataDeclaration();
   string RowStrideDefine();
   string ColStrideDefine();

@@ -33,13 +33,15 @@ DataTypeInfo::DataTypeInfo()
 
 DataTypeInfo::DataTypeInfo(Stride rowStride, Stride colStride,
 			   string numRowsVar, string numColsVar,
-			   string rowStrideVar, string colStrideVar)
+			   string rowStrideVar, string colStrideVar,
+			   Type type)
   : m_rowStride(rowStride),
     m_colStride(colStride),
     m_numRowsVar(numRowsVar),
     m_numColsVar(numColsVar),
     m_rowStrideVar(rowStrideVar),
-    m_colStrideVar(colStrideVar)
+    m_colStrideVar(colStrideVar),
+    m_type(type)
 {
 
 }

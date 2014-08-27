@@ -31,7 +31,13 @@ SplitSingleIter::SplitSingleIter()
   m_addDir = false;
 }
 
-#if TWOD
+#if DOLLDLA
+SplitSingleIter::SplitSingleIter(PartDir dir, TunType type, Type dataType, bool isControl = false)
+  : SplitBase(dir, type, isControl)
+{
+  m_dataType = dataType;
+}
+#elif (DOBLIS||DOELEM)
 SplitSingleIter::SplitSingleIter(PartDir dir, TunType type, bool isControl) 
   : SplitBase(dir, type, isControl)
 {
@@ -1094,13 +1100,13 @@ void SplitSingleIter::AddVariables(VarSet &set) const
   BasePSet *pset = ((Tunnel*)Input(0))->m_pset;
   if (!pset->IsReal() || !((RealLoop*)pset)->IsUnrolled()) {
     if (PartInUse(0)) {
-      Var var(name, 0);
+      Var var(name, 0, m_dataType);
       set.insert(var);
     }
-    Var var1(name, 1);
+    Var var1(name, 1, m_dataType);
     set.insert(var1);
     if (PartInUse(2)) {
-      Var var(name, 2);
+      Var var(name, 2, m_dataType);
       set.insert(var);
     }
 

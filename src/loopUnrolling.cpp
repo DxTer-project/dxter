@@ -787,7 +787,7 @@ void ViewMultipleIters::AddVariables(VarSet &set) const
   else
     throw;
   for(int i = 0; i < m_numIters; ++i) {
-    Var var(inName, i);
+    Var var(inName, i, m_info.m_type);
     set.insert(var);
   }
 }

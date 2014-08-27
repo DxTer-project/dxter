@@ -42,7 +42,7 @@ string IndexPairVarName(Dim dim1, Dim dim2)
 
 string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2)
 {
-  std::stringstream name;
+n  std::stringstream name;
   name << "modeArray";
   DimVecConstIter iter = arr1.begin();
   for(; iter != arr1.end(); ++iter) {
@@ -186,18 +186,20 @@ Var::Var(VarType type, const string &str)
 
 
 #if DOLLDLA
-Var::Var(const string &varName, unsigned int partNum)
+Var::Var(const string &varName, unsigned int partNum, Type dataType)
 {
   m_type = VarPartType;
   m_part = new string(LLDLAPartVarName(varName, partNum));
   m_compStr = "g" + *m_part;
+  m_dataType = dataType;
 }
 
-Var::Var(const string &varName, Trans trans)
+Var::Var(const string &varName, Trans trans, Type dataType)
 {
   m_type = VarTransType;
   m_transVar = new string (LLDLATransVarName(varName, trans));
   m_compStr = "f" + *m_transVar;
+  m_dataType = dataType;
 }
 #endif
 
@@ -354,21 +356,21 @@ void Var::PrintDecl(IndStream &out) const
     case (VarPartType):
       {
 	out.Indent();
-#if USE_DOUBLE_PRECISION
-	*out << "double *" << *m_part << ";\n";
-#else
-	*out << "float *" << *m_part << ";\n";
-#endif // USE_DOUBLE_PRECISION
+	if (m_dataType == REAL_SINGLE) {
+	  *out << "float *" << *m_part << ";\n";
+	} else {
+	  *out << "double *" << *m_part << ";\n";
+	}
 	break;
       }
     case (VarTransType):
       {
 	out.Indent();
-#if USE_DOUBLE_PRECISION
-	*out << "double *" << *m_transVar << ";\n";
-#else
-	*out << "float *" << *m_transVar << ";\n";
-#endif // USE_DOUBLE_PRECISION
+	if (m_dataType == REAL_SINGLE) {
+	  *out << "float *" << *m_part << ";\n";
+	} else {
+	  *out << "double *" << *m_part << ";\n";
+	}
 	break;
       }
 #endif

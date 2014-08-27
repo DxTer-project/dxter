@@ -55,7 +55,8 @@ class SMulLoopRef : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
   BSSize m_bs;
-  SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs);
+  Type m_type;
+  SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

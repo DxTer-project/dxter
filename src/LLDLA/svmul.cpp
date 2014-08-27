@@ -251,7 +251,7 @@ void SVMulLoopRef::Apply(Node *node) const
 {
   SVMul *svmul = (SVMul*) node;
 
-  SplitSingleIter *split = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, true);
   split->AddInput(svmul->Input(1), svmul->InputConnNum(1));
 
   if (m_vtype == COLVECTOR) {
@@ -379,9 +379,9 @@ void SVMulToRegArith::Apply(Node* node) const
   // Split up the input vector
   SplitSingleIter* splitVec;
   if (m_vType == ROWVECTOR) {
-    splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+    splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
   } else {
-    splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+    splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
   }
 
   splitVec->AddInput(svmul->Input(1), svmul->InputConnNum(1));

@@ -105,62 +105,6 @@ void LoadToRegs::PrintCode(IndStream &out)
     *out << arch->ContiguousLoad(m_type, toLoadName, loadStr);
   }
 
-  /*  if (IsInputColVector(0)) {
-    if (IsUnitStride(inputRowStride)) {
-      *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
-      return;
-    } else {
-#if USE_DOUBLE_PRECISION
-      toLoad = toLoadName;
-      *out << "tmp[0] = *" << toLoadName << ";\n";
-      for (int i = 1; i < m_regWidth; i++) {
-	out.Indent();
-	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
-      }
-      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
-#else
-      toLoad = toLoadName;
-      *out << "tmp[0] = *" << toLoadName << ";\n";
-      for (int i = 1; i < m_regWidth; i++) {
-	string valToLoad = toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_rowStrideVar;
-	*out << "tmp[ " << std::to_string((long long int) i) << " ] = *(" << valToLoad << ");\n";
-	toLoad += ", " + valToLoad;
-      }
-      out.Indent();
-      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
-#endif // USE_DOUBLE PRECISION
-      return;
-    }
-  } else if (IsInputRowVector(0)) {
-    if (IsUnitStride(inputColStride)) {
-      *out << "VEC_PTR_PD_LOAD( " << loadStr << ", " << toLoadName << " );\n";
-      return;
-    } else {
-#if USE_DOUBLE_PRECISION
-      toLoad = toLoadName;
-      for (int i = 1; i < m_regWidth; i++) {
-	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
-      }
-
-      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
-#else
-      toLoad = toLoadName;
-      *out << "tmp[0] = *" << toLoadName << ";\n";
-      for (int i = 1; i < m_regWidth; i++) {
-      string valToLoad = toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
-	*out << "tmp[ " << std::to_string((long long int) i) << " ] = *(" << valToLoad << ");\n";
-	toLoad += ", " + toLoadName + " + " + std::to_string((long long int) i) + " * " + InputDataType(0).m_colStrideVar;
-      }
-
-      *out << "VEC_PPTR_PD_LOAD( " << loadStr << ", " << toLoad << " );\n";
-      
-#endif // USE_DOUBLE_PRECISION
-      return;
-    }
-  } else {
-    cout << "ERROR: Input to vector register load is neither row nor column vector\n";
-    throw;
-    }*/
   return;
 }
 

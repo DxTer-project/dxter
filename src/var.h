@@ -71,6 +71,7 @@ class Var
 #if DOLLDLA
     string *m_part;
     string *m_transVar;
+    Type m_dataType;
 #endif
   };
   string m_compStr;
@@ -87,8 +88,8 @@ class Var
   Var(const DistType &type);
 #endif
 #if DOLLDLA
-  Var(const string &varName, unsigned int partNum);
-  Var(const string &varName, Trans trans);
+  Var(const string &varName, unsigned int partNum, Type dataType);
+  Var(const string &varName, Trans trans, Type dataType);
 #endif
   ~Var();
   Var& operator=(const Var &rhs);

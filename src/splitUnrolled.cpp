@@ -411,7 +411,7 @@ void SplitUnrolled::AddVariables(VarSet &set) const
   if (GetLoopType() == LLDLALOOP) {
     const string name = GetInputNameStr(0);
     for(unsigned int i = 0; i < m_unrollFactor; ++i) {
-      Var var(name, i);
+      Var var(name, i, m_dataTypeInfo.m_type);
       set.insert(var);
     }
   }

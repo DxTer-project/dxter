@@ -198,10 +198,10 @@ void MAddLoopRef::Apply(Node *node) const
 {
   MAdd *madd = (MAdd*) node;
   
-  SplitSingleIter *split0 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split0 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, true);
   split0->AddInput(madd->Input(0), madd->InputConnNum(0));
 
-  SplitSingleIter *split1 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter *split1 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, false);
   split1->AddInput(madd->Input(1), madd->InputConnNum(1));
 
   split0->SetAllStats(FULLUP);
@@ -272,10 +272,10 @@ void MAddToVAddLoopRef::Apply(Node *node) const
 {
   MAdd *madd = (MAdd*) node;
 
-  SplitSingleIter *split0 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split0 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, true);
   split0->AddInput(madd->Input(0), madd->InputConnNum(0));
 
-  SplitSingleIter *split1 = new SplitSingleIter(m_dim == DIMN ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter *split1 = new SplitSingleIter(m_dim == DIMN ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, false);
   split1->AddInput(madd->Input(1), madd->InputConnNum(1));
 
   split0->SetAllStats(FULLUP);
@@ -389,11 +389,11 @@ void MAddToRegArith::Apply(Node* node) const
   SplitSingleIter* splitA;
   SplitSingleIter* splitB;
   if (splitIntoRows) {
-    splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
-    splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+    splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
+    splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
   } else {
-    splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
-    splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+    splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+    splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
   }
 
   splitA->AddInput(madd->Input(0), madd->InputConnNum(0));
