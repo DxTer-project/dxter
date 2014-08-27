@@ -413,12 +413,12 @@ void Gemm::PrintCode(IndStream &out)
 #if DOLLDLA
 
     if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
-#if USE_DOUBLE_PRECISION
-      *out << "simple_mmul( " <<
-#else
-	*out << "simple_mmul_float( " <<
-#endif // USE_DOUBLE_PRECISION
-	InputDataType(2).m_numRowsVar << ", " <<
+      if (m_type == REAL_DOUBLE) {
+	*out << "simple_mmul( ";
+      } else if (m_type == REAL_SINGLE) {
+	*out << "simple_mmul_float( ";
+      }
+      *out << InputDataType(2).m_numRowsVar << ", " <<
 	InputDataType(2).m_numColsVar << ", " <<
 	InputDataType(0).m_numColsVar << ", " <<
 	GetInputName(0).str() << ", " <<
@@ -441,8 +441,8 @@ void Gemm::PrintCode(IndStream &out)
 	 << ", \n\t";
     out << m_alpha;
     *out << ", "
-    << GetInputName(0).str() << ", " << GetInputName(1).str()
-    << ", ";
+	 << GetInputName(0).str() << ", " << GetInputName(1).str()
+	 << ", ";
     out << m_beta;
     *out << ", " << GetInputName(2).str() << " );\n";
 #endif
@@ -454,8 +454,8 @@ void Gemm::PrintCode(IndStream &out)
 	 << ", \n\t";
     out << m_alpha;
     *out << ", "
-    << GetInputName(0).str() << ", " << GetInputName(1).str()
-    << ", ";
+	 << GetInputName(0).str() << ", " << GetInputName(1).str()
+	 << ", ";
     out << m_beta;
     *out << ", " << GetInputName(2).str() << " );\n";
   }
@@ -472,7 +472,7 @@ void Gemm::PrintCode(IndStream &out)
     *out << "internal::LocalGemm( " << transAStr << ", " << transBStr << ", \n" << out.Tabs(1);
     out << m_alpha;
     *out << ","
-    << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
+	 << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
     out << m_beta;
     *out << ", " << GetInputName(2).str() << " );\n";
   }
@@ -488,7 +488,7 @@ void Gemm::PrintCode(IndStream &out)
       *out << transAStr << ", " << transBStr << ", \n" << out.Tabs(1);
       out << m_alpha;
       *out << ","
-      << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
+	   << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
       out << m_beta;
       *out << ", " << GetInputName(2).str() << " );\n";
     }
@@ -497,7 +497,7 @@ void Gemm::PrintCode(IndStream &out)
       *out << transAStr << ", " << transBStr << ", \n" << out.Tabs(1);
       out << m_alpha;
       *out << ","
-      << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
+	   << GetInputName(0).str() << ", " << GetInputName(1).str() << ", \n" << out.Tabs(1);
       out << m_beta;
       *out << ", " << GetInputName(2).str() << " );\n";
     }
@@ -508,8 +508,8 @@ void Gemm::PrintCode(IndStream &out)
 	*out << "bli_gemm_ker_var2_par( ";
       out << m_alpha;
       *out<< ", &"
-      << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n"
-      << out.Tabs(2);
+	  << GetInputName(0).str() << ", &" << GetInputName(1).str() << ", \n"
+	  << out.Tabs(2);
       out << m_beta;
       *out << ", &" << GetInputName(2).str() << ", (gemm_t*)NULL";
       if (m_comm != CORECOMM)

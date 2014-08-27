@@ -37,7 +37,8 @@ VMMul::VMMul(Layer layer, Type type)
   return;
 }
 
-void VMMul::PrintCode(IndStream &out) {
+void VMMul::PrintCode(IndStream &out)
+{
 
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
@@ -46,12 +47,12 @@ void VMMul::PrintCode(IndStream &out) {
   out.Indent();
 
   if (m_layer == ABSLAYER) {
-#if USE_DOUBLE_PRECISION
-      *out << "simple_mmul( " <<
-#else
-      *out << "simple_mmul_float( " <<
-#endif // USE_DOUBLE_PRECISION
-      "1, " <<
+    if (m_type == REAL_DOUBLE) {
+      *out << "simple_mmul( ";
+    } else if (m_type == REAL_SINGLE) {
+      *out << "simple_mmul_float( ";
+    }
+    *out << "1, " <<
       InputDataType(1).m_numRowsVar << ", " <<
       InputDataType(0).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<

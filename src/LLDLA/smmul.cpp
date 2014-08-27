@@ -35,12 +35,12 @@ SMMul::SMMul(Layer layer, Type type)
 void SMMul::PrintCode(IndStream &out)
 {
   if (GetLayer() == ABSLAYER) {
-#if USE_DOUBLE_PRECISION
-    *out << "simple_smul( " <<
-#else
-    *out << "simple_smul_float( " <<
-#endif // USE_DOUBLE_PRECISION
-      InputDataType(1).m_numRowsVar << ", " <<
+    if (m_type == REAL_DOUBLE) {
+      *out << "simple_smul( ";
+    } else if (m_type == REAL_SINGLE) {
+      *out << "simple_smul_float( ";
+    }
+    *out << InputDataType(1).m_numRowsVar << ", " <<
       InputDataType(1).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ", " <<
