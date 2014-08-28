@@ -55,6 +55,7 @@ DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
   m_numColsVar = rhs.m_numColsVar;
   m_rowStrideVar = rhs.m_rowStrideVar;
   m_colStrideVar = rhs.m_colStrideVar;
+  m_type = rhs.m_type;
   return *this;
 }
 

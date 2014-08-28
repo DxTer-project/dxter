@@ -197,7 +197,7 @@ void AddGemmTrans()
 
 void AddVVDotTrans()
 {
-  //  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
 
   Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
   return;
@@ -205,9 +205,9 @@ void AddVVDotTrans()
 
 void AddMAddTrans()
 {
-    Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
 
-    Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
 
     Universe::AddTrans(MAdd::GetClass(), new MAddToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
 
@@ -217,7 +217,7 @@ void AddMAddTrans()
 
     Universe::AddTrans(MAdd::GetClass(), new MAddToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
 
-  return;
+    return;
 }
 
 void AddMVMulTrans()
@@ -318,16 +318,16 @@ void AddVAddTrans()
 
 void AddTrans()
 {
-  //  AddGemmTrans();
+  AddGemmTrans();
   AddVVDotTrans();
-  //  AddMAddTrans();
-  //  AddMVMulTrans();
-  //  AddSMMulTrans();
-  //  AddSVMulTrans();
-  //  AddVMMulTrans();
-  //  AddVAddTrans();
+  AddMAddTrans();
+  AddMVMulTrans();
+  AddSMMulTrans();
+  AddSVMulTrans();
+  AddVMMulTrans();
+  AddVAddTrans();
 
-  //  AddUnrollingTrans();
+  AddUnrollingTrans();
   
 }
 

@@ -81,7 +81,6 @@ class MVMulToRegArith : public SingleTrans
   Type m_type;
   int m_regWidth;
   MVMulToRegArith(Layer fromLayer, Layer toLayer, Type type);
-
   virtual string GetType() const;
   virtual bool CanApply(const Node* node) const;
   virtual void Apply(Node* node) const;

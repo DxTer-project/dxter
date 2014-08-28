@@ -134,7 +134,7 @@ Name LoadToRegs::GetName(ConnNum num) const
 void LoadToRegs::AddVariables(VarSet &set) const
 {
   string varDecl = arch->TypeName(m_type) + " " + GetInputNameStr(0)+ "_regs;\n";
-  Var var(DirectVarDeclType, varDecl);
+  Var var(DirectVarDeclType, varDecl, m_type);
   set.insert(var);
 }
 
@@ -308,7 +308,7 @@ Name DuplicateRegLoad::GetName(ConnNum num) const
 void DuplicateRegLoad::AddVariables(VarSet &set) const
 {
   string varDecl = arch->TypeName(m_type) + " " + GetInputNameStr(0)+ "_regDup;";
-  Var var(DirectVarDeclType, varDecl);
+  Var var(DirectVarDeclType, varDecl, m_type);
   set.insert(var);
 }
 
@@ -382,7 +382,7 @@ Name TempVecReg::GetName(ConnNum num) const
 void TempVecReg::AddVariables(VarSet &set) const
 {
   string varDecl = arch->TypeName(m_type) + " " +  GetInputNameStr(0)+ "_regTemp;";
-  Var var(DirectVarDeclType, varDecl);
+  Var var(DirectVarDeclType, varDecl, m_type);
   set.insert(var);
 }
 

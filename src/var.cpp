@@ -157,6 +157,14 @@ Var::Var(const DimVec &vec1, const DimVec &vec2)
 
 #endif //DOTENSORS
 
+#if !DOLLDLA
+
+Var::Var(const Var &var)
+{
+  m_type = InvalidType;
+  *this = var;
+}
+
 Var::Var(VarType type, const string &str)
 {
   switch(type)
@@ -164,7 +172,7 @@ Var::Var(VarType type, const string &str)
     case (DirectVarDeclType):
       {
 	m_type = DirectVarDeclType;
-	m_varDecl = new string(str);
+	m_varDecl = str;//new string(str);
 	m_compStr = "a " + str;
 	break;
       }      
@@ -182,15 +190,42 @@ Var::Var(VarType type, const string &str)
       throw;
     }
 }
-
+#endif // !DOLLDLA
 
 
 #if DOLLDLA
+Var::Var(const Var &var, Type dataType)
+{
+  m_type = InvalidType;
+  *this = var;
+  m_dataType = dataType;
+}
+
+Var::Var(VarType type, const string &str, Type dataType)
+{
+  m_dataType = dataType;
+  switch(type)
+    {
+    case (DirectVarDeclType):
+      {
+	m_type = DirectVarDeclType;
+        m_varDecl = str;//new string(str);
+	m_compStr = "a " + str;
+	break;
+      }      
+    default:
+    {
+      cout << "Error: Bad var type\n";
+      throw;
+    }
+    }
+}
+
 Var::Var(const string &varName, unsigned int partNum, Type dataType)
 {
   m_type = VarPartType;
-  m_part = new string(LLDLAPartVarName(varName, partNum));
-  m_compStr = "g" + *m_part;
+  m_part = LLDLAPartVarName(varName, partNum);//new string(LLDLAPartVarName(varName, partNum));
+  m_compStr = "g" + m_part;
   m_dataType = dataType;
 }
 
@@ -198,6 +233,7 @@ Var::Var(const string &varName, Trans trans, Type dataType)
 {
   m_type = VarTransType;
   m_transVar = new string (LLDLATransVarName(varName, trans));
+  m_part = LLDLAPartVarName(varName, 0);//new string (LLDLAPartVarName(varName, 0));
   m_compStr = "f" + *m_transVar;
   m_dataType = dataType;
 }
@@ -228,14 +264,14 @@ Var::~Var()
       break;
 #elif DOLLDLA
     case (VarPartType):
-      delete m_part;
+      //      delete m_part;
       break;
     case (VarTransType):
       delete m_transVar;
       break;
 #endif
     case (DirectVarDeclType):
-      delete m_varDecl;
+//      delete m_varDecl;
       break;
     case (InvalidType) :
     default:
@@ -357,9 +393,12 @@ void Var::PrintDecl(IndStream &out) const
       {
 	out.Indent();
 	if (m_dataType == REAL_SINGLE) {
-	  *out << "float *" << *m_part << ";\n";
+	  *out << "float *" << m_part << ";\n";
+	} else if (m_dataType == REAL_DOUBLE) {
+	  *out << "double *" << m_part << ";\n";
 	} else {
-	  *out << "double *" << *m_part << ";\n";
+	  cout << "ERROR: Var " << m_part << " has invalid m_dataType\n";
+	  throw;
 	}
 	break;
       }
@@ -367,9 +406,12 @@ void Var::PrintDecl(IndStream &out) const
       {
 	out.Indent();
 	if (m_dataType == REAL_SINGLE) {
-	  *out << "float *" << *m_part << ";\n";
+	  *out << "float *" << m_part << ";\n";
+	} else if (m_dataType == REAL_DOUBLE) {
+	  *out << "double *" << m_part << ";\n";
 	} else {
-	  *out << "double *" << *m_part << ";\n";
+	  cout << "ERROR: Var " << m_part << " has invalid m_dataType\n";
+	  throw;
 	}
 	break;
       }
@@ -377,11 +419,16 @@ void Var::PrintDecl(IndStream &out) const
     case (DirectVarDeclType):
       {
 	out.Indent();
-	*out << *m_varDecl << endl;
+//	cout << "DirectVarDeclType " << *m_varDecl << endl;
+//	m_varDecl = new string("Nope\n");
+	*out << m_varDecl << endl;
 	break;
       }
     case (InvalidType):
-      throw;
+      {
+	cout << "Error: Invalid var type\n";
+	throw;
+      }
     }
 }
 
@@ -423,7 +470,7 @@ string Var::GetVarName() const
 #elif DOLLDLA
     case (VarPartType):
       {
-	return *m_part;
+	return m_part;
 	break;
       }
     case (VarTransType):
@@ -441,11 +488,6 @@ string Var::GetVarName() const
   throw;
 }
 
-Var::Var(const Var &var)
-{
-  m_type = InvalidType;
-  *this = var;
-}
 
 Var& Var::operator=(const Var &rhs)
 {
@@ -473,14 +515,14 @@ Var& Var::operator=(const Var &rhs)
 	break;
 #elif DOLLDLA
       case (VarPartType):
-	delete m_part;
+	//	delete m_part;
 	break;
       case (VarTransType):
 	delete m_transVar;
 	break;
 #endif
       case (DirectVarDeclType):
-	delete m_varDecl;
+	//	delete m_varDecl;
 	break;
       case (InvalidType):
 	throw;
@@ -515,14 +557,14 @@ Var& Var::operator=(const Var &rhs)
       break;
 #elif DOLLDLA
     case (VarPartType):
-      m_part = new string(*(rhs.m_part));
+      m_part = rhs.m_part;//new string(*(rhs.m_part));
       break;
     case (VarTransType):
       m_transVar = new string (*(rhs.m_transVar));
       break;
 #endif
     case (DirectVarDeclType):
-      m_varDecl = new string (*(rhs.m_varDecl));
+      m_varDecl = rhs.m_varDecl;//new string ((rhs.m_varDecl));
       break;
     case (InvalidType):
       throw;

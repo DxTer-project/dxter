@@ -58,8 +58,8 @@ class Var
   VarType m_type;
   union {
     Name *m_name;
-    string *m_varDecl;
-#if DOTENSORS
+
+    #if DOTENSORS
     DimVec *m_vec;
     std::pair<DimVec, DimVec> *m_arrPair;
     std::pair<Dim,Dim> *m_pair;
@@ -69,11 +69,13 @@ class Var
     DistType *m_distType;
 #endif
 #if DOLLDLA
-    string *m_part;
+
     string *m_transVar;
-    Type m_dataType;
 #endif
   };
+  string m_part;
+  string m_varDecl;
+  Type m_dataType;
   string m_compStr;
  Var() : m_type(InvalidType) {}
 #if DOTENSORS
@@ -82,14 +84,20 @@ class Var
   Var(const DimVec &vec1, const DimVec &vec2);
   Var(Dim dim1, Dim dim2);
 #endif
+
+#if !DOLLDLA
   Var(const Var &var);
   Var(VarType type, const string &str);
+#endif // !DOLLDLA
+
 #if DODM
   Var(const DistType &type);
 #endif
 #if DOLLDLA
   Var(const string &varName, unsigned int partNum, Type dataType);
   Var(const string &varName, Trans trans, Type dataType);
+  Var(const Var &var, Type dataType);
+  Var(VarType type, const string &str, Type dataType);
 #endif
   ~Var();
   Var& operator=(const Var &rhs);
