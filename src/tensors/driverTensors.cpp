@@ -378,14 +378,15 @@ RealPSet* MartinsExample2()
   //i-l = big
 
   for (Dim dim = 0; dim < 4; ++dim)
-    sizes[dim].AddRepeatedSizes(medSize, 1, 1);
+    sizes[dim].AddRepeatedSizes(bigSize, 1, 1);
 
   InputNode *Uin = new InputNode("U input",  sizes, "U", 4);
+  
 
   sizes[2].ClearSizes();
-  sizes[2].AddRepeatedSizes(bigSize,1,1);
+  sizes[2].AddRepeatedSizes(medSize,1,1);
   sizes[3].ClearSizes();
-  sizes[3].AddRepeatedSizes(bigSize,1,1);
+  sizes[3].AddRepeatedSizes(medSize,1,1);
   
   InputNode *Vin = new InputNode("V input",  sizes, "V", 4);
   InputNode *Tin = new InputNode("T input",  sizes, "T", 4);
@@ -409,6 +410,11 @@ RealPSet* MartinsExample2()
 
   InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", 0);
   //InputNode *epIn = new InputNode("ep input",  ones, "epsilon", 0);
+
+  sizes[0].ClearSizes();
+  sizes[0].AddRepeatedSizes(bigSize,1,1);
+  sizes[1].ClearSizes();
+  sizes[1].AddRepeatedSizes(bigSize,1,1);
 
   InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", 4);
 

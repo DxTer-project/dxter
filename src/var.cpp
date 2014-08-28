@@ -312,7 +312,9 @@ void Var::PrintDecl(IndStream &out) const
       {
 	out.Indent();
 	string name = GetVarName();
-	*out << "std::pair<Index,Index> " << name << ";\n";
+	*out << "std::pair<Index,Index> " << name 
+	     << "(" << m_pair->first << "," << m_pair->second << ");\n";
+	
 	break;
       }
     case (ModeArrayPairVarType):

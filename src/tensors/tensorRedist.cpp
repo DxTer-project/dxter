@@ -603,7 +603,7 @@ void RedistNode::PrintCode(IndStream &out)
 	 << IndexPairVarName(diff1, diff2)
 	 << ", ";
     */
-    *out << outName << ".AllToAllDoubleIndexRedistFrom( "
+    *out << outName << ".AllToAllDoubleModeRedistFrom( "
 	 << inName << ", " 
 	 << IndexPairVarName(diff1, diff2)
 	 << ", ";
