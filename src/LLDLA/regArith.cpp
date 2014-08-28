@@ -48,6 +48,14 @@ void FMAdd::Prop()
   }
 }
 
+void FMAdd::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  const FMAdd* rhs = (FMAdd*) orig;
+  m_type = rhs->m_type;
+  return;
+}
+
 void FMAdd::PrintCode(IndStream &out)
 {
   out.Indent();
@@ -84,6 +92,15 @@ void Add::PrintCode(IndStream &out)
   return;
 }
 
+void Add::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  const Add* rhs = (Add*) orig;
+  m_type = rhs->m_type;
+  return;
+}
+
+
 Mul::Mul(Type type)
 {
   m_type = type;
@@ -110,6 +127,15 @@ void Mul::PrintCode(IndStream &out)
   return;
 }
 
+void Mul::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  const Mul* rhs = (Mul*) orig;
+  m_type = rhs->m_type;
+  return;
+}
+
+
 ZeroReg::ZeroReg(Type type)
 {
   m_type = type;
@@ -126,6 +152,14 @@ void ZeroReg::PrintCode(IndStream &out)
   out.Indent();
   string aStr = GetInputNameStr(0);
   *out << arch->ZeroVar(m_type, aStr);
+  return;
+}
+
+void ZeroReg::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  const ZeroReg* rhs = (ZeroReg*) orig;
+  m_type = rhs->m_type;
   return;
 }
 
@@ -146,6 +180,14 @@ void AccumReg::PrintCode(IndStream &out)
   string vecStr = GetInputNameStr(0);
   string accStr = GetInputNameStr(1);
   *out << arch->AccumCode(m_type, accStr, vecStr);
+  return;
+}
+
+void AccumReg::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  const AccumReg* rhs = (AccumReg*) orig;
+  m_type = rhs->m_type;
   return;
 }
 

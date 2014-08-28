@@ -335,6 +335,8 @@ bool VVDotToRegArith::CanApply(const Node* node) const
 
 void VVDotToRegArith::Apply(Node *node) const
 {
+  cout << "Applying vvdot to reg arith\n";
+  cout << "m_type == REAL_DOUBLE ? " << std::to_string((long long int) m_type == REAL_DOUBLE) << endl;
   VVDot* vvdot = (VVDot*) node;
   // Split A on N dimension
   SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);

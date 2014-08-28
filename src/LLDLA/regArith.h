@@ -35,6 +35,8 @@ class FMAdd : public DLAOp<3, 1>
   virtual NodeType GetType() const { return "FMAdd"; }
   static Node* BlankInst() { return new FMAdd(REAL_SINGLE); }
   virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
  
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -53,6 +55,8 @@ class Add : public DLAOp<2, 1>
   virtual NodeType GetType() const { return "Add"; }
   static Node* BlankInst() { return new Add(REAL_SINGLE); }
   virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
  
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -71,6 +75,8 @@ class Mul : public DLAOp<2, 1>
   virtual NodeType GetType() const { return "Mul"; }
   static Node* BlankInst() { return new Mul(REAL_SINGLE); }
   virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
  
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -89,6 +95,8 @@ class ZeroReg : public DLAOp<1, 1>
   virtual NodeType GetType() const { return "ZeroReg"; }
   static Node* BlankInst() { return new ZeroReg(REAL_SINGLE); }
   virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
  
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -107,6 +115,8 @@ class AccumReg : public DLAOp<2, 1>
   virtual NodeType GetType() const { return "AccumReg"; }
   static Node* BlankInst() { return new AccumReg(REAL_SINGLE); }
   virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
  
   virtual void Prop();
   virtual void PrintCode(IndStream &out);

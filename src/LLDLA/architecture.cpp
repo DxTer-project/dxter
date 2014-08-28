@@ -26,12 +26,12 @@
 
 int Architecture::VecRegWidth(Type type)
 {
-  cout << "Getting reg width\n";
+  //  cout << "Getting reg width\n";
   if (type == REAL_SINGLE) {
-    cout << "Type is single\n";
+    //    cout << "Type is single\n";
     return SVecRegWidth();
   } else if (type == REAL_DOUBLE) {
-    cout << "Type is double\n";
+    //    cout << "Type is double\n";
     return DVecRegWidth();
   } else {
     cout << "Error: VecRegWidth bad type\n";

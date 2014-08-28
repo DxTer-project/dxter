@@ -27,6 +27,9 @@ LoadToRegs::LoadToRegs(Type type)
 {
   m_type = type;
   m_regWidth = arch->VecRegWidth(m_type);
+  //  cout << "\n\nCreated new LoadToRegs\n";
+  //  cout << "Type passed in is REAL_DOUBLE ? " << std::to_string((long long int) type == REAL_DOUBLE) << endl;
+  //  cout << "Reg width = " << std::to_string((long long int) m_regWidth) << endl;
 }
 
 void LoadToRegs::Prop()
@@ -105,6 +108,15 @@ void LoadToRegs::PrintCode(IndStream &out)
     *out << arch->ContiguousLoad(m_type, toLoadName, loadStr);
   }
 
+  return;
+}
+
+void LoadToRegs::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  const LoadToRegs* rhs = (LoadToRegs*) orig;
+  m_type = rhs->m_type;
+  m_regWidth = rhs->m_regWidth;
   return;
 }
 
@@ -282,6 +294,19 @@ void DuplicateRegLoad::BuildDataTypeCache()
   }
 }
 
+void DuplicateRegLoad::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  const DuplicateRegLoad* rhs = (DuplicateRegLoad*) orig;
+  m_type = rhs->m_type;
+  m_regWidth = rhs->m_regWidth;
+  m_mSizes = rhs->m_mSizes;
+  m_nSizes = rhs->m_nSizes;
+  m_info = rhs->m_info;
+  return;
+}
+
+
 const Sizes* DuplicateRegLoad::GetM(ConnNum num) const
 {
   if (num != 0)
@@ -338,6 +363,17 @@ void TempVecReg::PrintCode(IndStream &out)
   return;
 }
 
+void TempVecReg::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  const TempVecReg* rhs = (TempVecReg*) orig;
+  m_type = rhs->m_type;
+  m_regWidth = rhs->m_regWidth;
+  m_mSizes = rhs->m_mSizes;
+  m_nSizes = rhs->m_nSizes;
+  return;
+}
+
 void TempVecReg::ClearDataTypeCache()
 {
   m_mSizes.ClearSizes();
@@ -385,5 +421,15 @@ void TempVecReg::AddVariables(VarSet &set) const
   Var var(DirectVarDeclType, varDecl, m_type);
   set.insert(var);
 }
+
+void StoreFromRegs::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLANode::Duplicate(orig, shallow, possMerging);
+  const StoreFromRegs* rhs = (StoreFromRegs*) orig;
+  m_type = rhs->m_type;
+  m_regWidth = rhs->m_regWidth;
+  return;
+}
+
 
 #endif //DOLLDLA

@@ -86,7 +86,7 @@ RealPSet* DoubleGemmExample();
 Trans transA, transB;
 
 Architecture* arch;
-Type dataType = REAL_DOUBLE;
+Type dataType = REAL_SINGLE;
 
 ImplementationMap ImpStrMap(Universe *uni)
 {
