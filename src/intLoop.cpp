@@ -647,14 +647,18 @@ template<class PSetType>
 #elif DOLLDLA
   if (GetType() != LLDLALOOP)
     throw;
-  if (GetBSSize() != UnitBS &&
-      GetBSSize() != LLDLAMuSingle &&
-      GetBSSize() != LLDLA2MuSingle &&
-      GetBSSize() != LLDLA3MuSingle &&
-      GetBSSize() != LLDLAMuDouble &&
-      GetBSSize() != LLDLA2MuDouble &&
-      GetBSSize() != LLDLA3MuDouble)
-    throw;
+  switch(GetBSSize().m_val)
+    {
+    case (USEUNITBS):
+    case (USELLDLAMUSINGLE):
+    case (USELLDLA3MUSINGLE):
+    case (USELLDLAMUDOUBLE):
+    case (USELLDLA2MUDOUBLE):
+    case (USELLDLA3MUDOUBLE):
+      break;
+    default:
+      throw;
+    }
   if (!PSetType::IsReal() || !((RealLoop*)this)->IsUnrolled()) {
     SplitBase *split = GetControl();
     switch(GetDimName()) 
