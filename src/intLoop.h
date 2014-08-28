@@ -81,20 +81,41 @@ class BSSize
 {
  public:
   BSSizeEnum m_val;
-
- BSSize() : m_val(BADBSSIZE) {}
-
+#if DOLLDLA
+  unsigned int m_multiple;
+#endif
+ 
+  
+ BSSize() : m_val(BADBSSIZE), m_multiple(0) {}
+  
   explicit BSSize(BSSizeEnum val)
-   : m_val(val) {}
+    : m_val(val), m_multiple(1) {}
 
-  bool operator==(const BSSize &rhs) const {return m_val == rhs.m_val;}
-  bool operator!=(const BSSize &rhs) const {return m_val != rhs.m_val;}
+  explicit BSSize(BSSizeEnum val, unsigned int multiple)
+    : m_val(val), m_multiple(multiple) {}
+
+  bool operator==(const BSSize &rhs) const 
+#if DOLLDLA
+  {return m_val == rhs.m_val && m_multiple == rhs.m_multiple;}
+#else
+  {return m_val == rhs.m_val;}
+#endif
+
+  bool operator!=(const BSSize &rhs) const 
+#if DOLLDLA
+  {return m_val != rhs.m_val || m_multiple != rhs.m_multiple;}
+#else
+  {return m_val != rhs.m_val;}
+#endif
 
   string VarName() const;
   string SubSizeStr() const;
   string Str() const;
 
   inline Size GetSize() const {
+    //Just a sanity check; upperbound can be changed
+    if (m_multiple == 0 || m_multiple > 32)
+      throw;
     switch(m_val)
       {
 #if DOELEM
@@ -114,20 +135,24 @@ class BSSize
 	return TENSOR_BS;
 #elif DOLLDLA
       case (USELLDLAMUSINGLE):
-	return arch->SVecRegWidth();
+	return m_multiple * arch->SVecRegWidth();
       case (USELLDLA2MUSINGLE):
-	return 2*arch->SVecRegWidth();
+	return m_multiple*2*arch->SVecRegWidth();
       case (USELLDLA3MUSINGLE):
-	return 3*arch->SVecRegWidth();
+	return m_multiple*3*arch->SVecRegWidth();
       case (USELLDLAMUDOUBLE):
-	return arch->DVecRegWidth();
+	return m_multiple*arch->DVecRegWidth();
       case (USELLDLA2MUDOUBLE):
-	return 2*arch->DVecRegWidth();
+	return m_multiple*2*arch->DVecRegWidth();
       case (USELLDLA3MUDOUBLE):
-	return 3*arch->DVecRegWidth();
+	return m_multiple*3*arch->DVecRegWidth();
 #endif
       case (USEUNITBS):
+#if DOLLDLA
+	return m_multiple*ONE;
+#else
 	return ONE;
+#endif
       default:
 	throw;
       }

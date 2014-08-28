@@ -289,7 +289,7 @@ Tunnel* CombineSingleIter::GetSetTunnel()
     tun = new CombineSingleIter(m_partDim, SETTUNIN);
 #endif
 else*/
-  if (m_tunType == POSSTUNOUT)
+  if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT)
 #if TWOD
     tun = new CombineSingleIter(m_dir, SETTUNOUT);
 #else

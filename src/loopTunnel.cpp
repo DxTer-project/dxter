@@ -99,9 +99,9 @@ void LoopTunnel::CopyTunnelInfo(const LoopTunnel *tun)
 Tunnel* LoopTunnel::GetSetTunnel()
 {
   LoopTunnel *tun;
-  if (m_tunType == POSSTUNIN)
+  if (m_tunType == POSSTUNIN || m_tunType == SETTUNIN)
     tun = new LoopTunnel(SETTUNIN);
-  else if (m_tunType == POSSTUNOUT)
+  else if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT)
     tun = new LoopTunnel(SETTUNOUT);
   else
     throw;

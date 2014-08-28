@@ -701,9 +701,9 @@ const Sizes* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
 Tunnel* SplitSingleIter::GetSetTunnel()
 {
   SplitSingleIter *tun;
-  if (m_tunType == POSSTUNIN)
+  if (m_tunType == POSSTUNIN || m_tunType == SETTUNIN)
     tun = new SplitSingleIter(m_dir, SETTUNIN, m_isControlTun);
-  else if (m_tunType == POSSTUNOUT)
+  else if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT)
     tun = new SplitSingleIter(m_dir, SETTUNOUT, m_isControlTun);
   else
     throw;

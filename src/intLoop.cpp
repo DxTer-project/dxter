@@ -56,19 +56,23 @@ string BSSize::VarName() const
     {
 #if DOLLDLA
     case (USEUNITBS):
-      return "1";
+      return "(" + std::to_string(m_multiple) + "*1)";
     case (USELLDLAMUSINGLE):
-      return MU_VAR_NAME;
+      return "(" + std::to_string(m_multiple) + "*" + MU_VAR_NAME + ")";
     case (USELLDLA2MUSINGLE):
-      return "(2*" + (string)(MU_VAR_NAME) + ")";
+      return "(" + std::to_string(m_multiple) 
+	+ "*(2*" + (string)(MU_VAR_NAME) + "))";
     case (USELLDLA3MUSINGLE):
-      return "(3*" + (string)(MU_VAR_NAME) + ")";
+      return "(" + std::to_string(m_multiple) 
+	+ "*(3*" + (string)(MU_VAR_NAME) + "))";
     case (USELLDLAMUDOUBLE):
-      return MU_VAR_NAME;
+      return "(" + std::to_string(m_multiple) + "*" + MU_VAR_NAME + ")";
     case (USELLDLA2MUDOUBLE):
-      return "(2*" + (string)(MU_VAR_NAME) + ")";
+      return "(" + std::to_string(m_multiple) + 
+	"*(2*" + (string)(MU_VAR_NAME) + "))";
     case (USELLDLA3MUDOUBLE):
-      return "(3*" + (string)(MU_VAR_NAME) + ")";
+      return "(" + std::to_string(m_multiple) + 
+	"*(3*" + (string)(MU_VAR_NAME) + "))";
 #endif
     default:
       throw;
