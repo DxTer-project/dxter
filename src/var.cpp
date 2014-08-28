@@ -42,7 +42,7 @@ string IndexPairVarName(Dim dim1, Dim dim2)
 
 string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2)
 {
-n  std::stringstream name;
+  std::stringstream name;
   name << "modeArray";
   DimVecConstIter iter = arr1.begin();
   for(; iter != arr1.end(); ++iter) {
