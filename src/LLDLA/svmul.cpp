@@ -391,7 +391,7 @@ void SVMulToRegArith::Apply(Node* node) const
   }
 
   // Duplicate the value of C into the temp register
-  DuplicateRegLoad* dup = new DuplicateRegLoad(m_type);
+  DuplicateRegLoad* dup = new DuplicateRegLoad();
   dup->AddInput(svmul->Input(0), svmul->InputConnNum(0));
   
   node->m_poss->AddNode(dup);
@@ -402,16 +402,16 @@ void SVMulToRegArith::Apply(Node* node) const
   scalarTun->SetAllStats(FULLUP);
 
   // Create register for vector elements
-  LoadToRegs* loadA = new LoadToRegs(m_type);
+  LoadToRegs* loadA = new LoadToRegs();
   loadA->AddInput(splitVec, 1);
 
   // Create inner multiply operation
-  Mul* mul = new Mul(m_type);
+  Mul* mul = new Mul();
   mul->AddInput(scalarTun, 0);
   mul->AddInput(loadA, 0);
 
   // Create store node to save newly computed elements of x * A
-  StoreFromRegs* storeVec = new StoreFromRegs(m_type);
+  StoreFromRegs* storeVec = new StoreFromRegs();
   storeVec->AddInput(mul, 0);
   storeVec->AddInput(splitVec, 1);
 

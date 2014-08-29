@@ -1094,9 +1094,9 @@ void SplitSingleIter::AddVariables(VarSet &set) const
   const string name = GetInputNameStr(0);
 
   BasePSet *pset = ((Tunnel*)Input(0))->m_pset;
-  if (m_info.m_type == REAL_SINGLE) {
+  if (GetDataType() == REAL_SINGLE) {
     //    cout << "Var " << name << " has type is float\n";
-  } else if (m_info.m_type == REAL_DOUBLE) {
+  } else if (GetDataType() == REAL_DOUBLE) {
     //    cout << "Var " << name << " has type is double\n";
   } else {
     cout << "Error: Bad type, var " << name << " in SplitSingleIter::AddVariables\n";
@@ -1104,19 +1104,19 @@ void SplitSingleIter::AddVariables(VarSet &set) const
   }
   if (!pset->IsReal() || !((RealLoop*)pset)->IsUnrolled()) {
     if (PartInUse(0)) {
-      Var var(name, 0, m_info.m_type);
+      Var var(name, 0, GetDataType());
       set.insert(var);
     }
-    Var var1(name, 1, m_info.m_type);
+    Var var1(name, 1, GetDataType());
     set.insert(var1);
     if (PartInUse(2)) {
-      Var var(name, 2, m_info.m_type);
+      Var var(name, 2, GetDataType());
       set.insert(var);
     }
 
     if (m_isControlTun) {
       string loopLevel = GetLoopLevel(-1);
-      Var var(DirectVarDeclType, "int lcv"+loopLevel+";\n", m_info.m_type);
+      Var var(DirectVarDeclType, "int lcv"+loopLevel+";\n", GetDataType());
       set.insert(var);
     }
   }
@@ -1125,11 +1125,11 @@ void SplitSingleIter::AddVariables(VarSet &set) const
       throw;
     unsigned int numIters = NumIters(0);
     for(unsigned int i = 0; i < numIters; ++i) {
-      if (m_info.m_type == REAL_DOUBLE) {
-	Var varD(DirectVarDeclType, "double *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";", m_info.m_type);
+      if (GetDataType() == REAL_DOUBLE) {
+	Var varD(DirectVarDeclType, "double *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";", GetDataType());
 	set.insert(varD);
-      } else if (m_info.m_type == REAL_SINGLE) {
-	Var varS(DirectVarDeclType, "float *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";", m_info.m_type);
+      } else if (GetDataType() == REAL_SINGLE) {
+	Var varS(DirectVarDeclType, "float *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";", GetDataType());
 	set.insert(varS);
       }
       }

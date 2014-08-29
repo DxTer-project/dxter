@@ -204,17 +204,11 @@ void AddVVDotTrans()
 
 void AddMAddTrans()
 {
-  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
 
-    Universe::AddTrans(MAdd::GetClass(), new MAddToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
-
-    Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble, REAL_DOUBLE), LLDLALOOPPHASE);
-
-    Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble, REAL_DOUBLE), LLDLALOOPPHASE);
-
-    Universe::AddTrans(MAdd::GetClass(), new MAddToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
+    Universe::AddTrans(MAdd::GetClass(), new MAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
     return;
 }
@@ -308,9 +302,7 @@ void AddVMMulTrans()
 
 void AddVAddTrans()
 {
-  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
-
-  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }
@@ -702,7 +694,7 @@ RealPSet* GemvExample()
 			tunAlpha, 0,
 			axMul, 0);
 
-  VAdd* sumVecs = new VAdd(COLVECTOR, ABSLAYER, dataType);
+  VAdd* sumVecs = new VAdd(COLVECTOR, ABSLAYER);
   sumVecs->AddInputs(4,
 		     alphaAXMul, 0,
 		     by, 0);
@@ -811,12 +803,12 @@ RealPSet* MAdd2Example()
   Tunnel* tunZ = new Tunnel(POSSTUNIN);
   tunZ->AddInput(zIn, 0);
 
-  MAdd* madd1 = new MAdd(ABSLAYER, dataType);
+  MAdd* madd1 = new MAdd(ABSLAYER);
   madd1->AddInputs(4,
 		  tunX, 0,
 		  tunY, 0);
 
-  MAdd* madd2 = new MAdd(ABSLAYER, dataType);
+  MAdd* madd2 = new MAdd(ABSLAYER);
   madd2->AddInputs(4,
 		   tunZ, 0,
 		   madd1, 0);
@@ -859,12 +851,12 @@ RealPSet* VAdd2Example()
   Tunnel* tunZ = new Tunnel(POSSTUNIN);
   tunZ->AddInput(zIn, 0);
 
-  VAdd* vadd1 = new VAdd(COLVECTOR, ABSLAYER, dataType);
+  VAdd* vadd1 = new VAdd(COLVECTOR, ABSLAYER);
   vadd1->AddInputs(4,
 		  tunX, 0,
 		  tunY, 0);
 
-  VAdd* vadd2 = new VAdd(COLVECTOR, ABSLAYER, dataType);
+  VAdd* vadd2 = new VAdd(COLVECTOR, ABSLAYER);
   vadd2->AddInputs(4,
 		   tunZ, 0,
 		   vadd1, 0);
@@ -900,7 +892,7 @@ RealPSet* VAddExample()
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  VAdd* vadd = new VAdd(COLVECTOR, ABSLAYER, dataType);
+  VAdd* vadd = new VAdd(COLVECTOR, ABSLAYER);
   vadd->AddInputs(4,
 		  tunX, 0,
 		  tunY, 0);
@@ -1192,7 +1184,7 @@ RealPSet* MAddExample()
   Tunnel* tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(Bin, 0);
 
-  MAdd* madd = new MAdd(ABSLAYER, dataType);
+  MAdd* madd = new MAdd(ABSLAYER);
   madd->AddInputs(4,
 		 tunA, 0,
 		 tunB, 0);

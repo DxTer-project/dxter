@@ -416,7 +416,7 @@ void VMMulToRegArith::Apply(Node* node) const
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();
 
-  LoadToRegs* loadY = new LoadToRegs(m_type);
+  LoadToRegs* loadY = new LoadToRegs();
   loadY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
 
   node->m_poss->AddNode(loadY);
@@ -425,13 +425,13 @@ void VMMulToRegArith::Apply(Node* node) const
   yTun->AddInput(loadY, 0);
   yTun->SetAllStats(PARTUP);
 
-  LoadToRegs* loadA = new LoadToRegs(m_type);
+  LoadToRegs* loadA = new LoadToRegs();
   loadA->AddInput(splitA, 1);
 
-  DuplicateRegLoad* loadX = new DuplicateRegLoad(m_type);
+  DuplicateRegLoad* loadX = new DuplicateRegLoad();
   loadX->AddInput(splitX, 1);
 
-  FMAdd* fmadd = new FMAdd(m_type);
+  FMAdd* fmadd = new FMAdd();
   fmadd->AddInput(loadX, 0);
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(yTun, 0);
@@ -451,7 +451,7 @@ void VMMulToRegArith::Apply(Node* node) const
 
   node->m_poss->AddPSet(loop);
 
-  StoreFromRegs* storeToY = new StoreFromRegs(m_type);
+  StoreFromRegs* storeToY = new StoreFromRegs();
   storeToY->AddInput(loop->OutTun(2), 0);
   storeToY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
 

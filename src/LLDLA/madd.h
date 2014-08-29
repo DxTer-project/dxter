@@ -28,10 +28,7 @@
 class MAdd : public DLAOp<2, 1>
 {
  public:
-  Type m_type;
-  int m_regWidth;
-
-  MAdd(Layer layer, Type type);
+  MAdd(Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
   virtual Phase MaxPhase() const;
@@ -57,10 +54,9 @@ class MAddLoopRef : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
   VecType m_vtype;
-  Type m_type;
   BSSize m_bs;
-  int m_regWidth;
-  MAddLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type);
+
+  MAddLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -74,9 +70,8 @@ class MAddToVAddLoopRef : SingleTrans
   DimName m_dim;
   VecType m_vtype;
   BSSize m_bs;
-  Type m_type;
-  int m_regWidth;
-  MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs, Type type);
+
+  MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -88,9 +83,8 @@ class MAddToRegArith : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
-  Type m_type;
-  int m_regWidth;
-  MAddToRegArith(Layer fromLayer, Layer toLayer, Type type);
+
+  MAddToRegArith(Layer fromLayer, Layer toLayer);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -102,8 +96,8 @@ class MAddLowerLayer : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
-  Type m_type;
-  MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type);
+
+  MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

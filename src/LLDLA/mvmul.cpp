@@ -433,7 +433,7 @@ void MVMulToRegArith::Apply(Node* node) const
   splitX->SetIndepIters();
 
   // Create vector register with elements of y
-  LoadToRegs* loadY = new LoadToRegs(m_type);
+  LoadToRegs* loadY = new LoadToRegs();
   loadY->AddInput(mvmul->Input(2), mvmul->InputConnNum(2));
   
   node->m_poss->AddNode(loadY);
@@ -444,15 +444,15 @@ void MVMulToRegArith::Apply(Node* node) const
   yTun->SetAllStats(PARTUP);
   
   // Create load for elements of A in loop body
-  LoadToRegs* loadA = new LoadToRegs(m_type);
+  LoadToRegs* loadA = new LoadToRegs();
   loadA->AddInput(splitA, 1);
 
   // Create duplicate load for x
-  DuplicateRegLoad* loadX = new DuplicateRegLoad(m_type);
+  DuplicateRegLoad* loadX = new DuplicateRegLoad();
   loadX->AddInput(splitX, 1);
 
   // Create new FMA instruction for loop body
-  FMAdd* fmadd = new FMAdd(m_type);
+  FMAdd* fmadd = new FMAdd();
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(loadX, 0);
   fmadd->AddInput(yTun, 0);
@@ -474,7 +474,7 @@ void MVMulToRegArith::Apply(Node* node) const
   node->m_poss->AddPSet(loop);
 
   // Store result of computation back to y
-  StoreFromRegs* storeToY = new StoreFromRegs(m_type);
+  StoreFromRegs* storeToY = new StoreFromRegs();
   storeToY->AddInput(loop->OutTun(2), 0);
   storeToY->AddInput(mvmul->Input(2), mvmul->InputConnNum(2));
 

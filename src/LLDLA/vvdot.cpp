@@ -337,7 +337,7 @@ void VVDotToRegArith::Apply(Node *node) const
   splitB->SetIndepIters();
   
   // Create new node to accumulate data in the loop
-  TempVecReg* accum = new TempVecReg(dataType);
+  TempVecReg* accum = new TempVecReg();
   accum->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
 
   node->m_poss->AddNode(accum);
@@ -348,14 +348,14 @@ void VVDotToRegArith::Apply(Node *node) const
   accTun->SetAllStats(PARTUP);
 
   // Create loads for A and B
-  LoadToRegs* loadA = new LoadToRegs(dataType);
+  LoadToRegs* loadA = new LoadToRegs();
   loadA->AddInput(splitA, 1);
 
-  LoadToRegs* loadB = new LoadToRegs(dataType);
+  LoadToRegs* loadB = new LoadToRegs();
   loadB->AddInput(splitB, 1);
 
   // Create FMA operation that updates accum
-  FMAdd* fmadd = new FMAdd(dataType);
+  FMAdd* fmadd = new FMAdd();
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(loadB, 0);
   fmadd->AddInput(accTun, 0);
@@ -386,7 +386,7 @@ void VVDotToRegArith::Apply(Node *node) const
   node->m_poss->AddPSet(loop);
 
   // Accumulate result of operation in C
-  AccumReg* accumInC = new AccumReg(dataType);
+  AccumReg* accumInC = new AccumReg();
   accumInC->AddInput(loop->OutTun(2), 0);
   accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
 

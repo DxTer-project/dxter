@@ -26,20 +26,17 @@
 
 #if DOLLDLA
 
-MAdd::MAdd(Layer layer, Type type)
+MAdd::MAdd(Layer layer)
 {
-  m_type = type;
   m_layer = layer;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void MAdd::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
-    if (m_type == REAL_DOUBLE) {
+    if (GetDataType() == REAL_DOUBLE) {
       *out << "simple_add( ";
-    } else if (m_type == REAL_SINGLE) {
+    } else if (GetDataType() == REAL_SINGLE) {
       *out << "simple_add_float( ";
     }
     *out << InputDataType(0).m_numRowsVar << ", " <<
@@ -114,9 +111,9 @@ void MAdd::Prop()
     }
 
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if ((*GetInputM(0) != m_regWidth) || (*GetInputN(0) != m_regWidth)
-	  || (*GetInputM(1) != m_regWidth) || (*GetInputN(1) != m_regWidth)) {
-	cout << "ERROR: MAdd of matrices that do not have m_regWidth dimensions in LLDLAPRIMITIVELAYER\n";
+      if ((*GetInputM(0) != GetVecRegWidth()) || (*GetInputN(0) != GetVecRegWidth())
+	  || (*GetInputM(1) != GetVecRegWidth()) || (*GetInputN(1) != GetVecRegWidth())) {
+	cout << "ERROR: MAdd of matrices that do not have GetVecRegWidth() dimensions in LLDLAPRIMITIVELAYER\n";
       }
     }
 
@@ -130,12 +127,12 @@ void MAdd::Prop()
 
 Node* MAdd::BlankInst()
 {
-  return new MAdd(LLDLAPRIMITIVELAYER, REAL_SINGLE);
+  return new MAdd(LLDLAPRIMITIVELAYER);
 }
 
 NodeType MAdd::GetType() const
 {
-  return "MAdd" + LayerNumToStr(GetLayer()) + " type " + std::to_string((long long int) m_type);
+  return "MAdd" + LayerNumToStr(GetLayer());// + " type " + std::to_string((long long int) GetDataType());
 }
 
 Phase MAdd::MaxPhase() const
@@ -153,23 +150,21 @@ Phase MAdd::MaxPhase() const
     }
 }
 
-MAddLoopRef::MAddLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type)
+MAddLoopRef::MAddLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_dim = dim;
   m_bs = bs;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(type);
 }
 
 string MAddLoopRef::GetType() const
 {
   switch (m_dim) {
   case (DIMM):
-    return "MAddM " + std::to_string((long long int) m_type);
+    return "MAddM";
   case(DIMN):
-    return "MAddN " + std::to_string((long long int) m_type);
+    return "MAddN";
   default:
     return "ERROR: Bad dimension in MAddLoopRef transform";
   }
@@ -180,7 +175,7 @@ bool MAddLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
     const MAdd *madd = (MAdd*) node;
-    if (madd->GetLayer() != m_fromLayer || m_type != madd->m_type) {
+    if (madd->GetLayer() != m_fromLayer) {
       return false;
     }
     if (m_dim == DIMM) {
@@ -216,7 +211,7 @@ void MAddLoopRef::Apply(Node *node) const
   split0->SetIndepIters();
   split1->SetIndepIters();
 
-  MAdd *newMAdd = new MAdd(m_toLayer, madd->m_type);
+  MAdd *newMAdd = new MAdd(m_toLayer);
   newMAdd->AddInput(split0, 1);
   newMAdd->AddInput(split1, 1);
 
@@ -233,14 +228,12 @@ void MAddLoopRef::Apply(Node *node) const
   return;
 }
 
-MAddToVAddLoopRef::MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs, Type type)
+MAddToVAddLoopRef::MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_vtype = vtype;
   m_bs = bs;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 string MAddToVAddLoopRef::GetType() const
@@ -252,15 +245,15 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
 {
   if (node->GetClass() == MAdd::GetClass()) {
     const MAdd *madd = (MAdd*) node;
-    if (madd->GetLayer() != m_fromLayer || m_type != madd->m_type) {
+    if (madd->GetLayer() != m_fromLayer) {
       return false;
     }
     if (m_dim == DIMM) {
-      return (*(madd->GetInputN(0)) == m_regWidth) && (*(madd->GetInputN(1)) == m_regWidth) &&
-	!(*(madd->GetInputM(0)) <= m_regWidth) && !(*(madd->GetInputM(1)) <= m_regWidth);
+      return (*(madd->GetInputN(0)) == madd->GetVecRegWidth()) && (*(madd->GetInputN(1)) == madd->GetVecRegWidth()) &&
+	!(*(madd->GetInputM(0)) <= madd->GetVecRegWidth()) && !(*(madd->GetInputM(1)) <= madd->GetVecRegWidth());
     } else if (m_dim == DIMN) {
-      return (*(madd->GetInputM(0)) == m_regWidth) && (*(madd->GetInputM(0)) == m_regWidth) &&
-	!(*(madd->GetInputN(0)) <= m_regWidth) && !(*(madd->GetInputN(1)) <= m_regWidth);
+      return (*(madd->GetInputM(0)) == madd->GetVecRegWidth()) && (*(madd->GetInputM(0)) == madd->GetVecRegWidth()) &&
+	!(*(madd->GetInputN(0)) <= madd->GetVecRegWidth()) && !(*(madd->GetInputN(1)) <= madd->GetVecRegWidth());
     } else {
       return false;
     }  
@@ -290,7 +283,7 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   split0->SetIndepIters();
   split1->SetIndepIters();
 
-  VAdd *newVAdd = new VAdd(m_dim == DIMM ? ROWVECTOR : COLVECTOR, m_toLayer, madd->m_type);
+  VAdd *newVAdd = new VAdd(m_dim == DIMM ? ROWVECTOR : COLVECTOR, m_toLayer);
   newVAdd->AddInput(split0, 1);
   newVAdd->AddInput(split1, 1);
 
@@ -309,19 +302,18 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   return;
 }
 
-MAddLowerLayer::MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+MAddLowerLayer::MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_bs = bs;
-  m_type = type;
 }
 
 bool MAddLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
     const MAdd *madd = (MAdd*) node;
-    if (madd->GetLayer() != m_fromLayer || m_type != madd->m_type) {
+    if (madd->GetLayer() != m_fromLayer) {
       return false;
     }
     if (*(madd->GetInputM(1)) <= m_bs &&
@@ -353,24 +345,22 @@ string MAddLowerLayer::GetType() const
 string MAddToRegArith::GetType() const
 {
   return "MAddToRegArith " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer)  + " type " + std::to_string((long long int) m_type);
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
-MAddToRegArith::MAddToRegArith(Layer fromLayer, Layer toLayer, Type type)
+MAddToRegArith::MAddToRegArith(Layer fromLayer, Layer toLayer)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 bool MAddToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
     MAdd* madd = (MAdd*) node;
-    if ((*(madd->GetInputM(0)) == m_regWidth) ||
-	(*(madd->GetInputN(0)) == m_regWidth)) {
-      return m_type == madd->m_type;
+    if ((*(madd->GetInputM(0)) == madd->GetVecRegWidth()) ||
+	(*(madd->GetInputN(0)) == madd->GetVecRegWidth())) {
+      return true;
     } else {
       return false;
     }
@@ -383,7 +373,7 @@ void MAddToRegArith::Apply(Node* node) const
   MAdd* madd = (MAdd*) node;
 
   // Set direction of split
-  bool splitIntoRows = !(*(madd->GetInputM(0)) <= m_regWidth);
+  bool splitIntoRows = !(*(madd->GetInputM(0)) <= madd->GetVecRegWidth());
 
   // Split matrices A and B
   SplitSingleIter* splitA;
@@ -411,19 +401,19 @@ void MAddToRegArith::Apply(Node* node) const
   splitB->SetIndepIters();
 
   // Create loads for A and B
-  LoadToRegs* loadA = new LoadToRegs(m_type);
+  LoadToRegs* loadA = new LoadToRegs();
   loadA->AddInput(splitA, 1);
 
-  LoadToRegs* loadB = new LoadToRegs(m_type);
+  LoadToRegs* loadB = new LoadToRegs();
   loadB->AddInput(splitB, 1);
 
   // Create new add node
-  Add* add = new Add(m_type);
+  Add* add = new Add();
   add->AddInput(loadA, 0);
   add->AddInput(loadB, 0);
 
   // Create store to write back to B
-  StoreFromRegs* storeToB = new StoreFromRegs(m_type);
+  StoreFromRegs* storeToB = new StoreFromRegs();
   storeToB->AddInput(add, 0);
   storeToB->AddInput(splitB, 1);
 
