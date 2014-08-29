@@ -1021,3 +1021,17 @@ const BasePSet* Node::FindClosestLoop() const
   }
   return NULL;
 }
+
+#if DOLLDLA
+
+const Type Node::GetDataType() const
+{
+  return InputDataType(0).m_type;
+}
+
+const int Node::GetVecRegWidth() const
+{
+  return arch->VecRegWidth(GetDataType());
+}
+
+#endif

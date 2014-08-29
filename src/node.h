@@ -208,6 +208,11 @@ class Node
   virtual const DataTypeInfo& DataType(ConnNum num) const = 0;
   virtual const DataTypeInfo& InputDataType(ConnNum num) const;
 
+#if DOLLDLA
+  virtual const Type GetDataType() const;
+  virtual const int GetVecRegWidth() const;
+#endif
+
   string GetFunctionalityString() const;
 };
 

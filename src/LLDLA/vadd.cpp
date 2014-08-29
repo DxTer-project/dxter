@@ -254,10 +254,10 @@ void VAddLoopRef::Apply(Node *node) const
 {
   VAdd *vadd = (VAdd*) node;
 
-  SplitSingleIter *split1 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter *split1 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split1->AddInput(vadd->Input(1), vadd->InputConnNum(1));
 
-  SplitSingleIter *split0 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, false);
+  SplitSingleIter *split0 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
   split0->AddInput(vadd->Input(0), vadd->InputConnNum(0));
 
   split0->SetAllStats(FULLUP);
@@ -376,11 +376,11 @@ void VAddToRegArith::Apply(Node* node) const
   SplitSingleIter* splitY;
 
   if (splitDown) {
-    splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
-    splitY = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
+    splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+    splitY = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   } else {
-    splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
-    splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
+    splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+    splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
   }
 
   splitX->AddInput(vadd->Input(0), vadd->InputConnNum(0));

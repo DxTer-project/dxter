@@ -38,9 +38,6 @@ class SplitSingleIter : public SplitBase
  public:
   bool m_addDir;
   DataTypeInfo m_info;
-#if DOLLDLA
-  SplitSingleIter(PartDir dir, TunType type, Type dataType, bool isControl);
-#endif
 
 #if TWOD
   SplitSingleIter();

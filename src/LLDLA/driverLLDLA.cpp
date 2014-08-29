@@ -53,7 +53,7 @@
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
 
-#define DOLOOPUNROLLING 1
+#define DOLOOPUNROLLING 0
 #define DO2MUTRANSFORMATIONS 1
 #define DO3MUTRANSFORMATIONS 1
 #define DO16MUTRANSFORMATIONS 1
@@ -86,7 +86,7 @@ RealPSet* DoubleGemmExample();
 Trans transA, transB;
 
 Architecture* arch;
-Type dataType = REAL_SINGLE;
+Type dataType = REAL_DOUBLE;
 
 ImplementationMap ImpStrMap(Universe *uni)
 {
@@ -197,9 +197,8 @@ void AddGemmTrans()
 
 void AddVVDotTrans()
 {
-  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
   return;
 }
 
@@ -967,7 +966,7 @@ RealPSet* VMVMulExample()
 		   tunX, 0,
 		   tunZ, 0);
 
-  VVDot* vvdot = new VVDot(ABSLAYER, dataType);
+  VVDot* vvdot = new VVDot(ABSLAYER);
   vvdot->AddInputs(6,
 		   tunY, 0,
 		   mvmul, 0,
@@ -1236,7 +1235,7 @@ RealPSet* DotExample()
   Tunnel *tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin,0);
 
-  VVDot* dot = new VVDot(ABSLAYER, dataType);
+  VVDot* dot = new VVDot(ABSLAYER);
   dot->AddInputs(6,
 		 tunA, 0,
 		 tunB, 0,

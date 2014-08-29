@@ -247,12 +247,12 @@ void VMMulLoopRef::ApplyDimK(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
-  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
+  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
   splitX->AddInput(vmmul->Input(0), vmmul->InputConnNum(0));
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();
@@ -288,7 +288,7 @@ void VMMulLoopRef::ApplyDimN(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -298,7 +298,7 @@ void VMMulLoopRef::ApplyDimN(Node* node) const
   tunX->SetAllStats(FULLUP);
   tunX->SetIndepIters();
 
-  SplitSingleIter* splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
+  SplitSingleIter* splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
   splitY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
   splitY->SetUpStats(FULLUP, NOTUP,
 		     FULLUP, NOTUP);
@@ -406,12 +406,12 @@ void VMMulToRegArith::Apply(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
-  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitX->AddInput(vmmul->Input(0), vmmul->InputConnNum(0));
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();

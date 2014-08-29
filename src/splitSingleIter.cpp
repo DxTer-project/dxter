@@ -26,14 +26,6 @@
 #include "LLDLA.h"
 
 
-#if DOLLDLA
-SplitSingleIter::SplitSingleIter(PartDir dir, TunType type, Type dataType, bool isControl)
-  : SplitBase(dir, type, isControl)
-{
-  m_info.m_type = dataType;
-}
-#endif
-
 #if TWOD
 SplitSingleIter::SplitSingleIter() 
   : SplitBase()

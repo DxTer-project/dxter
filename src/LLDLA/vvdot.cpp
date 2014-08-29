@@ -27,11 +27,9 @@
 
 #if DOLLDLA
 
-VVDot::VVDot(Layer layer, Type type)
+VVDot::VVDot(Layer layer)
 {
   m_layer = layer;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void VVDot::PrintCode(IndStream &out)
@@ -43,9 +41,9 @@ void VVDot::PrintCode(IndStream &out)
   out.Indent();
 
   if (m_layer == ABSLAYER) {
-    if (m_type == REAL_DOUBLE) {
+    if (GetDataType() == REAL_DOUBLE) {
       *out << "simple_mmul( ";
-    } else if (m_type == REAL_SINGLE) {
+    } else if (GetDataType() == REAL_SINGLE) {
       *out << "simple_mmul_float( ";
     }
     *out << "1, " <<
@@ -149,7 +147,7 @@ void VVDot::Prop()
 
 Node* VVDot::BlankInst()
 {
-  return new VVDot(LLDLAPRIMITIVELAYER, REAL_SINGLE);
+  return new VVDot(LLDLAPRIMITIVELAYER);
 }
 
 Phase VVDot::MaxPhase() const 
@@ -172,21 +170,11 @@ NodeType VVDot::GetType() const
   return "VVDot" +  LayerNumToStr(GetLayer());
 }
 
-void VVDot::Duplicate(const Node *orig, bool shallow, bool possMerging)
-{
-  DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
-  const VVDot *rhs = (VVDot*)orig;
-  m_type = rhs->m_type;
-  return;
-}
-
-VVDotLoopRef::VVDotLoopRef(Layer fromLayer, Layer toLayer, BSSize bs, Type type)
+VVDotLoopRef::VVDotLoopRef(Layer fromLayer, Layer toLayer, BSSize bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_bs = bs;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 string VVDotLoopRef::GetType() const
@@ -197,7 +185,7 @@ string VVDotLoopRef::GetType() const
 bool VVDotLoopRef::CanApply(const Node *node) const
 {
   const VVDot *dot = (VVDot*) node;
-  if (dot->GetLayer() != m_fromLayer || m_type != dot->m_type) {
+  if (dot->GetLayer() != m_fromLayer) {
     return false;
   }
   if (*(dot->GetInputN(0)) <= m_bs.GetSize()) {
@@ -212,15 +200,16 @@ bool VVDotLoopRef::CanApply(const Node *node) const
 void VVDotLoopRef::Apply(Node *node) const
 {
   VVDot *dot = (VVDot*) node;
+  Type dataType = dot->GetDataType();
 
   // Split for row vector
-  SplitSingleIter *splitRow = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter *splitRow = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitRow->AddInput(dot->Input(0), dot->InputConnNum(0));
   splitRow->SetAllStats(FULLUP);
   splitRow->SetIndepIters();
 
   // Split for col vector
-  SplitSingleIter *splitCol = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
+  SplitSingleIter *splitCol = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitCol->AddInput(dot->Input(1), dot->InputConnNum(1));
   splitCol->SetAllStats(FULLUP);
   splitCol->SetIndepIters();
@@ -230,7 +219,7 @@ void VVDotLoopRef::Apply(Node *node) const
   scalarTun->SetAllStats(PARTUP);
 
   // Create new dot product for interior of loop
-  VVDot *newDot = new VVDot(m_toLayer, dot->m_type);
+  VVDot *newDot = new VVDot(m_toLayer);
   newDot->SetLayer(m_toLayer);
 
   // Attach inputs to dot product
@@ -250,12 +239,12 @@ void VVDotLoopRef::Apply(Node *node) const
   // Create the poss
   Poss *loopPoss = new Poss(3, rowCom, colCom, scalarTunOut);
   RealLoop* loop;
-  if (m_type == REAL_SINGLE) {
+  if (dataType == REAL_SINGLE) {
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
-  } else if (m_type == REAL_DOUBLE) {
+  } else if (dataType == REAL_DOUBLE) {
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
-    cout << "Error: Bad m_type in vadd apply\n";
+    cout << "Error: Bad dataType in vadd apply\n";
     throw;
   }
   loop->SetDimName(DIMK);
@@ -266,20 +255,18 @@ void VVDotLoopRef::Apply(Node *node) const
   return;
 }
 
-VVDotLowerLayer::VVDotLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+VVDotLowerLayer::VVDotLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_bs = bs;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 bool VVDotLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
     const VVDot *vvdot = (VVDot*) node;
-    if (vvdot->GetLayer() != m_fromLayer || m_type != vvdot->m_type) {
+    if (vvdot->GetLayer() != m_fromLayer) {
       return false;
     }
 
@@ -305,26 +292,25 @@ void VVDotLowerLayer::Apply(Node *node) const
 string VVDotLowerLayer::GetType() const
 {
   return "VVDot lower layer " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
-VVDotToRegArith::VVDotToRegArith(Layer fromLayer, Layer toLayer, Type type)
+VVDotToRegArith::VVDotToRegArith(Layer fromLayer, Layer toLayer)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 bool VVDotToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
     const VVDot* vvdot = (VVDot*) node;
-    if (vvdot->GetLayer() != m_fromLayer || m_type != vvdot->m_type) {
+    int regWidth = arch->VecRegWidth(vvdot->GetDataType());
+    if (vvdot->GetLayer() != m_fromLayer) {
       return false;
     }
-    if (!(*(vvdot->GetInputN(0)) <= m_regWidth) &&
-	!(*(vvdot->GetInputM(1)) <= m_regWidth)) {
+    if (!(*(vvdot->GetInputN(0)) <= regWidth) &&
+	!(*(vvdot->GetInputM(1)) <= regWidth)) {
       return true;
     } else {
       return false;
@@ -335,23 +321,23 @@ bool VVDotToRegArith::CanApply(const Node* node) const
 
 void VVDotToRegArith::Apply(Node *node) const
 {
-  cout << "Applying vvdot to reg arith\n";
-  cout << "m_type == REAL_DOUBLE ? " << std::to_string((long long int) m_type == REAL_DOUBLE) << endl;
   VVDot* vvdot = (VVDot*) node;
+  Type dataType = vvdot->GetDataType();
+
   // Split A on N dimension
-  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(vvdot->Input(0), vvdot->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
   
   // Split B on M dimension
-  SplitSingleIter* splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
+  SplitSingleIter* splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitB->AddInput(vvdot->Input(1), vvdot->InputConnNum(1));
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
   
   // Create new node to accumulate data in the loop
-  TempVecReg* accum = new TempVecReg(m_type);
+  TempVecReg* accum = new TempVecReg(dataType);
   accum->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
 
   node->m_poss->AddNode(accum);
@@ -362,14 +348,14 @@ void VVDotToRegArith::Apply(Node *node) const
   accTun->SetAllStats(PARTUP);
 
   // Create loads for A and B
-  LoadToRegs* loadA = new LoadToRegs(m_type);
+  LoadToRegs* loadA = new LoadToRegs(dataType);
   loadA->AddInput(splitA, 1);
 
-  LoadToRegs* loadB = new LoadToRegs(m_type);
+  LoadToRegs* loadB = new LoadToRegs(dataType);
   loadB->AddInput(splitB, 1);
 
   // Create FMA operation that updates accum
-  FMAdd* fmadd = new FMAdd(m_type);
+  FMAdd* fmadd = new FMAdd(dataType);
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(loadB, 0);
   fmadd->AddInput(accTun, 0);
@@ -387,12 +373,12 @@ void VVDotToRegArith::Apply(Node *node) const
   // Create the poss
   Poss* loopPoss = new Poss(3, comA, comB, accOut);
   RealLoop* loop;
-  if (m_type == REAL_SINGLE) {
+  if (dataType == REAL_SINGLE) {
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
-  } else if (m_type == REAL_DOUBLE) {
+  } else if (dataType == REAL_DOUBLE) {
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
-    cout << "Error: Bad m_type in vadd apply\n";
+    cout << "Error: Bad dataType in vadd apply\n";
     throw;
   }
 
@@ -400,7 +386,7 @@ void VVDotToRegArith::Apply(Node *node) const
   node->m_poss->AddPSet(loop);
 
   // Accumulate result of operation in C
-  AccumReg* accumInC = new AccumReg(m_type);
+  AccumReg* accumInC = new AccumReg(dataType);
   accumInC->AddInput(loop->OutTun(2), 0);
   accumInC->AddInput(vvdot->Input(2), vvdot->InputConnNum(2));
 
@@ -413,7 +399,7 @@ void VVDotToRegArith::Apply(Node *node) const
 string VVDotToRegArith::GetType() const
 {
   return "VVDot register arith " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
 #endif // DOLLDLA

@@ -30,10 +30,7 @@
 class VVDot : public DLAOp<3, 1>
 {
  public:
-  Type m_type;
-  int m_regWidth;
-
-  VVDot(Layer layer, Type type);
+  VVDot(Layer layer);
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
@@ -41,7 +38,6 @@ class VVDot : public DLAOp<3, 1>
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 
   static ClassType GetClass() { return "LLDLASVVDot"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -61,9 +57,7 @@ class VVDotLoopRef : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   BSSize m_bs;
-  Type m_type;
-  int m_regWidth;
-  VVDotLoopRef(Layer fromLayer, Layer toLayer, BSSize bs, Type type);
+  VVDotLoopRef(Layer fromLayer, Layer toLayer, BSSize bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -74,9 +68,7 @@ class VVDotToRegArith : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  Type m_type;
-  int m_regWidth;
-  VVDotToRegArith(Layer fromLayer, Layer toLayer, Type type);
+  VVDotToRegArith(Layer fromLayer, Layer toLayer);
   virtual string GetType() const;
   virtual bool CanApply(const Node* node) const;
   virtual void Apply(Node *node) const;
@@ -88,9 +80,7 @@ class VVDotLowerLayer : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
-  Type m_type;
-  int m_regWidth;
-  VVDotLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type);
+  VVDotLowerLayer(Layer fromLayer, Layer toLayer, Size bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

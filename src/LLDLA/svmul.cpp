@@ -181,6 +181,7 @@ void SVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
   DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
   const SVMul *rhs = (SVMul*)orig;
   m_type = rhs->m_type;
+  m_regWidth = rhs->m_regWidth;
   m_vecType = rhs->m_vecType;
 }
 
@@ -246,7 +247,7 @@ void SVMulLoopRef::Apply(Node *node) const
 {
   SVMul *svmul = (SVMul*) node;
 
-  SplitSingleIter *split = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter *split = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split->AddInput(svmul->Input(1), svmul->InputConnNum(1));
 
   if (m_vtype == COLVECTOR) {
@@ -374,9 +375,9 @@ void SVMulToRegArith::Apply(Node* node) const
   // Split up the input vector
   SplitSingleIter* splitVec;
   if (m_vType == ROWVECTOR) {
-    splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+    splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   } else {
-    splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
+    splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   }
 
   splitVec->AddInput(svmul->Input(1), svmul->InputConnNum(1));
