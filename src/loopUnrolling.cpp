@@ -644,6 +644,9 @@ bool PartiallyUnrollLoop::CanApply(const Node *node) const
     throw;
   }
 
+  if (loopInt->GetBSSize().m_multiple != 1)
+    return false;
+
   if (loop->m_flags & SETLOOPISUNROLLED)
     return false;
   
@@ -709,8 +712,14 @@ void PartiallyUnrollLoop::Apply(Node *node) const
     oldTun->RemoveAllInputs2Way();
     newSetTunsIn.push_back(newSetTun);
 
-    
-    oldTun->AddInput(newTun, 0);
+
+    if (oldTun->IsSplit()) {
+      if (oldTun->NumOutputs() != 4)
+	throw;
+      oldTun->AddInput(newTun, 1);
+    }
+    else
+      oldTun->AddInput(newTun, 0);
     outerPoss->RemoveFromGraphNodes(oldTun);
   }
 
@@ -723,16 +732,28 @@ void PartiallyUnrollLoop::Apply(Node *node) const
     LoopTunnel *newTun = (LoopTunnel*)(oldTun->GetSetTunnel());
     newTun->m_tunType = POSSTUNOUT;
     newPossTunsOut.push_back(newTun);
+    LoopTunnel *newPossTunIn = (LoopTunnel*)(oldTun->GetMatchingInTun()->Input(0));
+
 
     LoopTunnel *newSetTun = (LoopTunnel*)(oldTun->GetSetTunnel());
     newSetTun->m_pset = newOuter;
     newSetTun->m_tunType = SETTUNOUT;
-    newSetTun->AddInput(oldTun->Input(0), oldTun->InputConnNum(0));
+    //    newSetTun->AddInput(oldTun->Input(0), oldTun->InputConnNum(0));
     if (oldTun->m_children.size())
       oldTun->RedirectChildren(newSetTun);
     newSetTunsOut.push_back(newSetTun);
     
-    newTun->AddInput(oldTun, 0);
+    if (newTun->IsCombine()) {
+      newTun->AddInput(newPossTunIn, 0);
+      newTun->AddInput(oldTun, 0);
+      newTun->AddInput(newPossTunIn, 2);
+      newTun->AddInput(newPossTunIn, 3);
+    }
+    else {
+      newTun->AddInput(oldTun, 0);
+      newTun->AddInput(newPossTunIn, 1);
+    }
+      
     outerPoss->RemoveFromGraphNodes(oldTun);
   }
 
@@ -754,8 +775,8 @@ void PartiallyUnrollLoop::Apply(Node *node) const
   newOuter->m_bsSize = innerLoop->m_bsSize;
   newOuter->m_bsSize.m_multiple = m_unrollingFactor;
 
-  newOuter->ClearBeforeProp();
-  newOuter->ClearDataTypeCache();
+  newOuter->m_ownerPoss->ClearBeforeProp();
+  newOuter->m_ownerPoss->ClearDataTypeCache();
 }
 
 

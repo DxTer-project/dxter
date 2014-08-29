@@ -112,5 +112,7 @@ class SplitSingleIter : public SplitBase
 #if DOLLDLA
   virtual void MigrateFromOldTun(Tunnel *tun);
 #endif
+
+  virtual LoopTunnel* GetMatchingOutTun() const;
 };
 
