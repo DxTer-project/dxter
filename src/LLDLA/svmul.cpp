@@ -26,20 +26,18 @@
 
 #if DOLLDLA
 
-SVMul::SVMul(VecType vecType, Layer layer, Type type)
+SVMul::SVMul(VecType vecType, Layer layer)
 {
   m_vecType = vecType;
   m_layer = layer;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void SVMul::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
-    if (m_type == REAL_DOUBLE) {
+    if (GetDataType() == REAL_DOUBLE) {
       *out << "simple_smul( ";
-    } else if (m_type == REAL_SINGLE) {
+    } else if (GetDataType() == REAL_SINGLE) {
       *out << "simple_smul_float( ";
     }
     if (m_vecType == COLVECTOR) {
@@ -154,13 +152,13 @@ void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
   } else if (m_vecType == COLVECTOR && *GetInputN(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum  << " has more than 1 column\n";
   }
-  
+  int regWidth = GetVecRegWidth();
   if (m_layer == LLDLAPRIMITIVELAYER) {
-    if (m_vecType == ROWVECTOR && *GetInputN(inputNum) != m_regWidth) {
-      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth columns\n";
+    if (m_vecType == ROWVECTOR && *GetInputN(inputNum) != regWidth) {
+      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have regWidth columns\n";
       throw;
-    } else if(m_vecType == COLVECTOR && *GetInputM(inputNum) != m_regWidth) {
-      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth rows\n";
+    } else if(m_vecType == COLVECTOR && *GetInputM(inputNum) != regWidth) {
+      cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have regWidth rows\n";
       throw;
     }
   }
@@ -168,7 +166,7 @@ void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
 
 Node* SVMul::BlankInst()
 {
-  return new SVMul(ROWVECTOR, LLDLAPRIMITIVELAYER, REAL_SINGLE);
+  return new SVMul(ROWVECTOR, LLDLAPRIMITIVELAYER);
 }
 
 NodeType SVMul::GetType() const
@@ -180,8 +178,6 @@ void SVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
   const SVMul *rhs = (SVMul*)orig;
-  m_type = rhs->m_type;
-  m_regWidth = rhs->m_regWidth;
   m_vecType = rhs->m_vecType;
 }
 
@@ -200,14 +196,12 @@ Phase SVMul::MaxPhase() const
     }
 }
 
-SVMulLoopRef::SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs, Type type)
+SVMulLoopRef::SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_vtype = vtype;
   m_bs = bs;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 string SVMulLoopRef::GetType() const
@@ -227,7 +221,7 @@ bool SVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     const SVMul *svmul = (SVMul*) node;
-    if (svmul->GetLayer() != m_fromLayer || m_type != svmul->m_type) {
+    if (svmul->GetLayer() != m_fromLayer) {
       return false;
     }
     if (m_vtype == ROWVECTOR) {
@@ -265,7 +259,7 @@ void SVMulLoopRef::Apply(Node *node) const
   scalarTun->SetAllStats(FULLUP);
   scalarTun->SetIndepIters();
 
-  SVMul *newMul = new SVMul(svmul->m_vecType, svmul->m_layer, svmul->m_type);
+  SVMul *newMul = new SVMul(svmul->m_vecType, svmul->m_layer);
   newMul->SetLayer(m_toLayer);
 
   newMul->AddInput(scalarTun, 0);
@@ -282,12 +276,12 @@ void SVMulLoopRef::Apply(Node *node) const
   Poss *loopPoss = new Poss(2, scalarTunOut, com);
 
   RealLoop* loop;
-  if (m_type == REAL_SINGLE) {
+  if (svmul->GetDataType() == REAL_SINGLE) {
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
-  } else if (m_type == REAL_DOUBLE) {
+  } else if (svmul->GetDataType() == REAL_DOUBLE) {
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
-    cout << "Error: Bad m_type in vadd apply\n";
+    cout << "Error: Bad data type in vadd apply\n";
     throw;
   }
 
@@ -300,20 +294,18 @@ void SVMulLoopRef::Apply(Node *node) const
 
 }
 
-SVMulLowerLayer::SVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+SVMulLowerLayer::SVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_bs = bs;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 bool SVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     const SVMul *svmul = (SVMul*) node;
-    if (svmul->GetLayer() != m_fromLayer || m_type != svmul->m_type) {
+    if (svmul->GetLayer() != m_fromLayer) {
       return false;
     }
     if (*(svmul->GetInputM(1)) <= m_bs &&
@@ -341,25 +333,23 @@ string SVMulLowerLayer::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
-SVMulToRegArith::SVMulToRegArith(Layer fromLayer, Layer toLayer, VecType vtype, Type type)
+SVMulToRegArith::SVMulToRegArith(Layer fromLayer, Layer toLayer, VecType vtype)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_vType = vtype;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 bool SVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     SVMul* svmul = (SVMul*) node;
-    if (svmul->GetLayer() != m_fromLayer || m_type != svmul->m_type) {
+    if (svmul->GetLayer() != m_fromLayer) {
       return false;
     }
-    if ((!(*(svmul->GetInputM(1)) <= m_regWidth) &&
+    if ((!(*(svmul->GetInputM(1)) <= svmul->GetVecRegWidth()) &&
 	 m_vType == COLVECTOR) ||
-	(!(*(svmul->GetInputN(1)) <= m_regWidth) &&
+	(!(*(svmul->GetInputN(1)) <= svmul->GetVecRegWidth()) &&
 	 m_vType == ROWVECTOR)) {
       return true;
     }
@@ -427,12 +417,12 @@ void SVMulToRegArith::Apply(Node* node) const
   // Create poss
   Poss* loopPoss = new Poss(2, combineVec, scalarOut);
   RealLoop* loop;
-  if (m_type == REAL_SINGLE) {
+  if (svmul->GetDataType() == REAL_SINGLE) {
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
-  } else if (m_type == REAL_DOUBLE) {
+  } else if (svmul->GetDataType() == REAL_DOUBLE) {
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
-    cout << "Error: Bad m_type in vadd apply\n";
+    cout << "Error: Bad data type in vadd apply\n";
     throw;
   }
   
@@ -447,10 +437,10 @@ string SVMulToRegArith::GetType() const
 {
   if (m_vType == ROWVECTOR) {
     return "SVMul register arith - Row vector " + LayerNumToStr(m_fromLayer)
-      + " to " + LayerNumToStr(m_fromLayer)  + " type " + std::to_string((long long int) m_type);
+      + " to " + LayerNumToStr(m_fromLayer);
   } else {
     return "SVMul register arith - Col vector " + LayerNumToStr(m_fromLayer)
-      + " to " + LayerNumToStr(m_fromLayer)  + " type " + std::to_string((long long int) m_type);
+      + " to " + LayerNumToStr(m_fromLayer);
   }
 }
 

@@ -271,13 +271,9 @@ void AddUnrollingTrans()
 
 void AddSVMulTrans()
 {
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR, REAL_SINGLE), LLDLALOOPPHASE);
-
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR, REAL_DOUBLE), LLDLALOOPPHASE);
-
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR, REAL_DOUBLE), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   return;
 }
@@ -678,7 +674,7 @@ RealPSet* GemvExample()
   Tunnel* tunBeta = new Tunnel(POSSTUNIN);
   tunBeta->AddInput(betaIn, 0);
 
-  SVMul* by = new SVMul(COLVECTOR, ABSLAYER, dataType);
+  SVMul* by = new SVMul(COLVECTOR, ABSLAYER);
   by->AddInputs(4,
 		tunBeta, 0,
 		tunY, 0);
@@ -689,7 +685,7 @@ RealPSet* GemvExample()
 		   tunX, 0,
 		   tunZ, 0);
 
-  SVMul* alphaAXMul = new SVMul(COLVECTOR, ABSLAYER, dataType);
+  SVMul* alphaAXMul = new SVMul(COLVECTOR, ABSLAYER);
   alphaAXMul->AddInputs(4,
 			tunAlpha, 0,
 			axMul, 0);
@@ -1071,7 +1067,7 @@ RealPSet* SVMulRowExample()
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  SVMul* svmul = new SVMul(ROWVECTOR, ABSLAYER, dataType);
+  SVMul* svmul = new SVMul(ROWVECTOR, ABSLAYER);
   svmul->AddInputs(4,
 		   tunX, 0,
 		   tunA, 0);
@@ -1106,7 +1102,7 @@ RealPSet* SVMulColExample()
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  SVMul* svmul = new SVMul(COLVECTOR, ABSLAYER, dataType);
+  SVMul* svmul = new SVMul(COLVECTOR, ABSLAYER);
   svmul->AddInputs(4,
 		   tunX, 0,
 		   tunA, 0);

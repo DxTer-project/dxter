@@ -233,9 +233,9 @@ void SMulLoopRef::Apply(Node *node) const
   //Create a new SMul or the same type and in my m_toLayer layer
   SVMul* newMul;
   if (m_dim == DIMM) {
-    newMul = new SVMul(ROWVECTOR, m_toLayer, mul->m_type);
+    newMul = new SVMul(ROWVECTOR, m_toLayer);
   } else {
-    newMul = new SVMul(COLVECTOR, m_toLayer, mul->m_type);
+    newMul = new SVMul(COLVECTOR, m_toLayer);
   }
   newMul->SetLayer(m_toLayer);
 
