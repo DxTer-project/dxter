@@ -35,12 +35,12 @@ SMMul::SMMul(Layer layer, Type type)
 void SMMul::PrintCode(IndStream &out)
 {
   if (GetLayer() == ABSLAYER) {
-#if USE_DOUBLE_PRECISION
-    *out << "simple_smul( " <<
-#else
-    *out << "simple_smul_float( " <<
-#endif // USE_DOUBLE_PRECISION
-      InputDataType(1).m_numRowsVar << ", " <<
+    if (m_type == REAL_DOUBLE) {
+      *out << "simple_smul( ";
+    } else if (m_type == REAL_SINGLE) {
+      *out << "simple_smul_float( ";
+    }
+    *out << InputDataType(1).m_numRowsVar << ", " <<
       InputDataType(1).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ", " <<
@@ -158,12 +158,13 @@ string SMulLoopRef::GetType() const
     }  
 }
 
-SMulLoopRef::SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs)
+SMulLoopRef::SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_dim = dim;
   m_bs = bs;
+  m_type = type;
 }
 
 bool SMulLoopRef::CanApply(const Node *node) const
@@ -201,7 +202,7 @@ void SMulLoopRef::Apply(Node *node) const
   //    (i.e., it's horizontal)
   // If we're splitting on the n dimension, then the split moves right
   //    (i.e., it's vertical)
-  SplitSingleIter* split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, true);
   // Add input, which is the matrix input to mul
   split->AddInput(mul->Input(1), mul->InputConnNum(1));
   //Set the update statuses

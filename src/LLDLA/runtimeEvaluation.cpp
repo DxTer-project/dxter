@@ -53,6 +53,7 @@ void RuntimeTest::AddIncludes()
 
 void RuntimeTest::AddMiscellaneousDefines()
 {
+  cout << "\n\n\n\n\n\n\nAdding misc defines\n\n\n\n\n";
   m_defines.push_back("#define BUF_SIZE 1000000");
   m_defines.push_back("#define NUM_ITERATIONS " + std::to_string((long long int) m_numIterations));
   m_defines.push_back("#define CHUNK_SIZE " + std::to_string((long long int) m_chunkSize));
@@ -61,15 +62,20 @@ void RuntimeTest::AddMiscellaneousDefines()
   m_defines.push_back("#define MUVALUE " + std::to_string((long long int) arch->VecRegWidth(m_type)) + "\n");
   m_defines.push_back(arch->VecRegTypeDec(m_type));
   if (m_type == REAL_SINGLE) {
+    cout << "Datatype is real single\n";
     m_defines.push_back("#define NUM_SIZE sizeof(float)");
     m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_floats((size), (buf))");
     m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff_float((size), (b1), (b2), (test_name))");
     m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer_float((size), (b1), (b2))");
-  } else {
+  } else if (m_type == REAL_DOUBLE) {
+    cout << "Datatype is real double\n";
     m_defines.push_back("#define NUM_SIZE sizeof(double)");
     m_defines.push_back("#define FILL_WITH_RAND_VALUES(size, buf) rand_doubles((size), (buf))");
     m_defines.push_back("#define TEST_BUFFER_DIFF(size, b1, b2, test_name) test_buffer_diff((size), (b1), (b2), (test_name))");
     m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer((size), (b1), (b2))");
+  } else {
+    cout << "Error: Unsupported type for runtime test data\n";
+    throw;
   }
 
   return;

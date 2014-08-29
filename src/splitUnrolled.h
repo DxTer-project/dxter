@@ -35,6 +35,7 @@ class SplitUnrolled : public SplitBase
 {
  public:
   unsigned int m_unrollFactor;
+  DataTypeInfo m_dataTypeInfo;
   SplitUnrolled();
 #if TWOD
   SplitUnrolled(PartDir dir, unsigned int unrollFactor, TunType type, bool isControl = false);

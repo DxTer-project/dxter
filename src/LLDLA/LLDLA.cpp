@@ -33,13 +33,15 @@ DataTypeInfo::DataTypeInfo()
 
 DataTypeInfo::DataTypeInfo(Stride rowStride, Stride colStride,
 			   string numRowsVar, string numColsVar,
-			   string rowStrideVar, string colStrideVar)
+			   string rowStrideVar, string colStrideVar,
+			   Type type)
   : m_rowStride(rowStride),
     m_colStride(colStride),
     m_numRowsVar(numRowsVar),
     m_numColsVar(numColsVar),
     m_rowStrideVar(rowStrideVar),
-    m_colStrideVar(colStrideVar)
+    m_colStrideVar(colStrideVar),
+    m_type(type)
 {
 
 }
@@ -53,6 +55,7 @@ DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
   m_numColsVar = rhs.m_numColsVar;
   m_rowStrideVar = rhs.m_rowStrideVar;
   m_colStrideVar = rhs.m_colStrideVar;
+  m_type = rhs.m_type;
   return *this;
 }
 

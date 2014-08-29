@@ -6,7 +6,7 @@
     Copyright (C) 2014, The University of Texas and Bryan Marker
 
     DxTer is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
+n    it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
@@ -41,6 +41,8 @@ class LoadToRegs : public DLANode
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
+
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -72,6 +74,8 @@ class DuplicateRegLoad : public DLANode
   static Node* BlankInst() { return  new DuplicateRegLoad(REAL_SINGLE); }
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
 
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -107,6 +111,8 @@ class TempVecReg : public DLANode
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
+
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -136,6 +142,8 @@ class StoreFromRegs : public DLAOp<2,1>
   virtual NodeType GetType() const {return "StoreFromRegs";}
   static Node* BlankInst() { return  new StoreFromRegs(REAL_SINGLE); }
   virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
 
   virtual void Prop();
   virtual void PrintCode(IndStream &out);

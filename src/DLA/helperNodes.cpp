@@ -43,7 +43,8 @@ InputNode::InputNode()
 InputNode::InputNode(NodeType type, Size m, Size n, string name, 
 		     Size rowStrideVal, Size colStrideVal,
 		     string numRowsVar, string numColsVar,
-		     string rowStrideVar, string colStrideVar)
+		     string rowStrideVar, string colStrideVar,
+		     Type dataType)
 : 
   m_msize(NAN), m_nsize(NAN)
 {
@@ -59,7 +60,7 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
     cs = NONUNITSTRIDE;
   }
 
-  m_dataTypeInfo = DataTypeInfo(rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar);
+  m_dataTypeInfo = DataTypeInfo(rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
 
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
@@ -69,29 +70,13 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
   m_varName.m_name = name;
 }
 
-InputNode::InputNode(string name, Size m, Size n, Size rowStrideVal, Size colStrideVal)
-{
-  InputNode(name + " input",
-	    m,
-	    n,
-	    name,
-	    rowStrideVal,
-	    colStrideVal,
-	    name + "NumRows",
-	    name + "NumCols",
-	    name + "RowStride",
-	    name + "ColStride");
-}
-
 string InputNode::DataDeclaration()
 {
-#if USE_DOUBLE_PRECISION
-  string doubleStr = "double *";
-  string varDecString = doubleStr + m_varName.str();
-  return varDecString;
-#else
-  return "float *" + m_varName.str();
-#endif // USE_DOUBLE_PRECISION
+  if (m_dataTypeInfo.m_type == REAL_DOUBLE) {
+    return "double *" + m_varName.str();
+  } else if (m_dataTypeInfo.m_type == REAL_SINGLE) {
+    return "float *" + m_varName.str();
+  }
 }
 
 string InputNode::RowStrideDefine()

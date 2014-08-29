@@ -61,11 +61,13 @@ class DataTypeInfo
   string m_numColsVar;
   string m_rowStrideVar;
   string m_colStrideVar;
+  Type m_type;
 
   DataTypeInfo();
   DataTypeInfo(Stride rowStride, Stride colStride,
 	       string numRowsVar, string numColsVar,
-	       string rowStrideVar, string colStrideVar);
+	       string rowStrideVar, string colStrideVar,
+	       Type type);
 
   DataTypeInfo& operator=(const DataTypeInfo &rhs);
 

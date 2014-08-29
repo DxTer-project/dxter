@@ -37,7 +37,8 @@ VMMul::VMMul(Layer layer, Type type)
   return;
 }
 
-void VMMul::PrintCode(IndStream &out) {
+void VMMul::PrintCode(IndStream &out)
+{
 
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
@@ -46,12 +47,12 @@ void VMMul::PrintCode(IndStream &out) {
   out.Indent();
 
   if (m_layer == ABSLAYER) {
-#if USE_DOUBLE_PRECISION
-      *out << "simple_mmul( " <<
-#else
-      *out << "simple_mmul_float( " <<
-#endif // USE_DOUBLE_PRECISION
-      "1, " <<
+    if (m_type == REAL_DOUBLE) {
+      *out << "simple_mmul( ";
+    } else if (m_type == REAL_SINGLE) {
+      *out << "simple_mmul_float( ";
+    }
+    *out << "1, " <<
       InputDataType(1).m_numRowsVar << ", " <<
       InputDataType(0).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<
@@ -246,12 +247,12 @@ void VMMulLoopRef::ApplyDimK(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
-  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
   splitX->AddInput(vmmul->Input(0), vmmul->InputConnNum(0));
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();
@@ -287,7 +288,7 @@ void VMMulLoopRef::ApplyDimN(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -297,7 +298,7 @@ void VMMulLoopRef::ApplyDimN(Node* node) const
   tunX->SetAllStats(FULLUP);
   tunX->SetIndepIters();
 
-  SplitSingleIter* splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter* splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
   splitY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
   splitY->SetUpStats(FULLUP, NOTUP,
 		     FULLUP, NOTUP);
@@ -405,12 +406,12 @@ void VMMulToRegArith::Apply(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
-  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
   splitX->AddInput(vmmul->Input(0), vmmul->InputConnNum(0));
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();

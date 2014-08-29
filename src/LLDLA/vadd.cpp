@@ -40,13 +40,13 @@ void VAdd::PrintCode(IndStream &out)
 {
   out.Indent();
   if (m_layer == ABSLAYER) {
+    if (m_type == REAL_DOUBLE) {
+      *out << "simple_add( ";
+    } else if (m_type == REAL_SINGLE) {
+      *out << "simple_add_float( ";
+    }
     if (m_vecType == COLVECTOR) {
-#if USE_DOUBLE_PRECISION
-      *out << "simple_add( " <<
-#else
-	*out << "simple_add_float( " <<
-#endif // USE_DOUBLE_PRECISION
-	InputDataType(1).m_numRowsVar << ", " <<
+      *out << InputDataType(1).m_numRowsVar << ", " <<
 	" 1, " <<
 	GetInputName(0).str() << ", " <<
 	InputDataType(0).m_rowStrideVar << ", " <<
@@ -55,12 +55,7 @@ void VAdd::PrintCode(IndStream &out)
 	InputDataType(1).m_rowStrideVar << ", " <<
 	InputDataType(1).m_colStrideVar << ");\n";
     } else {
-#if USE_DOUBLE_PRECISION
-      *out << "simple_add( " <<
-#else
-	*out << "simple_add_float( " <<
-#endif // USE_DOUBLE_PRECISION
-	" 1, " <<
+      *out << " 1, " <<
 	InputDataType(1).m_numColsVar << ", " <<
 	GetInputName(0).str() << ", " <<
 	InputDataType(0).m_rowStrideVar << ", " <<
@@ -259,10 +254,10 @@ void VAddLoopRef::Apply(Node *node) const
 {
   VAdd *vadd = (VAdd*) node;
 
-  SplitSingleIter *split1 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split1 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, true);
   split1->AddInput(vadd->Input(1), vadd->InputConnNum(1));
 
-  SplitSingleIter *split0 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter *split0 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, false);
   split0->AddInput(vadd->Input(0), vadd->InputConnNum(0));
 
   split0->SetAllStats(FULLUP);
@@ -381,11 +376,11 @@ void VAddToRegArith::Apply(Node* node) const
   SplitSingleIter* splitY;
 
   if (splitDown) {
-    splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
-    splitY = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+    splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
+    splitY = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
   } else {
-    splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
-    splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+    splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+    splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
   }
 
   splitX->AddInput(vadd->Input(0), vadd->InputConnNum(0));

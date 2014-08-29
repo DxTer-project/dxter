@@ -246,7 +246,7 @@ Name Transpose::GetName(ConnNum num) const
 void Transpose::AddVariables(VarSet &set) const
 {
   DLAOp<1,1>::AddVariables(set);
-  Var var(GetInputNameStr(0), m_trans);
+  Var var(GetInputNameStr(0), m_trans, m_info.m_type);
   set.insert(var);
 }
 #endif

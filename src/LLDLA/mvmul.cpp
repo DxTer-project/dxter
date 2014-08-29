@@ -46,12 +46,12 @@ void MVMul::PrintCode(IndStream &out)
   out.Indent();
 
   if (m_layer == ABSLAYER) {
-#if USE_DOUBLE_PRECISION
-    *out << "simple_mmul( " <<
-#else
-    *out << "simple_mmul_float( " <<
-#endif // USE_DOUBLE_PRECISION
-      InputDataType(0).m_numRowsVar << ", " <<
+    if (m_type == REAL_DOUBLE) {
+      *out << "simple_mmul( ";
+    } else if (m_type == REAL_SINGLE) {
+      *out << "simple_mmul_float( ";
+    }
+    *out << InputDataType(0).m_numRowsVar << ", " <<
       "1, " <<
       InputDataType(0).m_numColsVar << ", " <<
       GetInputName(0).str() << ", " <<
@@ -295,13 +295,13 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
   MVMul *mul = (MVMul*) node;
   
   // Split A on m dimension
-  SplitSingleIter *splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
   splitA->AddInput(mul->Input(0), mul->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
   // Split y (the result vector) on m dimension
-  SplitSingleIter *splitY = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  SplitSingleIter *splitY = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
   splitY->AddInput(mul->Input(2), mul->InputConnNum(2));
   splitY->SetUpStats(FULLUP, FULLUP,
 		     NOTUP, NOTUP);
@@ -346,13 +346,13 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
   MVMul *mul = (MVMul*) node;
 
   // Split a on n dimension
-  SplitSingleIter *splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
   splitA->AddInput(mul->Input(0), mul->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
   // Split x on m dimension
-  SplitSingleIter *splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  SplitSingleIter *splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
   splitX->AddInput(mul->Input(1), mul->InputConnNum(1));
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();
@@ -421,13 +421,13 @@ void MVMulToRegArith::Apply(Node* node) const
   MVMul* mvmul = (MVMul*) node;
   
   // Split matrix A into mu x 1 column vectors
-  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
   splitA->AddInput(mvmul->Input(0), mvmul->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
   // Split x into individual elements
-  SplitSingleIter* splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
+  SplitSingleIter* splitX = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
   splitX->AddInput(mvmul->Input(1), mvmul->InputConnNum(1));
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();

@@ -25,19 +25,29 @@
 #include <cmath>
 #include "LLDLA.h"
 
+
+#if DOLLDLA
+SplitSingleIter::SplitSingleIter(PartDir dir, TunType type, Type dataType, bool isControl)
+  : SplitBase(dir, type, isControl)
+{
+  m_info.m_type = dataType;
+}
+#endif
+
+#if TWOD
 SplitSingleIter::SplitSingleIter() 
   : SplitBase()
 {
   m_addDir = false;
 }
 
-#if TWOD
 SplitSingleIter::SplitSingleIter(PartDir dir, TunType type, bool isControl) 
   : SplitBase(dir, type, isControl)
 {
   m_addDir = false;
 }
 #else
+
 SplitSingleIter::SplitSingleIter(unsigned int partDim, TunType type, bool isControl) 
   : SplitBase(partDim, type, isControl)
 {
@@ -1092,21 +1102,29 @@ void SplitSingleIter::AddVariables(VarSet &set) const
   const string name = GetInputNameStr(0);
 
   BasePSet *pset = ((Tunnel*)Input(0))->m_pset;
+  if (m_info.m_type == REAL_SINGLE) {
+    //    cout << "Var " << name << " has type is float\n";
+  } else if (m_info.m_type == REAL_DOUBLE) {
+    //    cout << "Var " << name << " has type is double\n";
+  } else {
+    cout << "Error: Bad type, var " << name << " in SplitSingleIter::AddVariables\n";
+    throw;
+  }
   if (!pset->IsReal() || !((RealLoop*)pset)->IsUnrolled()) {
     if (PartInUse(0)) {
-      Var var(name, 0);
+      Var var(name, 0, m_info.m_type);
       set.insert(var);
     }
-    Var var1(name, 1);
+    Var var1(name, 1, m_info.m_type);
     set.insert(var1);
     if (PartInUse(2)) {
-      Var var(name, 2);
+      Var var(name, 2, m_info.m_type);
       set.insert(var);
     }
 
     if (m_isControlTun) {
       string loopLevel = GetLoopLevel(-1);
-      Var var(DirectVarDeclType, "int lcv"+loopLevel+";\n");
+      Var var(DirectVarDeclType, "int lcv"+loopLevel+";\n", m_info.m_type);
       set.insert(var);
     }
   }
@@ -1115,16 +1133,17 @@ void SplitSingleIter::AddVariables(VarSet &set) const
       throw;
     unsigned int numIters = NumIters(0);
     for(unsigned int i = 0; i < numIters; ++i) {
-#if USE_DOUBLE_PRECISION
-      Var var(DirectVarDeclType, "double *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";");
-#else
-      Var var(DirectVarDeclType, "float *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";");
+      if (m_info.m_type == REAL_DOUBLE) {
+	Var varD(DirectVarDeclType, "double *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";", m_info.m_type);
+	set.insert(varD);
+      } else if (m_info.m_type == REAL_SINGLE) {
+	Var varS(DirectVarDeclType, "float *" + LLDLAPartVarName(name, 1) + "_iter" + std::to_string((long long int) i) + ";", m_info.m_type);
+	set.insert(varS);
+      }
+      }
+      }
 #endif
-      set.insert(var);
-    }
-  }
-#endif
-}
+      }
 
 CombineSingleIter* SplitSingleIter::CreateMatchingCombine(int numArgs, ...)
 {

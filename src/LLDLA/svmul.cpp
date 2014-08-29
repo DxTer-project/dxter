@@ -37,25 +37,20 @@ SVMul::SVMul(VecType vecType, Layer layer, Type type)
 void SVMul::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
+    if (m_type == REAL_DOUBLE) {
+      *out << "simple_smul( ";
+    } else if (m_type == REAL_SINGLE) {
+      *out << "simple_smul_float( ";
+    }
     if (m_vecType == COLVECTOR) {
-#if USE_DOUBLE_PRECISION
-    *out << "simple_smul( " <<
-#else
-    *out << "simple_smul_float( " <<
-#endif // USE_DOUBLE_PRECISION
-	InputDataType(1).m_numRowsVar << ", " <<
+      *out << InputDataType(1).m_numRowsVar << ", " <<
 	" 1, " <<
 	GetInputName(0).str() << ", " <<
 	GetInputName(1).str() << ", " <<
 	InputDataType(1).m_rowStrideVar << ", " <<
 	InputDataType(1).m_colStrideVar << ");\n";
     } else {
-#if USE_DOUBLE_PRECISION
-    *out << "simple_smul( " <<
-#else
-    *out << "simple_smul_float( " <<
-#endif // USE_DOUBLE_PRECISION
-	" 1, " <<
+      *out <<" 1, " <<
 	InputDataType(1).m_numColsVar << ", " <<
 	GetInputName(0).str() << ", " <<
 	GetInputName(1).str() << ", " <<
@@ -251,7 +246,7 @@ void SVMulLoopRef::Apply(Node *node) const
 {
   SVMul *svmul = (SVMul*) node;
 
-  SplitSingleIter *split = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, true);
   split->AddInput(svmul->Input(1), svmul->InputConnNum(1));
 
   if (m_vtype == COLVECTOR) {
@@ -379,9 +374,9 @@ void SVMulToRegArith::Apply(Node* node) const
   // Split up the input vector
   SplitSingleIter* splitVec;
   if (m_vType == ROWVECTOR) {
-    splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+    splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
   } else {
-    splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+    splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
   }
 
   splitVec->AddInput(svmul->Input(1), svmul->InputConnNum(1));
