@@ -651,6 +651,7 @@ template<class PSetType>
     {
     case (USEUNITBS):
     case (USELLDLAMUSINGLE):
+    case (USELLDLA2MUSINGLE):
     case (USELLDLA3MUSINGLE):
     case (USELLDLAMUDOUBLE):
     case (USELLDLA2MUDOUBLE):
