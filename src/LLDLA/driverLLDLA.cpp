@@ -63,6 +63,11 @@
 #define PARTIALUNROLLINGSTARTCOEF 2
 #define PARTIALUNROLLINGENDCOEF 16
 
+#if DOCOMPACTLOOPUNROLLING + DOPARTIALLOOPUNROLLING > 1
+do you really want to do compact unrolling and partial unrolling?
+#endif
+
+
 #include <sstream>
 
 Size one = 1;
