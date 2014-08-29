@@ -215,17 +215,15 @@ void AddMAddTrans()
 
 void AddMVMulTrans()
 {
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble, REAL_DOUBLE), LLDLALOOPPHASE);
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble, REAL_DOUBLE), LLDLALOOPPHASE);
-
-  Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
+  Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }
@@ -679,7 +677,7 @@ RealPSet* GemvExample()
 		tunBeta, 0,
 		tunY, 0);
 
-  MVMul* axMul = new MVMul(ABSLAYER, dataType);
+  MVMul* axMul = new MVMul(ABSLAYER);
   axMul->AddInputs(6,
 		   tunA, 0,
 		   tunX, 0,
@@ -749,13 +747,13 @@ RealPSet* MVMul2Example()
   Tunnel* tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(BIn, 0);
 
-  MVMul* mvmul1 = new MVMul(ABSLAYER, dataType);
+  MVMul* mvmul1 = new MVMul(ABSLAYER);
   mvmul1->AddInputs(6,
 		    tunB, 0,
 		    tunX, 0,
 		    tunY, 0);
 
-  MVMul* mvmul2 = new MVMul(ABSLAYER, dataType);
+  MVMul* mvmul2 = new MVMul(ABSLAYER);
   mvmul2->AddInputs(6,
 		    tunA, 0,
 		    mvmul1, 0,
@@ -948,7 +946,7 @@ RealPSet* VMVMulExample()
   Tunnel* tunW = new Tunnel(POSSTUNIN);
   tunW->AddInput(wIn, 0);
 
-  MVMul* mvmul = new MVMul(ABSLAYER, dataType);
+  MVMul* mvmul = new MVMul(ABSLAYER);
   mvmul->AddInputs(6,
 		   tunA, 0,
 		   tunX, 0,
@@ -1144,7 +1142,7 @@ RealPSet* MVMulExample()
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  MVMul* mvmul = new MVMul(ABSLAYER, dataType);
+  MVMul* mvmul = new MVMul(ABSLAYER);
   mvmul->AddInputs(6,
 		   tunA, 0,
 		   tunX, 0,

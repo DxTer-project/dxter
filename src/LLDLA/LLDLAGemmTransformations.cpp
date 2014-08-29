@@ -235,7 +235,7 @@ void LLDLAGemmToMVMul::Apply(Node* node) const
   splitC->SetIndepIters();
 
   // Create inner MVMul
-  MVMul* mvmul = new MVMul(m_toLayer, gemm->m_type);
+  MVMul* mvmul = new MVMul(m_toLayer);
   mvmul->AddInput(aTun, 0);
   mvmul->AddInput(splitB, 1);
   mvmul->AddInput(splitC, 1);

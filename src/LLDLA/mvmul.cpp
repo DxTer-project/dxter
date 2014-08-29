@@ -29,11 +29,9 @@
 
 #if DOLLDLA
 
-MVMul::MVMul(Layer layer, Type type)
+MVMul::MVMul(Layer layer)
 {
-  m_type = type;
   m_layer = layer;
-  m_regWidth = arch->VecRegWidth(m_type);
   return;
 }
 
@@ -46,9 +44,9 @@ void MVMul::PrintCode(IndStream &out)
   out.Indent();
 
   if (m_layer == ABSLAYER) {
-    if (m_type == REAL_DOUBLE) {
+    if (GetDataType() == REAL_DOUBLE) {
       *out << "simple_mmul( ";
-    } else if (m_type == REAL_SINGLE) {
+    } else if (GetDataType() == REAL_SINGLE) {
       *out << "simple_mmul_float( ";
     }
     *out << InputDataType(0).m_numRowsVar << ", " <<
@@ -116,7 +114,7 @@ void MVMul::PrintGeneralStride(IndStream &out)
 
 Node* MVMul::BlankInst()
 {
-  return new MVMul(ABSLAYER, REAL_SINGLE);
+  return new MVMul(ABSLAYER);
 }
 
 Phase MVMul::MaxPhase() const 
@@ -151,15 +149,15 @@ void MVMul::Prop()
     }
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if (*GetInputM(0) != m_regWidth || *GetInputN(0) != m_regWidth) {
+      if (*GetInputM(0) != GetVecRegWidth() || *GetInputN(0) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive matrix must be 2 x 2 for MVMul\n";
 	throw;
       }
-      if (*GetInputM(1) != m_regWidth) {
+      if (*GetInputM(1) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive vector must be 2 x 1 MVMul\n";
 	throw;
       }
-      if (*GetInputM(2) != m_regWidth) {
+      if (*GetInputM(2) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive vector must be 2 x 1 MVMul\n";
 	throw;
       }
@@ -182,34 +180,32 @@ void MVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
   const MVMul *rhs = (MVMul*)orig;
-  m_type = rhs->m_type;
   m_layer = rhs->m_layer;
   return;
 }
 
-MVMulLowerLayer::MVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+MVMulLowerLayer::MVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_bs = bs;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 bool MVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
     const MVMul *mvmul = (MVMul*) node;
-    if (mvmul->GetLayer() != m_fromLayer || m_type != mvmul->m_type) {
+    if (mvmul->GetLayer() != m_fromLayer) {
       return false;
     }
 
+    int regWidth = mvmul->GetVecRegWidth();
     if (m_toLayer == LLDLAPRIMITIVELAYER) {
-      if (*mvmul->GetInputM(0) != m_regWidth ||
-	  *mvmul->GetInputN(0) != m_regWidth ||
-	  *mvmul->GetInputM(1) != m_regWidth ||
+      if (*mvmul->GetInputM(0) != regWidth ||
+	  *mvmul->GetInputN(0) != regWidth ||
+	  *mvmul->GetInputM(1) != regWidth ||
 	  *mvmul->GetInputN(1) != 1        ||
-	  *mvmul->GetInputM(2) != m_regWidth ||
+	  *mvmul->GetInputM(2) != regWidth ||
 	  *mvmul->GetInputN(2) != 1) {
 	return false;
       } else {
@@ -238,14 +234,12 @@ string MVMulLowerLayer::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
-MVMulLoopRef::MVMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type)
+MVMulLoopRef::MVMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_dim = dim;
   m_bs = bs;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 string MVMulLoopRef::GetType() const
@@ -253,9 +247,9 @@ string MVMulLoopRef::GetType() const
   switch (m_dim)
     {
     case (DIMM):
-      return "MVMulLoopRef - dim m " + std::to_string((long long int) m_type);
+      return "MVMulLoopRef - dim m ";
     case (DIMN):
-      return "MVMulLoopRef - dim n " + std::to_string((long long int) m_type);
+      return "MVMulLoopRef - dim n ";
     default:
       throw;
     }  
@@ -265,7 +259,11 @@ bool MVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
     const MVMul *mvmul = (MVMul*) node;
-    if (mvmul->GetLayer() != m_fromLayer || m_type != mvmul->m_type) {
+    if (mvmul->GetLayer() != m_fromLayer) {
+      return false;
+    }
+
+    if (m_bs.GetSize() % mvmul->GetVecRegWidth != 0) {
       return false;
     }
 
@@ -313,7 +311,7 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const
   xTun->SetAllStats(FULLUP);
 
   // Create new mvmul for loop body
-  MVMul *newMul = new MVMul(m_toLayer, mul->m_type);
+  MVMul *newMul = new MVMul(m_toLayer);
   newMul->SetLayer(m_toLayer);
 
   // Attach the new multiply to arguments
@@ -363,7 +361,7 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
   tunY->SetAllStats(PARTUP);
 
   // Create new svmul for loop body
-  MVMul *newMul = new MVMul(m_toLayer, mul->m_type);
+  MVMul *newMul = new MVMul(m_toLayer);
   newMul->SetLayer(m_toLayer);
 
   // Attach to arguments
@@ -391,27 +389,23 @@ void MVMulLoopRef::ApplyColSplit(Node *node) const
 
 }
 
-MVMulToRegArith::MVMulToRegArith(Layer fromLayer, Layer toLayer, Type type)
+MVMulToRegArith::MVMulToRegArith(Layer fromLayer, Layer toLayer)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 string MVMulToRegArith::GetType() const
 {
   return "MVMulToRegArith from " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer)  + " type " + std::to_string((long long int) m_type);
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
 bool MVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
     MVMul* mvmul = (MVMul*) node;
-    if (m_type == mvmul->m_type) {
-      return *mvmul->GetInputM(0) == m_regWidth;
-    }
+    return *mvmul->GetInputM(0) == mvmul->GetVecRegWidth();
   }
   return false;
 }
