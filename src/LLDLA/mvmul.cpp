@@ -247,9 +247,9 @@ string MVMulLoopRef::GetType() const
   switch (m_dim)
     {
     case (DIMM):
-      return "MVMulLoopRef - dim m ";
+      return "MVMulLoopRef - dim m " + std::to_string((long long int) m_bs.GetSize());
     case (DIMN):
-      return "MVMulLoopRef - dim n ";
+      return "MVMulLoopRef - dim n " + std::to_string((long long int) m_bs.GetSize());
     default:
       throw;
     }  
@@ -260,10 +260,6 @@ bool MVMulLoopRef::CanApply(const Node *node) const
   if (node->GetNodeClass() == MVMul::GetClass()) {
     const MVMul *mvmul = (MVMul*) node;
     if (mvmul->GetLayer() != m_fromLayer) {
-      return false;
-    }
-
-    if (m_bs.GetSize() % mvmul->GetVecRegWidth != 0) {
       return false;
     }
 

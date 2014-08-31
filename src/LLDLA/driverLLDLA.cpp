@@ -148,16 +148,10 @@ GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, doubl
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Transform gemm into loop over vmmuls
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
-
-    // Convert gemm into loop over mvmul
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
-
-  // Transform gemm into loop over vmmuls
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
+  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   //Introduces loops in the m, n, and k dimensions, respectively
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
@@ -217,9 +211,9 @@ void AddMVMulTrans()
 {
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
+    Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
+    Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
 
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
 
@@ -231,9 +225,9 @@ void AddMVMulTrans()
 void AddSMMulTrans()
 {
   //Introduces loops in the m and n dimension for SMMul
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble, REAL_DOUBLE), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
 
   return;
 }
@@ -279,17 +273,15 @@ void AddSVMulTrans()
 void AddVMMulTrans()
 {
   // Transformers for vector matrix multiply
-  Universe::AddTrans(VMMul::GetClass(), new VMMulToRegArith(ABSLAYER, ABSLAYER, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(VMMul::GetClass(), new VMMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle), LLDLALOOPPHASE);
 
- Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+ Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VMMul::GetClass(), new VMMulToRegArith(ABSLAYER, ABSLAYER, REAL_DOUBLE), LLDLALOOPPHASE);
+  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMK, LLDLAMuDouble), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMK, LLDLAMuDouble, REAL_DOUBLE), LLDLALOOPPHASE);
-
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble, REAL_DOUBLE), LLDLALOOPPHASE);
+  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
 
   return;
 }
@@ -987,7 +979,7 @@ RealPSet* SMMulExample()
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  SMMul* smmul = new SMMul(ABSLAYER, dataType);
+  SMMul* smmul = new SMMul(ABSLAYER);
   smmul->AddInputs(4,
 		   tunX, 0,
 		   tunA, 0);
@@ -1029,7 +1021,7 @@ RealPSet* VMMulExample()
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  VMMul* vmmul = new VMMul(ABSLAYER, dataType);
+  VMMul* vmmul = new VMMul(ABSLAYER);
   vmmul->AddInputs(6,
 		   tunX, 0,
 		   tunA, 0,
@@ -1119,7 +1111,7 @@ RealPSet* SVMulColExample()
 
 RealPSet* MVMulExample()
 {
-  InputNode* Ain = new InputNode("A input", 16, medSize, "A",
+  InputNode* Ain = new InputNode("A input", arch->VecRegWidth(dataType), medSize, "A",
 				 1, 16,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
@@ -1128,7 +1120,7 @@ RealPSet* MVMulExample()
 				 1, medSize,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
-  InputNode* yIn = new InputNode("y input", 16, 1, "Y",
+  InputNode* yIn = new InputNode("y input", arch->VecRegWidth(dataType), 1, "Y",
 				 1, 16,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
