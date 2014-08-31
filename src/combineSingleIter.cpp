@@ -416,7 +416,11 @@ LoopTunnel* CombineSingleIter::GetMatchingInTun() const
   else if (m_tunType != POSSTUNOUT)
     throw;
   
+#if DOTENSORS
+  const Node *in = Input(3);
+#else
   const Node *in = Input(GetNumElems(m_dir));
+#endif
   if (in->IsTunnel(POSSTUNIN) && ((Tunnel*)in)->IsSplit()) {
     return (LoopTunnel*)in;
   }

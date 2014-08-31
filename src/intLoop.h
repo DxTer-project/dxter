@@ -86,13 +86,25 @@ class BSSize
 #endif
  
   
- BSSize() : m_val(BADBSSIZE), m_multiple(0) {}
+ BSSize() : m_val(BADBSSIZE)
+#if DOLLDLA
+    , m_multiple(0) 
+#endif
+{}
   
   explicit BSSize(BSSizeEnum val)
-    : m_val(val), m_multiple(1) {}
+    : m_val(val)
+#if DOLLDLA
+    , m_multiple(1) 
+#endif
+    {}
 
   explicit BSSize(BSSizeEnum val, unsigned int multiple)
-    : m_val(val), m_multiple(multiple) {}
+    : m_val(val)
+#if DOLLDLA
+, m_multiple(multiple) 
+#endif
+  {}
 
   bool operator==(const BSSize &rhs) const 
 #if DOLLDLA
@@ -114,8 +126,10 @@ class BSSize
 
   inline Size GetSize() const {
     //Just a sanity check; upperbound can be changed
+#if DOLLDLA
     if (m_multiple == 0 || m_multiple > 32)
       throw;
+#endif
     switch(m_val)
       {
 #if DOELEM
