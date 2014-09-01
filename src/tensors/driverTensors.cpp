@@ -495,6 +495,9 @@ RealPSet* MP3()
   InputNode *t_gfno;
   InputNode *accum_temp;
   InputNode *cont1_temp;
+  InputNode *axpy2_temp;
+  InputNode *axpy3_temp;
+  InputNode *axpy4_temp;
 
   {
     Sizes sizes[4];
@@ -609,6 +612,37 @@ RealPSet* MP3()
 			       sizes, "cont1_temp", 4);
   }
 
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(gSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(oSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    axpy2_temp = new InputNode("axpy2_temp", 
+			       sizes, "axpy2_temp", 4);
+  }
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(oSize,1,1);
+    sizes[1].AddRepeatedSizes(eSize,1,1);
+    sizes[2].AddRepeatedSizes(gSize,1,1);
+    sizes[3].AddRepeatedSizes(mSize,1,1);
+    axpy3_temp = new InputNode("axpy3_temp", 
+			       sizes, "axpy3_temp", 4);
+  }
+
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    axpy4_temp = new InputNode("axpy4_temp", 
+			       sizes, "axpy4_temp", 4);
+  }
+
 
 
   Sizes ones[2];
@@ -629,28 +663,87 @@ RealPSet* MP3()
 		  v_oemg,0,
 		  t_gfno,0,
 		  cont1_temp,0);
-
-  Poss *poss1 = new Poss(cont1);
-  RealPSet *set1 = new RealPSet(poss1);
+  Poss *cont1Poss = new Poss(cont1);
+  RealPSet *cont1Set = new RealPSet(cont1Poss);
 
   Axpy *axpy1 = new Axpy(COEFONEHALF, COEFONE, COEFZERO, "efmn", "efnm", "efmn");
   axpy1->AddInputs(6,
 		   set1->OutTun(0), 0,
 		   set1->OutTun(0), 0,
 		   accum_temp, 0);
-		   
+  Poss *axpy1Poss = new Poss(axpy1);
+  RealPSet * axpy1Set = new RealPSet(axpy1Poss);
 
 
+  Axpy *axpy1 = new Axpy(COEFONEHALF, COEFONE, COEFZERO, "efmn", "efnm", "efmn");
+  axpy1->AddInputs(6,
+		   set1->OutTun(0), 0,
+		   set1->OutTun(0), 0,
+		   accum_temp, 0);
+  Poss *axpy1Poss = new Poss(axpy1);
+  RealPSet * axpy1Set = new RealPSet(axpy1Poss);
 
 
+  Axpy *axpy2 = new Axpy(COEFTWO, COEFNEGONE, COEFZERO, "gfon", "gfno", "gfon");
+  axpy2->AddInputs(6,
+		   t_gfon, 0,
+		   t_gfno, 0,
+		   axpy2_temp, 0);
+  Poss *axpy2Poss = new Poss(axpy2);
+  RealPSet * axpy2Set = new RealPSet(axpy2Poss);
+
+  Axpy *axpy3 = new Axpy(COEFTWO, COEFNEGONE, COEFZERO, "oegm", "oemg", "oegm");
+  axpy3->AddInputs(6,
+		   v_oegm, 0,
+		   v_oemg, 0,
+		   axpy3_temp, 0);
+  Poss *axpy3Poss = new Poss(axpy3);
+  RealPSet * axpy3Set = new RealPSet(axpy3Poss);
+
+  Contraction *cont2 = new Contraction(DMLAYER,COEFONEHALF,COEFNEGONE,REAL,"oegm","gfon","efmn",(string)"go");
+  cont2->AddInputs(6,
+		   axpy2Set->OutTun(0),0,
+		   axpy3Set->OutTun(0),0,
+		   cont1Set->OutTun(0),0);
+  Poss *cont2Poss = new Poss(cont2);
+  RealPSet *cont2Set = new RealPSet(cont2Poss);
+
+  Contraction *cont3 = new Contraction(DMLAYER,COEFONEHALF,COEFONE,REAL,"efgh","ghmn","efmn",(string)"gh");
+  cont3->AddInputs(6,
+		   v_efgh, 0,
+		   t_ghmn, 0,
+		   cont2Set->OutTun(0),0);
+  Poss *cont3Poss = new Poss(cont3);
+  RealPSet *cont3Set = new RealPSet(contPoss);
+
+  Contraction *cont4 = new Contraction(DMLAYER,COEFONEHALF,COEFONE,REAL,"opmn","efop","efmn",(string)"op");
+  cont4->AddInputs(6,
+		   v_opmn, 0,
+		   t_efop, 0,
+		   cont3Set->OutTun(0),0);
+  Poss *cont4Poss = new Poss(cont4);
+  RealPSet *cont4Set = new RealPSet(cont4Poss);
 
 
+  Axpy *axpy4 = new Axpy(COEFTWO, COEFNEGONE, COEFZERO, "efmn", "efnm", "efmn");
+  axpy4->AddInputs(6,
+		   t_efmn, 0,
+		   t_efnm, 0,
+		   axpy4_temp, 0);
+  Poss *axpy4Poss = new Poss(axpy4);
+  RealPSet * axpy4Set = new RealPSet(axpy4Poss);
 
-
+  Contraction *cont5 = new Contraction(DMLAYER,COEFTWO,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
+  cont4->AddInputs(6,
+		   axpy4Set->OutTun(0), 0,
+		   cont4Set->OutTun(0), 0,
+		   scalarIn,0);
+  Poss *cont5Poss = new Poss(cont5);
+  RealPSet *cont5Set = new RealPSet(cont5Poss);
 
 
   OutputNode *out = new OutputNode("output");
-  out->AddInput(set4->OutTun(0),0);
+  out->AddInput(cont5Set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out,true);
   RealPSet *outerSet = new RealPSet(outerPoss);
