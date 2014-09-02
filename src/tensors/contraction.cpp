@@ -542,6 +542,8 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
       }
     }
   }
+  if (sumDims.size() != contIndices.length())
+    throw;
 
   DistType BType;
   MatchDistsAndFillInWithStar(cont->m_BIndices,
@@ -754,6 +756,8 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
       }
     }
   }
+  if (sumDims.size() != contIndices.length())
+    throw;
 
   DistType AType;
   MatchDistsAndFillInWithStar(cont->m_AIndices,
