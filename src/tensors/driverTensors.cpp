@@ -37,6 +37,7 @@
 #include "tensorRedist.h"
 #include "tensorPermute.h"
 
+
 #if DOTENSORS
 
 #include "debug.h"
@@ -74,6 +75,8 @@ void AddTrans()
 
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
+
+  Universe::AddTrans(Axppx::GetClass(), new DistAxppxToDefaultLocalAxppx, DPTENSORPHASE);
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
