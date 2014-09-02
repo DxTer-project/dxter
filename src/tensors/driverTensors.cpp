@@ -668,8 +668,8 @@ RealPSet* MP3()
 
   Contraction *cont2 = new Contraction(DMLAYER,COEFONEHALF,COEFNEGONE,REAL,"oegm","gfon","efmn",(string)"go");
   cont2->AddInputs(6,
-		   axppx2Set->OutTun(0),0,
 		   axppx3Set->OutTun(0),0,
+		   axppx2Set->OutTun(0),0,
 		   axppx1Set->OutTun(0),0);
   Poss *cont2Poss = new Poss(cont2);
   RealPSet *cont2Set = new RealPSet(cont2Poss);
@@ -700,7 +700,7 @@ RealPSet* MP3()
   RealPSet * axppx4Set = new RealPSet(axppx4Poss);
 
   Contraction *cont5 = new Contraction(DMLAYER,COEFTWO,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
-  cont4->AddInputs(6,
+  cont5->AddInputs(6,
 		   axppx4Set->OutTun(0), 0,
 		   cont4Set->OutTun(0), 0,
 		   scalarIn,0);
@@ -711,7 +711,7 @@ RealPSet* MP3()
   OutputNode *out = new OutputNode("output");
   out->AddInput(cont5Set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out,true);
+  Poss *outerPoss = new Poss(out, true);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
