@@ -220,8 +220,19 @@ void Contraction::CheckInputTypesAlign() const
       }
     }
     else {
-      if (CType.m_dists[dim] != AType.m_dists[aFind])
-	throw;
+      if (CType.m_dists[dim] != AType.m_dists[aFind]) {
+	cout << "C\n";
+        cout << CType.PrettyStr() << endl;
+        cout << m_CIndices << endl;
+        cout << dim << endl;
+	cout << "A\n";
+        cout << AType.PrettyStr() << endl;
+        cout << aFind << endl;
+        cout << m_AIndices << endl;
+        cout << Input(0)->GetType() << endl;
+        cout << Input(2)->GetType() << endl;
+        throw;
+      }
       size_t bFind = m_BIndices.find(index);
       if (bFind != string::npos) {
 	if (AType.m_dists[aFind].IsStar())
@@ -512,11 +523,23 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
   const DistType &AType = ((DLANode*)(AConn->m_n))->DataType(AConn->m_num).m_dist;
 
   EntrySet sumDims;
+  string contIndices;
   string::iterator iter = cont->m_contIndices.begin();
   for(; iter != cont->m_contIndices.end(); ++iter) {
     size_t loc = cont->m_AIndices.find(*iter);
     if (loc != string::npos) {
-      sumDims.insert(AType.m_dists[loc]);
+      DistEntry entry = AType.m_dists[loc];
+      sumDims.insert(entry);
+      EntrySetIter tmp = sumDims.begin();
+      
+      for(int i = 0; tmp != sumDims.end(); ++tmp,++i) {
+	if (*tmp == entry) {
+	  string tmp;
+	  tmp += *iter;
+	  contIndices.insert(i, tmp);
+	  break;
+	}
+      }
     }
   }
 
@@ -549,7 +572,7 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
-				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
+				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+contIndices, contIndices);
   temp->AddInput(node->Input(2),node->InputConnNum(2));
   LCont->AddInput(node->Input(0), node->InputConnNum(0));
   if (BSet)
@@ -713,11 +736,22 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
   const DistType &BType = ((DLANode*)(BConn->m_n))->DataType(BConn->m_num).m_dist;
 
   EntrySet sumDims;
+  string contIndices;
   string::iterator iter = cont->m_contIndices.begin();
   for(; iter != cont->m_contIndices.end(); ++iter) {
     size_t loc = cont->m_BIndices.find(*iter);
     if (loc != string::npos) {
-      sumDims.insert(BType.m_dists[loc]);
+      DistEntry entry = BType.m_dists[loc];
+      sumDims.insert(entry);
+      EntrySetIter tmp = sumDims.begin();
+      for(int i = 0; tmp != sumDims.end(); ++tmp,++i) {
+	if (*tmp == entry) {
+	  string tmp;
+	  tmp += *iter;
+	  contIndices.insert(i, tmp);
+	  break;
+	}
+      }
     }
   }
 
@@ -750,7 +784,7 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
-				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
+				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+contIndices, contIndices);
   temp->AddInput(node->Input(2),node->InputConnNum(2));
   if (ASet)
     LCont->AddInput(ASet->OutTun(0),0);
