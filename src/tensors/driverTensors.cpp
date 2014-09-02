@@ -473,14 +473,14 @@ RealPSet* MartinsExample2()
 
 RealPSet* MP3()
 {
-  Size eSize = ;
-  Size fSize = ;
-  Size gSize = ;
-  Size hSize = ;
-  Size mSize = ;
-  Size nSize = ;
-  Size oSize = ;
-  Size pSize = ;
+  Size eSize = 53;
+  Size fSize = 53;
+  Size gSize = 53;
+  Size hSize = 53;
+  Size mSize = 5;
+  Size nSize = 5;
+  Size oSize = 5;
+  Size pSize = 5;
 
 
   InputNode *t_efmn;
@@ -589,8 +589,6 @@ RealPSet* MP3()
     sizes[3].AddRepeatedSizes(oSize,1,1);
     t_gfno = new InputNode("t_gfno", sizes, "t_gfno", 4);
   }
-
-  //more...
 
   {
     Sizes sizes[4];
