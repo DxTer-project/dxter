@@ -157,6 +157,21 @@ const Dim DLANode::InputNumDims(ConnNum num) const
   return in->NumDims(inNum);
 }
 
+Size DLANode::TotalNumberOfLocalElements(ConnNum num) const
+{
+  Dim numDims = NumDims(num);
+  Size totSize = 0;
+  const unsigned int totNumIters = LocalLen(num,0)->NumSizes();
+  for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+    Size temp = 1;
+    for (Dim dim = 0; dim < numDims; ++dim) {
+      temp *= (*LocalLen(num,dim))[iteration];
+    }
+    totSize += temp;
+  }
+  return totSize;
+}
+
 
 #endif
 
@@ -321,7 +336,22 @@ void TenCullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 {
   doNotCull = false;
   cullIfPossible = false;
+  NodeVecIter iter = poss->m_possNodes.begin();
+  for(; iter != poss->m_possNodes.end(); ++iter) {
+    Node *node = *iter;
+    if (node->IsDLA()) {
+      DLANode *ddla = (DLANode*)node;
+      if (ddla->DoNotCullDP()) {
+        doNotCull = true;
+        return;
+      }
+      if (!cullIfPossible) {
+        cullIfPossible = ddla->ShouldCullDP();
+      }
+    }
+  }
 }
+
 
 void TenCullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull)
 {

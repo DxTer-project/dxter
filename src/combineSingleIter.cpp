@@ -289,7 +289,7 @@ Tunnel* CombineSingleIter::GetSetTunnel()
     tun = new CombineSingleIter(m_partDim, SETTUNIN);
 #endif
 else*/
-  if (m_tunType == POSSTUNOUT)
+  if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT)
 #if TWOD
     tun = new CombineSingleIter(m_dir, SETTUNOUT);
 #else
@@ -402,3 +402,30 @@ NodeType CombineSingleIter::GetType() const
 #endif
 }
 
+
+LoopTunnel* CombineSingleIter::GetMatchingInTun() const
+{
+  if (m_tunType == SETTUNOUT)
+    if (m_pset->IsReal())
+      return (LoopTunnel*)(((LoopTunnel*)Input(0))->GetMatchingInTun()->Input(0));
+    else {
+      LoopTunnel *possTunIn = ((LoopTunnel*)(GetRealTunnel()->Input(0)))->GetMatchingInTun();
+      LoopTunnel *realSetTunIn = (LoopTunnel*)(possTunIn->Input(0));
+      return (LoopTunnel*)(m_pset->m_inTuns[FindInNodeVec(m_pset->GetReal()->m_inTuns, realSetTunIn)]);
+    }
+  else if (m_tunType != POSSTUNOUT)
+    throw;
+  
+#if DOTENSORS
+  const Node *in = Input(3);
+#else
+  const Node *in = Input(GetNumElems(m_dir));
+#endif
+  if (in->IsTunnel(POSSTUNIN) && ((Tunnel*)in)->IsSplit()) {
+    return (LoopTunnel*)in;
+  }
+  else {
+    cout << "Didn't find matching in tun\n";
+    throw;
+  }
+}

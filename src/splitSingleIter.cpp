@@ -703,9 +703,9 @@ const Sizes* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
 Tunnel* SplitSingleIter::GetSetTunnel()
 {
   SplitSingleIter *tun;
-  if (m_tunType == POSSTUNIN)
+  if (m_tunType == POSSTUNIN || m_tunType == SETTUNIN)
     tun = new SplitSingleIter(m_dir, SETTUNIN, m_isControlTun);
-  else if (m_tunType == POSSTUNOUT)
+  else if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT)
     tun = new SplitSingleIter(m_dir, SETTUNOUT, m_isControlTun);
   else
     throw;
@@ -1623,3 +1623,34 @@ void SplitSingleIter::MigrateFromOldTun(Tunnel *tun)
   m_info = ((SplitSingleIter*)tun)->m_info;
 }
 #endif
+
+
+LoopTunnel* SplitSingleIter::GetMatchingOutTun() const
+{
+  if (m_tunType == SETTUNIN)
+    if (m_pset->IsReal()) 
+      return (LoopTunnel*)(((LoopTunnel*)Child(0))->GetMatchingOutTun()->Child(0));
+    else {
+      LoopTunnel *possTunOut = ((LoopTunnel*)(GetRealTunnel()->Child(0)))->GetMatchingOutTun();
+      LoopTunnel *realSetTunOut = (LoopTunnel*)(possTunOut->Child(0));
+      return (LoopTunnel*)(m_pset->m_outTuns[FindInNodeVec(m_pset->GetReal()->m_outTuns, realSetTunOut)]);
+    }
+  else if (m_tunType != POSSTUNIN) 
+    throw;
+  
+
+  //BAMTODO : instead of doing this search, the child connected to the 
+  // second (1th) output should be the poss out tun
+  NodeConnVecConstIter iter = m_children.begin();
+  for(; iter != m_children.end(); ++iter) {
+    const NodeConn *con = *iter;
+    const Node *child = con->m_n;
+    if (child->IsTunnel(POSSTUNOUT) &&
+        ((Tunnel*)child)->IsCombine()) {
+      return (LoopTunnel*)child;
+    }
+  }
+  cout << "Didn't find matching out tun\n";
+  throw;
+}
+

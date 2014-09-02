@@ -227,13 +227,17 @@ void RealLoop::FillTunnelSizes()
       throw;
     ((LoopTunnel*)in)->StartFillingSizes();
   }
+  //  cout << "Bs " << GetBS() << endl;
   unsigned int numExecs = control->NumberOfLoopExecs();
+  //  cout << "numExecs " << numExecs << endl;
   for(unsigned int i = 0; i < numExecs; ++i) {
     unsigned int numIters = control->NumIters(i);
+    //    cout << "numIters " << numIters << endl;
     if (numIters) {
       iter = m_inTuns.begin();
       for (; iter != m_inTuns.end(); ++iter) {
         LoopTunnel *in = (LoopTunnel*)(*iter);
+	//	cout << "appending for " << in << endl;
 #if DOBLIS
         in->AppendSizes(i, numIters, NumGroupsInComm(m_comm));
 #else
@@ -242,6 +246,35 @@ void RealLoop::FillTunnelSizes()
       }
     }
   }
+//   int num = -1;
+//   iter = m_inTuns.begin();
+//   for(; iter != m_inTuns.end(); ++iter) {
+//     DLANode *in = (DLANode*)(*iter);
+//     if (num < 0) { 
+//       cout << "For " << in << endl;
+//       cout << in->GetType() << endl;
+
+//       num = ((DLANode*)(in->Child(0)))->GetM(0)->NumSizes();
+//       cout << "setting num2 " << ((DLANode*)(in->Child(0)))->GetM(0)->NumSizes() << endl;
+//       cout << "setting in " << in->GetInputM(0)->NumSizes() << endl;
+//       cout << "setting in2 " << (*(in->GetInputM(0)))[0] << endl;
+
+//       cout << "setting num2 n " << ((DLANode*)(in->Child(0)))->GetN(0)->NumSizes() << endl;
+//       cout << "setting in n " << in->GetInputN(0)->NumSizes() << endl;
+//       cout << "setting in2 n " << (*(in->GetInputN(0)))[0] << endl;
+//     }
+//     else if (num != ((DLANode*)(in->Child(0)))->GetM(0)->NumSizes()) {
+//       cout << "For " << in << endl;
+//       cout << in->GetType() << endl;
+//       cout << "num " << num << endl;
+//       cout << "num2 " << ((DLANode*)(in->Child(0)))->GetM(0)->NumSizes() << endl;
+//       cout << "in " << in->GetInputM(0)->NumSizes() << endl;
+//       cout << "in2 " << (*(in->GetInputM(0)))[0] << endl;
+//       cout.flush();
+//       throw;
+//     }
+      
+//   }
 #if DODM
   iter = m_inTuns.begin();
   for (; iter != m_inTuns.end(); ++iter) {

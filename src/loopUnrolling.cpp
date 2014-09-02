@@ -616,6 +616,169 @@ void CompactlyUnrollLoop::Apply(Node *node) const
   ((RealPSet*)base)->RemoveLoops(&trash);
 }
 
+  
+PartiallyUnrollLoop::PartiallyUnrollLoop(unsigned int unrollingFactor)
+  : m_unrollingFactor(unrollingFactor)
+{
+}
+
+bool PartiallyUnrollLoop::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
+    cout << "Error: Attempted to apply FullyUnrollLoop to non SplitSingleIter node\n";
+    throw;
+  }
+
+  if (!node->IsTunnel(SETTUNIN))
+    return false;
+
+  const SplitSingleIter *split = (SplitSingleIter*)node;
+
+  if (!split->m_isControlTun)
+    return false;
+
+  const LoopInterface *loopInt = split->GetMyLoop();
+  const BasePSet *loop = dynamic_cast<const BasePSet*>(loopInt);
+  if (!loop->IsReal()) {
+    cout << "might be able to apply, but this is a shadow\n";
+    throw;
+  }
+
+  if (loopInt->GetBSSize().m_multiple != 1)
+    return false;
+
+  if (loop->m_flags & SETLOOPISUNROLLED)
+    return false;
+  
+  unsigned int numExecs = split->NumberOfLoopExecs();
+  if (!numExecs) {
+    cout << "Error: Attempted to unroll loop with 0 executions\n";
+    throw;
+  }
+
+  //  unsigned int size = m_unrollingFactor * loopInt->GetBS();
+  for(unsigned int i = 0; i < numExecs; ++i) {
+    unsigned int numIters = split->NumIters(i);
+    if (numIters % m_unrollingFactor)
+      return false;
+  }
+
+  const PossMMap &map = loop->GetPosses();
+  PossMMapConstIter iter = map.begin();
+  for(; iter != map.end(); ++iter) {
+    const Poss *poss = iter->second;
+    if (poss->ContainsNonLoopCode()) {
+      return true;
+
+    }
+  }
+  return false;
+}
+
+void PartiallyUnrollLoop::Apply(Node *node) const
+{
+  if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
+    cout << "Error: Unrolling node other than SplitSingleIter\n";
+    throw;
+  }
+  
+  SplitSingleIter *split = (SplitSingleIter*)node;
+  
+  LoopInterface *loop = split->GetMyLoop();
+  RealLoop *innerLoop = dynamic_cast<RealLoop*>(loop);
+
+  Poss *outerPoss = innerLoop->m_ownerPoss;
+
+  bool trash;
+  innerLoop->RemoveLoops(&trash);
+  
+  outerPoss->RemoveFromSets(innerLoop);
+
+  RealLoop *newOuter = (RealLoop*)(innerLoop->GetNewInst());
+  newOuter->m_functionality = innerLoop->m_functionality + "partunrolled";
+
+  
+  NodeVec newSetTunsIn;
+  NodeVecIter tunIter = innerLoop->m_inTuns.begin();
+  for(; tunIter != innerLoop->m_inTuns.end(); ++tunIter) {
+    LoopTunnel *oldTun = (LoopTunnel*)(*tunIter);
+    LoopTunnel *newTun = (LoopTunnel*)(oldTun->GetSetTunnel());
+    newTun->m_tunType = POSSTUNIN;
+
+    LoopTunnel *newSetTun = (LoopTunnel*)(oldTun->GetSetTunnel());
+    newSetTun->m_pset = newOuter;
+    newSetTun->m_tunType = SETTUNIN;
+    newSetTun->AddInput(oldTun->Input(0), oldTun->InputConnNum(0));
+    oldTun->RemoveAllInputs2Way();
+    newSetTunsIn.push_back(newSetTun);
+
+
+    if (oldTun->IsSplit()) {
+      if (oldTun->NumOutputs() != 4)
+	throw;
+      oldTun->AddInput(newTun, 1);
+    }
+    else
+      oldTun->AddInput(newTun, 0);
+    outerPoss->RemoveFromGraphNodes(oldTun);
+  }
+
+
+  NodeVec newSetTunsOut;
+  NodeVec newPossTunsOut;
+  tunIter = innerLoop->m_outTuns.begin();
+  for(; tunIter != innerLoop->m_outTuns.end(); ++tunIter) {
+    LoopTunnel *oldTun = (LoopTunnel*)(*tunIter);
+    LoopTunnel *newTun = (LoopTunnel*)(oldTun->GetSetTunnel());
+    newTun->m_tunType = POSSTUNOUT;
+    newPossTunsOut.push_back(newTun);
+    LoopTunnel *newPossTunIn = (LoopTunnel*)(oldTun->GetMatchingInTun()->Input(0));
+
+
+    LoopTunnel *newSetTun = (LoopTunnel*)(oldTun->GetSetTunnel());
+    newSetTun->m_pset = newOuter;
+    newSetTun->m_tunType = SETTUNOUT;
+    //    newSetTun->AddInput(oldTun->Input(0), oldTun->InputConnNum(0));
+    if (oldTun->m_children.size())
+      oldTun->RedirectChildren(newSetTun);
+    newSetTunsOut.push_back(newSetTun);
+    
+    if (newTun->IsCombine()) {
+      newTun->AddInput(newPossTunIn, 0);
+      newTun->AddInput(oldTun, 0);
+      newTun->AddInput(newPossTunIn, 2);
+      newTun->AddInput(newPossTunIn, 3);
+    }
+    else {
+      newTun->AddInput(oldTun, 0);
+      newTun->AddInput(newPossTunIn, 1);
+    }
+      
+    outerPoss->RemoveFromGraphNodes(oldTun);
+  }
+
+  swap(newOuter->m_inTuns,newSetTunsIn);
+  swap(newOuter->m_outTuns,newSetTunsOut);
+
+  innerLoop->m_functionality += "innerUnrolled";
+
+  Poss *newInnerPoss = new Poss(newPossTunsOut, true, true);
+
+  newOuter->AddPoss(newInnerPoss);
+  outerPoss->AddPSet(newOuter, true, true);
+
+  innerLoop->m_flags |= SETLOOPISUNROLLED;
+
+#if TWOD
+  newOuter->SetDimName(innerLoop->GetDimName());
+#endif
+  newOuter->m_bsSize = innerLoop->m_bsSize;
+  newOuter->m_bsSize.m_multiple = m_unrollingFactor;
+
+  newOuter->m_ownerPoss->ClearBeforeProp();
+  newOuter->m_ownerPoss->ClearDataTypeCache();
+}
+
 
 ViewMultipleIters::~ViewMultipleIters()
 {

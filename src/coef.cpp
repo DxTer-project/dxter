@@ -30,6 +30,7 @@ Coef COEFALPHA(COEFVALALPHA);
 Coef COEFBETA(COEFVALBETA);
 Coef COEFZERO(COEFVALZERO);
 Coef COEFONE(COEFVALONE);
+Coef COEFTWO(COEFVALTWO);
 Coef COEFONEHALF(COEFVALONEHALF);
 Coef COEFNEGONE(COEFVALNEGONE);
 Coef COEFNEGONEHALF(COEFVALNEGONEHALF);
@@ -92,6 +93,8 @@ string Coef::TenStr() const
       return "0.0";
     case (COEFVALONE):
       return "1.0";
+    case (COEFVALTWO):
+      return "2.0";
     case (COEFVALONEHALF):
       return "0.5";
     case (COEFVALNEGONE):

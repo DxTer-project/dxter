@@ -53,6 +53,17 @@ class CompactlyUnrollLoop : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+class PartiallyUnrollLoop : public SingleTrans
+{
+ public:
+  unsigned int m_unrollingFactor;
+  PartiallyUnrollLoop(unsigned  unrollingFactor);
+
+  virtual string GetType() const {return "partiallyUnrollLoop " + std::to_string((long long int) m_unrollingFactor);}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 class ViewMultipleIters : public DLANode
 {
  public:
@@ -115,6 +126,5 @@ class CombineMultipleIters : public DLANode
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
-
 
 #endif //DOLLDLA
