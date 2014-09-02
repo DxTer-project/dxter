@@ -29,6 +29,7 @@ enum CoefVal { COEFVALALPHA,
 	    COEFVALBETA,
 	    COEFVALZERO,
 	    COEFVALONE,
+	    COEFVALTWO,
 	    COEFVALONEHALF,
 	       COEFVALNEGONE,
 	    COEFVALNEGONEHALF };
@@ -54,6 +55,7 @@ extern Coef COEFALPHA;
 extern Coef COEFBETA;
 extern Coef COEFZERO;
 extern Coef COEFONE;
+extern Coef COEFTWO;
 extern Coef COEFONEHALF;
 extern Coef COEFNEGONE;
 extern Coef COEFNEGONEHALF;

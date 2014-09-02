@@ -76,6 +76,7 @@ class DLANode : public Node
   virtual const Dim InputNumDims(ConnNum num) const;
   const Sizes* InputLen(ConnNum num, Dim dim) const;
   const Sizes* InputLocalLen(ConnNum num, Dim dim) const;
+  Size TotalNumberOfLocalElements(ConnNum num) const;
 #endif
   virtual void ClearBeforeProp();
   virtual bool IsDLA() const {return true;}
@@ -84,8 +85,14 @@ class DLANode : public Node
   DLANode* FindNonRedistParent(ConnNum num);
   DLANode* FindNonRedistParent(ConnNum num, ConnNum &parentNum);
   virtual bool CanTransposeInputs() const {return false;} 
-  virtual bool ShouldCullDP() const {return false;}
+#endif
+#if DODM
   virtual bool DoNotCullDP() const {return false;}
+#endif
+#if DOELEM
+  virtual bool ShouldCullDP() const {return false;}
+#elif DOTENSORS
+  virtual bool ShouldCullDP() const {return GetLayer() == DMLAYER;}
 #endif
   DLANode* FindSideEffectingUser(ConnNum num);
 #if TWOD
