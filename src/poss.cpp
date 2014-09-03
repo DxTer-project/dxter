@@ -2458,6 +2458,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      Node *newNode = nodeMap[node];
 #if 0
 	      cout << "applying " << single->GetType() << endl;
+	      //	      cout << "\tto " << newNode->GetType << endl;
 	      cout.flush();
 #endif
 	      
