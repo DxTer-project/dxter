@@ -53,11 +53,19 @@
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
 
-#define DO
+#define DOCOMPACTLOOPUNROLLING 0
 #define DO2MUTRANSFORMATIONS 1
 #define DO3MUTRANSFORMATIONS 1
 #define DO16MUTRANSFORMATIONS 1
 #define DOLARGEMUTRANSFORMATIONS 0
+
+#define DOPARTIALLOOPUNROLLING 1
+#define PARTIALUNROLLINGSTARTCOEF 2
+#define PARTIALUNROLLINGENDCOEF 16
+
+#if DOCOMPACTLOOPUNROLLING + DOPARTIALLOOPUNROLLING > 1
+do you really want to do compact unrolling and partial unrolling?
+#endif
 
 #include <sstream>
 
@@ -158,6 +166,7 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
 
+#if DOCOMPACTLOOPUNROLLING
 #if DO2MUTRANSFORMATIONS
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
@@ -169,7 +178,10 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
 #endif
+#endif // DOCOMPACTLOOPUNROLLING
 
+
+#if DOCOMPACTLOOPUNROLLING
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
@@ -185,6 +197,8 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
 #endif
+
+#endif // DOCOMPACTLOOPUNROLLING
 
   return;
 }
@@ -235,7 +249,7 @@ void AddSMMulTrans()
 void AddUnrollingTrans()
 {
 
-#if DOLOOPUNROLLING
+#if DOCOMPACTLOOPUNROLLING
 #if DO2MUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(),
 		     new CompactlyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
@@ -256,7 +270,13 @@ void AddUnrollingTrans()
 		     new CompactlyUnrollLoop(bigSize / LLDLA_MU), LLDLALOOPUNROLLPHASE);
 #endif // DOLARGEMUTRANSFORMATIONS
 
-#endif // DOLOOPUNROLLING
+#endif // DOCOMPACTLOOPUNROLLING
+
+#if DOPARTIALLOOPUNROLLING
+  for (unsigned int mult = PARTIALUNROLLINGSTARTCOEF; mult <= PARTIALUNROLLINGENDCOEF; mult += 2) {
+    Universe::AddTrans(SplitSingleIter::GetClass(), new PartiallyUnrollLoop(mult), LLDLALOOPUNROLLPHASE);
+  }
+#endif // DOPARTIALLOOPUNROLLING
 
 }
 
