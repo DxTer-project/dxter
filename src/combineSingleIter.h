@@ -62,4 +62,5 @@ class CombineSingleIter : public CombineBase
 #endif
   virtual Name GetName(ConnNum num) const;
   virtual bool IsCombine() const {return true;}
+  virtual LoopTunnel* GetMatchingInTun() const;
 };

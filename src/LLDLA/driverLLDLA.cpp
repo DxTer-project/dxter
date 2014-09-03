@@ -53,7 +53,7 @@
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
 
-#define DOLOOPUNROLLING 0
+#define DO
 #define DO2MUTRANSFORMATIONS 1
 #define DO3MUTRANSFORMATIONS 1
 #define DO16MUTRANSFORMATIONS 1
@@ -86,7 +86,7 @@ RealPSet* DoubleGemmExample();
 Trans transA, transB;
 
 Architecture* arch;
-Type dataType = REAL_DOUBLE;
+Type dataType = REAL_SINGLE;
 
 ImplementationMap ImpStrMap(Universe *uni)
 {
@@ -258,7 +258,6 @@ void AddUnrollingTrans()
 
 #endif // DOLOOPUNROLLING
 
-  return;
 }
 
 void AddSVMulTrans()

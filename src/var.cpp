@@ -66,6 +66,15 @@ string IndexArrayVarName(const string &indices)
   return "indices_" + indices;
 }
 
+string PermutationVarName(const DimVec &perm)
+{
+  string str = "perm";
+  DimVecConstIter iter = perm.begin();
+  for(; iter != perm.end(); ++iter)
+    str += "_" + std::to_string(*iter);
+  return str;
+}
+
 
 #endif //DOTENSORS
 
@@ -113,16 +122,28 @@ Var::Var(const Name &name)
 #endif
 
 #if DOTENSORS
-Var::Var(const DimVec &vec)
+Var::Var(VarType type, const DimVec &vec)
 {
-  m_type = ModeArrayVarType;
-  m_vec = new DimVec(vec);
-  std::stringstream str;
-  str << "c";
-  DimVecConstIter iter = m_vec->begin();
-  for(; iter != m_vec->end(); ++iter)
-    str << "_" << *iter;
-  m_compStr = str.str();
+  if (type == ModeArrayVarType) {
+    m_type = ModeArrayVarType;
+    m_vec = new DimVec(vec);
+    std::stringstream str;
+    str << "c";
+    DimVecConstIter iter = m_vec->begin();
+    for(; iter != m_vec->end(); ++iter)
+      str << "_" << *iter;
+    m_compStr = str.str();
+  }
+  else if (type == PermutationVarType) {
+    m_type = PermutationVarType;
+    m_vec = new DimVec(vec);
+    std::stringstream str;
+    str << "f";
+    DimVecConstIter iter = m_vec->begin();
+    for(; iter != m_vec->end(); ++iter)
+      str << "_" << *iter;
+    m_compStr = str.str();
+  }
 }
 
 
@@ -248,6 +269,7 @@ Var::~Var()
       delete m_name;
       break;
     case (ModeArrayVarType) :
+    case (PermutationVarType):
       delete m_vec;
       break;
     case (IndexPairType):
@@ -296,6 +318,7 @@ void Var::PrintDecl(IndStream &out) const
 	break;
       }
     case (ModeArrayVarType) :
+    case (PermutationVarType):      
       {
 	out.Indent();
 	string name = GetVarName();
@@ -449,6 +472,11 @@ string Var::GetVarName() const
 	return ModeArrayVarName(*(m_vec));
 	break;
       }
+    case (PermutationVarType) :
+      {
+	return PermutationVarName(*(m_vec));
+	break;
+      }
     case (IndexPairType):
       {
 	return IndexPairVarName(m_pair->first, m_pair->second);
@@ -501,6 +529,7 @@ Var& Var::operator=(const Var &rhs)
 	delete m_name;
 	break;
       case (ModeArrayVarType) :
+      case (PermutationVarType) :
 	delete m_vec;
 	break;
       case (IndexPairType):
@@ -539,6 +568,7 @@ Var& Var::operator=(const Var &rhs)
       m_name = new Name(*(rhs.m_name));
       break;
     case (ModeArrayVarType):
+    case (PermutationVarType) :
       m_vec = new DimVec (*(rhs.m_vec));
       break;
     case (IndexPairType):

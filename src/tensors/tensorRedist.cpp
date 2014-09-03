@@ -664,19 +664,19 @@ void RedistNode::AddVariables(VarSet &set) const
     if (src.empty() || IsPrefix(src, dest)) {
       DimVec suff;
       GetSuffix(src, dest, suff);
-      Var var(suff);
+      Var var(ModeArrayVarType, suff);
       set.insert(var);
     }
     else if (IsPrefix(dest, src) || dest.empty()) {
       if (!src.empty()) {
 	DimVec suff;
 	GetSuffix(dest, src, suff);
-	Var var(suff);
+	Var var(ModeArrayVarType, suff);
 	set.insert(var);
       }
     }
     else {
-      Var var(src);
+      Var var(ModeArrayVarType, src);
       set.insert(var);
     }
 

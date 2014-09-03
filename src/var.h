@@ -29,6 +29,7 @@ string IndexPairVarName(Dim dim1, Dim dim2);
 string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2);
 string TensorDistVarName(const DistType &type);
 string IndexArrayVarName(const string &indices);
+string PermutationVarName(const DimVec &perm);
 #elif DOLLDLA
 string LLDLAPartVarName(const string &var, unsigned int part);
 string LLDLATransVarName(const string &var, Trans trans);
@@ -44,6 +45,7 @@ enum VarType {
   ModeArrayPairVarType,
   TensorDistVarType,
   IndexArrayType,
+  PermutationVarType,
 #elif DOLLDLA
   VarPartType,
   VarTransType,
@@ -80,7 +82,7 @@ class Var
  Var() : m_type(InvalidType) {}
 #if DOTENSORS
   Var(const Name &name);
-  Var(const DimVec &vec);
+  Var(VarType type, const DimVec &vec);
   Var(const DimVec &vec1, const DimVec &vec2);
   Var(Dim dim1, Dim dim2);
 #endif

@@ -56,19 +56,23 @@ string BSSize::VarName() const
     {
 #if DOLLDLA
     case (USEUNITBS):
-      return "1";
+      return "(" + std::to_string(m_multiple) + "*1)";
     case (USELLDLAMUSINGLE):
-      return MU_VAR_NAME;
+      return "(" + std::to_string(m_multiple) + "*" + MU_VAR_NAME + ")";
     case (USELLDLA2MUSINGLE):
-      return "(2*" + (string)(MU_VAR_NAME) + ")";
+      return "(" + std::to_string(m_multiple) 
+	+ "*(2*" + (string)(MU_VAR_NAME) + "))";
     case (USELLDLA3MUSINGLE):
-      return "(3*" + (string)(MU_VAR_NAME) + ")";
+      return "(" + std::to_string(m_multiple) 
+	+ "*(3*" + (string)(MU_VAR_NAME) + "))";
     case (USELLDLAMUDOUBLE):
-      return MU_VAR_NAME;
+      return "(" + std::to_string(m_multiple) + "*" + MU_VAR_NAME + ")";
     case (USELLDLA2MUDOUBLE):
-      return "(2*" + (string)(MU_VAR_NAME) + ")";
+      return "(" + std::to_string(m_multiple) + 
+	"*(2*" + (string)(MU_VAR_NAME) + "))";
     case (USELLDLA3MUDOUBLE):
-      return "(3*" + (string)(MU_VAR_NAME) + ")";
+      return "(" + std::to_string(m_multiple) + 
+	"*(3*" + (string)(MU_VAR_NAME) + "))";
 #endif
     default:
       throw;
@@ -643,14 +647,19 @@ template<class PSetType>
 #elif DOLLDLA
   if (GetType() != LLDLALOOP)
     throw;
-  if (GetBSSize() != UnitBS &&
-      GetBSSize() != LLDLAMuSingle &&
-      GetBSSize() != LLDLA2MuSingle &&
-      GetBSSize() != LLDLA3MuSingle &&
-      GetBSSize() != LLDLAMuDouble &&
-      GetBSSize() != LLDLA2MuDouble &&
-      GetBSSize() != LLDLA3MuDouble)
-    throw;
+  switch(GetBSSize().m_val)
+    {
+    case (USEUNITBS):
+    case (USELLDLAMUSINGLE):
+    case (USELLDLA2MUSINGLE):
+    case (USELLDLA3MUSINGLE):
+    case (USELLDLAMUDOUBLE):
+    case (USELLDLA2MUDOUBLE):
+    case (USELLDLA3MUDOUBLE):
+      break;
+    default:
+      throw;
+    }
   if (!PSetType::IsReal() || !((RealLoop*)this)->IsUnrolled()) {
     SplitBase *split = GetControl();
     switch(GetDimName()) 

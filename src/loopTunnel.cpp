@@ -25,6 +25,8 @@
 #include "elemRedist.h"
 #include <cmath>
 #include "helperNodes.h"
+#include "splitBase.h"
+#include "splitSingleIter.h"
 
 
 LoopTunnel::LoopTunnel(TunType type)
@@ -99,9 +101,9 @@ void LoopTunnel::CopyTunnelInfo(const LoopTunnel *tun)
 Tunnel* LoopTunnel::GetSetTunnel()
 {
   LoopTunnel *tun;
-  if (m_tunType == POSSTUNIN)
+  if (m_tunType == POSSTUNIN || m_tunType == SETTUNIN)
     tun = new LoopTunnel(SETTUNIN);
-  else if (m_tunType == POSSTUNOUT)
+  else if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT)
     tun = new LoopTunnel(SETTUNOUT);
   else
     throw;
@@ -183,7 +185,7 @@ const DataTypeInfo& LoopTunnel::DataType(ConnNum num) const
 const Sizes* LoopTunnel::GetM(ConnNum num) const
 {
   switch(m_tunType) 
-  {
+    {
     case (POSSTUNOUT):
       if (num > 0)
         throw;
@@ -193,18 +195,15 @@ const Sizes* LoopTunnel::GetM(ConnNum num) const
         throw;
       return GetRealTunnel()->GetInputM(0);
     case (POSSTUNIN):
-      if (num == 0) {
+      if (num == 0 || num == 1) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         return input->m_msizes;
-      }
-      else if (num == 1) {
-        return GetInputM(0);
       }
       else
         throw;
     default:
       throw;
-  }
+    }
 }
 
 const Sizes* LoopTunnel::GetN(ConnNum num) const
@@ -221,12 +220,9 @@ const Sizes* LoopTunnel::GetN(ConnNum num) const
         throw;
       return GetRealTunnel()->GetInputN(0);
     case (POSSTUNIN):
-      if (num == 0) {
+      if (num == 0 || num == 1) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         return input->m_nsizes;
-      }
-      else if (num == 1) {
-        return GetInputN(0);
       }
       else
         throw;
@@ -707,6 +703,14 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     cout << "execNum = " << std::to_string((long long int) execNum) << endl;
     cout << "length != ns->NumSizes() ? " << (length != ns->NumSizes()) << endl;
     cout << "length <= execNum ? " << (length <= execNum) << endl;
+
+    cout << Input(0)->Input(0)->GetType() << endl;
+    LoopInterface *loop = ((LoopTunnel*)(Input(0)->Input(0)))->GetMyLoop();
+    SplitSingleIter *split = (SplitSingleIter*)(loop->GetControl());
+    cout << split->NumberOfLoopExecs() << endl;
+    cout << "outer loop bs " << loop->GetBS() << endl;
+    cout << "inner loop bs " << GetMyLoop()->GetBS() << endl;
+    
     throw;
   }
   const Size m = (*ms)[execNum];

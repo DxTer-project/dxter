@@ -2456,8 +2456,11 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 #endif
 	      newPoss->PatchAfterDuplicate(nodeMap);
 	      Node *newNode = nodeMap[node];
-	      //	      cout << "applying " << single->GetType() << endl;
-	      //	      cout.flush();
+#if 0
+	      cout << "applying " << single->GetType() << endl;
+	      cout.flush();
+#endif
+	      
 	      single->Apply(newNode);
 	      newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
 	      newPoss->Simplify(simplifiers);
