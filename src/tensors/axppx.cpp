@@ -135,6 +135,12 @@ void Axppx::Prop()
       m_cost = 0;
     else if (m_layer == SMLAYER) {
       m_cost = 3 * TotalNumberOfLocalElements(0);
+      /*
+      DistType tmp;
+      tmp.SetToDefault(InputDataType(2).m_dist.m_numDims);
+      if (tmp != DataType(0).m_dist)
+	throw;
+      */
     }
     else {
       cout << LayerNumToStr(m_layer) << endl;
