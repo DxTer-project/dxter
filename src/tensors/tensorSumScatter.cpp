@@ -65,7 +65,13 @@ void SumScatterUpdateNode::Duplicate(const Node *orig, bool shallow, bool possMe
 
 NodeType SumScatterUpdateNode::GetType() const
 {
-  return "SumScatterUpdate";
+  string tmp = "SumScatterUpdate";
+  EntryListConstIter iter = m_sumDims.begin();
+  for(; iter != m_sumDims.end(); ++iter) {
+    tmp += "|";
+    tmp += char(((*iter).m_val)+48);
+  }
+  return tmp;
 }
 
 void SumScatterUpdateNode::Prop()
@@ -435,7 +441,9 @@ bool SeparateRedistFromSumScatter::CanApply(const Node *node) const
       cout << "dim >= outType.m_numDims\n";
       cout << sum->InputDataType(0).m_dist.str() << " -> " 
 	   << outType.str() << " with " << sum->m_sumDims.size() << endl;
+      sum->m_poss->PrintTransVec();
       throw;
+      
     }
     DistEntry outEntry = outType.m_dists[dim];
     if (inEntry != outEntry) {
@@ -647,15 +655,17 @@ void SplitSumScatter::Apply(Node *node) const
     //	 <<  sum->GetDistType(0).PrettyStr() << endl;
 
     EntryList sums = sum->m_sumDims;
-    EntryListIter iter = sum->m_sumDims.begin();
+    EntryListIter iter = sums.begin();
     bool found = false;
-    for(; iter != sum->m_sumDims.end() && !found; ++iter) {
+    for(; iter != sums.end() && !found; ++iter) {
       if (*iter == inEntry) {
-	sum->m_sumDims.erase(iter);
+	sums.erase(iter);
 	found = true;
 	break;
       }
     }
+    if (!found)
+      throw;
 
 
     DistType intType = sum->DataType(0).m_dist;
