@@ -23,6 +23,7 @@
 #if DOTENSORS
 #include "tensorRedist.h"
 #include "helperNodes.h"
+#include "xpay.h"
 
 typedef vector<unsigned int *> ContType;
 typedef ContType::iterator ContTypeIter;
@@ -522,79 +523,114 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
 
   const DistType &AType = ((DLANode*)(AConn->m_n))->DataType(AConn->m_num).m_dist;
 
-  EntrySet sumDims;
-  string contIndices;
+  EntryList sumDims;
   string::iterator iter = cont->m_contIndices.begin();
   for(; iter != cont->m_contIndices.end(); ++iter) {
     size_t loc = cont->m_AIndices.find(*iter);
     if (loc != string::npos) {
       DistEntry entry = AType.m_dists[loc];
-      sumDims.insert(entry);
-      EntrySetIter tmp = sumDims.begin();
-      
-      for(int i = 0; tmp != sumDims.end(); ++tmp,++i) {
-	if (*tmp == entry) {
-	  string tmp;
-	  tmp += *iter;
-	  contIndices.insert(i, tmp);
-	  break;
-	}
-      }
+      sumDims.push_back(entry);
     }
   }
-  if (sumDims.size() != contIndices.length())
-    throw;
 
   DistType BType;
   MatchDistsAndFillInWithStar(cont->m_BIndices,
 			      AType, cont->m_AIndices,
 			      BType);
 
-  RedistNode *node2 = NULL;
+  RedistNode *node1 = NULL;
   RealPSet *BSet = NULL;
 
   if (BType != node->InputDataType(1).m_dist) {
-    node2 = new RedistNode(BType);
-    node2->AddInput(node->Input(1),node->InputConnNum(1));
-    Poss *BPoss = new Poss(node2, false);
+    node1 = new RedistNode(BType);
+    node1->AddInput(node->Input(1),node->InputConnNum(1));
+
+    Poss *BPoss = new Poss(node1, false);
     BSet = new RealPSet(BPoss);
     node->m_poss->AddPSet(BSet,true,true);
   }
 
   
-
   DistType CType;
+  const DistType &CDestType = cont->InputDataType(2).m_dist;
   MatchDistsAndFillInWithStar(cont->m_CIndices,
 			      AType, cont->m_AIndices, 
 			      CType);
 
-
-  
-
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
-				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+contIndices, contIndices);
+				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
   temp->AddInput(node->Input(2),node->InputConnNum(2));
-  LCont->AddInput(node->Input(0), node->InputConnNum(0));
+  LCont->AddInput(node->Input(0),node->InputConnNum(0));
   if (BSet)
     LCont->AddInput(BSet->OutTun(0),0);
   else
     LCont->AddInput(node->Input(1),node->InputConnNum(1));
   LCont->AddInput(temp,0);
+
   node->m_poss->AddNode(temp);
   node->m_poss->AddNode(LCont);
 
-  SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta, sumDims);
-  sum->AddInput(LCont, 0);
-  sum->AddInput(node->Input(2),node->InputConnNum(2));
-  
-  Poss *sumPoss = new Poss(sum, false);
-  RealPSet *sumSet = new RealPSet(sumPoss);
-  node->m_poss->AddPSet(sumSet,true,true);
-  
+  bool notFinalType = false;
+  iter = cont->m_CIndices.begin();
+  EntryListIter iter2 = sumDims.begin();
+  for(int i = 0; iter != cont->m_CIndices.end(); ++iter, ++i) {
+    size_t loc = cont->m_AIndices.find(*iter);
+    if (loc != string::npos) {
+      CType.m_dists[i] = AType.m_dists[loc]; 
+      if (CType.m_dists[i] != CDestType.m_dists[i])
+        notFinalType = true;
+    }
+    else {
+      if (iter2 == sumDims.end())
+	throw;
+      CType.m_dists[i] = *iter2;
+      ++iter2;
+    }
+  }
 
-  cont->RedirectChildren(sumSet->OutTun(0),0);
+
+  if (!notFinalType) {
+    SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta, sumDims);
+    sum->AddInput(LCont, 0);
+    sum->AddInput(node->Input(2),node->InputConnNum(2));
+    
+    Poss *sumPoss = new Poss(sum, false);
+    RealPSet *sumSet = new RealPSet(sumPoss);
+    node->m_poss->AddPSet(sumSet,true,true);
+    cont->RedirectChildren(sumSet->OutTun(0),0);
+  }
+  else {
+    TempVarNode *temp2 = new TempVarNode(CType);
+    temp2->AddInput(node->Input(2),node->InputConnNum(2));
+    node->m_poss->AddNode(temp2);
+
+    SumScatterUpdateNode *sum = new SumScatterUpdateNode(COEFZERO, sumDims);
+    sum->AddInput(LCont, 0);
+    sum->AddInput(temp2, 0);
+    Poss *sumPoss = new Poss(sum, false);
+    RealPSet *sumSet = new RealPSet(sumPoss);
+    node->m_poss->AddPSet(sumSet,true,true);
+    
+    RedistNode *finalRedist = new RedistNode(CDestType);
+    finalRedist->AddInput(sumSet->OutTun(0),0);
+    Poss *redistPoss = new Poss(finalRedist, false);
+    RealPSet *redistSet = new RealPSet(redistPoss);
+    node->m_poss->AddPSet(redistSet,true,true);
+    
+    if (cont->m_beta != COEFZERO) {
+      Xpay *xpay = new Xpay(SMLAYER, cont->m_beta);
+      xpay->AddInput(redistSet->OutTun(0), 0);
+      xpay->AddInput(node->Input(2),node->InputConnNum(2));
+      node->m_poss->AddNode(xpay);
+      cont->RedirectChildren(xpay,0);
+    }
+    else {
+      cont->RedirectChildren(redistSet->OutTun(0),0);
+    }
+  }
+
 
   node->m_poss->DeleteChildAndCleanUp(node);
 }
@@ -737,27 +773,15 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
 
   const DistType &BType = ((DLANode*)(BConn->m_n))->DataType(BConn->m_num).m_dist;
 
-  EntrySet sumDims;
-  string contIndices;
+  EntryList sumDims;
   string::iterator iter = cont->m_contIndices.begin();
   for(; iter != cont->m_contIndices.end(); ++iter) {
     size_t loc = cont->m_BIndices.find(*iter);
     if (loc != string::npos) {
       DistEntry entry = BType.m_dists[loc];
-      sumDims.insert(entry);
-      EntrySetIter tmp = sumDims.begin();
-      for(int i = 0; tmp != sumDims.end(); ++tmp,++i) {
-	if (*tmp == entry) {
-	  string tmp;
-	  tmp += *iter;
-	  contIndices.insert(i, tmp);
-	  break;
-	}
-      }
+      sumDims.push_back(entry);
     }
   }
-  if (sumDims.size() != contIndices.length())
-    throw;
 
   DistType AType;
   MatchDistsAndFillInWithStar(cont->m_AIndices,
@@ -776,19 +800,19 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
     node->m_poss->AddPSet(ASet,true,true);
   }
 
+  //  cout << "AType " << AType.PrettyStr() << endl;
+
   
   DistType CType;
+  const DistType &CDestType = cont->InputDataType(2).m_dist;
   MatchDistsAndFillInWithStar(cont->m_CIndices,
 			      BType, cont->m_BIndices, 
 			      CType);
 
-
-
-
   TempVarNode *temp = new TempVarNode(CType, sumDims);
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
-				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+contIndices, contIndices);
+				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
   temp->AddInput(node->Input(2),node->InputConnNum(2));
   if (ASet)
     LCont->AddInput(ASet->OutTun(0),0);
@@ -800,16 +824,65 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
   node->m_poss->AddNode(temp);
   node->m_poss->AddNode(LCont);
 
-  SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta, sumDims);
-  sum->AddInput(LCont, 0);
-  sum->AddInput(node->Input(2),node->InputConnNum(2));
+  bool notFinalType = false;
+  iter = cont->m_CIndices.begin();
+  EntryListIter iter2 = sumDims.begin();
+  for(int i = 0; iter != cont->m_CIndices.end(); ++iter, ++i) {
+    size_t loc = cont->m_BIndices.find(*iter);
+    if (loc != string::npos) {
+      CType.m_dists[i] = BType.m_dists[loc]; 
+      if (CType.m_dists[i] != CDestType.m_dists[i])
+        notFinalType = true;
+    }
+    else {
+      if (iter2 == sumDims.end())
+	throw;
+      CType.m_dists[i] = *iter2;
+      ++iter2;
+    }
+  }
 
-  Poss *sumPoss = new Poss(sum, false);
-  RealPSet *sumSet = new RealPSet(sumPoss);
-  node->m_poss->AddPSet(sumSet,true,true);
+  if (!notFinalType) {
+    SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta, sumDims);
+    sum->AddInput(LCont, 0);
+    sum->AddInput(node->Input(2),node->InputConnNum(2));
+    
+    Poss *sumPoss = new Poss(sum, false);
+    RealPSet *sumSet = new RealPSet(sumPoss);
+    node->m_poss->AddPSet(sumSet,true,true);
+    cont->RedirectChildren(sumSet->OutTun(0),0);
+  }
+  else {
+    TempVarNode *temp2 = new TempVarNode(CType);
+    temp2->AddInput(node->Input(2),node->InputConnNum(2));
+    node->m_poss->AddNode(temp2);
 
-  cont->RedirectChildren(sumSet->OutTun(0),0);
+    SumScatterUpdateNode *sum = new SumScatterUpdateNode(COEFZERO, sumDims);
+    sum->AddInput(LCont, 0);
+    sum->AddInput(temp2, 0);
+    Poss *sumPoss = new Poss(sum, false);
+    RealPSet *sumSet = new RealPSet(sumPoss);
+    node->m_poss->AddPSet(sumSet,true,true);
 
+    RedistNode *finalRedist = new RedistNode(CDestType);
+    finalRedist->AddInput(sumSet->OutTun(0),0);
+    Poss *redistPoss = new Poss(finalRedist, false);
+    RealPSet *redistSet = new RealPSet(redistPoss);
+    node->m_poss->AddPSet(redistSet,true,true);
+    
+    if (cont->m_beta != COEFZERO) {
+      Xpay *xpay = new Xpay(SMLAYER, cont->m_beta);
+      xpay->AddInput(redistSet->OutTun(0), 0);
+      xpay->AddInput(node->Input(2),node->InputConnNum(2));
+      node->m_poss->AddNode(xpay);
+      cont->RedirectChildren(xpay,0);
+    }
+    else {
+      cont->RedirectChildren(redistSet->OutTun(0),0);
+    }
+  }
+
+  
   node->m_poss->DeleteChildAndCleanUp(node);
 }
   

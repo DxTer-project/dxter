@@ -34,9 +34,9 @@ class SumScatterUpdateNode : public DLAOp<2,1>
 {
  public:
   Coef m_coef;
-  EntrySet m_sumDims;
+  EntryList m_sumDims;
  SumScatterUpdateNode() : DLAOp<2,1>(), m_coef(COEFVALZERO) {}
-  SumScatterUpdateNode(Coef coeff, const EntrySet &sumDims);
+  SumScatterUpdateNode(Coef coeff, const EntryList &sumDims);
   static Node* BlankInst() { return  new SumScatterUpdateNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

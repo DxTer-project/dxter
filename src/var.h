@@ -46,6 +46,7 @@ enum VarType {
   TensorDistVarType,
   IndexArrayType,
   PermutationVarType,
+  
 #elif DOLLDLA
   VarPartType,
   VarTransType,
@@ -61,7 +62,7 @@ class Var
   union {
     Name *m_name;
 
-    #if DOTENSORS
+#if DOTENSORS
     DimVec *m_vec;
     std::pair<DimVec, DimVec> *m_arrPair;
     std::pair<Dim,Dim> *m_pair;

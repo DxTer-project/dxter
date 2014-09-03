@@ -313,10 +313,12 @@ void GetDifferentSuffix(const DimVec &dims1, const DimVec &dims2,
     else
       break;
   }
+  /*
   if (iter1 == dims1.end())
     throw;
   if (iter2 == dims2.end())
     throw;
+  */
   while (iter1 != dims1.end()) {
     suff1.push_back(*iter1);
     ++iter1;
@@ -358,7 +360,51 @@ Phase RedistNode::MaxPhase() const
   bool foundMemCopy = false;
   bool foundAllGather = false;
   bool foundAllToAll = false;
+  bool mightBeMultiAllToAll = true;
   DimSet diffs;
+
+  //Check for multi-mode AllToAll
+  
+  EntrySet srcSuffixes, destSuffixes;
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    DistEntry srcDistEntry = m_srcType.m_dists[dim];
+    DistEntry destDistEntry = m_info.m_dist.m_dists[dim];
+    DimVec srcDims = srcDistEntry.DistEntryDims();
+    DimVec destDims = destDistEntry.DistEntryDims();
+    DimVec suff1, suff2;
+    if (srcDistEntry != destDistEntry) {
+      if (srcDistEntry.IsStar() || destDistEntry.IsStar()) {
+	mightBeMultiAllToAll = false;
+	break;
+      }
+      else {
+	GetDifferentSuffix(srcDims, destDims, suff1, suff2);
+	if (suff1.empty() || suff2.empty()) {
+	  mightBeMultiAllToAll = false;
+	  break;
+	}
+	DistEntry srcSuff;
+	srcSuff.DimsToDistEntry(suff1);
+	srcSuffixes.insert(srcSuff);
+	DistEntry destSuff;
+	destSuff.DimsToDistEntry(suff2);
+	destSuffixes.insert(destSuff);
+      }
+    }
+  }
+
+  if (mightBeMultiAllToAll) {
+    EntrySetIter srcIter = srcSuffixes.begin();
+    for(; mightBeMultiAllToAll && srcIter != srcSuffixes.end(); ++srcIter) {
+      DistEntry entry = *srcIter;
+      if (!destSuffixes.erase(entry))
+	mightBeMultiAllToAll = false;
+    }
+    if (mightBeMultiAllToAll) {
+      if (destSuffixes.empty())
+	return NUMPHASES;
+    }
+  }
   
   for (Dim dim = 0; dim < numDims; ++dim) {
     DistEntry srcDistEntry = m_srcType.m_dists[dim];
@@ -382,7 +428,7 @@ Phase RedistNode::MaxPhase() const
 	    
 	if (commonSuff1.empty() && commonSuff2.empty())
 	  return ROTENSORPHASE;
-
+	
 	if (otherSrcPref != otherDestPref) {
 	  return ROTENSORPHASE;
 	}
@@ -530,6 +576,45 @@ void RedistNode::PrintCode(IndStream &out)
   if (m_srcType.m_numDims != numDims)
     throw;
 
+  bool mightBeMultiAllToAll = true;
+  EntrySet srcSuffixes, destSuffixes;
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    DistEntry srcDistEntry = m_srcType.m_dists[dim];
+    DistEntry destDistEntry = m_info.m_dist.m_dists[dim];
+    DimVec srcDims = srcDistEntry.DistEntryDims();
+    DimVec destDims = destDistEntry.DistEntryDims();
+    DimVec suff1, suff2;
+    if (srcDistEntry != destDistEntry) {
+      GetDifferentSuffix(srcDims, destDims, suff1, suff2);
+      if (suff1.empty() || suff2.empty()) {
+	mightBeMultiAllToAll = false;
+	break;
+      }
+      DistEntry srcSuff;
+      srcSuff.DimsToDistEntry(suff1);
+      srcSuffixes.insert(srcSuff);
+      DistEntry destSuff;
+      destSuff.DimsToDistEntry(suff2);
+      destSuffixes.insert(destSuff);
+    }
+  }
+
+  if (mightBeMultiAllToAll) {
+    EntrySetIter srcIter = srcSuffixes.begin();
+    for(; mightBeMultiAllToAll && srcIter != srcSuffixes.end(); ++srcIter) {
+      DistEntry entry = *srcIter;
+      if (!destSuffixes.erase(entry))
+	mightBeMultiAllToAll = false;
+    }
+    if (mightBeMultiAllToAll) {
+      if (destSuffixes.empty()) {
+	*out << "multi index AllToAll;\n";
+	return;
+      }
+    }
+  }
+
+
   DimSet diffs;
 
   for (Dim dim = 0; dim < numDims; ++dim) {
@@ -643,8 +728,48 @@ void RedistNode::AddVariables(VarSet &set) const
   if (m_srcType.m_numDims != numDims)
     throw;
 
+  bool mightBeMultiAllToAll = true;
+  EntrySet srcSuffixes, destSuffixes;
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    DistEntry srcDistEntry = m_srcType.m_dists[dim];
+    DistEntry destDistEntry = m_info.m_dist.m_dists[dim];
+    DimVec srcDims = srcDistEntry.DistEntryDims();
+    DimVec destDims = destDistEntry.DistEntryDims();
+    DimVec suff1, suff2;
+    if (srcDistEntry != destDistEntry) {
+      GetDifferentSuffix(srcDims, destDims, suff1, suff2);
+      if (suff1.empty() || suff2.empty()) {
+	mightBeMultiAllToAll = false;
+	break;
+      }
+      DistEntry srcSuff;
+      srcSuff.DimsToDistEntry(suff1);
+      srcSuffixes.insert(srcSuff);
+      DistEntry destSuff;
+      destSuff.DimsToDistEntry(suff2);
+      destSuffixes.insert(destSuff);
+    }
+  }
+
+  if (mightBeMultiAllToAll) {
+    EntrySetIter srcIter = srcSuffixes.begin();
+    for(; mightBeMultiAllToAll && srcIter != srcSuffixes.end(); ++srcIter) {
+      DistEntry entry = *srcIter;
+      if (!destSuffixes.erase(entry))
+	mightBeMultiAllToAll = false;
+    }
+    if (mightBeMultiAllToAll) {
+      if (destSuffixes.empty()) {
+	cout << "Need to add MultiModeAllToAll variables;\n";
+	return;
+      }
+    }
+  }
+
+
   DimSet diffs;
     
+
   for (Dim dim = 0; dim < numDims; ++dim) {
     if (m_srcType.m_dists[dim] != m_info.m_dist.m_dists[dim]) {
       diffs.insert(dim);
@@ -1116,6 +1241,15 @@ void SingleIndexAllToAll::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+void PrintVec(DimVec vec)
+{
+  DimVecIter iter = vec.begin();
+  for(; iter != vec.end(); ++iter) {
+    cout << *iter << " ";
+  }
+  cout << endl;
+}
+
 
 bool DoubleIndexAllToAll::CanApply(const Node *node) const
 {
@@ -1217,6 +1351,7 @@ void DoubleIndexAllToAll::Apply(Node *node) const
     throw;
   RedistNode *redist = (RedistNode*)node;
   const DistType &srcType = redist->InputDataType(0).m_dist;
+  //  cout << srcType.PrettyStr() << " -> " << redist->DataType(0).m_dist.PrettyStr() << endl;
 
   if (srcType.m_numDims != redist->m_info.m_dist.m_numDims)
     throw;
@@ -1237,6 +1372,9 @@ void DoubleIndexAllToAll::Apply(Node *node) const
       DimVec srcVec2 = srcEntry2.DistEntryDims();
       DimVec destVec2 = destEntry2.DistEntryDims();
 
+      //      cout << srcEntry.PrettyStr() << " -> " << destEntry.PrettyStr() << endl;
+      //      cout << srcEntry2.PrettyStr() << " -> " << destEntry2.PrettyStr() << endl;
+
       //[(x|_|y),(z|_|w)] <- [(x|_|u|_|w),(z|_|v|_|y)]
 
       DimVec suff1, suff2;
@@ -1250,6 +1388,7 @@ void DoubleIndexAllToAll::Apply(Node *node) const
       // pref22 = z|_|v
       GetCommonSuffix(destVec, srcVec2, suff2, pref21, pref22);
 
+
       if (!(suff1.empty()&&suff2.empty()))  {
 	if ((pref11 == pref21 || pref21.empty()) 
 	    && (pref12 == pref22 || pref12.empty())) {
@@ -1257,7 +1396,14 @@ void DoubleIndexAllToAll::Apply(Node *node) const
 
 	  DimVec newDims1;
 	  DimVec newDims2;
-	    
+	  /*
+	  PrintVec(suff1);
+	  PrintVec(pref11);
+	  PrintVec(pref12);
+	  PrintVec(suff2);
+	  PrintVec(pref21);
+	  PrintVec(pref22);
+*/
 		  
 	  // have to choose where u and v go
 
@@ -1269,7 +1415,7 @@ void DoubleIndexAllToAll::Apply(Node *node) const
 			    suff2.begin(), suff2.end());
 	    newDims2 = pref22;
 	    newDims2.insert(newDims2.end(),
-			    suff1.begin(), suff2.end());		
+			    suff1.begin(), suff1.end());		
 	  }
 	  else {
 
@@ -1297,8 +1443,9 @@ void DoubleIndexAllToAll::Apply(Node *node) const
 	    }
 	  }	    
 
-
+	  //	  PrintVec(newDims1);
 	  intType.m_dists[m_dim].DimsToDistEntry(newDims1);
+	  //	  PrintVec(newDims2);
 	  intType.m_dists[dim].DimsToDistEntry(newDims2);
 	  if (DistTypeNotEqual(intType, redist->m_info.m_dist)) {
 	      RedistNode *newRedist = new RedistNode(intType);
@@ -1319,6 +1466,9 @@ void DoubleIndexAllToAll::Apply(Node *node) const
   }
   throw;
 }
+
+
+
 
 bool SplitAllGathers::CanApply(const Node *node) const
 {

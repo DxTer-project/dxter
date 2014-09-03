@@ -96,7 +96,7 @@ void Node::Cull(Phase phase)
       for (ConnNum i = 0; i < m_inputs.size(); ++i) {
         DLANode *in = (DLANode*)Input(i);
         cout << "Input " << i 
-#if DOELEM
+#if DOELEM||DOTENSORS
 	     << " " << DistTypeToStr(((DLANode*)this)->InputDataType(i).m_dist) << endl;
 #else
 	<<endl;
@@ -108,6 +108,8 @@ void Node::Cull(Phase phase)
         }
 #endif
       }
+      cout << GetNameStr(0) << endl;
+      
       m_poss->PrintTransVec();
       throw;
     }

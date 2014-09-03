@@ -235,6 +235,11 @@ typedef set<DistEntry,DistEntryCompare> EntrySet;
 typedef EntrySet::iterator EntrySetIter;
 typedef EntrySet::const_iterator EntrySetConstIter;
 
+typedef list<DistEntry> EntryList;
+typedef EntryList::iterator EntryListIter;
+typedef EntryList::const_iterator EntryListConstIter;
+
+
 class DistType;
 inline bool DistTypeNotEqual(const DistType &one, const DistType &two);
 inline bool DistTypeEqual(const DistType &one, const DistType &two);

@@ -47,7 +47,7 @@ bool SameDims(DistEntry entry1, DistEntry entry2)
   return true;
 }
 
-SumScatterUpdateNode::SumScatterUpdateNode(Coef coef, const EntrySet &sumDims)
+SumScatterUpdateNode::SumScatterUpdateNode(Coef coef, const EntryList &sumDims)
   : DLAOp<2,1>(), m_coef(coef), m_sumDims(sumDims)
 {
   if (!m_sumDims.size())
@@ -94,7 +94,7 @@ void SumScatterUpdateNode::Prop()
 
 
       DimSet allSumDims;
-      EntrySetConstIter iter = m_sumDims.begin();
+      EntryListConstIter iter = m_sumDims.begin();
       for(; iter != m_sumDims.end(); ++iter) {
 	DimVec vec = (*iter).DistEntryDims();
 	allSumDims.insert(vec.begin(), vec.end());
@@ -128,7 +128,7 @@ void SumScatterUpdateNode::Prop()
     else {
       DistEntry inNotReped = inType.m_notReped;
       DimSet notReped = inNotReped.DistEntryDimSet();
-      EntrySetIter iter = m_sumDims.begin();
+      EntryListIter iter = m_sumDims.begin();
       for(; iter != m_sumDims.end(); ++iter) {
 	DistEntry entry = *iter;
 	DimSet set = entry.DistEntryDimSet();
@@ -198,7 +198,7 @@ void SumScatterUpdateNode::CheckSumDimsInOutput() const
       return;
 
     DimSet allSumDims;
-    EntrySetConstIter iter = m_sumDims.begin();
+    EntryListConstIter iter = m_sumDims.begin();
     for(; iter != m_sumDims.end(); ++iter) {
       DimVec vec = (*iter).DistEntryDims();
       allSumDims.insert(vec.begin(), vec.end());
@@ -420,10 +420,10 @@ bool SeparateRedistFromSumScatter::CanApply(const Node *node) const
     return false;
   
 
-  const EntrySet &sumDims = sum->m_sumDims;
+  const EntryList &sumDims = sum->m_sumDims;
 
   DimSet allSumDims;
-  EntrySetConstIter iter = sumDims.begin();
+  EntryListConstIter iter = sumDims.begin();
   for(; iter != sumDims.end(); ++iter) {
     DimVec vec = (*iter).DistEntryDims();
     allSumDims.insert(vec.begin(), vec.end());
@@ -469,10 +469,10 @@ void SeparateRedistFromSumScatter::Apply(Node *node) const
   DistType inTypeInt = sum->InputDataType(0).m_dist;
   const DistType &outType = sum->InputDataType(1).m_dist;
 
-  const EntrySet &sumDims = sum->m_sumDims;
+  const EntryList &sumDims = sum->m_sumDims;
 
   DimSet allSumDims;
-  EntrySetConstIter iter = sumDims.begin();
+  EntryListConstIter iter = sumDims.begin();
   for(; iter != sumDims.end(); ++iter) {
     DimVec vec = (*iter).DistEntryDims();
     allSumDims.insert(vec.begin(), vec.end());
@@ -533,7 +533,7 @@ void SeparateRedistFromSumScatter::Apply(Node *node) const
     cout << "!sane: " << inTypeInt.str() << endl;
     cout << "was " << sum->InputDataType(0).m_dist.str() << " -> "
 	 << outType.str() << " with " << sumDims.size() << endl;
-      EntrySetConstIter iter = sumDims.begin();
+      EntryListConstIter iter = sumDims.begin();
       for(; iter != sumDims.end(); ++iter) {
 	DimVec vec = (*iter).DistEntryDims();
 	cout << "sum on " << *(vec.begin()) << endl;
@@ -581,7 +581,7 @@ bool SplitSumScatter::CanApply(const Node *node) const
     else if (outEntry.IsStar())
       return false;
 
-    const EntrySet &sumDims = sum->m_sumDims;
+    const EntryList &sumDims = sum->m_sumDims;
   
 
 
@@ -594,7 +594,7 @@ bool SplitSumScatter::CanApply(const Node *node) const
 
 	
     bool found = false;
-    EntrySetIter iter = sumDims.begin();
+    EntryListConstIter iter = sumDims.begin();
     for(; !found && iter != sumDims.end(); ++iter) {
       DimVec sumVec = (*iter).DistEntryDims();
       DimSet sumSet;
@@ -646,19 +646,17 @@ void SplitSumScatter::Apply(Node *node) const
     //    cout << "applying to sum scatter " << sum->InputDataType(0).m_dist.PrettyStr() << " -> "
     //	 <<  sum->GetDistType(0).PrettyStr() << endl;
 
-
-    EntrySet sums = sum->m_sumDims;
-    if (!sums.erase(inEntry)) {
-      cout << "scalar " << sum->GetNameStr(0) << endl;
-      cout << "didn't find entry\n";
-      cout << "in " << inType.str()
-	   << "\nout " << outType.str()
-	   << "\ninEntry: " << inEntry.str() << endl;
-      throw;
+    EntryList sums = sum->m_sumDims;
+    EntryListIter iter = sum->m_sumDims.begin();
+    bool found = false;
+    for(; iter != sum->m_sumDims.end() && !found; ++iter) {
+      if (*iter == inEntry) {
+	sum->m_sumDims.erase(iter);
+	found = true;
+	break;
+      }
     }
 
-    if (sums.empty())
-      throw;
 
     DistType intType = sum->DataType(0).m_dist;
     {
@@ -678,10 +676,10 @@ void SplitSumScatter::Apply(Node *node) const
 
     //    cout << "tempType " << temp->GetDistType(0).PrettyStr() << endl;
 
-    EntrySet set;
-    set.insert(inEntry);
+    EntryList list;
+    list.push_back(inEntry);
     
-    SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFZERO, set);
+    SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFZERO, list);
     newSum->AddInput(node->Input(0), node->InputConnNum(0));
     newSum->AddInput(temp, 0);
     node->m_poss->AddNode(newSum);
@@ -712,7 +710,7 @@ void SplitSumScatter::Apply(Node *node) const
     DimSet outSet;
     outSet.insert(outVec.begin(), outVec.end());
 	
-    EntrySetIter iter = sum->m_sumDims.begin();
+    EntryListIter iter = sum->m_sumDims.begin();
     for(; iter != sum->m_sumDims.end(); ++iter) {
       DimVec sumVec = (*iter).DistEntryDims();
       DimSet sumSet;
@@ -769,8 +767,8 @@ void SplitSumScatter::Apply(Node *node) const
 	    }
 	  }
 
-	  EntrySet sums = sum->m_sumDims;
-	  EntrySetIter sumIter = sums.begin();
+	  EntryList sums = sum->m_sumDims;
+	  EntryListIter sumIter = sums.begin();
 	  for(; sumIter != sums.end(); ++sumIter) {
 	    if (*sumIter == *iter) {
 	      sums.erase(sumIter);
@@ -784,10 +782,10 @@ void SplitSumScatter::Apply(Node *node) const
 	  node->m_poss->AddNode(temp);
 	  
 
-	  EntrySet set;
-	  set.insert(*iter);
+	  EntryList list;
+	  list.push_back(*iter);
 
-	  SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFZERO, set);
+	  SumScatterUpdateNode *newSum = new SumScatterUpdateNode(COEFZERO, list);
 	  newSum->AddInput(node->Input(0), node->InputConnNum(0));
 	  newSum->AddInput(temp, 0);
 	  node->m_poss->AddNode(newSum);
@@ -872,7 +870,7 @@ bool MoveSumScatterRedistAfter::CanApply(const Node *node) const
 	    }
 	    
 	    if (diff) {
-	      EntrySetIter iter = sum->m_sumDims.begin();
+	      EntryListConstIter iter = sum->m_sumDims.begin();
 	      for(; iter != sum->m_sumDims.end(); ++iter) {
 		DistEntry sumEntry = *iter;
 		DimVec sumVec = sumEntry.DistEntryDims();
@@ -924,7 +922,7 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
 	    }
 	    
 	    if (diff) {
-	      EntrySetIter iter = sum->m_sumDims.begin();
+	      EntryListIter iter = sum->m_sumDims.begin();
 	      for(; iter != sum->m_sumDims.end(); ++iter) {
 		DistEntry sumEntry = *iter;
 		DimVec sumVec = sumEntry.DistEntryDims();

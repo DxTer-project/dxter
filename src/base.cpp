@@ -342,8 +342,10 @@ void DistEntry::DimsToDistEntry(DimVec dims)
   unsigned int distVal = 0;
   DimVecConstRevIter iter = dims.rbegin();
   for(; iter != dims.rend(); ++iter) {
-    if (*iter > NUM_GRID_DIMS)
+    if (*iter > NUM_GRID_DIMS) {
+      cout << *iter << endl;
       throw;
+    }
     //offset coming from the left
     distVal += currStage;
     //offset on the right

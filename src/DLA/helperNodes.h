@@ -185,15 +185,15 @@ class TempVarNode : public DLANode
 #elif DOTENSORS
   SizesArray m_lsizes;
   SizesArray m_sumLens;
-  EntrySet m_sumDims;
+  EntryList m_sumDims;
   Sizes m_ones;
 #endif
 
   TempVarNode();
   TempVarNode(string name);
 #if DOTENSORS
-  TempVarNode(DistType dist, EntrySet sumDims);
-  TempVarNode(DistType dist, EntrySet sumDims, string name);
+  TempVarNode(DistType dist, EntryList sumDims);
+  TempVarNode(DistType dist, EntryList sumDims, string name);
 #endif
 #if DODM
   TempVarNode(DistType dist);

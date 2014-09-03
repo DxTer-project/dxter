@@ -726,7 +726,7 @@ TempVarNode::TempVarNode(DistType dist, string name)
 
 
 #if DOTENSORS
-TempVarNode::TempVarNode(DistType dist, EntrySet sumDims) 
+TempVarNode::TempVarNode(DistType dist, EntryList sumDims) 
    : m_lsizes(NULL),
      m_sumLens(NULL),
      m_sumDims(sumDims)
@@ -740,14 +740,14 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims)
   m_info.m_dist.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
     m_info.m_dist.m_dists[dim] = dist.m_dists[dim];
-  EntrySetIter iter = m_sumDims.begin();
+  EntryListIter iter = m_sumDims.begin();
   for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
     m_info.m_dist.m_dists[dist.m_numDims + dim] = *iter;
   }
   m_info.m_dist.m_notReped = dist.m_notReped;
 }
 
-TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name)
+TempVarNode::TempVarNode(DistType dist, EntryList  sumDims, string name)
   :  m_name(name),
      m_lsizes(NULL),
      m_sumLens(NULL),
@@ -762,7 +762,7 @@ TempVarNode::TempVarNode(DistType dist, EntrySet sumDims, string name)
   m_info.m_dist.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
     m_info.m_dist.m_dists[dim] = dist.m_dists[dim];
-  EntrySetIter iter = m_sumDims.begin();
+  EntryListIter iter = m_sumDims.begin();
   for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
     m_info.m_dist.m_dists[dist.m_numDims + dim] = *iter;
   }
@@ -826,7 +826,7 @@ void TempVarNode::PrintCode(IndStream &out)
 #if DOTENSORS
   out.Indent();
   *out << "tempShape = " << GetInputNameStr(0) << ".Shape();\n";
-  EntrySetIter iter = m_sumDims.begin();
+  EntryListIter iter = m_sumDims.begin();
   for (; iter != m_sumDims.end(); ++iter) {
     out.Indent();
     DistEntry entry = *iter;
@@ -1014,7 +1014,7 @@ void TempVarNode::BuildDataTypeCache()
 
  m_sumLens = new Sizes[m_sumDims.size()];
  m_ones.AddRepeatedSizes(1, InputLen(0,0)->NumSizes(), 1);
- EntrySetIter iter = m_sumDims.begin();
+ EntryListIter iter = m_sumDims.begin();
  for(Dim dim = 0; iter != m_sumDims.end(); ++dim, ++iter) {
    DimVec vec = (*iter).DistEntryDims();
    unsigned int numProcs = 1;
