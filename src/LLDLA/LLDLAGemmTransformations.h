@@ -57,8 +57,8 @@ class LLDLAGemmToMVMul : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
   Type m_type;
- LLDLAGemmToMVMul(Layer fromLayer, Layer toLayer, Type type)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_type(type) {}
+ LLDLAGemmToMVMul(Layer fromLayer, Layer toLayer)
+   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -71,8 +71,8 @@ class LLDLAGemmToVMMul : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
   Type m_type;
- LLDLAGemmToVMMul(Layer fromLayer, Layer toLayer, Type type)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_type(type) {}
+ LLDLAGemmToVMMul(Layer fromLayer, Layer toLayer)
+   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

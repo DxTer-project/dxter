@@ -28,12 +28,9 @@
 
 #if DOLLDLA
 
-VMMul::VMMul(Layer layer, Type type)
+VMMul::VMMul(Layer layer)
 {
-  m_type = type;
   m_layer = layer;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(type);
   return;
 }
 
@@ -47,9 +44,9 @@ void VMMul::PrintCode(IndStream &out)
   out.Indent();
 
   if (m_layer == ABSLAYER) {
-    if (m_type == REAL_DOUBLE) {
+    if (GetDataType() == REAL_DOUBLE) {
       *out << "simple_mmul( ";
-    } else if (m_type == REAL_SINGLE) {
+    } else if (GetDataType() == REAL_SINGLE) {
       *out << "simple_mmul_float( ";
     }
     *out << "1, " <<
@@ -117,7 +114,7 @@ void VMMul::PrintGeneralStride(IndStream &out)
 
 Node* VMMul::BlankInst()
 {
-  return new VMMul(LLDLAPRIMITIVELAYER, REAL_SINGLE);
+  return new VMMul(LLDLAPRIMITIVELAYER);
 }
 
 Phase VMMul::MaxPhase() const
@@ -155,11 +152,11 @@ void VMMul::Prop()
     }
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
-      if (*GetInputM(0) != 1 || *GetInputN(0) != m_regWidth) {
+      if (*GetInputM(0) != 1 || *GetInputN(0) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive vector for vmmul must be 1 x 2\n";
 	throw;
       }
-      if (*GetInputN(1) != m_regWidth || *GetInputM(1) != m_regWidth) {
+      if (*GetInputN(1) != GetVecRegWidth() || *GetInputM(1) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive matrix must be 2 x 2\n";
 	throw;
       }
@@ -182,30 +179,28 @@ void VMMul::Duplicate(const Node* orig, bool shallow, bool possMerging)
 {
   DLAOp<3, 1>::Duplicate(orig, shallow, possMerging);
   const VMMul* rhs = (VMMul*) orig;
-  m_type = rhs->m_type;
   m_layer = rhs->m_layer;
   return;
 }
 
-VMMulLoopRef::VMMulLoopRef(Layer toLayer, Layer fromLayer, DimName dim, BSSize bs, Type type)
+VMMulLoopRef::VMMulLoopRef(Layer toLayer, Layer fromLayer, DimName dim, BSSize bs)
 {
   m_toLayer = toLayer;
   m_fromLayer = fromLayer;
   m_dim = dim;
   m_bs = bs;
-  m_type = type;
 }
 
 string VMMulLoopRef::GetType() const
 {
   switch (m_dim) {
   case(DIMN):
-    return "VMMulLoopRef N dim" + std::to_string((long long int) m_type);
+    return "VMMulLoopRef N dim" + std::to_string((long long int) m_bs.GetSize());
   case(DIMM):
     cout << "Error: DIMN is not valid dimension for  VMMulLoopRef\n";
     throw;
   case(DIMK):
-    return "VMMulLoopRef K dim" + std::to_string((long long int) m_type);
+    return "VMMulLoopRef K dim" + std::to_string((long long int) m_bs.GetSize());
   case(BADDIM):
     cout << "Error: VMMulLoopRef has BADDIM\n";
     throw;
@@ -218,7 +213,7 @@ bool VMMulLoopRef::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
     const VMMul* vmmul = (VMMul*) node;
-    if (vmmul->GetLayer() != m_fromLayer || m_type != vmmul->m_type) {
+    if (vmmul->GetLayer() != m_fromLayer) {
       return false;
     }
     if (m_dim == DIMN) {
@@ -247,12 +242,12 @@ void VMMulLoopRef::ApplyDimK(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
-  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
+  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
   splitX->AddInput(vmmul->Input(0), vmmul->InputConnNum(0));
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();
@@ -262,7 +257,7 @@ void VMMulLoopRef::ApplyDimK(Node* node) const
   inY->SetAllStats(PARTUP);
   inY->SetIndepIters();
 
-  VMMul* newVMMul = new VMMul(m_toLayer, vmmul->m_type);
+  VMMul* newVMMul = new VMMul(m_toLayer);
   newVMMul->AddInput(splitX, 1);
   newVMMul->AddInput(splitA, 1);
   newVMMul->AddInput(inY, 0);
@@ -288,7 +283,7 @@ void VMMulLoopRef::ApplyDimN(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -298,13 +293,13 @@ void VMMulLoopRef::ApplyDimN(Node* node) const
   tunX->SetAllStats(FULLUP);
   tunX->SetIndepIters();
 
-  SplitSingleIter* splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
+  SplitSingleIter* splitY = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
   splitY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
   splitY->SetUpStats(FULLUP, NOTUP,
 		     FULLUP, NOTUP);
   splitY->SetIndepIters();
 
-  VMMul* newMul = new VMMul(m_toLayer, vmmul->m_type);
+  VMMul* newMul = new VMMul(m_toLayer);
 
   // Attach to arguments
   newMul->AddInput(tunX, 0);
@@ -330,20 +325,18 @@ void VMMulLoopRef::ApplyDimN(Node* node) const
   return;
 }
 
-VMMulLowerLayer::VMMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type)
+VMMulLowerLayer::VMMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_bs = bs;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 bool VMMulLowerLayer::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
     const VMMul* vmmul = (VMMul*) node;
-    if (vmmul->GetLayer() != m_fromLayer || m_type != vmmul->m_type) {
+    if (vmmul->GetLayer() != m_fromLayer) {
       return false;
     }
     if (m_toLayer == LLDLAPRIMITIVELAYER) {
@@ -379,25 +372,23 @@ string VMMulLowerLayer::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
-VMMulToRegArith::VMMulToRegArith(Layer fromLayer, Layer toLayer, Type type)
+VMMulToRegArith::VMMulToRegArith(Layer fromLayer, Layer toLayer)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 string VMMulToRegArith::GetType() const
 {
   return "VMMulToRegArith from " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer)  + " type " + std::to_string((long long int) m_type);
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
 bool VMMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
     VMMul* vmmul = (VMMul*) node;
-    return (*vmmul->GetInputN(1) == m_regWidth) && (m_type == vmmul->m_type);
+    return (*vmmul->GetInputN(1) == vmmul->GetVecRegWidth());
   }
   return false;
 }
@@ -406,17 +397,17 @@ void VMMulToRegArith::Apply(Node* node) const
 {
   VMMul* vmmul = (VMMul*) node;
 
-  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
 
-  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter* splitX = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitX->AddInput(vmmul->Input(0), vmmul->InputConnNum(0));
   splitX->SetAllStats(FULLUP);
   splitX->SetIndepIters();
 
-  LoadToRegs* loadY = new LoadToRegs(m_type);
+  LoadToRegs* loadY = new LoadToRegs();
   loadY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
 
   node->m_poss->AddNode(loadY);
@@ -425,13 +416,13 @@ void VMMulToRegArith::Apply(Node* node) const
   yTun->AddInput(loadY, 0);
   yTun->SetAllStats(PARTUP);
 
-  LoadToRegs* loadA = new LoadToRegs(m_type);
+  LoadToRegs* loadA = new LoadToRegs();
   loadA->AddInput(splitA, 1);
 
-  DuplicateRegLoad* loadX = new DuplicateRegLoad(m_type);
+  DuplicateRegLoad* loadX = new DuplicateRegLoad();
   loadX->AddInput(splitX, 1);
 
-  FMAdd* fmadd = new FMAdd(m_type);
+  FMAdd* fmadd = new FMAdd();
   fmadd->AddInput(loadX, 0);
   fmadd->AddInput(loadA, 0);
   fmadd->AddInput(yTun, 0);
@@ -451,7 +442,7 @@ void VMMulToRegArith::Apply(Node* node) const
 
   node->m_poss->AddPSet(loop);
 
-  StoreFromRegs* storeToY = new StoreFromRegs(m_type);
+  StoreFromRegs* storeToY = new StoreFromRegs();
   storeToY->AddInput(loop->OutTun(2), 0);
   storeToY->AddInput(vmmul->Input(2), vmmul->InputConnNum(2));
 

@@ -23,15 +23,6 @@
 
 #if DOLLDLA
 
-LoadToRegs::LoadToRegs(Type type)
-{
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
-  //  cout << "\n\nCreated new LoadToRegs\n";
-  //  cout << "Type passed in is REAL_DOUBLE ? " << std::to_string((long long int) type == REAL_DOUBLE) << endl;
-  //  cout << "Reg width = " << std::to_string((long long int) m_regWidth) << endl;
-}
-
 void LoadToRegs::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -39,20 +30,20 @@ void LoadToRegs::Prop()
     if (m_inputs.size() != 1)
       throw;
 
-    if (*(GetInputM(0)) != m_regWidth) {
-      // this isn't 1 x m_regWidth
-      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != m_regWidth) {
+    if (*(GetInputM(0)) != GetVecRegWidth()) {
+      // this isn't 1 x GetVecRegWidth()
+      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != GetVecRegWidth()) {
 	cout << "Error: Incorrect dimensions for register load\n";
 	GetInputN(0)->Print();
-	cout << "m_regWidth = " << std::to_string((long long int) m_regWidth) << endl;
-	cout << "m_type == REAL_DOUBLE ? " << std::to_string((long long int) m_type == REAL_DOUBLE) << endl;
+	cout << "GetVecRegWidth() = " << std::to_string((long long int) GetVecRegWidth()) << endl;
+	cout << "GetDataType() == REAL_DOUBLE ? " << std::to_string((long long int) GetDataType() == REAL_DOUBLE) << endl;
 	cout << "*GetInputM(0) != 1 ? " << std::to_string((long long int) (*GetInputM(0) != 1)) << endl;
-	cout << "*GetInputN(0) != m_regWidth ? " << std::to_string((long long int) (*GetInputN(0) != m_regWidth)) << endl;
+	cout << "*GetInputN(0) != GetVecRegWidth() ? " << std::to_string((long long int) (*GetInputN(0) != GetVecRegWidth())) << endl;
 	throw;
       }
     } else if (*(GetInputN(0)) != 1) {
       GetInputN(0)->Print();
-      // m_regWidth rows but not 1 column
+      // GetVecRegWidth() rows but not 1 column
       throw;
     }
 
@@ -61,13 +52,13 @@ void LoadToRegs::Prop()
       if (IsUnitStride(InputDataType(0).m_rowStride)) {
 	m_cost = CONTIG_VECTOR_LOAD_COST;
       } else {
-	m_cost = m_regWidth * CONTIG_VECTOR_LOAD_COST;
+	m_cost = GetVecRegWidth() * CONTIG_VECTOR_LOAD_COST;
       }
     } else {
       if (IsUnitStride(InputDataType(0).m_colStride)) {
 	m_cost = CONTIG_VECTOR_LOAD_COST;
       } else {
-	m_cost = m_regWidth * CONTIG_VECTOR_LOAD_COST;
+	m_cost = GetVecRegWidth() * CONTIG_VECTOR_LOAD_COST;
       }
     }
   }
@@ -103,20 +94,11 @@ void LoadToRegs::PrintCode(IndStream &out)
   }
 
   if (isStridedLoad) {
-    *out << arch->StridedLoad(m_type, toLoadName, loadStr, strideVar);
+    *out << arch->StridedLoad(GetDataType(), toLoadName, loadStr, strideVar);
   } else {
-    *out << arch->ContiguousLoad(m_type, toLoadName, loadStr);
+    *out << arch->ContiguousLoad(GetDataType(), toLoadName, loadStr);
   }
 
-  return;
-}
-
-void LoadToRegs::Duplicate(const Node* orig, bool shallow, bool possMerging)
-{
-  DLANode::Duplicate(orig, shallow, possMerging);
-  const LoadToRegs* rhs = (LoadToRegs*) orig;
-  m_type = rhs->m_type;
-  m_regWidth = rhs->m_regWidth;
   return;
 }
 
@@ -145,15 +127,9 @@ Name LoadToRegs::GetName(ConnNum num) const
 
 void LoadToRegs::AddVariables(VarSet &set) const
 {
-  string varDecl = arch->TypeName(m_type) + " " + GetInputNameStr(0)+ "_regs;\n";
-  Var var(DirectVarDeclType, varDecl, m_type);
+  string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regs;\n";
+  Var var(DirectVarDeclType, varDecl, GetDataType());
   set.insert(var);
-}
-
-StoreFromRegs::StoreFromRegs(Type type)
-{
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void StoreFromRegs::Prop()
@@ -165,13 +141,13 @@ void StoreFromRegs::Prop()
       if (IsUnitStride(InputDataType(1).m_rowStride)) {
 	m_cost = CONTIG_VECTOR_STORE_COST;
       } else {
-	m_cost = m_regWidth * CONTIG_VECTOR_STORE_COST;
+	m_cost = GetVecRegWidth() * CONTIG_VECTOR_STORE_COST;
       }
     } else {
       if (IsUnitStride(InputDataType(1).m_colStride)) {
 	m_cost = CONTIG_VECTOR_STORE_COST;
       } else {
-	m_cost = m_regWidth * CONTIG_VECTOR_STORE_COST;
+	m_cost = GetVecRegWidth() * CONTIG_VECTOR_STORE_COST;
       }
     }
     
@@ -208,9 +184,9 @@ void StoreFromRegs::PrintCode(IndStream &out)
   }
 
   if (isStridedLoad) {
-    *out << arch->StridedStore(m_type, storeLocation, regVarName, strideVar);
+    *out << arch->StridedStore(GetDataType(), storeLocation, regVarName, strideVar);
   } else {
-    *out << arch->ContiguousStore(m_type, storeLocation, regVarName);
+    *out << arch->ContiguousStore(GetDataType(), storeLocation, regVarName);
   }
 
 
@@ -243,17 +219,11 @@ void StoreFromRegs::StoreNonContigLocations(IndStream &out, string regVarName, s
 {
   out.Indent();
   *out << "VEC_PTR_PD_SET( 0, " + regVarName + ", " + storePtr + " );\n";
-  for (int i = 1; i < m_regWidth; i++) {
+  for (int i = 1; i < GetVecRegWidth(); i++) {
     out.Indent();
     string storePtrStr = storePtr + " + " + std::to_string((long long int) i) + " * " + strideVar;
     *out << "VEC_PTR_PD_SET( " + std::to_string((long long int) i) + ", " + regVarName + ", " + storePtrStr + " );\n";
   }
-}
-
-DuplicateRegLoad::DuplicateRegLoad(Type type)
-{
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(m_type);
 }
 
 void DuplicateRegLoad::Prop()
@@ -272,7 +242,7 @@ void DuplicateRegLoad::Prop()
 void DuplicateRegLoad::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << arch->DuplicateLoad(m_type, GetInputNameStr(0), GetNameStr(0));
+  *out << arch->DuplicateLoad(GetDataType(), GetInputNameStr(0), GetNameStr(0));
   return;
 }
 
@@ -289,23 +259,10 @@ void DuplicateRegLoad::BuildDataTypeCache()
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "1";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(m_regWidth, num, 1);
+    m_mSizes.AddRepeatedSizes(GetVecRegWidth(), num, 1);
     m_nSizes.AddRepeatedSizes(1, num, 1);
   }
 }
-
-void DuplicateRegLoad::Duplicate(const Node* orig, bool shallow, bool possMerging)
-{
-  DLANode::Duplicate(orig, shallow, possMerging);
-  const DuplicateRegLoad* rhs = (DuplicateRegLoad*) orig;
-  m_type = rhs->m_type;
-  m_regWidth = rhs->m_regWidth;
-  m_mSizes = rhs->m_mSizes;
-  m_nSizes = rhs->m_nSizes;
-  m_info = rhs->m_info;
-  return;
-}
-
 
 const Sizes* DuplicateRegLoad::GetM(ConnNum num) const
 {
@@ -332,15 +289,9 @@ Name DuplicateRegLoad::GetName(ConnNum num) const
 
 void DuplicateRegLoad::AddVariables(VarSet &set) const
 {
-  string varDecl = arch->TypeName(m_type) + " " + GetInputNameStr(0)+ "_regDup;";
-  Var var(DirectVarDeclType, varDecl, m_type);
+  string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regDup;";
+  Var var(DirectVarDeclType, varDecl, GetDataType());
   set.insert(var);
-}
-
-TempVecReg::TempVecReg(Type type)
-{
-  m_type = type;
-  m_regWidth = arch->VecRegWidth(type);
 }
 
 void TempVecReg::Prop()
@@ -359,18 +310,7 @@ void TempVecReg::Prop()
 void TempVecReg::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << arch->ZeroVar(m_type, GetNameStr(0));
-  return;
-}
-
-void TempVecReg::Duplicate(const Node* orig, bool shallow, bool possMerging)
-{
-  DLANode::Duplicate(orig, shallow, possMerging);
-  const TempVecReg* rhs = (TempVecReg*) orig;
-  m_type = rhs->m_type;
-  m_regWidth = rhs->m_regWidth;
-  m_mSizes = rhs->m_mSizes;
-  m_nSizes = rhs->m_nSizes;
+  *out << arch->ZeroVar(GetDataType(), GetNameStr(0));
   return;
 }
 
@@ -387,7 +327,7 @@ void TempVecReg::BuildDataTypeCache()
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "vector register size";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(m_regWidth, num, 1);
+    m_mSizes.AddRepeatedSizes(GetVecRegWidth(), num, 1);
     m_nSizes.AddRepeatedSizes(1, num, 1);
   }
 }
@@ -417,19 +357,9 @@ Name TempVecReg::GetName(ConnNum num) const
 
 void TempVecReg::AddVariables(VarSet &set) const
 {
-  string varDecl = arch->TypeName(m_type) + " " +  GetInputNameStr(0)+ "_regTemp;";
-  Var var(DirectVarDeclType, varDecl, m_type);
+  string varDecl = arch->TypeName(GetDataType()) + " " +  GetInputNameStr(0)+ "_regTemp;";
+  Var var(DirectVarDeclType, varDecl, GetDataType());
   set.insert(var);
 }
-
-void StoreFromRegs::Duplicate(const Node* orig, bool shallow, bool possMerging)
-{
-  DLANode::Duplicate(orig, shallow, possMerging);
-  const StoreFromRegs* rhs = (StoreFromRegs*) orig;
-  m_type = rhs->m_type;
-  m_regWidth = rhs->m_regWidth;
-  return;
-}
-
 
 #endif //DOLLDLA

@@ -916,7 +916,7 @@ RealLoop* GemmVar3Loop(Node *Ain, ConnNum Anum,
     ConstVal *constVal = new ConstVal(beta.LLDLAStr(),beta);
     constVal->AddInput(Cin, Cnum);
     
-    scale = new SMMul(layer, type);
+    scale = new SMMul(layer);
     scale->SetLayer(layer);
     scale->AddInputs(4, 
 		     constVal, 0,

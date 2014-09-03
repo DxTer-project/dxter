@@ -32,9 +32,7 @@
 class VMMul : public DLAOp<3, 1>
 {
  public:
-  Type m_type;
-  int m_regWidth;
-  VMMul(Layer layer, Type type);
+  VMMul(Layer layer);
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
@@ -62,10 +60,8 @@ class VMMulLoopRef : public SingleTrans
   Layer m_fromLayer, m_toLayer;
   DimName m_dim;
   BSSize m_bs;
-  Type m_type;
-  int m_regWidth;
 
-  VMMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type);
+  VMMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -80,9 +76,7 @@ class VMMulToRegArith : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  Type m_type;
-  int m_regWidth;
-  VMMulToRegArith(Layer fromLayer, Layer toLayer, Type type);
+  VMMulToRegArith(Layer fromLayer, Layer toLayer);
   virtual string GetType() const;
   virtual bool CanApply(const Node* node) const;
   virtual void Apply(Node* node) const;
@@ -94,9 +88,8 @@ class VMMulLowerLayer : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
-  Type m_type;
-  int m_regWidth;
-  VMMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs, Type type);
+
+  VMMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

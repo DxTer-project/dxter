@@ -195,20 +195,19 @@ void LLDAGemmLowerLayer::Apply(Node *node) const
 string LLDAGemmLowerLayer::GetType() const
 { 
   return "Gemm lower layer " + LayerNumToStr(m_fromLayer) 
-  + " to " + LayerNumToStr(m_toLayer)  + " type " + std::to_string((long long int) m_type);
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
 string LLDLAGemmToMVMul::GetType() const
 {
   return "Gemm to MVMul from " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
 bool LLDLAGemmToMVMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
-    Gemm* gemm = (Gemm*) node;
-    return m_type == gemm->m_type;
+    return true;
   }
   return false;
 }
@@ -223,19 +222,19 @@ void LLDLAGemmToMVMul::Apply(Node* node) const
   aTun->SetAllStats(FULLUP);
 
   // Create splits for B and C
-  SplitSingleIter* splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter* splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitB->AddInput(gemm->Input(1), gemm->InputConnNum(1));
   splitB->SetAllStats(FULLUP);
   splitB->SetIndepIters();
 
-  SplitSingleIter* splitC = new SplitSingleIter(PARTRIGHT, POSSTUNIN, m_type, false);
+  SplitSingleIter* splitC = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
   splitC->AddInput(gemm->Input(2), gemm->InputConnNum(2));
   splitC->SetUpStats(FULLUP, NOTUP,
 		     FULLUP, NOTUP);
   splitC->SetIndepIters();
 
   // Create inner MVMul
-  MVMul* mvmul = new MVMul(m_toLayer, gemm->m_type);
+  MVMul* mvmul = new MVMul(m_toLayer);
   mvmul->AddInput(aTun, 0);
   mvmul->AddInput(splitB, 1);
   mvmul->AddInput(splitC, 1);
@@ -263,14 +262,14 @@ void LLDLAGemmToMVMul::Apply(Node* node) const
 string LLDLAGemmToVMMul::GetType() const
 {
   return "Gemm to VMMul from " + LayerNumToStr(m_fromLayer)
-    + " to " + LayerNumToStr(m_toLayer) + " type " + std::to_string((long long int) m_type);
+    + " to " + LayerNumToStr(m_toLayer);
 }
 
 bool LLDLAGemmToVMMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     Gemm* gemm = (Gemm*) node;
-    if (gemm->m_alpha == COEFONE && gemm->m_beta == COEFONE && m_type == gemm->m_type) {
+    if (gemm->m_alpha == COEFONE && gemm->m_beta == COEFONE) {
       return true;
     }
   }
@@ -282,7 +281,7 @@ void LLDLAGemmToVMMul::Apply(Node* node) const
   Gemm* gemm = (Gemm*) node;
 
   // Split A into row vectors
-  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, true);
+  SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(gemm->Input(0), gemm->InputConnNum(0));
   splitA->SetAllStats(FULLUP);
   splitA->SetIndepIters();
@@ -294,14 +293,14 @@ void LLDLAGemmToVMMul::Apply(Node* node) const
   inB->SetIndepIters();
 
   // Split C into rows
-  SplitSingleIter* splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN, m_type, false);
+  SplitSingleIter* splitC = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitC->AddInput(gemm->Input(2), gemm->InputConnNum(2));
   splitC->SetUpStats(FULLUP, FULLUP,
 		     NOTUP, NOTUP);
   splitC->SetIndepIters();
 
   // Create new inner vmmul for loop
-  VMMul* vmmul = new VMMul(m_toLayer, gemm->m_type);
+  VMMul* vmmul = new VMMul(m_toLayer);
   vmmul->AddInput(splitA, 1);
   vmmul->AddInput(inB, 0);
   vmmul->AddInput(splitC, 1);

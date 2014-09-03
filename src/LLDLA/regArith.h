@@ -30,14 +30,10 @@
 class FMAdd : public DLAOp<3, 1>
 {
  public:
-  Type m_type;
-  FMAdd(Type type);
   virtual NodeType GetType() const { return "FMAdd"; }
-  static Node* BlankInst() { return new FMAdd(REAL_SINGLE); }
+  static Node* BlankInst() { return new FMAdd(); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
- 
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -50,14 +46,10 @@ class FMAdd : public DLAOp<3, 1>
 class Add : public DLAOp<2, 1>
 {
  public:
-  Type m_type;
-  Add(Type type);
   virtual NodeType GetType() const { return "Add"; }
-  static Node* BlankInst() { return new Add(REAL_SINGLE); }
+  static Node* BlankInst() { return new Add(); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
- 
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -70,14 +62,10 @@ class Add : public DLAOp<2, 1>
 class Mul : public DLAOp<2, 1>
 {
  public:
-  Type m_type;
-  Mul(Type type);
   virtual NodeType GetType() const { return "Mul"; }
-  static Node* BlankInst() { return new Mul(REAL_SINGLE); }
+  static Node* BlankInst() { return new Mul(); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
- 
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -90,14 +78,10 @@ class Mul : public DLAOp<2, 1>
 class ZeroReg : public DLAOp<1, 1>
 {
  public:
-  Type m_type;
-  ZeroReg(Type type);
   virtual NodeType GetType() const { return "ZeroReg"; }
-  static Node* BlankInst() { return new ZeroReg(REAL_SINGLE); }
+  static Node* BlankInst() { return new ZeroReg(); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
- 
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -110,14 +94,10 @@ class ZeroReg : public DLAOp<1, 1>
 class AccumReg : public DLAOp<2, 1>
 {
  public:
-  Type m_type;
-  AccumReg(Type type);
   virtual NodeType GetType() const { return "AccumReg"; }
-  static Node* BlankInst() { return new AccumReg(REAL_SINGLE); }
+  static Node* BlankInst() { return new AccumReg(); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
- 
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const { return GetClass(); }

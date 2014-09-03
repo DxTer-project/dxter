@@ -25,19 +25,17 @@
 
 #if DOLLDLA
 
-SMMul::SMMul(Layer layer, Type type)
+SMMul::SMMul(Layer layer)
 {
-  m_type = type;
   SetLayer(layer);
-  m_regWidth = arch->VecRegWidth(type);
 }
 
 void SMMul::PrintCode(IndStream &out)
 {
   if (GetLayer() == ABSLAYER) {
-    if (m_type == REAL_DOUBLE) {
+    if (GetDataType() == REAL_DOUBLE) {
       *out << "simple_smul( ";
-    } else if (m_type == REAL_SINGLE) {
+    } else if (GetDataType() == REAL_SINGLE) {
       *out << "simple_smul_float( ";
     }
     *out << InputDataType(1).m_numRowsVar << ", " <<
@@ -108,7 +106,7 @@ void SMMul::Prop()
     }
     
     if (GetLayer() == LLDLAPRIMITIVELAYER || GetLayer() == LLDLAMIDLAYER) {
-      if (*GetInputM(1) != m_regWidth || *GetInputN(1) != m_regWidth) {
+      if (*GetInputM(1) != GetVecRegWidth() || *GetInputN(1) != GetVecRegWidth()) {
 	GetInputM(1)->Print();
 	cout << endl;
 	GetInputN(1)->Print();
@@ -137,7 +135,7 @@ Phase SMMul::MaxPhase() const
 
 Node* SMMul::BlankInst()
 {
-  return new SMMul(ABSLAYER, REAL_SINGLE);
+  return new SMMul(ABSLAYER);
 }
 
 NodeType SMMul::GetType() const
@@ -158,13 +156,12 @@ string SMulLoopRef::GetType() const
     }  
 }
 
-SMulLoopRef::SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs, Type type)
+SMulLoopRef::SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_dim = dim;
   m_bs = bs;
-  m_type = type;
 }
 
 bool SMulLoopRef::CanApply(const Node *node) const
@@ -202,7 +199,7 @@ void SMulLoopRef::Apply(Node *node) const
   //    (i.e., it's horizontal)
   // If we're splitting on the n dimension, then the split moves right
   //    (i.e., it's vertical)
-  SplitSingleIter* split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, m_type, true);
+  SplitSingleIter* split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   // Add input, which is the matrix input to mul
   split->AddInput(mul->Input(1), mul->InputConnNum(1));
   //Set the update statuses
@@ -233,9 +230,9 @@ void SMulLoopRef::Apply(Node *node) const
   //Create a new SMul or the same type and in my m_toLayer layer
   SVMul* newMul;
   if (m_dim == DIMM) {
-    newMul = new SVMul(ROWVECTOR, m_toLayer, mul->m_type);
+    newMul = new SVMul(ROWVECTOR, m_toLayer);
   } else {
-    newMul = new SVMul(COLVECTOR, m_toLayer, mul->m_type);
+    newMul = new SVMul(COLVECTOR, m_toLayer);
   }
   newMul->SetLayer(m_toLayer);
 
