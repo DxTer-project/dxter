@@ -237,7 +237,7 @@ int main(int argc, const char* argv[])
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-#if 1
+#if 0
   uni.PrintAll(algNum);
 #else
   uni.PrintBest();
