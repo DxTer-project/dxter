@@ -665,7 +665,7 @@ RealPSet* MP3()
   Poss *axppx2Poss = new Poss(axppx2);
   RealPSet * axppx2Set = new RealPSet(axppx2Poss);
 
-  Axppx *axppx3 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "oemg", "oemg");
+  Axppx *axppx3 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "oemg", "oegm");
   axppx3->AddInputs(6,
 		   v_oegm, 0,
 		   v_oemg, 0,
