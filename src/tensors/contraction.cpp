@@ -23,7 +23,7 @@
 #if DOTENSORS
 #include "tensorRedist.h"
 #include "helperNodes.h"
-#include "xpay.h"
+#include "yxpby.h"
 
 typedef vector<unsigned int *> ContType;
 typedef ContType::iterator ContTypeIter;
@@ -651,11 +651,11 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
     node->m_poss->AddPSet(redistSet,true,true);
     
     if (cont->m_beta != COEFZERO) {
-      Xpay *xpay = new Xpay(SMLAYER, cont->m_beta);
-      xpay->AddInput(redistSet->OutTun(0), 0);
-      xpay->AddInput(node->Input(2),node->InputConnNum(2));
-      node->m_poss->AddNode(xpay);
-      cont->RedirectChildren(xpay,0);
+      YxpBy *yxpby = new YxpBy(SMLAYER, cont->m_beta);
+      yxpby->AddInput(redistSet->OutTun(0), 0);
+      yxpby->AddInput(node->Input(2),node->InputConnNum(2));
+      node->m_poss->AddNode(yxpby);
+      cont->RedirectChildren(yxpby,0);
     }
     else {
       cont->RedirectChildren(redistSet->OutTun(0),0);
@@ -902,11 +902,11 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
     node->m_poss->AddPSet(redistSet,true,true);
     
     if (cont->m_beta != COEFZERO) {
-      Xpay *xpay = new Xpay(SMLAYER, cont->m_beta);
-      xpay->AddInput(redistSet->OutTun(0), 0);
-      xpay->AddInput(node->Input(2),node->InputConnNum(2));
-      node->m_poss->AddNode(xpay);
-      cont->RedirectChildren(xpay,0);
+      YxpBy *yxpby = new YxpBy(SMLAYER, cont->m_beta);
+      yxpby->AddInput(redistSet->OutTun(0), 0);
+      yxpby->AddInput(node->Input(2),node->InputConnNum(2));
+      node->m_poss->AddNode(yxpby);
+      cont->RedirectChildren(yxpby,0);
     }
     else {
       cont->RedirectChildren(redistSet->OutTun(0),0);

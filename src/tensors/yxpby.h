@@ -29,18 +29,18 @@
 #include "DLAOp.h"
 #include "tensorRedist.h"
 
-class Xpay : public DLAOp<2,1>
+class YxpBy : public DLAOp<2,1>
 {
  public:
-  Coef m_alpha;
-  Xpay(Layer layer, Coef alpha);
+  Coef m_beta;
+  YxpBy(Layer layer, Coef beta);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "xpay";}
-  static Node* BlankInst() { return new Xpay(ABSLAYER, COEFZERO); }
+  static Node* BlankInst() { return new YxpBy(ABSLAYER, COEFZERO); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
