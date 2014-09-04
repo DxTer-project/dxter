@@ -23,13 +23,13 @@
 #include "layers.h"
 #if DOTENSORS
 #include "base.h"
-#include "axppx.h"
+#include "yaxppx.h"
 #include "string.h"
 #include "helperNodes.h"
 
 using namespace std;
 
-Axppx::Axppx(Layer layer, Coef alpha, Coef beta, string start, string end)
+YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta, string start, string end)
   : m_alpha(alpha), m_beta(beta)
 { 
   SetLayer(layer);
@@ -41,34 +41,34 @@ Axppx::Axppx(Layer layer, Coef alpha, Coef beta, string start, string end)
   }
 }
 
-Axppx::Axppx(Layer layer, Coef alpha, Coef beta)
+YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta)
   : m_alpha(alpha), m_beta(beta)
 { 
   SetLayer(layer);
 }
 
-Axppx::Axppx(Layer layer, Coef alpha, Coef beta, const DimVec &perm)
+YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta, const DimVec &perm)
   : m_alpha(alpha), m_beta(beta)
 { 
   SetLayer(layer);
   m_permutation = perm;
 }
 
-NodeType Axppx::GetType() const
+NodeType YAxpPx::GetType() const
 {
-  return "Axppx " + LayerNumToStr(GetLayer());
+  return "YAxpPx " + LayerNumToStr(GetLayer());
 }
 
-void Axppx::Duplicate(const Node *orig, bool shallow, bool possMerging)
+void YAxpPx::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
-  const Axppx *axpy = (Axppx*)orig;
+  const YAxpPx *axpy = (YAxpPx*)orig;
   m_alpha = axpy->m_alpha;
   m_beta = axpy->m_beta;
   m_permutation = axpy->m_permutation;
 }
 
-void Axppx::FlattenCore(ofstream &out) const
+void YAxpPx::FlattenCore(ofstream &out) const
 {
   DLAOp<3,1>::FlattenCore(out);
   WRITE(m_alpha);
@@ -77,14 +77,14 @@ void Axppx::FlattenCore(ofstream &out) const
   //m_permutation
 }
 
-void Axppx::UnflattenCore(ifstream &in, SaveInfo &info)
+void YAxpPx::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLAOp<3,1>::UnflattenCore(in, info);
   throw;
   //m_permutation
 }
 
-Phase Axppx::MaxPhase() const 
+Phase YAxpPx::MaxPhase() const 
 {
   if (m_layer == DMLAYER)
     return DPTENSORPHASE;
@@ -94,7 +94,7 @@ Phase Axppx::MaxPhase() const
     throw;
 }
 /*
-bool Axppx::ShouldCullDP() const 
+bool YAxpPx::ShouldCullDP() const 
 {
 #if DODPTENSORPHASE
   return m_layer == DMLAYER;
@@ -103,7 +103,7 @@ bool Axppx::ShouldCullDP() const
 #endif
 }
 */
-bool Axppx::DoNotCullDP() const 
+bool YAxpPx::DoNotCullDP() const 
 {
 #if DODPTENSORPHASE
   return m_layer == DMLAYER;
@@ -112,10 +112,10 @@ bool Axppx::DoNotCullDP() const
 #endif
 }
 
-void Axppx::PrintCode(IndStream &out)
+void YAxpPx::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << "Axppx( ";
+  *out << "YAxpPx( ";
   out << m_alpha;
   *out << ", " << GetInputName(0).str() << ", ";
   out << m_beta;
@@ -124,7 +124,7 @@ void Axppx::PrintCode(IndStream &out)
        << GetInputName(2).str() << " );\n";
 }
 
-void Axppx::Prop()
+void YAxpPx::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
@@ -170,21 +170,21 @@ void Axppx::Prop()
 
 
 
-bool DistAxppxToDefaultLocalAxppx::CanApply(const Node *node) const
+bool DistYAxpPxToDefaultLocalYAxpPx::CanApply(const Node *node) const
 {
-  if (node->GetNodeClass() != Axppx::GetClass())
+  if (node->GetNodeClass() != YAxpPx::GetClass())
     return false;
-  if (((Axppx*)node)->GetLayer() != DMLAYER)
+  if (((YAxpPx*)node)->GetLayer() != DMLAYER)
     return false;
   return true;
 }
 
-void DistAxppxToDefaultLocalAxppx::Apply(Node *node) const
+void DistYAxpPxToDefaultLocalYAxpPx::Apply(Node *node) const
 {
-  Axppx *orig = (Axppx*)node;
-  Axppx *newAxppx = new Axppx(SMLAYER, orig->m_alpha, orig->m_beta, orig->m_permutation);
+  YAxpPx *orig = (YAxpPx*)node;
+  YAxpPx *newYAxpPx = new YAxpPx(SMLAYER, orig->m_alpha, orig->m_beta, orig->m_permutation);
 
-  newAxppx->AddInput(node->Input(0),node->InputConnNum(0));
+  newYAxpPx->AddInput(node->Input(0),node->InputConnNum(0));
 
   if (!orig->m_permutation.empty()) {
     const DataTypeInfo &inputType = orig->InputDataType(0);
@@ -194,17 +194,17 @@ void DistAxppxToDefaultLocalAxppx::Apply(Node *node) const
     }
     RedistNode *redist = new RedistNode(newType);
     redist->AddInput(node->Input(1),node->InputConnNum(1));
-    newAxppx->AddInput(redist, 0);
+    newYAxpPx->AddInput(redist, 0);
     node->m_poss->AddNode(redist);
   }
   else
-    newAxppx->AddInput(node->Input(1),node->InputConnNum(1));
+    newYAxpPx->AddInput(node->Input(1),node->InputConnNum(1));
   
-  newAxppx->AddInput(node->Input(2),node->InputConnNum(2));
+  newYAxpPx->AddInput(node->Input(2),node->InputConnNum(2));
 
-  node->m_poss->AddNode(newAxppx);
+  node->m_poss->AddNode(newYAxpPx);
   
-  node->RedirectChildren(newAxppx,0);
+  node->RedirectChildren(newYAxpPx,0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 

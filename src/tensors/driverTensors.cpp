@@ -41,7 +41,7 @@
 #if DOTENSORS
 
 #include "debug.h"
-#include "axppx.h"
+#include "yaxppx.h"
 
 Size one = 1;
 Size smallSize = 10;
@@ -77,7 +77,7 @@ void AddTrans()
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
 
-  Universe::AddTrans(Axppx::GetClass(), new DistAxppxToDefaultLocalAxppx, DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
@@ -649,7 +649,7 @@ RealPSet* MP3()
   Poss *cont1Poss = new Poss(cont1);
   RealPSet *cont1Set = new RealPSet(cont1Poss);
 
-  Axppx *axppx1 = new Axppx(DMLAYER, COEFONEHALF, COEFONE, "efmn", "efnm");
+  YAxpPx *axppx1 = new YAxpPx(DMLAYER, COEFONEHALF, COEFONE, "efmn", "efnm");
   axppx1->AddInputs(6,
 		   cont1Set->OutTun(0), 0,
 		   cont1Set->OutTun(0), 0,
@@ -657,7 +657,7 @@ RealPSet* MP3()
   Poss *axppx1Poss = new Poss(axppx1);
   RealPSet * axppx1Set = new RealPSet(axppx1Poss);
 
-  Axppx *axppx2 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
+  YAxpPx *axppx2 = new YAxpPx(DMLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
   axppx2->AddInputs(6,
 		   t_gfon, 0,
 		   t_gfon, 0,
@@ -665,7 +665,7 @@ RealPSet* MP3()
   Poss *axppx2Poss = new Poss(axppx2);
   RealPSet * axppx2Set = new RealPSet(axppx2Poss);
 
-  Axppx *axppx3 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "oemg", "oegm");
+  YAxpPx *axppx3 = new YAxpPx(DMLAYER,COEFTWO, COEFNEGONE, "oemg", "oegm");
   axppx3->AddInputs(6,
 		   v_oegm, 0,
 		   v_oemg, 0,
@@ -698,7 +698,7 @@ RealPSet* MP3()
   RealPSet *cont4Set = new RealPSet(cont4Poss);
 
 
-  Axppx *axppx4 = new Axppx(DMLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
+  YAxpPx *axppx4 = new YAxpPx(DMLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
   axppx4->AddInputs(6,
 		   t_efmn, 0,
 		   t_efmn, 0,
@@ -896,7 +896,7 @@ RealPSet* MP3Small()
   RealPSet *cont1Set = new RealPSet(cont1Poss);
 
   /*
-  Axppx *axppx1 = new Axppx(DMLAYER, COEFONEHALF, COEFONE, "efmn", "efnm");
+  YAxpPx *axppx1 = new YAxpPx(DMLAYER, COEFONEHALF, COEFONE, "efmn", "efnm");
   axppx1->AddInputs(6,
 		   cont1Set->OutTun(0), 0,
 		   cont1Set->OutTun(0), 0,
@@ -904,7 +904,7 @@ RealPSet* MP3Small()
   Poss *axppx1Poss = new Poss(axppx1);
   RealPSet * axppx1Set = new RealPSet(axppx1Poss);
 
-  Axppx *axppx2 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
+  YAxpPx *axppx2 = new YAxpPx(DMLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
   axppx2->AddInputs(6,
 		   t_gfon, 0,
 		   t_gfon, 0,
@@ -912,7 +912,7 @@ RealPSet* MP3Small()
   Poss *axppx2Poss = new Poss(axppx2);
   RealPSet * axppx2Set = new RealPSet(axppx2Poss);
 
-  Axppx *axppx3 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "oemg", "oemg");
+  YAxpPx *axppx3 = new YAxpPx(DMLAYER,COEFTWO, COEFNEGONE, "oemg", "oemg");
   axppx3->AddInputs(6,
 		   v_oegm, 0,
 		   v_oemg, 0,
@@ -945,7 +945,7 @@ RealPSet* MP3Small()
   RealPSet *cont4Set = new RealPSet(cont4Poss);
 
 
-  Axppx *axppx4 = new Axppx(DMLAYER, COEFTWO, COEFNEGONE);
+  YAxpPx *axppx4 = new YAxpPx(DMLAYER, COEFTWO, COEFNEGONE);
   axppx4->AddInputs(6,
 		   t_efmn, 0,
 		   t_efmn, 0,
