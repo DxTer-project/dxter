@@ -218,6 +218,11 @@ void Contraction::CheckInputTypesAlign() const
 	  cout << BType.m_dists[bFind].str() << endl;
 	  throw;
 	}
+	if (m_contIndices.find(index) == string::npos &&
+	    *InputLocalLen(2,dim) != *InputLocalLen(1,bFind)) {
+	  cout << "C and B sizes don't align\n";
+	  throw;
+	}	  
       }
     }
     else {
@@ -234,6 +239,18 @@ void Contraction::CheckInputTypesAlign() const
         cout << Input(2)->GetType() << endl;
         throw;
       }
+      if (m_contIndices.find(index) == string::npos && 
+	  *InputLocalLen(2,dim) != *InputLocalLen(0,aFind)) {
+	cout << "C and A sizes don't align\n";
+	cout << "C:\n";
+	InputLocalLen(2,dim)->Print();
+	cout << "A:\n";
+	InputLocalLen(0,aFind)->Print();
+	cout << m_CIndices << endl;
+	cout << m_AIndices << endl;
+	cout << m_contIndices << endl;
+	throw;
+      }
       size_t bFind = m_BIndices.find(index);
       if (bFind != string::npos) {
 	if (AType.m_dists[aFind].IsStar())
@@ -243,6 +260,20 @@ void Contraction::CheckInputTypesAlign() const
 	if (!InputLocalLen(2,dim)->AllOnes())
 	  throw;
       }
+    }
+  }
+
+  dim = 0;
+  strIter = m_contIndices.begin();
+  for(; strIter != m_contIndices.end(); ++strIter, ++dim) {
+    const char index = *strIter;
+    size_t aFind = m_AIndices.find(index);
+    size_t bFind = m_BIndices.find(index);
+    if (*InputLocalLen(0,aFind) != *InputLocalLen(1,bFind)) {
+      cout << "A and B contraction sizes don't align\n";
+    }
+    if (AType.m_dists[aFind] != BType.m_dists[bFind]) {
+      cout << "A and B contraction distributions don't align\n";
     }
   }
 }
