@@ -59,7 +59,7 @@
 #define DO16MUTRANSFORMATIONS 1
 #define DOLARGEMUTRANSFORMATIONS 0
 
-#define DOPARTIALLOOPUNROLLING 1
+#define DOPARTIALLOOPUNROLLING 0
 #define PARTIALUNROLLINGSTARTCOEF 2
 #define PARTIALUNROLLINGENDCOEF 16
 
@@ -71,7 +71,7 @@ do you really want to do compact unrolling and partial unrolling?
 
 Size one = 1;
 Size smallSize = 4;
-Size medSize = 32;
+Size medSize = 1024;
 Size bigSize = 1024;
 //Size bs = ELEM_BS;
 
@@ -355,7 +355,7 @@ int main(int argc, const char* argv[])
   omp_set_nested(true);
 #endif
 
-  arch = new AMDEngSample();
+  arch = new Stampede();
   //  PrintType printType = CODE;
   int numIters = -1;
   RealPSet* (*algFunc)();
@@ -635,8 +635,8 @@ int main(int argc, const char* argv[])
 
 RealPSet* GemvExample()
 {
-  InputNode* xIn = new InputNode("x input", 4, 1, "X",
-				 1, 4,
+  InputNode* xIn = new InputNode("x input", 8, 1, "X",
+				 1, 8,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
@@ -650,7 +650,7 @@ RealPSet* GemvExample()
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
 
-  InputNode* AIn = new InputNode("a input", medSize, 4, "A",
+  InputNode* AIn = new InputNode("a input", medSize, 8, "A",
 				 1, medSize,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
