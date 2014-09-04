@@ -35,9 +35,9 @@ Axppx::Axppx(Layer layer, Coef alpha, Coef beta, string start, string end)
   SetLayer(layer);
   if (start.length() != end.length())
     throw;
-  string::iterator iter = end.begin();
-  for(; iter != end.end(); ++iter) {
-    m_permutation.push_back(start.find(*iter));
+  string::iterator iter = start.begin();
+  for(; iter != start.end(); ++iter) {
+    m_permutation.push_back(end.find(*iter));
   }
 }
 
@@ -135,12 +135,31 @@ void Axppx::Prop()
       m_cost = 0;
     else if (m_layer == SMLAYER) {
       m_cost = 3 * TotalNumberOfLocalElements(0);
-      /*
-      DistType tmp;
-      tmp.SetToDefault(InputDataType(2).m_dist.m_numDims);
-      if (tmp != DataType(0).m_dist)
+      Dim numDims = InputNumDims(0);
+      if (InputNumDims(1) != numDims || InputNumDims(2) != numDims)
 	throw;
-      */
+      if (m_permutation.size() != numDims)
+	throw;
+      for (Dim dim = 0; dim < numDims; ++dim) {
+	const DataTypeInfo &in0Type = InputDataType(0);
+	const DataTypeInfo &in1Type = InputDataType(1);
+	const DataTypeInfo &in2Type = InputDataType(2);
+	if (in0Type.m_dist.m_dists[dim] != in2Type.m_dist.m_dists[dim])
+	  throw;
+	if (*InputLen(0,dim) != *InputLen(2,dim))
+	  throw;
+
+	Dim mapping = m_permutation[dim];
+	if (in0Type.m_dist.m_dists[dim] != in1Type.m_dist.m_dists[mapping])
+	  throw;
+	if (*InputLen(0,dim) != *InputLen(1,mapping)) {
+	  cout << "Input 0:\n";
+	  InputLen(0,dim)->Print();
+	  cout << "Input 1:\n";
+	  InputLen(1,mapping)->Print();
+	  throw;
+	}
+      }
     }
     else {
       cout << LayerNumToStr(m_layer) << endl;
