@@ -124,6 +124,15 @@ void YAxpPx::PrintCode(IndStream &out)
        << GetInputName(2).str() << " );\n";
 }
 
+
+
+void YAxpPx::AddVariables(VarSet &set) const
+{
+  DLAOp<3,1>::AddVariables(set);
+  Var var(PermutationVarType,m_permutation);
+  set.insert(var);
+}
+
 void YAxpPx::Prop()
 {
   if (!IsValidCost(m_cost)) {

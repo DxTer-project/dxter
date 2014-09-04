@@ -207,6 +207,7 @@ typedef DimSet::iterator DimSetIter;
 typedef DimSet::const_iterator DimSetConstIter;
 
 
+
 class DistEntry
 {
  public:
@@ -231,10 +232,12 @@ struct DistEntryCompare {
   }
 };
 
+typedef vector<DistEntry> DistEntryVec;
+typedef DistEntryVec::iterator DistEntryVecIter;
+typedef DistEntryVec::const_iterator DistEntryVecConstIter;
 typedef set<DistEntry,DistEntryCompare> EntrySet;
 typedef EntrySet::iterator EntrySetIter;
 typedef EntrySet::const_iterator EntrySetConstIter;
-
 typedef list<DistEntry> EntryList;
 typedef EntryList::iterator EntryListIter;
 typedef EntryList::const_iterator EntryListConstIter;

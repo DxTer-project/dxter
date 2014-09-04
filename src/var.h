@@ -30,6 +30,7 @@ string ModeArrayPairVarName(const DimVec &arr1, const DimVec &arr2);
 string TensorDistVarName(const DistType &type);
 string IndexArrayVarName(const string &indices);
 string PermutationVarName(const DimVec &perm);
+string DistEntryVecVarName(const DistEntryVec &vec);
 #elif DOLLDLA
 string LLDLAPartVarName(const string &var, unsigned int part);
 string LLDLATransVarName(const string &var, Trans trans);
@@ -46,7 +47,7 @@ enum VarType {
   TensorDistVarType,
   IndexArrayType,
   PermutationVarType,
-  
+  DistEntryVecVarType,
 #elif DOLLDLA
   VarPartType,
   VarTransType,
@@ -67,6 +68,7 @@ class Var
     std::pair<DimVec, DimVec> *m_arrPair;
     std::pair<Dim,Dim> *m_pair;
     string *m_indices;
+    DistEntryVec *m_entryVec;
 #endif
 #if DODM
     DistType *m_distType;
@@ -86,6 +88,7 @@ class Var
   Var(VarType type, const DimVec &vec);
   Var(const DimVec &vec1, const DimVec &vec2);
   Var(Dim dim1, Dim dim2);
+  Var(const DistEntryVec &vec);
 #endif
 
 #if !DOLLDLA
