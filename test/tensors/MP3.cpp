@@ -532,7 +532,7 @@ DistTensorTest( const Grid& g )
 
     // t_efmn[D0,D1,D3,D2] <- t_efmn[D0,D1,D2,D3]
     t_efmn__D_0__D_1__D_3__D_2.AllToAllRedistFrom( t_efmn__D_0__D_1__D_2__D_3, modes_2_3, modes_3_2, modeArrayArray___2___3 );
-    YAxpPx( 2.0, t_efmn__D_0__D_1__D_2__D_3, -1.0, perm_0_1_3_2, t_efmn__D_0__D_1__D_3__D_2, axppx4_temp__D_0__D_1__D_2__D_3 );
+    YAxpPx( 2.0, t_efmn__D_0__D_1__D_2__D_3, -1.0, t_efmn__D_0__D_1__D_3__D_2, perm_0_1_3_2, axppx4_temp__D_0__D_1__D_2__D_3 );
 
     //------------------------------------//
 
@@ -550,7 +550,7 @@ DistTensorTest( const Grid& g )
 
     // t_gfon[D0,D1,D3,D2] <- t_gfon[D0,D1,D2,D3]
     t_gfon__D_0__D_1__D_3__D_2.AllToAllRedistFrom( t_gfon__D_0__D_1__D_2__D_3, modes_2_3, modes_3_2, modeArrayArray___2___3 );
-    YAxpPx( 2.0, t_gfon__D_0__D_1__D_2__D_3, -1.0, perm_0_1_3_2, t_gfon__D_0__D_1__D_3__D_2, axppx2_temp__D_0__D_1__D_2__D_3 );
+    YAxpPx( 2.0, t_gfon__D_0__D_1__D_2__D_3, -1.0, t_gfon__D_0__D_1__D_3__D_2, perm_0_1_3_2, axppx2_temp__D_0__D_1__D_2__D_3 );
 
     //------------------------------------//
 
@@ -605,7 +605,7 @@ DistTensorTest( const Grid& g )
 
     // cont1_temp[D0,D1,D3,D2] <- cont1_temp[D0,D1,D2,D3]
     cont1_temp__D_0__D_1__D_3__D_2.AllToAllRedistFrom( cont1_temp__D_0__D_1__D_2__D_3, modes_2_3, modes_3_2, modeArrayArray___2___3 );
-    YAxpPx( 0.5, cont1_temp__D_0__D_1__D_2__D_3, 1.0, perm_0_1_3_2, cont1_temp__D_0__D_1__D_3__D_2, accum_temp__D_0__D_1__D_2__D_3 );
+    YAxpPx( 0.5, cont1_temp__D_0__D_1__D_2__D_3, 1.0, cont1_temp__D_0__D_1__D_3__D_2, perm_0_1_3_2, accum_temp__D_0__D_1__D_2__D_3 );
 
     //------------------------------------//
 
@@ -734,8 +734,7 @@ DistTensorTest( const Grid& g )
 
     //------------------------------------//
 
-
-
+    //****
 
     /*
     DistTensor<T> diffTensor( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );    

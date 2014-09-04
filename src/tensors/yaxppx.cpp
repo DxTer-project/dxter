@@ -119,9 +119,9 @@ void YAxpPx::PrintCode(IndStream &out)
   out << m_alpha;
   *out << ", " << GetInputName(0).str() << ", ";
   out << m_beta;
-  *out << ", " << PermutationVarName(m_permutation)
-       << ", " << GetInputName(1).str() << ", "
-       << GetInputName(2).str() << " );\n";
+  *out  << ", " << GetInputName(1).str() << ", "
+	<< PermutationVarName(m_permutation) << ", " 
+	<< GetInputName(2).str() << " );\n";
 }
 
 

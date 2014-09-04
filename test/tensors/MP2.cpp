@@ -241,7 +241,7 @@ DistTensorTest( const Grid& g )
 
     // v_efmn[D0,D1,D3,D2] <- v_efmn[D0,D1,D2,D3]
     v_efmn__D_0__D_1__D_3__D_2.AllToAllRedistFrom( v_efmn__D_0__D_1__D_2__D_3, modes_2_3, modes_3_2, modeArrayArray___2___3 );
-    YAxpPx( 2.0, v_efmn__D_0__D_1__D_2__D_3, -1.0, perm_0_1_3_2, v_efmn__D_0__D_1__D_3__D_2, axppx1_temp__D_0__D_1__D_2__D_3 );
+    YAxpPx( 2.0, v_efmn__D_0__D_1__D_2__D_3, -1.0, v_efmn__D_0__D_1__D_3__D_2, perm_0_1_3_2, axppx1_temp__D_0__D_1__D_2__D_3 );
 
     //------------------------------------//
 
