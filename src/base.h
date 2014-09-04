@@ -223,7 +223,7 @@ class DistEntry
   string PrettyStr() const;
   DimVec DistEntryDims() const;
   DimSet DistEntryDimSet() const;
-  void DimsToDistEntry(DimVec dims);
+  void DimsToDistEntry(const DimVec &dims);
 };
 
 struct DistEntryCompare {

@@ -166,21 +166,11 @@ DistTensorTest( const Grid& g )
     const Unsigned gridOrder = 4;
 
     ObjShape tempShape;
-
     TensorDistribution dist____N_D_0_1_2_3 = tmen::StringToTensorDist("[]|(0,1,2,3)");
     TensorDistribution dist__D_0__D_1__D_2__D_3 = tmen::StringToTensorDist("[(0),(1),(2),(3)]");
     TensorDistribution dist__D_0__D_1__D_3__D_2 = tmen::StringToTensorDist("[(0),(1),(3),(2)]");
-    TensorDistribution dist__D_0__D_2__D_3__N_D_1 = tmen::StringToTensorDist("[(0),(2),(3)]|(1)");
-    TensorDistribution dist__D_0__D_2__N_D_1_3 = tmen::StringToTensorDist("[(0),(2)]|(1,3)");
-    TensorDistribution dist__D_2__N_D_0_1_3 = tmen::StringToTensorDist("[(2)]|(0,1,3)");
     //E_MP2[D0,D1,D2,D3]
     DistTensor<double> E_MP2__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
-    //E_MP2[D0,D2,D3] | {1}
-    DistTensor<double> E_MP2__D_0__D_2__D_3__N_D_1( dist__D_0__D_2__D_3__N_D_1, g );
-    //E_MP2[D0,D2] | {1,3}
-    DistTensor<double> E_MP2__D_0__D_2__N_D_1_3( dist__D_0__D_2__N_D_1_3, g );
-    //E_MP2[D2] | {0,1,3}
-    DistTensor<double> E_MP2__D_2__N_D_0_1_3( dist__D_2__N_D_0_1_3, g );
     //E_MP2[] | {0,1,2,3}
     DistTensor<double> E_MP2____N_D_0_1_2_3( dist____N_D_0_1_2_3, g );
     //axppx1_temp[D0,D1,D2,D3]
@@ -189,6 +179,11 @@ DistTensorTest( const Grid& g )
     DistTensor<double> v_efmn__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
     //v_efmn[D0,D1,D3,D2]
     DistTensor<double> v_efmn__D_0__D_1__D_3__D_2( dist__D_0__D_1__D_3__D_2, g );
+    ModeArray modes_0_1_2_3;
+    modes_0_1_2_3.push_back(0);
+    modes_0_1_2_3.push_back(1);
+    modes_0_1_2_3.push_back(2);
+    modes_0_1_2_3.push_back(3);
     ModeArray modes_2;
     modes_2.push_back(2);
     ModeArray modes_2_3;
@@ -251,7 +246,7 @@ DistTensorTest( const Grid& g )
     //------------------------------------//
 
     //****
-    //**** (out of 24)
+    //**** (out of 1)
     //------------------------------------//
 
     tempShape = E_MP2____N_D_0_1_2_3.Shape();
@@ -264,32 +259,15 @@ DistTensorTest( const Grid& g )
     LocalContract(1.0, v_efmn__D_0__D_1__D_2__D_3.LockedTensor(), indices_efmn,
 		  axppx1_temp__D_0__D_1__D_2__D_3.LockedTensor(), indices_efmn,
 		  0.0, E_MP2__D_0__D_1__D_2__D_3.Tensor(), indices_efmn);
-    tempShape = E_MP2____N_D_0_1_2_3.Shape();
-    tempShape.push_back( g.Shape()[0] );
-    tempShape.push_back( g.Shape()[2] );
-    tempShape.push_back( g.Shape()[3] );
-    E_MP2__D_0__D_2__D_3__N_D_1.ResizeTo( tempShape );
-    // E_MP2[D0,D2,D3] | {1} <- E_MP2[D0,D1,D2,D3] (with SumScatter on D1)
-    E_MP2__D_0__D_2__D_3__N_D_1.ReduceToOneRedistFrom( E_MP2__D_0__D_1__D_2__D_3, 1 );
-    tempShape = E_MP2____N_D_0_1_2_3.Shape();
-    tempShape.push_back( g.Shape()[0] );
-    tempShape.push_back( g.Shape()[2] );
-    E_MP2__D_0__D_2__N_D_1_3.ResizeTo( tempShape );
-    // E_MP2[D0,D2] | {1,3} <- E_MP2[D0,D2,D3] | {1} (with SumScatter on D3)
-    E_MP2__D_0__D_2__N_D_1_3.ReduceToOneRedistFrom( E_MP2__D_0__D_2__D_3__N_D_1, 2 );
-    tempShape = E_MP2____N_D_0_1_2_3.Shape();
-    tempShape.push_back( g.Shape()[2] );
-    E_MP2__D_2__N_D_0_1_3.ResizeTo( tempShape );
-    // E_MP2[D2] | {0,1,3} <- E_MP2[D0,D2] | {1,3} (with SumScatter on D0)
-    E_MP2__D_2__N_D_0_1_3.ReduceToOneRedistFrom( E_MP2__D_0__D_2__N_D_1_3, 0 );
-    // E_MP2[] | {0,1,2,3} <- E_MP2[D2] | {0,1,3} (with SumScatter on D2)
-    E_MP2____N_D_0_1_2_3.ReduceToOneRedistFrom( E_MP2__D_2__N_D_0_1_3, 0 );
+    // E_MP2[] | {0,1,2,3} <- E_MP2[D0,D1,D2,D3] (with SumScatter on (D0)(D1)(D2)(D3))
+    E_MP2____N_D_0_1_2_3.ReduceToOneRedistFrom( E_MP2__D_0__D_1__D_2__D_3, modes_0_1_2_3 );
 
     //------------------------------------//
 
+    //****
 
 
-    /*
+   /*
       DistTensor<T> diffTensor( tmen::StringToTensorDist("[(),(),()]|(0,1,2,3)"), g );    
       diffTensor.ResizeTo(C_local);
       Diff( C_local.LockedTensor(), C_local_comparison.LockedTensor(), diffTensor.Tensor() );

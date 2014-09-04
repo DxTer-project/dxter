@@ -166,22 +166,16 @@ DistTensorTest( const Grid& g )
     const Unsigned gridOrder = 4;
 
 
-
     ObjShape tempShape;
     TensorDistribution dist____N_D_0_1_2_3 = tmen::StringToTensorDist("[]|(0,1,2,3)");
     TensorDistribution dist__S__S__D_2__D_3 = tmen::StringToTensorDist("[(),(),(2),(3)]");
     TensorDistribution dist__S__D_1__D_2__D_3 = tmen::StringToTensorDist("[(),(1),(2),(3)]");
     TensorDistribution dist__D_0__D_1__S__S__D_2__D_3 = tmen::StringToTensorDist("[(0),(1),(),(),(2),(3)]");
     TensorDistribution dist__D_0__D_1__S__S = tmen::StringToTensorDist("[(0),(1),(),()]");
-    TensorDistribution dist__D_0__D_1__S__D_3__D_2 = tmen::StringToTensorDist("[(0),(1),(),(3),(2)]");
     TensorDistribution dist__D_0__D_1__D_2__S = tmen::StringToTensorDist("[(0),(1),(2),()]");
     TensorDistribution dist__D_0__D_1__D_2__D_3 = tmen::StringToTensorDist("[(0),(1),(2),(3)]");
     TensorDistribution dist__D_0__D_1__D_3__D_2 = tmen::StringToTensorDist("[(0),(1),(3),(2)]");
-    TensorDistribution dist__D_0__D_1__D_3__N_D_2 = tmen::StringToTensorDist("[(0),(1),(3)]|(2)");
-    TensorDistribution dist__D_0__D_3__N_D_1_2 = tmen::StringToTensorDist("[(0),(3)]|(1,2)");
-    TensorDistribution dist__D_0__N_D_1_2_3 = tmen::StringToTensorDist("[(0)]|(1,2,3)");
     TensorDistribution dist__D_1__S__D_3__S__D_2__D_0 = tmen::StringToTensorDist("[(1),(),(3),(),(2),(0)]");
-    TensorDistribution dist__D_1__D_2__D_3__S__D_0 = tmen::StringToTensorDist("[(1),(2),(3),(),(0)]");
     TensorDistribution dist__D_1__D_2__D_3__D_0 = tmen::StringToTensorDist("[(1),(2),(3),(0)]");
     TensorDistribution dist__D_2__S__S__D_0 = tmen::StringToTensorDist("[(2),(),(),(0)]");
     TensorDistribution dist__D_2__S__D_0__S = tmen::StringToTensorDist("[(2),(),(0),()]");
@@ -194,24 +188,14 @@ DistTensorTest( const Grid& g )
     TensorDistribution dist__D_2__D_3__S__D_1 = tmen::StringToTensorDist("[(2),(3),(),(1)]");
     //E_MP3[D0,D1,D2,D3]
     DistTensor<double> E_MP3__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
-    //E_MP3[D0,D1,D3] | {2}
-    DistTensor<double> E_MP3__D_0__D_1__D_3__N_D_2( dist__D_0__D_1__D_3__N_D_2, g );
-    //E_MP3[D0,D3] | {1,2}
-    DistTensor<double> E_MP3__D_0__D_3__N_D_1_2( dist__D_0__D_3__N_D_1_2, g );
-    //E_MP3[D0] | {1,2,3}
-    DistTensor<double> E_MP3__D_0__N_D_1_2_3( dist__D_0__N_D_1_2_3, g );
     //E_MP3[] | {0,1,2,3}
     DistTensor<double> E_MP3____N_D_0_1_2_3( dist____N_D_0_1_2_3, g );
     //accum_temp[D0,D1,D2,D3]
     DistTensor<double> accum_temp__D_0__D_1__D_2__D_3( dist__D_0__D_1__D_2__D_3, g );
-    //accum_temp[D0,D1,*,D3,D2]
-    DistTensor<double> accum_temp__D_0__D_1__S__D_3__D_2( dist__D_0__D_1__S__D_3__D_2, g );
     //accum_temp[D0,D1,*,*,D2,D3]
     DistTensor<double> accum_temp__D_0__D_1__S__S__D_2__D_3( dist__D_0__D_1__S__S__D_2__D_3, g );
     //accum_temp[D1,D2,D3,D0]
     DistTensor<double> accum_temp__D_1__D_2__D_3__D_0( dist__D_1__D_2__D_3__D_0, g );
-    //accum_temp[D1,D2,D3,*,D0]
-    DistTensor<double> accum_temp__D_1__D_2__D_3__S__D_0( dist__D_1__D_2__D_3__S__D_0, g );
     //accum_temp[D1,*,D3,*,D2,D0]
     DistTensor<double> accum_temp__D_1__S__D_3__S__D_2__D_0( dist__D_1__S__D_3__S__D_2__D_0, g );
     //axppx2_temp[D0,D1,D2,D3]
@@ -232,8 +216,6 @@ DistTensorTest( const Grid& g )
     DistTensor<double> cont1_temp__D_0__D_1__D_3__D_2( dist__D_0__D_1__D_3__D_2, g );
     //cont1_temp[D1,D2,D3,D0]
     DistTensor<double> cont1_temp__D_1__D_2__D_3__D_0( dist__D_1__D_2__D_3__D_0, g );
-    //cont1_temp[D1,D2,D3,*,D0]
-    DistTensor<double> cont1_temp__D_1__D_2__D_3__S__D_0( dist__D_1__D_2__D_3__S__D_0, g );
     //cont1_temp[D1,*,D3,*,D2,D0]
     DistTensor<double> cont1_temp__D_1__S__D_3__S__D_2__D_0( dist__D_1__S__D_3__S__D_2__D_0, g );
     //t_efmn[D0,D1,D2,D3]
@@ -316,6 +298,9 @@ DistTensorTest( const Grid& g )
     ModeArray modes_3_2;
     modes_3_2.push_back(3);
     modes_3_2.push_back(2);
+    ModeArray modes_5_4;
+    modes_5_4.push_back(5);
+    modes_5_4.push_back(4);
     IndexArray indices_efgh( 4 );
     indices_efgh[0] = 'e';
     indices_efgh[1] = 'f';
@@ -599,25 +584,12 @@ DistTensorTest( const Grid& g )
     LocalContract(1.0, v2_oegm__D_0__D_1__D_2__D_3.LockedTensor(), indices_oegm,
 		  t_gfon__D_2__S__S__D_0.LockedTensor(), indices_gfno,
 		  0.0, cont1_temp__D_1__S__D_3__S__D_2__D_0.Tensor(), indices_efmngo);
-    //**** (out of 2)
-    //**** Is real
-    //------------------------------------//
-
-    tempShape = cont1_temp__D_1__D_2__D_3__D_0.Shape();
-    tempShape.push_back( g.Shape()[0] );
-    cont1_temp__D_1__D_2__D_3__S__D_0.ResizeTo( tempShape );
-    // cont1_temp[D1,D2,D3,*,D0] <- cont1_temp[D1,*,D3,*,D2,D0] (with SumScatter on D2)
-    cont1_temp__D_1__D_2__D_3__S__D_0.ReduceScatterRedistFrom( cont1_temp__D_1__S__D_3__S__D_2__D_0, 4, 1 );
-    // cont1_temp[D1,D2,D3,D0] <- cont1_temp[D1,D2,D3,*,D0] (with SumScatter on D0)
-    cont1_temp__D_1__D_2__D_3__D_0.ReduceScatterRedistFrom( cont1_temp__D_1__D_2__D_3__S__D_0, 4, 3 );
-
-    //------------------------------------//
-
-    //****
     //**** (out of 1)
     //**** Is real
     //------------------------------------//
 
+    // cont1_temp[D1,D2,D3,D0] <- cont1_temp[D1,*,D3,*,D2,D0] (with SumScatter on (D2)(D0))
+    cont1_temp__D_1__D_2__D_3__D_0.ReduceScatterRedistFrom( cont1_temp__D_1__S__D_3__S__D_2__D_0, modes_5_4, modes_3_1 );
     // cont1_temp[D0,D1,D2,D3] <- cont1_temp[D1,D2,D3,D0]
     cont1_temp__D_0__D_1__D_2__D_3.AllToAllRedistFrom( cont1_temp__D_1__D_2__D_3__D_0, modes_0_1_2_3, modes_1_2_3_0, modeArrayArray___1___2___3___0 );
 
@@ -633,9 +605,7 @@ DistTensorTest( const Grid& g )
 
     // cont1_temp[D0,D1,D3,D2] <- cont1_temp[D0,D1,D2,D3]
     cont1_temp__D_0__D_1__D_3__D_2.AllToAllRedistFrom( cont1_temp__D_0__D_1__D_2__D_3, modes_2_3, modes_3_2, modeArrayArray___2___3 );
-    YAxpPx( 0.5, cont1_temp__D_0__D_1__D_2__D_3, 
-	    1.0, perm_0_1_3_2, cont1_temp__D_0__D_1__D_3__D_2, 
-	    accum_temp__D_0__D_1__D_2__D_3 );
+    YAxpPx( 0.5, cont1_temp__D_0__D_1__D_2__D_3, 1.0, perm_0_1_3_2, cont1_temp__D_0__D_1__D_3__D_2, accum_temp__D_0__D_1__D_2__D_3 );
 
     //------------------------------------//
 
@@ -707,25 +677,12 @@ DistTensorTest( const Grid& g )
     LocalContract(0.5, axppx3_temp__D_0__D_1__D_2__D_3.LockedTensor(), indices_oegm,
 		  axppx2_temp__D_2__S__D_0__S.LockedTensor(), indices_gfon,
 		  0.0, accum_temp__D_1__S__D_3__S__D_2__D_0.Tensor(), indices_efmngo);
-    //**** (out of 2)
-    //**** Is a shadow
-    //------------------------------------//
-
-    tempShape = accum_temp__D_1__D_2__D_3__D_0.Shape();
-    tempShape.push_back( g.Shape()[0] );
-    accum_temp__D_1__D_2__D_3__S__D_0.ResizeTo( tempShape );
-    // accum_temp[D1,D2,D3,*,D0] <- accum_temp[D1,*,D3,*,D2,D0] (with SumScatter on D2)
-    accum_temp__D_1__D_2__D_3__S__D_0.ReduceScatterRedistFrom( accum_temp__D_1__S__D_3__S__D_2__D_0, 4, 1 );
-    // accum_temp[D1,D2,D3,D0] <- accum_temp[D1,D2,D3,*,D0] (with SumScatter on D0)
-    accum_temp__D_1__D_2__D_3__D_0.ReduceScatterRedistFrom( accum_temp__D_1__D_2__D_3__S__D_0, 4, 3 );
-
-    //------------------------------------//
-
-    //****
     //**** (out of 1)
     //**** Is a shadow
     //------------------------------------//
 
+    // accum_temp[D1,D2,D3,D0] <- accum_temp[D1,*,D3,*,D2,D0] (with SumScatter on (D2)(D0))
+    accum_temp__D_1__D_2__D_3__D_0.ReduceScatterRedistFrom( accum_temp__D_1__S__D_3__S__D_2__D_0, modes_5_4, modes_3_1 );
     // accum_temp[D0,D1,D2,D3] <- accum_temp[D1,D2,D3,D0]
     accum_temp__D_0__D_1__D_2__D_3.AllToAllRedistFrom( accum_temp__D_1__D_2__D_3__D_0, modes_0_1_2_3, modes_1_2_3_0, modeArrayArray___1___2___3___0 );
 
@@ -741,17 +698,12 @@ DistTensorTest( const Grid& g )
     LocalContract(0.5, v_efgh__D_0__D_1__D_2__D_3.LockedTensor(), indices_efgh,
 		  t_ghmn__D_2__D_3__S__S.LockedTensor(), indices_ghmn,
 		  0.0, accum_temp__D_0__D_1__S__S__D_2__D_3.Tensor(), indices_efmngh);
-    //**** (out of 2)
+    //**** (out of 1)
     //**** Is a shadow
     //------------------------------------//
 
-    tempShape = accum_temp__D_0__D_1__D_2__D_3.Shape();
-    tempShape.push_back( g.Shape()[2] );
-    accum_temp__D_0__D_1__S__D_3__D_2.ResizeTo( tempShape );
-    // accum_temp[D0,D1,*,D3,D2] <- accum_temp[D0,D1,*,*,D2,D3] (with SumScatter on D3)
-    accum_temp__D_0__D_1__S__D_3__D_2.ReduceScatterRedistFrom( accum_temp__D_0__D_1__S__S__D_2__D_3, 5, 3 );
-    // accum_temp[D0,D1,D2,D3] <- accum_temp[D0,D1,*,D3,D2] (with SumScatter on D2)
-    accum_temp__D_0__D_1__D_2__D_3.ReduceScatterUpdateRedistFrom( accum_temp__D_0__D_1__S__D_3__D_2, 1.0, 4, 2 );
+    // accum_temp[D0,D1,D2,D3] <- accum_temp[D0,D1,*,*,D2,D3] (with SumScatter on (D2)(D3))
+    accum_temp__D_0__D_1__D_2__D_3.ReduceScatterUpdateRedistFrom( accum_temp__D_0__D_1__S__S__D_2__D_3, 1.0, modes_5_4, modes_3_2 );
 
     //------------------------------------//
 
@@ -764,7 +716,7 @@ DistTensorTest( const Grid& g )
     //------------------------------------//
 
     //****
-    //**** (out of 24)
+    //**** (out of 1)
     //------------------------------------//
 
     tempShape = E_MP3____N_D_0_1_2_3.Shape();
@@ -777,28 +729,12 @@ DistTensorTest( const Grid& g )
     LocalContract(2.0, axppx4_temp__D_0__D_1__D_2__D_3.LockedTensor(), indices_efmn,
 		  accum_temp__D_0__D_1__D_2__D_3.LockedTensor(), indices_efmn,
 		  0.0, E_MP3__D_0__D_1__D_2__D_3.Tensor(), indices_efmn);
-    tempShape = E_MP3____N_D_0_1_2_3.Shape();
-    tempShape.push_back( g.Shape()[0] );
-    tempShape.push_back( g.Shape()[1] );
-    tempShape.push_back( g.Shape()[3] );
-    E_MP3__D_0__D_1__D_3__N_D_2.ResizeTo( tempShape );
-    // E_MP3[D0,D1,D3] | {2} <- E_MP3[D0,D1,D2,D3] (with SumScatter on D2)
-    E_MP3__D_0__D_1__D_3__N_D_2.ReduceToOneRedistFrom( E_MP3__D_0__D_1__D_2__D_3, 2 );
-    tempShape = E_MP3____N_D_0_1_2_3.Shape();
-    tempShape.push_back( g.Shape()[0] );
-    tempShape.push_back( g.Shape()[3] );
-    E_MP3__D_0__D_3__N_D_1_2.ResizeTo( tempShape );
-    // E_MP3[D0,D3] | {1,2} <- E_MP3[D0,D1,D3] | {2} (with SumScatter on D1)
-    E_MP3__D_0__D_3__N_D_1_2.ReduceToOneRedistFrom( E_MP3__D_0__D_1__D_3__N_D_2, 1 );
-    tempShape = E_MP3____N_D_0_1_2_3.Shape();
-    tempShape.push_back( g.Shape()[0] );
-    E_MP3__D_0__N_D_1_2_3.ResizeTo( tempShape );
-    // E_MP3[D0] | {1,2,3} <- E_MP3[D0,D3] | {1,2} (with SumScatter on D3)
-    E_MP3__D_0__N_D_1_2_3.ReduceToOneRedistFrom( E_MP3__D_0__D_3__N_D_1_2, 1 );
-    // E_MP3[] | {0,1,2,3} <- E_MP3[D0] | {1,2,3} (with SumScatter on D0)
-    E_MP3____N_D_0_1_2_3.ReduceToOneRedistFrom( E_MP3__D_0__N_D_1_2_3, 0 );
+    // E_MP3[] | {0,1,2,3} <- E_MP3[D0,D1,D2,D3] (with SumScatter on (D0)(D1)(D2)(D3))
+    E_MP3____N_D_0_1_2_3.ReduceToOneRedistFrom( E_MP3__D_0__D_1__D_2__D_3, modes_0_1_2_3 );
 
     //------------------------------------//
+
+
 
 
     /*

@@ -30,6 +30,12 @@
 #include "transform.h"
 #include "DLAOp.h"
 
+#define ALLOWMULTIMODESCATTER 1
+#define SPLITMULTIMODESCATTER 0
+#if (ALLOWMULTIMODESCATTER+SPLITMULTIMODESCATTER)==0
+Bad configuration
+#endif
+
 class SumScatterUpdateNode : public DLAOp<2,1>
 {
  public:
@@ -51,6 +57,7 @@ class SumScatterUpdateNode : public DLAOp<2,1>
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   void CheckSumDimsInOutput() const;
+  virtual void AddVariables(VarSet &set) const;
 };
 
 class SeparateRedistFromSumScatter : public SingleTrans

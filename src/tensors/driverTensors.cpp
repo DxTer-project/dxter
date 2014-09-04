@@ -86,7 +86,10 @@ void AddTrans()
     Universe::AddTrans(RedistNode::GetClass(), new SingleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllGathers(dim), ROTENSORPHASE);
+
+#if SPLITMULTIMODESCATTER
     Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SplitSumScatter(dim), SUMSCATTERTENSORPHASE);
+#endif
 
     for(Dim dim2 = 0; dim2 < NUM_GRID_DIMS; ++dim2) {
       if (dim2 != dim) {
