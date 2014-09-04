@@ -30,9 +30,9 @@ Permute::Permute(string start, string end, Layer layer)
   SetLayer(layer);
   if (start.length() != end.length())
     throw;
-  string::iterator iter = end.begin();
-  for(; iter != end.end(); ++iter) {
-    m_permutation.push_back(start.find(*iter));
+  string::iterator iter = start.begin();
+  for(; iter != start.end(); ++iter) {
+    m_permutation.push_back(end.find(*iter));
   }
 }
 
