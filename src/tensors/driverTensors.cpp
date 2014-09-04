@@ -53,6 +53,7 @@ Size bigSize = 1000;
 RealPSet* Cont1Example();
 RealPSet* MartinsExample();
 RealPSet* MartinsExample2();
+RealPSet* MP2();
 RealPSet* MP3();
 
 void AddTrans()
@@ -112,7 +113,8 @@ void Usage()
   cout <<"         1  -> Contraction (abcd,cdef,abef)\n";
   cout <<"         2  -> Martin's Example\n";
   cout <<"         3  -> Martin's Example - real\n";
-  cout <<"         4  -> MP3\n";
+  cout <<"         4  -> MP2\n";
+  cout <<"         5  -> MP3\n";
 }
 
 int main(int argc, const char* argv[])
@@ -145,6 +147,9 @@ int main(int argc, const char* argv[])
       algFunc = MartinsExample2;
       break;
     case(4):
+      algFunc = MP2;
+      break;
+    case(5):
       algFunc = MP3;
       break;
     default:
@@ -474,6 +479,85 @@ RealPSet* MartinsExample2()
   
   return outerSet;
 
+}
+
+RealPSet* MP2()
+{
+  Size eSize = 53;
+  Size fSize = 53;
+  Size mSize = 5;
+  Size nSize = 5;
+
+
+  InputNode *v_efmn;
+  InputNode *t_efmn;
+
+
+  InputNode *axppx1_temp;
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    t_efmn = new InputNode("t_efmn", sizes, "t_efmn", 4);
+  }
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    v_efmn = new InputNode("v_efmn", sizes, "v_efmn", 4);
+  }
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    axppx1_temp = new InputNode("axppx1_temp", 
+				sizes, "axppx1_temp", 4);
+  }
+
+
+  Sizes ones[2];
+  for (Dim dim = 0; dim < 2; ++dim)
+    ones[dim].AddRepeatedSizes(one, 1, 1);
+
+  DistType scalarDist;
+  scalarDist.SetToScalarNoRep();
+
+  InputNode *scalarIn = new InputNode("scalar input",  ones, scalarDist, "E_MP2", 0);
+
+
+  YAxpPx *axppx1 = new YAxpPx(DMLAYER, COEFTWO, COEFNEGONE, "efnm", "efmn");
+  axppx1->AddInputs(6,
+		   v_efmn, 0,
+		   v_efmn, 0,
+		   axppx1_temp, 0);
+  Poss *axppx1Poss = new Poss(axppx1);
+  RealPSet * axppx1Set = new RealPSet(axppx1Poss);
+
+
+  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
+  cont1->AddInputs(6,
+		   v_efmn,0,
+		   axppx1Set->OutTun(0),0,
+		   scalarIn,0);
+  Poss *cont1Poss = new Poss(cont1);
+  RealPSet *cont1Set = new RealPSet(cont1Poss);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(cont1Set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
 }
 
 RealPSet* MP3()
