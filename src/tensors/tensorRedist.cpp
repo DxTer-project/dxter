@@ -40,6 +40,12 @@ void GetDifferentSuffix(const DimVec &dims1, const DimVec &dims2,
 void GetSuffix(const DimVec &dims1, const DimVec &dims2, 
 	       DimVec &suff);
 
+bool GetAllToAllPattern(const DistType &srcType, 
+			const DistType &destType,
+			DimVec *fromIndices,
+			DimVec *toIndices,
+			DistEntryVec *gridModesInvolved);
+
 RedistNode::RedistNode() 
 {
   m_info.m_dist.SetToDefault(0);
@@ -360,51 +366,15 @@ Phase RedistNode::MaxPhase() const
   bool foundMemCopy = false;
   bool foundAllGather = false;
   bool foundAllToAll = false;
-  bool mightBeMultiAllToAll = true;
   DimSet diffs;
 
   //Check for multi-mode AllToAll
-  
-  EntrySet srcSuffixes, destSuffixes;
-  for (Dim dim = 0; dim < numDims; ++dim) {
-    DistEntry srcDistEntry = m_srcType.m_dists[dim];
-    DistEntry destDistEntry = m_info.m_dist.m_dists[dim];
-    DimVec srcDims = srcDistEntry.DistEntryDims();
-    DimVec destDims = destDistEntry.DistEntryDims();
-    DimVec suff1, suff2;
-    if (srcDistEntry != destDistEntry) {
-      if (srcDistEntry.IsStar() || destDistEntry.IsStar()) {
-	mightBeMultiAllToAll = false;
-	break;
-      }
-      else {
-	GetDifferentSuffix(srcDims, destDims, suff1, suff2);
-	if (suff1.empty() || suff2.empty()) {
-	  mightBeMultiAllToAll = false;
-	  break;
-	}
-	DistEntry srcSuff;
-	srcSuff.DimsToDistEntry(suff1);
-	srcSuffixes.insert(srcSuff);
-	DistEntry destSuff;
-	destSuff.DimsToDistEntry(suff2);
-	destSuffixes.insert(destSuff);
-      }
-    }
-  }
 
-  if (mightBeMultiAllToAll) {
-    EntrySetIter srcIter = srcSuffixes.begin();
-    for(; mightBeMultiAllToAll && srcIter != srcSuffixes.end(); ++srcIter) {
-      DistEntry entry = *srcIter;
-      if (!destSuffixes.erase(entry))
-	mightBeMultiAllToAll = false;
+  if (GetAllToAllPattern(m_srcType, m_info.m_dist,
+			 NULL, NULL, NULL)) 
+    {
+      return NUMPHASES;
     }
-    if (mightBeMultiAllToAll) {
-      if (destSuffixes.empty())
-	return NUMPHASES;
-    }
-  }
   
   for (Dim dim = 0; dim < numDims; ++dim) {
     DistEntry srcDistEntry = m_srcType.m_dists[dim];
@@ -576,44 +546,19 @@ void RedistNode::PrintCode(IndStream &out)
   if (m_srcType.m_numDims != numDims)
     throw;
 
-  bool mightBeMultiAllToAll = true;
-  EntrySet srcSuffixes, destSuffixes;
-  for (Dim dim = 0; dim < numDims; ++dim) {
-    DistEntry srcDistEntry = m_srcType.m_dists[dim];
-    DistEntry destDistEntry = m_info.m_dist.m_dists[dim];
-    DimVec srcDims = srcDistEntry.DistEntryDims();
-    DimVec destDims = destDistEntry.DistEntryDims();
-    DimVec suff1, suff2;
-    if (srcDistEntry != destDistEntry) {
-      GetDifferentSuffix(srcDims, destDims, suff1, suff2);
-      if (suff1.empty() || suff2.empty()) {
-	mightBeMultiAllToAll = false;
-	break;
-      }
-      DistEntry srcSuff;
-      srcSuff.DimsToDistEntry(suff1);
-      srcSuffixes.insert(srcSuff);
-      DistEntry destSuff;
-      destSuff.DimsToDistEntry(suff2);
-      destSuffixes.insert(destSuff);
-    }
+  DimVec fromIndices, toIndices;
+  DistEntryVec gridModesInvolved;
+  if (GetAllToAllPattern(m_srcType, m_info.m_dist,
+			 &fromIndices,
+			 &toIndices,
+			 &gridModesInvolved)) {
+    *out << outName << ".AllToAllRedistFrom( " 
+	 << inName << ", "
+	 << ModeArrayVarName(fromIndices) << ", "
+	 << ModeArrayVarName(toIndices) << ", "
+	 << DistEntryVecVarName(gridModesInvolved) << " );\n";
+    return;
   }
-
-  if (mightBeMultiAllToAll) {
-    EntrySetIter srcIter = srcSuffixes.begin();
-    for(; mightBeMultiAllToAll && srcIter != srcSuffixes.end(); ++srcIter) {
-      DistEntry entry = *srcIter;
-      if (!destSuffixes.erase(entry))
-	mightBeMultiAllToAll = false;
-    }
-    if (mightBeMultiAllToAll) {
-      if (destSuffixes.empty()) {
-	*out << "multi index AllToAll;\n";
-	return;
-      }
-    }
-  }
-
 
   DimSet diffs;
 
@@ -728,43 +673,35 @@ void RedistNode::AddVariables(VarSet &set) const
   if (m_srcType.m_numDims != numDims)
     throw;
 
-  bool mightBeMultiAllToAll = true;
-  EntrySet srcSuffixes, destSuffixes;
-  for (Dim dim = 0; dim < numDims; ++dim) {
-    DistEntry srcDistEntry = m_srcType.m_dists[dim];
-    DistEntry destDistEntry = m_info.m_dist.m_dists[dim];
-    DimVec srcDims = srcDistEntry.DistEntryDims();
-    DimVec destDims = destDistEntry.DistEntryDims();
-    DimVec suff1, suff2;
-    if (srcDistEntry != destDistEntry) {
-      GetDifferentSuffix(srcDims, destDims, suff1, suff2);
-      if (suff1.empty() || suff2.empty()) {
-	mightBeMultiAllToAll = false;
-	break;
-      }
-      DistEntry srcSuff;
-      srcSuff.DimsToDistEntry(suff1);
-      srcSuffixes.insert(srcSuff);
-      DistEntry destSuff;
-      destSuff.DimsToDistEntry(suff2);
-      destSuffixes.insert(destSuff);
-    }
-  }
+  DimVec fromIndices, toIndices;
+  DistEntryVec gridModesInvolved;
+  if (GetAllToAllPattern(m_srcType, m_info.m_dist,
+			 &fromIndices,
+			 &toIndices,
+			 &gridModesInvolved)) {
 
-  if (mightBeMultiAllToAll) {
-    EntrySetIter srcIter = srcSuffixes.begin();
-    for(; mightBeMultiAllToAll && srcIter != srcSuffixes.end(); ++srcIter) {
-      DistEntry entry = *srcIter;
-      if (!destSuffixes.erase(entry))
-	mightBeMultiAllToAll = false;
+    {
+      Var var(ModeArrayVarType, fromIndices);
+      set.insert(var);
     }
-    if (mightBeMultiAllToAll) {
-      if (destSuffixes.empty()) {
-	cout << "Need to add MultiModeAllToAll variables;\n";
-	return;
+    { 
+      Var var(ModeArrayVarType, toIndices);
+      set.insert(var);
+    }
+    { 
+      DistEntryVecIter iter = gridModesInvolved.begin();
+      for(; iter != gridModesInvolved.end(); ++iter) {
+	Var var(ModeArrayVarType, (*iter).DistEntryDims());
+	set.insert(var);
       }
+      Var var(gridModesInvolved);
+      set.insert(var);
     }
+
+    return;
   }
+    
+
 
 
   DimSet diffs;
@@ -1716,6 +1653,65 @@ void PermuteDistribution::Apply(Node *node) const
   
   redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0),
 			  newRedist, 0);    
+}
+
+bool GetAllToAllPattern(const DistType &srcType, 
+			const DistType &destType,
+			DimVec *fromIndices,
+			DimVec *toIndices,
+			DistEntryVec *gridModesInvolved)
+{
+  map<Dim,DistEntry> srcModes;
+  map<DistEntry,Dim,DistEntryCompare> destModes;
+  typedef pair<Dim,DistEntry> SrcModePair;
+  typedef pair<DistEntry,Dim> DestModePair;
+
+  Dim numDims = srcType.m_numDims;
+  
+  EntrySet srcSuffixes, destSuffixes;
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    DistEntry srcDistEntry = srcType.m_dists[dim];
+    DistEntry destDistEntry = destType.m_dists[dim];
+    DimVec srcDims = srcDistEntry.DistEntryDims();
+    DimVec destDims = destDistEntry.DistEntryDims();
+    DimVec suff1, suff2;
+    if (srcDistEntry != destDistEntry) {
+      GetDifferentSuffix(srcDims, destDims, suff1, suff2);
+      if (suff1.empty() || suff2.empty()) {
+	return false;
+      }
+      DistEntry srcSuff;
+      srcSuff.DimsToDistEntry(suff1);
+      srcSuffixes.insert(srcSuff);
+      if (fromIndices)
+	srcModes.insert(SrcModePair(dim,srcSuff));
+      DistEntry destSuff;
+      destSuff.DimsToDistEntry(suff2);
+      destSuffixes.insert(destSuff);
+      if (fromIndices)
+	destModes.insert(DestModePair(destSuff,dim));
+    }
+  }
+
+  EntrySetIter srcIter = srcSuffixes.begin();
+  for(; srcIter != srcSuffixes.end(); ++srcIter) {
+    DistEntry entry = *srcIter;
+    if (!destSuffixes.erase(entry))
+      return false;
+  }
+  if (!destSuffixes.empty())
+    return false;
+
+  if (fromIndices) {
+    map<Dim,DistEntry>::iterator srcModeIter = srcModes.begin();
+    for(; srcModeIter != srcModes.end(); ++srcModeIter) {
+      fromIndices->push_back(srcModeIter->first);
+      toIndices->push_back(destModes.find(srcModeIter->second)->second);
+      gridModesInvolved->push_back(srcModeIter->second);
+    }
+  }
+
+  return true;
 }
 
 
