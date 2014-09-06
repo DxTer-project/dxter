@@ -91,6 +91,13 @@ void YxpBy::Prop()
       m_cost = 3 * TotalNumberOfLocalElements(0);
       if (InputDataType(0).m_dist != InputDataType(1).m_dist)
 	throw;
+
+      if (m_beta == COEFZERO)
+	throw;
+      if (m_beta == COEFNEGONE) {
+	if (GetInputNameStr(0) == GetInputNameStr(1))
+	  throw;
+      }
     }
     else {
       cout << LayerNumToStr(m_layer) << endl;
