@@ -556,7 +556,7 @@ string HaswellMacbook::CompileString(string executableName, string testFileName)
 
 double HaswellMacbook::CyclesPerSecond()
 {
-  return 2.8e9;
+  return 1.4e9;
 }
 
 double HaswellMacbook::DFlopsPerCycle()
@@ -575,7 +575,7 @@ string HaswellMacbook::SFMACode(string operand1, string operand2, string operand
 }
 string HaswellMacbook::DFMACode(string operand1, string operand2, string operand3, string result)
 {
-  return result + ".v = _mm256_fmadd_pd( " + operand1 + ".v, " + operand2 + ".v, " + operand3 + ". );\n";
+  return result + ".v = _mm256_fmadd_pd( " + operand1 + ".v, " + operand2 + ".v, " + operand3 + ".v );\n";
 }
 
 #endif // DOLLDLA

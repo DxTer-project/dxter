@@ -162,9 +162,9 @@ string MAddLoopRef::GetType() const
 {
   switch (m_dim) {
   case (DIMM):
-    return "MAddM";
+    return "MAddM" + std::to_string((long long int) m_bs.GetSize());
   case(DIMN):
-    return "MAddN";
+    return "MAddN" + std::to_string((long long int) m_bs.GetSize());
   default:
     return "ERROR: Bad dimension in MAddLoopRef transform";
   }
