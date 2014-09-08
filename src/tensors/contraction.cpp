@@ -633,7 +633,11 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
     cont->RedirectChildren(sumSet->OutTun(0),0);
   }
   else {
-    TempVarNode *temp2 = new TempVarNode(CType);
+    TempVarNode *temp2;
+    if (cont->m_beta != COEFZERO)
+	temp2 = new TempVarNode(CType,node->GetInputName(2).m_name+"_temp");
+    else
+      temp2 = new TempVarNode(CType);
     temp2->AddInput(node->Input(2),node->InputConnNum(2));
     node->m_poss->AddNode(temp2);
 
@@ -884,7 +888,11 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
     cont->RedirectChildren(sumSet->OutTun(0),0);
   }
   else {
-    TempVarNode *temp2 = new TempVarNode(CType);
+    TempVarNode *temp2;
+    if (cont->m_beta != COEFZERO)
+      temp2 = new TempVarNode(CType, node->GetInputName(2).m_name+"_temp");
+    else
+      temp2 = new TempVarNode(CType);
     temp2->AddInput(node->Input(2),node->InputConnNum(2));
     node->m_poss->AddNode(temp2);
 
