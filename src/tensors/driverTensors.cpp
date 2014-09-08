@@ -50,7 +50,7 @@ Size medSize = 100;
 Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
-RealPSet* Cont1Example();
+RealPSet* RedistExample();
 RealPSet* MartinsExample();
 RealPSet* MartinsExample2();
 RealPSet* MP2();
@@ -113,7 +113,7 @@ void Usage()
 {
   cout << "./driver arg1 arg2 arg3 arg4\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
-  cout <<"         1  -> Contraction (abcd,cdef,abef)\n";
+  cout <<"         1  -> Redist example\n";
   cout <<"         2  -> Martin's Example\n";
   cout <<"         3  -> Martin's Example - real\n";
   cout <<"         4  -> MP2\n";
@@ -141,7 +141,7 @@ int main(int argc, const char* argv[])
     algNum = atoi(argv[1]);
     switch(algNum) {
     case(1):
-      algFunc = Cont1Example;
+      algFunc = RedistExample;
       break;
     case(2):
       algFunc = MartinsExample;
@@ -256,39 +256,43 @@ int main(int argc, const char* argv[])
   return 0;
 }
 
-RealPSet* Cont1Example()
+RealPSet* RedistExample()
 {
   Sizes sizes[4];
 
   for (Dim dim = 0; dim < 4; ++dim)
     sizes[dim].AddRepeatedSizes(bigSize, 1, 1);
 
-  InputNode *Ain = new InputNode("A input",  sizes, "A", 3);
-  InputNode *Bin = new InputNode("B input",  sizes, "B", 4);
-  InputNode *Cin = new InputNode("C input",  sizes, "C", 3);
+  InputNode *Ain = new InputNode("A input",  sizes, "A", 4);
 
-  Tunnel *tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain,0);
+  DistType type1;
+  type1.SetToDefault(4);
+  type1.m_dists[0].m_val = 3;
+  type1.m_dists[1].m_val = 4;
+  type1.m_dists[2].m_val = 0;
+  type1.m_dists[3].m_val = 0;
 
-  Tunnel *tunB = new Tunnel(POSSTUNIN);
-  tunB->AddInput(Bin,0);
+  RedistNode *redist1 = new RedistNode(type1);
+  redist1->AddInput(Ain, 0);
 
-  Tunnel *tunC = new Tunnel(POSSTUNIN);
-  tunC->AddInput(Cin,0);
+  DistType type2;
+  type2.SetToDefault(4);
+  type2.m_dists[0].m_val = 0;
+  type2.m_dists[1].m_val = 2;
+  type2.m_dists[2].m_val = 0;
+  type2.m_dists[3].m_val = 4;
 
-  Contraction *cont = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"acd", "cefd", "aef", (string)"cd");
-  cont->AddInputs(6,
-		  tunA,0,
-		  tunB,0,
-		  tunC,0);
+  RedistNode *redist2 = new RedistNode(type2);
+  redist2->AddInput(Ain, 0);
 
-  Poss *innerPoss = new Poss(cont,true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
+  OutputNode *Cout1 = new OutputNode("C output");
+  Cout1->AddInput(redist1, 0);
 
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(Cout,true);
+  OutputNode *Cout2 = new OutputNode("C1 output");
+  Cout2->AddInput(redist2, 0);
+
+  Poss *outerPoss = new Poss(2, Cout1, Cout2);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
