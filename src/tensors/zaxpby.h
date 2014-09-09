@@ -41,7 +41,7 @@ class ZAxpBy : public DLAOp<3,1>
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "axppx";}
+  static ClassType GetClass() {return "zaxpby";}
   static Node* BlankInst() { return new ZAxpBy(ABSLAYER, COEFZERO, COEFZERO); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Prop();

@@ -168,8 +168,13 @@ void YAxpPx::Prop()
 	  throw;
 
 	Dim mapping = m_permutation[dim];
-	if (in0Type.m_dist.m_dists[dim] != in1Type.m_dist.m_dists[mapping])
+	if (in0Type.m_dist.m_dists[dim] != in1Type.m_dist.m_dists[mapping]) {
+	  cout << dim << endl;
+	  cout << in0Type.m_dist.PrettyStr() << endl;
+	  cout << mapping << endl;
+	  cout << in1Type.m_dist.PrettyStr() << endl;
 	  throw;
+	}
 	if (*InputLen(0,dim) != *InputLen(1,mapping)) {
 	  cout << "Input 0:\n";
 	  InputLen(0,dim)->Print();
