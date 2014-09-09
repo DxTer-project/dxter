@@ -37,7 +37,7 @@ class LowerLayer : public SingleTrans
   LowerLayer(Layer fromLayer, Layer toLayer)
     : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
 #endif
-
+  virtual bool IsRef() const {return true;}
 
 };
 
