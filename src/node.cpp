@@ -35,7 +35,7 @@
 #include "twoSidedTrxm.h"
 #include "tensorSumScatter.h"
 
-#define PRINTCOSTS
+//#define PRINTCOSTS
 
 Node::Node()
   :m_flags(0), m_poss(NULL) 
