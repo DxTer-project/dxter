@@ -80,6 +80,8 @@ void AddTrans()
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
 
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
+   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(DMLAYER,SMLAYER), DPTENSORPHASE);
+
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
@@ -191,6 +193,9 @@ int main(int argc, const char* argv[])
     Cost flopCost = graphIter.EvalAndSetBest();
     cout << "*****FLOPS = " << setprecision(15) << flopCost << endl;
     time(&start);
+
+  uni.PrintAll(algNum);
+  throw;
   }
 
 
@@ -760,7 +765,7 @@ RealPSet* MP3()
   Poss *axppx2Poss = new Poss(axppx2);
   RealPSet * axppx2Set = new RealPSet(axppx2Poss);
 
-  ZAxpBy *axppx3 = new ZAxpBy(SMLAYER,COEFTWO, COEFNEGONE);
+  ZAxpBy *axppx3 = new ZAxpBy(DMLAYER,COEFTWO, COEFNEGONE);
   axppx3->AddInputs(6,
 		   v_oegm, 0,
 		   v2_oegm, 0,

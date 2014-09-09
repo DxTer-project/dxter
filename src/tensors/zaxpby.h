@@ -28,6 +28,7 @@
 #include "transform.h"
 #include "DLAOp.h"
 #include "tensorRedist.h"
+#include "lowerLayer.h"
 
 class ZAxpBy : public DLAOp<3,1>
 {
@@ -51,4 +52,16 @@ class ZAxpBy : public DLAOp<3,1>
 };
 
 
+class ZAxpByLowerLayer : public LowerLayer
+{
+ public:
+  ZAxpByLowerLayer(Layer fromLayer, Layer toLayer)
+   : LowerLayer(fromLayer, toLayer) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+
 #endif //DOTENSORS
+

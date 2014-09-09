@@ -33,10 +33,6 @@ using namespace std;
 ZAxpBy::ZAxpBy(Layer layer, Coef alpha, Coef beta)
   : m_alpha(alpha), m_beta(beta)
 { 
-  if (layer!=SMLAYER) {
-    cout << "no refinements for ZAxpBy, so use SM\n";
-    throw;
-  }
   SetLayer(layer);
 }
 
@@ -151,4 +147,27 @@ void ZAxpBy::Prop()
   }
 }
 
+bool ZAxpByLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == ZAxpBy::GetClass()) {
+    const ZAxpBy *zaxpby = (ZAxpBy*)node;
+    return zaxpby->GetLayer() == m_fromLayer;
+  }
+  else
+    throw;
+}
+
+void ZAxpByLowerLayer::Apply(Node *node) const
+{
+  ZAxpBy *zaxpby = (ZAxpBy*)node;
+  zaxpby->SetLayer(m_toLayer);
+}
+
+string ZAxpByLowerLayer::GetType() const
+{ 
+  return "ZAxpBy lower layer " + LayerNumToStr(m_fromLayer) 
+  + " to " + LayerNumToStr(m_toLayer);
+}
+
 #endif // DOTENSORS
+
