@@ -193,9 +193,6 @@ int main(int argc, const char* argv[])
     Cost flopCost = graphIter.EvalAndSetBest();
     cout << "*****FLOPS = " << setprecision(15) << flopCost << endl;
     time(&start);
-
-  uni.PrintAll(algNum);
-  throw;
   }
 
 
