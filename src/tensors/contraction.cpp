@@ -153,18 +153,39 @@ void Contraction::Prop()
     const Sizes *sizes = InputLocalLen(2,0);
     Dim numDims = InputNumDims(2);
     unsigned int totNumIters = sizes->NumSizes();
-    for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
-      Cost temp = 1;
-      for (Dim dim = 0; dim < numDims; ++dim) {
-	temp *= (*InputLocalLen(2,dim))[iteration];
+
+    if (m_layer == ABSLAYER || m_layer == DMLAYER) {
+      for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+	Cost temp = 1;
+	for (Dim dim = 0; dim < numDims; ++dim) {
+	  cout << "cont " << (*InputLen(2,dim))[iteration] << endl;
+	  temp *= (*InputLen(2,dim))[iteration];
+	}
+	DimVecConstIter iter = dims.begin();
+	for(; iter != dims.end(); ++iter) {
+	  cout << "cont " << (*InputLen(0,*iter))[iteration] << endl;
+	  temp *= (*InputLen(0,*iter))[iteration];
+	}
+	m_cost += temp;
       }
-      DimVecConstIter iter = dims.begin();
-      for(; iter != dims.end(); ++iter) {
-	temp *= (*InputLocalLen(0,*iter))[iteration];
-      }
-      m_cost += temp;
+      m_cost *= 2;
     }
-    m_cost *= 2;
+    else if (m_layer == SMLAYER) {
+      for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+	Cost temp = 1;
+	for (Dim dim = 0; dim < numDims; ++dim) {
+	  temp *= (*InputLocalLen(2,dim))[iteration];
+	}
+	DimVecConstIter iter = dims.begin();
+	for(; iter != dims.end(); ++iter) {
+	  temp *= (*InputLocalLen(0,*iter))[iteration];
+	}
+	m_cost += temp;
+      }
+      m_cost *= 2;
+    }
+    else
+      throw;
   }
 }
 
