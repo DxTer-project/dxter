@@ -84,11 +84,11 @@ void YxpBy::Prop()
     DLAOp<2,1>::Prop();
 
     if (m_layer == ABSLAYER)
-      throw;
+      m_cost = 2 * TotalNumberOfElements(0);
     if (m_layer == DMLAYER)
-      throw;
+      m_cost = 2 * TotalNumberOfElements(0);
     else if (m_layer == SMLAYER) {
-      m_cost = 3 * TotalNumberOfLocalElements(0);
+      m_cost = 2 * TotalNumberOfLocalElements(0);
       if (InputDataType(0).m_dist != InputDataType(1).m_dist)
 	throw;
 

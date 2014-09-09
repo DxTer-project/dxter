@@ -29,6 +29,7 @@
 #include "transform.h"
 #include "loopSupport.h"
 #include <time.h>
+#include <iomanip>
 #include "DLAReg.h"
 #ifdef _OPENMP
 #include <omp.h>
@@ -188,7 +189,7 @@ int main(int argc, const char* argv[])
     GraphIter graphIter(startSet->m_posses.begin()->second);
     //    cout << "Printing evaluation code\n";
     Cost flopCost = graphIter.EvalAndSetBest();
-    cout << "*****FLOPS = " << flopCost << endl;
+    cout << "*****FLOPS = " << setprecision(15) << flopCost << endl;
     time(&start);
   }
 
