@@ -182,7 +182,13 @@ int main(int argc, const char* argv[])
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
   else {
-    uni.Init(algFunc());
+    RealPSet *startSet = algFunc();
+    uni.Init(startSet);
+    uni.Prop();
+    GraphIter graphIter(startSet->m_posses.begin()->second);
+    //    cout << "Printing evaluation code\n";
+    Cost flopCost = graphIter.EvalAndSetBest();
+    cout << "*****FLOPS = " << flopCost << endl;
     time(&start);
   }
 
