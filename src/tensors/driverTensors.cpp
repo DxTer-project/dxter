@@ -59,7 +59,7 @@ RealPSet* MP3();
 
 void AddTrans()
 {
-#if 0
+#if 1
   MultiTrans *trans = new MultiTrans;
   trans->AddTrans(new DistContToLocalContStatC(DMLAYER, SMLAYER));
   trans->AddTrans(new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER));
@@ -590,17 +590,13 @@ RealPSet* MP3()
 
   InputNode *t_efmn;
   InputNode *v_opmn;
-  InputNode *t_efop;
   InputNode *v_efgh;
-  InputNode *t_ghmn;
   InputNode *v_oegm;
   InputNode *v2_oegm;
-  InputNode *t_gfon;
   InputNode *accum_temp;
   InputNode *cont1_temp;
   InputNode *axppx2_temp;
   InputNode *axppx3_temp;
-  InputNode *axppx4_temp;
 
   {
     Sizes sizes[4];
@@ -620,15 +616,6 @@ RealPSet* MP3()
     v_opmn = new InputNode("v_opmn", sizes, "v_opmn", 4);
   }
 
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(oSize,1,1);
-    sizes[3].AddRepeatedSizes(pSize,1,1);
-    t_efop = new InputNode("t_efop", sizes, "t_efop", 4);
-  }
-
 
   {
     Sizes sizes[4];
@@ -639,14 +626,7 @@ RealPSet* MP3()
     v_efgh = new InputNode("v_efgh", sizes, "v_efgh", 4);
   }
 
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(gSize,1,1);
-    sizes[1].AddRepeatedSizes(hSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    t_ghmn = new InputNode("t_ghmn", sizes, "t_ghmn", 4);
-  }
+
 
   {
     Sizes sizes[4];
@@ -666,14 +646,7 @@ RealPSet* MP3()
     v2_oegm = new InputNode("v2_oegm", sizes, "v2_oegm", 4);
   }
 
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(gSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(oSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    t_gfon = new InputNode("t_gfon", sizes, "t_gfon", 4);
-  }
+
 
   {
     Sizes sizes[4];
@@ -716,15 +689,7 @@ RealPSet* MP3()
   }
 
 
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    axppx4_temp = new InputNode("axppx4_temp", 
-			       sizes, "axppx4_temp", 4);
-  }
+
 
 
 
@@ -741,7 +706,7 @@ RealPSet* MP3()
   Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"oegm","gfno","efmn",(string)"go");
   cont1->AddInputs(6,
 		  v2_oegm,0,
-		  t_gfon,0,
+		  t_efmn,0,
 		  cont1_temp,0);
   Poss *cont1Poss = new Poss(cont1);
   RealPSet *cont1Set = new RealPSet(cont1Poss);
@@ -756,8 +721,8 @@ RealPSet* MP3()
 
   YAxpPx *axppx2 = new YAxpPx(DMLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
   axppx2->AddInputs(6,
-		   t_gfon, 0,
-		   t_gfon, 0,
+		   t_efmn, 0,
+		   t_efmn, 0,
 		   axppx2_temp, 0);
   Poss *axppx2Poss = new Poss(axppx2);
   RealPSet * axppx2Set = new RealPSet(axppx2Poss);
@@ -781,7 +746,7 @@ RealPSet* MP3()
   Contraction *cont3 = new Contraction(DMLAYER,COEFONEHALF,COEFONE,REAL,"efgh","ghmn","efmn",(string)"gh");
   cont3->AddInputs(6,
 		   v_efgh, 0,
-		   t_ghmn, 0,
+		   t_efmn, 0,
 		   cont2Set->OutTun(0),0);
   Poss *cont3Poss = new Poss(cont3);
   RealPSet *cont3Set = new RealPSet(cont3Poss);
@@ -789,23 +754,15 @@ RealPSet* MP3()
   Contraction *cont4 = new Contraction(DMLAYER,COEFONEHALF,COEFONE,REAL,"opmn","efop","efmn",(string)"op");
   cont4->AddInputs(6,
 		   v_opmn, 0,
-		   t_efop, 0,
+		   t_efmn, 0,
 		   cont3Set->OutTun(0),0);
   Poss *cont4Poss = new Poss(cont4);
   RealPSet *cont4Set = new RealPSet(cont4Poss);
 
 
-  YAxpPx *axppx4 = new YAxpPx(DMLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
-  axppx4->AddInputs(6,
-		   t_efmn, 0,
-		   t_efmn, 0,
-		   axppx4_temp, 0);
-  Poss *axppx4Poss = new Poss(axppx4);
-  RealPSet * axppx4Set = new RealPSet(axppx4Poss);
-
   Contraction *cont5 = new Contraction(DMLAYER,COEFTWO,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
   cont5->AddInputs(6,
-		   axppx4Set->OutTun(0), 0,
+		   axppx2Set->OutTun(0), 0,
 		   cont4Set->OutTun(0), 0,
 		   scalarIn,0);
   Poss *cont5Poss = new Poss(cont5);
