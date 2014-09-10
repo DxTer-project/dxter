@@ -27,7 +27,7 @@ n    it under the terms of the GNU General Public License as published by
 
 #if DOLLDLA
 
-RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize)
+RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations)
 {
   m_type = type;
   m_operationName = operationName;
@@ -35,7 +35,6 @@ RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argName
   m_argDeclarations = argDeclarations;
   m_defines = defines;
   m_numIterations = numIterations;
-  m_chunkSize = chunkSize;
   m_dataFileName = m_operationName + "_time_data";
   m_correctTestFileName = m_operationName + "_correctness_test_results";
   AddIncludes();
@@ -48,6 +47,7 @@ void RuntimeTest::AddIncludes()
   m_headers.push_back("#include \"utils.h\"");
   m_headers.push_back("#include <string.h>");
   m_headers.push_back("#include <unistd.h>");
+  m_headers.push_back("#include \"rdtsc.h\"");
   return;
 }
 
@@ -56,7 +56,6 @@ void RuntimeTest::AddMiscellaneousDefines()
   cout << "\n\n\n\n\n\n\nAdding misc defines\n\n\n\n\n";
   m_defines.push_back("#define BUF_SIZE 1000000");
   m_defines.push_back("#define NUM_ITERATIONS " + std::to_string((long long int) m_numIterations));
-  m_defines.push_back("#define CHUNK_SIZE " + std::to_string((long long int) m_chunkSize));
   m_defines.push_back("#define min(a,b) ((a) < (b) ? (a) : (b))");
   m_defines.push_back("#define ALLOC_BUFFER(size) alloc_aligned_16((size))");
   m_defines.push_back("#define MUVALUE " + std::to_string((long long int) arch->VecRegWidth(m_type)) + "\n");
@@ -111,7 +110,7 @@ string RuntimeTest::MainFuncCode(ImplementationMap imps)
   argBufferAllocation += AllocateArgBuffers("");
   argBufferAllocation += "FILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
   argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
-  string timingSetup = "\tint i, j, k;\n\tstruct timeval begin, end;\n\tdouble exec_time;\n";
+  string timingSetup = "\tint i, j, k;\n\tlong long start_time, end_time, exec_time;\n";
   string mainFunc = prototype + argBufferAllocation + "\n" + timingSetup;
   string timingLoop = TimingLoop(imps);
   timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
@@ -131,7 +130,7 @@ string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap imps, str
   argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
   string correctnessCheck = argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
   correctnessCheck += CorrectnessCheck(imps, referenceImpName);
-  string timingSetup = "\tint i, j, k;\n\tstruct timeval begin, end;\n\tdouble exec_time;\n";
+  string timingSetup = "\tint i, j, k;\n\tlong long start_time, end_time, exec_time;\n";
   string mainFunc = prototype + correctnessCheck + "\n" + timingSetup;
   string timingLoop = TimingLoop(imps);
   timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
@@ -186,15 +185,12 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
   for (i = 1; i <= imps.size(); i++) {
     string opName = m_operationName + "_" + std::to_string((long long int) i);
     loopBody += "\tfor (j = 0; j < NUM_ITERATIONS; j++) {\n";
-    loopBody += "\t\tgettimeofday( &begin, NULL );\n";
-    loopBody += "\t\tfor (k = 0; k < CHUNK_SIZE; k++) {\n";
-    loopBody += "\t\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
-    loopBody += "\t\t}\n";
-    loopBody += "\t\tgettimeofday( &end, NULL );\n";
-    loopBody += "\t\texec_time = end.tv_sec - begin.tv_sec;\n";
-    loopBody += "\t\texec_time += (end.tv_usec - begin.tv_usec) * 1.0e-6;\n";
+    loopBody += "\t\tstart_time = rdtsc();\n";
+    loopBody += "\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
+    loopBody += "\t\tend_time = rdtsc();\n";
+    loopBody += "\t\texec_time = end_time - start_time;\n";
     loopBody += "\t\tchar exec_time_str[100];\n";
-    loopBody += "\t\tsprintf(exec_time_str, \"%f\\n\", exec_time);\n";
+    loopBody += "\t\tsprintf(exec_time_str, \"%lld\\n\", exec_time);\n";
     loopBody += "\t\tsize_t trash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
     loopBody += "\t}\n";
     loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";

@@ -45,7 +45,7 @@ class RuntimeTest
   int m_chunkSize;
   Type m_type;
 
-  RuntimeTest(Type m_type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations, int chunkSize);
+  RuntimeTest(Type m_type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations);
   string MakeTestCode(ImplementationMap imps);
   string MakeTestCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImp);
   string ToCStatements(vector<string> lines);
