@@ -23,43 +23,43 @@
 #include "layers.h"
 #if DOTENSORS
 #include "base.h"
-#include "xpay.h"
+#include "yxpby.h"
 #include "string.h"
 #include "helperNodes.h"
 
 using namespace std;
 
-Xpay::Xpay(Layer layer, Coef alpha)
-  : m_alpha(alpha)
+YxpBy::YxpBy(Layer layer, Coef beta)
+  : m_beta(beta)
 { 
   SetLayer(layer);
 }
 
-NodeType Xpay::GetType() const
+NodeType YxpBy::GetType() const
 {
-  return "Xpay " + LayerNumToStr(GetLayer());
+  return "YxpBy " + LayerNumToStr(GetLayer());
 }
 
-void Xpay::Duplicate(const Node *orig, bool shallow, bool possMerging)
+void YxpBy::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
-  const Xpay *axpy = (Xpay*)orig;
-  m_alpha = axpy->m_alpha;
+  const YxpBy *axpy = (YxpBy*)orig;
+  m_beta = axpy->m_beta;
 }
 
-void Xpay::FlattenCore(ofstream &out) const
+void YxpBy::FlattenCore(ofstream &out) const
 {
   DLAOp<2,1>::FlattenCore(out);
-  WRITE(m_alpha);
+  WRITE(m_beta);
 }
 
-void Xpay::UnflattenCore(ifstream &in, SaveInfo &info)
+void YxpBy::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLAOp<2,1>::UnflattenCore(in, info);
-  READ(m_alpha);
+  READ(m_beta);
 }
 
-Phase Xpay::MaxPhase() const 
+Phase YxpBy::MaxPhase() const 
 {
   if (m_layer == DMLAYER)
     throw;
@@ -69,16 +69,16 @@ Phase Xpay::MaxPhase() const
     throw;
 }
 
-void Xpay::PrintCode(IndStream &out)
+void YxpBy::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << "Xpay( ";
+  *out << "YxpBy( ";
   *out << GetInputName(0).str() << ", ";
-  out << m_alpha;
+  out << m_beta;
   *out << ", " << GetInputName(1).str() << " );\n";
 }
 
-void Xpay::Prop()
+void YxpBy::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
@@ -91,6 +91,13 @@ void Xpay::Prop()
       m_cost = 3 * TotalNumberOfLocalElements(0);
       if (InputDataType(0).m_dist != InputDataType(1).m_dist)
 	throw;
+
+      if (m_beta == COEFZERO)
+	throw;
+      if (m_beta == COEFNEGONE) {
+	if (GetInputNameStr(0) == GetInputNameStr(1))
+	  throw;
+      }
     }
     else {
       cout << LayerNumToStr(m_layer) << endl;

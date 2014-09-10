@@ -29,25 +29,50 @@
 #include "DLAOp.h"
 #include "tensorRedist.h"
 
-class Xpay : public DLAOp<2,1>
+class YAxpPx : public DLAOp<3,1>
 {
  public:
-  Coef m_alpha;
-  Xpay(Layer layer, Coef alpha);
+  Coef m_alpha, m_beta;
+  DimVec m_permutation;
+  YAxpPx(Layer layer, Coef alpha, Coef beta, string startIndices, string endIndices);
+  YAxpPx(Layer layer, Coef alpha, Coef beta, const DimVec &perm);
+  YAxpPx(Layer layer, Coef alpha, Coef beta);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "xpay";}
-  static Node* BlankInst() { return new Xpay(ABSLAYER, COEFZERO); }
+  static ClassType GetClass() {return "axppx";}
+  static Node* BlankInst() { return new YAxpPx(ABSLAYER, COEFZERO, COEFZERO, "", ""); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual Phase MaxPhase() const;
   //  virtual bool ShouldCullDP() const;
-  //  virtual bool DoNotCullDP() const;
+  virtual bool DoNotCullDP() const;
+  virtual void AddVariables(VarSet &set) const;
 };
 
+
+
+class DistYAxpPxToDefaultLocalYAxpPx : public SingleTrans
+{
+ public:
+  virtual string GetType() const {return "DistYAxpPx to Default Dist LocalYAxpPx";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+/*
+class DistYAxpPxToNonDefaultLocalYAxpPx : public SingleTrans
+{
+ public:
+  virtual string GetType() const {return "DistYAxpPx to NonDefault Dist LocalYAxpPx";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+*/
 
 #endif //DOTENSORS

@@ -29,49 +29,25 @@
 #include "DLAOp.h"
 #include "tensorRedist.h"
 
-class Axppx : public DLAOp<3,1>
+class YxpBy : public DLAOp<2,1>
 {
  public:
-  Coef m_alpha, m_beta;
-  DimVec m_permutation;
-  Axppx(Layer layer, Coef alpha, Coef beta, string startIndices, string endIndices);
-  Axppx(Layer layer, Coef alpha, Coef beta, const DimVec &perm);
-  Axppx(Layer layer, Coef alpha, Coef beta);
+  Coef m_beta;
+  YxpBy(Layer layer, Coef beta);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "axppx";}
-  static Node* BlankInst() { return new Axppx(ABSLAYER, COEFZERO, COEFZERO, "", ""); }
+  static ClassType GetClass() {return "xpay";}
+  static Node* BlankInst() { return new YxpBy(ABSLAYER, COEFZERO); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual Phase MaxPhase() const;
   //  virtual bool ShouldCullDP() const;
-  virtual bool DoNotCullDP() const;
+  //  virtual bool DoNotCullDP() const;
 };
 
-
-
-class DistAxppxToDefaultLocalAxppx : public SingleTrans
-{
- public:
-  virtual string GetType() const {return "DistAxppx to Default Dist LocalAxppx";}
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-
-/*
-class DistAxppxToNonDefaultLocalAxppx : public SingleTrans
-{
- public:
-  virtual string GetType() const {return "DistAxppx to NonDefault Dist LocalAxppx";}
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-*/
 
 #endif //DOTENSORS

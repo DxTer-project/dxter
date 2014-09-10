@@ -36,7 +36,7 @@ void LoadToRegs::Prop()
 	cout << "Error: Incorrect dimensions for register load\n";
 	GetInputN(0)->Print();
 	cout << "GetVecRegWidth() = " << std::to_string((long long int) GetVecRegWidth()) << endl;
-	cout << "GetDataType() == REAL_DOUBLE ? " << std::to_string((long long int) GetDataType() == REAL_DOUBLE) << endl;
+	cout << "GetDataType() == REAL_DOUBLE ? " << std::to_string((long long int) (GetDataType() == REAL_DOUBLE)) << endl;
 	cout << "*GetInputM(0) != 1 ? " << std::to_string((long long int) (*GetInputM(0) != 1)) << endl;
 	cout << "*GetInputN(0) != GetVecRegWidth() ? " << std::to_string((long long int) (*GetInputN(0) != GetVecRegWidth())) << endl;
 	throw;

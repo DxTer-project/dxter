@@ -41,7 +41,8 @@
 #if DOTENSORS
 
 #include "debug.h"
-#include "axppx.h"
+#include "yaxppx.h"
+#include "zaxpby.h"
 
 Size one = 1;
 Size smallSize = 10;
@@ -52,8 +53,8 @@ Size bigSize = 1000;
 RealPSet* Cont1Example();
 RealPSet* MartinsExample();
 RealPSet* MartinsExample2();
+RealPSet* MP2();
 RealPSet* MP3();
-RealPSet* MP3Small();
 
 void AddTrans()
 {
@@ -77,7 +78,7 @@ void AddTrans()
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SeparateRedistFromSumScatter, SUMSCATTERTENSORPHASE);
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
 
-  Universe::AddTrans(Axppx::GetClass(), new DistAxppxToDefaultLocalAxppx, DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
@@ -85,7 +86,10 @@ void AddTrans()
     Universe::AddTrans(RedistNode::GetClass(), new SingleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllGathers(dim), ROTENSORPHASE);
+
+#if SPLITMULTIMODESCATTER
     Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SplitSumScatter(dim), SUMSCATTERTENSORPHASE);
+#endif
 
     for(Dim dim2 = 0; dim2 < NUM_GRID_DIMS; ++dim2) {
       if (dim2 != dim) {
@@ -112,7 +116,8 @@ void Usage()
   cout <<"         1  -> Contraction (abcd,cdef,abef)\n";
   cout <<"         2  -> Martin's Example\n";
   cout <<"         3  -> Martin's Example - real\n";
-  cout <<"         4  -> MP3\n";
+  cout <<"         4  -> MP2\n";
+  cout <<"         5  -> MP3\n";
 }
 
 int main(int argc, const char* argv[])
@@ -145,10 +150,10 @@ int main(int argc, const char* argv[])
       algFunc = MartinsExample2;
       break;
     case(4):
-      algFunc = MP3;
+      algFunc = MP2;
       break;
     case(5):
-      algFunc = MP3Small;
+      algFunc = MP3;
       break;
     default:
       Usage();
@@ -479,6 +484,85 @@ RealPSet* MartinsExample2()
 
 }
 
+RealPSet* MP2()
+{
+  Size eSize = 53;
+  Size fSize = 53;
+  Size mSize = 5;
+  Size nSize = 5;
+
+
+  InputNode *v_efmn;
+  InputNode *t_efmn;
+
+
+  InputNode *axppx1_temp;
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    t_efmn = new InputNode("t_efmn", sizes, "t_efmn", 4);
+  }
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    v_efmn = new InputNode("v_efmn", sizes, "v_efmn", 4);
+  }
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    axppx1_temp = new InputNode("axppx1_temp", 
+				sizes, "axppx1_temp", 4);
+  }
+
+
+  Sizes ones[2];
+  for (Dim dim = 0; dim < 2; ++dim)
+    ones[dim].AddRepeatedSizes(one, 1, 1);
+
+  DistType scalarDist;
+  scalarDist.SetToScalarNoRep();
+
+  InputNode *scalarIn = new InputNode("scalar input",  ones, scalarDist, "E_MP2", 0);
+
+
+  YAxpPx *axppx1 = new YAxpPx(DMLAYER, COEFTWO, COEFNEGONE, "efnm", "efmn");
+  axppx1->AddInputs(6,
+		   v_efmn, 0,
+		   v_efmn, 0,
+		   axppx1_temp, 0);
+  Poss *axppx1Poss = new Poss(axppx1);
+  RealPSet * axppx1Set = new RealPSet(axppx1Poss);
+
+
+  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
+  cont1->AddInputs(6,
+		   v_efmn,0,
+		   axppx1Set->OutTun(0),0,
+		   scalarIn,0);
+  Poss *cont1Poss = new Poss(cont1);
+  RealPSet *cont1Set = new RealPSet(cont1Poss);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(cont1Set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
 RealPSet* MP3()
 {
   Size eSize = 53;
@@ -497,7 +581,7 @@ RealPSet* MP3()
   InputNode *v_efgh;
   InputNode *t_ghmn;
   InputNode *v_oegm;
-  InputNode *v_oemg;
+  InputNode *v2_oegm;
   InputNode *t_gfon;
   InputNode *accum_temp;
   InputNode *cont1_temp;
@@ -564,9 +648,9 @@ RealPSet* MP3()
     Sizes sizes[4];
     sizes[0].AddRepeatedSizes(oSize,1,1);
     sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(gSize,1,1);
-    v_oemg = new InputNode("v_oemg", sizes, "v_oemg", 4);
+    sizes[2].AddRepeatedSizes(gSize,1,1);
+    sizes[3].AddRepeatedSizes(mSize,1,1);
+    v2_oegm = new InputNode("v2_oegm", sizes, "v2_oegm", 4);
   }
 
   {
@@ -641,15 +725,15 @@ RealPSet* MP3()
   InputNode *scalarIn = new InputNode("scalar input",  ones, scalarDist, "E_MP3", 0);
 
 
-  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"oemg","gfno","efmn",(string)"go");
+  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"oegm","gfno","efmn",(string)"go");
   cont1->AddInputs(6,
-		  v_oemg,0,
+		  v2_oegm,0,
 		  t_gfon,0,
 		  cont1_temp,0);
   Poss *cont1Poss = new Poss(cont1);
   RealPSet *cont1Set = new RealPSet(cont1Poss);
 
-  Axppx *axppx1 = new Axppx(DMLAYER, COEFONEHALF, COEFONE, "efmn", "efnm");
+  YAxpPx *axppx1 = new YAxpPx(DMLAYER, COEFONEHALF, COEFONE, "efmn", "efnm");
   axppx1->AddInputs(6,
 		   cont1Set->OutTun(0), 0,
 		   cont1Set->OutTun(0), 0,
@@ -657,7 +741,7 @@ RealPSet* MP3()
   Poss *axppx1Poss = new Poss(axppx1);
   RealPSet * axppx1Set = new RealPSet(axppx1Poss);
 
-  Axppx *axppx2 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
+  YAxpPx *axppx2 = new YAxpPx(DMLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
   axppx2->AddInputs(6,
 		   t_gfon, 0,
 		   t_gfon, 0,
@@ -665,10 +749,10 @@ RealPSet* MP3()
   Poss *axppx2Poss = new Poss(axppx2);
   RealPSet * axppx2Set = new RealPSet(axppx2Poss);
 
-  Axppx *axppx3 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "oemg", "oemg");
+  ZAxpBy *axppx3 = new ZAxpBy(SMLAYER,COEFTWO, COEFNEGONE);
   axppx3->AddInputs(6,
 		   v_oegm, 0,
-		   v_oemg, 0,
+		   v2_oegm, 0,
 		   axppx3_temp, 0);
   Poss *axppx3Poss = new Poss(axppx3);
   RealPSet * axppx3Set = new RealPSet(axppx3Poss);
@@ -698,7 +782,7 @@ RealPSet* MP3()
   RealPSet *cont4Set = new RealPSet(cont4Poss);
 
 
-  Axppx *axppx4 = new Axppx(DMLAYER, COEFTWO, COEFNEGONE);
+  YAxpPx *axppx4 = new YAxpPx(DMLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
   axppx4->AddInputs(6,
 		   t_efmn, 0,
 		   t_efmn, 0,
@@ -725,250 +809,6 @@ RealPSet* MP3()
 }
 
 
-RealPSet* MP3Small()
-{
-  Size eSize = 53;
-  Size fSize = 53;
-  Size gSize = 53;
-  Size hSize = 53;
-  Size mSize = 5;
-  Size nSize = 5;
-  Size oSize = 5;
-  Size pSize = 5;
 
-
-  InputNode *t_efmn;
-  InputNode *v_opmn;
-  InputNode *t_efop;
-  InputNode *v_efgh;
-  InputNode *t_ghmn;
-  InputNode *v_oegm;
-  InputNode *v_oemg;
-  InputNode *t_gfon;
-  InputNode *accum_temp;
-  InputNode *cont1_temp;
-  InputNode *axppx2_temp;
-  InputNode *axppx3_temp;
-  InputNode *axppx4_temp;
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    t_efmn = new InputNode("t_efmn", sizes, "t_efmn", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(pSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    v_opmn = new InputNode("v_opmn", sizes, "v_opmn", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(oSize,1,1);
-    sizes[3].AddRepeatedSizes(pSize,1,1);
-    t_efop = new InputNode("t_efop", sizes, "t_efop", 4);
-  }
-
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(hSize,1,1);
-    v_efgh = new InputNode("v_efgh", sizes, "v_efgh", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(gSize,1,1);
-    sizes[1].AddRepeatedSizes(hSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    t_ghmn = new InputNode("t_ghmn", sizes, "t_ghmn", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(mSize,1,1);
-    v_oegm = new InputNode("v_oegm", sizes, "v_oegm", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(gSize,1,1);
-    v_oemg = new InputNode("v_oemg", sizes, "v_oemg", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(gSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(oSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    t_gfon = new InputNode("t_gfon", sizes, "t_gfon", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    accum_temp = new InputNode("accum_temp", 
-			       sizes, "accum_temp", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    cont1_temp = new InputNode("cont1_temp", 
-			       sizes, "cont1_temp", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(gSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(oSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    axppx2_temp = new InputNode("axppx2_temp", 
-			       sizes, "axppx2_temp", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(mSize,1,1);
-    axppx3_temp = new InputNode("axppx3_temp", 
-			       sizes, "axppx3_temp", 4);
-  }
-
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    axppx4_temp = new InputNode("axppx4_temp", 
-			       sizes, "axppx4_temp", 4);
-  }
-
-
-
-  Sizes ones[2];
-  for (Dim dim = 0; dim < 2; ++dim)
-    ones[dim].AddRepeatedSizes(one, 1, 1);
-
-  DistType scalarDist;
-  scalarDist.SetToScalarNoRep();
-
-  InputNode *scalarIn = new InputNode("scalar input",  ones, scalarDist, "E_MP3", 0);
-
-
-  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"oemg","gfno","efmn",(string)"go");
-  cont1->AddInputs(6,
-		  v_oemg,0,
-		  t_gfon,0,
-		  cont1_temp,0);
-  Poss *cont1Poss = new Poss(cont1);
-  RealPSet *cont1Set = new RealPSet(cont1Poss);
-
-  /*
-  Axppx *axppx1 = new Axppx(DMLAYER, COEFONEHALF, COEFONE, "efmn", "efnm");
-  axppx1->AddInputs(6,
-		   cont1Set->OutTun(0), 0,
-		   cont1Set->OutTun(0), 0,
-		   accum_temp, 0);
-  Poss *axppx1Poss = new Poss(axppx1);
-  RealPSet * axppx1Set = new RealPSet(axppx1Poss);
-
-  Axppx *axppx2 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
-  axppx2->AddInputs(6,
-		   t_gfon, 0,
-		   t_gfon, 0,
-		   axppx2_temp, 0);
-  Poss *axppx2Poss = new Poss(axppx2);
-  RealPSet * axppx2Set = new RealPSet(axppx2Poss);
-
-  Axppx *axppx3 = new Axppx(DMLAYER,COEFTWO, COEFNEGONE, "oemg", "oemg");
-  axppx3->AddInputs(6,
-		   v_oegm, 0,
-		   v_oemg, 0,
-		   axppx3_temp, 0);
-  Poss *axppx3Poss = new Poss(axppx3);
-  RealPSet * axppx3Set = new RealPSet(axppx3Poss);
-
-  Contraction *cont2 = new Contraction(DMLAYER,COEFONEHALF,COEFNEGONE,REAL,"oegm","gfon","efmn",(string)"go");
-  cont2->AddInputs(6,
-		   axppx3Set->OutTun(0),0,
-		   axppx2Set->OutTun(0),0,
-		   axppx1Set->OutTun(0),0);
-  Poss *cont2Poss = new Poss(cont2);
-  RealPSet *cont2Set = new RealPSet(cont2Poss);
-
-  Contraction *cont3 = new Contraction(DMLAYER,COEFONEHALF,COEFONE,REAL,"efgh","ghmn","efmn",(string)"gh");
-  cont3->AddInputs(6,
-		   v_efgh, 0,
-		   t_ghmn, 0,
-		   cont2Set->OutTun(0),0);
-  Poss *cont3Poss = new Poss(cont3);
-  RealPSet *cont3Set = new RealPSet(cont3Poss);
-
-  Contraction *cont4 = new Contraction(DMLAYER,COEFONEHALF,COEFONE,REAL,"opmn","efop","efmn",(string)"op");
-  cont4->AddInputs(6,
-		   v_opmn, 0,
-		   t_efop, 0,
-		   cont3Set->OutTun(0),0);
-  Poss *cont4Poss = new Poss(cont4);
-  RealPSet *cont4Set = new RealPSet(cont4Poss);
-
-
-  Axppx *axppx4 = new Axppx(DMLAYER, COEFTWO, COEFNEGONE);
-  axppx4->AddInputs(6,
-		   t_efmn, 0,
-		   t_efmn, 0,
-		   axppx4_temp, 0);
-  Poss *axppx4Poss = new Poss(axppx4);
-  RealPSet * axppx4Set = new RealPSet(axppx4Poss);
-
-  Contraction *cont5 = new Contraction(DMLAYER,COEFTWO,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
-  cont5->AddInputs(6,
-		   axppx4Set->OutTun(0), 0,
-		   cont4Set->OutTun(0), 0,
-		   scalarIn,0);
-  Poss *cont5Poss = new Poss(cont5);
-  RealPSet *cont5Set = new RealPSet(cont5Poss);
-  */
-
-  OutputNode *out = new OutputNode("output");
-  out->AddInput(cont1Set->OutTun(0),0);
-
-  Poss *outerPoss = new Poss(out, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
 
 #endif //DOTENSORS

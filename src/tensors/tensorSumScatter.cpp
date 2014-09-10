@@ -27,6 +27,47 @@
 
 #if DOTENSORS
 
+#if ALLOWMULTIMODESCATTER
+void GetMultiModeScatterInfo(const DistType &srcType,
+			     const DistType &destType,
+			     const EntryList &m_sumDims,
+			     DimVec *redDims,
+			     DimVec *scatDims)
+{
+  EntrySet sumDimSet;
+  sumDimSet.insert(m_sumDims.begin(),m_sumDims.end());
+  
+  for (int dim = srcType.m_numDims-1; dim >= 0; --dim) {
+    if (sumDimSet.find(srcType.m_dists[dim]) != sumDimSet.end()) {
+      redDims->push_back(dim);
+    }
+  }
+  if (redDims->size() != m_sumDims.size())
+    throw;
+  
+
+  DimVecIter redDimsIter = redDims->begin();
+  for(; redDimsIter != redDims->end(); ++redDimsIter) {
+    DistEntry entry = srcType.m_dists[*redDimsIter];
+    DimVec entryDims = entry.DistEntryDims();
+    for(Dim dim = 0; dim < destType.m_numDims; ++dim) {
+      DimVec destDims = destType.m_dists[dim].DistEntryDims();
+      DimVec srcDims = srcType.m_dists[dim].DistEntryDims();
+      srcDims.insert(srcDims.end(), entryDims.begin(), entryDims.end());
+      if (destDims == srcDims) {
+	scatDims->push_back(dim);
+	break;
+      }
+    }
+  }
+  if (scatDims->size() != redDims->size())
+    throw;
+
+
+
+}
+#endif
+
 bool SameDims(DistEntry entry1, DistEntry entry2)
 {
   DimVec vec1 = entry1.DistEntryDims();
@@ -246,27 +287,20 @@ Phase SumScatterUpdateNode::MaxPhase() const
   if (CurrPhase >= SUMSCATTERTENSORPHASE) {
     DistEntry sumDims;
     if (m_sumDims.size() != 1) {
-      /*
-      if (!m_hasRefined) {
-	cout << "Too many SumScatter dimensions\n";
-	cout << "1trying SumScatter from " << DistTypeToStr(inType)
-	     << " to " << DistTypeToStr(outType)  << endl;
-      }
-      */
+#if !ALLOWMULTIMODESCATTER
       return SUMSCATTERTENSORPHASE;
-    }
-    else if (inType.m_notReped == outType.m_notReped) {
-      sumDims = *(m_sumDims.begin());
+#else
+      if (inType.m_notReped == outType.m_notReped) {
+	EntrySet sumSet;
+	sumSet.insert(m_sumDims.begin(), m_sumDims.end());
 
-      bool foundSumDim = false;
-      for (Dim dim = 0; !foundSumDim && dim < inType.m_numDims; ++dim) {
-	if (dim < outType.m_numDims) {
+	for (Dim dim = 0; !sumSet.empty() && dim < outType.m_numDims; ++dim) {
 	  DistEntry inEntry = inType.m_dists[dim];
 	  DistEntry outEntry = outType.m_dists[dim];
 	  if (inEntry != outEntry) {
 	    if (inEntry.IsStar()) {
 	      //[*] -> ...
-	      if (outEntry != sumDims) {
+	      if (!sumSet.erase(outEntry)) {
 		cout << "2trying SumScatter from " << DistTypeToStr(inType)
 		     << " to " << DistTypeToStr(outType)  << endl;
 		cout << inEntry.str() << " -> "
@@ -278,33 +312,67 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	    }
 	    else {
 	      DimVec inVec = inEntry.DistEntryDims();
-	      DimVec dims = sumDims.DistEntryDims();
-
 	      DimVec outVec = outEntry.DistEntryDims();
-	      inVec.insert(inVec.end(), dims.begin(), dims.end());
-	      if (inVec != outVec) {
-		/*
-		if (!m_hasRefined) {
-		  cout << "3trying SumScatter from " << DistTypeToStr(inType)
-		       << " to " << DistTypeToStr(outType)  << endl;
-		  cout << m_sumDims.size() << " sum dims\n";
-		  if (IsScalar(0)) 
-		    cout << "is scalar\n";
-		  else
-		    cout << "is not scalar\n";
-		      
-		}
-		*/
+	      
+	      if (inVec[0] != outVec[0])
+		return SUMSCATTERTENSORPHASE;
 
+	      DimVec suff;
+	      GetSuffix(inVec, outVec,
+			suff);
+
+	      DistEntry entry;
+	      entry.DimsToDistEntry(suff);
+
+	      if (!sumSet.erase(outEntry))
 		return SUMSCATTERTENSORPHASE;	
-	      }
 	    }
-	    foundSumDim = true;
 	  }
 	}
+	if (!sumSet.empty())
+	  throw;
       }
-      if (!foundSumDim)
-	throw;
+#endif
+    }
+    else {
+      if (inType.m_notReped == outType.m_notReped) {
+	sumDims = *(m_sumDims.begin());
+
+	bool foundSumDim = false;
+	for (Dim dim = 0; !foundSumDim && dim < inType.m_numDims; ++dim) {
+	  if (dim < outType.m_numDims) {
+	    DistEntry inEntry = inType.m_dists[dim];
+	    DistEntry outEntry = outType.m_dists[dim];
+	    if (inEntry != outEntry) {
+	      if (inEntry.IsStar()) {
+		//[*] -> ...
+		if (outEntry != sumDims) {
+		  cout << "2trying SumScatter from " << DistTypeToStr(inType)
+		       << " to " << DistTypeToStr(outType)  << endl;
+		  cout << inEntry.str() << " -> "
+		       << outEntry.str() << endl;
+		  cout << "sumDims " << sumDims.str() << endl;
+		
+		  throw;
+		}
+	      }
+	      else {
+		DimVec inVec = inEntry.DistEntryDims();
+		DimVec dims = sumDims.DistEntryDims();
+
+		DimVec outVec = outEntry.DistEntryDims();
+		inVec.insert(inVec.end(), dims.begin(), dims.end());
+		if (inVec != outVec) {
+		  return SUMSCATTERTENSORPHASE;	
+		}
+	      }
+	      foundSumDim = true;
+	    }
+	  }
+	}
+	if (!foundSumDim)
+	  throw;
+      }
     }
   }
 
@@ -313,8 +381,6 @@ Phase SumScatterUpdateNode::MaxPhase() const
 
 void SumScatterUpdateNode::PrintCode(IndStream &out)
 {
-  out.Indent();
-
   const DistType &m_srcType = InputDataType(0).m_dist;
   const DistType &m_destType = InputDataType(1).m_dist;
 
@@ -322,85 +388,156 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 
   string inName = GetInputName(0).str();
   string outName = GetName(0).str();
-  DistEntry sumDims = *(m_sumDims.begin());
-    
-
-  *out << "   // " << GetName(0).PrettyStr() 
-       << " <- " << GetInputName(0).PrettyStr() 
-       << " (with SumScatter on " << sumDims.PrettyStr() << ")\n";
 
   if (CurrPhase <= SUMSCATTERTENSORPHASE)
     return;
 
+#if !ALLOWMULTIMODESCATTER
   if (m_sumDims.size() != 1)
     throw;
+#else
+  if (m_sumDims.empty())
+    throw;
+#endif
 
 
+  if (m_sumDims.size() == 1) {
+    DistEntry sumDims = *(m_sumDims.begin());
+    
+    out.Indent();
+    *out << "   // " << GetName(0).PrettyStr() 
+	 << " <- " << GetInputName(0).PrettyStr() 
+	 << " (with SumScatter on " << sumDims.PrettyStr() << ")\n";
+    
+    out.Indent();
 
-  out.Indent();
-
-  if (m_srcType.m_notReped != m_destType.m_notReped) {
-    if (m_coef != COEFZERO) {
-      throw;
-      //need to use an ReduceScatterUpdateRedistFrom flavor
-    }
-    *out << outName << ".ReduceToOneRedistFrom( "
-	 << inName << ", ";
-    bool found = false;
-    for(Dim dim = 0; !found &&dim < srcNumDims; ++dim) {
-      if (m_srcType.m_dists[dim] == sumDims) {
-	*out << dim;
-	found = true;
+    if (m_srcType.m_notReped != m_destType.m_notReped) {
+      if (m_coef != COEFZERO) {
+	throw;
+	//need to use an ReduceScatterUpdateRedistFrom flavor
       }
+      *out << outName << ".ReduceToOneRedistFrom( "
+	   << inName << ", ";
+      bool found = false;
+      for(Dim dim = 0; !found &&dim < srcNumDims; ++dim) {
+	if (m_srcType.m_dists[dim] == sumDims) {
+	  *out << dim;
+	  found = true;
+	}
+      }
+      if (!found)
+	throw;
+      *out << " );\n";
     }
-    if (!found)
-      throw;
-    *out << " );\n";
+    else {
+      if (srcNumDims != (m_destType.m_numDims+1))
+	throw;
+
+      *out << outName;
+      if (m_coef == COEFZERO) 
+	*out << ".ReduceScatterRedistFrom( ";
+      else
+	*out << ".ReduceScatterUpdateRedistFrom( ";
+
+      *out << inName << ", ";
+    
+      if (m_coef != COEFZERO) {
+	out << m_coef;
+	*out << ", ";
+      }
+
+      DimVec scatDims = sumDims.DistEntryDims();
+
+
+      Dim redDim = srcNumDims;
+      for (int dim = srcNumDims-1; dim >= 0; --dim) {
+	if (m_srcType.m_dists[dim] == sumDims) {
+	  redDim = dim;
+	  break;
+	}
+      }
+      if (redDim == srcNumDims)
+	throw;
+
+      Dim scatDim = srcNumDims;
+      for(Dim dim = 0; dim < m_destType.m_numDims; ++dim) {
+	DimVec destDims = m_destType.m_dists[dim].DistEntryDims();
+	DimVec srcDims = m_srcType.m_dists[dim].DistEntryDims();
+	srcDims.insert(srcDims.end(), scatDims.begin(), scatDims.end());
+	if (destDims == srcDims) {
+	  scatDim = dim;
+	  break;
+	}
+      }
+      if (scatDim == srcNumDims)
+	throw;
+
+      *out << redDim << ", " << scatDim << " );\n";
+    }
   }
   else {
-    if (srcNumDims != (m_destType.m_numDims+1))
-      throw;
-
-    *out << outName;
-    if (m_coef == COEFZERO) 
-      *out << ".ReduceScatterRedistFrom( ";
-    else
-      *out << ".ReduceScatterUpdateRedistFrom( ";
-
-    *out << inName << ", ";
+    out.Indent();
+    *out << "   // " << GetName(0).PrettyStr() 
+	 << " <- " << GetInputName(0).PrettyStr() 
+	 << " (with SumScatter on ";
+    EntryListIter iter = m_sumDims.begin();
+    for(; iter != m_sumDims.end(); ++iter) {
+      *out << "(" << (*iter).PrettyStr() << ")";
+    }
+    *out << ")\n";
     
-    if (m_coef != COEFZERO) {
-      out << m_coef;
-      *out << ", ";
-    }
+    out.Indent();
 
-    DimVec scatDims = sumDims.DistEntryDims();
-
-
-    Dim redDim = srcNumDims;
-    for (int dim = srcNumDims-1; dim >= 0; --dim) {
-      if (m_srcType.m_dists[dim] == sumDims) {
-	redDim = dim;
-	break;
+    if (m_srcType.m_notReped != m_destType.m_notReped) {
+      if (m_coef != COEFZERO) {
+	throw;
+	//need to use an ReduceScatterUpdateRedistFrom flavor
       }
-    }
-    if (redDim == srcNumDims)
-      throw;
+      *out << outName << ".ReduceToOneRedistFrom( "
+	   << inName << ", ";
 
-    Dim scatDim = srcNumDims;
-    for(Dim dim = 0; dim < m_destType.m_numDims; ++dim) {
-      DimVec destDims = m_destType.m_dists[dim].DistEntryDims();
-      DimVec srcDims = m_srcType.m_dists[dim].DistEntryDims();
-      srcDims.insert(srcDims.end(), scatDims.begin(), scatDims.end());
-      if (destDims == srcDims) {
-	scatDim = dim;
-	break;
+      EntrySet dimSet;
+      dimSet.insert(m_sumDims.begin(), m_sumDims.end());
+      DimVec dims;
+
+      for(Dim dim = 0; dim < srcNumDims; ++dim) {
+	if (dimSet.erase(m_srcType.m_dists[dim])) {
+	  dims.push_back(dim);
+	}
       }
-    }
-    if (scatDim == srcNumDims)
-      throw;
+      if (!dimSet.empty())
+	throw;
 
-    *out << redDim << ", " << scatDim << " );\n";
+
+      *out << ModeArrayVarName(dims) << " );\n";
+    }
+    else {
+      if (srcNumDims != (m_destType.m_numDims+m_sumDims.size()))
+	throw;
+
+      *out << outName;
+      if (m_coef == COEFZERO) 
+	*out << ".ReduceScatterRedistFrom( ";
+      else
+	*out << ".ReduceScatterUpdateRedistFrom( ";
+
+      *out << inName << ", ";
+    
+      if (m_coef != COEFZERO) {
+	out << m_coef;
+	*out << ", ";
+      }
+
+      DimVec redDims, scatDims;
+
+      GetMultiModeScatterInfo(m_srcType, m_destType,
+			      m_sumDims,
+			      &redDims,
+			      &scatDims);
+	
+
+      *out << ModeArrayVarName(redDims) << ", " << ModeArrayVarName(scatDims) << " );\n";
+    }
   }
 }
 
@@ -412,6 +549,51 @@ void SumScatterUpdateNode::FlattenCore(ofstream &out) const
 void SumScatterUpdateNode::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   throw;
+}
+
+void SumScatterUpdateNode::AddVariables(VarSet &set) const
+{
+  DLAOp<2,1>::AddVariables(set);
+#if ALLOWMULTIMODESCATTER
+  if (m_sumDims.size() > 1) {
+    const DistType &m_srcType = InputDataType(0).m_dist;
+    const DistType &m_destType = InputDataType(1).m_dist;
+    if (m_srcType.m_notReped != m_destType.m_notReped) {
+      EntrySet dimSet;
+      dimSet.insert(m_sumDims.begin(), m_sumDims.end());
+      DimVec dims;
+
+      for(Dim dim = 0; dim < m_srcType.m_numDims; ++dim) {
+	if (dimSet.erase(m_srcType.m_dists[dim])) {
+	  dims.push_back(dim);
+	}
+      }
+      if (!dimSet.empty())
+	throw;
+      Var var(ModeArrayVarType, dims);
+      set.insert(var);
+    }
+    else {
+      DimVec redDims, scatDims;
+
+      GetMultiModeScatterInfo(m_srcType, m_destType,
+			      m_sumDims,
+			      &redDims,
+			      &scatDims);
+      {
+	Var var(ModeArrayVarType, redDims);
+	set.insert(var);
+      }
+      {
+	Var var(ModeArrayVarType, scatDims);
+	set.insert(var);
+      }
+    }
+  }
+#else
+  if (m_sumDims.size() > 1) 
+    throw;
+#endif 
 }
 
 

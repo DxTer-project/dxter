@@ -23,7 +23,7 @@
 #if DOTENSORS
 #include "tensorRedist.h"
 #include "helperNodes.h"
-#include "xpay.h"
+#include "yxpby.h"
 
 typedef vector<unsigned int *> ContType;
 typedef ContType::iterator ContTypeIter;
@@ -218,6 +218,11 @@ void Contraction::CheckInputTypesAlign() const
 	  cout << BType.m_dists[bFind].str() << endl;
 	  throw;
 	}
+	if (m_contIndices.find(index) == string::npos &&
+	    *InputLocalLen(2,dim) != *InputLocalLen(1,bFind)) {
+	  cout << "C and B sizes don't align\n";
+	  throw;
+	}	  
       }
     }
     else {
@@ -234,6 +239,18 @@ void Contraction::CheckInputTypesAlign() const
         cout << Input(2)->GetType() << endl;
         throw;
       }
+      if (m_contIndices.find(index) == string::npos && 
+	  *InputLocalLen(2,dim) != *InputLocalLen(0,aFind)) {
+	cout << "C and A sizes don't align\n";
+	cout << "C:\n";
+	InputLocalLen(2,dim)->Print();
+	cout << "A:\n";
+	InputLocalLen(0,aFind)->Print();
+	cout << m_CIndices << endl;
+	cout << m_AIndices << endl;
+	cout << m_contIndices << endl;
+	throw;
+      }
       size_t bFind = m_BIndices.find(index);
       if (bFind != string::npos) {
 	if (AType.m_dists[aFind].IsStar())
@@ -243,6 +260,20 @@ void Contraction::CheckInputTypesAlign() const
 	if (!InputLocalLen(2,dim)->AllOnes())
 	  throw;
       }
+    }
+  }
+
+  dim = 0;
+  strIter = m_contIndices.begin();
+  for(; strIter != m_contIndices.end(); ++strIter, ++dim) {
+    const char index = *strIter;
+    size_t aFind = m_AIndices.find(index);
+    size_t bFind = m_BIndices.find(index);
+    if (*InputLocalLen(0,aFind) != *InputLocalLen(1,bFind)) {
+      cout << "A and B contraction sizes don't align\n";
+    }
+    if (AType.m_dists[aFind] != BType.m_dists[bFind]) {
+      cout << "A and B contraction distributions don't align\n";
     }
   }
 }
@@ -602,7 +633,11 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
     cont->RedirectChildren(sumSet->OutTun(0),0);
   }
   else {
-    TempVarNode *temp2 = new TempVarNode(CType);
+    TempVarNode *temp2;
+    if (cont->m_beta != COEFZERO)
+	temp2 = new TempVarNode(CType,node->GetInputName(2).m_name+"_temp");
+    else
+      temp2 = new TempVarNode(CType);
     temp2->AddInput(node->Input(2),node->InputConnNum(2));
     node->m_poss->AddNode(temp2);
 
@@ -620,11 +655,11 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
     node->m_poss->AddPSet(redistSet,true,true);
     
     if (cont->m_beta != COEFZERO) {
-      Xpay *xpay = new Xpay(SMLAYER, cont->m_beta);
-      xpay->AddInput(redistSet->OutTun(0), 0);
-      xpay->AddInput(node->Input(2),node->InputConnNum(2));
-      node->m_poss->AddNode(xpay);
-      cont->RedirectChildren(xpay,0);
+      YxpBy *yxpby = new YxpBy(SMLAYER, cont->m_beta);
+      yxpby->AddInput(redistSet->OutTun(0), 0);
+      yxpby->AddInput(node->Input(2),node->InputConnNum(2));
+      node->m_poss->AddNode(yxpby);
+      cont->RedirectChildren(yxpby,0);
     }
     else {
       cont->RedirectChildren(redistSet->OutTun(0),0);
@@ -853,7 +888,11 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
     cont->RedirectChildren(sumSet->OutTun(0),0);
   }
   else {
-    TempVarNode *temp2 = new TempVarNode(CType);
+    TempVarNode *temp2;
+    if (cont->m_beta != COEFZERO)
+      temp2 = new TempVarNode(CType, node->GetInputName(2).m_name+"_temp");
+    else
+      temp2 = new TempVarNode(CType);
     temp2->AddInput(node->Input(2),node->InputConnNum(2));
     node->m_poss->AddNode(temp2);
 
@@ -871,11 +910,11 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
     node->m_poss->AddPSet(redistSet,true,true);
     
     if (cont->m_beta != COEFZERO) {
-      Xpay *xpay = new Xpay(SMLAYER, cont->m_beta);
-      xpay->AddInput(redistSet->OutTun(0), 0);
-      xpay->AddInput(node->Input(2),node->InputConnNum(2));
-      node->m_poss->AddNode(xpay);
-      cont->RedirectChildren(xpay,0);
+      YxpBy *yxpby = new YxpBy(SMLAYER, cont->m_beta);
+      yxpby->AddInput(redistSet->OutTun(0), 0);
+      yxpby->AddInput(node->Input(2),node->InputConnNum(2));
+      node->m_poss->AddNode(yxpby);
+      cont->RedirectChildren(yxpby,0);
     }
     else {
       cont->RedirectChildren(redistSet->OutTun(0),0);

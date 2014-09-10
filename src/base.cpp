@@ -336,7 +336,7 @@ DimSet DistEntry::DistEntryDimSet() const
   return set;
 }
 
-void DistEntry::DimsToDistEntry(DimVec dims)
+void DistEntry::DimsToDistEntry(const DimVec &dims)
 {
   unsigned int currStage = 1;
   unsigned int distVal = 0;

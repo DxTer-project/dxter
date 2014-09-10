@@ -59,7 +59,7 @@
 #define DO16MUTRANSFORMATIONS 1
 #define DOLARGEMUTRANSFORMATIONS 0
 
-#define DOPARTIALLOOPUNROLLING 0
+#define DOPARTIALLOOPUNROLLING 1
 #define PARTIALUNROLLINGSTARTCOEF 2
 #define PARTIALUNROLLINGENDCOEF 16
 
@@ -71,8 +71,8 @@ do you really want to do compact unrolling and partial unrolling?
 
 Size one = 1;
 Size smallSize = 4;
-Size medSize = 32;
-Size bigSize = 1024;
+Size medSize = 500000;
+Size bigSize = 4096;
 //Size bs = ELEM_BS;
 
 RealPSet* GemvExample();
@@ -123,33 +123,33 @@ void PrintImpMap(ImplementationRuntimeMap &impTimes)
   }
 }
 
-GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, double flopCost, int chunkSize) {
-  double peakFLOPS = arch->FlopsPerCycle(type) * arch->CyclesPerSecond();
+GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
+  double peakFlopsPerCycle = arch->FlopsPerCycle(type);
   GraphNum bestImpNum = 0;
-  double bestFLOPS = 0;
+  double bestFlopsPerCycle = 0;
   ImplementationRuntimeMapIter mit;
   for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
     TimeVecIter vit;
     cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
     for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
-      double totalFlops = flopCost * chunkSize;
-      double totalTimeInSecs = *vit;
-      double actualFLOPS = totalFlops / totalTimeInSecs;
-      double pctPeak = (actualFLOPS / peakFLOPS) * 100;
-      if (actualFLOPS > bestFLOPS) {
-	bestFLOPS = actualFLOPS;
+      double totalTimeInCycles = *vit;
+      double actualFlopsPerCycle = flopCost / totalTimeInCycles;
+      double pctPeak = (actualFlopsPerCycle / peakFlopsPerCycle) * 100;
+      if (actualFlopsPerCycle > bestFlopsPerCycle) {
+	bestFlopsPerCycle = actualFlopsPerCycle;
 	bestImpNum = mit->first;
       }
-      cout << "GFLOPS = " << std::to_string((long double) actualFLOPS / 1.0e9) << "\t%Peak = " << std::to_string((long double) pctPeak) << endl;
-      /*      if (pctPeak > 100) {
+      cout << "Flops per cycle = " << std::to_string((long double) actualFlopsPerCycle);
+      cout << "\t%Peak = " << std::to_string((long double) pctPeak) << endl;
+      if (pctPeak > 100) {
 	cout << "pctPeak > 100\n";
 	throw;
-	}*/
+      }
     }
     cout << endl;
   }
-  cout << "Best GFLOPS achieved: " << std::to_string((long double) bestFLOPS / 1.0e9) << endl;
-  cout << "Best percent of peak: " << std::to_string((long double) (bestFLOPS / peakFLOPS) * 100) << endl;
+  cout << "Best flops/cycle achieved: " << std::to_string((long double) bestFlopsPerCycle / 1.0e9) << endl;
+  cout << "Best percent of peak: " << std::to_string((long double) (bestFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
   return bestImpNum;      
 }
 
@@ -605,15 +605,14 @@ int main(int argc, const char* argv[])
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int chunkSize = 3000;
-  int numIterations = 1;
-  RuntimeTest rtest(dataType, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations, chunkSize);
+  int numIterations = 10;
+  RuntimeTest rtest(dataType, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
   cout << "Done evaluating\n";
-  GraphNum best = PrintImpMapInFlops(dataType, impMap, flopCost, chunkSize);
+  GraphNum best = PrintImpMapInFlops(dataType, impMap, flopCost);
   cout << "All implementations printed\n";
   cout << "Best times";
 
@@ -1135,7 +1134,7 @@ RealPSet* SVMulColExample()
 RealPSet* MVMulExample()
 {
   InputNode* Ain = new InputNode("A input", arch->VecRegWidth(dataType), medSize, "A",
-				 1, 16,
+				 1, arch->VecRegWidth(dataType),
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
@@ -1144,7 +1143,7 @@ RealPSet* MVMulExample()
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
   InputNode* yIn = new InputNode("y input", arch->VecRegWidth(dataType), 1, "Y",
-				 1, 16,
+				 1, arch->VecRegWidth(dataType),
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
@@ -1256,18 +1255,18 @@ RealPSet* DotExample()
 
 RealPSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", smallSize, bigSize, "A",
+  InputNode *Ain = new InputNode("A input", arch->VecRegWidth(dataType), bigSize, "A",
 				 bigSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);
 
-  InputNode *Bin = new InputNode("B input", bigSize, smallSize, "B",
-				 smallSize, 1,
+  InputNode *Bin = new InputNode("B input", bigSize, arch->VecRegWidth(dataType), "B",
+				 arch->VecRegWidth(dataType), 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride", dataType);
 
-  InputNode *Cin = new InputNode("C input", smallSize, smallSize, "C",
-				 smallSize, 1,
+  InputNode *Cin = new InputNode("C input", arch->VecRegWidth(dataType), arch->VecRegWidth(dataType), "C",
+				 arch->VecRegWidth(dataType), 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride", dataType);
 

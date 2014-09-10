@@ -31,6 +31,10 @@
 #include "DLAOp.h"
 #include "tensorSumScatter.h"
 
+void GetSuffix(const DimVec &dims1, const DimVec &dims2, 
+	       DimVec &suff);
+
+
 class RedistNode : public DLANode
 {
  public:

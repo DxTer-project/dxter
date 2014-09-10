@@ -77,6 +77,8 @@ string InputNode::DataDeclaration()
   } else if (m_dataTypeInfo.m_type == REAL_SINGLE) {
     return "float *" + m_varName.str();
   }
+  else
+    throw;
 }
 
 string InputNode::RowStrideDefine()

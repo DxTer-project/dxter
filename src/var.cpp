@@ -75,6 +75,22 @@ string PermutationVarName(const DimVec &perm)
   return str;
 }
 
+string DistEntryVecVarName(const DistEntryVec &vec)
+{
+  string str = "modeArrayArray";
+  DistEntryVecConstIter iter = vec.begin();
+  for( ; iter != vec.end(); ++iter) {
+    DistEntry entry = *iter;
+    DimVec vec = entry.DistEntryDims();
+    DimVecConstIter iter2 = vec.begin();
+    str += "__";
+    for (; iter2 != vec.end(); ++iter2) {
+      str += "_" + std::to_string(*iter2);
+    }
+  }
+  return str;
+}
+
 
 #endif //DOTENSORS
 
@@ -159,6 +175,7 @@ Var::Var(Dim dim1, Dim dim2)
 }
 
 
+
 Var::Var(const DimVec &vec1, const DimVec &vec2)
 {
   m_type = ModeArrayPairVarType;
@@ -174,6 +191,14 @@ Var::Var(const DimVec &vec1, const DimVec &vec2)
   m_arrPair->first = vec1;
   m_arrPair->second = vec2;
   m_compStr = str.str();
+}
+
+
+Var::Var(const DistEntryVec &vec)
+{
+  m_type = DistEntryVecVarType;
+  m_compStr = "f " + DistEntryVecVarName(vec);
+  m_entryVec = new DistEntryVec(vec);
 }
 
 #endif //DOTENSORS
@@ -272,6 +297,9 @@ Var::~Var()
     case (PermutationVarType):
       delete m_vec;
       break;
+    case (DistEntryVecVarType):
+      delete m_entryVec;
+      break;
     case (IndexPairType):
       delete m_pair;
       break;
@@ -317,12 +345,39 @@ void Var::PrintDecl(IndStream &out) const
 	     << ", g );" << endl;
 	break;
       }
-    case (ModeArrayVarType) :
-    case (PermutationVarType):      
+    case (DistEntryVecVarType):
+      {
+	out.Indent();
+	string name = GetVarName();
+	*out << "std::vector<ModeArray> " << name << ";\n";
+	DistEntryVecIter iter = m_entryVec->begin();
+	for(; iter != m_entryVec->end(); ++iter) {
+	  DistEntry entry = *iter;
+	  out.Indent();
+	  *out << name << ".push_back(" <<
+	    ModeArrayVarName(entry.DistEntryDims()) 
+	       << ");\n";
+	}
+	break;
+      }
+    case (ModeArrayVarType) : 
       {
 	out.Indent();
 	string name = GetVarName();
 	*out << "ModeArray " << name << ";\n";
+	DimVecConstIter iter = m_vec->begin();
+	for(; iter != m_vec->end(); ++iter) {
+	  out.Indent();
+	  *out << name << ".push_back("
+	       << *iter << ");\n";
+	}
+	break;
+      }
+    case (PermutationVarType):      
+      {
+	out.Indent();
+	string name = GetVarName();
+	*out << "Permutation " << name << ";\n";
 	DimVecConstIter iter = m_vec->begin();
 	for(; iter != m_vec->end(); ++iter) {
 	  out.Indent();
@@ -467,6 +522,11 @@ string Var::GetVarName() const
 	return m_name->str();
 	break;
       }
+    case (DistEntryVecVarType) :
+      {
+	return DistEntryVecVarName(*m_entryVec);
+	break;
+      }
     case (ModeArrayVarType) :
       {
 	return ModeArrayVarName(*(m_vec));
@@ -532,6 +592,9 @@ Var& Var::operator=(const Var &rhs)
       case (PermutationVarType) :
 	delete m_vec;
 	break;
+      case (DistEntryVecVarType):
+	delete m_entryVec;
+	break;
       case (IndexPairType):
 	delete m_pair;
 	break;
@@ -570,6 +633,9 @@ Var& Var::operator=(const Var &rhs)
     case (ModeArrayVarType):
     case (PermutationVarType) :
       m_vec = new DimVec (*(rhs.m_vec));
+      break;
+    case (DistEntryVecVarType):
+      m_entryVec = new DistEntryVec(*(rhs.m_entryVec));
       break;
     case (IndexPairType):
       m_pair = new std::pair<Dim,Dim>;
