@@ -28,9 +28,16 @@ class LowerLayer : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
+#if DOBLIS||DOLLDLA||DOELEM
   DimName m_dim;
   Size m_bs;
  LowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
+#elif DOTENSORS
+  LowerLayer(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+#endif
+  virtual bool IsRef() const {return true;}
+
 };
 

@@ -138,10 +138,19 @@ void YAxpPx::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
 
-    if (m_layer == ABSLAYER)
-      m_cost = 0;
-    if (m_layer == DMLAYER)
-      m_cost = 0;
+    if (m_layer == ABSLAYER || m_layer == DMLAYER) {
+      m_cost = 3 * TotalNumberOfElements(0);
+      Dim numDims = InputNumDims(0);
+      if (InputNumDims(1) != numDims || InputNumDims(2) != numDims)
+	throw;
+      for (Dim dim = 0; dim < numDims; ++dim) {
+	Dim mapping = m_permutation[dim];
+	if (*InputLen(0,dim) != *InputLen(2,dim))
+	  throw;
+	if (*InputLen(0,dim) != *InputLen(1,mapping))
+	  throw;
+      }
+    }
     else if (m_layer == SMLAYER) {
       m_cost = 3 * TotalNumberOfLocalElements(0);
       Dim numDims = InputNumDims(0);
@@ -159,8 +168,13 @@ void YAxpPx::Prop()
 	  throw;
 
 	Dim mapping = m_permutation[dim];
-	if (in0Type.m_dist.m_dists[dim] != in1Type.m_dist.m_dists[mapping])
+	if (in0Type.m_dist.m_dists[dim] != in1Type.m_dist.m_dists[mapping]) {
+	  cout << dim << endl;
+	  cout << in0Type.m_dist.PrettyStr() << endl;
+	  cout << mapping << endl;
+	  cout << in1Type.m_dist.PrettyStr() << endl;
 	  throw;
+	}
 	if (*InputLen(0,dim) != *InputLen(1,mapping)) {
 	  cout << "Input 0:\n";
 	  InputLen(0,dim)->Print();

@@ -324,7 +324,7 @@ void Node::Print(IndStream &out, GraphNum graphNum, const GraphIter *graphIter)
       PrintCode(out);
 #ifdef PRINTCOSTS
       if (((DLANode*)this)->m_cost) {
-	(*out).precision(5);
+	(*out).precision(10);
 	*out << scientific << "cost of previous node: " << ((DLANode*)this)->m_cost << endl;
       }
 #endif
