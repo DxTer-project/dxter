@@ -172,6 +172,21 @@ Size DLANode::TotalNumberOfLocalElements(ConnNum num) const
   return totSize;
 }
 
+Size DLANode::TotalNumberOfElements(ConnNum num) const
+{
+  Dim numDims = NumDims(num);
+  Size totSize = 0;
+  const unsigned int totNumIters = LocalLen(num,0)->NumSizes();
+  for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+    Size temp = 1;
+    for (Dim dim = 0; dim < numDims; ++dim) {
+      temp *= (*Len(num,dim))[iteration];
+    }
+    totSize += temp;
+  }
+  return totSize;
+}
+
 
 #endif
 
