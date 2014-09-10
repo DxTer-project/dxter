@@ -614,7 +614,7 @@ void Node::CheckConnections()
       }
     }
     
-    if (!(*iter1)->m_n->InChildren(this, (*iter1)->m_num)) {
+    if (!IsTunnel(POSSTUNIN) && !(*iter1)->m_n->InChildren(this, (*iter1)->m_num)) {
       Node *input = (*iter1)->m_n;
       cout << "Input doesn't know about child\n";
       cout << "Input is " << (*iter1)->m_n << " " << (*iter1)->m_num << endl;
@@ -659,7 +659,7 @@ void Node::CheckConnections()
     }
   }
   
-  {
+  if (!IsTunnel(POSSTUNOUT)) {
     NodeConnVecConstIter iter = m_children.begin();
     for(; iter != m_children.end(); ++iter) {
       Node *child = (*iter)->m_n;
