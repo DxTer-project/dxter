@@ -217,8 +217,17 @@ void DistYAxpPxToDefaultLocalYAxpPx::Apply(Node *node) const
     }
     RedistNode *redist = new RedistNode(newType);
     redist->AddInput(node->Input(1),node->InputConnNum(1));
-    newYAxpPx->AddInput(redist, 0);
-    node->m_poss->AddNode(redist);
+
+    Poss *poss = new Poss(redist, false);
+    RealPSet *set = new RealPSet(poss);
+    node->m_poss->AddPSet(set,true,true);
+    if (set->m_inTuns.empty())
+      throw;
+    if (set->m_outTuns.empty())
+      throw;
+
+    newYAxpPx->AddInput(set->OutTun(0), 0);
+    //    node->m_poss->AddNode(redist);
   }
   else
     newYAxpPx->AddInput(node->Input(1),node->InputConnNum(1));

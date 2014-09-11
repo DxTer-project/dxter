@@ -674,24 +674,7 @@ Cost Poss::Prop()
     throw;
   }
   
-  unsigned int i = 0;
-  nodeIter = m_inTuns.begin();
-  for(; nodeIter != m_inTuns.end(); ++nodeIter, ++i) {
-    if (m_pset->InTun(i) != (*nodeIter)->Input(0))
-      throw;
-    if (!m_pset->InTun(i)->InChildren(*nodeIter,0)) {
-      cout << "!m_pset->m_inputs[i]->InChildren(*iter,0)\n";
-      cout << "poss tunnel " << *nodeIter << " on poss " << this << " on set " << m_pset << endl;
-      cout << "expected on set tunnel " << m_pset->InTun(i) << endl;
-      cout << "i = " << i << endl;
-      for(unsigned int j = 0; j < m_pset->InTun(0)->m_children.size(); ++j) {
-        cout << m_pset->InTun(i)->m_children[j]->m_n << " is " << j << " child\n";
-        if ( m_pset->InTun(i)->m_children[j]->m_num)
-          cout << "!!!!!" << m_pset->InTun(i)->m_children[j]->m_num << " is " << j << " num\n";
-      }
-      throw;
-    }
-  }
+
   return m_cost;
 }
 
@@ -975,10 +958,8 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
       delete conn;
       if (!tun->m_inputs.empty())
 	throw;
-      tun->RemoveAllChildren2Way();
-      DeleteNode(tun);
+      RemoveFromGraphNodes(tun);
     }
-    (*leftSet)->m_inTuns.clear();
     
 
     tunIter = (*rightSet)->m_inTuns.begin();
@@ -994,10 +975,8 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
       delete conn;
       if (!tun->m_inputs.empty())
 	throw;
-      tun->RemoveAllChildren2Way();
-      DeleteNode(tun);
+      RemoveFromGraphNodes(tun);
     }
-    (*rightSet)->m_inTuns.clear();
 
     tunIter = (*leftSet)->m_outTuns.begin();
     mapIter = merged->m_leftOutMap.begin();
@@ -1015,10 +994,8 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
 	}
 	tun->RemoveAllChildren2Way();
       }
-      tun->RemoveAllInputs2Way();
-      DeleteNode(tun);
+      RemoveFromGraphNodes(tun);
     }
-    (*leftSet)->m_outTuns.clear();
 
 
     tunIter = (*rightSet)->m_outTuns.begin();
@@ -1037,10 +1014,8 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
 	}
 	tun->RemoveAllChildren2Way();
       }
-      tun->RemoveAllInputs2Way();
-      DeleteNode(tun);
+      RemoveFromGraphNodes(tun);
     }
-    (*rightSet)->m_outTuns.clear();
     delete *leftSet;
     delete *rightSet;
     return true;
@@ -2638,7 +2613,7 @@ void Poss::PrintNodeAddresses() const
 {
   cout << "Nodes on " << this << endl;
   for(unsigned int i = 0; i < m_possNodes.size(); ++i)
-    cout << m_possNodes[i]->GetNodeClass() << " " << m_possNodes[i] << endl;
+    cout << m_possNodes[i]->GetNodeClass() << " " << m_possNodes[i] << "\t(" << m_possNodes[i]->GetType() << ")\n";
 }
 
 void Poss::Flatten(ofstream &out) const

@@ -412,7 +412,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	out.Indent();
 	*out << "//**** ";
 	if (set->IsReal()) {
-	  *out << "Is real\n";
+	  *out << "Is real\t" << ((RealPSet*)set)->m_shadows.size() << " shadows\n";
 	}
 	else {
 	  *out << "Is a shadow\n";
