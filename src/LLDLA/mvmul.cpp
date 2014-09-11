@@ -259,11 +259,7 @@ bool MVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
     const MVMul *mvmul = (MVMul*) node;
-    /*    if (mvmul->Input(0)->GetVecRegWidth() != ((int) m_bs.GetSize())) {dr
-      cout << "Vector width is not a multiple of block size\n";
-      return false;
-    }
-    cout << "Vector width is multiple of block size\n";*/
+
     if (m_dim == DIMM && (mvmul->Input(0)->GetVecRegWidth() > ((int) m_bs.GetSize()))) {
       return false;
     }

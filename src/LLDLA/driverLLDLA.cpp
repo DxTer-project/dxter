@@ -638,8 +638,8 @@ int main(int argc, const char* argv[])
 
 RealPSet* GemvExample()
 {
-  InputNode* xIn = new InputNode("x input", 4, 1, "X",
-				 1, 4,
+  InputNode* xIn = new InputNode("x input", arch->VecRegWidth(dataType), 1, "X",
+				 1, arch->VecRegWidth(dataType),
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
@@ -653,7 +653,7 @@ RealPSet* GemvExample()
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
 
-  InputNode* AIn = new InputNode("a input", medSize, 4, "A",
+  InputNode* AIn = new InputNode("a input", medSize, arch->VecRegWidth(dataType), "A",
 				 1, medSize,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
