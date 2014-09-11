@@ -264,6 +264,9 @@ bool MVMulLoopRef::CanApply(const Node *node) const
       return false;
     }
     cout << "Vector width is multiple of block size\n";*/
+    if (m_dim == DIMM && (mvmul->Input(0)->GetVecRegWidth() > ((int) m_bs.GetSize()))) {
+      return false;
+    }
     if (mvmul->GetLayer() != m_fromLayer) {
       return false;
     }

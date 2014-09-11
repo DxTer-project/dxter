@@ -94,7 +94,7 @@ RealPSet* DoubleGemmExample();
 Trans transA, transB;
 
 Architecture* arch;
-Type dataType = REAL_DOUBLE;
+Type dataType = REAL_SINGLE;
 
 ImplementationMap ImpStrMap(Universe *uni)
 {
@@ -227,7 +227,7 @@ void AddMAddTrans()
 
 void AddMVMulTrans()
 {
-  //  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble), LLDLALOOPPHASE);
+  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble), LLDLALOOPPHASE);
 
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
 
@@ -1255,7 +1255,7 @@ RealPSet* DotExample()
 
 RealPSet* GemmExample()
 {
-  InputNode *Ain = new InputNode("A input", arch->VecRegWidth(dataType), bigSize, "A",
+  InputNode *Ain= new InputNode("A input", arch->VecRegWidth(dataType), bigSize, "A",
 				 bigSize, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);
