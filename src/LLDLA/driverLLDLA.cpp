@@ -71,7 +71,7 @@ do you really want to do compact unrolling and partial unrolling?
 
 Size one = 1;
 Size smallSize = 4;
-Size medSize = 500000;
+Size medSize = 512;
 Size bigSize = 4096;
 //Size bs = ELEM_BS;
 
@@ -304,7 +304,7 @@ void AddVMMulTrans()
 
   Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMK, LLDLAMuDouble), LLDLALOOPPHASE);
 
-  //  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
+  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
 
   return;
 }
@@ -1020,8 +1020,8 @@ RealPSet* SMMulExample()
 
 RealPSet* VMMulExample()
 {
-  InputNode* Ain = new InputNode("A input", medSize, medSize, "A",
-				 medSize, 1,
+  InputNode* Ain = new InputNode("A input", medSize, arch->VecRegWidth(dataType), "A",
+				 arch->VecRegWidth(dataType), 1,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
   InputNode* xIn = new InputNode("x input", 1, medSize, "X",
@@ -1029,8 +1029,8 @@ RealPSet* VMMulExample()
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", 1, medSize, "Y",
-				 medSize, 1,
+  InputNode* yIn = new InputNode("y input", 1, arch->VecRegWidth(dataType), "Y",
+				 arch->VecRegWidth(dataType), 1,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 

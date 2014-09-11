@@ -216,6 +216,11 @@ bool VMMulLoopRef::CanApply(const Node* node) const
     if (vmmul->GetLayer() != m_fromLayer) {
       return false;
     }
+
+    if (m_dim == DIMN && (vmmul->Input(0)->GetVecRegWidth() > ((int) m_bs.GetSize()))) {
+      return false;
+    }
+
     if (m_dim == DIMN) {
     return !(*(vmmul->GetInputN(1)) <= m_bs.GetSize());
     } else if (m_dim == DIMK) {
