@@ -59,7 +59,7 @@
 #define DO16MUTRANSFORMATIONS 1
 #define DOLARGEMUTRANSFORMATIONS 0
 
-#define DOPARTIALLOOPUNROLLING 1
+#define DOPARTIALLOOPUNROLLING 0
 #define PARTIALUNROLLINGSTARTCOEF 2
 #define PARTIALUNROLLINGENDCOEF 16
 
@@ -359,7 +359,7 @@ int main(int argc, const char* argv[])
   omp_set_nested(true);
 #endif
 
-  arch = new HaswellMacbook();
+  arch = new Stampede();
   //  PrintType printType = CODE;
   int numIters = -1;
   RealPSet* (*algFunc)();
