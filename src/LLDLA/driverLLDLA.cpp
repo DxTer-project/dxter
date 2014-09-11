@@ -71,8 +71,8 @@ do you really want to do compact unrolling and partial unrolling?
 
 Size one = 1;
 Size smallSize = 4;
-Size medSize = 500000;
-Size bigSize = 4096;
+Size medSize = 512;
+Size bigSize = 256;
 //Size bs = ELEM_BS;
 
 RealPSet* GemvExample();
@@ -94,7 +94,7 @@ RealPSet* DoubleGemmExample();
 Trans transA, transB;
 
 Architecture* arch;
-Type dataType = REAL_DOUBLE;
+Type dataType = REAL_SINGLE;
 
 ImplementationMap ImpStrMap(Universe *uni)
 {
@@ -359,7 +359,7 @@ int main(int argc, const char* argv[])
   omp_set_nested(true);
 #endif
 
-  arch = new HaswellMacbook();
+  arch = new Stampede();
   //  PrintType printType = CODE;
   int numIters = -1;
   RealPSet* (*algFunc)();
