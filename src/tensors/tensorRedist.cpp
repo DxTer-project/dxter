@@ -46,6 +46,17 @@ bool GetAllToAllPattern(const DistType &srcType,
 			DimVec *toIndices,
 			DistEntryVec *gridModesInvolved);
 
+bool GetAllGatherPattern(const DistType &srcType,
+			 const DistType &destType,
+			 DimVec *indices,
+			 DistEntryVec *gridModes);
+
+bool GetLocalRedistPattern(const DistType &srcType,
+			   const DistType &destType,
+			   DimVec *indices,
+			   DistEntryVec *gridModes);
+			
+
 RedistNode::RedistNode() 
 {
   m_info.m_dist.SetToDefault(0);
@@ -131,102 +142,95 @@ void RedistNode::Prop()
       throw;
     }
 
+    m_cost = 0;
+
+    DimVec fromIndices, toIndices;
+    DistEntryVec gridModesInvolved;
+    if (GetAllToAllPattern(m_srcType, m_info.m_dist,
+			   &fromIndices,
+			   &toIndices,
+			   &gridModesInvolved)) {
+      unsigned int numProcs = 1;
+      DistEntryVecIter gridModeIter = gridModesInvolved.begin();
+      for(; gridModeIter != gridModesInvolved.end(); ++gridModeIter) {
+	DistEntry entry = *gridModeIter;
+	DimVec gridModes = entry.DistEntryDims();
+	DimVecIter iter = gridModes.begin();
+	for(; iter != gridModes.end(); ++iter) {
+	  numProcs *= GridLens[*iter];
+	}
+      }
+      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+	Cost temp = 1;
+	for (Dim dim = 0; dim < numDims; ++dim) {
+	  temp *= m_lsizes[dim][iteration];
+	}
+	m_cost += AllToAll(temp * numProcs, numProcs);
+      }
+      return;
+    }
+
+    DimVec indices;
+    if (GetAllGatherPattern(m_srcType, m_info.m_dist,
+			    &indices,
+			    &gridModesInvolved)) {
+      unsigned int numProcs = 1;
+      DistEntryVecIter gridModeIter = gridModesInvolved.begin();
+      for(; gridModeIter != gridModesInvolved.end(); ++gridModeIter) {
+	DistEntry entry = *gridModeIter;
+	DimVec gridModes = entry.DistEntryDims();
+	DimVecIter iter = gridModes.begin();
+	for(; iter != gridModes.end(); ++iter) {
+	  numProcs *= GridLens[*iter];
+	}
+      }
+      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+	Cost temp = 1;
+	for (Dim dim = 0; dim < numDims; ++dim) {
+	  temp *= m_lsizes[dim][iteration];
+	}
+	m_cost += AllGather(temp * numProcs, numProcs);
+      }
+      return;
+    }
+
+    if (GetLocalRedistPattern(m_srcType, m_info.m_dist,
+			      &indices,
+			      &gridModesInvolved)) {
+      //Local mem copy
+      m_cost = 0; 
+      return;
+    }
+
     DimSet diffs;
-    
+  
     for (Dim dim = 0; dim < numDims; ++dim) {
       if (m_srcType.m_dists[dim] != m_info.m_dist.m_dists[dim]) {
 	diffs.insert(dim);
       }
     }
-
+  
     if (diffs.empty()) {
-      m_cost = 0;
+      throw;
     }
     else if (diffs.size() == 1) {
-      const Dim dim = *(diffs.begin());
+      Dim dim = *(diffs.begin());
       DimVec src = m_srcType.m_dists[dim].DistEntryDims();
       DimVec dest = m_info.m_dist.m_dists[dim].DistEntryDims();
 
-      
-      if (src.empty() || IsPrefix(src, dest)) {
-	//local memory copy
-	//	throw;
-	m_cost = 0;
-      }
-      else if (IsPrefix(dest, src) || dest.empty()) {
-	m_cost = 0;
-	const unsigned int totNumIters = m_lsizes[0].NumSizes();
-	unsigned int numProcs = 1;
-	DimVecIter iter = src.begin() + dest.size();
-	for(; iter != src.end(); ++iter) {
-	  numProcs *= GridLens[*iter];
-	}
-	for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
-	  Cost temp = 1;
-	  for (Dim dim = 0; dim < numDims; ++dim) {
-	    temp *= m_lsizes[dim][iteration];
-	  }
-	  m_cost += AllGather(temp * numProcs, numProcs);
-	}
-      }
-      else {
-	m_cost = 0;
-	const unsigned int totNumIters = m_lsizes[0].NumSizes();
-	unsigned int numProcs = 1;
-	DimVecIter iter = src.begin();
-	DimSet unionSet;
-	for(; iter != src.end(); ++iter) {
-	  numProcs *= GridLens[*iter];
-	  unionSet.insert(*iter);
-	}
-	iter = dest.begin();
-	for(; iter != dest.end(); ++iter) {
-	  if (unionSet.find(*iter) == unionSet.end())
-	    numProcs *= GridLens[*iter];
-	}
-
-	for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
-	  Cost temp = 1;
-	  for (Dim dim = 0; dim < numDims; ++dim) {
-	    temp *= m_lsizes[dim][iteration];
-	  }
-	  m_cost += AllToAll(temp * numProcs, numProcs);
-	}
-      }
-    }
-    else if (diffs.size() > 2) {
-      m_cost = 0;
-    }
-    else {
-
-      DimSetConstIter iterDiffs = diffs.begin();
-      Dim diff1 = *iterDiffs;
-      ++iterDiffs;
-      Dim diff2 = *iterDiffs;
-
-      DimVec srcDims = m_srcType.m_dists[diff1].DistEntryDims();
-      DimVec destDims = m_info.m_dist.m_dists[diff1].DistEntryDims();
-      DimVec otherSrcDims = m_srcType.m_dists[diff2].DistEntryDims();
-      DimVec otherDestDims = m_info.m_dist.m_dists[diff2].DistEntryDims();
-    
-      DimVec commonSuff1, commonSuff2, otherSrcPref, destPref, srcPref, otherDestPref;
-      GetCommonSuffix(otherSrcDims, destDims, commonSuff1, otherSrcPref, destPref);
-      GetCommonSuffix(srcDims, otherDestDims, commonSuff2, srcPref, otherDestPref);
-
-    
-      m_cost = 0;
       const unsigned int totNumIters = m_lsizes[0].NumSizes();
       unsigned int numProcs = 1;
+      DimVecIter iter = src.begin();
       DimSet unionSet;
-      
-      DimVecIter iter = commonSuff1.begin();
-      for(; iter != commonSuff1.end(); ++iter) {
-	if (unionSet.insert(*iter).second)
-	  numProcs *= GridLens[*iter];
+      for(; iter != src.end(); ++iter) {
+	numProcs *= GridLens[*iter];
+	unionSet.insert(*iter);
       }
-      iter = commonSuff2.begin();
-      for(; iter != commonSuff2.end(); ++iter) {
-	if (unionSet.insert(*iter).second)
+      iter = dest.begin();
+      for(; iter != dest.end(); ++iter) {
+	if (unionSet.find(*iter) == unionSet.end())
 	  numProcs *= GridLens[*iter];
       }
 
@@ -238,6 +242,9 @@ void RedistNode::Prop()
 	m_cost += AllToAll(temp * numProcs, numProcs);
       }
     }
+    else
+      m_cost = 0;
+  
   }
 }
 
@@ -348,8 +355,14 @@ void GetSuffix(const DimVec &dims1, const DimVec &dims2,
     else
       break;
   }
-  if (iter2 == dims2.end())
+  if (iter2 == dims2.end()) {
+    DistEntry entry1, entry2;
+    entry1.DimsToDistEntry(dims1);
+    cout << entry1.PrettyStr() << endl;
+    entry2.DimsToDistEntry(dims2);
+    cout << entry2.PrettyStr() << endl;
     throw;
+  }
   while (iter2 != dims2.end()) {
     suff.push_back(*iter2);
     ++iter2;
@@ -363,10 +376,6 @@ Phase RedistNode::MaxPhase() const
   const DistType &m_srcType = parent->DataType(InputConnNum(0)).m_dist;
   const Dim numDims = m_info.m_dist.m_numDims;
   
-  bool foundMemCopy = false;
-  bool foundAllGather = false;
-  bool foundAllToAll = false;
-  DimSet diffs;
 
   //Check for multi-mode AllToAll
 
@@ -375,74 +384,35 @@ Phase RedistNode::MaxPhase() const
     {
       return NUMPHASES;
     }
+
+  if (GetAllGatherPattern(m_srcType, m_info.m_dist,
+			  NULL, NULL))
+    {
+      return NUMPHASES;
+    }
+
+  if (GetLocalRedistPattern(m_srcType, m_info.m_dist,
+			    NULL, NULL))
+    {
+      return NUMPHASES;
+    }
+  
+  DimSet diffs;
   
   for (Dim dim = 0; dim < numDims; ++dim) {
-    DistEntry srcDistEntry = m_srcType.m_dists[dim];
-    DistEntry destDistEntry = m_info.m_dist.m_dists[dim];
-    if (srcDistEntry != destDistEntry) {
-      DimVec srcDims = srcDistEntry.DistEntryDims();
-      DimVec destDims = destDistEntry.DistEntryDims();
-      if (diffs.size() > 1) {
-	return ROTENSORPHASE;
-      }
-      else if (diffs.size() == 1) {
-	foundAllToAll = true;
-	diffs.insert(dim);
-	Dim otherDim = *(diffs.begin());
-	DimVec otherSrcDims = m_srcType.m_dists[otherDim].DistEntryDims();
-	DimVec otherDestDims = m_info.m_dist.m_dists[otherDim].DistEntryDims();
-	    
-	DimVec commonSuff1, commonSuff2, otherSrcPref, destPref, srcPref, otherDestPref;
-	GetCommonSuffix(otherSrcDims, destDims, commonSuff1, otherSrcPref, destPref);
-	GetCommonSuffix(srcDims, otherDestDims, commonSuff2, srcPref, otherDestPref);
-	    
-	if (commonSuff1.empty() && commonSuff2.empty())
-	  return ROTENSORPHASE;
-	
-	if (otherSrcPref != otherDestPref) {
-	  return ROTENSORPHASE;
-	}
-	if (srcPref != destPref) {
-	  return ROTENSORPHASE;
-	}
-      }
-      else if (srcDistEntry.IsStar() || IsPrefix(srcDims, destDims)) {
-	foundMemCopy = true;
-	diffs.insert(dim);
-	if (foundAllGather || foundAllToAll) {
-	  return ROTENSORPHASE;
-	}
-      }
-      else if (destDistEntry.IsStar() || IsPrefix(destDims, srcDims)) {
-	diffs.insert(dim);
-	if (foundAllGather || foundMemCopy || foundAllToAll)
-	  return ROTENSORPHASE;
-	else
-	  foundAllGather = true;
-      }
-      else {
-	foundAllToAll = true;
-	diffs.insert(dim);
-      }
+    if (m_srcType.m_dists[dim] != m_info.m_dist.m_dists[dim]) {
+      diffs.insert(dim);
     }
   }
-
-  if (diffs.size() == 1 && foundAllToAll) {
-    Dim dim = *(diffs.begin());
-    DistEntry srcDistEntry = m_srcType.m_dists[dim];
-    DistEntry destDistEntry = m_info.m_dist.m_dists[dim];
-
-    DimSet srcSet = srcDistEntry.DistEntryDimSet();
-    DimSet destSet = destDistEntry.DistEntryDimSet();
-    if (srcSet.size() != destSet.size())
-      return ROTENSORPHASE;
-    if (!includes(srcSet.begin(), srcSet.end(),
-		  destSet.begin(), destSet.end())) {
-      return ROTENSORPHASE;
-    }
+  
+  if (diffs.empty()) {
+    throw;
   }
-
-  return NUMPHASES;
+  else if (diffs.size() == 1) {
+    return NUMPHASES;
+  }
+  else
+    return ROTENSORPHASE;
 }
 
 const Dim RedistNode::NumDims(ConnNum num) const
@@ -560,6 +530,27 @@ void RedistNode::PrintCode(IndStream &out)
     return;
   }
 
+  DimVec indices;
+  if (GetAllGatherPattern(m_srcType, m_info.m_dist,
+			  &indices,
+			  &gridModesInvolved)) {
+    *out << outName << ".AllGatherRedistFrom( "
+	 << inName << ", "
+      	 << ModeArrayVarName(indices) << ", "
+	 << DistEntryVecVarName(gridModesInvolved) << " );\n";
+    return;
+  }
+
+  if (GetLocalRedistPattern(m_srcType, m_info.m_dist,
+			  &indices,
+			  &gridModesInvolved)) {
+    *out << outName << ".LocalRedistFrom( "
+	 << inName << ", "
+      	 << ModeArrayVarName(indices) << ", "
+	 << DistEntryVecVarName(gridModesInvolved) << " );\n";
+    return;
+  }
+
   DimSet diffs;
 
   for (Dim dim = 0; dim < numDims; ++dim) {
@@ -572,88 +563,19 @@ void RedistNode::PrintCode(IndStream &out)
     throw;
   }
   else if (diffs.size() == 1) {
-    const Dim dim = *(diffs.begin());
+    Dim dim = *(diffs.begin());
     DimVec src = m_srcType.m_dists[dim].DistEntryDims();
     DimVec dest = m_info.m_dist.m_dists[dim].DistEntryDims();
-       
-    if (src.empty() || IsPrefix(src, dest)) {
-      DimVec suff;
-      GetSuffix(src, dest, suff);
-      /*
-       *out << "LocalRedist( " << outName << ", "
-       << inName << ", " << dim 
-       << ", " << ModeArrayVarName(suff)
-       << " );\n";
-      */
-      *out << outName << ".LocalRedistFrom( " 
-	   << inName << ", " << dim 
-	   << ", " << ModeArrayVarName(suff)
-	   << " );\n";
-    }
-    else if (IsPrefix(dest, src) || dest.empty()) {
-      if (!src.empty()) {
-	
-	//	*out << "AllGatherRedist( " << outName << ", "
-	//	     << inName << ", " << dim << ", ";
-	//	DimVec suff;
-	//	GetSuffix(dest, src, suff);
-	//	*out << ModeArrayVarName(suff) << " );\n";
-	*out << outName << ".AllGatherRedistFrom( " << inName
-	     << ", " << dim << ", ";
-	DimVec suff;
-	GetSuffix(dest, src, suff);
-	*out << ModeArrayVarName(suff) << " );\n";
-      }
-      else {
-	throw;
-	//*out << "AllGatherRedist( " << outName << ", "
-	//	     << inName << ", " << dim << " );\n";
-      }
-    }
-    else {
-      //      *out << "PermutationRedist( " << outName << ", "
-      //      	   << inName << ", " << dim << " );\n";
-      *out << outName << ".PermutationRedistFrom( "
-      	   << inName << ", " << dim << ", "
-	   << ModeArrayVarName(src) << " );\n";
-    }
+    if (m_srcType.m_dists[dim].DistEntryDimSet() != m_info.m_dist.m_dists[dim].DistEntryDimSet())
+      throw;       
+    if (m_srcType.m_dists[dim].DistEntryDimSet() != m_info.m_dist.m_dists[dim].DistEntryDimSet())
+      throw;
+    *out << outName << ".PermutationRedistFrom( "
+	 << inName << ", " << dim << ", "
+	 << ModeArrayVarName(src) << " );\n";
   }
-  else if (diffs.size() > 2) {
+  else 
     throw;
-  }
-  else {
-    DimSetConstIter iter = diffs.begin();
-    Dim diff1 = *iter;
-    ++iter;
-    Dim diff2 = *iter;
-
-    /*
-    *out << "AllToAllDoubleIndexRedist( "  << outName << ", "
-	 << inName << ", " 
-	 << IndexPairVarName(diff1, diff2)
-	 << ", ";
-    */
-    *out << outName << ".AllToAllDoubleModeRedistFrom( "
-	 << inName << ", " 
-	 << IndexPairVarName(diff1, diff2)
-	 << ", ";
-
-
-    DimVec firstVec, secondVec;
-
-    DimVec srcDims = m_srcType.m_dists[diff1].DistEntryDims();
-    DimVec destDims = m_info.m_dist.m_dists[diff1].DistEntryDims();
-    DimVec otherSrcDims = m_srcType.m_dists[diff2].DistEntryDims();
-    DimVec otherDestDims = m_info.m_dist.m_dists[diff2].DistEntryDims();
-    
-    DimVec commonSuff1, commonSuff2, otherSrcPref, destPref, srcPref, otherDestPref;
-    GetCommonSuffix(otherSrcDims, destDims, commonSuff1, otherSrcPref, destPref);
-    GetCommonSuffix(srcDims, otherDestDims, commonSuff2, srcPref, otherDestPref);
-
-    
-    *out << ModeArrayPairVarName(commonSuff2, commonSuff1)
-	 << " );\n";
-  }
 }
 
 void RedistNode::AddVariables(VarSet &set) const
@@ -700,9 +622,45 @@ void RedistNode::AddVariables(VarSet &set) const
 
     return;
   }
-    
 
+  DimVec indices;
+  if (GetAllGatherPattern(m_srcType, m_info.m_dist,
+			  &indices,
+			  &gridModesInvolved)) {
+    {
+      Var var(ModeArrayVarType, indices);
+      set.insert(var);
+    }
+    { 
+      DistEntryVecIter iter = gridModesInvolved.begin();
+      for(; iter != gridModesInvolved.end(); ++iter) {
+	Var var(ModeArrayVarType, (*iter).DistEntryDims());
+	set.insert(var);
+      }
+      Var var(gridModesInvolved);
+      set.insert(var);
+    }
+    return;
+  }
 
+  if (GetLocalRedistPattern(m_srcType, m_info.m_dist,
+			  &indices,
+			  &gridModesInvolved)) {
+    {
+      Var var(ModeArrayVarType, indices);
+      set.insert(var);
+    }
+    { 
+      DistEntryVecIter iter = gridModesInvolved.begin();
+      for(; iter != gridModesInvolved.end(); ++iter) {
+	Var var(ModeArrayVarType, (*iter).DistEntryDims());
+	set.insert(var);
+      }
+      Var var(gridModesInvolved);
+      set.insert(var);
+    }
+    return;
+  }
 
   DimSet diffs;
     
@@ -719,56 +677,18 @@ void RedistNode::AddVariables(VarSet &set) const
     throw;
   }
   else if (diffs.size() == 1) {
-    const Dim dim = *(diffs.begin());
+    Dim dim = *(diffs.begin());
     DimVec src = m_srcType.m_dists[dim].DistEntryDims();
     DimVec dest = m_info.m_dist.m_dists[dim].DistEntryDims();
-       
-    if (src.empty() || IsPrefix(src, dest)) {
-      DimVec suff;
-      GetSuffix(src, dest, suff);
-      Var var(ModeArrayVarType, suff);
-      set.insert(var);
+    if (m_srcType.m_dists[dim].DistEntryDimSet() != m_info.m_dist.m_dists[dim].DistEntryDimSet()) {
+      cout << m_srcType.PrettyStr() << " -> " << m_info.m_dist.PrettyStr() << endl;
+      throw;
     }
-    else if (IsPrefix(dest, src) || dest.empty()) {
-      if (!src.empty()) {
-	DimVec suff;
-	GetSuffix(dest, src, suff);
-	Var var(ModeArrayVarType, suff);
-	set.insert(var);
-      }
-    }
-    else {
-      Var var(ModeArrayVarType, src);
-      set.insert(var);
-    }
-
+    Var var(ModeArrayVarType, src);
+    set.insert(var);
   }
-  else if (diffs.size() > 2) {
+  else
     throw;
-  }
-  else {
-    DimSetConstIter iter = diffs.begin();
-    Dim diff1 = *iter;
-    ++iter;
-    Dim diff2 = *iter;
-
-    Var pairVar(diff1, diff2);
-    set.insert(pairVar);
-
-    DimVec firstVec, secondVec;
-
-    DimVec srcDims = m_srcType.m_dists[diff1].DistEntryDims();
-    DimVec destDims = m_info.m_dist.m_dists[diff1].DistEntryDims();
-    DimVec otherSrcDims = m_srcType.m_dists[diff2].DistEntryDims();
-    DimVec otherDestDims = m_info.m_dist.m_dists[diff2].DistEntryDims();
-    
-    DimVec commonSuff1, commonSuff2, otherSrcPref, destPref, srcPref, otherDestPref;
-    GetCommonSuffix(otherSrcDims, destDims, commonSuff1, otherSrcPref, destPref);
-    GetCommonSuffix(srcDims, otherDestDims, commonSuff2, srcPref, otherDestPref);
-
-    Var arrayPairVar(commonSuff2, commonSuff1);
-    set.insert(arrayPairVar);
-  }
 }
 
 
@@ -1714,6 +1634,97 @@ bool GetAllToAllPattern(const DistType &srcType,
   return true;
 }
 
+bool GetAllGatherPattern(const DistType &srcType,
+			 const DistType &destType,
+			 DimVec *indices,
+			 DistEntryVec *gridModes)
+{
+  const DimSet destUsedDims = destType.UsedGridDims();
+
+  Dim numDims = srcType.m_numDims;
+
+  if (numDims != destType.m_numDims)
+    return false;
+
+  int count = 0;
+  
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    DistEntry srcDistEntry = srcType.m_dists[dim];
+    DistEntry destDistEntry = destType.m_dists[dim];
+    if (srcDistEntry != destDistEntry) {
+      DimVec srcDims = srcDistEntry.DistEntryDims();
+      DimVec destDims = destDistEntry.DistEntryDims();
+      DimVec suff;
+      if (srcDims.size() > destDims.size()) {
+	GetSuffix(destDims, srcDims, suff);
+	if (suff.size() + destDims.size() != srcDims.size())
+	  return false;
+	DimVecIter iter = suff.begin();
+	for(; iter != suff.end(); ++iter) {
+	  if (destUsedDims.find(*iter) != destUsedDims.end())
+	    return false;
+	}
+	if (indices) {
+	  indices->push_back(dim);
+	  DistEntry entry;
+	  entry.DimsToDistEntry(suff);
+	  gridModes->push_back(entry);
+	}
+	++count;
+      }
+      else
+	return false;
+    }
+  }
+
+  return count != 0;
+}
+
+bool GetLocalRedistPattern(const DistType &srcType,
+			   const DistType &destType,
+			   DimVec *indices,
+			   DistEntryVec *gridModes)
+{
+  const DimSet srcUsedDims = srcType.UsedGridDims();
+
+  Dim numDims = srcType.m_numDims;
+
+  if (numDims != destType.m_numDims)
+    return false;
+
+  int count = 0;
+  
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    DistEntry srcDistEntry = srcType.m_dists[dim];
+    DistEntry destDistEntry = destType.m_dists[dim];
+    if (srcDistEntry != destDistEntry) {
+      DimVec srcDims = srcDistEntry.DistEntryDims();
+      DimVec destDims = destDistEntry.DistEntryDims();
+      DimVec suff;
+      if (destDims.size() > srcDims.size()) {
+	GetSuffix(srcDims, destDims, suff);
+	if (suff.size() + srcDims.size() != destDims.size())
+	  return false;
+	DimVecIter iter = suff.begin();
+	for(; iter != suff.end(); ++iter) {
+	  if (srcUsedDims.find(*iter) != srcUsedDims.end())
+	  return false;
+	}
+	if (indices) {
+	  indices->push_back(dim);
+	  DistEntry entry;
+	  entry.DimsToDistEntry(suff);
+	  gridModes->push_back(entry);
+	}
+	++count;
+      }
+      else
+	return false;
+    }
+  }
+
+  return count != 0;
+}
 
 #endif
 

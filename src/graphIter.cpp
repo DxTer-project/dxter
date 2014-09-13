@@ -417,6 +417,18 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	else {
 	  *out << "Is a shadow\n";
 	}
+#if DOTENSORS
+	out.Indent();
+	*out << "\t//Outputs:\n";
+	NodeVecIter iter = set->m_outTuns.begin();
+	for(; iter != set->m_outTuns.end(); ++iter) {
+	  Node *node = *iter;
+	  if (!node->m_children.empty()) {
+	    out.Indent();
+	    *out << "\t//  " << node->GetNameStr(0) << endl;
+	  }
+	}
+#endif //DOTENSORS
 	
 	RealPSet *real = set->GetReal();
 	

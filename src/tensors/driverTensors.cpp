@@ -561,8 +561,8 @@ RealPSet* MP2()
 
   Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
   cont1->AddInputs(6,
-		   v_efmn,0,
 		   axppx1Set->OutTun(0),0,
+		   t_efmn,0,
 		   scalarIn,0);
   Poss *cont1Poss = new Poss(cont1);
   RealPSet *cont1Set = new RealPSet(cont1Poss);
