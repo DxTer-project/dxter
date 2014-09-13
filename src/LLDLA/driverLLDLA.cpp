@@ -69,6 +69,8 @@ do you really want to do compact unrolling and partial unrolling?
 
 #include <sstream>
 
+void MuNNMuGemmResults(Type precision);
+double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName);
 RealPSet* GemvExample(Type dataType, int m, int n);
 RealPSet* MVMul2Example(Type dataType, int m, int n, int p);
 RealPSet* MAdd2Example(Type dataType, int m, int n);
@@ -114,6 +116,28 @@ void PrintImpMap(ImplementationRuntimeMap &impTimes)
     }
     cout << endl;
   }
+}
+
+double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
+  double peakFlopsPerCycle = arch->FlopsPerCycle(type);
+  double bestFlopsPerCycle = 0;
+  ImplementationRuntimeMapIter mit;
+  for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
+    TimeVecIter vit;
+    for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
+      double totalTimeInCycles = *vit;
+      double actualFlopsPerCycle = flopCost / totalTimeInCycles;
+      double pctPeak = (actualFlopsPerCycle / peakFlopsPerCycle) * 100;
+      if (actualFlopsPerCycle > bestFlopsPerCycle) {
+	bestFlopsPerCycle = actualFlopsPerCycle;
+      }
+      if (pctPeak > 100) {
+	cout << "pctPeak > 100\n";
+	throw;
+      }
+    }
+  }
+  return bestFlopsPerCycle;
 }
 
 GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
@@ -343,6 +367,7 @@ void Usage()
   cout <<"        13  -> Matrix add twice F/D M N\n";
   cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
   cout <<"        15  -> Gemv F/D M N\n";
+  cout <<"        16  -> Run (mu x n) (n x mu) tests with precision F/D\n";
 }
 
 int main(int argc, const char* argv[])
@@ -356,14 +381,15 @@ int main(int argc, const char* argv[])
   Type precision;
 
   arch = new HaswellMacbook();
+  AddTrans();
+
   //  PrintType printType = CODE;
-  int numIters = -1;
+
   RealPSet* algPSet;
   //  GraphNum whichGraph = 0;
   int algNum;
-  string fileName;
   string opName;
-  Cost flopCost = 0;
+
 
   if(argc < 2) {
     Usage();
@@ -540,66 +566,108 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = GemvExample(precision, m, n);
       break;
+    case(16):
+      if (argc != 3) {
+	Usage();
+	return 0;
+      }
+      precision = CharToType(*argv[2]);
+      MuNNMuGemmResults(precision);
+      return 0;
     default:
       Usage();
       return 0;
     }
   }
 
-  RegAllLLDLANodes();
-  AddTrans();
+  RunExample(algNum, algPSet, precision, opName);
+  return 0;
+}
 
+void MuNNMuGemmResults(Type precision) {
+  int m = arch->VecRegWidth(precision);
+  int n = m;
+  int p = 16;
+  int p_inc = 16;
+  int num_trials = 10;
+  int algNum = 1;
+  string opName = "dxt_gemm";
+  string resultFileName = "dxt_gemm_mu_by_n_times_n_by_mu_trials.csv";
+  std::ofstream outFile(resultFileName);
+
+  outFile << "m, n, p, bestFlopsPerCylcle\n";
+
+  for (int i = 0; i < num_trials; i++) {
+    RealPSet* algPSet = GemmExample(precision, m, n, p);
+    double bestFlops = RunExample(algNum, algPSet, precision, opName);
+    outFile << std::to_string((long long int) m) << ", ";
+    outFile << std::to_string((long long int) n) << ", ";
+    outFile << std::to_string((long long int) p) << ", ";
+    outFile << std::to_string((double) bestFlops) << "\n";
+    p += p_inc;
+  }
+  outFile.close();
+  return;
+}
+
+double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
+{
+  RegAllLLDLANodes();
+
+
+  int numIters = -1;
+  Cost flopCost = 0;
   Universe uni;
   time_t start, start2, end;
-  uni.PrintStats();
   string absImpStr;
-  if (algNum==0) {
-    time(&start);
-    uni.Init(fileName);
-    time(&end);
-    cout << "Unflatten took " << difftime(end,start) << " seconds\n";
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-  else {
-    cout << "Creating startSet\n";
-    RealPSet *startSet = algPSet;
-    cout << "Created startSet\n";
-    uni.Init(startSet);
-    cout << "Initialized universe\n";
-    uni.Prop();
-    GraphIter graphIter(startSet->m_posses.begin()->second);
-    cout << "Printing evaluation code\n";
-    flopCost = graphIter.EvalAndSetBest();
-    // Print abstract implementation to string for use in testing
-    // EXTREMELY HACKY, I could not figure out how to redirect an
-    // ostream to a string
-    std::stringstream ss;
-    IndStream optOut(&ss, LLDLASTREAM);
-    graphIter.PrintRoot(optOut, 0, true, startSet);
-    absImpStr = ss.str();
-    cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
-    cout << "Flops for operation = " << std::to_string((long double) flopCost) << endl;
-    time(&start);
-  }
 
+  uni.PrintStats();
+
+  cout << "Creating startSet\n";
+
+  RealPSet *startSet = algPSet;
+
+  cout << "Created startSet\n";
+
+  uni.Init(startSet);
+
+  cout << "Initialized universe\n";
+
+  uni.Prop();
+  GraphIter graphIter(startSet->m_posses.begin()->second);
+  cout << "Printing evaluation code\n";
+  flopCost = graphIter.EvalAndSetBest();
+  // Print abstract implementation to string for use in testing
+  // EXTREMELY HACKY, I could not figure out how to redirect an
+  // ostream to a string
+  std::stringstream ss;
+  IndStream optOut(&ss, LLDLASTREAM);
+  graphIter.PrintRoot(optOut, 0, true, startSet);
+  absImpStr = ss.str();
+
+  cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
+  cout << "Flops for operation = " << std::to_string((long double) flopCost) << endl;
+
+  time(&start);
 
 #if DOLLDLALOOPPHASE
   if (CurrPhase == LLDLALOOPPHASE) {
+
     cout << "Expanding LLDLA loop phase\n";
+
     uni.Expand(-1, LLDLALOOPPHASE, LLDLACull);
     time(&end);
+
     cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
     cout << "Propagating\n";
+
     cout.flush();
     time(&start2);
     uni.Prop();
     time(&end);
+
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+
   }
 #endif
 
@@ -649,6 +717,8 @@ int main(int argc, const char* argv[])
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
+
+
   cout << "Done evaluating\n";
   GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);
   cout << "All implementations printed\n";
@@ -665,13 +735,8 @@ int main(int argc, const char* argv[])
 #if PRINTCOSTS  
   uni.PrintCosts(impMap);
 #endif
-
-  /*  if (whichGraph <= 0)
-      uni.PrintAll();
-      else
-      uni.Print(cout, CODE, whichGraph); */
-
-  return 0;
+  double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
+  return bestFPS;
 }
 
 RealPSet* GemvExample(Type dataType, int m, int n)
