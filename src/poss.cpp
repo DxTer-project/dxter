@@ -2397,14 +2397,21 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
     if ((*iter)->IsReal())
       didSomething |= ((RealPSet*)(*iter))->TakeIter(transMap, simplifiers);
   }
+
   if (!didSomething) {
     NodeMap setTunnels;
     NodeVecIter iter2 = m_pset->m_inTuns.begin();
-    for(; iter2 != m_pset->m_inTuns.end(); ++iter2)
+
+    for(; iter2 != m_pset->m_inTuns.end(); ++iter2) {
       setTunnels[*iter2] = *iter2;
+    }
+
     iter2 = m_pset->m_outTuns.begin();
-    for(; iter2 != m_pset->m_outTuns.end(); ++iter2)
+
+    for(; iter2 != m_pset->m_outTuns.end(); ++iter2) {
       setTunnels[*iter2] = *iter2;
+    }
+
     for(unsigned int nodeIdx = 0; nodeIdx < m_possNodes.size(); ++nodeIdx) {
       Node *node = m_possNodes[nodeIdx];
       TransMapConstIter transMapIter = transMap.find(node->GetNodeClass());
@@ -2506,7 +2513,6 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
   }
   return didSomething;
 }
-
 
 string GetFusedString(const IntSet *set)
 {

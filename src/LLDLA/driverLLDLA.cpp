@@ -614,7 +614,6 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
 {
   RegAllLLDLANodes();
 
-
   int numIters = -1;
   Cost flopCost = 0;
   Universe uni;
@@ -626,23 +625,23 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   cout << "Creating startSet\n";
 
   RealPSet *startSet = algPSet;
-
+  
   cout << "Created startSet\n";
 
   uni.Init(startSet);
-
+  
   cout << "Initialized universe\n";
-
+  
   uni.Prop();
-  GraphIter graphIter(startSet->m_posses.begin()->second);
+  GraphIter* graphIter = new GraphIter(startSet->m_posses.begin()->second);
   cout << "Printing evaluation code\n";
-  flopCost = graphIter.EvalAndSetBest();
+  flopCost = graphIter->EvalAndSetBest();
   // Print abstract implementation to string for use in testing
   // EXTREMELY HACKY, I could not figure out how to redirect an
   // ostream to a string
   std::stringstream ss;
   IndStream optOut(&ss, LLDLASTREAM);
-  graphIter.PrintRoot(optOut, 0, true, startSet);
+  graphIter->PrintRoot(optOut, 0, true, startSet);
   absImpStr = ss.str();
 
   cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
@@ -723,7 +722,7 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);
   cout << "All implementations printed\n";
   cout << "Best times";
-
+  
 #endif //DOEMPIRICALEVAL
 
 #if 1
@@ -732,9 +731,10 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   uni.PrintBest();
 #endif
 
-#if PRINTCOSTS  
+#if PRINTCOSTS
   uni.PrintCosts(impMap);
 #endif
+
   double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
   return bestFPS;
 }

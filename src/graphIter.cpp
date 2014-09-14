@@ -44,12 +44,14 @@ GraphIter::GraphIter(const GraphIter &iter)
 
 GraphIter::~GraphIter()
 {
+
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
     delete m_subIters[i];
   }
   delete [] m_setIters;
   delete [] m_subIters;
   m_poss = NULL;
+
 }
 
 void GraphIter::Init(Poss *poss) 
