@@ -183,35 +183,13 @@ void StoreFromRegs::PrintCode(IndStream &out)
     }    
   }
 
+  out.Indent();
   if (isStridedLoad) {
     *out << arch->StridedStore(GetDataType(), storeLocation, regVarName, strideVar);
   } else {
     *out << arch->ContiguousStore(GetDataType(), storeLocation, regVarName);
   }
 
-
-  /*  if (IsInputColVector(1)) {
-    if (IsUnitStride(inputRowStride)) {
-      out.Indent();
-      *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << storeLocation << " );\n";
-      return;
-    } else {
-      StoreNonContigLocations(out, regVarName, storeLocation, InputDataType(1).m_rowStrideVar);
-      return;
-    }
-  } else if (IsInputRowVector(1)) {
-    if (IsUnitStride(inputColStride)) {
-      out.Indent();
-      *out << "VEC_PTR_PD_STORE( " << regVarName << ", " << storeLocation << " );\n";
-      return;
-    } else {
-      StoreNonContigLocations(out, regVarName, storeLocation, InputDataType(1).m_colStrideVar);
-      return;
-    }
-  } else {
-    cout << "ERROR: Input to vector register store is neither row nor column vector\n";
-    throw;
-    }*/
   return;
 }
 
