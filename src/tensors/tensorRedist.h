@@ -139,6 +139,11 @@ class CombineDisappearingModes : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+
+//Implements [D0] <- [D1] as
+// [D10] <- [D1]    (Local copy)
+// [D01] <- [D10]   (Permutation)
+// [D0] <- [D01]    (AllGather)
 class SingleIndexAllToAll : public SingleTrans
 {
  public:
