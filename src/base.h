@@ -301,8 +301,8 @@ void CheckThisSpot();
 #if TWOD
 void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
 #else
-void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes);
-void GetLocalSizes(DistType dist, Dim dim, const Sizes* sizes, Sizes* localSizes);
+void GetLocalSizes(const DistType &dist, const SizesArray sizes, SizesArray localSizes);
+void GetLocalSizes(const DistType &dist, Dim dim, const Sizes* sizes, Sizes* localSizes);
 #endif
 #endif
 
