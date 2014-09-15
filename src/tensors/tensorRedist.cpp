@@ -1405,6 +1405,82 @@ void SplitAllGathers::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+bool SplitAllAllGathers::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).m_dist;
+  const DistType &destType = redist->m_info.m_dist;
+
+  if (srcType.m_numDims != redist->m_info.m_dist.m_numDims)
+    throw;
+
+  int allGathers = 0;
+  bool foundOther = false;
+
+  for (Dim dim = 0; dim < srcType.m_numDims; ++dim) {
+    const DistEntry &src = srcType.m_dists[dim];
+    const DistEntry &dest = destType.m_dists[dim];
+    if (src != dest) {
+      if (dest.IsStar()) {
+	++allGathers;
+      }
+      else if (IsPrefix(dest.DistEntryDims(),
+			src.DistEntryDims())) 
+	{
+	  ++allGathers;
+	}
+      else
+	foundOther = true;
+    }
+  }
+  return (allGathers > 1) && foundOther;
+}
+
+void SplitAllAllGathers::Apply(Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).m_dist;
+  const DistType &destType = redist->m_info.m_dist;
+
+  DistType intType = srcType;
+
+  for (Dim dim = 0; dim < srcType.m_numDims; ++dim) {
+    const DistEntry &src = srcType.m_dists[dim];
+    const DistEntry &dest = destType.m_dists[dim];
+    if (src != dest) {
+      if (dest.IsStar()) {
+	intType.m_dists[dim] = dest;
+      }
+      else if (IsPrefix(dest.DistEntryDims(),
+			src.DistEntryDims())) 
+	{
+	  intType.m_dists[dim] = dest;
+	}
+    }
+  }
+
+  RedistNode *redist1 = new RedistNode(intType);
+  redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
+  node->m_poss->AddNode(redist1);
+
+  if (intType == redist1->InputDataType(0).m_dist)
+    throw;
+
+  RedistNode *redist2 = new RedistNode(destType);
+  redist2->AddInput(redist1, 0);
+  node->m_poss->AddNode(redist2);
+
+  if (destType == intType)
+    throw;
+
+  node->RedirectChildren(redist2, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
 bool CombineDisappearingModes::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())

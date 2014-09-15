@@ -196,4 +196,12 @@ class SplitAllGathers : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+class SplitAllAllGathers : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return (string)"SplitAllAllGathers";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 #endif
