@@ -185,14 +185,23 @@ void RedistNode::Prop()
 	  numProcs *= GridLens[*iter];
 	}
       }
+      /*
+      cout << "***\n";
+      cout << "For " << InputDataType(0).m_dist.PrettyStr() << " -> "
+	   << m_info.m_dist.PrettyStr() << endl;
+      */
       const unsigned int totNumIters = m_lsizes[0].NumSizes();
       for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
 	Cost temp = 1;
 	for (Dim dim = 0; dim < numDims; ++dim) {
 	  temp *= m_lsizes[dim][iteration];
 	}
-	m_cost += AllGather(temp * numProcs, numProcs);
+	//	cout << "AllGather( " << std::scientific << temp * numProcs << ", " << numProcs << " )\n";
+	//	cout << "\t" << temp << " data\n";
+	m_cost += AllGather(temp, numProcs);
+	//	cout << "cost " << m_cost << endl;
       }
+      //      cout << "***\n";
       return;
     }
 
@@ -458,14 +467,22 @@ void RedistNode::BuildDataTypeCache()
   if (m_lsizes)
     return;
 
+  //  cout << "For " << InputDataType(0).m_dist.PrettyStr() << " -> "
+  //       << m_info.m_dist.PrettyStr() << endl;
+
   DLANode *in = (DLANode*)Input(0);
   ConnNum num = InputConnNum(0);
   Dim numDims = in->NumDims(num);
   if (numDims) {
     m_isArray = true;
     m_lsizes = new Sizes[numDims];
-    for (Dim dim = 0; dim < numDims; ++dim)
-      GetLocalSizes(m_info.m_dist, dim, in->Len(num,dim), m_lsizes+dim);
+    for (Dim dim = 0; dim < numDims; ++dim) {
+      GetLocalSizes(m_info.m_dist, dim, in->Len(num,dim), m_lsizes+dim); 
+      //      cout << "dim " << dim << ": ";
+      //      in->Len(num,dim)->Print();
+      //      cout << "*to*\n";
+      //      (m_lsizes+dim)->Print();	
+    }
   }
   else {
     m_isArray = false;
@@ -1399,6 +1416,82 @@ void SplitAllGathers::Apply(Node *node) const
   node->m_poss->AddNode(redist2);
 
   if (destType == redist2->InputDataType(0).m_dist)
+    throw;
+
+  node->RedirectChildren(redist2, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+bool SplitAllAllGathers::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).m_dist;
+  const DistType &destType = redist->m_info.m_dist;
+
+  if (srcType.m_numDims != redist->m_info.m_dist.m_numDims)
+    throw;
+
+  int allGathers = 0;
+  bool foundOther = false;
+
+  for (Dim dim = 0; dim < srcType.m_numDims; ++dim) {
+    const DistEntry &src = srcType.m_dists[dim];
+    const DistEntry &dest = destType.m_dists[dim];
+    if (src != dest) {
+      if (dest.IsStar()) {
+	++allGathers;
+      }
+      else if (IsPrefix(dest.DistEntryDims(),
+			src.DistEntryDims())) 
+	{
+	  ++allGathers;
+	}
+      else
+	foundOther = true;
+    }
+  }
+  return (allGathers > 1) && foundOther;
+}
+
+void SplitAllAllGathers::Apply(Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).m_dist;
+  const DistType &destType = redist->m_info.m_dist;
+
+  DistType intType = srcType;
+
+  for (Dim dim = 0; dim < srcType.m_numDims; ++dim) {
+    const DistEntry &src = srcType.m_dists[dim];
+    const DistEntry &dest = destType.m_dists[dim];
+    if (src != dest) {
+      if (dest.IsStar()) {
+	intType.m_dists[dim] = dest;
+      }
+      else if (IsPrefix(dest.DistEntryDims(),
+			src.DistEntryDims())) 
+	{
+	  intType.m_dists[dim] = dest;
+	}
+    }
+  }
+
+  RedistNode *redist1 = new RedistNode(intType);
+  redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
+  node->m_poss->AddNode(redist1);
+
+  if (intType == redist1->InputDataType(0).m_dist)
+    throw;
+
+  RedistNode *redist2 = new RedistNode(destType);
+  redist2->AddInput(redist1, 0);
+  node->m_poss->AddNode(redist2);
+
+  if (destType == intType)
     throw;
 
   node->RedirectChildren(redist2, 0);

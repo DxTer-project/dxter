@@ -417,7 +417,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	  *out << "Is real\t" << ((RealPSet*)set)->m_shadows.size() << " shadows\n";
 	}
 	else {
-	  *out << "Is a shadow\n";
+	  *out << "Is a shadow\t" << "of " << set->GetReal()->m_shadows.size() << " shadows\n";
 	}
 #if DOTENSORS
 	out.Indent();

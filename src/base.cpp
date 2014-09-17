@@ -456,55 +456,35 @@ bool IsPrefix(const DimVec &isPrefix, const DimVec &dims)
 }
 #endif
 
-void GetLocalSizes(DistType dist, const SizesArray sizes, SizesArray localSizes)
+void GetLocalSizes(const DistType &dist, const SizesArray sizes, SizesArray localSizes)
 {
-  const Dim  numDims = dist.m_numDims;
+  const Dim numDims = dist.m_numDims;
   for (Dim dim = 0; dim < numDims; ++ dim) {
-    unsigned int distVal = dist.m_dists[dim].m_val;
+    const DistEntry &entry = dist.m_dists[dim];
     localSizes[dim] = sizes[dim];
-    if (distVal != 0) {
-      distVal--;
-      unsigned int currStage = NUM_GRID_DIMS;
-      unsigned int numDists = 0;
+    if (!entry.IsStar()) {
+      DimVec vec = entry.DistEntryDims();
       unsigned int coef = 1;
-      while (distVal >= currStage) {
-	distVal -= currStage;
-	numDists++;
-	currStage *= NUM_GRID_DIMS;
+      DimVecIter iter = vec.begin();
+      for(; iter != vec.end(); ++iter) {
+	coef *= GridLens[*iter];
       }
-      string out;
-      while (distVal > 0) {
-	Dim distDim = distVal % NUM_GRID_DIMS;
-	coef *= GridLens[distDim];
-	distVal = distVal / NUM_GRID_DIMS;
-	--numDists;
-      }    
       localSizes[dim].SetCoeff(1.0 / coef);
     }
   }
 }
 
-void GetLocalSizes(DistType dist, Dim dim, const Sizes* sizes, Sizes* localSizes)
+void GetLocalSizes(const DistType &dist, Dim dim, const Sizes* sizes, Sizes* localSizes)
 {
-  unsigned int distVal = dist.m_dists[dim].m_val;
+  const DistEntry &entry = dist.m_dists[dim];
   *localSizes = *sizes;
-  if (distVal != 0) {
-    distVal--;
-    unsigned int currStage = NUM_GRID_DIMS;
-    unsigned int numDists = 0;
+  if (!entry.IsStar()) {
+    DimVec vec = entry.DistEntryDims();
     unsigned int coef = 1;
-    while (distVal >= currStage) {
-      distVal -= currStage;
-      numDists++;
-      currStage *= NUM_GRID_DIMS;
+    DimVecIter iter = vec.begin();
+    for(; iter != vec.end(); ++iter) {
+      coef *= GridLens[*iter];
     }
-    string out;
-    while (distVal > 0) {
-      Dim distDim = distVal % NUM_GRID_DIMS;
-      coef *= GridLens[distDim];
-      distVal = distVal / NUM_GRID_DIMS;
-      --numDists;
-    }    
     localSizes->SetCoeff(1.0 / coef);
   }
 }
