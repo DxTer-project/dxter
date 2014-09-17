@@ -2418,7 +2418,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
       if (transMapIter != transMap.end()) {
         TransVecConstIter transIter = transMapIter->second->begin();
         for(; transIter != transMapIter->second->end(); ++transIter) {
-          const Transformation *trans = *transIter;
+	  const Transformation *trans = *transIter;
 	  if (trans->IsSingle()) {
 	    if (node->HasApplied(trans)) {
 	      //            cout << "skipping because " << trans->GetType() << " has been applied\n";
@@ -2502,6 +2502,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	    throw;
 	  }
 	}
+	
       }
     }
     m_fullyExpanded = true;
@@ -2513,6 +2514,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
   }
   return didSomething;
 }
+
 
 string GetFusedString(const IntSet *set)
 {
