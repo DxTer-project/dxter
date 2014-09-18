@@ -381,7 +381,7 @@ int main(int argc, const char* argv[])
   Type precision;
 
   arch = new HaswellMacbook();
-  AddTrans();
+
 
   //  PrintType printType = CODE;
 
@@ -613,6 +613,7 @@ void MuNNMuGemmResults(Type precision) {
 double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
 {
   RegAllLLDLANodes();
+  AddTrans();
 
   int numIters = -1;
   Cost flopCost = 0;
