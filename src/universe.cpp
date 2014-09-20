@@ -106,21 +106,27 @@ Universe::~Universe()
   TransMapIter iter3 = M_simplifiers.begin();
   for(; iter3 != M_simplifiers.end(); ++iter3)
     delete iter3->second;
+  M_simplifiers.clear();
   for(int i = 0; i < NUMPHASES; ++i) {
     iter3 = M_trans[i].begin();
     for(; iter3 != M_trans[i].end(); ++iter3)
       delete iter3->second;
+    M_trans[i].clear();
   }
-  NodeVec in = m_pset->m_inTuns;
-  NodeVec out = m_pset->m_outTuns;
-  delete m_pset;
-  iter = in.begin();
-  for(; iter != in.end(); ++iter) {
-    delete *iter;
-  }
-  iter = out.begin();
-  for(; iter != out.end(); ++iter) {
-    delete *iter;
+  if (m_pset != NULL) {
+    NodeVec in = m_pset->m_inTuns;
+    NodeVec out = m_pset->m_outTuns;
+    delete m_pset;
+    iter = in.begin();
+    for(; iter != in.end(); ++iter) {
+      delete *iter;
+    }
+    in.clear();
+    iter = out.begin();
+    for(; iter != out.end(); ++iter) {
+      delete *iter;
+    }
+    out.clear();
   }
 }
 

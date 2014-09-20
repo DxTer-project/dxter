@@ -69,32 +69,27 @@ do you really want to do compact unrolling and partial unrolling?
 
 #include <sstream>
 
-Size one = 1;
-Size smallSize = 4;
-Size medSize = 512;
-Size bigSize = 256;
-//Size bs = ELEM_BS;
-
-RealPSet* GemvExample();
-RealPSet* MVMul2Example();
-RealPSet* MAdd2Example();
-RealPSet* VAdd2Example();
-RealPSet* VAddExample();
-RealPSet* VMVMulExample();
-RealPSet* SMMulExample();
-RealPSet* VMMulExample();
-RealPSet* SVMulRowExample();
-RealPSet* SVMulColExample();
-RealPSet* MVMulExample();
-RealPSet* MAddExample();
-RealPSet* DotExample();
-RealPSet* GemmExample();
-RealPSet* DoubleGemmExample();
+void MuNNMuGemmResults(Type precision);
+double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName);
+RealPSet* GemvExample(Type dataType, int m, int n);
+RealPSet* MVMul2Example(Type dataType, int m, int n, int p);
+RealPSet* MAdd2Example(Type dataType, int m, int n);
+RealPSet* VAdd2Example(Type dataType, int m);
+RealPSet* VAddExample(Type dataType, int m);
+RealPSet* VMVMulExample(Type dataType, int m, int n);
+RealPSet* SMMulExample(Type dataType, int m, int n);
+RealPSet* VMMulExample(Type dataType, int m, int n);
+RealPSet* SVMulRowExample(Type dataType, int m);
+RealPSet* SVMulColExample(Type dataType, int m);
+RealPSet* MVMulExample(Type dataType, int m, int n);
+RealPSet* MAddExample(Type dataType, int m, int n);
+RealPSet* DotExample(Type dataType, int m);
+RealPSet* GemmExample(Type dataType, int m, int n, int p);
+RealPSet* DoubleGemmExample(Type dataType, int m, int n, int p, int k);
 
 Trans transA, transB;
 
 Architecture* arch;
-Type dataType = REAL_SINGLE;
 
 ImplementationMap ImpStrMap(Universe *uni)
 {
@@ -121,6 +116,28 @@ void PrintImpMap(ImplementationRuntimeMap &impTimes)
     }
     cout << endl;
   }
+}
+
+double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
+  double peakFlopsPerCycle = arch->FlopsPerCycle(type);
+  double bestFlopsPerCycle = 0;
+  ImplementationRuntimeMapIter mit;
+  for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
+    TimeVecIter vit;
+    for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
+      double totalTimeInCycles = *vit;
+      double actualFlopsPerCycle = flopCost / totalTimeInCycles;
+      double pctPeak = (actualFlopsPerCycle / peakFlopsPerCycle) * 100;
+      if (actualFlopsPerCycle > bestFlopsPerCycle) {
+	bestFlopsPerCycle = actualFlopsPerCycle;
+      }
+      if (pctPeak > 100) {
+	cout << "pctPeak > 100\n";
+	throw;
+      }
+    }
+  }
+  return bestFlopsPerCycle;
 }
 
 GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
@@ -335,21 +352,22 @@ void Usage()
 {
   cout << "./driver arg1 arg2 ...\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
-  cout <<"         1  -> Gemm  N/T N/T\n";
-  cout <<"         2  -> Double Gemm  N/T N/T\n";
-  cout <<"         3  -> Dot prod\n";
-  cout <<"         4  -> Matrix add\n";
-  cout <<"         5  -> Matrix vector multiply\n";
-  cout <<"         6  -> Scalar column vector multiply\n";
-  cout <<"         7  -> Scalar row vector multiply\n";
-  cout <<"         8  -> Vector matrix multiply\n";
-  cout <<"         9  -> Scalar matrix multiply\n";
-  cout <<"        10  -> Vector add\n";
-  cout <<"        11  -> Vector add twice\n";
-  cout <<"        12  -> Vector matrix vector multiply\n";
-  cout <<"        13  -> Matrix add twice\n";
-  cout <<"        14  -> Matrix vector multiply twice\n";
-  cout <<"        15  -> Gemv\n";
+  cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
+  cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
+  cout <<"         3  -> Dot prod F/D M\n";
+  cout <<"         4  -> Matrix add F/D M N\n";
+  cout <<"         5  -> Matrix vector multiply F/D M N\n";
+  cout <<"         6  -> Scalar column vector multiply F/D M\n";
+  cout <<"         7  -> Scalar row vector multiply F/D M\n";
+  cout <<"         8  -> Vector matrix multiply F/D M N\n";
+  cout <<"         9  -> Scalar matrix multiply F/D M N\n";
+  cout <<"        10  -> Vector add F/D M\n";
+  cout <<"        11  -> Vector add twice F/D M\n";
+  cout <<"        12  -> Vector matrix vector multiply F/D M N\n";
+  cout <<"        13  -> Matrix add twice F/D M N\n";
+  cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
+  cout <<"        15  -> Gemv F/D M N\n";
+  cout <<"        16  -> Run (mu x n) (n x mu) tests with precision F/D\n";
 }
 
 int main(int argc, const char* argv[])
@@ -359,17 +377,19 @@ int main(int argc, const char* argv[])
   omp_set_nested(true);
 #endif
 
+  int m, n, p, k;
+  Type precision;
+
   arch = new Stampede();
+  AddTrans();
+
   //  PrintType printType = CODE;
-  int numIters = -1;
-  RealPSet* (*algFunc)();
+
+  RealPSet* algPSet;
   //  GraphNum whichGraph = 0;
   int algNum;
-  string fileName;
   string opName;
-  Cost flopCost = 0;
-  printf("dataType == REAL_DOUBLE ? %d\n", dataType == REAL_DOUBLE);
-  printf("dataType == REAL_SINGLE ? %d\n", dataType == REAL_SINGLE);
+
 
   if(argc < 2) {
     Usage();
@@ -379,189 +399,274 @@ int main(int argc, const char* argv[])
     algNum = atoi(argv[1]);
     switch(algNum) {
     case(1):
-      if (argc != 4) {
+      if (argc != 8) {
 	Usage();
 	return 0;
       }
       opName = "dxt_gemm";
-      algFunc = GemmExample;
       transA = CharToTrans(*argv[2]);
       transB = CharToTrans(*argv[3]);
+      precision = CharToType(*argv[4]);
+      m = atoi(argv[5]);
+      n = atoi(argv[6]);
+      p = atoi(argv[7]);
+      algPSet = GemmExample(precision, m, n, p);
       break;
     case(2):
-      if (argc != 4) {
+      if (argc != 9) {
 	Usage();
 	return 0;
       }
       opName = "dxt_double_gemm";
-      algFunc = DoubleGemmExample;
+      precision = CharToType(*argv[4]);
+      m = atoi(argv[5]);
+      n = atoi(argv[6]);
+      p = atoi(argv[7]);
+      k = atoi(argv[8]);
+      algPSet = DoubleGemmExample(precision, m, n, p, k);
       transA = CharToTrans(*argv[2]);
       transB = CharToTrans(*argv[3]);
       break;
     case(3):
-      if (argc != 2) {
+      if (argc != 4) {
 	Usage();
 	return 0;
       }
       opName = "dxt_dot";
-      algFunc = DotExample;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      algPSet = DotExample(precision, m);
       break;
     case(4):
-      if (argc != 2) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       opName = "dxt_madd";
-      algFunc = MAddExample;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      algPSet = MAddExample(precision, m, n);
       break;
     case(5):
-      if (argc != 2) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       opName = "dxt_mvmul";
-      algFunc = MVMulExample;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      algPSet = MVMulExample(precision, m, n);
       break;
     case(6):
-      if (argc != 2) {
+      if (argc != 4) {
 	Usage();
 	return 0;
       }
       opName = "dxt_sv_col_mul";
-      algFunc = SVMulColExample;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      algPSet = SVMulColExample(precision, m);
       break;
     case(7):
-      if (argc != 2) {
+      if (argc != 4) {
 	Usage();
 	return 0;
       }
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[4]);
       opName = "dxt_sv_row_mul";
-      algFunc = SVMulRowExample;
+      algPSet = SVMulRowExample(precision, m);
       break;
     case(8):
-      if (argc != 2) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       opName = "dxt_vmmul";
-      algFunc = VMMulExample;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      algPSet = VMMulExample(precision, m, n);
       break;
     case(9):
-      if (argc != 2) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       opName = "dxt_smmul";
-      algFunc = SMMulExample;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      algPSet = SMMulExample(precision, m, n);
       break;
     case(10):
-      if (argc != 2) {
+      if (argc != 4) {
 	Usage();
 	return 0;
       }
       opName = "dxt_vadd";
-      algFunc = VAddExample;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      algPSet = VAddExample(precision, m);
       break;
     case(11):
-      if (argc != 2) {
+      if (argc != 4) {
 	Usage();
 	return 0;
       }
       opName = "dxt_vadd2";
-      algFunc = VAdd2Example;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      algPSet = VAdd2Example(precision, m);
       break;
     case(12):
-      if (argc != 2) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       opName = "dxt_vmvmul";
-      algFunc = VMVMulExample;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      algPSet = VMVMulExample(precision, m, n);
       break;
     case(13):
-      if (argc != 2) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       opName = "dxt_madd2";
-      algFunc = MAdd2Example;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      algPSet = MAdd2Example(precision, m, n);
       break;
     case(14):
-      if (argc != 2) {
+      if (argc != 6) {
 	Usage();
 	return 0;
       }
       opName = "dxt_mvmul2";
-      algFunc = MVMul2Example;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      p = atoi(argv[5]);
+      algPSet = MVMul2Example(precision, m, n, p);
       break;
     case(15):
-      if (argc != 2) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       opName = "dxt_gemv";
-      algFunc = GemvExample;
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      algPSet = GemvExample(precision, m, n);
       break;
+    case(16):
+      if (argc != 3) {
+	Usage();
+	return 0;
+      }
+      precision = CharToType(*argv[2]);
+      MuNNMuGemmResults(precision);
+      return 0;
     default:
       Usage();
       return 0;
     }
   }
 
-  RegAllLLDLANodes();
-  AddTrans();
+  RunExample(algNum, algPSet, precision, opName);
+  return 0;
+}
 
+void MuNNMuGemmResults(Type precision) {
+  int m = arch->VecRegWidth(precision);
+  int n = m;
+  int p = 16;
+  int p_inc = 16;
+  int num_trials = 10;
+  int algNum = 1;
+  string opName = "dxt_gemm";
+  string resultFileName = "dxt_gemm_mu_by_n_times_n_by_mu_trials.csv";
+  std::ofstream outFile(resultFileName);
+
+  outFile << "m, n, p, bestFlopsPerCylcle\n";
+
+  for (int i = 0; i < num_trials; i++) {
+    RealPSet* algPSet = GemmExample(precision, m, n, p);
+    double bestFlops = RunExample(algNum, algPSet, precision, opName);
+    outFile << std::to_string((long long int) m) << ", ";
+    outFile << std::to_string((long long int) n) << ", ";
+    outFile << std::to_string((long long int) p) << ", ";
+    outFile << std::to_string((double) bestFlops) << "\n";
+    p += p_inc;
+  }
+  outFile.close();
+  return;
+}
+
+double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
+{
+  RegAllLLDLANodes();
+
+  int numIters = -1;
+  Cost flopCost = 0;
   Universe uni;
   time_t start, start2, end;
-  uni.PrintStats();
   string absImpStr;
-  if (algNum==0) {
-    time(&start);
-    uni.Init(fileName);
-    time(&end);
-    cout << "Unflatten took " << difftime(end,start) << " seconds\n";
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-  else {
-    cout << "Creating startSet\n";
-    RealPSet *startSet = algFunc();
-    cout << "Created startSet\n";
-    uni.Init(startSet);
-    cout << "Initialized universe\n";
-    uni.Prop();
-    GraphIter graphIter(startSet->m_posses.begin()->second);
-    cout << "Printing evaluation code\n";
-    flopCost = graphIter.EvalAndSetBest();
-    // Print abstract implementation to string for use in testing
-    // EXTREMELY HACKY, I could not figure out how to redirect an
-    // ostream to a string
-    std::stringstream ss;
-    IndStream optOut(&ss, LLDLASTREAM);
-    graphIter.PrintRoot(optOut, 0, true, startSet);
-    absImpStr = ss.str();
-    cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
-    cout << "Flops for operation = " << std::to_string((long double) flopCost) << endl;
-    time(&start);
-  }
 
+  uni.PrintStats();
+
+  cout << "Creating startSet\n";
+
+  RealPSet *startSet = algPSet;
+  
+  cout << "Created startSet\n";
+
+  uni.Init(startSet);
+  
+  cout << "Initialized universe\n";
+  
+  uni.Prop();
+  GraphIter* graphIter = new GraphIter(startSet->m_posses.begin()->second);
+  cout << "Printing evaluation code\n";
+  flopCost = graphIter->EvalAndSetBest();
+  // Print abstract implementation to string for use in testing
+  // EXTREMELY HACKY, I could not figure out how to redirect an
+  // ostream to a string
+  std::stringstream ss;
+  IndStream optOut(&ss, LLDLASTREAM);
+  graphIter->PrintRoot(optOut, 0, true, startSet);
+  absImpStr = ss.str();
+
+  cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
+  cout << "Flops for operation = " << std::to_string((long double) flopCost) << endl;
+
+  time(&start);
 
 #if DOLLDLALOOPPHASE
   if (CurrPhase == LLDLALOOPPHASE) {
+
     cout << "Expanding LLDLA loop phase\n";
+
     uni.Expand(-1, LLDLALOOPPHASE, LLDLACull);
     time(&end);
+
     cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
     cout << "Propagating\n";
+
     cout.flush();
     time(&start2);
     uni.Prop();
     time(&end);
+
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+
   }
 #endif
 
@@ -606,16 +711,18 @@ int main(int argc, const char* argv[])
   cout << "Writing all implementations to runtime eval files\n";
 
   int numIterations = 10;
-  RuntimeTest rtest(dataType, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
+  RuntimeTest rtest(precision, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
+
+
   cout << "Done evaluating\n";
-  GraphNum best = PrintImpMapInFlops(dataType, impMap, flopCost);
+  GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);
   cout << "All implementations printed\n";
   cout << "Best times";
-
+  
 #endif //DOEMPIRICALEVAL
 
 #if 1
@@ -624,47 +731,43 @@ int main(int argc, const char* argv[])
   uni.PrintBest();
 #endif
 
-#if PRINTCOSTS  
+#if PRINTCOSTS
   uni.PrintCosts(impMap);
 #endif
 
-  /*  if (whichGraph <= 0)
-      uni.PrintAll();
-      else
-      uni.Print(cout, CODE, whichGraph); */
-
-  return 0;
+  double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
+  return bestFPS;
 }
 
-RealPSet* GemvExample()
+RealPSet* GemvExample(Type dataType, int m, int n)
 {
-  InputNode* xIn = new InputNode("x input", arch->VecRegWidth(dataType), 1, "X",
-				 1, arch->VecRegWidth(dataType),
+  InputNode* xIn = new InputNode("x input", n, 1, "X",
+				 1, n,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
-				 1, medSize,
+  InputNode* yIn = new InputNode("y input", m, 1, "Y",
+				 1, m,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
-  InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
-				 1, medSize,
+  InputNode* zIn = new InputNode("z input", m, 1, "Z",
+				 1, m,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
 
-  InputNode* AIn = new InputNode("a input", medSize, arch->VecRegWidth(dataType), "A",
-				 1, medSize,
+  InputNode* AIn = new InputNode("a input", m, n, "A",
+				 1, m,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
   InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
-				     1, medSize,
+				     1, m,
 				     "AlphaNumRows", "AlphaNumCols",
 				     "AlphaRowStride", "AlphaColStride", dataType);
 
   InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
-				    1, medSize,
+				    1, m,
 				    "BetaNumRows", "BetaNumCols",
 				    "BetaRowStride", "BetaColStride", dataType);
 
@@ -719,30 +822,30 @@ RealPSet* GemvExample()
   return outerSet;
 }
 
-RealPSet* MVMul2Example()
+RealPSet* MVMul2Example(Type dataType, int m, int n, int p)
 {
-  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
-				 1, medSize,
+  InputNode* xIn = new InputNode("x input", p, 1, "X",
+				 1, p,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", medSize, 1, "Y",
-				 1, medSize,
+  InputNode* yIn = new InputNode("y input", n, 1, "Y",
+				 1, n,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
-  InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
-				 1, medSize,
+  InputNode* zIn = new InputNode("z input", m, 1, "Z",
+				 1, m,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
 
-  InputNode* AIn = new InputNode("a input", medSize, medSize, "A",
-				 1, medSize,
+  InputNode* AIn = new InputNode("a input", m, n, "A",
+				 1, m,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
-  InputNode* BIn = new InputNode("b input", medSize, medSize, "B",
-				 1, medSize,
+  InputNode* BIn = new InputNode("b input", n, p, "B",
+				 1, n,
 				 "BNumRows", "BNumCols",
 				 "BRowStride", "BColStride", dataType);
   
@@ -785,20 +888,20 @@ RealPSet* MVMul2Example()
   return outerSet;
 }
 
-RealPSet* MAdd2Example()
+RealPSet* MAdd2Example(Type dataType, int m, int n)
 {
-  InputNode* xIn = new InputNode("x input", medSize, medSize, "X",
-				 1, medSize,
+  InputNode* xIn = new InputNode("x input", m, n, "X",
+				 1, m,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", medSize, medSize, "Y",
-				 1, medSize,
+  InputNode* yIn = new InputNode("y input", m, n, "Y",
+				 1, m,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
-  InputNode* zIn = new InputNode("z input", medSize, medSize, "Z",
-				 1, medSize,
+  InputNode* zIn = new InputNode("z input", m, n, "Z",
+				 1, m,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
   
@@ -833,20 +936,20 @@ RealPSet* MAdd2Example()
   return outerSet;
 }
 
-RealPSet* VAdd2Example()
+RealPSet* VAdd2Example(Type dataType, int m)
 {
-  InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
-				 1, bigSize,
+  InputNode* xIn = new InputNode("x input", m, 1, "X",
+				 1, m,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", bigSize, 1, "Y",
-				 1, bigSize,
+  InputNode* yIn = new InputNode("y input", m, 1, "Y",
+				 1, m,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
-  InputNode* zIn = new InputNode("z input", bigSize, 1, "Z",
-				 1, bigSize,
+  InputNode* zIn = new InputNode("z input", m, 1, "Z",
+				 1, m,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
   
@@ -882,15 +985,15 @@ RealPSet* VAdd2Example()
 
 }
 
-RealPSet* VAddExample()
+RealPSet* VAddExample(Type dataType, int m)
 {
-  InputNode* xIn = new InputNode("x input", bigSize, 1, "X",
-				 1, bigSize,
+  InputNode* xIn = new InputNode("x input", m, 1, "X",
+				 1, m,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", bigSize, 1, "Y",
-				 1, bigSize,
+  InputNode* yIn = new InputNode("y input", m, 1, "Y",
+				 1, m,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
   
@@ -918,24 +1021,24 @@ RealPSet* VAddExample()
 
 }
 
-RealPSet* VMVMulExample()
+RealPSet* VMVMulExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", medSize, 8, "A",
-				 1, 8,
+  InputNode* Ain = new InputNode("A input", m, n, "A",
+				 1, m,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
-  InputNode* xIn = new InputNode("x input", 8, 1, "X",
-				 1, 8,
+  InputNode* xIn = new InputNode("x input", n, 1, "X",
+				 1, n,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* zIn = new InputNode("z input", medSize, 1, "Z",
-				 1, medSize,
+  InputNode* zIn = new InputNode("z input", m, 1, "Z",
+				 1, m,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", 1, medSize, "Y",
+  InputNode* yIn = new InputNode("y input", 1, m, "Y",
 				 1, 1,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
@@ -984,14 +1087,14 @@ RealPSet* VMVMulExample()
   return outerSet;
 }
 
-RealPSet* SMMulExample()
+RealPSet* SMMulExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", medSize, medSize, "A",
-				 medSize, 1,
+  InputNode* Ain = new InputNode("A input", m, n, "A",
+				 n, 1,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
   InputNode* xIn = new InputNode("x input", 1, 1, "X",
-				 medSize, 1,
+				 1, 1,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
@@ -1018,19 +1121,19 @@ RealPSet* SMMulExample()
   return outerSet;
 }
 
-RealPSet* VMMulExample()
+RealPSet* VMMulExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", medSize, arch->VecRegWidth(dataType), "A",
-				 arch->VecRegWidth(dataType), 1,
+  InputNode* Ain = new InputNode("A input", m, n, "A",
+				 n, 1,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
-  InputNode* xIn = new InputNode("x input", 1, medSize, "X",
-				 medSize, 1,
+  InputNode* xIn = new InputNode("x input", 1, m, "X",
+				 m, 1,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", 1, arch->VecRegWidth(dataType), "Y",
-				 arch->VecRegWidth(dataType), 1,
+  InputNode* yIn = new InputNode("y input", 1, n, "Y",
+				 n, 1,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
@@ -1061,15 +1164,15 @@ RealPSet* VMMulExample()
   return outerSet;
 }
 
-RealPSet* SVMulRowExample()
+RealPSet* SVMulRowExample(Type dataType, int m)
 {
-  InputNode* Ain = new InputNode("A input", 1, medSize, "A",
-				 medSize, 1,
+  InputNode* Ain = new InputNode("A input", 1, m, "A",
+				 m, 1,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
   InputNode* xIn = new InputNode("x input", 1, 1, "X",
-				 medSize, 1,
+				 m, 1,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
@@ -1096,15 +1199,15 @@ RealPSet* SVMulRowExample()
   return outerSet;
 }
 
-RealPSet* SVMulColExample()
+RealPSet* SVMulColExample(Type dataType, int m)
 {
-  InputNode* Ain = new InputNode("A input", medSize, 1, "A",
-				 medSize, 1,
+  InputNode* Ain = new InputNode("A input", m, 1, "A",
+				 m, 1,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
   InputNode* xIn = new InputNode("x input", 1, 1, "X",
-				 medSize, 1,
+				 m, 1,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
@@ -1131,19 +1234,19 @@ RealPSet* SVMulColExample()
   return outerSet;
 }
 
-RealPSet* MVMulExample()
+RealPSet* MVMulExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", arch->VecRegWidth(dataType), medSize, "A",
-				 1, arch->VecRegWidth(dataType),
+  InputNode* Ain = new InputNode("A input", m, n, "A",
+				 1, m,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
-  InputNode* xIn = new InputNode("x input", medSize, 1, "X",
-				 1, medSize,
+  InputNode* xIn = new InputNode("x input", n, 1, "X",
+				 1, n,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
-  InputNode* yIn = new InputNode("y input", arch->VecRegWidth(dataType), 1, "Y",
-				 1, arch->VecRegWidth(dataType),
+  InputNode* yIn = new InputNode("y input", m, 1, "Y",
+				 1, m,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
@@ -1174,15 +1277,15 @@ RealPSet* MVMulExample()
   return outerSet;
 }
 
-RealPSet* MAddExample()
+RealPSet* MAddExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", medSize, medSize, "A", 
-				 1, medSize,
+  InputNode* Ain = new InputNode("A input", m, n, "A", 
+				 1, m,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);
 
-  InputNode* Bin = new InputNode("B input", medSize, medSize, "B", 
-				 1, medSize,
+  InputNode* Bin = new InputNode("B input", m, n, "B", 
+				 1, m,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride", dataType);
 
@@ -1209,20 +1312,20 @@ RealPSet* MAddExample()
   return outerSet;
 }
 
-RealPSet* DotExample()
+RealPSet* DotExample(Type dataType, int m)
 {
-  InputNode* Ain = new InputNode("A input", 1, medSize, "A", 
-				 medSize, 1,
+  InputNode* Ain = new InputNode("A input", 1, m, "A", 
+				 m, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);
 
-  InputNode* Bin = new InputNode("B input", medSize, 1, "B", 
-				 medSize, 1,
+  InputNode* Bin = new InputNode("B input", m, 1, "B", 
+				 m, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride", dataType);
 
   InputNode* Cin = new InputNode("C input", 1, 1, "C", 
-				 medSize, 1,
+				 m, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride", dataType);
 
@@ -1253,20 +1356,20 @@ RealPSet* DotExample()
   return outerSet;
 }
 
-RealPSet* GemmExample()
+RealPSet* GemmExample(Type dataType, int m, int n, int p)
 {
-  InputNode *Ain= new InputNode("A input", arch->VecRegWidth(dataType), bigSize, "A",
-				 bigSize, 1,
+  InputNode *Ain= new InputNode("A input", m, p, "A",
+				 p, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);
 
-  InputNode *Bin = new InputNode("B input", bigSize, arch->VecRegWidth(dataType), "B",
-				 arch->VecRegWidth(dataType), 1,
+  InputNode *Bin = new InputNode("B input", p, n, "B",
+				 n, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride", dataType);
 
-  InputNode *Cin = new InputNode("C input", arch->VecRegWidth(dataType), arch->VecRegWidth(dataType), "C",
-				 arch->VecRegWidth(dataType), 1,
+  InputNode *Cin = new InputNode("C input", m, n, "C",
+				 n, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride", dataType);
 
@@ -1297,20 +1400,20 @@ RealPSet* GemmExample()
   return outerSet;
 }
 
-RealPSet* DoubleGemmExample()
+RealPSet* DoubleGemmExample(Type dataType, int m, int n, int p, int k)
 {
-  InputNode *Ain = new InputNode("A input",  8, bigSize, "A",
-				 bigSize, 1,
+  InputNode *Ain = new InputNode("A input",  m, n, "A",
+				 n, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);
 
-  InputNode *Bin = new InputNode("B input", bigSize, 8, "B",
-				 8, 1,
+  InputNode *Bin = new InputNode("B input", n, p, "B",
+				 p, 1,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride", dataType);
 
-  InputNode *Cin = new InputNode("C input",  8, 8, "C",
-				 8, 1,
+  InputNode *Cin = new InputNode("C input",  p, k, "C",
+				 k, 1,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride", dataType);
 

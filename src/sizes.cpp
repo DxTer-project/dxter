@@ -559,6 +559,7 @@ void Sizes::Print() const
   cout << NumSizes() << " sizes\n";
   EntryVecConstIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
+    cout << "With coef " << m_coeff << ", ";
     (*iter)->Print();
   }
 }

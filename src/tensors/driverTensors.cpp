@@ -52,8 +52,8 @@ Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
 RealPSet* RedistExample();
+RealPSet* RedistExample2();
 RealPSet* MartinsExample();
-RealPSet* MartinsExample2();
 RealPSet* MP2();
 RealPSet* MP3();
 
@@ -82,6 +82,7 @@ void AddTrans()
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
    Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(DMLAYER,SMLAYER), DPTENSORPHASE);
 
+    Universe::AddTrans(RedistNode::GetClass(), new SplitAllAllGathers, ROTENSORPHASE);
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
@@ -117,8 +118,8 @@ void Usage()
   cout << "./driver arg1 arg2 arg3 arg4\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
   cout <<"         1  -> Redist example\n";
-  cout <<"         2  -> Martin's Example\n";
-  cout <<"         3  -> Martin's Example - real\n";
+  cout <<"         2  -> Redist Example2\n";
+  cout <<"         3  -> Martin's Example\n";
   cout <<"         4  -> MP2\n";
   cout <<"         5  -> MP3\n";
 }
@@ -147,10 +148,10 @@ int main(int argc, const char* argv[])
       algFunc = RedistExample;
       break;
     case(2):
-      algFunc = MartinsExample;
+      algFunc = RedistExample2;
       break;
     case(3):
-      algFunc = MartinsExample2;
+      algFunc = MartinsExample;
       break;
     case(4):
       algFunc = MP2;
@@ -308,100 +309,36 @@ RealPSet* RedistExample()
 
 }
 
-RealPSet* MartinsExample()
+RealPSet* RedistExample2()
 {
   Sizes sizes[4];
 
-  //a-d = medium
-  //i-l = big
-
   for (Dim dim = 0; dim < 4; ++dim)
-    sizes[dim].AddRepeatedSizes(medSize, 1, 1);
+    sizes[dim].AddRepeatedSizes(bigSize, 1, 1);
 
-  InputNode *Uin = new InputNode("U input",  sizes, "U", 4);
+  InputNode *Ain = new InputNode("A input",  sizes, "A", 4);
 
-  sizes[2].ClearSizes();
-  sizes[2].AddRepeatedSizes(bigSize,1,1);
-  sizes[3].ClearSizes();
-  sizes[3].AddRepeatedSizes(bigSize,1,1);
-  
-  InputNode *Vin = new InputNode("V input",  sizes, "V", 4);
-  InputNode *T1in = new InputNode("T1 input",  sizes, "T1", 4);
-  InputNode *T2in = new InputNode("T2 input",  sizes, "T2", 4);
-  InputNode *T3in = new InputNode("T3 input",  sizes, "T3", 4);
-  InputNode *T4in = new InputNode("T4 input",  sizes, "T4", 4);
+  DistType type1;
+  type1.SetToDefault(4);
+  type1.m_dists[0].m_val = 0;
+  type1.m_dists[1].m_val = 2;
+  type1.m_dists[2].m_val = 0;
+  type1.m_dists[3].m_val = 4;
 
+  RedistNode *redist1 = new RedistNode(type1);
+  redist1->AddInput(Ain, 0);
 
-  sizes[0].ClearSizes();
-  sizes[0].AddRepeatedSizes(medSize,1,1);
-  sizes[1].ClearSizes();
-  sizes[1].AddRepeatedSizes(medSize,1,1);
+  OutputNode *Cout1 = new OutputNode("C output");
+  Cout1->AddInput(redist1, 0);
 
-  InputNode *Win = new InputNode("W input",  sizes, "W", 4);
-  
-
-  Sizes ones[2];
-
-  for (Dim dim = 0; dim < 2; ++dim)
-    ones[dim].AddRepeatedSizes(one, 1, 1);
-
-  DistType epDist;
-  epDist.SetToScalarNoRep();
-
-  InputNode *epIn = new InputNode("ep input",  ones, epDist, "epsilon", 0);
-  //InputNode *epIn = new InputNode("ep input",  ones, "epsilon", 0);
-
-  InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", 4);
-
-  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abcd","cdij","abij",(string)"cd");
-  cont1->AddInputs(6,
-		  Uin,0,
-		  T1in,0,
-		  tempIn,0);
-
-  Poss *poss1 = new Poss(cont1);
-  RealPSet *set1 = new RealPSet(poss1);
-
-
-  Contraction *cont2 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"acik","bcjk","abij",(string)"ck");
-  cont2->AddInputs(6,
-		   Vin,0,
-		   T2in,0,
-		   set1->OutTun(0),0);
-
-  Poss *poss2 = new Poss(cont2);
-  RealPSet *set2 = new RealPSet(poss2);
-
-
-  Contraction *cont3 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"ijkl","abkl","abij",(string)"kl");
-  cont3->AddInputs(6,
-		   Win,0,
-		   T3in,0,
-		   set2->OutTun(0),0);
-
-  Poss *poss3 = new Poss(cont3);
-  RealPSet *set3 = new RealPSet(poss3);
-
-  Contraction *cont4 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abij","abij","", (string)"abij");
-  cont4->AddInputs(6,
-		   T4in,0,
-		   set3->OutTun(0),0,
-		   epIn,0);
-
-  Poss *poss4 = new Poss(cont4);
-  RealPSet *set4 = new RealPSet(poss4);
-
-  OutputNode *out = new OutputNode("output");
-  out->AddInput(set4->OutTun(0),0);
-
-  Poss *outerPoss = new Poss(out,true);
+  Poss *outerPoss = new Poss(1, Cout1);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
-
 }
 
-RealPSet* MartinsExample2()
+
+RealPSet* MartinsExample()
 {
   Sizes sizes[4];
 
@@ -561,8 +498,8 @@ RealPSet* MP2()
 
   Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
   cont1->AddInputs(6,
-		   v_efmn,0,
 		   axppx1Set->OutTun(0),0,
+		   t_efmn,0,
 		   scalarIn,0);
   Poss *cont1Poss = new Poss(cont1);
   RealPSet *cont1Set = new RealPSet(cont1Poss);

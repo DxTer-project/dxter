@@ -356,8 +356,6 @@ void CombineTranspose::Apply(Node *node) const
   throw;
 }
 
-
-
 Transpose* InsertTranspose(Trans trans, 
 #if DOBLIS
 			   bool objTrans,
@@ -374,7 +372,5 @@ Transpose* InsertTranspose(Trans trans,
   node->ChangeInput2Way(input, num, newTrans, 0);
   return newTrans;
 }
-
-
 
 #endif
