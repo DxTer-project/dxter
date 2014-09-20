@@ -72,7 +72,7 @@ do you really want to do compact unrolling and partial unrolling?
 Size one = 1;
 Size smallSize = 4;
 Size medSize = 512;
-Size bigSize = 4096;
+Size bigSize = 256;
 //Size bs = ELEM_BS;
 
 RealPSet* GemvExample();
