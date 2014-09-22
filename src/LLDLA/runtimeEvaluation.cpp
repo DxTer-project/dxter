@@ -185,6 +185,7 @@ string RuntimeTest::TimingLoop(ImplementationMap imps)
   for (i = 1; i <= imps.size(); i++) {
     string opName = m_operationName + "_" + std::to_string((long long int) i);
     loopBody += "\tfor (j = 0; j < NUM_ITERATIONS; j++) {\n";
+    loopBody += FillBuffersWithRandValues("") + "\n";
     loopBody += "\t\tstart_time = rdtsc();\n";
     loopBody += "\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
     loopBody += "\t\tend_time = rdtsc();\n";

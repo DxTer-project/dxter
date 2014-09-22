@@ -603,7 +603,7 @@ void MuNNMuGemmResults(Type precision) {
     outFile << std::to_string((long long int) m) << ", ";
     outFile << std::to_string((long long int) n) << ", ";
     outFile << std::to_string((long long int) p) << ", ";
-    outFile << std::to_string((double) bestFlops) << "\n";
+    outFile << std::to_string((long double) bestFlops) << "\n";
     p += p_inc;
   }
   outFile.close();
