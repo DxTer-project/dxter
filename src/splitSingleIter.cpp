@@ -1490,8 +1490,15 @@ void SplitSingleIter::UpdateLocalSizes()
   Dim numDims = InputNumDims(0);
   const DistType t = InputDataType(0).m_dist;
   for (Dim dim = 0; dim < numDims; ++ dim) {
-    throw;
-    GetLocalSizes(t, m_sizes+dim, m_lsizes+dim);
+    if (dim < m_partDim)
+      GetLocalSizes(t, dim, m_sizes+dim, m_lsizes+dim);
+    else if (dim == m_partDim) {
+      GetLocalSizes(t, dim, m_sizes+dim, m_lsizes+dim);
+      GetLocalSizes(t, dim, m_sizes+dim+1, m_lsizes+dim+1);
+      GetLocalSizes(t, dim, m_sizes+dim+2, m_lsizes+dim+2);
+    }
+    else 
+      GetLocalSizes(t, dim, m_sizes+dim+2, m_lsizes+dim+2);
   }
 }
 #endif

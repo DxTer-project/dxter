@@ -264,9 +264,10 @@ class MoveMakeTrap : public SingleTrans
   bool CanApply(const Node *node) const;
   void Apply(Node *node) const;
 };
-#endif
+#endif //DOELEM
+#endif //TWOD
 
-#if DOELEM||DOBLIS
+#if DOELEM||DOBLIS||DOTENSORS
 class ScaleNode : public DLAOp<1,1>
 {
  public:
@@ -293,7 +294,11 @@ class RemoveScaleByOne : public SingleTrans
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return false;}
 };
+#endif //DOELEM||DOBLIS||DOTENSORS
 
+
+#if TWOD
+#if DOELEM||DOBLIS
 class ScaleTrapNode : public DLAOp<1,1>
 {
   Side m_side;
