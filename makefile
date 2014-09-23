@@ -1,5 +1,5 @@
 # indicate where the object files are to be created
-CC         := icc
+CC         := g++
 LINKER     := $(CC)
 #CFLAGS     := -O3 -fopenmp -std=c++0x -Wall -Isrc/ -Isrc/DLA/ -Isrc/tensors/ -Isrc/LLDLA
 #CFLAGS     := -O3 -Wall
