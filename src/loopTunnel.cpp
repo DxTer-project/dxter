@@ -390,7 +390,7 @@ unsigned int LoopTunnel::NumOutputs() const
 
 Name LoopTunnel::GetName(ConnNum num) const
 {
-  if (num > 0)
+  if (num != 0 && num != 1)
     throw;
   Name name;
   if (GetLoopType() == BLISLOOP) {
