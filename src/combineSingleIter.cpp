@@ -384,6 +384,23 @@ void CombineSingleIter::PrintCode(IndStream &out)
       break;
     }
   }
+#elif DOTENSORS
+  Name nameT = GetInputName(3);
+  Name nameB = nameT;
+  nameT.m_name += "_partT";
+  nameB.m_name += "_partB";
+
+      out.Indent();
+      *out << "SlidePartitionDown\n"
+	   << out.Tabs(0)
+	   << "( " << nameT.str() << ",  " << GetInputNameStr(0) << ",\n"
+	   << out.Tabs(0)
+	   << "       " << GetInputNameStr(1) << ",\n"
+	   << out.Tabs(0)
+	   << "  /**/ /**/\n"
+	   << out.Tabs(0)
+	   << "  " << nameB.str() << ", " << GetInputNameStr(2) << ", " 
+	   << m_partDim << " );\n";
 #else
   throw;
 #endif

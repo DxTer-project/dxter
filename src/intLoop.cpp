@@ -758,6 +758,15 @@ template<class PSetType>
       }
     }
   }
+#elif DOTENSORS
+  SplitBase *split = GetControl();
+  Name name = split->GetInputName(0);
+  name.m_name += "_partT";
+  out.Indent();
+  *out << "while(" << name.str() << ".Dimension(" << split->m_partDim << ") < "
+       << split->GetInputNameStr(0) << ".Dimension(" << split->m_partDim << "))\n";
+  out.Indent();
+  *out << "{\n";
 #endif
 }
 
@@ -776,12 +785,12 @@ template<class PSetType>
     }
   }
 
-#if DOBLIS||DOLLDLA
-  if (GetType() == BLISLOOP || GetType() == LLDLALOOP) {
+#if DOBLIS||DOLLDLA||DOTENSORS
+  if (GetType() == BLISLOOP || GetType() == LLDLALOOP || GetType() == TENSORLOOP) {
     out.Indent();
     *out << "}\n";
   }
-#endif //DOBLIS||DOLLDLA
+#endif //DOBLIS||DOLLDLA||DOTENSORS
 }
 
 template <class PSetType>

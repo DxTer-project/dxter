@@ -196,15 +196,13 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
     if (loop->IsUnrolled())
       name.m_name += "_iter" + std::to_string((long long int) loop->GetCurrIter());
     return name;
-    
-
 #else
     if (m_partDim >= InputNumDims(0))
       throw;
-    if (num > 2) 
+    if (num <= 2) 
+      name.m_name += "_part" + std::to_string(num);
+    else if (num > 3)
       throw;
-    else
-      name.m_name += num;      
 #endif
     return name;
   }
@@ -893,6 +891,25 @@ void SplitSingleIter::PrintCode(IndStream &out)
       }
     }
   }
+#elif DOTENSORS
+  Name nameT = GetInputName(0);
+  Name nameB = nameT;
+  nameT.m_name += "_partT";
+  nameB.m_name += "_partB";
+    
+  out.Indent();
+  *out << "RepartitionDown\n"
+       << out.Tabs(0)
+       << "( " << nameT.str() << ",  " << GetNameStr(0) << ",\n"
+       << out.Tabs(0)
+       << "  /**/ /**/\n"
+       << out.Tabs(0)
+       << "       " << GetNameStr(1) << ",\n"
+       << out.Tabs(0)
+       << "  " << nameB.str() << ", " << GetNameStr(2) << ", " 
+       <<  m_partDim << ", " 
+       << GetMyLoop()->GetBS() << " );\n";
+
 #else
   *out << "need split print code\n";
   throw;
@@ -1061,6 +1078,16 @@ void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
     *out << LLDLAPartVarName(name, 1)
 	 << " = " << name << ";\n";
   }
+#elif DOTENSORS
+  Name nameT = GetInputName(0);
+  Name nameB = nameT;
+  nameT.m_name += "_partT";
+  nameB.m_name += "_partB";
+  out.Indent();
+  *out << "PartitionDown(" << GetInputNameStr(0) << ", " 
+       << nameT.str() << ", "
+       << nameB.str() << ", "
+       << m_partDim << ", 0);\n";
 #endif
 }
 
@@ -1132,8 +1159,33 @@ void SplitSingleIter::AddVariables(VarSet &set) const
       }
       }
       }
+#elif DOTENSORS
+  {
+    Name name = GetInputName(0);
+    name.m_name += "_partT";
+    Var var(name);
+    set.insert(var);
+  }
+{
+    Name name = GetInputName(0);
+    name.m_name += "_partB";
+    Var var(name);
+    set.insert(var);
+  }
+  {
+    Var var(GetName(0));
+    set.insert(var);
+  }
+  {
+    Var var(GetName(1));
+    set.insert(var);
+  }
+  {
+    Var var(GetName(2));
+    set.insert(var);
+  }
 #endif
-      }
+}
 
 CombineSingleIter* SplitSingleIter::CreateMatchingCombine(int numArgs, ...)
 {
