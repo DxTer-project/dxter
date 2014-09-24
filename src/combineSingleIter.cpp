@@ -68,8 +68,6 @@ void CombineSingleIter::Prop()
 	cout << "bad statuses\n";
 	throw;
       }
-#else
-    throw;
 #endif
   
     if (m_tunType == SETTUNOUT) {

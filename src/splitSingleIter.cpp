@@ -245,8 +245,6 @@ void SplitSingleIter::Prop()
 	cout << "bad statuses\n";
 	throw;
       }
-#else
-    throw;
 #endif  
     if (m_tunType == POSSTUNIN) {
       for(ConnNum i = 0; i < m_inputs.size(); ++i) {
