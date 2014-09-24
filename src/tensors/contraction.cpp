@@ -237,10 +237,37 @@ void Contraction::CheckInputTypesAlign() const
 	  throw;
 	}
 	if (m_contIndices.find(index) == string::npos &&
-	    *InputLocalLen(2,dim) != *InputLocalLen(1,bFind)) {
-	  cout << "C and B sizes don't align\n";
-	  throw;
-	}	  
+	    *InputLocalLen(2,dim) != *InputLocalLen(1,bFind)) 
+	  {
+	    
+	    InputLocalLen(2,dim)->Print();
+	    cout << " vs. \n";
+	    InputLocalLen(1,bFind)->Print();
+	    cout << "C and B sizes don't align\n";
+
+	    InputLen(2,dim)->Print();
+	    cout << " vs. \n";
+	    InputLen(1,bFind)->Print();
+
+	    cout << dim << endl;
+	    cout << InputDataType(2).m_dist.PrettyStr() << endl;
+	    cout << bFind << endl;
+	    cout << InputDataType(1).m_dist.PrettyStr() << endl;
+
+
+	    cout << ((DLANode*)(Input(1)->Input(0)->Input(0)))->GetType() << endl;
+	    ((DLANode*)(Input(1)->Input(0)->Input(0)))->Len(0,1)->Print();
+	    ((DLANode*)(Input(1)->Input(0)->Input(0)))->LocalLen(0,1)->Print();
+      
+      cout << Input(1)->Input(0)->GetType() << endl;
+      cout << Input(1)->Input(0)->Input(0)->GetType() << endl;
+      cout << "conn num " << Input(1)->Input(0)->InputConnNum(0) << endl;
+      ((LoopTunnel*)(Input(1)->Input(0)))->m_lsizes[1].Print();
+      ((DLANode*)(Input(1)->Input(0)))->InputLocalLen(0,1)->Print();
+
+
+	    throw;
+	  }	  
       }
     }
     else {
