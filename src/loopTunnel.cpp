@@ -653,8 +653,15 @@ void LoopTunnel::StartFillingSizes()
   if (m_sizes)
     throw;
   Dim numDims = InputNumDims(0);
-  m_sizes = new Sizes[numDims];
-  m_lsizes = new Sizes[numDims];
+  if (numDims) {
+    m_sizes = new Sizes[numDims]();
+    m_lsizes = new Sizes[numDims];
+  }
+  else {
+    //scalar
+    m_sizes = new Sizes[1]();
+    m_lsizes = new Sizes[1];
+  }
 #endif
 }
 
@@ -758,6 +765,11 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     const Size lsize = (*lsizes)[execNum];
     m_sizes[i].AddRepeatedSizes(size, numIters, parFactor);
     m_lsizes[i].AddRepeatedSizes(lsize, numIters, parFactor);
+  }
+  if (!numDims) {
+    //scalar
+    m_sizes[0].AddRepeatedSizes(1, numIters, parFactor);
+    m_lsizes[0].AddRepeatedSizes(1, numIters, parFactor);
   }
 }
 #endif
