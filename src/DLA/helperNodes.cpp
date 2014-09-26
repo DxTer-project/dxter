@@ -1240,7 +1240,7 @@ void ScaleNode::PrintCode(IndStream &out)
     *out << "bli_scalm( ";
 #elif DOTENSORS
   if (GetLayer() != ABSLAYER) {
-    *out << "scale( ";
+    *out << "Scal( ";
   }
 #else
   throw;
