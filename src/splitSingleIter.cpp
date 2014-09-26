@@ -946,7 +946,6 @@ unsigned int SplitSingleIter::NumOutputs() const
 #endif
 }
 
-#if TWOD
 bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
 {
   if (m_pset && !m_pset->IsReal())
@@ -962,7 +961,11 @@ bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
     for( ; iter != m_children.end(); ++iter) {
       bool check = false;
       ConnNum num = (*iter)->m_num;
+#if DOTENSORS
+      switch (PARTDOWN) {
+#else
       switch (m_dir) {
+#endif
       case (PARTDOWN):
 	if ((quad == TL || quad == TR) && ((!atEnd && num == 0) || (atEnd && (num == 0 || num == 1))))
 	  check = true;
@@ -1030,12 +1033,6 @@ bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
   else
     throw;
 }
-#else
-bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
-{
-  throw;
-}
-#endif
 
 void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
 {
