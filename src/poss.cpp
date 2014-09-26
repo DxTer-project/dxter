@@ -2144,7 +2144,8 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 
   MergePart4(newSet, leftSet, rightSet,
 	     tunMapLeft, tunMapRight, newInputTunnelsToFix);
-    
+
+  NodeMap outTunToInTun;
   
   NodeVecIter setTunInIter = newInputTunnelsToFix.begin();
   for(; setTunInIter != newInputTunnelsToFix.end(); ++setTunInIter) {
@@ -2153,140 +2154,156 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
     NodeSet set;
     for(unsigned int i = 0; i < newSetInput->m_inputs.size(); ++i) {
       Tunnel *newSetOutput = NULL;
-      if (newSetInput->Input(i)->IsTunnel() && ((Tunnel*)((*inputInputConIter)->m_n))->m_pset == newSet)
+
+      /*
+      cout << "looking at " << newSetInput << " " << i << endl;
+      cout << "Input is " << newSetInput->Input(i) << endl;
+      */
+      if (outTunToInTun.find(newSetInput->Input(i)) != outTunToInTun.end())
+	newSetOutput = (Tunnel*)(newSetInput->Input(i));
+      if (!newSetOutput && newSetInput->Input(i)->IsTunnel() && ((Tunnel*)((*inputInputConIter)->m_n))->m_pset == newSet)
         newSetOutput = (Tunnel*)(newSetInput->Input(i));
       if (newSetOutput) {
 	Tunnel *newOutputToUse = NULL;
 	if (newSetInput->IsLoopTunnel())
 	  newOutputToUse = ((LoopTunnel*)newSetInput)->GetMatchingOutTun();
-	if(newSetOutput->IsCombine() != newSetInput->IsSplit())
-	  throw;
-        if (!newSetOutput->IsTunnel()) {
-          cout << "!newSetOutput->IsTunnel()\n";
-          throw;
-        }
-        if (((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT) {
-          cout << "((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT\n";
-          throw;
-        }
-	if (newSetInput->m_children.size() != newSetOutput->m_inputs.size())
-	  throw;
+	if(outTunToInTun.find(newSetInput->Input(i)) != outTunToInTun.end()) {
+	  //The input to this new input is a set output that has been deleted.
+	  Node *tunIn = outTunToInTun[newSetOutput];
+	  newSetInput->ChangeInput1Way(newSetOutput, 0, tunIn->Input(0), tunIn->InputConnNum(0));
+	}
+	else if (newSetOutput->IsCombine() != newSetInput->IsSplit()) {
+	  if (!newSetOutput->IsLoopTunnel() || !newSetInput->IsLoopTunnel())
+	    throw;
+	  if (!((LoopTunnel*)newSetOutput)->IsConst() || !((LoopTunnel*)newSetInput)->IsConst())
+	    throw;
+	  Node *temp = ((LoopTunnel*)(newSetOutput->Input(0)))->GetMatchingInTun()->Input(0);
+	  newSetInput->ChangeInput1Way(newSetOutput, 0, temp->Input(0), temp->InputConnNum(0));
+	  //	  cout << "Changing input to " << newSetInput << " to be " << temp->Input(0) << endl;
+	  //	  cout << "\tIt was " << newSetOutput << endl;
+	  //	  cout << newSetInput->GetNameStr(0) << endl;
+	  //	  throw;
+	}
+	else {
+	  if (!newSetOutput->IsTunnel()) {
+	    cout << "!newSetOutput->IsTunnel()\n";
+	    throw;
+	  }
+	  if (((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT) {
+	    cout << "((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT\n";
+	    throw;
+	  }
+	  if (newSetInput->m_children.size() != newSetOutput->m_inputs.size())
+	    throw;
 
-	while (!newSetInput->m_children.empty())
-	  {
-	    Node *possInput = newSetInput->m_children[0]->m_n;
-	    Node *possOutput = newSetOutput->m_inputs[0]->m_n;
-	    if (possInput->m_poss != possOutput->m_poss) {
-	      cout << "(possInput->m_poss != possOutput->m_poss)\n";
-	      cout << possInput->m_poss << " != " << possOutput->m_poss << endl;
-	      throw;
-	    }
+	  outTunToInTun.insert(std::pair<Node*,Node*>(newSetOutput,((LoopTunnel*)newSetOutput)->GetMatchingInTun()));
 
-	    while (!possInput->m_children.empty()) {
-	      Node *userOfInput = possInput->m_children[0]->m_n;
-	      ConnNum inputUseNum = possInput->m_children[0]->m_num;
-	      /*
-	      if (userOfInput->IsTunnel(POSSTUNOUT)) {
-		cout << "user of input " << userOfInput << ", " << inputUseNum << endl;
-		cout << "changed to " << possOutput->Input(inputUseNum) << ", " << possOutput->InputConnNum(inputUseNum) << endl;
-		Node *in = possOutput->Input(inputUseNum);
-		for(int i = 0; i < in->m_children.size(); ++i) {
-		  if (in->m_children[i]->m_num == possOutput->InputConnNum(inputUseNum)) {
-		    cout << "\talready had a child with same connection: " << in->m_children[i]->m_n << endl;
-		  }
-		}
-	      }
-	      */
-	      if (userOfInput->m_poss != possInput->m_poss) {
-		cout << "userOfInput->m_poss != possInput->m_poss\n";
+
+	  while (!newSetInput->m_children.empty())
+	    {
+	      Node *possInput = newSetInput->m_children[0]->m_n;
+	      Node *possOutput = newSetOutput->m_inputs[0]->m_n;
+	      if (possInput->m_poss != possOutput->m_poss) {
+		cout << "(possInput->m_poss != possOutput->m_poss)\n";
+		cout << possInput->m_poss << " != " << possOutput->m_poss << endl;
 		throw;
 	      }
-	      userOfInput->ChangeInput1Way(possInput, inputUseNum,
-					   possOutput->Input(inputUseNum), possOutput->InputConnNum(inputUseNum));
 
-	      delete possInput->m_children[0];
-	      possInput->m_children.erase(possInput->m_children.begin());
+	      while (!possInput->m_children.empty()) {
+		Node *userOfInput = possInput->m_children[0]->m_n;
+		ConnNum inputUseNum = possInput->m_children[0]->m_num;
+		if (userOfInput->m_poss != possInput->m_poss) {
+		  cout << "userOfInput->m_poss != possInput->m_poss\n";
+		  throw;
+		}
+		userOfInput->ChangeInput1Way(possInput, inputUseNum,
+					     possOutput->Input(inputUseNum), possOutput->InputConnNum(inputUseNum));
+
+		delete possInput->m_children[0];
+		possInput->m_children.erase(possInput->m_children.begin());
+	      }
+
+	      delete possInput->m_inputs[0];
+	      possInput->m_inputs.clear();
+	      delete newSetInput->m_children[0];
+	      newSetInput->m_children.erase(newSetInput->m_children.begin());
+
+	      delete newSetOutput->m_inputs[0];
+	      newSetOutput->m_inputs.erase(newSetOutput->m_inputs.begin());
+	      delete possOutput->m_children[0];
+	      possOutput->m_children.clear();
+	      possOutput->m_poss->DeleteChildAndCleanUp(possOutput,false,true,false);
+	      possInput->m_poss->DeleteNode(possInput);
 	    }
+	  --i;
 
-	    delete possInput->m_inputs[0];
-	    possInput->m_inputs.clear();
-	    delete newSetInput->m_children[0];
-	    newSetInput->m_children.erase(newSetInput->m_children.begin());
 
-	    delete newSetOutput->m_inputs[0];
-	    newSetOutput->m_inputs.erase(newSetOutput->m_inputs.begin());
-	    delete possOutput->m_children[0];
-	    possOutput->m_children.clear();
-	    possOutput->m_poss->DeleteChildAndCleanUp(possOutput,false,true,false);
-	    possInput->m_poss->DeleteNode(possInput);
+
+	  if (newSetOutput->m_children.size()) {
+	    if (!newOutputToUse)
+	      throw;
+	    newSetOutput->RedirectChildren(newOutputToUse);
 	  }
-        --i;
+	  unsigned int find = FindInNodeVec(newSet->m_outTuns, newSetOutput);
 
-        if (newSetOutput->m_children.size()) {
-	  if (!newOutputToUse)
+	  unsigned int newVal = (newOutputToUse ? FindInNodeVec(newSet->m_outTuns, newOutputToUse) : 999);
+	  if (newVal > find)
+	    --newVal;
+
+	  for(unsigned int j = 0; j < newSet->m_leftOutMap.size(); ++j) {
+	    int val = newSet->m_leftOutMap[j];
+	    if (val == (int)find) {
+	      if (newOutputToUse)
+		newSet->m_leftOutMap[j] = newVal;
+	      else
+		newSet->m_leftOutMap[j] = -1;
+	    }
+	    else if (val > (int)find)
+	      newSet->m_leftOutMap[j] = val-1;
+	  }
+
+	  for(unsigned int j = 0; j < newSet->m_rightOutMap.size(); ++j) {
+	    int val = newSet->m_rightOutMap[j];
+	    if (val == (int)find) {
+	      if (newOutputToUse)
+		newSet->m_rightOutMap[j] = newVal;
+	      else
+		newSet->m_rightOutMap[j] = -1;
+	    }
+	    else if (val > (int)find)
+	      newSet->m_rightOutMap[j] = val-1;
+	  }
+
+	  newSet->RemoveOutTun(newSetOutput);
+	  delete newSetOutput;
+
+
+	  find = FindInNodeVec(newSet->m_inTuns, newSetInput);
+
+	  for (unsigned int j = 0; j < newSet->m_leftInMap.size(); ++j) {
+	    int val = newSet->m_leftInMap[j];
+	    if (val == (int)find)
+	      newSet->m_leftInMap[j] = -1;
+	    if (val > (int)find)
+	      newSet->m_leftInMap[j] = val-1;
+	  }
+	  for (unsigned int j = 0; j < newSet->m_rightInMap.size(); ++j) {
+	    int val = newSet->m_rightInMap[j];
+	    if (val == (int)find)
+	      newSet->m_rightInMap[j] = -1;
+	    else if (val > (int)find)
+	      newSet->m_rightInMap[j] = val-1;
+	  }
+
+
+	  newSet->RemoveInTun(newSetInput);
+	  if (newSetInput->m_inputs.size() > 1) {
 	    throw;
-	  newSetOutput->RedirectChildren(newOutputToUse);
-	}
-	unsigned int find = FindInNodeVec(newSet->m_outTuns, newSetOutput);
-
-	unsigned int newVal = (newOutputToUse ? FindInNodeVec(newSet->m_outTuns, newOutputToUse) : 999);
-	if (newVal > find)
-	  --newVal;
-
-	for(unsigned int j = 0; j < newSet->m_leftOutMap.size(); ++j) {
-	  int val = newSet->m_leftOutMap[j];
-	  if (val == (int)find) {
-	    if (newOutputToUse)
-	      newSet->m_leftOutMap[j] = newVal;
-	    else
-	      newSet->m_leftOutMap[j] = -1;
 	  }
-	  else if (val > (int)find)
-	    newSet->m_leftOutMap[j] = val-1;
+	  delete newSetInput->m_inputs[0];
+	  newSetInput->m_inputs.clear();
+	  delete newSetInput;
 	}
-
-	for(unsigned int j = 0; j < newSet->m_rightOutMap.size(); ++j) {
-	  int val = newSet->m_rightOutMap[j];
-	  if (val == (int)find) {
-	    if (newOutputToUse)
-	      newSet->m_rightOutMap[j] = newVal;
-	    else
-	      newSet->m_rightOutMap[j] = -1;
-	  }
-	  else if (val > (int)find)
-	    newSet->m_rightOutMap[j] = val-1;
-	}
-
-        newSet->RemoveOutTun(newSetOutput);
-        delete newSetOutput;
-
-
-	find = FindInNodeVec(newSet->m_inTuns, newSetInput);
-
-	for (unsigned int j = 0; j < newSet->m_leftInMap.size(); ++j) {
-	  int val = newSet->m_leftInMap[j];
-	  if (val == (int)find)
-	    newSet->m_leftInMap[j] = -1;
-	  if (val > (int)find)
-	    newSet->m_leftInMap[j] = val-1;
-	}
-	for (unsigned int j = 0; j < newSet->m_rightInMap.size(); ++j) {
-	  int val = newSet->m_rightInMap[j];
-	  if (val == (int)find)
-	    newSet->m_rightInMap[j] = -1;
-	  else if (val > (int)find)
-	    newSet->m_rightInMap[j] = val-1;
-	}
-
-
-        newSet->RemoveInTun(newSetInput);
-        if (newSetInput->m_inputs.size() > 1) {
-          throw;
-        }
-	delete newSetInput->m_inputs[0];
-        newSetInput->m_inputs.clear();
-        delete newSetInput;
-
       }
     }
   }
