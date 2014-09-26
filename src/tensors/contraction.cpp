@@ -1482,6 +1482,39 @@ void ContractionLoopExp::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+
+
+bool ContractionLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == Contraction::GetClass()) {
+    const Contraction *cont = (Contraction*)node;
+    if (cont->GetLayer() != m_fromLayer)
+      return false;
+    for (Dim dim = 0; dim < cont->InputNumDims(0); ++dim) {
+      if (!(*(cont->InputLen(0,dim)) <= m_bs))
+	return false;
+    }
+    for (Dim dim = 0; dim < cont->InputNumDims(2); ++dim) {
+      if (!(*(cont->InputLen(2,dim)) <= m_bs))
+	return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+void ContractionLowerLayer::Apply(Node *node) const
+{
+  Contraction *cont = (Contraction*)node;
+  cont->SetLayer(m_toLayer);
+  throw;
+}
+
+string ContractionLowerLayer::GetType() const
+{ 
+  return "Contraction lower layer " + LayerNumToStr(m_fromLayer) 
+  + " to " + LayerNumToStr(m_toLayer);
+}
 #endif
 
 

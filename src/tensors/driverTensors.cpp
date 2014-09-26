@@ -74,6 +74,7 @@ void AddTrans()
 
   for (Dim dim = 0; dim < 10; ++dim)
     Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DMLAYER, dim), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DMLAYER, TensorBS.GetSize()), DPTENSORPHASE);
 
 #if 0
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
