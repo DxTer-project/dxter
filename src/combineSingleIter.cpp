@@ -387,8 +387,8 @@ void CombineSingleIter::PrintCode(IndStream &out)
 #elif DOTENSORS
   Name nameT = GetInputName(3);
   Name nameB = nameT;
-  nameT.m_name += "_partT";
-  nameB.m_name += "_partB";
+  nameT.m_name += "_part" + std::to_string(m_partDim) + "T";
+  nameB.m_name += "_part" + std::to_string(m_partDim) + "B";
 
       out.Indent();
       *out << "SlidePartitionDown\n"

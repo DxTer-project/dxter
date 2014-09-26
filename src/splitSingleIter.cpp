@@ -200,7 +200,7 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
     if (m_partDim >= InputNumDims(0))
       throw;
     if (num <= 2) 
-      name.m_name += "_part" + std::to_string(num);
+      name.m_name += "_part" + std::to_string(m_partDim) + "_" + std::to_string(num);
     else if (num > 3)
       throw;
 #endif
@@ -894,8 +894,8 @@ void SplitSingleIter::PrintCode(IndStream &out)
 #elif DOTENSORS
   Name nameT = GetInputName(0);
   Name nameB = nameT;
-  nameT.m_name += "_partT";
-  nameB.m_name += "_partB";
+  nameT.m_name += "_part" + std::to_string(m_partDim) + "T";
+  nameB.m_name += "_part" + std::to_string(m_partDim) + "B";
     
   out.Indent();
   *out << "RepartitionDown\n"
@@ -1078,8 +1078,8 @@ void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
 #elif DOTENSORS
   Name nameT = GetInputName(0);
   Name nameB = nameT;
-  nameT.m_name += "_partT";
-  nameB.m_name += "_partB";
+  nameT.m_name += "_part" + std::to_string(m_partDim) + "T";
+  nameB.m_name += "_part" + std::to_string(m_partDim) + "B";
   out.Indent();
   *out << "PartitionDown(" << GetInputNameStr(0) << ", " 
        << nameT.str() << ", "
@@ -1159,13 +1159,13 @@ void SplitSingleIter::AddVariables(VarSet &set) const
 #elif DOTENSORS
   {
     Name name = GetInputName(0);
-    name.m_name += "_partT";
+    name.m_name += "_part" + std::to_string(m_partDim) + "T";
     Var var(name);
     set.insert(var);
   }
 {
     Name name = GetInputName(0);
-    name.m_name += "_partB";
+    name.m_name += "_part" + std::to_string(m_partDim) + "B";
     Var var(name);
     set.insert(var);
   }
