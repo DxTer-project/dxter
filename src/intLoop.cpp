@@ -73,6 +73,9 @@ string BSSize::VarName() const
     case (USELLDLA3MUDOUBLE):
       return "(" + std::to_string((long long int) m_multiple) + 
 	"*(3*" + (string)(MU_VAR_NAME) + "))";
+#elif DOTENSORS
+    case (USETENSORBS):
+      return "tensor bs name here";
 #endif
     default:
       throw;
