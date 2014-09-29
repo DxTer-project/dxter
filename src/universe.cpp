@@ -100,9 +100,11 @@ Universe::~Universe()
 {
   NodeVecIter iter;
   TransPtrMapIter iter2 = M_transNames.begin();
+  M_transPtrs.clear();
   for(; iter2 != M_transNames.end(); ++iter2) {
     delete iter2->first;
   }
+  M_transNames.clear();
   TransMapIter iter3 = M_simplifiers.begin();
   for(; iter3 != M_simplifiers.end(); ++iter3)
     delete iter3->second;

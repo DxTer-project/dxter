@@ -80,9 +80,9 @@ void RuntimeTest::AddMiscellaneousDefines()
   return;
 }
 
-string RuntimeTest::MakeTestCode(ImplementationMap imps)
+string RuntimeTest::MakeTestCode(ImplementationMap* imps)
 {
-  int numImplementations = imps.size();
+  int numImplementations = imps->size();
   m_defines.push_back("#define NUM_ALGS " + std::to_string((long long int) numImplementations));
   string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
   string implementationFunctions = MakeImpFuncs(imps);
@@ -91,9 +91,9 @@ string RuntimeTest::MakeTestCode(ImplementationMap imps)
   return testCode;
 }
 
-string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImp)
+string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImp)
 {
-  int numImplementations = imps.size();
+  int numImplementations = imps->size();
   m_defines.push_back("#define NUM_ALGS " + std::to_string((long long int) numImplementations));
   string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
   string refFuncName = m_operationName + "_test";
@@ -103,7 +103,7 @@ string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap imps, str
   return testCode;
 }
 
-string RuntimeTest::MainFuncCode(ImplementationMap imps)
+string RuntimeTest::MainFuncCode(ImplementationMap* imps)
 {
   string prototype = "int main() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
@@ -118,7 +118,7 @@ string RuntimeTest::MainFuncCode(ImplementationMap imps)
   return mainFunc;
 }
 
-string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap imps, string referenceImpName)
+string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImpName)
 {
   string prototype = "int main() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
@@ -138,7 +138,7 @@ string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap imps, str
   return mainFunc;
 }
 
-string RuntimeTest::CorrectnessCheck(ImplementationMap imps, string referenceImpName)
+string RuntimeTest::CorrectnessCheck(ImplementationMap* imps, string referenceImpName)
 {
   int i;
   string correctnessCheck = "";
@@ -146,7 +146,7 @@ string RuntimeTest::CorrectnessCheck(ImplementationMap imps, string referenceImp
   vector<string> testBuffers = ArgBuffers("_test");
   string callRefImp = "\t" + referenceImpName + "(" + CArgList(argBuffers) + ");\n\n";
   correctnessCheck += callRefImp;
-  for (i = 1; i <= imps.size(); i++) {
+  for (i = 1; i <= imps->size(); i++) {
     correctnessCheck += CopyArgBuffersTo("_test") + "\n\t";
     correctnessCheck += m_operationName + "_" + std::to_string((long long int) i) + "(" + CArgList(testBuffers) + ");\n";
     correctnessCheck += CheckArgBufferDiffs("_ref", "_test",std::to_string((long long int) i)) + "\n";
@@ -178,11 +178,11 @@ vector<string> RuntimeTest::ArgBuffers(string postfix)
   return argBufs;
 }
 
-string RuntimeTest::TimingLoop(ImplementationMap imps)
+string RuntimeTest::TimingLoop(ImplementationMap* imps)
 {
   int i;
   string loopBody = "";
-  for (i = 1; i <= imps.size(); i++) {
+  for (i = 1; i <= imps->size(); i++) {
     string opName = m_operationName + "_" + std::to_string((long long int) i);
     loopBody += "\tfor (j = 0; j < NUM_ITERATIONS; j++) {\n";
     loopBody += "\t\tstart_time = rdtsc();\n";
@@ -257,12 +257,12 @@ string RuntimeTest::CArgList(vector<string> args)
   return argList;
 }
 
-string RuntimeTest::MakeImpFuncs(ImplementationMap imps)
+string RuntimeTest::MakeImpFuncs(ImplementationMap* imps)
 {
   string endOfFuncDec = "(" + CArgList(m_argDeclarations) + ")";
   string allImplementationFuncs = "";
   ImplementationMap::iterator impIt;
-  for (impIt = imps.begin(); impIt != imps.end(); ++impIt) {
+  for (impIt = imps->begin(); impIt != imps->end(); ++impIt) {
     string funcName = m_operationName + "_" + std::to_string((long long int) impIt->first);
     string funcBody = impIt->second;
     string funcDec = MakeFunc(funcName, funcBody);
@@ -284,7 +284,7 @@ RuntimeEvaluator::RuntimeEvaluator(string evalDirName)
   m_numIterations = 0;
 }
 
-ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest test, ImplementationMap imps)
+ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest test, ImplementationMap* imps)
 {
   m_numIterations = test.m_numIterations;
   string executableName = test.m_operationName;
@@ -301,10 +301,10 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest t
   system(runStr.c_str());
   string removeExecutable = "rm -f " + executableName;
   system(removeExecutable.c_str());
-  return ReadTimeDataFromFile(test.m_dataFileName, imps.size());
+  return ReadTimeDataFromFile(test.m_dataFileName, imps->size());
 }
 
-ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap imps, string referenceImp)
+ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp)
 {
   m_numIterations = test.m_numIterations;
   string executableName = test.m_operationName;
@@ -320,7 +320,8 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnes
   system(runStr.c_str());
   string removeExecutable = "rm -f " + executableName;
   system(removeExecutable.c_str());
-  return ReadTimeDataFromFile(test.m_dataFileName, imps.size());  
+  cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
+  return ReadTimeDataFromFile(test.m_dataFileName, imps->size());
 }
 
 ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName, int numImpls)
@@ -328,15 +329,19 @@ ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName,
   std::ifstream dataStream(fileName);
   std::stringstream buffer;
   buffer << dataStream.rdbuf();
+  dataStream.close();
   string timeData = buffer.str();
   ImplementationRuntimeMap runtimeMap;
   std::vector<string> runtimeStrings;
   Tokenize(timeData, runtimeStrings, "\n");
   std::vector<string>::iterator it = runtimeStrings.begin();
   int i, j;
+  cout << "Num impls " << std::to_string((long long int) numImpls) << endl;
   for (i = 1; i <= numImpls; i++) {
     TimeVec impTimes;
-    for (j = 0; j < m_numIterations; j++) {
+    cout << "Implementation # " << std::to_string((long long int) i) << endl;
+    for (j = 0; j < 1; j++) {
+      cout << "Iteration # " << std::to_string((long long int) j) << endl;
       impTimes.push_back(std::stod(*it));
       it++;
     }

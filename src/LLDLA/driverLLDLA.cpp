@@ -91,16 +91,16 @@ Trans transA, transB;
 
 Architecture* arch;
 
-ImplementationMap ImpStrMap(Universe *uni)
+ImplementationMap* ImpStrMap(Universe *uni)
 {
-  ImplementationMap impMap;
+  ImplementationMap* impMap = new ImplementationMap();
   GraphNum i;
   for (i = 1; i <= uni->TotalCount(); i++) {
     std::stringbuf sbuf;
     std::ostream out(&sbuf);
     IndStream istream = IndStream(&out, LLDLASTREAM);
     uni->Print(istream, i);
-    impMap.insert(NumImplementationPair(i, sbuf.str()));
+    impMap->insert(NumImplementationPair(i, sbuf.str()));
   }
   return impMap;
 }
@@ -589,7 +589,7 @@ void MuNNMuGemmResults(Type precision) {
   int n = m;
   int p = 16;
   int p_inc = 16;
-  int num_trials = 10;
+  int num_trials = 15;
   int algNum = 1;
   string opName = "dxt_gemm";
   string resultFileName = "dxt_gemm_mu_by_n_times_n_by_mu_trials.csv";
