@@ -764,7 +764,7 @@ template<class PSetType>
 #elif DOTENSORS
   SplitBase *split = GetControl();
   Name name = split->GetInputName(0);
-  name.m_name += "_partT";
+  name.m_name += "_part" + std::to_string(split->m_partDim) + "T";
   out.Indent();
   *out << "while(" << name.str() << ".Dimension(" << split->m_partDim << ") < "
        << split->GetInputNameStr(0) << ".Dimension(" << split->m_partDim << "))\n";
