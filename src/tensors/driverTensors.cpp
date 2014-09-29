@@ -28,6 +28,7 @@
 #endif
 #include "transform.h"
 #include "loopSupport.h"
+#include "helperNodes.h"
 #include <time.h>
 #include <iomanip>
 #include "DLAReg.h"
@@ -71,6 +72,10 @@ void AddTrans()
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);  
 #endif
 
+  for (Dim dim = 0; dim < 10; ++dim)
+    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DMLAYER, dim), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DMLAYER, TensorBS.GetSize()), DPTENSORPHASE);
+
 #if 0
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
@@ -80,7 +85,7 @@ void AddTrans()
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
 
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
-   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(DMLAYER,SMLAYER), DPTENSORPHASE);
+   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllAllGathers, ROTENSORPHASE);
   
@@ -111,6 +116,7 @@ void AddSimplifiers()
    Universe::AddTrans(RedistNode::GetClass(), new RemoveWastedRedist, SIMP);
    Universe::AddTrans(RedistNode::GetClass(), new CombineRedistribs, SIMP);
    Universe::AddTrans(Permute::GetClass(), new LowerPermute, SIMP);
+   Universe::AddTrans(ScaleNode::GetClass(), new RemoveScaleByOne, SIMP);
 }
 
 void Usage()
@@ -386,7 +392,7 @@ RealPSet* MartinsExample()
 
   InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", 4);
 
-  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abcd","cdij","abij",(string)"cd");
+  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"abcd","cdij","abij",(string)"cd");
   cont1->AddInputs(6,
 		  Uin,0,
 		  Tin,0,
@@ -396,7 +402,7 @@ RealPSet* MartinsExample()
   Poss *poss1 = new Poss(cont1);
   RealPSet *set1 = new RealPSet(poss1);
 
-  Contraction *cont2 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"acik","bcjk","abij",(string)"ck");
+  Contraction *cont2 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"acik","bcjk","abij",(string)"ck");
   cont2->AddInputs(6,
 		   Vin,0,
 		   Tin,0,
@@ -406,7 +412,7 @@ RealPSet* MartinsExample()
   RealPSet *set2 = new RealPSet(poss2);
 
 
-  Contraction *cont3 = new Contraction(DMLAYER,COEFONE,COEFONE,REAL,"ijkl","abkl","abij",(string)"kl");
+  Contraction *cont3 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"ijkl","abkl","abij",(string)"kl");
   cont3->AddInputs(6,
 		   Win,0,
 		   Tin,0,
@@ -415,7 +421,7 @@ RealPSet* MartinsExample()
   Poss *poss3 = new Poss(cont3);
   RealPSet *set3 = new RealPSet(poss3);
 
-  Contraction *cont4 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"abij","abij","", (string)"abij");
+  Contraction *cont4 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"abij","abij","", (string)"abij");
   cont4->AddInputs(6,
 		   Tin,0,
 		   set3->OutTun(0),0,
@@ -487,7 +493,7 @@ RealPSet* MP2()
   InputNode *scalarIn = new InputNode("scalar input",  ones, scalarDist, "E_MP2", 0);
 
 
-  YAxpPx *axppx1 = new YAxpPx(DMLAYER, COEFTWO, COEFNEGONE, "efnm", "efmn");
+  YAxpPx *axppx1 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "efnm", "efmn");
   axppx1->AddInputs(6,
 		   v_efmn, 0,
 		   v_efmn, 0,
@@ -496,7 +502,7 @@ RealPSet* MP2()
   RealPSet * axppx1Set = new RealPSet(axppx1Poss);
 
 
-  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
+  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
   cont1->AddInputs(6,
 		   axppx1Set->OutTun(0),0,
 		   t_efmn,0,
@@ -640,7 +646,7 @@ RealPSet* MP3()
   InputNode *scalarIn = new InputNode("scalar input",  ones, scalarDist, "E_MP3", 0);
 
 
-  Contraction *cont1 = new Contraction(DMLAYER,COEFONE,COEFZERO,REAL,"oegm","gfno","efmn",(string)"go");
+  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"oegm","gfno","efmn",(string)"go");
   cont1->AddInputs(6,
 		  v2_oegm,0,
 		  t_efmn,0,
@@ -648,7 +654,7 @@ RealPSet* MP3()
   Poss *cont1Poss = new Poss(cont1);
   RealPSet *cont1Set = new RealPSet(cont1Poss);
 
-  YAxpPx *axppx1 = new YAxpPx(DMLAYER, COEFONEHALF, COEFONE, "efmn", "efnm");
+  YAxpPx *axppx1 = new YAxpPx(ABSLAYER, COEFONEHALF, COEFONE, "efmn", "efnm");
   axppx1->AddInputs(6,
 		   cont1Set->OutTun(0), 0,
 		   cont1Set->OutTun(0), 0,
@@ -656,7 +662,7 @@ RealPSet* MP3()
   Poss *axppx1Poss = new Poss(axppx1);
   RealPSet * axppx1Set = new RealPSet(axppx1Poss);
 
-  YAxpPx *axppx2 = new YAxpPx(DMLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
+  YAxpPx *axppx2 = new YAxpPx(ABSLAYER,COEFTWO, COEFNEGONE, "gfon", "gfno");
   axppx2->AddInputs(6,
 		   t_efmn, 0,
 		   t_efmn, 0,
@@ -664,7 +670,7 @@ RealPSet* MP3()
   Poss *axppx2Poss = new Poss(axppx2);
   RealPSet * axppx2Set = new RealPSet(axppx2Poss);
 
-  ZAxpBy *axppx3 = new ZAxpBy(DMLAYER,COEFTWO, COEFNEGONE);
+  ZAxpBy *axppx3 = new ZAxpBy(ABSLAYER,COEFTWO, COEFNEGONE);
   axppx3->AddInputs(6,
 		   v_oegm, 0,
 		   v2_oegm, 0,
@@ -672,7 +678,7 @@ RealPSet* MP3()
   Poss *axppx3Poss = new Poss(axppx3);
   RealPSet * axppx3Set = new RealPSet(axppx3Poss);
 
-  Contraction *cont2 = new Contraction(DMLAYER,COEFONEHALF,COEFNEGONE,REAL,"oegm","gfon","efmn",(string)"go");
+  Contraction *cont2 = new Contraction(ABSLAYER,COEFONEHALF,COEFNEGONE,REAL,"oegm","gfon","efmn",(string)"go");
   cont2->AddInputs(6,
 		   axppx3Set->OutTun(0),0,
 		   axppx2Set->OutTun(0),0,
@@ -680,7 +686,7 @@ RealPSet* MP3()
   Poss *cont2Poss = new Poss(cont2);
   RealPSet *cont2Set = new RealPSet(cont2Poss);
 
-  Contraction *cont3 = new Contraction(DMLAYER,COEFONEHALF,COEFONE,REAL,"efgh","ghmn","efmn",(string)"gh");
+  Contraction *cont3 = new Contraction(ABSLAYER,COEFONEHALF,COEFONE,REAL,"efgh","ghmn","efmn",(string)"gh");
   cont3->AddInputs(6,
 		   v_efgh, 0,
 		   t_efmn, 0,
@@ -688,7 +694,7 @@ RealPSet* MP3()
   Poss *cont3Poss = new Poss(cont3);
   RealPSet *cont3Set = new RealPSet(cont3Poss);
 
-  Contraction *cont4 = new Contraction(DMLAYER,COEFONEHALF,COEFONE,REAL,"opmn","efop","efmn",(string)"op");
+  Contraction *cont4 = new Contraction(ABSLAYER,COEFONEHALF,COEFONE,REAL,"opmn","efop","efmn",(string)"op");
   cont4->AddInputs(6,
 		   v_opmn, 0,
 		   t_efmn, 0,
@@ -697,7 +703,7 @@ RealPSet* MP3()
   RealPSet *cont4Set = new RealPSet(cont4Poss);
 
 
-  Contraction *cont5 = new Contraction(DMLAYER,COEFTWO,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
+  Contraction *cont5 = new Contraction(ABSLAYER,COEFTWO,COEFZERO,REAL,"efmn","efmn","",(string)"efmn");
   cont5->AddInputs(6,
 		   axppx2Set->OutTun(0), 0,
 		   cont4Set->OutTun(0), 0,

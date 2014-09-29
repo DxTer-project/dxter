@@ -66,7 +66,7 @@ void ZAxpBy::UnflattenCore(ifstream &in, SaveInfo &info)
 
 Phase ZAxpBy::MaxPhase() const 
 {
-  if (m_layer == DMLAYER)
+  if (m_layer == DMLAYER || m_layer == ABSLAYER)
     return DPTENSORPHASE;
   else if (m_layer == SMLAYER)
     return NUMPHASES;

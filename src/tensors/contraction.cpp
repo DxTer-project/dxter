@@ -22,6 +22,7 @@
 
 #if DOTENSORS
 #include "tensorRedist.h"
+#include "loopSupport.h"
 #include "helperNodes.h"
 #include "yxpby.h"
 
@@ -236,10 +237,37 @@ void Contraction::CheckInputTypesAlign() const
 	  throw;
 	}
 	if (m_contIndices.find(index) == string::npos &&
-	    *InputLocalLen(2,dim) != *InputLocalLen(1,bFind)) {
-	  cout << "C and B sizes don't align\n";
-	  throw;
-	}	  
+	    *InputLocalLen(2,dim) != *InputLocalLen(1,bFind)) 
+	  {
+	    
+	    InputLocalLen(2,dim)->Print();
+	    cout << " vs. \n";
+	    InputLocalLen(1,bFind)->Print();
+	    cout << "C and B sizes don't align\n";
+
+	    InputLen(2,dim)->Print();
+	    cout << " vs. \n";
+	    InputLen(1,bFind)->Print();
+
+	    cout << dim << endl;
+	    cout << InputDataType(2).m_dist.PrettyStr() << endl;
+	    cout << bFind << endl;
+	    cout << InputDataType(1).m_dist.PrettyStr() << endl;
+
+
+	    cout << ((DLANode*)(Input(1)->Input(0)->Input(0)))->GetType() << endl;
+	    ((DLANode*)(Input(1)->Input(0)->Input(0)))->Len(0,1)->Print();
+	    ((DLANode*)(Input(1)->Input(0)->Input(0)))->LocalLen(0,1)->Print();
+      
+      cout << Input(1)->Input(0)->GetType() << endl;
+      cout << Input(1)->Input(0)->Input(0)->GetType() << endl;
+      cout << "conn num " << Input(1)->Input(0)->InputConnNum(0) << endl;
+      ((LoopTunnel*)(Input(1)->Input(0)))->m_lsizes[1].Print();
+      ((DLANode*)(Input(1)->Input(0)))->InputLocalLen(0,1)->Print();
+
+
+	    throw;
+	  }	  
       }
     }
     else {
@@ -1282,4 +1310,211 @@ Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
 }
 */
 
+
+ContractionLoopExp::ContractionLoopExp(Layer fromLayer, Layer toLayer, int dim)
+  : 
+  m_fromLayer(fromLayer), 
+  m_toLayer(toLayer), 
+  m_dim(dim) 
+{
+}
+
+string ContractionLoopExp::GetType() const
+{
+  string str = "Contraction Loop Exp " 
+    + LayerNumToStr(m_fromLayer)
+    + " + " 
+    + LayerNumToStr(m_toLayer)
+    + " on dim " + std::to_string(m_dim);
+  return str;
+}
+
+bool ContractionLoopExp::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == Contraction::GetClass()) {
+    const Contraction *cont = (Contraction*)node;
+    if (cont->GetLayer() == m_fromLayer) {
+      const string &cIndices = cont->m_CIndices;
+      if (cIndices.length() > m_dim) {
+	return !(*(cont->InputLen(2,m_dim)) <= TensorBS.GetSize());
+      }
+      else if (cont->m_contIndices.length() > (m_dim - cIndices.length())) {
+	char contIndex = cont->m_contIndices[m_dim - cIndices.length()];
+	size_t index = cont->m_AIndices.find(contIndex);
+	if (index == string::npos)
+	  throw;
+	return !(*(cont->InputLen(0,index)) <= TensorBS.GetSize());
+      }
+    }
+  }
+  return false;
+}
+
+void ContractionLoopExp::Apply(Node *node) const
+{
+  Contraction *cont = (Contraction*)node;
+  const string &aIndices = cont->m_AIndices;
+  const string &bIndices = cont->m_BIndices;
+  const string &cIndices = cont->m_CIndices;
+  const bool isCIndex = cIndices.length() > m_dim;
+  const char splitIndex = (isCIndex 
+			   ? cIndices[m_dim] 
+			   : cont->m_contIndices[m_dim-cIndices.length()]);
+  const size_t cDim = m_dim;
+
+  const size_t aDim = aIndices.find(splitIndex);
+  const bool isAIndex = aDim != string::npos;
+  const size_t bDim = bIndices.find(splitIndex);
+  const bool isBIndex = bDim != string::npos;
+  
+
+  NodeConn *connA, *connB, *connC;
+  connA = cont->m_inputs[0];
+  connB = cont->m_inputs[1];
+  connC = cont->m_inputs[2];
+
+  LoopTunnel *ATun;
+  ConnNum ATunNum;
+  if (isAIndex) {
+    ATun = new SplitSingleIter(aDim, POSSTUNIN, isCIndex ? false : true);
+    ATunNum = 1;
+  }
+  else {
+    ATun = new LoopTunnel(POSSTUNIN);
+    ATunNum = 0;
+  }
+  ATun->AddInput(connA->m_n, connA->m_num);
+  ATun->SetAllStats(FULLUP);
+  if (isCIndex)
+    ATun->SetIndepIters();
+
+
+  LoopTunnel *BTun;
+  ConnNum BTunNum;
+  if (isBIndex) {
+    BTun = new SplitSingleIter(bDim, POSSTUNIN, false);
+    BTunNum = 1;
+  }
+  else {
+    BTun = new LoopTunnel(POSSTUNIN);
+    BTunNum = 0;
+  }
+  BTun->AddInput(connB->m_n, connB->m_num);
+  BTun->SetAllStats(FULLUP);
+  if (isCIndex)
+    BTun->SetIndepIters();
+
+
+  LoopTunnel *CTun;
+  ConnNum CTunNum;
+  if (isCIndex) {
+    CTun = new SplitSingleIter(cDim, POSSTUNIN, true);
+    CTunNum = 1;
+    CTun->AddInput(connC->m_n, connC->m_num);
+  }
+  else {
+    CTun = new LoopTunnel(POSSTUNIN);
+    CTunNum = 0;
+    if (cont->m_beta == COEFONE)
+      CTun->AddInput(connC->m_n, connC->m_num);
+    else {
+      ScaleNode *scale = new ScaleNode(m_toLayer, cont->m_beta);
+      cont->m_poss->AddNode(scale);
+      scale->AddInput(connC->m_n, connC->m_num);
+      CTun->AddInput(scale,0);
+    }
+  }
+  CTun->SetAllStats(FULLUP);
+  if (isCIndex)
+    CTun->SetIndepIters();
+  
+  Contraction *newCont = new Contraction(m_toLayer, cont->m_alpha, 
+					 isCIndex ? cont->m_beta : COEFZERO, 
+					 cont->m_type,
+					 cont->m_AIndices,
+					 cont->m_BIndices,
+					 cont->m_CIndices,
+					 cont->m_contIndices);
+  newCont->AddInput(ATun, ATunNum);
+  newCont->AddInput(BTun, BTunNum);
+  newCont->AddInput(CTun, CTunNum);
+  
+  LoopTunnel *AOut;
+  if (isAIndex)
+    AOut = ((SplitSingleIter*)ATun)->CreateMatchingCombine(0);
+  else {
+    AOut = new LoopTunnel(POSSTUNOUT);
+    AOut->AddInput(ATun, 0);
+    AOut->AddInput(ATun, 1);
+    AOut->CopyTunnelInfo(ATun);
+  }
+
+
+  LoopTunnel *BOut;
+  if (isBIndex)
+    BOut = ((SplitSingleIter*)BTun)->CreateMatchingCombine(0);
+  else {
+    BOut = new LoopTunnel(POSSTUNOUT);
+    BOut->AddInput(BTun, 0);
+    BOut->AddInput(BTun, 1);
+    BOut->CopyTunnelInfo(BTun);
+  }
+
+
+  LoopTunnel *COut;
+  if (isCIndex) {
+    COut = ((SplitSingleIter*)CTun)->CreateMatchingCombine(1,
+							   1, newCont, 0);
+  }
+  else {
+    COut = new LoopTunnel(POSSTUNOUT);
+    COut->AddInput(newCont, 0);
+    COut->AddInput(CTun, 1);
+    COut->CopyTunnelInfo(CTun);
+  }
+  
+					
+  
+  Poss *loopPoss = new Poss(3, AOut, BOut, COut);
+  RealLoop *loop = new RealLoop(TENSORLOOP, loopPoss, TensorBS);
+  node->m_poss->AddPSet(loop);
+  node->RedirectChildren(loop->OutTun(2),0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+
+
+bool ContractionLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == Contraction::GetClass()) {
+    const Contraction *cont = (Contraction*)node;
+    if (cont->GetLayer() != m_fromLayer)
+      return false;
+    for (Dim dim = 0; dim < cont->InputNumDims(0); ++dim) {
+      if (!(*(cont->InputLen(0,dim)) <= m_bs))
+	return false;
+    }
+    for (Dim dim = 0; dim < cont->InputNumDims(2); ++dim) {
+      if (!(*(cont->InputLen(2,dim)) <= m_bs))
+	return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+void ContractionLowerLayer::Apply(Node *node) const
+{
+  Contraction *cont = (Contraction*)node;
+  cont->SetLayer(m_toLayer);
+  throw;
+}
+
+string ContractionLowerLayer::GetType() const
+{ 
+  return "Contraction lower layer " + LayerNumToStr(m_fromLayer) 
+  + " to " + LayerNumToStr(m_toLayer);
+}
 #endif
+
+

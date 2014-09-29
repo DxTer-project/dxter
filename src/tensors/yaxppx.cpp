@@ -86,7 +86,7 @@ void YAxpPx::UnflattenCore(ifstream &in, SaveInfo &info)
 
 Phase YAxpPx::MaxPhase() const 
 {
-  if (m_layer == DMLAYER)
+  if (m_layer == DMLAYER || m_layer == ABSLAYER)
     return DPTENSORPHASE;
   else if (m_layer == SMLAYER)
     return NUMPHASES;
@@ -197,7 +197,7 @@ bool DistYAxpPxToDefaultLocalYAxpPx::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != YAxpPx::GetClass())
     return false;
-  if (((YAxpPx*)node)->GetLayer() != DMLAYER)
+  if (((YAxpPx*)node)->GetLayer() != DMLAYER && ((YAxpPx*)node)->GetLayer() != ABSLAYER)
     return false;
   return true;
 }

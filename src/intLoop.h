@@ -44,6 +44,7 @@ enum MatPart { PART0, PART1, PART2,
 enum LoopType { ELEMLOOP,
 		BLISLOOP,
 		LLDLALOOP,
+		TENSORLOOP,
 		UNKNOWNLOOP };
 
 enum UpStat { FULLUP,

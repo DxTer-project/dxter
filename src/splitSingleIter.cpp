@@ -196,15 +196,13 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
     if (loop->IsUnrolled())
       name.m_name += "_iter" + std::to_string((long long int) loop->GetCurrIter());
     return name;
-    
-
 #else
     if (m_partDim >= InputNumDims(0))
       throw;
-    if (num > 2) 
+    if (num <= 2) 
+      name.m_name += "_part" + std::to_string(m_partDim) + "_" + std::to_string(num);
+    else if (num > 3)
       throw;
-    else
-      name.m_name += num;      
 #endif
     return name;
   }
@@ -245,8 +243,6 @@ void SplitSingleIter::Prop()
 	cout << "bad statuses\n";
 	throw;
       }
-#else
-    throw;
 #endif  
     if (m_tunType == POSSTUNIN) {
       for(ConnNum i = 0; i < m_inputs.size(); ++i) {
@@ -895,6 +891,25 @@ void SplitSingleIter::PrintCode(IndStream &out)
       }
     }
   }
+#elif DOTENSORS
+  Name nameT = GetInputName(0);
+  Name nameB = nameT;
+  nameT.m_name += "_part" + std::to_string(m_partDim) + "T";
+  nameB.m_name += "_part" + std::to_string(m_partDim) + "B";
+    
+  out.Indent();
+  *out << "RepartitionDown\n"
+       << out.Tabs(0)
+       << "( " << nameT.str() << ",  " << GetNameStr(0) << ",\n"
+       << out.Tabs(0)
+       << "  /**/ /**/\n"
+       << out.Tabs(0)
+       << "       " << GetNameStr(1) << ",\n"
+       << out.Tabs(0)
+       << "  " << nameB.str() << ", " << GetNameStr(2) << ", " 
+       <<  m_partDim << ", " 
+       << GetMyLoop()->GetBS() << " );\n";
+
 #else
   *out << "need split print code\n";
   throw;
@@ -931,7 +946,6 @@ unsigned int SplitSingleIter::NumOutputs() const
 #endif
 }
 
-#if TWOD
 bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
 {
   if (m_pset && !m_pset->IsReal())
@@ -947,7 +961,11 @@ bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
     for( ; iter != m_children.end(); ++iter) {
       bool check = false;
       ConnNum num = (*iter)->m_num;
+#if DOTENSORS
+      switch (PARTDOWN) {
+#else
       switch (m_dir) {
+#endif
       case (PARTDOWN):
 	if ((quad == TL || quad == TR) && ((!atEnd && num == 0) || (atEnd && (num == 0 || num == 1))))
 	  check = true;
@@ -1015,12 +1033,6 @@ bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
   else
     throw;
 }
-#else
-bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
-{
-  throw;
-}
-#endif
 
 void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
 {
@@ -1063,6 +1075,16 @@ void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
     *out << LLDLAPartVarName(name, 1)
 	 << " = " << name << ";\n";
   }
+#elif DOTENSORS
+  Name nameT = GetInputName(0);
+  Name nameB = nameT;
+  nameT.m_name += "_part" + std::to_string(m_partDim) + "T";
+  nameB.m_name += "_part" + std::to_string(m_partDim) + "B";
+  out.Indent();
+  *out << "PartitionDown(" << GetInputNameStr(0) << ", " 
+       << nameT.str() << ", "
+       << nameB.str() << ", "
+       << m_partDim << ", 0);\n";
 #endif
 }
 
@@ -1134,8 +1156,33 @@ void SplitSingleIter::AddVariables(VarSet &set) const
       }
       }
       }
+#elif DOTENSORS
+  {
+    Name name = GetInputName(0);
+    name.m_name += "_part" + std::to_string(m_partDim) + "T";
+    Var var(name);
+    set.insert(var);
+  }
+{
+    Name name = GetInputName(0);
+    name.m_name += "_part" + std::to_string(m_partDim) + "B";
+    Var var(name);
+    set.insert(var);
+  }
+  {
+    Var var(GetName(0));
+    set.insert(var);
+  }
+  {
+    Var var(GetName(1));
+    set.insert(var);
+  }
+  {
+    Var var(GetName(2));
+    set.insert(var);
+  }
 #endif
-      }
+}
 
 CombineSingleIter* SplitSingleIter::CreateMatchingCombine(int numArgs, ...)
 {
@@ -1490,8 +1537,15 @@ void SplitSingleIter::UpdateLocalSizes()
   Dim numDims = InputNumDims(0);
   const DistType t = InputDataType(0).m_dist;
   for (Dim dim = 0; dim < numDims; ++ dim) {
-    throw;
-    GetLocalSizes(t, m_sizes+dim, m_lsizes+dim);
+    if (dim < m_partDim)
+      GetLocalSizes(t, dim, m_sizes+dim, m_lsizes+dim);
+    else if (dim == m_partDim) {
+      GetLocalSizes(t, dim, m_sizes+dim, m_lsizes+dim);
+      GetLocalSizes(t, dim, m_sizes+dim+1, m_lsizes+dim+1);
+      GetLocalSizes(t, dim, m_sizes+dim+2, m_lsizes+dim+2);
+    }
+    else 
+      GetLocalSizes(t, dim, m_sizes+dim+2, m_lsizes+dim+2);
   }
 }
 #endif

@@ -68,8 +68,6 @@ void CombineSingleIter::Prop()
 	cout << "bad statuses\n";
 	throw;
       }
-#else
-    throw;
 #endif
   
     if (m_tunType == SETTUNOUT) {
@@ -386,6 +384,23 @@ void CombineSingleIter::PrintCode(IndStream &out)
       break;
     }
   }
+#elif DOTENSORS
+  Name nameT = GetInputName(3);
+  Name nameB = nameT;
+  nameT.m_name += "_part" + std::to_string(m_partDim) + "T";
+  nameB.m_name += "_part" + std::to_string(m_partDim) + "B";
+
+      out.Indent();
+      *out << "SlidePartitionDown\n"
+	   << out.Tabs(0)
+	   << "( " << nameT.str() << ",  " << GetInputNameStr(0) << ",\n"
+	   << out.Tabs(0)
+	   << "       " << GetInputNameStr(1) << ",\n"
+	   << out.Tabs(0)
+	   << "  /**/ /**/\n"
+	   << out.Tabs(0)
+	   << "  " << nameB.str() << ", " << GetInputNameStr(2) << ", " 
+	   << m_partDim << " );\n";
 #else
   throw;
 #endif

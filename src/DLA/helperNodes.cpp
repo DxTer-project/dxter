@@ -1113,8 +1113,9 @@ void MoveMakeTrap::Apply(Node *node) const
 }
 
 #endif
+#endif
 
-#if DOBLIS||DOELEM
+#if DOELEM||DOBLIS||DOTENSORS
 bool RemoveScaleByOne::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != ScaleNode::GetClass())
@@ -1132,7 +1133,11 @@ void RemoveScaleByOne::Apply(Node *node) const
   node->RedirectChildren(node->Input(0), node->InputConnNum(0));
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+#endif //DOELEM||DOBLIS||DOTENSORS
 
+
+#if TWOD
+#if DOBLIS||DOELEM
 void ScaleTrapNode::PrintCode(IndStream &out)
 {  
   Layer layer = GetLayer();
@@ -1205,7 +1210,10 @@ void ScaleTrapNode::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_tri);
   READ(m_val);
 }
+#endif //DOBLIS||DOELEM
+#endif //TWOD
 
+#if DOELEM||DOBLIS||DOTENSORS
 ScaleNode::ScaleNode(Layer layer, Coef val) 
   : m_val(val) 
 {
@@ -1230,6 +1238,10 @@ void ScaleNode::PrintCode(IndStream &out)
 #elif DOBLIS
   if (GetLayer() == S1LAYER || GetLayer() == S2LAYER || GetLayer() == S3LAYER)
     *out << "bli_scalm( ";
+#elif DOTENSORS
+  if (GetLayer() != ABSLAYER) {
+    *out << "Scal( ";
+  }
 #else
   throw;
 #endif
@@ -1261,7 +1273,7 @@ void ScaleNode::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 #endif
 
-
+#if TWOD
 #if DOELEM
 ViewPan::~ViewPan()
 {

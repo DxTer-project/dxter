@@ -390,7 +390,7 @@ unsigned int LoopTunnel::NumOutputs() const
 
 Name LoopTunnel::GetName(ConnNum num) const
 {
-  if (num > 0)
+  if (num != 0 && num != 1)
     throw;
   Name name;
   if (GetLoopType() == BLISLOOP) {
@@ -653,8 +653,15 @@ void LoopTunnel::StartFillingSizes()
   if (m_sizes)
     throw;
   Dim numDims = InputNumDims(0);
-  m_sizes = new Sizes[numDims];
-  m_lsizes = new Sizes[numDims];
+  if (numDims) {
+    m_sizes = new Sizes[numDims]();
+    m_lsizes = new Sizes[numDims];
+  }
+  else {
+    //scalar
+    m_sizes = new Sizes[1]();
+    m_lsizes = new Sizes[1];
+  }
 #endif
 }
 
@@ -745,27 +752,54 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
       cout << "!sizes\n";
       throw;
     }
-    const Sizes *lsizes = input->LocalLen(num,i);
     unsigned int length = sizes->NumSizes();
-    if (length != lsizes->NumSizes() 
-	|| length <= execNum) 
+    if (length <= execNum) 
       {
 	cout << sizes->NumSizes() << endl;
-	cout << lsizes->NumSizes() << endl;
 	throw;
       }
     const Size size = (*sizes)[execNum];
-    const Size lsize = (*lsizes)[execNum];
     m_sizes[i].AddRepeatedSizes(size, numIters, parFactor);
-    m_lsizes[i].AddRepeatedSizes(lsize, numIters, parFactor);
+  }
+  if (!numDims) {
+    //scalar
+    m_sizes[0].AddRepeatedSizes(1, numIters, parFactor);
   }
 }
 #endif
 
-#if DODM
+#if DOELEM
 void LoopTunnel::UpdateLocalSizes()
 {
   //already calculated in AppendSizes
+}
+#elif DOTENSORS
+void LoopTunnel::UpdateLocalSizes()
+{
+  if (m_tunType != SETTUNIN)
+    return;
+  if (!m_pset->IsReal())
+    return;
+
+  if (!m_sizes)
+    throw;
+
+  const DLANode *input = (DLANode*)Input(0);
+  ConnNum num = InputConnNum(0);
+  Dim numDims = input->NumDims(num);
+  for (Dim i = 0; i < numDims; ++i) {
+    m_lsizes[i] = m_sizes[i];
+    double coeff = input->LocalLen(num,i)->m_coeff;
+    if (coeff)
+      m_lsizes[i].SetCoeff(coeff);
+  }
+  if (!numDims) {
+    //scalar
+    *m_lsizes = *m_sizes;
+    double coeff =input->LocalLen(num,0)->m_coeff;
+    if (coeff)
+      m_lsizes->SetCoeff(coeff);
+  }
 }
 #endif
 

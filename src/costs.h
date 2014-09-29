@@ -48,7 +48,7 @@ using namespace std;
 #define BLIS_NC_BSVAL 4096
 #define BLIS_OUTER_BSVAL 256
 #elif DOTENSORS
-#define TENSOR_BSVAL 128
+#define TENSOR_BSVAL 16
 #define NUM_GRID_DIMS 4
 #elif DOLLDLA
 #define RVAL 40

@@ -25,6 +25,7 @@
 
 #include "DLAOp.h"
 #include "transform.h"
+#include "lowerLayer.h"
 
 class Contraction : public DLAOp<3,1>
 {
@@ -127,5 +128,30 @@ class DistContToLocalContStatC : public VarTrans
   //  virtual Cost RHSCostEstimate(const Node *node) const;
 };
 */
+
+
+class ContractionLoopExp : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  int m_dim;
+  ContractionLoopExp(Layer fromLayer, Layer toLayer, int dim);
+  
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+class ContractionLowerLayer : public LowerLayer
+{
+ public:
+ ContractionLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
+   : LowerLayer(fromLayer, toLayer, bs) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 #endif
 

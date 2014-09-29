@@ -56,7 +56,7 @@ class ZAxpByLowerLayer : public LowerLayer
 {
  public:
   ZAxpByLowerLayer(Layer fromLayer, Layer toLayer)
-   : LowerLayer(fromLayer, toLayer) {}
+    : LowerLayer(fromLayer, toLayer, 0) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
