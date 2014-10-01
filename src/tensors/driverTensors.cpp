@@ -89,9 +89,11 @@ void AddTrans()
 
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllAllGathers, ROTENSORPHASE);
 
+#if DOPACKOPTPHASE
     Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(0), PACKOPTPHASE);
     Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(1), PACKOPTPHASE);
     Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(2), PACKOPTPHASE);
+#endif
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
@@ -289,7 +291,7 @@ int main(int argc, const char* argv[])
   cout.flush();
 
   //  uni.Prop();
-
+  
   //  uni.CullWorstPerformers(.99,3);
 
 
