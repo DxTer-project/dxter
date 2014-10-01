@@ -194,45 +194,35 @@ void SumScatterUpdateNode::Prop()
       
     }
     
-    if (m_sumDims.size() == 1) {
-      unsigned int numProcs = 1;
+    unsigned int numProcs = 1;
 
-      DimVec sums = (*(m_sumDims.begin())).DistEntryDims();
+    EntryListIter iter = m_sumDims.begin();
+    for(; iter != m_sumDims.end(); ++iter) {
+      DimVec sums = (*(iter)).DistEntryDims();
       DimVecConstIter iter = sums.begin();
       for(; iter != sums.end(); ++iter) {
 	numProcs *= GridLens[*iter];
       }
-
-      DLANode *input = (DLANode*)(Input(1));
-      ConnNum num = InputConnNum(1);
-      const Dim numDims = input->NumDims(num);
-
-      if (inType.m_notReped != outType.m_notReped) {
-	input = (DLANode*)(Input(0));
-	num = InputConnNum(0);
-	m_cost = input->LocalLen(num,0)->NumSizes() * ReduceScatter(numProcs,numProcs);
-      }
-      else {
-	const unsigned int totNumIters = input->LocalLen(num,0)->NumSizes();
-	for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
-	  Cost temp = 1;
-	  for (Dim dim = 0; dim < numDims; ++dim) {
-	    temp *= (*(input->LocalLen(num,dim)))[iteration];
-	  }
-	  m_cost += ReduceScatter(temp*numProcs, numProcs);
-	}
-      }
     }
-    else if (inType.m_numDims == outType.m_numDims) {
-      cout << "in : " << inType.str() << endl;
-      cout << "out : " << outType.str() << endl;
-      cout << "sumDims " << m_sumDims.size() << endl;
-      cout << Input(0)->GetNodeClass() << endl;
-      SumScatterUpdateNode *in = (SumScatterUpdateNode*)Input(0);
-      cout << "sumdims = " << in->m_sumDims.size() << endl;
-      cout << in->InputDataType(0).m_dist.str() << endl;
-      cout << in->InputDataType(1).m_dist.str() << endl;
-      throw;
+
+    DLANode *input = (DLANode*)(Input(1));
+    ConnNum num = InputConnNum(1);
+    const Dim numDims = input->NumDims(num);
+
+    if (inType.m_notReped != outType.m_notReped) {
+      input = (DLANode*)(Input(0));
+      num = InputConnNum(0);
+      m_cost = input->LocalLen(num,0)->NumSizes() * ReduceScatter(numProcs,numProcs);
+    }
+    else {
+      const unsigned int totNumIters = input->LocalLen(num,0)->NumSizes();
+      for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+	Cost temp = 1;
+	for (Dim dim = 0; dim < numDims; ++dim) {
+	  temp *= (*(input->LocalLen(num,dim)))[iteration];
+	}
+	m_cost += ReduceScatter(temp*numProcs, numProcs);
+      }
     }
   }
 }
