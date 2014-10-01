@@ -321,6 +321,7 @@ class InputNode;
 class RealPSet;
 typedef unsigned int Flags;
 typedef unsigned long int GraphNum;
+typedef std::string::iterator StringIter;
 typedef string ClassType;
 typedef vector<Node*> NodeVec;
 typedef NodeVec::iterator NodeVecIter;
@@ -412,6 +413,21 @@ bool IsPrefix(const DimVec &isPrefix, const DimVec &dims);
 #endif
 
 
+//in permutation.cpp
+class Permutation
+{
+ public:
+  DimVec m_permutation;
+  Permutation() {}
+  Permutation(string start, string end);
+  Permutation& operator=(const Permutation &rhs);
+  bool operator==(const Permutation &rhs) const;
+  void SetToDefault(Dim numDims);
+  string Str() const;
+  inline unsigned int Size() const {return m_permutation.size();}
+  inline Dim Map(Dim dim) const {return m_permutation[dim];}
+  Permutation ComposeWith(const Permutation &perm) const;
+};
 
 //Variable name
 class Name
@@ -421,6 +437,7 @@ class Name
   DistType m_type;
 #elif DOTENSORS
   DistType m_type;
+  Permutation m_permutation;
 #endif
   string m_name;
  Name() :

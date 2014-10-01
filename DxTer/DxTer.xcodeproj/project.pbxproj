@@ -80,6 +80,7 @@
 		BD5CBCF819D25A330039526C /* tunnel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD5CBCAC19D25A330039526C /* tunnel.cpp */; };
 		BD5CBCF919D25A330039526C /* universe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD5CBCAE19D25A330039526C /* universe.cpp */; };
 		BD5CBCFA19D25A330039526C /* var.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD5CBCB019D25A330039526C /* var.cpp */; };
+		BD9531F119DB76A0005CB5E7 /* permutation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9531F019DB76A0005CB5E7 /* permutation.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -245,6 +246,7 @@
 		BD5CBCAF19D25A330039526C /* universe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = universe.h; sourceTree = "<group>"; };
 		BD5CBCB019D25A330039526C /* var.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = var.cpp; sourceTree = "<group>"; };
 		BD5CBCB119D25A330039526C /* var.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = var.h; sourceTree = "<group>"; };
+		BD9531F019DB76A0005CB5E7 /* permutation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = permutation.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -444,6 +446,7 @@
 		BD5CBC9A19D25A330039526C /* tensors */ = {
 			isa = PBXGroup;
 			children = (
+				BD9531F019DB76A0005CB5E7 /* permutation.cpp */,
 				BD5CBC9B19D25A330039526C /* contraction.cpp */,
 				BD5CBC9C19D25A330039526C /* contraction.h */,
 				BD5CBC9D19D25A330039526C /* driverTensors.cpp */,
@@ -531,6 +534,7 @@
 				BD5CBCB819D25A330039526C /* comm.cpp in Sources */,
 				BD5CBCD119D25A330039526C /* graphIter.cpp in Sources */,
 				BD5CBCF019D25A330039526C /* driverTensors.cpp in Sources */,
+				BD9531F119DB76A0005CB5E7 /* permutation.cpp in Sources */,
 				BD5CBCF819D25A330039526C /* tunnel.cpp in Sources */,
 				BD5CBCD319D25A330039526C /* intLoop.cpp in Sources */,
 				BD5CBCF919D25A330039526C /* universe.cpp in Sources */,
@@ -705,6 +709,7 @@
 				BD5CBC1819D25A0A0039526C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

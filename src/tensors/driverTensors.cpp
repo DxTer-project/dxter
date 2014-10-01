@@ -88,6 +88,10 @@ void AddTrans()
    Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllAllGathers, ROTENSORPHASE);
+
+    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(0), PACKOPTPHASE);
+    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(1), PACKOPTPHASE);
+    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(2), PACKOPTPHASE);
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
@@ -255,8 +259,39 @@ int main(int argc, const char* argv[])
   }
 #endif
 
+
+#if DOPACKOPTPHASE
+  if (CurrPhase == PACKOPTPHASE) {
+    cout << "Pack optimization phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    uni.Prop();
+    //    uni.CullWorstPerformers(.95, 3);
+    cout << "After culling worst, left with " << uni.TotalCount() << endl;
+    time(&start2);
+    //    uni.InlineRedists();
+    time(&end);
+    cout << "Inlining took " << difftime(end,start2) << " seconds\n";
+    time(&start2);
+    uni.Expand(numIters, PACKOPTPHASE, TenCullRO);
+    time(&end);
+    cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
+
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
+
+  //  uni.Prop();
+
+  //  uni.CullWorstPerformers(.99,3);
+
 
 #if 0
   uni.PrintAll(algNum);

@@ -25,9 +25,11 @@
 #include "loopSupport.h"
 #include "helperNodes.h"
 #include "yxpby.h"
+#include "tensorPermute.h"
 
 typedef vector<unsigned int *> ContType;
 typedef ContType::iterator ContTypeIter;
+
 
 void MatchDistsAndFillInWithStar(string indices, 
 				 const DistType &matchingDists, string matchingIndices,
@@ -1515,6 +1517,174 @@ string ContractionLowerLayer::GetType() const
   return "Contraction lower layer " + LayerNumToStr(m_fromLayer) 
   + " to " + LayerNumToStr(m_toLayer);
 }
+
+
+void UpdateWithPermutation(Contraction *cont, ConnNum contInput, Permutation &perm)
+{
+  Node *inNode = cont->Input(contInput);
+  ConnNum inNum = cont->InputConnNum(contInput);
+
+  if (inNode->GetNodeClass() == RedistNode::GetClass()) {
+    RedistNode *oldRedist = (RedistNode*)inNode;
+    RedistNode *newInput = new RedistNode(oldRedist->m_info.m_dist, perm);
+    cont->m_poss->AddNode(newInput);
+    cont->ChangeInput2Way(inNode, inNum, newInput, 0);
+    if (oldRedist->m_children.empty()) {
+      cont->m_poss->DeleteChildAndCleanUp(oldRedist);
+    }
+  }
+  else if (inNode->GetClass() == Permute::GetClass()) {
+    Permute *oldPerm = (Permute*)inNode;
+    Permutation composedPerm = oldPerm->m_permutation.ComposeWith(perm);
+    Permute *newInput = new Permute(composedPerm, oldPerm->GetLayer());
+    cont->m_poss->AddNode(newInput);
+    cont->ChangeInput2Way(inNode, inNum, newInput, 0);
+    if (oldPerm->m_children.empty()) {
+      cont->m_poss->DeleteChildAndCleanUp(oldPerm);
+    }
+  }
+  else {
+    Permute *newInput = new Permute(perm, SMLAYER);
+    cont->m_poss->AddNode(newInput);
+    cont->ChangeInput2Way(inNode, inNum, newInput, 0);
+    newInput->AddInput(inNode, inNum);
+  }
+}
+
+bool PermuteWhileUnpacking::CanApply(const Node *node) const
+{
+  const Contraction *cont = (Contraction*)node;
+  if (m_type > 2)
+    throw;
+  if (cont->Input(m_type)->GetNodeClass() == RedistNode::GetClass() ||
+      cont->Input(m_type)->GetNodeClass() == Permute::GetClass())
+    return true;
+  return false;
+}
+
+void PermuteWhileUnpacking::Apply(Node *node) const
+{
+  Contraction *cont = (Contraction*)node;
+  string newA, newB, newC;
+  if (m_type == 0) {
+    string inner, aOuter;
+    string bOuter;
+    StringIter aIter = cont->m_AIndices.begin();
+    for(; aIter != cont->m_AIndices.end(); ++aIter) {
+      if (cont->m_contIndices.find(*aIter) != string::npos) {
+	inner += (*aIter);
+      }
+      else {
+	aOuter += (*aIter);
+      }
+    }
+    newA = aOuter;
+    newA += inner;
+	
+	
+    StringIter bIter = cont->m_BIndices.begin();
+    for(; bIter != cont->m_BIndices.end(); ++bIter) {
+      if (inner.find(*bIter) == string::npos) {
+	bOuter += (*bIter);
+      }
+    }
+    newB = inner;
+    newB += bOuter;
+	
+    newC = aOuter + bOuter;
+  }
+  else if (m_type == 1) {
+    string inner, aOuter, bOuter;
+    StringIter bIter = cont->m_BIndices.begin();
+    for(; bIter != cont->m_BIndices.end(); ++bIter) {
+      if (cont->m_contIndices.find(*bIter) != string::npos) {
+	inner += (*bIter);
+      }
+      else {
+	bOuter += (*bIter);
+      }
+    }
+    newB = inner;
+    newB += bOuter;
+
+    StringIter aIter = cont->m_AIndices.begin();
+    for(; aIter != cont->m_AIndices.end(); ++aIter) {
+      if (inner.find(*aIter) == string::npos) {
+	aOuter += (*aIter);
+      }
+    }
+    newA = aOuter;
+    newA += inner;
+	
+    newC = aOuter + bOuter;
+  }
+  else if (m_type == 2) {
+    newC = cont->m_CIndices;
+    string inner, aOuter, bOuter;
+    StringIter aIter = cont->m_AIndices.begin();
+    for(; aIter != cont->m_AIndices.end(); ++aIter) {
+      if (newC.find(*aIter) != string::npos) {
+	aOuter += (*aIter);
+      }
+      else {
+	inner += (*aIter);
+      }
+    }
+    newA = aOuter;
+    newA += inner;
+    
+    StringIter bIter = cont->m_BIndices.begin();
+    for(; bIter != cont->m_BIndices.end(); ++bIter) {
+      if (cont->m_contIndices.find(*bIter) != string::npos) {	
+	bOuter += (*bIter);
+      }
+    }
+    newB = inner;
+    newB += bOuter;
+  }
+  else
+    throw;
+      
+  if (newA != cont->m_AIndices) {
+    Permutation perm(cont->m_AIndices, newA);
+    UpdateWithPermutation(cont, 0, perm);
+  }
+
+  if (newB != cont->m_BIndices) {
+    Permutation perm(cont->m_BIndices, newB);
+    UpdateWithPermutation(cont, 1, perm);
+  }
+
+  if (newC != cont->m_CIndices) {
+    Permutation perm(cont->m_CIndices, newC);
+    UpdateWithPermutation(cont, 2, perm);
+  }
+
+  if (cont->m_children.size() != 1) {
+    //just need to handle this
+    throw;
+  }
+
+  Node *child = cont->Child(0);
+  if (child->GetNodeClass() != SumScatterUpdateNode::GetClass()
+      && child->GetNodeClass() != RedistNode::GetClass()
+      && child->GetNodeClass() != AllReduceNode::GetClass()) 
+    {
+      Permute *newPermute = new Permute(newC, cont->m_CIndices, SMLAYER);
+      cont->m_poss->AddNode(newPermute);
+      cont->RedirectChildren(newPermute, 0);
+      newPermute->AddInput(cont, 0);
+    }
+
+  cont->m_AIndices = newA;
+  cont->m_BIndices = newB;
+  cont->m_CIndices = newC;
+      
+  return;
+}
+
+
+
 #endif
 
 

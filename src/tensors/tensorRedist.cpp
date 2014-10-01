@@ -69,6 +69,12 @@ RedistNode::RedistNode(const DistType &destType)
   m_lsizes = NULL;
 }
 
+RedistNode::RedistNode(const DistType &destType, const Permutation &perm)
+  :RedistNode(destType)
+{
+  m_permutation = perm;
+}
+
 RedistNode::~RedistNode()
 {
   if (m_lsizes) {
@@ -85,6 +91,7 @@ void RedistNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   DLANode::Duplicate(orig,shallow, possMerging);
   const RedistNode *origNode = (RedistNode*)orig;
   m_info = origNode->m_info;
+  m_permutation = origNode->m_permutation;
 }
 
 NodeType RedistNode::GetType() const
@@ -92,7 +99,7 @@ NodeType RedistNode::GetType() const
   if (m_name.length()) 
     return m_name;
   else {
-    return (string)"RedistNode to " +  m_info.m_dist.QuickStr();
+    return (string)"RedistNode to " +  m_info.m_dist.QuickStr() + m_permutation.Str();
   }
 }
 
@@ -118,8 +125,9 @@ void RedistNode::Prop()
 
     if (m_info.m_dist == m_srcType)
       throw;
-    
 
+    if (m_permutation.Size() && m_permutation.Size() != numDims)
+      throw;
     
     if (numDims != InputNumDims(0)) {
       cout << "numDims " << numDims << " " << InputNumDims(0) << endl;
@@ -507,6 +515,7 @@ Name RedistNode::GetName(ConnNum num) const
   if (num > 0)
     throw;
   Name name = GetInputName(0);
+  name.m_permutation = m_permutation;
   name.m_type = m_info.m_dist;
   return name;
 }
@@ -524,7 +533,10 @@ void RedistNode::PrintCode(IndStream &out)
   string outName = GetName(0).str(); 
 
   *out << "   // " << GetName(0).PrettyStr() 
-       << " <- " << GetInputName(0).PrettyStr() << endl;
+       << " <- " << GetInputName(0).PrettyStr();
+  if (m_permutation.Size())
+    *out << " with permutation " << m_permutation.Str();
+  *out << endl;
   out.Indent();
 
   if (CurrPhase <= ROTENSORPHASE)
@@ -590,6 +602,7 @@ void RedistNode::PrintCode(IndStream &out)
     *out << outName << ".PermutationRedistFrom( "
 	 << inName << ", " << dim << ", "
 	 << ModeArrayVarName(src) << " );\n";
+    return;
   }
   else 
     throw;
@@ -602,6 +615,7 @@ void RedistNode::AddVariables(VarSet &set) const
 
   if (CurrPhase <= ROTENSORPHASE)
     return;
+
   
   const DistType &m_srcType = InputDataType(0).m_dist;
   const Dim numDims = m_info.m_dist.m_numDims;
@@ -699,6 +713,11 @@ void RedistNode::AddVariables(VarSet &set) const
     DimVec dest = m_info.m_dist.m_dists[dim].DistEntryDims();
     if (m_srcType.m_dists[dim].DistEntryDimSet() != m_info.m_dist.m_dists[dim].DistEntryDimSet()) {
       cout << m_srcType.PrettyStr() << " -> " << m_info.m_dist.PrettyStr() << endl;
+      
+      GetAllToAllPattern(m_srcType, m_info.m_dist,
+			 &fromIndices,
+			 &toIndices,
+			 &gridModesInvolved);
       throw;
     }
     Var var(ModeArrayVarType, src);
@@ -809,8 +828,9 @@ bool RemoveWastedRedist::CanApply(const Node *node) const
       for(ConnNum i = 0; i < redistNode->m_children.size(); ++i) {
 	Node *tmp = redistNode->Child(i);
 	if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
-	  if (DistTypeEqual(((RedistNode*)tmp)->m_info.m_dist, *type))
-	    return true;
+	  RedistNode *redist = ((RedistNode*)tmp);
+	  if (DistTypeEqual(redist->m_info.m_dist, *type))
+	    return redist->m_permutation == redistNode->m_permutation;
 	}
       }
     }
@@ -836,10 +856,13 @@ void RemoveWastedRedist::Apply(Node *node) const
       for(ConnNum i = 0; i < redistNode->m_children.size(); ++i) {
 	Node *tmp = redistNode->Child(i);
 	if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
-	  if (DistTypeEqual(((RedistNode*)tmp)->m_info.m_dist,*type)) {
-	    node->RedirectChildren(tmp, 0);
-	    node->m_poss->DeleteChildAndCleanUp(node);
-	    return;
+	  RedistNode *redist = ((RedistNode*)tmp);
+	  if (DistTypeEqual(redist->m_info.m_dist,*type)) {
+	    if (redist->m_permutation == redistNode->m_permutation) {
+	      node->RedirectChildren(tmp, 0);
+	      node->m_poss->DeleteChildAndCleanUp(node);
+	      return;
+	    }
 	  }
 	}
       }
@@ -889,7 +912,8 @@ bool CombineRedistribs::CanApply(const Node *node) const
     if (output != node
         && (output->GetNodeClass() == RedistNode::GetClass())
         && (output->InputConnNum(0) == node->InputConnNum(0))
-        && DistTypeEqual(((RedistNode*)output)->m_info.m_dist, redist->m_info.m_dist)) 
+        && DistTypeEqual(((RedistNode*)output)->m_info.m_dist, redist->m_info.m_dist)
+	&& ((RedistNode*)output)->m_permutation == redist->m_permutation)
       {
 	return true;
       }
@@ -911,7 +935,8 @@ void CombineRedistribs::Apply(Node *node) const
     if (output != node
         && (output->GetNodeClass() == RedistNode::GetClass())
         && (output->InputConnNum(0) == node->InputConnNum(0))
-        && DistTypeEqual(((RedistNode*)output)->m_info.m_dist, redist->m_info.m_dist)) 
+        && DistTypeEqual(((RedistNode*)output)->m_info.m_dist, redist->m_info.m_dist)
+	&& ((RedistNode*)output)->m_permutation == redist->m_permutation) 
       {
 	output->RedirectChildren(node,0);
 	output->m_poss->DeleteChildAndCleanUp(output);
@@ -979,7 +1004,7 @@ void SplitRedistribs::Apply(Node *node) const
 
 
 
-  RedistNode *newRedist = new RedistNode(one);
+  RedistNode *newRedist = new RedistNode(one, orig->m_permutation);
   newRedist->AddInput(orig->Input(0), orig->InputConnNum(0));
   node->m_poss->AddNode(newRedist);
 
@@ -987,7 +1012,7 @@ void SplitRedistribs::Apply(Node *node) const
     throw;
 
 
-  RedistNode *newRedist2 = new RedistNode(*two);
+  RedistNode *newRedist2 = new RedistNode(*two, orig->m_permutation);
   newRedist2->AddInput(newRedist, 0);
   node->m_poss->AddNode(newRedist2);
 
@@ -1071,7 +1096,7 @@ void SingleIndexAllToAll::Apply(Node *node) const
   }
   type1.m_dists[m_dim].DimsToDistEntry(vec1);
 
-  RedistNode *redist1 = new RedistNode(type1);
+  RedistNode *redist1 = new RedistNode(type1, redist->m_permutation);
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
   node->m_poss->AddNode(redist1);
 
@@ -1094,7 +1119,7 @@ void SingleIndexAllToAll::Apply(Node *node) const
   }
   type2.m_dists[m_dim].DimsToDistEntry(vec2);
   
-  RedistNode *redist2 = new RedistNode(type2);
+  RedistNode *redist2 = new RedistNode(type2, redist->m_permutation);
   redist2->AddInput(redist1, 0);
   node->m_poss->AddNode(redist2);
 
@@ -1103,7 +1128,7 @@ void SingleIndexAllToAll::Apply(Node *node) const
 
 
 
-  RedistNode *redist3 = new RedistNode(redist->m_info.m_dist);
+  RedistNode *redist3 = new RedistNode(redist->m_info.m_dist, redist->m_permutation);
   redist3->AddInput(redist2, 0);
   node->m_poss->AddNode(redist3);
 
@@ -1322,7 +1347,7 @@ void DoubleIndexAllToAll::Apply(Node *node) const
 	  //	  PrintVec(newDims2);
 	  intType.m_dists[dim].DimsToDistEntry(newDims2);
 	  if (DistTypeNotEqual(intType, redist->m_info.m_dist)) {
-	      RedistNode *newRedist = new RedistNode(intType);
+	      RedistNode *newRedist = new RedistNode(intType, redist->m_permutation);
 	      newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
 	      node->m_poss->AddNode(newRedist);
 
@@ -1404,14 +1429,14 @@ void SplitAllGathers::Apply(Node *node) const
   DistType intType = srcType;
   intType.m_dists[m_dim].DimsToDistEntry(srcDims);
 
-  RedistNode *redist1 = new RedistNode(intType);
+  RedistNode *redist1 = new RedistNode(intType, redist->m_permutation);
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
   node->m_poss->AddNode(redist1);
 
   if (intType == redist1->InputDataType(0).m_dist)
     throw;
 
-  RedistNode *redist2 = new RedistNode(destType);
+  RedistNode *redist2 = new RedistNode(destType, redist->m_permutation);
   redist2->AddInput(redist1, 0);
   node->m_poss->AddNode(redist2);
 
@@ -1480,14 +1505,14 @@ void SplitAllAllGathers::Apply(Node *node) const
     }
   }
 
-  RedistNode *redist1 = new RedistNode(intType);
+  RedistNode *redist1 = new RedistNode(intType, redist->m_permutation);
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
   node->m_poss->AddNode(redist1);
 
   if (intType == redist1->InputDataType(0).m_dist)
     throw;
 
-  RedistNode *redist2 = new RedistNode(destType);
+  RedistNode *redist2 = new RedistNode(destType, redist->m_permutation);
   redist2->AddInput(redist1, 0);
   node->m_poss->AddNode(redist2);
 
@@ -1545,7 +1570,7 @@ void CombineDisappearingModes::Apply(Node *node) const
   intType.m_dists[m_destDim].DimsToDistEntry(dest);
   intType.m_dists[m_srcDim].DimsToDistEntry(src);
 
-  RedistNode *newRedist = new RedistNode(intType);
+  RedistNode *newRedist = new RedistNode(intType, redist->m_permutation);
   newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   redist->m_poss->AddNode(newRedist);
 
@@ -1612,6 +1637,9 @@ bool PermuteDistribution::CanApply(const Node *node) const
 
 void PermuteDistribution::Apply(Node *node) const
 {  
+  // Didn't know if this was actually needed
+  //check / propagate m_permutation as needed
+  throw;
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
   RedistNode *redist = (RedistNode*)node;

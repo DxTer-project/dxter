@@ -153,5 +153,16 @@ class ContractionLowerLayer : public LowerLayer
   virtual void Apply(Node *node) const;
 };
 
+class PermuteWhileUnpacking : public SingleTrans
+{
+ public:
+  unsigned int m_type;
+ PermuteWhileUnpacking(unsigned int type) : m_type(type) {}
+  virtual string GetType() const { return (string)"PermuteWhileUnpacking " + std::to_string(m_type);}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+
 #endif
 

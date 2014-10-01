@@ -772,7 +772,11 @@ string Name::str() const
   else
     return name + "_" + DistTypeToStr(m_type);
 #elif DOTENSORS
-  return m_name + "_" + DistTypeToStr(m_type);
+  string name = m_name;
+  name += "_" + DistTypeToStr(m_type);
+  if (m_permutation.Size())
+    name += "_perm" + m_permutation.Str();
+  return name;
 #else
   return m_name;
 #endif
@@ -790,6 +794,9 @@ Name& Name::operator= (const Name &rhs)
 #if DODM
   m_type = rhs.m_type;
 #endif
+#if DOTENSORS
+  m_permutation = rhs.m_permutation;
+#endif
   m_name = rhs.m_name;
   return *this;
 }
@@ -799,6 +806,10 @@ void Name::Flatten(ofstream &out) const
 #if DODM
   WRITE(m_type);
 #endif
+#if DOTENSORS
+  throw;
+  //m_permutation
+#endif
   out << m_name << endl;
 
 }
@@ -807,6 +818,10 @@ void Name::Unflatten(ifstream &in)
 {
 #if DODM
   READ(m_type);
+#endif
+#if DOTENSORS
+  throw;
+  //m_permutation
 #endif
   getline(in, m_name);
 }

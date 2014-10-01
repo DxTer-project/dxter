@@ -966,6 +966,16 @@ void Node::AddVariables(VarSet &set) const
     set.insert(var);
     Var var2(name.m_type);
     set.insert(var2);
+    if (name.m_permutation.Size()) {
+      Var var(PermutationVarType, name.m_permutation.m_permutation);
+      set.insert(var);
+    }
+    else {
+      Permutation defaultPerm;
+      defaultPerm.SetToDefault(name.m_type.m_numDims);
+      Var var(PermutationVarType, defaultPerm.m_permutation);
+      set.insert(var);
+    }
   }
 #endif
 }
