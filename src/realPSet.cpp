@@ -673,6 +673,25 @@ Cost RealPSet::Prop()
     }
   }
 
+
+  iter = m_posses.begin();
+  while (iter != m_posses.end()) {
+    Poss *poss = (*iter).second;
+    if (!poss->IsSane()) {
+      RemoveAndDeletePoss(poss, false);
+      m_posses.erase(iter);
+      iter = m_posses.begin();
+      if (!m_posses.size()) {
+	cout << "Ran out of posses in set " << this << endl;
+	throw;
+      }
+    }
+    else {
+      ++iter;
+    }
+  }
+
+  //  m_cost = -1;
   iter = m_posses.begin();
   do {
     Poss *poss = (*iter).second;
@@ -702,22 +721,6 @@ Cost RealPSet::Prop()
     }
   } while (iter != m_posses.end());
 
-  iter = m_posses.begin();
-  while (iter != m_posses.end()) {
-    Poss *poss = (*iter).second;
-    if (!poss->IsSane()) {
-      RemoveAndDeletePoss(poss, false);
-      m_posses.erase(iter);
-      iter = m_posses.begin();
-      if (!m_posses.size()) {
-	cout << "Ran out of posses in set " << this << endl;
-	throw;
-      }
-    }
-    else {
-      ++iter;
-    }
-  }
 
   PSetVecIter shadowIter = m_shadows.begin();
   for(; shadowIter != m_shadows.end(); ++shadowIter) {
@@ -866,6 +869,8 @@ void RealPSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
 void RealPSet::ClearBeforeProp()
 {
   BasePSet::ClearBeforeProp();
+
+  m_cost = -1;
   
   PossMMapIter iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter)
