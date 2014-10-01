@@ -1224,7 +1224,10 @@ void ScaleNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<1,1>::Prop();
-    m_cost = 0;
+#if DOTENSORS
+    m_cost = TotalNumberOfLocalElements(0);
+#else
+#endif
   }
 }
 
