@@ -112,7 +112,7 @@ class PossCostComparison
       throw;
     if (rhs->m_cost < 0)
       throw;
-    return lhs->m_cost < rhs->m_cost;
+    return lhs->m_cost > rhs->m_cost;
   }
 };
 
