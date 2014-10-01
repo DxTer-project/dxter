@@ -130,16 +130,18 @@ enum Layers {
 #define DPTENSORPHASE 0
 #define SUMSCATTERTENSORPHASE 1
 #define ROTENSORPHASE 2
+#define PACKOPTPHASE 3
 
 #define FIRSTPHASE DPTENSORPHASE
 
 //Max phase for which to generate code
-#define MAXPHASE ROTENSORPHASE
+#define MAXPHASE PACKOPTPHASE
 #define NUMPHASES (MAXPHASE+1)
 
 #define DODPTENSORPHASE 1
 #define DOSUMSCATTERTENSORPHASE 1
 #define DOROTENSORPHASE 1
+#define DOPACKOPTPHASE 0
 
 #elif DOLLDLA
 // Layering for LLDLA operations
