@@ -266,9 +266,11 @@ int main(int argc, const char* argv[])
   if (CurrPhase == PACKOPTPHASE) {
     cout << "Pack optimization phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
     uni.Prop();
     //    uni.CullWorstPerformers(.95, 3);
-    cout << "After culling worst, left with " << uni.TotalCount() << endl;
+    time(&end);
+    cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
     time(&start2);
     //    uni.InlineRedists();
     time(&end);
@@ -290,9 +292,9 @@ int main(int argc, const char* argv[])
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-  //  uni.Prop();
+  //uni.Prop();
   
-  //  uni.CullWorstPerformers(.99,3);
+  //  uni.CullWorstPerformers(.9999,3);
 
 
 #if 0
