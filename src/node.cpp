@@ -301,8 +301,8 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
 	  --i;
 	}
       else {
-	cout << "this " << this << " " << this->GetNodeClass() << endl;
-	cout << "child " << child << " " << child->GetNodeClass() << endl;
+	cout << "this " << this << " " << this->GetType() << endl;
+	cout << "child " << child << " " << child->GetType() << endl;
 	cout << "map[m_children[i]->m_n] size = " << map.size() << endl;
 	printf("didn't find child %p %s, %p %s\n", m_children[i]->m_n, m_children[i]->m_n->GetType().c_str(), this, GetType().c_str());
 	cout << "m_poss = " << m_poss << endl;
@@ -1003,8 +1003,10 @@ string Node::GetFunctionalityString() const
     }
     else if (in->IsTunnel(SETTUNOUT)) {
       const BasePSet *set = ((Tunnel*)in)->m_pset;
-      if (!set)
+      if (!set) {
+	cout << in->GetType() << endl;
 	throw;
+      }
       str += "(";
       str += set->GetFunctionalityString();
       str += ")";
