@@ -746,3 +746,8 @@ void Universe::CullWorstPerformers(double percentToCull, int ignoreThreshold)
 {
   m_pset->CullWorstPerformers(percentToCull, ignoreThreshold);
 }
+
+void Universe::InlineAllSets()
+{
+  m_pset->InlineAllSets();
+}

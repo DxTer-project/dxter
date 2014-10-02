@@ -263,6 +263,7 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
   for( ; iter != orig->m_possNodes.end(); ++iter) {
     Node *oldNode = *iter;
     Node *newNode = oldNode->GetNewInst();
+    //    cout << "node " << oldNode << " to " << newNode << endl;
     newNode->Duplicate(oldNode,false, possMerging);
     if (newNode->m_inputs.size() != oldNode->m_inputs.size())
       throw;
@@ -3047,6 +3048,17 @@ void Poss::CullWorstPerformers(double percentToCull, int ignoreThreshold)
     BasePSet *set = *iter;
     if (set->IsReal()) {
       ((RealPSet*)set)->CullWorstPerformers(percentToCull, ignoreThreshold);
+    }
+  }
+}
+
+void Poss::InlineAllSets()
+{
+  PSetVecIter iter = m_sets.begin();
+  for( ; iter != m_sets.end(); ++iter) {
+    BasePSet *set = *iter;
+    if (set->IsReal()) {
+      ((RealPSet*)set)->InlineAllSets();
     }
   }
 }

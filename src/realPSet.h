@@ -84,6 +84,8 @@ class RealPSet : public BasePSet
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();
 
+  void InlineAllSets();
+
   void SetInTunsAsPrinted();
   bool RemoveLoops(bool *doneSomething);
 

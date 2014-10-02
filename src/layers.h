@@ -141,7 +141,7 @@ enum Layers {
 #define DODPTENSORPHASE 1
 #define DOSUMSCATTERTENSORPHASE 1
 #define DOROTENSORPHASE 1
-#define DOPACKOPTPHASE 0
+#define DOPACKOPTPHASE 1
 
 #elif DOLLDLA
 // Layering for LLDLA operations
