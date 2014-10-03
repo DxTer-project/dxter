@@ -73,15 +73,9 @@ void Permute::Prop()
 	}
       case (SMLAYER):
 	{
-	  m_cost = 1;
-	  if (InputLocalLen(0,0)->NumSizes() != 1)
+	  if (m_permutation.Size() != InputNumDims(0))
 	    throw;
-	  const unsigned int numDims = InputNumDims(0);
-	  if (m_permutation.Size() != numDims)
-	    throw;
-	  for (Dim dim = 0; dim < numDims; ++dim)
-	    m_cost *= (*InputLocalLen(0,dim))[0];
-	  m_cost *= PSIW + PSIR;
+	  m_cost *= (PSIW + PSIR) * TotalNumberOfLocalElements(0);
 	  break;
 	}
       default:
