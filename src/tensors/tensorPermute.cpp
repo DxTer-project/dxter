@@ -55,6 +55,7 @@ void Permute::Prop()
 
     if (m_inputs.size() != 1) {
       cout << "m_inputs.size() != 1\n";
+      cout << m_inputs.size() << endl;
       throw;
     }
     

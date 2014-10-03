@@ -1528,6 +1528,7 @@ void UpdateWithPermutation(Contraction *cont, ConnNum contInput, Permutation &pe
     RedistNode *oldRedist = (RedistNode*)inNode;
     RedistNode *newInput = new RedistNode(oldRedist->m_info.m_dist, perm);
     cont->m_poss->AddNode(newInput);
+    newInput->AddInput(inNode->Input(0),inNode->InputConnNum(0));
     cont->ChangeInput2Way(inNode, inNum, newInput, 0);
     if (oldRedist->m_children.empty()) {
       cont->m_poss->DeleteChildAndCleanUp(oldRedist);
@@ -1537,6 +1538,7 @@ void UpdateWithPermutation(Contraction *cont, ConnNum contInput, Permutation &pe
     Permute *oldPerm = (Permute*)inNode;
     Permutation composedPerm = oldPerm->m_permutation.ComposeWith(perm);
     Permute *newInput = new Permute(composedPerm, oldPerm->GetLayer());
+    newInput->AddInput(inNode->Input(0),inNode->InputConnNum(0));
     cont->m_poss->AddNode(newInput);
     cont->ChangeInput2Way(inNode, inNum, newInput, 0);
     if (oldPerm->m_children.empty()) {
@@ -1545,9 +1547,9 @@ void UpdateWithPermutation(Contraction *cont, ConnNum contInput, Permutation &pe
   }
   else {
     Permute *newInput = new Permute(perm, SMLAYER);
+    newInput->AddInput(inNode,inNum);
     cont->m_poss->AddNode(newInput);
     cont->ChangeInput2Way(inNode, inNum, newInput, 0);
-    newInput->AddInput(inNode, inNum);
   }
 }
 
@@ -1592,6 +1594,8 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     newB += bOuter;
 	
     newC = aOuter + bOuter;
+    if (newC.size() < cont->m_CIndices.size())
+      newC += cont->m_contIndices;
   }
   else if (m_type == 1) {
     string inner, aOuter, bOuter;
@@ -1617,13 +1621,15 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     newA += inner;
 	
     newC = aOuter + bOuter;
+    if (newC.size() < cont->m_CIndices.size())
+      newC += cont->m_contIndices;
   }
   else if (m_type == 2) {
     newC = cont->m_CIndices;
     string inner, aOuter, bOuter;
     StringIter aIter = cont->m_AIndices.begin();
     for(; aIter != cont->m_AIndices.end(); ++aIter) {
-      if (newC.find(*aIter) != string::npos) {
+      if (cont->m_contIndices.find(*aIter) == string::npos) {
 	aOuter += (*aIter);
       }
       else {
@@ -1635,7 +1641,7 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     
     StringIter bIter = cont->m_BIndices.begin();
     for(; bIter != cont->m_BIndices.end(); ++bIter) {
-      if (cont->m_contIndices.find(*bIter) != string::npos) {	
+      if (cont->m_contIndices.find(*bIter) == string::npos) {	
 	bOuter += (*bIter);
       }
     }
@@ -1644,6 +1650,7 @@ void PermuteWhileUnpacking::Apply(Node *node) const
   }
   else
     throw;
+
       
   if (newA != cont->m_AIndices) {
     Permutation perm(cont->m_AIndices, newA);
@@ -1654,8 +1661,9 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     Permutation perm(cont->m_BIndices, newB);
     UpdateWithPermutation(cont, 1, perm);
   }
-
-  if (newC != cont->m_CIndices) {
+  
+  if (newC != cont->m_CIndices)
+  {
     Permutation perm(cont->m_CIndices, newC);
     UpdateWithPermutation(cont, 2, perm);
   }
@@ -1666,7 +1674,8 @@ void PermuteWhileUnpacking::Apply(Node *node) const
   }
 
   Node *child = cont->Child(0);
-  if (child->GetNodeClass() != SumScatterUpdateNode::GetClass()
+  if (newC != cont->m_CIndices
+      && child->GetNodeClass() != SumScatterUpdateNode::GetClass()
       && child->GetNodeClass() != RedistNode::GetClass()
       && child->GetNodeClass() != AllReduceNode::GetClass()) 
     {
