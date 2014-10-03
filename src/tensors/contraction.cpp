@@ -61,7 +61,8 @@ Contraction::Contraction(Layer layer, Coef alpha, Coef beta, Type type,
   m_AIndices(AIndices),
   m_BIndices(BIndices),
   m_CIndices(CIndices),
-  m_contIndices(contIndices)
+  m_contIndices(contIndices),
+  m_needsPacking(true)
 {
   SetLayer(layer);
 }
@@ -75,7 +76,7 @@ NodeType Contraction::GetType() const
 {
   return "Contraction " + m_AIndices + " " + m_BIndices + " " 
     + m_CIndices + " " + m_contIndices
-    + LayerNumToStr(GetLayer());
+    + LayerNumToStr(GetLayer()) + (m_needsPacking ? "withPacking" : "withoutPacking");
 }
 
 void Contraction::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -89,6 +90,7 @@ void Contraction::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_BIndices = cont->m_BIndices;
   m_CIndices = cont->m_CIndices;
   m_contIndices = cont->m_contIndices;
+  m_needsPacking = cont->m_needsPacking;
 }
 
 void Contraction::FlattenCore(ofstream &out) const
@@ -97,6 +99,7 @@ void Contraction::FlattenCore(ofstream &out) const
   WRITE(m_alpha);
   WRITE(m_beta);
   WRITE(m_type);
+  WRITE(m_needsPacking);
   out << m_AIndices <<endl;
   out << m_BIndices <<endl;
   out << m_CIndices <<endl;
@@ -109,6 +112,7 @@ void Contraction::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_alpha);
   READ(m_beta);
   READ(m_type);
+  READ(m_needsPacking);
   getline(in, m_AIndices);
   getline(in, m_BIndices);
   getline(in, m_CIndices);
@@ -158,6 +162,8 @@ void Contraction::Prop()
     unsigned int totNumIters = sizes->NumSizes();
 
     if (m_layer == ABSLAYER || m_layer == DMLAYER) {
+      if (!m_needsPacking)
+	throw;
       for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
 	Cost temp = 2;
 	for (Dim dim = 0; dim < numDims; ++dim) {
@@ -171,16 +177,67 @@ void Contraction::Prop()
       }
     }
     else if (m_layer == SMLAYER) {
+      if (!m_needsPacking) {
+	StringIter aIter = m_AIndices.begin();
+	StringIter bIter = m_BIndices.begin();
+	StringIter cIter = m_CIndices.begin();
+	while (aIter != m_AIndices.end() 
+	       && cIter != m_CIndices.end()
+	       && *aIter == *cIter) 
+	  {
+	    if (m_contIndices.find(*aIter) != string::npos)
+	      break;
+	    ++aIter;
+	    ++cIter;
+	  }
+	if (cIter != m_CIndices.end()) {
+	  StringIter contIter = m_contIndices.begin();
+	  while (cIter != m_CIndices.end()
+		 && contIter != m_contIndices.end()
+		 && *cIter == *contIter) 
+	    {
+	      ++cIter;
+	      ++contIter;
+	    }
+	  if (contIter != m_contIndices.end())
+	    throw;
+	}
+	while (aIter != m_AIndices.end() 
+	       && bIter != m_BIndices.end()
+	       && *aIter == *bIter) 
+	  {
+	    ++aIter;
+	    ++bIter;
+	  }
+	while (bIter != m_BIndices.end()
+	       && cIter != m_CIndices.end()
+	       && *bIter == *cIter) 
+	  {
+	    ++bIter;
+	    ++cIter;
+	  }
+	if (aIter != m_AIndices.end()
+	    || bIter != m_BIndices.end()
+	    || cIter != m_CIndices.end())
+	  throw;
+      }
       for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
-	Cost temp = 2;
+	Cost temp = 1;
 	for (Dim dim = 0; dim < numDims; ++dim) {
 	  temp *= (*InputLocalLen(2,dim))[iteration];
+	}
+	if (m_needsPacking) {
+	  m_cost += (PSIW + PSIR) * temp;
 	}
 	DimVecConstIter iter = dims.begin();
 	for(; iter != dims.end(); ++iter) {
 	  temp *= (*InputLocalLen(0,*iter))[iteration];
 	}
-	m_cost += temp;
+	m_cost += temp * 2;
+      }
+      if (m_needsPacking) {
+	m_cost += (PSIW + PSIR) * ((DLANode*)Input(0))->TotalNumberOfLocalElements(InputConnNum(0));
+	m_cost += (PSIW + PSIR) * ((DLANode*)Input(1))->TotalNumberOfLocalElements(InputConnNum(1));
       }
     }
     else
@@ -281,8 +338,11 @@ void Contraction::CheckInputTypesAlign() const
 	cout << "A\n";
         cout << AType.PrettyStr() << endl;
         cout << aFind << endl;
+        cout << GetInputNameStr(0) << endl;
         cout << m_AIndices << endl;
         cout << Input(0)->GetType() << endl;
+        cout << GetInputNameStr(2) << endl;
+        cout << m_CIndices << endl;
         cout << Input(2)->GetType() << endl;
         throw;
       }
@@ -351,15 +411,18 @@ void Contraction::PrintCode(IndStream &out)
   out << m_alpha;
   *out << ", " << in0.str()
        << ".LockedTensor(), " 
-       << IndexArrayVarName(m_AIndices) << ",\n";
-  out.Indent(1);
+       << IndexArrayVarName(m_AIndices) 
+       << (m_needsPacking ? ", true,\n" : ", false,\n");
+  out.Indent(1);f
   *out << in1.str()
        << ".LockedTensor(), "
-       << IndexArrayVarName(m_BIndices) << ",\n";
+       << IndexArrayVarName(m_BIndices)        
+       << (m_needsPacking ? ", true,\n" : ", false,\n");
   out.Indent(1);
   out << m_beta;
   *out << ", " << in2.str() << ".Tensor(), "
-       << IndexArrayVarName(m_CIndices) << ");\n";
+       << IndexArrayVarName(m_CIndices) 
+       << (m_needsPacking ? ", true);\n" : ", false);\n");
 
   
 }
@@ -1558,6 +1621,8 @@ bool PermuteWhileUnpacking::CanApply(const Node *node) const
   const Contraction *cont = (Contraction*)node;
   if (m_type > 2)
     throw;
+  if (!cont->m_needsPacking)
+    return false;
   if (cont->Input(m_type)->GetNodeClass() == RedistNode::GetClass() ||
       cont->Input(m_type)->GetNodeClass() == Permute::GetClass())
     return true;
@@ -1688,6 +1753,7 @@ void PermuteWhileUnpacking::Apply(Node *node) const
   cont->m_AIndices = newA;
   cont->m_BIndices = newB;
   cont->m_CIndices = newC;
+  cont->m_needsPacking = false;
       
   return;
 }

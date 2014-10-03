@@ -34,6 +34,7 @@ class Contraction : public DLAOp<3,1>
   Type m_type;
   string m_AIndices, m_BIndices, m_CIndices;
   string m_contIndices;
+  bool m_needsPacking;
   Contraction(Layer layer, Coef alpha, Coef beta, Type type, 
 	      string AIndices, string BIndices, string CIndices,
 	      string contIndices);
