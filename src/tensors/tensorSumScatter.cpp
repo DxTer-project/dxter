@@ -123,7 +123,7 @@ void SumScatterUpdateNode::Prop()
     m_cost = 0;
 
     //need to update everything
-    if (InputDataType(0).HasPerm() || InputDataType(1).HasPerm())
+    if (InputDataType(1).HasPerm())
       throw;
 
     const DistType &inType = InputDataType(0).GetDist();
@@ -269,7 +269,6 @@ void SumScatterUpdateNode::CheckSumDimsInOutput() const
       m_poss->PrintTransVec();
       throw;
     }
-
 }
 
 Phase SumScatterUpdateNode::MaxPhase() const
@@ -1153,8 +1152,4 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
 }
 
 #endif
-
-
-
-
 

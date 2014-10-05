@@ -239,6 +239,7 @@ void Contraction::Prop()
       if (m_needsPacking) {
 	m_cost += (PSIW + PSIR) * ((DLANode*)Input(0))->TotalNumberOfLocalElements(InputConnNum(0));
 	m_cost += (PSIW + PSIR) * ((DLANode*)Input(1))->TotalNumberOfLocalElements(InputConnNum(1));
+	//Input(2) handled above
       }
     }
     else
