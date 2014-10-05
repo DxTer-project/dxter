@@ -32,7 +32,7 @@ class LowerLayer : public SingleTrans
 #if DOBLIS||DOLLDLA||DOELEM
   DimName m_dim;
  LowerLayer(Layer fromLayer, Layer toLayer, DimName dim, Size bs)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_dim(dim), m_bs(bs) {}
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs), m_dim(dim) {}
 #elif DOTENSORS
  LowerLayer(Layer fromLayer, Layer toLayer, Size bs)
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_bs(bs) {}
