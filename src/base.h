@@ -415,6 +415,7 @@ bool IsPrefix(const DimVec &isPrefix, const DimVec &dims);
 #endif
 
 
+#if DOTENSORS
 //in permutation.cpp
 class Permutation
 {
@@ -433,6 +434,7 @@ class Permutation
   Permutation ComposeWith(const Permutation &perm) const;
   inline bool HasPerm() const {return !m_permutation.empty();}
 };
+#endif
 
 //Variable name
 class Name
