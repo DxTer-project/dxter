@@ -43,12 +43,11 @@ class RedistNode : public DLANode
   SizesArray m_lsizes;
   bool m_isArray;
   string m_name;
-  Permutation m_permutation;
   RedistNode();
   RedistNode(const DistType &destType);
   RedistNode(const DistType &destType, const Permutation &perm);
   virtual ~RedistNode();
-  virtual const DataTypeInfo& DataType(ConnNum num) const {return m_info; }
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
   static Node* BlankInst() { return  new RedistNode; }
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }

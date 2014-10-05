@@ -125,7 +125,7 @@ void TenCullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 #endif
 
 
-#if DODM
+#if DOELEM
 
 class DataTypeInfo
 {
@@ -135,6 +135,30 @@ class DataTypeInfo
   DataTypeInfo(DistType dist);
   DataTypeInfo(const DataTypeInfo &rhs);
   DataTypeInfo& operator=(const DataTypeInfo &rhs);
+  
+};
+
+#elif DOTENSORS
+class DataTypeInfo
+{
+  DistType m_dist;
+  Permutation m_perm;
+ public:
+  DataTypeInfo();
+  DataTypeInfo(DistType dist);
+  DataTypeInfo(const DataTypeInfo &rhs);
+  DataTypeInfo(DistType dist, const Permutation &perm);
+  DataTypeInfo& operator=(const DataTypeInfo &rhs);
+  bool operator==(const DataTypeInfo &rhs) const;
+  bool operator!=(const DataTypeInfo &rhs) const;
+  DistType GetEffectiveDist() const;
+  inline const DistType& GetDist() const {return m_dist;}
+  inline const Permutation& GetPerm() const {return m_perm;}
+  inline const bool HasPerm() const {return m_perm.HasPerm();}
+  void SetToDefault(Dim numDims);
+  void SetDistAndClearPerm(const DistType &dist);
+  void SetPerm(const Permutation &perm);
+  string Str() const;
 };
 
 #elif !DOLLDLA

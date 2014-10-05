@@ -29,8 +29,11 @@ Permutation::Permutation(string start, string end)
 {
   if (start == end)
     throw;
-  if (start.length() != end.length())
+  if (start.length() != end.length()) {
+    cout << start << endl;
+    cout << end << endl;
     throw;
+  }
   string::iterator iter = start.begin();
   for(; iter != start.end(); ++iter) {
     m_permutation.push_back(end.find(*iter));
@@ -40,6 +43,11 @@ Permutation::Permutation(string start, string end)
 bool Permutation::operator==(const Permutation &rhs) const
 {
   return m_permutation == rhs.m_permutation;
+}
+
+bool Permutation::operator!=(const Permutation &rhs) const
+{
+  return !(*this == rhs);
 }
 
 void Permutation::SetToDefault(Dim numDims)
@@ -66,12 +74,35 @@ string Permutation::Str() const
 
 Permutation Permutation::ComposeWith(const Permutation &perm) const
 {
+  if (!perm.HasPerm())
+    return *this;
+  if (!HasPerm())
+    return perm;
   if (perm.Size() != Size())
     throw;
   Permutation newPerm;
   DimVecConstIter iter = m_permutation.begin();
-  for(; iter != m_permutation.end(); ++iter)
-    newPerm.m_permutation.push_back(perm.Map(*iter));
+  Dim dim = 0;
+  bool isIdent = true;
+  for(; iter != m_permutation.end(); ++iter, ++dim){
+    Dim tmp = perm.MapStartToFinish(*iter);
+    newPerm.m_permutation.push_back(tmp);
+    if (tmp!=dim)
+      isIdent = false;
+  }
+  if (isIdent)
+    newPerm.m_permutation.clear();
   return newPerm;
+}
+
+Dim Permutation::MapFinishToStart(Dim dim) const
+{
+  DimVecConstIter iter = m_permutation.begin();
+  Dim srcDim = 0;
+  for(; iter != m_permutation.end(); ++iter, ++srcDim) {
+    if (*iter == dim)
+      return srcDim;
+  }
+  throw;
 }
 #endif

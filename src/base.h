@@ -246,6 +246,7 @@ typedef EntryList::const_iterator EntryListConstIter;
 class DistType;
 inline bool DistTypeNotEqual(const DistType &one, const DistType &two);
 inline bool DistTypeEqual(const DistType &one, const DistType &two);
+class Permutation;
 
 class DistType
 {
@@ -272,6 +273,7 @@ class DistType
   DistType& operator=(const DistType &rhs);
   bool operator==(const DistType &rhs) const {return DistTypeEqual(*this,rhs);}
   bool operator!=(const DistType &rhs) const {return DistTypeNotEqual(*this,rhs);}
+  DistType Permute(const Permutation &perm) const;
 };
 #endif
 
@@ -422,11 +424,14 @@ class Permutation
   Permutation(string start, string end);
   Permutation& operator=(const Permutation &rhs);
   bool operator==(const Permutation &rhs) const;
+  bool operator!=(const Permutation &rhs) const;
   void SetToDefault(Dim numDims);
   string Str() const;
   inline unsigned int Size() const {return m_permutation.size();}
-  inline Dim Map(Dim dim) const {return m_permutation[dim];}
+  inline Dim MapStartToFinish(Dim dim) const {return m_permutation.empty() ? dim : m_permutation[dim];}
+  Dim MapFinishToStart(Dim dim) const;
   Permutation ComposeWith(const Permutation &perm) const;
+  inline bool HasPerm() const {return !m_permutation.empty();}
 };
 
 //Variable name

@@ -1535,7 +1535,7 @@ void SplitSingleIter::UpdateLocalSizes()
   if (m_pset && !m_pset->IsReal())
     return;
   Dim numDims = InputNumDims(0);
-  const DistType t = InputDataType(0).m_dist;
+  const DistType t = InputDataType(0).GetEffectiveDist();
   for (Dim dim = 0; dim < numDims; ++ dim) {
     if (dim < m_partDim)
       GetLocalSizes(t, dim, m_sizes+dim, m_lsizes+dim);

@@ -158,21 +158,21 @@ void YAxpPx::Prop()
 	throw;
       if (m_permutation.size() != numDims)
 	throw;
+      const DistType in0Type = InputDataType(0).GetEffectiveDist();
+      const DistType in1Type = InputDataType(1).GetEffectiveDist();
+      const DistType in2Type = InputDataType(2).GetEffectiveDist();
       for (Dim dim = 0; dim < numDims; ++dim) {
-	const DataTypeInfo &in0Type = InputDataType(0);
-	const DataTypeInfo &in1Type = InputDataType(1);
-	const DataTypeInfo &in2Type = InputDataType(2);
-	if (in0Type.m_dist.m_dists[dim] != in2Type.m_dist.m_dists[dim])
+	if (in0Type.m_dists[dim] != in2Type.m_dists[dim])
 	  throw;
 	if (*InputLen(0,dim) != *InputLen(2,dim))
 	  throw;
 
 	Dim mapping = m_permutation[dim];
-	if (in0Type.m_dist.m_dists[dim] != in1Type.m_dist.m_dists[mapping]) {
+	if (in0Type.m_dists[dim] != in1Type.m_dists[mapping]) {
 	  cout << dim << endl;
-	  cout << in0Type.m_dist.PrettyStr() << endl;
+	  cout << in0Type.PrettyStr() << endl;
 	  cout << mapping << endl;
-	  cout << in1Type.m_dist.PrettyStr() << endl;
+	  cout << in1Type.PrettyStr() << endl;
 	  throw;
 	}
 	if (*InputLen(0,dim) != *InputLen(1,mapping)) {
@@ -211,9 +211,11 @@ void DistYAxpPxToDefaultLocalYAxpPx::Apply(Node *node) const
 
   if (!orig->m_permutation.empty()) {
     const DataTypeInfo &inputType = orig->InputDataType(0);
-    DistType newType = inputType.m_dist;
-    for(Dim dim = 0; dim < inputType.m_dist.m_numDims; ++dim) {
-      newType.m_dists[dim] = inputType.m_dist.m_dists[orig->m_permutation[dim]];
+    if (inputType.HasPerm())
+      throw;
+    DistType newType = inputType.GetDist();
+    for(Dim dim = 0; dim < newType.m_numDims; ++dim) {
+      newType.m_dists[dim] = inputType.GetDist().m_dists[orig->m_permutation[dim]];
     }
     RedistNode *redist = new RedistNode(newType);
     redist->AddInput(node->Input(1),node->InputConnNum(1));

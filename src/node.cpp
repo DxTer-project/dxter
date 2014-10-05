@@ -88,16 +88,18 @@ void Node::Cull(Phase phase)
 #if DOTENSORS
       if (GetNodeClass() == SumScatterUpdateNode::GetClass()) {
 	SumScatterUpdateNode *sum = (SumScatterUpdateNode*)this;
-	cout << "sumscatter " << sum->InputDataType(0).m_dist.str() 
-	     << " -> " << sum->DataType(0).m_dist.str() << endl;
+	cout << "sumscatter " << sum->InputDataType(0).GetEffectiveDist().str() 
+	     << " -> " << sum->DataType(0).GetEffectiveDist().str() << endl;
       }
 
 #endif
       for (ConnNum i = 0; i < m_inputs.size(); ++i) {
         DLANode *in = (DLANode*)Input(i);
         cout << "Input " << i 
-#if DOELEM||DOTENSORS
+#if DOELEM
 	     << " " << DistTypeToStr(((DLANode*)this)->InputDataType(i).m_dist) << endl;
+#elif DOTENSORS
+	<< " " << DistTypeToStr(((DLANode*)this)->InputDataType(i).GetEffectiveDist()) << endl;
 #else
 	<<endl;
 #endif

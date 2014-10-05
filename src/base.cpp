@@ -94,6 +94,17 @@ DistType& DistType::operator=(const DistType &rhs)
   return *this;
 }
 
+DistType DistType::Permute(const Permutation &perm) const
+{
+  DistType ret;
+  ret.m_notReped = m_notReped;
+  ret.PrepForNumDims(m_numDims);
+  for(Dim dim = 0; dim < m_numDims; ++dim) {
+    ret.m_dists[perm.MapStartToFinish(dim)] = m_dists[dim];
+  }
+  return ret;
+}
+
 void DistType::PrepForNumDims(Dim numDims)
 {
   if (m_dists)
@@ -773,9 +784,13 @@ string Name::str() const
     return name + "_" + DistTypeToStr(m_type);
 #elif DOTENSORS
   string name = m_name;
-  name += "_" + DistTypeToStr(m_type);
-  if (m_permutation.Size())
+  if (m_permutation.Size()) {
     name += "_perm" + m_permutation.Str();
+    name += "_" + DistTypeToStr(m_type.Permute(m_permutation));
+  }
+  else {
+    name += "_" + DistTypeToStr(m_type);
+  }
   return name;
 #else
   return m_name;

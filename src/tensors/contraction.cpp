@@ -133,7 +133,7 @@ void Contraction::Prop()
 
     if(InputNumDims(2) != m_CIndices.size()) {
       cout << "num " << InputNumDims(2) << endl;
-      cout << "dist " << InputDataType(2).m_dist.PrettyStr() << endl;
+      cout << "dist " << InputDataType(2).GetEffectiveDist().PrettyStr() << endl;
       cout << m_CIndices << endl;
       cout << "Input " << Input(2)->GetNodeClass() << endl;
       throw;
@@ -190,18 +190,7 @@ void Contraction::Prop()
 	    ++aIter;
 	    ++cIter;
 	  }
-	if (cIter != m_CIndices.end()) {
-	  StringIter contIter = m_contIndices.begin();
-	  while (cIter != m_CIndices.end()
-		 && contIter != m_contIndices.end()
-		 && *cIter == *contIter) 
-	    {
-	      ++cIter;
-	      ++contIter;
-	    }
-	  if (contIter != m_contIndices.end())
-	    throw;
-	}
+
 	while (aIter != m_AIndices.end() 
 	       && bIter != m_BIndices.end()
 	       && *aIter == *bIter) 
@@ -216,6 +205,18 @@ void Contraction::Prop()
 	    ++bIter;
 	    ++cIter;
 	  }
+	if (cIter != m_CIndices.end()) {
+	  StringIter contIter = m_contIndices.begin();
+	  while (cIter != m_CIndices.end()
+		 && contIter != m_contIndices.end()
+		 && *cIter == *contIter) 
+	    {
+	      ++cIter;
+	      ++contIter;
+	    }
+	  if (contIter != m_contIndices.end())
+	    throw;
+	}
 	if (aIter != m_AIndices.end()
 	    || bIter != m_BIndices.end()
 	    || cIter != m_CIndices.end())
@@ -263,9 +264,9 @@ void Contraction::CheckInputTypesAlign() const
   if (m_layer != SMLAYER)
     return;
 
-  const DistType &AType = InputDataType(0).m_dist;
-  const DistType &BType = InputDataType(1).m_dist;
-  const DistType &CType = InputDataType(2).m_dist;
+  const DistType &AType = InputDataType(0).GetEffectiveDist();
+  const DistType &BType = InputDataType(1).GetEffectiveDist();
+  const DistType &CType = InputDataType(2).GetEffectiveDist();
     
   Dim dim = 0;
   string::const_iterator strIter = m_CIndices.begin();
@@ -309,20 +310,9 @@ void Contraction::CheckInputTypesAlign() const
 	    InputLen(1,bFind)->Print();
 
 	    cout << dim << endl;
-	    cout << InputDataType(2).m_dist.PrettyStr() << endl;
+	    cout << InputDataType(2).GetEffectiveDist().PrettyStr() << endl;
 	    cout << bFind << endl;
-	    cout << InputDataType(1).m_dist.PrettyStr() << endl;
-
-
-	    cout << ((DLANode*)(Input(1)->Input(0)->Input(0)))->GetType() << endl;
-	    ((DLANode*)(Input(1)->Input(0)->Input(0)))->Len(0,1)->Print();
-	    ((DLANode*)(Input(1)->Input(0)->Input(0)))->LocalLen(0,1)->Print();
-      
-      cout << Input(1)->Input(0)->GetType() << endl;
-      cout << Input(1)->Input(0)->Input(0)->GetType() << endl;
-      cout << "conn num " << Input(1)->Input(0)->InputConnNum(0) << endl;
-      ((LoopTunnel*)(Input(1)->Input(0)))->m_lsizes[1].Print();
-      ((DLANode*)(Input(1)->Input(0)))->InputLocalLen(0,1)->Print();
+	    cout << InputDataType(1).GetEffectiveDist().PrettyStr() << endl;
 
 
 	    throw;
@@ -343,7 +333,7 @@ void Contraction::CheckInputTypesAlign() const
         cout << Input(0)->GetType() << endl;
         cout << GetInputNameStr(2) << endl;
         cout << m_CIndices << endl;
-        cout << Input(2)->GetType() << endl;
+        cout << Input(2)->GetType() << endl;  
         throw;
       }
       if (m_contIndices.find(index) == string::npos && 
@@ -413,7 +403,7 @@ void Contraction::PrintCode(IndStream &out)
        << ".LockedTensor(), " 
        << IndexArrayVarName(m_AIndices) 
        << (m_needsPacking ? ", true,\n" : ", false,\n");
-  out.Indent(1);f
+  out.Indent(1);
   *out << in1.str()
        << ".LockedTensor(), "
        << IndexArrayVarName(m_BIndices)        
@@ -467,7 +457,7 @@ bool DistContToLocalContStatC::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDataType(2).m_dist.HasNoReped())
+  if (!cont->InputDataType(2).GetDist().HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -483,7 +473,7 @@ void DistContToLocalContStatC::Apply(Node *node) const
   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
     CConn = CConn->m_n->InputConn(0);
 
-  const DistType &CType = ((DLANode*)(CConn->m_n))->DataType(CConn->m_num).m_dist;
+  const DistType &CType = ((DLANode*)(CConn->m_n))->DataType(CConn->m_num).GetEffectiveDist();
 
   DistType AType;
   MatchDistsAndFillInWithStar(cont->m_AIndices,
@@ -499,7 +489,7 @@ void DistContToLocalContStatC::Apply(Node *node) const
   RedistNode *node1 = new RedistNode(AType);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
 
-  if (AType == node1->InputDataType(0).m_dist)
+  if (AType == node1->InputDataType(0).GetEffectiveDist())
     throw;
 
   Poss *APoss = new Poss(node1, false);
@@ -509,7 +499,7 @@ void DistContToLocalContStatC::Apply(Node *node) const
   RedistNode *node2 = new RedistNode(BType);
   node2->AddInput(node->Input(1),node->InputConnNum(1));
 
-  if (BType == node2->InputDataType(0).m_dist)
+  if (BType == node2->InputDataType(0).GetEffectiveDist())
     throw;
 
   Poss *BPoss = new Poss(node2, false);
@@ -541,9 +531,9 @@ bool DistContToLocalContStatAAllReduce::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDataType(0).m_dist.HasNoReped())
+  if (!cont->InputDataType(0).GetDist().HasNoReped())
     return false;
-  if (!cont->InputDataType(2).m_dist.HasNoReped())
+  if (!cont->InputDataType(2).GetDist().HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -559,7 +549,10 @@ void DistContToLocalContStatAAllReduce::Apply(Node *node) const
   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
     AConn = AConn->m_n->InputConn(0);
 
-  const DistType &AType = ((DLANode*)(AConn->m_n))->DataType(AConn->m_num).m_dist;
+  const DataTypeInfo &aInfo = ((DLANode*)(AConn->m_n))->DataType(AConn->m_num);
+  if (aInfo.HasPerm())
+    throw;
+  const DistType &AType = aInfo.GetDist();
 
   DimVec sumDims;
   string sumIndices;
@@ -609,7 +602,10 @@ void DistContToLocalContStatAAllReduce::Apply(Node *node) const
   sum->AddInput(LCont, 0);
   node->m_poss->AddNode(sum);
 
-  RedistNode *node4 = new RedistNode(cont->DataType(0).m_dist);
+  const DataTypeInfo &info = cont->DataType(0);
+  if (info.HasPerm())
+    throw;
+  RedistNode *node4 = new RedistNode(info.GetDist());
   node4->AddInput(sum);
   node->m_poss->AddNode(node4);
 
@@ -631,7 +627,7 @@ bool DistContToLocalContStatASumScatter::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDataType(0).m_dist.HasNoReped())
+  if (!cont->InputDataType(0).GetDist().HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -662,7 +658,10 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
   if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
     AConn = AConn->m_n->InputConn(0);
 
-  const DistType &AType = ((DLANode*)(AConn->m_n))->DataType(AConn->m_num).m_dist;
+  const DataTypeInfo &aInfo = ((DLANode*)(AConn->m_n))->DataType(AConn->m_num);
+  if (aInfo.HasPerm())
+    throw;
+  const DistType &AType = aInfo.GetDist();
 
   EntryList sumDims;
   string::iterator iter = cont->m_contIndices.begin();
@@ -682,7 +681,7 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
   RedistNode *node1 = NULL;
   RealPSet *BSet = NULL;
 
-  if (BType != node->InputDataType(1).m_dist) {
+  if (BType != node->InputDataType(1).GetEffectiveDist()) {
     node1 = new RedistNode(BType);
     node1->AddInput(node->Input(1),node->InputConnNum(1));
 
@@ -693,7 +692,11 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
 
   
   DistType CType;
-  const DistType &CDestType = cont->InputDataType(2).m_dist;
+
+  const DataTypeInfo &cInfo = cont->InputDataType(2);
+  if (cInfo.HasPerm())
+    throw;
+  const DistType &CDestType = cInfo.GetDist();
   MatchDistsAndFillInWithStar(cont->m_CIndices,
 			      AType, cont->m_AIndices, 
 			      CType);
@@ -794,9 +797,9 @@ bool DistContToLocalContStatBAllReduce::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDataType(1).m_dist.HasNoReped())
+  if (!cont->InputDataType(1).GetDist().HasNoReped())
     return false;
-  if (!cont->InputDataType(2).m_dist.HasNoReped())
+  if (!cont->InputDataType(2).GetDist().HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -813,7 +816,10 @@ void DistContToLocalContStatBAllReduce::Apply(Node *node) const
   if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
     BConn = BConn->m_n->InputConn(0);
 
-  const DistType &BType = ((DLANode*)(BConn->m_n))->DataType(BConn->m_num).m_dist;
+  const DataTypeInfo &bInfo = ((DLANode*)(BConn->m_n))->DataType(BConn->m_num);
+  if (bInfo.HasPerm())
+    throw;
+  const DistType &BType = bInfo.GetDist();
 
   DimVec sumDims;
   string sumIndices;
@@ -863,7 +869,10 @@ void DistContToLocalContStatBAllReduce::Apply(Node *node) const
   sum->AddInput(LCont, 0);
   node->m_poss->AddNode(sum);
 
-  RedistNode *node4 = new RedistNode(cont->DataType(0).m_dist);
+  const DataTypeInfo &info = cont->DataType(0);
+  if (info.HasPerm())
+    throw;
+  RedistNode *node4 = new RedistNode(info.GetDist());
   node4->AddInput(sum);
   node->m_poss->AddNode(node4);
 
@@ -899,7 +908,7 @@ bool DistContToLocalContStatBSumScatter::CanApply(const Node *node) const
   if (node->GetNodeClass() != Contraction::GetClass())
     throw;
   const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDataType(1).m_dist.HasNoReped())
+  if (!cont->InputDataType(1).GetDist().HasNoReped())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -916,7 +925,10 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
   if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
     BConn = BConn->m_n->InputConn(0);
 
-  const DistType &BType = ((DLANode*)(BConn->m_n))->DataType(BConn->m_num).m_dist;
+  const DataTypeInfo &bInfo = ((DLANode*)(BConn->m_n))->DataType(BConn->m_num);
+  if (bInfo.HasPerm())
+    throw;
+  const DistType &BType = bInfo.GetDist();
 
   EntryList sumDims;
   string::iterator iter = cont->m_contIndices.begin();
@@ -936,7 +948,10 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
   RedistNode *node1 = NULL;
   RealPSet *ASet = NULL;
 
-  if (AType != node->InputDataType(0).m_dist) {
+  const DataTypeInfo &AInfo = node->InputDataType(0);
+  if (AInfo.HasPerm())
+    throw;
+  if (AType != AInfo.GetDist()) {
     node1 = new RedistNode(AType);
     node1->AddInput(node->Input(0),node->InputConnNum(0));
 
@@ -949,7 +964,11 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
 
   
   DistType CType;
-  const DistType &CDestType = cont->InputDataType(2).m_dist;
+
+  const DataTypeInfo &cInfo = cont->InputDataType(2);
+  if (cInfo.HasPerm())
+    throw;
+  const DistType &CDestType = cInfo.GetDist();
   MatchDistsAndFillInWithStar(cont->m_CIndices,
 			      BType, cont->m_BIndices, 
 			      CType);
@@ -1249,7 +1268,11 @@ void DistContToLocalContStatC::Apply(int num, Node *node, void **cache) const
   if (CConn->m_n->GetNodeClass() == RedistNode::GetClass())
     CConn = CConn->m_n->InputConn(0);
 
-    const DistType &CType = ((DLANode*)(CConn->m_n))->DataType(CConn->m_num).m_dist;
+
+  const DataTypeInfo &cInfo = ((DLANode*)(CConn->m_n))->DataType(CConn->m_num);
+  if (cInfo.GetPerm().m_permutation.empty())
+    throw;
+  const DistType &CType = cInfo->GetDist();
 
   DistType AType;
   MatchDistsAndFillIn(cont->GetInputName(0).m_indices,
@@ -1294,12 +1317,16 @@ void DistContToLocalContStatC::Apply(int num, Node *node, void **cache) const
     if (entries[i] != 0)
       sum = true;
   }
-
+  
   DLANode *node4;
-  if (sum)
-    cout << "need different refinement code!\n";
+  if (sum) {
+  cout << "need different refinement code!\n";
+  throw;
+  }
   //  else {
-    node4 = new RedistNode(cont->InputDataType(2).m_dist);
+  if (cInfo.GetPerm().m_permutation.empty())
+    throw;
+    node4 = new RedistNode(CType.GetDist());
     node4->AddInput(LCont, 0);
 
     Poss *CAfterPoss = new Poss(node4, false);
@@ -1589,7 +1616,9 @@ void UpdateWithPermutation(Contraction *cont, ConnNum contInput, Permutation &pe
 
   if (inNode->GetNodeClass() == RedistNode::GetClass()) {
     RedistNode *oldRedist = (RedistNode*)inNode;
-    RedistNode *newInput = new RedistNode(oldRedist->m_info.m_dist, perm);
+    if (oldRedist->m_info.HasPerm())
+      throw;
+    RedistNode *newInput = new RedistNode(oldRedist->m_info.GetDist(), perm);
     cont->m_poss->AddNode(newInput);
     newInput->AddInput(inNode->Input(0),inNode->InputConnNum(0));
     cont->ChangeInput2Way(inNode, inNum, newInput, 0);
@@ -1633,8 +1662,9 @@ void PermuteWhileUnpacking::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
   string newA, newB, newC;
+  string inner;
   if (m_type == 0) {
-    string inner, aOuter;
+    string aOuter;
     string bOuter;
     StringIter aIter = cont->m_AIndices.begin();
     for(; aIter != cont->m_AIndices.end(); ++aIter) {
@@ -1657,13 +1687,11 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     }
     newB = inner;
     newB += bOuter;
-	
+
     newC = aOuter + bOuter;
-    if (newC.size() < cont->m_CIndices.size())
-      newC += cont->m_contIndices;
   }
   else if (m_type == 1) {
-    string inner, aOuter, bOuter;
+    string aOuter, bOuter;
     StringIter bIter = cont->m_BIndices.begin();
     for(; bIter != cont->m_BIndices.end(); ++bIter) {
       if (cont->m_contIndices.find(*bIter) != string::npos) {
@@ -1686,12 +1714,10 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     newA += inner;
 	
     newC = aOuter + bOuter;
-    if (newC.size() < cont->m_CIndices.size())
-      newC += cont->m_contIndices;
   }
   else if (m_type == 2) {
     newC = cont->m_CIndices;
-    string inner, aOuter, bOuter;
+    string aOuter, bOuter;
     StringIter aIter = cont->m_AIndices.begin();
     for(; aIter != cont->m_AIndices.end(); ++aIter) {
       if (cont->m_contIndices.find(*aIter) == string::npos) {
@@ -1716,6 +1742,9 @@ void PermuteWhileUnpacking::Apply(Node *node) const
   else
     throw;
 
+
+  
+
       
   if (newA != cont->m_AIndices) {
     Permutation perm(cont->m_AIndices, newA);
@@ -1726,12 +1755,23 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     Permutation perm(cont->m_BIndices, newB);
     UpdateWithPermutation(cont, 1, perm);
   }
-  
+
   if (newC != cont->m_CIndices)
   {
+    if (newC.size() < cont->InputDataType(2).GetDist().m_numDims)
+      newC += inner;
+
     Permutation perm(cont->m_CIndices, newC);
     UpdateWithPermutation(cont, 2, perm);
   }
+
+  cout << "was " 
+       << cont->m_AIndices << ", " 
+       << cont->m_BIndices << ", "
+       << cont->m_CIndices << "\nand now:\n"
+       << newA << ", "
+       << newB << ", "
+       << newC << endl;
 
   if (cont->m_children.size() != 1) {
     //just need to handle this
@@ -1750,9 +1790,16 @@ void PermuteWhileUnpacking::Apply(Node *node) const
       newPermute->AddInput(cont, 0);
     }
 
+  if (m_type == 0 || m_type == 1) {
+    if (newC.size() < cont->m_CIndices.size())
+      newC += cont->m_contIndices;
+
+  }
+
   cont->m_AIndices = newA;
   cont->m_BIndices = newB;
   cont->m_CIndices = newC;
+  cont->m_contIndices = inner;
   cont->m_needsPacking = false;
       
   return;

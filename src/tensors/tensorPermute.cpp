@@ -26,11 +26,15 @@
 Permute::Permute(string start, string end, Layer layer)
  : m_permutation(start,end)
 {
+  if (start.empty())
+    throw;
   SetLayer(layer);
 }
 
 Permute::Permute(const Permutation &permutation, Layer layer)
 {
+  if (!permutation.Size())
+    throw;
   SetLayer(layer);
   m_permutation = permutation;
 }
@@ -112,7 +116,7 @@ const Sizes* Permute::Len(ConnNum num, Dim dim) const
     throw;
   if (dim >= m_permutation.Size())
     throw;
-  return InputLen(0,m_permutation.Map(dim));
+  return InputLen(0,m_permutation.MapFinishToStart(dim));
 }
 
 const Sizes* Permute::LocalLen(ConnNum num, Dim dim) const
@@ -121,22 +125,13 @@ const Sizes* Permute::LocalLen(ConnNum num, Dim dim) const
     throw;
   if (dim >= m_permutation.Size())
     throw;
-  return InputLocalLen(0,m_permutation.Map(dim));
+  return InputLocalLen(0,m_permutation.MapFinishToStart(dim));
 }
-
-
 
 void Permute::BuildDataTypeCache()
 {
-  const DataTypeInfo &inputType = InputDataType(0);
-  if (m_permutation.Size() != inputType.m_dist.m_numDims)
-    throw;
-  m_info.m_dist = inputType.m_dist;
-  for(Dim dim = 0; dim < inputType.m_dist.m_numDims; ++dim) {
-    m_info.m_dist.m_dists[dim] = inputType.m_dist.m_dists[m_permutation.Map(dim)];
-  }
-  if (DistTypeEqual(m_info.m_dist, inputType.m_dist))
-    throw;
+  m_info = InputDataType(0);
+  m_info.SetPerm(m_info.GetPerm().ComposeWith(m_permutation));
 }
 
 void Permute::FlattenCore(ofstream &out) const
@@ -156,8 +151,9 @@ Name Permute::GetName(ConnNum num) const
   if (num > 0)
     throw;
   Name name = GetInputName(0);
-  name.m_type = m_info.m_dist;
-  name.m_name += "_p";
+  name.m_type = m_info.GetDist();
+  name.m_permutation = m_info.GetPerm();
+  //  name.m_name += "_perm" + m_info.GetPerm().Str();
   return name;
 }
 
