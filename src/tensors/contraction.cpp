@@ -1504,6 +1504,8 @@ void ContractionLoopExp::Apply(Node *node) const
     CTun = new SplitSingleIter(cDim, POSSTUNIN, true);
     CTunNum = 1;
     CTun->AddInput(connC->m_n, connC->m_num);
+    CTun->SetUpStats(FULLUP,FULLUP,
+		     NOTUP,NOTUP);
   }
   else {
     CTun = new LoopTunnel(POSSTUNIN);
@@ -1516,8 +1518,8 @@ void ContractionLoopExp::Apply(Node *node) const
       scale->AddInput(connC->m_n, connC->m_num);
       CTun->AddInput(scale,0);
     }
+    CTun->SetAllStats(PARTUP);
   }
-  CTun->SetAllStats(FULLUP);
   if (isCIndex)
     CTun->SetIndepIters();
   
