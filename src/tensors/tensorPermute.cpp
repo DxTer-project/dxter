@@ -161,7 +161,7 @@ void Permute::PrintCode(IndStream &out)
 {  
   //Reflect in AddVars
   out.Indent();
-  cout << "Permute( " << GetInputNameStr(0) << ", " << GetNameStr(0) << " )\n";
+  cout << "Permute( " << GetInputNameStr(0) << ", " << GetNameStr(0) << " );\n";
 }
 
 void Permute::AddVariables(VarSet &set) const
