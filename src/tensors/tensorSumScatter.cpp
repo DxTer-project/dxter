@@ -406,9 +406,10 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 
     if (m_srcType.m_notReped != m_destType.m_notReped) {
       if (m_coef != COEFZERO) {
-	*out << outName << ".ReduceToOneUpdateRedistFrom( ";
+	*out << outName << ".ReduceToOneUpdateRedistFrom( "
+	     << inName << ", ";
 	out << m_coef;
-	*out << ", " << inName << ", ";
+	*out << ", ";
       }
       else {
 	*out << outName << ".ReduceToOneRedistFrom( "
@@ -486,11 +487,15 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 
     if (m_srcType.m_notReped != m_destType.m_notReped) {
       if (m_coef != COEFZERO) {
-	throw;
-	//need to use an ReduceScatterUpdateRedistFrom flavor
+	*out << outName << ".ReduceToOneUpdateRedistFrom( "
+	     << inName << ", ";
+	out << m_coef;
+	*out << ", ";
       }
-      *out << outName << ".ReduceToOneRedistFrom( "
-	   << inName << ", ";
+      else {
+	*out << outName << ".ReduceToOneRedistFrom( "
+	     << inName << ", ";
+      }
 
       EntrySet dimSet;
       dimSet.insert(m_sumDims.begin(), m_sumDims.end());
