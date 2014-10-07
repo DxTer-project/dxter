@@ -429,8 +429,8 @@ class Permutation
   void SetToDefault(Dim numDims);
   string Str() const;
   inline unsigned int Size() const {return m_permutation.size();}
-  inline Dim MapStartToFinish(Dim dim) const {return m_permutation.empty() ? dim : m_permutation[dim];}
-  Dim MapFinishToStart(Dim dim) const;
+  inline Dim MapFinishToStart(Dim dim) const {return m_permutation.empty() ? dim : m_permutation[dim];}
+  Dim MapStartToFinish(Dim dim) const;
   Permutation ComposeWith(const Permutation &perm) const;
   inline bool HasPerm() const {return !m_permutation.empty();}
 };

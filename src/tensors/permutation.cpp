@@ -37,9 +37,9 @@ Permutation::Permutation(string start, string end)
     cout << end << endl;
     throw;
   }
-  string::iterator iter = start.begin();
-  for(; iter != start.end(); ++iter) {
-    m_permutation.push_back(end.find(*iter));
+  string::iterator iter = end.begin();
+  for(; iter != end.end(); ++iter) {
+    m_permutation.push_back(start.find(*iter));
   }
 }
 
@@ -88,7 +88,7 @@ Permutation Permutation::ComposeWith(const Permutation &perm) const
   Dim dim = 0;
   bool isIdent = true;
   for(; iter != m_permutation.end(); ++iter, ++dim){
-    Dim tmp = perm.MapStartToFinish(*iter);
+    Dim tmp = perm.MapFinishToStart(*iter);
     newPerm.m_permutation.push_back(tmp);
     if (tmp!=dim)
       isIdent = false;
@@ -98,8 +98,10 @@ Permutation Permutation::ComposeWith(const Permutation &perm) const
   return newPerm;
 }
 
-Dim Permutation::MapFinishToStart(Dim dim) const
+Dim Permutation::MapStartToFinish(Dim dim) const
 {
+  if (m_permutation.empty())
+    return dim;
   DimVecConstIter iter = m_permutation.begin();
   Dim srcDim = 0;
   for(; iter != m_permutation.end(); ++iter, ++srcDim) {
