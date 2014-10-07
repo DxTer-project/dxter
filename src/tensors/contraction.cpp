@@ -1524,7 +1524,7 @@ void ContractionLoopExp::Apply(Node *node) const
     CTun->SetIndepIters();
   
   Contraction *newCont = new Contraction(m_toLayer, cont->m_alpha, 
-					 isCIndex ? cont->m_beta : COEFZERO, 
+					 isCIndex ? cont->m_beta : COEFONE, 
 					 cont->m_type,
 					 cont->m_AIndices,
 					 cont->m_BIndices,
