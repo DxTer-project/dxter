@@ -407,7 +407,7 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
     if (m_srcType.m_notReped != m_destType.m_notReped) {
       if (m_coef != COEFZERO) {
 	*out << outName << ".ReduceToOneUpdateRedistFrom( ";
-	out << m_coeff;
+	out << m_coef;
 	*out << ", " << inName << ", ";
       }
       else {
