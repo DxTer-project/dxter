@@ -1759,22 +1759,19 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     UpdateWithPermutation(cont, 1, perm);
   }
 
-  if (newC != cont->m_CIndices)
-  {
+
+
+  if (newC != cont->m_CIndices) {
     if (newC.size() < cont->InputDataType(2).GetDist().m_numDims)
       newC += inner;
+  }
+
+  if (newC != cont->m_CIndices)
+  {
 
     Permutation perm(cont->m_CIndices, newC);
     UpdateWithPermutation(cont, 2, perm);
   }
-
-  cout << "was " 
-       << cont->m_AIndices << ", " 
-       << cont->m_BIndices << ", "
-       << cont->m_CIndices << "\nand now:\n"
-       << newA << ", "
-       << newB << ", "
-       << newC << endl;
 
   if (cont->m_children.size() != 1) {
     //just need to handle this
