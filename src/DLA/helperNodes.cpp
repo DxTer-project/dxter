@@ -234,17 +234,17 @@ void InputNode::PrintCode(IndStream &out)
   out.Indent();
   *out << GetNameStr(0) << ".ResizeTo( " << name << " );\n";
   out.Indent();
-  *out << "MakeUniform( " << GetNameStr(0) << " );\n";
-  out.Indent();
-  *out << "DistTensor<T> " << m_varName.m_name << "_local( tmen::StringToTensorDist(\"[";
-  for (Dim dim = 0; dim < m_dataTypeInfo.GetDist().m_numDims; ++dim)
-    *out << (dim ? "," : "") << "()";
-  *out << "]|(";
-  for (Dim dim = 0; dim < NUM_GRID_DIMS; ++dim)
-    *out << (dim ? "," : "") << dim;
-  *out << ")\"), g );\n";
-  out.Indent();
-  *out << "GatherAllModes( " << GetNameStr(0) << ", " << m_varName.m_name << "_local );\n";
+  //  *out << "MakeUniform( " << GetNameStr(0) << " );\n";
+  //  out.Indent();
+  //  *out << "DistTensor<T> " << m_varName.m_name << "_local( tmen::StringToTensorDist(\"[";
+  //  for (Dim dim = 0; dim < m_dataTypeInfo.GetDist().m_numDims; ++dim)
+  //    *out << (dim ? "," : "") << "()";
+  //  *out << "]|(";
+  //  for (Dim dim = 0; dim < NUM_GRID_DIMS; ++dim)
+  //    *out << (dim ? "," : "") << dim;
+  //  *out << ")\"), g );\n";
+  //  out.Indent();
+  //  *out << "GatherAllModes( " << GetNameStr(0) << ", " << m_varName.m_name << "_local );\n";
 #endif
 #endif //DOTENSORS
 }
