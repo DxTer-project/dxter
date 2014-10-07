@@ -406,11 +406,14 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 
     if (m_srcType.m_notReped != m_destType.m_notReped) {
       if (m_coef != COEFZERO) {
-	throw;
-	//need to use an ReduceScatterUpdateRedistFrom flavor
+	*out << outName << ".ReduceToOneUpdateRedistFrom( ";
+	out << m_coeff;
+	*out << ", " << inName << ", ";
       }
-      *out << outName << ".ReduceToOneRedistFrom( "
-	   << inName << ", ";
+      else {
+	*out << outName << ".ReduceToOneRedistFrom( "
+	     << inName << ", ";
+      }
       bool found = false;
       for(Dim dim = 0; !found &&dim < srcNumDims; ++dim) {
 	if (m_srcType.m_dists[dim] == sumDims) {
