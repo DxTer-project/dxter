@@ -27,8 +27,11 @@
 
 Permutation::Permutation(string start, string end)
 {
-  if (start == end)
+  if (start == end) {
+    cout << start << endl;
+    cout << end << endl;
     throw;
+  }
   if (start.length() != end.length()) {
     cout << start << endl;
     cout << end << endl;
