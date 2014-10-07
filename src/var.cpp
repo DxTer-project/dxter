@@ -345,7 +345,7 @@ void Var::PrintDecl(IndStream &out) const
 	     << ", g );" << endl;
 	if (m_name->m_permutation.Size()) {
 	  out.Indent();
-	  *out << m_name->str() << ".SetLocalPerm( "
+	  *out << m_name->str() << ".SetLocalPermutation( "
 	       << PermutationVarName(m_name->m_permutation.m_permutation) 
 	       << " );\n";
 	}
@@ -353,7 +353,7 @@ void Var::PrintDecl(IndStream &out) const
 	  Permutation defaultPerm;
 	  defaultPerm.SetToDefault(m_name->m_type.m_numDims);
 	  out.Indent();
-	  *out << m_name->str() << ".SetLocalPerm( "
+	  *out << m_name->str() << ".SetLocalPermutation( "
 	       << PermutationVarName(defaultPerm.m_permutation) 
 	       << " );\n";
 	}
