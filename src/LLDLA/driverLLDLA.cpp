@@ -25,6 +25,7 @@
 #include "omp.h"
 #endif
 #include "transform.h"
+#include "transpose.h"
 #include "loopSupport.h"
 #include <time.h>
 #ifdef _OPENMP
@@ -71,6 +72,7 @@ do you really want to do compact unrolling and partial unrolling?
 
 void MuNNMuGemmResults(Type precision);
 double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName);
+RealPSet* TransMVMulExample(Type dataType, int m, int n);
 RealPSet* GemvExample(Type dataType, int m, int n);
 RealPSet* MVMul2Example(Type dataType, int m, int n, int p);
 RealPSet* MAdd2Example(Type dataType, int m, int n);
@@ -91,16 +93,16 @@ Trans transA, transB;
 
 Architecture* arch;
 
-ImplementationMap ImpStrMap(Universe *uni)
+ImplementationMap* ImpStrMap(Universe *uni)
 {
-  ImplementationMap impMap;
+  ImplementationMap* impMap = new ImplementationMap();
   GraphNum i;
   for (i = 1; i <= uni->TotalCount(); i++) {
     std::stringbuf sbuf;
     std::ostream out(&sbuf);
     IndStream istream = IndStream(&out, LLDLASTREAM);
     uni->Print(istream, i);
-    impMap.insert(NumImplementationPair(i, sbuf.str()));
+    impMap->insert(NumImplementationPair(i, sbuf.str()));
   }
   return impMap;
 }
@@ -165,9 +167,9 @@ GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, doubl
     }
     cout << endl;
   }
-  cout << "Best flops/cycle achieved: " << std::to_string((long double) bestFlopsPerCycle / 1.0e9) << endl;
+  cout << "Best flops/cycle achieved: " << std::to_string((long double) bestFlopsPerCycle) << endl;
   cout << "Best percent of peak: " << std::to_string((long double) (bestFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
-  return bestImpNum;      
+  return bestImpNum;
 }
 
 void AddGemmTrans()
@@ -367,7 +369,7 @@ void Usage()
   cout <<"        13  -> Matrix add twice F/D M N\n";
   cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
   cout <<"        15  -> Gemv F/D M N\n";
-  cout <<"        16  -> Run (mu x n) (n x mu) tests with precision F/D\n";
+  cout <<"        16  -> MVMul Trans N/T F/D M N\n";
 }
 
 int main(int argc, const char* argv[])
@@ -380,8 +382,8 @@ int main(int argc, const char* argv[])
   int m, n, p, k;
   Type precision;
 
-  arch = new Stampede();
-  AddTrans();
+  arch = new HaswellMacbook();
+
 
   //  PrintType printType = CODE;
 
@@ -389,6 +391,7 @@ int main(int argc, const char* argv[])
   //  GraphNum whichGraph = 0;
   int algNum;
   string opName;
+  Trans tr;
 
 
   if(argc < 2) {
@@ -567,13 +570,15 @@ int main(int argc, const char* argv[])
       algPSet = GemvExample(precision, m, n);
       break;
     case(16):
-      if (argc != 3) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       precision = CharToType(*argv[2]);
-      MuNNMuGemmResults(precision);
-      return 0;
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      algPSet = TransMVMulExample(precision, m, n);
+      break;
     default:
       Usage();
       return 0;
@@ -589,7 +594,7 @@ void MuNNMuGemmResults(Type precision) {
   int n = m;
   int p = 16;
   int p_inc = 16;
-  int num_trials = 10;
+  int num_trials = 15;
   int algNum = 1;
   string opName = "dxt_gemm";
   string resultFileName = "dxt_gemm_mu_by_n_times_n_by_mu_trials.csv";
@@ -603,7 +608,7 @@ void MuNNMuGemmResults(Type precision) {
     outFile << std::to_string((long long int) m) << ", ";
     outFile << std::to_string((long long int) n) << ", ";
     outFile << std::to_string((long long int) p) << ", ";
-    outFile << std::to_string((long double) bestFlops) << "\n";
+    outFile << std::to_string((double) bestFlops) << "\n";
     p += p_inc;
   }
   outFile.close();
@@ -613,6 +618,7 @@ void MuNNMuGemmResults(Type precision) {
 double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
 {
   RegAllLLDLANodes();
+  AddTrans();
 
   int numIters = -1;
   Cost flopCost = 0;
@@ -737,6 +743,54 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
 
   double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
   return bestFPS;
+}
+
+RealPSet* TransMVMulExample(Type dataType, int m, int n)
+{
+  InputNode* xIn = new InputNode("x input", n, 1, "X",
+				 1, n,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride", dataType);  
+
+  InputNode* AIn = new InputNode("a input", n, m, "A",
+				 m, 1,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride", dataType);
+
+  InputNode* yIn = new InputNode("y input", m, 1, "Y",
+				 1, m,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride", dataType);
+
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(AIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  Transpose* trans = new Transpose(TRANS);
+  trans->AddInputs(2,
+		   tunA, 0);
+
+  MVMul* mul = new MVMul(ABSLAYER);
+  mul->AddInputs(6,
+		 trans, 0,
+		 tunX, 0,
+		 tunY, 0);
+
+  Poss* innerPoss = new Poss(mul, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
 }
 
 RealPSet* GemvExample(Type dataType, int m, int n)
@@ -1359,17 +1413,17 @@ RealPSet* DotExample(Type dataType, int m)
 RealPSet* GemmExample(Type dataType, int m, int n, int p)
 {
   InputNode *Ain= new InputNode("A input", m, p, "A",
-				 p, 1,
+				 1, m,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);
 
   InputNode *Bin = new InputNode("B input", p, n, "B",
-				 n, 1,
+				 1, p,
 				 "BNumRows","BNumCols",
 				 "BRowStride","BColStride", dataType);
 
   InputNode *Cin = new InputNode("C input", m, n, "C",
-				 n, 1,
+				 1, m,
 				 "CNumRows","CNumCols",
 				 "CRowStride","CColStride", dataType);
 

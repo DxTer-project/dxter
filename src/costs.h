@@ -54,9 +54,6 @@ using namespace std;
 #define RVAL 40
 #define CVAL 40
 
-#define CONTIG_VECTOR_LOAD_COST 20
-#define CONTIG_VECTOR_STORE_COST 200
-
 #define MU_VAR_NAME "MUVALUE"
 #endif 
 #if TWOD
