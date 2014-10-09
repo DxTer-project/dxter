@@ -297,10 +297,15 @@ void YAxpPxLoopExp::Apply(Node *node) const
   xTun->SetIndepIters();
 
 
-  SplitSingleIter *pxTun = new SplitSingleIter(axpy->m_permutation.MapFinishToStart(m_dim), POSSTUNIN, false);
-  pxTun->AddInput(connB->m_n, connB->m_num);
-  pxTun->SetAllStats(FULLUP);
-  pxTun->SetIndepIters();
+  Dim mappedDim = axpy->m_permutation.MapFinishToStart(m_dim);
+
+  SplitSingleIter *pxTun = NULL;
+  if (mappedDim != m_dim) {
+    pxTun = new SplitSingleIter(mappedDim, POSSTUNIN, false);
+    pxTun->AddInput(connB->m_n, connB->m_num);
+    pxTun->SetAllStats(FULLUP);
+    pxTun->SetIndepIters();
+  }
 
 
   SplitSingleIter *yTun = new SplitSingleIter(m_dim, POSSTUNIN, true);
@@ -314,20 +319,36 @@ void YAxpPxLoopExp::Apply(Node *node) const
 			       axpy->m_beta,
 			       axpy->m_permutation);
   newAxpy->AddInput(xTun, 1);
-  newAxpy->AddInput(pxTun, 1);
+  if (mappedDim != m_dim) {
+    newAxpy->AddInput(pxTun, 1);
+  }
+  else {
+    newAxpy->AddInput(xTun, 1);
+  }
   newAxpy->AddInput(yTun, 1);
   
   CombineSingleIter *xOut = xTun->CreateMatchingCombine(0);
-  CombineSingleIter *pxOut = pxTun->CreateMatchingCombine(0);
+  CombineSingleIter *pxOut = NULL;
+  if (mappedDim != m_dim) {
+    pxOut = pxTun->CreateMatchingCombine(0);
+  }
   CombineSingleIter *yOut = yTun->CreateMatchingCombine(1,
 							 1, newAxpy, 0);
 					
-  
-  Poss *loopPoss = new Poss(3, xOut, pxOut, yOut);
-  RealLoop *loop = new RealLoop(TENSORLOOP, loopPoss, TensorBS);
-  node->m_poss->AddPSet(loop);
-  node->RedirectChildren(loop->OutTun(2),0);
-  node->m_poss->DeleteChildAndCleanUp(node);
+  if (mappedDim != m_dim) {
+    Poss *loopPoss = new Poss(3, xOut, pxOut, yOut);
+    RealLoop *loop = new RealLoop(TENSORLOOP, loopPoss, TensorBS);
+    node->m_poss->AddPSet(loop);
+    node->RedirectChildren(loop->OutTun(2),0);
+  }
+  else {
+    Poss *loopPoss = new Poss(2, xOut, yOut);
+    RealLoop *loop = new RealLoop(TENSORLOOP, loopPoss, TensorBS);
+    node->m_poss->AddPSet(loop);
+    node->RedirectChildren(loop->OutTun(1),0);
+  }
+
+  node->m_poss->DeleteChildAndCleanUp(node, false, false, true);
 }
 
 #endif // DOTENSORS
