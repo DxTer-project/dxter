@@ -234,8 +234,8 @@ void InputNode::PrintCode(IndStream &out)
   out.Indent();
   *out << GetNameStr(0) << ".ResizeTo( " << name << " );\n";
   out.Indent();
-  //  *out << "MakeUniform( " << GetNameStr(0) << " );\n";
-  //  out.Indent();
+  *out << "MakeUniform( " << GetNameStr(0) << " );\n";
+  out.Indent();
   //  *out << "DistTensor<T> " << m_varName.m_name << "_local( tmen::StringToTensorDist(\"[";
   //  for (Dim dim = 0; dim < m_dataTypeInfo.GetDist().m_numDims; ++dim)
   //    *out << (dim ? "," : "") << "()";
