@@ -1854,7 +1854,11 @@ bool GetAllGatherPattern(const DistType &srcType,
     }
   }
 
+#if ALLMULTIMODEALLGATHER
   return count;
+#else
+  return count==1;
+#endif
 }
 
 bool GetLocalRedistPattern(const DistType &srcType,

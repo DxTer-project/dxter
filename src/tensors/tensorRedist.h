@@ -26,6 +26,8 @@
 
 #if DOTENSORS
 
+#define ALLMULTIMODEALLGATHER 1
+
 #include "DLANode.h"
 #include "transform.h"
 #include "DLAOp.h"
