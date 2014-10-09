@@ -27,7 +27,6 @@
 
 #if DOTENSORS
 
-#if ALLOWMULTIMODESCATTER
 void GetMultiModeScatterInfo(const DistType &srcType,
 			     const DistType &destType,
 			     const EntryList &m_sumDims,
@@ -66,7 +65,6 @@ void GetMultiModeScatterInfo(const DistType &srcType,
 
 
 }
-#endif
 
 bool SameDims(DistEntry entry1, DistEntry entry2)
 {
