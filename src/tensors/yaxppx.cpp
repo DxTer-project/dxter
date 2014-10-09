@@ -26,19 +26,14 @@
 #include "yaxppx.h"
 #include "string.h"
 #include "helperNodes.h"
+#include "loopSupport.h"
 
 using namespace std;
 
 YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta, string start, string end)
-  : m_alpha(alpha), m_beta(beta)
+  : m_alpha(alpha), m_beta(beta), m_permutation(start, end)
 { 
   SetLayer(layer);
-  if (start.length() != end.length())
-    throw;
-  string::iterator iter = start.begin();
-  for(; iter != start.end(); ++iter) {
-    m_permutation.push_back(end.find(*iter));
-  }
 }
 
 YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta)
@@ -47,7 +42,7 @@ YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta)
   SetLayer(layer);
 }
 
-YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta, const DimVec &perm)
+YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta, const Permutation &perm)
   : m_alpha(alpha), m_beta(beta)
 { 
   SetLayer(layer);
@@ -120,7 +115,7 @@ void YAxpPx::PrintCode(IndStream &out)
   *out << ", " << GetInputName(0).str() << ", ";
   out << m_beta;
   *out  << ", " << GetInputName(1).str() << ", "
-	<< PermutationVarName(m_permutation) << ", " 
+	<< PermutationVarName(m_permutation.m_permutation) << ", " 
 	<< GetInputName(2).str() << " );\n";
 }
 
@@ -129,7 +124,7 @@ void YAxpPx::PrintCode(IndStream &out)
 void YAxpPx::AddVariables(VarSet &set) const
 {
   DLAOp<3,1>::AddVariables(set);
-  Var var(PermutationVarType,m_permutation);
+  Var var(PermutationVarType,m_permutation.m_permutation);
   set.insert(var);
 }
 
@@ -144,10 +139,9 @@ void YAxpPx::Prop()
       if (InputNumDims(1) != numDims || InputNumDims(2) != numDims)
 	throw;
       for (Dim dim = 0; dim < numDims; ++dim) {
-	Dim mapping = m_permutation[dim];
 	if (*InputLen(0,dim) != *InputLen(2,dim))
 	  throw;
-	if (*InputLen(0,dim) != *InputLen(1,mapping))
+	if (*InputLen(0,dim) != *InputLen(1,m_permutation.MapFinishToStart(dim)))
 	  throw;
       }
     }
@@ -156,7 +150,7 @@ void YAxpPx::Prop()
       Dim numDims = InputNumDims(0);
       if (InputNumDims(1) != numDims || InputNumDims(2) != numDims)
 	throw;
-      if (m_permutation.size() != numDims)
+      if (m_permutation.Size() != numDims)
 	throw;
       const DistType in0Type = InputDataType(0).GetEffectiveDist();
       const DistType in1Type = InputDataType(1).GetEffectiveDist();
@@ -167,7 +161,7 @@ void YAxpPx::Prop()
 	if (*InputLen(0,dim) != *InputLen(2,dim))
 	  throw;
 
-	Dim mapping = m_permutation[dim];
+	Dim mapping = m_permutation.MapFinishToStart(dim);
 	if (in0Type.m_dists[dim] != in1Type.m_dists[mapping]) {
 	  cout << dim << endl;
 	  cout << in0Type.PrettyStr() << endl;
@@ -197,7 +191,7 @@ bool DistYAxpPxToDefaultLocalYAxpPx::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != YAxpPx::GetClass())
     return false;
-  if (((YAxpPx*)node)->GetLayer() != DMLAYER && ((YAxpPx*)node)->GetLayer() != ABSLAYER)
+  if (((YAxpPx*)node)->GetLayer() != DMLAYER)
     return false;
   return true;
 }
@@ -209,13 +203,13 @@ void DistYAxpPxToDefaultLocalYAxpPx::Apply(Node *node) const
 
   newYAxpPx->AddInput(node->Input(0),node->InputConnNum(0));
 
-  if (!orig->m_permutation.empty()) {
+  if (orig->m_permutation.HasPerm()) {
     const DataTypeInfo &inputType = orig->InputDataType(0);
     if (inputType.HasPerm())
       throw;
     DistType newType = inputType.GetDist();
     for(Dim dim = 0; dim < newType.m_numDims; ++dim) {
-      newType.m_dists[dim] = inputType.GetDist().m_dists[orig->m_permutation[dim]];
+      newType.m_dists[dim] = inputType.GetDist().m_dists[orig->m_permutation.MapFinishToStart(dim)];
     }
     RedistNode *redist = new RedistNode(newType);
     redist->AddInput(node->Input(1),node->InputConnNum(1));
@@ -239,6 +233,100 @@ void DistYAxpPxToDefaultLocalYAxpPx::Apply(Node *node) const
   node->m_poss->AddNode(newYAxpPx);
   
   node->RedirectChildren(newYAxpPx,0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+YAxpPxLoopExp::YAxpPxLoopExp(Layer fromLayer, Layer toLayer)
+  : 
+  m_fromLayer(fromLayer), 
+  m_toLayer(toLayer)
+{
+}
+
+string YAxpPxLoopExp::GetType() const
+{
+  string str = "YAxpPx Loop Exp " 
+    + LayerNumToStr(m_fromLayer)
+    + " + " 
+    + LayerNumToStr(m_toLayer);
+  return str;
+}
+
+bool YAxpPxLoopExp::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == YAxpPx::GetClass()) {
+    const YAxpPx *axpy = (YAxpPx*)node;
+    if (axpy->GetLayer() == m_fromLayer) {
+      Dim numDims = axpy->InputNumDims(0);
+      for(Dim dim = 0; dim < numDims; ++dim)
+	if (!(*(axpy->InputLen(0,dim)) <= TensorBS.GetSize()))
+	  return true;
+    }
+  }
+  return false;
+}
+
+void YAxpPxLoopExp::Apply(Node *node) const
+{
+  YAxpPx *axpy = (YAxpPx*)node;
+
+  Dim m_dim = 0;
+  Size size = (*(axpy->InputLen(0,0)))[0];
+
+  Dim numDims = axpy->InputNumDims(0);
+  for(Dim dim = 1; dim < numDims; ++dim) {
+    Size newSize = (*(axpy->InputLen(0,dim)))[0];
+    if (newSize > size) {
+      m_dim = dim;
+      size = newSize;
+    }
+  }
+
+  if (size <= TensorBS.GetSize())
+    throw;
+  
+  
+  NodeConn *connA, *connB, *connC;
+  connA = axpy->m_inputs[0];
+  connB = axpy->m_inputs[1];
+  connC = axpy->m_inputs[2];
+
+  SplitSingleIter *xTun = new SplitSingleIter(m_dim, POSSTUNIN, false);
+  xTun->AddInput(connA->m_n, connA->m_num);
+  xTun->SetAllStats(FULLUP);
+  xTun->SetIndepIters();
+
+
+  SplitSingleIter *pxTun = new SplitSingleIter(axpy->m_permutation.MapFinishToStart(m_dim), POSSTUNIN, false);
+  pxTun->AddInput(connB->m_n, connB->m_num);
+  pxTun->SetAllStats(FULLUP);
+  pxTun->SetIndepIters();
+
+
+  SplitSingleIter *yTun = new SplitSingleIter(m_dim, POSSTUNIN, true);
+  yTun->AddInput(connC->m_n, connC->m_num);
+  yTun->SetUpStats(FULLUP,FULLUP,
+		     NOTUP,NOTUP);
+  yTun->SetIndepIters();
+  
+  YAxpPx *newAxpy = new YAxpPx(m_toLayer, 
+			       axpy->m_alpha, 
+			       axpy->m_beta,
+			       axpy->m_permutation);
+  newAxpy->AddInput(xTun, 1);
+  newAxpy->AddInput(pxTun, 1);
+  newAxpy->AddInput(yTun, 1);
+  
+  CombineSingleIter *xOut = xTun->CreateMatchingCombine(0);
+  CombineSingleIter *pxOut = pxTun->CreateMatchingCombine(0);
+  CombineSingleIter *yOut = yTun->CreateMatchingCombine(1,
+							 1, newAxpy, 0);
+					
+  
+  Poss *loopPoss = new Poss(3, xOut, pxOut, yOut);
+  RealLoop *loop = new RealLoop(TENSORLOOP, loopPoss, TensorBS);
+  node->m_poss->AddPSet(loop);
+  node->RedirectChildren(loop->OutTun(2),0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
