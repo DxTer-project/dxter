@@ -50,15 +50,15 @@ void LoadToRegs::Prop()
     Input(0)->Prop();
     if (IsInputColVector(0)) {
       if (IsUnitStride(InputDataType(0).m_rowStride)) {
-	m_cost = CONTIG_VECTOR_LOAD_COST;
+	m_cost = arch->ContigVecLoadCost();
       } else {
-	m_cost = GetVecRegWidth() * CONTIG_VECTOR_LOAD_COST;
+	m_cost = GetVecRegWidth() * arch->ContigVecLoadCost();
       }
     } else {
       if (IsUnitStride(InputDataType(0).m_colStride)) {
-	m_cost = CONTIG_VECTOR_LOAD_COST;
+	m_cost = arch->ContigVecLoadCost();
       } else {
-	m_cost = GetVecRegWidth() * CONTIG_VECTOR_LOAD_COST;
+	m_cost = GetVecRegWidth() * arch->ContigVecLoadCost();
       }
     }
   }
@@ -139,15 +139,15 @@ void StoreFromRegs::Prop()
 
     if (IsInputColVector(1)) {
       if (IsUnitStride(InputDataType(1).m_rowStride)) {
-	m_cost = CONTIG_VECTOR_STORE_COST;
+	m_cost = arch->ContigVecStoreCost();
       } else {
-	m_cost = GetVecRegWidth() * CONTIG_VECTOR_STORE_COST;
+	m_cost = GetVecRegWidth() * arch->ContigVecStoreCost();
       }
     } else {
       if (IsUnitStride(InputDataType(1).m_colStride)) {
-	m_cost = CONTIG_VECTOR_STORE_COST;
+	m_cost = arch->ContigVecStoreCost();
       } else {
-	m_cost = GetVecRegWidth() * CONTIG_VECTOR_STORE_COST;
+	m_cost = GetVecRegWidth() * arch->ContigVecStoreCost();
       }
     }
     

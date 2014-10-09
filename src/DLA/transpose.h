@@ -49,9 +49,9 @@ class Transpose : public DLAOp<1,1>
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void PrintCode(IndStream &out);
 #if DOBLIS
-  static Node* BlankInst() {return new Transpose(NORMAL, false); }
+  static Node* BlankInst() { return new Transpose(NORMAL, false); }
 #elif DOLLDLA
-  static Node* BlankInst() {return new Transpose(NORMAL); }
+  static Node* BlankInst() { return new Transpose(NORMAL); }
 #endif
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual ClassType GetNodeClass() const {return GetClass();}

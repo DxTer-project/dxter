@@ -185,7 +185,6 @@ string RuntimeTest::TimingLoop(ImplementationMap* imps)
   for (i = 1; i <= imps->size(); i++) {
     string opName = m_operationName + "_" + std::to_string((long long int) i);
     loopBody += "\tfor (j = 0; j < NUM_ITERATIONS; j++) {\n";
-    loopBody += FillBuffersWithRandValues("") + "\n";
     loopBody += "\t\tstart_time = rdtsc();\n";
     loopBody += "\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
     loopBody += "\t\tend_time = rdtsc();\n";
@@ -340,9 +339,7 @@ ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName,
   cout << "Num impls " << std::to_string((long long int) numImpls) << endl;
   for (i = 1; i <= numImpls; i++) {
     TimeVec impTimes;
-    cout << "Implementation # " << std::to_string((long long int) i) << endl;
     for (j = 0; j < 1; j++) {
-      cout << "Iteration # " << std::to_string((long long int) j) << endl;
       impTimes.push_back(std::stod(*it));
       it++;
     }
