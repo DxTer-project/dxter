@@ -162,7 +162,7 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, string name, Dim num
   }
   m_varName.m_name = name;
   m_varName.m_type.SetToDefault(m_numDims);
-  m_dataTypeInfo.m_dist.SetToDefault(m_numDims);
+  m_dataTypeInfo.SetToDefault(m_numDims);
 }
 
 InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, Dim numDims)
@@ -184,7 +184,7 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist
   }
   m_varName.m_name = name;
   m_varName.m_type = dist;
-  m_dataTypeInfo.m_dist = dist;
+  m_dataTypeInfo.SetDistAndClearPerm(dist);
 }
 #endif
 
@@ -236,15 +236,15 @@ void InputNode::PrintCode(IndStream &out)
   out.Indent();
   *out << "MakeUniform( " << GetNameStr(0) << " );\n";
   out.Indent();
-  *out << "DistTensor<T> " << m_varName.m_name << "_local( tmen::StringToTensorDist(\"[";
-  for (Dim dim = 0; dim < m_dataTypeInfo.m_dist.m_numDims; ++dim)
-    *out << (dim ? "," : "") << "()";
-  *out << "]|(";
-  for (Dim dim = 0; dim < NUM_GRID_DIMS; ++dim)
-    *out << (dim ? "," : "") << dim;
-  *out << ")\"), g );\n";
-  out.Indent();
-  *out << "GatherAllModes( " << GetNameStr(0) << ", " << m_varName.m_name << "_local );\n";
+  //  *out << "DistTensor<T> " << m_varName.m_name << "_local( tmen::StringToTensorDist(\"[";
+  //  for (Dim dim = 0; dim < m_dataTypeInfo.GetDist().m_numDims; ++dim)
+  //    *out << (dim ? "," : "") << "()";
+  //  *out << "]|(";
+  //  for (Dim dim = 0; dim < NUM_GRID_DIMS; ++dim)
+  //    *out << (dim ? "," : "") << dim;
+  //  *out << ")\"), g );\n";
+  //  out.Indent();
+  //  *out << "GatherAllModes( " << GetNameStr(0) << ", " << m_varName.m_name << "_local );\n";
 #endif
 #endif //DOTENSORS
 }
@@ -739,14 +739,16 @@ TempVarNode::TempVarNode(DistType dist, EntryList sumDims)
     cout << "!numSumDims\n";
     throw;
   }
-  m_info.m_dist.PrepForNumDims(dist.m_numDims+numSumDims);
+  DistType temp;
+  temp.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
-    m_info.m_dist.m_dists[dim] = dist.m_dists[dim];
+    temp.m_dists[dim] = dist.m_dists[dim];
   EntryListIter iter = m_sumDims.begin();
   for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
-    m_info.m_dist.m_dists[dist.m_numDims + dim] = *iter;
+    temp.m_dists[dist.m_numDims + dim] = *iter;
   }
-  m_info.m_dist.m_notReped = dist.m_notReped;
+  temp.m_notReped = dist.m_notReped;
+  m_info.SetDistAndClearPerm(temp);
 }
 
 TempVarNode::TempVarNode(DistType dist, EntryList  sumDims, string name)
@@ -761,14 +763,16 @@ TempVarNode::TempVarNode(DistType dist, EntryList  sumDims, string name)
     cout << "!numSumDims 2\n";
     throw;
   }
-  m_info.m_dist.PrepForNumDims(dist.m_numDims+numSumDims);
+  DistType temp;
+  temp.PrepForNumDims(dist.m_numDims+numSumDims);
   for (Dim dim = 0; dim < dist.m_numDims; ++dim)
-    m_info.m_dist.m_dists[dim] = dist.m_dists[dim];
+    temp.m_dists[dim] = dist.m_dists[dim];
   EntryListIter iter = m_sumDims.begin();
   for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
-    m_info.m_dist.m_dists[dist.m_numDims + dim] = *iter;
+    temp.m_dists[dist.m_numDims + dim] = *iter;
   }
-  m_info.m_dist.m_notReped = dist.m_notReped;
+  temp.m_notReped = dist.m_notReped;
+  m_info.SetDistAndClearPerm(temp);
 }
 #endif
 
@@ -907,7 +911,7 @@ const Sizes* TempVarNode::Len(ConnNum num, Dim dim) const
   if (num > 0)
     throw;
   if (!m_sumDims.empty()) {
-    Dim dims = m_info.m_dist.m_numDims-m_sumDims.size();
+    Dim dims = m_info.GetDist().m_numDims-m_sumDims.size();
     if (dim >= dims)
       return m_sumLens + (dim - dims);
     else
@@ -922,7 +926,7 @@ const Sizes* TempVarNode::LocalLen(ConnNum num, Dim dim) const
   if (num > 0)
     throw;
   if (!m_sumDims.empty()) {
-    Dim dims = m_info.m_dist.m_numDims-m_sumDims.size();
+    Dim dims = m_info.GetDist().m_numDims-m_sumDims.size();
     if (dim >= dims)
       return &m_ones;
     else
@@ -950,7 +954,8 @@ Name TempVarNode::GetName(ConnNum num) const
     tmp.m_name = m_name;
   }
 #if DODM
-  tmp.m_type = m_info.m_dist;
+  tmp.m_type = m_info.GetDist();
+  tmp.m_permutation = m_info.GetPerm();
 #endif
   return tmp;
 }
@@ -1007,11 +1012,13 @@ void TempVarNode::BuildDataTypeCache()
 
   if (m_lsizes)
     return;
- Dim numDims = m_info.m_dist.m_numDims-m_sumDims.size();
+  Dim numDims = m_info.GetDist().m_numDims-m_sumDims.size();
  m_lsizes = new Sizes[numDims];
+
+ DistType type = m_info.GetEffectiveDist();
  
  for (Dim dim = 0; dim < numDims; ++dim)
-   GetLocalSizes(m_info.m_dist, dim, InputLen(0,dim), m_lsizes+dim);
+   GetLocalSizes(type, dim, InputLen(0,dim), m_lsizes+dim);
 
 
  m_sumLens = new Sizes[m_sumDims.size()];
@@ -1224,7 +1231,10 @@ void ScaleNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<1,1>::Prop();
-    m_cost = 0;
+#if DOTENSORS
+    m_cost = TotalNumberOfLocalElements(0);
+#else
+#endif
   }
 }
 

@@ -85,9 +85,17 @@ void AddTrans()
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
 
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
-   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DMLAYER), DPTENSORPHASE);
+  
+  Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllAllGathers, ROTENSORPHASE);
+
+#if DOPACKOPTPHASE
+    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(0), PACKOPTPHASE);
+    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(1), PACKOPTPHASE);
+    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(2), PACKOPTPHASE);
+#endif
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
@@ -255,8 +263,37 @@ int main(int argc, const char* argv[])
   }
 #endif
 
+
+#if DOPACKOPTPHASE
+  if (CurrPhase == PACKOPTPHASE) {
+    cout << "Pack optimization phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Prop();
+    uni.CullWorstPerformers(.99, 3);
+    time(&end);
+    cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.InlineAllSets();
+    time(&end);
+    cout << "Inlining took " << difftime(end,start2) << " seconds\n";
+    time(&start2);
+    uni.Expand(numIters, PACKOPTPHASE, TenCullRO);
+    time(&end);
+    cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
+
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
+
 
 #if 0
   uni.PrintAll(algNum);

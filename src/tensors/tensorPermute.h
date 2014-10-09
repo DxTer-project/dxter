@@ -34,11 +34,11 @@ class Permute : public DLANode
 {
  public:
   DataTypeInfo m_info;
-  DimVec m_permutation;
+  Permutation m_permutation;
   Permute(string start, string end, Layer layer);
-  Permute(const DimVec &permutation, Layer layer);
+  Permute(const Permutation &permutation, Layer layer);
   virtual const DataTypeInfo& DataType(ConnNum num) const {return m_info;}
-  static Node* BlankInst() { return new Permute("","",ABSLAYER); }
+  static Node* BlankInst() { return new Permute("ab","ba",ABSLAYER); }
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

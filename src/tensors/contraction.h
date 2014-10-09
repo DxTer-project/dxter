@@ -34,6 +34,7 @@ class Contraction : public DLAOp<3,1>
   Type m_type;
   string m_AIndices, m_BIndices, m_CIndices;
   string m_contIndices;
+  bool m_needsPacking;
   Contraction(Layer layer, Coef alpha, Coef beta, Type type, 
 	      string AIndices, string BIndices, string CIndices,
 	      string contIndices);
@@ -152,6 +153,17 @@ class ContractionLowerLayer : public LowerLayer
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };
+
+class PermuteWhileUnpacking : public SingleTrans
+{
+ public:
+  unsigned int m_type;
+ PermuteWhileUnpacking(unsigned int type) : m_type(type) {}
+  virtual string GetType() const { return (string)"PermuteWhileUnpacking " + std::to_string(m_type);}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 
 #endif
 

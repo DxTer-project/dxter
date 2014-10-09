@@ -397,19 +397,83 @@ DataTypeInfo::DataTypeInfo(DistType dist)
 {
 }
 
+#if DOTENSORS
+DataTypeInfo::DataTypeInfo(DistType dist, const Permutation &perm)
+  : m_dist(dist),
+    m_perm(perm)
+{
+
+}
+#endif
+
+
 
 DataTypeInfo::DataTypeInfo(const DataTypeInfo &rhs)
 {
   m_dist = rhs.m_dist;
+#if DOTENSORS
+  m_perm = rhs.m_perm;
+#endif
 }
+
 
 DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
 {
   m_dist = rhs.m_dist;
+#if DOTENSORS
+  m_perm = rhs.m_perm;
+#endif
   return *this;
 }
 
-#endif
+#if DOTENSORS
+
+bool DataTypeInfo::operator==(const DataTypeInfo &rhs) const
+{
+  if (DistTypeNotEqual(m_dist,rhs.m_dist))
+    return false;
+#if DOTENSORS
+  if (m_perm != rhs.m_perm)
+    return false;
+#endif 
+  return true;
+}
+
+void DataTypeInfo::SetPerm(const Permutation &perm)
+{
+  m_perm = perm;
+}
+
+string DataTypeInfo::Str() const
+{
+  return m_dist.str() + " perm " + m_perm.Str();
+}
+
+bool DataTypeInfo::operator!=(const DataTypeInfo &rhs) const
+{
+  return ! (*this == rhs);
+}
+
+DistType DataTypeInfo::GetEffectiveDist() const
+{
+  return m_dist.Permute(m_perm);
+}
+
+void DataTypeInfo::SetToDefault(Dim numDims)
+{
+  m_dist.SetToDefault(numDims);
+  m_perm.m_permutation.clear();
+}
+
+void DataTypeInfo::SetDistAndClearPerm(const DistType &dist)
+{
+  m_dist = dist;
+  m_perm.m_permutation.clear();
+}
+
+#endif //DOTENSORS
+
+#endif //DODM
 
 #if TWOD
 bool DLANode::IsInputRowVector(ConnNum num) const

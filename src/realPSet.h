@@ -84,6 +84,8 @@ class RealPSet : public BasePSet
   virtual void BuildDataTypeCache();
   virtual void ClearDataTypeCache();
 
+  void InlineAllSets();
+
   void SetInTunsAsPrinted();
   bool RemoveLoops(bool *doneSomething);
 
@@ -112,7 +114,7 @@ class PossCostComparison
       throw;
     if (rhs->m_cost < 0)
       throw;
-    return lhs->m_cost < rhs->m_cost;
+    return lhs->m_cost > rhs->m_cost;
   }
 };
 

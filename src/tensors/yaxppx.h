@@ -33,9 +33,9 @@ class YAxpPx : public DLAOp<3,1>
 {
  public:
   Coef m_alpha, m_beta;
-  DimVec m_permutation;
+  Permutation m_permutation;
   YAxpPx(Layer layer, Coef alpha, Coef beta, string startIndices, string endIndices);
-  YAxpPx(Layer layer, Coef alpha, Coef beta, const DimVec &perm);
+  YAxpPx(Layer layer, Coef alpha, Coef beta, const Permutation &perm);
   YAxpPx(Layer layer, Coef alpha, Coef beta);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
@@ -43,7 +43,7 @@ class YAxpPx : public DLAOp<3,1>
   virtual NodeType GetType() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "axppx";}
-  static Node* BlankInst() { return new YAxpPx(ABSLAYER, COEFZERO, COEFZERO, "", ""); }
+  static Node* BlankInst() { return new YAxpPx(ABSLAYER, COEFZERO, COEFZERO, "ab", "ba"); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
@@ -64,15 +64,16 @@ class DistYAxpPxToDefaultLocalYAxpPx : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
-/*
-class DistYAxpPxToNonDefaultLocalYAxpPx : public SingleTrans
+class YAxpPxLoopExp : public SingleTrans
 {
  public:
-  virtual string GetType() const {return "DistYAxpPx to NonDefault Dist LocalYAxpPx";}
+  Layer m_fromLayer, m_toLayer;
+  YAxpPxLoopExp(Layer fromLayer, Layer toLayer);
+  
+  virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
-*/
 
 #endif //DOTENSORS

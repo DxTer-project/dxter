@@ -24,20 +24,17 @@
 #if DOTENSORS
 
 Permute::Permute(string start, string end, Layer layer)
+ : m_permutation(start,end)
 {
-  if (start == end)
+  if (start.empty())
     throw;
   SetLayer(layer);
-  if (start.length() != end.length())
-    throw;
-  string::iterator iter = start.begin();
-  for(; iter != start.end(); ++iter) {
-    m_permutation.push_back(end.find(*iter));
-  }
 }
 
-Permute::Permute(const DimVec &permutation, Layer layer)
+Permute::Permute(const Permutation &permutation, Layer layer)
 {
+  if (!permutation.Size())
+    throw;
   SetLayer(layer);
   m_permutation = permutation;
 }
@@ -52,12 +49,7 @@ void Permute::Duplicate(const Node *orig, bool shallow, bool possMerging)
 
 NodeType Permute::GetType() const 
 {
-  string str = LayerNumToStr(GetLayer()) + "perm";
-  DimVecConstIter iter = m_permutation.begin();
-  for(; iter != m_permutation.end(); ++iter) {
-    str += std::to_string(*iter);
-  }
-  return str;  
+  return LayerNumToStr(GetLayer()) + "perm" + m_permutation.Str();
 }
 
 void Permute::Prop()
@@ -67,6 +59,7 @@ void Permute::Prop()
 
     if (m_inputs.size() != 1) {
       cout << "m_inputs.size() != 1\n";
+      cout << m_inputs.size() << endl;
       throw;
     }
     
@@ -84,12 +77,9 @@ void Permute::Prop()
 	}
       case (SMLAYER):
 	{
-	  m_cost = 1;
-	  if (InputLocalLen(0,0)->NumSizes() != 1)
+	  if (m_permutation.Size() != InputNumDims(0))
 	    throw;
-	  for (Dim dim = 0; dim < m_permutation.size(); ++dim)
-	    m_cost *= (*InputLocalLen(0,dim))[0];
-	  m_cost *= PSIW + PSIR;
+	  m_cost *= (PSIW + PSIR) * TotalNumberOfLocalElements(0);
 	  break;
 	}
       default:
@@ -124,33 +114,24 @@ const Sizes* Permute::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
-  if (dim >= m_permutation.size())
+  if (dim >= m_permutation.Size())
     throw;
-  return InputLen(0,m_permutation[dim]);
+  return InputLen(0,m_permutation.MapFinishToStart(dim));
 }
 
 const Sizes* Permute::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
-  if (dim >= m_permutation.size())
+  if (dim >= m_permutation.Size())
     throw;
-  return InputLocalLen(0,m_permutation[dim]);
+  return InputLocalLen(0,m_permutation.MapFinishToStart(dim));
 }
-
-
 
 void Permute::BuildDataTypeCache()
 {
-  const DataTypeInfo &inputType = InputDataType(0);
-  if (m_permutation.size() != inputType.m_dist.m_numDims)
-    throw;
-  m_info.m_dist = inputType.m_dist;
-  for(Dim dim = 0; dim < inputType.m_dist.m_numDims; ++dim) {
-    m_info.m_dist.m_dists[dim] = inputType.m_dist.m_dists[m_permutation[dim]];
-  }
-  if (DistTypeEqual(m_info.m_dist, inputType.m_dist))
-    throw;
+  m_info = InputDataType(0);
+  m_info.SetPerm(m_info.GetPerm().ComposeWith(m_permutation));
 }
 
 void Permute::FlattenCore(ofstream &out) const
@@ -170,8 +151,9 @@ Name Permute::GetName(ConnNum num) const
   if (num > 0)
     throw;
   Name name = GetInputName(0);
-  name.m_type = m_info.m_dist;
-  name.m_name += "_p";
+  name.m_type = m_info.GetDist();
+  name.m_permutation = m_info.GetPerm();
+  //  name.m_name += "_perm" + m_info.GetPerm().Str();
   return name;
 }
 
@@ -179,16 +161,14 @@ void Permute::PrintCode(IndStream &out)
 {  
   //Reflect in AddVars
   out.Indent();
-  throw;
-
+  cout << "Permute( " << GetInputNameStr(0) << ", " << GetNameStr(0) << " );\n";
 }
 
 void Permute::AddVariables(VarSet &set) const
 {
   DLANode::AddVariables(set);
-  
-  throw; //permutation
-  
+  Var var(PermutationVarType, m_permutation.m_permutation);
+  set.insert(var);  
 }
 
 bool LowerPermute::CanApply(const Node *node) const

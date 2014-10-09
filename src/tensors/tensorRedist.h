@@ -30,6 +30,7 @@
 #include "transform.h"
 #include "DLAOp.h"
 #include "tensorSumScatter.h"
+#include "base.h"
 
 void GetSuffix(const DimVec &dims1, const DimVec &dims2, 
 	       DimVec &suff);
@@ -44,8 +45,9 @@ class RedistNode : public DLANode
   string m_name;
   RedistNode();
   RedistNode(const DistType &destType);
+  RedistNode(const DistType &destType, const Permutation &perm);
   virtual ~RedistNode();
-  virtual const DataTypeInfo& DataType(ConnNum num) const {return m_info; }
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
   static Node* BlankInst() { return  new RedistNode; }
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }

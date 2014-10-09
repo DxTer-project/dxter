@@ -1,23 +1,23 @@
 /*
- This file is part of DxTer.
- DxTer is a prototype using the Design by Transformation (DxT)
- approach to program generation.
- 
- Copyright (C) 2014, The University of Texas and Bryan Marker
- 
- DxTer is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- DxTer is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
- */
+  This file is part of DxTer.
+  DxTer is a prototype using the Design by Transformation (DxT)
+  approach to program generation.
+  
+  Copyright (C) 2014, The University of Texas and Bryan Marker
+  
+  DxTer is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  DxTer is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #include "tensorRedist.h"
 #include <ostream>
 #include <sstream>
@@ -122,8 +122,12 @@ void SumScatterUpdateNode::Prop()
 
     m_cost = 0;
 
-    const DistType &inType = InputDataType(0).m_dist;
-    const DistType &outType = InputDataType(1).m_dist;
+    //need to update everything
+    if (InputDataType(1).HasPerm())
+      throw;
+
+    const DistType &inType = InputDataType(0).GetDist();
+    const DistType &outType = InputDataType(1).GetDist();
 
 
     
@@ -194,54 +198,44 @@ void SumScatterUpdateNode::Prop()
       
     }
     
-    if (m_sumDims.size() == 1) {
-      unsigned int numProcs = 1;
+    unsigned int numProcs = 1;
 
-      DimVec sums = (*(m_sumDims.begin())).DistEntryDims();
+    EntryListIter iter = m_sumDims.begin();
+    for(; iter != m_sumDims.end(); ++iter) {
+      DimVec sums = (*(iter)).DistEntryDims();
       DimVecConstIter iter = sums.begin();
       for(; iter != sums.end(); ++iter) {
 	numProcs *= GridLens[*iter];
       }
-
-      DLANode *input = (DLANode*)(Input(1));
-      ConnNum num = InputConnNum(1);
-      const Dim numDims = input->NumDims(num);
-
-      if (inType.m_notReped != outType.m_notReped) {
-	input = (DLANode*)(Input(0));
-	num = InputConnNum(0);
-	m_cost = input->LocalLen(num,0)->NumSizes() * ReduceScatter(numProcs,numProcs);
-      }
-      else {
-	const unsigned int totNumIters = input->LocalLen(num,0)->NumSizes();
-	for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
-	  Cost temp = 1;
-	  for (Dim dim = 0; dim < numDims; ++dim) {
-	    temp *= (*(input->LocalLen(num,dim)))[iteration];
-	  }
-	  m_cost += ReduceScatter(temp*numProcs, numProcs);
-	}
-      }
     }
-    else if (inType.m_numDims == outType.m_numDims) {
-      cout << "in : " << inType.str() << endl;
-      cout << "out : " << outType.str() << endl;
-      cout << "sumDims " << m_sumDims.size() << endl;
-      cout << Input(0)->GetNodeClass() << endl;
-      SumScatterUpdateNode *in = (SumScatterUpdateNode*)Input(0);
-      cout << "sumdims = " << in->m_sumDims.size() << endl;
-      cout << in->InputDataType(0).m_dist.str() << endl;
-      cout << in->InputDataType(1).m_dist.str() << endl;
-      throw;
+
+    DLANode *input = (DLANode*)(Input(1));
+    ConnNum num = InputConnNum(1);
+    const Dim numDims = input->NumDims(num);
+
+    if (inType.m_notReped != outType.m_notReped) {
+      input = (DLANode*)(Input(0));
+      num = InputConnNum(0);
+      m_cost = input->LocalLen(num,0)->NumSizes() * ReduceScatter(numProcs,numProcs);
+    }
+    else {
+      const unsigned int totNumIters = input->LocalLen(num,0)->NumSizes();
+      for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+	Cost temp = 1;
+	for (Dim dim = 0; dim < numDims; ++dim) {
+	  temp *= (*(input->LocalLen(num,dim)))[iteration];
+	}
+	m_cost += ReduceScatter(temp*numProcs, numProcs);
+      }
     }
   }
 }
 
 void SumScatterUpdateNode::CheckSumDimsInOutput() const
 {
-    const DistType &outType = InputDataType(1).m_dist;
+  const DistType &outType = InputDataType(1).GetDist();
     
-    if (InputDataType(0).m_dist.m_notReped != outType.m_notReped)
+  if (InputDataType(0).GetDist().m_notReped != outType.m_notReped)
       return;
 
     DimSet allSumDims;
@@ -271,18 +265,17 @@ void SumScatterUpdateNode::CheckSumDimsInOutput() const
     if (!foundAll) {
       cout << "bad out type\n";
       cout << "outType " << outType.str() << endl;
-      cout << "inType " << InputDataType(0).m_dist.str() << endl;
+      cout << "inType " << InputDataType(0).GetDist().str() << endl;
       m_poss->PrintTransVec();
       throw;
     }
-
 }
 
 Phase SumScatterUpdateNode::MaxPhase() const
 {
 
-  const DistType &inType = InputDataType(0).m_dist;
-  const DistType &outType = InputDataType(1).m_dist;
+  const DistType &inType = InputDataType(0).GetDist();
+  const DistType &outType = InputDataType(1).GetDist();
 
   if (CurrPhase >= SUMSCATTERTENSORPHASE) {
     DistEntry sumDims;
@@ -381,8 +374,8 @@ Phase SumScatterUpdateNode::MaxPhase() const
 
 void SumScatterUpdateNode::PrintCode(IndStream &out)
 {
-  const DistType &m_srcType = InputDataType(0).m_dist;
-  const DistType &m_destType = InputDataType(1).m_dist;
+  const DistType &m_srcType = InputDataType(0).GetDist();
+  const DistType &m_destType = InputDataType(1).GetDist();
 
   Dim srcNumDims = m_srcType.m_numDims;
 
@@ -413,11 +406,15 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 
     if (m_srcType.m_notReped != m_destType.m_notReped) {
       if (m_coef != COEFZERO) {
-	throw;
-	//need to use an ReduceScatterUpdateRedistFrom flavor
+	*out << outName << ".ReduceToOneUpdateRedistFrom( "
+	     << inName << ", ";
+	out << m_coef;
+	*out << ", ";
       }
-      *out << outName << ".ReduceToOneRedistFrom( "
-	   << inName << ", ";
+      else {
+	*out << outName << ".ReduceToOneRedistFrom( "
+	     << inName << ", ";
+      }
       bool found = false;
       for(Dim dim = 0; !found &&dim < srcNumDims; ++dim) {
 	if (m_srcType.m_dists[dim] == sumDims) {
@@ -490,11 +487,15 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 
     if (m_srcType.m_notReped != m_destType.m_notReped) {
       if (m_coef != COEFZERO) {
-	throw;
-	//need to use an ReduceScatterUpdateRedistFrom flavor
+	*out << outName << ".ReduceToOneUpdateRedistFrom( "
+	     << inName << ", ";
+	out << m_coef;
+	*out << ", ";
       }
-      *out << outName << ".ReduceToOneRedistFrom( "
-	   << inName << ", ";
+      else {
+	*out << outName << ".ReduceToOneRedistFrom( "
+	     << inName << ", ";
+      }
 
       EntrySet dimSet;
       dimSet.insert(m_sumDims.begin(), m_sumDims.end());
@@ -556,8 +557,8 @@ void SumScatterUpdateNode::AddVariables(VarSet &set) const
   DLAOp<2,1>::AddVariables(set);
 #if ALLOWMULTIMODESCATTER
   if (m_sumDims.size() > 1) {
-    const DistType &m_srcType = InputDataType(0).m_dist;
-    const DistType &m_destType = InputDataType(1).m_dist;
+    const DistType &m_srcType = InputDataType(0).GetDist();
+    const DistType &m_destType = InputDataType(1).GetDist();
     if (m_srcType.m_notReped != m_destType.m_notReped) {
       EntrySet dimSet;
       dimSet.insert(m_sumDims.begin(), m_sumDims.end());
@@ -601,8 +602,8 @@ void SumScatterUpdateNode::AddVariables(VarSet &set) const
 bool SeparateRedistFromSumScatter::CanApply(const Node *node) const
 {
   const SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
-  const DistType &inType = sum->InputDataType(0).m_dist;
-  const DistType &outType = sum->InputDataType(1).m_dist;
+  const DistType &inType = sum->InputDataType(0).GetDist();
+  const DistType &outType = sum->InputDataType(1).GetDist();
 
   if (inType.m_notReped != outType.m_notReped)
     return false;
@@ -621,7 +622,7 @@ bool SeparateRedistFromSumScatter::CanApply(const Node *node) const
     DistEntry inEntry = inType.m_dists[dim];
     if (dim >= outType.m_numDims) {
       cout << "dim >= outType.m_numDims\n";
-      cout << sum->InputDataType(0).m_dist.str() << " -> " 
+      cout << sum->InputDataType(0).GetDist().str() << " -> " 
 	   << outType.str() << " with " << sum->m_sumDims.size() << endl;
       sum->m_poss->PrintTransVec();
       throw;
@@ -656,8 +657,8 @@ void SeparateRedistFromSumScatter::Apply(Node *node) const
 {
   SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
 
-  DistType inTypeInt = sum->InputDataType(0).m_dist;
-  const DistType &outType = sum->InputDataType(1).m_dist;
+  DistType inTypeInt = sum->InputDataType(0).GetDist();
+  const DistType &outType = sum->InputDataType(1).GetDist();
 
   const EntryList &sumDims = sum->m_sumDims;
 
@@ -672,7 +673,7 @@ void SeparateRedistFromSumScatter::Apply(Node *node) const
     DistEntry inEntry = inTypeInt.m_dists[dim];
     if (dim >= outType.m_numDims) {
       cout << "dim >= outType.m_numDims\n";
-      cout << sum->InputDataType(0).m_dist.str() << " -> " 
+      cout << sum->InputDataType(0).GetDist().str() << " -> " 
 	   << outType.str() << " with " << sum->m_sumDims.size() << endl;
       throw;
     }
@@ -705,7 +706,7 @@ void SeparateRedistFromSumScatter::Apply(Node *node) const
     throw;
   }
   
-  if (DistTypeEqual(inTypeInt,sum->InputDataType(0).m_dist)) {
+  if (DistTypeEqual(inTypeInt,sum->InputDataType(0).GetDist())) {
     cout << "same dist\n";
     throw;
   }
@@ -714,14 +715,14 @@ void SeparateRedistFromSumScatter::Apply(Node *node) const
   RedistNode *redist = new RedistNode(inTypeInt);
   redist->AddInput(sum->Input(0), sum->InputConnNum(0));
 
-  if (inTypeInt == sum->InputDataType(0).m_dist)
+  if (inTypeInt == sum->InputDataType(0).GetDist())
     throw;
   
   node->m_poss->AddNode(redist);
 
   if (!inTypeInt.IsSane()) {
     cout << "!sane: " << inTypeInt.str() << endl;
-    cout << "was " << sum->InputDataType(0).m_dist.str() << " -> "
+    cout << "was " << sum->InputDataType(0).GetDist().str() << " -> "
 	 << outType.str() << " with " << sumDims.size() << endl;
       EntryListConstIter iter = sumDims.begin();
       for(; iter != sumDims.end(); ++iter) {
@@ -747,8 +748,8 @@ bool SplitSumScatter::CanApply(const Node *node) const
 {
   const SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
   
-  const DistType &inType = sum->InputDataType(0).m_dist;
-  const DistType &outType = sum->InputDataType(1).m_dist;
+  const DistType &inType = sum->InputDataType(0).GetDist();
+  const DistType &outType = sum->InputDataType(1).GetDist();
 
   if (inType.m_notReped != outType.m_notReped) {
     if (m_dim >= inType.m_numDims)
@@ -826,8 +827,8 @@ void SplitSumScatter::Apply(Node *node) const
 {
   SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
 
-  const DistType &inType = sum->InputDataType(0).m_dist;
-  const DistType &outType = sum->InputDataType(1).m_dist;
+  const DistType &inType = sum->InputDataType(0).GetDist();
+  const DistType &outType = sum->InputDataType(1).GetDist();
 
 
   if (inType.m_notReped != outType.m_notReped) {
@@ -850,7 +851,7 @@ void SplitSumScatter::Apply(Node *node) const
       throw;
 
 
-    DistType intType = sum->DataType(0).m_dist;
+    DistType intType = sum->DataType(0).GetDist();
     {
       DimSet set = inType.m_notReped.DistEntryDimSet();
       DimSet tempSet = inEntry.DistEntryDimSet();
@@ -880,7 +881,7 @@ void SplitSumScatter::Apply(Node *node) const
     node->ChangeInput2Way(node->Input(0), node->InputConnNum(0),
 			  newSum, 0);
 
-    //    cout << "new sum scatter " << newSum->InputDataType(0).m_dist.PrettyStr() << " -> "
+    //    cout << "new sum scatter " << newSum->InputDataType(0).GetDist().PrettyStr() << " -> "
     //	 <<  newSum->GetDistType(0).PrettyStr() << endl;
 
 
@@ -984,7 +985,7 @@ void SplitSumScatter::Apply(Node *node) const
 
 	  RedistNode *newRedist = NULL;
 	  if (needRedist) {
-	    if (newOutTypeFull == newSum->DataType(0).m_dist)
+	    if (newOutTypeFull == newSum->DataType(0).GetDist())
 	      needRedist = false;
 	    else {
 	      newRedist = new RedistNode(newOutTypeFull);
@@ -993,10 +994,10 @@ void SplitSumScatter::Apply(Node *node) const
 	      node->m_poss->AddNode(newRedist);
 	      
 	      if (!newOutTypeFull.IsSane()) {
-		cout << "created new " << newSum->DataType(0).m_dist.str() << " -> " << newOutTypeFull.str() << endl;
+		cout << "created new " << newSum->DataType(0).GetDist().str() << " -> " << newOutTypeFull.str() << endl;
 		throw;
 	      }
-	      if (newSum->DataType(0).m_dist.m_numDims != newOutTypeFull.m_numDims)
+	      if (newSum->DataType(0).GetDist().m_numDims != newOutTypeFull.m_numDims)
 		throw;
 	    }
 	  }
@@ -1035,8 +1036,8 @@ bool MoveSumScatterRedistAfter::CanApply(const Node *node) const
 {
   const SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
   
-  const DistType &inType = sum->InputDataType(0).m_dist;
-  const DistType &outType = sum->InputDataType(1).m_dist;
+  const DistType &inType = sum->InputDataType(0).GetDist();
+  const DistType &outType = sum->InputDataType(1).GetDist();
 
   for (Dim dim = 0; dim < outType.m_numDims; ++dim) {
     DistEntry inEntry = inType.m_dists[dim];
@@ -1086,8 +1087,8 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
 {
   SumScatterUpdateNode *sum = (SumScatterUpdateNode*)node;
   
-  const DistType &inType = sum->InputDataType(0).m_dist;
-  const DistType &outType = sum->InputDataType(1).m_dist;
+  const DistType &inType = sum->InputDataType(0).GetDist();
+  const DistType &outType = sum->InputDataType(1).GetDist();
   DistType outTypeInt = outType;
 
   for (Dim dim = 0; dim < outTypeInt.m_numDims; ++dim) {
@@ -1137,7 +1138,7 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
   redist->AddInput(node->Input(1), node->InputConnNum(1));
   node->m_poss->AddNode(redist);
 
-  if (outTypeInt == redist->InputDataType(0).m_dist)
+  if (outTypeInt == redist->InputDataType(0).GetDist())
     throw;
 
   SumScatterUpdateNode *newSum = new SumScatterUpdateNode(sum->m_coef, sum->m_sumDims);
@@ -1150,7 +1151,7 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
   redist2->AddInput(newSum, 0);
   node->m_poss->AddNode(redist2);
 
-  if (outType == redist2->InputDataType(0).m_dist)
+  if (outType == redist2->InputDataType(0).GetDist())
     throw;
   
   
@@ -1159,8 +1160,4 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
 }
 
 #endif
-
-
-
-
 

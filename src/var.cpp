@@ -133,7 +133,7 @@ Var::Var(const Name &name)
 {
   m_type = TensorVarType;
   m_name = new Name(name);
-  m_compStr = "b"+m_name->str();
+  m_compStr = "f"+m_name->str();
 }
 #endif
 
@@ -154,7 +154,7 @@ Var::Var(VarType type, const DimVec &vec)
     m_type = PermutationVarType;
     m_vec = new DimVec(vec);
     std::stringstream str;
-    str << "f";
+    str << "b";
     DimVecConstIter iter = m_vec->begin();
     for(; iter != m_vec->end(); ++iter)
       str << "_" << *iter;
@@ -343,6 +343,20 @@ void Var::PrintDecl(IndStream &out) const
 	*out << "DistTensor<double> " << m_name->str() << "( "
 	     << TensorDistVarName(m_name->m_type)
 	     << ", g );" << endl;
+	if (m_name->m_permutation.Size()) {
+	  out.Indent();
+	  *out << m_name->str() << ".SetLocalPermutation( "
+	       << PermutationVarName(m_name->m_permutation.m_permutation) 
+	       << " );\n";
+	}
+	else {
+	  Permutation defaultPerm;
+	  defaultPerm.SetToDefault(m_name->m_type.m_numDims);
+	  out.Indent();
+	  *out << m_name->str() << ".SetLocalPermutation( "
+	       << PermutationVarName(defaultPerm.m_permutation) 
+	       << " );\n";
+	}
 	break;
       }
     case (DistEntryVecVarType):

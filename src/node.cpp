@@ -88,16 +88,18 @@ void Node::Cull(Phase phase)
 #if DOTENSORS
       if (GetNodeClass() == SumScatterUpdateNode::GetClass()) {
 	SumScatterUpdateNode *sum = (SumScatterUpdateNode*)this;
-	cout << "sumscatter " << sum->InputDataType(0).m_dist.str() 
-	     << " -> " << sum->DataType(0).m_dist.str() << endl;
+	cout << "sumscatter " << sum->InputDataType(0).GetEffectiveDist().str() 
+	     << " -> " << sum->DataType(0).GetEffectiveDist().str() << endl;
       }
 
 #endif
       for (ConnNum i = 0; i < m_inputs.size(); ++i) {
         DLANode *in = (DLANode*)Input(i);
         cout << "Input " << i 
-#if DOELEM||DOTENSORS
+#if DOELEM
 	     << " " << DistTypeToStr(((DLANode*)this)->InputDataType(i).m_dist) << endl;
+#elif DOTENSORS
+	<< " " << DistTypeToStr(((DLANode*)this)->InputDataType(i).GetEffectiveDist()) << endl;
 #else
 	<<endl;
 #endif
@@ -301,8 +303,8 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
 	  --i;
 	}
       else {
-	cout << "this " << this << " " << this->GetNodeClass() << endl;
-	cout << "child " << child << " " << child->GetNodeClass() << endl;
+	cout << "this " << this << " " << this->GetType() << endl;
+	cout << "child " << child << " " << child->GetType() << endl;
 	cout << "map[m_children[i]->m_n] size = " << map.size() << endl;
 	printf("didn't find child %p %s, %p %s\n", m_children[i]->m_n, m_children[i]->m_n->GetType().c_str(), this, GetType().c_str());
 	cout << "m_poss = " << m_poss << endl;
@@ -966,6 +968,16 @@ void Node::AddVariables(VarSet &set) const
     set.insert(var);
     Var var2(name.m_type);
     set.insert(var2);
+    if (name.m_permutation.Size()) {
+      Var var(PermutationVarType, name.m_permutation.m_permutation);
+      set.insert(var);
+    }
+    else {
+      Permutation defaultPerm;
+      defaultPerm.SetToDefault(name.m_type.m_numDims);
+      Var var(PermutationVarType, defaultPerm.m_permutation);
+      set.insert(var);
+    }
   }
 #endif
 }
@@ -993,8 +1005,10 @@ string Node::GetFunctionalityString() const
     }
     else if (in->IsTunnel(SETTUNOUT)) {
       const BasePSet *set = ((Tunnel*)in)->m_pset;
-      if (!set)
+      if (!set) {
+	cout << in->GetType() << endl;
 	throw;
+      }
       str += "(";
       str += set->GetFunctionalityString();
       str += ")";

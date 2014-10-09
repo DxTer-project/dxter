@@ -135,6 +135,8 @@ class Poss
   void BuildDataTypeCache();
   void ClearDataTypeCache();
 
+  virtual void InlineAllSets();
+
   void Flatten(ofstream &out) const;
   static void FlattenStatic(ofstream &out);
   void Unflatten(ifstream &in, SaveInfo &info);

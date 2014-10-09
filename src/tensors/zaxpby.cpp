@@ -126,12 +126,12 @@ void ZAxpBy::Prop()
       if (InputNumDims(1) != numDims || InputNumDims(2) != numDims)
 	throw;
       for (Dim dim = 0; dim < numDims; ++dim) {
-	const DataTypeInfo &in0Type = InputDataType(0);
-	const DataTypeInfo &in1Type = InputDataType(1);
-	const DataTypeInfo &in2Type = InputDataType(2);
-	if (in0Type.m_dist.m_dists[dim] != in1Type.m_dist.m_dists[dim])
+	const DistType in0Type = InputDataType(0).GetEffectiveDist();
+	const DistType in1Type = InputDataType(1).GetEffectiveDist();
+	const DistType in2Type = InputDataType(2).GetEffectiveDist();
+	if (in0Type.m_dists[dim] != in1Type.m_dists[dim])
 	  throw;
-	if (in0Type.m_dist.m_dists[dim] != in2Type.m_dist.m_dists[dim])
+	if (in0Type.m_dists[dim] != in2Type.m_dists[dim])
 	  throw;
 	
 	if (*InputLen(0,dim) != *InputLen(1,dim))

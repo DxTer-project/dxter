@@ -87,4 +87,5 @@ class Universe
   void LoadFromFile(string fileName);
   void Unflatten(ifstream &in);
   void CullWorstPerformers(double percentToCull, int ignoreThreshold);
+  void InlineAllSets();
 };

@@ -94,6 +94,17 @@ DistType& DistType::operator=(const DistType &rhs)
   return *this;
 }
 
+DistType DistType::Permute(const Permutation &perm) const
+{
+  DistType ret;
+  ret.m_notReped = m_notReped;
+  ret.PrepForNumDims(m_numDims);
+  for(Dim dim = 0; dim < m_numDims; ++dim) {
+    ret.m_dists[perm.MapStartToFinish(dim)] = m_dists[dim];
+  }
+  return ret;
+}
+
 void DistType::PrepForNumDims(Dim numDims)
 {
   if (m_dists)
@@ -772,7 +783,15 @@ string Name::str() const
   else
     return name + "_" + DistTypeToStr(m_type);
 #elif DOTENSORS
-  return m_name + "_" + DistTypeToStr(m_type);
+  string name = m_name;
+  if (m_permutation.Size()) {
+    name += "_perm" + m_permutation.Str();
+    name += "_" + DistTypeToStr(m_type.Permute(m_permutation));
+  }
+  else {
+    name += "_" + DistTypeToStr(m_type);
+  }
+  return name;
 #else
   return m_name;
 #endif
@@ -790,6 +809,9 @@ Name& Name::operator= (const Name &rhs)
 #if DODM
   m_type = rhs.m_type;
 #endif
+#if DOTENSORS
+  m_permutation = rhs.m_permutation;
+#endif
   m_name = rhs.m_name;
   return *this;
 }
@@ -799,6 +821,10 @@ void Name::Flatten(ofstream &out) const
 #if DODM
   WRITE(m_type);
 #endif
+#if DOTENSORS
+  throw;
+  //m_permutation
+#endif
   out << m_name << endl;
 
 }
@@ -807,6 +833,10 @@ void Name::Unflatten(ifstream &in)
 {
 #if DODM
   READ(m_type);
+#endif
+#if DOTENSORS
+  throw;
+  //m_permutation
 #endif
   getline(in, m_name);
 }

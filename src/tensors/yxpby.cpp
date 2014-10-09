@@ -89,7 +89,7 @@ void YxpBy::Prop()
       m_cost = 2 * TotalNumberOfElements(0);
     else if (m_layer == SMLAYER) {
       m_cost = 2 * TotalNumberOfLocalElements(0);
-      if (InputDataType(0).m_dist != InputDataType(1).m_dist)
+      if (InputDataType(0).GetEffectiveDist() != InputDataType(1).GetEffectiveDist())
 	throw;
 
       if (m_beta == COEFZERO)

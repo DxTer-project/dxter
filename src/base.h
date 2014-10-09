@@ -246,6 +246,7 @@ typedef EntryList::const_iterator EntryListConstIter;
 class DistType;
 inline bool DistTypeNotEqual(const DistType &one, const DistType &two);
 inline bool DistTypeEqual(const DistType &one, const DistType &two);
+class Permutation;
 
 class DistType
 {
@@ -272,6 +273,7 @@ class DistType
   DistType& operator=(const DistType &rhs);
   bool operator==(const DistType &rhs) const {return DistTypeEqual(*this,rhs);}
   bool operator!=(const DistType &rhs) const {return DistTypeNotEqual(*this,rhs);}
+  DistType Permute(const Permutation &perm) const;
 };
 #endif
 
@@ -321,6 +323,7 @@ class InputNode;
 class RealPSet;
 typedef unsigned int Flags;
 typedef unsigned long int GraphNum;
+typedef std::string::iterator StringIter;
 typedef string ClassType;
 typedef vector<Node*> NodeVec;
 typedef NodeVec::iterator NodeVecIter;
@@ -412,6 +415,26 @@ bool IsPrefix(const DimVec &isPrefix, const DimVec &dims);
 #endif
 
 
+#if DOTENSORS
+//in permutation.cpp
+class Permutation
+{
+ public:
+  DimVec m_permutation;
+  Permutation() {}
+  Permutation(string start, string end);
+  Permutation& operator=(const Permutation &rhs);
+  bool operator==(const Permutation &rhs) const;
+  bool operator!=(const Permutation &rhs) const;
+  void SetToDefault(Dim numDims);
+  string Str() const;
+  inline unsigned int Size() const {return m_permutation.size();}
+  inline Dim MapFinishToStart(Dim dim) const {return m_permutation.empty() ? dim : m_permutation[dim];}
+  Dim MapStartToFinish(Dim dim) const;
+  Permutation ComposeWith(const Permutation &perm) const;
+  inline bool HasPerm() const {return !m_permutation.empty();}
+};
+#endif
 
 //Variable name
 class Name
@@ -421,6 +444,7 @@ class Name
   DistType m_type;
 #elif DOTENSORS
   DistType m_type;
+  Permutation m_permutation;
 #endif
   string m_name;
  Name() :

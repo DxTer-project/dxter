@@ -34,7 +34,6 @@ class ZAxpBy : public DLAOp<3,1>
 {
  public:
   Coef m_alpha, m_beta;
-  DimVec m_permutation;
   ZAxpBy(Layer layer, Coef alpha, Coef beta);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
