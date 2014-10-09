@@ -403,20 +403,7 @@ Phase RedistNode::MaxPhase() const
 
   //Check for multi-mode AllToAll
 
-  if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
-			 NULL, NULL, NULL)) 
-    {
-      return NUMPHASES;
-    }
-
-  if (GetAllGatherPattern(m_srcType, m_info.GetDist(),
-			  NULL, NULL))
-    {
-      return NUMPHASES;
-    }
-
-  if (GetLocalRedistPattern(m_srcType, m_info.GetDist(),
-			    NULL, NULL))
+  if (IsPrimitive()) 
     {
       return NUMPHASES;
     }
@@ -437,6 +424,51 @@ Phase RedistNode::MaxPhase() const
   }
   else
     return ROTENSORPHASE;
+}
+
+bool RedistNode::IsPrimitive() const
+{
+  const DLANode *parent = (DLANode*)Input(0);
+  const DistType &m_srcType = parent->DataType(InputConnNum(0)).GetDist();
+  const Dim numDims = m_info.GetDist().m_numDims;
+  
+
+  //Check for multi-mode AllToAll
+
+  if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
+			 NULL, NULL, NULL)) 
+    {
+      return true;
+    }
+
+  if (GetAllGatherPattern(m_srcType, m_info.GetDist(),
+			  NULL, NULL))
+    {
+      return true;
+    }
+
+  if (GetLocalRedistPattern(m_srcType, m_info.GetDist(),
+			    NULL, NULL))
+    {
+      return true;
+    }
+  
+  DimSet diffs;
+  
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    if (m_srcType.m_dists[dim] != m_info.GetDist().m_dists[dim]) {
+      diffs.insert(dim);
+    }
+  }
+  
+  if (diffs.empty()) {
+    throw;
+  }
+  else if (diffs.size() == 1) {
+    return true;
+  }
+  else
+    return false;
 }
 
 const Dim RedistNode::NumDims(ConnNum num) const
@@ -1822,7 +1854,7 @@ bool GetAllGatherPattern(const DistType &srcType,
     }
   }
 
-  return count != 0;
+  return count;
 }
 
 bool GetLocalRedistPattern(const DistType &srcType,
