@@ -25,6 +25,7 @@
 #include "omp.h"
 #endif
 #include "transform.h"
+#include "LLDLATranspose.h"
 #include "transpose.h"
 #include "loopSupport.h"
 #include <time.h>
@@ -83,7 +84,7 @@ RealPSet* SMMulExample(Type dataType, int m, int n);
 RealPSet* VMMulExample(Type dataType, int m, int n);
 RealPSet* SVMulRowExample(Type dataType, int m);
 RealPSet* SVMulColExample(Type dataType, int m);
-RealPSet* MVMulExample(Type dataType, int m, int n);
+RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n);
 RealPSet* MAddExample(Type dataType, int m, int n);
 RealPSet* DotExample(Type dataType, int m);
 RealPSet* GemmExample(Type dataType, int m, int n, int p);
@@ -358,7 +359,7 @@ void Usage()
   cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
   cout <<"         3  -> Dot prod F/D M\n";
   cout <<"         4  -> Matrix add F/D M N\n";
-  cout <<"         5  -> Matrix vector multiply F/D M N\n";
+  cout <<"         5  -> Matrix vector multiply N/T F/D M N\n";
   cout <<"         6  -> Scalar column vector multiply F/D M\n";
   cout <<"         7  -> Scalar row vector multiply F/D M\n";
   cout <<"         8  -> Vector matrix multiply F/D M N\n";
@@ -369,7 +370,6 @@ void Usage()
   cout <<"        13  -> Matrix add twice F/D M N\n";
   cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
   cout <<"        15  -> Gemv F/D M N\n";
-  cout <<"        16  -> MVMul Trans N/T F/D M N\n";
 }
 
 int main(int argc, const char* argv[])
@@ -391,8 +391,6 @@ int main(int argc, const char* argv[])
   //  GraphNum whichGraph = 0;
   int algNum;
   string opName;
-  Trans tr;
-
 
   if(argc < 2) {
     Usage();
@@ -452,15 +450,19 @@ int main(int argc, const char* argv[])
       algPSet = MAddExample(precision, m, n);
       break;
     case(5):
-      if (argc != 5) {
+      if (argc != 6) {
 	Usage();
 	return 0;
       }
       opName = "dxt_mvmul";
-      precision = CharToType(*argv[2]);
-      m = atoi(argv[3]);
-      n = atoi(argv[4]);
-      algPSet = MVMulExample(precision, m, n);
+      precision = CharToType(*argv[3]);
+      m = atoi(argv[4]);
+      n = atoi(argv[5]);
+      if (TRANS == CharToTrans(*argv[2])) {
+	algPSet = MVMulExample(precision, true, m, n);
+      } else {
+	algPSet = MVMulExample(precision, false, m, n);
+      }
       break;
     case(6):
       if (argc != 4) {
@@ -569,16 +571,6 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = GemvExample(precision, m, n);
       break;
-    case(16):
-      if (argc != 5) {
-	Usage();
-	return 0;
-      }
-      precision = CharToType(*argv[2]);
-      m = atoi(argv[3]);
-      n = atoi(argv[4]);
-      algPSet = TransMVMulExample(precision, m, n);
-      break;
     default:
       Usage();
       return 0;
@@ -587,32 +579,6 @@ int main(int argc, const char* argv[])
 
   RunExample(algNum, algPSet, precision, opName);
   return 0;
-}
-
-void MuNNMuGemmResults(Type precision) {
-  int m = arch->VecRegWidth(precision);
-  int n = m;
-  int p = 16;
-  int p_inc = 16;
-  int num_trials = 15;
-  int algNum = 1;
-  string opName = "dxt_gemm";
-  string resultFileName = "dxt_gemm_mu_by_n_times_n_by_mu_trials.csv";
-  std::ofstream outFile(resultFileName);
-
-  outFile << "m, n, p, bestFlopsPerCylcle\n";
-
-  for (int i = 0; i < num_trials; i++) {
-    RealPSet* algPSet = GemmExample(precision, m, n, p);
-    double bestFlops = RunExample(algNum, algPSet, precision, opName);
-    outFile << std::to_string((long long int) m) << ", ";
-    outFile << std::to_string((long long int) n) << ", ";
-    outFile << std::to_string((long long int) p) << ", ";
-    outFile << std::to_string((double) bestFlops) << "\n";
-    p += p_inc;
-  }
-  outFile.close();
-  return;
 }
 
 double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
@@ -723,12 +689,8 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   cout << "About to evaluate\n";
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
 
-
   cout << "Done evaluating\n";
   GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);
-  cout << "All implementations printed\n";
-  cout << "Best times";
-  
 #endif //DOEMPIRICALEVAL
 
 #if 1
@@ -743,54 +705,6 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
 
   double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
   return bestFPS;
-}
-
-RealPSet* TransMVMulExample(Type dataType, int m, int n)
-{
-  InputNode* xIn = new InputNode("x input", n, 1, "X",
-				 1, n,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);  
-
-  InputNode* AIn = new InputNode("a input", n, m, "A",
-				 m, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-
-  InputNode* yIn = new InputNode("y input", m, 1, "Y",
-				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(AIn, 0);
-
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
-  tunY->AddInput(yIn, 0);
-
-  Transpose* trans = new Transpose(TRANS);
-  trans->AddInputs(2,
-		   tunA, 0);
-
-  MVMul* mul = new MVMul(ABSLAYER);
-  mul->AddInputs(6,
-		 trans, 0,
-		 tunX, 0,
-		 tunY, 0);
-
-  Poss* innerPoss = new Poss(mul, true);
-  RealPSet* innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
 }
 
 RealPSet* GemvExample(Type dataType, int m, int n)
@@ -1288,7 +1202,7 @@ RealPSet* SVMulColExample(Type dataType, int m)
   return outerSet;
 }
 
-RealPSet* MVMulExample(Type dataType, int m, int n)
+RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
 {
   InputNode* Ain = new InputNode("A input", m, n, "A",
 				 1, m,
@@ -1314,11 +1228,20 @@ RealPSet* MVMulExample(Type dataType, int m, int n)
   tunY->AddInput(yIn, 0);
 
   MVMul* mvmul = new MVMul(ABSLAYER);
-  mvmul->AddInputs(6,
-		   tunA, 0,
-		   tunX, 0,
-		   tunY, 0);
-
+  if (transpose) {
+    LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
+    trans->AddInputs(2,
+		     tunA, 0);
+    mvmul->AddInputs(6,
+		     trans, 0,
+		     tunX, 0,
+		     tunY, 0);
+  } else {
+    mvmul->AddInputs(6,
+		     tunA, 0,
+		     tunX, 0,
+		     tunY, 0);
+  }
   Poss *innerPoss = new Poss(mvmul, true);
   RealPSet *innerSet = new RealPSet(innerPoss);
 
