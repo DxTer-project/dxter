@@ -265,6 +265,24 @@ int main(int argc, const char* argv[])
   }
 #endif
 
+#if DOFUSEANDOPTPHASE
+  if (CurrPhase == FUSEANDOPTTENSORPHASE) {
+    cout << "Fusing and opt phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, FUSEANDOPTTENSORPHASE, TenCullRO);
+    time(&end);
+    cout << "Fusing and opt phase took " << difftime(end,start2) << " seconds\n";
+    
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
 
 #if DOPACKOPTPHASE
   if (CurrPhase == PACKOPTPHASE) {
