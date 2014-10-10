@@ -26,6 +26,8 @@
 
 #if DOTENSORS
 
+#define ALLMULTIMODEALLGATHER 1
+
 #include "DLANode.h"
 #include "transform.h"
 #include "DLAOp.h"
@@ -54,6 +56,7 @@ class RedistNode : public DLANode
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;
   virtual void Prop();
+  bool IsPrimitive() const;
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "redist";}

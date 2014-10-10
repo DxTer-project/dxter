@@ -89,7 +89,9 @@ void AddTrans()
   
   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 
+#if ALLMULTIMODEALLGATHER
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllAllGathers, ROTENSORPHASE);
+#endif
 
 #if DOPACKOPTPHASE
     Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(0), PACKOPTPHASE);
@@ -253,6 +255,24 @@ int main(int argc, const char* argv[])
     uni.Expand(numIters, ROTENSORPHASE, TenCullRO);
     time(&end);
     cout << "RO phase took " << difftime(end,start2) << " seconds\n";
+    
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
+#if DOFUSEANDOPTPHASE
+  if (CurrPhase == FUSEANDOPTTENSORPHASE) {
+    cout << "Fusing and opt phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, FUSEANDOPTTENSORPHASE, TenCullRO);
+    time(&end);
+    cout << "Fusing and opt phase took " << difftime(end,start2) << " seconds\n";
     
     cout << "Propagating\n";
     cout.flush();
