@@ -31,6 +31,9 @@
 #define NODIST
 #define NOALGS
 
+#define PRINTEMPTY 1
+
+
 void PrintSetOrNodeChildren(Node *node);
 void PrintSetOrNodeInputs(Node *node);
 
@@ -169,6 +172,7 @@ class Node
   inline bool HasRefined() const {return m_flags & NODEHASREFINEDFLAG;}
   Node* Input(ConnNum num) const;
   NodeConn* InputConn(ConnNum num) const;
+  void PrintEmptyStatementIfOK(IndStream &out) const;
   //output number of the input taken as input
   ConnNum InputConnNum(ConnNum num) const;
   Node* Child(unsigned int num) const;

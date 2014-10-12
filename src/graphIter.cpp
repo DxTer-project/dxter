@@ -28,6 +28,7 @@
 #include "realLoop.h"
 #include "splitSingleIter.h"
 
+
 GraphIter::GraphIter(Poss *poss)
 {
   m_poss = NULL;
@@ -323,6 +324,9 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	  if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsTunnel(POSSTUNOUT)) {
 	    (*nodeIter)->Print(out, whichGraph, this);
 	    hasPrinted |= (*nodeIter)->HasPrinted();
+#if PRINTEMPTY
+	    (*nodeIter)->PrintEmptyStatementIfOK(out);
+#endif
 	  }
 	}
 	for(unsigned int i = 0; i < numPSets; ++i) {
@@ -404,6 +408,11 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	{
 	  (*nodeIter)->Print(out, graphNum, this);
 	  hasPrinted |= (*nodeIter)->HasPrinted();
+#if PRINTEMPTY
+	  (*nodeIter)->PrintEmptyStatementIfOK(out);
+#endif
+	
+
 	}
     }
     for(unsigned int i = 0; i < numPSets; ++i) {
