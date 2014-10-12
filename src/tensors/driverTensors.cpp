@@ -578,14 +578,16 @@ RealPSet* MP2()
 
 RealPSet* MP3()
 {
-  Size eSize = 53;
-  Size fSize = 53;
-  Size gSize = 53;
-  Size hSize = 53;
-  Size mSize = 5;
-  Size nSize = 5;
-  Size oSize = 5;
-  Size pSize = 5;
+  const Size bigMP3Size = 53;
+  const Size smallMP3Size = 5;
+  Size eSize = bigMP3Size;
+  Size fSize = bigMP3Size;
+  Size gSize = bigMP3Size;
+  Size hSize = bigMP3Size;
+  Size mSize = smallMP3Size;
+  Size nSize = smallMP3Size;
+  Size oSize = smallMP3Size;
+  Size pSize = smallMP3Size;
 
 
   InputNode *t_efmn;
