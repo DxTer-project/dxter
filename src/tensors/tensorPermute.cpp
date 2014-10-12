@@ -79,7 +79,7 @@ void Permute::Prop()
 	{
 	  if (m_permutation.Size() != InputNumDims(0))
 	    throw;
-	  m_cost *= (PSIW + PSIR) * TotalNumberOfLocalElements(0);
+	  m_cost = (PSIW + PSIR) * TotalNumberOfLocalElements(0);
 	  break;
 	}
       default:
