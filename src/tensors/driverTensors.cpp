@@ -62,9 +62,9 @@ void AddTrans()
 {
 #if 1
   MultiTrans *trans = new MultiTrans;
-  trans->AddTrans(new DistContToLocalContStatC(DMLAYER, SMLAYER));
-  trans->AddTrans(new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER));
-  trans->AddTrans(new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER));
+  trans->AddTrans(new DistContToLocalContStatC(DM2LAYER, SMLAYER));
+  trans->AddTrans(new DistContToLocalContStatASumScatter(DM2LAYER, SMLAYER));
+  trans->AddTrans(new DistContToLocalContStatBSumScatter(DM2LAYER, SMLAYER));
   Universe::AddTrans(Contraction::GetClass(), trans, DPTENSORPHASE);
 #else
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
@@ -72,9 +72,12 @@ void AddTrans()
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);  
 #endif
 
-  for (Dim dim = 0; dim < 10; ++dim)
-    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DMLAYER, dim), DPTENSORPHASE);
-  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DMLAYER, TensorBS.GetSize()), DPTENSORPHASE);
+  for (Dim dim = 0; dim < 10; ++dim) {
+    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DM1LAYER, dim), DPTENSORPHASE);
+    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(DM1LAYER, DM2LAYER, dim), DPTENSORPHASE);
+  }
+  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DM2LAYER, TensorBS.GetSize()), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(DM1LAYER, DM2LAYER, TensorBS.GetSize()), DPTENSORPHASE);
 
 #if 0
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
@@ -85,7 +88,8 @@ void AddTrans()
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
 
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
-  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER), DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER), DPTENSORPHASE);
   
   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 
@@ -260,6 +264,7 @@ int main(int argc, const char* argv[])
     cout.flush();
     time(&start2);
     uni.Prop();
+    uni.CullWorstPerformers(.98, 5);
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }

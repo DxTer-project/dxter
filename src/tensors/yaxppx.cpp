@@ -81,7 +81,7 @@ void YAxpPx::UnflattenCore(ifstream &in, SaveInfo &info)
 
 Phase YAxpPx::MaxPhase() const 
 {
-  if (m_layer == DMLAYER || m_layer == ABSLAYER)
+  if (m_layer == DM1LAYER || m_layer == DM2LAYER || m_layer == ABSLAYER)
     return DPTENSORPHASE;
   else if (m_layer == SMLAYER)
     return NUMPHASES;
@@ -101,7 +101,7 @@ bool YAxpPx::ShouldCullDP() const
 bool YAxpPx::DoNotCullDP() const 
 {
 #if DODPTENSORPHASE
-  return m_layer == DMLAYER;
+  return m_layer == DM1LAYER || m_layer == DM2LAYER;
 #else
   throw;
 #endif
@@ -133,7 +133,7 @@ void YAxpPx::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3,1>::Prop();
 
-    if (m_layer == ABSLAYER || m_layer == DMLAYER) {
+    if (m_layer == ABSLAYER || m_layer == DM1LAYER || m_layer == DM2LAYER) {
       m_cost = 3 * TotalNumberOfElements(0);
       Dim numDims = InputNumDims(0);
       if (InputNumDims(1) != numDims || InputNumDims(2) != numDims)
@@ -191,7 +191,7 @@ bool DistYAxpPxToDefaultLocalYAxpPx::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != YAxpPx::GetClass())
     return false;
-  if (((YAxpPx*)node)->GetLayer() != DMLAYER)
+  if (((YAxpPx*)node)->GetLayer() != DM2LAYER)
     return false;
   return true;
 }

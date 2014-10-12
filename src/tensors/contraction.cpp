@@ -161,7 +161,7 @@ void Contraction::Prop()
     Dim numDims = InputNumDims(2);
     unsigned int totNumIters = sizes->NumSizes();
 
-    if (m_layer == ABSLAYER || m_layer == DMLAYER) {
+    if (m_layer == ABSLAYER || m_layer == DM1LAYER || m_layer == DM2LAYER) {
       if (!m_needsPacking)
 	throw;
       for(unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
@@ -423,7 +423,8 @@ Phase Contraction::MaxPhase() const
 {
   switch(GetLayer()) {
   case (ABSLAYER):
-  case (DMLAYER):
+  case (DM1LAYER):
+  case (DM2LAYER):
     return DPTENSORPHASE;
   case (SMLAYER):
     return NUMPHASES;

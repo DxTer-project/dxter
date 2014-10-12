@@ -121,7 +121,8 @@ enum Layers {
 //Software layers
 enum Layers {
   ABSLAYER = 0,
-  DMLAYER,
+  DM1LAYER,
+  DM2LAYER,
   SMLAYER,
   BADLAYER
 };
@@ -143,7 +144,7 @@ enum Layers {
 #define DOSUMSCATTERTENSORPHASE 1
 #define DOROTENSORPHASE 1
 #define DOFUSEANDOPTPHASE 1
-#define DOPACKOPTPHASE 0
+#define DOPACKOPTPHASE 1
 
 #elif DOLLDLA
 // Layering for LLDLA operations
