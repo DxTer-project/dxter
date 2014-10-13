@@ -349,14 +349,6 @@ void Var::PrintDecl(IndStream &out) const
 	       << PermutationVarName(m_name->m_permutation.m_permutation) 
 	       << " );\n";
 	}
-	else {
-	  Permutation defaultPerm;
-	  defaultPerm.SetToDefault(m_name->m_type.m_numDims);
-	  out.Indent();
-	  *out << m_name->str() << ".SetLocalPermutation( "
-	       << PermutationVarName(defaultPerm.m_permutation) 
-	       << " );\n";
-	}
 	break;
       }
     case (DistEntryVecVarType):
