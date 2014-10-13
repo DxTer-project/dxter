@@ -228,7 +228,7 @@ void Contraction::Prop()
 	  temp *= (*InputLocalLen(2,dim))[iteration];
 	}
 	if (m_needsPacking) {
-	  m_cost += (PSIW + PSIR) * temp;
+	  m_cost += 2 * (PSIW + PSIR) * temp;
 	}
 	DimVecConstIter iter = dims.begin();
 	for(; iter != dims.end(); ++iter) {
