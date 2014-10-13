@@ -71,6 +71,7 @@ class RealPSet : public BasePSet
   void Cull(Phase phase);
   void Cull(CullFunction cullFunc);
   void CullWorstPerformers(double percentToCull, int ignoreThreshold);
+  void CullAllBut(int num);
   bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   virtual GraphNum TotalCount() const;

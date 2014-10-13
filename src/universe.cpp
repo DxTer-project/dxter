@@ -208,6 +208,12 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
       m_pset->Simplify(M_simplifiers, true);
     }
   }
+#elif DOFINALOPTPHASE
+  if (!M_simplifiers.empty()) {
+    if (CurrPhase == FINALOPTPHASE) {
+      m_pset->Simplify(M_simplifiers, true);
+    }
+  }
 #endif
 
   GraphNum count = 0;
@@ -747,6 +753,12 @@ void Universe::Unflatten(ifstream &in)
 void Universe::CullWorstPerformers(double percentToCull, int ignoreThreshold)
 {
   m_pset->CullWorstPerformers(percentToCull, ignoreThreshold);
+}
+
+
+void Universe::CullAllBut(int num)
+{
+  m_pset->CullAllBut(num);
 }
 
 void Universe::InlineAllSets()

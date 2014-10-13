@@ -23,6 +23,8 @@
 
 #if DOTENSORS
 
+#include "loopTunnel.h"
+
 Permute::Permute(string start, string end, Layer layer)
  : m_permutation(start,end)
 {
@@ -161,6 +163,8 @@ void Permute::PrintCode(IndStream &out)
 {  
   //Reflect in AddVars
   out.Indent();
+  *out << GetNameStr(0) << ".ResizeTo( " << GetInputNameStr(0) << ".Shape() );\n";
+  out.Indent();
   *out << "Permute( " << GetInputNameStr(0) << ", " << GetNameStr(0) << " );\n";
 }
 
@@ -186,4 +190,95 @@ void LowerPermute::Apply(Node *node) const
   perm->SetLayer(SMLAYER);
 }
 
+
+bool PermuteLoopHoist::CanApply(const Node *node) const
+{
+  if (CurrPhase != FINALOPTPHASE)
+    return false;
+  if (node->GetNodeClass() != LoopTunnel::GetClass())
+    throw;
+  if (!node->IsTunnel(SETTUNIN))
+    return false;
+  bool foundOne = false;
+  Permutation perm;
+  const LoopTunnel *setTun = (LoopTunnel*)node;
+  NodeConnVecConstIter setIter = setTun->m_children.begin();
+  for(; setIter != setTun->m_children.end(); ++setIter) {
+    const LoopTunnel *possTun = (LoopTunnel*)((*setIter)->m_n);
+    bool foundHere = false;
+    bool foundSomethingElse = false;
+    NodeConnVecConstIter possIter = possTun->m_children.begin();
+    for(; possIter != possTun->m_children.end(); ++possIter) {
+      const Node *child = (*possIter)->m_n;
+      if (child->GetNodeClass() == Permute::GetClass()) {
+	const Permute *thisPerm = (Permute*)child;
+	if (foundHere || foundOne) {
+	  if (perm != thisPerm->m_permutation)
+	    throw;
+	}
+	else 
+	  perm = thisPerm->m_permutation;
+	foundHere = true;
+      }
+      else if (!child->IsTunnel(POSSTUNOUT))
+	foundSomethingElse = true;
+    }
+    if (foundHere && foundSomethingElse) {
+      throw;
+    }
+    foundOne |= foundHere;
+  }
+  return foundOne;
+}
+
+void PermuteLoopHoist::Apply(Node *node) const
+{
+  if (node->GetNodeClass() != LoopTunnel::GetClass())
+    throw;
+  if (!node->IsTunnel(SETTUNIN))
+    throw;
+  LoopTunnel *setTun = (LoopTunnel*)node;
+  if (setTun->m_pset->GetPosses().size() > 1)
+    throw;
+  LoopTunnel *possTun = (LoopTunnel*)(setTun->Child(0));
+  Permute *perm = NULL;
+  NodeConnVecConstIter possIter = possTun->m_children.begin();
+  for(; possIter != possTun->m_children.end(); ++possIter) {
+    const Node *child = (*possIter)->m_n;
+    if (child->GetNodeClass() == Permute::GetClass()) {
+      perm = (Permute*)child;
+      break;
+    }
+    else if (!child->IsTunnel(POSSTUNOUT))
+      throw;
+  }
+  if (!perm)
+    throw;
+  Permute *newPermute = new Permute(perm->m_permutation, perm->GetLayer());
+  newPermute->AddInput(setTun->Input(0), setTun->InputConnNum(0));
+  setTun->ChangeInput2Way(setTun->Input(0), setTun->InputConnNum(0), newPermute, 0);
+  setTun->m_poss->AddNode(newPermute);
+  newPermute->BuildDataTypeCache();
+
+  perm->RedirectChildren(possTun, 0);
+  perm->m_poss->DeleteChildAndCleanUp(perm);
+
+  LoopTunnel *possTunOut = possTun->GetMatchingOutTun();
+  if (possTunOut->Input(0)->GetNodeClass() == Permute::GetClass()) {
+    Permute *outPermute = (Permute*)(possTunOut->Input(0));
+    Permute *newOutPermute = new Permute(outPermute->m_permutation, outPermute->GetLayer());
+    LoopTunnel *setTunOut = (LoopTunnel*)(possTunOut->Child(0));
+    if (setTunOut->m_children.size() == 0)
+      throw;
+    setTunOut->RedirectChildren(newOutPermute, 0);
+    newOutPermute->AddInput(setTunOut, 0);
+    //sanity check
+    if (setTunOut->m_poss != setTun->m_poss)
+      throw;
+    setTunOut->m_poss->AddNode(newOutPermute);
+    outPermute->RedirectChildren(outPermute->Input(0), outPermute->InputConnNum(0));
+    outPermute->m_poss->DeleteChildAndCleanUp(outPermute);
+    newOutPermute->BuildDataTypeCache();
+  }
+}
 #endif //DOTENSORS

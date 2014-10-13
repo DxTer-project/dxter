@@ -827,6 +827,46 @@ void RealPSet::CullWorstPerformers(double percentToCull, int ignoreThreshold)
   }
 }
 
+void RealPSet::CullAllBut(int num)
+{
+  if (m_posses.size() > num) {
+    SortedPossQueue queue;
+    PossMMapIter iter = m_posses.begin();
+    for(; iter != m_posses.end(); ++iter) {
+      queue.push(iter->second);
+    }
+    if (queue.size() != m_posses.size())
+      throw;
+    int numToKeep = num;
+    for(; numToKeep > 0; --numToKeep)
+      queue.pop();
+    while(!queue.empty()) {
+      RemoveAndDeletePoss(queue.top(), true);
+      queue.pop();
+    }
+  }
+  PossMMapIter iter;
+  int j = 0;
+#pragma omp parallel private(j,iter)
+  {
+    iter = m_posses.begin();
+    j = 0;
+    int size = m_posses.size();
+#pragma omp for schedule(static) 
+    for (int i = 0; i < size; ++i) {
+      if (j > i) {
+	cout << "uhoh\n";
+	throw;
+      }
+      while (j < i) {
+	++iter;
+	++j;
+      }
+      iter->second->CullAllBut(num);
+    }
+  }
+}
+
 void RealPSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
 {
   if (removeFromMyList && m_posses.size() <= 1) {

@@ -67,4 +67,12 @@ class LowerPermute : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+class PermuteLoopHoist : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "PermuteLoopHoist"; }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 #endif //DOTENSORS

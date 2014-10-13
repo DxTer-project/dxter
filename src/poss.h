@@ -111,6 +111,7 @@ class Poss
   virtual Cost Prop();
   virtual void Cull(Phase phase);
   void CullWorstPerformers(double percentToCull, int ignoreThreshold);
+  void CullAllBut(int num);
   virtual void ClearBeforeProp();
   virtual void ClearNodesPrinted();
   void ClearFullyExpanded();

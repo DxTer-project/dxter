@@ -102,6 +102,10 @@ void AddTrans()
     Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(1), PACKOPTPHASE);
     Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(2), PACKOPTPHASE);
 #endif
+
+#if DOFINALOPTPHASE
+    Universe::AddTrans(LoopTunnel::GetClass(), new PermuteLoopHoist, SIMP);
+#endif
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
@@ -304,6 +308,29 @@ int main(int argc, const char* argv[])
     cout << "Inlining took " << difftime(end,start2) << " seconds\n";
     time(&start2);
     uni.Expand(numIters, PACKOPTPHASE, TenCullRO);
+    time(&end);
+    cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
+
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
+#if DOFINALOPTPHASE
+  if (CurrPhase == FINALOPTPHASE) {
+    cout << "Final optimization phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Prop();
+    uni.CullAllBut(1);
+    time(&end);
+    cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, FINALOPTPHASE, TenCullRO);
     time(&end);
     cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
 
@@ -583,8 +610,8 @@ RealPSet* MP2()
 
 RealPSet* MP3()
 {
-  const Size bigMP3Size = 53;
-  const Size smallMP3Size = 5;
+  const Size bigMP3Size = 300;
+  const Size smallMP3Size = 300;
   Size eSize = bigMP3Size;
   Size fSize = bigMP3Size;
   Size gSize = bigMP3Size;
