@@ -26,8 +26,8 @@
 #define DOELEM 0
 #define DOSQM 0
 #define DOSM 0
-#define DOTENSORS 0
-#define DOLLDLA 1
+#define DOTENSORS 1
+#define DOLLDLA 0
 
 #define DOBLIS (DOSM||DOSQM)
 #define DODM (DOELEM||DOTENSORS)
@@ -121,7 +121,8 @@ enum Layers {
 //Software layers
 enum Layers {
   ABSLAYER = 0,
-  DMLAYER,
+  DM1LAYER,
+  DM2LAYER,
   SMLAYER,
   BADLAYER
 };
@@ -132,18 +133,20 @@ enum Layers {
 #define ROTENSORPHASE 2
 #define FUSEANDOPTTENSORPHASE 3
 #define PACKOPTPHASE 4
+#define FINALOPTPHASE 5
 
 #define FIRSTPHASE DPTENSORPHASE
 
 //Max phase for which to generate code
-#define MAXPHASE PACKOPTPHASE
+#define MAXPHASE FINALOPTPHASE
 #define NUMPHASES (MAXPHASE+1)
 
 #define DODPTENSORPHASE 1
 #define DOSUMSCATTERTENSORPHASE 1
 #define DOROTENSORPHASE 1
 #define DOFUSEANDOPTPHASE 1
-#define DOPACKOPTPHASE 0
+#define DOPACKOPTPHASE 1
+#define DOFINALOPTPHASE 1
 
 #elif DOLLDLA
 // Layering for LLDLA operations

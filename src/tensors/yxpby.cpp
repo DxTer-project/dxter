@@ -61,7 +61,7 @@ void YxpBy::UnflattenCore(ifstream &in, SaveInfo &info)
 
 Phase YxpBy::MaxPhase() const 
 {
-  if (m_layer == DMLAYER)
+  if (m_layer == DM1LAYER || m_layer == DM2LAYER)
     throw;
   else if (m_layer == SMLAYER)
     return NUMPHASES;
@@ -85,7 +85,7 @@ void YxpBy::Prop()
 
     if (m_layer == ABSLAYER)
       m_cost = 2 * TotalNumberOfElements(0);
-    if (m_layer == DMLAYER)
+    else if (m_layer == DM1LAYER || m_layer == DM2LAYER)
       m_cost = 2 * TotalNumberOfElements(0);
     else if (m_layer == SMLAYER) {
       m_cost = 2 * TotalNumberOfLocalElements(0);

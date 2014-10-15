@@ -363,6 +363,9 @@ void Node::Print(IndStream &out, GraphNum graphNum, const GraphIter *graphIter)
               (child->Input(child->m_inputs.size()-1) != this))
           {
             child->Print(out, graphNum, graphIter);
+#if PRINTEMPTY
+	    child->PrintEmptyStatementIfOK(out);
+#endif
           }
         }
       }
@@ -1051,3 +1054,28 @@ const int Node::GetVecRegWidth() const
 }
 
 #endif
+
+void Node::PrintEmptyStatementIfOK(IndStream &out) const
+{
+  StrSet set;
+  for(ConnNum num = 0; num < m_inputs.size(); ++num) {
+    set.insert(GetInputNameStr(num));
+  }
+  for(ConnNum num = 0; num < NumOutputs(); ++num) {
+    set.erase(GetNameStr(num));
+  }
+  NodeVecConstIter nodeIter = m_poss->m_possNodes.begin();
+  for(; !set.empty() && nodeIter != m_poss->m_possNodes.end(); ++nodeIter) {
+    const Node *node = *nodeIter;
+    if (!node->HasPrinted()) {
+      for(ConnNum inNum = 0; inNum < node->m_inputs.size(); ++inNum) {
+	set.erase(node->GetInputNameStr(inNum));
+      }
+    }
+  }
+  StrSetIter iter = set.begin();
+  for(; iter != set.end(); ++iter) {
+    out.Indent();
+    *out << *iter << ".EmptyData();\n";
+  }
+}

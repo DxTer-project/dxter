@@ -600,7 +600,14 @@ void Poss::AddPSet(BasePSet *pset)
 bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
 {
   bool didSomething = false;
-  for(unsigned int nodeIdx = 0; nodeIdx < m_possNodes.size(); ++nodeIdx) {
+  if (recursive) {
+    PSetVecIter iter = m_sets.begin();
+    for(; iter != m_sets.end(); ++iter) {
+      if ((*iter)->IsReal()) 
+	((RealPSet*)(*iter))->Simplify(simplifiers, recursive);
+    }
+  }
+  for(int nodeIdx = 0; nodeIdx < m_possNodes.size(); ++nodeIdx) {
     Node *node = m_possNodes[nodeIdx];
     TransMapConstIter iter = simplifiers.find(node->GetNodeClass());
     if (iter != simplifiers.end()) {
@@ -618,13 +625,6 @@ bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
           break;
         }
       }
-    }
-  }
-  if (recursive) {
-    PSetVecIter iter = m_sets.begin();
-    for(; iter != m_sets.end(); ++iter) {
-      if ((*iter)->IsReal()) 
-	((RealPSet*)(*iter))->Simplify(simplifiers, recursive);
     }
   }
   return didSomething;
@@ -3048,6 +3048,17 @@ void Poss::CullWorstPerformers(double percentToCull, int ignoreThreshold)
     BasePSet *set = *iter;
     if (set->IsReal()) {
       ((RealPSet*)set)->CullWorstPerformers(percentToCull, ignoreThreshold);
+    }
+  }
+}
+
+void Poss::CullAllBut(int num)
+{
+  PSetVecIter iter = m_sets.begin();
+  for( ; iter != m_sets.end(); ++iter) {
+    BasePSet *set = *iter;
+    if (set->IsReal()) {
+      ((RealPSet*)set)->CullAllBut(num);
     }
   }
 }

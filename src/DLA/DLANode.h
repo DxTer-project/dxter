@@ -93,7 +93,7 @@ class DLANode : public Node
 #if DOELEM
   virtual bool ShouldCullDP() const {return false;}
 #elif DOTENSORS
-  virtual bool ShouldCullDP() const {return GetLayer() == DMLAYER;}
+  virtual bool ShouldCullDP() const {return GetLayer() == DM1LAYER || GetLayer() == DM2LAYER;}
 #endif
   DLANode* FindSideEffectingUser(ConnNum num);
 #if TWOD

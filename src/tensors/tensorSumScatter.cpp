@@ -215,6 +215,7 @@ void SumScatterUpdateNode::Prop()
       input = (DLANode*)(Input(0));
       num = InputConnNum(0);
       m_cost = input->LocalLen(num,0)->NumSizes() * ReduceScatter(numProcs,numProcs);
+      m_cost += (PSIR+PSIW)*(numProcs+1);
     }
     else {
       const unsigned int totNumIters = input->LocalLen(num,0)->NumSizes();
@@ -224,6 +225,7 @@ void SumScatterUpdateNode::Prop()
 	  temp *= (*(input->LocalLen(num,dim)))[iteration];
 	}
 	m_cost += ReduceScatter(temp*numProcs, numProcs);
+	m_cost += (PSIR+PSIW)*(temp*numProcs + temp);
       }
     }
   }

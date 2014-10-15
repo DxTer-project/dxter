@@ -62,9 +62,9 @@ void AddTrans()
 {
 #if 1
   MultiTrans *trans = new MultiTrans;
-  trans->AddTrans(new DistContToLocalContStatC(DMLAYER, SMLAYER));
-  trans->AddTrans(new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER));
-  trans->AddTrans(new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER));
+  trans->AddTrans(new DistContToLocalContStatC(DM2LAYER, SMLAYER));
+  trans->AddTrans(new DistContToLocalContStatASumScatter(DM2LAYER, SMLAYER));
+  trans->AddTrans(new DistContToLocalContStatBSumScatter(DM2LAYER, SMLAYER));
   Universe::AddTrans(Contraction::GetClass(), trans, DPTENSORPHASE);
 #else
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
@@ -72,9 +72,12 @@ void AddTrans()
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);  
 #endif
 
-  for (Dim dim = 0; dim < 10; ++dim)
-    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DMLAYER, dim), DPTENSORPHASE);
-  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DMLAYER, TensorBS.GetSize()), DPTENSORPHASE);
+  for (Dim dim = 0; dim < 10; ++dim) {
+    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DM1LAYER, dim), DPTENSORPHASE);
+    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(DM1LAYER, DM2LAYER, dim), DPTENSORPHASE);
+  }
+  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DM2LAYER, TensorBS.GetSize()), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(DM1LAYER, DM2LAYER, TensorBS.GetSize()), DPTENSORPHASE);
 
 #if 0
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
@@ -85,7 +88,8 @@ void AddTrans()
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
 
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
-  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER), DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER), DPTENSORPHASE);
   
   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 
@@ -97,6 +101,10 @@ void AddTrans()
     Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(0), PACKOPTPHASE);
     Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(1), PACKOPTPHASE);
     Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(2), PACKOPTPHASE);
+#endif
+
+#if DOFINALOPTPHASE
+    Universe::AddTrans(LoopTunnel::GetClass(), new PermuteLoopHoist, SIMP);
 #endif
   
 #if 1
@@ -260,6 +268,7 @@ int main(int argc, const char* argv[])
     cout.flush();
     time(&start2);
     uni.Prop();
+    uni.CullWorstPerformers(.98, 5);
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
@@ -299,6 +308,29 @@ int main(int argc, const char* argv[])
     cout << "Inlining took " << difftime(end,start2) << " seconds\n";
     time(&start2);
     uni.Expand(numIters, PACKOPTPHASE, TenCullRO);
+    time(&end);
+    cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
+
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
+#if DOFINALOPTPHASE
+  if (CurrPhase == FINALOPTPHASE) {
+    cout << "Final optimization phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Prop();
+    uni.CullAllBut(1);
+    time(&end);
+    cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, FINALOPTPHASE, TenCullRO);
     time(&end);
     cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
 
@@ -578,14 +610,16 @@ RealPSet* MP2()
 
 RealPSet* MP3()
 {
-  Size eSize = 53;
-  Size fSize = 53;
-  Size gSize = 53;
-  Size hSize = 53;
-  Size mSize = 5;
-  Size nSize = 5;
-  Size oSize = 5;
-  Size pSize = 5;
+  const Size bigMP3Size = 300;
+  const Size smallMP3Size = 300;
+  Size eSize = bigMP3Size;
+  Size fSize = bigMP3Size;
+  Size gSize = bigMP3Size;
+  Size hSize = bigMP3Size;
+  Size mSize = smallMP3Size;
+  Size nSize = smallMP3Size;
+  Size oSize = smallMP3Size;
+  Size pSize = smallMP3Size;
 
 
   InputNode *t_efmn;

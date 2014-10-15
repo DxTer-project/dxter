@@ -180,7 +180,8 @@ void RedistNode::Prop()
 	for (Dim dim = 0; dim < numDims; ++dim) {
 	  temp *= m_lsizes[dim][iteration];
 	}
-	m_cost += AllToAll(temp * numProcs, numProcs);
+	m_cost += AllToAll(temp, numProcs);
+	m_cost += (PSIR+PSIW)*(2*temp);
       }
       return;
     }
@@ -213,6 +214,7 @@ void RedistNode::Prop()
 	//	cout << "AllGather( " << std::scientific << temp * numProcs << ", " << numProcs << " )\n";
 	//	cout << "\t" << temp << " data\n";
 	m_cost += AllGather(temp, numProcs);
+	m_cost += (PSIR+PSIW)*(temp + temp / numProcs);
 	//	cout << "cost " << m_cost << endl;
       }
       //      cout << "***\n";
@@ -223,7 +225,7 @@ void RedistNode::Prop()
 			      &indices,
 			      &gridModesInvolved)) {
       //Local mem copy
-      m_cost = 0; 
+      m_cost = (PSIR+PSIW)*(TotalNumberOfLocalElements(0));
       return;
     }
 
@@ -262,7 +264,8 @@ void RedistNode::Prop()
 	for (Dim dim = 0; dim < numDims; ++dim) {
 	  temp *= m_lsizes[dim][iteration];
 	}
-	m_cost += AllToAll(temp * numProcs, numProcs);
+	m_cost += AllToAll(temp, numProcs);
+	m_cost += (PSIR+PSIW)*(2*temp);
       }
     }
     else
