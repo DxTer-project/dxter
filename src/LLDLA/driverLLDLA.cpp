@@ -74,7 +74,7 @@ do you really want to do compact unrolling and partial unrolling?
 void MuNNMuGemmResults(Type precision);
 double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName);
 RealPSet* TransMVMulExample(Type dataType, int m, int n);
-RealPSet* GemvExample(Type dataType, int m, int n);
+RealPSet* GemvExample(Type dataType, bool transpose, int m, int n);
 RealPSet* MVMul2Example(Type dataType, int m, int n, int p);
 RealPSet* MAdd2Example(Type dataType, int m, int n);
 RealPSet* VAdd2Example(Type dataType, int m);
@@ -336,6 +336,14 @@ void AddVAddTrans()
   return;
 }
 
+void AddTransposeTrans()
+{
+  Universe::AddTrans(LLDLATranspose::GetClass(), new LLDLATransposeLowerLayer(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(LLDLATranspose::GetClass(), new LLDLATransposeLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
+
+  return;
+}
+
 void AddTrans()
 {
   AddGemmTrans();
@@ -346,6 +354,8 @@ void AddTrans()
   AddSVMulTrans();
   AddVMMulTrans();
   AddVAddTrans();
+
+  AddTransposeTrans();
 
   AddUnrollingTrans();
   
@@ -369,7 +379,7 @@ void Usage()
   cout <<"        12  -> Vector matrix vector multiply F/D M N\n";
   cout <<"        13  -> Matrix add twice F/D M N\n";
   cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
-  cout <<"        15  -> Gemv F/D M N\n";
+  cout <<"        15  -> Gemv N/T F/D M N\n";
 }
 
 int main(int argc, const char* argv[])
@@ -561,15 +571,19 @@ int main(int argc, const char* argv[])
       algPSet = MVMul2Example(precision, m, n, p);
       break;
     case(15):
-      if (argc != 5) {
+      if (argc != 6) {
 	Usage();
 	return 0;
       }
       opName = "dxt_gemv";
-      precision = CharToType(*argv[2]);
-      m = atoi(argv[3]);
-      n = atoi(argv[4]);
-      algPSet = GemvExample(precision, m, n);
+      precision = CharToType(*argv[3]);
+      m = atoi(argv[4]);
+      n = atoi(argv[5]);
+      if (TRANS == CharToTrans(*argv[2])) {
+	algPSet = GemvExample(precision, true, m, n);
+      } else {
+	algPSet = GemvExample(precision, false, m, n);
+      }
       break;
     default:
       Usage();
@@ -707,7 +721,7 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   return bestFPS;
 }
 
-RealPSet* GemvExample(Type dataType, int m, int n)
+RealPSet* GemvExample(Type dataType, bool transpose, int m, int n)
 {
   InputNode* xIn = new InputNode("x input", n, 1, "X",
 				 1, n,
@@ -724,10 +738,19 @@ RealPSet* GemvExample(Type dataType, int m, int n)
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
 
-  InputNode* AIn = new InputNode("a input", m, n, "A",
-				 1, m,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
+
+  InputNode* AIn;
+  if (transpose) {
+    AIn = new InputNode("a input", n, m, "A",
+			1, n,
+			"ANumRows", "ANumCols",
+			"ARowStride", "AColStride", dataType);
+  } else {
+    AIn = new InputNode("a input", m, n, "A",
+			1, m,
+			"ANumRows", "ANumCols",
+			"ARowStride", "AColStride", dataType);
+  }
 
   InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
 				     1, m,
@@ -762,11 +785,21 @@ RealPSet* GemvExample(Type dataType, int m, int n)
 		tunBeta, 0,
 		tunY, 0);
 
+  LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
   MVMul* axMul = new MVMul(ABSLAYER);
-  axMul->AddInputs(6,
-		   tunA, 0,
-		   tunX, 0,
-		   tunZ, 0);
+  if (transpose) {
+    trans->AddInputs(2,
+		     tunA, 0);
+    axMul->AddInputs(6,
+		     trans, 0,
+		     tunX, 0,
+		     tunZ, 0);
+  } else {
+    axMul->AddInputs(6,
+		     tunA, 0,
+		     tunX, 0,
+		     tunZ, 0);
+  }
 
   SVMul* alphaAXMul = new SVMul(COLVECTOR, ABSLAYER);
   alphaAXMul->AddInputs(4,
@@ -1204,10 +1237,18 @@ RealPSet* SVMulColExample(Type dataType, int m)
 
 RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", m, n, "A",
-				 1, m,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
+  InputNode* Ain;
+  if (transpose) {
+    Ain = new InputNode("A input", n, m, "A",
+			1, n,
+			"ANumRows", "ANumCols",
+			"ARowStride", "AColStride", dataType);
+  } else {
+    Ain = new InputNode("A input", m, n, "A",
+			1, m,
+			"ANumRows", "ANumCols",
+			"ARowStride", "AColStride", dataType);
+  }
 
   InputNode* xIn = new InputNode("x input", n, 1, "X",
 				 1, n,
@@ -1228,8 +1269,8 @@ RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
   tunY->AddInput(yIn, 0);
 
   MVMul* mvmul = new MVMul(ABSLAYER);
+  LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
   if (transpose) {
-    LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
     trans->AddInputs(2,
 		     tunA, 0);
     mvmul->AddInputs(6,

@@ -33,15 +33,13 @@ LLDLATranspose::LLDLATranspose(Layer layer)
 
 void LLDLATranspose::PrintCode(IndStream &out)
 {
-  DataTypeInfo info = InputDataType(0);
-  out.Indent();
-  *out << "int " << info.m_colStrideVar << "_tmp, " << info.m_numColsVar << "_tmp;\n";
   return;
 }
 
 Phase LLDLATranspose::MaxPhase() const
 {
-  switch (m_layer)
+  return NUMPHASES;
+  /*  switch (m_layer)
     { 
     case(ABSLAYER):
       return LLDLALOOPPHASE;
@@ -51,7 +49,7 @@ Phase LLDLATranspose::MaxPhase() const
       return NUMPHASES; 
     default:
       throw;
-    }
+      }*/
 }
 
 NodeType LLDLATranspose::GetType() const
@@ -74,7 +72,81 @@ void LLDLATranspose::Duplicate(const Node *orig, bool shallow, bool possMerging)
 
 void LLDLATranspose::Prop()
 {
+  if (!IsValidCost(m_cost)) {
+    DLAOp<1, 1>::Prop();
 
+    m_cost = ZERO;
+  }
+  return;
+}
+
+LLDLATransposeLowerLayer::LLDLATransposeLowerLayer(Layer toLayer, Layer fromLayer)
+{
+  m_toLayer = toLayer;
+  m_fromLayer = fromLayer;
+}
+
+bool LLDLATransposeLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == LLDLATranspose::GetClass()) {
+    const LLDLATranspose *trans = (LLDLATranspose*) node;
+    if (trans->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    return true;
+  }
+  cout << "Error: Applying LLDLATransposeLowerLayer to non LLDLATranspose node\n";
+  throw;
+}
+
+void LLDLATransposeLowerLayer::Apply(Node *node) const
+{
+  LLDLATranspose* trans = (LLDLATranspose*) node;
+  trans->SetLayer(m_toLayer);
+}
+
+string LLDLATransposeLowerLayer::GetType() const
+{
+  return "LLDLATranspose lower layer " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+const DataTypeInfo& LLDLATranspose::DataType(ConnNum num) const
+{
+  return m_info;
+}
+
+void LLDLATranspose::ClearDataTypeCache()
+{
+  m_info.m_rowStride = BADSTRIDE;
+}
+
+void LLDLATranspose::BuildDataTypeCache()
+{
+  const DataTypeInfo &in = InputDataType(0);
+
+  m_info.m_rowStride = in.m_colStride;
+  m_info.m_colStride = in.m_rowStride;
+  m_info.m_numRowsVar = in.m_numColsVar;
+  m_info.m_numColsVar = in.m_numRowsVar;
+  m_info.m_rowStrideVar = in.m_colStrideVar;
+  m_info.m_colStrideVar = in.m_rowStrideVar;
+}
+
+const Sizes* LLDLATranspose::GetN(ConnNum num) const
+{
+  if (num > 0) {
+    throw;
+  }
+  return GetInputM(0);
+}
+
+const Sizes* LLDLATranspose::GetM(ConnNum num) const
+{
+  if (num > 0) {
+    throw;
+  }
+  return GetInputN(0);
 }
 
 #endif // DOLLDLA
