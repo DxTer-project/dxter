@@ -324,7 +324,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	  if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsTunnel(POSSTUNOUT)) {
 	    (*nodeIter)->Print(out, whichGraph, this);
 	    hasPrinted |= (*nodeIter)->HasPrinted();
-#if PRINTEMPTY
+#if PRINTEMPTY && DOLLDLA == 0
 	    (*nodeIter)->PrintEmptyStatementIfOK(out);
 #endif
 	  }
@@ -408,7 +408,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	{
 	  (*nodeIter)->Print(out, graphNum, this);
 	  hasPrinted |= (*nodeIter)->HasPrinted();
-#if PRINTEMPTY
+#if PRINTEMPTY && DOLLDLA == 0
 	  (*nodeIter)->PrintEmptyStatementIfOK(out);
 #endif
 	
