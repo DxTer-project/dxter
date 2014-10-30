@@ -120,8 +120,8 @@ void CombineSingleIter::Prop()
 	for(ConnNum i = 0; i < m_inputs.size(); ++i) {
 	  if (type != InputDataType(i)) {
 	    cout << "Bad input types\n";
-      cout << InputDataType(i).Str() << endl;
-      cout << type.Str() << endl;
+	    //      cout << InputDataType(i).Str() << endl;
+	    //      cout << type.Str() << endl;
 	    //From when we just used DistType w/out perm
 	    //	    cout << DistTypeToStr(type) << endl;
 	    //	    cout << DistTypeToStr(InputDataType(i).m_dist) << endl;
