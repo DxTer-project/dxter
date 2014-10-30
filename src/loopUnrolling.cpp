@@ -697,7 +697,9 @@ void PartiallyUnrollLoop::Apply(Node *node) const
   RealLoop *newOuter = (RealLoop*)(innerLoop->GetNewInst());
   newOuter->m_functionality = innerLoop->m_functionality + "partunrolled";
 
-  
+  NodeVec newInnerPossInTuns;
+
+
   NodeVec newSetTunsIn;
   NodeVecIter tunIter = innerLoop->m_inTuns.begin();
   for(; tunIter != innerLoop->m_inTuns.end(); ++tunIter) {
@@ -706,11 +708,15 @@ void PartiallyUnrollLoop::Apply(Node *node) const
     newTun->m_tunType = POSSTUNIN;
 
     LoopTunnel *newSetTun = (LoopTunnel*)(oldTun->GetSetTunnel());
+
+
     newSetTun->m_pset = newOuter;
     newSetTun->m_tunType = SETTUNIN;
     newSetTun->AddInput(oldTun->Input(0), oldTun->InputConnNum(0));
     oldTun->RemoveAllInputs2Way();
     newSetTunsIn.push_back(newSetTun);
+    newInnerPossInTuns.push_back(newTun);
+    
 
 
     if (oldTun->IsSplit()) {
@@ -764,8 +770,14 @@ void PartiallyUnrollLoop::Apply(Node *node) const
 
   Poss *newInnerPoss = new Poss(newPossTunsOut, true, true);
 
+  if (newInnerPoss->m_inTuns.size() != newInnerPossInTuns.size())
+    throw;
+
+  swap(newInnerPoss->m_inTuns, newInnerPossInTuns);
+
   newOuter->AddPoss(newInnerPoss);
   outerPoss->AddPSet(newOuter, true, true);
+
 
   innerLoop->m_flags |= SETLOOPISUNROLLED;
 

@@ -135,7 +135,9 @@ class DataTypeInfo
   DataTypeInfo(DistType dist);
   DataTypeInfo(const DataTypeInfo &rhs);
   DataTypeInfo& operator=(const DataTypeInfo &rhs);
-  
+  const DistType& GetDist() const {return m_dist;}
+  bool operator==(const DataTypeInfo &rhs) const  {return m_dist == rhs.m_dist;}
+  bool operator!=(const DataTypeInfo &rhs) const  {return !(*this == rhs);}
 };
 
 #elif DOTENSORS

@@ -32,6 +32,7 @@ SMMul::SMMul(Layer layer)
 
 void SMMul::PrintCode(IndStream &out)
 {
+
   if (GetLayer() == ABSLAYER) {
     if (GetDataType() == REAL_DOUBLE) {
       *out << "simple_smul( ";

@@ -30,6 +30,7 @@
 class LLDLATranspose : public DLAOp<1, 1>
 {
  public:
+  DataTypeInfo m_info;
   LLDLATranspose(Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
@@ -39,9 +40,29 @@ class LLDLATranspose : public DLAOp<1, 1>
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
 
-  static ClassType GetClass() { return "LLDLAPrimMVMul"; }
+  static ClassType GetClass() { return "LLDLATranspose"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
+
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
+  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache();
+
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
 
   virtual NodeType GetType() const;
 };
+
+class LLDLATransposeLowerLayer : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+
+  LLDLATransposeLowerLayer(Layer toLayer, Layer fromLayer);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 #endif // DOLLDLA
