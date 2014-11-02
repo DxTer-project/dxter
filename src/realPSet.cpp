@@ -333,6 +333,7 @@ void RealPSet::Migrate()
   }
   newSet->ClearDeletingRecursively();
   delete shadowToReplace;
+  m_shadows.clear();
   //  cout << "building on " << newSet->m_ownerPoss << endl;
   //  newSet->m_ownerPoss->BuildDataTypeCache();
 }
