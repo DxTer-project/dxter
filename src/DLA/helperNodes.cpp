@@ -955,7 +955,9 @@ Name TempVarNode::GetName(ConnNum num) const
   }
 #if DODM
   tmp.m_type = m_info.GetDist();
+#if DOTENSORS
   tmp.m_permutation = m_info.GetPerm();
+#endif
 #endif
   return tmp;
 }

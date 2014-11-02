@@ -67,9 +67,9 @@ void AddTrans()
   trans->AddTrans(new DistContToLocalContStatBSumScatter(DM2LAYER, SMLAYER));
   Universe::AddTrans(Contraction::GetClass(), trans, DPTENSORPHASE);
 #else
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DMLAYER, SMLAYER), DPTENSORPHASE);
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);
-  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DMLAYER, SMLAYER), DPTENSORPHASE);  
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatC(DM2LAYER, SMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatASumScatter(DM2LAYER, SMLAYER), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatBSumScatter(DM2LAYER, SMLAYER), DPTENSORPHASE);  
 #endif
 
   for (Dim dim = 0; dim < 10; ++dim) {
@@ -531,10 +531,10 @@ RealPSet* MartinsExample()
 
 RealPSet* MP2()
 {
-  Size eSize = 53;
-  Size fSize = 53;
-  Size mSize = 5;
-  Size nSize = 5;
+  Size eSize = 53*5;
+  Size fSize = 53*5;
+  Size mSize = 5*5;
+  Size nSize = 5*5;
 
 
   InputNode *v_efmn;
