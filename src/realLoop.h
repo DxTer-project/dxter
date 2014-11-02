@@ -54,7 +54,7 @@ class RealLoop : public IntLoop<RealPSet>
   RealLoop(LoopType type);
   RealLoop(LoopType type, Poss *poss, BSSize bsSize);
   virtual ~RealLoop();
-  virtual BasePSet* GetNewInst() {return (BasePSet*)(new RealLoop(m_type));}
+  virtual BasePSet* GetNewInst();
   virtual ShadowPSet* GetNewShadow();
 
   virtual const IntSet& GetLabel() const {return m_label;}

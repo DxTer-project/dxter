@@ -524,6 +524,17 @@ ShadowPSet* RealLoop::GetNewShadow()
   return shadow;
 }
 
+ BasePSet* RealLoop::GetNewInst() 
+{
+  RealLoop *real = new RealLoop(m_type);
+  real->m_bsSize = m_bsSize;
+  real->m_label = m_label;
+#if DOBLIS
+  real->m_comm = m_comm;
+#endif
+  return (BasePSet*)real;
+}
+
 
  RealLoop::~RealLoop()
  {
