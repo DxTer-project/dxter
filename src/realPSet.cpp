@@ -201,6 +201,8 @@ void RealPSet::Migrate()
 
   //  m_shadows.erase(m_shadows.begin());
 
+  m_flags |= SETHASMIGRATED;
+
 
   BasePSet *newBase = GetNewInst();
   if (!newBase->IsReal())
@@ -340,7 +342,8 @@ void RealPSet::Migrate()
 
 RealPSet::~RealPSet()
 {
-  if (!(m_flags & SETTOPLEVELFLAG) && (m_inTuns.empty() || m_outTuns.empty()))
+  if (!(m_flags & SETTOPLEVELFLAG) && !(m_flags & SETHASMIGRATED)
+      && (m_inTuns.empty() || m_outTuns.empty()))
     throw;
   SetDeletingRecursively();
   Migrate();
