@@ -405,7 +405,7 @@ Name LoopTunnel::GetName(ConnNum num) const
       return name;
     }
   }
-  return GetInputName(0);
+  return GetRealTunnel()->GetInputName(0);
 }
 
 Name LoopTunnel::GetOrigName() const
