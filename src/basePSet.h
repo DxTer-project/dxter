@@ -30,10 +30,11 @@
 class RealPSet;
 class ShadowPSet;
 
-#define SETHASPROPEDFLAG     (1L<<1)
+#define SETHASPROPEDFLAG  (1L<<1)
 #define SETTOPLEVELFLAG   (1L<<2)
 #define SETLOOPISUNROLLED (1L<<3)
 #define SETISDELETINGFLAG (1L<<3)
+#define SETHASMIGRATED    (1L<<4)
 
 class BasePSet
 {
