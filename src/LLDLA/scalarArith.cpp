@@ -60,7 +60,7 @@ void MulScalars::PrintCode(IndStream &out)
 void SetScalarToZero::Prop()
 {
   if (!IsValidCost(m_cost)) {
-    DLAOp<2, 1>::Prop();
+    DLAOp<1, 1>::Prop();
     m_cost = 1;
   }
   return;
