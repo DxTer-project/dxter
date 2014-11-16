@@ -35,12 +35,27 @@ Partition::Partition(Layer layer, Dir partType, Size partStart, Size totalSize)
   m_startSizes = new Sizes(partStart);
   m_endSizes = new Sizes(totalSize - partStart);
 
-  startName = GetInputName(0);
-  endName = GetInputName(0);
+  m_startName = GetInputName(0);
+  m_endName = GetInputName(0);
   if (partType == HORIZONTAL) {
-    endName.m_name += "_HORIZONTAL_PARTITION";
+    m_startName.m_name += "_LEFT";
+    m_endName.m_name += "_RIGHT";
   } else {
-    endName.m_name += "_VERTICAL_PARTITION";
+    m_startName.m_name += "_TOP";
+    m_endName.m_name += "_BOTTOM";
+  }
+  return;
+}
+
+void Partition::PrintCode(IndStream &out)
+{
+  out.Indent();
+  *out << m_startName.m_name << " = " << GetInputName(0).m_name << ";\n";
+  out.Indent();
+  if (m_partType == HORIZONTAL) {
+  *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << std::to_string(m_startSizes->m_constVal);
+  } else {
+  *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_rowStrideVar << " * " << std::to_string(m_startSizes->m_constVal);
   }
   return;
 }
@@ -48,7 +63,7 @@ Partition::Partition(Layer layer, Dir partType, Size partStart, Size totalSize)
 void Partition::Prop()
 {
   if (!IsValidCost(m_cost)) {
-  DLANode::Prop();
+    DLANode::Prop();
     m_cost = 0;
   }
   return;
@@ -62,22 +77,30 @@ Name Partition::GetName(ConnNum num) const
   }
 
   if (num == 0) {
-    return startName;
+    return m_startName;
   } else {
-    return endName;
+    return m_endName;
   }
 }
 
 void Partition::AddVariables(VarSet &set) const
 {
-  string varDecl;
+  string startVarDecl;
+  string endVarDecl;
+
   if (m_partType == HORIZONTAL) {
-    varDecl = arch->TypeName(GetDataType()) + " " +  GetInputNameStr(0) + "_HORIZONTAL_PARTITION;";
+    startVarDecl = arch->TypeName(GetDataType()) + " " +  m_startName.m_name;
+    endVarDecl = arch->TypeName(GetDataType()) + " " +  m_endName.m_name;
   } else {
-    varDecl = arch->TypeName(GetDataType()) + " " +  GetInputNameStr(0) + "_VERTICAL_PARTITION;";
+    startVarDecl = arch->TypeName(GetDataType()) + " " +  m_startName.m_name;
+    endVarDecl = arch->TypeName(GetDataType()) + " " +  m_endName.m_name;
   }
-  Var var(DirectVarDeclType, varDecl, GetDataType());
-  set.insert(var);
+
+  Var startVar(DirectVarDeclType, startVarDecl, GetDataType());
+  Var endVar(DirectVarDeclType, endVarDecl, GetDataType());
+
+  set.insert(startVar);
+  set.insert(endVar);
 }
 
 const Sizes* Partition::GetM(ConnNum num) const {

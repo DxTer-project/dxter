@@ -34,13 +34,15 @@ class Partition : public DLANode
   Dir m_partType;
   Sizes* m_startSizes;
   Sizes* m_endSizes;
-  Name startName;
-  Name endName;
+  Name m_startName;
+  Name m_endName;
 
  public:
   Layer m_layer;
   
   Partition(Layer layer, Dir partType, Size partStart, Size totalSize);
+
+  virtual void PrintCode(IndStream &out);
 
   virtual ~Partition() {}
   inline void SetLayer(Layer layer) {m_layer = layer;}
