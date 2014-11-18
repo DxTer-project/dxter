@@ -27,7 +27,7 @@ void AddScalars::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
-     m_cost = 1;
+    m_cost = arch->ContigVecLoadCost() + arch->ContigVecStoreCost();
   }
 }
 
@@ -44,7 +44,7 @@ void MulScalars::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
-    m_cost = 1;
+    m_cost = arch->ContigVecLoadCost() + arch->ContigVecStoreCost();
   }
 }
 
@@ -61,7 +61,7 @@ void SetScalarToZero::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<1, 1>::Prop();
-    m_cost = 1;
+    m_cost = arch->ContigVecStoreCost();
   }
   return;
 }
