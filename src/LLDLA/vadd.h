@@ -51,6 +51,22 @@ class VAdd : public DLAOp<2, 1>
   void VectorOpInputDimensionCheck(ConnNum inputNum);
 };
 
+// BAMTODO: THIS IS PART OF A TEST
+// TO SEE IF SPLIT / COMBINE ACTUALLY WORKS
+/*
+class SplitUnusualSizeVAdd : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  unsigned int m_multiple;
+
+  SplitUnusualSizeVAdd(Layer fromLayer, Layer toLayer, unsigned int m_multiple);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const { return true; }
+};
+*/
 class VAddLoopRef : public SingleTrans
 {
  public:

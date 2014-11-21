@@ -32,26 +32,60 @@ class Partition : public DLANode
   
  private:
   Dir m_partType;
+
+  Size m_partSplitPoint;
+
   Sizes* m_startSizes;
   Sizes* m_endSizes;
+
+  DataTypeInfo* m_startInfo;
+  DataTypeInfo* m_endInfo;
+
   Name m_startName;
   Name m_endName;
+
+  void BuildHorizontalDataTypeCache();
+  void BuildVerticalDataTypeCache();
+
+  void BuildHorizontalDataTypeInfo();
+  void BuildVerticalDataTypeInfo();
+
+  void BuildHorizontalSizes();
+  void BuildVerticalSizes();
 
  public:
   Layer m_layer;
   
-  Partition(Layer layer, Dir partType, Size partStart, Size totalSize);
+  Partition(Layer layer, Dir partType, Size partStart);
 
   virtual void PrintCode(IndStream &out);
 
   virtual ~Partition() {}
-  inline void SetLayer(Layer layer) {m_layer = layer;}
-  inline Layer GetLayer() const {return m_layer;}
-  virtual bool IsReadOnly() const {return false;}
-  virtual bool CanTrans() const {return false;}
+  inline void SetLayer(Layer layer) { m_layer = layer; }
+  inline Layer GetLayer() const { return m_layer; }
+  virtual bool IsReadOnly() const { return false; }
+  virtual bool CanTrans() const { return false; }
 
+  virtual NodeType GetType() const { return "Partition"; }
+  static ClassType GetClass() {return "partitionNode";}
+  virtual ClassType GetNodeClass() const { return GetClass(); }
   virtual Name GetName(ConnNum num) const;
+
   virtual void AddVariables(VarSet &set) const;
+  virtual void BuildDataTypeCache();
+  virtual void ClearDataTypeCache();
+
+  virtual ConnNum NumOutputs() const;
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
+
+  bool KeepsInputVarLive(Node* input, ConnNum numIn, ConnNum &numOut)
+    const { return false; }
+  virtual bool Overwrites(const Node* input, ConnNum num) const { return true; }
+
+  virtual Node* GetNewInst() { return BlankInst(); }
+  static Node* BlankInst() { return new Partition(ABSLAYER, VERTICAL, 0); }
+
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
 
   virtual void Prop();
 

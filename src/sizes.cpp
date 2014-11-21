@@ -393,7 +393,6 @@ bool SizeEntry::operator!=(const Size &rhs) const
   return !(*this == rhs);
 }
 
-
 bool SizeEntry::operator<= (const Size &rhs) const
 {
   switch(m_type) {
