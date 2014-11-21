@@ -19,6 +19,7 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <assert.h>
 #include "LLDLA.h"
 #include "partition.h"
 
@@ -121,12 +122,32 @@ void Partition::BuildVerticalDataTypeCache()
 
 void Partition::BuildHorizontalSizes()
 {
-  throw;
+  const Sizes* colSizes = GetInputN(0);
+  assert(colSizes->IsPartitionable(m_partSplitPoint));
+  BuildStartAndEndSizes(colSizes);
 }
 
 void Partition::BuildVerticalSizes()
 {
-  throw;
+  const Sizes* rowSizes = GetInputM(0);
+  assert(rowSizes->IsPartitionable(m_partSplitPoint));
+  BuildStartAndEndSizes(rowSizes);
+}
+
+void Partition::BuildStartAndEndSizes(const Sizes* toSplit)
+{
+  SizeEntry* sizeEnt = toSplit->m_entries[0];
+  int numIterations = sizeEnt->m_repeats;
+  int parFactor = sizeEnt->m_parFactor;
+  Size sizeOfEachIteration = sizeEnt->m_valA;
+  Size sizeOfEndIterations = sizeOfEachIteration - m_partSplitPoint;
+  
+  m_startSizes = new Sizes();
+  m_startSizes->AddRepeatedSizes(m_partSplitPoint, numIterations, parFactor);  
+
+  m_endSizes = new Sizes();
+  m_endSizes->AddRepeatedSizes(sizeOfEndIterations, numIterations, parFactor);
+  return;
 }
 
 void Partition::BuildHorizontalDataTypeInfo()

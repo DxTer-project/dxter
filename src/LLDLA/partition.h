@@ -52,6 +52,9 @@ class Partition : public DLANode
 
   void BuildHorizontalSizes();
   void BuildVerticalSizes();
+  void BuildStartAndEndSizes(const Sizes* toSplit);
+
+  bool ArePartitionableSizes(const Sizes* sizes) const;
 
  public:
   Layer m_layer;

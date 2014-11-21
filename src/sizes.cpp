@@ -1129,3 +1129,21 @@ void Sizes::SetParFactor(int parFactor)
     (*iter)->m_parFactor = parFactor;
   }
 }
+
+bool Sizes::IsPartitionable(const Size partitionPoint) const
+{
+  if (*this <= partitionPoint) {
+    return false;
+  }
+
+  if (this->m_entries.size() != 1) {
+    return false;
+  }
+
+  SizeEntry* firstSizeEntry = this->m_entries[0];
+  if (firstSizeEntry->m_type != REPEATEDSIZES) {
+    return false;
+  }
+
+  return true;
+}
