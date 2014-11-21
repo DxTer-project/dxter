@@ -71,4 +71,21 @@ const Sizes* Recombine::GetN(ConnNum num) const
   return GetInputN(2);
 }
 
+void Recombine::Duplicate(const Node* orig, bool shallow, bool possMerging)
+{
+  DLAOp<3, 1>::Duplicate(orig, shallow, possMerging);
+  const Recombine* rec = (Recombine*) orig;
+  m_layer = rec->m_layer;
+  m_partType = rec->m_partType;
+}
+
+const DataTypeInfo& Recombine::DataType(ConnNum num) const
+{
+  if (num != 0) {
+    cout << "Error: num > 0 in Recombine::DataType\n";
+    throw;
+  }
+  return InputDataType(2);
+}
+
 #endif // DOLLDLA

@@ -164,7 +164,7 @@ void Partition::BuildVerticalDataTypeInfo()
   m_startInfo = new DataTypeInfo(inData.m_rowStride, inData.m_colStride,
 				 endNumRowsVar, inData.m_numColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
-				 inData.m_type);  
+				 inData.m_type);
 }
 
 void Partition::ClearDataTypeCache()
@@ -198,6 +198,7 @@ void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig, shallow, possMerging);
   const Partition* part = (Partition*) orig;
+  m_layer = part->m_layer;
   m_partType = part->m_partType;
   m_startSizes = part->m_startSizes;
   m_endSizes = part->m_endSizes;

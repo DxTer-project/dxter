@@ -13,7 +13,7 @@
     DxTer is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
+    GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
@@ -29,7 +29,7 @@
 
 class Recombine : public DLAOp<3, 1>
 {
-  
+
  private:
   Dir m_partType;
 
@@ -46,6 +46,14 @@ class Recombine : public DLAOp<3, 1>
   virtual bool IsReadOnly() const {return false;}
   virtual bool CanTrans() const {return false;}
 
+  virtual NodeType GetType() const { return "Recombine"; }
+  static ClassType GetClass() {return "recombineNode"; }
+  virtual ClassType GetNodeClass() const {return GetClass(); }
+
+  virtual Node* GetNewInst() { return BlankInst(); }
+  static Node* BlankInst() { return new Recombine(ABSLAYER, VERTICAL); }
+  virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
+
   virtual Name GetName(ConnNum num) const;
 
   virtual void Prop();
@@ -53,6 +61,7 @@ class Recombine : public DLAOp<3, 1>
   virtual const Sizes* GetM(ConnNum num) const;
   virtual const Sizes* GetN(ConnNum num) const;
 
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
 };
 
 #endif //DOLLDLA
