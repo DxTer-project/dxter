@@ -30,16 +30,6 @@ Partition::Partition(Layer layer, Dir partType, Size partStart)
   m_layer = layer;
   m_partType = partType;
 
-  m_startName = GetInputName(0);
-  m_endName = GetInputName(0);
-
-  if (partType == HORIZONTAL) {
-    m_startName.m_name += "_LEFT";
-    m_endName.m_name += "_RIGHT";
-  } else {
-    m_startName.m_name += "_TOP";
-    m_endName.m_name += "_BOTTOM";
-  }
   return;
 }
 
@@ -102,10 +92,30 @@ void Partition::AddVariables(VarSet &set) const
 void Partition::BuildDataTypeCache()
 {
   if (m_partType == HORIZONTAL) {
+    SetHorizontalNames();
     BuildHorizontalDataTypeCache();
   } else {
+    SetVerticalNames();
     BuildVerticalDataTypeCache();
   }
+}
+
+void Partition::SetHorizontalNames()
+{
+  m_startName = GetInputName(0);
+  m_startName.m_name += "_LEFT";
+
+  m_endName = GetInputName(0);
+  m_endName.m_name += "_RIGHT";
+}
+
+void Partition::SetVerticalNames()
+{
+  m_startName = GetInputName(0);
+  m_startName.m_name += "_TOP";
+
+  m_endName = GetInputName(0);
+  m_endName.m_name += "_BOTTOM";
 }
 
 void Partition::BuildHorizontalDataTypeCache()
@@ -143,7 +153,7 @@ void Partition::BuildStartAndEndSizes(const Sizes* toSplit)
   Size sizeOfEndIterations = sizeOfEachIteration - m_partSplitPoint;
   
   m_startSizes = new Sizes();
-  m_startSizes->AddRepeatedSizes(m_partSplitPoint, numIterations, parFactor);  
+  m_startSizes->AddRepeatedSizes(m_partSplitPoint, numIterations, parFactor);
 
   m_endSizes = new Sizes();
   m_endSizes->AddRepeatedSizes(sizeOfEndIterations, numIterations, parFactor);

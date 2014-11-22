@@ -44,6 +44,9 @@ class Partition : public DLANode
   Name m_startName;
   Name m_endName;
 
+  void SetHorizontalNames();
+  void SetVerticalNames();
+
   void BuildHorizontalDataTypeCache();
   void BuildVerticalDataTypeCache();
 
@@ -53,8 +56,6 @@ class Partition : public DLANode
   void BuildHorizontalSizes();
   void BuildVerticalSizes();
   void BuildStartAndEndSizes(const Sizes* toSplit);
-
-  bool ArePartitionableSizes(const Sizes* sizes) const;
 
  public:
   Layer m_layer;
