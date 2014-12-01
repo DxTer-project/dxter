@@ -22,6 +22,7 @@
 #include "LLDLA.h"
 #include "regArith.h"
 #include "regLoadStore.h"
+#include "scalarArith.h"
 #include "svmul.h"
 
 #if DOLLDLA
@@ -440,6 +441,95 @@ string SVMulToRegArith::GetType() const
       + " to " + LayerNumToStr(m_fromLayer);
   } else {
     return "SVMul register arith - Col vector " + LayerNumToStr(m_fromLayer)
+      + " to " + LayerNumToStr(m_fromLayer);
+  }
+}
+
+// Scalar arithmetic
+SVMulToScalarArith::SVMulToScalarArith(Layer fromLayer, Layer toLayer, VecType vtype)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_vType = vtype;
+}
+
+bool SVMulToScalarArith::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == SVMul::GetClass()) {
+    SVMul* svmul = (SVMul*) node;
+    if (svmul->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+void SVMulToScalarArith::Apply(Node* node) const
+{
+  SVMul* svmul = (SVMul*) node;
+
+  // Split up the input vector
+  SplitSingleIter* splitVec;
+  if (m_vType == ROWVECTOR) {
+    splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  } else {
+    splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
+  }
+
+  splitVec->AddInput(svmul->Input(1), svmul->InputConnNum(1));
+
+  if (m_vType == ROWVECTOR) {
+    splitVec->SetUpStats(FULLUP, NOTUP,
+			  FULLUP, NOTUP);
+  } else {
+    splitVec->SetUpStats(FULLUP, FULLUP,
+			  NOTUP, NOTUP);
+  }
+
+  LoopTunnel* scalarTun = new LoopTunnel(POSSTUNIN);
+  scalarTun->AddInput(svmul->Input(0), svmul->InputConnNum(0));
+  scalarTun->SetAllStats(FULLUP);
+
+  MulScalars* sMul = new MulScalars();
+  sMul->AddInput(scalarTun, 0);
+  sMul->AddInput(splitVec, 1);
+
+  // Create output tunnel for scalar
+  LoopTunnel* scalarOut = new LoopTunnel(POSSTUNOUT);
+  scalarOut->AddInput(scalarTun, 0);
+  scalarOut->AddInput(scalarTun, 1);
+  scalarOut->CopyTunnelInfo(scalarTun);
+
+  // Combine resulting vector
+  CombineSingleIter* combineVec = splitVec->CreateMatchingCombine(1, 1, sMul, 0);
+
+  // Create poss
+  Poss* loopPoss = new Poss(2, combineVec, scalarOut);
+  RealLoop* loop;
+  if (svmul->GetDataType() == REAL_SINGLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
+  } else if (svmul->GetDataType() == REAL_DOUBLE) {
+    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
+  } else {
+    cout << "Error: Bad data type in vadd apply\n";
+    throw;
+  }
+  
+  // Adding loop to poss and cleanup
+  node->m_poss->AddPSet(loop);
+  node->RedirectChildren(loop->OutTun(0), 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+}
+
+string SVMulToScalarArith::GetType() const
+{
+  if (m_vType == ROWVECTOR) {
+    return "SVMul scalar arith - Row vector " + LayerNumToStr(m_fromLayer)
+      + " to " + LayerNumToStr(m_fromLayer);
+  } else {
+    return "SVMul scalar arith - Col vector " + LayerNumToStr(m_fromLayer)
       + " to " + LayerNumToStr(m_fromLayer);
   }
 }

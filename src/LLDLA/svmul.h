@@ -82,6 +82,19 @@ class SVMulToRegArith : public SingleTrans
   virtual bool IsRef() const { return true; }
 };
 
+class SVMulToScalarArith : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  VecType m_vType;
+
+  SVMulToScalarArith(Layer fromLayer, Layer toLayer, VecType vType);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+  virtual bool IsRef() const { return true; }
+};
+
 class SVMulLowerLayer : public SingleTrans
 {
  public:

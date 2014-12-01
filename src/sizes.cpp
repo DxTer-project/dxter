@@ -393,7 +393,6 @@ bool SizeEntry::operator!=(const Size &rhs) const
   return !(*this == rhs);
 }
 
-
 bool SizeEntry::operator<= (const Size &rhs) const
 {
   switch(m_type) {
@@ -1129,4 +1128,22 @@ void Sizes::SetParFactor(int parFactor)
   for(; iter != m_entries.end(); ++iter) {
     (*iter)->m_parFactor = parFactor;
   }
+}
+
+bool Sizes::IsPartitionable(const Size partitionPoint) const
+{
+  if (*this <= partitionPoint) {
+    return false;
+  }
+
+  if (this->m_entries.size() != 1) {
+    return false;
+  }
+
+  SizeEntry* firstSizeEntry = this->m_entries[0];
+  if (firstSizeEntry->m_type != REPEATEDSIZES) {
+    return false;
+  }
+
+  return true;
 }

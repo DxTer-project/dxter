@@ -154,6 +154,8 @@ class Sizes
   bool IsZero(unsigned int n) const;
   void AddParFactor(int parFactor);
   void SetParFactor(int parFactor);
+
+  bool IsPartitionable(const Size partitionPoint) const;
 };
 
 

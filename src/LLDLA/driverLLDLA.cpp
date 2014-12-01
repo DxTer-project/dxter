@@ -37,20 +37,22 @@
 
 #if DOLLDLA
 
-#include "LLDLAGemm.h"
-#include "DLAReg.h"
-#include "madd.h"
-#include "vadd.h"
-#include "vmmul.h"
-#include "mvmul.h"
-#include "vvdot.h"
 #include "driverUtils.h"
 #include "debug.h"
+#include "DLAReg.h"
+#include "loopUnrolling.h"
+#include "LLDLAGemm.h"
 #include "LLDLAGemmTransformations.h"
+#include "madd.h"
+#include "mvmul.h"
+#include "partition.h"
+#include "recombine.h"
+#include "runtimeEvaluation.h"
 #include "smmul.h"
 #include "svmul.h"
-#include "runtimeEvaluation.h"
-#include "loopUnrolling.h"
+#include "vadd.h"
+#include "vmmul.h"
+#include "vvdot.h"
 
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
@@ -73,6 +75,8 @@ do you really want to do compact unrolling and partial unrolling?
 
 void MuNNMuGemmResults(Type precision);
 double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName);
+
+RealPSet* GenSizeColSVMul(Type dataType, int m);
 RealPSet* TransMVMulExample(Type dataType, int m, int n);
 RealPSet* GemvExample(Type dataType, bool transpose, int m, int n);
 RealPSet* MVMul2Example(Type dataType, int m, int n, int p);
@@ -380,6 +384,7 @@ void Usage()
   cout <<"        13  -> Matrix add twice F/D M N\n";
   cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
   cout <<"        15  -> Gemv N/T F/D M N\n";
+  cout <<"        16  -> Gen Size Col Vector SVMul F/D M\n";
 }
 
 int main(int argc, const char* argv[])
@@ -585,6 +590,16 @@ int main(int argc, const char* argv[])
 	algPSet = GemvExample(precision, false, m, n);
       }
       break;
+    case(16):
+      if (argc != 4) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_sv_col_mul_gen";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      algPSet = GenSizeColSVMul(precision, m);
+      break;
     default:
       Usage();
       return 0;
@@ -719,6 +734,62 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
 
   double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
   return bestFPS;
+}
+
+RealPSet* GenSizeColSVMul(Type dataType, int m)
+{
+  InputNode* Ain = new InputNode("A input", m, 1, "A",
+				 m, 1,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride", dataType);
+
+  InputNode* xIn = new InputNode("x input", 1, 1, "X",
+				 m, 1,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride", dataType);
+
+  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(Ain, 0);
+
+  Partition* part =
+    new Partition(ABSLAYER, VERTICAL, m - (m % arch->VecRegWidth(dataType)));
+  part->AddInput(tunA, 0);
+
+  Tunnel* tunATop = new Tunnel(POSSTUNIN);
+  tunATop->AddInput(part, 0);
+
+  Tunnel* tunABottom = new Tunnel(POSSTUNIN);
+  tunABottom->AddInput(part, 1);
+
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  SVMul* topSVMul = new SVMul(COLVECTOR, ABSLAYER);
+  topSVMul->AddInputs(4,
+		      tunX, 0,
+		      tunATop, 0);
+
+  SVMul* bottomSVMul = new SVMul(COLVECTOR, ABSLAYER);
+  bottomSVMul->AddInputs(4,
+			 tunX, 0,
+			 tunABottom, 0);
+
+  Recombine* recombine = new Recombine(ABSLAYER, VERTICAL);
+  recombine->AddInputs(6,
+		       tunATop, 0,
+		       tunABottom, 0,
+		       tunA, 0);
+
+  Poss *innerPoss = new Poss(recombine, true);
+  RealPSet *innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+
+  return outerSet;
 }
 
 RealPSet* GemvExample(Type dataType, bool transpose, int m, int n)
