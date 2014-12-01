@@ -148,6 +148,7 @@ class Node
   bool CanPrintCode(const GraphIter *graphIter) const;
   void AddInput(Node *node);
   void AddInputs(int numArgs, ...);
+  void AddInputs0(int numArgs, ...);
 
   //num is the output number of the input that this is taking as input
   void AddInput(Node *node, ConnNum num);

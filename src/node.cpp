@@ -465,6 +465,16 @@ void Node::AddInputs(int numArgs, ...)
   }
 }
 
+void Node::AddInputs0(int numArgs, ...)
+{
+  va_list listPointer;
+  va_start (listPointer, numArgs);
+  for(int i = 0; i < numArgs; ++i) {
+    Node *node = va_arg(listPointer, Node* );
+    AddInput(node, 0);
+  }
+}
+
 void Node::ChangeInput1Way(Node *oldInput, ConnNum oldNum, Node *newInput, ConnNum newNum)
 {
   //Reflect in 2Way
