@@ -88,6 +88,7 @@ class Poss
   bool RemoveLoops(bool *doneSomething);
   bool Simplify(const TransMap &simplifiers, bool recursive = false);
   void PrintTransVec();
+  void PrintTransVecUp();
   void RemoveConnectionToSet();
   //  void ExpandTunnels();
   Node* InTun(unsigned int num) const {return m_inTuns[num];}
