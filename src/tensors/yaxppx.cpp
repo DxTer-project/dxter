@@ -282,6 +282,11 @@ void YAxpPxLoopExp::Apply(Node *node) const
     }
   }
 
+  cout << "*****sizes " << endl;
+  axpy->InputLen(0,m_dim)->Print();
+  cout << "*****end sizes\n";
+
+
   if (size <= TensorBS.GetSize())
     throw;
   
@@ -300,7 +305,7 @@ void YAxpPxLoopExp::Apply(Node *node) const
   Dim mappedDim = axpy->m_permutation.MapFinishToStart(m_dim);
 
   SplitSingleIter *pxTun = NULL;
-  if (mappedDim != m_dim) {
+  if (mappedDim != m_dim || connA->m_n != connB->m_n || connA->m_num != connB->m_num) {
     pxTun = new SplitSingleIter(mappedDim, POSSTUNIN, false);
     pxTun->AddInput(connB->m_n, connB->m_num);
     pxTun->SetAllStats(FULLUP);
@@ -319,7 +324,7 @@ void YAxpPxLoopExp::Apply(Node *node) const
 			       axpy->m_beta,
 			       axpy->m_permutation);
   newAxpy->AddInput(xTun, 1);
-  if (mappedDim != m_dim) {
+  if (mappedDim != m_dim || connA->m_n != connB->m_n || connA->m_num != connB->m_num) {
     newAxpy->AddInput(pxTun, 1);
   }
   else {
@@ -329,13 +334,13 @@ void YAxpPxLoopExp::Apply(Node *node) const
   
   CombineSingleIter *xOut = xTun->CreateMatchingCombine(0);
   CombineSingleIter *pxOut = NULL;
-  if (mappedDim != m_dim) {
+  if (mappedDim != m_dim || connA->m_n != connB->m_n || connA->m_num != connB->m_num) {
     pxOut = pxTun->CreateMatchingCombine(0);
   }
   CombineSingleIter *yOut = yTun->CreateMatchingCombine(1,
 							 1, newAxpy, 0);
 					
-  if (mappedDim != m_dim) {
+  if (mappedDim != m_dim || connA->m_n != connB->m_n || connA->m_num != connB->m_num) {
     Poss *loopPoss = new Poss(3, xOut, pxOut, yOut);
     RealLoop *loop = new RealLoop(TENSORLOOP, loopPoss, TensorBS);
     node->m_poss->AddPSet(loop);
