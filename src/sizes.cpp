@@ -39,7 +39,7 @@
 
 using namespace std;
 
-#define COMBINESIZEENTRIES 1
+#define COMBINESIZEENTRIES 0
 
 Sizes ONEVAL(1);
 Sizes *ONES = &ONEVAL;
@@ -696,6 +696,7 @@ Size Sizes::operator[] (unsigned int n) const
     else
       currLoc += numSizes;
   }
+  cout << n << " of " << NumSizes() << endl;
   throw;
 }
 
