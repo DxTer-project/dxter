@@ -631,6 +631,8 @@ bool DistContToLocalContStatASumScatter::CanApply(const Node *node) const
   const Contraction *cont = (Contraction*)node;
   if (!cont->InputDataType(0).GetDist().HasNoReped())
     return false;
+  if (cont->m_contIndices.empty())
+    return false;
   return (cont->GetLayer() == m_fromLayer);
 }
 
@@ -911,6 +913,8 @@ bool DistContToLocalContStatBSumScatter::CanApply(const Node *node) const
     throw;
   const Contraction *cont = (Contraction*)node;
   if (!cont->InputDataType(1).GetDist().HasNoReped())
+    return false;
+  if (cont->m_contIndices.empty())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
