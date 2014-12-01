@@ -842,7 +842,6 @@ RealPSet* W()
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
-  InputNode *W_bmje = CreateInput4("W_bmje", big, small, small, big);
 
   RealPSet *set = W_bmje_calc(w_bmje, x_bmej, r_bmef, t_fj, 
 			      u_mnje, v_femn, T_bfnj, 
