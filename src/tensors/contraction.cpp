@@ -214,8 +214,13 @@ void Contraction::Prop()
 	      ++cIter;
 	      ++contIter;
 	    }
-	  if (contIter != m_contIndices.end())
+	  if (contIter != m_contIndices.end()) {
+	    cout << m_AIndices << endl;
+	    cout << m_BIndices << endl;
+	    cout << m_CIndices << endl;
+	    cout << m_contIndices << endl;
 	    throw;
+	  }
 	}
 	if (aIter != m_AIndices.end()
 	    || bIter != m_BIndices.end()
@@ -1535,26 +1540,32 @@ void PermuteWhileUnpacking::Apply(Node *node) const
   else if (m_type == 2) {
     newC = cont->m_CIndices;
     string aOuter, bOuter;
+
+    StringIter cIter = cont->m_CIndices.begin();
+    for(; cIter != cont->m_CIndices.end(); ++cIter) {
+      if (cont->m_AIndices.find(*cIter) != string::npos) {	
+	aOuter += (*cIter);
+      } 
+      else if (cont->m_BIndices.find(*cIter) != string::npos) {	
+	bOuter += (*cIter);
+      }
+      else
+	throw;
+    }
+
     StringIter aIter = cont->m_AIndices.begin();
     for(; aIter != cont->m_AIndices.end(); ++aIter) {
-      if (cont->m_contIndices.find(*aIter) == string::npos) {
-	aOuter += (*aIter);
-      }
-      else {
+      if (aOuter.find(*aIter) == string::npos) {
 	inner += (*aIter);
       }
     }
     newA = aOuter;
     newA += inner;
     
-    StringIter bIter = cont->m_BIndices.begin();
-    for(; bIter != cont->m_BIndices.end(); ++bIter) {
-      if (cont->m_contIndices.find(*bIter) == string::npos) {	
-	bOuter += (*bIter);
-      }
-    }
     newB = inner;
     newB += bOuter;
+
+    newC = aOuter + bOuter;
   }
   else
     throw;
