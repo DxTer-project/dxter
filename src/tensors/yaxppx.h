@@ -28,6 +28,7 @@
 #include "transform.h"
 #include "DLAOp.h"
 #include "tensorRedist.h"
+#include "lowerLayer.h"
 
 class YAxpPx : public DLAOp<3,1>
 {
@@ -74,6 +75,16 @@ class YAxpPxLoopExp : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
+};
+
+class YAxpPxLowerLayer : public LowerLayer
+{
+ public:
+  YAxpPxLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
+    : LowerLayer(fromLayer,  toLayer,  bs) {}
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #endif //DOTENSORS

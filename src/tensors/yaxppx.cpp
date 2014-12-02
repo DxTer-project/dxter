@@ -356,4 +356,34 @@ void YAxpPxLoopExp::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node, false, false, true);
 }
 
+
+string YAxpPxLowerLayer::GetType() const
+{
+  return "YAxpPxLowerLayer "
+    + LayerNumToStr(m_fromLayer) 
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
+
+bool YAxpPxLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == YAxpPx::GetClass()) {
+    const YAxpPx *axpy = (YAxpPx*)node;
+    if (axpy->GetLayer() == m_fromLayer) {
+      Dim numDims = axpy->InputNumDims(0);
+      for(Dim dim = 0; dim < numDims; ++dim)
+	if (!(*(axpy->InputLen(0,dim)) <= m_bs))
+	  return false;
+      return true;
+    }
+  }
+  return false;  
+}
+
+void YAxpPxLowerLayer::Apply(Node *node) const
+{
+  YAxpPx *axpy = (YAxpPx*)node;
+  axpy->SetLayer(m_toLayer);
+}
+
 #endif // DOTENSORS
