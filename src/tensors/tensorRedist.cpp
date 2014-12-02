@@ -1155,12 +1155,16 @@ void SingleIndexAllToAll::Apply(Node *node) const
   }
   type1.m_dists[m_dim].DimsToDistEntry(vec1);
 
-  RedistNode *redist1 = new RedistNode(type1, redist->m_info.GetPerm());
-  redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
-  node->m_poss->AddNode(redist1);
-
-  if (type1 == redist1->InputDataType(0).GetDist())
-    throw;
+  bool skipFirstRedist = false;
+  RedistNode *redist1 = NULL;
+  if (type1 == srcType) {
+    skipFirstRedist = true;
+  }
+  else {
+    redist1 = new RedistNode(type1, redist->m_info.GetPerm());
+    redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
+    node->m_poss->AddNode(redist1);
+  }
 
   DistType type2 = redist->m_info.GetDist();
   DistEntry entry2 = type2.m_dists[m_dim];
@@ -1179,7 +1183,10 @@ void SingleIndexAllToAll::Apply(Node *node) const
   type2.m_dists[m_dim].DimsToDistEntry(vec2);
   
   RedistNode *redist2 = new RedistNode(type2, redist->m_info.GetPerm());
-  redist2->AddInput(redist1, 0);
+  if (skipFirstRedist)
+    redist2->AddInput(redist->Input(0), redist->InputConnNum(0));
+  else
+    redist2->AddInput(redist1, 0);
   node->m_poss->AddNode(redist2);
 
   if (type2 == redist2->InputDataType(0).GetDist())
