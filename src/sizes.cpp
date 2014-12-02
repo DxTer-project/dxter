@@ -725,8 +725,11 @@ bool Sizes::operator==(const Sizes &rhs) const
     throw;
   if (!std::isnan((double)m_constVal) && (m_constVal != rhs.m_constVal))
     return false;
-  if (m_entries.size() != rhs.m_entries.size())
+  if (m_entries.size() != rhs.m_entries.size()) {
+    cout << m_entries.size() << endl;
+    cout << rhs.m_entries.size() << endl;
     throw;
+  }
   EntryVecConstIter iter1 = m_entries.begin();
   EntryVecConstIter iter2 = rhs.m_entries.begin();
   for(; iter1 != m_entries.end(); ++iter1,++iter2) {
