@@ -39,7 +39,7 @@
 
 using namespace std;
 
-#define COMBINESIZEENTRIES 0
+#define COMBINESIZEENTRIES 1
 
 Sizes ONEVAL(1);
 Sizes *ONES = &ONEVAL;
