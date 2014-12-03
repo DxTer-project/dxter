@@ -24,6 +24,7 @@
 #if DOTENSORS
 
 #include "helperNodes.h"
+#include "tensorHelpers.h"
 #include "yaxppx.h"
 #include "zaxpby.h"
 #include "yaxpy.h"
@@ -133,7 +134,14 @@ RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
 
   InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
 
-  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"bn","fj","bfnj",(string)"");
+  Copy *copy1 = new Copy(SMLAYER);
+  copy1->AddInputs0(2,
+		   x_bmej,
+		   X_bmej);
+  Poss *copy1Poss = new Poss(copy1);
+  RealPSet *copy1Set = new RealPSet(copy1Poss);
+
+  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"bn","fj","bfnj",(string)"");
   cont1->AddInputs0(3,
 		    t_fj, t_fj, temp1);
   Poss *cont1Poss = new Poss(cont1);
@@ -147,7 +155,7 @@ RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
 
   Contraction *cont2 = new Contraction(ABSLAYER,COEFNEGONE,COEFZERO,REAL,"femn","bfnj","bmej",(string)"fn");
   cont2->AddInputs0(3,
-		    v_femn, axpy1Set->OutTun(0), X_bmej);
+		    v_femn, axpy1Set->OutTun(0), copy1Set->OutTun(0));
   Poss *cont2Poss = new Poss(cont2);
   RealPSet *cont2Set = new RealPSet(cont2Poss);
 
@@ -164,14 +172,7 @@ RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
   Poss *cont4Poss = new Poss(cont4);
   RealPSet *cont4Set = new RealPSet(cont4Poss);
 
-  Yxpy *axpy2 = new Yxpy(SMLAYER);
-  axpy2->AddInputs0(2,
-		    x_bmej, cont4Set->OutTun(0));
-  Poss *axpy2Poss = new Poss(axpy2);
-  RealPSet * axpy2Set = new RealPSet(axpy2Poss);
-  
-
-  return axpy2Set;
+  return cont4Set;
 }
 
 #endif //DOTENSORS
