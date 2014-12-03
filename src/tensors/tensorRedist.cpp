@@ -153,6 +153,8 @@ void RedistNode::Prop()
     if (!m_info.GetDist().IsSane()) {
       cout << m_info.GetDist().str() << endl;
       m_poss->PrintTransVec();
+      cout << m_srcType.PrettyStr() << endl;
+      cout <<m_info.GetDist().PrettyStr() << endl;
       throw;
     }
 
@@ -423,7 +425,14 @@ Phase RedistNode::MaxPhase() const
     throw;
   }
   else if (diffs.size() == 1) {
-    return NUMPHASES;
+    Dim dim = *(diffs.begin());
+    DimVec src = m_srcType.m_dists[dim].DistEntryDims();
+    DimVec dest = m_info.GetDist().m_dists[dim].DistEntryDims();
+    if (m_srcType.m_dists[dim].DistEntryDimSet() != m_info.GetDist().m_dists[dim].DistEntryDimSet()) {
+      return ROTENSORPHASE;
+    }
+    else
+      return NUMPHASES;
   }
   else
     return ROTENSORPHASE;
@@ -468,6 +477,12 @@ bool RedistNode::IsPrimitive() const
     throw;
   }
   else if (diffs.size() == 1) {
+    Dim dim = *(diffs.begin());
+    DimVec src = m_srcType.m_dists[dim].DistEntryDims();
+    DimVec dest = m_info.GetDist().m_dists[dim].DistEntryDims();
+    if (m_srcType.m_dists[dim].DistEntryDimSet() != m_info.GetDist().m_dists[dim].DistEntryDimSet()) {
+      return false;
+    }
     return true;
   }
   else
@@ -1092,6 +1107,7 @@ bool SingleIndexAllToAll::CanApply(const Node *node) const
     throw;
   const RedistNode *redist = (RedistNode*)node;
   const DistType &srcType = redist->InputDataType(0).GetDist();
+  const DistType &destType = redist->m_info.GetDist();
 
   if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
     throw;
@@ -1099,16 +1115,18 @@ bool SingleIndexAllToAll::CanApply(const Node *node) const
     return false;
 
   DistEntry srcEntry = srcType.m_dists[m_dim];
-  DistEntry destEntry = redist->m_info.GetDist().m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
   if (srcEntry == destEntry)
     return false;
 
+/*
   for(Dim dim = 0; dim < srcType.m_numDims; ++dim) {
     if (dim != m_dim) {
       if (srcType.m_dists[dim] != redist->m_info.GetDist().m_dists[dim])
 	return false;
     }
   }
+  */
 
   if (srcEntry.IsStar() || destEntry.IsStar())
     return false;
@@ -1119,14 +1137,43 @@ bool SingleIndexAllToAll::CanApply(const Node *node) const
   if (IsPrefix(srcDims,destDims) || IsPrefix(destDims,srcDims))
     return false;
 
-  if (srcDims.size() == destDims.size()) {
     DimSet srcSet;
     srcSet.insert(srcDims.begin(), srcDims.end());
     DimSet destSet;
     destSet.insert(destDims.begin(), destDims.end());
+
+  if (srcDims.size() == destDims.size()) {
+    //if the src and dest have the same grid modes, then this
+    // is already a single-mode AllToAll
     if (includes(srcSet.begin(), srcSet.end(),
 		 destSet.begin(), destSet.end()))
       return false;
+  }
+
+  //Now check that no other src or dest entry
+  //  uses the same grid mode as the src or dest m_dim entry
+  DimSet fullSet = srcSet;
+  fullSet.insert(destSet.begin(), destSet.end());
+  for (Dim dim = 0; dim < srcType.m_numDims; ++dim) {
+    if (dim != m_dim) {
+      DimSet tmp = srcType.m_dists[dim].DistEntryDimSet();
+      DimVec intersection;
+      intersection.resize(tmp.size());
+      DimVecIter iter = set_intersection(tmp.begin(), tmp.end(),
+					 fullSet.begin(), fullSet.end(),
+					 intersection.begin());
+      if (iter - intersection.begin())
+	return false;
+
+      intersection.clear();
+      intersection.resize(tmp.size());
+      tmp = destType.m_dists[dim].DistEntryDimSet();
+      iter = set_intersection(tmp.begin(), tmp.end(),
+			      fullSet.begin(), fullSet.end(),
+			      intersection.begin());
+      if (iter - intersection.begin())
+	return false;
+    }
   }
 
   return true;
@@ -1155,12 +1202,16 @@ void SingleIndexAllToAll::Apply(Node *node) const
   }
   type1.m_dists[m_dim].DimsToDistEntry(vec1);
 
-  RedistNode *redist1 = new RedistNode(type1, redist->m_info.GetPerm());
-  redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
-  node->m_poss->AddNode(redist1);
-
-  if (type1 == redist1->InputDataType(0).GetDist())
-    throw;
+  bool skipFirstRedist = false;
+  RedistNode *redist1 = NULL;
+  if (type1 == srcType) {
+    skipFirstRedist = true;
+  }
+  else {
+    redist1 = new RedistNode(type1, redist->m_info.GetPerm());
+    redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
+    node->m_poss->AddNode(redist1);
+  }
 
   DistType type2 = redist->m_info.GetDist();
   DistEntry entry2 = type2.m_dists[m_dim];
@@ -1179,13 +1230,14 @@ void SingleIndexAllToAll::Apply(Node *node) const
   type2.m_dists[m_dim].DimsToDistEntry(vec2);
   
   RedistNode *redist2 = new RedistNode(type2, redist->m_info.GetPerm());
-  redist2->AddInput(redist1, 0);
+  if (skipFirstRedist)
+    redist2->AddInput(redist->Input(0), redist->InputConnNum(0));
+  else
+    redist2->AddInput(redist1, 0);
   node->m_poss->AddNode(redist2);
 
   if (type2 == redist2->InputDataType(0).GetDist())
     throw;
-
-
 
   RedistNode *redist3 = new RedistNode(redist->m_info.GetDist(), redist->m_info.GetPerm());
   redist3->AddInput(redist2, 0);

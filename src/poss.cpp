@@ -702,6 +702,14 @@ void Poss::PrintTransVec()
   }
 }
 
+void Poss::PrintTransVecUp()
+{
+  if (m_pset && m_pset->m_ownerPoss) {
+    m_pset->m_ownerPoss->PrintTransVecUp();
+  }
+  PrintTransVec();
+}
+
 
 void Poss::RemoveConnectionToSet()
 {

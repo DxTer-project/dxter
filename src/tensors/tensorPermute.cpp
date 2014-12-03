@@ -165,7 +165,7 @@ void Permute::PrintCode(IndStream &out)
   out.Indent();
   *out << GetNameStr(0) << ".ResizeTo( " << GetInputNameStr(0) << ".Shape() );\n";
   out.Indent();
-  *out << "Permute( " << GetInputNameStr(0) << ", " << GetNameStr(0) << " );\n";
+  *out << "Permute( " << GetNameStr(0) << ", " << GetInputNameStr(0) << " );\n";
 }
 
 void Permute::AddVariables(VarSet &set) const
@@ -259,6 +259,8 @@ void PermuteLoopHoist::Apply(Node *node) const
   setTun->ChangeInput2Way(setTun->Input(0), setTun->InputConnNum(0), newPermute, 0);
   setTun->m_poss->AddNode(newPermute);
   newPermute->BuildDataTypeCache();
+
+  setTun->ClearDataTypeCache();
 
   perm->RedirectChildren(possTun, 0);
   perm->m_poss->DeleteChildAndCleanUp(perm);

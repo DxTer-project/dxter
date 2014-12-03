@@ -45,11 +45,10 @@
 #include "debug.h"
 #include "yaxppx.h"
 #include "zaxpby.h"
+#include "ccsd.h"
+
 
 Size one = 1;
-Size smallSize = 10;
-Size medSize = 100;
-Size bigSize = 1000;
 //Size bs = ELEM_BS;
 
 RealPSet* RedistExample();
@@ -57,6 +56,8 @@ RealPSet* RedistExample2();
 RealPSet* MartinsExample();
 RealPSet* MP2();
 RealPSet* MP3();
+RealPSet* W();
+RealPSet* X();
 
 void AddTrans()
 {
@@ -90,6 +91,8 @@ void AddTrans()
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
   Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER), DPTENSORPHASE);
   Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER), DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(ABSLAYER,DM1LAYER,TensorBS.GetSize()), DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(DM1LAYER,DM2LAYER,TensorBS.GetSize()), DPTENSORPHASE);
   
   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 
@@ -146,6 +149,8 @@ void Usage()
   cout <<"         3  -> Martin's Example\n";
   cout <<"         4  -> MP2\n";
   cout <<"         5  -> MP3\n";
+  cout <<"         6  -> W_bmje\n";
+  cout <<"         7  -> X_bmej\n";
 }
 
 int main(int argc, const char* argv[])
@@ -182,6 +187,12 @@ int main(int argc, const char* argv[])
       break;
     case(5):
       algFunc = MP3;
+      break;
+    case(6):
+      algFunc = W;
+      break;
+    case(7):
+      algFunc = X;
       break;
     default:
       Usage();
@@ -363,6 +374,10 @@ int main(int argc, const char* argv[])
 
 RealPSet* RedistExample()
 {
+  Size smallSize = 10;
+  Size medSize = 100;
+  Size bigSize = 1000;
+
   Sizes sizes[4];
 
   for (Dim dim = 0; dim < 4; ++dim)
@@ -406,6 +421,10 @@ RealPSet* RedistExample()
 
 RealPSet* RedistExample2()
 {
+  Size smallSize = 10;
+  Size medSize = 100;
+  Size bigSize = 1000;
+  
   Sizes sizes[4];
 
   for (Dim dim = 0; dim < 4; ++dim)
@@ -435,6 +454,10 @@ RealPSet* RedistExample2()
 
 RealPSet* MartinsExample()
 {
+  Size smallSize = 10;
+  Size medSize = 100;
+  Size bigSize = 1000;
+
   Sizes sizes[4];
 
   //a-d = medium
@@ -811,6 +834,63 @@ RealPSet* MP3()
   
   return outerSet;
 }
+
+RealPSet* W()
+{
+  //~ 10:1 ratio
+  // 53, 5 for H20
+  const Size big = 53; //a-h
+  const Size small = 5; //i-p
+
+  InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
+  InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
+  InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+
+  RealPSet *set = W_bmje_calc(w_bmje, x_bmej, r_bmef, t_fj, 
+			      u_mnje, v_femn, T_bfnj, 
+			      big, small);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* X()
+{
+  //~ 10:1 ratio
+  // 53, 5 for H20
+  const Size big = 53; //a-h
+  const Size small = 5; //i-p
+
+  InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
+  InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+
+  RealPSet *set = X_bmej_calc(x_bmej, r_bmef, t_fj, 
+			      u_mnje, v_femn, T_bfnj, 
+			      big, small);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+
 
 
 

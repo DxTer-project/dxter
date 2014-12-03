@@ -53,18 +53,6 @@ class Contraction : public DLAOp<3,1>
   virtual void AddVariables(VarSet &set) const;
 };
 
-class DistContToLocalContStatAAllReduce : public SingleTrans
-{
- public:
-  Layer m_fromLayer, m_toLayer;
-  DistContToLocalContStatAAllReduce(Layer fromLayer, Layer toLayer)
-    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
-  virtual string GetType() const;
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-
 class DistContToLocalContStatASumScatter : public SingleTrans
 {
  public:
@@ -78,18 +66,6 @@ class DistContToLocalContStatASumScatter : public SingleTrans
   virtual Cost RHSCostEstimate(const Node *node) const;
 };
 
-
-class DistContToLocalContStatBAllReduce : public SingleTrans
-{
- public:
-  Layer m_fromLayer, m_toLayer;
-  DistContToLocalContStatBAllReduce(Layer fromLayer, Layer toLayer)
-    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
-  virtual string GetType() const;
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
 
 class DistContToLocalContStatBSumScatter : public SingleTrans
 {

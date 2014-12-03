@@ -28,63 +28,26 @@
 #include "transform.h"
 #include "DLAOp.h"
 #include "tensorRedist.h"
-#include "lowerLayer.h"
 
-class YAxpPx : public DLAOp<3,1>
+class Yaxpy : public DLAOp<2,1>
 {
  public:
-  Coef m_alpha, m_beta;
-  Permutation m_permutation;
-  YAxpPx(Layer layer, Coef alpha, Coef beta, string startIndices, string endIndices);
-  YAxpPx(Layer layer, Coef alpha, Coef beta, const Permutation &perm);
-  YAxpPx(Layer layer, Coef alpha, Coef beta);
+  Coef m_alpha;
+  Yaxpy(Layer layer, Coef alpha);
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual NodeType GetType() const;
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "axppx";}
-  static Node* BlankInst() { return new YAxpPx(ABSLAYER, COEFZERO, COEFZERO, "ab", "ba"); }
+  static ClassType GetClass() {return "axpy";}
+  static Node* BlankInst() { return new Yaxpy(ABSLAYER, COEFZERO); }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual Phase MaxPhase() const;
   //  virtual bool ShouldCullDP() const;
-  virtual bool DoNotCullDP() const;
-  virtual void AddVariables(VarSet &set) const;
+  //  virtual bool DoNotCullDP() const;
 };
 
-
-
-class DistYAxpPxToDefaultLocalYAxpPx : public SingleTrans
-{
- public:
-  virtual string GetType() const {return "DistYAxpPx to Default Dist LocalYAxpPx";}
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-
-class YAxpPxLoopExp : public SingleTrans
-{
- public:
-  Layer m_fromLayer, m_toLayer;
-  YAxpPxLoopExp(Layer fromLayer, Layer toLayer);
-  
-  virtual string GetType() const;
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-  virtual bool IsRef() const {return true;}
-};
-
-class YAxpPxLowerLayer : public LowerLayer
-{
- public:
-  YAxpPxLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
-    : LowerLayer(fromLayer,  toLayer,  bs) {}
-  virtual string GetType() const;
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-};
 
 #endif //DOTENSORS

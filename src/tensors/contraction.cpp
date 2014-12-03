@@ -214,8 +214,13 @@ void Contraction::Prop()
 	      ++cIter;
 	      ++contIter;
 	    }
-	  if (contIter != m_contIndices.end())
+	  if (contIter != m_contIndices.end()) {
+	    cout << m_AIndices << endl;
+	    cout << m_BIndices << endl;
+	    cout << m_CIndices << endl;
+	    cout << m_contIndices << endl;
 	    throw;
+	  }
 	}
 	if (aIter != m_AIndices.end()
 	    || bIter != m_BIndices.end()
@@ -523,102 +528,6 @@ void DistContToLocalContStatC::Apply(Node *node) const
 
 
 
-string DistContToLocalContStatAAllReduce::GetType() const
-{
-  return "DistContToLocalContStatAAllReduce";
-}
-
-bool DistContToLocalContStatAAllReduce::CanApply(const Node *node) const
-{
-  if (node->GetNodeClass() != Contraction::GetClass())
-    throw;
-  const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDataType(0).GetDist().HasNoReped())
-    return false;
-  if (!cont->InputDataType(2).GetDist().HasNoReped())
-    return false;
-  return (cont->GetLayer() == m_fromLayer);
-}
-
-void DistContToLocalContStatAAllReduce::Apply(Node *node) const
-{
-  Contraction *cont = (Contraction*)node;
-
-  DimVec BDims = MapIndicesToDims(cont->m_contIndices,cont->m_BIndices);
-  DimVec CDims = MapIndicesToDims(cont->m_contIndices,cont->m_CIndices);
-
-  NodeConn *AConn = cont->InputConn(0);
-  if (AConn->m_n->GetNodeClass() == RedistNode::GetClass())
-    AConn = AConn->m_n->InputConn(0);
-
-  const DataTypeInfo &aInfo = ((DLANode*)(AConn->m_n))->DataType(AConn->m_num);
-  if (aInfo.HasPerm())
-    throw;
-  const DistType &AType = aInfo.GetDist();
-
-  DimVec sumDims;
-  string sumIndices;
-  string::iterator iter = cont->m_contIndices.begin();
-  for(; iter != cont->m_contIndices.end(); ++iter) {
-    size_t loc = cont->m_AIndices.find(*iter);
-    if (loc != string::npos) {
-      DimVec dims = AType.m_dists[loc].DistEntryDims();
-      DimVecIter iter2 = dims.begin();
-      for( ; iter2 != dims.end(); ++iter2) {
-	sumDims.push_back(*iter2);
-	sumIndices += *iter;
-      }
-    }
-  }
-
-  DistType BType;
-  MatchDistsAndFillInWithStar(cont->m_BIndices,
-			      AType, cont->m_AIndices,
-			      BType);
-  
-  DistType CType;
-  MatchDistsAndFillInWithStar(cont->m_CIndices,
-			      AType, cont->m_AIndices, 
-			      CType);
-
-  
-
-
-  RedistNode *node1 = new RedistNode(AType);
-  RedistNode *node2 = new RedistNode(BType);
-  RedistNode *node3 = new RedistNode(CType);
-  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, 
-				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices, cont->m_contIndices);
-  node1->AddInput(node->Input(0),node->InputConnNum(0));
-  node2->AddInput(node->Input(1),node->InputConnNum(1));
-  node3->AddInput(node->Input(2),node->InputConnNum(2));
-  LCont->AddInput(node1,0);
-  LCont->AddInput(node2,0);
-  LCont->AddInput(node3,0);
-  node->m_poss->AddNode(node1);
-  node->m_poss->AddNode(node2);
-  node->m_poss->AddNode(node3);
-  node->m_poss->AddNode(LCont);
-
-  AllReduceNode *sum = new AllReduceNode(sumDims, sumIndices);
-  sum->AddInput(LCont, 0);
-  node->m_poss->AddNode(sum);
-
-  const DataTypeInfo &info = cont->DataType(0);
-  if (info.HasPerm())
-    throw;
-  RedistNode *node4 = new RedistNode(info.GetDist());
-  node4->AddInput(sum);
-  node->m_poss->AddNode(node4);
-
-  cont->RedirectChildren(node4,0);
-
-  node->m_poss->DeleteChildAndCleanUp(node);
-}
-
-
-
-
 string DistContToLocalContStatASumScatter::GetType() const
 {
   return "DistContToLocalContStatASumScatter";
@@ -630,6 +539,8 @@ bool DistContToLocalContStatASumScatter::CanApply(const Node *node) const
     throw;
   const Contraction *cont = (Contraction*)node;
   if (!cont->InputDataType(0).GetDist().HasNoReped())
+    return false;
+  if (cont->m_contIndices.empty())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -789,101 +700,6 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
 
 
 
-string DistContToLocalContStatBAllReduce::GetType() const
-{
-  return "DistContToLocalContStatBAllReduce";
-}
-
-bool DistContToLocalContStatBAllReduce::CanApply(const Node *node) const
-{
-  if (node->GetNodeClass() != Contraction::GetClass())
-    throw;
-  const Contraction *cont = (Contraction*)node;
-  if (!cont->InputDataType(1).GetDist().HasNoReped())
-    return false;
-  if (!cont->InputDataType(2).GetDist().HasNoReped())
-    return false;
-  return (cont->GetLayer() == m_fromLayer);
-}
-
-void DistContToLocalContStatBAllReduce::Apply(Node *node) const
-{
-  Contraction *cont = (Contraction*)node;
-
-  DimVec ADims = MapIndicesToDims(cont->m_contIndices,cont->m_AIndices);
-  DimVec CDims = MapIndicesToDims(cont->m_contIndices,cont->m_CIndices);
-
-
-  NodeConn *BConn = cont->InputConn(1);
-  if (BConn->m_n->GetNodeClass() == RedistNode::GetClass())
-    BConn = BConn->m_n->InputConn(0);
-
-  const DataTypeInfo &bInfo = ((DLANode*)(BConn->m_n))->DataType(BConn->m_num);
-  if (bInfo.HasPerm())
-    throw;
-  const DistType &BType = bInfo.GetDist();
-
-  DimVec sumDims;
-  string sumIndices;
-  string::iterator iter = cont->m_contIndices.begin();
-  for(; iter != cont->m_contIndices.end(); ++iter) {
-    size_t loc = cont->m_BIndices.find(*iter);
-    if (loc != string::npos) {
-      DimVec dims = BType.m_dists[loc].DistEntryDims();
-      DimVecIter iter2 = dims.begin();
-      for(; iter2 != dims.end(); ++iter2) {
-	sumDims.push_back(*iter2);
-	sumIndices += *iter;
-      }
-    }
-  }
-
-  DistType AType;
-  MatchDistsAndFillInWithStar(cont->m_AIndices,
-			      BType, cont->m_BIndices,
-			      AType);
-  
-  DistType CType;
-  MatchDistsAndFillInWithStar(cont->m_CIndices,
-			      BType, cont->m_BIndices, 
-			      CType);
-
-  
-
-
-  RedistNode *node1 = new RedistNode(AType);
-  RedistNode *node2 = new RedistNode(BType);
-  RedistNode *node3 = new RedistNode(CType);
-  Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, cont->m_beta, cont->m_type, 
-				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices, cont->m_contIndices);
-  node1->AddInput(node->Input(0),node->InputConnNum(0));
-  node2->AddInput(node->Input(1),node->InputConnNum(1));
-  node3->AddInput(node->Input(2),node->InputConnNum(2));
-  LCont->AddInput(node1,0);
-  LCont->AddInput(node2,0);
-  LCont->AddInput(node3,0);
-  node->m_poss->AddNode(node1);
-  node->m_poss->AddNode(node2);
-  node->m_poss->AddNode(node3);
-  node->m_poss->AddNode(LCont);
-
-  AllReduceNode *sum = new AllReduceNode(sumDims, sumIndices);
-  sum->AddInput(LCont, 0);
-  node->m_poss->AddNode(sum);
-
-  const DataTypeInfo &info = cont->DataType(0);
-  if (info.HasPerm())
-    throw;
-  RedistNode *node4 = new RedistNode(info.GetDist());
-  node4->AddInput(sum);
-  node->m_poss->AddNode(node4);
-
-  cont->RedirectChildren(node4,0);
-
-  node->m_poss->DeleteChildAndCleanUp(node);
-}
-
-
 
 Cost DistContToLocalContStatBSumScatter::RHSCostEstimate(const Node *node) const
 {
@@ -911,6 +727,8 @@ bool DistContToLocalContStatBSumScatter::CanApply(const Node *node) const
     throw;
   const Contraction *cont = (Contraction*)node;
   if (!cont->InputDataType(1).GetDist().HasNoReped())
+    return false;
+  if (cont->m_contIndices.empty())
     return false;
   return (cont->GetLayer() == m_fromLayer);
 }
@@ -1722,26 +1540,32 @@ void PermuteWhileUnpacking::Apply(Node *node) const
   else if (m_type == 2) {
     newC = cont->m_CIndices;
     string aOuter, bOuter;
+
+    StringIter cIter = cont->m_CIndices.begin();
+    for(; cIter != cont->m_CIndices.end(); ++cIter) {
+      if (cont->m_AIndices.find(*cIter) != string::npos) {	
+	aOuter += (*cIter);
+      } 
+      else if (cont->m_BIndices.find(*cIter) != string::npos) {	
+	bOuter += (*cIter);
+      }
+      else
+	throw;
+    }
+
     StringIter aIter = cont->m_AIndices.begin();
     for(; aIter != cont->m_AIndices.end(); ++aIter) {
-      if (cont->m_contIndices.find(*aIter) == string::npos) {
-	aOuter += (*aIter);
-      }
-      else {
+      if (aOuter.find(*aIter) == string::npos) {
 	inner += (*aIter);
       }
     }
     newA = aOuter;
     newA += inner;
     
-    StringIter bIter = cont->m_BIndices.begin();
-    for(; bIter != cont->m_BIndices.end(); ++bIter) {
-      if (cont->m_contIndices.find(*bIter) == string::npos) {	
-	bOuter += (*bIter);
-      }
-    }
     newB = inner;
     newB += bOuter;
+
+    newC = aOuter + bOuter;
   }
   else
     throw;
