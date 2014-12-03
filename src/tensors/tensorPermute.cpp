@@ -260,6 +260,8 @@ void PermuteLoopHoist::Apply(Node *node) const
   setTun->m_poss->AddNode(newPermute);
   newPermute->BuildDataTypeCache();
 
+  setTun->ClearDataTypeCache();
+
   perm->RedirectChildren(possTun, 0);
   perm->m_poss->DeleteChildAndCleanUp(perm);
 
