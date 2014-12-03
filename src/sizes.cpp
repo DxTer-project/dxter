@@ -728,6 +728,9 @@ bool Sizes::operator==(const Sizes &rhs) const
   if (m_entries.size() != rhs.m_entries.size()) {
     cout << m_entries.size() << endl;
     cout << rhs.m_entries.size() << endl;
+    Print();
+  cout << "****\n";
+    rhs.Print();
     throw;
   }
   EntryVecConstIter iter1 = m_entries.begin();
