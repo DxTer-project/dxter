@@ -26,6 +26,8 @@
 #include "helperNodes.h"
 #include "yaxppx.h"
 #include "zaxpby.h"
+#include "yaxpy.h"
+#include "yxpy.h"
 #include "contraction.h"
 
 InputNode *CreateInput2(string name, Size size1, Size size2)
@@ -118,6 +120,58 @@ RealPSet* W_bmje_calc(DLANode *w_bmje, DLANode *x_bmej,
   RealPSet *cont4Set = new RealPSet(cont4Poss);
 
   return cont4Set;
+}
+
+RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
+		      DLANode *t_fj, 
+		      DLANode *u_mnje, DLANode *v_femn,
+		      DLANode *T_bfnj,
+		      const Size big, const Size small)
+{
+  InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
+
+
+  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
+
+  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"bn","fj","bfnj",(string)"");
+  cont1->AddInputs0(3,
+		    t_fj, t_fj, temp1);
+  Poss *cont1Poss = new Poss(cont1);
+  RealPSet *cont1Set = new RealPSet(cont1Poss);
+
+  Yaxpy *axpy1 = new Yaxpy(SMLAYER, COEFONEHALF);
+  axpy1->AddInputs0(2,
+		    T_bfnj, cont1Set->OutTun(0));
+  Poss *axpy1Poss = new Poss(axpy1);
+  RealPSet * axpy1Set = new RealPSet(axpy1Poss);
+
+  Contraction *cont2 = new Contraction(ABSLAYER,COEFNEGONE,COEFZERO,REAL,"femn","bfnj","bmej",(string)"fn");
+  cont2->AddInputs0(3,
+		    v_femn, axpy1Set->OutTun(0), X_bmej);
+  Poss *cont2Poss = new Poss(cont2);
+  RealPSet *cont2Set = new RealPSet(cont2Poss);
+
+
+  Contraction *cont3 = new Contraction(ABSLAYER,COEFNEGONE,COEFONE,REAL,"mnje","bn","bmej",(string)"n");
+  cont3->AddInputs0(3,
+		    u_mnje, t_fj, cont2Set->OutTun(0));
+  Poss *cont3Poss = new Poss(cont3);
+  RealPSet *cont3Set = new RealPSet(cont3Poss);
+
+  Contraction *cont4 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"bmef","fj","bmej",(string)"f");
+  cont4->AddInputs0(3,
+		    r_bmef, t_fj, cont3Set->OutTun(0));
+  Poss *cont4Poss = new Poss(cont4);
+  RealPSet *cont4Set = new RealPSet(cont4Poss);
+
+  Yxpy *axpy2 = new Yxpy(SMLAYER);
+  axpy2->AddInputs0(2,
+		    x_bmej, cont4Set->OutTun(0));
+  Poss *axpy2Poss = new Poss(axpy2);
+  RealPSet * axpy2Set = new RealPSet(axpy2Poss);
+  
+
+  return axpy2Set;
 }
 
 #endif //DOTENSORS

@@ -29,20 +29,21 @@
 #include "DLAOp.h"
 #include "tensorRedist.h"
 
-RealPSet* W_bmje_calc(DLANode *w_bmje, DLANode *x_bmej,
-		      DLANode *r_bmfe, DLANode *t_fj,
-		      DLANode *u_mnje, DLANode *v_femn,
-		      DLANode *T_bfnj,
-		      const Size big, const Size small);
-
-RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
-		      DLANode *t_fj, 
-		      DLANode *u_mnje, DLANode *v_femn,
-		      DLANode *T_bfnj,
-		      const Size big, const Size small);
-
-InputNode *CreateInput2(string name, Size size1, Size size2);
-InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size size4);
+class Yxpy : public DLAOp<2,1>
+{
+ public:
+  Yxpy(Layer layer);
+  virtual NodeType GetType() const;
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "axpy";}
+  static Node* BlankInst() { return new Yxpy(ABSLAYER); }
+  virtual Node* GetNewInst() { return BlankInst(); }
+  virtual void Prop();
+  virtual void PrintCode(IndStream &out);
+  virtual Phase MaxPhase() const;
+  //  virtual bool ShouldCullDP() const;
+  //  virtual bool DoNotCullDP() const;
+};
 
 
 #endif //DOTENSORS
