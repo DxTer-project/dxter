@@ -58,6 +58,8 @@ RealPSet* MP2();
 RealPSet* MP3();
 RealPSet* W();
 RealPSet* X();
+RealPSet* U();
+RealPSet* Q();
 
 void AddTrans()
 {
@@ -152,6 +154,8 @@ void Usage()
   cout <<"         5  -> MP3\n";
   cout <<"         6  -> W_bmje\n";
   cout <<"         7  -> X_bmej\n";
+  cout <<"         8  -> U_mnie\n";
+  cout <<"         9  -> Q_mnij\n";
 }
 
 int main(int argc, const char* argv[])
@@ -194,6 +198,12 @@ int main(int argc, const char* argv[])
       break;
     case(7):
       algFunc = X;
+      break;
+    case(8):
+      algFunc = U;
+      break;
+    case(9):
+      algFunc = Q;
       break;
     default:
       Usage();
@@ -875,6 +885,56 @@ RealPSet* X()
 
   RealPSet *set = X_bmej_calc(x_bmej, r_bmef, t_fj, 
 			      u_mnje, v_femn, T_bfnj, 
+			      big, small);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* U()
+{
+  //~ 10:1 ratio
+  // 53, 5 for H20
+  const Size big = 53; //a-h
+  const Size small = 5; //i-p
+
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *u_mnie = CreateInput4("u_mnie", small, small, small, big);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
+
+  RealPSet *set = U_mnie_calc(t_fj, 
+			      u_mnie, v_femn,
+			      big, small);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* Q()
+{
+  //~ 10:1 ratio
+  // 53, 5 for H20
+  const Size big = 53; //a-h
+  const Size small = 5; //i-p
+
+  InputNode *q_mnij = CreateInput4("q_mnij", small, small, small, small);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *u_mnie = CreateInput4("u_mnie", small, small, small, big);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+
+  RealPSet *set = Q_mnij_calc(q_mnij, t_fj, 
+			      u_mnie, v_femn, T_bfnj, 
 			      big, small);
 
   OutputNode *out = new OutputNode("output");
