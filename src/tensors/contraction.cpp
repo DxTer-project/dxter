@@ -1421,7 +1421,6 @@ void ContractionLowerLayer::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
   cont->SetLayer(m_toLayer);
-  throw;
 }
 
 string ContractionLowerLayer::GetType() const
