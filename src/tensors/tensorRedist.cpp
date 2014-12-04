@@ -116,7 +116,7 @@ void RedistNode::Prop()
       throw;
   
     if (!m_name.length())
-      m_name = (string)"RedistNode to " +  m_info.GetDist().QuickStr();
+      m_name = (string)"RedistNode to " +  m_info.GetDist().QuickStr() + m_info.GetPerm().Str();
     DLANode *parent = (DLANode*)Input(0);
     parent->Prop();
 
