@@ -283,4 +283,47 @@ void PermuteLoopHoist::Apply(Node *node) const
     newOutPermute->BuildDataTypeCache();
   }
 }
+
+bool CombinePermutations::CanApply(const Node *node) const
+{
+  const Permute *perm = (Permute*)node;
+  NodeConnVecConstIter iter = perm->m_children.begin();
+  for(; iter != perm->m_children.end(); ++iter) {
+    const Node *child = (*iter)->m_n;
+    if (child->GetNodeClass() == Permute::GetClass())
+      return true;
+  }
+  return false;
+}
+  
+void CombinePermutations::Apply(Node *node) const
+{
+  Permute *perm = (Permute*)node;
+  for(int i = 0; i < perm->m_children.size(); ++i) {
+    Node *tmp = perm->Child(i);
+    if (tmp->GetNodeClass() == Permute::GetClass()) {
+      Permute *child = (Permute*)tmp;
+      Permutation composition = perm->m_permutation.ComposeWith(child->m_permutation);
+      if (composition.HasPerm()) {
+	Permute *newPerm = new Permute(composition, perm->GetLayer());
+	child->RedirectChildren(newPerm, 0);
+	child->m_poss->AddNode(newPerm);
+      }
+      else {
+	child->RedirectChildren(perm->Input(0), perm->InputConnNum(0));
+      }
+      bool needToBreak = false;
+      if (perm->m_children.size() == 1)
+	needToBreak = true;
+      child->m_poss->DeleteChildAndCleanUp(child);
+      if (needToBreak)
+	break;
+      else
+	--i;
+    }
+  }
+}
+
+
+
 #endif //DOTENSORS

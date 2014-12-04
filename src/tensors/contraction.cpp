@@ -1598,22 +1598,21 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     UpdateWithPermutation(cont, 2, perm);
   }
 
-  if (cont->m_children.size() != 1) {
-    //just need to handle this
-    throw;
-  }
-
-  Node *child = cont->Child(0);
-  if (newC != cont->m_CIndices
-      && child->GetNodeClass() != SumScatterUpdateNode::GetClass()
-      && child->GetNodeClass() != RedistNode::GetClass()
-      && child->GetNodeClass() != AllReduceNode::GetClass()) 
-    {
-      Permute *newPermute = new Permute(newC, cont->m_CIndices, SMLAYER);
-      cont->m_poss->AddNode(newPermute);
-      cont->RedirectChildren(newPermute, 0);
-      newPermute->AddInput(cont, 0);
+  if (newC != cont->m_CIndices) {
+    NodeConnVecIter iter = cont->m_children.begin();
+    for(; iter != cont->m_children.end(); ++iter) {
+      Node *child = (*iter)->m_n;
+      if (child->GetNodeClass() != SumScatterUpdateNode::GetClass()
+	  && child->GetNodeClass() != RedistNode::GetClass()
+	  && child->GetNodeClass() != AllReduceNode::GetClass()) 
+	{
+	  Permute *newPermute = new Permute(newC, cont->m_CIndices, SMLAYER);
+	  cont->m_poss->AddNode(newPermute);
+	  cont->RedirectChildren(newPermute, 0);
+	  newPermute->AddInput(cont, 0);
+	}
     }
+  }
 
   if (m_type == 0 || m_type == 1) {
     if (newC.size() < cont->m_CIndices.size())

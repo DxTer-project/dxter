@@ -75,4 +75,14 @@ class PermuteLoopHoist : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+class CombinePermutations : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "CombinePermutations"; }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+
+
 #endif //DOTENSORS

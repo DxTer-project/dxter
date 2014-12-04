@@ -137,6 +137,7 @@ void AddSimplifiers()
    Universe::AddTrans(RedistNode::GetClass(), new RemoveWastedRedist, SIMP);
    Universe::AddTrans(RedistNode::GetClass(), new CombineRedistribs, SIMP);
    Universe::AddTrans(Permute::GetClass(), new LowerPermute, SIMP);
+   Universe::AddTrans(Permute::GetClass(), new CombinePermutations, SIMP);
    Universe::AddTrans(ScaleNode::GetClass(), new RemoveScaleByOne, SIMP);
 }
 
@@ -374,8 +375,6 @@ int main(int argc, const char* argv[])
 
 RealPSet* RedistExample()
 {
-  Size smallSize = 10;
-  Size medSize = 100;
   Size bigSize = 1000;
 
   Sizes sizes[4];
@@ -421,8 +420,6 @@ RealPSet* RedistExample()
 
 RealPSet* RedistExample2()
 {
-  Size smallSize = 10;
-  Size medSize = 100;
   Size bigSize = 1000;
   
   Sizes sizes[4];
@@ -454,7 +451,6 @@ RealPSet* RedistExample2()
 
 RealPSet* MartinsExample()
 {
-  Size smallSize = 10;
   Size medSize = 100;
   Size bigSize = 1000;
 
