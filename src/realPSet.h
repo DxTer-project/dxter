@@ -75,7 +75,7 @@ class RealPSet : public BasePSet
   bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   virtual GraphNum TotalCount() const;
-  virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
+  virtual void InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPosses);
   virtual ShadowPSet* GetNewShadow();
   virtual ShadowPSet* GetNewShadowDup(Poss *poss);
 

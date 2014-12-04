@@ -1442,7 +1442,7 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 	  && m_ownerPoss->m_sets.size() > 1)
         {
 	  //	  didMerge = true;
-	  InlinePoss(poss, newPosses);
+	  InlinePoss(poss, 0, newPosses);
 	  m_posses.erase(iter);
           PossMMapIter mapIter = newPosses.begin();
           for(; mapIter != newPosses.end(); ++mapIter)
@@ -1471,32 +1471,28 @@ void RealPSet::InlineAllSets()
     iter = m_posses.begin();
     while (iter != m_posses.end()) {
       Poss *poss = (*iter).second;
+      bool inlined = false;
       //This poss has only a single PSet on it
       // Make new posses for me, each containing the posses in
       // poss->m_posses[0];
-      if (poss->m_sets.size() >= 1  &&
-	     poss->m_sets[0]->IsTransparent())
-	{
-	  PossMMap newPosses;
-	  //	  didMerge = true;
-	  InlinePoss(poss, newPosses);
-	  m_posses.erase(iter);
-	  PossMMapIter mapIter = newPosses.begin();
-	  for(; mapIter != newPosses.end(); ++mapIter)
-	    (*mapIter).second->BuildDataTypeCache();
-	  AddPossesOrDispose(newPosses);
-	  iter = m_posses.begin();
-	}
-      else {
-	if (poss->m_sets.size() > 1) {
-	  BasePSet *set = poss->m_sets[1];
-	  if (set->IsTransparent()) {
-	    cout << "second set is transparent\n";
-	    throw;
-	  }	 
-	} 
-	++iter;
+      for(int i = 0; !inlined && i < poss->m_sets.size(); ++i) {
+	if (poss->m_sets[i]->IsTransparent())
+	  {
+	    PossMMap newPosses;
+	    //	  didMerge = true;
+	    InlinePoss(poss, i, newPosses);
+	    m_posses.erase(iter);
+	    PossMMapIter mapIter = newPosses.begin();
+	    for(; mapIter != newPosses.end(); ++mapIter)
+	      (*mapIter).second->BuildDataTypeCache();
+	    AddPossesOrDispose(newPosses);
+	    inlined = true;
+	  }
       }
+      if (inlined)
+	iter = m_posses.begin();
+      else
+	++iter;
     }
   }
 }
@@ -1525,16 +1521,16 @@ GraphNum RealPSet::TotalCount() const
   return tot;
 }
 
-void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
+void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPosses)
 {
 #if PRINTTRACKING
-  cout << "inlining " << this << endl;
+  cout << "inlining " << num << " on " << this << endl;
 #endif
-  if (inliningPoss->m_sets[0]->IsShadow()) {
-    inliningPoss->ReplaceShadowSetWithReal(0);
+  if (inliningPoss->m_sets[num]->IsShadow()) {
+    inliningPoss->ReplaceShadowSetWithReal(num);
   }
 
-  RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[0]);
+  RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[num]);
 
   if (pset->IsLoop() || !pset->IsTransparent())
     throw;
@@ -1606,10 +1602,12 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 
 
     {
+      int i = 0;
       PSetVecIter setIter = inliningPoss->m_sets.begin();
       //inlining the first one
-      ++setIter;
-      for(; setIter != inliningPoss->m_sets.end(); ++setIter) {
+      for(; setIter != inliningPoss->m_sets.end(); ++setIter,++i) {
+	if (i == num)
+	  continue;
 	BasePSet *oldSet = (*setIter);
 #if USESHADOWS
         BasePSet *newSet = oldSet->GetNewShadow();
