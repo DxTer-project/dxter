@@ -104,7 +104,10 @@ void RealPSet::Init(Poss *poss)
 
 void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
 {
-  //  cout << "updating " << this << endl;
+#if PRINTTRACKING
+  cout << "updating " << this << endl;
+  cout << "old " << oldPtr << " to new " << newPtr << endl;
+#endif
   if (m_mergeLeft == oldPtr) {
     m_mergeLeft = newPtr;
     if (newPtr == NULL) {
@@ -162,6 +165,11 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
 
 void RealPSet::Migrate()
 {
+#if PRINTTRACKING
+  cout << "migrating " << this << endl;
+#endif
+  if (m_flags & SETHASMIGRATED)
+    return;
   ShadowPSet *shadowToReplace = NULL;
   for(unsigned int shadowNum = 0; shadowNum < m_shadows.size(); ++shadowNum) {
     BasePSet *tmp = m_shadows[shadowNum];
@@ -178,21 +186,29 @@ void RealPSet::Migrate()
     cout << "deleting, no shadows " << this << endl;
 #endif
     if (m_mergeLeft) {
-      //      cout << "updating left\n";
-      m_mergeLeft->UpdateRealPSetPointers(this, NULL); 
+#if PRINTTRACKING
+      cout << "updating left\n";
+#endif
+      m_mergeLeft->UpdateRealPSetPointers(this, NULL);
       m_mergeLeft = NULL;
     }
     if (m_mergeRight) {
-      //      cout << "updating right\n";
+#if PRINTTRACKING
+      cout << "updating right\n";
+#endif
       m_mergeRight->UpdateRealPSetPointers(this, NULL);
-      m_mergeLeft = NULL;
+      m_mergeRight = NULL;
     }
     //    cout << "map's size : " << m_mergeMap.size() << endl;
     PSetMapIter setIter = m_mergeMap.begin();
     for(; setIter != m_mergeMap.end(); ++setIter) {
-      //      cout << "updating first\n";
+#if PRINTTRACKING
+      cout << "updating first\n";
+#endif
       setIter->first->UpdateRealPSetPointers(this, NULL);
-      //      cout << "updating second\n";
+#if PRINTTRACKING
+      cout << "updating second\n";
+#endif
       setIter->second->UpdateRealPSetPointers(this, NULL);
     }
     m_mergeMap.clear();
@@ -232,13 +248,29 @@ void RealPSet::Migrate()
 #endif
 
 
-  if (m_mergeLeft)
+  if (m_mergeLeft) {
+#if PRINTTRACKING
+    cout << "updating merge left\n";
+#endif
     m_mergeLeft->UpdateRealPSetPointers(this, newSet);
-  if (m_mergeRight)
+  }
+  if (m_mergeRight){
+#if PRINTTRACKING
+    cout << "updating merge right\n";
+#endif
     m_mergeRight->UpdateRealPSetPointers(this, newSet);
+  }
   PSetMapIter setIter = m_mergeMap.begin();
   for(; setIter != m_mergeMap.end(); ++setIter) {
+#if PRINTTRACKING
+    cout << "updating mergemap first\n";
+#endif
+
     setIter->first->UpdateRealPSetPointers(this, newSet);
+#if PRINTTRACKING
+    cout << "updating mergemap second\n";
+#endif
+    
     setIter->second->UpdateRealPSetPointers(this, newSet);
   }
 
@@ -336,12 +368,19 @@ void RealPSet::Migrate()
   newSet->ClearDeletingRecursively();
   delete shadowToReplace;
   m_shadows.clear();
+  m_flags |= SETHASMIGRATED;
   //  cout << "building on " << newSet->m_ownerPoss << endl;
   //  newSet->m_ownerPoss->BuildDataTypeCache();
+#if PRINTTRACKING
+  cout << "done migrating " << this << endl;
+#endif
 }
 
 RealPSet::~RealPSet()
 {
+#if PRINTTRACKING
+  cout << "deleting " << this << endl;
+#endif
   if (!(m_flags & SETTOPLEVELFLAG) && !(m_flags & SETHASMIGRATED)
       && (m_inTuns.empty() || m_outTuns.empty()))
     throw;

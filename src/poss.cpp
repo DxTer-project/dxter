@@ -809,11 +809,11 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
     //If so, duplicate this and do the fusion
     //If not, then merge non-loop posses
     if (m_sets.size() >= 2) {
-      for (unsigned int left = 0; left < m_sets.size()-1; ++left) {
+      for (unsigned int left = 0; !didMerge && left < m_sets.size()-1; ++left) {
         //check if the poss set is transparent poss (i.e. not a loop)
         BasePSet *leftSet = m_sets[left];
         if (leftSet->IsLoop()) {
-          for (unsigned int right = left + 1; right < m_sets.size(); ++right) {
+          for (unsigned int right = left + 1; !didMerge && right < m_sets.size(); ++right) {
             BasePSet *rightSet = m_sets[right];
             if (rightSet->IsLoop()) {
 	      //              if (!(dynamic_cast<const LoopInterface*>(leftSet))->WorthFusing(dynamic_cast<const LoopInterface*>(rightSet))) {
@@ -871,6 +871,10 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
           for (unsigned int right = left + 1; right < m_sets.size(); ++right) {
             if (m_sets[right]->IsTransparent()) {
               if (m_sets[left]->CanMerge(m_sets[right])) {
+#if PRINTTRACKING
+		cout << "merging non-loops " << m_sets[left] << " and " << m_sets[right] << endl;
+#endif
+
                 MergePosses(left,right,simplifiers,cullFunc);
                 didMerge = true;
                 break;
@@ -2059,6 +2063,10 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
     return;
   if (!leftSet->IsLoop() || !rightSet->IsLoop())
     throw;
+
+#if PRINTTRACKING
+  cout << "fusing left " << leftSet << " and right " << rightSet << endl;
+#endif
   
   NodeMap tunMapLeft, tunMapRight;
   RealLoop *newSet = new RealLoop();

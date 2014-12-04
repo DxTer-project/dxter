@@ -535,8 +535,14 @@ ShadowPSet* RealLoop::GetNewShadow()
   return (BasePSet*)real;
 }
 
-
+ 
  RealLoop::~RealLoop()
  {
+#if PRINTTRACKING
+   cout << "migrating in real loop " << this << endl;
+#endif
    Migrate();
+#if PRINTTRACKING
+   cout << "done migrating in real loop " << this << endl;
+#endif
  }
