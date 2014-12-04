@@ -800,13 +800,13 @@ bool Node::InInputs(Node *node, ConnNum num) const
   return false;
 }
 
-void Node::PrintChildren()
+void Node::PrintChildren() const
 {
   for (unsigned int i = 0; i < m_children.size(); ++i)
     cout << "Child " << i << " " << Child(i)->GetType() << " " << Child(i) << endl;
 }
 
-void Node::PrintInputs()
+void Node::PrintInputs() const
 {
   for (ConnNum i = 0; i < m_inputs.size(); ++i) {
     const Node *node = Input(i);
