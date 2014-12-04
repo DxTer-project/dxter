@@ -41,6 +41,17 @@ RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
 		      DLANode *T_bfnj,
 		      const Size big, const Size small);
 
+RealPSet* U_mnie_calc(DLANode *t_fj, 
+		      DLANode *u_mnie, DLANode *v_femn,
+		      const Size big, const Size small);
+
+RealPSet* Q_mnij_calc(DLANode *q_mnij,
+		      DLANode *t_fj, 
+		      DLANode *u_mnie, DLANode *v_femn,
+		      DLANode *T_bfnj,
+		      const Size big, const Size small);
+
+
 InputNode *CreateInput2(string name, Size size1, Size size2);
 InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size size4);
 
