@@ -502,9 +502,6 @@ void Poss::DeleteChildAndCleanUp(Node *output,
   DeleteNode(output);
 }
 
-
-
-
 void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
 {
   InvalidateHash();

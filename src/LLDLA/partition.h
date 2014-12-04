@@ -60,7 +60,7 @@ class Partition : public DLANode
  public:
   Layer m_layer;
   
-  Partition(Layer layer, Dir partType, Size partStart);
+  Partition(Layer layer, Dir partType, Size partSplitPoint);
 
   virtual void PrintCode(IndStream &out);
 
@@ -84,7 +84,8 @@ class Partition : public DLANode
 
   bool KeepsInputVarLive(Node* input, ConnNum numIn, ConnNum &numOut)
     const { return false; }
-  virtual bool Overwrites(const Node* input, ConnNum num) const { return true; }
+  // TODO LOOK FOR MULTIPLE PARTITIONS
+  virtual bool Overwrites(const Node* input, ConnNum num) const { return false; }
 
   virtual Node* GetNewInst() { return BlankInst(); }
   static Node* BlankInst() { return new Partition(ABSLAYER, VERTICAL, 0); }

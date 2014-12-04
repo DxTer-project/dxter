@@ -755,29 +755,23 @@ RealPSet* GenSizeColSVMul(Type dataType, int m)
     new Partition(ABSLAYER, VERTICAL, m - (m % arch->VecRegWidth(dataType)));
   part->AddInput(tunA, 0);
 
-  Tunnel* tunATop = new Tunnel(POSSTUNIN);
-  tunATop->AddInput(part, 0);
-
-  Tunnel* tunABottom = new Tunnel(POSSTUNIN);
-  tunABottom->AddInput(part, 1);
-
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
   SVMul* topSVMul = new SVMul(COLVECTOR, ABSLAYER);
   topSVMul->AddInputs(4,
 		      tunX, 0,
-		      tunATop, 0);
+		      part, 0);
 
   SVMul* bottomSVMul = new SVMul(COLVECTOR, ABSLAYER);
   bottomSVMul->AddInputs(4,
 			 tunX, 0,
-			 tunABottom, 0);
+			 part, 1);
 
   Recombine* recombine = new Recombine(ABSLAYER, VERTICAL);
   recombine->AddInputs(6,
-		       tunATop, 0,
-		       tunABottom, 0,
+		       topSVMul, 0,
+		       bottomSVMul, 0,
 		       tunA, 0);
 
   Poss *innerPoss = new Poss(recombine, true);

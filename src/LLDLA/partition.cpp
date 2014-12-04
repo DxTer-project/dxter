@@ -25,11 +25,11 @@
 
 #if DOLLDLA
 
-Partition::Partition(Layer layer, Dir partType, Size partStart)
+Partition::Partition(Layer layer, Dir partType, Size partSplitPoint)
 {
   m_layer = layer;
   m_partType = partType;
-
+  m_partSplitPoint = partSplitPoint;
   return;
 }
 
@@ -39,9 +39,9 @@ void Partition::PrintCode(IndStream &out)
   *out << m_startName.m_name << " = " << GetInputName(0).m_name << ";\n";
   out.Indent();
   if (m_partType == HORIZONTAL) {
-  *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << std::to_string(m_startSizes->m_constVal);
+    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n"; 
   } else {
-  *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_rowStrideVar << " * " << std::to_string(m_startSizes->m_constVal);
+    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_rowStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n";
   }
   return;
 }
@@ -73,13 +73,20 @@ void Partition::AddVariables(VarSet &set) const
 {
   string startVarDecl;
   string endVarDecl;
-
-  if (m_partType == HORIZONTAL) {
-    startVarDecl = arch->TypeName(GetDataType()) + " " +  m_startName.m_name;
-    endVarDecl = arch->TypeName(GetDataType()) + " " +  m_endName.m_name;
+  string typeName;
+  if (GetDataType() == REAL_SINGLE) {
+    typeName = "float* ";
+  } else if (GetDataType() == REAL_DOUBLE) {
+    typeName = "double* ";
   } else {
-    startVarDecl = arch->TypeName(GetDataType()) + " " +  m_startName.m_name;
-    endVarDecl = arch->TypeName(GetDataType()) + " " +  m_endName.m_name;
+    cout << "Unsupported datatype: " << GetDataType() << endl;
+  }
+  if (m_partType == HORIZONTAL) {
+    startVarDecl = typeName + " " +  m_startName.m_name + ";";
+    endVarDecl = typeName + " " +  m_endName.m_name + ";";
+  } else {
+    startVarDecl = typeName + " " +  m_startName.m_name + ";";
+    endVarDecl = typeName + " " +  m_endName.m_name + ";";
   }
 
   Var startVar(DirectVarDeclType, startVarDecl, GetDataType());
@@ -173,7 +180,7 @@ void Partition::BuildHorizontalDataTypeInfo()
 
   string endNumColsVar = inData.m_numColsVar;
   endNumColsVar = endNumColsVar + "_RIGHT";
-  m_startInfo = new DataTypeInfo(inData.m_rowStride, inData.m_colStride,
+  m_endInfo = new DataTypeInfo(inData.m_rowStride, inData.m_colStride,
 				 inData.m_numRowsVar, endNumColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
 				 inData.m_type);
@@ -192,7 +199,7 @@ void Partition::BuildVerticalDataTypeInfo()
 
   string endNumRowsVar = inData.m_numColsVar;
   endNumRowsVar = endNumRowsVar + "_BOTTOM";
-  m_startInfo = new DataTypeInfo(inData.m_rowStride, inData.m_colStride,
+  m_endInfo = new DataTypeInfo(inData.m_rowStride, inData.m_colStride,
 				 endNumRowsVar, inData.m_numColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
 				 inData.m_type);
@@ -214,6 +221,7 @@ ConnNum Partition::NumOutputs() const
 
 const DataTypeInfo& Partition::DataType(ConnNum num) const
 {
+  cout << "GETTING DATATYPE FROM PARTITION\n";
   if (num > 1) {
     cout << "Error: argument to DataType is too large\n";
     throw;
@@ -241,11 +249,12 @@ void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging)
 
 const Sizes* Partition::GetM(ConnNum num) const {
   if (num > 1) {
+    cout << "Bad connection number in Partition::GetM" << endl;
     throw;
   }
 
   if (m_partType == HORIZONTAL) {
-    return GetInputM(num);
+    return GetInputM(0);
   } else {
     if (num == 0) {
       return m_startSizes;
@@ -258,11 +267,12 @@ const Sizes* Partition::GetM(ConnNum num) const {
 
 const Sizes* Partition::GetN(ConnNum num) const {
   if (num > 1) {
+    cout << "Bad connection number in partition::GetN" << endl;
     throw;
   }
 
   if (m_partType == VERTICAL) {
-    return GetInputN(num);
+    return GetInputN(0);
   } else {
     if (num == 0) {
       return m_startSizes;

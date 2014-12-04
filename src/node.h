@@ -169,7 +169,7 @@ class Node
   inline void SetPrinted() {m_flags |= NODEPRINTEDFLAG;} 
   inline bool HasPrinted() const {return m_flags & NODEPRINTEDFLAG;}
   inline void ClearHasRefined() {m_flags &= ~NODEHASREFINEDFLAG;}
-  inline void SetHasRefined() {m_flags |= NODEHASREFINEDFLAG;} 
+  inline void SetHasRefined() {m_flags |= NODEHASREFINEDFLAG;}
   inline bool HasRefined() const {return m_flags & NODEHASREFINEDFLAG;}
   Node* Input(ConnNum num) const;
   NodeConn* InputConn(ConnNum num) const;
