@@ -163,9 +163,7 @@ void Permute::PrintCode(IndStream &out)
 {  
   //Reflect in AddVars
   out.Indent();
-  *out << GetNameStr(0) << ".ResizeTo( " << GetInputNameStr(0) << ".Shape() );\n";
-  out.Indent();
-  *out << "Permute( " << GetNameStr(0) << ", " << GetInputNameStr(0) << " );\n";
+  *out << "Permute( " << GetInputNameStr(0) << ", " << GetNameStr(0) << " );\n";
 }
 
 void Permute::AddVariables(VarSet &set) const
