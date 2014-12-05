@@ -200,6 +200,11 @@ bool PermuteLoopHoist::CanApply(const Node *node) const
   bool foundOne = false;
   Permutation perm;
   const LoopTunnel *setTun = (LoopTunnel*)node;
+  //should have inlined
+  if (setTun->m_pset->IsShadow())
+    throw;
+  if (setTun->m_children.size() == 0)
+    throw;
   NodeConnVecConstIter setIter = setTun->m_children.begin();
   for(; setIter != setTun->m_children.end(); ++setIter) {
     const LoopTunnel *possTun = (LoopTunnel*)((*setIter)->m_n);
@@ -263,6 +268,7 @@ void PermuteLoopHoist::Apply(Node *node) const
   perm->RedirectChildren(possTun, 0);
   perm->m_poss->DeleteChildAndCleanUp(perm);
 
+
   LoopTunnel *possTunOut = possTun->GetMatchingOutTun();
   if (possTunOut->Input(0)->GetNodeClass() == Permute::GetClass()) {
     Permute *outPermute = (Permute*)(possTunOut->Input(0));
@@ -293,7 +299,7 @@ bool CombinePermutations::CanApply(const Node *node) const
   }
   return false;
 }
-  
+
 void CombinePermutations::Apply(Node *node) const
 {
   Permute *perm = (Permute*)node;
@@ -307,6 +313,7 @@ void CombinePermutations::Apply(Node *node) const
 	newPerm->AddInput(perm->Input(0), perm->InputConnNum(0));
 	child->RedirectChildren(newPerm, 0);
 	child->m_poss->AddNode(newPerm);
+	newPerm->BuildDataTypeCache();
       }
       else {
 	child->RedirectChildren(perm->Input(0), perm->InputConnNum(0));
@@ -321,6 +328,7 @@ void CombinePermutations::Apply(Node *node) const
 	--i;
     }
   }
+  perm->m_poss->BuildDataTypeCache();
 }
 
 
