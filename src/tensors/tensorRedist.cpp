@@ -1750,7 +1750,7 @@ void PermuteDistribution::Apply(Node *node) const
 {  
   // Didn't know if this was actually needed
   //check / propagate m_permutation as needed
-  throw;
+  //  throw;
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
   RedistNode *redist = (RedistNode*)node;
