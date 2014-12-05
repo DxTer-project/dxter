@@ -125,8 +125,11 @@ void Contraction::Prop()
     DLAOp<3,1>::Prop();
     m_cost = 0;
 
-    if(InputNumDims(0) != m_AIndices.size())
+    if(InputNumDims(0) != m_AIndices.size()) {
+      cout << InputNumDims(0) << endl;
+      cout << m_AIndices << endl;
       throw;
+    }
 
     if(InputNumDims(1) != m_BIndices.size())
       throw;
