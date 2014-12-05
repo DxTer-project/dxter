@@ -84,11 +84,11 @@ Permutation Permutation::ComposeWith(const Permutation &perm) const
   if (perm.Size() != Size())
     throw;
   Permutation newPerm;
-  DimVecConstIter iter = m_permutation.begin();
+  DimVecConstIter iter = perm.m_permutation.begin();
   Dim dim = 0;
   bool isIdent = true;
-  for(; iter != m_permutation.end(); ++iter, ++dim){
-    Dim tmp = perm.MapFinishToStart(*iter);
+  for(; iter != perm.m_permutation.end(); ++iter, ++dim){
+    Dim tmp = MapFinishToStart(*iter);
     newPerm.m_permutation.push_back(tmp);
     if (tmp!=dim)
       isIdent = false;
