@@ -619,6 +619,7 @@ bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
           ((SingleTrans*)trans)->Apply(node);
           m_transVec.push_back(const_cast<Transformation*>(trans));
           nodeIdx = -1;
+	  //	  BuildDataTypeCache();
           break;
         }
       }
@@ -2463,7 +2464,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      Poss *newPoss = new Poss;
 	      NodeMap nodeMap = setTunnels;
 #if USESHADOWS
-	      newPoss->Duplicate(this,nodeMap,false,true);
+		newPoss->Duplicate(this,nodeMap,false,true);
 #else
 	      newPoss->Duplicate(this,nodeMap,false,false);
 #endif
@@ -2519,7 +2520,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 		var->Apply(i, newNode, &cache);
 		newPoss->m_transVec.push_back(const_cast<Transformation*>(marking));
 		newPoss->Simplify(simplifiers);
-		//newPoss->BuildDataTypeCache();
+		//		newPoss->BuildDataTypeCache();
 		if(!AddPossToMMap(newPosses,newPoss,newPoss->GetHash())) {
 		  delete newPoss;
 		}
@@ -2811,8 +2812,10 @@ void Poss::BuildDataTypeCache()
 void Poss::ClearDataTypeCache()
 {
   NodeVecIter iter1 = m_possNodes.begin();
-  for(; iter1 != m_possNodes.end(); ++iter1)
+  for(; iter1 != m_possNodes.end(); ++iter1) {
+    (*iter1)->m_flags &= ~NODEBUILDFLAG;
     (*iter1)->ClearDataTypeCache();
+  }
   PSetVecIter iter2 = m_sets.begin();
   for(; iter2 != m_sets.end(); ++iter2)
     (*iter2)->ClearDataTypeCache();
