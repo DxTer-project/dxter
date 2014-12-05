@@ -84,7 +84,9 @@ DistType& DistType::operator=(const DistType &rhs)
   m_notReped = rhs.m_notReped;
   if (m_dists)
     delete [] m_dists;
-  if (m_numDims) {
+  if (m_numDims == 99)
+    throw;
+  else if (m_numDims) {
     m_dists = new DistEntry[m_numDims];
     for (Dim dim = 0; dim < m_numDims; ++dim)
       m_dists[dim] = rhs.m_dists[dim];
