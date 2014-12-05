@@ -304,6 +304,7 @@ void CombinePermutations::Apply(Node *node) const
       Permutation composition = perm->m_permutation.ComposeWith(child->m_permutation);
       if (composition.HasPerm()) {
 	Permute *newPerm = new Permute(composition, perm->GetLayer());
+	newPerm->AddInput(perm->Input(0), perm->InputConnNum(0));
 	child->RedirectChildren(newPerm, 0);
 	child->m_poss->AddNode(newPerm);
       }
