@@ -148,7 +148,7 @@ void SumScatterUpdateNode::Prop()
 	DimVec vec = (*iter).DistEntryDims();
 	allSumDims.insert(vec.begin(), vec.end());
       }
-      
+
       bool foundAll = false;
 
       for(Dim dim = 0; !foundAll && dim < outType.m_numDims; ++dim) {
@@ -170,7 +170,12 @@ void SumScatterUpdateNode::Prop()
       if (!foundAll) {
 	cout << "Bad sum scatter from " << inType.str() << " -> "
 	     << outType.str() << " with " << m_sumDims.size() << " sums\n";
-	m_poss->PrintTransVec();
+	EntryListIter iter = m_sumDims.begin();
+	for( ; iter != m_sumDims.end(); ++iter) {
+	  DistEntry entry = *iter;
+	  cout << entry.PrettyStr() << endl;
+	}
+	m_poss->PrintTransVecUp();
 	throw;
       }
     }
@@ -306,9 +311,16 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	    else {
 	      DimVec inVec = inEntry.DistEntryDims();
 	      DimVec outVec = outEntry.DistEntryDims();
+
+	      //	      DimVecIter inVecIter = inVec.begin();
+	      //	      DimVecIter outVecIter = outVec.begin();
 	      
-	      if (inVec[0] != outVec[0])
+	      
+	      if (inVec[0] != outVec[0]) {
+		throw;
+		cout << inVec[0] << " " << outVec[0] << endl;
 		return SUMSCATTERTENSORPHASE;
+	      }
 
 	      DimVec suff;
 	      GetSuffix(inVec, outVec,
@@ -317,8 +329,9 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	      DistEntry entry;
 	      entry.DimsToDistEntry(suff);
 
-	      if (!sumSet.erase(outEntry))
+	      if (!sumSet.erase(entry)) {
 		return SUMSCATTERTENSORPHASE;	
+	      }
 	    }
 	  }
 	}
