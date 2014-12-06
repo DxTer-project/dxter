@@ -1031,3 +1031,13 @@ double MinTime(const TimeVec &times)
   }
   return minVal;
 }
+
+#if DOTENSORS
+void IdentDimVec(unsigned int num, DimVec &vec)
+{
+  vec.clear();
+  vec.reserve(num);
+  for(Dim dim = 0; dim < num; ++dim)
+    vec.push_back(dim);
+}
+#endif //DOTENSORS

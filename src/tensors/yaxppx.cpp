@@ -207,11 +207,15 @@ void DistYAxpPxToDefaultLocalYAxpPx::Apply(Node *node) const
     const DataTypeInfo &inputType = orig->InputDataType(0);
     if (inputType.HasPerm())
       throw;
+    DimVec alignModes, alignModesSrc;
     DistType newType = inputType.GetDist();
     for(Dim dim = 0; dim < newType.m_numDims; ++dim) {
-      newType.m_dists[dim] = inputType.GetDist().m_dists[orig->m_permutation.MapFinishToStart(dim)];
+      Dim mode = orig->m_permutation.MapFinishToStart(dim);
+      alignModesSrc.push_back(mode);
+      alignModes.push_back(dim);
+      newType.m_dists[dim] = inputType.GetDist().m_dists[mode];
     }
-    RedistNode *redist = new RedistNode(newType);
+    RedistNode *redist = new RedistNode(newType, node->GetInputNameStr(0), alignModes, alignModesSrc);
     redist->AddInput(node->Input(1),node->InputConnNum(1));
 
     Poss *poss = new Poss(redist, false);

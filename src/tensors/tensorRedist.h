@@ -45,9 +45,14 @@ class RedistNode : public DLANode
   SizesArray m_lsizes;
   bool m_isArray;
   string m_name;
+  string m_align;
+  DimVec m_alignModes;
+  DimVec m_alignModesSrc;
+  
   RedistNode();
-  RedistNode(const DistType &destType);
-  RedistNode(const DistType &destType, const Permutation &perm);
+  RedistNode(const DistType &destType, const string &align, const DimVec &alignModes, const DimVec &alignModesSrc);
+  RedistNode(const DistType &destType, const Permutation &perm, const string &align, 
+	     const DimVec &alignModes, const DimVec &alignModesSrc);
   virtual ~RedistNode();
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   static Node* BlankInst() { return  new RedistNode; }

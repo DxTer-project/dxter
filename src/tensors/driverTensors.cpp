@@ -406,7 +406,10 @@ RealPSet* RedistExample()
   type1.m_dists[2].m_val = 0;
   type1.m_dists[3].m_val = 0;
 
-  RedistNode *redist1 = new RedistNode(type1);
+  DimVec ident;
+  IdentDimVec(4, ident);
+  
+  RedistNode *redist1 = new RedistNode(type1, Ain->GetNameStr(0), ident, ident);
   redist1->AddInput(Ain, 0);
 
   DistType type2;
@@ -416,7 +419,7 @@ RealPSet* RedistExample()
   type2.m_dists[2].m_val = 0;
   type2.m_dists[3].m_val = 4;
 
-  RedistNode *redist2 = new RedistNode(type2);
+  RedistNode *redist2 = new RedistNode(type2, Ain->GetNameStr(0), ident, ident);
   redist2->AddInput(Ain, 0);
 
   OutputNode *Cout1 = new OutputNode("C output");
@@ -451,7 +454,10 @@ RealPSet* RedistExample2()
   type1.m_dists[2].m_val = 0;
   type1.m_dists[3].m_val = 4;
 
-  RedistNode *redist1 = new RedistNode(type1);
+  DimVec ident;
+  IdentDimVec(4, ident);
+
+  RedistNode *redist1 = new RedistNode(type1, Ain->GetNameStr(0), ident, ident);
   redist1->AddInput(Ain, 0);
 
   OutputNode *Cout1 = new OutputNode("C output");

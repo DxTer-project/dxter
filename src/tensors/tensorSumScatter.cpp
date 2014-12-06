@@ -711,8 +711,10 @@ void SeparateRedistFromSumScatter::Apply(Node *node) const
     throw;
   }
 
+  DimVec ident;
+  IdentDimVec(sum->InputNumDims(1), ident);
 
-  RedistNode *redist = new RedistNode(inTypeInt);
+  RedistNode *redist = new RedistNode(inTypeInt, sum->GetInputNameStr(0), ident, ident);
   redist->AddInput(sum->Input(0), sum->InputConnNum(0));
 
   if (inTypeInt == sum->InputDataType(0).GetDist())
@@ -988,7 +990,8 @@ void SplitSumScatter::Apply(Node *node) const
 	    if (newOutTypeFull == newSum->DataType(0).GetDist())
 	      needRedist = false;
 	    else {
-	      newRedist = new RedistNode(newOutTypeFull);
+	      DimVec trash;
+	      newRedist = new RedistNode(newOutTypeFull, newSum->GetNameStr(0), trash, trash);
 	      newRedist->AddInput(newSum, 0);
 	      
 	      node->m_poss->AddNode(newRedist);
@@ -1134,7 +1137,8 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
     }
   }
 
-  RedistNode *redist = new RedistNode(outTypeInt);
+  DimVec trash;
+  RedistNode *redist = new RedistNode(outTypeInt, node->GetInputNameStr(1), trash, trash);
   redist->AddInput(node->Input(1), node->InputConnNum(1));
   node->m_poss->AddNode(redist);
 
@@ -1147,7 +1151,7 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
   node->m_poss->AddNode(newSum);
 
 
-  RedistNode *redist2 = new RedistNode(outType);
+  RedistNode *redist2 = new RedistNode(outType, newSum->GetNameStr(0), trash, trash);
   redist2->AddInput(newSum, 0);
   node->m_poss->AddNode(redist2);
 

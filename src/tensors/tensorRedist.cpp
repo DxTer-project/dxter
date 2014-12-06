@@ -63,14 +63,19 @@ RedistNode::RedistNode()
   m_lsizes = NULL;
 }
 
-RedistNode::RedistNode(const DistType &destType)
+RedistNode::RedistNode(const DistType &destType, const string &align, 
+	     const DimVec &alignModes, const DimVec &alignModesSrc)
 {
   m_info.SetDistAndClearPerm(destType);
   m_lsizes = NULL;
+  m_align = align;
+  m_alignModes = alignModes;
+  m_alignModesSrc = alignModesSrc;
 }
 
-RedistNode::RedistNode(const DistType &destType, const Permutation &perm)
-  :RedistNode(destType)
+RedistNode::RedistNode(const DistType &destType, const Permutation &perm, const string &align, 
+	     const DimVec &alignModes, const DimVec &alignModesSrc)
+  : RedistNode(destType, align, alignModes, alignModesSrc)
 {
   m_info.SetPerm(perm);
 }
@@ -91,6 +96,9 @@ void RedistNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   DLANode::Duplicate(orig,shallow, possMerging);
   const RedistNode *origNode = (RedistNode*)orig;
   m_info = origNode->m_info;
+  m_align = origNode->m_align;
+  m_alignModes = origNode->m_alignModes;
+  m_alignModesSrc = origNode->m_alignModesSrc;
 }
 
 NodeType RedistNode::GetType() const
@@ -106,6 +114,9 @@ void RedistNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLANode::Prop();
+
+    if (m_align.empty())
+      throw;
 
     if (m_inputs.size() != 1) {
       cout << "m_inputs.size() != 1\n";
@@ -597,15 +608,26 @@ const DataTypeInfo& RedistNode::DataType(ConnNum num) const
 void RedistNode::PrintCode(IndStream &out)
 {  
   //Reflect in AddVars
-  out.Indent();
-
-
   const DistType &m_srcType = InputDataType(0).GetDist();
   const Dim numDims = m_info.GetDist().m_numDims;
 
   string inName = GetInputName(0).str();
   string outName = GetName(0).str(); 
 
+  if (m_align.empty()) 
+    throw;
+  if (m_alignModes.size() != m_alignModesSrc.size())
+    throw;
+
+  if (m_align != GetInputNameStr(0)) {
+    out.Indent();
+    *out << outName << ".AlignWith( " 
+	 << ModeArrayVarName(m_alignModes) << ", "
+	 << m_align << ", " 
+	 << ModeArrayVarName(m_alignModesSrc) << " );\n";
+  }
+
+  out.Indent();
   *out << "   // " << GetName(0).PrettyStr() 
        << " <- " << GetInputName(0).PrettyStr();
   if (InputDataType(0).HasPerm())
@@ -689,6 +711,16 @@ void RedistNode::AddVariables(VarSet &set) const
 
   if (CurrPhase <= ROTENSORPHASE)
     return;
+
+  {
+    Var var(ModeArrayVarType, m_alignModes);
+    set.insert(var);
+  }
+  {
+    Var var(ModeArrayVarType, m_alignModesSrc);
+    set.insert(var);
+  }
+
 
   
   const DistType &m_srcType = InputDataType(0).GetDist();
@@ -1068,17 +1100,9 @@ void SplitRedistribs::Apply(Node *node) const
 
   one.m_dists[m_dim] = two->m_dists[m_dim];
 
-/*  if (!one.IsSane()) {
-    cout << "splitting " << m_dim << endl;
-    cout << DistTypeToStr(one) << endl;
-    cout << "from " << DistTypeToStr(orig->InputDataType(0).m_dist)
-	 << " -> " << DistTypeToStr(orig->m_info.GetDist());
-    throw;
-    }*/
 
-
-
-  RedistNode *newRedist = new RedistNode(one, orig->m_info.GetPerm());
+  RedistNode *newRedist = new RedistNode(one, orig->m_info.GetPerm(), 
+					 orig->m_align, orig->m_alignModes, orig->m_alignModesSrc);
   newRedist->AddInput(orig->Input(0), orig->InputConnNum(0));
   node->m_poss->AddNode(newRedist);
 
@@ -1086,7 +1110,8 @@ void SplitRedistribs::Apply(Node *node) const
     throw;
 
 
-  RedistNode *newRedist2 = new RedistNode(*two, orig->m_info.GetPerm());
+  RedistNode *newRedist2 = new RedistNode(*two, orig->m_info.GetPerm(), 
+					 orig->m_align, orig->m_alignModes, orig->m_alignModesSrc);
   newRedist2->AddInput(newRedist, 0);
   node->m_poss->AddNode(newRedist2);
 
@@ -1208,7 +1233,8 @@ void SingleIndexAllToAll::Apply(Node *node) const
     skipFirstRedist = true;
   }
   else {
-    redist1 = new RedistNode(type1, redist->m_info.GetPerm());
+    redist1 = new RedistNode(type1, redist->m_info.GetPerm(), 
+					 redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
     redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
     node->m_poss->AddNode(redist1);
   }
@@ -1229,7 +1255,8 @@ void SingleIndexAllToAll::Apply(Node *node) const
   }
   type2.m_dists[m_dim].DimsToDistEntry(vec2);
   
-  RedistNode *redist2 = new RedistNode(type2, redist->m_info.GetPerm());
+  RedistNode *redist2 = new RedistNode(type2, redist->m_info.GetPerm(),
+				       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   if (skipFirstRedist)
     redist2->AddInput(redist->Input(0), redist->InputConnNum(0));
   else
@@ -1239,7 +1266,8 @@ void SingleIndexAllToAll::Apply(Node *node) const
   if (type2 == redist2->InputDataType(0).GetDist())
     throw;
 
-  RedistNode *redist3 = new RedistNode(redist->m_info.GetDist(), redist->m_info.GetPerm());
+  RedistNode *redist3 = new RedistNode(redist->m_info.GetDist(), redist->m_info.GetPerm(),
+				       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   redist3->AddInput(redist2, 0);
   node->m_poss->AddNode(redist3);
 
@@ -1458,7 +1486,8 @@ void DoubleIndexAllToAll::Apply(Node *node) const
 	  //	  PrintVec(newDims2);
 	  intType.m_dists[dim].DimsToDistEntry(newDims2);
 	  if (DistTypeNotEqual(intType, redist->m_info.GetDist())) {
-	    RedistNode *newRedist = new RedistNode(intType, redist->m_info.GetPerm());
+	    RedistNode *newRedist = new RedistNode(intType, redist->m_info.GetPerm(),
+						   redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
 	    newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
 	      node->m_poss->AddNode(newRedist);
 
@@ -1540,14 +1569,16 @@ void SplitAllGathers::Apply(Node *node) const
   DistType intType = srcType;
   intType.m_dists[m_dim].DimsToDistEntry(srcDims);
 
-  RedistNode *redist1 = new RedistNode(intType, redist->m_info.GetPerm());
+  RedistNode *redist1 = new RedistNode(intType, redist->m_info.GetPerm(),
+				       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
   node->m_poss->AddNode(redist1);
 
   if (intType == redist1->InputDataType(0).GetDist())
     throw;
 
-  RedistNode *redist2 = new RedistNode(destType, redist->m_info.GetPerm());
+  RedistNode *redist2 = new RedistNode(destType, redist->m_info.GetPerm(),
+				       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   redist2->AddInput(redist1, 0);
   node->m_poss->AddNode(redist2);
 
@@ -1616,14 +1647,16 @@ void SplitAllAllGathers::Apply(Node *node) const
     }
   }
 
-  RedistNode *redist1 = new RedistNode(intType, redist->m_info.GetPerm());
+  RedistNode *redist1 = new RedistNode(intType, redist->m_info.GetPerm(),
+				       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
   node->m_poss->AddNode(redist1);
 
   if (intType == redist1->InputDataType(0).GetDist())
     throw;
 
-  RedistNode *redist2 = new RedistNode(destType, redist->m_info.GetPerm());
+  RedistNode *redist2 = new RedistNode(destType, redist->m_info.GetPerm(),
+				       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   redist2->AddInput(redist1, 0);
   node->m_poss->AddNode(redist2);
 
@@ -1681,7 +1714,8 @@ void CombineDisappearingModes::Apply(Node *node) const
   intType.m_dists[m_destDim].DimsToDistEntry(dest);
   intType.m_dists[m_srcDim].DimsToDistEntry(src);
 
-  RedistNode *newRedist = new RedistNode(intType, redist->m_info.GetPerm());
+  RedistNode *newRedist = new RedistNode(intType, redist->m_info.GetPerm(),
+                                         redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   redist->m_poss->AddNode(newRedist);
 
@@ -1796,7 +1830,8 @@ void PermuteDistribution::Apply(Node *node) const
   DistType type = srcType;
   type.m_dists[m_srcDim].DimsToDistEntry(vec);
 
-  RedistNode *newRedist = new RedistNode(type);
+  RedistNode *newRedist = new RedistNode(type,
+                                         redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   redist->m_poss->AddNode(newRedist);
 

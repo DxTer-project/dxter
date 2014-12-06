@@ -206,6 +206,8 @@ typedef set<Dim> DimSet;
 typedef DimSet::iterator DimSetIter;
 typedef DimSet::const_iterator DimSetConstIter;
 
+void IdentDimVec(unsigned int num, DimVec &vec);
+
 
 
 class DistEntry
