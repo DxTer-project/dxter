@@ -307,4 +307,27 @@ RealPSet* P_jimb_calc(DLANode *r_bmef,
   return cont4Set;
 }
 
+RealPSet* H_me_calc(DLANode *t_fn, DLANode *v_efmn,
+		      const Size big, const Size small)
+{
+  InputNode *H_me = CreateInput2("H_me", small, big);
+
+
+  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
+
+  YAxpPx *axpy1 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
+  axpy1->AddInputs0(3,
+		    v_efmn, v_efmn, temp1);
+  Poss *axpy1Poss = new Poss(axpy1);
+  RealPSet * axpy1Set = new RealPSet(axpy1Poss);
+
+  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"efmn","fn","me",(string)"fn");
+  cont1->AddInputs0(3,
+		    axpy1Set->OutTun(0), t_fn, H_me);
+  Poss *cont1Poss = new Poss(cont1);
+  RealPSet *cont1Set = new RealPSet(cont1Poss);
+
+  return cont1Set;
+}
+
 #endif //DOTENSORS

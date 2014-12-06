@@ -57,6 +57,10 @@ RealPSet* P_jimb_calc(DLANode *r_bmef,
 		      DLANode *T_efij, DLANode *x_bmej,
 		      const Size big, const Size small);
 
+RealPSet* H_me_calc(DLANode *t_fn, DLANode *v_efmn,
+		      const Size big, const Size small);
+
+
 
 InputNode *CreateInput2(string name, Size size1, Size size2);
 InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size size4);

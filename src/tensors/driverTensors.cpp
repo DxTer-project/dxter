@@ -61,6 +61,7 @@ RealPSet* X();
 RealPSet* U();
 RealPSet* Q();
 RealPSet* P();
+RealPSet* H();
 
 void AddTrans()
 {
@@ -158,6 +159,7 @@ void Usage()
   cout <<"         8  -> U_mnie\n";
   cout <<"         9  -> Q_mnij\n";
   cout <<"        10  -> P_jimb\n";
+  cout <<"        11  -> H_me\n";
 }
 
 int main(int argc, const char* argv[])
@@ -209,6 +211,9 @@ int main(int argc, const char* argv[])
       break;
     case(10):
       algFunc = P;
+      break;
+    case(11):
+      algFunc = H;
       break;
     default:
       Usage();
@@ -985,8 +990,27 @@ RealPSet* P()
   return outerSet;
 }
 
+RealPSet* H()
+{
+  //~ 10:1 ratio
+  // 53, 5 for H20
+  const Size big = 53; //a-h
+  const Size small = 5; //i-p
 
+  InputNode *t_fn = CreateInput2("t_fn", big, small);
+  InputNode *v_efmn = CreateInput4("v_efmn", big, big, small, small);
 
+  RealPSet *set = H_me_calc(t_fn, v_efmn,
+			      big, small);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
 
 
 
