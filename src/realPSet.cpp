@@ -816,6 +816,10 @@ void RealPSet::Cull(Phase phase)
   while (iter != m_posses.end()) {
     Poss *poss = (*iter).second;
     if (!poss->IsSane()) {
+      if (m_posses.size() == 1) {
+        poss->PrintTransVec();
+        poss->ForcePrint();
+      }
       RemoveAndDeletePoss(poss, false);
       m_posses.erase(iter);
       iter = m_posses.begin();
