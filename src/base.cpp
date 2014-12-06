@@ -373,6 +373,13 @@ void DistEntry::DimsToDistEntry(const DimVec &dims)
   m_val = distVal;
 }
 
+void DistEntry::AppendDim(Dim dim)
+{
+  DimVec vec = DistEntryDims();
+  vec.push_back(dim);
+  DimsToDistEntry(vec);
+}
+
 string DistType::str() const
 {
   string out = "_";

@@ -226,6 +226,7 @@ class DistEntry
   DimVec DistEntryDims() const;
   DimSet DistEntryDimSet() const;
   void DimsToDistEntry(const DimVec &dims);
+  void AppendDim(Dim dim);
 };
 
 struct DistEntryCompare {
