@@ -681,8 +681,8 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
     }
   }
 
-  if (!sumSet.empty())
-    throw;
+//  if (!sumSet.empty())
+//    throw;
 
 
   if (!notFinalType) {
@@ -893,8 +893,8 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
     }
   }
 
-  if (!sumSet.empty())
-    throw;
+//  if (!sumSet.empty())
+//    throw;
 
   if (!notFinalType) {
     SumScatterUpdateNode *sum = new SumScatterUpdateNode(cont->m_beta, sumDims);
