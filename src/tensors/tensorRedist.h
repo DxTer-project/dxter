@@ -179,6 +179,27 @@ class DoubleIndexAllToAll : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+
+//E.g., [21,03] -> [01,23]
+// as [21,03] -> [12,03]
+//    [12,03] -> [12,30]
+//    [12,30] -> [21,03]
+//Separating legal AllToAll like the following
+//[(x|_|y),(z|_|w)] <- [(z),(x)]
+// to
+//[(x),(z)] <- [(z),(x)]
+//[(x|_|y),(z|_|w)] <- [(x),(z)]
+class DoubleIndexAllToAllPrefix : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ DoubleIndexAllToAllPrefix(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"DoubleIndexAllToAllPrefix" + (char)(m_dim+48); }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 /*
 [([x|_|p(y)|_|z),(w)]
 [([x|_|z),(w|_|y)]

@@ -1400,13 +1400,13 @@ void DoubleIndexAllToAll::Apply(Node *node) const
   DistEntry destEntry = redist->m_info.GetDist().m_dists[m_dim];
   if (srcEntry == destEntry)
     throw;
+  const DimVec srcVec = srcEntry.DistEntryDims();
+  const DimVec destVec = destEntry.DistEntryDims();
 
   for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
     DistEntry srcEntry2 = srcType.m_dists[dim];
     DistEntry destEntry2 = redist->m_info.GetDist().m_dists[dim];
     if (srcEntry2 != destEntry2) {
-      DimVec srcVec = srcEntry.DistEntryDims();
-      DimVec destVec = destEntry.DistEntryDims();
       DimVec srcVec2 = srcEntry2.DistEntryDims();
       DimVec destVec2 = destEntry2.DistEntryDims();
 
@@ -1503,6 +1503,93 @@ void DoubleIndexAllToAll::Apply(Node *node) const
       }
     }
   }
+  throw;
+}
+
+bool DoubleIndexAllToAllPrefix::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).GetDist();
+  const DistType &destType = redist->m_info.GetDist();
+
+  if (srcType.m_numDims != destType.m_numDims)
+    throw;
+  else if (srcType.m_numDims <= m_dim)
+    return false;
+
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
+  if (srcEntry == destEntry)
+    return false;
+  const DimVec srcVec = srcEntry.DistEntryDims();
+  const DimVec destVec = destEntry.DistEntryDims();
+
+
+  //[(x|_|y),(z|_|w)] <- [(z),(x)]
+
+  for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
+    DistEntry srcEntry2 = srcType.m_dists[dim];
+    DistEntry destEntry2 = destType.m_dists[dim];
+    if (srcEntry2 != destEntry2) {
+      DimVec srcVec2 = srcEntry2.DistEntryDims();
+      DimVec destVec2 = destEntry2.DistEntryDims();
+      if (IsPrefix(srcVec, destVec2) && IsPrefix(srcVec2, destVec))
+	return true;
+      }
+    }
+  return false;
+}
+
+void DoubleIndexAllToAllPrefix::Apply(Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).GetDist();
+  //  cout << srcType.PrettyStr() << " -> " << redist->DataType(0).m_dist.PrettyStr() << endl;
+
+  if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
+    throw;
+  else if (srcType.m_numDims <= m_dim)
+    throw;
+
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = redist->m_info.GetDist().m_dists[m_dim];
+  if (srcEntry == destEntry)
+    throw;
+  const DimVec srcVec = srcEntry.DistEntryDims();
+  const DimVec destVec = destEntry.DistEntryDims();
+
+  for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
+    DistEntry srcEntry2 = srcType.m_dists[dim];
+    DistEntry destEntry2 = redist->m_info.GetDist().m_dists[dim];
+    if (srcEntry2 != destEntry2) {
+      DimVec srcVec2 = srcEntry2.DistEntryDims();
+      DimVec destVec2 = destEntry2.DistEntryDims();
+      if (IsPrefix(srcVec, destVec2) && IsPrefix(srcVec2, destVec)) {
+	//[(x|_|y),(z|_|w)] <- [(z),(x)]
+	// to
+	//[(x),(z)] <- [(z),(x)]
+	//[(x|_|y),(z|_|w)] <- [(x),(z)]
+
+	DistType intType = srcType;
+	intType.m_dists[m_dim] = srcEntry2;
+	intType.m_dists[dim] = srcEntry;
+	
+	RedistNode *newRedist = new RedistNode(intType, redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+	newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
+
+	redist->m_poss->AddNode(newRedist);
+
+	redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0), newRedist, 0);
+
+	return;
+      }
+    }
+  }
+
   throw;
 }
 
@@ -1730,6 +1817,7 @@ bool PermuteDistribution::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
+
   const RedistNode *redist = (RedistNode*)node;
 
   const DistType &srcType = redist->InputDataType(0).GetDist();
@@ -1743,6 +1831,18 @@ bool PermuteDistribution::CanApply(const Node *node) const
 
   const DistEntry &srcEntry = srcType.m_dists[m_srcDim];
   const DistEntry &destEntry = destType.m_dists[m_destDim];
+
+  /*
+  if (m_srcDim == 1 && m_destDim == 0) {
+    if (srcEntry.m_val == 8 && destEntry.m_val == 6 && srcType.m_dists[0].m_val == 11) {
+      cout << srcEntry.PrettyStr() << endl;
+      cout << destEntry.PrettyStr() << endl;
+      cout << srcType.PrettyStr() << endl;
+      cout << destType.PrettyStr() << endl;
+    }
+  }
+  */
+
 
   if (srcEntry.IsStar() || destEntry.IsStar())
     return false;
@@ -1776,6 +1876,12 @@ bool PermuteDistribution::CanApply(const Node *node) const
 
   DistType type = srcType;
   type.m_dists[m_srcDim].DimsToDistEntry(vec);
+
+  /*  
+  cout << srcType.PrettyStr() << endl;
+  cout << type.PrettyStr() << endl;
+  cout << destType.PrettyStr() << endl;
+  */
 
   return DistTypeNotEqual(type, srcType);
 }
@@ -1834,12 +1940,15 @@ void PermuteDistribution::Apply(Node *node) const
                                          redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   redist->m_poss->AddNode(newRedist);
-
-  if (type == newRedist->InputDataType(0).GetDist())
-    throw;
   
-  redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0),
-			  newRedist, 0);    
+  RedistNode *newRedist2 = new RedistNode(redist->m_info.GetDist(),
+                                          redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+  newRedist2->AddInput(newRedist,0);
+  redist->m_poss->AddNode(newRedist2);
+  
+  redist->RedirectAllChildren(newRedist2);
+  
+  redist->m_poss->DeleteChildAndCleanUp(redist);
 }
 
 bool GetAllToAllPattern(const DistType &srcType, 
