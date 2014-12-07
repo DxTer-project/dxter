@@ -1191,7 +1191,7 @@ bool SingleIndexAllToAll::CanApply(const Node *node) const
 	return false;
 
       intersection.clear();
-      intersection.resize(tmp.size());
+      intersection.resize(max(tmp.size(),fullSet.size()));
       tmp = destType.m_dists[dim].DistEntryDimSet();
       iter = set_intersection(tmp.begin(), tmp.end(),
 			      fullSet.begin(), fullSet.end(),
@@ -1295,17 +1295,22 @@ bool DoubleIndexAllToAll::CanApply(const Node *node) const
     throw;
   const RedistNode *redist = (RedistNode*)node;
   const DistType &srcType = redist->InputDataType(0).GetDist();
+  const DistType &destType = redist->m_info.GetDist();
 
-  if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
+  if (srcType.m_numDims != destType.m_numDims)
     throw;
   else if (srcType.m_numDims <= m_dim)
     return false;
 
   DistEntry srcEntry = srcType.m_dists[m_dim];
-  DistEntry destEntry = redist->m_info.GetDist().m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
   if (srcEntry == destEntry)
     return false;
+  DimVec srcVec = srcEntry.DistEntryDims();
+  DimSet destSet = destEntry.DistEntryDimSet();
 
+  bool yes = false;
+  int num;
   for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
     DistEntry srcEntry2 = srcType.m_dists[dim];
     DistEntry destEntry2 = redist->m_info.GetDist().m_dists[dim];
@@ -1374,12 +1379,82 @@ bool DoubleIndexAllToAll::CanApply(const Node *node) const
 	  }	    
 	  intType.m_dists[m_dim].DimsToDistEntry(newDims1);
 	  intType.m_dists[dim].DimsToDistEntry(newDims2);
-	  if (DistTypeNotEqual(intType, redist->m_info.GetDist()))
-	    return true;
+	  if (DistTypeNotEqual(intType, redist->m_info.GetDist())) {
+	    num = dim;
+	    yes = true;
+	  }
 	}
       }
     }
   }
+
+
+  for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
+    DistEntry srcEntry2 = srcType.m_dists[dim];
+    DistEntry destEntry2 = destType.m_dists[dim];
+    if (srcEntry2 != destEntry2) {
+      DimVec srcVec2 = srcEntry2.DistEntryDims();
+      DimSet destSet2 = destEntry2.DistEntryDimSet();
+      if (srcVec.empty() && srcVec2.empty())
+	continue;
+      
+      //if at least one grid mode at the end of srcVec is in destSet2
+      // and at least one grid mode at the end of srcVec2 is in destSet
+      if ((!srcVec.empty() &&  destSet2.find(srcVec[srcVec.size() - 1]) != destSet2.end()) ||
+	  (!srcVec2.empty() && destSet.find(srcVec2[srcVec2.size() - 1]) != destSet.end())) {
+	{
+	  DimVec suff1;
+	  DimVecRevIter riter = srcVec.rbegin();
+	  for(; riter != srcVec.rend(); ++riter) {
+	    Dim d = *riter;
+	    if (destSet2.find(d) != destSet2.end()) {
+	      suff1.insert(suff1.begin(), d);
+	    }
+	    else
+	      break;
+	  }
+
+	  DimVec suff2;
+	  riter = srcVec2.rbegin();
+	  for(; riter != srcVec2.rend(); ++riter) {
+	    Dim d = *riter;
+	    if (destSet.find(d) != destSet.end()) {
+	      suff2.insert(suff2.begin(), d);
+	    }
+	    else
+	      break;
+	  }
+
+	  DistType intType = srcType;
+
+	  int size = suff1.size();
+	  if (size) {
+	    DimVec int1;
+	    if (size < srcVec.size())
+	      int1.insert(int1.begin(), srcVec.begin(), srcVec.begin() + srcVec.size() - suff1.size());
+	    int1.insert(int1.end(), suff2.begin(), suff2.end());
+	    intType.m_dists[m_dim].DimsToDistEntry(int1);
+	  }
+
+	  size = suff2.size();
+	  if (size) {
+	    DimVec int2;
+	    if (size < srcVec2.size())
+	      int2.insert(int2.begin(), srcVec2.begin(), srcVec2.begin() + srcVec2.size() - suff2.size());
+	    int2.insert(int2.end(), suff1.begin(), suff1.end());
+	    intType.m_dists[dim].DimsToDistEntry(int2);
+	  }
+
+	  if (srcType != intType) {
+	    return true;
+	  }
+	}
+      }
+    }
+  }
+
+  if (yes)
+    throw;
   return false;
 }
 
@@ -1389,121 +1464,101 @@ void DoubleIndexAllToAll::Apply(Node *node) const
     throw;
   RedistNode *redist = (RedistNode*)node;
   const DistType &srcType = redist->InputDataType(0).GetDist();
-  //  cout << srcType.PrettyStr() << " -> " << redist->DataType(0).m_dist.PrettyStr() << endl;
+  const DistType &destType = redist->m_info.GetDist();
 
-  if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
+  if (srcType.m_numDims != destType.m_numDims)
     throw;
   else if (srcType.m_numDims <= m_dim)
     throw;
 
   DistEntry srcEntry = srcType.m_dists[m_dim];
-  DistEntry destEntry = redist->m_info.GetDist().m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
   if (srcEntry == destEntry)
     throw;
-  const DimVec srcVec = srcEntry.DistEntryDims();
-  const DimVec destVec = destEntry.DistEntryDims();
+  DimVec srcVec = srcEntry.DistEntryDims();
+  DimSet destSet = destEntry.DistEntryDimSet();
 
   for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
     DistEntry srcEntry2 = srcType.m_dists[dim];
-    DistEntry destEntry2 = redist->m_info.GetDist().m_dists[dim];
+    DistEntry destEntry2 = destType.m_dists[dim];
     if (srcEntry2 != destEntry2) {
       DimVec srcVec2 = srcEntry2.DistEntryDims();
-      DimVec destVec2 = destEntry2.DistEntryDims();
+      DimSet destSet2 = destEntry2.DistEntryDimSet();
+      if (srcVec.empty() && srcVec2.empty())
+	continue;
+      
+      //if at least one grid mode at the end of srcVec is in destSet2
+      // and at least one grid mode at the end of srcVec2 is in destSet
+      if ((!srcVec.empty() &&  destSet2.find(srcVec[srcVec.size() - 1]) != destSet2.end()) ||
+	  (!srcVec2.empty() && destSet.find(srcVec2[srcVec2.size() - 1]) != destSet.end())) 
+	{
+	  DimVec suff1;
+	  DimVecRevIter riter = srcVec.rbegin();
+	  for(; riter != srcVec.rend(); ++riter) {
+	    Dim d = *riter;
+	    if (destSet2.find(d) != destSet2.end()) {
+	      suff1.insert(suff1.begin(), d);
+	    }
+	    else
+	      break;
+	  }
 
-      //      cout << srcEntry.PrettyStr() << " -> " << destEntry.PrettyStr() << endl;
-      //      cout << srcEntry2.PrettyStr() << " -> " << destEntry2.PrettyStr() << endl;
+	  DimVec suff2;
+	  riter = srcVec2.rbegin();
+	  for(; riter != srcVec2.rend(); ++riter) {
+	    Dim d = *riter;
+	    if (destSet.find(d) != destSet.end()) {
+	      suff2.insert(suff2.begin(), d);
+	    }
+	    else
+	      break;
+	  }
 
-      //[(x|_|y),(z|_|w)] <- [(x|_|u|_|w),(z|_|v|_|y)]
-
-      DimVec suff1, suff2;
-      DimVec pref11, pref12, pref21, pref22;
-      // suff1 = w
-      // pref11 = x|_|u
-      // pref12 = z
-      GetCommonSuffix(srcVec, destVec2, suff1, pref11, pref12);
-      // suff2 = y
-      // pref21 = x
-      // pref22 = z|_|v
-      GetCommonSuffix(destVec, srcVec2, suff2, pref21, pref22);
-
-
-      if (!(suff1.empty()&&suff2.empty()))  {
-	if ((pref11 == pref21 || pref21.empty()) 
-	    && (pref12 == pref22 || pref12.empty())) {
 	  DistType intType = srcType;
 
-	  DimVec newDims1;
-	  DimVec newDims2;
-	  /*
-	  PrintVec(suff1);
-	  PrintVec(pref11);
-	  PrintVec(pref12);
-	  PrintVec(suff2);
-	  PrintVec(pref21);
-	  PrintVec(pref22);
-*/
-		  
-	  // have to choose where u and v go
-
-	  if (!suff1.empty() && !suff2.empty()) {
-	    //[(x|_|u|_|y),(z|_|v|_|w)] <- [(x|_|u|_|w),(z|_|v|_|y)]
-	    //[(x|_|y),(z|_|w)] <- [(x|_|u|_|y),(z|_|v|_|w)]
-	    newDims1 = pref11;
-	    newDims1.insert(newDims1.end(),
-			    suff2.begin(), suff2.end());
-	    newDims2 = pref22;
-	    newDims2.insert(newDims2.end(),
-			    suff1.begin(), suff1.end());		
+	  int size = suff1.size();
+	  if (size) {
+	    DimVec int1;
+	    if (size < srcVec.size())
+	      int1.insert(int1.begin(), srcVec.begin(), srcVec.begin() + srcVec.size() - suff1.size());
+	    int1.insert(int1.end(), suff2.begin(), suff2.end());
+	    intType.m_dists[m_dim].DimsToDistEntry(int1);
 	  }
-	  else {
 
-	    if (suff1.empty())  { // w is empty, y isn't
-	      //[(x|_|y),(z|_|v|_|u)] <- [(x|_|u),(z|_|v|_|y)]
-	      //[(x|_|y),(z)] <- [(x|_|y),(z|_|v|_|u)]
-	      newDims1 = GetCommonPrefix(srcVec, destVec); // x
-	      
-	      newDims2 = pref22; // z |_| v
-	      newDims2.insert(newDims2.end(), 
-			      srcVec.begin()+newDims1.size(), srcVec.end()); // add u
-	      
-	      newDims1.insert(newDims1.end(), suff2.begin(), suff2.end()); // add y
-	    }
-	    else { // y is empty, w isn't
-	      //[(x|_|u|_|v),(z|_|w)] <- [(x|_|u|_|w),(z|_|v)]
-	      //[(x),(z|_|w)] <- [(x|_|u|_|v),(z|_|w)]
-	      newDims2 = GetCommonPrefix(srcVec2, destVec2); // z
-	      
-	      newDims1 = pref11; // x |_| u
-	      newDims1.insert(newDims1.end(), 
-			      srcVec2.begin()+newDims2.size(), srcVec2.end()); // add v
-	      
-	      newDims2.insert(newDims2.end(), suff1.begin(), suff1.end()); // add w
-	    }
-	  }	    
+	  size = suff2.size();
+	  if (size) {
+	    DimVec int2;
+	    if (size < srcVec2.size())
+	      int2.insert(int2.begin(), srcVec2.begin(), srcVec2.begin() + srcVec2.size() - suff2.size());
+	    int2.insert(int2.end(), suff1.begin(), suff1.end());
+	    intType.m_dists[dim].DimsToDistEntry(int2);
+	  }
 
-	  //	  PrintVec(newDims1);
-	  intType.m_dists[m_dim].DimsToDistEntry(newDims1);
-	  //	  PrintVec(newDims2);
-	  intType.m_dists[dim].DimsToDistEntry(newDims2);
-	  if (DistTypeNotEqual(intType, redist->m_info.GetDist())) {
-	    RedistNode *newRedist = new RedistNode(intType, redist->m_info.GetPerm(),
+	  if (srcType != intType) {
+	    RedistNode *intRedist = new RedistNode(intType,
 						   redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
-	    newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
-	      node->m_poss->AddNode(newRedist);
+	    intRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
+		  
+	    RedistNode *finalRedist = new RedistNode(destType,
+						     redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+	    finalRedist->AddInput(intRedist, 0);
 
-	      if (intType == newRedist->InputDataType(0).GetDist())
-		throw;
-	      
-	      redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0),
-				      newRedist, 0);    
-	  
-	      return;	    
+	    redist->RedirectAllChildren(finalRedist);
+
+	    redist->m_poss->AddNode(intRedist);
+	    redist->m_poss->AddNode(finalRedist);
+
+	    redist->m_poss->DeleteChildAndCleanUp(redist);
+
+
+	    return;
 	  }
 	}
-      }
     }
   }
+
   throw;
+
 }
 
 bool DoubleIndexAllToAllPrefix::CanApply(const Node *node) const

@@ -167,7 +167,11 @@ class SingleIndexAllToAll : public SingleTrans
 
 
 //Separating legal AllToAll like the following
-//[(x|_|y),(z|_|w)] <- [(x|_|w),(z|_|y)]
+//[p(x|_|y),p(z|_|w)] <- [(p(x)|_|w),(p(z)|_|y)]
+// into
+//[(p(x)|_|y),(p(z)|_|w)] <- [(p(x)|_|w),(p(z)|_|y)]
+//[p(x|_|y),p(z|_|w)] <- [(p(x)|_|y),(p(z)|_|w)]
+// (Also, grid modes can disappear in the final redistribution)
 class DoubleIndexAllToAll : public SingleTrans
 {
  public:
