@@ -839,11 +839,18 @@ void TempVarNode::PrintCode(IndStream &out)
     DimVec vec = entry.DistEntryDims();
     if (vec.empty())
       throw;
-    if (vec.size() > 1) {
-      cout << "do something more complicated, where you have to multiply grid dims\n";
-      throw;
+    if (vec.size() == 1) {
+      *out << "tempShape.push_back( g.Shape()[" << vec[0] << "] );\n";
     }
-    *out << "tempShape.push_back( g.Shape()[" << vec[0] << "] );\n";
+    else {
+      *out << "tempShape.push_back( ";
+      for( int i = 0; i < vec.size(); ++i) {
+	if (i)
+	  *out << " * ";
+	*out << "g.Shape()[" << vec[i] << "]";
+      }
+      *out << " );\n";
+    }
   }
   out.Indent();
   *out << GetNameStr(0) << ".ResizeTo( tempShape );\n";
