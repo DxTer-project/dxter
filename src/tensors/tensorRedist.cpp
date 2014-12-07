@@ -1309,86 +1309,6 @@ bool DoubleIndexAllToAll::CanApply(const Node *node) const
   DimVec srcVec = srcEntry.DistEntryDims();
   DimSet destSet = destEntry.DistEntryDimSet();
 
-  bool yes = false;
-  int num;
-  for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
-    DistEntry srcEntry2 = srcType.m_dists[dim];
-    DistEntry destEntry2 = redist->m_info.GetDist().m_dists[dim];
-    if (srcEntry2 != destEntry2) {
-      DimVec srcVec = srcEntry.DistEntryDims();
-      DimVec destVec = destEntry.DistEntryDims();
-      DimVec srcVec2 = srcEntry2.DistEntryDims();
-      DimVec destVec2 = destEntry2.DistEntryDims();
-
-      //[(x|_|y),(z|_|w)] <- [(x|_|u|_|w),(z|_|v|_|y)]
-
-      DimVec suff1, suff2;
-      DimVec pref11, pref12, pref21, pref22;
-      // suff1 = w
-      // pref11 = x|_|u
-      // pref12 = z
-      GetCommonSuffix(srcVec, destVec2, suff1, pref11, pref12);
-      // suff2 = y
-      // pref21 = x
-      // pref22 = z|_|v
-      GetCommonSuffix(destVec, srcVec2, suff2, pref21, pref22);
-      if (!(suff1.empty()&&suff2.empty()))  {
-	if ((pref11 == pref21 || pref21.empty()) 
-	    && (pref12 == pref22 || pref12.empty())) {
-	  DistType intType = srcType;
-
-	  DimVec newDims1;
-	  DimVec newDims2;
-	    
-		  
-	  // have to choose where u and v go
-
-	  if (!suff1.empty() && !suff2.empty()) {
-	    //[(x|_|u|_|y),(z|_|v|_|w)] <- [(x|_|u|_|w),(z|_|v|_|y)]
-	    //[(x|_|y),(z|_|w)] <- [(x|_|u|_|y),(z|_|v|_|w)]
-	    newDims1 = pref11;
-	    newDims1.insert(newDims1.end(),
-			    suff2.begin(), suff2.end());
-	    newDims2 = pref22;
-	    newDims2.insert(newDims2.end(),
-			    suff1.begin(), suff1.end());		
-	  }
-	  else {
-	    if (suff1.empty())  { // w is empty, y isn't
-	      //[(x|_|y),(z|_|v|_|u)] <- [(x|_|u),(z|_|v|_|y)]
-	      //[(x|_|y),(z)] <- [(x|_|y),(z|_|v|_|u)]
-	      newDims1 = GetCommonPrefix(srcVec, destVec); // x
-	      
-	      newDims2 = pref22; // z |_| v
-	      newDims2.insert(newDims2.end(), 
-			      srcVec.begin()+newDims1.size(), srcVec.end()); // add u
-	      
-	      newDims1.insert(newDims1.end(), suff2.begin(), suff2.end()); // add y
-	    }
-	    else { // y is empty, w isn't
-	      //[(x|_|u|_|v),(z|_|w)] <- [(x|_|u|_|w),(z|_|v)]
-	      //[(x),(z|_|w)] <- [(x|_|u|_|v),(z|_|w)]
-	      newDims2 = GetCommonPrefix(srcVec2, destVec2); // z
-	      
-	      newDims1 = pref11; // x |_| u
-	      newDims1.insert(newDims1.end(), 
-			      srcVec2.begin()+newDims2.size(), srcVec2.end()); // add v
-	      
-	      newDims2.insert(newDims2.end(), suff1.begin(), suff1.end()); // add w
-	    }
-	  }	    
-	  intType.m_dists[m_dim].DimsToDistEntry(newDims1);
-	  intType.m_dists[dim].DimsToDistEntry(newDims2);
-	  if (DistTypeNotEqual(intType, redist->m_info.GetDist())) {
-	    num = dim;
-	    yes = true;
-	  }
-	}
-      }
-    }
-  }
-
-
   for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
     DistEntry srcEntry2 = srcType.m_dists[dim];
     DistEntry destEntry2 = destType.m_dists[dim];
@@ -1453,8 +1373,6 @@ bool DoubleIndexAllToAll::CanApply(const Node *node) const
     }
   }
 
-  if (yes)
-    throw;
   return false;
 }
 
