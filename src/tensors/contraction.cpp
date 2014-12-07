@@ -951,6 +951,8 @@ void MatchDistsAndFillInWithStar(string indices,
 				 const DistType &matchingDists, string matchingIndices,
 				 DistType &final, DimVec &alignModes, DimVec &alignModesSrc)
 {
+  alignModes.clear();
+  alignModesSrc.clear();
   final.PrepForNumDims(indices.length());
   for(unsigned int i = 0; i < indices.length(); ++i) {
     char index = indices[i];
