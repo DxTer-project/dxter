@@ -1144,14 +1144,6 @@ bool SingleIndexAllToAll::CanApply(const Node *node) const
   if (srcEntry == destEntry)
     return false;
 
-/*
-  for(Dim dim = 0; dim < srcType.m_numDims; ++dim) {
-    if (dim != m_dim) {
-      if (srcType.m_dists[dim] != redist->m_info.GetDist().m_dists[dim])
-	return false;
-    }
-  }
-  */
 
   if (srcEntry.IsStar() || destEntry.IsStar())
     return false;
@@ -1270,9 +1262,6 @@ void SingleIndexAllToAll::Apply(Node *node) const
 				       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   redist3->AddInput(redist2, 0);
   node->m_poss->AddNode(redist3);
-
-  if (redist->m_info.GetDist() == redist3->InputDataType(0).GetDist())
-    throw;
 
 
   node->RedirectChildren(redist3, 0);
