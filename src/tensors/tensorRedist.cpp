@@ -614,12 +614,32 @@ void RedistNode::PrintCode(IndStream &out)
   string inName = GetInputName(0).str();
   string outName = GetName(0).str(); 
 
+  out.Indent();
+  *out << "   // " << GetName(0).PrettyStr() 
+       << " <- " << GetInputName(0).PrettyStr();
+  if (InputDataType(0).HasPerm())
+    *out << " with permutation " << InputDataType(0).GetPerm().Str();
+  *out << endl;
+
+
   if (m_align.empty()) 
     throw;
   if (m_alignModes.size() != m_alignModesSrc.size())
     throw;
 
-  if (m_align != GetInputNameStr(0)) {
+
+  bool align = false;
+  if (m_alignModes.empty())
+    align = false; // to superscede any of the following
+  else if (m_align != GetInputNameStr(0)) 
+    align = true;
+  else {
+    //aligning to input, so make sure the alignment isn't the identity
+    if (m_alignModes != m_alignModesSrc)
+      align = true;
+  }
+
+  if (align) {
     out.Indent();
     *out << outName << ".AlignWith( " 
 	 << ModeArrayVarName(m_alignModes) << ", "
@@ -627,12 +647,7 @@ void RedistNode::PrintCode(IndStream &out)
 	 << ModeArrayVarName(m_alignModesSrc) << " );\n";
   }
 
-  out.Indent();
-  *out << "   // " << GetName(0).PrettyStr() 
-       << " <- " << GetInputName(0).PrettyStr();
-  if (InputDataType(0).HasPerm())
-    *out << " with permutation " << InputDataType(0).GetPerm().Str();
-  *out << endl;
+
   out.Indent();
 
   if (CurrPhase <= ROTENSORPHASE)
