@@ -616,10 +616,11 @@ bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
         if (((SingleTrans*)trans)->CanApply(node)) {
           didSomething = true;
           InvalidateHash();
+          //BuildDataTypeCache();
           ((SingleTrans*)trans)->Apply(node);
           m_transVec.push_back(const_cast<Transformation*>(trans));
           nodeIdx = -1;
-	  //	  BuildDataTypeCache();
+          BuildDataTypeCache();
           break;
         }
       }
@@ -2478,8 +2479,9 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 	      
 	      single->Apply(newNode);
 	      newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
+	      newPoss->BuildDataTypeCache();
 	      newPoss->Simplify(simplifiers);
-	      //newPoss->BuildDataTypeCache();
+	      newPoss->BuildDataTypeCache();
 	      if(!AddPossToMMap(newPosses,newPoss,newPoss->GetHash())) {
 		delete newPoss;
 	      }
@@ -2519,8 +2521,9 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
 		Node *newNode = nodeMap[node];
 		var->Apply(i, newNode, &cache);
 		newPoss->m_transVec.push_back(const_cast<Transformation*>(marking));
+		newPoss->BuildDataTypeCache();
 		newPoss->Simplify(simplifiers);
-		//		newPoss->BuildDataTypeCache();
+		newPoss->BuildDataTypeCache();
 		if(!AddPossToMMap(newPosses,newPoss,newPoss->GetHash())) {
 		  delete newPoss;
 		}
