@@ -31,7 +31,7 @@
 // in a MultiTrans (set to something large
 // if you don't want to use this heuristic)
 #if DOTENSORS
-#define MAXNUMBEROFREFINEMENTS 2
+#define MAXNUMBEROFREFINEMENTS 4
 #else
 #define MAXNUMBEROFREFINEMENTS 2
 #endif
@@ -227,6 +227,7 @@ class DistEntry
   DimSet DistEntryDimSet() const;
   void DimsToDistEntry(const DimVec &dims);
   void AppendDim(Dim dim);
+  bool ContainsDim(Dim dim) const;
 };
 
 struct DistEntryCompare {

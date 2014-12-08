@@ -248,6 +248,12 @@ string DistEntry::str() const
   return ret.str();
 }
 
+bool DistEntry::ContainsDim(Dim dim) const
+{
+  DimSet dimSet = DistEntryDimSet();
+  return dimSet.find(dim) != dimSet.end();
+}
+
 
 string DistEntry::PrettyStr() const
 {
