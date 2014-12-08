@@ -58,10 +58,21 @@ RealPSet* W_bmje_calc(DLANode *w_bmje, DLANode *x_bmej,
   InputNode *W_bmje = CreateInput4("W_bmje", big, small, small, big);
 
 
+  TempVarNode *temp1 = new TempVarNode(T_bfnj->DataType(0).GetDist(), "temp1");
+  temp1->AddInput(T_bfnj,0);
+  TempVarNode *temp2 = new TempVarNode(v_femn->DataType(0).GetDist(), "temp2");
+  temp2->AddInput(v_femn,0);
+  TempVarNode *temp3 = new TempVarNode(u_mnje->DataType(0).GetDist(), "temp3");
+  temp3->AddInput(u_mnje,0);
+  TempVarNode *temp4 = new TempVarNode(r_bmef->DataType(0).GetDist(), "temp4");
+  temp4->AddInput(r_bmef,0);
+
+/*  
   InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
   InputNode *temp2 = CreateInput4("temp2", big, big, small, small);
   InputNode *temp3 = CreateInput4("temp3", small, small, small, big);
   InputNode *temp4 = CreateInput4("temp4", big, small, big, big);
+*/
 
   YAxpPx *axpy0 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONEHALF, "bmej", "bmje");
   axpy0->AddInputs0(3,
@@ -132,7 +143,9 @@ RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
   InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
 
 
-  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
+  TempVarNode *temp1 = new TempVarNode(T_bfnj->DataType(0).GetDist(), "temp1");
+  temp1->AddInput(T_bfnj,0);
+  //  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
 
   Copy *copy1 = new Copy(SMLAYER);
   copy1->AddInputs0(2,
@@ -206,9 +219,14 @@ RealPSet* Q_mnij_calc(DLANode *q_mnij,
 {
   InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
 
-
+  TempVarNode *temp1 = new TempVarNode(T_efij->DataType(0).GetDist(), "temp1");
+  temp1->AddInput(T_efij,0);
+  TempVarNode *temp2 = new TempVarNode(Q_mnij->DataType(0).GetDist(), "temp2");
+  temp2->AddInput(Q_mnij,0);
+  /*
   InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
   InputNode *temp2 = CreateInput4("temp2", small, small, small, small);
+  */
 
   Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"mnie","ej","mnij",(string)"e");
   cont1->AddInputs0(3,
@@ -261,8 +279,9 @@ RealPSet* P_jimb_calc(DLANode *r_bmef,
   InputNode *P_jimb = CreateInput4("P_jimb", small, small, small, big);
 
 
-  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
-  //  InputNode *temp2 = CreateInput4("temp2", small, small, small, small);
+  TempVarNode *temp1 = new TempVarNode(T_efij->DataType(0).GetDist(), "temp1");
+  temp1->AddInput(T_efij,0);
+  //  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
 
   Copy *copy1 = new Copy(SMLAYER);
   copy1->AddInputs0(2,
