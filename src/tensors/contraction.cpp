@@ -776,10 +776,6 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
     throw;
   const DistType &BType = bInfo.GetDist();
   
-  if (cont->m_AIndices == "bmef" && cont->m_BIndices == "fj" && cont->m_CIndices == "bmje") {
-    cout << "here\n";
-  }
-
   EntryList sumDims;
   DimSet sumSet;
   string::iterator iter = cont->m_contIndices.begin();
