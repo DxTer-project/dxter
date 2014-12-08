@@ -34,6 +34,9 @@ typedef ContType::iterator ContTypeIter;
 void MatchDistsAndFillInWithStar(string indices, 
 				 const DistType &matchingDists, string matchingIndices,
 				 DistType &final, DimVec &alignModes, DimVec &alignModesSrc);
+
+void FillIn(const DistEntry &CDestEntry, DistEntry &CTypeEntry, DimSet &sumSet, EntryList &sumDims);
+
 /*
 void RecursivelyFindDistributions(DimVec *dists, Dim thisDim, 
 				  const DistType &AType, const DimVec &ADims,
@@ -654,30 +657,11 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
       CType.m_dists[i] = AType.m_dists[loc]; 
       if (CType.m_dists[i] != CDestType.m_dists[i])
         notFinalType = true;
-      DimVec dest = CDestType.m_dists[i].DistEntryDims();
-      DimVecIter destIter = dest.begin();
-      for(; destIter != dest.end(); ++destIter) {
-	Dim dim = *destIter;
-	DimSetIter find = sumSet.find(dim);
-	if (find != sumSet.end()) {
-	  CType.m_dists[i].AppendDim(dim);
-	  sumSet.erase(find);
-	}
-      }
+      FillIn(CDestType.m_dists[i], CType.m_dists[i], sumSet, sumDims);
     }
     else {
-      DimVec CDims;
-      DimVec dest = CDestType.m_dists[i].DistEntryDims();
-      DimVecIter destIter = dest.begin();
-      for(; destIter != dest.end(); ++destIter) {
-	Dim dim = *destIter;
-	DimSetIter find = sumSet.find(dim);
-	if (find != sumSet.end()) {
-	  CDims.push_back(dim);
-	  sumSet.erase(find);
-	}
-      }
-      CType.m_dists[i].DimsToDistEntry(CDims);
+      CType.m_dists[i].SetToStar();
+      FillIn(CDestType.m_dists[i], CType.m_dists[i], sumSet, sumDims);
     }
   }
 
@@ -791,6 +775,10 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
   if (bInfo.HasPerm())
     throw;
   const DistType &BType = bInfo.GetDist();
+  
+  if (cont->m_AIndices == "bmef" && cont->m_BIndices == "fj" && cont->m_CIndices == "bmje") {
+    cout << "here\n";
+  }
 
   EntryList sumDims;
   DimSet sumSet;
@@ -866,30 +854,11 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
       CType.m_dists[i] = BType.m_dists[loc]; 
       if (CType.m_dists[i] != CDestType.m_dists[i])
         notFinalType = true;
-      DimVec dest = CDestType.m_dists[i].DistEntryDims();
-      DimVecIter destIter = dest.begin();
-      for(; destIter != dest.end(); ++destIter) {
-	Dim dim = *destIter;
-	DimSetIter find = sumSet.find(dim);
-	if (find != sumSet.end()) {
-	  CType.m_dists[i].AppendDim(dim);
-	  sumSet.erase(find);
-	}
-      }
+      FillIn(CDestType.m_dists[i], CType.m_dists[i], sumSet, sumDims);
     }
     else {
-      DimVec CDims;
-      DimVec dest = CDestType.m_dists[i].DistEntryDims();
-      DimVecIter destIter = dest.begin();
-      for(; destIter != dest.end(); ++destIter) {
-	Dim dim = *destIter;
-	DimSetIter find = sumSet.find(dim);
-	if (find != sumSet.end()) {
-	  CDims.push_back(dim);
-	  sumSet.erase(find);
-	}
-      }
-      CType.m_dists[i].DimsToDistEntry(CDims);
+      CType.m_dists[i].SetToStar();
+      FillIn(CDestType.m_dists[i], CType.m_dists[i], sumSet, sumDims);
     }
   }
 
@@ -1375,6 +1344,35 @@ void PermuteWhileUnpacking::Apply(Node *node) const
   return;
 }
 
+//if the final C type contains some grid mode over
+// which we are summing, add all of the modes that must be summed
+// with it to the intermediate C type mode with that grid mode
+void FillIn(const DistEntry &CDestEntry, DistEntry &CTypeEntry, DimSet &sumSet, EntryList &sumDims)
+{
+  bool didSomething = false;
+  DimVec destTmp = CDestEntry.DistEntryDims();
+  DimVec dest = CTypeEntry.DistEntryDims();
+  DimVecIter destIter = destTmp.begin();
+  for(; !didSomething && destIter != destTmp.end(); ++destIter) {
+    Dim dim = *destIter;
+    DimSetIter find = sumSet.find(dim);
+    if (find != sumSet.end()) {
+      EntryListIter iter = sumDims.begin();
+      for (; !didSomething && iter != sumDims.end(); ++ iter) {
+	DistEntry entry = *iter;
+	if (entry.ContainsDim(dim)) {
+	  DimVec sumDimEntry = entry.DistEntryDims();
+	  dest.insert(dest.end(), sumDimEntry.begin(), sumDimEntry.end());
+	  DimVecIter sumDimEntryIter = sumDimEntry.begin();
+	  for(; sumDimEntryIter != sumDimEntry.end(); ++sumDimEntryIter)
+	    sumSet.erase(*sumDimEntryIter);
+	  didSomething = true;
+	}
+      }
+    }
+  }
+  CTypeEntry.DimsToDistEntry(dest);
+}
 
 
 #endif
