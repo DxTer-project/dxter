@@ -885,8 +885,12 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
     }
   }
   
-  if (didMerge)
-    m_fullyExpanded = false;
+
+  if (didMerge) {
+    //Merging can enable some simplifiers to run like
+    // moving TempVarNodes into loops
+    Simplify(simplifiers, true);
+  }
   
   return didMerge;
 }
