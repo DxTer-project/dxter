@@ -234,6 +234,14 @@ class TempVarNode : public DLANode
   virtual bool IsDataDependencyOfInput() const {return false;}
 };
 
+class MoveTempVarNodeIntoLoop : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "MoveTempVarNodeIntoLoop"; }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 
 #if TWOD
 #if DOELEM
