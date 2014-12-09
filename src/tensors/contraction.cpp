@@ -648,22 +648,23 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
 
   node->m_poss->AddNode(temp);
   node->m_poss->AddNode(LCont);
-
+  
   bool notFinalType = false;
   iter = cont->m_CIndices.begin();
   for(int i = 0; iter != cont->m_CIndices.end(); ++iter, ++i) {
     size_t loc = cont->m_AIndices.find(*iter);
     if (loc != string::npos) {
       CType.m_dists[i] = AType.m_dists[loc]; 
+      FillIn(CDestType.m_dists[i], CType.m_dists[i], sumSet, sumDims);
       if (CType.m_dists[i] != CDestType.m_dists[i])
         notFinalType = true;
-      FillIn(CDestType.m_dists[i], CType.m_dists[i], sumSet, sumDims);
     }
     else {
       CType.m_dists[i].SetToStar();
       FillIn(CDestType.m_dists[i], CType.m_dists[i], sumSet, sumDims);
     }
   }
+
 
 //  if (!sumSet.empty())
 //    throw;
@@ -848,9 +849,9 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
     size_t loc = cont->m_BIndices.find(*iter);
     if (loc != string::npos) {
       CType.m_dists[i] = BType.m_dists[loc]; 
+      FillIn(CDestType.m_dists[i], CType.m_dists[i], sumSet, sumDims);
       if (CType.m_dists[i] != CDestType.m_dists[i])
         notFinalType = true;
-      FillIn(CDestType.m_dists[i], CType.m_dists[i], sumSet, sumDims);
     }
     else {
       CType.m_dists[i].SetToStar();
@@ -1349,12 +1350,12 @@ void FillIn(const DistEntry &CDestEntry, DistEntry &CTypeEntry, DimSet &sumSet, 
   DimVec destTmp = CDestEntry.DistEntryDims();
   DimVec dest = CTypeEntry.DistEntryDims();
   DimVecIter destIter = destTmp.begin();
-  for(; !didSomething && destIter != destTmp.end(); ++destIter) {
+  for(; destIter != destTmp.end(); ++destIter) {
     Dim dim = *destIter;
     DimSetIter find = sumSet.find(dim);
     if (find != sumSet.end()) {
       EntryListIter iter = sumDims.begin();
-      for (; !didSomething && iter != sumDims.end(); ++ iter) {
+      for (; iter != sumDims.end(); ++ iter) {
 	DistEntry entry = *iter;
 	if (entry.ContainsDim(dim)) {
 	  DimVec sumDimEntry = entry.DistEntryDims();
