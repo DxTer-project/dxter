@@ -182,36 +182,7 @@ void RealPSet::Migrate()
   //  cout << "migrating " << this << endl;
   if (!shadowToReplace) {
     //    cout << "deleting, no shadows " << this << endl;
-#if PRINTTRACKING
-    cout << "deleting, no shadows " << this << endl;
-#endif
-    if (m_mergeLeft) {
-#if PRINTTRACKING
-      cout << "updating left\n";
-#endif
-      m_mergeLeft->UpdateRealPSetPointers(this, NULL);
-      m_mergeLeft = NULL;
-    }
-    if (m_mergeRight) {
-#if PRINTTRACKING
-      cout << "updating right\n";
-#endif
-      m_mergeRight->UpdateRealPSetPointers(this, NULL);
-      m_mergeRight = NULL;
-    }
-    //    cout << "map's size : " << m_mergeMap.size() << endl;
-    PSetMapIter setIter = m_mergeMap.begin();
-    for(; setIter != m_mergeMap.end(); ++setIter) {
-#if PRINTTRACKING
-      cout << "updating first\n";
-#endif
-      setIter->first->UpdateRealPSetPointers(this, NULL);
-#if PRINTTRACKING
-      cout << "updating second\n";
-#endif
-      setIter->second->UpdateRealPSetPointers(this, NULL);
-    }
-    m_mergeMap.clear();
+    DisconnectFromSetsForMergingRecord();
     return;
   }
 
@@ -374,6 +345,41 @@ void RealPSet::Migrate()
 #if PRINTTRACKING
   cout << "done migrating " << this << endl;
 #endif
+}
+
+void RealPSet::DisconnectFromSetsForMergingRecord()
+{
+    if (m_mergeLeft) {
+#if PRINTTRACKING
+      cout << "updating left\n";
+#endif
+      m_mergeLeft->UpdateRealPSetPointers(this, NULL);
+      m_mergeLeft = NULL;
+    }
+    if (m_mergeRight) {
+#if PRINTTRACKING
+      cout << "updating right\n";
+#endif
+      m_mergeRight->UpdateRealPSetPointers(this, NULL);
+      m_mergeRight = NULL;
+    }
+    //    cout << "map's size : " << m_mergeMap.size() << endl;
+    PSetMapIter setIter = m_mergeMap.begin();
+    for(; setIter != m_mergeMap.end(); ++setIter) {
+#if PRINTTRACKING
+      cout << "updating first\n";
+#endif
+      setIter->first->UpdateRealPSetPointers(this, NULL);
+#if PRINTTRACKING
+      cout << "updating second\n";
+#endif
+      setIter->second->UpdateRealPSetPointers(this, NULL);
+    }
+    m_mergeMap.clear();
+    m_leftInMap.clear();
+    m_rightInMap.clear();
+    m_leftOutMap.clear();
+    m_rightOutMap.clear();
 }
 
 RealPSet::~RealPSet()

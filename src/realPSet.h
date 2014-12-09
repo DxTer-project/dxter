@@ -59,6 +59,7 @@ class RealPSet : public BasePSet
   virtual void ClearBeforeProp();
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows);
   void Migrate();
+  void DisconnectFromSetsForMergingRecord();
   virtual BasePSet* GetNewInst() {return (BasePSet*)(new RealPSet);}
   virtual const PossMMap& GetPosses() const {return m_posses;}
   virtual PossMMap& GetPosses() {return m_posses;}
