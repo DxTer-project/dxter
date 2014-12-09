@@ -204,7 +204,7 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 	  return false;
     }
   }
-  else// if (CurrPhase == DPTENSORPHASE) 
+  else if (!set1->IsLoop())// if (CurrPhase == DPTENSORPHASE) 
   {
     const Poss *poss1 = set1->GetPosses().begin()->second;
     const Poss *poss2 = set2->GetPosses().begin()->second;
