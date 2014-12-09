@@ -332,7 +332,9 @@ RealPSet* H_me_calc(DLANode *t_fn, DLANode *v_efmn,
   InputNode *H_me = CreateInput2("H_me", small, big);
 
 
-  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
+  TempVarNode *temp1 = new TempVarNode(v_efmn->DataType(0).GetDist(), "temp1");
+  temp1->AddInput(v_efmn,0);
+  //  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
 
   YAxpPx *axpy1 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
   axpy1->AddInputs0(3,
