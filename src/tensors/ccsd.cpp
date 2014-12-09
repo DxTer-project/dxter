@@ -351,4 +351,52 @@ RealPSet* H_me_calc(DLANode *t_fn, DLANode *v_efmn,
   return cont1Set;
 }
 
+RealPSet* F_ae_calc(DLANode *H_me, DLANode *r_amef,
+		    DLANode *t_am,
+		    DLANode *v_efmn,
+		    DLANode *T_afmn,
+		    const Size big, const Size small)
+{
+  InputNode *F_ae = CreateInput2("F_ae", big, big);
+
+
+  TempVarNode *temp1 = new TempVarNode(v_efmn->DataType(0).GetDist(), "temp1");
+  temp1->AddInput(v_efmn,0);
+  TempVarNode *temp2 = new TempVarNode(r_amef->DataType(0).GetDist(), "temp2");
+  temp2->AddInput(r_amef,0);
+
+  YAxpPx *axpy1 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
+  axpy1->AddInputs0(3,
+		    v_efmn, v_efmn, temp1);
+  Poss *axpy1Poss = new Poss(axpy1);
+  RealPSet * axpy1Set = new RealPSet(axpy1Poss);
+
+  Contraction *cont1 = new Contraction(ABSLAYER,COEFNEGONE,COEFZERO,REAL,"efmn","afmn","ae",(string)"fmn");
+  cont1->AddInputs0(3,
+		    axpy1Set->OutTun(0), T_afmn, F_ae);
+  Poss *cont1Poss = new Poss(cont1);
+  RealPSet *cont1Set = new RealPSet(cont1Poss);
+
+  YAxpPx *axpy2 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "amef", "amfe");
+  axpy2->AddInputs0(3,
+		     r_amef, r_amef, temp2);
+  Poss *axpy2Poss = new Poss(axpy2);
+  RealPSet * axpy2Set = new RealPSet(axpy2Poss);
+
+  Contraction *cont2 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"amef","fm","ae",(string)"fm");
+  cont2->AddInputs0(3,
+		    axpy2Set->OutTun(0), t_am, cont1Set->OutTun(0));
+  Poss *cont2Poss = new Poss(cont2);
+  RealPSet *cont2Set = new RealPSet(cont2Poss);
+
+
+  Contraction *cont3 = new Contraction(ABSLAYER,COEFNEGONE,COEFONE,REAL,"me","am","ae",(string)"m");
+  cont3->AddInputs0(3,
+		    H_me, t_am, cont2Set->OutTun(0));
+  Poss *cont3Poss = new Poss(cont3);
+  RealPSet *cont3Set = new RealPSet(cont3Poss);
+
+  return cont3Set;
+}
+
 #endif //DOTENSORS

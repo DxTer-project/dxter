@@ -62,6 +62,7 @@ RealPSet* U();
 RealPSet* Q();
 RealPSet* P();
 RealPSet* H();
+RealPSet* F();
 
 void AddTrans()
 {
@@ -165,6 +166,7 @@ void Usage()
   cout <<"         9  -> Q_mnij\n";
   cout <<"        10  -> P_jimb\n";
   cout <<"        11  -> H_me\n";
+  cout <<"        12  -> F_ae\n";
 }
 
 int main(int argc, const char* argv[])
@@ -219,6 +221,9 @@ int main(int argc, const char* argv[])
       break;
     case(11):
       algFunc = H;
+      break;
+    case(12):
+      algFunc = F;
       break;
     default:
       Usage();
@@ -1008,6 +1013,33 @@ RealPSet* H()
   RealPSet *set = H_me_calc(t_fn, v_efmn,
 			      big, small);
 
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+
+RealPSet* F()
+{
+  //~ 10:1 ratio
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
+  
+  InputNode *H_me = CreateInput2("H_me", small, big);
+  InputNode *T_afmn = CreateInput4("T_afmn", big, big, small, small);
+  InputNode *r_amef = CreateInput4("r_amef", big, small, big, big);
+  InputNode *t_am = CreateInput2("t_am", big, small);
+  InputNode *v_efmn = CreateInput4("v_efmn", big, big, small, small);
+  
+  RealPSet *set = F_ae_calc(H_me, r_amef, 
+			    t_am, v_efmn, T_afmn,
+			    big, small);
+  
   OutputNode *out = new OutputNode("output");
   out->AddInput(set->OutTun(0),0);
 
