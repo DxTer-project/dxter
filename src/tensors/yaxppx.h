@@ -69,7 +69,8 @@ class YAxpPxLoopExp : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  YAxpPxLoopExp(Layer fromLayer, Layer toLayer);
+  Dim m_dim;
+  YAxpPxLoopExp(Layer fromLayer, Layer toLayer, Dim dim);
   
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;

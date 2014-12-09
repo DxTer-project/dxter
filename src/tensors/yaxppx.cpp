@@ -240,10 +240,11 @@ void DistYAxpPxToDefaultLocalYAxpPx::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-YAxpPxLoopExp::YAxpPxLoopExp(Layer fromLayer, Layer toLayer)
+YAxpPxLoopExp::YAxpPxLoopExp(Layer fromLayer, Layer toLayer, Dim dim)
   : 
   m_fromLayer(fromLayer), 
-  m_toLayer(toLayer)
+  m_toLayer(toLayer),
+  m_dim(dim)
 {
 }
 
@@ -252,7 +253,8 @@ string YAxpPxLoopExp::GetType() const
   string str = "YAxpPx Loop Exp " 
     + LayerNumToStr(m_fromLayer)
     + " + " 
-    + LayerNumToStr(m_toLayer);
+    + LayerNumToStr(m_toLayer) + " dim "
+    + (char)(m_dim+48);
   return str;
 }
 
@@ -261,10 +263,10 @@ bool YAxpPxLoopExp::CanApply(const Node *node) const
   if (node->GetNodeClass() == YAxpPx::GetClass()) {
     const YAxpPx *axpy = (YAxpPx*)node;
     if (axpy->GetLayer() == m_fromLayer) {
-      Dim numDims = axpy->InputNumDims(0);
-      for(Dim dim = 0; dim < numDims; ++dim)
-	if (!(*(axpy->InputLen(0,dim)) <= TensorBS.GetSize()))
-	  return true;
+      if (m_dim >= axpy->InputNumDims(0))
+	return false;
+      if (!(*(axpy->InputLen(0,m_dim)) <= TensorBS.GetSize()))
+	return true;
     }
   }
   return false;
@@ -274,26 +276,6 @@ void YAxpPxLoopExp::Apply(Node *node) const
 {
   YAxpPx *axpy = (YAxpPx*)node;
 
-  Dim m_dim = 0;
-  Size size = (*(axpy->InputLen(0,0)))[0];
-
-  Dim numDims = axpy->InputNumDims(0);
-  for(Dim dim = 1; dim < numDims; ++dim) {
-    Size newSize = (*(axpy->InputLen(0,dim)))[0];
-    if (newSize > size) {
-      m_dim = dim;
-      size = newSize;
-    }
-  }
-
-  cout << "*****sizes " << endl;
-  axpy->InputLen(0,m_dim)->Print();
-  cout << "*****end sizes\n";
-
-
-  if (size <= TensorBS.GetSize())
-    throw;
-  
   
   NodeConn *connA, *connB, *connC;
   connA = axpy->m_inputs[0];

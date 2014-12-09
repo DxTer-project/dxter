@@ -93,8 +93,7 @@ void AddTrans()
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
 
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
-  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER), DPTENSORPHASE);
-  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER), DPTENSORPHASE);
+
   Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(ABSLAYER,DM1LAYER,TensorBS.GetSize()), DPTENSORPHASE);
   Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(DM1LAYER,DM2LAYER,TensorBS.GetSize()), DPTENSORPHASE);
   
@@ -116,6 +115,8 @@ void AddTrans()
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
+    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
+    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SingleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);
@@ -144,6 +145,8 @@ void AddSimplifiers()
    Universe::AddTrans(Permute::GetClass(), new LowerPermute, SIMP);
    Universe::AddTrans(Permute::GetClass(), new CombinePermutations, SIMP);
    Universe::AddTrans(ScaleNode::GetClass(), new RemoveScaleByOne, SIMP);
+   //   Universe::AddTrans(TempVarNode::GetClass(), new MoveTempVarNodeIntoLoop, SIMP);
+
 }
 
 void Usage()
@@ -322,6 +325,9 @@ int main(int argc, const char* argv[])
     uni.Prop();
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+
+    uni.PrintAll(algNum);
+    throw;
   }
 #endif
 
@@ -862,8 +868,8 @@ RealPSet* W()
 {
   //~ 10:1 ratio
   // 53, 5 for H20
-  const Size big = 53; //a-h
-  const Size small = 5; //i-p
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
 
   InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
@@ -889,9 +895,9 @@ RealPSet* W()
 RealPSet* X()
 {
   //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 53; //a-h
-  const Size small = 5; //i-p
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
 
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
   InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
@@ -916,9 +922,9 @@ RealPSet* X()
 RealPSet* U()
 {
   //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 53; //a-h
-  const Size small = 5; //i-p
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
 
   InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *u_mnie = CreateInput4("u_mnie", small, small, small, big);
@@ -940,9 +946,9 @@ RealPSet* U()
 RealPSet* Q()
 {
   //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 53; //a-h
-  const Size small = 5; //i-p
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
 
   InputNode *q_mnij = CreateInput4("q_mnij", small, small, small, small);
   InputNode *t_fj = CreateInput2("t_fj", big, small);
@@ -966,9 +972,9 @@ RealPSet* Q()
 RealPSet* P()
 {
   //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 53; //a-h
-  const Size small = 5; //i-p
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
 
   InputNode *u_jimb = CreateInput4("u_jimb", small, small, small, big);
   InputNode *r_bmef = CreateInput4("r_bmef", big, small, big, big);
@@ -994,9 +1000,9 @@ RealPSet* P()
 RealPSet* H()
 {
   //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 53; //a-h
-  const Size small = 5; //i-p
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
 
   InputNode *t_fn = CreateInput2("t_fn", big, small);
   InputNode *v_efmn = CreateInput4("v_efmn", big, big, small, small);
