@@ -1050,6 +1050,8 @@ void TempVarNode::BuildDataTypeCache()
 #endif
 }
 
+#if DOTENSORS
+
 bool HasDecendentForApplication(const Node *node)
 {
   if (node->IsTunnel()) {
@@ -1329,6 +1331,7 @@ void MoveTempVarNodeIntoLoop::Apply(Node *node) const
   MoveIn(tmp->Child(0), tmp->Input(0), tmp->InputConnNum(0), tmp);
   tmp->m_poss->DeleteChildAndCleanUp(tmp);
 }
+#endif //DOTENSORS
 
 #if TWOD
 #if DOELEM
