@@ -66,6 +66,12 @@ RealPSet* F_ae_calc(DLANode *H_me, DLANode *r_amef,
 		    DLANode *T_afmn,
 		    const Size big, const Size small);
 
+RealPSet* G_mi_calc(DLANode *H_me, DLANode *u_mnie,
+		    DLANode *t_ei,
+		    DLANode *v_efmn,
+		    DLANode *T_efin,
+		    const Size big, const Size small);
+
 
 
 
