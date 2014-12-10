@@ -41,6 +41,17 @@ class BasePSet;
 
 #define POSSISSANEFLAG (1L<<1)
 
+typedef vector<NodeConn*> NodeConnVec;
+typedef NodeConnVec::iterator NodeConnVecIter;
+
+struct NodeConnComp {
+  bool operator() (const NodeConn &lhs, const NodeConn &rhs) const
+  {return lhs.m_n < rhs.m_n || (lhs.m_n == rhs.m_n && lhs.m_num < rhs.m_num);}
+};
+
+typedef map<NodeConn,vector<int>,NodeConnComp> NodeConnIntMap;
+typedef NodeConnIntMap::iterator NodeConnIntMapIter;
+
 class Poss
 {
   static GraphNum M_count;
@@ -97,7 +108,8 @@ class Poss
 		  BasePSet **leftSet, BasePSet **rightSet);
   void MergePart2(RealPSet *newSet, 
 		  BasePSet *leftSet, BasePSet *rightSet,
-		  unsigned int left, NodeMap &mapLeft, NodeMap &mapRight);
+		  unsigned int left, NodeMap &mapLeft, NodeMap &mapRight,
+		  NodeConnIntMap &inMap, NodeConnIntMap &outMap);
   void MergePart4(RealPSet *newSet, 
 		  BasePSet *leftSet, 
 		  BasePSet *rightSet, 
@@ -105,6 +117,10 @@ class Poss
 		  NodeVec &newInputTunnelsToFix);
   void MergePart6(RealPSet *newSet, BasePSet *leftSet, 
 		  BasePSet *rightSet, NodeMap &mapLeft, NodeMap &mapRight);
+  void MergePart7(RealPSet *newSet, 
+		  unsigned int numLeftInTuns, unsigned int numRightInTuns,
+		  unsigned int numLeftOutTuns, unsigned int numRightOutTuns,
+		  NodeConnIntMap &inMap, NodeConnIntMap &outMap);
   bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
