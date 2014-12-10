@@ -144,8 +144,6 @@ class Poss
   void PrintNodeAddresses() const;
   RealPSet* FormSubPSet(NodeVec &outputTuns, bool isCritSect);
   void FillClique(NodeSet &set);
-  RealPSet* FormSetForClique(NodeSet &set, bool isCritSect);
-
   static size_t Hash(const string &str);
   size_t GetHash();
   virtual void InvalidateHash() {m_hashValid=false;}
