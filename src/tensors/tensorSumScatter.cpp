@@ -291,21 +291,42 @@ Phase SumScatterUpdateNode::MaxPhase() const
       if (inType.m_notReped == outType.m_notReped) {
 	EntrySet sumSet;
 	sumSet.insert(m_sumDims.begin(), m_sumDims.end());
-
-	for (Dim dim = 0; !sumSet.empty() && dim < outType.m_numDims; ++dim) {
+	
+	//check that each mode just has a sum grid mode appended to the src mode distribution
+	// or a combination of them (e.g., [0] -> [012], summing over 1 and 2 in two separate steps)
+	for (Dim dim = 0; dim < outType.m_numDims; ++dim) {
 	  DistEntry inEntry = inType.m_dists[dim];
 	  DistEntry outEntry = outType.m_dists[dim];
 	  if (inEntry != outEntry) {
 	    if (inEntry.IsStar()) {
 	      //[*] -> ...
 	      if (!sumSet.erase(outEntry)) {
-		cout << "2trying SumScatter from " << DistTypeToStr(inType)
-		     << " to " << DistTypeToStr(outType)  << endl;
-		cout << inEntry.str() << " -> "
-		     << outEntry.str() << endl;
-		cout << "sumDims " << sumDims.str() << endl;
-		
-		throw;
+		//now try subsets
+		DimVec vec = outEntry.DistEntryDims();
+		while (!vec.empty()) {
+		  DistEntry tmp;
+		  tmp.SetToStar();
+		  while (!vec.empty()) {
+		    tmp.AppendDim(vec[0]);
+		    vec.erase(vec.begin());
+		    if (sumSet.erase(tmp)) {
+		      tmp.SetToStar();
+		      break;
+		    }
+		  }
+		  if (!tmp.IsStar()) {
+		    cout << "2trying SumScatter from " << DistTypeToStr(inType)
+			 << " to " << DistTypeToStr(outType)  << endl;
+		    cout << inEntry.str() << " -> "
+			 << outEntry.str() << endl;
+		    cout << "sumDims " << sumDims.str() << endl;
+		    cout << "listing:\n";
+		    EntrySetIter iter = sumSet.begin();
+		    for(; iter != sumSet.end(); ++iter)
+		      cout << (*iter).PrettyStr() << endl;
+		    throw;
+		  }
+		}
 	      }
 	    }
 	    else {
@@ -330,7 +351,33 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	      entry.DimsToDistEntry(suff);
 
 	      if (!sumSet.erase(entry)) {
-		return SUMSCATTERTENSORPHASE;	
+		//now try subsets
+		DimVec vec = suff;
+		while (!vec.empty()) {
+		  DistEntry tmp;
+		  tmp.SetToStar();
+		  while (!vec.empty()) {
+		    tmp.AppendDim(vec[0]);
+		    vec.erase(vec.begin());
+		    if (sumSet.erase(tmp)) {
+		      tmp.SetToStar();
+		      break;
+		    }
+		  }
+		  if (!tmp.IsStar()) {
+		    cout << "2trying SumScatter from " << DistTypeToStr(inType)
+			 << " to " << DistTypeToStr(outType)  << endl;
+		    cout << inEntry.str() << " -> "
+			 << outEntry.str() << endl;
+		    cout << "sumDims " << sumDims.str() << endl;
+		    cout << "listing:\n";
+		    EntrySetIter iter = sumSet.begin();
+		    for(; iter != sumSet.end(); ++iter)
+		      cout << (*iter).PrettyStr() << endl;
+		    throw;
+		  }
+		}
+		//		return SUMSCATTERTENSORPHASE;	
 	      }
 	    }
 	  }
