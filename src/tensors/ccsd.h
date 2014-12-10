@@ -73,6 +73,15 @@ RealPSet* G_mi_calc(DLANode *H_me, DLANode *u_mnie,
 		    const Size big, const Size small);
 
 
+RealPSet* z_ai_calc(DLANode * f_ae, DLANode *G_mi,
+		    DLANode *H_me, DLANode *U_mnie,
+		    DLANode *w_amie,
+		    DLANode *x_amei,
+		    DLANode *t_am, 
+		    DLANode *r_amef, 
+		    DLANode *T_aeim,
+		    const Size big, const Size small);
+
 
 
 InputNode *CreateInput2(string name, Size size1, Size size2);

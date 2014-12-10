@@ -64,6 +64,7 @@ RealPSet* P();
 RealPSet* H();
 RealPSet* F();
 RealPSet* G();
+RealPSet* z();
 
 void AddTrans()
 {
@@ -169,6 +170,7 @@ void Usage()
   cout <<"        11  -> H_me\n";
   cout <<"        12  -> F_ae\n";
   cout <<"        13  -> G_mi\n";
+  cout <<"        14  -> z_ai\n";
 }
 
 int main(int argc, const char* argv[])
@@ -229,6 +231,9 @@ int main(int argc, const char* argv[])
       break;
     case(13):
       algFunc = G;
+      break;
+    case(14):
+      algFunc = z;
       break;
     default:
       Usage();
@@ -1071,6 +1076,40 @@ RealPSet* G()
   
   RealPSet *set = G_mi_calc(H_me, u_mnie,
 			    t_ei, v_efmn, T_efin,
+			    big, small);
+  
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* z()
+{
+  //~ 10:1 ratio
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
+  
+  InputNode *f_ae = CreateInput2("f_ae", big, big);
+  InputNode *G_mi = CreateInput2("G_mi", small, small);
+  InputNode *w_amie = CreateInput4("w_amie", big, small, small, big);
+  InputNode *x_amei = CreateInput4("x_amei", big, small, big, small);
+  InputNode *T_aeim = CreateInput4("T_aeim", big, big, small, small);
+  InputNode *r_amef = CreateInput4("r_amef", big, small, big, big);
+  InputNode *t_am = CreateInput2("t_am", big, small);
+  DLANode *H_me = CreateInput2("H_me", small, big);
+  InputNode *U_mnie = CreateInput4("U_mnie", small, small, small, big);
+  
+
+  RealPSet *set = z_ai_calc(f_ae, G_mi, 
+			    H_me, U_mnie,
+			    w_amie,
+			    x_amei, 
+			    t_am, r_amef, T_aeim,
 			    big, small);
   
   OutputNode *out = new OutputNode("output");
