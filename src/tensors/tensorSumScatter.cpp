@@ -59,8 +59,12 @@ void GetMultiModeScatterInfo(const DistType &srcType,
       }
     }
   }
-  if (scatDims->size() != redDims->size())
+  if (scatDims->size() != redDims->size()) {
+    cout << srcType.PrettyStr() << endl;
+    cout << destType.PrettyStr() << endl;
+    cout << m_sumDims.size() << endl;
     throw;
+  }
 
 
 
@@ -289,6 +293,8 @@ Phase SumScatterUpdateNode::MaxPhase() const
       return SUMSCATTERTENSORPHASE;
 #else
       if (inType.m_notReped == outType.m_notReped) {
+	bool multiSumScatterInSameMode = false;
+
 	EntrySet sumSet;
 	sumSet.insert(m_sumDims.begin(), m_sumDims.end());
 	
@@ -301,6 +307,8 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	    if (inEntry.IsStar()) {
 	      //[*] -> ...
 	      if (!sumSet.erase(outEntry)) {
+		multiSumScatterInSameMode = true;
+
 		//now try subsets
 		DimVec vec = outEntry.DistEntryDims();
 		while (!vec.empty()) {
@@ -351,6 +359,7 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	      entry.DimsToDistEntry(suff);
 
 	      if (!sumSet.erase(entry)) {
+		multiSumScatterInSameMode = true;
 		//now try subsets
 		DimVec vec = suff;
 		while (!vec.empty()) {
@@ -384,6 +393,8 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	}
 	if (!sumSet.empty())
 	  throw;
+	if (multiSumScatterInSameMode)
+	  return SUMSCATTERTENSORPHASE;
       }
 #endif
     }
