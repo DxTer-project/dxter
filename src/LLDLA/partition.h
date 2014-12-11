@@ -24,6 +24,7 @@
 #include "DLANode.h"
 #include "node.h"
 #include "layers.h"
+#include "DLAOp.h"
 
 #if DOLLDLA
 
@@ -97,6 +98,19 @@ class Partition : public DLANode
   virtual const Sizes* GetM(ConnNum num) const;
   virtual const Sizes* GetN(ConnNum num) const;
 
+};
+
+class PartitionLowerLayer : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  Size m_bs;
+
+  PartitionLowerLayer(Layer fromLayer, Layer toLayer);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
 };
 
 #endif //DOLLDLA

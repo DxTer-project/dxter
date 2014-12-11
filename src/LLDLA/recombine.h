@@ -46,7 +46,7 @@ class Recombine : public DLAOp<3, 1>
   virtual bool IsReadOnly() const {return false;}
   virtual bool CanTrans() const {return false;}
 
-  virtual NodeType GetType() const { return "Recombine"; }
+  virtual NodeType GetType() const { return "recombineNode"; }
   static ClassType GetClass() {return "recombineNode"; }
   virtual ClassType GetNodeClass() const {return GetClass(); }
 
@@ -62,6 +62,19 @@ class Recombine : public DLAOp<3, 1>
   virtual const Sizes* GetN(ConnNum num) const;
 
   virtual const DataTypeInfo& DataType(ConnNum num) const;
+};
+
+class RecombineLowerLayer : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  Size m_bs;
+
+  RecombineLowerLayer(Layer fromLayer, Layer toLayer);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
 };
 
 #endif //DOLLDLA

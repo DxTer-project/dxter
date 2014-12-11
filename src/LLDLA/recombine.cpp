@@ -88,4 +88,37 @@ const DataTypeInfo& Recombine::DataType(ConnNum num) const
   return InputDataType(2);
 }
 
+RecombineLowerLayer::RecombineLowerLayer(Layer fromLayer, Layer toLayer)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+}
+
+bool RecombineLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == Recombine::GetClass()) {
+    const Recombine *recombine = (Recombine*) node;
+    if (recombine->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    return true;
+  }
+  cout << "Error: Applying RecombineLowerLayer to non-Recombine node\n";
+  cout << "Node class is: " << node->GetClass() << endl;
+  cout << "GetNodeClass is: " << node->GetNodeClass() << endl;
+  throw;
+}
+
+void RecombineLowerLayer::Apply(Node *node) const
+{
+  Recombine *recombine = (Recombine*) node;
+  recombine->SetLayer(m_toLayer);
+}
+
+string RecombineLowerLayer::GetType() const
+{
+  return "Recombine lower layer " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
 #endif // DOLLDLA

@@ -282,4 +282,35 @@ const Sizes* Partition::GetN(ConnNum num) const {
   }
 }
 
+PartitionLowerLayer::PartitionLowerLayer(Layer fromLayer, Layer toLayer)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+}
+
+bool PartitionLowerLayer::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() == Partition::GetClass()) {
+    const Partition *part = (Partition*) node;
+    if (part->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    return true;
+  }
+  cout << "Error: Applying PartitionLowerLayer to non-Partition node\n";
+  throw;
+}
+
+void PartitionLowerLayer::Apply(Node *node) const
+{
+  Partition *part = (Partition*) node;
+  part->SetLayer(m_toLayer);
+}
+
+string PartitionLowerLayer::GetType() const
+{
+  return "Partition lower layer " + LayerNumToStr(m_fromLayer)
+    + " to " + LayerNumToStr(m_toLayer);
+}
+
 #endif // DOLLDLA
