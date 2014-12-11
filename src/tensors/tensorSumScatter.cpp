@@ -30,8 +30,7 @@
 void GetMultiModeScatterInfo(const DistType &srcType,
 			     const DistType &destType,
 			     const EntryList &m_sumDims,
-			     DimVec *redDims,
-			     DimVec *scatDims)
+			     DimVec *redDims)
 {
   EntrySet sumDimSet;
   sumDimSet.insert(m_sumDims.begin(),m_sumDims.end());
@@ -54,20 +53,10 @@ void GetMultiModeScatterInfo(const DistType &srcType,
       DimVec srcDims = srcType.m_dists[dim].DistEntryDims();
       srcDims.insert(srcDims.end(), entryDims.begin(), entryDims.end());
       if (destDims == srcDims) {
-	scatDims->push_back(dim);
 	break;
       }
     }
   }
-  if (scatDims->size() != redDims->size()) {
-    cout << srcType.PrettyStr() << endl;
-    cout << destType.PrettyStr() << endl;
-    cout << m_sumDims.size() << endl;
-    throw;
-  }
-
-
-
 }
 
 bool SameDims(DistEntry entry1, DistEntry entry2)
@@ -393,8 +382,10 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	}
 	if (!sumSet.empty())
 	  throw;
+#if !ALLOWMULTIPLESCATTERSINONEMODE
 	if (multiSumScatterInSameMode)
 	  return SUMSCATTERTENSORPHASE;
+#endif
       }
 #endif
     }
@@ -600,15 +591,14 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 	*out << ", ";
       }
 
-      DimVec redDims, scatDims;
+      DimVec redDims;
 
       GetMultiModeScatterInfo(m_srcType, m_destType,
 			      m_sumDims,
-			      &redDims,
-			      &scatDims);
+			      &redDims);
 	
 
-      *out << ModeArrayVarName(redDims) << ", " << ModeArrayVarName(scatDims) << " );\n";
+      *out << ModeArrayVarName(redDims) << " );\n";
     }
   }
 }
@@ -646,18 +636,13 @@ void SumScatterUpdateNode::AddVariables(VarSet &set) const
       set.insert(var);
     }
     else {
-      DimVec redDims, scatDims;
+      DimVec redDims;
 
       GetMultiModeScatterInfo(m_srcType, m_destType,
 			      m_sumDims,
-			      &redDims,
-			      &scatDims);
+			      &redDims);
       {
 	Var var(ModeArrayVarType, redDims);
-	set.insert(var);
-      }
-      {
-	Var var(ModeArrayVarType, scatDims);
 	set.insert(var);
       }
     }
