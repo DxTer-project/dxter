@@ -1606,7 +1606,6 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
 	     inMap, outMap);
   
   newSet->BuildDataTypeCache();
-  newSet->Simplify(simplifiers);
 }
 
 bool AddNodesDown(Node *edgeStart, ConnNum childNum, NodeVec &outputTuns, NodeSet &possNodes)
@@ -2414,7 +2413,6 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 
   newSet->BuildDataTypeCache();
   BuildDataTypeCache();
-  newSet->Simplify(simplifiers);
 }
 
 void Poss::ClearBeforeProp()
