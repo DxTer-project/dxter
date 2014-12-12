@@ -26,6 +26,8 @@
 #include <cmath>
 #include "loopSupport.h"
 
+#define THROWWHENCANTMOVETEMPVARNODE 0
+
 InputNode::InputNode()
 :
 m_type("InputNode")
@@ -1064,11 +1066,20 @@ bool HasDecendentForApplication(const Node *node)
         if (out->m_children.empty()) {
           if (!tun->m_pset)
             throw;
-          if (tun->m_pset->IsShadow())
+          if (tun->m_pset->IsShadow()) {
+#if THROWWHENCANTMOVETEMPVARNODE
             throw;
+#else
+	    return false;
+#endif
+	  }
           else if (!((RealPSet*)(tun->m_pset))->m_shadows.empty()) {
+#if THROWWHENCANTMOVETEMPVARNODE
             cout << node->GetNameStr(0) << endl;
             throw;
+#else
+	    return false;
+#endif
           }
           return true;
         }
@@ -1079,17 +1090,25 @@ bool HasDecendentForApplication(const Node *node)
         if (!tun->m_pset)
           throw;
         if (tun->m_pset->IsShadow()) {
-          if (HasDecendentForApplication(tun->GetRealTunnel()))
+#if THROWWHENCANTMOVETEMPVARNODE
+          if (HasDecendentForApplication(tun->GetRealTunnel()))  {
+            cout << node->GetNameStr(0) << endl;
             throw;
-          else
-            return false;
+	  }
+#endif
+	    return false;
         }
         //go through each poss tuns
         NodeConnVecConstIter iter = tun->m_children.begin();
         for(; iter != tun->m_children.end(); ++iter) {
           if (HasDecendentForApplication((*iter)->m_n)) {
-            if (!((RealPSet*)(tun->m_pset))->m_shadows.empty())
-              throw;
+            if (!((RealPSet*)(tun->m_pset))->m_shadows.empty()) {
+#if THROWWHENCANTMOVETEMPVARNODE
+            throw;
+#else
+	    return false;
+#endif
+	    }
             return true;
           }
         }
