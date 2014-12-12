@@ -31,7 +31,7 @@
 // in a MultiTrans (set to something large
 // if you don't want to use this heuristic)
 #if DOTENSORS
-#define MAXNUMBEROFREFINEMENTS 4
+#define MAXNUMBEROFREFINEMENTS 2
 #else
 #define MAXNUMBEROFREFINEMENTS 2
 #endif
