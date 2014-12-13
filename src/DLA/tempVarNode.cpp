@@ -270,10 +270,11 @@ const Dim TempVarNode::NumDims(ConnNum num) const
   return InputNumDims(0) + m_sumDims.size();
 }
 
-const Sizes* TempVarNode::Len(ConnNum num, Dim dim) const
+const Sizes* TempVarNode::Len(ConnNum num, Dim reqDim) const
 {
   if (num > 0)
     throw;
+  Dim dim = m_info.GetPerm().MapFinishToStart(reqDim);
   if (!m_sumDims.empty()) {
     Dim dims = m_info.GetDist().m_numDims-m_sumDims.size();
     if (dim >= dims)
@@ -285,10 +286,11 @@ const Sizes* TempVarNode::Len(ConnNum num, Dim dim) const
     return InputLen(0, dim);
 }
 
-const Sizes* TempVarNode::LocalLen(ConnNum num, Dim dim) const
+const Sizes* TempVarNode::LocalLen(ConnNum num, Dim reqDim) const
 {
   if (num > 0)
     throw;
+  Dim dim = m_info.GetPerm().MapFinishToStart(reqDim);
   if (!m_sumDims.empty()) {
     Dim dims = m_info.GetDist().m_numDims-m_sumDims.size();
     if (dim >= dims)

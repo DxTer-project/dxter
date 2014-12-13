@@ -67,6 +67,14 @@ class LowerPermute : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+class MovePermuteIntoTempVarNode : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "MovePermuteIntoTempVarNode"; }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 class PermuteLoopHoist : public SingleTrans
 {
  public:

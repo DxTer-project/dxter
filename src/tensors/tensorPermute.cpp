@@ -24,6 +24,7 @@
 #if DOTENSORS
 
 #include "loopTunnel.h"
+#include "tempVarNode.h"
 
 Permute::Permute(string start, string end, Layer layer)
  : m_permutation(start,end)
@@ -186,6 +187,24 @@ void LowerPermute::Apply(Node *node) const
 {
   Permute *perm = (Permute*)node;
   perm->SetLayer(SMLAYER);
+}
+
+bool MovePermuteIntoTempVarNode::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != Permute::GetClass())
+    throw;
+  const Permute *perm = (Permute*)node;
+  return (perm->Input(0)->GetNodeClass() == TempVarNode::GetClass());
+}
+
+
+void MovePermuteIntoTempVarNode::Apply(Node *node) const
+{
+  Permute *perm = (Permute*)node;
+  TempVarNode *temp = (TempVarNode*)(perm->Input(0));
+  temp->m_info.SetPerm(temp->m_info.GetPerm().ComposeWith(perm->m_permutation));
+  perm->RedirectAllChildren(temp);
+  perm->m_poss->DeleteChildAndCleanUp(perm);
 }
 
 
