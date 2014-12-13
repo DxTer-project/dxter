@@ -637,7 +637,12 @@ void RedistNode::PrintCode(IndStream &out)
   DimVec gridModesInvolved;
   if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
 			 &gridModesInvolved)) {
-    *out << outName << ".AllToAllRedistFrom( " 
+    if (gridModesInvolved.empty()) {
+      GetAllToAllPattern(m_srcType, m_info.GetDist(),
+                         &gridModesInvolved);
+      throw;
+    }
+    *out << outName << ".AllToAllRedistFrom( "
 	 << inName << ", "
 	 << ModeArrayVarName(gridModesInvolved) << " );\n";
     return;
@@ -646,6 +651,8 @@ void RedistNode::PrintCode(IndStream &out)
   DimVec indices;
   if (GetAllGatherPattern(m_srcType, m_info.GetDist(),
 			  &gridModesInvolved)) {
+    if (gridModesInvolved.empty())
+      throw;
     *out << outName << ".AllGatherRedistFrom( "
 	 << inName << ", "
 	 << ModeArrayVarName(gridModesInvolved) << " );\n";
@@ -1888,18 +1895,13 @@ bool GetAllToAllPattern(const DistType &srcType,
     DistEntry entry = *srcIter;
     if (!destSuffixes.erase(entry))
       return false;
-  }
-  if (!destSuffixes.empty())
-    return false;
-
-  if (gridModesInvolved) {
-    map<Dim,DistEntry>::iterator srcModeIter = srcModes.begin();
-    for(; srcModeIter != srcModes.end(); ++srcModeIter) {
-      DimVec vec = srcModeIter->second.DistEntryDims();
+    if (gridModesInvolved) {
+      DimVec vec = entry.DistEntryDims();
       gridModesInvolved->insert(gridModesInvolved->end(), vec.begin(), vec.end());
     }
   }
-
+  if (!destSuffixes.empty())
+    return false;
   return true;
 }
 
