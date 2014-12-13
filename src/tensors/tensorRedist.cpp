@@ -634,7 +634,7 @@ void RedistNode::PrintCode(IndStream &out)
 
   if (align) {
     out.Indent();
-    *out << outName << ".AlignWith( " 
+    *out << outName << ".AlignModesWith( " 
 	 << ModeArrayVarName(m_alignModes) << ", "
 	 << m_align << ", " 
 	 << ModeArrayVarName(m_alignModesSrc) << " );\n";
