@@ -42,16 +42,14 @@ void GetSuffix(const DimVec &dims1, const DimVec &dims2,
 
 bool GetAllToAllPattern(const DistType &srcType, 
 			const DistType &destType,
-			DistEntryVec *gridModesInvolved);
+			DimVec *gridModesInvolved);
 
 bool GetAllGatherPattern(const DistType &srcType,
 			 const DistType &destType,
-			 DistEntryVec *gridModes);
+			 DimVec *gridModes);
 
 bool GetLocalRedistPattern(const DistType &srcType,
-			   const DistType &destType,
-			   DimVec *indices,
-			   DistEntryVec *gridModes);
+			   const DistType &destType);
 			
 
 RedistNode::RedistNode() 
@@ -168,18 +166,13 @@ void RedistNode::Prop()
 
     m_cost = 0;
 
-    DistEntryVec gridModesInvolved;
+    DimVec gridModesInvolved;
     if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
 			   &gridModesInvolved)) {
       unsigned int numProcs = 1;
-      DistEntryVecIter gridModeIter = gridModesInvolved.begin();
+      DimVecIter gridModeIter = gridModesInvolved.begin();
       for(; gridModeIter != gridModesInvolved.end(); ++gridModeIter) {
-	DistEntry entry = *gridModeIter;
-	DimVec gridModes = entry.DistEntryDims();
-	DimVecIter iter = gridModes.begin();
-	for(; iter != gridModes.end(); ++iter) {
-	  numProcs *= GridLens[*iter];
-	}
+	numProcs *= GridLens[*gridModeIter];
       }
       const unsigned int totNumIters = m_lsizes[0].NumSizes();
       for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
@@ -196,14 +189,9 @@ void RedistNode::Prop()
     if (GetAllGatherPattern(m_srcType, m_info.GetDist(),
 			    &gridModesInvolved)) {
       unsigned int numProcs = 1;
-      DistEntryVecIter gridModeIter = gridModesInvolved.begin();
+      DimVecIter gridModeIter = gridModesInvolved.begin();
       for(; gridModeIter != gridModesInvolved.end(); ++gridModeIter) {
-	DistEntry entry = *gridModeIter;
-	DimVec gridModes = entry.DistEntryDims();
-	DimVecIter iter = gridModes.begin();
-	for(; iter != gridModes.end(); ++iter) {
-	  numProcs *= GridLens[*iter];
-	}
+	numProcs *= GridLens[*gridModeIter];
       }
       /*
       cout << "***\n";
@@ -227,9 +215,7 @@ void RedistNode::Prop()
     }
 
     DimVec indices;
-    if (GetLocalRedistPattern(m_srcType, m_info.GetDist(),
-			      &indices,
-			      &gridModesInvolved)) {
+    if (GetLocalRedistPattern(m_srcType, m_info.GetDist())) {
       //Local mem copy
       m_cost = (PSIR+PSIW)*(TotalNumberOfLocalElements(0));
       return;
@@ -463,8 +449,7 @@ bool RedistNode::IsPrimitive() const
       return true;
     }
 
-  if (GetLocalRedistPattern(m_srcType, m_info.GetDist(),
-			    NULL, NULL))
+  if (GetLocalRedistPattern(m_srcType, m_info.GetDist()))
     {
       return true;
     }
@@ -649,12 +634,12 @@ void RedistNode::PrintCode(IndStream &out)
   if (m_srcType.m_numDims != numDims)
     throw;
 
-  DistEntryVec gridModesInvolved;
+  DimVec gridModesInvolved;
   if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
 			 &gridModesInvolved)) {
     *out << outName << ".AllToAllRedistFrom( " 
 	 << inName << ", "
-	 << DistEntryVecVarName(gridModesInvolved) << " );\n";
+	 << ModeArrayVarName(gridModesInvolved) << " );\n";
     return;
   }
 
@@ -663,17 +648,13 @@ void RedistNode::PrintCode(IndStream &out)
 			  &gridModesInvolved)) {
     *out << outName << ".AllGatherRedistFrom( "
 	 << inName << ", "
-	 << DistEntryVecVarName(gridModesInvolved) << " );\n";
+	 << ModeArrayVarName(gridModesInvolved) << " );\n";
     return;
   }
 
-  if (GetLocalRedistPattern(m_srcType, m_info.GetDist(),
-			  &indices,
-			  &gridModesInvolved)) {
+  if (GetLocalRedistPattern(m_srcType, m_info.GetDist())) {
     *out << outName << ".LocalRedistFrom( "
-	 << inName << ", "
-      	 << ModeArrayVarName(indices) << ", "
-	 << DistEntryVecVarName(gridModesInvolved) << " );\n";
+	 << inName << " );\n";
     return;
   }
 
@@ -697,7 +678,7 @@ void RedistNode::PrintCode(IndStream &out)
     if (m_srcType.m_dists[dim].DistEntryDimSet() != m_info.GetDist().m_dists[dim].DistEntryDimSet())
       throw;
     *out << outName << ".PermutationRedistFrom( "
-	 << inName << ", " << dim << ", "
+	 << inName << ", "
 	 << ModeArrayVarName(src) << " );\n";
     return;
   }
@@ -733,16 +714,11 @@ void RedistNode::AddVariables(VarSet &set) const
   if (m_srcType.m_numDims != numDims)
     throw;
 
-  DistEntryVec gridModesInvolved;
+  DimVec gridModesInvolved;
   if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
 			 &gridModesInvolved)) {
     { 
-      DistEntryVecIter iter = gridModesInvolved.begin();
-      for(; iter != gridModesInvolved.end(); ++iter) {
-	Var var(ModeArrayVarType, (*iter).DistEntryDims());
-	set.insert(var);
-      }
-      Var var(gridModesInvolved);
+      Var var(ModeArrayVarType, gridModesInvolved); 
       set.insert(var);
     }
 
@@ -752,39 +728,19 @@ void RedistNode::AddVariables(VarSet &set) const
   if (GetAllGatherPattern(m_srcType, m_info.GetDist(),
 			  &gridModesInvolved)) {
     { 
-      DistEntryVecIter iter = gridModesInvolved.begin();
-      for(; iter != gridModesInvolved.end(); ++iter) {
-	Var var(ModeArrayVarType, (*iter).DistEntryDims());
-	set.insert(var);
-      }
-      Var var(gridModesInvolved);
+      Var var(ModeArrayVarType, gridModesInvolved); 
       set.insert(var);
     }
     return;
   }
 
   DimVec indices;
-  if (GetLocalRedistPattern(m_srcType, m_info.GetDist(),
-			  &indices,
-			  &gridModesInvolved)) {
-    {
-      Var var(ModeArrayVarType, indices);
-      set.insert(var);
-    }
-    { 
-      DistEntryVecIter iter = gridModesInvolved.begin();
-      for(; iter != gridModesInvolved.end(); ++iter) {
-	Var var(ModeArrayVarType, (*iter).DistEntryDims());
-	set.insert(var);
-      }
-      Var var(gridModesInvolved);
-      set.insert(var);
-    }
+  if (GetLocalRedistPattern(m_srcType, m_info.GetDist())) {
     return;
   }
 
   DimSet diffs;
-    
+  
 
   for (Dim dim = 0; dim < numDims; ++dim) {
     if (m_srcType.m_dists[dim] != m_info.GetDist().m_dists[dim]) {
@@ -1897,7 +1853,7 @@ void PermuteDistribution::Apply(Node *node) const
 
 bool GetAllToAllPattern(const DistType &srcType, 
 			const DistType &destType,
-			DistEntryVec *gridModesInvolved)
+			DimVec *gridModesInvolved)
 {
   map<Dim,DistEntry> srcModes;
   map<DistEntry,Dim,DistEntryCompare> destModes;
@@ -1939,7 +1895,8 @@ bool GetAllToAllPattern(const DistType &srcType,
   if (gridModesInvolved) {
     map<Dim,DistEntry>::iterator srcModeIter = srcModes.begin();
     for(; srcModeIter != srcModes.end(); ++srcModeIter) {
-      gridModesInvolved->push_back(srcModeIter->second);
+      DimVec vec = srcModeIter->second.DistEntryDims();
+      gridModesInvolved->insert(gridModesInvolved->end(), vec.begin(), vec.end());
     }
   }
 
@@ -1948,7 +1905,7 @@ bool GetAllToAllPattern(const DistType &srcType,
 
 bool GetAllGatherPattern(const DistType &srcType,
 			 const DistType &destType,
-			 DistEntryVec *gridModes)
+			 DimVec *gridModes)
 {
   const DimSet destUsedDims = destType.UsedGridDims();
 
@@ -1976,9 +1933,7 @@ bool GetAllGatherPattern(const DistType &srcType,
 	    return false;
 	}
 	if (gridModes) {
-	  DistEntry entry;
-	  entry.DimsToDistEntry(suff);
-	  gridModes->push_back(entry);
+	  gridModes->insert(gridModes->end(), suff.begin(), suff.end());
 	}
 	++count;
       }
@@ -1995,9 +1950,7 @@ bool GetAllGatherPattern(const DistType &srcType,
 }
 
 bool GetLocalRedistPattern(const DistType &srcType,
-			   const DistType &destType,
-			   DimVec *indices,
-			   DistEntryVec *gridModes)
+			   const DistType &destType)
 {
   const DimSet srcUsedDims = srcType.UsedGridDims();
 
@@ -2023,12 +1976,6 @@ bool GetLocalRedistPattern(const DistType &srcType,
 	for(; iter != suff.end(); ++iter) {
 	  if (srcUsedDims.find(*iter) != srcUsedDims.end())
 	  return false;
-	}
-	if (indices) {
-	  indices->push_back(dim);
-	  DistEntry entry;
-	  entry.DimsToDistEntry(suff);
-	  gridModes->push_back(entry);
 	}
 	++count;
       }
