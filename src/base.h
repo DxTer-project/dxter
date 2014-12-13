@@ -354,6 +354,11 @@ typedef PossMMap::iterator PossMMapIter;
 typedef PossMMap::const_iterator PossMMapConstIter;
 typedef std::pair<size_t,Poss*> PossMMapPair;
 typedef std::pair<PossMMapIter,PossMMapIter> PossMMapRangePair;
+typedef multimap<size_t,RealPSet*> RealPSetMMap;
+typedef RealPSetMMap::iterator RealPSetMMapIter;
+typedef RealPSetMMap::const_iterator RealPSetMMapConstIter;
+typedef std::pair<size_t,RealPSet*> RealPSetMMapPair;
+typedef std::pair<RealPSetMMapIter,RealPSetMMapIter> RealPSetMMapRangePair;
 typedef vector<Name> NameVec;
 typedef vector<NodeConn*> NodeConnVec;
 typedef NodeConnVec::iterator NodeConnVecIter;
@@ -466,6 +471,7 @@ class Name
   Name& operator=(const Name &rhs);
   void Flatten(ofstream &out) const;
   void Unflatten(ifstream &in);
+  bool operator!=(const Name &rhs) const;
 };
 
 

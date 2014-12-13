@@ -814,6 +814,22 @@ string Name::str() const
 #endif
 }
 
+bool Name::operator!=(const Name &rhs) const
+{
+#if DOELEM
+  if (m_type != rhs.m_type)
+    return true;
+#elif DOTENSORS
+  if (m_type != rhs.m_type)
+    return true;
+  if (m_permutation != rhs.m_permutation)
+    return true;
+#endif
+  if (m_name != rhs.m_name)
+    return true;
+  return false;
+}
+
 #if DOTENSORS
 string Name::PrettyStr() const
 {

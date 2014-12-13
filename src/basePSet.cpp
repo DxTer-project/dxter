@@ -66,7 +66,7 @@ void BasePSet::ClearBeforeProp()
 
 void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows)
 {
-  m_flags = orig->m_flags;
+  m_flags = orig->m_flags & ~SETCHECKEDFORDUP;
   NodeVecConstIter iter  = orig->m_inTuns.begin();
   for (; iter != orig->m_inTuns.end(); ++iter) {
     Tunnel *tun = (Tunnel*)(map[*iter]);

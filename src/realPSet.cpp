@@ -33,6 +33,13 @@ extern unsigned int M_phase;
 
 #define FORMSETSEARLY 0
 
+#if DOTENSORS
+RealPSetMMap RealPSet::m_setMap;
+#ifdef _OPENMP
+omp_lock_t RealPSet::m_lock;
+#endif //_OPENMP
+#endif
+
 
 RealPSet::RealPSet()
   : m_functionality(), m_mergeLeft(NULL), m_mergeRight(NULL)
@@ -178,6 +185,33 @@ void RealPSet::Migrate()
       break;
     }
   }
+
+
+#if CHECKFORSETREUSE
+#if DOTENSORS
+  if (m_flags & SETCHECKEDFORDUP) {
+    size_t hash = Poss::Hash(m_functionality);
+    bool found = false;
+#ifdef _OPENMP
+    omp_set_lock(&m_lock);
+#endif //_OPENMP
+    RealPSetMMapRangePair pair = m_setMap.equal_range(hash);
+    for( ; pair.first != pair.second; ++pair.first) {
+      if ((*(pair.first)).second == this) {
+	m_setMap.erase(pair.first);
+	found = true;
+        break;
+      }
+    }
+#ifdef _OPENMP
+    omp_unset_lock(&m_lock);
+#endif //_OPENMP
+    m_flags &= ~SETCHECKEDFORDUP;
+    if (!found)
+      throw;
+  }
+#endif //DOTENSORS
+#endif //CHECKFORSETREUSE
 
   //  cout << "migrating " << this << endl;
   if (!shadowToReplace) {
@@ -1028,8 +1062,16 @@ bool RealPSet::TakeIter(const TransMap &transMap,
   // BAM: Or do I?
   if (mmap.size()) {
     if (mmap.size() > 100) {
-      cout << "\t\tAdding " << mmap.size() << " posses\n";
-      //      cout << "\t\t" << m_functionality << endl;
+      cout << "\t\tAdding " << mmap.size() << " posses\t( " << m_shadows.size() << " shadows)\n";
+      /*
+      if (InTun(0)->GetInputNameStr(0) == "P_jimb_part3_1_part1_1_temp__S__D_3__D_1_2__D_0") {
+	m_ownerPoss->PrintTransVec();
+	cout << "\t\t" << m_functionality << endl;
+	for (int i = 0; i < m_inTuns.size(); ++i) {
+	  cout << "\t\t\t" << m_inTuns[i]->GetInputNameStr(0) << endl;
+	}
+      }
+      */
     }
     AddPossesOrDispose(mmap, &actuallyAdded);
     if (mmap.size() > 100)
@@ -2271,3 +2313,48 @@ void RealPSet::ClearDeletingRecursively()
     iter->second->ClearDeletingRecursively();
   }
 }
+
+#if DOTENSORS
+bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
+{
+  if (m_functionality != other->m_functionality)
+    throw;
+  if (IsLoop() != other->IsLoop())
+    throw;
+  if (m_inTuns.size() != other->m_inTuns.size())
+    return false;
+  if (m_outTuns.size() != other->m_outTuns.size())
+    return false;
+  for (int i = 0; i < m_inTuns.size(); ++i) {
+    const Tunnel *in1 = (Tunnel*)(InTun(i));
+    const Tunnel *in2 = (Tunnel*)(other->InTun(i));
+    if (in1->GetType() != in2->GetType())
+      return false;
+    Dim numDims = in1->InputNumDims(0);
+    if (numDims != in2->InputNumDims(0))
+      return false;       
+    for (int dim = 0; dim < numDims; ++dim) {
+      const Sizes *sizes1 = in1->InputLen(0,dim);
+      const Sizes *sizes2 = in2->InputLen(0,dim);
+      if (sizes1->m_entries.size() != sizes2->m_entries.size())
+        return false;
+      if (*sizes1 != *sizes2)
+	return false;
+    }
+    
+    if (in1->InputDataType(0) != in2->InputDataType(0))
+      return false;
+
+    if (in1->GetInputName(0) != in2->GetInputName(0)) {
+      return false;
+      Name name1 = in1->GetInputName(0);
+      Name name2 = in2->GetInputName(0);
+      cout << in1->GetInputNameStr(0) << endl;
+      cout << in2->GetInputNameStr(0) << endl;
+      cout << (name1 != name2);
+      throw;
+    }
+  }
+  return true;
+}
+#endif

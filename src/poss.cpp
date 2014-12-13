@@ -649,6 +649,67 @@ void Poss::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
 Cost Poss::Prop()
 {
   m_cost = 0;
+
+#if CHECKFORSETREUSE
+#if DOTENSORS
+  //Have to do this here instead of in RealPSet::Prop
+  // because we might end up replacing a PSet...
+  for(int i = 0; i < m_sets.size(); ++i) {
+    BasePSet *baseSet = m_sets[i];
+    if (baseSet->IsReal()) {
+      RealPSet *replacement = NULL;
+      RealPSet *set = (RealPSet*)(baseSet);
+      if (!(set->m_flags & SETCHECKEDFORDUP)) {
+	size_t hash = Poss::Hash(set->m_functionality);
+#ifdef _OPENMP
+	omp_set_lock(&RealPSet::m_lock);
+#endif //_OPENMP
+	RealPSetMMapRangePair pair = RealPSet::m_setMap.equal_range(hash);
+	for( ; !replacement && pair.first != pair.second; ++pair.first) {
+	  if ((*(pair.first)).second->SamePSetWRTFunctionality(set)) {
+	    replacement = (*(pair.first)).second;
+	  }
+	}
+	if (!replacement) {
+	  set->m_flags |= SETCHECKEDFORDUP;
+	  RealPSet::m_setMap.insert(RealPSetMMapPair(hash,set));
+	}
+
+#ifdef _OPENMP
+	omp_unset_lock(&RealPSet::m_lock);
+#endif //_OPENMP
+	
+	if (replacement) {
+	  if (!set->m_shadows.empty())
+	    throw;
+	  ShadowPSet *shadow = replacement->GetNewShadowDup(this);
+	  for (int i = 0; i < shadow->m_inTuns.size(); ++i) {
+	    Node *newTun = shadow->InTun(i);
+	    Node *oldTun = set->InTun(i);
+	    newTun->AddInput(oldTun->Input(0), oldTun->InputConnNum(0));
+	    oldTun->RemoveAllInputs2Way();
+	    RemoveFromGraphNodes(oldTun);
+	  }
+
+	  for (int i = 0; i < shadow->m_outTuns.size(); ++i) {
+	    Node *newTun = shadow->OutTun(i);
+	    Node *oldTun = set->OutTun(i);
+	    oldTun->RedirectAllChildren(newTun);
+	    RemoveFromGraphNodes(oldTun);
+	  }
+
+	  RemoveFromSets(set);
+
+	  delete set;
+
+	  i = -1;
+	}
+      }
+    }
+  }
+#endif // DOTENSORS
+#endif // CHECKFORSETREUSE
+
   NodeVecIter nodeIter = m_possNodes.begin();
   for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
     Node *node = *nodeIter;

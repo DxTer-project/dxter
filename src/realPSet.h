@@ -24,6 +24,7 @@
 #pragma once
 
 #define PRINTTRACKING 0
+#define CHECKFORSETREUSE 1
 
 #include "base.h"
 #include "poss.h"
@@ -37,6 +38,12 @@ class ShadowPSet;
 class RealPSet : public BasePSet
 {
  public:
+#if DOTENSORS
+  static RealPSetMMap m_setMap;
+#ifdef _OPENMP
+  static omp_lock_t m_lock;
+#endif //_OPENMP
+#endif
   PossMMap m_posses;
   string m_functionality;
   PSetVec m_shadows;
@@ -87,6 +94,10 @@ class RealPSet : public BasePSet
   virtual void ClearDataTypeCache();
 
   void InlineAllSets();
+
+#if DOTENSORS
+  bool SamePSetWRTFunctionality(const RealPSet *other) const;
+#endif
 
   void SetInTunsAsPrinted();
   bool RemoveLoops(bool *doneSomething);

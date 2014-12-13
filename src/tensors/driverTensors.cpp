@@ -178,6 +178,7 @@ int main(int argc, const char* argv[])
 #ifdef _OPENMP
   omp_set_num_threads(1);
   omp_set_nested(true);
+  omp_init_lock(&RealPSet::m_lock);
 #endif
   //  PrintType printType = CODE;
   int numIters = -1;
@@ -320,7 +321,7 @@ int main(int argc, const char* argv[])
     cout.flush();
     time(&start2);
     uni.Prop();
-    uni.CullWorstPerformers(.98, 5);
+    uni.CullWorstPerformers(.99, 3);
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
