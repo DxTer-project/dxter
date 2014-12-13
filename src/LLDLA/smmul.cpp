@@ -35,8 +35,10 @@ void SMMul::PrintCode(IndStream &out)
 
   if (GetLayer() == ABSLAYER) {
     if (GetDataType() == REAL_DOUBLE) {
+      out.Indent();
       *out << "simple_smul( ";
     } else if (GetDataType() == REAL_SINGLE) {
+      out.Indent();
       *out << "simple_smul_float( ";
     }
     *out << InputDataType(1).m_numRowsVar << ", " <<
@@ -276,6 +278,44 @@ void SMulLoopRef::Apply(Node *node) const
   //Delete the node and recursively move up to delete any stragling
   // nodes (in this case, there shouldn't be any)
   node->m_poss->DeleteChildAndCleanUp(node);
+}
+
+SMulToScalarArith::SMulToScalarArith(Layer fromLayer, Layer toLayer, DimName dim)
+{
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_dim = dim;
+}
+
+string SMulToScalarArith::GetType() const
+{
+  switch (m_dim) {
+  case (DIMM):
+    return "SMulToScalarArithMDIM";
+  case (DIMN):
+    return "SMulToScalarArithNDIM";
+  default:
+    cout << "Invalid dimension in SMulToScalarArith::GetType()" << endl;
+    throw;
+  }
+}
+
+bool SMulToScalarArith::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == SMMul::GetClass()) {
+    const SMMul *mul = (SMMul*)node;
+    if (mul->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    return true;
+  }
+  cout << "ERROR: Called SMulToScalarArith::CanApply on non SMul node" << endl;
+  throw;
+}
+
+void SMulToScalarArith::Apply(Node* node) const
+{
+  
 }
 
 SMulLowerLayer::SMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
