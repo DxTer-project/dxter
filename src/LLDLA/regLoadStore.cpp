@@ -34,6 +34,7 @@ void LoadToRegs::Prop()
       // this isn't 1 x GetVecRegWidth()
       if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != GetVecRegWidth()) {
 	cout << "Error: Incorrect dimensions for register load\n";
+	cout << "Input name: " << GetInputName(0).str() << endl;
 	GetInputN(0)->Print();
 	cout << "GetVecRegWidth() = " << std::to_string((long long int) GetVecRegWidth()) << endl;
 	cout << "GetDataType() == REAL_DOUBLE ? " << std::to_string((long long int) (GetDataType() == REAL_DOUBLE)) << endl;

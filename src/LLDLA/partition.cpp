@@ -221,7 +221,6 @@ ConnNum Partition::NumOutputs() const
 
 const DataTypeInfo& Partition::DataType(ConnNum num) const
 {
-  cout << "GETTING DATATYPE FROM PARTITION\n";
   if (num > 1) {
     cout << "Error: argument to DataType is too large\n";
     throw;

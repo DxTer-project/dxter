@@ -61,6 +61,19 @@ class SMulLoopRef : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+class SMulToScalarArith : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  DimName m_dim;
+
+  SMulToScalarArith(Layer fromLayer, Layer toLayer, DimName m_dim);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}  
+};
+
 class SMulLowerLayer : public SingleTrans
 {
  public:
@@ -69,8 +82,8 @@ class SMulLowerLayer : public SingleTrans
 
   SMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs);
   virtual string GetType() const;
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
   virtual bool IsRef() const {return true;}
 };
 
