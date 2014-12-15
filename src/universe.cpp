@@ -217,7 +217,7 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
 #endif
 
   GraphNum count = 0;
-  double prevAlgs = TotalCount();
+  GraphNum prevAlgs = TotalCount();
   bool foundNew = true;
   while ( foundNew ) {
     time_t start, end;
