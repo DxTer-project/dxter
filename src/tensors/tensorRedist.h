@@ -244,4 +244,14 @@ class SplitAllAllGathers : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+#if ALLMULTIMODEALLGATHER
+class CombineAllGathers : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return (string)"CombineAllGathers";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+#endif //ALLMULTIMODEALLGATHER
+
 #endif

@@ -1531,15 +1531,24 @@ bool SplitAllGathers::CanApply(const Node *node) const
   DimVec srcDims = srcEntry.DistEntryDims();
 
   if (destEntry.IsStar() && srcDims.size() > 1)
+#if ALLMULTIMODEALLGATHER
+    return !GetAllGatherPattern(srcType, destType, NULL);
+#else
     return true;
+#endif
 
   DimVec destDims = destEntry.DistEntryDims();
 
   if (srcDims.size() < destDims.size())
     return false;
 
-  if ((srcDims.size() - destDims.size()) > 1 &&  IsPrefix(destDims, srcDims))
+  if ((srcDims.size() - destDims.size()) > 1 &&  IsPrefix(destDims, srcDims)) {
+#if ALLMULTIMODEALLGATHER
+    return !GetAllGatherPattern(srcType, destType, NULL);
+#else
     return true;
+#endif
+  }
   else
     return false;
 }
@@ -1660,6 +1669,67 @@ void SplitAllAllGathers::Apply(Node *node) const
   node->RedirectChildren(redist2, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
+
+#if ALLMULTIMODEALLGATHER
+bool CombineAllGathers::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).GetDist();
+  const DistType &destType = redist->m_info.GetDist();
+
+  if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
+    throw;
+
+  if (!GetAllGatherPattern(srcType, destType, NULL))
+    return false;
+
+  if (redist->m_children.size() != 1) {
+    return false;
+  }
+
+  const Node *child = redist->Child(0);
+  if (child->GetNodeClass() != RedistNode::GetClass())
+    return false;
+
+  const RedistNode *childRedist = (RedistNode*)child;
+  
+  return GetAllGatherPattern(srcType, childRedist->m_info.GetDist(), NULL);
+}
+
+void CombineAllGathers::Apply(Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).GetDist();
+
+  if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
+    throw;
+
+  if (redist->m_children.size() != 1) {
+    throw;
+  }
+
+  Node *child = redist->Child(0);
+  if (child->GetNodeClass() != RedistNode::GetClass())
+    throw;
+
+  RedistNode *childRedist = (RedistNode*)child;
+  
+  RedistNode *newRedist = new RedistNode(childRedist->m_info.GetDist(),
+					 childRedist->m_info.GetPerm(),
+					 childRedist->m_align,
+					 childRedist->m_alignModes,
+					 childRedist->m_alignModesSrc);
+  newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
+  node->RedirectChildren(newRedist, 0);
+  node->m_poss->AddNode(newRedist);
+
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+#endif //ALLMULTIMODEALLGATHER
 
 bool CombineDisappearingModes::CanApply(const Node *node) const
 {
