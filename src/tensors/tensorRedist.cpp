@@ -2059,6 +2059,225 @@ bool GetLocalRedistPattern(const DistType &srcType,
   return count != 0;
 }
 
+
+
+bool DoubleIndexAllToAll2::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).GetDist();
+
+  if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
+    throw;
+  else if (srcType.m_numDims <= m_dim)
+    return false;
+
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = redist->m_info.GetDist().m_dists[m_dim];
+  if (srcEntry == destEntry)
+    return false;
+
+  for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
+    DistEntry srcEntry2 = srcType.m_dists[dim];
+    DistEntry destEntry2 = redist->m_info.GetDist().m_dists[dim];
+    if (srcEntry2 != destEntry2) {
+      DimVec srcVec = srcEntry.DistEntryDims();
+      DimVec destVec = destEntry.DistEntryDims();
+      DimVec srcVec2 = srcEntry2.DistEntryDims();
+      DimVec destVec2 = destEntry2.DistEntryDims();
+
+      //[(x|_|y),(z|_|w)] <- [(x|_|u|_|w),(z|_|v|_|y)]
+
+      DimVec suff1, suff2;
+      DimVec pref11, pref12, pref21, pref22;
+      // suff1 = w
+      // pref11 = x|_|u
+      // pref12 = z
+      GetCommonSuffix(srcVec, destVec2, suff1, pref11, pref12);
+      // suff2 = y
+      // pref21 = x
+      // pref22 = z|_|v
+      GetCommonSuffix(destVec, srcVec2, suff2, pref21, pref22);
+      if (!(suff1.empty()&&suff2.empty()))  {
+	if ((pref11 == pref21 || pref21.empty()) 
+	    && (pref12 == pref22 || pref12.empty())) {
+	  DistType intType = srcType;
+
+	  DimVec newDims1;
+	  DimVec newDims2;
+	    
+		  
+	  // have to choose where u and v go
+
+	  if (!suff1.empty() && !suff2.empty()) {
+	    //[(x|_|u|_|y),(z|_|v|_|w)] <- [(x|_|u|_|w),(z|_|v|_|y)]
+	    //[(x|_|y),(z|_|w)] <- [(x|_|u|_|y),(z|_|v|_|w)]
+	    newDims1 = pref11;
+	    newDims1.insert(newDims1.end(),
+			    suff2.begin(), suff2.end());
+	    newDims2 = pref22;
+	    newDims2.insert(newDims2.end(),
+			    suff1.begin(), suff1.end());		
+	  }
+	  else {
+	    if (suff1.empty())  { // w is empty, y isn't
+	      //[(x|_|y),(z|_|v|_|u)] <- [(x|_|u),(z|_|v|_|y)]
+	      //[(x|_|y),(z)] <- [(x|_|y),(z|_|v|_|u)]
+	      newDims1 = GetCommonPrefix(srcVec, destVec); // x
+	      
+	      newDims2 = pref22; // z |_| v
+	      newDims2.insert(newDims2.end(), 
+			      srcVec.begin()+newDims1.size(), srcVec.end()); // add u
+	      
+	      newDims1.insert(newDims1.end(), suff2.begin(), suff2.end()); // add y
+	    }
+	    else { // y is empty, w isn't
+	      //[(x|_|u|_|v),(z|_|w)] <- [(x|_|u|_|w),(z|_|v)]
+	      //[(x),(z|_|w)] <- [(x|_|u|_|v),(z|_|w)]
+	      newDims2 = GetCommonPrefix(srcVec2, destVec2); // z
+	      
+	      newDims1 = pref11; // x |_| u
+	      newDims1.insert(newDims1.end(), 
+			      srcVec2.begin()+newDims2.size(), srcVec2.end()); // add v
+	      
+	      newDims2.insert(newDims2.end(), suff1.begin(), suff1.end()); // add w
+	    }
+	  }	    
+	  intType.m_dists[m_dim].DimsToDistEntry(newDims1);
+	  intType.m_dists[dim].DimsToDistEntry(newDims2);
+	  if (DistTypeNotEqual(intType, redist->m_info.GetDist()))
+	    return true;
+	}
+      }
+    }
+  }
+  return false;
+}
+
+void DoubleIndexAllToAll2::Apply(Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  RedistNode *redist = (RedistNode*)node;
+  const DistType &srcType = redist->InputDataType(0).GetDist();
+  //  cout << srcType.PrettyStr() << " -> " << redist->DataType(0).m_dist.PrettyStr() << endl;
+
+  if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
+    throw;
+  else if (srcType.m_numDims <= m_dim)
+    throw;
+
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = redist->m_info.GetDist().m_dists[m_dim];
+  if (srcEntry == destEntry)
+    throw;
+
+  for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
+    DistEntry srcEntry2 = srcType.m_dists[dim];
+    DistEntry destEntry2 = redist->m_info.GetDist().m_dists[dim];
+    if (srcEntry2 != destEntry2) {
+      DimVec srcVec = srcEntry.DistEntryDims();
+      DimVec destVec = destEntry.DistEntryDims();
+      DimVec srcVec2 = srcEntry2.DistEntryDims();
+      DimVec destVec2 = destEntry2.DistEntryDims();
+
+      //      cout << srcEntry.PrettyStr() << " -> " << destEntry.PrettyStr() << endl;
+      //      cout << srcEntry2.PrettyStr() << " -> " << destEntry2.PrettyStr() << endl;
+
+      //[(x|_|y),(z|_|w)] <- [(x|_|u|_|w),(z|_|v|_|y)]
+
+      DimVec suff1, suff2;
+      DimVec pref11, pref12, pref21, pref22;
+      // suff1 = w
+      // pref11 = x|_|u
+      // pref12 = z
+      GetCommonSuffix(srcVec, destVec2, suff1, pref11, pref12);
+      // suff2 = y
+      // pref21 = x
+      // pref22 = z|_|v
+      GetCommonSuffix(destVec, srcVec2, suff2, pref21, pref22);
+
+
+      if (!(suff1.empty()&&suff2.empty()))  {
+	if ((pref11 == pref21 || pref21.empty()) 
+	    && (pref12 == pref22 || pref12.empty())) {
+	  DistType intType = srcType;
+
+	  DimVec newDims1;
+	  DimVec newDims2;
+	  /*
+	  PrintVec(suff1);
+	  PrintVec(pref11);
+	  PrintVec(pref12);
+	  PrintVec(suff2);
+	  PrintVec(pref21);
+	  PrintVec(pref22);
+*/
+		  
+	  // have to choose where u and v go
+
+	  if (!suff1.empty() && !suff2.empty()) {
+	    //[(x|_|u|_|y),(z|_|v|_|w)] <- [(x|_|u|_|w),(z|_|v|_|y)]
+	    //[(x|_|y),(z|_|w)] <- [(x|_|u|_|y),(z|_|v|_|w)]
+	    newDims1 = pref11;
+	    newDims1.insert(newDims1.end(),
+			    suff2.begin(), suff2.end());
+	    newDims2 = pref22;
+	    newDims2.insert(newDims2.end(),
+			    suff1.begin(), suff1.end());		
+	  }
+	  else {
+
+	    if (suff1.empty())  { // w is empty, y isn't
+	      //[(x|_|y),(z|_|v|_|u)] <- [(x|_|u),(z|_|v|_|y)]
+	      //[(x|_|y),(z)] <- [(x|_|y),(z|_|v|_|u)]
+	      newDims1 = GetCommonPrefix(srcVec, destVec); // x
+	      
+	      newDims2 = pref22; // z |_| v
+	      newDims2.insert(newDims2.end(), 
+			      srcVec.begin()+newDims1.size(), srcVec.end()); // add u
+	      
+	      newDims1.insert(newDims1.end(), suff2.begin(), suff2.end()); // add y
+	    }
+	    else { // y is empty, w isn't
+	      //[(x|_|u|_|v),(z|_|w)] <- [(x|_|u|_|w),(z|_|v)]
+	      //[(x),(z|_|w)] <- [(x|_|u|_|v),(z|_|w)]
+	      newDims2 = GetCommonPrefix(srcVec2, destVec2); // z
+	      
+	      newDims1 = pref11; // x |_| u
+	      newDims1.insert(newDims1.end(), 
+			      srcVec2.begin()+newDims2.size(), srcVec2.end()); // add v
+	      
+	      newDims2.insert(newDims2.end(), suff1.begin(), suff1.end()); // add w
+	    }
+	  }	    
+
+	  //	  PrintVec(newDims1);
+	  intType.m_dists[m_dim].DimsToDistEntry(newDims1);
+	  //	  PrintVec(newDims2);
+	  intType.m_dists[dim].DimsToDistEntry(newDims2);
+	  if (DistTypeNotEqual(intType, redist->m_info.GetDist())) {
+	    RedistNode *newRedist = new RedistNode(intType, redist->m_info.GetPerm(),
+						   redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+	    newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
+	      node->m_poss->AddNode(newRedist);
+
+	      if (intType == newRedist->InputDataType(0).GetDist())
+		throw;
+	      
+	      redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0),
+				      newRedist, 0);    
+	  
+	      return;	    
+	  }
+	}
+      }
+    }
+  }
+  throw;
+}
+
 #endif
 
 

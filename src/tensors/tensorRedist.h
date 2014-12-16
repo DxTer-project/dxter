@@ -183,6 +183,17 @@ class DoubleIndexAllToAll : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+class DoubleIndexAllToAll2 : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ DoubleIndexAllToAll2(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"DoubleIndexAllToAll2" + (char)(m_dim+48); }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 
 //E.g., [21,03] -> [01,23]
 // as [21,03] -> [12,03]

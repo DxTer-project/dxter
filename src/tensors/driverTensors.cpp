@@ -124,6 +124,7 @@ void AddTrans()
     Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SingleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);
+    Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll2(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAllPrefix(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllGathers(dim), ROTENSORPHASE);
 
