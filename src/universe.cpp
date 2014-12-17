@@ -35,7 +35,7 @@
 #if DOLLDLA
 #define PRINTCODE
 #endif
-//#define PRINTCODE
+#define PRINTCODE
 
 #define OUTPUTCODEATEACHITER 0
 
@@ -481,7 +481,7 @@ void Universe::PrintAll(int algNum, GraphNum optGraph)
 #elif DOLLDLA
     IndStream optOut(&cout,LLDLASTREAM);
 #endif
-    Print(optOut, optGraph);
+    Print(optOut, optGraph, false);
   }
   else {
     cout << "optGraph = " << optGraph << endl;
@@ -551,6 +551,7 @@ void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
     GraphIter graphIter(poss);
+    graphIter.ClearPrintedRecursively();
     graphIter.PrintRoot(out, whichGraph, currOnly, m_pset);
   }
 
