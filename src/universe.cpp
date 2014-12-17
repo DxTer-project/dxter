@@ -35,7 +35,7 @@
 #if DOLLDLA
 #define PRINTCODE
 #endif
-#define PRINTCODE
+//#define PRINTCODE
 
 #define OUTPUTCODEATEACHITER 0
 
