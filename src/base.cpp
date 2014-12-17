@@ -939,6 +939,15 @@ unsigned int FindInNodeVec(const NodeVec &vec, const Node *node)
   throw;
 }
 
+bool FoundInDimVec(const DimVec &vec, Dim dim)
+{
+  for (unsigned int i = 0; i < vec.size(); ++i) {
+    if (vec[i] == dim)
+      return true;
+  }
+  return false;
+}
+
 unsigned int FindInSetVec(const PSetVec &vec, const BasePSet *set)
 {
   unsigned int i = 0;

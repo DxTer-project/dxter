@@ -479,6 +479,7 @@ class Name
 bool FoundInNodeVec(const NodeVec &vec, const Node *node);
 unsigned int FindInNodeVec(const NodeVec &vec, const Node *node);
 unsigned int FindInSetVec(const PSetVec &vec, const BasePSet *set);
+bool FoundInDimVec(const DimVec &vec, Dim dim);
 
 
 
