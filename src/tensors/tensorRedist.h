@@ -215,6 +215,15 @@ class DoubleIndexAllToAllPrefix : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+class MultiIndexAllToAll : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "MultiIndexAllToAll"; }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 /*
 [([x|_|p(y)|_|z),(w)]
 [([x|_|z),(w|_|y)]

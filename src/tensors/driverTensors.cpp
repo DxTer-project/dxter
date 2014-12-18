@@ -118,6 +118,8 @@ void AddTrans()
 #endif
   
 #if 1
+    Universe::AddTrans(RedistNode::GetClass(), new MultiIndexAllToAll, ROTENSORPHASE);
+    
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
     Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
     Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
@@ -320,7 +322,7 @@ int main(int argc, const char* argv[])
     uni.Expand(numIters, ROTENSORPHASE, TenCullRO);
     time(&end);
     cout << "RO phase took " << difftime(end,start2) << " seconds\n";
-    
+
     cout << "Propagating\n";
     cout.flush();
     time(&start2);
@@ -431,10 +433,10 @@ RealPSet* RedistExample()
 
   DistType type1;
   type1.SetToDefault(4);
-  type1.m_dists[0].m_val = 3;
-  type1.m_dists[1].m_val = 4;
+  type1.m_dists[0].m_val = 0;
+  type1.m_dists[1].m_val = 1;
   type1.m_dists[2].m_val = 0;
-  type1.m_dists[3].m_val = 0;
+  type1.m_dists[3].m_val = 3;
 
   DimVec ident;
   IdentDimVec(4, ident);
@@ -442,24 +444,10 @@ RealPSet* RedistExample()
   RedistNode *redist1 = new RedistNode(type1, Ain->GetNameStr(0), ident, ident);
   redist1->AddInput(Ain, 0);
 
-  DistType type2;
-  type2.SetToDefault(4);
-  type2.m_dists[0].m_val = 0;
-  type2.m_dists[1].m_val = 2;
-  type2.m_dists[2].m_val = 0;
-  type2.m_dists[3].m_val = 4;
-
-  RedistNode *redist2 = new RedistNode(type2, Ain->GetNameStr(0), ident, ident);
-  redist2->AddInput(Ain, 0);
-
   OutputNode *Cout1 = new OutputNode("C output");
   Cout1->AddInput(redist1, 0);
 
-
-  OutputNode *Cout2 = new OutputNode("C1 output");
-  Cout2->AddInput(redist2, 0);
-
-  Poss *outerPoss = new Poss(2, Cout1, Cout2);
+  Poss *outerPoss = new Poss(1, Cout1);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
