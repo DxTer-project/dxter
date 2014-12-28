@@ -1171,8 +1171,13 @@ void Poss::MergePart2(RealPSet *newSet,
       mapLeft[*realIter] = tun;
     NodeConnVecIter iter = (*leftIter)->m_children.begin();
     for(; iter != (*leftIter)->m_children.end(); ++iter) {
-      if (outMap.find(**iter) != outMap.end())
-	throw;
+      NodeConnIntMapIter found = outMap.find(**iter);
+      if (found != outMap.end()) {
+	vector<int> vec = found->second;
+	if (vec.size() != 1 || vec[0] != -j-1) {
+	  throw;
+	}
+      }
       vector<int> tmp;
       tmp.push_back(-j-1);
       outMap[**iter] = tmp;
@@ -1195,10 +1200,14 @@ void Poss::MergePart2(RealPSet *newSet,
       mapRight[*realIter] = tun;
     NodeConnVecIter iter = (*rightIter)->m_children.begin();
     for(; iter != (*rightIter)->m_children.end(); ++iter) {
-      if (outMap.find(**iter) != outMap.end()) {
-	cout << "this is " << (*rightIter)->GetType() << endl;
-	cout << "child is " << (*iter)->m_n->GetType() << endl;
-	throw;
+      NodeConnIntMapIter found = outMap.find(**iter);
+      if (found != outMap.end()) {
+	vector<int> vec = found->second;
+	if (vec.size() != 1 || vec[0] != j+1) {
+	  cout << "this is " << (*rightIter)->GetType() << endl;
+	  cout << "child is " << (*iter)->m_n->GetType() << endl;
+	  throw;
+	}
       }
       vector<int> tmp;
       tmp.push_back(j+1);
