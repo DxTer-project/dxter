@@ -1195,8 +1195,11 @@ void Poss::MergePart2(RealPSet *newSet,
       mapRight[*realIter] = tun;
     NodeConnVecIter iter = (*rightIter)->m_children.begin();
     for(; iter != (*rightIter)->m_children.end(); ++iter) {
-      if (outMap.find(**iter) != outMap.end())
+      if (outMap.find(**iter) != outMap.end()) {
+	cout << "this is " << (*rightIter)->GetType() << endl;
+	cout << "child is " << (*iter)->m_n->GetType() << endl;
 	throw;
+      }
       vector<int> tmp;
       tmp.push_back(j+1);
       outMap[**iter] = tmp;
