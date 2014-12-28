@@ -218,11 +218,14 @@ class DoubleIndexAllToAllPrefix : public SingleTrans
 class MultiIndexAllToAll : public SingleTrans
 {
  public:
-  virtual string GetType() const { return "MultiIndexAllToAll"; }
+  Dim m_dim;
+ MultiIndexAllToAll(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"MultiIndexAllToAll" + (char)(m_dim+48); }
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+
 
 /*
 [([x|_|p(y)|_|z),(w)]

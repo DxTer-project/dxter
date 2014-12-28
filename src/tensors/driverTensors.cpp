@@ -118,8 +118,6 @@ void AddTrans()
 #endif
   
 #if 1
-    Universe::AddTrans(RedistNode::GetClass(), new MultiIndexAllToAll, ROTENSORPHASE);
-    
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
     Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
     Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
@@ -128,6 +126,7 @@ void AddTrans()
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll2(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAllPrefix(dim), ROTENSORPHASE);
+    Universe::AddTrans(RedistNode::GetClass(), new MultiIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllGathers(dim), ROTENSORPHASE);
 
 #if SPLITMULTIMODESCATTER
@@ -323,6 +322,9 @@ int main(int argc, const char* argv[])
     time(&end);
     cout << "RO phase took " << difftime(end,start2) << " seconds\n";
 
+    //        uni.PrintAll(algNum);
+    //        throw;
+      
     cout << "Propagating\n";
     cout.flush();
     time(&start2);
@@ -422,7 +424,7 @@ int main(int argc, const char* argv[])
 
 RealPSet* RedistExample()
 {
-  Size bigSize = 1000;
+  Size bigSize = 300;
 
   Sizes sizes[4];
 
@@ -668,8 +670,8 @@ RealPSet* MP2()
 
 RealPSet* MP3()
 {
-  const Size bigMP3Size = 300;
-  const Size smallMP3Size = 300;
+  const Size bigMP3Size = 200;
+  const Size smallMP3Size = 20;
   Size eSize = bigMP3Size;
   Size fSize = bigMP3Size;
   Size gSize = bigMP3Size;

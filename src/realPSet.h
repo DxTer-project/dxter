@@ -24,7 +24,7 @@
 #pragma once
 
 #define PRINTTRACKING 0
-#define CHECKFORSETREUSE 1
+#define CHECKFORSETREUSE USESHADOWS
 
 #include "base.h"
 #include "poss.h"

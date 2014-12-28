@@ -643,6 +643,9 @@ void Node::CheckConnections()
 	cout << i << ": " << input->Child(i)->GetType() << "\t" << input->Child(i) << endl;
 	cout << "\t\t\ton " << input->Child(i)->m_poss << endl;
       }
+
+      m_poss->PrintTransVecUp();
+
       throw;
     }
   }

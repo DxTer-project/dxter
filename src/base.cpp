@@ -98,6 +98,19 @@ DistType& DistType::operator=(const DistType &rhs)
   return *this;
 }
 
+bool DistType::FindGridMode(Dim gridMode, Dim &tensorMode) const
+{
+  for(Dim dim = 0; dim < m_numDims; ++dim) {
+    DimSet set = m_dists[dim].DistEntryDimSet();
+    if (set.find(gridMode) != set.end()) {
+      tensorMode = dim;
+      return true;
+    }
+  }
+
+  return false;
+}
+
 DistType DistType::Permute(const Permutation &perm) const
 {
   DistType ret;
@@ -939,6 +952,7 @@ unsigned int FindInNodeVec(const NodeVec &vec, const Node *node)
   throw;
 }
 
+#if DOTENSORS
 bool FoundInDimVec(const DimVec &vec, Dim dim)
 {
   for (unsigned int i = 0; i < vec.size(); ++i) {
@@ -947,6 +961,7 @@ bool FoundInDimVec(const DimVec &vec, Dim dim)
   }
   return false;
 }
+#endif
 
 unsigned int FindInSetVec(const PSetVec &vec, const BasePSet *set)
 {

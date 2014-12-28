@@ -220,7 +220,7 @@ void RedistNode::Prop()
 	  tempIn *= (*InputLocalLen(0, dim))[iteration];
         }
         m_cost += AllToAll(tempOut, numProcs);
-        m_cost += (PSIR+PSIW)*(tempIn + tempOut);
+	m_cost += (PSIR+PSIW)*(tempIn + tempOut);
       }
       return;
     }
@@ -651,6 +651,31 @@ void RedistNode::PrintCode(IndStream &out)
     *out << outName << ".AllGatherRedistFrom( "
     << inName << ", "
     << ModeArrayVarName(gridModesInvolved) << " );\n";
+
+#if 0
+      double numProcs = 1;
+      DimVecIter gridModeIter = gridModesInvolved.begin();
+      for(; gridModeIter != gridModesInvolved.end(); ++gridModeIter) {
+        numProcs *= GridLens[*gridModeIter];
+      }
+      *out << "for previous one\n";
+      *out << "numProcs " << numProcs << endl;
+
+      Size size = 1;
+      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+        Cost temp = 1;
+        for (Dim dim = 0; dim < numDims; ++dim) {
+          size *= m_lsizes[dim][iteration];
+        }
+      }
+      *out << "on " << size << endl;
+      *out << log2(numProcs) * ALPHA << " alpha\n";
+      *out << ((numProcs - ONE) / numProcs) << endl;
+      *out << ((numProcs - ONE) / numProcs) * size * BETA;
+      *out << " beta\n";
+#endif // 0
+
     return;
   }
   
@@ -670,6 +695,34 @@ void RedistNode::PrintCode(IndStream &out)
     *out << outName << ".AllToAllRedistFrom( "
     << inName << ", "
     << ModeArrayVarName(gridModesInvolved) << " );\n";
+#if 0
+    *out << "for that previous one:\n";
+    double numProcs = 1;
+    DimVecIter gridModeIter = gridModesInvolved.begin();
+    for(; gridModeIter != gridModesInvolved.end(); ++gridModeIter) {
+      numProcs *= GridLens[*gridModeIter];
+    }
+    *out << "numProcs = " << numProcs << endl;
+    Size size = 0;
+    double cost = 0;
+      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+        Cost tempOut = 1;
+	Cost tempIn = 1;
+        for (Dim dim = 0; dim < numDims; ++dim) {
+          tempOut *= m_lsizes[dim][iteration];
+	  tempIn *= (*InputLocalLen(0, dim))[iteration];
+        }
+	size += tempOut;
+	//        cost += AllToAll(tempOut, numProcs);
+	//       m_cost += (PSIR+PSIW)*(tempIn + tempOut);
+      }
+      *out << "size " << size << endl;
+      *out << (numProcs-1) * ALPHA << " alpha\n";
+      *out << ((numProcs-1)/numProcs) << endl;
+      *out << ((numProcs-1)/numProcs) * (size * BETA);
+      *out << " beta\n";
+#endif // 0
     return;
   }
   
@@ -2361,6 +2414,54 @@ void DoubleIndexAllToAll2::Apply(Node *node) const
   throw;
 }
 
+bool RecursivelyUpdateWithIntType(Dim minDim, Dim dim, const DistType &srcType, const DistType &fullIntType, DistType &finalIntType)
+{
+  if (dim >= finalIntType.m_numDims 
+      || srcType.m_numDims != fullIntType.m_numDims 
+      || srcType.m_numDims!= finalIntType.m_numDims) 
+    {
+      throw;
+    }
+  if (finalIntType.m_dists[dim] == fullIntType.m_dists[dim])
+    return true;
+      
+  finalIntType.m_dists[dim] = fullIntType.m_dists[dim];
+
+  DistEntry srcEntry = srcType.m_dists[dim];
+  DistEntry newEntry = finalIntType.m_dists[dim];
+
+  //if a grid mode disappears from src to final, then recurse on the tensor mode to which it is moved
+  const DimSet srcSet = srcEntry.DistEntryDimSet();
+  const DimSet newSet = newEntry.DistEntryDimSet();
+  
+  DimSetConstIter iter = srcSet.begin();
+  for(; iter != srcSet.end(); ++iter) {
+    if (newSet.find(*iter) == newSet.end()) {
+      Dim dest;
+      if (fullIntType.FindGridMode(*iter, dest)) {
+	if (dest < minDim)
+	  return false;
+	if (!RecursivelyUpdateWithIntType(minDim, dest, srcType, fullIntType, finalIntType))
+	  return false;
+      }
+    }
+  }
+
+  iter = newSet.begin();
+  for(; iter != newSet.end(); ++iter) {
+    if (srcSet.find(*iter) == srcSet.end()) {
+      Dim dest;
+      if (srcType.FindGridMode(*iter, dest)) {
+	if (dest < minDim)
+	  return false;
+	if (!RecursivelyUpdateWithIntType(minDim, dest, srcType, fullIntType, finalIntType))
+	  return false;
+      }
+    }
+  }
+  return true;
+}
+
 bool MultiIndexAllToAll::CanApply(const Node *node) const
 {
   const RedistNode *redist = (RedistNode*)node;
@@ -2462,8 +2563,8 @@ bool MultiIndexAllToAll::CanApply(const Node *node) const
   }
   
   //Now add moved dims to intType.
-  // Add mvoed dims in the same order they're found in the dest
-  // just in case they int dist is the same as the dest
+  // Add moved dims in the same order they're found in the dest
+  // just in case the int dist is the same as the dest
   for(Dim dim = 0; dim < numDims; ++dim) {
     if (!movedDims[dim].IsStar()) {
       //dims are moving to this mode;
@@ -2483,8 +2584,13 @@ bool MultiIndexAllToAll::CanApply(const Node *node) const
       intType.m_dists[dim].DimsToDistEntry(vec);
     }
   }
+
+  DistType finalIntType = srcType;
+  if (!RecursivelyUpdateWithIntType(m_dim, m_dim, srcType, intType, finalIntType))
+    return false;
+
   
-  return (intType != destType && intType != srcType);
+  return (finalIntType != destType && finalIntType != srcType);
 }
 
 void MultiIndexAllToAll::Apply(Node *node) const
@@ -2609,8 +2715,12 @@ void MultiIndexAllToAll::Apply(Node *node) const
       intType.m_dists[dim].DimsToDistEntry(vec);
     }
   }
+
+  DistType finalIntType = srcType;
+  if (!RecursivelyUpdateWithIntType(m_dim, m_dim,srcType, intType, finalIntType))
+    throw;
   
-  RedistNode *intRedist = new RedistNode(intType,
+  RedistNode *intRedist = new RedistNode(finalIntType,
                                          redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   intRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   

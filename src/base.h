@@ -278,6 +278,7 @@ class DistType
   bool operator==(const DistType &rhs) const {return DistTypeEqual(*this,rhs);}
   bool operator!=(const DistType &rhs) const {return DistTypeNotEqual(*this,rhs);}
   DistType Permute(const Permutation &perm) const;
+  bool FindGridMode(Dim gridMode, Dim &tensorMode) const;
 };
 #endif
 
@@ -479,7 +480,10 @@ class Name
 bool FoundInNodeVec(const NodeVec &vec, const Node *node);
 unsigned int FindInNodeVec(const NodeVec &vec, const Node *node);
 unsigned int FindInSetVec(const PSetVec &vec, const BasePSet *set);
+
+#if DOTENSORS
 bool FoundInDimVec(const DimVec &vec, Dim dim);
+#endif
 
 
 
