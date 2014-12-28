@@ -2475,6 +2475,9 @@ bool MultiIndexAllToAll::CanApply(const Node *node) const
   if (numDims != destType.m_numDims)
     throw;
   
+  if (m_dim >= numDims)
+    return false;
+  
   DistType intType = srcType;
   
   DistEntryVec movedDims;
