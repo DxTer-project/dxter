@@ -1541,8 +1541,9 @@ void RealPSet::InlineAllSets()
 	    inlined = true;
 	  }
       }
-      if (inlined)
+      if (inlined) {
 	iter = m_posses.begin();
+      }
       else
 	++iter;
     }
@@ -1656,7 +1657,6 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
     {
       int i = 0;
       PSetVecIter setIter = inliningPoss->m_sets.begin();
-      //inlining the first one
       for(; setIter != inliningPoss->m_sets.end(); ++setIter,++i) {
 	if (i == num)
 	  continue;
@@ -1822,12 +1822,19 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
       
       Node *node = *iter;
 
+      //going through inputs of the node and patching them if they
+      // were connecting to the outputs of the inlining pset
+      //need to change the inputs of this node to be nodes
+      // on the inlined poss
       NodeConnVecIter connIter = node->m_inputs.begin();
       for(; connIter != node->m_inputs.end(); ++connIter) {
         NodeConn *conn = *connIter;
         NodeIntMapIter mapIter = tunnelNumMap.find(conn->m_n);
         if (mapIter != tunnelNumMap.end()) {
 	  if (!conn->m_n->IsTunnel(SETTUNOUT))
+	    throw;
+	  //check for multiple in/out
+	  if (conn->m_num)
 	    throw;
           Node *newParent = map[currPoss->OutTun(mapIter->second)->Input(conn->m_num)];
           unsigned int newNum = currPoss->OutTun(mapIter->second)->InputConnNum(conn->m_num);
@@ -1841,9 +1848,12 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 	  else {
 	    for(unsigned int i = 0; i < newParent->m_children.size(); ++i) {
 	      if (newParent->Child(i)->IsTunnel(POSSTUNOUT)) {
-		delete newParent->m_children[i];
-		newParent->m_children.erase(newParent->m_children.begin()+i);
-		--i;
+		if (tunnelNumMap.find(newParent->Child(i)->Child(0)) != tunnelNumMap.end()) {
+		  //The child of this is the posstunout for the pos that's being inlined, so remove it.
+		  delete newParent->m_children[i];
+		  newParent->m_children.erase(newParent->m_children.begin()+i);
+		  --i;
+		}
 	      }
 	    }
 	  }
@@ -1979,11 +1989,11 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 	    //the following can happen if currPoss has a set
 	    if ((nodeTun->m_tunType == SETTUNIN && childTun->m_tunType == POSSTUNIN))
 	      continue;
-      cout << nodeTun->GetType() << endl;
-      cout << childTun->GetType() << endl;
-      cout << nodeTun->m_poss << " vs. " << childTun->m_poss << endl;
-      cout << "old " << currPoss << endl;
-      cout << "new " << newPoss << endl;
+	    cout << nodeTun->GetType() << endl;
+	    cout << childTun->GetType() << endl;
+	    cout << nodeTun->m_poss << " vs. " << childTun->m_poss << endl;
+	    cout << "old " << currPoss << endl;
+	    cout << "new " << newPoss << endl;
 	  }
 	  cout << node << " " << node->GetType() << endl;
 	  cout << "child " << i << " is " << child << " " << child->GetType() << endl;
