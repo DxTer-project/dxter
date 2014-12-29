@@ -45,6 +45,9 @@ class Partition : public DLANode
   Name m_startName;
   Name m_endName;
 
+  Name m_startDim;
+  Name m_endDim;
+
   void SetHorizontalNames();
   void SetVerticalNames();
 
