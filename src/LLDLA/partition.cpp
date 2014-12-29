@@ -38,17 +38,21 @@ void Partition::PrintCode(IndStream &out)
   out.Indent();
   *out << m_startName.m_name << " = " << GetInputName(0).m_name << ";\n";
   out.Indent();
+  string splitPoint = std::to_string((int) m_partSplitPoint);
   if (m_partType == HORIZONTAL) {
-    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n";
+    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << splitPoint + ";\n";
 
-    *out << m_startDim.m_name << " = " << std::to_string((int) m_partSplitPoint) + ";\n";
-    *out << m_endDim.m_name << " = " << InputDataType(0).m_numColsVar << " - " << std::to_string((int) m_partSplitPoint) + ";\n";
+    out.Indent();
+    *out << m_startDim.m_name << " = " << splitPoint + ";\n";
+    out.Indent();
+    *out << m_endDim.m_name << " = " << InputDataType(0).m_numColsVar << " - " << splitPoint+ ";\n";
   } else {
-    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_rowStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n";
+    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_rowStrideVar << " * " << splitPoint + ";\n";
 
-    *out << m_startDim.m_name << " = " << std::to_string((int) m_partSplitPoint) + ";\n";
-    *out << m_endDim.m_name << " = " << InputDataType(0).m_numRowsVar << " - " << std::to_string((int) m_partSplitPoint) + ";\n";
-
+    out.Indent();
+    *out << m_startDim.m_name << " = " << splitPoint + ";\n";
+    out.Indent();
+    *out << m_endDim.m_name << " = " << InputDataType(0).m_numRowsVar << " - " << splitPoint + ";\n";
   }
   return;
 }
