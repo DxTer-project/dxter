@@ -226,10 +226,12 @@ bool SVMulLoopRef::CanApply(const Node *node) const
       return false;
     }
     if (m_vtype == ROWVECTOR) {
-      return !(*(svmul->GetInputN(1)) <= m_bs.GetSize());
+      return !(*(svmul->GetInputN(1)) <= m_bs.GetSize()) &&
+	svmul->GetInputN(1)->EvenlyDivisibleBy(m_bs.GetSize());
     } 
     else if (m_vtype == COLVECTOR) {
-      return !(*(svmul->GetInputM(1)) <= m_bs.GetSize());
+      return !(*(svmul->GetInputM(1)) <= m_bs.GetSize()) &&
+	svmul->GetInputM(1)->EvenlyDivisibleBy(m_bs.GetSize());
     } 
     else {
       throw;
@@ -349,14 +351,19 @@ bool SVMulToRegArith::CanApply(const Node* node) const
       return false;
     }
     if ((!(*(svmul->GetInputM(1)) <= svmul->GetVecRegWidth()) &&
-	 m_vType == COLVECTOR) ||
-	(!(*(svmul->GetInputN(1)) <= svmul->GetVecRegWidth()) &&
-	 m_vType == ROWVECTOR)) {
+	 m_vType == COLVECTOR) &&
+	svmul->GetInputM(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth())) {
+      return true;
+    }
+    if (!(*(svmul->GetInputN(1)) <= svmul->GetVecRegWidth()) &&
+	m_vType == ROWVECTOR &&
+	svmul->GetInputN(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth())) {
       return true;
     }
     return false;
   }
-  return false;
+  cout << "ERROR: Trying to apply SVMulToRegArith to non SVMul node" << endl;
+  throw;
 }
 
 void SVMulToRegArith::Apply(Node* node) const

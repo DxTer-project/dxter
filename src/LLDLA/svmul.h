@@ -55,6 +55,12 @@ class SVMul : public DLAOp<2, 1>
 
 };
 
+class PartitionSVMul : public SingleTrans
+{
+  // public:
+  //  PartitionSVMul(Layer fromLayer, Layer toLayer);
+};
+
 class SVMulLoopRef : public SingleTrans
 {
  public:
