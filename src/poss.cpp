@@ -899,6 +899,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
               }
               if (leftSet->CanMerge(rightSet)) {
 #if ALWAYSFUSE
+		m_transVec.push_back(LoopFusionStub);
                 FuseLoops(left,right,simplifiers,cullFunc);
                 didMerge = true;
 #else
@@ -912,6 +913,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
                   nodeMap[*tunIter] = *tunIter;
                 }
                 Poss *newPoss = new Poss;
+		newPoss->m_transVec.push_back(LoopFusionStub);
 #if USESHADOWS
                 newPoss->Duplicate(this,nodeMap,true,true);
 #else

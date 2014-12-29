@@ -29,6 +29,9 @@
 #include "critSect.h"
 #include "blis.h"
 
+LoopFusionStubTrans *LoopFusionStub = new LoopFusionStubTrans;
+
+
 #if DOELEM
 BSSize ElemBS(USEELEMBS);
 #elif DOBLIS

@@ -29,6 +29,9 @@
 #include "comm.h"
 #include "LLDLA.h"
 
+class LoopFusionStubTrans;
+extern LoopFusionStubTrans *LoopFusionStub;
+
 enum PartDir { PARTDOWN,
 	       PARTRIGHT,
 	       PARTDIAG,
@@ -235,4 +238,14 @@ class IntLoop : public PSetType, public LoopInterface
   virtual void PostPrint(IndStream &out, Poss *poss);
   virtual bool IsLoop() const {return true;}
   virtual bool IsTransparent() const {return false;}
+};
+
+
+class LoopFusionStubTrans : public SingleTrans
+{
+ public:
+  virtual string GetType() const {return "Loop Fusion";}
+  virtual bool IsSingle() const {return true;}
+  virtual bool CanApply(const Node *node) const {throw;}
+  virtual void Apply(Node *node) const {throw;}
 };
