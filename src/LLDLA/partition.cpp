@@ -240,6 +240,7 @@ void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging)
   const Partition* part = (Partition*) orig;
   m_layer = part->m_layer;
   m_partType = part->m_partType;
+  m_partSplitPoint = part->m_partSplitPoint;
   m_startSizes = part->m_startSizes;
   m_endSizes = part->m_endSizes;
   m_startInfo = part->m_startInfo;
