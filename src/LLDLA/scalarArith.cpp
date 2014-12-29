@@ -53,7 +53,7 @@ void MulScalars::PrintCode(IndStream &out)
   out.Indent();
   string aStr = GetInputNameStr(0);
   string bStr = GetInputNameStr(1);
-  *out << bStr << " = " << bStr << " * " << aStr << ";\n";
+  *out << "*" << bStr << " = *" << bStr << " * *" << aStr << ";\n";
   return;
 }
 

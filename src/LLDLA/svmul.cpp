@@ -457,12 +457,16 @@ bool SVMulToScalarArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     SVMul* svmul = (SVMul*) node;
-    if (svmul->GetLayer() != m_fromLayer) {
-      return false;
+    if (svmul->GetLayer() == m_fromLayer) {
+      if ((*(svmul->GetInputM(1)) == 1 && m_vType == ROWVECTOR) ||
+	  (*(svmul->GetInputN(1)) == 1 && m_vType == COLVECTOR)) {
+	return true;
+      }
     }
-    return true;
+    return false;
   }
-  return false;
+  cout << "ERROR: SVMulToScalarArith applied to non SVMul node" << endl;
+  throw;
 }
 
 void SVMulToScalarArith::Apply(Node* node) const
@@ -506,15 +510,7 @@ void SVMulToScalarArith::Apply(Node* node) const
 
   // Create poss
   Poss* loopPoss = new Poss(2, combineVec, scalarOut);
-  RealLoop* loop;
-  if (svmul->GetDataType() == REAL_SINGLE) {
-    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
-  } else if (svmul->GetDataType() == REAL_DOUBLE) {
-    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
-  } else {
-    cout << "Error: Bad data type in vadd apply\n";
-    throw;
-  }
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
   
   // Adding loop to poss and cleanup
   node->m_poss->AddPSet(loop);

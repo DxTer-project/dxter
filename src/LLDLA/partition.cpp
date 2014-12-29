@@ -38,10 +38,21 @@ void Partition::PrintCode(IndStream &out)
   out.Indent();
   *out << m_startName.m_name << " = " << GetInputName(0).m_name << ";\n";
   out.Indent();
+  string splitPoint = std::to_string((int) m_partSplitPoint);
   if (m_partType == HORIZONTAL) {
-    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n"; 
+    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << splitPoint + ";\n";
+
+    out.Indent();
+    *out << m_startDim.m_name << " = " << splitPoint + ";\n";
+    out.Indent();
+    *out << m_endDim.m_name << " = " << InputDataType(0).m_numColsVar << " - " << splitPoint+ ";\n";
   } else {
-    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_rowStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n";
+    *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_rowStrideVar << " * " << splitPoint + ";\n";
+
+    out.Indent();
+    *out << m_startDim.m_name << " = " << splitPoint + ";\n";
+    out.Indent();
+    *out << m_endDim.m_name << " = " << InputDataType(0).m_numRowsVar << " - " << splitPoint + ";\n";
   }
   return;
 }
@@ -94,6 +105,15 @@ void Partition::AddVariables(VarSet &set) const
 
   set.insert(startVar);
   set.insert(endVar);
+
+  DataTypeInfo inData = InputDataType(0);
+
+  string startDimDecl = "unsigned int " + m_startDim.m_name + ";";
+  string endDimDecl = "unsigned int " + m_endDim.m_name + ";";
+  Var startDimVar(DirectVarDeclType, startDimDecl, GetDataType());
+  Var endDimVar(DirectVarDeclType, endDimDecl, GetDataType());
+  set.insert(startDimVar);
+  set.insert(endDimVar);
 }
 
 void Partition::BuildDataTypeCache()
@@ -114,6 +134,10 @@ void Partition::SetHorizontalNames()
 
   m_endName = GetInputName(0);
   m_endName.m_name += "_RIGHT";
+
+  DataTypeInfo inData = InputDataType(0);
+  m_startDim.m_name = inData.m_numColsVar + "_LEFT";
+  m_endDim.m_name = inData.m_numColsVar + "_RIGHT";
 }
 
 void Partition::SetVerticalNames()
@@ -123,6 +147,10 @@ void Partition::SetVerticalNames()
 
   m_endName = GetInputName(0);
   m_endName.m_name += "_BOTTOM";
+
+  DataTypeInfo inData = InputDataType(0);
+  m_startDim.m_name = inData.m_numRowsVar + "_TOP";
+  m_endDim.m_name = inData.m_numRowsVar + "_BOTTOM";
 }
 
 void Partition::BuildHorizontalDataTypeCache()
@@ -190,14 +218,14 @@ void Partition::BuildVerticalDataTypeInfo()
 {
   DataTypeInfo inData = InputDataType(0);
 
-  string startNumRowsVar = inData.m_numColsVar;
+  string startNumRowsVar = inData.m_numRowsVar;
   startNumRowsVar = startNumRowsVar + "_TOP";
   m_startInfo = new DataTypeInfo(inData.m_rowStride, inData.m_colStride,
 				 startNumRowsVar, inData.m_numColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
 				 inData.m_type);
 
-  string endNumRowsVar = inData.m_numColsVar;
+  string endNumRowsVar = inData.m_numRowsVar;
   endNumRowsVar = endNumRowsVar + "_BOTTOM";
   m_endInfo = new DataTypeInfo(inData.m_rowStride, inData.m_colStride,
 				 endNumRowsVar, inData.m_numColsVar,
@@ -236,12 +264,18 @@ void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig, shallow, possMerging);
   const Partition* part = (Partition*) orig;
+
   m_layer = part->m_layer;
+
   m_partType = part->m_partType;
+  m_partSplitPoint = part->m_partSplitPoint;
+
   m_startSizes = part->m_startSizes;
   m_endSizes = part->m_endSizes;
+
   m_startInfo = part->m_startInfo;
   m_endInfo = part->m_endInfo;
+
   m_startName = m_startName;
   m_endName = m_endName;
 }

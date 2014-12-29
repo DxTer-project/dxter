@@ -45,6 +45,9 @@ class Partition : public DLANode
   Name m_startName;
   Name m_endName;
 
+  Name m_startDim;
+  Name m_endDim;
+
   void SetHorizontalNames();
   void SetVerticalNames();
 
@@ -89,7 +92,7 @@ class Partition : public DLANode
   virtual bool Overwrites(const Node* input, ConnNum num) const { return false; }
 
   virtual Node* GetNewInst() { return BlankInst(); }
-  static Node* BlankInst() { return new Partition(ABSLAYER, VERTICAL, 0); }
+  static Node* BlankInst() { return new Partition(ABSLAYER, VERTICAL, 5); }
 
   virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
 

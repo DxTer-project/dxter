@@ -312,7 +312,11 @@ void AddSVMulTrans()
 {
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+      Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   return;
 }
@@ -762,8 +766,10 @@ RealPSet* GenSizeColSVMul(Type dataType, int m)
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
 
+  Size partSplitPoint = m - (m % arch->VecRegWidth(dataType));
+  cout << "Part split point = " << partSplitPoint << endl;
   Partition* part =
-    new Partition(ABSLAYER, VERTICAL, m - (m % arch->VecRegWidth(dataType)));
+    new Partition(ABSLAYER, VERTICAL, partSplitPoint);
   part->AddInput(tunA, 0);
 
   Tunnel* tunX = new Tunnel(POSSTUNIN);
