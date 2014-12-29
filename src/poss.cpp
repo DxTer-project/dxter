@@ -41,6 +41,20 @@ StrSet Poss::M_fusedSets;
 
 GraphNum Poss::M_count = 1;
 
+int FindInNodeConnVec(const Node *node,
+		      const ConnNum num,
+		      const NodeConnVec &vec)
+{
+  int i = 0;
+  NodeConnVecConstIter iter = vec.begin();
+  for( ; iter != vec.end(); ++iter,++i) {
+    if ((*iter)->m_n == node &&
+	(*iter)->m_num == num)
+      return i;
+  }
+  return -1;
+}
+
 Poss::Poss()
 {
   m_num = M_count;
@@ -1125,7 +1139,7 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
 void Poss::MergePart2(RealPSet *newSet, 
 		      BasePSet *leftSet, BasePSet *rightSet,
 		      unsigned int left, NodeMap &mapLeft, NodeMap &mapRight,
-		      NodeConnIntMap &inMap, NodeConnIntMap &outMap)
+		      NodeConnAndNumIntMap &inMap, NodeConnAndNumIntMap &outMap)
 {
   const bool leftIsReal = leftSet->IsReal();
   const bool rightIsReal = rightSet->IsReal();
@@ -1171,7 +1185,21 @@ void Poss::MergePart2(RealPSet *newSet,
       mapLeft[*realIter] = tun;
     NodeConnVecIter iter = (*leftIter)->m_children.begin();
     for(; iter != (*leftIter)->m_children.end(); ++iter) {
-      NodeConnIntMapIter found = outMap.find(**iter);
+      Node *child = (*iter)->m_n;
+
+      //Need to keep track of the out tunnel and keep track of 
+      //the input number for the child into which it is flowing
+      int inNum = FindInNodeConnVec(*leftIter,
+					(*iter)->m_num,
+					child->m_inputs);
+      if (inNum < 0)
+	throw;
+
+      NodeConnAndNum entry;
+      entry.m_conn = **iter;
+      entry.m_num = inNum;
+
+      NodeConnAndNumIntMapIter found = outMap.find(entry);
       if (found != outMap.end()) {
 	vector<int> vec = found->second;
 	if (vec.size() != 1 || vec[0] != -j-1) {
@@ -1180,7 +1208,7 @@ void Poss::MergePart2(RealPSet *newSet,
       }
       vector<int> tmp;
       tmp.push_back(-j-1);
-      outMap[**iter] = tmp;
+      outMap[entry] = tmp;
     }
   }
 
@@ -1200,18 +1228,29 @@ void Poss::MergePart2(RealPSet *newSet,
       mapRight[*realIter] = tun;
     NodeConnVecIter iter = (*rightIter)->m_children.begin();
     for(; iter != (*rightIter)->m_children.end(); ++iter) {
-      NodeConnIntMapIter found = outMap.find(**iter);
+      NodeConnAndNum entry;
+      entry.m_conn = **iter;
+
+      Node *child = entry.m_conn.m_n;
+
+      int inNum = FindInNodeConnVec(*rightIter,
+					(*iter)->m_num,
+					child->m_inputs);
+      if (inNum < 0)
+	throw;
+
+      entry.m_num = inNum;
+
+      NodeConnAndNumIntMapIter found = outMap.find(entry);
       if (found != outMap.end()) {
 	vector<int> vec = found->second;
 	if (vec.size() != 1 || vec[0] != j+1) {
-	  cout << "this is " << (*rightIter)->GetType() << endl;
-	  cout << "child is " << (*iter)->m_n->GetType() << endl;
 	  throw;
 	}
       }
       vector<int> tmp;
       tmp.push_back(j+1);
-      outMap[**iter] = tmp;
+      outMap[entry] = tmp;
     }
   }
 
@@ -1231,13 +1270,18 @@ void Poss::MergePart2(RealPSet *newSet,
     mapLeft[*leftIter] = tun;
     if (!leftIsReal)
       mapLeft[*realIter] = tun;
-    NodeConnIntMapIter iter = inMap.find(*((*leftIter)->m_inputs[0]));
+    NodeConnAndNum entry;
+    entry.m_conn = *((*leftIter)->m_inputs[0]);
+    entry.m_num = 999;
+      
+
+    NodeConnAndNumIntMapIter iter = inMap.find(entry);
     vector<int> tmp;
     if (iter != inMap.end()) {
       tmp = iter->second;
     }
     tmp.push_back(-j-1);
-    inMap[*((*leftIter)->m_inputs[0])] = tmp;
+    inMap[entry] = tmp;
 
     for (unsigned int i = 0; i < (*leftIter)->m_inputs.size(); ++i) {
       Node *input = (*leftIter)->Input(i);
@@ -1266,13 +1310,16 @@ void Poss::MergePart2(RealPSet *newSet,
     mapRight[*rightIter] = tun;
     if (!rightIsReal)
       mapRight[*realIter] = tun;
-    NodeConnIntMapIter iter = inMap.find(*((*rightIter)->m_inputs[0]));
+    NodeConnAndNum entry;
+    entry.m_conn = *((*rightIter)->m_inputs[0]);
+    entry.m_num = 999;
+    NodeConnAndNumIntMapIter iter = inMap.find(entry);
     vector<int> tmp;
     if (iter != inMap.end()) {
       tmp = iter->second;
     }
     tmp.push_back(j+1);
-    inMap[*((*rightIter)->m_inputs[0])] = tmp;
+    inMap[entry] = tmp;
     for (unsigned int i = 0; i < (*rightIter)->m_inputs.size(); ++i) {
       Node *input = (*rightIter)->Input(i);
       if (mapLeft[input]) {
@@ -1398,7 +1445,7 @@ void Poss::MergePart6(RealPSet *newSet, BasePSet *leftSet,
 void Poss::MergePart7(RealPSet *newSet, 
 		      unsigned int numLeftInTuns, unsigned int numRightInTuns,
 		      unsigned int numLeftOutTuns, unsigned int numRightOutTuns,
-		      NodeConnIntMap &inMap, NodeConnIntMap &outMap)
+		      NodeConnAndNumIntMap &inMap, NodeConnAndNumIntMap &outMap)
 {
   //This was set in Part2.  If it's been cleared, then the real left and right sets
   // were deleted, so do not set these connections.
@@ -1416,13 +1463,17 @@ void Poss::MergePart7(RealPSet *newSet,
   for(; iter != newSet->m_inTuns.end(); ++iter, ++i) {
     if ((*iter)->m_inputs.empty())
       throw;
-    NodeConnIntMapIter find = inMap.find(*((*iter)->m_inputs[0]));
+    NodeConnAndNum entry;
+    entry.m_conn = *((*iter)->m_inputs[0]);
+    entry.m_num = 999;
+
+    NodeConnAndNumIntMapIter find = inMap.find(entry);
     if (find == inMap.end())
       throw;
     vector<int> tmp = find->second;
     int val = tmp.back();
     tmp.pop_back();
-    inMap[*((*iter)->m_inputs[0])] = tmp;
+    inMap[entry] = tmp;
     if (val < 0) {
       val = -1*val - 1;
       if (val < 0)
@@ -1452,7 +1503,18 @@ void Poss::MergePart7(RealPSet *newSet,
   for(; iter != newSet->m_outTuns.end(); ++iter, ++i) {
     Node *tun = *iter;
     for(int j = 0; j < tun->m_children.size(); ++j) {
-      NodeConnIntMapIter find = outMap.find(*(tun->m_children[j]));
+      NodeConnAndNum entry;
+      entry.m_conn = *(tun->m_children[j]);
+
+      int inNum = FindInNodeConnVec(tun, 
+				    entry.m_conn.m_num,
+				    entry.m_conn.m_n->m_inputs);
+      if (inNum < 0)
+	throw;
+      else
+	entry.m_num = inNum;
+
+      NodeConnAndNumIntMapIter find = outMap.find(entry);
       if (find == outMap.end())
 	throw;
       if (find->second.size() != 1)
@@ -1490,7 +1552,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
 
 
   NodeVecConstIter iter;
-  NodeConnIntMap inMap, outMap;
+  NodeConnAndNumIntMap inMap, outMap;
 
   unsigned int numLeftInTuns = leftSet->m_inTuns.size();
   unsigned int numRightInTuns = rightSet->m_inTuns.size();
@@ -2219,7 +2281,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   newSet->m_label.insert(realRight->m_label.begin(),realRight->m_label.end());
   
   NodeVecConstIter iter;
-  NodeConnIntMap inMap, outMap;
+  NodeConnAndNumIntMap inMap, outMap;
 
   unsigned int numLeftInTuns = leftSet->m_inTuns.size();
   unsigned int numRightInTuns = rightSet->m_inTuns.size();

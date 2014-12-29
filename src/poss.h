@@ -43,14 +43,35 @@ class BasePSet;
 
 typedef vector<NodeConn*> NodeConnVec;
 typedef NodeConnVec::iterator NodeConnVecIter;
+typedef NodeConnVec::const_iterator NodeConnVecConstIter;
 
-struct NodeConnComp {
-  bool operator() (const NodeConn &lhs, const NodeConn &rhs) const
-  {return lhs.m_n < rhs.m_n || (lhs.m_n == rhs.m_n && lhs.m_num < rhs.m_num);}
+int FindInNodeConnVec(const Node *node,
+		      const ConnNum num,
+		      const NodeConnVec &vec);
+
+
+//When merging and keeping track of where tunnels get merged,
+// we have to do some bookeeping to note what the inputs
+// of tunnels are and the children of tunnes
+//If two different tunnels are input to the same child,
+// we need to look at the input number for that child
+// as a differentiator
+//For two inputs to tunnels, we don't care
+typedef struct { 
+  NodeConn m_conn;
+  ConnNum m_num;
+} NodeConnAndNum;
+
+struct NodeConnAndNumComp {
+  bool operator() (const NodeConnAndNum &lhs, const NodeConnAndNum &rhs) const
+  {return lhs.m_conn.m_n < rhs.m_conn.m_n || (lhs.m_conn.m_n == rhs.m_conn.m_n && lhs.m_conn.m_num < rhs.m_conn.m_num)
+      || (lhs.m_conn.m_n == rhs.m_conn.m_n && lhs.m_conn.m_num == rhs.m_conn.m_num && lhs.m_num < rhs.m_num); }
 };
 
-typedef map<NodeConn,vector<int>,NodeConnComp> NodeConnIntMap;
-typedef NodeConnIntMap::iterator NodeConnIntMapIter;
+    
+
+typedef map<NodeConnAndNum,vector<int>,NodeConnAndNumComp> NodeConnAndNumIntMap;
+typedef NodeConnAndNumIntMap::iterator NodeConnAndNumIntMapIter;
 
 class Poss
 {
@@ -109,7 +130,7 @@ class Poss
   void MergePart2(RealPSet *newSet, 
 		  BasePSet *leftSet, BasePSet *rightSet,
 		  unsigned int left, NodeMap &mapLeft, NodeMap &mapRight,
-		  NodeConnIntMap &inMap, NodeConnIntMap &outMap);
+		  NodeConnAndNumIntMap &inMap, NodeConnAndNumIntMap &outMap);
   void MergePart4(RealPSet *newSet, 
 		  BasePSet *leftSet, 
 		  BasePSet *rightSet, 
@@ -120,7 +141,7 @@ class Poss
   void MergePart7(RealPSet *newSet, 
 		  unsigned int numLeftInTuns, unsigned int numRightInTuns,
 		  unsigned int numLeftOutTuns, unsigned int numRightOutTuns,
-		  NodeConnIntMap &inMap, NodeConnIntMap &outMap);
+		  NodeConnAndNumIntMap &inMap, NodeConnAndNumIntMap &outMap);
   bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
