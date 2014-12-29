@@ -510,15 +510,7 @@ void SVMulToScalarArith::Apply(Node* node) const
 
   // Create poss
   Poss* loopPoss = new Poss(2, combineVec, scalarOut);
-  RealLoop* loop;
-  if (svmul->GetDataType() == REAL_SINGLE) {
-    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuSingle);
-  } else if (svmul->GetDataType() == REAL_DOUBLE) {
-    loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
-  } else {
-    cout << "Error: Bad data type in vadd apply\n";
-    throw;
-  }
+  RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
   
   // Adding loop to poss and cleanup
   node->m_poss->AddPSet(loop);

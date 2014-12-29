@@ -724,7 +724,7 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   cout.flush();
 
 #if DOEMPIRICALEVAL  
-  /*  cout << "Writing all implementations to runtime eval files\n";
+  cout << "Writing all implementations to runtime eval files\n";
 
   int numIterations = 10;
   RuntimeTest rtest(precision, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
@@ -734,22 +734,21 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
 
   cout << "Done evaluating\n";
-  GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);*/
+  GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);
 #endif //DOEMPIRICALEVAL
 
-#if 0
+#if 1
   uni.PrintAll(algNum, best);
 #else
   uni.PrintBest();
 #endif
 
 #if PRINTCOSTS
-  //  uni.PrintCosts(impMap);
+  uni.PrintCosts(impMap);
 #endif
 
-  //  double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
-  //  return bestFPS;
-  return 1;
+  double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
+  return bestFPS;
 }
 
 RealPSet* GenSizeColSVMul(Type dataType, int m)

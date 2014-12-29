@@ -39,10 +39,8 @@ void Partition::PrintCode(IndStream &out)
   *out << m_startName.m_name << " = " << GetInputName(0).m_name << ";\n";
   out.Indent();
   if (m_partType == HORIZONTAL) {
-    cout << "Part split point is " << std::to_string((int) m_partSplitPoint) << endl;
     *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n"; 
   } else {
-    cout << "Part split point is " << m_partSplitPoint << endl;
     *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_rowStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n";
   }
   return;
@@ -96,6 +94,24 @@ void Partition::AddVariables(VarSet &set) const
 
   set.insert(startVar);
   set.insert(endVar);
+
+  DataTypeInfo inData = InputDataType(0);
+
+  if (m_partType == HORIZONTAL) {
+    string leftNumColsVar = "unsigned int " + inData.m_numColsVar + "_LEFT;";
+    string rightNumColsVar = "unsigned int " + inData.m_numColsVar + "_BOTTOM;";
+    Var newLeftNumColsVar(DirectVarDeclType, leftNumColsVar, GetDataType());
+    Var newRightNumColsVar(DirectVarDeclType, rightNumColsVar, GetDataType());
+    set.insert(newLeftNumColsVar);
+    set.insert(newRightNumColsVar);
+  } else {
+    string topNumRowsVar = "unsigned int " + inData.m_numRowsVar + "_TOP;";
+    string bottomNumRowsVar = "unsigned int " + inData.m_numRowsVar + "_BOTTOM;";
+    Var newTopNumRowsVar(DirectVarDeclType, topNumRowsVar, GetDataType());
+    Var newBottomNumRowsVar(DirectVarDeclType, bottomNumRowsVar, GetDataType());
+    set.insert(newTopNumRowsVar);
+    set.insert(newBottomNumRowsVar);
+  }
 }
 
 void Partition::BuildDataTypeCache()
@@ -192,14 +208,14 @@ void Partition::BuildVerticalDataTypeInfo()
 {
   DataTypeInfo inData = InputDataType(0);
 
-  string startNumRowsVar = inData.m_numColsVar;
+  string startNumRowsVar = inData.m_numRowsVar;
   startNumRowsVar = startNumRowsVar + "_TOP";
   m_startInfo = new DataTypeInfo(inData.m_rowStride, inData.m_colStride,
 				 startNumRowsVar, inData.m_numColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
 				 inData.m_type);
 
-  string endNumRowsVar = inData.m_numColsVar;
+  string endNumRowsVar = inData.m_numRowsVar;
   endNumRowsVar = endNumRowsVar + "_BOTTOM";
   m_endInfo = new DataTypeInfo(inData.m_rowStride, inData.m_colStride,
 				 endNumRowsVar, inData.m_numColsVar,
