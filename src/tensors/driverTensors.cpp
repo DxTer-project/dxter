@@ -876,7 +876,7 @@ RealPSet* W()
 {
   //~ 10:1 ratio
   // 53, 5 for H20
-  const Size big = 530; //a-h
+  const Size big = 500; //a-h
   const Size small = 50; //i-p
 
   InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
@@ -903,8 +903,8 @@ RealPSet* W()
 RealPSet* X()
 {
   //~ 10:1 ratio
-  // 530, 5 for H20
-  const Size big = 530; //a-h
+  // 53, 5 for H20
+  const Size big = 500; //a-h
   const Size small = 50; //i-p
 
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
@@ -930,8 +930,8 @@ RealPSet* X()
 RealPSet* U()
 {
   //~ 10:1 ratio
-  // 530, 5 for H20
-  const Size big = 530; //a-h
+  // 53, 5 for H20
+  const Size big = 500; //a-h
   const Size small = 50; //i-p
 
   InputNode *t_fj = CreateInput2("t_fj", big, small);
@@ -954,8 +954,8 @@ RealPSet* U()
 RealPSet* Q()
 {
   //~ 10:1 ratio
-  // 530, 5 for H20
-  const Size big = 530; //a-h
+  // 53, 5 for H20
+  const Size big = 500; //a-h
   const Size small = 50; //i-p
 
   InputNode *q_mnij = CreateInput4("q_mnij", small, small, small, small);
@@ -980,8 +980,8 @@ RealPSet* Q()
 RealPSet* P()
 {
   //~ 10:1 ratio
-  // 530, 5 for H20
-  const Size big = 530; //a-h
+  // 53, 5 for H20
+  const Size big = 500; //a-h
   const Size small = 50; //i-p
 
   InputNode *u_jimb = CreateInput4("u_jimb", small, small, small, big);
@@ -1008,8 +1008,8 @@ RealPSet* P()
 RealPSet* H()
 {
   //~ 10:1 ratio
-  // 530, 5 for H20
-  const Size big = 530; //a-h
+  // 53, 5 for H20
+  const Size big = 500; //a-h
   const Size small = 50; //i-p
 
   InputNode *t_fn = CreateInput2("t_fn", big, small);
@@ -1031,8 +1031,8 @@ RealPSet* H()
 RealPSet* F()
 {
   //~ 10:1 ratio
-  // 530, 5 for H20
-  const Size big = 530; //a-h
+  // 53, 5 for H20
+  const Size big = 500; //a-h
   const Size small = 50; //i-p
   
   InputNode *H_me = CreateInput2("H_me", small, big);
@@ -1059,8 +1059,8 @@ RealPSet* F()
 RealPSet* G()
 {
   //~ 10:1 ratio
-  // 530, 5 for H20
-  const Size big = 530; //a-h
+  // 53, 5 for H20
+  const Size big = 500; //a-h
   const Size small = 50; //i-p
   
   InputNode *H_me = CreateInput2("H_me", small, big);
@@ -1085,8 +1085,8 @@ RealPSet* G()
 RealPSet* z()
 {
   //~ 10:1 ratio
-  // 530, 5 for H20
-  const Size big = 530; //a-h
+  // 53, 5 for H20
+  const Size big = 500; //a-h
   const Size small = 50; //i-p
   
   InputNode *f_ae = CreateInput2("f_ae", big, big);
