@@ -544,6 +544,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 void GraphIter::ClearPrintedRecursively()
 {
   m_hasPrinted = false;
+  m_poss->ClearPrintedFromGraph();
   unsigned int numPSets = m_poss->m_sets.size();
   for(unsigned int i = 0; i < numPSets; ++i) {
     m_subIters[i]->ClearPrintedRecursively();

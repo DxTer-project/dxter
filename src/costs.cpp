@@ -60,7 +60,7 @@ Cost ZERO(0);
 
 inline double log2(double in)
 {
-  return log(in) / log(2.0);
+  return ceil(log(in) / log(2.0));
 }
 
 Cost AllGather(Size totalSize, Size numProcs)
@@ -118,6 +118,10 @@ Cost AllToAll(Size totalSize, Size numProcs)
     return 0;
   if (totalSize < 0) {
     cout << "totalSize in AllToAll\n";
+    throw;
+  }
+  if (!(totalSize/numProcs)){
+    cout << "nope\n";
     throw;
   }
   return (numProcs - 1) * SendRecv(totalSize/numProcs);

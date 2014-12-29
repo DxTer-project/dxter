@@ -41,6 +41,38 @@ class BasePSet;
 
 #define POSSISSANEFLAG (1L<<1)
 
+typedef vector<NodeConn*> NodeConnVec;
+typedef NodeConnVec::iterator NodeConnVecIter;
+typedef NodeConnVec::const_iterator NodeConnVecConstIter;
+
+int FindInNodeConnVec(const Node *node,
+		      const ConnNum num,
+		      const NodeConnVec &vec);
+
+
+//When merging and keeping track of where tunnels get merged,
+// we have to do some bookeeping to note what the inputs
+// of tunnels are and the children of tunnes
+//If two different tunnels are input to the same child,
+// we need to look at the input number for that child
+// as a differentiator
+//For two inputs to tunnels, we don't care
+typedef struct { 
+  NodeConn m_conn;
+  ConnNum m_num;
+} NodeConnAndNum;
+
+struct NodeConnAndNumComp {
+  bool operator() (const NodeConnAndNum &lhs, const NodeConnAndNum &rhs) const
+  {return lhs.m_conn.m_n < rhs.m_conn.m_n || (lhs.m_conn.m_n == rhs.m_conn.m_n && lhs.m_conn.m_num < rhs.m_conn.m_num)
+      || (lhs.m_conn.m_n == rhs.m_conn.m_n && lhs.m_conn.m_num == rhs.m_conn.m_num && lhs.m_num < rhs.m_num); }
+};
+
+    
+
+typedef map<NodeConnAndNum,vector<int>,NodeConnAndNumComp> NodeConnAndNumIntMap;
+typedef NodeConnAndNumIntMap::iterator NodeConnAndNumIntMapIter;
+
 class Poss
 {
   static GraphNum M_count;
@@ -97,7 +129,8 @@ class Poss
 		  BasePSet **leftSet, BasePSet **rightSet);
   void MergePart2(RealPSet *newSet, 
 		  BasePSet *leftSet, BasePSet *rightSet,
-		  unsigned int left, NodeMap &mapLeft, NodeMap &mapRight);
+		  unsigned int left, NodeMap &mapLeft, NodeMap &mapRight,
+		  NodeConnAndNumIntMap &inMap, NodeConnAndNumIntMap &outMap);
   void MergePart4(RealPSet *newSet, 
 		  BasePSet *leftSet, 
 		  BasePSet *rightSet, 
@@ -105,6 +138,10 @@ class Poss
 		  NodeVec &newInputTunnelsToFix);
   void MergePart6(RealPSet *newSet, BasePSet *leftSet, 
 		  BasePSet *rightSet, NodeMap &mapLeft, NodeMap &mapRight);
+  void MergePart7(RealPSet *newSet, 
+		  unsigned int numLeftInTuns, unsigned int numRightInTuns,
+		  unsigned int numLeftOutTuns, unsigned int numRightOutTuns,
+		  NodeConnAndNumIntMap &inMap, NodeConnAndNumIntMap &outMap);
   bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
@@ -128,8 +165,6 @@ class Poss
   void PrintNodeAddresses() const;
   RealPSet* FormSubPSet(NodeVec &outputTuns, bool isCritSect);
   void FillClique(NodeSet &set);
-  RealPSet* FormSetForClique(NodeSet &set, bool isCritSect);
-
   static size_t Hash(const string &str);
   size_t GetHash();
   virtual void InvalidateHash() {m_hashValid=false;}

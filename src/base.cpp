@@ -84,7 +84,11 @@ DistType& DistType::operator=(const DistType &rhs)
   m_notReped = rhs.m_notReped;
   if (m_dists)
     delete [] m_dists;
-  if (m_numDims) {
+  if (m_numDims == 99) {
+    m_dists = NULL;
+    throw;
+  }
+ else if (m_numDims) {
     m_dists = new DistEntry[m_numDims];
     for (Dim dim = 0; dim < m_numDims; ++dim)
       m_dists[dim] = rhs.m_dists[dim];
@@ -92,6 +96,19 @@ DistType& DistType::operator=(const DistType &rhs)
   else
     m_dists = NULL;
   return *this;
+}
+
+bool DistType::FindGridMode(Dim gridMode, Dim &tensorMode) const
+{
+  for(Dim dim = 0; dim < m_numDims; ++dim) {
+    DimSet set = m_dists[dim].DistEntryDimSet();
+    if (set.find(gridMode) != set.end()) {
+      tensorMode = dim;
+      return true;
+    }
+  }
+
+  return false;
 }
 
 DistType DistType::Permute(const Permutation &perm) const
@@ -248,6 +265,12 @@ string DistEntry::str() const
   return ret.str();
 }
 
+bool DistEntry::ContainsDim(Dim dim) const
+{
+  DimSet dimSet = DistEntryDimSet();
+  return dimSet.find(dim) != dimSet.end();
+}
+
 
 string DistEntry::PrettyStr() const
 {
@@ -371,6 +394,13 @@ void DistEntry::DimsToDistEntry(const DimVec &dims)
   }
     
   m_val = distVal;
+}
+
+void DistEntry::AppendDim(Dim dim)
+{
+  DimVec vec = DistEntryDims();
+  vec.push_back(dim);
+  DimsToDistEntry(vec);
 }
 
 string DistType::str() const
@@ -797,6 +827,22 @@ string Name::str() const
 #endif
 }
 
+bool Name::operator!=(const Name &rhs) const
+{
+#if DOELEM
+  if (m_type != rhs.m_type)
+    return true;
+#elif DOTENSORS
+  if (m_type != rhs.m_type)
+    return true;
+  if (m_permutation != rhs.m_permutation)
+    return true;
+#endif
+  if (m_name != rhs.m_name)
+    return true;
+  return false;
+}
+
 #if DOTENSORS
 string Name::PrettyStr() const
 {
@@ -905,6 +951,17 @@ unsigned int FindInNodeVec(const NodeVec &vec, const Node *node)
       return i;
   throw;
 }
+
+#if DOTENSORS
+bool FoundInDimVec(const DimVec &vec, Dim dim)
+{
+  for (unsigned int i = 0; i < vec.size(); ++i) {
+    if (vec[i] == dim)
+      return true;
+  }
+  return false;
+}
+#endif
 
 unsigned int FindInSetVec(const PSetVec &vec, const BasePSet *set)
 {
@@ -1031,3 +1088,13 @@ double MinTime(const TimeVec &times)
   }
   return minVal;
 }
+
+#if DOTENSORS
+void IdentDimVec(unsigned int num, DimVec &vec)
+{
+  vec.clear();
+  vec.reserve(num);
+  for(Dim dim = 0; dim < num; ++dim)
+    vec.push_back(dim);
+}
+#endif //DOTENSORS

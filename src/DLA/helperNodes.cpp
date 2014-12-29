@@ -1,52 +1,55 @@
 /*
-    This file is part of DxTer.
-    DxTer is a prototype using the Design by Transformation (DxT)
-    approach to program generation.
-
-    Copyright (C) 2014, The University of Texas and Bryan Marker
-
-    DxTer is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    DxTer is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
-
-    You should have received a copy of the GNU General Public License
-    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ This file is part of DxTer.
+ DxTer is a prototype using the Design by Transformation (DxT)
+ approach to program generation.
+ 
+ Copyright (C) 2014, The University of Texas and Bryan Marker
+ 
+ DxTer is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ DxTer is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 
 
 #include "helperNodes.h"
 #include "elemRedist.h"
 #include <cmath>
+#include "loopSupport.h"
 
-InputNode::InputNode() 
-  : 
-  m_type("InputNode")
+#define THROWWHENCANTMOVETEMPVARNODE 0
+
+InputNode::InputNode()
+:
+m_type("InputNode")
 #if TWOD
 #if DODM
-  , m_mlsize(NULL), m_nlsize(NULL) 
+, m_mlsize(NULL), m_nlsize(NULL)
 #endif //DODM
 #else
-  , m_numDims(0)
+, m_numDims(0)
 #endif
 {
 }
 
 #if TWOD
 #if DOLLDLA
-InputNode::InputNode(NodeType type, Size m, Size n, string name, 
-		     Size rowStrideVal, Size colStrideVal,
-		     string numRowsVar, string numColsVar,
-		     string rowStrideVar, string colStrideVar,
-		     Type dataType)
-: 
-  m_msize(NAN), m_nsize(NAN)
+InputNode::InputNode(NodeType type, Size m, Size n, string name,
+                     Size rowStrideVal, Size colStrideVal,
+                     string numRowsVar, string numColsVar,
+                     string rowStrideVar, string colStrideVar,
+                     Type dataType)
+:
+m_msize(NAN), m_nsize(NAN)
 {
   Stride rs, cs;
   if (rowStrideVal == 1) {
@@ -59,12 +62,12 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
   } else {
     cs = NONUNITSTRIDE;
   }
-
+  
   m_dataTypeInfo = DataTypeInfo(rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
-
+  
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
-
+  
   m_msize.AddRepeatedSizes(m, 1, 1);
   m_nsize.AddRepeatedSizes(n, 1, 1);
   m_varName.m_name = name;
@@ -107,7 +110,7 @@ string InputNode::NumColsDefine()
 #if TWOD
 #if !DOLLDLA
 InputNode::InputNode(NodeType type, Size m, Size n, string name)
-: 
+:
 #if DODM
 m_type(type),
 #endif
@@ -130,8 +133,8 @@ m_msize(NAN), m_nsize(NAN)
 #if (DODM&&TWOD)
 InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 : m_type(type),
-  m_dataTypeInfo(dist),
-  m_msize(NAN), m_nsize(NAN)
+m_dataTypeInfo(dist),
+m_msize(NAN), m_nsize(NAN)
 #if DODM
 , m_mlsize(NULL), m_nlsize(NULL)
 #endif
@@ -146,8 +149,8 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 
 #if DOTENSORS
 InputNode::InputNode(NodeType type, const SizesArray sizes, string name, Dim numDims)
-: 
-  m_type(type), m_numDims(numDims), m_lsizes(NULL)
+:
+m_type(type), m_numDims(numDims), m_lsizes(NULL)
 {
   if (m_numDims > NUM_GRID_DIMS)
     throw;
@@ -166,8 +169,8 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, string name, Dim num
 }
 
 InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, Dim numDims)
-  :
-  m_type(type), m_numDims(numDims), m_lsizes(NULL)
+:
+m_type(type), m_numDims(numDims), m_lsizes(NULL)
 {
   if (dist.m_numDims != numDims)
     throw;
@@ -267,7 +270,7 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
     if(node->m_lsizes) {
       m_lsizes = new Sizes[m_numDims];
       for (Dim i = 0; i < m_numDims; ++i)
-	m_lsizes[i] = node->m_lsizes[i];
+        m_lsizes[i] = node->m_lsizes[i];
     }
   }
   else {
@@ -294,7 +297,7 @@ void InputNode::Prop()
       cout << "!m_inputs.empty()\n";
       throw;
     }
-
+    
     m_cost = ZERO;
   }
 }
@@ -477,12 +480,12 @@ void OutputNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLANode::Prop();
-
+    
     if (m_inputs.size() != 1) {
       cout << "m_inputs.size() != 1\n";
       throw;
     }
-
+    
     Node *input = Input(0);
     input->Prop();
     m_cost = ZERO;
@@ -574,7 +577,7 @@ void OutputNode::UnflattenCore(ifstream &in, SaveInfo &info)
 
 #if DOLLDLA
 ConstVal::ConstVal(string name, Coef val)
-  :m_val(val), m_sizes(NULL)
+:m_val(val), m_sizes(NULL)
 {
   m_val = val;
   m_varName.m_name = name;
@@ -667,7 +670,7 @@ ConstVal::~ConstVal()
 }
 
 
-void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info) 
+void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info)
 {
   DLANode::UnflattenCore(in, info);
   m_varName.Unflatten(in);
@@ -675,368 +678,6 @@ void ConstVal::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 #endif //DOELEM||DOBLIS||DOLLDLA
 
-TempVarNode::TempVarNode() 
-#if DOELEM
-  : m_info(D_LASTDIST), m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-    : m_info(), m_lsizes(NULL), m_sumLens(NULL)
-#endif
-{
-
-}
-
-TempVarNode::TempVarNode(string name) 
-#if DOELEM
-  : m_info(D_LASTDIST), m_name(name)
-#elif DOTENSORS
-    : m_info(), m_name(name)
-#else
-    : m_name(name)
-#endif
-#if DOELEM
-  , m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-, m_lsizes(NULL), m_sumLens(NULL)
-#endif
- {}
-
-#if DODM
-TempVarNode::TempVarNode(DistType dist) 
-   : m_info(dist), 
-#if TWOD
- m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-  m_lsizes(NULL), m_sumLens(NULL)
-#endif
- {}
-#endif
-
-
-#if DODM
-TempVarNode::TempVarNode(DistType dist, string name) 
-   :  m_info(dist), m_name(name),
-#if TWOD
- m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-  m_lsizes(NULL),
-  m_sumLens(NULL)
-#endif
-  {}
-#endif
-
-
-
-
-#if DOTENSORS
-TempVarNode::TempVarNode(DistType dist, EntryList sumDims) 
-   : m_lsizes(NULL),
-     m_sumLens(NULL),
-     m_sumDims(sumDims)
-{
-  //update below, too
-  Dim numSumDims = sumDims.size();
-  if (!numSumDims) {
-    cout << "!numSumDims\n";
-    throw;
-  }
-  DistType temp;
-  temp.PrepForNumDims(dist.m_numDims+numSumDims);
-  for (Dim dim = 0; dim < dist.m_numDims; ++dim)
-    temp.m_dists[dim] = dist.m_dists[dim];
-  EntryListIter iter = m_sumDims.begin();
-  for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
-    temp.m_dists[dist.m_numDims + dim] = *iter;
-  }
-  temp.m_notReped = dist.m_notReped;
-  m_info.SetDistAndClearPerm(temp);
-}
-
-TempVarNode::TempVarNode(DistType dist, EntryList  sumDims, string name)
-  :  m_name(name),
-     m_lsizes(NULL),
-     m_sumLens(NULL),
-     m_sumDims(sumDims)
-{
-  //update above, too
-  Dim numSumDims = sumDims.size();
-  if (!numSumDims) {
-    cout << "!numSumDims 2\n";
-    throw;
-  }
-  DistType temp;
-  temp.PrepForNumDims(dist.m_numDims+numSumDims);
-  for (Dim dim = 0; dim < dist.m_numDims; ++dim)
-    temp.m_dists[dim] = dist.m_dists[dim];
-  EntryListIter iter = m_sumDims.begin();
-  for (Dim dim = 0; iter != m_sumDims.end(); ++iter, ++dim) {
-    temp.m_dists[dist.m_numDims + dim] = *iter;
-  }
-  temp.m_notReped = dist.m_notReped;
-  m_info.SetDistAndClearPerm(temp);
-}
-#endif
-
-
-NodeType TempVarNode::GetType() const 
-{
-  if (m_inputs.size() != 1) {
-    cout << "m_inputs.size() != 1\n";
-    cout.flush();
-    throw;
-  }
-
-  return GetName(0).m_name;
-}
-
-void TempVarNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
-{
-  DLANode::Duplicate(orig,shallow, possMerging);
-  m_info = ((TempVarNode*)orig)->m_info;
-  m_name = ((TempVarNode*)orig)->m_name;
-#if DOTENSORS
-  m_sumDims = ((TempVarNode*)orig)->m_sumDims;
-#endif
-}
-
-TempVarNode::~TempVarNode()
-{
-#if TWOD
-#if DODM
-  if (m_mlsize) {
-    delete m_mlsize;
-    m_mlsize = NULL;
-    delete m_nlsize;
-    m_nlsize = NULL;
-  }
-#endif
-#elif DOTENSORS
-  if (m_lsizes) {
-    delete [] m_lsizes;
-    m_lsizes = NULL;
-  }
-#endif
-}
-
-void TempVarNode::PrintCode(IndStream &out)
-{
-  /*
-  if (GetLayer() == SQ2LAYER || GetLayer() == SQ1LAYER) {
-    string name = GetInputNameStr(0);
-    out.Indent();
-    *out << "bli_obj_create( BLIS_DOUBLE, bli_obj_length("
-	 << name << "), bli_obj_width(" << name << "), 0, 0, &"
-	 << GetNameStr(0) << " );\n";
-    out.Indent();
-    *out << "bli_copym(&" << name << ", &" << GetNameStr(0) << ");\n";
-  }*/
-#if DOTENSORS
-  out.Indent();
-  *out << "tempShape = " << GetInputNameStr(0) << ".Shape();\n";
-  EntryListIter iter = m_sumDims.begin();
-  for (; iter != m_sumDims.end(); ++iter) {
-    out.Indent();
-    DistEntry entry = *iter;
-    DimVec vec = entry.DistEntryDims();
-    if (vec.empty())
-      throw;
-    if (vec.size() > 1) {
-      cout << "do something more complicated, where you have to multiply grid dims\n";
-      throw;
-    }
-    *out << "tempShape.push_back( g.Shape()[" << vec[0] << "] );\n";
-  }
-  out.Indent();
-  *out << GetNameStr(0) << ".ResizeTo( tempShape );\n";
-#endif
-}
-
-
-void TempVarNode::Prop()
-{
-  if (!IsValidCost(m_cost)) {
-    if (m_inputs.size() != 1) {
-      cout << "m_inputs.size() != 1\n";
-      cout.flush();
-      throw;
-    }
-    Input(0)->Prop();
-    m_cost = ZERO;
-  }
-}
-
-const DataTypeInfo& TempVarNode::DataType(ConnNum num) const
-{
-  return m_info;
-}
-
-#if TWOD
-const Sizes* TempVarNode::GetM(ConnNum num) const
-{
-  if (num > 0)
-    throw;
-  return GetInputM(0);
-}
-
-const Sizes* TempVarNode::GetN(ConnNum num) const
-{
-  if (num > 0)
-    throw;
-  return GetInputN(0);
-}
-
-#if DODM
-const Sizes* TempVarNode::LocalM(ConnNum num) const
-{
-  if (num > 0)
-    throw;
-  return m_mlsize;
-}
-
-const Sizes* TempVarNode::LocalN(ConnNum num) const
-{
-  if (num > 0)
-    throw;
-  return m_nlsize;
-}
-#endif //DODM
-
-#elif DOTENSORS
-const Dim TempVarNode::NumDims(ConnNum num) const
-{
-  return InputNumDims(0) + m_sumDims.size();
-}
-
-const Sizes* TempVarNode::Len(ConnNum num, Dim dim) const
-{
-  if (num > 0)
-    throw;
-  if (!m_sumDims.empty()) {
-    Dim dims = m_info.GetDist().m_numDims-m_sumDims.size();
-    if (dim >= dims)
-      return m_sumLens + (dim - dims);
-    else
-      return InputLen(0, dim);
-  }
-  else
-    return InputLen(0, dim);
-}
-
-const Sizes* TempVarNode::LocalLen(ConnNum num, Dim dim) const
-{
-  if (num > 0)
-    throw;
-  if (!m_sumDims.empty()) {
-    Dim dims = m_info.GetDist().m_numDims-m_sumDims.size();
-    if (dim >= dims)
-      return &m_ones;
-    else
-      return &(m_lsizes[dim]);
-  }
-  else
-    return &(m_lsizes[dim]);
-}
-#endif
-
-Name TempVarNode::GetName(ConnNum num) const
-{
-  if (num > 0)
-    throw; 
-  Name tmp;
-  if (m_name.empty()) {
-    tmp = GetInputName(0);
-#if DOTENSORS
-    
-#else
-    tmp.m_name = tmp.m_name + "temp";
-#endif
-  }
-  else {
-    tmp.m_name = m_name;
-  }
-#if DODM
-  tmp.m_type = m_info.GetDist();
-#if DOTENSORS
-  tmp.m_permutation = m_info.GetPerm();
-#endif
-#endif
-  return tmp;
-}
-
-void TempVarNode::FlattenCore(ofstream &out) const
-{
-  DLANode::FlattenCore(out);
-  throw; // m_info
-  out << m_name << endl;
-#if DOTENSORS
-  throw; //m_sumDims
-#endif
-}
-
-void TempVarNode::UnflattenCore(ifstream &in, SaveInfo &info)
-{
-  DLANode::UnflattenCore(in, info);
-  throw; // m_info
-  getline(in,m_name);
-#if DOTENSORS
-  throw; //m_sumDims
-#endif
-}
-
-void TempVarNode::ClearDataTypeCache()
-{
-#if TWOD&&DODM
-  if (!m_mlsize)
-    return;
-  delete m_mlsize;
-  m_mlsize = NULL;
-  delete m_nlsize;
-  m_nlsize = NULL;
-#elif DOTENSORS
-  if (m_lsizes)
-    return;
-  delete [] m_lsizes;
-  m_lsizes = NULL;
-  m_ones.ClearSizes();
-  delete [] m_sumLens;
-  m_sumLens = NULL;
-#endif
-}
-
-void TempVarNode::BuildDataTypeCache()
-{
-#if DOELEM
-  if (m_mlsize)
-    return;
-  m_mlsize = new Sizes;
-  m_nlsize = new Sizes;
-  GetLocalSizes(m_info.m_dist, GetM(0), GetN(0), *m_mlsize, *m_nlsize);
-#elif DOTENSORS
-
-  if (m_lsizes)
-    return;
-  Dim numDims = m_info.GetDist().m_numDims-m_sumDims.size();
- m_lsizes = new Sizes[numDims];
-
- DistType type = m_info.GetEffectiveDist();
- 
- for (Dim dim = 0; dim < numDims; ++dim)
-   GetLocalSizes(type, dim, InputLen(0,dim), m_lsizes+dim);
-
-
- m_sumLens = new Sizes[m_sumDims.size()];
- m_ones.AddRepeatedSizes(1, InputLen(0,0)->NumSizes(), 1);
- EntryListIter iter = m_sumDims.begin();
- for(Dim dim = 0; iter != m_sumDims.end(); ++dim, ++iter) {
-   DimVec vec = (*iter).DistEntryDims();
-   unsigned int numProcs = 1;
-   DimVecIter iter2 = vec.begin();
-   for(; iter2 != vec.end(); ++iter2)
-     numProcs *= GridLens[*iter2];
-   m_sumLens[dim].AddRepeatedSizes(numProcs, InputLen(0,0)->NumSizes(), 1);
- }
- 
-#endif
-}
 
 #if TWOD
 #if DOELEM
@@ -1059,12 +700,12 @@ void MakeTrapNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 }
 
 void MakeTrapNode::PrintCode(IndStream &out)
-{  
+{
   out.Indent();
-  *out << "MakeTrapezoidal( " 
+  *out << "MakeTrapezoidal( "
   << SideToStr(m_side) << ", "
-  << TriToStr(m_tri) << ", " 
-  << m_offset << ", " 
+  << TriToStr(m_tri) << ", "
+  << m_offset << ", "
   << GetNameStr(0)
   << " );\n";
 }
@@ -1098,7 +739,7 @@ bool MoveMakeTrap::CanApply(const Node *node) const
   }
   //This only works if we have one child.
   //The idea is that this node is on the abstract algorithm, but in code it
-  // only gets applied to the final data that gets input into computation, 
+  // only gets applied to the final data that gets input into computation,
   // not the middle redistributions or the original MC_MR data
   if (node->m_children.size() != 1) {
     cout << "MakeTrapNode has more than one child!\n";
@@ -1148,7 +789,7 @@ void RemoveScaleByOne::Apply(Node *node) const
 #if TWOD
 #if DOBLIS||DOELEM
 void ScaleTrapNode::PrintCode(IndStream &out)
-{  
+{
   Layer layer = GetLayer();
   out.Indent();
 #if DOELEM
@@ -1156,30 +797,30 @@ void ScaleTrapNode::PrintCode(IndStream &out)
     *out << "ScaleTrapezoid( ";
     out << m_val;
     *out << ", "
-	 << SideToStr(m_side) << ", "
-	 << TriToStr(m_tri) << ", 0, "
-	 << GetNameStr(0) << " );\n";
+    << SideToStr(m_side) << ", "
+    << TriToStr(m_tri) << ", 0, "
+    << GetNameStr(0) << " );\n";
   }
 #elif DOBLIS
-  if (layer == S1LAYER 
-	   || layer == S2LAYER
-	   || layer == S3LAYER) 
-    {
-      //      bli_obj_set_struc( BLIS_TRIANGULAR, L_10_1 );                                  
-      //      bli_obj_set_uplo( BLIS_LOWER, L_10_1 );  
-      string name = GetInputNameStr(0);
-      *out << "bli_obj_set_struc( BLIS_TRIANGULAR, " << name << " );\n";
-      out.Indent();
-      *out << "bli_obj_set_uplo( BLIS_LOWER, " << name << " );\n";
-      out.Indent();
-      *out << "bli_scalm( ";
-      out << m_val;
-      *out << ", &" << name << " );\n";
-      out.Indent();
-      *out << "bli_obj_set_struc( BLIS_GENERAL, " << name << " );\n";
-      out.Indent();
-      *out << "bli_obj_set_uplo( BLIS_DENSE, " << name << " );\n";
-    }
+  if (layer == S1LAYER
+      || layer == S2LAYER
+      || layer == S3LAYER)
+  {
+    //      bli_obj_set_struc( BLIS_TRIANGULAR, L_10_1 );
+    //      bli_obj_set_uplo( BLIS_LOWER, L_10_1 );
+    string name = GetInputNameStr(0);
+    *out << "bli_obj_set_struc( BLIS_TRIANGULAR, " << name << " );\n";
+    out.Indent();
+    *out << "bli_obj_set_uplo( BLIS_LOWER, " << name << " );\n";
+    out.Indent();
+    *out << "bli_scalm( ";
+    out << m_val;
+    *out << ", &" << name << " );\n";
+    out.Indent();
+    *out << "bli_obj_set_struc( BLIS_GENERAL, " << name << " );\n";
+    out.Indent();
+    *out << "bli_obj_set_uplo( BLIS_DENSE, " << name << " );\n";
+  }
 #else
   throw;
 #endif
@@ -1223,10 +864,10 @@ void ScaleTrapNode::UnflattenCore(ifstream &in, SaveInfo &info)
 #endif //TWOD
 
 #if DOELEM||DOBLIS||DOTENSORS
-ScaleNode::ScaleNode(Layer layer, Coef val) 
-  : m_val(val) 
+ScaleNode::ScaleNode(Layer layer, Coef val)
+: m_val(val)
 {
-  SetLayer(layer); 
+  SetLayer(layer);
 }
 
 void ScaleNode::Prop()
@@ -1241,7 +882,7 @@ void ScaleNode::Prop()
 }
 
 void ScaleNode::PrintCode(IndStream &out)
-{  
+{
   out.Indent();
 #if DOELEM
   if (GetLayer() == DMLAYER || GetLayer() == ABSLAYER) {
@@ -1257,11 +898,11 @@ void ScaleNode::PrintCode(IndStream &out)
 #else
   throw;
 #endif
-
+  
   out << m_val;
   *out << ", "
 	 << GetNameStr(0) << " );\n";
-
+  
 }
 
 void ScaleNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -1363,7 +1004,7 @@ void ViewPan::BuildDataTypeCache()
 
 const Sizes* ViewPan::GetM(ConnNum num) const
 {
-  if (num >  0) 
+  if (num >  0)
     throw;
   if (m_isVert)
     return m_sizes;
@@ -1384,7 +1025,7 @@ const Sizes* ViewPan::GetN(ConnNum num) const
 
 const Sizes* ViewPan::LocalM(ConnNum num) const
 {
-  if (num >  0) 
+  if (num >  0)
     throw;
   if (m_isVert)
     return m_lsizes;
@@ -1535,7 +1176,7 @@ void ViewAroundDiag::BuildDataTypeCache()
 
 const Sizes* ViewAroundDiag::GetM(ConnNum num) const
 {
-  if (num >  1) 
+  if (num >  1)
     throw;
   if (m_isVert) {
     if (num == 0)
@@ -1564,7 +1205,7 @@ const Sizes* ViewAroundDiag::GetN(ConnNum num) const
 
 const Sizes* ViewAroundDiag::LocalM(ConnNum num) const
 {
-  if (num >  1) 
+  if (num >  1)
     throw;
   if (m_isVert) {
     if (num == 0)
@@ -1695,7 +1336,7 @@ Name ViewTL::GetName(ConnNum num) const
   return name;    
 }
 
- void ViewTL::Prop()
+void ViewTL::Prop()
 {
   if (!IsValidCost(m_cost)) {
     if (m_inputs.size() != 3)
@@ -1718,12 +1359,12 @@ void ViewTL::PrintCode(IndStream &out)
     *out << "obj_t " << name << ", " << name << "tmp;\n";
     out.Indent();
     *out << "bli_acquire_mpart_l2r( BLIS_SUBPART1, 0, bli_obj_width( " 
-	 << GetInputNameStr(1) << " ), &" << GetInputNameStr(0)
-	 << ", &" << name << "tmp );\n";
+    << GetInputNameStr(1) << " ), &" << GetInputNameStr(0)
+    << ", &" << name << "tmp );\n";
     out.Indent();
     *out << "bli_acquire_mpart_t2b( BLIS_SUBPART1, 0, bli_obj_length( " 
-	 << GetInputNameStr(2) << " ), &" << name
-	 << "tmp, &" << name << " );\n";
+    << GetInputNameStr(2) << " ), &" << name
+    << "tmp, &" << name << " );\n";
   }
   else
 #endif

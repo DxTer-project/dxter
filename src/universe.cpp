@@ -217,7 +217,7 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
 #endif
 
   GraphNum count = 0;
-  double prevAlgs = TotalCount();
+  GraphNum prevAlgs = TotalCount();
   bool foundNew = true;
   while ( foundNew ) {
     time_t start, end;
@@ -481,7 +481,7 @@ void Universe::PrintAll(int algNum, GraphNum optGraph)
 #elif DOLLDLA
     IndStream optOut(&cout,LLDLASTREAM);
 #endif
-    Print(optOut, optGraph);
+    Print(optOut, optGraph, false);
   }
   else {
     cout << "optGraph = " << optGraph << endl;
@@ -551,6 +551,7 @@ void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
     GraphIter graphIter(poss);
+    graphIter.ClearPrintedRecursively();
     graphIter.PrintRoot(out, whichGraph, currOnly, m_pset);
   }
 

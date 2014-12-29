@@ -58,6 +58,13 @@ RealPSet* MP2();
 RealPSet* MP3();
 RealPSet* W();
 RealPSet* X();
+RealPSet* U();
+RealPSet* Q();
+RealPSet* P();
+RealPSet* H();
+RealPSet* F();
+RealPSet* G();
+RealPSet* z();
 
 void AddTrans()
 {
@@ -77,6 +84,7 @@ void AddTrans()
     Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DM1LAYER, dim), DPTENSORPHASE);
     Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(DM1LAYER, DM2LAYER, dim), DPTENSORPHASE);
   }
+
   Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DM2LAYER, TensorBS.GetSize()), DPTENSORPHASE);
   Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(DM1LAYER, DM2LAYER, TensorBS.GetSize()), DPTENSORPHASE);
 
@@ -89,8 +97,7 @@ void AddTrans()
   Universe::AddTrans(SumScatterUpdateNode::GetClass(), new MoveSumScatterRedistAfter, SUMSCATTERTENSORPHASE);
 
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
-  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER), DPTENSORPHASE);
-  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER), DPTENSORPHASE);
+
   Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(ABSLAYER,DM1LAYER,TensorBS.GetSize()), DPTENSORPHASE);
   Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(DM1LAYER,DM2LAYER,TensorBS.GetSize()), DPTENSORPHASE);
   
@@ -112,9 +119,14 @@ void AddTrans()
   
 #if 1
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
+    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
+    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SingleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);
+    Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll2(dim), ROTENSORPHASE);
+    Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAllPrefix(dim), ROTENSORPHASE);
+    Universe::AddTrans(RedistNode::GetClass(), new MultiIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllGathers(dim), ROTENSORPHASE);
 
 #if SPLITMULTIMODESCATTER
@@ -136,8 +148,14 @@ void AddSimplifiers()
    Universe::AddTrans(RedistNode::GetClass(), new RemoveNOPRedistribs, SIMP);
    Universe::AddTrans(RedistNode::GetClass(), new RemoveWastedRedist, SIMP);
    Universe::AddTrans(RedistNode::GetClass(), new CombineRedistribs, SIMP);
+#if ALLMULTIMODEALLGATHER
+   Universe::AddTrans(RedistNode::GetClass(), new CombineAllGathers, SIMP);
+#endif
    Universe::AddTrans(Permute::GetClass(), new LowerPermute, SIMP);
+   Universe::AddTrans(Permute::GetClass(), new CombinePermutations, SIMP);
+   Universe::AddTrans(Permute::GetClass(), new MovePermuteIntoTempVarNode, SIMP);
    Universe::AddTrans(ScaleNode::GetClass(), new RemoveScaleByOne, SIMP);
+   Universe::AddTrans(TempVarNode::GetClass(), new MoveTempVarNodeIntoLoop, SIMP);
 }
 
 void Usage()
@@ -151,6 +169,13 @@ void Usage()
   cout <<"         5  -> MP3\n";
   cout <<"         6  -> W_bmje\n";
   cout <<"         7  -> X_bmej\n";
+  cout <<"         8  -> U_mnie\n";
+  cout <<"         9  -> Q_mnij\n";
+  cout <<"        10  -> P_jimb\n";
+  cout <<"        11  -> H_me\n";
+  cout <<"        12  -> F_ae\n";
+  cout <<"        13  -> G_mi\n";
+  cout <<"        14  -> z_ai\n";
 }
 
 int main(int argc, const char* argv[])
@@ -158,6 +183,7 @@ int main(int argc, const char* argv[])
 #ifdef _OPENMP
   omp_set_num_threads(1);
   omp_set_nested(true);
+  omp_init_lock(&RealPSet::m_lock);
 #endif
   //  PrintType printType = CODE;
   int numIters = -1;
@@ -193,6 +219,27 @@ int main(int argc, const char* argv[])
       break;
     case(7):
       algFunc = X;
+      break;
+    case(8):
+      algFunc = U;
+      break;
+    case(9):
+      algFunc = Q;
+      break;
+    case(10):
+      algFunc = P;
+      break;
+    case(11):
+      algFunc = H;
+      break;
+    case(12):
+      algFunc = F;
+      break;
+    case(13):
+      algFunc = G;
+      break;
+    case(14):
+      algFunc = z;
       break;
     default:
       Usage();
@@ -274,12 +321,15 @@ int main(int argc, const char* argv[])
     uni.Expand(numIters, ROTENSORPHASE, TenCullRO);
     time(&end);
     cout << "RO phase took " << difftime(end,start2) << " seconds\n";
-    
+
+    //        uni.PrintAll(algNum);
+    //        throw;
+      
     cout << "Propagating\n";
     cout.flush();
     time(&start2);
     uni.Prop();
-    uni.CullWorstPerformers(.98, 5);
+    uni.CullWorstPerformers(.99, 3);
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
@@ -374,9 +424,7 @@ int main(int argc, const char* argv[])
 
 RealPSet* RedistExample()
 {
-  Size smallSize = 10;
-  Size medSize = 100;
-  Size bigSize = 1000;
+  Size bigSize = 300;
 
   Sizes sizes[4];
 
@@ -387,32 +435,21 @@ RealPSet* RedistExample()
 
   DistType type1;
   type1.SetToDefault(4);
-  type1.m_dists[0].m_val = 3;
-  type1.m_dists[1].m_val = 4;
+  type1.m_dists[0].m_val = 0;
+  type1.m_dists[1].m_val = 1;
   type1.m_dists[2].m_val = 0;
-  type1.m_dists[3].m_val = 0;
+  type1.m_dists[3].m_val = 3;
 
-  RedistNode *redist1 = new RedistNode(type1);
+  DimVec ident;
+  IdentDimVec(4, ident);
+  
+  RedistNode *redist1 = new RedistNode(type1, Ain->GetNameStr(0), ident, ident);
   redist1->AddInput(Ain, 0);
-
-  DistType type2;
-  type2.SetToDefault(4);
-  type2.m_dists[0].m_val = 0;
-  type2.m_dists[1].m_val = 2;
-  type2.m_dists[2].m_val = 0;
-  type2.m_dists[3].m_val = 4;
-
-  RedistNode *redist2 = new RedistNode(type2);
-  redist2->AddInput(Ain, 0);
 
   OutputNode *Cout1 = new OutputNode("C output");
   Cout1->AddInput(redist1, 0);
 
-
-  OutputNode *Cout2 = new OutputNode("C1 output");
-  Cout2->AddInput(redist2, 0);
-
-  Poss *outerPoss = new Poss(2, Cout1, Cout2);
+  Poss *outerPoss = new Poss(1, Cout1);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -421,8 +458,6 @@ RealPSet* RedistExample()
 
 RealPSet* RedistExample2()
 {
-  Size smallSize = 10;
-  Size medSize = 100;
   Size bigSize = 1000;
   
   Sizes sizes[4];
@@ -439,7 +474,10 @@ RealPSet* RedistExample2()
   type1.m_dists[2].m_val = 0;
   type1.m_dists[3].m_val = 4;
 
-  RedistNode *redist1 = new RedistNode(type1);
+  DimVec ident;
+  IdentDimVec(4, ident);
+
+  RedistNode *redist1 = new RedistNode(type1, Ain->GetNameStr(0), ident, ident);
   redist1->AddInput(Ain, 0);
 
   OutputNode *Cout1 = new OutputNode("C output");
@@ -454,7 +492,6 @@ RealPSet* RedistExample2()
 
 RealPSet* MartinsExample()
 {
-  Size smallSize = 10;
   Size medSize = 100;
   Size bigSize = 1000;
 
@@ -633,8 +670,8 @@ RealPSet* MP2()
 
 RealPSet* MP3()
 {
-  const Size bigMP3Size = 300;
-  const Size smallMP3Size = 300;
+  const Size bigMP3Size = 200;
+  const Size smallMP3Size = 20;
   Size eSize = bigMP3Size;
   Size fSize = bigMP3Size;
   Size gSize = bigMP3Size;
@@ -839,8 +876,8 @@ RealPSet* W()
 {
   //~ 10:1 ratio
   // 53, 5 for H20
-  const Size big = 53; //a-h
-  const Size small = 5; //i-p
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
 
   InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
@@ -866,9 +903,9 @@ RealPSet* W()
 RealPSet* X()
 {
   //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 53; //a-h
-  const Size small = 5; //i-p
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
 
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
   InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
@@ -890,8 +927,194 @@ RealPSet* X()
   return outerSet;
 }
 
+RealPSet* U()
+{
+  //~ 10:1 ratio
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
+
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *u_mnie = CreateInput4("u_mnie", small, small, small, big);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
+
+  RealPSet *set = U_mnie_calc(t_fj, 
+			      u_mnie, v_femn,
+			      big, small);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* Q()
+{
+  //~ 10:1 ratio
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
+
+  InputNode *q_mnij = CreateInput4("q_mnij", small, small, small, small);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *u_mnie = CreateInput4("u_mnie", small, small, small, big);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+
+  RealPSet *set = Q_mnij_calc(q_mnij, t_fj, 
+			      u_mnie, v_femn, T_bfnj, 
+			      big, small);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* P()
+{
+  //~ 10:1 ratio
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
+
+  InputNode *u_jimb = CreateInput4("u_jimb", small, small, small, big);
+  InputNode *r_bmef = CreateInput4("r_bmef", big, small, big, big);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *w_bmie = CreateInput4("w_bmie", big, small, small, big);
+  InputNode *T_efij = CreateInput4("T_efij", big, big, small, small);
+  InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
+
+  RealPSet *set = P_jimb_calc(r_bmef, t_fj, 
+			      u_jimb, w_bmie, T_efij, 
+			      x_bmej,
+			      big, small);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* H()
+{
+  //~ 10:1 ratio
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
+
+  InputNode *t_fn = CreateInput2("t_fn", big, small);
+  InputNode *v_efmn = CreateInput4("v_efmn", big, big, small, small);
+
+  RealPSet *set = H_me_calc(t_fn, v_efmn,
+			      big, small);
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
 
 
+RealPSet* F()
+{
+  //~ 10:1 ratio
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
+  
+  InputNode *H_me = CreateInput2("H_me", small, big);
+  InputNode *T_afmn = CreateInput4("T_afmn", big, big, small, small);
+  InputNode *r_amef = CreateInput4("r_amef", big, small, big, big);
+  InputNode *t_am = CreateInput2("t_am", big, small);
+  InputNode *v_efmn = CreateInput4("v_efmn", big, big, small, small);
+  
+  RealPSet *set = F_ae_calc(H_me, r_amef, 
+			    t_am, v_efmn, T_afmn,
+			    big, small);
+  
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+
+
+RealPSet* G()
+{
+  //~ 10:1 ratio
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
+  
+  InputNode *H_me = CreateInput2("H_me", small, big);
+  InputNode *T_efin = CreateInput4("T_efin", big, big, small, small);
+  InputNode *u_mnie = CreateInput4("u_mnie", small, small, small, big);
+  InputNode *t_ei = CreateInput2("t_ei", big, small);
+  InputNode *v_efmn = CreateInput4("v_efmn", big, big, small, small);
+  
+  RealPSet *set = G_mi_calc(H_me, u_mnie,
+			    t_ei, v_efmn, T_efin,
+			    big, small);
+  
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* z()
+{
+  //~ 10:1 ratio
+  // 530, 5 for H20
+  const Size big = 530; //a-h
+  const Size small = 50; //i-p
+  
+  InputNode *f_ae = CreateInput2("f_ae", big, big);
+  InputNode *G_mi = CreateInput2("G_mi", small, small);
+  InputNode *w_amie = CreateInput4("w_amie", big, small, small, big);
+  InputNode *x_amei = CreateInput4("x_amei", big, small, big, small);
+  InputNode *T_aeim = CreateInput4("T_aeim", big, big, small, small);
+  InputNode *r_amef = CreateInput4("r_amef", big, small, big, big);
+  InputNode *t_am = CreateInput2("t_am", big, small);
+  DLANode *H_me = CreateInput2("H_me", small, big);
+  InputNode *U_mnie = CreateInput4("U_mnie", small, small, small, big);
+  
+
+  RealPSet *set = z_ai_calc(f_ae, G_mi, 
+			    H_me, U_mnie,
+			    w_amie,
+			    x_amei, 
+			    t_am, r_amef, T_aeim,
+			    big, small);
+  
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
 
 
 

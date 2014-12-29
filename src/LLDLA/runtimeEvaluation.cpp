@@ -140,12 +140,12 @@ string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap* imps, st
 
 string RuntimeTest::CorrectnessCheck(ImplementationMap* imps, string referenceImpName)
 {
-  int i;
   string correctnessCheck = "";
   vector<string> argBuffers = ArgBuffers("_ref");
   vector<string> testBuffers = ArgBuffers("_test");
   string callRefImp = "\t" + referenceImpName + "(" + CArgList(argBuffers) + ");\n\n";
   correctnessCheck += callRefImp;
+  unsigned int i;
   for (i = 1; i <= imps->size(); i++) {
     correctnessCheck += CopyArgBuffersTo("_test") + "\n\t";
     correctnessCheck += m_operationName + "_" + std::to_string((long long int) i) + "(" + CArgList(testBuffers) + ");\n";
@@ -180,7 +180,7 @@ vector<string> RuntimeTest::ArgBuffers(string postfix)
 
 string RuntimeTest::TimingLoop(ImplementationMap* imps)
 {
-  int i;
+  unsigned int i;
   string loopBody = "";
   for (i = 1; i <= imps->size(); i++) {
     string opName = m_operationName + "_" + std::to_string((long long int) i);

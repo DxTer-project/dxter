@@ -45,9 +45,14 @@ class RedistNode : public DLANode
   SizesArray m_lsizes;
   bool m_isArray;
   string m_name;
+  string m_align;
+  DimVec m_alignModes;
+  DimVec m_alignModesSrc;
+  
   RedistNode();
-  RedistNode(const DistType &destType);
-  RedistNode(const DistType &destType, const Permutation &perm);
+  RedistNode(const DistType &destType, const string &align, const DimVec &alignModes, const DimVec &alignModesSrc);
+  RedistNode(const DistType &destType, const Permutation &perm, const string &align, 
+	     const DimVec &alignModes, const DimVec &alignModesSrc);
   virtual ~RedistNode();
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   static Node* BlankInst() { return  new RedistNode; }
@@ -162,7 +167,11 @@ class SingleIndexAllToAll : public SingleTrans
 
 
 //Separating legal AllToAll like the following
-//[(x|_|y),(z|_|w)] <- [(x|_|w),(z|_|y)]
+//[p(x|_|y),p(z|_|w)] <- [(p(x)|_|w),(p(z)|_|y)]
+// into
+//[(p(x)|_|y),(p(z)|_|w)] <- [(p(x)|_|w),(p(z)|_|y)]
+//[p(x|_|y),p(z|_|w)] <- [(p(x)|_|y),(p(z)|_|w)]
+// (Also, grid modes can disappear in the final redistribution)
 class DoubleIndexAllToAll : public SingleTrans
 {
  public:
@@ -173,6 +182,50 @@ class DoubleIndexAllToAll : public SingleTrans
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
 };
+
+class DoubleIndexAllToAll2 : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ DoubleIndexAllToAll2(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"DoubleIndexAllToAll2" + (char)(m_dim+48); }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+
+//E.g., [21,03] -> [01,23]
+// as [21,03] -> [12,03]
+//    [12,03] -> [12,30]
+//    [12,30] -> [21,03]
+//Separating legal AllToAll like the following
+//[(x|_|y),(z|_|w)] <- [(z),(x)]
+// to
+//[(x),(z)] <- [(z),(x)]
+//[(x|_|y),(z|_|w)] <- [(x),(z)]
+class DoubleIndexAllToAllPrefix : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ DoubleIndexAllToAllPrefix(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"DoubleIndexAllToAllPrefix" + (char)(m_dim+48); }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
+class MultiIndexAllToAll : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ MultiIndexAllToAll(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"MultiIndexAllToAll" + (char)(m_dim+48); }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const {return true;}
+};
+
 
 /*
 [([x|_|p(y)|_|z),(w)]
@@ -213,5 +266,15 @@ class SplitAllAllGathers : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };
+
+#if ALLMULTIMODEALLGATHER
+class CombineAllGathers : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return (string)"CombineAllGathers";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+#endif //ALLMULTIMODEALLGATHER
 
 #endif

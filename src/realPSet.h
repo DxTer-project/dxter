@@ -24,6 +24,7 @@
 #pragma once
 
 #define PRINTTRACKING 0
+#define CHECKFORSETREUSE USESHADOWS
 
 #include "base.h"
 #include "poss.h"
@@ -37,6 +38,12 @@ class ShadowPSet;
 class RealPSet : public BasePSet
 {
  public:
+#if DOTENSORS
+  static RealPSetMMap m_setMap;
+#ifdef _OPENMP
+  static omp_lock_t m_lock;
+#endif //_OPENMP
+#endif
   PossMMap m_posses;
   string m_functionality;
   PSetVec m_shadows;
@@ -59,6 +66,7 @@ class RealPSet : public BasePSet
   virtual void ClearBeforeProp();
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows);
   void Migrate();
+  void DisconnectFromSetsForMergingRecord();
   virtual BasePSet* GetNewInst() {return (BasePSet*)(new RealPSet);}
   virtual const PossMMap& GetPosses() const {return m_posses;}
   virtual PossMMap& GetPosses() {return m_posses;}
@@ -75,7 +83,7 @@ class RealPSet : public BasePSet
   bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   virtual GraphNum TotalCount() const;
-  virtual void InlinePoss(Poss *inliningPoss, PossMMap &newPosses);
+  virtual void InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPosses);
   virtual ShadowPSet* GetNewShadow();
   virtual ShadowPSet* GetNewShadowDup(Poss *poss);
 
@@ -86,6 +94,10 @@ class RealPSet : public BasePSet
   virtual void ClearDataTypeCache();
 
   void InlineAllSets();
+
+#if DOTENSORS
+  bool SamePSetWRTFunctionality(const RealPSet *other) const;
+#endif
 
   void SetInTunsAsPrinted();
   bool RemoveLoops(bool *doneSomething);

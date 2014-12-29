@@ -24,6 +24,7 @@
 #if DOTENSORS
 
 #include "loopTunnel.h"
+#include "tempVarNode.h"
 
 Permute::Permute(string start, string end, Layer layer)
  : m_permutation(start,end)
@@ -163,9 +164,7 @@ void Permute::PrintCode(IndStream &out)
 {  
   //Reflect in AddVars
   out.Indent();
-  *out << GetNameStr(0) << ".ResizeTo( " << GetInputNameStr(0) << ".Shape() );\n";
-  out.Indent();
-  *out << "Permute( " << GetNameStr(0) << ", " << GetInputNameStr(0) << " );\n";
+  *out << "Permute( " << GetInputNameStr(0) << ", " << GetNameStr(0) << " );\n";
 }
 
 void Permute::AddVariables(VarSet &set) const
@@ -190,6 +189,24 @@ void LowerPermute::Apply(Node *node) const
   perm->SetLayer(SMLAYER);
 }
 
+bool MovePermuteIntoTempVarNode::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != Permute::GetClass())
+    throw;
+  const Permute *perm = (Permute*)node;
+  return (perm->Input(0)->GetNodeClass() == TempVarNode::GetClass());
+}
+
+
+void MovePermuteIntoTempVarNode::Apply(Node *node) const
+{
+  Permute *perm = (Permute*)node;
+  TempVarNode *temp = (TempVarNode*)(perm->Input(0));
+  temp->m_info.SetPerm(temp->m_info.GetPerm().ComposeWith(perm->m_permutation));
+  perm->RedirectAllChildren(temp);
+  perm->m_poss->DeleteChildAndCleanUp(perm);
+}
+
 
 bool PermuteLoopHoist::CanApply(const Node *node) const
 {
@@ -202,6 +219,11 @@ bool PermuteLoopHoist::CanApply(const Node *node) const
   bool foundOne = false;
   Permutation perm;
   const LoopTunnel *setTun = (LoopTunnel*)node;
+  //should have inlined
+  if (setTun->m_pset->IsShadow())
+    throw;
+  if (setTun->m_children.size() == 0)
+    throw;
   NodeConnVecConstIter setIter = setTun->m_children.begin();
   for(; setIter != setTun->m_children.end(); ++setIter) {
     const LoopTunnel *possTun = (LoopTunnel*)((*setIter)->m_n);
@@ -265,6 +287,7 @@ void PermuteLoopHoist::Apply(Node *node) const
   perm->RedirectChildren(possTun, 0);
   perm->m_poss->DeleteChildAndCleanUp(perm);
 
+
   LoopTunnel *possTunOut = possTun->GetMatchingOutTun();
   if (possTunOut->Input(0)->GetNodeClass() == Permute::GetClass()) {
     Permute *outPermute = (Permute*)(possTunOut->Input(0));
@@ -283,4 +306,50 @@ void PermuteLoopHoist::Apply(Node *node) const
     newOutPermute->BuildDataTypeCache();
   }
 }
+
+bool CombinePermutations::CanApply(const Node *node) const
+{
+  const Permute *perm = (Permute*)node;
+  NodeConnVecConstIter iter = perm->m_children.begin();
+  for(; iter != perm->m_children.end(); ++iter) {
+    const Node *child = (*iter)->m_n;
+    if (child->GetNodeClass() == Permute::GetClass())
+      return true;
+  }
+  return false;
+}
+
+void CombinePermutations::Apply(Node *node) const
+{
+  Permute *perm = (Permute*)node;
+  for(int i = 0; i < perm->m_children.size(); ++i) {
+    Node *tmp = perm->Child(i);
+    if (tmp->GetNodeClass() == Permute::GetClass()) {
+      Permute *child = (Permute*)tmp;
+      Permutation composition = perm->m_permutation.ComposeWith(child->m_permutation);
+      if (composition.HasPerm()) {
+	Permute *newPerm = new Permute(composition, perm->GetLayer());
+	newPerm->AddInput(perm->Input(0), perm->InputConnNum(0));
+	child->RedirectChildren(newPerm, 0);
+	child->m_poss->AddNode(newPerm);
+	newPerm->BuildDataTypeCache();
+      }
+      else {
+	child->RedirectChildren(perm->Input(0), perm->InputConnNum(0));
+      }
+      bool needToBreak = false;
+      if (perm->m_children.size() == 1)
+	needToBreak = true;
+      child->m_poss->DeleteChildAndCleanUp(child);
+      if (needToBreak)
+	break;
+      else
+	--i;
+    }
+  }
+  perm->m_poss->BuildDataTypeCache();
+}
+
+
+
 #endif //DOTENSORS

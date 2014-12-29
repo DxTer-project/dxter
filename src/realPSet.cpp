@@ -33,6 +33,13 @@ extern unsigned int M_phase;
 
 #define FORMSETSEARLY 0
 
+#if DOTENSORS
+RealPSetMMap RealPSet::m_setMap;
+#ifdef _OPENMP
+omp_lock_t RealPSet::m_lock;
+#endif //_OPENMP
+#endif
+
 
 RealPSet::RealPSet()
   : m_functionality(), m_mergeLeft(NULL), m_mergeRight(NULL)
@@ -104,7 +111,10 @@ void RealPSet::Init(Poss *poss)
 
 void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
 {
-  //  cout << "updating " << this << endl;
+#if PRINTTRACKING
+  cout << "updating " << this << endl;
+  cout << "old " << oldPtr << " to new " << newPtr << endl;
+#endif
   if (m_mergeLeft == oldPtr) {
     m_mergeLeft = newPtr;
     if (newPtr == NULL) {
@@ -162,6 +172,11 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
 
 void RealPSet::Migrate()
 {
+#if PRINTTRACKING
+  cout << "migrating " << this << endl;
+#endif
+  if (m_flags & SETHASMIGRATED)
+    return;
   ShadowPSet *shadowToReplace = NULL;
   for(unsigned int shadowNum = 0; shadowNum < m_shadows.size(); ++shadowNum) {
     BasePSet *tmp = m_shadows[shadowNum];
@@ -171,31 +186,37 @@ void RealPSet::Migrate()
     }
   }
 
+
+#if CHECKFORSETREUSE
+#if DOTENSORS
+  if (m_flags & SETCHECKEDFORDUP) {
+    size_t hash = Poss::Hash(m_functionality);
+    bool found = false;
+#ifdef _OPENMP
+    omp_set_lock(&m_lock);
+#endif //_OPENMP
+    RealPSetMMapRangePair pair = m_setMap.equal_range(hash);
+    for( ; pair.first != pair.second; ++pair.first) {
+      if ((*(pair.first)).second == this) {
+	m_setMap.erase(pair.first);
+	found = true;
+        break;
+      }
+    }
+#ifdef _OPENMP
+    omp_unset_lock(&m_lock);
+#endif //_OPENMP
+    m_flags &= ~SETCHECKEDFORDUP;
+    if (!found)
+      throw;
+  }
+#endif //DOTENSORS
+#endif //CHECKFORSETREUSE
+
   //  cout << "migrating " << this << endl;
   if (!shadowToReplace) {
     //    cout << "deleting, no shadows " << this << endl;
-#if PRINTTRACKING
-    cout << "deleting, no shadows " << this << endl;
-#endif
-    if (m_mergeLeft) {
-      //      cout << "updating left\n";
-      m_mergeLeft->UpdateRealPSetPointers(this, NULL); 
-      m_mergeLeft = NULL;
-    }
-    if (m_mergeRight) {
-      //      cout << "updating right\n";
-      m_mergeRight->UpdateRealPSetPointers(this, NULL);
-      m_mergeLeft = NULL;
-    }
-    //    cout << "map's size : " << m_mergeMap.size() << endl;
-    PSetMapIter setIter = m_mergeMap.begin();
-    for(; setIter != m_mergeMap.end(); ++setIter) {
-      //      cout << "updating first\n";
-      setIter->first->UpdateRealPSetPointers(this, NULL);
-      //      cout << "updating second\n";
-      setIter->second->UpdateRealPSetPointers(this, NULL);
-    }
-    m_mergeMap.clear();
+    DisconnectFromSetsForMergingRecord();
     return;
   }
 
@@ -232,13 +253,29 @@ void RealPSet::Migrate()
 #endif
 
 
-  if (m_mergeLeft)
+  if (m_mergeLeft) {
+#if PRINTTRACKING
+    cout << "updating merge left\n";
+#endif
     m_mergeLeft->UpdateRealPSetPointers(this, newSet);
-  if (m_mergeRight)
+  }
+  if (m_mergeRight){
+#if PRINTTRACKING
+    cout << "updating merge right\n";
+#endif
     m_mergeRight->UpdateRealPSetPointers(this, newSet);
+  }
   PSetMapIter setIter = m_mergeMap.begin();
   for(; setIter != m_mergeMap.end(); ++setIter) {
+#if PRINTTRACKING
+    cout << "updating mergemap first\n";
+#endif
+
     setIter->first->UpdateRealPSetPointers(this, newSet);
+#if PRINTTRACKING
+    cout << "updating mergemap second\n";
+#endif
+    
     setIter->second->UpdateRealPSetPointers(this, newSet);
   }
 
@@ -336,12 +373,54 @@ void RealPSet::Migrate()
   newSet->ClearDeletingRecursively();
   delete shadowToReplace;
   m_shadows.clear();
+  m_flags |= SETHASMIGRATED;
   //  cout << "building on " << newSet->m_ownerPoss << endl;
   //  newSet->m_ownerPoss->BuildDataTypeCache();
+#if PRINTTRACKING
+  cout << "done migrating " << this << endl;
+#endif
+}
+
+void RealPSet::DisconnectFromSetsForMergingRecord()
+{
+    if (m_mergeLeft) {
+#if PRINTTRACKING
+      cout << "updating left\n";
+#endif
+      m_mergeLeft->UpdateRealPSetPointers(this, NULL);
+      m_mergeLeft = NULL;
+    }
+    if (m_mergeRight) {
+#if PRINTTRACKING
+      cout << "updating right\n";
+#endif
+      m_mergeRight->UpdateRealPSetPointers(this, NULL);
+      m_mergeRight = NULL;
+    }
+    //    cout << "map's size : " << m_mergeMap.size() << endl;
+    PSetMapIter setIter = m_mergeMap.begin();
+    for(; setIter != m_mergeMap.end(); ++setIter) {
+#if PRINTTRACKING
+      cout << "updating first\n";
+#endif
+      setIter->first->UpdateRealPSetPointers(this, NULL);
+#if PRINTTRACKING
+      cout << "updating second\n";
+#endif
+      setIter->second->UpdateRealPSetPointers(this, NULL);
+    }
+    m_mergeMap.clear();
+    m_leftInMap.clear();
+    m_rightInMap.clear();
+    m_leftOutMap.clear();
+    m_rightOutMap.clear();
 }
 
 RealPSet::~RealPSet()
 {
+#if PRINTTRACKING
+  cout << "deleting " << this << endl;
+#endif
   if (!(m_flags & SETTOPLEVELFLAG) && !(m_flags & SETHASMIGRATED)
       && (m_inTuns.empty() || m_outTuns.empty()))
     throw;
@@ -777,6 +856,10 @@ void RealPSet::Cull(Phase phase)
   while (iter != m_posses.end()) {
     Poss *poss = (*iter).second;
     if (!poss->IsSane()) {
+      if (m_posses.size() == 1) {
+        poss->PrintTransVec();
+        poss->ForcePrint();
+      }
       RemoveAndDeletePoss(poss, false);
       m_posses.erase(iter);
       iter = m_posses.begin();
@@ -979,8 +1062,16 @@ bool RealPSet::TakeIter(const TransMap &transMap,
   // BAM: Or do I?
   if (mmap.size()) {
     if (mmap.size() > 100) {
-      cout << "\t\tAdding " << mmap.size() << " posses\n";
-      //      cout << "\t\t" << m_functionality << endl;
+      cout << "\t\tAdding " << mmap.size() << " posses\t( " << m_shadows.size() << " shadows)\n";
+      /*
+      if (InTun(0)->GetInputNameStr(0) == "P_jimb_part3_1_part1_1_temp__S__D_3__D_1_2__D_0") {
+	m_ownerPoss->PrintTransVec();
+	cout << "\t\t" << m_functionality << endl;
+	for (int i = 0; i < m_inTuns.size(); ++i) {
+	  cout << "\t\t\t" << m_inTuns[i]->GetInputNameStr(0) << endl;
+	}
+      }
+      */
     }
     AddPossesOrDispose(mmap, &actuallyAdded);
     if (mmap.size() > 100)
@@ -1403,7 +1494,7 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 	  && m_ownerPoss->m_sets.size() > 1)
         {
 	  //	  didMerge = true;
-	  InlinePoss(poss, newPosses);
+	  InlinePoss(poss, 0, newPosses);
 	  m_posses.erase(iter);
           PossMMapIter mapIter = newPosses.begin();
           for(; mapIter != newPosses.end(); ++mapIter)
@@ -1432,32 +1523,29 @@ void RealPSet::InlineAllSets()
     iter = m_posses.begin();
     while (iter != m_posses.end()) {
       Poss *poss = (*iter).second;
+      bool inlined = false;
       //This poss has only a single PSet on it
       // Make new posses for me, each containing the posses in
       // poss->m_posses[0];
-      if (poss->m_sets.size() >= 1  &&
-	     poss->m_sets[0]->IsTransparent())
-	{
-	  PossMMap newPosses;
-	  //	  didMerge = true;
-	  InlinePoss(poss, newPosses);
-	  m_posses.erase(iter);
-	  PossMMapIter mapIter = newPosses.begin();
-	  for(; mapIter != newPosses.end(); ++mapIter)
-	    (*mapIter).second->BuildDataTypeCache();
-	  AddPossesOrDispose(newPosses);
-	  iter = m_posses.begin();
-	}
-      else {
-	if (poss->m_sets.size() > 1) {
-	  BasePSet *set = poss->m_sets[1];
-	  if (set->IsTransparent()) {
-	    cout << "second set is transparent\n";
-	    throw;
-	  }	 
-	} 
-	++iter;
+      for(int i = 0; !inlined && i < poss->m_sets.size(); ++i) {
+	if (poss->m_sets[i]->IsTransparent())
+	  {
+	    PossMMap newPosses;
+	    //	  didMerge = true;
+	    InlinePoss(poss, i, newPosses);
+	    m_posses.erase(iter);
+	    PossMMapIter mapIter = newPosses.begin();
+	    for(; mapIter != newPosses.end(); ++mapIter)
+	      (*mapIter).second->BuildDataTypeCache();
+	    AddPossesOrDispose(newPosses);
+	    inlined = true;
+	  }
       }
+      if (inlined) {
+	iter = m_posses.begin();
+      }
+      else
+	++iter;
     }
   }
 }
@@ -1486,16 +1574,16 @@ GraphNum RealPSet::TotalCount() const
   return tot;
 }
 
-void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
+void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPosses)
 {
 #if PRINTTRACKING
-  cout << "inlining " << this << endl;
+  cout << "inlining " << num << " on " << this << endl;
 #endif
-  if (inliningPoss->m_sets[0]->IsShadow()) {
-    inliningPoss->ReplaceShadowSetWithReal(0);
+  if (inliningPoss->m_sets[num]->IsShadow()) {
+    inliningPoss->ReplaceShadowSetWithReal(num);
   }
 
-  RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[0]);
+  RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[num]);
 
   if (pset->IsLoop() || !pset->IsTransparent())
     throw;
@@ -1567,10 +1655,11 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 
 
     {
+      int i = 0;
       PSetVecIter setIter = inliningPoss->m_sets.begin();
-      //inlining the first one
-      ++setIter;
-      for(; setIter != inliningPoss->m_sets.end(); ++setIter) {
+      for(; setIter != inliningPoss->m_sets.end(); ++setIter,++i) {
+	if (i == num)
+	  continue;
 	BasePSet *oldSet = (*setIter);
 #if USESHADOWS
         BasePSet *newSet = oldSet->GetNewShadow();
@@ -1733,12 +1822,19 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
       
       Node *node = *iter;
 
+      //going through inputs of the node and patching them if they
+      // were connecting to the outputs of the inlining pset
+      //need to change the inputs of this node to be nodes
+      // on the inlined poss
       NodeConnVecIter connIter = node->m_inputs.begin();
       for(; connIter != node->m_inputs.end(); ++connIter) {
         NodeConn *conn = *connIter;
         NodeIntMapIter mapIter = tunnelNumMap.find(conn->m_n);
         if (mapIter != tunnelNumMap.end()) {
 	  if (!conn->m_n->IsTunnel(SETTUNOUT))
+	    throw;
+	  //check for multiple in/out
+	  if (conn->m_num)
 	    throw;
           Node *newParent = map[currPoss->OutTun(mapIter->second)->Input(conn->m_num)];
           unsigned int newNum = currPoss->OutTun(mapIter->second)->InputConnNum(conn->m_num);
@@ -1752,9 +1848,12 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 	  else {
 	    for(unsigned int i = 0; i < newParent->m_children.size(); ++i) {
 	      if (newParent->Child(i)->IsTunnel(POSSTUNOUT)) {
-		delete newParent->m_children[i];
-		newParent->m_children.erase(newParent->m_children.begin()+i);
-		--i;
+		if (tunnelNumMap.find(newParent->Child(i)->Child(0)) != tunnelNumMap.end()) {
+		  //The child of this is the posstunout for the pos that's being inlined, so remove it.
+		  delete newParent->m_children[i];
+		  newParent->m_children.erase(newParent->m_children.begin()+i);
+		  --i;
+		}
 	      }
 	    }
 	  }
@@ -1890,11 +1989,11 @@ void RealPSet::InlinePoss(Poss *inliningPoss, PossMMap &newPosses)
 	    //the following can happen if currPoss has a set
 	    if ((nodeTun->m_tunType == SETTUNIN && childTun->m_tunType == POSSTUNIN))
 	      continue;
-      cout << nodeTun->GetType() << endl;
-      cout << childTun->GetType() << endl;
-      cout << nodeTun->m_poss << " vs. " << childTun->m_poss << endl;
-      cout << "old " << currPoss << endl;
-      cout << "new " << newPoss << endl;
+	    cout << nodeTun->GetType() << endl;
+	    cout << childTun->GetType() << endl;
+	    cout << nodeTun->m_poss << " vs. " << childTun->m_poss << endl;
+	    cout << "old " << currPoss << endl;
+	    cout << "new " << newPoss << endl;
 	  }
 	  cout << node << " " << node->GetType() << endl;
 	  cout << "child " << i << " is " << child << " " << child->GetType() << endl;
@@ -2224,3 +2323,48 @@ void RealPSet::ClearDeletingRecursively()
     iter->second->ClearDeletingRecursively();
   }
 }
+
+#if DOTENSORS
+bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
+{
+  if (m_functionality != other->m_functionality)
+    throw;
+  if (IsLoop() != other->IsLoop())
+    throw;
+  if (m_inTuns.size() != other->m_inTuns.size())
+    return false;
+  if (m_outTuns.size() != other->m_outTuns.size())
+    return false;
+  for (int i = 0; i < m_inTuns.size(); ++i) {
+    const Tunnel *in1 = (Tunnel*)(InTun(i));
+    const Tunnel *in2 = (Tunnel*)(other->InTun(i));
+    if (in1->GetType() != in2->GetType())
+      return false;
+    Dim numDims = in1->InputNumDims(0);
+    if (numDims != in2->InputNumDims(0))
+      return false;       
+    for (int dim = 0; dim < numDims; ++dim) {
+      const Sizes *sizes1 = in1->InputLen(0,dim);
+      const Sizes *sizes2 = in2->InputLen(0,dim);
+      if (sizes1->m_entries.size() != sizes2->m_entries.size())
+        return false;
+      if (*sizes1 != *sizes2)
+	return false;
+    }
+    
+    if (in1->InputDataType(0) != in2->InputDataType(0))
+      return false;
+
+    if (in1->GetInputName(0) != in2->GetInputName(0)) {
+      return false;
+      Name name1 = in1->GetInputName(0);
+      Name name2 = in2->GetInputName(0);
+      cout << in1->GetInputNameStr(0) << endl;
+      cout << in2->GetInputNameStr(0) << endl;
+      cout << (name1 != name2);
+      throw;
+    }
+  }
+  return true;
+}
+#endif

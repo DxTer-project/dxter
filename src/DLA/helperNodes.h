@@ -26,6 +26,7 @@
 #include "DLANode.h"
 #include "DLAOp.h"
 #include "LLDLA.h"
+#include "tempVarNode.h"
 
 class InputNode : public DLANode
 {
@@ -174,65 +175,6 @@ blah
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
 #endif
-
-class TempVarNode : public DLANode
-{
- public:
-  DataTypeInfo m_info;
-  string m_name;
-#if DOELEM
-  Sizes *m_mlsize, *m_nlsize;
-#elif DOTENSORS
-  SizesArray m_lsizes;
-  SizesArray m_sumLens;
-  EntryList m_sumDims;
-  Sizes m_ones;
-#endif
-
-  TempVarNode();
-  TempVarNode(string name);
-#if DOTENSORS
-  TempVarNode(DistType dist, EntryList sumDims);
-  TempVarNode(DistType dist, EntryList sumDims, string name);
-#endif
-#if DODM
-  TempVarNode(DistType dist);
-  TempVarNode(DistType dist, string name); 
-#endif
-
- ~TempVarNode();
-  virtual NodeType GetType() const;
-  static Node* BlankInst() { return  new TempVarNode; }
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
-  virtual Node* GetNewInst() { return BlankInst(); }
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-
-  virtual void Prop();
-  virtual void PrintCode(IndStream &out);
-  virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "tempVar";}
-  virtual const DataTypeInfo& DataType(ConnNum num) const;
-#if TWOD
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
-#if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
-#endif
-#else
-  virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
-#endif
-  virtual Name GetName(ConnNum num) const;
-  virtual void FlattenCore(ofstream &out) const;
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual void ClearDataTypeCache();
-  virtual void BuildDataTypeCache();
-  virtual bool IsReadOnly() const {return true;}
-  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
-  virtual bool IsDataDependencyOfInput() const {return false;}
-};
 
 
 #if TWOD

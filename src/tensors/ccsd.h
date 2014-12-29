@@ -41,6 +41,49 @@ RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
 		      DLANode *T_bfnj,
 		      const Size big, const Size small);
 
+RealPSet* U_mnie_calc(DLANode *t_fj, 
+		      DLANode *u_mnie, DLANode *v_femn,
+		      const Size big, const Size small);
+
+RealPSet* Q_mnij_calc(DLANode *q_mnij,
+		      DLANode *t_fj, 
+		      DLANode *u_mnie, DLANode *v_femn,
+		      DLANode *T_bfnj,
+		      const Size big, const Size small);
+
+RealPSet* P_jimb_calc(DLANode *r_bmef,
+		      DLANode *t_fj, 
+		      DLANode *u_jimb, DLANode *w_bmie,
+		      DLANode *T_efij, DLANode *x_bmej,
+		      const Size big, const Size small);
+
+RealPSet* H_me_calc(DLANode *t_fn, DLANode *v_efmn,
+		      const Size big, const Size small);
+
+RealPSet* F_ae_calc(DLANode *H_me, DLANode *r_amef,
+		    DLANode *t_am,
+		    DLANode *v_efmn,
+		    DLANode *T_afmn,
+		    const Size big, const Size small);
+
+RealPSet* G_mi_calc(DLANode *H_me, DLANode *u_mnie,
+		    DLANode *t_ei,
+		    DLANode *v_efmn,
+		    DLANode *T_efin,
+		    const Size big, const Size small);
+
+
+RealPSet* z_ai_calc(DLANode * f_ae, DLANode *G_mi,
+		    DLANode *H_me, DLANode *U_mnie,
+		    DLANode *w_amie,
+		    DLANode *x_amei,
+		    DLANode *t_am, 
+		    DLANode *r_amef, 
+		    DLANode *T_aeim,
+		    const Size big, const Size small);
+
+
+
 InputNode *CreateInput2(string name, Size size1, Size size2);
 InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size size4);
 

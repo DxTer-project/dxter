@@ -30,8 +30,7 @@
 void GetMultiModeScatterInfo(const DistType &srcType,
 			     const DistType &destType,
 			     const EntryList &m_sumDims,
-			     DimVec *redDims,
-			     DimVec *scatDims)
+			     DimVec *redDims)
 {
   EntrySet sumDimSet;
   sumDimSet.insert(m_sumDims.begin(),m_sumDims.end());
@@ -54,16 +53,10 @@ void GetMultiModeScatterInfo(const DistType &srcType,
       DimVec srcDims = srcType.m_dists[dim].DistEntryDims();
       srcDims.insert(srcDims.end(), entryDims.begin(), entryDims.end());
       if (destDims == srcDims) {
-	scatDims->push_back(dim);
 	break;
       }
     }
   }
-  if (scatDims->size() != redDims->size())
-    throw;
-
-
-
 }
 
 bool SameDims(DistEntry entry1, DistEntry entry2)
@@ -148,7 +141,7 @@ void SumScatterUpdateNode::Prop()
 	DimVec vec = (*iter).DistEntryDims();
 	allSumDims.insert(vec.begin(), vec.end());
       }
-      
+
       bool foundAll = false;
 
       for(Dim dim = 0; !foundAll && dim < outType.m_numDims; ++dim) {
@@ -170,7 +163,12 @@ void SumScatterUpdateNode::Prop()
       if (!foundAll) {
 	cout << "Bad sum scatter from " << inType.str() << " -> "
 	     << outType.str() << " with " << m_sumDims.size() << " sums\n";
-	m_poss->PrintTransVec();
+	EntryListIter iter = m_sumDims.begin();
+	for( ; iter != m_sumDims.end(); ++iter) {
+	  DistEntry entry = *iter;
+	  cout << entry.PrettyStr() << endl;
+	}
+	m_poss->PrintTransVecUp();
 	throw;
       }
     }
@@ -284,31 +282,63 @@ Phase SumScatterUpdateNode::MaxPhase() const
       return SUMSCATTERTENSORPHASE;
 #else
       if (inType.m_notReped == outType.m_notReped) {
+	bool multiSumScatterInSameMode = false;
+
 	EntrySet sumSet;
 	sumSet.insert(m_sumDims.begin(), m_sumDims.end());
-
-	for (Dim dim = 0; !sumSet.empty() && dim < outType.m_numDims; ++dim) {
+	
+	//check that each mode just has a sum grid mode appended to the src mode distribution
+	// or a combination of them (e.g., [0] -> [012], summing over 1 and 2 in two separate steps)
+	for (Dim dim = 0; dim < outType.m_numDims; ++dim) {
 	  DistEntry inEntry = inType.m_dists[dim];
 	  DistEntry outEntry = outType.m_dists[dim];
 	  if (inEntry != outEntry) {
 	    if (inEntry.IsStar()) {
 	      //[*] -> ...
 	      if (!sumSet.erase(outEntry)) {
-		cout << "2trying SumScatter from " << DistTypeToStr(inType)
-		     << " to " << DistTypeToStr(outType)  << endl;
-		cout << inEntry.str() << " -> "
-		     << outEntry.str() << endl;
-		cout << "sumDims " << sumDims.str() << endl;
-		
-		throw;
+		multiSumScatterInSameMode = true;
+
+		//now try subsets
+		DimVec vec = outEntry.DistEntryDims();
+		while (!vec.empty()) {
+		  DistEntry tmp;
+		  tmp.SetToStar();
+		  while (!vec.empty()) {
+		    tmp.AppendDim(vec[0]);
+		    vec.erase(vec.begin());
+		    if (sumSet.erase(tmp)) {
+		      tmp.SetToStar();
+		      break;
+		    }
+		  }
+		  if (!tmp.IsStar()) {
+		    cout << "2trying SumScatter from " << DistTypeToStr(inType)
+			 << " to " << DistTypeToStr(outType)  << endl;
+		    cout << inEntry.str() << " -> "
+			 << outEntry.str() << endl;
+		    cout << "sumDims " << sumDims.str() << endl;
+		    cout << "listing:\n";
+		    EntrySetIter iter = sumSet.begin();
+		    for(; iter != sumSet.end(); ++iter)
+		      cout << (*iter).PrettyStr() << endl;
+		    throw;
+		  }
+		}
 	      }
 	    }
 	    else {
 	      DimVec inVec = inEntry.DistEntryDims();
 	      DimVec outVec = outEntry.DistEntryDims();
+
+	      //	      DimVecIter inVecIter = inVec.begin();
+	      //	      DimVecIter outVecIter = outVec.begin();
 	      
-	      if (inVec[0] != outVec[0])
+	      
+	      if (inVec[0] != outVec[0]) {
+		throw;
+		cout << inVec[0] << " " << outVec[0] << endl;
 		return SUMSCATTERTENSORPHASE;
+	      }
 
 	      DimVec suff;
 	      GetSuffix(inVec, outVec,
@@ -317,13 +347,45 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	      DistEntry entry;
 	      entry.DimsToDistEntry(suff);
 
-	      if (!sumSet.erase(outEntry))
-		return SUMSCATTERTENSORPHASE;	
+	      if (!sumSet.erase(entry)) {
+		multiSumScatterInSameMode = true;
+		//now try subsets
+		DimVec vec = suff;
+		while (!vec.empty()) {
+		  DistEntry tmp;
+		  tmp.SetToStar();
+		  while (!vec.empty()) {
+		    tmp.AppendDim(vec[0]);
+		    vec.erase(vec.begin());
+		    if (sumSet.erase(tmp)) {
+		      tmp.SetToStar();
+		      break;
+		    }
+		  }
+		  if (!tmp.IsStar()) {
+		    cout << "2trying SumScatter from " << DistTypeToStr(inType)
+			 << " to " << DistTypeToStr(outType)  << endl;
+		    cout << inEntry.str() << " -> "
+			 << outEntry.str() << endl;
+		    cout << "sumDims " << sumDims.str() << endl;
+		    cout << "listing:\n";
+		    EntrySetIter iter = sumSet.begin();
+		    for(; iter != sumSet.end(); ++iter)
+		      cout << (*iter).PrettyStr() << endl;
+		    throw;
+		  }
+		}
+		//		return SUMSCATTERTENSORPHASE;	
+	      }
 	    }
 	  }
 	}
 	if (!sumSet.empty())
 	  throw;
+#if !ALLOWMULTIPLESCATTERSINONEMODE
+	if (multiSumScatterInSameMode)
+	  return SUMSCATTERTENSORPHASE;
+#endif
       }
 #endif
     }
@@ -529,15 +591,14 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
 	*out << ", ";
       }
 
-      DimVec redDims, scatDims;
+      DimVec redDims;
 
       GetMultiModeScatterInfo(m_srcType, m_destType,
 			      m_sumDims,
-			      &redDims,
-			      &scatDims);
+			      &redDims);
 	
 
-      *out << ModeArrayVarName(redDims) << ", " << ModeArrayVarName(scatDims) << " );\n";
+      *out << ModeArrayVarName(redDims) << " );\n";
     }
   }
 }
@@ -575,18 +636,13 @@ void SumScatterUpdateNode::AddVariables(VarSet &set) const
       set.insert(var);
     }
     else {
-      DimVec redDims, scatDims;
+      DimVec redDims;
 
       GetMultiModeScatterInfo(m_srcType, m_destType,
 			      m_sumDims,
-			      &redDims,
-			      &scatDims);
+			      &redDims);
       {
 	Var var(ModeArrayVarType, redDims);
-	set.insert(var);
-      }
-      {
-	Var var(ModeArrayVarType, scatDims);
 	set.insert(var);
       }
     }
@@ -711,8 +767,10 @@ void SeparateRedistFromSumScatter::Apply(Node *node) const
     throw;
   }
 
+  DimVec ident;
+  IdentDimVec(sum->InputNumDims(1), ident);
 
-  RedistNode *redist = new RedistNode(inTypeInt);
+  RedistNode *redist = new RedistNode(inTypeInt, sum->GetInputNameStr(0), ident, ident);
   redist->AddInput(sum->Input(0), sum->InputConnNum(0));
 
   if (inTypeInt == sum->InputDataType(0).GetDist())
@@ -988,7 +1046,8 @@ void SplitSumScatter::Apply(Node *node) const
 	    if (newOutTypeFull == newSum->DataType(0).GetDist())
 	      needRedist = false;
 	    else {
-	      newRedist = new RedistNode(newOutTypeFull);
+	      DimVec trash;
+	      newRedist = new RedistNode(newOutTypeFull, newSum->GetNameStr(0), trash, trash);
 	      newRedist->AddInput(newSum, 0);
 	      
 	      node->m_poss->AddNode(newRedist);
@@ -1134,7 +1193,8 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
     }
   }
 
-  RedistNode *redist = new RedistNode(outTypeInt);
+  DimVec trash;
+  RedistNode *redist = new RedistNode(outTypeInt, node->GetInputNameStr(1), trash, trash);
   redist->AddInput(node->Input(1), node->InputConnNum(1));
   node->m_poss->AddNode(redist);
 
@@ -1147,7 +1207,7 @@ void MoveSumScatterRedistAfter::Apply(Node *node) const
   node->m_poss->AddNode(newSum);
 
 
-  RedistNode *redist2 = new RedistNode(outType);
+  RedistNode *redist2 = new RedistNode(outType, newSum->GetNameStr(0), trash, trash);
   redist2->AddInput(newSum, 0);
   node->m_poss->AddNode(redist2);
 

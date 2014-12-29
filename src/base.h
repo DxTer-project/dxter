@@ -206,6 +206,8 @@ typedef set<Dim> DimSet;
 typedef DimSet::iterator DimSetIter;
 typedef DimSet::const_iterator DimSetConstIter;
 
+void IdentDimVec(unsigned int num, DimVec &vec);
+
 
 
 class DistEntry
@@ -224,6 +226,8 @@ class DistEntry
   DimVec DistEntryDims() const;
   DimSet DistEntryDimSet() const;
   void DimsToDistEntry(const DimVec &dims);
+  void AppendDim(Dim dim);
+  bool ContainsDim(Dim dim) const;
 };
 
 struct DistEntryCompare {
@@ -274,6 +278,7 @@ class DistType
   bool operator==(const DistType &rhs) const {return DistTypeEqual(*this,rhs);}
   bool operator!=(const DistType &rhs) const {return DistTypeNotEqual(*this,rhs);}
   DistType Permute(const Permutation &perm) const;
+  bool FindGridMode(Dim gridMode, Dim &tensorMode) const;
 };
 #endif
 
@@ -350,6 +355,11 @@ typedef PossMMap::iterator PossMMapIter;
 typedef PossMMap::const_iterator PossMMapConstIter;
 typedef std::pair<size_t,Poss*> PossMMapPair;
 typedef std::pair<PossMMapIter,PossMMapIter> PossMMapRangePair;
+typedef multimap<size_t,RealPSet*> RealPSetMMap;
+typedef RealPSetMMap::iterator RealPSetMMapIter;
+typedef RealPSetMMap::const_iterator RealPSetMMapConstIter;
+typedef std::pair<size_t,RealPSet*> RealPSetMMapPair;
+typedef std::pair<RealPSetMMapIter,RealPSetMMapIter> RealPSetMMapRangePair;
 typedef vector<Name> NameVec;
 typedef vector<NodeConn*> NodeConnVec;
 typedef NodeConnVec::iterator NodeConnVecIter;
@@ -462,6 +472,7 @@ class Name
   Name& operator=(const Name &rhs);
   void Flatten(ofstream &out) const;
   void Unflatten(ifstream &in);
+  bool operator!=(const Name &rhs) const;
 };
 
 
@@ -469,6 +480,10 @@ class Name
 bool FoundInNodeVec(const NodeVec &vec, const Node *node);
 unsigned int FindInNodeVec(const NodeVec &vec, const Node *node);
 unsigned int FindInSetVec(const PSetVec &vec, const BasePSet *set);
+
+#if DOTENSORS
+bool FoundInDimVec(const DimVec &vec, Dim dim);
+#endif
 
 
 

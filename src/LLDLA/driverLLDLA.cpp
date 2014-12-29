@@ -352,6 +352,15 @@ void AddTransposeTrans()
   return;
 }
 
+void AddPartitionRecombineTrans()
+{
+  Universe::AddTrans(Partition::GetClass(), new PartitionLowerLayer(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(Partition::GetClass(), new PartitionLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(Recombine::GetClass(), new RecombineLowerLayer(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(Recombine::GetClass(), new RecombineLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
+}
+
 void AddTrans()
 {
   AddGemmTrans();
@@ -366,6 +375,8 @@ void AddTrans()
   AddTransposeTrans();
 
   AddUnrollingTrans();
+
+  AddPartitionRecombineTrans();
   
 }
 
@@ -401,7 +412,7 @@ int main(int argc, const char* argv[])
   int m, n, p, k;
   Type precision;
 
-  arch = new HaswellMacbook();
+  arch = new AMDEngSample();
 
 
   //  PrintType printType = CODE;

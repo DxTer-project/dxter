@@ -200,8 +200,8 @@ class Node
 
   virtual bool IsDataDependencyOfInput() const {return true;}
 
-  void PrintChildren();
-  void PrintInputs();
+  void PrintChildren() const;
+  void PrintInputs() const;
 
   void BuildDataTypeCacheRecursive();
 
