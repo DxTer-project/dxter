@@ -39,8 +39,10 @@ void Partition::PrintCode(IndStream &out)
   *out << m_startName.m_name << " = " << GetInputName(0).m_name << ";\n";
   out.Indent();
   if (m_partType == HORIZONTAL) {
+    cout << "Part split point is " << std::to_string((int) m_partSplitPoint) << endl;
     *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n"; 
   } else {
+    cout << "Part split point is " << m_partSplitPoint << endl;
     *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_rowStrideVar << " * " << std::to_string((int) m_partSplitPoint) + ";\n";
   }
   return;
@@ -221,7 +223,6 @@ ConnNum Partition::NumOutputs() const
 
 const DataTypeInfo& Partition::DataType(ConnNum num) const
 {
-  cout << "GETTING DATATYPE FROM PARTITION\n";
   if (num > 1) {
     cout << "Error: argument to DataType is too large\n";
     throw;

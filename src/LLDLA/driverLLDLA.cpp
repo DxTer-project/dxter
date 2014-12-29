@@ -310,9 +310,13 @@ void AddUnrollingTrans()
 
 void AddSVMulTrans()
 {
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  /*  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+      Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);*/
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   return;
 }
@@ -709,7 +713,7 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   cout.flush();
 
 #if DOEMPIRICALEVAL  
-  cout << "Writing all implementations to runtime eval files\n";
+  /*  cout << "Writing all implementations to runtime eval files\n";
 
   int numIterations = 10;
   RuntimeTest rtest(precision, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
@@ -719,21 +723,22 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
 
   cout << "Done evaluating\n";
-  GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);
+  GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);*/
 #endif //DOEMPIRICALEVAL
 
-#if 1
+#if 0
   uni.PrintAll(algNum, best);
 #else
   uni.PrintBest();
 #endif
 
 #if PRINTCOSTS
-  uni.PrintCosts(impMap);
+  //  uni.PrintCosts(impMap);
 #endif
 
-  double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
-  return bestFPS;
+  //  double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
+  //  return bestFPS;
+  return 1;
 }
 
 RealPSet* GenSizeColSVMul(Type dataType, int m)
@@ -751,8 +756,10 @@ RealPSet* GenSizeColSVMul(Type dataType, int m)
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
 
+  Size partSplitPoint = m - (m % arch->VecRegWidth(dataType));
+  cout << "Part split point = " << partSplitPoint << endl;
   Partition* part =
-    new Partition(ABSLAYER, VERTICAL, m - (m % arch->VecRegWidth(dataType)));
+    new Partition(ABSLAYER, VERTICAL, partSplitPoint);
   part->AddInput(tunA, 0);
 
   Tunnel* tunX = new Tunnel(POSSTUNIN);

@@ -457,12 +457,16 @@ bool SVMulToScalarArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     SVMul* svmul = (SVMul*) node;
-    if (svmul->GetLayer() != m_fromLayer) {
-      return false;
+    if (svmul->GetLayer() == m_fromLayer) {
+      if ((*(svmul->GetInputM(1)) == 1 && m_vType == ROWVECTOR) ||
+	  (*(svmul->GetInputN(1)) == 1 && m_vType == COLVECTOR)) {
+	return true;
+      }
     }
-    return true;
+    return false;
   }
-  return false;
+  cout << "ERROR: SVMulToScalarArith applied to non SVMul node" << endl;
+  throw;
 }
 
 void SVMulToScalarArith::Apply(Node* node) const
