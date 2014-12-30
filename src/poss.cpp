@@ -890,7 +890,6 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
           for (unsigned int right = left + 1; !didMerge && right < m_sets.size(); ++right) {
             BasePSet *rightSet = m_sets[right];
             if (rightSet->IsLoop()) {
-	      //              if (!(dynamic_cast<const LoopInterface*>(leftSet))->WorthFusing(dynamic_cast<const LoopInterface*>(rightSet))) {
               if (!(dynamic_cast<LoopInterface*>(leftSet))->WorthFusing(rightSet)) {
                 continue;
               }
@@ -1471,6 +1470,8 @@ void Poss::MergePart7(RealPSet *newSet,
 
     NodeConnAndNumIntMapIter find = inMap.find(entry);
     if (find == inMap.end())
+      throw;
+    if (find->second.empty())
       throw;
     vector<int> tmp = find->second;
     int val = tmp.back();
@@ -2396,8 +2397,12 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
 	else if (newSetOutput->IsCombine() != newSetInput->IsSplit()) {
 	  if (!newSetOutput->IsLoopTunnel() || !newSetInput->IsLoopTunnel())
 	    throw;
-	  if (!((LoopTunnel*)newSetOutput)->IsConst() || !((LoopTunnel*)newSetInput)->IsConst())
-	    throw;
+	  if (!((LoopTunnel*)newSetOutput)->IsConst() || !((LoopTunnel*)newSetInput)->IsConst()) {
+#if DOTENSORS
+	    if (!((LoopTunnel*)newSetOutput)->m_justAdditive || !((LoopTunnel*)newSetInput)->m_justAdditive)
+#endif
+	      throw;
+	  }
 	  Node *temp = ((LoopTunnel*)(newSetOutput->Input(0)))->GetMatchingInTun()->Input(0);
 	  newSetInput->ChangeInput1Way(newSetOutput, 0, temp->Input(0), temp->InputConnNum(0));
 	  //	  cout << "Changing input to " << newSetInput << " to be " << temp->Input(0) << endl;

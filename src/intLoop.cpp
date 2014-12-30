@@ -327,8 +327,9 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
 #else
               if (((CombineSingleIter*)leftOutTun)->m_partDim != ((SplitSingleIter*)rightInTun)->m_partDim) {
 #endif
-                if (!leftOutTun->IsConst() || !rightInTun->IsConst())
+                if (!leftOutTun->IsConst() || !rightInTun->IsConst()) {
                   return false;
+		}
                 return false;
                 cout << "not yet supporting different directions";
                 throw;
@@ -336,11 +337,20 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
             }
             else {
               if (!leftOutTun->IsConst() || !rightInTun->IsConst()) {
-                return false;
+#if DOTENSORS
+		//If they're both additive and not const
+		if (!leftOutTun->IsConst() && !rightInTun->IsConst()) {
+		  if (!leftOutTun->m_justAdditive || !rightInTun->m_justAdditive) {
+		    return false;
+		  }
+		}
+		else
+#endif
+		  return false;
               }
             }
-          }
-          else {
+	  }
+	  else {
             if (rightInTun->GetNodeClass() == SplitSingleIter::GetClass()) {
               if (!leftOutTun->IsConst() || !rightInTun->IsConst()) {
                 return false;
@@ -386,7 +396,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
             for(int quad = TL; quad < LASTQUAD; ++quad) {
               if (rightInTun->QuadInUse((Quad)quad, true)) {
                 if (leftOutTun->GetUpStat((Quad)quad) != FULLUP) {
-                  return false;
+		  return false;
                 }
               }
             }
@@ -412,8 +422,12 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
             if (leftOutTun->Child(i)->IsLoopTunnel()) {
               LoopTunnel *rightInTun = (LoopTunnel*)(leftOutTun->Child(i));
               if (rightInTun->m_pset == right) {
-                if (!rightInTun->IsConst() && rightInTun->GetUpStat((Quad)quad) != NOTUP)
-                  return false;
+                if (!rightInTun->IsConst() && rightInTun->GetUpStat((Quad)quad) != NOTUP) {
+#if DOTENSORS
+		  if (!leftInTun->m_justAdditive || ! rightInTun->m_justAdditive)
+#endif
+		    return false;
+		}
               }
             }
           }
@@ -441,6 +455,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
                 if (leftSet) {
                   if (leftSet != pset) {
                     cout << "!!!! Not supported\n";
+		    throw;
                     return false;
                   }
                 }
@@ -457,7 +472,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
               else if (tun2->IsConst()){
                 if (leftSet) {
                   if (leftSet != this) {
-                    cout << "!!!! Not supported\n";
+		    throw;
                     return false;
                   }
                 }
@@ -495,8 +510,12 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
               
               for(int quad = TL; quad < LASTQUAD; ++quad) {
                 if (leftTun->QuadInUse((Quad)quad,false)) {
-                  if (!rightTun->IsConst() && rightTun->GetUpStat((Quad)quad) != NOTUP)
-                    return false;
+                  if (!rightTun->IsConst() && rightTun->GetUpStat((Quad)quad) != NOTUP) {
+#if DOTENSORS
+		    if (!rightTun->m_justAdditive || !leftTun->m_justAdditive)
+#endif
+		      return false;
+		  }
                 }
               }
             }

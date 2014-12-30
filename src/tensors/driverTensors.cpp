@@ -343,6 +343,7 @@ int main(int argc, const char* argv[])
     uni.Expand(numIters, FUSEANDOPTTENSORPHASE, TenCullRO);
     time(&end);
     cout << "Fusing and opt phase took " << difftime(end,start2) << " seconds\n";
+
     
     cout << "Propagating\n";
     cout.flush();
@@ -458,32 +459,142 @@ RealPSet* RedistExample()
 
 RealPSet* RedistExample2()
 {
-  Size bigSize = 1000;
-  
-  Sizes sizes[4];
+  const Size bigMP3Size = 500;
+  const Size smallMP3Size = 50;
+  Size eSize = bigMP3Size;
+  Size fSize = bigMP3Size;
+  Size gSize = bigMP3Size;
+  Size hSize = bigMP3Size;
+  Size mSize = smallMP3Size;
+  Size nSize = smallMP3Size;
+  Size oSize = smallMP3Size;
+  Size pSize = smallMP3Size;
 
-  for (Dim dim = 0; dim < 4; ++dim)
-    sizes[dim].AddRepeatedSizes(bigSize, 1, 1);
 
-  InputNode *Ain = new InputNode("A input",  sizes, "A", 4);
+  InputNode *t_efmn;
+  InputNode *v_opmn;
+  InputNode *v_efgh;
+  InputNode *v_oegm;
+  InputNode *v2_oegm;
+  InputNode *accum_temp;
+  InputNode *cont1_temp;
+  InputNode *axppx2_temp;
+  InputNode *axppx3_temp;
 
-  DistType type1;
-  type1.SetToDefault(4);
-  type1.m_dists[0].m_val = 0;
-  type1.m_dists[1].m_val = 2;
-  type1.m_dists[2].m_val = 0;
-  type1.m_dists[3].m_val = 4;
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    t_efmn = new InputNode("t_efmn", sizes, "t_efmn", 4);
+  }
 
-  DimVec ident;
-  IdentDimVec(4, ident);
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(oSize,1,1);
+    sizes[1].AddRepeatedSizes(pSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    v_opmn = new InputNode("v_opmn", sizes, "v_opmn", 4);
+  }
 
-  RedistNode *redist1 = new RedistNode(type1, Ain->GetNameStr(0), ident, ident);
-  redist1->AddInput(Ain, 0);
 
-  OutputNode *Cout1 = new OutputNode("C output");
-  Cout1->AddInput(redist1, 0);
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(gSize,1,1);
+    sizes[3].AddRepeatedSizes(hSize,1,1);
+    v_efgh = new InputNode("v_efgh", sizes, "v_efgh", 4);
+  }
 
-  Poss *outerPoss = new Poss(1, Cout1);
+
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(oSize,1,1);
+    sizes[1].AddRepeatedSizes(eSize,1,1);
+    sizes[2].AddRepeatedSizes(gSize,1,1);
+    sizes[3].AddRepeatedSizes(mSize,1,1);
+    v_oegm = new InputNode("v_oegm", sizes, "v_oegm", 4);
+  }
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(oSize,1,1);
+    sizes[1].AddRepeatedSizes(eSize,1,1);
+    sizes[2].AddRepeatedSizes(gSize,1,1);
+    sizes[3].AddRepeatedSizes(mSize,1,1);
+    v2_oegm = new InputNode("v2_oegm", sizes, "v2_oegm", 4);
+  }
+
+
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    accum_temp = new InputNode("accum_temp", 
+			       sizes, "accum_temp", 4);
+  }
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(eSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(mSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    cont1_temp = new InputNode("cont1_temp", 
+			       sizes, "cont1_temp", 4);
+  }
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(gSize,1,1);
+    sizes[1].AddRepeatedSizes(fSize,1,1);
+    sizes[2].AddRepeatedSizes(oSize,1,1);
+    sizes[3].AddRepeatedSizes(nSize,1,1);
+    axppx2_temp = new InputNode("axppx2_temp", 
+			       sizes, "axppx2_temp", 4);
+  }
+
+  {
+    Sizes sizes[4];
+    sizes[0].AddRepeatedSizes(oSize,1,1);
+    sizes[1].AddRepeatedSizes(eSize,1,1);
+    sizes[2].AddRepeatedSizes(gSize,1,1);
+    sizes[3].AddRepeatedSizes(mSize,1,1);
+    axppx3_temp = new InputNode("axppx3_temp", 
+			       sizes, "axppx3_temp", 4);
+  }
+
+
+
+  Contraction *cont3 = new Contraction(ABSLAYER,COEFONEHALF,COEFONE,REAL,"efgh","ghmn","efmn",(string)"gh");
+  cont3->AddInputs(6,
+		   v_efgh, 0,
+		   t_efmn, 0,
+		   accum_temp,0);
+  Poss *cont3Poss = new Poss(cont3);
+  RealPSet *cont3Set = new RealPSet(cont3Poss);
+
+  Contraction *cont4 = new Contraction(ABSLAYER,COEFONEHALF,COEFONE,REAL,"opmn","efop","efmn",(string)"op");
+  cont4->AddInputs(6,
+		   v_opmn, 0,
+		   t_efmn, 0,
+		   cont3Set->OutTun(0),0);
+  Poss *cont4Poss = new Poss(cont4);
+  RealPSet *cont4Set = new RealPSet(cont4Poss);
+
+
+
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(cont4Set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -670,8 +781,8 @@ RealPSet* MP2()
 
 RealPSet* MP3()
 {
-  const Size bigMP3Size = 200;
-  const Size smallMP3Size = 20;
+  const Size bigMP3Size = 500;
+  const Size smallMP3Size = 50;
   Size eSize = bigMP3Size;
   Size fSize = bigMP3Size;
   Size gSize = bigMP3Size;
