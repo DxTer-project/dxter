@@ -108,4 +108,19 @@ class SVMulLowerLayer : public SingleTrans
   virtual bool IsRef() const {return true;}
 };
 
+class ResidualPartitionSVMul : public SingleTrans
+{
+ public:
+  Layer m_fromLayer, m_toLayer;
+  VecType m_vType;
+  Size m_blockSize;
+
+  ResidualPartitionSVMul(Layer fromLayer, Layer toLayer, VecType vType, Size blockSize);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+  virtual bool IsRef() const { return true; }
+};
+
+
 #endif // DOLLDLA

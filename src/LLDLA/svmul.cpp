@@ -226,16 +226,20 @@ bool SVMulLoopRef::CanApply(const Node *node) const
       return false;
     }
     if (m_vtype == ROWVECTOR) {
-      return !(*(svmul->GetInputN(1)) <= m_bs.GetSize());
+      return !(*(svmul->GetInputN(1)) <= m_bs.GetSize()) &&
+	svmul->GetInputN(1)->EvenlyDivisibleBy(m_bs.GetSize());
     } 
     else if (m_vtype == COLVECTOR) {
-      return !(*(svmul->GetInputM(1)) <= m_bs.GetSize());
+      return !(*(svmul->GetInputM(1)) <= m_bs.GetSize()) &&
+	svmul->GetInputM(1)->EvenlyDivisibleBy(m_bs.GetSize());
     } 
     else {
       throw;
     }
   }
-  return false;
+
+  cout << "ERROR: Cannot apply SVMulLoopRef to a non SVMul node" << endl;
+  throw;
 }
 
 void SVMulLoopRef::Apply(Node *node) const
@@ -349,14 +353,19 @@ bool SVMulToRegArith::CanApply(const Node* node) const
       return false;
     }
     if ((!(*(svmul->GetInputM(1)) <= svmul->GetVecRegWidth()) &&
-	 m_vType == COLVECTOR) ||
-	(!(*(svmul->GetInputN(1)) <= svmul->GetVecRegWidth()) &&
-	 m_vType == ROWVECTOR)) {
+	 m_vType == COLVECTOR) &&
+	svmul->GetInputM(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth())) {
+      return true;
+    }
+    if (!(*(svmul->GetInputN(1)) <= svmul->GetVecRegWidth()) &&
+	m_vType == ROWVECTOR &&
+	svmul->GetInputN(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth())) {
       return true;
     }
     return false;
   }
-  return false;
+  cout << "ERROR: Trying to apply SVMulToRegArith to non SVMul node" << endl;
+  throw;
 }
 
 void SVMulToRegArith::Apply(Node* node) const
@@ -528,6 +537,43 @@ string SVMulToScalarArith::GetType() const
     return "SVMul scalar arith - Col vector " + LayerNumToStr(m_fromLayer)
       + " to " + LayerNumToStr(m_fromLayer);
   }
+}
+
+ResidualPartitionSVMul::ResidualPartitionSVMul(Layer fromLayer, Layer toLayer, VecType vType, Size blockSize) {
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_vType = vType;
+  m_blockSize = blockSize;
+}
+
+string ResidualPartitionSVMul::GetType() const
+{
+  if (m_vType == ROWVECTOR) {
+    return "Row vector ResidualPartitionSVMul " + LayerNumToStr(m_fromLayer) + " to " + LayerNumToStr(m_toLayer) + " with dim = " + std::to_string(m_blockSize);
+  } else {
+    return "Col vector ResidualPartitionSVMul " + LayerNumToStr(m_fromLayer) + " to " + LayerNumToStr(m_toLayer) + " with dim = " + std::to_string(m_blockSize);
+  }
+}
+
+bool ResidualPartitionSVMul::CanApply(const Node* node) const
+{
+  if (node->GetNodeClass() == SVMul::GetClass()) {
+    SVMul* svmul = (SVMul*) node;
+    if (m_vType == ROWVECTOR) {
+      return !(svmul->GetInputN(1)->EvenlyDivisibleBy(m_blockSize));
+    } else {
+      return !(svmul->GetInputM(1)->EvenlyDivisibleBy(m_blockSize));
+    }
+  }
+  cout << "ERROR: Cannot apply ResidualPartitionSVMul to non SVMul node" << endl;
+  throw;
+}
+
+void ResidualPartitionSVMul::Apply(Node* node) const
+{
+  /*  Dir partType = m_vType == ROWVECTOR ? HORIZONTAL : VERTICAL;
+      Node* svmul = (SVMul*) node;*/
+  return;
 }
 
 #endif // DOLLDLA

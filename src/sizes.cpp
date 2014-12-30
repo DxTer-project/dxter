@@ -387,7 +387,6 @@ bool SizeEntry::EvenlyDivisibleBy(const Size &size) const
     }
 }
 
-
 bool SizeEntry::operator!=(const Size &rhs) const
 {
   return !(*this == rhs);
@@ -1111,6 +1110,11 @@ bool Sizes::operator<= (const Size &rhs) const
       return false;
   }
   return true;
+}
+
+bool Sizes::operator>(const Size &rhs) const
+{
+  return !(*this <= rhs);
 }
 
 void Sizes::AddParFactor(int parFactor)

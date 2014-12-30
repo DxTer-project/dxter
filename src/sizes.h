@@ -141,6 +141,7 @@ class Sizes
   bool operator== (const Size &rhs) const;
   bool operator!= (const Size &rhs) const;
   bool operator<= (const Size &rhs) const;
+  bool operator>(const Size &rhs) const;
   bool EvenlyDivisibleBy(const Size &size) const;
   Cost Sum() const;
   Cost SumSquares() const;
