@@ -19,6 +19,14 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "allTransformations.h"
+#include "driverUtils.h"
+#include "debug.h"
+#include "DLAReg.h"
+#include "loopUnrolling.h"
+#include "LLDLAGemm.h"
+#include "LLDLAGemmTransformations.h"
+#include "runtimeEvaluation.h"
 #include "base.h"
 #include "costs.h"
 #ifdef _OPENMP
@@ -29,6 +37,7 @@
 #include "transpose.h"
 #include "loopSupport.h"
 #include <time.h>
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -36,23 +45,6 @@
 #include <climits>
 
 #if DOLLDLA
-
-#include "driverUtils.h"
-#include "debug.h"
-#include "DLAReg.h"
-#include "loopUnrolling.h"
-#include "LLDLAGemm.h"
-#include "LLDLAGemmTransformations.h"
-#include "madd.h"
-#include "mvmul.h"
-#include "partition.h"
-#include "recombine.h"
-#include "runtimeEvaluation.h"
-#include "smmul.h"
-#include "svmul.h"
-#include "vadd.h"
-#include "vmmul.h"
-#include "vvdot.h"
 
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
@@ -425,7 +417,7 @@ int main(int argc, const char* argv[])
 double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
 {
   RegAllLLDLANodes();
-  AddTrans();
+  AddTransformations();
 
   int numIters = -1;
   Cost flopCost = 0;

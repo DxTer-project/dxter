@@ -1,3 +1,8 @@
+#include "allTransformations.h"
+
+#if DOLLDLA
+
+
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
@@ -182,7 +187,7 @@ void AddPartitionRecombineTrans()
   Universe::AddTrans(Recombine::GetClass(), new RecombineLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
 }
 
-void AddTrans()
+void AddTransformations()
 {
   AddGemmTrans();
   AddVVDotTrans();
@@ -200,3 +205,5 @@ void AddTrans()
   AddPartitionRecombineTrans();
   
 }
+
+#endif // DOLLDLA
