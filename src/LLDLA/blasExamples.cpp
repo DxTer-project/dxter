@@ -2,6 +2,57 @@
 
 #if DOLLDLA
 
+RealPSet* ColSaxpyExample(Type dataType, int m)
+{
+  InputNode* alphaIn = new InputNode("alpha input", 1, 1, "alpha",
+				     1, m,
+				     "alphaNumRows", "alphaNumCols",
+				     "alphaRowStride", "alphaColStride",
+				     dataType);
+
+  InputNode* xIn = new InputNode("x input", m, 1, "x",
+				 1, m,
+				 "xNumRows", "xNumCols",
+				 "xRowStride", "xColStride",
+				 dataType);
+
+  InputNode* yIn = new InputNode("y input", m, 1, "y",
+				 1, m,
+				 "yNumRows", "yNumCols",
+				 "yRowStride", "yColStride",
+				 dataType);
+
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
+  tunAlpha->AddInput(alphaIn, 0);
+
+  SVMul* axMul = new SVMul(COLVECTOR, ABSLAYER);
+  axMul->AddInputs(4,
+		   tunAlpha, 0,
+		   tunX, 0);
+
+  VAdd* axPlusY = new VAdd(COLVECTOR, ABSLAYER);
+  axPlusY->AddInputs(4,
+		     axMul, 0,
+		     yIn, 0);
+
+  Poss* innerPoss = new Poss(axPlusY, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;  
+}
+
 RealPSet* GemvExample(Type dataType, bool transpose, int m, int n)
 {
   InputNode* xIn = new InputNode("x input", n, 1, "X",
