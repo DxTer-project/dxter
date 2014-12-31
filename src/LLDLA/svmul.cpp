@@ -599,7 +599,7 @@ void ResidualPartitionSVMul::Apply(Node* node) const
 
   Poss* recPoss = new Poss(1, rec);
   
-  //  node->m_poss->AddPSet(recPoss);
+  node->m_poss->AddPSet(recPoss);
   //  node->RedirectChildren(recPoss, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 
