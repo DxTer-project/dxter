@@ -110,6 +110,9 @@ class SVMulLowerLayer : public SingleTrans
 
 class ResidualPartitionSVMul : public SingleTrans
 {
+ private:
+  Size ResidualSplitPoint(const SVMul* svmul) const;
+
  public:
   Layer m_fromLayer, m_toLayer;
   VecType m_vType;
