@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _MADD_H_
+#define _MADD_H_
+
 #include "DLAOp.h"
 #include "LLDLA.h"
 #include "loopSupport.h"
@@ -105,3 +108,5 @@ class MAddLowerLayer : public SingleTrans
 };
 
 #endif //DOLLDLA
+
+#endif

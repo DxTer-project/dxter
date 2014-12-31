@@ -12,4 +12,8 @@
 #include "vadd.h"
 #include "vvdot.h"
 
+#if DOLLDLA
+
 void AddTransformations();
+
+#endif // DOLLDLA

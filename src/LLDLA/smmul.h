@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _SMMUL_H_
+#define _SMMUL_H_
+
 #include "DLAOp.h"
 #include "loopSupport.h"
 
@@ -88,3 +91,5 @@ class SMulLowerLayer : public SingleTrans
 };
 
 #endif // DOLLDLA
+
+#endif
