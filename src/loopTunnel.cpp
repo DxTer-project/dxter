@@ -48,6 +48,9 @@ LoopTunnel::LoopTunnel(TunType type)
   m_lsizes = NULL;
 #endif
   m_indepIters = false;
+#if DOTENSORS
+  m_justAdditive = false;
+#endif
 }
 
 LoopTunnel::~LoopTunnel()
@@ -96,6 +99,9 @@ void LoopTunnel::CopyTunnelInfo(const LoopTunnel *tun)
   m_statBL = tun->m_statBL;
   m_statBR = tun->m_statBR;
   m_indepIters = tun->m_indepIters;
+#if DOTENSORS
+  m_justAdditive = tun->m_justAdditive;
+#endif
 }
 
 Tunnel* LoopTunnel::GetSetTunnel()
@@ -622,6 +628,9 @@ void LoopTunnel::FlattenCore(ofstream &out) const
   WRITE(m_statBL);
   WRITE(m_statBR);
   WRITE(m_indepIters);
+#if DOTENSORS
+  WRITE(m_justAdditive);
+#endif
 }
 
 void LoopTunnel::UnflattenCore(ifstream &in, SaveInfo &info) 
@@ -632,6 +641,9 @@ void LoopTunnel::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_statBL);
   READ(m_statBR);
   READ(m_indepIters);
+#if DOTENSORS
+  READ(m_justAdditive);
+#endif
 }
 
 void LoopTunnel::StartFillingSizes()

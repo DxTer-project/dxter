@@ -41,6 +41,9 @@ class LoopTunnel : public Tunnel
   SizesArray m_sizes, m_lsizes;
 #endif
   bool m_indepIters;
+#if DOTENSORS
+  bool m_justAdditive;
+#endif
 
   LoopTunnel(TunType type);
   virtual ~LoopTunnel();
@@ -103,4 +106,7 @@ class LoopTunnel : public Tunnel
 
   string GetLoopLevel(int offset=0) const;
   virtual void MigrateFromOldTun(Tunnel *tun);
+#if DOTENSORS
+  void SetAdditive() {m_justAdditive = true;}
+#endif
 };

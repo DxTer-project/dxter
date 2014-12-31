@@ -1053,6 +1053,7 @@ void ContractionLoopExp::Apply(Node *node) const
   }
   if (isCIndex)
     CTun->SetIndepIters();
+  CTun->SetAdditive();
   
   Contraction *newCont = new Contraction(m_toLayer, cont->m_alpha, 
 					 isCIndex ? cont->m_beta : COEFONE, 
