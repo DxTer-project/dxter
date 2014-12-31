@@ -30,6 +30,7 @@
 #include "LLDLAGemm.h"
 #include "LLDLAGemmTransformations.h"
 #include "miscellaneousExamples.h"
+#include "multiBLASExamples.h"
 #include "runtimeEvaluation.h"
 
 #ifdef _OPENMP
