@@ -2,6 +2,92 @@
 
 #if DOLLDLA
 
+RealPSet* MAddGemm(Type dataType, int m, int n, int k)
+{
+  InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
+				     1, m,
+				     "AlphaNumRows", "AlphaNumCols",
+				     "AlphaRowStride", "AlphaColStride", dataType);
+
+  InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
+				    1, m,
+				    "BetaNumRows", "BetaNumCols",
+				    "BetaRowStride", "BetaColStride", dataType);
+
+  InputNode* A0In = new InputNode("A0 input", m, n, "A0",
+				 n, 1,
+				 "A0NumRows", "A0NumCols",
+				 "A0RowStride", "A0ColStride", dataType);
+
+  InputNode* A1In = new InputNode("A1 input", m, n, "A1",
+				 n, 1,
+				 "A1NumRows", "A1NumCols",
+				 "A1RowStride", "A1ColStride", dataType);
+
+  InputNode* BIn = new InputNode("B input", m, k, "B",
+				 1, m,
+				 "BNumRows", "BNumCols",
+				 "BRowStride", "BColStride", dataType);
+
+  InputNode* CIn = new InputNode("C input", m, k, "C",
+				 1, m,
+				 "CNumRows", "CNumCols",
+				 "CRowStride", "CColStride", dataType);
+
+  Tunnel* tunA0 = new Tunnel(POSSTUNIN);
+  tunA0->AddInput(A0In, 0);
+
+  Tunnel* tunA1 = new Tunnel(POSSTUNIN);
+  tunA1->AddInput(A1In, 0);
+
+  Tunnel* tunB = new Tunnel(POSSTUNIN);
+  tunB->AddInput(BIn, 0);
+
+  Tunnel* tunC = new Tunnel(POSSTUNIN);
+  tunC->AddInput(CIn, 0);
+
+  Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
+  tunAlpha->AddInput(alphaIn, 0);
+
+  Tunnel* tunBeta = new Tunnel(POSSTUNIN);
+  tunBeta->AddInput(betaIn, 0);
+
+  MAdd* madd = new MAdd(ABSLAYER);
+  madd->AddInputs(4,
+		  tunA0, 0,
+		  tunA1, 0);
+
+  LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
+  trans->AddInput(madd, 0);
+
+  SMMul* alphaA = new SMMul(ABSLAYER);
+  alphaA->AddInputs(4,
+		    tunAlpha, 0,
+		    trans, 0);
+
+  SMMul* betaC = new SMMul(ABSLAYER);
+  betaC->AddInputs(4,
+		   tunBeta, 0,
+		   tunC, 0);
+
+  Gemm* gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
+  gemm->AddInputs(6,
+		  alphaA, 0,
+		  tunB, 0,
+		  tunC, 0);
+
+  Poss* innerPoss = new Poss(gemm, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
 RealPSet* Gemv2(Type dataType, int m, int n, int k)
 {
   InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
