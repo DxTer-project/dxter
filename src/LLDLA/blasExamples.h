@@ -7,7 +7,7 @@
 
 #if DOLLDLA
 
-RealPSet* ColSaxpyExample(Type dataType, int m);
+RealPSet* SaxpyExample(Type dataType, VecType vType, int m);
 RealPSet* GemvExample(Type dataType, bool transpose, int m, int n);
 
 #endif //DOLLDLA

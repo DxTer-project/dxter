@@ -2,7 +2,7 @@
 
 #if DOLLDLA
 
-RealPSet* ColSaxpyExample(Type dataType, int m)
+RealPSet* SaxpyExample(Type dataType, VecType vType, int m)
 {
   InputNode* alphaIn = new InputNode("alpha input", 1, 1, "alpha",
 				     1, m,
@@ -36,7 +36,7 @@ RealPSet* ColSaxpyExample(Type dataType, int m)
 		   tunAlpha, 0,
 		   tunX, 0);
 
-  VAdd* axPlusY = new VAdd(COLVECTOR, ABSLAYER);
+  VAdd* axPlusY = new VAdd(vType, ABSLAYER);
   axPlusY->AddInputs(4,
 		     axMul, 0,
 		     yIn, 0);
@@ -50,7 +50,7 @@ RealPSet* ColSaxpyExample(Type dataType, int m)
   Poss *outerPoss = new Poss(Cout, true);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
-  return outerSet;  
+  return outerSet;
 }
 
 RealPSet* GemvExample(Type dataType, bool transpose, int m, int n)

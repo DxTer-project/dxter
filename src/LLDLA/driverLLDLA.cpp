@@ -161,8 +161,8 @@ void Usage()
 {
   cout << "./driver arg1 arg2 ...\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
-  cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
-  cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
+  cout <<"\n";
+  cout <<"Single Operation Examples\n";
   cout <<"         3  -> Dot prod F/D M\n";
   cout <<"         4  -> Matrix add F/D M N\n";
   cout <<"         5  -> Matrix vector multiply N/T F/D M N\n";
@@ -171,12 +171,19 @@ void Usage()
   cout <<"         8  -> Vector matrix multiply F/D M N\n";
   cout <<"         9  -> Scalar matrix multiply F/D M N\n";
   cout <<"        10  -> Vector add F/D M\n";
+  cout <<"        16  -> Gen Size Col Vector SVMul F/D M\n";
+  cout <<"\n";
+  cout <<"BLAS Examples\n";
+  cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
+  cout <<"        15  -> Gemv N/T F/D M N\n";
+  cout <<"\n";
+  cout <<"Miscellaneous Examples\n";
+  cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
   cout <<"        11  -> Vector add twice F/D M\n";
   cout <<"        12  -> Vector matrix vector multiply F/D M N\n";
   cout <<"        13  -> Matrix add twice F/D M N\n";
   cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
-  cout <<"        15  -> Gemv N/T F/D M N\n";
-  cout <<"        16  -> Gen Size Col Vector SVMul F/D M\n";
+  cout <<"\n";
 }
 
 int main(int argc, const char* argv[])
