@@ -159,8 +159,10 @@ GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, doubl
 
 void Usage()
 {
+  cout <<"\n";
   cout << "./driver arg1 arg2 ...\n";
-  cout <<" arg1 == 0  -> Load from file arg1\n";
+  cout <<"\n";
+  cout <<"arg1 == 0  -> Load from file arg1\n";
   cout <<"\n";
   cout <<"Single Operation Examples\n";
   cout <<"         3  -> Dot prod F/D M\n";
@@ -176,6 +178,7 @@ void Usage()
   cout <<"BLAS Examples\n";
   cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
   cout <<"        15  -> Gemv N/T F/D M N\n";
+  cout <<"        17  -> Saxpy C/R F/D M\n";
   cout <<"\n";
   cout <<"Miscellaneous Examples\n";
   cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
@@ -195,9 +198,9 @@ int main(int argc, const char* argv[])
 
   int m, n, p, k;
   Type precision;
+  VecType vecType;
 
   arch = new AMDEngSample();
-
 
   //  PrintType printType = CODE;
 
@@ -398,6 +401,17 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       algPSet = GenSizeColSVMul(precision, m);
+      break;
+    case(17):
+      if (argc != 5) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_madd2";
+      vecType = CharToVecType(*argv[2]);
+      precision = CharToType(*argv[3]);
+      m = atoi(argv[4]);
+      algPSet = SaxpyExample(precision, vecType, m);
       break;
     default:
       Usage();

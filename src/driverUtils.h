@@ -62,6 +62,22 @@ Side CharToSide(char c)
   }
 }
 
+#if DOLLDLA
+
+VecType CharToVecType(char c)
+{
+switch(c) {
+ case('C'):
+return COLVECTOR;
+ case('R'):
+return ROWVECTOR;
+ default:
+throw;
+}
+}
+
+#endif // DOLLDLA
+
 Type CharToType(char c)
 {
   switch(c) {

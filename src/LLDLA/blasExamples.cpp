@@ -31,7 +31,7 @@ RealPSet* SaxpyExample(Type dataType, VecType vType, int m)
   Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
   tunAlpha->AddInput(alphaIn, 0);
 
-  SVMul* axMul = new SVMul(COLVECTOR, ABSLAYER);
+  SVMul* axMul = new SVMul(vType, ABSLAYER);
   axMul->AddInputs(4,
 		   tunAlpha, 0,
 		   tunX, 0);
