@@ -10,14 +10,23 @@ RealPSet* SaxpyExample(Type dataType, VecType vType, int m)
 				     "alphaRowStride", "alphaColStride",
 				     dataType);
 
-  InputNode* xIn = new InputNode("x input", m, 1, "x",
-				 1, m,
+  int nCols, nRows;
+  if (vType == COLVECTOR) {
+    nCols = 1;
+    nRows = m;
+  } else {
+    nCols = m;
+    nRows = 1;
+  }
+
+  InputNode* xIn = new InputNode("x input", nRows, nCols, "x",
+				 nCols, nRows,
 				 "xNumRows", "xNumCols",
 				 "xRowStride", "xColStride",
 				 dataType);
 
-  InputNode* yIn = new InputNode("y input", m, 1, "y",
-				 1, m,
+  InputNode* yIn = new InputNode("y input", nRows, nCols, "y",
+				 nCols, nRows,
 				 "yNumRows", "yNumCols",
 				 "yRowStride", "yColStride",
 				 dataType);

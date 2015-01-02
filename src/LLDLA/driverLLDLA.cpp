@@ -186,6 +186,7 @@ void Usage()
   cout <<"        12  -> Vector matrix vector multiply F/D M N\n";
   cout <<"        13  -> Matrix add twice F/D M N\n";
   cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
+  cout <<"        18  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
   cout <<"\n";
 }
 
@@ -407,11 +408,23 @@ int main(int argc, const char* argv[])
 	Usage();
 	return 0;
       }
-      opName = "dxt_madd2";
+      opName = "dxt_saxpy";
       vecType = CharToVecType(*argv[2]);
       precision = CharToType(*argv[3]);
       m = atoi(argv[4]);
       algPSet = SaxpyExample(precision, vecType, m);
+      break;
+    case(18):
+      if (argc != 6) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_maddGemm";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      p = atoi(argv[5]);
+      algPSet = MAddGemm(precision, m, n, p);
       break;
     default:
       Usage();

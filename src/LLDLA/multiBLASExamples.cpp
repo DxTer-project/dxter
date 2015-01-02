@@ -2,7 +2,7 @@
 
 #if DOLLDLA
 
-RealPSet* MAddGemm(Type dataType, int m, int n, int k)
+RealPSet* MAddGemm(Type dataType, int m, int n, int p)
 {
   InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
 				     1, m,
@@ -24,12 +24,12 @@ RealPSet* MAddGemm(Type dataType, int m, int n, int k)
 				 "A1NumRows", "A1NumCols",
 				 "A1RowStride", "A1ColStride", dataType);
 
-  InputNode* BIn = new InputNode("B input", m, k, "B",
+  InputNode* BIn = new InputNode("B input", m, p, "B",
 				 1, m,
 				 "BNumRows", "BNumCols",
 				 "BRowStride", "BColStride", dataType);
 
-  InputNode* CIn = new InputNode("C input", m, k, "C",
+  InputNode* CIn = new InputNode("C input", m, p, "C",
 				 1, m,
 				 "CNumRows", "CNumCols",
 				 "CRowStride", "CColStride", dataType);
