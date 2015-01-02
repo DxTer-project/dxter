@@ -39,7 +39,7 @@ RealPSet* SaxpyExample(Type dataType, VecType vType, int m)
   VAdd* axPlusY = new VAdd(vType, ABSLAYER);
   axPlusY->AddInputs(4,
 		     axMul, 0,
-		     yIn, 0);
+		     tunY, 0);
 
   Poss* innerPoss = new Poss(axPlusY, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
