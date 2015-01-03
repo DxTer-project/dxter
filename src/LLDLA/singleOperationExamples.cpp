@@ -334,6 +334,7 @@ RealPSet* VMMulExample(Type dataType, int m, int n)
 
 RealPSet* VAddExample(Type dataType, VecType vecType, int m)
 {
+
   int nRows, nCols;
   if (vecType == ROWVECTOR) {
     nRows = 1;

@@ -205,7 +205,6 @@ void AddTransformations()
   AddUnrollingTrans();
 
   AddPartitionRecombineTrans();
-  
 }
 
 #endif // DOLLDLA
