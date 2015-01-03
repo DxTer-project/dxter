@@ -57,7 +57,7 @@ RealPSet* MAddGemm(Type dataType, int m, int n, int p)
 		  tunA0, 0,
 		  tunA1, 0);
 
-  LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
+  /*  LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
   trans->AddInput(madd, 0);
 
   SMMul* alphaA = new SMMul(ABSLAYER);
@@ -74,9 +74,9 @@ RealPSet* MAddGemm(Type dataType, int m, int n, int p)
   gemm->AddInputs(6,
 		  alphaA, 0,
 		  tunB, 0,
-		  tunC, 0);
+		  tunC, 0);*/
 
-  Poss* innerPoss = new Poss(gemm, true);
+  Poss* innerPoss = new Poss(madd, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
   OutputNode *Cout = new OutputNode("C output");

@@ -19,6 +19,6 @@ RealPSet* SVMulRowExample(Type dataType, int m);
 RealPSet* SVMulColExample(Type dataType, int m);
 RealPSet* SMMulExample(Type dataType, int m, int n);
 RealPSet* VMMulExample(Type dataType, int m, int n);
-RealPSet* VAddExample(Type dataType, int m);
+RealPSet* VAddExample(Type dataType, VecType vecType, int m);
 
 #endif // DOLLDLA

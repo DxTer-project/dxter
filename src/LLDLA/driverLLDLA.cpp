@@ -172,7 +172,7 @@ void Usage()
   cout <<"         7  -> Scalar row vector multiply F/D M\n";
   cout <<"         8  -> Vector matrix multiply F/D M N\n";
   cout <<"         9  -> Scalar matrix multiply F/D M N\n";
-  cout <<"        10  -> Vector add F/D M\n";
+  cout <<"        10  -> Vector add C/R F/D M\n";
   cout <<"        16  -> Gen Size Col Vector SVMul F/D M\n";
   cout <<"\n";
   cout <<"BLAS Examples\n";
@@ -325,14 +325,15 @@ int main(int argc, const char* argv[])
       algPSet = SMMulExample(precision, m, n);
       break;
     case(10):
-      if (argc != 4) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       opName = "dxt_vadd";
-      precision = CharToType(*argv[2]);
-      m = atoi(argv[3]);
-      algPSet = VAddExample(precision, m);
+      vecType = CharToVecType(*argv[2]);
+      precision = CharToType(*argv[3]);
+      m = atoi(argv[4]);
+      algPSet = VAddExample(precision, vecType, m);
       break;
     case(11):
       if (argc != 4) {

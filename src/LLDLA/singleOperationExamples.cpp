@@ -332,15 +332,24 @@ RealPSet* VMMulExample(Type dataType, int m, int n)
   return outerSet;
 }
 
-RealPSet* VAddExample(Type dataType, int m)
+RealPSet* VAddExample(Type dataType, VecType vecType, int m)
 {
-  InputNode* xIn = new InputNode("x input", m, 1, "X",
-				 1, m,
+  int nRows, nCols;
+  if (vecType == ROWVECTOR) {
+    nRows = 1;
+    nCols = m;
+  } else {
+    nRows = m;
+    nCols = 1;
+  }
+
+  InputNode* xIn = new InputNode("x input", nRows, nCols, "X",
+				 nCols, nRows,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", m, 1, "Y",
-				 1, m,
+  InputNode* yIn = new InputNode("y input", nRows, nCols, "Y",
+				 nCols, nRows,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
   
@@ -350,7 +359,7 @@ RealPSet* VAddExample(Type dataType, int m)
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  VAdd* vadd = new VAdd(COLVECTOR, ABSLAYER);
+  VAdd* vadd = new VAdd(vecType, ABSLAYER);
   vadd->AddInputs(4,
 		  tunX, 0,
 		  tunY, 0);
