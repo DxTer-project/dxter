@@ -66,15 +66,13 @@ class MAddLoopRef : public SingleTrans
   virtual bool IsRef() const { return true; }
 };
 
-class MAddToVAddLoopRef : SingleTrans
+class MAddToVAddLoopRef : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  DimName m_dim;
-  VecType m_vtype;
-  BSSize m_bs;
+  VecType m_vecType;
 
-  MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs);
+  MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vecType);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

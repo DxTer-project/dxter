@@ -132,7 +132,7 @@ Node* MAdd::BlankInst()
 
 NodeType MAdd::GetType() const
 {
-  return "MAdd" + LayerNumToStr(GetLayer());// + " type " + std::to_string((long long int) GetDataType());
+  return "MAdd" + LayerNumToStr(GetLayer()) + " type " + std::to_string((long long int) GetDataType());
 }
 
 Phase MAdd::MaxPhase() const
@@ -228,17 +228,25 @@ void MAddLoopRef::Apply(Node *node) const
   return;
 }
 
-MAddToVAddLoopRef::MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs)
+MAddToVAddLoopRef::MAddToVAddLoopRef(Layer fromLayer, Layer toLayer, VecType vecType)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
-  m_vtype = vtype;
-  m_bs = bs;
+  m_vecType = vecType;
 }
 
 string MAddToVAddLoopRef::GetType() const
 {
-  return "MAddToVAddLoopRef";
+  switch (m_vecType) {
+  case(COLVECTOR):
+    return "MAddToVAddLoopRef from " + LayerNumToStr(m_fromLayer) + " to " +
+      LayerNumToStr(m_toLayer) + " of type COLVECTOR";
+  case(ROWVECTOR):
+    return "MAddToVAddLoopRef from " + LayerNumToStr(m_fromLayer) + " to " +
+      LayerNumToStr(m_toLayer) + " of type ROWVECTOR";    
+  default:
+    throw;
+  }
 }
 
 bool MAddToVAddLoopRef::CanApply(const Node *node) const
@@ -248,31 +256,28 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
     if (madd->GetLayer() != m_fromLayer) {
       return false;
     }
-    if (m_dim == DIMM) {
-      return (*(madd->GetInputN(0)) == madd->GetVecRegWidth()) && (*(madd->GetInputN(1)) == madd->GetVecRegWidth()) &&
-	!(*(madd->GetInputM(0)) <= madd->GetVecRegWidth()) && !(*(madd->GetInputM(1)) <= madd->GetVecRegWidth());
-    } else if (m_dim == DIMN) {
-      return (*(madd->GetInputM(0)) == madd->GetVecRegWidth()) && (*(madd->GetInputM(0)) == madd->GetVecRegWidth()) &&
-	!(*(madd->GetInputN(0)) <= madd->GetVecRegWidth()) && !(*(madd->GetInputN(1)) <= madd->GetVecRegWidth());
+    if (m_vecType == ROWVECTOR) {
+      return *(madd->GetInputM(0)) > 1 && *(madd->GetInputM(0)) > 1;
     } else {
-      return false;
-    }  
+      return *(madd->GetInputN(0)) > 1 && *(madd->GetInputN(0)) > 1;
+    }
   }
-  return false;
+  cout << "ERROR: Applying MAddToVAddLoopRef to non MAdd node\n";
+  throw;
 }
 
 void MAddToVAddLoopRef::Apply(Node *node) const
 {
   MAdd *madd = (MAdd*) node;
 
-  SplitSingleIter *split0 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter *split0 = new SplitSingleIter(m_vecType == ROWVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split0->AddInput(madd->Input(0), madd->InputConnNum(0));
 
-  SplitSingleIter *split1 = new SplitSingleIter(m_dim == DIMN ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
+  SplitSingleIter *split1 = new SplitSingleIter(m_vecType == ROWVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, false);
   split1->AddInput(madd->Input(1), madd->InputConnNum(1));
 
   split0->SetAllStats(FULLUP);
-  if (m_dim == DIMM) {
+  if (m_vecType == ROWVECTOR) {
     split1->SetUpStats(FULLUP, FULLUP,
 		       NOTUP, NOTUP);
   } else {
@@ -283,18 +288,15 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   split0->SetIndepIters();
   split1->SetIndepIters();
 
-  VAdd *newVAdd = new VAdd(m_dim == DIMM ? ROWVECTOR : COLVECTOR, m_toLayer);
+  VAdd *newVAdd = new VAdd(m_vecType, m_toLayer);
   newVAdd->AddInput(split0, 1);
   newVAdd->AddInput(split1, 1);
 
   CombineSingleIter *com0 = split0->CreateMatchingCombine(0);
   CombineSingleIter *com1 = split1->CreateMatchingCombine(1, 1, newVAdd, 0);
-
   
   Poss *loopPoss = new Poss(2, com0, com1);
-
   RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
-  loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
 
   node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
@@ -358,6 +360,9 @@ bool MAddToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
     MAdd* madd = (MAdd*) node;
+    if (madd->GetLayer() != m_fromLayer) {
+      return false;
+    }
     if ((*(madd->GetInputM(0)) == madd->GetVecRegWidth()) ||
 	(*(madd->GetInputN(0)) == madd->GetVecRegWidth())) {
       return true;
@@ -373,7 +378,7 @@ void MAddToRegArith::Apply(Node* node) const
   MAdd* madd = (MAdd*) node;
 
   // Set direction of split
-  bool splitIntoRows = !(*(madd->GetInputM(0)) <= madd->GetVecRegWidth());
+  bool splitIntoRows = *(madd->GetInputM(0)) > madd->GetVecRegWidth();
 
   // Split matrices A and B
   SplitSingleIter* splitA;

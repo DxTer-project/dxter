@@ -201,7 +201,7 @@ int main(int argc, const char* argv[])
   Type precision;
   VecType vecType;
 
-  arch = new AMDEngSample();
+  arch = new HaswellMacbook();
 
   //  PrintType printType = CODE;
 
