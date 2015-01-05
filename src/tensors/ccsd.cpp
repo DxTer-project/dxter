@@ -651,29 +651,15 @@ RealPSet* Z_abij_calc(DLANode *v_abij, DLANode *Q_mnij,
   Poss *cont8Poss = new Poss(cont8);
   RealPSet *cont8Set = new RealPSet(cont8Poss);
 
-
-  Copy *copy2 = new Copy(SMLAYER);
-  copy2->AddInputs0(2,
-		    T_aeim,
-		    temp4);
-  Poss *copy2Poss = new Poss(copy2);
-  RealPSet *copy2Set = new RealPSet(copy2Poss);
-
-  Contraction *cont9 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"am","bn","abmn",(string)"");
+  Contraction *cont9 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"mnij","abmn","abij",(string)"mn");
   cont9->AddInputs0(3,
-		    t_am, t_am, copy2Set->OutTun(0));
+		    Q_mnij, cont7Set->OutTun(0), cont8Set->OutTun(0));
   Poss *cont9Poss = new Poss(cont9);
   RealPSet *cont9Set = new RealPSet(cont9Poss);
 
-  Contraction *cont10 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"mnij","abmn","abij",(string)"mn");
-  cont10->AddInputs0(3,
-		    Q_mnij, cont9Set->OutTun(0), cont8Set->OutTun(0));
-  Poss *cont10Poss = new Poss(cont10);
-  RealPSet *cont10Set = new RealPSet(cont10Poss);
-
   Yxpy *axpy4 = new Yxpy(SMLAYER);
   axpy4->AddInputs0(2,
-		    v_abij, cont10Set->OutTun(0));
+		    v_abij, cont9Set->OutTun(0));
   Poss *axpy4Poss = new Poss(axpy4);
   RealPSet *axpy4Set = new RealPSet(axpy4Poss);
 
