@@ -19,16 +19,31 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "allTransformations.h"
 #include "base.h"
+#include "blasExamples.h"
 #include "costs.h"
+#include "driverUtils.h"
+#include "debug.h"
+#include "DLAReg.h"
+#include "loopUnrolling.h"
+#include "LLDLAGemm.h"
+#include "LLDLAGemmTransformations.h"
+#include "miscellaneousExamples.h"
+#include "multiBLASExamples.h"
+#include "runtimeEvaluation.h"
+
 #ifdef _OPENMP
 #include "omp.h"
 #endif
+
+#include "singleOperationExamples.h"
 #include "transform.h"
 #include "LLDLATranspose.h"
 #include "transpose.h"
 #include "loopSupport.h"
 #include <time.h>
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -36,23 +51,6 @@
 #include <climits>
 
 #if DOLLDLA
-
-#include "driverUtils.h"
-#include "debug.h"
-#include "DLAReg.h"
-#include "loopUnrolling.h"
-#include "LLDLAGemm.h"
-#include "LLDLAGemmTransformations.h"
-#include "madd.h"
-#include "mvmul.h"
-#include "partition.h"
-#include "recombine.h"
-#include "runtimeEvaluation.h"
-#include "smmul.h"
-#include "svmul.h"
-#include "vadd.h"
-#include "vmmul.h"
-#include "vvdot.h"
 
 #define DOEMPIRICALEVAL 1
 #define PRINTCOSTS 1
@@ -75,24 +73,6 @@ do you really want to do compact unrolling and partial unrolling?
 
 void MuNNMuGemmResults(Type precision);
 double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName);
-
-RealPSet* GenSizeColSVMul(Type dataType, int m);
-RealPSet* TransMVMulExample(Type dataType, int m, int n);
-RealPSet* GemvExample(Type dataType, bool transpose, int m, int n);
-RealPSet* MVMul2Example(Type dataType, int m, int n, int p);
-RealPSet* MAdd2Example(Type dataType, int m, int n);
-RealPSet* VAdd2Example(Type dataType, int m);
-RealPSet* VAddExample(Type dataType, int m);
-RealPSet* VMVMulExample(Type dataType, int m, int n);
-RealPSet* SMMulExample(Type dataType, int m, int n);
-RealPSet* VMMulExample(Type dataType, int m, int n);
-RealPSet* SVMulRowExample(Type dataType, int m);
-RealPSet* SVMulColExample(Type dataType, int m);
-RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n);
-RealPSet* MAddExample(Type dataType, int m, int n);
-RealPSet* DotExample(Type dataType, int m);
-RealPSet* GemmExample(Type dataType, int m, int n, int p);
-RealPSet* DoubleGemmExample(Type dataType, int m, int n, int p, int k);
 
 Trans transA, transB;
 
@@ -177,215 +157,14 @@ GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, doubl
   return bestImpNum;
 }
 
-void AddGemmTrans()
-{
-    // Convert gemm into loop over mvmul
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  // Transform gemm into loop over vmmuls
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  //Introduces loops in the m, n, and k dimensions, respectively
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-
-#if DOCOMPACTLOOPUNROLLING
-#if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-#endif
-
-#if DO3MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-#endif
-#endif // DOCOMPACTLOOPUNROLLING
-
-
-#if DOCOMPACTLOOPUNROLLING
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-
-#if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-#endif
-
-#if DO3MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new LLDLAGemmLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-#endif
-
-#endif // DOCOMPACTLOOPUNROLLING
-
-  return;
-}
-
-void AddVVDotTrans()
-{
-  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  return;
-}
-
-void AddMAddTrans()
-{
-  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
-
-  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
-
-  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble), LLDLALOOPPHASE);
-
-  Universe::AddTrans(MAdd::GetClass(), new MAddLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
-
-  Universe::AddTrans(MAdd::GetClass(), new MAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  return;
-}
-
-void AddMVMulTrans()
-{
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble), LLDLALOOPPHASE);
-
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
-
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
-
-  Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
-
-  Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  return;
-}
-
-void AddSMMulTrans()
-{
-  //Introduces loops in the m and n dimension for SMMul
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
-
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
-
-  return;
-}
-
-void AddUnrollingTrans()
-{
-
-#if DOCOMPACTLOOPUNROLLING
-#if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(),
-		     new CompactlyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
-#endif // DO2MUTRANSFORMATIONS
-
-#if DO3MUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new CompactlyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
-#endif // DO3MUTRANSFORMATIONS
-
-#if DO16MUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new CompactlyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
-#endif // DO3MUTRANSFORMATIONS
-
-#if DOLARGEMUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new CompactlyUnrollLoop(bigSize / LLDLA_MU), LLDLALOOPUNROLLPHASE);
-#endif // DOLARGEMUTRANSFORMATIONS
-
-#endif // DOCOMPACTLOOPUNROLLING
-
-#if DOPARTIALLOOPUNROLLING
-  for (unsigned int mult = PARTIALUNROLLINGSTARTCOEF; mult <= PARTIALUNROLLINGENDCOEF; mult += 2) {
-    Universe::AddTrans(SplitSingleIter::GetClass(), new PartiallyUnrollLoop(mult), LLDLALOOPUNROLLPHASE);
-  }
-#endif // DOPARTIALLOOPUNROLLING
-
-}
-
-void AddSVMulTrans()
-{
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
-
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
-
-  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-
-  return;
-}
-
-void AddVMMulTrans()
-{
-  // Transformers for vector matrix multiply
-  Universe::AddTrans(VMMul::GetClass(), new VMMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle), LLDLALOOPPHASE);
-
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
-
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMK, LLDLAMuDouble), LLDLALOOPPHASE);
-
-  Universe::AddTrans(VMMul::GetClass(), new VMMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
-
-  return;
-}
-
-void AddVAddTrans()
-{
-  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  return;
-}
-
-void AddTransposeTrans()
-{
-  Universe::AddTrans(LLDLATranspose::GetClass(), new LLDLATransposeLowerLayer(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
-  Universe::AddTrans(LLDLATranspose::GetClass(), new LLDLATransposeLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
-
-  return;
-}
-
-void AddPartitionRecombineTrans()
-{
-  Universe::AddTrans(Partition::GetClass(), new PartitionLowerLayer(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
-  Universe::AddTrans(Partition::GetClass(), new PartitionLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
-
-  Universe::AddTrans(Recombine::GetClass(), new RecombineLowerLayer(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
-  Universe::AddTrans(Recombine::GetClass(), new RecombineLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
-}
-
-void AddTrans()
-{
-  AddGemmTrans();
-  AddVVDotTrans();
-  AddMAddTrans();
-  AddMVMulTrans();
-  AddSMMulTrans();
-  AddSVMulTrans();
-  AddVMMulTrans();
-  AddVAddTrans();
-
-  AddTransposeTrans();
-
-  AddUnrollingTrans();
-
-  AddPartitionRecombineTrans();
-  
-}
-
 void Usage()
 {
+  cout <<"\n";
   cout << "./driver arg1 arg2 ...\n";
-  cout <<" arg1 == 0  -> Load from file arg1\n";
-  cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
-  cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
+  cout <<"\n";
+  cout <<"arg1 == 0  -> Load from file arg1\n";
+  cout <<"\n";
+  cout <<"Single Operation Examples\n";
   cout <<"         3  -> Dot prod F/D M\n";
   cout <<"         4  -> Matrix add F/D M N\n";
   cout <<"         5  -> Matrix vector multiply N/T F/D M N\n";
@@ -393,13 +172,22 @@ void Usage()
   cout <<"         7  -> Scalar row vector multiply F/D M\n";
   cout <<"         8  -> Vector matrix multiply F/D M N\n";
   cout <<"         9  -> Scalar matrix multiply F/D M N\n";
-  cout <<"        10  -> Vector add F/D M\n";
+  cout <<"        10  -> Vector add C/R F/D M\n";
+  cout <<"        16  -> Gen Size Col Vector SVMul F/D M\n";
+  cout <<"\n";
+  cout <<"BLAS Examples\n";
+  cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
+  cout <<"        15  -> Gemv N/T F/D M N\n";
+  cout <<"        17  -> Saxpy C/R F/D M\n";
+  cout <<"\n";
+  cout <<"Miscellaneous Examples\n";
+  cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
   cout <<"        11  -> Vector add twice F/D M\n";
   cout <<"        12  -> Vector matrix vector multiply F/D M N\n";
   cout <<"        13  -> Matrix add twice F/D M N\n";
   cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
-  cout <<"        15  -> Gemv N/T F/D M N\n";
-  cout <<"        16  -> Gen Size Col Vector SVMul F/D M\n";
+  cout <<"        18  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
+  cout <<"\n";
 }
 
 int main(int argc, const char* argv[])
@@ -411,9 +199,9 @@ int main(int argc, const char* argv[])
 
   int m, n, p, k;
   Type precision;
+  VecType vecType;
 
-  arch = new AMDEngSample();
-
+  arch = new HaswellMacbook();
 
   //  PrintType printType = CODE;
 
@@ -441,7 +229,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[5]);
       n = atoi(argv[6]);
       p = atoi(argv[7]);
-      algPSet = GemmExample(precision, m, n, p);
+      algPSet = GemmExample(precision, transA, transB, m, n, p);
       break;
     case(2):
       if (argc != 9) {
@@ -454,9 +242,9 @@ int main(int argc, const char* argv[])
       n = atoi(argv[6]);
       p = atoi(argv[7]);
       k = atoi(argv[8]);
-      algPSet = DoubleGemmExample(precision, m, n, p, k);
       transA = CharToTrans(*argv[2]);
       transB = CharToTrans(*argv[3]);
+      algPSet = DoubleGemmExample(precision, transA, transB, m, n, p, k);
       break;
     case(3):
       if (argc != 4) {
@@ -537,14 +325,15 @@ int main(int argc, const char* argv[])
       algPSet = SMMulExample(precision, m, n);
       break;
     case(10):
-      if (argc != 4) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
       opName = "dxt_vadd";
-      precision = CharToType(*argv[2]);
-      m = atoi(argv[3]);
-      algPSet = VAddExample(precision, m);
+      vecType = CharToVecType(*argv[2]);
+      precision = CharToType(*argv[3]);
+      m = atoi(argv[4]);
+      algPSet = VAddExample(precision, vecType, m);
       break;
     case(11):
       if (argc != 4) {
@@ -615,6 +404,29 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       algPSet = GenSizeColSVMul(precision, m);
       break;
+    case(17):
+      if (argc != 5) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_saxpy";
+      vecType = CharToVecType(*argv[2]);
+      precision = CharToType(*argv[3]);
+      m = atoi(argv[4]);
+      algPSet = SaxpyExample(precision, vecType, m);
+      break;
+    case(18):
+      if (argc != 6) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_maddGemm";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      p = atoi(argv[5]);
+      algPSet = MAddGemm(precision, m, n, p);
+      break;
     default:
       Usage();
       return 0;
@@ -628,7 +440,7 @@ int main(int argc, const char* argv[])
 double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
 {
   RegAllLLDLANodes();
-  AddTrans();
+  AddTransformations();
 
   int numIters = -1;
   Cost flopCost = 0;
@@ -750,805 +562,5 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
   return bestFPS;
 }
-
-RealPSet* GenSizeColSVMul(Type dataType, int m)
-{
-  InputNode* Ain = new InputNode("A input", m, 1, "A",
-				 m, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-
-  InputNode* xIn = new InputNode("x input", 1, 1, "X",
-				 m, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Size partSplitPoint = m - (m % arch->VecRegWidth(dataType));
-  cout << "Part split point = " << partSplitPoint << endl;
-  Partition* part =
-    new Partition(ABSLAYER, VERTICAL, partSplitPoint);
-  part->AddInput(tunA, 0);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  SVMul* topSVMul = new SVMul(COLVECTOR, ABSLAYER);
-  topSVMul->AddInputs(4,
-		      tunX, 0,
-		      part, 0);
-
-  SVMul* bottomSVMul = new SVMul(COLVECTOR, ABSLAYER);
-  bottomSVMul->AddInputs(4,
-			 tunX, 0,
-			 part, 1);
-
-  Recombine* recombine = new Recombine(ABSLAYER, VERTICAL);
-  recombine->AddInputs(6,
-		       topSVMul, 0,
-		       bottomSVMul, 0,
-		       tunA, 0);
-
-  Poss *innerPoss = new Poss(recombine, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-
-  return outerSet;
-}
-
-RealPSet* GemvExample(Type dataType, bool transpose, int m, int n)
-{
-  InputNode* xIn = new InputNode("x input", n, 1, "X",
-				 1, n,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  InputNode* yIn = new InputNode("y input", m, 1, "Y",
-				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
-
-  InputNode* zIn = new InputNode("z input", m, 1, "Z",
-				 1, m,
-				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride", dataType);
-
-
-  InputNode* AIn;
-  if (transpose) {
-    AIn = new InputNode("a input", n, m, "A",
-			1, n,
-			"ANumRows", "ANumCols",
-			"ARowStride", "AColStride", dataType);
-  } else {
-    AIn = new InputNode("a input", m, n, "A",
-			1, m,
-			"ANumRows", "ANumCols",
-			"ARowStride", "AColStride", dataType);
-  }
-
-  InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
-				     1, m,
-				     "AlphaNumRows", "AlphaNumCols",
-				     "AlphaRowStride", "AlphaColStride", dataType);
-
-  InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
-				    1, m,
-				    "BetaNumRows", "BetaNumCols",
-				    "BetaRowStride", "BetaColStride", dataType);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
-  tunY->AddInput(yIn, 0);
-
-  Tunnel* tunZ = new Tunnel(POSSTUNIN);
-  tunZ->AddInput(zIn, 0);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(AIn, 0);
-
-  Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
-  tunAlpha->AddInput(alphaIn, 0);
-
-  Tunnel* tunBeta = new Tunnel(POSSTUNIN);
-  tunBeta->AddInput(betaIn, 0);
-
-  SVMul* by = new SVMul(COLVECTOR, ABSLAYER);
-  by->AddInputs(4,
-		tunBeta, 0,
-		tunY, 0);
-
-  LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
-  MVMul* axMul = new MVMul(ABSLAYER);
-  if (transpose) {
-    trans->AddInputs(2,
-		     tunA, 0);
-    axMul->AddInputs(6,
-		     trans, 0,
-		     tunX, 0,
-		     tunZ, 0);
-  } else {
-    axMul->AddInputs(6,
-		     tunA, 0,
-		     tunX, 0,
-		     tunZ, 0);
-  }
-
-  SVMul* alphaAXMul = new SVMul(COLVECTOR, ABSLAYER);
-  alphaAXMul->AddInputs(4,
-			tunAlpha, 0,
-			axMul, 0);
-
-  VAdd* sumVecs = new VAdd(COLVECTOR, ABSLAYER);
-  sumVecs->AddInputs(4,
-		     alphaAXMul, 0,
-		     by, 0);
-
-  Poss* innerPoss = new Poss(sumVecs, true);
-  RealPSet* innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* MVMul2Example(Type dataType, int m, int n, int p)
-{
-  InputNode* xIn = new InputNode("x input", p, 1, "X",
-				 1, p,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  InputNode* yIn = new InputNode("y input", n, 1, "Y",
-				 1, n,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
-
-  InputNode* zIn = new InputNode("z input", m, 1, "Z",
-				 1, m,
-				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride", dataType);
-
-  InputNode* AIn = new InputNode("a input", m, n, "A",
-				 1, m,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-
-  InputNode* BIn = new InputNode("b input", n, p, "B",
-				 1, n,
-				 "BNumRows", "BNumCols",
-				 "BRowStride", "BColStride", dataType);
-  
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
-  tunY->AddInput(yIn, 0);
-
-  Tunnel* tunZ = new Tunnel(POSSTUNIN);
-  tunZ->AddInput(zIn, 0);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(AIn, 0);
-
-  Tunnel* tunB = new Tunnel(POSSTUNIN);
-  tunB->AddInput(BIn, 0);
-
-  MVMul* mvmul1 = new MVMul(ABSLAYER);
-  mvmul1->AddInputs(6,
-		    tunB, 0,
-		    tunX, 0,
-		    tunY, 0);
-
-  MVMul* mvmul2 = new MVMul(ABSLAYER);
-  mvmul2->AddInputs(6,
-		    tunA, 0,
-		    mvmul1, 0,
-		    tunZ, 0);
-
-  Poss* innerPoss = new Poss(mvmul2, true);
-  RealPSet* innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* MAdd2Example(Type dataType, int m, int n)
-{
-  InputNode* xIn = new InputNode("x input", m, n, "X",
-				 1, m,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  InputNode* yIn = new InputNode("y input", m, n, "Y",
-				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
-
-  InputNode* zIn = new InputNode("z input", m, n, "Z",
-				 1, m,
-				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride", dataType);
-  
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
-  tunY->AddInput(yIn, 0);
-
-  Tunnel* tunZ = new Tunnel(POSSTUNIN);
-  tunZ->AddInput(zIn, 0);
-
-  MAdd* madd1 = new MAdd(ABSLAYER);
-  madd1->AddInputs(4,
-		  tunX, 0,
-		  tunY, 0);
-
-  MAdd* madd2 = new MAdd(ABSLAYER);
-  madd2->AddInputs(4,
-		   tunZ, 0,
-		   madd1, 0);
-
-  Poss* innerPoss = new Poss(madd2, true);
-  RealPSet* innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* VAdd2Example(Type dataType, int m)
-{
-  InputNode* xIn = new InputNode("x input", m, 1, "X",
-				 1, m,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  InputNode* yIn = new InputNode("y input", m, 1, "Y",
-				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
-
-  InputNode* zIn = new InputNode("z input", m, 1, "Z",
-				 1, m,
-				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride", dataType);
-  
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
-  tunY->AddInput(yIn, 0);
-
-  Tunnel* tunZ = new Tunnel(POSSTUNIN);
-  tunZ->AddInput(zIn, 0);
-
-  VAdd* vadd1 = new VAdd(COLVECTOR, ABSLAYER);
-  vadd1->AddInputs(4,
-		  tunX, 0,
-		  tunY, 0);
-
-  VAdd* vadd2 = new VAdd(COLVECTOR, ABSLAYER);
-  vadd2->AddInputs(4,
-		   tunZ, 0,
-		   vadd1, 0);
-
-  Poss* innerPoss = new Poss(vadd2, true);
-  RealPSet* innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-
-}
-
-RealPSet* VAddExample(Type dataType, int m)
-{
-  InputNode* xIn = new InputNode("x input", m, 1, "X",
-				 1, m,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  InputNode* yIn = new InputNode("y input", m, 1, "Y",
-				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
-  
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
-  tunY->AddInput(yIn, 0);
-
-  VAdd* vadd = new VAdd(COLVECTOR, ABSLAYER);
-  vadd->AddInputs(4,
-		  tunX, 0,
-		  tunY, 0);
-
-  Poss* innerPoss = new Poss(vadd, true);
-  RealPSet* innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-
-}
-
-RealPSet* VMVMulExample(Type dataType, int m, int n)
-{
-  InputNode* Ain = new InputNode("A input", m, n, "A",
-				 1, m,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-
-  InputNode* xIn = new InputNode("x input", n, 1, "X",
-				 1, n,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  InputNode* zIn = new InputNode("z input", m, 1, "Z",
-				 1, m,
-				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride", dataType);
-
-  InputNode* yIn = new InputNode("y input", 1, m, "Y",
-				 1, 1,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
-
-  InputNode* wIn = new InputNode("w input", 1, 1, "W",
-				 1, 1,
-				 "WNumRows", "WNumCols",
-				 "WRowStride", "WColStride", dataType);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  Tunnel* tunZ = new Tunnel(POSSTUNIN);
-  tunZ->AddInput(zIn, 0);
-
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
-  tunY->AddInput(yIn, 0);
-
-  Tunnel* tunW = new Tunnel(POSSTUNIN);
-  tunW->AddInput(wIn, 0);
-
-  MVMul* mvmul = new MVMul(ABSLAYER);
-  mvmul->AddInputs(6,
-		   tunA, 0,
-		   tunX, 0,
-		   tunZ, 0);
-
-  VVDot* vvdot = new VVDot(ABSLAYER);
-  vvdot->AddInputs(6,
-		   tunY, 0,
-		   mvmul, 0,
-		   tunW, 0);
-
-  Poss* innerPoss = new Poss(vvdot, true);
-  RealPSet* innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* SMMulExample(Type dataType, int m, int n)
-{
-  InputNode* Ain = new InputNode("A input", m, n, "A",
-				 n, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-  InputNode* xIn = new InputNode("x input", 1, 1, "X",
-				 1, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  SMMul* smmul = new SMMul(ABSLAYER);
-  smmul->AddInputs(4,
-		   tunX, 0,
-		   tunA, 0);
-
-  Poss *innerPoss = new Poss(smmul, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* VMMulExample(Type dataType, int m, int n)
-{
-  InputNode* Ain = new InputNode("A input", m, n, "A",
-				 n, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-  InputNode* xIn = new InputNode("x input", 1, m, "X",
-				 m, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  InputNode* yIn = new InputNode("y input", 1, n, "Y",
-				 n, 1,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
-  tunY->AddInput(yIn, 0);
-
-  VMMul* vmmul = new VMMul(ABSLAYER);
-  vmmul->AddInputs(6,
-		   tunX, 0,
-		   tunA, 0,
-		   tunY, 0);
-
-  Poss *innerPoss = new Poss(vmmul, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* SVMulRowExample(Type dataType, int m)
-{
-  InputNode* Ain = new InputNode("A input", 1, m, "A",
-				 m, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-
-  InputNode* xIn = new InputNode("x input", 1, 1, "X",
-				 m, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  SVMul* svmul = new SVMul(ROWVECTOR, ABSLAYER);
-  svmul->AddInputs(4,
-		   tunX, 0,
-		   tunA, 0);
-
-  Poss *innerPoss = new Poss(svmul, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* SVMulColExample(Type dataType, int m)
-{
-  InputNode* Ain = new InputNode("A input", m, 1, "A",
-				 m, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-
-  InputNode* xIn = new InputNode("x input", 1, 1, "X",
-				 m, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  SVMul* svmul = new SVMul(COLVECTOR, ABSLAYER);
-  svmul->AddInputs(4,
-		   tunX, 0,
-		   tunA, 0);
-
-  Poss *innerPoss = new Poss(svmul, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
-{
-  InputNode* Ain;
-  if (transpose) {
-    Ain = new InputNode("A input", n, m, "A",
-			1, n,
-			"ANumRows", "ANumCols",
-			"ARowStride", "AColStride", dataType);
-  } else {
-    Ain = new InputNode("A input", m, n, "A",
-			1, m,
-			"ANumRows", "ANumCols",
-			"ARowStride", "AColStride", dataType);
-  }
-
-  InputNode* xIn = new InputNode("x input", n, 1, "X",
-				 1, n,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-  InputNode* yIn = new InputNode("y input", m, 1, "Y",
-				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
-  tunY->AddInput(yIn, 0);
-
-  MVMul* mvmul = new MVMul(ABSLAYER);
-  LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
-  if (transpose) {
-    trans->AddInputs(2,
-		     tunA, 0);
-    mvmul->AddInputs(6,
-		     trans, 0,
-		     tunX, 0,
-		     tunY, 0);
-  } else {
-    mvmul->AddInputs(6,
-		     tunA, 0,
-		     tunX, 0,
-		     tunY, 0);
-  }
-  Poss *innerPoss = new Poss(mvmul, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* MAddExample(Type dataType, int m, int n)
-{
-  InputNode* Ain = new InputNode("A input", m, n, "A", 
-				 1, m,
-				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride", dataType);
-
-  InputNode* Bin = new InputNode("B input", m, n, "B", 
-				 1, m,
-				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride", dataType);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel* tunB = new Tunnel(POSSTUNIN);
-  tunB->AddInput(Bin, 0);
-
-  MAdd* madd = new MAdd(ABSLAYER);
-  madd->AddInputs(4,
-		 tunA, 0,
-		 tunB, 0);
-
-  Poss *innerPoss = new Poss(madd, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* DotExample(Type dataType, int m)
-{
-  InputNode* Ain = new InputNode("A input", 1, m, "A", 
-				 m, 1,
-				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride", dataType);
-
-  InputNode* Bin = new InputNode("B input", m, 1, "B", 
-				 m, 1,
-				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride", dataType);
-
-  InputNode* Cin = new InputNode("C input", 1, 1, "C", 
-				 m, 1,
-				 "CNumRows","CNumCols",
-				 "CRowStride","CColStride", dataType);
-
-  Tunnel *tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain,0);
-
-  Tunnel *tunB = new Tunnel(POSSTUNIN);
-  tunB->AddInput(Bin,0);
-
-  Tunnel *tunC = new Tunnel(POSSTUNIN);
-  tunC->AddInput(Cin,0);
-
-  VVDot* dot = new VVDot(ABSLAYER);
-  dot->AddInputs(6,
-		 tunA, 0,
-		 tunB, 0,
-		 tunC, 0);
-
-  Poss *innerPoss = new Poss(dot, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* GemmExample(Type dataType, int m, int n, int p)
-{
-  InputNode *Ain= new InputNode("A input", m, p, "A",
-				 1, m,
-				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride", dataType);
-
-  InputNode *Bin = new InputNode("B input", p, n, "B",
-				 1, p,
-				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride", dataType);
-
-  InputNode *Cin = new InputNode("C input", m, n, "C",
-				 1, m,
-				 "CNumRows","CNumCols",
-				 "CRowStride","CColStride", dataType);
-
-  Tunnel *tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel *tunB = new Tunnel(POSSTUNIN);
-  tunB->AddInput(Bin, 0);
-
-  Tunnel *tunC = new Tunnel(POSSTUNIN);
-  tunC->AddInput(Cin, 0);
-
-  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
-  gemm->AddInputs(6,
-		  tunA, 0,
-		  tunB, 0,
-		  tunC, 0);
-
-  Poss *innerPoss = new Poss(gemm,true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0),0);
-
-  Poss *outerPoss = new Poss(Cout,true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* DoubleGemmExample(Type dataType, int m, int n, int p, int k)
-{
-  InputNode *Ain = new InputNode("A input",  m, n, "A",
-				 n, 1,
-				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride", dataType);
-
-  InputNode *Bin = new InputNode("B input", n, p, "B",
-				 p, 1,
-				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride", dataType);
-
-  InputNode *Cin = new InputNode("C input",  p, k, "C",
-				 k, 1,
-				 "CNumRows","CNumCols",
-				 "CRowStride","CColStride", dataType);
-
-  Tunnel *tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain,0);
-
-  Tunnel *tunB = new Tunnel(POSSTUNIN);
-  tunB->AddInput(Bin,0);
-
-  Tunnel *tunC = new Tunnel(POSSTUNIN);
-  tunC->AddInput(Cin,0);
-
-  Gemm *gemm1 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
-  gemm1->AddInputs(6,
-		  tunA,0,
-		  tunB,0,
-		  tunC,0);
-
-  Gemm *gemm2 = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
-  gemm2->AddInputs(6,
-		  tunA,0,
-		  tunB,0,
-		  gemm1,0);
-
-  Poss *innerPoss = new Poss(gemm2,true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0),0);
-
-  Poss *outerPoss = new Poss(Cout,true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
 
 #endif //DOLLDLA

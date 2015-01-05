@@ -41,14 +41,14 @@ class Recombine : public DLAOp<3, 1>
   virtual void PrintCode(IndStream &out);
 
   virtual ~Recombine() {}
-  inline void SetLayer(Layer layer) {m_layer = layer;}
-  inline Layer GetLayer() const {return m_layer;}
-  virtual bool IsReadOnly() const {return false;}
-  virtual bool CanTrans() const {return false;}
+  inline void SetLayer(Layer layer) { m_layer = layer; }
+  inline Layer GetLayer() const { return m_layer; }
+  virtual bool IsReadOnly() const { return false; }
+  virtual bool CanTrans() const { return false; }
 
   virtual NodeType GetType() const { return "recombineNode"; }
-  static ClassType GetClass() {return "recombineNode"; }
-  virtual ClassType GetNodeClass() const {return GetClass(); }
+  static ClassType GetClass() { return "recombineNode"; }
+  virtual ClassType GetNodeClass() const { return GetClass(); }
 
   virtual Node* GetNewInst() { return BlankInst(); }
   static Node* BlankInst() { return new Recombine(ABSLAYER, VERTICAL); }

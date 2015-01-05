@@ -19,8 +19,11 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <assert.h>
 #include "LLDLA.h"
+#include "partition.h"
 #include "regArith.h"
+#include "recombine.h"
 #include "regLoadStore.h"
 #include "scalarArith.h"
 #include "svmul.h"
@@ -559,10 +562,12 @@ bool ResidualPartitionSVMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     SVMul* svmul = (SVMul*) node;
-    if (m_vType == ROWVECTOR) {
+    if (m_vType == ROWVECTOR && svmul->m_vecType == ROWVECTOR) {
       return !(svmul->GetInputN(1)->EvenlyDivisibleBy(m_blockSize));
-    } else {
+    } else if (m_vType == COLVECTOR && svmul->m_vecType == COLVECTOR) {
       return !(svmul->GetInputM(1)->EvenlyDivisibleBy(m_blockSize));
+    } else {
+      return false;
     }
   }
   cout << "ERROR: Cannot apply ResidualPartitionSVMul to non SVMul node" << endl;
@@ -571,9 +576,59 @@ bool ResidualPartitionSVMul::CanApply(const Node* node) const
 
 void ResidualPartitionSVMul::Apply(Node* node) const
 {
-  /*  Dir partType = m_vType == ROWVECTOR ? HORIZONTAL : VERTICAL;
-      Node* svmul = (SVMul*) node;*/
+  Dir partType = m_vType == ROWVECTOR ? HORIZONTAL : VERTICAL;
+  SVMul* svmul = (SVMul*) node;
+
+  Size splitPoint = ResidualSplitPoint(svmul);
+
+  Partition* part = new Partition(m_toLayer, partType, splitPoint);
+  part->AddInput(svmul->Input(1), 0);
+
+  SVMul* startSVMul = new SVMul(svmul->m_vecType, m_toLayer);
+  startSVMul->AddInput(svmul->Input(0), 0);
+  startSVMul->AddInput(part, 0);
+
+  SVMul* endSVMul = new SVMul(svmul->m_vecType, m_toLayer);
+  endSVMul->AddInput(svmul->Input(0), 0);
+  endSVMul->AddInput(part, 1);
+
+  Recombine* rec = new Recombine(m_toLayer, partType);
+  rec->AddInput(startSVMul, 0);
+  rec->AddInput(endSVMul, 0);
+  rec->AddInput(svmul->Input(1), 0);
+
+  Poss* poss = node->m_poss;
+  poss->AddNode(part);
+  poss->AddNode(startSVMul);
+  poss->AddNode(endSVMul);
+  poss->AddNode(rec);
+
+  node->RedirectChildren(rec, 0);
+  poss->DeleteChildAndCleanUp(node);
+
   return;
+}
+
+Size ResidualPartitionSVMul::ResidualSplitPoint(const SVMul* svmul) const
+{
+  const Sizes* splittingDimSizes;
+  if (m_vType == ROWVECTOR) {
+    splittingDimSizes = svmul->GetInputN(1);
+  } else {
+    splittingDimSizes = svmul->GetInputM(1);
+  }
+
+  assert(splittingDimSizes->m_entries.size() == 1);
+
+  SizeEntry* sizeEnt = splittingDimSizes->m_entries[0];
+
+  assert(sizeEnt->m_type == REPEATEDSIZES);
+
+  Size totalSize = sizeEnt->m_valA;
+  int ts = (int) totalSize;
+  int bs = (int) m_blockSize;
+  int splitPoint = ts - (ts % bs);
+  return (Size) splitPoint;
 }
 
 #endif // DOLLDLA

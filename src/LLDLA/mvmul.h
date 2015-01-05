@@ -19,6 +19,9 @@ n    but WITHOUT ANY WARRANTY; without even the implied warranty of
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _MVMUL_H_
+#define _MVMUL_H_
+
 #pragma once
 
 #include "DLAOp.h"
@@ -96,3 +99,5 @@ class MVMulLowerLayer : public SingleTrans
 };
 
 #endif // DOLLDLA
+
+#endif

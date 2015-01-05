@@ -200,32 +200,6 @@ Phase VAdd::MaxPhase() const
     }
 }
 
-// TEST CODE
-/*
-SplitUnusualSizeVAdd::SplitUnusualSizeVAdd(Layer fromLayer, Layer toLayer, unsigned int multiple)
-{
-  m_fromLayer = fromLayer;
-  m_toLayer = toLayer;
-  m_multiple = multiple;
-}
-
-string SplitUnusualSizeVAdd::GetType() const
-{
-  return "SplitUnusualSizeVAdd";
-}
-
-bool SplitUnusualSizeVAdd::CanApply(const Node* node) const
-{
-  if (node->GetNodeClass() == VAdd::GetClass()) {
-    VAdd* vadd = (VAdd*) node;
-    
-  }
-
-  return false;
-}
-*/
-// END TEST CODE
-
 VAddLoopRef::VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs)
 {
   m_fromLayer = fromLayer;

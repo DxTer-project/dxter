@@ -159,7 +159,6 @@ class Sizes
   bool IsPartitionable(const Size partitionPoint) const;
 };
 
-
 extern Sizes *ONES;
 
 typedef Sizes *SizesArray;

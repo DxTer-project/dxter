@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _VADD_H_
+#define _VADD_H_
+
 #include "DLAOp.h"
 #include "LLDLA.h"
 #include "loopSupport.h"
@@ -109,3 +112,5 @@ class VAddToRegArith : public SingleTrans
 };
 
 #endif // DOLLDLA
+
+#endif
