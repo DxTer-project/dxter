@@ -72,7 +72,7 @@ Phase Yaxpy::MaxPhase() const
 void Yaxpy::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << "Yaxpy( ";
+  *out << "YAxpy( ";
   out << m_alpha;
   *out << ", " << GetInputName(0).str() << ", "
        << GetInputName(1).str() << " );\n";
