@@ -42,7 +42,6 @@
 
 #if DOTENSORS
 
-#include "debug.h"
 #include "yaxppx.h"
 #include "zaxpby.h"
 #include "ccsd.h"
