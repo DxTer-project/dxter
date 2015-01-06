@@ -1250,15 +1250,17 @@ RealPSet* Z()
   InputNode *T_aeim = CreateInput4("T_aeim", big, big, small, small);
   InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
 
-  RealPSet *set = Z_abij_calc(v_abij, Q_mnij,
+  RealPSet *set = Z_abij_calc(v_abij, 
 			      y_abef,
 			      r_ejab,
-			      P_ijmb,
 			      t_am,
+			      Q_mnij,
+			      P_ijmb,
 			      F_ae,
 			      G_mi, 
 			      W_bmje,
-			      T_aeim, X_bmej,
+			      X_bmej,
+			      T_aeim, 
 			      big, small);
   
   OutputNode *out = new OutputNode("output");
