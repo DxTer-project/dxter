@@ -518,20 +518,7 @@ void SumScatterUpdateNode::PrintCode(IndStream &out)
       if (redDim == srcNumDims)
 	throw;
 
-      Dim scatDim = srcNumDims;
-      for(Dim dim = 0; dim < m_destType.m_numDims; ++dim) {
-	DimVec destDims = m_destType.m_dists[dim].DistEntryDims();
-	DimVec srcDims = m_srcType.m_dists[dim].DistEntryDims();
-	srcDims.insert(srcDims.end(), scatDims.begin(), scatDims.end());
-	if (destDims == srcDims) {
-	  scatDim = dim;
-	  break;
-	}
-      }
-      if (scatDim == srcNumDims)
-	throw;
-
-      *out << redDim << ", " << scatDim << " );\n";
+      *out << redDim << " );\n";
     }
   }
   else {

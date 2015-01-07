@@ -38,20 +38,20 @@ BasePSet::BasePSet()
 {
 }
 
-Node* BasePSet::InTun(unsigned int num) const
+Tunnel* BasePSet::InTun(unsigned int num) const
 {
   if (num >= m_inTuns.size()) {
     cout << num << " >= " << m_inTuns.size() << endl;
     throw;
   }
-  return m_inTuns[num];
+  return (Tunnel*)(m_inTuns[num]);
 }
 
-Node* BasePSet::OutTun(unsigned int num) const
+Tunnel* BasePSet::OutTun(unsigned int num) const
 {
   if (num >= m_outTuns.size())
     throw;
-  return m_outTuns[num];
+  return (Tunnel*)(m_outTuns[num]);
 }
 
 void BasePSet::ClearBeforeProp()

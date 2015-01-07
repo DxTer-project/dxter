@@ -23,3 +23,5 @@ test.sh
 test/LLDLA/basicTests/all_tests
 runtimeEvaluation
 output*
+ccsdTests
+tensorTest

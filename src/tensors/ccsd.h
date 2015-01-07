@@ -83,6 +83,20 @@ RealPSet* z_ai_calc(DLANode * f_ae, DLANode *G_mi,
 		    const Size big, const Size small);
 
 
+RealPSet* Z_abij_calc(DLANode *v_abij, 
+		      DLANode *y_abef,
+		      DLANode *r_ejab,
+		      DLANode *t_am,
+		      DLANode *Q_mnij,
+		      DLANode *P_ijmb,
+		      DLANode *F_ae,
+		      DLANode *G_mi, 
+		      DLANode *W_bmje,
+		      DLANode *X_bmej,
+		      DLANode *T_aeim,
+		      const Size big, const Size small);
+
+
 
 InputNode *CreateInput2(string name, Size size1, Size size2);
 InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size size4);

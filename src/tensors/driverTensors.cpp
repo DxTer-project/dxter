@@ -42,7 +42,6 @@
 
 #if DOTENSORS
 
-#include "debug.h"
 #include "yaxppx.h"
 #include "zaxpby.h"
 #include "ccsd.h"
@@ -65,6 +64,7 @@ RealPSet* H();
 RealPSet* F();
 RealPSet* G();
 RealPSet* z();
+RealPSet* Z();
 
 void AddTrans()
 {
@@ -176,6 +176,7 @@ void Usage()
   cout <<"        12  -> F_ae\n";
   cout <<"        13  -> G_mi\n";
   cout <<"        14  -> z_ai\n";
+  cout <<"        15  -> Z_abij\n";
 }
 
 int main(int argc, const char* argv[])
@@ -240,6 +241,9 @@ int main(int argc, const char* argv[])
       break;
     case(14):
       algFunc = z;
+      break;
+    case(15):
+      algFunc = Z;
       break;
     default:
       Usage();
@@ -1217,6 +1221,47 @@ RealPSet* z()
 			    x_amei, 
 			    t_am, r_amef, T_aeim,
 			    big, small);
+  
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* Z()
+{
+  //~ 10:1 ratio
+  // 53, 5 for H20
+  const Size big = 500; //a-h
+  const Size small = 50; //i-p
+
+  InputNode *v_abij = CreateInput4("v_abij", big, big, small, small);
+  InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
+  InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
+  InputNode *r_ejab = CreateInput4("r_ejab", big, small, big, big);
+  InputNode *P_ijmb = CreateInput4("P_ijmb", small, small, small, big);
+  InputNode *t_am = CreateInput2("t_am", big, small);
+  InputNode *F_ae = CreateInput2("F_ae", big, big);
+  InputNode *G_mi = CreateInput2("G_mi", small, small);
+  InputNode *W_bmje = CreateInput4("W_bmje", big, small, small, big);
+  InputNode *T_aeim = CreateInput4("T_aeim", big, big, small, small);
+  InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
+
+  RealPSet *set = Z_abij_calc(v_abij, 
+			      y_abef,
+			      r_ejab,
+			      t_am,
+			      Q_mnij,
+			      P_ijmb,
+			      F_ae,
+			      G_mi, 
+			      W_bmje,
+			      X_bmej,
+			      T_aeim, 
+			      big, small);
   
   OutputNode *out = new OutputNode("output");
   out->AddInput(set->OutTun(0),0);

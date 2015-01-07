@@ -50,8 +50,8 @@ class BasePSet
   virtual bool operator==(const BasePSet &rhs) const = 0;
   virtual Cost Prop() = 0;
   virtual void ClearBeforeProp();
-  Node* InTun(unsigned int num) const;
-  Node* OutTun(unsigned int num) const;
+  Tunnel* InTun(unsigned int num) const;
+  Tunnel* OutTun(unsigned int num) const;
   virtual bool CanMerge(BasePSet *pset) const;
   virtual bool IsTransparent() const {return true;}
   virtual GraphNum TotalCount() const = 0;
