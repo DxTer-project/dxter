@@ -33,6 +33,8 @@ LLDLATranspose::LLDLATranspose(Layer layer)
 
 void LLDLATranspose::PrintCode(IndStream &out)
 {
+  /*  out.Indent();
+   *out << "simple_transpose( " <<*/
   return;
 }
 
