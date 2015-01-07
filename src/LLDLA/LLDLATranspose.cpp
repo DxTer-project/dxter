@@ -39,17 +39,6 @@ void LLDLATranspose::PrintCode(IndStream &out)
 Phase LLDLATranspose::MaxPhase() const
 {
   return NUMPHASES;
-  /*  switch (m_layer)
-    { 
-    case(ABSLAYER):
-      return LLDLALOOPPHASE;
-    case(LLDLAMIDLAYER):
-      return LLDLAPRIMPHASE;
-    case (LLDLAPRIMITIVELAYER):
-      return NUMPHASES; 
-    default:
-      throw;
-      }*/
 }
 
 NodeType LLDLATranspose::GetType() const

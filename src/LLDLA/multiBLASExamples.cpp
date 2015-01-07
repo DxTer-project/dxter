@@ -70,13 +70,13 @@ RealPSet* MAddGemm(Type dataType, int m, int n, int p)
 		   tunBeta, 0,
 		   tunC, 0);
 
-  /*Gemm* gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
+  Gemm* gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
   gemm->AddInputs(6,
 		  alphaA, 0,
 		  tunB, 0,
-		  tunC, 0);*/
+		  betaC, 0);
 
-  Poss* innerPoss = new Poss(alphaA, true);
+  Poss* innerPoss = new Poss(gemm, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
   OutputNode *Cout = new OutputNode("C output");

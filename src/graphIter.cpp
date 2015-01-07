@@ -338,7 +338,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	      *out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
 	      m_poss->m_sets[i]->PrePrint(out,m_setIters[i]->second);
 	      ++out;
-        BasePSet *set = m_poss->m_sets[i];
+	      BasePSet *set = m_poss->m_sets[i];
 	      RealPSet *real = set->GetReal();
 	      real->SetInTunsAsPrinted();
 	      //Do this now so printing within here will properly empty variables
