@@ -33,8 +33,16 @@ LLDLATranspose::LLDLATranspose(Layer layer)
 
 void LLDLATranspose::PrintCode(IndStream &out)
 {
-  /*  out.Indent();
-   *out << "simple_transpose( " <<*/
+  const DataTypeInfo& dataInfo = InputDataType(0);
+  out.Indent();
+  *out << dataInfo.m_numRowsVar << " = " << InputDataType(0).m_numColsVar << ";\n";
+  out.Indent();
+  *out << dataInfo.m_numColsVar << " = " << InputDataType(0).m_numRowsVar << ";\n";
+  out.Indent();
+  out.Indent();
+  *out << dataInfo.m_rowStrideVar << " = " << dataInfo.m_colStrideVar << ";\n";
+  out.Indent();
+  *out << dataInfo.m_colStrideVar << " = " << "tmp;\n";
   return;
 }
 
