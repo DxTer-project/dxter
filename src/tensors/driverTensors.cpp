@@ -65,6 +65,7 @@ RealPSet* F();
 RealPSet* G();
 RealPSet* z();
 RealPSet* Z();
+RealPSet* CCSD();
 
 void AddTrans()
 {
@@ -177,6 +178,7 @@ void Usage()
   cout <<"        13  -> G_mi\n";
   cout <<"        14  -> z_ai\n";
   cout <<"        15  -> Z_abij\n";
+  cout <<"        16  -> CCSD\n";
 }
 
 int main(int argc, const char* argv[])
@@ -244,6 +246,9 @@ int main(int argc, const char* argv[])
       break;
     case(15):
       algFunc = Z;
+      break;
+    case(16):
+      algFunc = CCSD;
       break;
     default:
       Usage();
@@ -1267,6 +1272,66 @@ RealPSet* Z()
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+
+RealPSet* CCSD()
+{
+  //~ 10:1 ratio
+  // 53, 5 for H20
+  const Size big = 500; //a-h
+  const Size small = 50; //i-p
+
+  InputNode *v_abij = CreateInput4("v_abij", big, big, small, small);
+  InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
+  InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
+  InputNode *r_ejab = CreateInput4("r_ejab", big, small, big, big);
+  InputNode *P_ijmb = CreateInput4("P_ijmb", small, small, small, big);
+  InputNode *t_am = CreateInput2("t_am", big, small);
+  InputNode *F_ae = CreateInput2("F_ae", big, big);
+  InputNode *G_mi = CreateInput2("G_mi", small, small);
+  InputNode *W_bmje = CreateInput4("W_bmje", big, small, small, big);
+  InputNode *T_aeim = CreateInput4("T_aeim", big, big, small, small);
+  InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
+  InputNode *f_ae = CreateInput2("f_ae", big, big);
+  InputNode *H_me = CreateInput2("H_me", small, big);
+  InputNode *U_mnie = CreateInput4("U_mnie", small, small, small, big);
+  InputNode *w_amie = CreateInput4("w_amie", big, small, small, big);
+  InputNode *x_amei = CreateInput4("x_amei", big, small, big, small);
+  InputNode *r_amef = CreateInput4("r_amef", big, small, big, big);
+
+  RealPSet *ZSet = Z_abij_calc(v_abij, 
+			      y_abef,
+			      r_ejab,
+			      t_am,
+			      Q_mnij,
+			      P_ijmb,
+			      F_ae,
+			      G_mi, 
+			      W_bmje,
+			      X_bmej,
+			      T_aeim, 
+			      big, small);
+
+  RealPSet *zset = z_ai_calc(f_ae, G_mi, 
+			    H_me, U_mnie,
+			    w_amie,
+			    x_amei, 
+			    t_am, r_amef, T_aeim,
+			    big, small);
+
+  
+  OutputNode *zout = new OutputNode("zoutput");
+  zout->AddInput(zset->OutTun(0),0);
+
+  
+  OutputNode *Zout = new OutputNode("Zoutput");
+  Zout->AddInput(ZSet->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(2, zout, Zout);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;

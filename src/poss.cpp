@@ -1147,21 +1147,21 @@ void Poss::MergePart2(RealPSet *newSet,
 
   RealPSet *realLeft = leftSet->GetReal();
   RealPSet *realRight = rightSet->GetReal();
- 
-			     
 
+  if (realLeft != realRight) {
 #if PRINTTRACKING
-  cout << "realLeft: " << realLeft << endl;
-  cout << "realRight: " << realRight << endl;
+    cout << "realLeft: " << realLeft << endl;
+    cout << "realRight: " << realRight << endl;
 #endif
-  if (realLeft->m_mergeMap.find(realRight) != realLeft->m_mergeMap.end())
-    throw;
-  realLeft->m_mergeMap.insert(PSetMapPair(realRight,newSet));
-  if (realRight->m_mergeMap.find(realLeft) != realRight->m_mergeMap.end())
-    throw;
-  realRight->m_mergeMap.insert(PSetMapPair(realLeft,newSet));
-  newSet->m_mergeLeft = realLeft;
-  newSet->m_mergeRight = realRight;
+    if (realLeft->m_mergeMap.find(realRight) != realLeft->m_mergeMap.end())
+      throw;
+    realLeft->m_mergeMap.insert(PSetMapPair(realRight,newSet));
+    if (realRight->m_mergeMap.find(realLeft) != realRight->m_mergeMap.end())
+      throw;
+    realRight->m_mergeMap.insert(PSetMapPair(realLeft,newSet));
+    newSet->m_mergeLeft = realLeft;
+    newSet->m_mergeRight = realRight;
+  }
 
   newSet->m_ownerPoss = this;
   m_sets.insert(m_sets.begin()+left,newSet);
