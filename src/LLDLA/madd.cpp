@@ -132,7 +132,7 @@ Node* MAdd::BlankInst()
 
 NodeType MAdd::GetType() const
 {
-  return "MAdd" + LayerNumToStr(GetLayer()) + " type " + std::to_string((long long int) GetDataType());
+  return "MAdd" + LayerNumToStr(GetLayer());
 }
 
 Phase MAdd::MaxPhase() const
@@ -179,9 +179,9 @@ bool MAddLoopRef::CanApply(const Node *node) const
       return false;
     }
     if (m_dim == DIMM) {
-      return !(*(madd->GetInputM(0)) <= m_bs.GetSize()) && !(*(madd->GetInputM(1)) <= m_bs.GetSize());
+      return (*(madd->GetInputM(0)) > m_bs.GetSize()) && (*(madd->GetInputM(1)) > m_bs.GetSize());
     } else if (m_dim == DIMN) {
-      return !(*(madd->GetInputN(0)) <= m_bs.GetSize()) && !(*(madd->GetInputN(1)) <= m_bs.GetSize());
+      return (*(madd->GetInputN(0)) > m_bs.GetSize()) && (*(madd->GetInputN(1)) > m_bs.GetSize());
     } else {
       return false;
     }
@@ -220,7 +220,7 @@ void MAddLoopRef::Apply(Node *node) const
 
   Poss *loopPoss = new Poss(2, com0, com1);
   RealLoop *loop = new RealLoop(LLDLALOOP, loopPoss, m_bs);
-  loop->SetDimName(m_dim == DIMM ? DIMM : DIMN);
+  loop->SetDimName(m_dim);
 
   node->m_poss->AddPSet(loop);
   node->RedirectChildren(loop->OutTun(1), 0);
