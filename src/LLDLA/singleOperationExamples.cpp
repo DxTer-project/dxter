@@ -152,7 +152,7 @@ RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
 
 RealPSet* MAddExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", m, n, "A", 
+  InputNode* Ain = new InputNode("A input", m, n, "A",
 				 1, m,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);

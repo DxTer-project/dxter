@@ -251,7 +251,7 @@ string MAddToVAddLoopRef::GetType() const
 
 bool MAddToVAddLoopRef::CanApply(const Node *node) const
 {
-  if (node->GetClass() == MAdd::GetClass()) {
+  if (node->GetNodeClass() == MAdd::GetClass()) {
     const MAdd *madd = (MAdd*) node;
     if (madd->GetLayer() != m_fromLayer) {
       return false;
@@ -263,6 +263,7 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
     }
   }
   cout << "ERROR: Applying MAddToVAddLoopRef to non MAdd node\n";
+  cout << "Node has class " << node->GetNodeClass() << endl;
   throw;
 }
 
