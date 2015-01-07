@@ -33,16 +33,23 @@ LLDLATranspose::LLDLATranspose(Layer layer)
 
 void LLDLATranspose::PrintCode(IndStream &out)
 {
-  const DataTypeInfo& dataInfo = InputDataType(0);
+  /*  const DataTypeInfo& dataInfo = InputDataType(0);
+  // EXTREMELY HACKY WAY TO GENERATE UNIQUE NAME FOR TEMPORARY VARIABLE
+  string tmpVar = "tmp" + std::to_string((long long int) this);
+  out.Indent();
+  *out << "int " << tmpVar << ";\n";
+  out.Indent();
+  *out << tmpVar << " = " << dataInfo.m_numRowsVar << ";\n";
   out.Indent();
   *out << dataInfo.m_numRowsVar << " = " << InputDataType(0).m_numColsVar << ";\n";
   out.Indent();
-  *out << dataInfo.m_numColsVar << " = " << InputDataType(0).m_numRowsVar << ";\n";
+  *out << dataInfo.m_numColsVar << " = " << tmpVar << ";\n";
   out.Indent();
+  *out << tmpVar << " = " << dataInfo.m_rowStrideVar << ";\n";
   out.Indent();
   *out << dataInfo.m_rowStrideVar << " = " << dataInfo.m_colStrideVar << ";\n";
   out.Indent();
-  *out << dataInfo.m_colStrideVar << " = " << "tmp;\n";
+  *out << dataInfo.m_colStrideVar << " = " << tmpVar << ";\n";*/
   return;
 }
 

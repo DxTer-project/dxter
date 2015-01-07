@@ -76,7 +76,7 @@ RealPSet* MAddGemm(Type dataType, int m, int n, int p)
 		  tunB, 0,
 		  tunC, 0);*/
 
-  Poss* innerPoss = new Poss(betaC, true);
+  Poss* innerPoss = new Poss(alphaA, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
   OutputNode *Cout = new OutputNode("C output");

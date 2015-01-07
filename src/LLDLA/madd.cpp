@@ -35,8 +35,10 @@ void MAdd::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
     if (GetDataType() == REAL_DOUBLE) {
+      out.Indent();
       *out << "simple_add( ";
     } else if (GetDataType() == REAL_SINGLE) {
+      out.Indent();
       *out << "simple_add_float( ";
     }
     *out << InputDataType(0).m_numRowsVar << ", " <<
