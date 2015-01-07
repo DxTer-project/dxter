@@ -25,7 +25,9 @@ dxter.x: $(OBJS) $(HEADERS)
 	$(LINKER) $(CFLAGS) $(OBJS) -o $@
 
 clean:
-	rm -f obj/*.o obj/DLA/*.o obj/tensors/*.o src/*~ src/DLA/*~ src/LLDLA/*~ src/LLDLA/*.o *.x *~
+	rm -f obj/*.o obj/DLA/*.o obj/tensors/*.o obj/LLDLA/*.o
+	rm -f src/*~ src/DLA/*~ src/tensors/*~ src/LLDLA/*~
+	rm -f *.x *~
 
 open:
 	emacs -nw src/*cpp src/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h src/LLDLA/*cpp src/LLDLA/*h makefile
