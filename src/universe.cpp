@@ -240,10 +240,17 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
     time(&end);
     cout << "//Done iteration " << count << " with " 
 	 << total << " algorithms";
-    double percent = 100.0 * (total / prevAlgs - 1 );
-    if (percent < 0)
-      throw;
-    cout << ";   increase of " << percent << "%";
+    if (prevAlgs) {
+      double percent =  100.0 * (total / prevAlgs - 1 );
+      if (percent < 0)
+	throw;
+      cout << ";   increase of " << percent << "%";
+    }
+    else {
+      if (m_pset->m_posses.empty())
+	throw;
+      cout << ";   0 algorithms, but there are still posses at the high level\n";
+    }
     cout << ";   took " << difftime(end,start) << " seconds";
     cout << endl;
     cout.flush();
