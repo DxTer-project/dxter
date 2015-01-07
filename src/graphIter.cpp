@@ -338,8 +338,11 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	      *out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
 	      m_poss->m_sets[i]->PrePrint(out,m_setIters[i]->second);
 	      ++out;
-	      RealPSet *real = m_poss->m_sets[i]->GetReal();
+        BasePSet *set = m_poss->m_sets[i];
+	      RealPSet *real = set->GetReal();
 	      real->SetInTunsAsPrinted();
+	      //Do this now so printing within here will properly empty variables
+	      m_poss->m_sets[i]->m_flags |= SETHASPRINTEDFLAG;
 	      m_subIters[i]->Print(out, whichGraph, m_poss->m_sets[i]);
 	      --out;
 	      m_poss->m_sets[i]->PostPrint(out,m_setIters[i]->second);
@@ -354,7 +357,6 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	      out.Indent();
 	      *out << "//****\n";
 	      hasPrinted = true;
-	      
 	    }
 	}
       }
@@ -452,6 +454,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 #endif //DOTENSORS
 	
 	RealPSet *real = set->GetReal();
+	set->m_flags |= SETHASPRINTEDFLAG;
 	
 	if (!real->IsLoop() ||
 	    !((RealLoop*)real)->IsUnrolled()) {
@@ -567,6 +570,9 @@ void GraphIter::ClearPrintedRecursively()
   m_poss->ClearPrintedFromGraph();
   unsigned int numPSets = m_poss->m_sets.size();
   for(unsigned int i = 0; i < numPSets; ++i) {
+    m_poss->m_sets[i]->m_flags &= ~SETHASPRINTEDFLAG;
     m_subIters[i]->ClearPrintedRecursively();
   }
 }
+
+
