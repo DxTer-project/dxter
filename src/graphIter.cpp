@@ -343,9 +343,18 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	      m_subIters[i]->Print(out, whichGraph, m_poss->m_sets[i]);
 	      --out;
 	      m_poss->m_sets[i]->PostPrint(out,m_setIters[i]->second);
+	      NodeVecIter tunnelIter = m_poss->m_sets[i]->m_outTuns.begin();
+	      for(; tunnelIter != m_poss->m_sets[i]->m_outTuns.end(); ++tunnelIter) {
+		(*tunnelIter)->PrintEmptyStatementIfOK(out);
+	      }
+	      tunnelIter = m_poss->m_sets[i]->m_inTuns.begin();
+	      for(; tunnelIter != m_poss->m_sets[i]->m_inTuns.end(); ++tunnelIter) {
+		(*tunnelIter)->PrintEmptyStatementIfOK(out);
+	      }
 	      out.Indent();
 	      *out << "//****\n";
 	      hasPrinted = true;
+	      
 	    }
 	}
       }
@@ -471,6 +480,16 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	  }
 	  --out;
 	}
+
+	NodeVecIter tunnelIter = m_poss->m_sets[i]->m_outTuns.begin();
+	for(; tunnelIter != m_poss->m_sets[i]->m_outTuns.end(); ++tunnelIter) {
+	  (*tunnelIter)->PrintEmptyStatementIfOK(out);
+	}
+	tunnelIter = m_poss->m_sets[i]->m_inTuns.begin();
+	for(; tunnelIter != m_poss->m_sets[i]->m_inTuns.end(); ++tunnelIter) {
+	  (*tunnelIter)->PrintEmptyStatementIfOK(out);
+	}
+
 	out.Indent();
 	*out << "//****\n";
 

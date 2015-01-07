@@ -1071,11 +1071,22 @@ const int Node::GetVecRegWidth() const
 void Node::PrintEmptyStatementIfOK(IndStream &out) const
 {
   StrSet set;
-  for(ConnNum num = 0; num < m_inputs.size(); ++num) {
-    set.insert(GetInputNameStr(num));
+  if (!IsTunnel(SETTUNOUT)) {
+    for(ConnNum num = 0; num < m_inputs.size(); ++num) {
+      set.insert(GetInputNameStr(num));
+    }
+    if (!IsTunnel(SETTUNIN)) {
+      for(ConnNum num = 0; num < NumOutputs(); ++num) {
+	set.erase(GetNameStr(num));
+      }
+    }
   }
-  for(ConnNum num = 0; num < NumOutputs(); ++num) {
-    set.erase(GetNameStr(num));
+  else {
+    if (!m_children.empty())
+      return;
+    else {
+      set.insert(GetNameStr(0));
+    }
   }
   NodeVecConstIter nodeIter = m_poss->m_possNodes.begin();
   for(; !set.empty() && nodeIter != m_poss->m_possNodes.end(); ++nodeIter) {
@@ -1083,6 +1094,13 @@ void Node::PrintEmptyStatementIfOK(IndStream &out) const
     if (!node->HasPrinted()) {
       for(ConnNum inNum = 0; inNum < node->m_inputs.size(); ++inNum) {
 	set.erase(node->GetInputNameStr(inNum));
+      }
+    }
+    else if (node->IsTunnel(POSSTUNIN)) {
+      for(ConnNum outNum = 0; outNum < node->NumOutputs(); ++outNum) {
+	//if the variable came in from outside of the poss, then
+	// it shouldn't be cleared here
+	set.erase(node->GetNameStr(outNum));
       }
     }
   }
