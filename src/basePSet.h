@@ -36,6 +36,7 @@ class ShadowPSet;
 #define SETISDELETINGFLAG (1L<<3)
 #define SETHASMIGRATED    (1L<<4)
 #define SETCHECKEDFORDUP    (1L<<5)
+#define SETHASPRINTEDFLAG    (1L<<6)
 
 class BasePSet
 {
