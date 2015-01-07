@@ -52,8 +52,8 @@ Phase Copy::MaxPhase() const
 void Copy::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << GetInputName(0).str() << " = "
-       << GetInputName(1).str() << ";\n";
+  *out << GetInputName(1).str() << " = "
+       << GetInputName(0).str() << ";\n";
 }
 
 void Copy::Prop()

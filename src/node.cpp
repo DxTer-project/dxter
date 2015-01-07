@@ -1068,27 +1068,73 @@ const int Node::GetVecRegWidth() const
 
 #endif
 
-void Node::PrintEmptyStatementIfOK(IndStream &out) const
+bool StillNeededToPrint(string name, Poss *poss, const BasePSet *ignore)
 {
-  StrSet set;
-  for(ConnNum num = 0; num < m_inputs.size(); ++num) {
-    set.insert(GetInputNameStr(num));
-  }
-  for(ConnNum num = 0; num < NumOutputs(); ++num) {
-    set.erase(GetNameStr(num));
-  }
-  NodeVecConstIter nodeIter = m_poss->m_possNodes.begin();
-  for(; !set.empty() && nodeIter != m_poss->m_possNodes.end(); ++nodeIter) {
+  bool checkUp = false;
+  NodeVecConstIter nodeIter = poss->m_possNodes.begin();
+  for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
     const Node *node = *nodeIter;
-    if (!node->HasPrinted()) {
-      for(ConnNum inNum = 0; inNum < node->m_inputs.size(); ++inNum) {
-	set.erase(node->GetInputNameStr(inNum));
+    if (!node->HasPrinted() || node->IsTunnel(POSSTUNOUT) 
+	|| (node->IsTunnel(SETTUNIN) && 
+	    ((Tunnel*)node)->m_pset != ignore &&
+	    (!(((Tunnel*)node)->m_pset->m_flags & SETHASPRINTEDFLAG))))
+      {
+	for(ConnNum inNum = 0; inNum < node->m_inputs.size(); ++inNum) {
+	  if (node->GetInputNameStr(inNum) == name)
+	    return true;
+	}
+      }
+    else if (node->IsTunnel(POSSTUNIN)) {
+      for(ConnNum outNum = 0; outNum < node->NumOutputs(); ++outNum) {
+	//if the variable came in from outside of the poss, then
+	// it shouldn't be cleared here
+	if (node->GetNameStr(outNum) == name)
+	  checkUp = true;
       }
     }
   }
-  StrSetIter iter = set.begin();
-  for(; iter != set.end(); ++iter) {
-    out.Indent();
-    *out << *iter << ".EmptyData();\n";
+  if (checkUp) {
+    if (!poss->m_pset || !poss->m_pset->m_ownerPoss)
+      return false;
+    else
+      return StillNeededToPrint(name, poss->m_pset->m_ownerPoss, ignore);
+  }
+  return false;
+}
+
+void Node::PrintEmptyStatementIfOK(IndStream &out) const
+{
+  if (!IsTunnel(SETTUNOUT)) {
+    StrSet set;
+    for(ConnNum num = 0; num < m_inputs.size(); ++num) {
+      set.insert(GetInputNameStr(num));
+    }
+    if (!IsTunnel(SETTUNIN)) {
+      for(ConnNum num = 0; num < NumOutputs(); ++num) {
+	set.erase(GetNameStr(num));
+      }
+    } 
+      
+    StrSetIter iter = set.begin();
+    for(; iter != set.end(); ++iter) {
+      if (!StillNeededToPrint(*iter, m_poss, NULL)) {
+	out.Indent();
+	*out << *iter << ".EmptyData();\n";
+      }
+    }
+  }
+  else {
+    //    cout << "checking " << GetNameStr(0) << endl;
+    if (!m_children.empty())
+      return;
+    else {
+      if (!StillNeededToPrint(GetNameStr(0), m_poss, ((Tunnel*)this)->m_pset)) {
+	out.Indent();
+	*out << GetNameStr(0) << ".EmptyData();\n";
+      }
+    }
   }
 }
+
+
+

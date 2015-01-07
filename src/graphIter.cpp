@@ -277,6 +277,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
       TransVecConstIter transIter = transVec.begin();
       for( ; transIter != transVec.end(); ++transIter)
 	*out << "\t" << (*transIter)->GetType() << endl;
+      *out << "\t\tCost = " << m_poss->m_cost << endl;
       *out << "*****************************************/" << endl;
       
       VarSet set;
@@ -337,11 +338,22 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	      *out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
 	      m_poss->m_sets[i]->PrePrint(out,m_setIters[i]->second);
 	      ++out;
-	      RealPSet *real = m_poss->m_sets[i]->GetReal();
+        BasePSet *set = m_poss->m_sets[i];
+	      RealPSet *real = set->GetReal();
 	      real->SetInTunsAsPrinted();
+	      //Do this now so printing within here will properly empty variables
+	      m_poss->m_sets[i]->m_flags |= SETHASPRINTEDFLAG;
 	      m_subIters[i]->Print(out, whichGraph, m_poss->m_sets[i]);
 	      --out;
 	      m_poss->m_sets[i]->PostPrint(out,m_setIters[i]->second);
+	      NodeVecIter tunnelIter = m_poss->m_sets[i]->m_outTuns.begin();
+	      for(; tunnelIter != m_poss->m_sets[i]->m_outTuns.end(); ++tunnelIter) {
+		(*tunnelIter)->PrintEmptyStatementIfOK(out);
+	      }
+	      tunnelIter = m_poss->m_sets[i]->m_inTuns.begin();
+	      for(; tunnelIter != m_poss->m_sets[i]->m_inTuns.end(); ++tunnelIter) {
+		(*tunnelIter)->PrintEmptyStatementIfOK(out);
+	      }
 	      out.Indent();
 	      *out << "//****\n";
 	      hasPrinted = true;
@@ -442,6 +454,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 #endif //DOTENSORS
 	
 	RealPSet *real = set->GetReal();
+	set->m_flags |= SETHASPRINTEDFLAG;
 	
 	if (!real->IsLoop() ||
 	    !((RealLoop*)real)->IsUnrolled()) {
@@ -470,6 +483,16 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	  }
 	  --out;
 	}
+
+	NodeVecIter tunnelIter = m_poss->m_sets[i]->m_outTuns.begin();
+	for(; tunnelIter != m_poss->m_sets[i]->m_outTuns.end(); ++tunnelIter) {
+	  (*tunnelIter)->PrintEmptyStatementIfOK(out);
+	}
+	tunnelIter = m_poss->m_sets[i]->m_inTuns.begin();
+	for(; tunnelIter != m_poss->m_sets[i]->m_inTuns.end(); ++tunnelIter) {
+	  (*tunnelIter)->PrintEmptyStatementIfOK(out);
+	}
+
 	out.Indent();
 	*out << "//****\n";
 
@@ -547,6 +570,9 @@ void GraphIter::ClearPrintedRecursively()
   m_poss->ClearPrintedFromGraph();
   unsigned int numPSets = m_poss->m_sets.size();
   for(unsigned int i = 0; i < numPSets; ++i) {
+    m_poss->m_sets[i]->m_flags &= ~SETHASPRINTEDFLAG;
     m_subIters[i]->ClearPrintedRecursively();
   }
 }
+
+
