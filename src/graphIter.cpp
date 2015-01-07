@@ -277,6 +277,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
       TransVecConstIter transIter = transVec.begin();
       for( ; transIter != transVec.end(); ++transIter)
 	*out << "\t" << (*transIter)->GetType() << endl;
+      *out << "\t\tCost = " << m_poss->m_cost << endl;
       *out << "*****************************************/" << endl;
       
       VarSet set;
