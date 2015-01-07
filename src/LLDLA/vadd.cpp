@@ -349,13 +349,21 @@ VAddToRegArith::VAddToRegArith(Layer fromLayer, Layer toLayer)
   m_toLayer = toLayer;
 }
 
-
 bool VAddToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VAdd::GetClass()) {
-    return true;
+    VAdd* vadd = (VAdd*) node;
+    if (*(vadd->GetInputM(0)) > 1 &&
+	vadd->GetInputM(0)->EvenlyDivisibleBy(vadd->GetVecRegWidth())) {
+      return true;
+    } else if (*(vadd->GetInputN(0)) > 1 &&
+	       vadd->GetInputN(0)->EvenlyDivisibleBy(vadd->GetVecRegWidth())) {
+      return true;
+    }
+    return false;
   }
-  return false;
+  cout << "ERROR: Applying VAddToRegArith to non-VAdd node\n";
+  throw;
 }
 
 void VAddToRegArith::Apply(Node* node) const

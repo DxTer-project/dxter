@@ -110,8 +110,10 @@ RealLoop::RealLoop(LoopType type, Poss *poss, BSSize bsSize)
       }
     }
   }
-  if (!foundControl)
+  if (!foundControl) {
+    cout << "ERROR: Could not find loop control\n";
     throw;
+  }
 }
 
 void RealLoop::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows)

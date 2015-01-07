@@ -29,8 +29,8 @@ RealPSet* MAddGemm(Type dataType, int m, int n, int p)
 				 "BNumRows", "BNumCols",
 				 "BRowStride", "BColStride", dataType);
 
-  InputNode* CIn = new InputNode("C input", m, p, "C",
-				 1, m,
+  InputNode* CIn = new InputNode("C input", n, p, "C",
+				 1, p,
 				 "CNumRows", "CNumCols",
 				 "CRowStride", "CColStride", dataType);
 
@@ -57,7 +57,7 @@ RealPSet* MAddGemm(Type dataType, int m, int n, int p)
 		  tunA0, 0,
 		  tunA1, 0);
 
-  /*  LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
+  LLDLATranspose* trans = new LLDLATranspose(ABSLAYER);
   trans->AddInput(madd, 0);
 
   SMMul* alphaA = new SMMul(ABSLAYER);
@@ -70,13 +70,13 @@ RealPSet* MAddGemm(Type dataType, int m, int n, int p)
 		   tunBeta, 0,
 		   tunC, 0);
 
-  Gemm* gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
+  /*Gemm* gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
   gemm->AddInputs(6,
 		  alphaA, 0,
 		  tunB, 0,
 		  tunC, 0);*/
 
-  Poss* innerPoss = new Poss(madd, true);
+  Poss* innerPoss = new Poss(betaC, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
   OutputNode *Cout = new OutputNode("C output");
