@@ -65,6 +65,7 @@ RealPSet* F();
 RealPSet* G();
 RealPSet* z();
 RealPSet* Z();
+RealPSet* Tau();
 RealPSet* CCSD();
 
 void AddTrans()
@@ -179,7 +180,8 @@ void Usage()
   cout <<"        13  -> G_mi\n";
   cout <<"        14  -> z_ai\n";
   cout <<"        15  -> Z_abij\n";
-  cout <<"        16  -> CCSD\n";
+  cout <<"        16  -> Tau_efmn\n";
+  cout <<"        17  -> CCSD\n";
 }
 
 int main(int argc, const char* argv[])
@@ -249,6 +251,9 @@ int main(int argc, const char* argv[])
       algFunc = Z;
       break;
     case(16):
+      algFunc = Tau;
+      break;
+    case(17):
       algFunc = CCSD;
       break;
     default:
@@ -1333,6 +1338,29 @@ RealPSet* CCSD()
   Zout->AddInput(ZSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(2, zout, Zout);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* Tau()
+{
+  //~ 10:1 ratio
+  // 53, 5 for H20
+  const Size big = 500; //a-h
+  const Size small = 50; //i-p
+
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+
+  RealPSet *set = Tau_efmn_calc(t_fj, 
+				T_bfnj, 
+				big, small);
+  
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;

@@ -668,5 +668,26 @@ RealPSet* Z_abij_calc(DLANode *v_abij,
   return axpy4Set;
 }
 
+RealPSet* Tau_efmn_calc(DLANode *t_am,
+			DLANode *T_aeim,
+			const Size big, const Size small)
+{
+  InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
+
+  Copy *copy1 = new Copy(SMLAYER);
+  copy1->AddInputs0(2,
+		    T_aeim,
+		    Tau_efmn);
+  Poss *copy1Poss = new Poss(copy1);
+  RealPSet *copy1Set = new RealPSet(copy1Poss);
+
+  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"em","fn","efmn",(string)"");
+  cont1->AddInputs0(3,
+		    t_am, t_am, copy1Set->OutTun(0));
+  Poss *cont1Poss = new Poss(cont1);
+  RealPSet *cont1Set = new RealPSet(cont1Poss);
+
+  return cont1Set;
+}
 
 #endif //DOTENSORS

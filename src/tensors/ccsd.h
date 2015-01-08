@@ -96,6 +96,10 @@ RealPSet* Z_abij_calc(DLANode *v_abij,
 		      DLANode *T_aeim,
 		      const Size big, const Size small);
 
+RealPSet* Tau_efmn_calc(DLANode *t_am,
+			DLANode *T_aeim,
+			const Size big, const Size small);
+
 
 
 InputNode *CreateInput2(string name, Size size1, Size size2);
