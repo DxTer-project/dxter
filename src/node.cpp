@@ -363,7 +363,7 @@ void Node::Print(IndStream &out, GraphNum graphNum, const GraphIter *graphIter)
               (child->Input(child->m_inputs.size()-1) != this))
           {
             child->Print(out, graphNum, graphIter);
-#if PRINTEMPTY && DOLLDLA == 0
+#if PRINTEMPTY && (DOLLDLA == 0)
      	    child->PrintEmptyStatementIfOK(out);
 #endif
           }
