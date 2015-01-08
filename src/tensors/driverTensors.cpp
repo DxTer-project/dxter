@@ -43,6 +43,7 @@
 #if DOTENSORS
 
 #include "yaxppx.h"
+#include "zaxpbyppx.h"
 #include "zaxpby.h"
 #include "ccsd.h"
 
@@ -65,6 +66,7 @@ RealPSet* F();
 RealPSet* G();
 RealPSet* z();
 RealPSet* Z();
+RealPSet* Tau();
 RealPSet* CCSD();
 
 void AddTrans()
@@ -101,6 +103,11 @@ void AddTrans()
 
   Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(ABSLAYER,DM1LAYER,TensorBS.GetSize()), DPTENSORPHASE);
   Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(DM1LAYER,DM2LAYER,TensorBS.GetSize()), DPTENSORPHASE);
+
+  Universe::AddTrans(ZAxpBypPx::GetClass(), new DistZAxpBypPxToDefaultLocalZAxpBypPx, DPTENSORPHASE);
+
+  Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLowerLayer(ABSLAYER,DM1LAYER,TensorBS.GetSize()), DPTENSORPHASE);
+  Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLowerLayer(DM1LAYER,DM2LAYER,TensorBS.GetSize()), DPTENSORPHASE);
   
   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 
@@ -122,6 +129,8 @@ void AddTrans()
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
     Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
     Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
+    Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
+    Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SingleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);
@@ -152,6 +161,7 @@ void AddSimplifiers()
 #if ALLMULTIMODEALLGATHER
    Universe::AddTrans(RedistNode::GetClass(), new CombineAllGathers, SIMP);
 #endif
+   Universe::AddTrans(ScaleNode::GetClass(), new CombineScaleAndPermutation, SIMP);
    Universe::AddTrans(Permute::GetClass(), new LowerPermute, SIMP);
    Universe::AddTrans(Permute::GetClass(), new CombinePermutations, SIMP);
    Universe::AddTrans(Permute::GetClass(), new MovePermuteIntoTempVarNode, SIMP);
@@ -178,7 +188,8 @@ void Usage()
   cout <<"        13  -> G_mi\n";
   cout <<"        14  -> z_ai\n";
   cout <<"        15  -> Z_abij\n";
-  cout <<"        16  -> CCSD\n";
+  cout <<"        16  -> Tau_efmn\n";
+  cout <<"        17  -> CCSD\n";
 }
 
 int main(int argc, const char* argv[])
@@ -248,6 +259,9 @@ int main(int argc, const char* argv[])
       algFunc = Z;
       break;
     case(16):
+      algFunc = Tau;
+      break;
+    case(17):
       algFunc = CCSD;
       break;
     default:
@@ -1006,9 +1020,11 @@ RealPSet* W()
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = W_bmje_calc(w_bmje, x_bmej, r_bmef, t_fj, 
 			      u_mnje, v_femn, T_bfnj, 
+			       Tau_efmn,
 			      big, small);
 
   OutputNode *out = new OutputNode("output");
@@ -1033,9 +1049,11 @@ RealPSet* X()
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = X_bmej_calc(x_bmej, r_bmef, t_fj, 
-			      u_mnje, v_femn, T_bfnj, 
+			      u_mnje, v_femn, T_bfnj,
+			       Tau_efmn,
 			      big, small);
 
   OutputNode *out = new OutputNode("output");
@@ -1083,9 +1101,11 @@ RealPSet* Q()
   InputNode *u_mnie = CreateInput4("u_mnie", small, small, small, big);
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = Q_mnij_calc(q_mnij, t_fj, 
 			      u_mnie, v_femn, T_bfnj, 
+			       Tau_efmn,
 			      big, small);
 
   OutputNode *out = new OutputNode("output");
@@ -1110,10 +1130,12 @@ RealPSet* P()
   InputNode *w_bmie = CreateInput4("w_bmie", big, small, small, big);
   InputNode *T_efij = CreateInput4("T_efij", big, big, small, small);
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
+  InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = P_jimb_calc(r_bmef, t_fj, 
 			      u_jimb, w_bmie, T_efij, 
 			      x_bmej,
+			       Tau_efmn,
 			      big, small);
 
   OutputNode *out = new OutputNode("output");
@@ -1218,13 +1240,14 @@ RealPSet* z()
   InputNode *t_am = CreateInput2("t_am", big, small);
   DLANode *H_me = CreateInput2("H_me", small, big);
   InputNode *U_mnie = CreateInput4("U_mnie", small, small, small, big);
-  
+    InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = z_ai_calc(f_ae, G_mi, 
 			    H_me, U_mnie,
 			    w_amie,
 			    x_amei, 
 			    t_am, r_amef, T_aeim,
+			       Tau_efmn,
 			    big, small);
   
   OutputNode *out = new OutputNode("output");
@@ -1254,6 +1277,7 @@ RealPSet* Z()
   InputNode *W_bmje = CreateInput4("W_bmje", big, small, small, big);
   InputNode *T_aeim = CreateInput4("T_aeim", big, big, small, small);
   InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
+  InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = Z_abij_calc(v_abij, 
 			      y_abef,
@@ -1266,6 +1290,7 @@ RealPSet* Z()
 			      W_bmje,
 			      X_bmej,
 			      T_aeim, 
+			       Tau_efmn,
 			      big, small);
   
   OutputNode *out = new OutputNode("output");
@@ -1302,6 +1327,7 @@ RealPSet* CCSD()
   InputNode *w_amie = CreateInput4("w_amie", big, small, small, big);
   InputNode *x_amei = CreateInput4("x_amei", big, small, big, small);
   InputNode *r_amef = CreateInput4("r_amef", big, small, big, big);
+  InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *ZSet = Z_abij_calc(v_abij, 
 			      y_abef,
@@ -1314,6 +1340,7 @@ RealPSet* CCSD()
 			      W_bmje,
 			      X_bmej,
 			      T_aeim, 
+			       Tau_efmn,
 			      big, small);
 
   RealPSet *zset = z_ai_calc(f_ae, G_mi, 
@@ -1321,6 +1348,7 @@ RealPSet* CCSD()
 			    w_amie,
 			    x_amei, 
 			    t_am, r_amef, T_aeim,
+			       Tau_efmn,
 			    big, small);
 
   
@@ -1332,6 +1360,29 @@ RealPSet* CCSD()
   Zout->AddInput(ZSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(2, zout, Zout);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
+RealPSet* Tau()
+{
+  //~ 10:1 ratio
+  // 53, 5 for H20
+  const Size big = 500; //a-h
+  const Size small = 50; //i-p
+
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+
+  RealPSet *set = Tau_efmn_calc(t_fj, 
+				T_bfnj, 
+				big, small);
+  
+  OutputNode *out = new OutputNode("output");
+  out->AddInput(set->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(out, true);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;

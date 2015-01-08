@@ -33,12 +33,14 @@ RealPSet* W_bmje_calc(DLANode *w_bmje, DLANode *x_bmej,
 		      DLANode *r_bmfe, DLANode *t_fj,
 		      DLANode *u_mnje, DLANode *v_femn,
 		      DLANode *T_bfnj,
+		      DLANode *Tau_efim,
 		      const Size big, const Size small);
 
 RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
 		      DLANode *t_fj, 
 		      DLANode *u_mnje, DLANode *v_femn,
 		      DLANode *T_bfnj,
+		      DLANode *Tau_efim,
 		      const Size big, const Size small);
 
 RealPSet* U_mnie_calc(DLANode *t_fj, 
@@ -49,12 +51,14 @@ RealPSet* Q_mnij_calc(DLANode *q_mnij,
 		      DLANode *t_fj, 
 		      DLANode *u_mnie, DLANode *v_femn,
 		      DLANode *T_bfnj,
+		      DLANode *Tau_efim,
 		      const Size big, const Size small);
 
 RealPSet* P_jimb_calc(DLANode *r_bmef,
 		      DLANode *t_fj, 
 		      DLANode *u_jimb, DLANode *w_bmie,
 		      DLANode *T_efij, DLANode *x_bmej,
+		      DLANode *Tau_efim,
 		      const Size big, const Size small);
 
 RealPSet* H_me_calc(DLANode *t_fn, DLANode *v_efmn,
@@ -80,6 +84,7 @@ RealPSet* z_ai_calc(DLANode * f_ae, DLANode *G_mi,
 		    DLANode *t_am, 
 		    DLANode *r_amef, 
 		    DLANode *T_aeim,
+		    DLANode *Tau_efim,
 		    const Size big, const Size small);
 
 
@@ -94,7 +99,12 @@ RealPSet* Z_abij_calc(DLANode *v_abij,
 		      DLANode *W_bmje,
 		      DLANode *X_bmej,
 		      DLANode *T_aeim,
+		      DLANode *Tau_efim,
 		      const Size big, const Size small);
+
+RealPSet* Tau_efmn_calc(DLANode *t_am,
+			DLANode *T_aeim,
+			const Size big, const Size small);
 
 
 

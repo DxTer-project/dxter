@@ -149,6 +149,7 @@ bool DLAOp<numIn, numOut>::KeepsInputVarLive(Node *input, ConnNum numInArg, Conn
 
 template class DLAOp<2,2>;
 template class DLAOp<3,1>;
+template class DLAOp<4,1>;
 template class DLAOp<3,2>;
 template class DLAOp<2,1>;
 template class DLAOp<1,1>;
