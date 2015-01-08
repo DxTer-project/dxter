@@ -2,7 +2,7 @@
 
 #if DOLLDLA
 
-RealPSet* MAddGemm(Type dataType, int m, int n, int p)
+RealPSet* Gemam(Type dataType, int m, int n, int p)
 {
   InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
 				     1, m,

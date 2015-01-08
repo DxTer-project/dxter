@@ -2,7 +2,7 @@
 
 #if DOLLDLA
 
-RealPSet* SaxpyExample(Type dataType, VecType vType, int m)
+RealPSet* Axpy(Type dataType, VecType vType, int m)
 {
   InputNode* alphaIn = new InputNode("alpha input", 1, 1, "alpha",
 				     1, m,
@@ -62,7 +62,7 @@ RealPSet* SaxpyExample(Type dataType, VecType vType, int m)
   return outerSet;
 }
 
-RealPSet* GemvExample(Type dataType, bool transpose, int m, int n)
+RealPSet* Gemv(Type dataType, bool transpose, int m, int n)
 {
   InputNode* xIn = new InputNode("x input", n, 1, "X",
 				 1, n,

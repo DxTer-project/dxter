@@ -178,7 +178,7 @@ void Usage()
   cout <<"BLAS Examples\n";
   cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
   cout <<"        15  -> Gemv N/T F/D M N\n";
-  cout <<"        17  -> Saxpy C/R F/D M\n";
+  cout <<"        17  -> Axpy C/R F/D M\n";
   cout <<"\n";
   cout <<"Miscellaneous Examples\n";
   cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
@@ -389,9 +389,9 @@ int main(int argc, const char* argv[])
       m = atoi(argv[4]);
       n = atoi(argv[5]);
       if (TRANS == CharToTrans(*argv[2])) {
-	algPSet = GemvExample(precision, true, m, n);
+	algPSet = Gemv(precision, true, m, n);
       } else {
-	algPSet = GemvExample(precision, false, m, n);
+	algPSet = Gemv(precision, false, m, n);
       }
       break;
     case(16):
@@ -413,19 +413,19 @@ int main(int argc, const char* argv[])
       vecType = CharToVecType(*argv[2]);
       precision = CharToType(*argv[3]);
       m = atoi(argv[4]);
-      algPSet = SaxpyExample(precision, vecType, m);
+      algPSet = Axpy(precision, vecType, m);
       break;
     case(18):
       if (argc != 6) {
 	Usage();
 	return 0;
       }
-      opName = "dxt_maddGemm";
+      opName = "dxt_sgemam";
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       n = atoi(argv[4]);
       p = atoi(argv[5]);
-      algPSet = MAddGemm(precision, m, n, p);
+      algPSet = Gemam(precision, m, n, p);
       break;
     default:
       Usage();
