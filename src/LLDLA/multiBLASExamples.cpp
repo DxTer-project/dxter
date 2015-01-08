@@ -2,6 +2,116 @@
 
 #if DOLLDLA
 
+RealPSet* Gesummv(Type dataType, int m, int n)
+{
+  InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
+				     1, m,
+				     "AlphaNumRows", "AlphaNumCols",
+				     "AlphaRowStride", "AlphaColStride", dataType);
+
+  InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
+				    1, m,
+				    "BetaNumRows", "BetaNumCols",
+				    "BetaRowStride", "BetaColStride", dataType);
+
+  InputNode* AIn = new InputNode("A input", m, n, "A",
+				 1, m,
+				 "ANumRows", "ANumCols",
+				 "ARowStride", "AColStride", dataType);
+
+  InputNode* BIn = new InputNode("B input", m, n, "B",
+				 1, m,
+				 "BNumRows", "BNumCols",
+				 "BRowStride", "BColStride", dataType);
+
+  InputNode* YIn = new InputNode("Y input", m, 1, "Y",
+				 1, m,
+				 "YNumRows", "YNumCols",
+				 "YRowStride", "YColStride", dataType);
+
+  InputNode* XIn = new InputNode("X input", n, 1, "X",
+				 1, n,
+				 "XNumRows", "XNumCols",
+				 "XRowStride", "XColStride", dataType);
+
+  InputNode* WIn = new InputNode("W input", m, 1, "W",
+				 1, m,
+				 "WNumRows", "WNumCols",
+				 "WRowStride", "WColStride", dataType);
+
+  InputNode* VIn = new InputNode("V input", m, 1, "V",
+				 1, m,
+				 "VNumRows", "VNumCols",
+				 "VRowStride", "VColStride", dataType);
+
+  Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
+  tunAlpha->AddInput(alphaIn, 0);
+
+  Tunnel* tunBeta = new Tunnel(POSSTUNIN);
+  tunBeta->AddInput(betaIn, 0);
+
+  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(AIn, 0);
+
+  Tunnel* tunB = new Tunnel(POSSTUNIN);
+  tunB->AddInput(BIn, 0);
+
+  Tunnel* tunW = new Tunnel(POSSTUNIN);
+  tunW->AddInput(WIn, 0);
+
+  Tunnel* tunV = new Tunnel(POSSTUNIN);
+  tunV->AddInput(VIn, 0);
+
+  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(YIn, 0);
+
+  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(XIn, 0);
+
+  MVMul* ax = new MVMul(ABSLAYER);
+  ax->AddInputs(6,
+		tunA, 0,
+		tunX, 0,
+		tunV, 0);
+
+  SVMul* alphaAX = new SVMul(COLVECTOR, ABSLAYER);
+  alphaAX->AddInputs(4,
+		     tunAlpha, 0,
+		     ax, 0);
+
+  MVMul* bx = new MVMul(ABSLAYER);
+  bx->AddInputs(6,
+		tunB, 0,
+		tunX, 0,
+		tunW, 0);
+
+  SVMul* betaBX = new SVMul(COLVECTOR, ABSLAYER);
+  betaBX->AddInputs(4,
+		    tunBeta, 0,
+		    bx, 0);
+
+  VAdd* alphaAXPlusBetaBX = new VAdd(COLVECTOR, ABSLAYER);
+  alphaAXPlusBetaBX->AddInputs(4,
+			       alphaAX, 0,
+			       betaBX, 0);
+
+  VAdd* addY = new VAdd(COLVECTOR, ABSLAYER);
+  addY->AddInputs(4,
+		  alphaAXPlusBetaBX, 0,
+		  tunY, 0);
+
+  Poss* innerPoss = new Poss(addY, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;  
+}
+
 RealPSet* Gemam(Type dataType, int m, int n, int p)
 {
   InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",

@@ -187,6 +187,7 @@ void Usage()
   cout <<"        13  -> Matrix add twice F/D M N\n";
   cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
   cout <<"        18  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
+  cout <<"        19  -> alpha*A*x + beta*B*x + y F/D M N\n";
   cout <<"\n";
 }
 
@@ -426,6 +427,17 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       p = atoi(argv[5]);
       algPSet = Gemam(precision, m, n, p);
+      break;
+    case(19):
+      if (argc != 5) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_sgemam";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      algPSet = Gesummv(precision, m, n);
       break;
     default:
       Usage();
