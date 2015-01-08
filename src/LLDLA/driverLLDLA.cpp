@@ -535,6 +535,8 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
+  uni.CullWorstPerformers(0.50, 0);
+
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 

@@ -325,7 +325,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	  if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsTunnel(POSSTUNOUT)) {
 	    (*nodeIter)->Print(out, whichGraph, this);
 	    hasPrinted |= (*nodeIter)->HasPrinted();
-#if PRINTEMPTY && DOLLDLA == 0
+#if PRINTEMPTY && (DOLLDLA == 0)
 	    (*nodeIter)->PrintEmptyStatementIfOK(out);
 #endif
 	  }
@@ -346,6 +346,8 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	      m_subIters[i]->Print(out, whichGraph, m_poss->m_sets[i]);
 	      --out;
 	      m_poss->m_sets[i]->PostPrint(out,m_setIters[i]->second);
+
+#if PRINTEMPTY && (DOLLDLA == 0)
 	      NodeVecIter tunnelIter = m_poss->m_sets[i]->m_outTuns.begin();
 	      for(; tunnelIter != m_poss->m_sets[i]->m_outTuns.end(); ++tunnelIter) {
 		(*tunnelIter)->PrintEmptyStatementIfOK(out);
@@ -354,6 +356,8 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 	      for(; tunnelIter != m_poss->m_sets[i]->m_inTuns.end(); ++tunnelIter) {
 		(*tunnelIter)->PrintEmptyStatementIfOK(out);
 	      }
+#endif
+
 	      out.Indent();
 	      *out << "//****\n";
 	      hasPrinted = true;
@@ -420,7 +424,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	{
 	  (*nodeIter)->Print(out, graphNum, this);
 	  hasPrinted |= (*nodeIter)->HasPrinted();
-#if PRINTEMPTY && DOLLDLA == 0
+#if PRINTEMPTY && (DOLLDLA == 0)
 	  (*nodeIter)->PrintEmptyStatementIfOK(out);
 #endif
 	
@@ -484,6 +488,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	  --out;
 	}
 
+#if PRINTEMPTY && (DOLLDLA == 0)
 	NodeVecIter tunnelIter = m_poss->m_sets[i]->m_outTuns.begin();
 	for(; tunnelIter != m_poss->m_sets[i]->m_outTuns.end(); ++tunnelIter) {
 	  (*tunnelIter)->PrintEmptyStatementIfOK(out);
@@ -492,6 +497,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	for(; tunnelIter != m_poss->m_sets[i]->m_inTuns.end(); ++tunnelIter) {
 	  (*tunnelIter)->PrintEmptyStatementIfOK(out);
 	}
+#endif
 
 	out.Indent();
 	*out << "//****\n";
