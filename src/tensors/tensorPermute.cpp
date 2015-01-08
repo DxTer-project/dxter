@@ -25,9 +25,11 @@
 
 #include "loopTunnel.h"
 #include "tempVarNode.h"
+#include "helperNodes.h"
 
 Permute::Permute(string start, string end, Layer layer)
- : m_permutation(start,end)
+  : m_permutation(start,end),
+    m_zero(false)
 {
   if (start.empty())
     throw;
@@ -35,6 +37,7 @@ Permute::Permute(string start, string end, Layer layer)
 }
 
 Permute::Permute(const Permutation &permutation, Layer layer)
+  : m_zero(false)
 {
   if (!permutation.Size())
     throw;
@@ -48,6 +51,7 @@ void Permute::Duplicate(const Node *orig, bool shallow, bool possMerging)
   const Permute *origNode = (Permute*)orig;
   m_info = origNode->m_info;
   m_permutation = origNode->m_permutation;
+  m_zero = origNode->m_zero;
 }
 
 NodeType Permute::GetType() const 
@@ -133,7 +137,8 @@ const Sizes* Permute::LocalLen(ConnNum num, Dim dim) const
 
 void Permute::BuildDataTypeCache()
 {
-  m_info = InputDataType(0);
+  Node *in = Input(0);
+  m_info = in->DataType(InputConnNum(0));
   m_info.SetPerm(m_info.GetPerm().ComposeWith(m_permutation));
 }
 
@@ -163,8 +168,21 @@ Name Permute::GetName(ConnNum num) const
 void Permute::PrintCode(IndStream &out)
 {  
   //Reflect in AddVars
-  out.Indent();
-  *out << "Permute( " << GetInputNameStr(0) << ", " << GetNameStr(0) << " );\n";
+  if (m_zero) {
+    out.Indent();
+    *out << "tempShape = " << GetInputNameStr(0) << ".Shape()\n";
+    out.Indent();
+    *out << GetNameStr(0) << ".ResizeTo( tempShape );\n";
+    out.Indent();
+    *out << "Scal( ";
+    out << COEFZERO;
+    *out << ", "
+	 << GetNameStr(0) << " );\n";
+  }
+  else {
+    out.Indent();
+    *out << "Permute( " << GetInputNameStr(0) << ", " << GetNameStr(0) << " );\n";
+  }
 }
 
 void Permute::AddVariables(VarSet &set) const
@@ -350,6 +368,29 @@ void CombinePermutations::Apply(Node *node) const
   perm->m_poss->BuildDataTypeCache();
 }
 
+bool CombineScaleAndPermutation::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != ScaleNode::GetClass())
+    throw;
+  const ScaleNode *scale = (ScaleNode*)node;
+  if (scale->m_val != COEFZERO)
+    return false;
+  if (scale->m_children.size() != 1)
+    return false;
+  return scale->Child(0)->GetNodeClass() == Permute::GetClass();
+}
 
+void CombineScaleAndPermutation::Apply(Node *node) const
+{
+  ScaleNode *scale = (ScaleNode*)node;
+  Permute *perm = (Permute*)(node->Child(0));
+  Permute *newPerm = new Permute(perm->m_permutation, perm->GetLayer());
+  newPerm->m_info = perm->m_info;
+  newPerm->m_zero = true;
+  newPerm->AddInput(scale->Input(0), scale->InputConnNum(0));
+  perm->RedirectChildren(newPerm);
+  perm->m_poss->AddNode(newPerm);
+  perm->m_poss->DeleteChildAndCleanUp(perm);
+}
 
 #endif //DOTENSORS

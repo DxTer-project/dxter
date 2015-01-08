@@ -152,6 +152,7 @@ void AddSimplifiers()
 #if ALLMULTIMODEALLGATHER
    Universe::AddTrans(RedistNode::GetClass(), new CombineAllGathers, SIMP);
 #endif
+   Universe::AddTrans(ScaleNode::GetClass(), new CombineScaleAndPermutation, SIMP);
    Universe::AddTrans(Permute::GetClass(), new LowerPermute, SIMP);
    Universe::AddTrans(Permute::GetClass(), new CombinePermutations, SIMP);
    Universe::AddTrans(Permute::GetClass(), new MovePermuteIntoTempVarNode, SIMP);

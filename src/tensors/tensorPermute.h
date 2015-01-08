@@ -35,6 +35,7 @@ class Permute : public DLANode
  public:
   DataTypeInfo m_info;
   Permutation m_permutation;
+  bool m_zero;
   Permute(string start, string end, Layer layer);
   Permute(const Permutation &permutation, Layer layer);
   virtual const DataTypeInfo& DataType(ConnNum num) const {return m_info;}
@@ -87,6 +88,14 @@ class CombinePermutations : public SingleTrans
 {
  public:
   virtual string GetType() const { return "CombinePermutations"; }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class CombineScaleAndPermutation : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "CombineScaleAndPermutation"; }
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };
