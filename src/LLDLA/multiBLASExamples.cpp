@@ -125,12 +125,12 @@ RealPSet* Gemam(Type dataType, int m, int n, int p)
 				    "BetaRowStride", "BetaColStride", dataType);
 
   InputNode* A0In = new InputNode("A0 input", m, n, "A0",
-				 n, 1,
+				 1, m,
 				 "A0NumRows", "A0NumCols",
 				 "A0RowStride", "A0ColStride", dataType);
 
   InputNode* A1In = new InputNode("A1 input", m, n, "A1",
-				 n, 1,
+				 1, m,
 				 "A1NumRows", "A1NumCols",
 				 "A1RowStride", "A1ColStride", dataType);
 
