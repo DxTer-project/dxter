@@ -265,14 +265,14 @@ RealPSet* P_jimb_calc(DLANode *r_bmef,
   RealPSet *copy1Set = new RealPSet(copy1Poss);
 
 
-  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"bmej","ei","ijmb",(string)"e");
+  Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"bmej","ei","jimb",(string)"e");
   cont1->AddInputs0(3,
 		    x_bmej, t_fj, copy1Set->OutTun(0));
   Poss *cont1Poss = new Poss(cont1);
   RealPSet *cont1Set = new RealPSet(cont1Poss);
 
   
-  Contraction *cont2 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"bmie","ej","ijmb",(string)"e");
+  Contraction *cont2 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"bmie","ej","jimb",(string)"e");
   cont2->AddInputs0(3,
 		    w_bmie, t_fj, cont1Set->OutTun(0));
   Poss *cont2Poss = new Poss(cont2);
