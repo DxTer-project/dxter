@@ -77,7 +77,7 @@ RealPSet* G_mi_calc(DLANode *H_me, DLANode *u_mnie,
 		    const Size big, const Size small);
 
 
-RealPSet* z_ai_calc(DLANode * f_ae, DLANode *G_mi,
+RealPSet* z_ai_calc(DLANode *G_mi,
 		    DLANode *H_me, DLANode *U_mnie,
 		    DLANode *w_amie,
 		    DLANode *x_amei,

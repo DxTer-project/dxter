@@ -410,7 +410,7 @@ RealPSet* G_mi_calc(DLANode *H_me, DLANode *u_mnie,
   return cont3Set;
 }
 
-RealPSet* z_ai_calc(DLANode *f_ae, DLANode *G_mi,
+RealPSet* z_ai_calc(DLANode *G_mi,
 		    DLANode *H_me, DLANode *U_mnie,
 		    DLANode *w_amie,
 		    DLANode *x_amei,
@@ -488,13 +488,7 @@ RealPSet* z_ai_calc(DLANode *f_ae, DLANode *G_mi,
   Poss *cont6Poss = new Poss(cont6);
   RealPSet *cont6Set = new RealPSet(cont6Poss);
 
-  Contraction *cont7 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"ae","ei","ai",(string)"e");
-  cont7->AddInputs0(3,
-		    f_ae, t_am, cont6Set->OutTun(0));
-  Poss *cont7Poss = new Poss(cont7);
-  RealPSet *cont7Set = new RealPSet(cont7Poss);
-
-  return cont7Set;
+  return cont6Set;
 }
 
 RealPSet* Z_abij_calc(DLANode *v_abij, 

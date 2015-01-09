@@ -1231,7 +1231,6 @@ RealPSet* z()
   const Size big = 500; //a-h
   const Size small = 50; //i-p
   
-  InputNode *f_ae = CreateInput2("f_ae", big, big);
   InputNode *G_mi = CreateInput2("G_mi", small, small);
   InputNode *w_amie = CreateInput4("w_bmje", big, small, small, big);
   InputNode *x_amei = CreateInput4("x_bmej", big, small, big, small);
@@ -1242,7 +1241,7 @@ RealPSet* z()
   InputNode *U_mnie = CreateInput4("U_mnje", small, small, small, big);
     InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
-  RealPSet *set = z_ai_calc(f_ae, G_mi, 
+  RealPSet *set = z_ai_calc(G_mi, 
 			    H_me, U_mnie,
 			    w_amie,
 			    x_amei, 
@@ -1321,7 +1320,6 @@ RealPSet* CCSD()
   InputNode *W_bmje = CreateInput4("W_bmje", big, small, small, big);
   InputNode *T_aeim = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
-  InputNode *f_ae = CreateInput2("f_ae", big, big);
   InputNode *H_me = CreateInput2("H_me", small, big);
   InputNode *U_mnie = CreateInput4("U_mnje", small, small, small, big);
   InputNode *w_amie = CreateInput4("w_amie", big, small, small, big);
@@ -1342,7 +1340,7 @@ RealPSet* CCSD()
 			       Tau_efmn,
 			      big, small);
 
-  RealPSet *zset = z_ai_calc(f_ae, G_mi, 
+  RealPSet *zset = z_ai_calc( G_mi, 
 			    H_me, U_mnie,
 			    w_amie,
 			    x_amei, 
