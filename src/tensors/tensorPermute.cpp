@@ -170,7 +170,7 @@ void Permute::PrintCode(IndStream &out)
   //Reflect in AddVars
   if (m_zero) {
     out.Indent();
-    *out << "tempShape = " << GetInputNameStr(0) << ".Shape()\n";
+    *out << "tempShape = " << GetInputNameStr(0) << ".Shape();\n";
     out.Indent();
     *out << GetNameStr(0) << ".ResizeTo( tempShape );\n";
     out.Indent();
