@@ -117,7 +117,11 @@ void SMMul::Prop()
       }
     }      
 
-    m_cost = ZERO;
+    if (m_layer == ABSLAYER) {
+      m_cost = GetInputM(1)->SumProds11(*GetInputN(1));
+    } else {
+      m_cost = ZERO;
+    }
   }
 }
 
