@@ -95,7 +95,7 @@ RealPSet* W_bmje_calc(DLANode *w_bmje, DLANode *x_bmej,
   Poss *axpy2Poss = new Poss(axpy2);
   RealPSet * axpy2Set = new RealPSet(axpy2Poss);
 
-  Contraction *cont2 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"femn","bfnj","bmje",(string)"fn");
+  Contraction *cont2 = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"femn","bfnj","bmje",(string)"fn");
   cont2->AddInputs0(3,
 		    axpy2Set->OutTun(0), axpy1Set->OutTun(0), axpy0Set->OutTun(0));
   Poss *cont2Poss = new Poss(cont2);
@@ -158,7 +158,7 @@ RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
   Poss *axpy1Poss = new Poss(axpy1);
   RealPSet * axpy1Set = new RealPSet(axpy1Poss);
 
-  Contraction *cont2 = new Contraction(ABSLAYER,COEFNEGONE,COEFZERO,REAL,"femn","bfnj","bmej",(string)"fn");
+  Contraction *cont2 = new Contraction(ABSLAYER,COEFNEGONE,COEFONE,REAL,"femn","bfnj","bmej",(string)"fn");
   cont2->AddInputs0(3,
 		    v_femn, axpy1Set->OutTun(0), copy1Set->OutTun(0));
   Poss *cont2Poss = new Poss(cont2);
@@ -241,7 +241,7 @@ RealPSet* Q_mnij_calc(DLANode *q_mnij,
 
   Yaxpy *axpy3 = new Yaxpy(SMLAYER, COEFONE);
   axpy3->AddInputs0(2,
-		    cont3Set->OutTun(0), q_mnij);
+		    q_mnij, cont3Set->OutTun(0));
   Poss *axpy3Poss = new Poss(axpy3);
   RealPSet * axpy3Set = new RealPSet(axpy3Poss);
 
