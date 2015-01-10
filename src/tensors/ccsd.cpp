@@ -151,7 +151,7 @@ RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
   Poss *copy1Poss = new Poss(copy1);
   RealPSet *copy1Set = new RealPSet(copy1Poss);
 
-  ZAxpBy *axpy1 = new ZAxpBy(SMLAYER, COEFONE, COEFNEGONE);
+  ZAxpBy *axpy1 = new ZAxpBy(SMLAYER, COEFONE, COEFNEGONEHALF);
   axpy1->AddInputs0(3,
 		    Tau_efim, T_bfnj,
 		    temp1);
