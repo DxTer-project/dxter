@@ -76,7 +76,7 @@ RealPSet* W_bmje_calc(DLANode *w_bmje, DLANode *x_bmej,
   InputNode *temp4 = CreateInput4("temp4", big, small, big, big);
 */
 
-  YAxpPx *axpy0 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONEHALF, "bmej", "bmje");
+  YAxpPx *axpy0 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "bmej", "bmje");
   axpy0->AddInputs0(3,
 		     w_bmje, x_bmej, W_bmje);
   Poss *axpy0Poss = new Poss(axpy0);
