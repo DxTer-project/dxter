@@ -168,8 +168,7 @@ void Usage()
   cout <<"         3  -> Dot prod F/D M\n";
   cout <<"         4  -> Matrix add F/D M N\n";
   cout <<"         5  -> Matrix vector multiply N/T F/D M N\n";
-  cout <<"         6  -> Scalar column vector multiply F/D M\n";
-  cout <<"         7  -> Scalar row vector multiply F/D M\n";
+  cout <<"         6  -> Scalar vector multiply C/R F/D M\n";
   cout <<"         8  -> Vector matrix multiply F/D M N\n";
   cout <<"         9  -> Scalar matrix multiply F/D M N\n";
   cout <<"        10  -> Vector add C/R F/D M\n";
@@ -284,24 +283,15 @@ int main(int argc, const char* argv[])
       }
       break;
     case(6):
-      if (argc != 4) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
-      opName = "dxt_sv_col_mul";
-      precision = CharToType(*argv[2]);
-      m = atoi(argv[3]);
-      algPSet = SVMulColExample(precision, m);
-      break;
-    case(7):
-      if (argc != 4) {
-	Usage();
-	return 0;
-      }
-      precision = CharToType(*argv[2]);
-      m = atoi(argv[3]);
-      opName = "dxt_sv_row_mul";
-      algPSet = SVMulRowExample(precision, m);
+      opName = "dxt_sv_mul";
+      vecType = CharToVecType(*argv[2]);
+      precision = CharToType(*argv[3]);
+      m = atoi(argv[4]);
+      algPSet = SVMulExample(precision, vecType, m);
       break;
     case(8):
       if (argc != 5) {
@@ -547,7 +537,6 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-  uni.CullWorstPerformers(0.50, 0);
 
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
