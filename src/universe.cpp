@@ -256,6 +256,8 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
     cout.flush();
     if (!foundNew) {
       time(&start);
+      cout << "prop before merge\n";
+      cout.flush();
       Prop();
 #if DOSOPHASE
       //In SOPHASE, we intentionally form sets
