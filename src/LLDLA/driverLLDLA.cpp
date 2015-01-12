@@ -169,24 +169,24 @@ void Usage()
   cout <<"         4  -> Matrix add F/D M N\n";
   cout <<"         5  -> Matrix vector multiply N/T F/D M N\n";
   cout <<"         6  -> Scalar vector multiply C/R F/D M\n";
-  cout <<"         8  -> Vector matrix multiply F/D M N\n";
-  cout <<"         9  -> Scalar matrix multiply F/D M N\n";
-  cout <<"        10  -> Vector add C/R F/D M\n";
-  cout <<"        16  -> Gen Size Col Vector SVMul F/D M\n";
+  cout <<"         7  -> Vector matrix multiply F/D M N\n";
+  cout <<"         8  -> Scalar matrix multiply F/D M N\n";
+  cout <<"         9  -> Vector add C/R F/D M\n";
+  cout <<"        15  -> Gen Size Col Vector SVMul F/D M\n";
   cout <<"\n";
   cout <<"BLAS Examples\n";
   cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
-  cout <<"        15  -> Gemv N/T F/D M N\n";
-  cout <<"        17  -> Axpy C/R F/D M\n";
+  cout <<"        14  -> Gemv N/T F/D M N\n";
+  cout <<"        16  -> Axpy C/R F/D M\n";
   cout <<"\n";
   cout <<"Miscellaneous Examples\n";
   cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
-  cout <<"        11  -> Vector add twice F/D M\n";
-  cout <<"        12  -> Vector matrix vector multiply F/D M N\n";
-  cout <<"        13  -> Matrix add twice F/D M N\n";
-  cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
-  cout <<"        18  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
-  cout <<"        19  -> alpha*A*x + beta*B*x + y F/D M N\n";
+  cout <<"        10  -> Vector add twice F/D M\n";
+  cout <<"        11  -> Vector matrix vector multiply F/D M N\n";
+  cout <<"        12  -> Matrix add twice F/D M N\n";
+  cout <<"        13  -> Matrix vector multiply twice F/D M N P\n";
+  cout <<"        17  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
+  cout <<"        18  -> alpha*A*x + beta*B*x + y F/D M N\n";
   cout <<"\n";
 }
 
@@ -293,7 +293,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[4]);
       algPSet = SVMulExample(precision, vecType, m);
       break;
-    case(8):
+    case(7):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -304,7 +304,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = VMMulExample(precision, m, n);
       break;
-    case(9):
+    case(8):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -315,7 +315,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = SMMulExample(precision, m, n);
       break;
-    case(10):
+    case(9):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -326,7 +326,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[4]);
       algPSet = VAddExample(precision, vecType, m);
       break;
-    case(11):
+    case(10):
       if (argc != 4) {
 	Usage();
 	return 0;
@@ -336,7 +336,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       algPSet = VAdd2Example(precision, m);
       break;
-    case(12):
+    case(11):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -347,7 +347,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = VMVMulExample(precision, m, n);
       break;
-    case(13):
+    case(12):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -358,7 +358,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = MAdd2Example(precision, m, n);
       break;
-    case(14):
+    case(13):
       if (argc != 6) {
 	Usage();
 	return 0;
@@ -370,7 +370,7 @@ int main(int argc, const char* argv[])
       p = atoi(argv[5]);
       algPSet = MVMul2Example(precision, m, n, p);
       break;
-    case(15):
+    case(14):
       if (argc != 6) {
 	Usage();
 	return 0;
@@ -385,7 +385,7 @@ int main(int argc, const char* argv[])
 	algPSet = Gemv(precision, false, m, n);
       }
       break;
-    case(16):
+    case(15):
       if (argc != 4) {
 	Usage();
 	return 0;
@@ -395,7 +395,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       algPSet = GenSizeColSVMul(precision, m);
       break;
-    case(17):
+    case(16):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -406,7 +406,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[4]);
       algPSet = Axpy(precision, vecType, m);
       break;
-    case(18):
+    case(17):
       if (argc != 6) {
 	Usage();
 	return 0;
@@ -418,7 +418,7 @@ int main(int argc, const char* argv[])
       p = atoi(argv[5]);
       algPSet = Gemam(precision, m, n, p);
       break;
-    case(19):
+    case(18):
       if (argc != 5) {
 	Usage();
 	return 0;

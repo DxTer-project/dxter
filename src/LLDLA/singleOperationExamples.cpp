@@ -48,7 +48,7 @@ RealPSet* GemmExample(Type dataType, Trans transA, Trans transB, int m, int n, i
 
 RealPSet* DotExample(Type dataType, int m)
 {
-  InputNode* Ain = new InputNode("A input", 1, m, "A", 
+  InputNode* Ain = new InputNode("A input", 1, m, "A",
 				 m, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);
@@ -187,7 +187,6 @@ RealPSet* MAddExample(Type dataType, int m, int n)
 
 RealPSet* SVMulExample(Type dataType, VecType vecType, int m)
 {
-
   int numRows, numCols, rowStride, colStride;
   if (vecType == ROWVECTOR) {
     numRows = 1;
@@ -354,7 +353,6 @@ RealPSet* VAddExample(Type dataType, VecType vecType, int m)
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
-
 }
 
 #endif //DOLLDLA
