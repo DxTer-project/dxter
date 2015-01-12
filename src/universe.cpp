@@ -256,20 +256,23 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
     cout.flush();
     if (!foundNew) {
       time(&start);
-      cout << "prop before merge\n";
-      cout.flush();
-      Prop();
+      //      cout << "\tProp'ing before merge\n";
+      //      cout.flush();
+      //Prop();
 #if DOSOPHASE
       //In SOPHASE, we intentionally form sets
       // to separate pack operations so the
       // same pack buffer can be used for
       // different pieces of data, sequentially.
       //We don't want to now get rid of those sets
-      if (phase < SOPHASE)
+      if (phase < SOPHASE) {
 #elif DOSUMSCATTERTENSORPHASE
-	if (phase == FUSEANDOPTTENSORPHASE)
+	if (phase == FUSEANDOPTTENSORPHASE) {
 #endif
+	  //	  cout << "\tDone prop'ing before; now merging\n";
+
 	  foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
+      }
       time(&end);
       if(difftime(end,start) > 10) {
 	cout << "Took " << difftime(end,start) << " seconds to merge\n";
