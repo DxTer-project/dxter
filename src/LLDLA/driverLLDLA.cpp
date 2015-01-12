@@ -299,7 +299,7 @@ int main(int argc, const char* argv[])
 	return 0;
       }
       precision = CharToType(*argv[2]);
-      m = atoi(argv[4]);
+      m = atoi(argv[3]);
       opName = "dxt_sv_row_mul";
       algPSet = SVMulRowExample(precision, m);
       break;

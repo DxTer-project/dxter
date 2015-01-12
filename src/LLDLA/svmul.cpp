@@ -144,7 +144,15 @@ void SVMul::Prop()
 
     VectorOpInputDimensionCheck(1);
 
-    m_cost = ZERO;
+    if (m_layer == ABSLAYER) {
+      if (m_vecType == ROWVECTOR) {
+	m_cost = GetInputN(1)->Sum();
+      } else {
+	m_cost = GetInputM(1)->Sum();
+      }
+    } else {
+      m_cost = ZERO;
+    }
   }
 }
 
@@ -552,9 +560,9 @@ ResidualPartitionSVMul::ResidualPartitionSVMul(Layer fromLayer, Layer toLayer, V
 string ResidualPartitionSVMul::GetType() const
 {
   if (m_vType == ROWVECTOR) {
-    return "Row vector ResidualPartitionSVMul " + LayerNumToStr(m_fromLayer) + " to " + LayerNumToStr(m_toLayer) + " with dim = " + std::to_string(m_blockSize);
+    return "Row vector ResidualPartitionSVMul " + LayerNumToStr(m_fromLayer) + " to " + LayerNumToStr(m_toLayer) + " with dim = " + std::to_string((long long int) m_blockSize);
   } else {
-    return "Col vector ResidualPartitionSVMul " + LayerNumToStr(m_fromLayer) + " to " + LayerNumToStr(m_toLayer) + " with dim = " + std::to_string(m_blockSize);
+    return "Col vector ResidualPartitionSVMul " + LayerNumToStr(m_fromLayer) + " to " + LayerNumToStr(m_toLayer) + " with dim = " + std::to_string((long long int) m_blockSize);
   }
 }
 

@@ -145,7 +145,16 @@ void VAdd::Prop()
       throw;
     }
 
-    m_cost = ZERO;
+    if (m_layer == ABSLAYER) {
+      if (m_vecType == ROWVECTOR) {
+	m_cost = GetInputN(1)->Sum();
+      } else {
+	m_cost = GetInputM(1)->Sum();
+      }
+    } else {
+      m_cost = ZERO;
+    }
+
   }
 }
 

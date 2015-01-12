@@ -138,7 +138,7 @@ void VVDot::Prop()
     }
     if (m_layer == ABSLAYER) {
       m_cost = TWO * GetInputN(0)->Sum() - 1;
-	} else {
+    } else {
       m_cost = ZERO;
     }
   }
