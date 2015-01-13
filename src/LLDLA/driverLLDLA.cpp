@@ -114,45 +114,13 @@ double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double f
   return bestFlopsPerCycle;
 }
 
-GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
-  double peakFlopsPerCycle = arch->FlopsPerCycle(type);
-  GraphNum bestImpNum = 0;
-  double bestFlopsPerCycle = 0;
-  for (auto mit : impTimes) {
-    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit.first) << endl;
-    for (auto vit : mit.second) {
-      double totalTimeInCycles = vit;
-      double actualFlopsPerCycle = flopCost / totalTimeInCycles;
-      double pctPeak = (actualFlopsPerCycle / peakFlopsPerCycle) * 100;
-      if (actualFlopsPerCycle > bestFlopsPerCycle) {
-	bestFlopsPerCycle = actualFlopsPerCycle;
-	bestImpNum = mit.first;
-      }
-      cout << "Flops per cycle = " << std::to_string((long double) actualFlopsPerCycle);
-      cout << "\t%Peak = " << std::to_string((long double) pctPeak) << endl;
-      if (pctPeak > 100) {
-	cout << "pctPeak > 100\n";
-	throw;
-      }
-    }
-    cout << endl;
-  }
-  cout << "Best flops/cycle achieved: " << std::to_string((long double) bestFlopsPerCycle) << endl;
-  cout << "Best percent of peak: " << std::to_string((long double) (bestFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
-  return bestImpNum;
-}
-
 GraphNum PrintImpMapStats(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
 
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
   GraphNum bestImpNum = 0;
-  double overallBestFlopsPerCycle = 0;
-  //  double overallWorstFlopsPerCycle = arch->FlopsPerCycle(type);
+  double overallBestAvgFlopsPerCycle = 0;
 
   for (auto mit : impTimes) {
-
-    /*    double thisImplementationBestFlopsPerCycle = 0.0;
-	  double thisImplementationWorstFlopsPerCycle = arch->FlopsPerCycle(type);*/
     double avgFlopsPerCycle = 0.0;
     double numRuns = 0.0;
 
@@ -161,22 +129,22 @@ GraphNum PrintImpMapStats(Type type, ImplementationRuntimeMap &impTimes, double 
       double timeInCycles = vit;
       double actualFlopsPerCycle = flopCost / timeInCycles;
       avgFlopsPerCycle += actualFlopsPerCycle;
-
-      if (actualFlopsPerCycle > overallBestFlopsPerCycle) {
-	overallBestFlopsPerCycle = actualFlopsPerCycle;
-	bestImpNum = mit.first;
-      }
       numRuns += 1.0;
     }
 
     avgFlopsPerCycle = avgFlopsPerCycle / numRuns;
 
+    if (avgFlopsPerCycle > overallBestAvgFlopsPerCycle) {
+      overallBestAvgFlopsPerCycle = avgFlopsPerCycle;
+      bestImpNum = mit.first;
+    }
+
     cout << "Avg. Flops per cycle = " << std::to_string((long double) avgFlopsPerCycle);
     double avgPctPeak = (avgFlopsPerCycle / peakFlopsPerCycle) * 100;
     cout << "\t%Peak = " << std::to_string((long double) avgPctPeak) << endl;
   }
-  cout << "Best flops/cycle achieved: " << std::to_string((long double) overallBestFlopsPerCycle) << endl;
-  cout << "Best percent of peak: " << std::to_string((long double) (overallBestFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
+  cout << "Best avg. flops/cycle achieved: " << std::to_string((long double) overallBestAvgFlopsPerCycle) << endl;
+  cout << "Best avg. percent of peak: " << std::to_string((long double) (overallBestAvgFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
   return bestImpNum;
 }
 
