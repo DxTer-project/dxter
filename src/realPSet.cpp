@@ -885,6 +885,8 @@ void RealPSet::CullWorstPerformers(double percentToCull, int ignoreThreshold)
     if (queue.size() != m_posses.size())
       throw;
     int numToKeep = ceil((1.0-percentToCull) * m_posses.size());
+    if (numToKeep < ignoreThreshold)
+      numToKeep = ignoreThreshold;
     for(; numToKeep > 0; --numToKeep)
       queue.pop();
     while(!queue.empty()) {
