@@ -92,19 +92,6 @@ ImplementationMap* ImpStrMap(Universe *uni)
   return impMap;
 }
 
-void PrintImpMap(ImplementationRuntimeMap &impTimes)
-{
-  ImplementationRuntimeMapIter mit;
-  for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
-    TimeVecIter vit;
-    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
-    for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
-      cout << std::to_string((long double) *vit) << endl;
-    }
-    cout << endl;
-  }
-}
-
 double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
   double bestFlopsPerCycle = 0;
@@ -131,17 +118,15 @@ GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, doubl
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
   GraphNum bestImpNum = 0;
   double bestFlopsPerCycle = 0;
-  ImplementationRuntimeMapIter mit;
-  for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
-    TimeVecIter vit;
-    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
-    for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
-      double totalTimeInCycles = *vit;
+  for (auto mit : impTimes) {
+    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit.first) << endl;
+    for (auto vit : mit.second) {
+      double totalTimeInCycles = vit;
       double actualFlopsPerCycle = flopCost / totalTimeInCycles;
       double pctPeak = (actualFlopsPerCycle / peakFlopsPerCycle) * 100;
       if (actualFlopsPerCycle > bestFlopsPerCycle) {
 	bestFlopsPerCycle = actualFlopsPerCycle;
-	bestImpNum = mit->first;
+	bestImpNum = mit.first;
       }
       cout << "Flops per cycle = " << std::to_string((long double) actualFlopsPerCycle);
       cout << "\t%Peak = " << std::to_string((long double) pctPeak) << endl;
@@ -154,6 +139,44 @@ GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, doubl
   }
   cout << "Best flops/cycle achieved: " << std::to_string((long double) bestFlopsPerCycle) << endl;
   cout << "Best percent of peak: " << std::to_string((long double) (bestFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
+  return bestImpNum;
+}
+
+GraphNum PrintImpMapStats(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
+
+  double peakFlopsPerCycle = arch->FlopsPerCycle(type);
+  GraphNum bestImpNum = 0;
+  double overallBestFlopsPerCycle = 0;
+  //  double overallWorstFlopsPerCycle = arch->FlopsPerCycle(type);
+
+  for (auto mit : impTimes) {
+
+    /*    double thisImplementationBestFlopsPerCycle = 0.0;
+	  double thisImplementationWorstFlopsPerCycle = arch->FlopsPerCycle(type);*/
+    double avgFlopsPerCycle = 0.0;
+    double numRuns = 0.0;
+
+    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit.first) << endl;
+    for (auto vit : mit.second) {
+      double timeInCycles = vit;
+      double actualFlopsPerCycle = flopCost / timeInCycles;
+      avgFlopsPerCycle += actualFlopsPerCycle;
+
+      if (actualFlopsPerCycle > overallBestFlopsPerCycle) {
+	overallBestFlopsPerCycle = actualFlopsPerCycle;
+	bestImpNum = mit.first;
+      }
+      numRuns += 1.0;
+    }
+
+    avgFlopsPerCycle = avgFlopsPerCycle / numRuns;
+
+    cout << "Avg. Flops per cycle = " << std::to_string((long double) avgFlopsPerCycle);
+    double avgPctPeak = (avgFlopsPerCycle / peakFlopsPerCycle) * 100;
+    cout << "\t%Peak = " << std::to_string((long double) avgPctPeak) << endl;
+  }
+  cout << "Best flops/cycle achieved: " << std::to_string((long double) overallBestFlopsPerCycle) << endl;
+  cout << "Best percent of peak: " << std::to_string((long double) (overallBestFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
   return bestImpNum;
 }
 
@@ -537,11 +560,10 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int numIterations = 10;
+  int numIterations = 100000;
   RuntimeTest rtest(precision, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
@@ -549,7 +571,7 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
 
   cout << "Done evaluating\n";
-  GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);
+  GraphNum best = PrintImpMapStats(precision, impMap, flopCost);
 #endif //DOEMPIRICALEVAL
 
 #if 1

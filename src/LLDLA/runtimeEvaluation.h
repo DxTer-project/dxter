@@ -73,8 +73,8 @@ class RuntimeEvaluator
   int m_numIterations;
 
   RuntimeEvaluator(string evalDirName);
-ImplementationRuntimeMap EvaluateImplementations(RuntimeTest test, ImplementationMap* imps);
-ImplementationRuntimeMap EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp);
-ImplementationRuntimeMap ReadTimeDataFromFile(string fileName, int numImpls);
+  ImplementationRuntimeMap EvaluateImplementations(RuntimeTest test, ImplementationMap* imps);
+  ImplementationRuntimeMap EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp);
+  ImplementationRuntimeMap ReadTimeDataFromFile(string fileName, int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
 };
