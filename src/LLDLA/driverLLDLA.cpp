@@ -194,10 +194,7 @@ int main(int argc, const char* argv[])
 
   arch = new HaswellMacbook();
 
-  //  PrintType printType = CODE;
-
   RealPSet* algPSet;
-  //  GraphNum whichGraph = 0;
   int algNum;
   string opName;
 
