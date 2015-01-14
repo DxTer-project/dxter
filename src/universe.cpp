@@ -275,15 +275,16 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
       }
       time(&end);
       if(difftime(end,start) > 10) {
-	cout << "Took " << difftime(end,start) << " seconds to merge\n";
+	cout << "\tTook " << difftime(end,start) << " seconds to merge\n";
 	cout.flush();
       }
       if (foundNew) {
-	total = TotalCount();
-	cout << total << " algorithms now" << endl;
+	time(&start);
 	cout << "\tProp'ing\n";
+	cout.flush();
 	Prop();
-	cout << "\tDone Prop'ing\n";
+	time(&end);
+	cout << "\tDone Prop'ing (" << difftime(end,start) << " seconds)\n";
 	cout.flush();
       }
     }
