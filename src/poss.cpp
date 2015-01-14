@@ -694,8 +694,12 @@ Cost Poss::Prop()
 #endif //_OPENMP
 	
 	if (replacement) {
-	  if (!set->m_shadows.empty())
-	    throw;
+	  while (!set->m_shadows.empty()) {
+	    ShadowPSet *shadow = (ShadowPSet*)(set->m_shadows[0]);
+	    shadow->m_realPSet = replacement;
+	    replacement->m_shadows.push_back(shadow);
+	    set->m_shadows.erase(set->m_shadows.begin());
+	  }
 	  ShadowPSet *shadow = replacement->GetNewShadowDup(this);
 	  for (int i = 0; i < shadow->m_inTuns.size(); ++i) {
 	    Node *newTun = shadow->InTun(i);
