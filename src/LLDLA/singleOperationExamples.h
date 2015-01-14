@@ -15,8 +15,7 @@ RealPSet* GemmExample(Type dataType, Trans transA, Trans transB, int m, int n, i
 RealPSet* DotExample(Type dataType, int m);
 RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n);
 RealPSet* MAddExample(Type dataType, int m, int n);
-RealPSet* SVMulRowExample(Type dataType, int m);
-RealPSet* SVMulColExample(Type dataType, int m);
+RealPSet* SVMulExample(Type dataType, VecType vecType, int m);
 RealPSet* SMMulExample(Type dataType, int m, int n);
 RealPSet* VMMulExample(Type dataType, int m, int n);
 RealPSet* VAddExample(Type dataType, VecType vecType, int m);

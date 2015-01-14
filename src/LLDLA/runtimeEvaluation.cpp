@@ -339,7 +339,7 @@ ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName,
   cout << "Num impls " << std::to_string((long long int) numImpls) << endl;
   for (i = 1; i <= numImpls; i++) {
     TimeVec impTimes;
-    for (j = 0; j < 1; j++) {
+    for (j = 0; j < m_numIterations; j++) {
       impTimes.push_back(std::stod(*it));
       it++;
     }

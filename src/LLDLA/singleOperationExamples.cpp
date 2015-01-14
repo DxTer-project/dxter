@@ -48,7 +48,7 @@ RealPSet* GemmExample(Type dataType, Trans transA, Trans transB, int m, int n, i
 
 RealPSet* DotExample(Type dataType, int m)
 {
-  InputNode* Ain = new InputNode("A input", 1, m, "A", 
+  InputNode* Ain = new InputNode("A input", 1, m, "A",
 				 m, 1,
 				 "ANumRows","ANumCols",
 				 "ARowStride","AColStride", dataType);
@@ -185,15 +185,28 @@ RealPSet* MAddExample(Type dataType, int m, int n)
   return outerSet;
 }
 
-RealPSet* SVMulRowExample(Type dataType, int m)
+RealPSet* SVMulExample(Type dataType, VecType vecType, int m)
 {
-  InputNode* Ain = new InputNode("A input", 1, m, "A",
-				 m, 1,
+  int numRows, numCols, rowStride, colStride;
+  if (vecType == ROWVECTOR) {
+    numRows = 1;
+    numCols = m;
+    rowStride = m;
+    colStride = 1;
+  } else {
+    numRows = m;
+    numCols = 1;
+    rowStride = 1;
+    colStride = m;
+  }
+
+  InputNode* Ain = new InputNode("A input", numRows, numCols, "A",
+				 rowStride, colStride,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
   InputNode* xIn = new InputNode("x input", 1, 1, "X",
-				 m, 1,
+				 1, 1,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
@@ -203,42 +216,7 @@ RealPSet* SVMulRowExample(Type dataType, int m)
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  SVMul* svmul = new SVMul(ROWVECTOR, ABSLAYER);
-  svmul->AddInputs(4,
-		   tunX, 0,
-		   tunA, 0);
-
-  Poss *innerPoss = new Poss(svmul, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode("C output");
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* SVMulColExample(Type dataType, int m)
-{
-  InputNode* Ain = new InputNode("A input", m, 1, "A",
-				 m, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-
-  InputNode* xIn = new InputNode("x input", 1, 1, "X",
-				 m, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
-
-  SVMul* svmul = new SVMul(COLVECTOR, ABSLAYER);
+  SVMul* svmul = new SVMul(vecType, ABSLAYER);
   svmul->AddInputs(4,
 		   tunX, 0,
 		   tunA, 0);
@@ -375,7 +353,6 @@ RealPSet* VAddExample(Type dataType, VecType vecType, int m)
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
-
 }
 
 #endif //DOLLDLA

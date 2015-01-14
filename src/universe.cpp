@@ -272,22 +272,26 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
 	  //	  cout << "\tDone prop'ing before; now merging\n";
 
 	  foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
-      }
-      time(&end);
-      if(difftime(end,start) > 10) {
-	cout << "\tTook " << difftime(end,start) << " seconds to merge\n";
-	cout.flush();
-      }
-      if (foundNew) {
-	time(&start);
-	cout << "\tProp'ing\n";
-	cout.flush();
-	Prop();
+
+#if DOSUMSCATTERTENSORPHASE
+	}
+#endif // DOSUMSCATTERTENSORPHASE
+
 	time(&end);
-	cout << "\tDone Prop'ing (" << difftime(end,start) << " seconds)\n";
-	cout.flush();
+	if(difftime(end,start) > 10) {
+	  cout << "\tTook " << difftime(end,start) << " seconds to merge\n";
+	  cout.flush();
+	}
+	if (foundNew) {
+	  time(&start);
+	  cout << "\tProp'ing\n";
+	  cout.flush();
+	  Prop();
+	  time(&end);
+	  cout << "\tDone Prop'ing (" << difftime(end,start) << " seconds)\n";
+	  cout.flush();
+	}
       }
-    }
     prevAlgs = total;
   }
   ++CurrPhase;

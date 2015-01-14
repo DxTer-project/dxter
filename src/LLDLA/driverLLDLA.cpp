@@ -92,19 +92,6 @@ ImplementationMap* ImpStrMap(Universe *uni)
   return impMap;
 }
 
-void PrintImpMap(ImplementationRuntimeMap &impTimes)
-{
-  ImplementationRuntimeMapIter mit;
-  for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
-    TimeVecIter vit;
-    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
-    for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
-      cout << std::to_string((long double) *vit) << endl;
-    }
-    cout << endl;
-  }
-}
-
 double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
   double bestFlopsPerCycle = 0;
@@ -127,33 +114,37 @@ double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double f
   return bestFlopsPerCycle;
 }
 
-GraphNum PrintImpMapInFlops(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
+GraphNum PrintImpMapStats(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
+
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
   GraphNum bestImpNum = 0;
-  double bestFlopsPerCycle = 0;
-  ImplementationRuntimeMapIter mit;
-  for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
-    TimeVecIter vit;
-    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit->first) << endl;
-    for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
-      double totalTimeInCycles = *vit;
-      double actualFlopsPerCycle = flopCost / totalTimeInCycles;
-      double pctPeak = (actualFlopsPerCycle / peakFlopsPerCycle) * 100;
-      if (actualFlopsPerCycle > bestFlopsPerCycle) {
-	bestFlopsPerCycle = actualFlopsPerCycle;
-	bestImpNum = mit->first;
-      }
-      cout << "Flops per cycle = " << std::to_string((long double) actualFlopsPerCycle);
-      cout << "\t%Peak = " << std::to_string((long double) pctPeak) << endl;
-      if (pctPeak > 100) {
-	cout << "pctPeak > 100\n";
-	throw;
-      }
+  double overallBestAvgFlopsPerCycle = 0;
+
+  for (auto mit : impTimes) {
+    double avgFlopsPerCycle = 0.0;
+    double numRuns = 0.0;
+
+    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit.first) << endl;
+    for (auto vit : mit.second) {
+      double timeInCycles = vit;
+      double actualFlopsPerCycle = flopCost / timeInCycles;
+      avgFlopsPerCycle += actualFlopsPerCycle;
+      numRuns += 1.0;
     }
-    cout << endl;
+
+    avgFlopsPerCycle = avgFlopsPerCycle / numRuns;
+
+    if (avgFlopsPerCycle > overallBestAvgFlopsPerCycle) {
+      overallBestAvgFlopsPerCycle = avgFlopsPerCycle;
+      bestImpNum = mit.first;
+    }
+
+    cout << "Avg. Flops per cycle = " << std::to_string((long double) avgFlopsPerCycle);
+    double avgPctPeak = (avgFlopsPerCycle / peakFlopsPerCycle) * 100;
+    cout << "\t%Peak = " << std::to_string((long double) avgPctPeak) << endl;
   }
-  cout << "Best flops/cycle achieved: " << std::to_string((long double) bestFlopsPerCycle) << endl;
-  cout << "Best percent of peak: " << std::to_string((long double) (bestFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
+  cout << "Best avg. flops/cycle achieved: " << std::to_string((long double) overallBestAvgFlopsPerCycle) << endl;
+  cout << "Best avg. percent of peak: " << std::to_string((long double) (overallBestAvgFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
   return bestImpNum;
 }
 
@@ -168,26 +159,25 @@ void Usage()
   cout <<"         3  -> Dot prod F/D M\n";
   cout <<"         4  -> Matrix add F/D M N\n";
   cout <<"         5  -> Matrix vector multiply N/T F/D M N\n";
-  cout <<"         6  -> Scalar column vector multiply F/D M\n";
-  cout <<"         7  -> Scalar row vector multiply F/D M\n";
-  cout <<"         8  -> Vector matrix multiply F/D M N\n";
-  cout <<"         9  -> Scalar matrix multiply F/D M N\n";
-  cout <<"        10  -> Vector add C/R F/D M\n";
-  cout <<"        16  -> Gen Size Col Vector SVMul F/D M\n";
+  cout <<"         6  -> Scalar vector multiply C/R F/D M\n";
+  cout <<"         7  -> Vector matrix multiply F/D M N\n";
+  cout <<"         8  -> Scalar matrix multiply F/D M N\n";
+  cout <<"         9  -> Vector add C/R F/D M\n";
+  cout <<"        15  -> Gen Size Col Vector SVMul F/D M\n";
   cout <<"\n";
   cout <<"BLAS Examples\n";
   cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
-  cout <<"        15  -> Gemv N/T F/D M N\n";
-  cout <<"        17  -> Axpy C/R F/D M\n";
+  cout <<"        14  -> Gemv N/T F/D M N\n";
+  cout <<"        16  -> Axpy C/R F/D M\n";
   cout <<"\n";
   cout <<"Miscellaneous Examples\n";
   cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
-  cout <<"        11  -> Vector add twice F/D M\n";
-  cout <<"        12  -> Vector matrix vector multiply F/D M N\n";
-  cout <<"        13  -> Matrix add twice F/D M N\n";
-  cout <<"        14  -> Matrix vector multiply twice F/D M N P\n";
-  cout <<"        18  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
-  cout <<"        19  -> alpha*A*x + beta*B*x + y F/D M N\n";
+  cout <<"        10  -> Vector add twice F/D M\n";
+  cout <<"        11  -> Vector matrix vector multiply F/D M N\n";
+  cout <<"        12  -> Matrix add twice F/D M N\n";
+  cout <<"        13  -> Matrix vector multiply twice F/D M N P\n";
+  cout <<"        17  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
+  cout <<"        18  -> alpha*A*x + beta*B*x + y F/D M N\n";
   cout <<"\n";
 }
 
@@ -204,10 +194,7 @@ int main(int argc, const char* argv[])
 
   arch = new HaswellMacbook();
 
-  //  PrintType printType = CODE;
-
   RealPSet* algPSet;
-  //  GraphNum whichGraph = 0;
   int algNum;
   string opName;
 
@@ -284,26 +271,17 @@ int main(int argc, const char* argv[])
       }
       break;
     case(6):
-      if (argc != 4) {
+      if (argc != 5) {
 	Usage();
 	return 0;
       }
-      opName = "dxt_sv_col_mul";
-      precision = CharToType(*argv[2]);
-      m = atoi(argv[3]);
-      algPSet = SVMulColExample(precision, m);
+      opName = "dxt_sv_mul";
+      vecType = CharToVecType(*argv[2]);
+      precision = CharToType(*argv[3]);
+      m = atoi(argv[4]);
+      algPSet = SVMulExample(precision, vecType, m);
       break;
     case(7):
-      if (argc != 4) {
-	Usage();
-	return 0;
-      }
-      precision = CharToType(*argv[2]);
-      m = atoi(argv[4]);
-      opName = "dxt_sv_row_mul";
-      algPSet = SVMulRowExample(precision, m);
-      break;
-    case(8):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -314,7 +292,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = VMMulExample(precision, m, n);
       break;
-    case(9):
+    case(8):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -325,7 +303,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = SMMulExample(precision, m, n);
       break;
-    case(10):
+    case(9):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -336,7 +314,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[4]);
       algPSet = VAddExample(precision, vecType, m);
       break;
-    case(11):
+    case(10):
       if (argc != 4) {
 	Usage();
 	return 0;
@@ -346,7 +324,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       algPSet = VAdd2Example(precision, m);
       break;
-    case(12):
+    case(11):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -357,7 +335,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = VMVMulExample(precision, m, n);
       break;
-    case(13):
+    case(12):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -368,7 +346,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       algPSet = MAdd2Example(precision, m, n);
       break;
-    case(14):
+    case(13):
       if (argc != 6) {
 	Usage();
 	return 0;
@@ -380,7 +358,7 @@ int main(int argc, const char* argv[])
       p = atoi(argv[5]);
       algPSet = MVMul2Example(precision, m, n, p);
       break;
-    case(15):
+    case(14):
       if (argc != 6) {
 	Usage();
 	return 0;
@@ -395,7 +373,7 @@ int main(int argc, const char* argv[])
 	algPSet = Gemv(precision, false, m, n);
       }
       break;
-    case(16):
+    case(15):
       if (argc != 4) {
 	Usage();
 	return 0;
@@ -405,7 +383,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       algPSet = GenSizeColSVMul(precision, m);
       break;
-    case(17):
+    case(16):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -416,7 +394,7 @@ int main(int argc, const char* argv[])
       m = atoi(argv[4]);
       algPSet = Axpy(precision, vecType, m);
       break;
-    case(18):
+    case(17):
       if (argc != 6) {
 	Usage();
 	return 0;
@@ -428,7 +406,7 @@ int main(int argc, const char* argv[])
       p = atoi(argv[5]);
       algPSet = Gemam(precision, m, n, p);
       break;
-    case(19):
+    case(18):
       if (argc != 5) {
 	Usage();
 	return 0;
@@ -547,12 +525,10 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-  uni.CullWorstPerformers(0.50, 0);
-
 #if DOEMPIRICALEVAL  
   cout << "Writing all implementations to runtime eval files\n";
 
-  int numIterations = 10;
+  int numIterations = 100000;
   RuntimeTest rtest(precision, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
@@ -560,7 +536,7 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
 
   cout << "Done evaluating\n";
-  GraphNum best = PrintImpMapInFlops(precision, impMap, flopCost);
+  GraphNum best = PrintImpMapStats(precision, impMap, flopCost);
 #endif //DOEMPIRICALEVAL
 
 #if 1
