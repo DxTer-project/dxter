@@ -26,6 +26,9 @@
 #define PRINTTRACKING 0
 #define CHECKFORSETREUSE USESHADOWS
 
+#ifdef _OPENMP
+#include "omp.h"
+#endif
 #include "base.h"
 #include "poss.h"
 #include <queue>

@@ -101,7 +101,8 @@ NodeType RedistNode::GetType() const
   if (m_name.length())
     return m_name;
   else {
-    return (string)"RedistNode to " +  m_info.GetDist().QuickStr() + m_info.GetPerm().Str();
+    return (string)"RedistNode to " +  m_info.GetDist().QuickStr() 
+      + m_info.GetPerm().Str() + m_align;
   }
 }
 
@@ -122,7 +123,7 @@ void RedistNode::Prop()
       throw;
     
     if (!m_name.length())
-      m_name = (string)"RedistNode to " +  m_info.GetDist().QuickStr() + m_info.GetPerm().Str();
+      m_name = (string)"RedistNode to " +  m_info.GetDist().QuickStr() + m_info.GetPerm().Str() + m_align;
     DLANode *parent = (DLANode*)Input(0);
     parent->Prop();
     
