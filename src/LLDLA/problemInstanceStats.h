@@ -28,15 +28,22 @@
 class ProblemInstanceStats {
 
  private:
+  ImplementationStats* m_bestAvgFlopsPerCycleImpl;
+  ImplementationStats* m_bestFlopsPerCycleImpl;
+  ImplementationStats* m_worstFlopsPerCycleImpl;
+
   ProblemInstance* m_problemInstance;
   vector<ImplementationStats*>* m_implementationStats;
 
+  void ComputeBestAndWorstImplementations(Type type);
   vector<ImplementationStats*>* ComputeImplementationStats(ImplementationRuntimeMap* impls);
 
  public:
   ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);
   ~ProblemInstanceStats();
 
+  double GetBestAvgFlopsPerCycle();
+  GraphNum GetBestAvgFlopsPerCycleImpl();
   void PrettyPrintPerformanceStats();
 };
 

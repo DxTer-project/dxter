@@ -43,6 +43,11 @@ class ImplementationStats {
  public:
   ImplementationStats(GraphNum implNumber, Type type, Cost flopCost, TimeVec* runtimes);
 
+  GraphNum GetNum();
+  double GetAvgFlopsPerCycle();
+  double GetBestFlopsPerCycle();
+  double GetWorstFlopsPerCycle();
+
   void PrettyPrintPerformanceStats();
 
 };

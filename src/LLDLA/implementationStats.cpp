@@ -66,6 +66,23 @@ ImplementationStats::ImplementationStats(GraphNum implNumber, Type type, Cost fl
   ComputePerformanceNumbers(type, flopCost, runtimes);
 }
 
+GraphNum ImplementationStats::GetNum() {
+  return m_implNumber;
+}
+
+double ImplementationStats::GetAvgFlopsPerCycle() {
+  return m_meanFlopsPerCycle;
+}
+
+double ImplementationStats::GetBestFlopsPerCycle() {
+  return m_bestFlopsPerCycle;
+}
+
+double ImplementationStats::GetWorstFlopsPerCycle() {
+  return m_worstFlopsPerCycle;
+}
+
+
 void ImplementationStats::PrettyPrintPerformanceStats()
 {
   cout << "IMPLEMENTATION #" << m_implNumber << endl;

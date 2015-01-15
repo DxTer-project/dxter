@@ -73,8 +73,7 @@ do you really want to do compact unrolling and partial unrolling?
 
 #include <sstream>
 
-void MuNNMuGemmResults(Type precision);
-ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+void RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
 
 Trans transA, transB;
 
@@ -464,13 +463,13 @@ int main(int argc, const char* argv[])
 
     problemInstance.SetType(precision);
     problemInstance.SetName(opName);
-    ProblemInstanceStats* pStats = RunExample(algNum, algPSet, &problemInstance);
-    pStats->PrettyPrintPerformanceStats();
+    RunExample(algNum, algPSet, &problemInstance);
+
   }
   return 0;
 }
 
-ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance)
+void RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance)
 {
   RegAllLLDLANodes();
   AddTransformations();
@@ -578,7 +577,11 @@ ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance*
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
 
   cout << "Done evaluating\n";
-  GraphNum best = PrintImpMapStats(problemInstance->GetType(), impMap, flopCost);
+  ProblemInstanceStats pStats(problemInstance, &impMap);
+  pStats.PrettyPrintPerformanceStats();
+
+  GraphNum best = pStats.GetBestAvgFlopsPerCycleImpl();
+  cout << "Best Avg. flops/cycle = " << pStats.GetBestAvgFlopsPerCycle();
 
 #if 1
   uni.PrintAll(algNum, best);
@@ -590,7 +593,7 @@ ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance*
   uni.PrintCosts(impMap);
 #endif
 
-  return new ProblemInstanceStats(problemInstance, &impMap);
+    return;
 }
 
 #endif //DOLLDLA

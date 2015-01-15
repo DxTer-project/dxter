@@ -23,6 +23,28 @@
 
 #if DOLLDLA
 
+void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
+  double bestAvgFlopsPerCycle = 0.0;
+  double bestFlopsPerCycle = 0.0;
+  double worstFlopsPerCycle = arch->FlopsPerCycle(type);
+  for (auto impl : *m_implementationStats) {
+    if (impl->GetAvgFlopsPerCycle() > bestAvgFlopsPerCycle) {
+      bestAvgFlopsPerCycle = impl->GetAvgFlopsPerCycle();
+      m_bestAvgFlopsPerCycleImpl = impl;
+    }
+
+    if (impl->GetBestFlopsPerCycle() > bestFlopsPerCycle) {
+      bestFlopsPerCycle = impl->GetBestFlopsPerCycle();
+      m_bestFlopsPerCycleImpl = impl;
+    }
+
+    if (impl->GetWorstFlopsPerCycle() < worstFlopsPerCycle) {
+      worstFlopsPerCycle = impl->GetWorstFlopsPerCycle();
+      m_worstFlopsPerCycleImpl = impl;
+    }
+  }
+}
+
 vector<ImplementationStats*>* ProblemInstanceStats::ComputeImplementationStats(ImplementationRuntimeMap* impls) {
   Cost cost = m_problemInstance->GetCost();
   Type probType = m_problemInstance->GetType();
@@ -39,6 +61,7 @@ vector<ImplementationStats*>* ProblemInstanceStats::ComputeImplementationStats(I
 ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls) {
   m_problemInstance = problemInstance;
   m_implementationStats = ComputeImplementationStats(impls);
+  ComputeBestAndWorstImplementations(problemInstance->GetType());
 }
 
 ProblemInstanceStats::~ProblemInstanceStats() {
@@ -46,6 +69,14 @@ ProblemInstanceStats::~ProblemInstanceStats() {
     delete implStats;
   }
   delete m_implementationStats;
+}
+
+double ProblemInstanceStats::GetBestAvgFlopsPerCycle() {
+  return m_bestAvgFlopsPerCycleImpl->GetAvgFlopsPerCycle();
+}
+
+GraphNum ProblemInstanceStats::GetBestAvgFlopsPerCycleImpl() {
+  return m_bestAvgFlopsPerCycleImpl->GetNum();
 }
 
 void ProblemInstanceStats::PrettyPrintPerformanceStats() {
