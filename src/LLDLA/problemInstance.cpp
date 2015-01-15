@@ -23,8 +23,33 @@
 
 #if DOLLDLA
 
-void ProblemInstance::SetType(Type type) {
+ProblemInstance::ProblemInstance() {
+  m_name = new string("");
+}
 
+ProblemInstance::~ProblemInstance() {
+  delete m_name;
+}
+
+void ProblemInstance::AddDimension(int val, string dimName) {
+  
+}
+
+string ProblemInstance::GetName() {
+  return *m_name;
+}
+
+Type ProblemInstance::GetType() {
+  return m_type;
+}
+
+void ProblemInstance::SetName(string name) {
+  delete m_name;
+  m_name = new string(name);
+}
+
+void ProblemInstance::SetType(Type type) {
+  m_type = type;
 }
 
 #endif // DOLLDLA

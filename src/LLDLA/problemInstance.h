@@ -24,8 +24,20 @@
 #if DOLLDLA
 
 class ProblemInstance {
+ private:
+  string* m_name;
+  Type m_type;
 
  public:
+  ProblemInstance();
+  ~ProblemInstance();
+
+  void AddDimension(int val, string dimName);
+
+  string GetName();
+  Type GetType();
+
+  void SetName(string name);
   void SetType(Type type);
 };
 
