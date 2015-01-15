@@ -21,6 +21,7 @@
 
 #include "allTransformations.h"
 #include "base.h"
+#include "benchmark.h"
 #include "blasExamples.h"
 #include "costs.h"
 #include "driverUtils.h"
@@ -153,7 +154,7 @@ void Usage()
   cout <<"\n";
   cout << "./driver arg1 arg2 ...\n";
   cout <<"\n";
-  cout <<"arg1 == 0  -> Load from file arg1\n";
+  cout <<"arg1 == 0   -> Run benchmark\n";
   cout <<"\n";
   cout <<"Single Operation Examples\n";
   cout <<"         3  -> Dot prod F/D M\n";
@@ -198,11 +199,12 @@ int main(int argc, const char* argv[])
   int algNum;
   string opName;
 
-  if(argc < 2) {
+  if (argc == 2 && *argv[1] == '0') {
+    RunBenchmark();
+  } else if(argc < 2) {
     Usage();
     return 0;
-  }
-  else {
+  } else {
     algNum = atoi(argv[1]);
     switch(algNum) {
     case(1):
@@ -421,9 +423,9 @@ int main(int argc, const char* argv[])
       Usage();
       return 0;
     }
-  }
 
-  RunExample(algNum, algPSet, precision, opName);
+    RunExample(algNum, algPSet, precision, opName);
+  }
   return 0;
 }
 
@@ -487,7 +489,6 @@ double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
 
   }
 #endif
-
 
 #if DOLLDLALOOPUNROLLPHASE
   if (CurrPhase == LLDLALOOPUNROLLPHASE) {
