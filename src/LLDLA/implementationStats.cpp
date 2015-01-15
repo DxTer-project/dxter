@@ -23,12 +23,52 @@
 
 #if DOLLDLA
 
-ImplementationStats::ImplementationStats(GraphNum implNumber, Type type, Cost flopCost, TimeVec* runtimes) {
+void ImplementationStats::ComputePerformanceNumbers(Type type, Cost flopCost, TimeVec* runtimes) {
+  m_meanFlopsPerCycle = 0.0;
+  m_bestFlopsPerCycle = 0.0;
+  m_worstFlopsPerCycle = arch->FlopsPerCycle(type);
 
+  double numRuns = 0.0;
+  double flopsPerCycle;
+
+  for (double runtime : *runtimes) {
+    flopsPerCycle = flopCost / runtime;
+
+    m_meanFlopsPerCycle += flopsPerCycle;
+
+    if (m_bestFlopsPerCycle < flopsPerCycle) {
+      m_bestFlopsPerCycle = flopsPerCycle;
+    }
+
+    if (m_worstFlopsPerCycle > flopsPerCycle) {
+      m_worstFlopsPerCycle = flopsPerCycle;
+    }
+
+    numRuns += 1.0;
+  }
+
+  m_meanFlopsPerCycle = m_meanFlopsPerCycle / numRuns;
+
+  m_meanPercentOfPeak = (m_meanFlopsPerCycle / arch->FlopsPerCycle(type)) * 100;
+  m_worstPercentOfPeak = (m_worstFlopsPerCycle / arch->FlopsPerCycle(type)) * 100;
+  m_bestPercentOfPeak = (m_bestFlopsPerCycle / arch->FlopsPerCycle(type)) * 100;
+}
+
+ImplementationStats::ImplementationStats(GraphNum implNumber, Type type, Cost flopCost, TimeVec* runtimes) {
+  m_implNumber = implNumber;
+  ComputePerformanceNumbers(type, flopCost, runtimes);
 }
 
 void ImplementationStats::PrettyPrintPerformanceStats()
 {
+  cout << "IMPLEMENTATION #" << m_implNumber << endl;
+  cout << "     Average flops/cycle = " << m_meanFlopsPerCycle << endl;
+  cout << "               % of peak = " << m_meanPercentOfPeak << endl << endl;
+  cout << "        Best flops/cycle = " << m_bestFlopsPerCycle << endl;
+  cout << "               % of peak = " << m_bestPercentOfPeak << endl << endl;
+  cout << "       Worst flops/cycle = " << m_worstFlopsPerCycle << endl;
+  cout << "               % of peak = " << m_worstPercentOfPeak << endl << endl;
+
   return;
 }
 

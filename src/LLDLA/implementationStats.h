@@ -25,6 +25,19 @@
 
 class ImplementationStats {
 
+ private:
+  double
+    m_meanFlopsPerCycle,
+    m_meanPercentOfPeak,
+    m_bestPercentOfPeak,
+    m_worstPercentOfPeak,
+    m_bestFlopsPerCycle,
+    m_worstFlopsPerCycle;
+
+  GraphNum m_implNumber;
+
+  void ComputePerformanceNumbers(Type type, Cost flopCost, TimeVec* runtimes);
+
  public:
   ImplementationStats(GraphNum implNumber, Type type, Cost flopCost, TimeVec* runtimes);
 

@@ -55,7 +55,7 @@ void ProblemInstanceStats::PrettyPrintPerformanceStats() {
     implStats->PrettyPrintPerformanceStats();
   }
 
-  cout << "========================================================================================================\n";
+  cout << "=======================================================================================================\n";
 }
 
 #endif // DOLLDLA
