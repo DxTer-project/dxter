@@ -65,7 +65,6 @@ class RuntimeTest
   void AddMiscellaneousDefines();
 };
 
-
 class RuntimeEvaluator
 {
  public:
