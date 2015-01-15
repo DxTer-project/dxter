@@ -36,6 +36,8 @@ class ImplementationStats {
 
   GraphNum m_implNumber;
 
+  void ComputeFlopsPerCycle(Type type, Cost flopsCost, TimeVec* runtimes);
+  void ComputePercentagesOfPeak(Type type);
   void ComputePerformanceNumbers(Type type, Cost flopCost, TimeVec* runtimes);
 
  public:

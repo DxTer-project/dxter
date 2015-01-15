@@ -23,7 +23,7 @@
 
 #if DOLLDLA
 
-void ImplementationStats::ComputePerformanceNumbers(Type type, Cost flopCost, TimeVec* runtimes) {
+void ImplementationStats::ComputeFlopsPerCycle(Type type, Cost flopCost, TimeVec* runtimes) {
   m_meanFlopsPerCycle = 0.0;
   m_bestFlopsPerCycle = 0.0;
   m_worstFlopsPerCycle = arch->FlopsPerCycle(type);
@@ -48,10 +48,17 @@ void ImplementationStats::ComputePerformanceNumbers(Type type, Cost flopCost, Ti
   }
 
   m_meanFlopsPerCycle = m_meanFlopsPerCycle / numRuns;
+}
 
+void ImplementationStats::ComputePercentagesOfPeak(Type type) {
   m_meanPercentOfPeak = (m_meanFlopsPerCycle / arch->FlopsPerCycle(type)) * 100;
   m_worstPercentOfPeak = (m_worstFlopsPerCycle / arch->FlopsPerCycle(type)) * 100;
   m_bestPercentOfPeak = (m_bestFlopsPerCycle / arch->FlopsPerCycle(type)) * 100;
+}
+
+void ImplementationStats::ComputePerformanceNumbers(Type type, Cost flopCost, TimeVec* runtimes) {
+  ComputeFlopsPerCycle(type, flopCost, runtimes);
+  ComputePercentagesOfPeak(type);
 }
 
 ImplementationStats::ImplementationStats(GraphNum implNumber, Type type, Cost flopCost, TimeVec* runtimes) {
