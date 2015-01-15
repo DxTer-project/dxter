@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef PROBLEM_INSTANCE_H_
+#define PROBLEM_INSTANCE_H_
+
 #include "LLDLA.h"
 
 #if DOLLDLA
@@ -45,3 +48,5 @@ class ProblemInstance {
 };
 
 #endif // DOLLDLA
+
+#endif // PROBLEM_INSTANCE_H_

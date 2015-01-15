@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef IMPLEMENTATION_STATS_H_
+#define IMPLEMENTATION_STATS_H_
+
 #include "LLDLA.h"
 
 #if DOLLDLA
@@ -53,3 +56,5 @@ class ImplementationStats {
 };
 
 #endif // DOLLDLA
+
+#endif // IMPLEMENTATION_STATS_H_

@@ -19,37 +19,26 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef PROBLEM_INSTANCE_STATS_H_
-#define PROBLEM_INSTANCE_STATS_H_
-
+#include "allTransformations.h"
 #include "base.h"
-#include "implementationStats.h"
-#include "problemInstance.h"
+#include "benchmark.h"
+#include "costs.h"
+#include "DLAReg.h"
+#include "loopSupport.h"
+#include "problemInstanceStats.h"
+#include "runtimeEvaluation.h"
+#include "transform.h"
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+#include <climits>
+#include <sstream>
+#include <time.h>
 
 #if DOLLDLA
 
-class ProblemInstanceStats {
-
- private:
-  ImplementationStats* m_bestAvgFlopsPerCycleImpl;
-  ImplementationStats* m_bestFlopsPerCycleImpl;
-  ImplementationStats* m_worstFlopsPerCycleImpl;
-
-  ProblemInstance* m_problemInstance;
-  vector<ImplementationStats*>* m_implementationStats;
-
-  void ComputeBestAndWorstImplementations(Type type);
-  vector<ImplementationStats*>* ComputeImplementationStats(ImplementationRuntimeMap* impls);
-
- public:
-  ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);
-  ~ProblemInstanceStats();
-
-  double GetBestAvgFlopsPerCycle();
-  GraphNum GetBestAvgFlopsPerCycleImpl();
-  void PrettyPrintPerformanceStats();
-};
+ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
 
 #endif // DOLLDLA
-
-#endif // PROBLEM_INSTANCE_STATS_H_

@@ -19,6 +19,8 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef DRIVER_UTILS_H_
+#define DRIVER_UTILS_H_
 
 #pragma once
 
@@ -96,3 +98,5 @@ Type CharToType(char c)
     throw;
   }
 }
+
+#endif // DRIVER_UTILS_H_

@@ -19,6 +19,9 @@
  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef LLDLA_H_
+#define LLDLA_H_
+
 #pragma once
 
 #include "architecture.h"
@@ -73,4 +76,6 @@ class DataTypeInfo
 
 };
 
-#endif //DOLLDLA
+#endif // DOLLDLA
+
+#endif // LLDLA_H_
