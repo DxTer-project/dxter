@@ -21,21 +21,20 @@
 
 #include "allTransformations.h"
 #include "base.h"
+#include "benchmark.h"
 #include "blasExamples.h"
 #include "costs.h"
 #include "driverUtils.h"
 #include "debug.h"
 #include "DLAReg.h"
+#include "exampleRunner.h"
 #include "loopUnrolling.h"
 #include "LLDLAGemm.h"
 #include "LLDLAGemmTransformations.h"
 #include "miscellaneousExamples.h"
 #include "multiBLASExamples.h"
+#include "problemInstanceStats.h"
 #include "runtimeEvaluation.h"
-
-#ifdef _OPENMP
-#include "omp.h"
-#endif
 
 #include "singleOperationExamples.h"
 #include "transform.h"
@@ -69,28 +68,9 @@
 do you really want to do compact unrolling and partial unrolling?
 #endif
 
-#include <sstream>
-
-void MuNNMuGemmResults(Type precision);
-double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName);
-
 Trans transA, transB;
 
 Architecture* arch;
-
-ImplementationMap* ImpStrMap(Universe *uni)
-{
-  ImplementationMap* impMap = new ImplementationMap();
-  GraphNum i;
-  for (i = 1; i <= uni->TotalCount(); i++) {
-    std::stringbuf sbuf;
-    std::ostream out(&sbuf);
-    IndStream istream = IndStream(&out, LLDLASTREAM);
-    uni->Print(istream, i);
-    impMap->insert(NumImplementationPair(i, sbuf.str()));
-  }
-  return impMap;
-}
 
 double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
@@ -153,7 +133,7 @@ void Usage()
   cout <<"\n";
   cout << "./driver arg1 arg2 ...\n";
   cout <<"\n";
-  cout <<"arg1 == 0  -> Load from file arg1\n";
+  cout <<"arg1 == 0   -> Run benchmark\n";
   cout <<"\n";
   cout <<"Single Operation Examples\n";
   cout <<"         3  -> Dot prod F/D M\n";
@@ -183,6 +163,7 @@ void Usage()
 
 int main(int argc, const char* argv[])
 {
+
 #ifdef _OPENMP
   omp_set_num_threads(1);
   omp_set_nested(true);
@@ -191,6 +172,7 @@ int main(int argc, const char* argv[])
   int m, n, p, k;
   Type precision;
   VecType vecType;
+  ProblemInstance problemInstance;
 
   arch = new HaswellMacbook();
 
@@ -198,11 +180,12 @@ int main(int argc, const char* argv[])
   int algNum;
   string opName;
 
-  if(argc < 2) {
+  if (argc == 2 && *argv[1] == '0') {
+    RunBenchmark();
+  } else if(argc < 2) {
     Usage();
     return 0;
-  }
-  else {
+  } else {
     algNum = atoi(argv[1]);
     switch(algNum) {
     case(1):
@@ -217,6 +200,9 @@ int main(int argc, const char* argv[])
       m = atoi(argv[5]);
       n = atoi(argv[6]);
       p = atoi(argv[7]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      problemInstance.AddDimension(p, "p");
       algPSet = GemmExample(precision, transA, transB, m, n, p);
       break;
     case(2):
@@ -232,6 +218,10 @@ int main(int argc, const char* argv[])
       k = atoi(argv[8]);
       transA = CharToTrans(*argv[2]);
       transB = CharToTrans(*argv[3]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      problemInstance.AddDimension(p, "p");
+      problemInstance.AddDimension(k, "k");
       algPSet = DoubleGemmExample(precision, transA, transB, m, n, p, k);
       break;
     case(3):
@@ -242,6 +232,7 @@ int main(int argc, const char* argv[])
       opName = "dxt_dot";
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
+      problemInstance.AddDimension(m, "m");
       algPSet = DotExample(precision, m);
       break;
     case(4):
@@ -253,6 +244,8 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
       algPSet = MAddExample(precision, m, n);
       break;
     case(5):
@@ -264,6 +257,8 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[3]);
       m = atoi(argv[4]);
       n = atoi(argv[5]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
       if (TRANS == CharToTrans(*argv[2])) {
 	algPSet = MVMulExample(precision, true, m, n);
       } else {
@@ -279,6 +274,7 @@ int main(int argc, const char* argv[])
       vecType = CharToVecType(*argv[2]);
       precision = CharToType(*argv[3]);
       m = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
       algPSet = SVMulExample(precision, vecType, m);
       break;
     case(7):
@@ -290,6 +286,8 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
       algPSet = VMMulExample(precision, m, n);
       break;
     case(8):
@@ -301,6 +299,8 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
       algPSet = SMMulExample(precision, m, n);
       break;
     case(9):
@@ -312,6 +312,7 @@ int main(int argc, const char* argv[])
       vecType = CharToVecType(*argv[2]);
       precision = CharToType(*argv[3]);
       m = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
       algPSet = VAddExample(precision, vecType, m);
       break;
     case(10):
@@ -322,6 +323,7 @@ int main(int argc, const char* argv[])
       opName = "dxt_vadd2";
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
+      problemInstance.AddDimension(m, "m");
       algPSet = VAdd2Example(precision, m);
       break;
     case(11):
@@ -333,6 +335,8 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
       algPSet = VMVMulExample(precision, m, n);
       break;
     case(12):
@@ -344,6 +348,8 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
       algPSet = MAdd2Example(precision, m, n);
       break;
     case(13):
@@ -356,6 +362,9 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       n = atoi(argv[4]);
       p = atoi(argv[5]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      problemInstance.AddDimension(p, "p");
       algPSet = MVMul2Example(precision, m, n, p);
       break;
     case(14):
@@ -367,6 +376,8 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[3]);
       m = atoi(argv[4]);
       n = atoi(argv[5]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
       if (TRANS == CharToTrans(*argv[2])) {
 	algPSet = Gemv(precision, true, m, n);
       } else {
@@ -381,6 +392,7 @@ int main(int argc, const char* argv[])
       opName = "dxt_sv_col_mul_gen";
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
+      problemInstance.AddDimension(m, "m");
       algPSet = GenSizeColSVMul(precision, m);
       break;
     case(16):
@@ -392,6 +404,7 @@ int main(int argc, const char* argv[])
       vecType = CharToVecType(*argv[2]);
       precision = CharToType(*argv[3]);
       m = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
       algPSet = Axpy(precision, vecType, m);
       break;
     case(17):
@@ -404,6 +417,9 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       n = atoi(argv[4]);
       p = atoi(argv[5]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      problemInstance.AddDimension(p, "p");
       algPSet = Gemam(precision, m, n, p);
       break;
     case(18):
@@ -415,142 +431,21 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
       algPSet = Gesummv(precision, m, n);
       break;
     default:
       Usage();
       return 0;
     }
-  }
 
-  RunExample(algNum, algPSet, precision, opName);
+    problemInstance.SetType(precision);
+    problemInstance.SetName(opName);
+    RunExample(algNum, algPSet, &problemInstance);
+
+  }
   return 0;
-}
-
-double RunExample(int algNum, RealPSet* algPSet, Type precision, string opName)
-{
-  RegAllLLDLANodes();
-  AddTransformations();
-
-  int numIters = -1;
-  Cost flopCost = 0;
-  Universe uni;
-  time_t start, start2, end;
-  string absImpStr;
-
-  uni.PrintStats();
-
-  cout << "Creating startSet\n";
-
-  RealPSet *startSet = algPSet;
-  
-  cout << "Created startSet\n";
-
-  uni.Init(startSet);
-  
-  cout << "Initialized universe\n";
-  
-  uni.Prop();
-  GraphIter* graphIter = new GraphIter(startSet->m_posses.begin()->second);
-  cout << "Printing evaluation code\n";
-  flopCost = graphIter->EvalAndSetBest();
-  // Print abstract implementation to string for use in testing
-  // EXTREMELY HACKY, I could not figure out how to redirect an
-  // ostream to a string
-  std::stringstream ss;
-  IndStream optOut(&ss, LLDLASTREAM);
-  graphIter->PrintRoot(optOut, 0, true, startSet);
-  absImpStr = ss.str();
-
-  cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
-  cout << "Flops for operation = " << std::to_string((long double) flopCost) << endl;
-
-  time(&start);
-
-#if DOLLDLALOOPPHASE
-  if (CurrPhase == LLDLALOOPPHASE) {
-
-    cout << "Expanding LLDLA loop phase\n";
-
-    uni.Expand(-1, LLDLALOOPPHASE, LLDLACull);
-    time(&end);
-
-    cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
-    cout << "Propagating\n";
-
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-
-  }
-#endif
-
-
-#if DOLLDLALOOPUNROLLPHASE
-  if (CurrPhase == LLDLALOOPUNROLLPHASE) {
-    cout << "LLDLALOOPUNROLL phase\n";
-    uni.Expand(-1, LLDLALOOPUNROLLPHASE, LLDLACull);
-    time(&end);
-    cout << "LLDLALOOPUNROLL phase took " << difftime(end,start) << " seconds\n";
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-#endif
-
-#if DOLLDLAPRIMPHASE
-  if (CurrPhase == LLDLAPRIMPHASE) {
-    cout << "Expanding LL DLA prim phase\n";
-    cout << "Starting with " << uni.TotalCount() << endl;
-    time(&start2);
-    uni.Expand(numIters, LLDLAPRIMPHASE, LLDLACull);
-    time(&end);
-    cout << "LLDLAPRIM phase took " << difftime(end,start2) << " seconds\n";
-
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni.Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-  }
-#endif
-
-  cout << "Full expansion took " << difftime(end,start) << " seconds\n";
-  cout.flush();
-
-#if DOEMPIRICALEVAL  
-  cout << "Writing all implementations to runtime eval files\n";
-
-  int numIterations = 100000;
-  RuntimeTest rtest(precision, opName, uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
-  string evalDirName = "runtimeEvaluation";
-  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
-  cout << "About to evaluate\n";
-  ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
-
-  cout << "Done evaluating\n";
-  GraphNum best = PrintImpMapStats(precision, impMap, flopCost);
-#endif //DOEMPIRICALEVAL
-
-#if 1
-  uni.PrintAll(algNum, best);
-#else
-  uni.PrintBest();
-#endif
-
-#if PRINTCOSTS
-  uni.PrintCosts(impMap);
-#endif
-
-  double bestFPS = BestFlopsPerCycle(precision, impMap, flopCost);
-  return bestFPS;
 }
 
 #endif //DOLLDLA

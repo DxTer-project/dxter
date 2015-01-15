@@ -19,84 +19,37 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DRIVER_UTILS_H_
-#define DRIVER_UTILS_H_
-
-#pragma once
+#ifndef PROBLEM_INSTANCE_STATS_H_
+#define PROBLEM_INSTANCE_STATS_H_
 
 #include "base.h"
-
-Trans CharToTrans(char c) 
-{
-  switch (c) {
-  case('N'):
-    return NORMAL;
-  case('T'):
-    return TRANS;
-  case ('C'):
-    return CONJTRANS;
-  default:
-    throw;
-  }
-}
-
-Tri CharToTri(char c)
-{
-  switch (c) {
-  case('L'):
-    return LOWER;
-  case('U'):
-    return UPPER;
-  default:
-    throw;
-  }
-}
-
-Side CharToSide(char c)
-{
-  switch (c) {
-  case('L'):
-    return LEFT;
-  case('R'):
-    return RIGHT;
-  default:
-    throw;
-  }
-}
+#include "implementationStats.h"
+#include "problemInstance.h"
 
 #if DOLLDLA
 
-VecType CharToVecType(char c)
-{
-switch(c) {
- case('C'):
-return COLVECTOR;
- case('R'):
-return ROWVECTOR;
- default:
-throw;
-}
-}
+class ProblemInstanceStats {
+
+ private:
+  ImplementationStats* m_bestAvgFlopsPerCycleImpl;
+  ImplementationStats* m_bestFlopsPerCycleImpl;
+  ImplementationStats* m_worstFlopsPerCycleImpl;
+
+  ProblemInstance* m_problemInstance;
+  vector<ImplementationStats*>* m_implementationStats;
+
+  void ComputeBestAndWorstImplementations(Type type);
+  vector<ImplementationStats*>* ComputeImplementationStats(ImplementationRuntimeMap* impls);
+
+ public:
+  ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);
+  ~ProblemInstanceStats();
+
+  double GetBestAvgFlopsPerCycle();
+  GraphNum GetBestAvgFlopsPerCycleImpl();
+  void PrettyPrintPerformanceStats();
+};
 
 #endif // DOLLDLA
 
-Type CharToType(char c)
-{
-  switch(c) {
-#if DOLLDLA
- case('F'):
-    return REAL_SINGLE;
- case('D'):
-    return REAL_DOUBLE;
-#else
-  case('R'):
-    return REAL;
-#endif // DOLLDLA
-  case('C'):
-    return COMPLEX;
-  default:
-    throw;
-  }
-}
-
-#endif // DRIVER_UTILS_H_
+#endif // PROBLEM_INSTANCE_STATS_H_

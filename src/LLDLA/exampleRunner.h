@@ -19,84 +19,25 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DRIVER_UTILS_H_
-#define DRIVER_UTILS_H_
-
-#pragma once
-
+#include "allTransformations.h"
 #include "base.h"
+#include "costs.h"
+#include "DLAReg.h"
+#include "loopSupport.h"
+#include "problemInstanceStats.h"
+#include "runtimeEvaluation.h"
+#include "transform.h"
 
-Trans CharToTrans(char c) 
-{
-  switch (c) {
-  case('N'):
-    return NORMAL;
-  case('T'):
-    return TRANS;
-  case ('C'):
-    return CONJTRANS;
-  default:
-    throw;
-  }
-}
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
-Tri CharToTri(char c)
-{
-  switch (c) {
-  case('L'):
-    return LOWER;
-  case('U'):
-    return UPPER;
-  default:
-    throw;
-  }
-}
-
-Side CharToSide(char c)
-{
-  switch (c) {
-  case('L'):
-    return LEFT;
-  case('R'):
-    return RIGHT;
-  default:
-    throw;
-  }
-}
+#include <climits>
+#include <sstream>
+#include <time.h>
 
 #if DOLLDLA
 
-VecType CharToVecType(char c)
-{
-switch(c) {
- case('C'):
-return COLVECTOR;
- case('R'):
-return ROWVECTOR;
- default:
-throw;
-}
-}
+ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
 
 #endif // DOLLDLA
-
-Type CharToType(char c)
-{
-  switch(c) {
-#if DOLLDLA
- case('F'):
-    return REAL_SINGLE;
- case('D'):
-    return REAL_DOUBLE;
-#else
-  case('R'):
-    return REAL;
-#endif // DOLLDLA
-  case('C'):
-    return COMPLEX;
-  default:
-    throw;
-  }
-}
-
-#endif // DRIVER_UTILS_H_

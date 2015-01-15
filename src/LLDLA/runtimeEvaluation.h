@@ -19,10 +19,15 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef RUNTIME_EVALUATION_H_
+#define RUNTIME_EVALUATION_H_
+
 #include "LLDLA.h"
 #include "base.h"
 #include <map>
 #include <vector>
+
+#if DOLLDLA
 
 using namespace std;
 
@@ -65,7 +70,6 @@ class RuntimeTest
   void AddMiscellaneousDefines();
 };
 
-
 class RuntimeEvaluator
 {
  public:
@@ -78,3 +82,7 @@ class RuntimeEvaluator
   ImplementationRuntimeMap ReadTimeDataFromFile(string fileName, int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
 };
+
+#endif // DOLLDLA
+
+#endif // RUNTIME_EVALUATION_H_
