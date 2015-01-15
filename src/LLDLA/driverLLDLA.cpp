@@ -497,9 +497,6 @@ void RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance)
   cout << "Printing evaluation code\n";
   flopCost = graphIter->EvalAndSetBest();
   problemInstance->SetCost(flopCost);
-  // Print abstract implementation to string for use in testing
-  // EXTREMELY HACKY, I could not figure out how to redirect an
-  // ostream to a string
   std::stringstream ss;
   IndStream optOut(&ss, LLDLASTREAM);
   graphIter->PrintRoot(optOut, 0, true, startSet);
@@ -581,7 +578,7 @@ void RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance)
   pStats.PrettyPrintPerformanceStats();
 
   GraphNum best = pStats.GetBestAvgFlopsPerCycleImpl();
-  cout << "Best Avg. flops/cycle = " << pStats.GetBestAvgFlopsPerCycle();
+  cout << "Best Avg. flops/cycle = " << pStats.GetBestAvgFlopsPerCycle() << endl;
 
 #if 1
   uni.PrintAll(algNum, best);
