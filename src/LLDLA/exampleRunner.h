@@ -21,7 +21,6 @@
 
 #include "allTransformations.h"
 #include "base.h"
-#include "benchmark.h"
 #include "costs.h"
 #include "DLAReg.h"
 #include "loopSupport.h"

@@ -20,7 +20,10 @@
 */
 
 #include <iostream>
-#include "smmul.h"
+
+#include "exampleRunner.h"
+#include "problemInstance.h"
+#include "singleOperationExamples.h"
 
 #if DOLLDLA
 

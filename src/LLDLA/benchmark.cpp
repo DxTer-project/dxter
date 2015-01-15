@@ -28,7 +28,9 @@ using namespace std;
 
 void DotProductBenchmark() {
   cout << "--------------------- dot product benchmark -----------------------------\n\n";
-
+  RealPSet* test = DotExample(REAL_SINGLE, 8);
+  ProblemInstance dotProd;
+  RunExample(1, test, &dotProd);
   cout << "\n------------------- end dot product benchmark ---------------------------\n";
 }
 
