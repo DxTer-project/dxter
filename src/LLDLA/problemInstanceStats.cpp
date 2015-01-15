@@ -23,8 +23,39 @@
 
 #if DOLLDLA
 
-ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls) {
+vector<ImplementationStats*>* ProblemInstanceStats::ComputeImplementationStats(ImplementationRuntimeMap* impls) {
+  Cost cost = m_problemInstance->GetCost();
+  Type probType = m_problemInstance->GetType();
+  vector<ImplementationStats*>* implStats = new vector<ImplementationStats*>();
+  for (std::pair<GraphNum, TimeVec> pair : *impls) {
+    GraphNum impNum = pair.first;
+    TimeVec* times = &(pair.second);
+    ImplementationStats* impStats = new ImplementationStats(impNum, probType, cost, times);
+    implStats->push_back(impStats);
+  }
+  return implStats;
+}
 
+ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls) {
+  m_problemInstance = problemInstance;
+  m_implementationStats = ComputeImplementationStats(impls);
+}
+
+ProblemInstanceStats::~ProblemInstanceStats() {
+  for (auto implStats : *m_implementationStats) {
+    delete implStats;
+  }
+  delete m_implementationStats;
+}
+
+void ProblemInstanceStats::PrettyPrintPerformanceStats() {
+  cout << "================== PERFORMANCE RESULTS FOR " << m_problemInstance->GetName() << " =====================\n";
+
+  for (auto implStats : *m_implementationStats) {
+    implStats->PrettyPrintPerformanceStats();
+  }
+
+  cout << "========================================================================================================\n";
 }
 
 #endif // DOLLDLA

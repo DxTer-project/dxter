@@ -19,25 +19,17 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "base.h"
 #include "implementationStats.h"
-#include "problemInstance.h"
 
 #if DOLLDLA
 
-class ProblemInstanceStats {
+ImplementationStats::ImplementationStats(GraphNum implNumber, Type type, Cost flopCost, TimeVec* runtimes) {
 
- private:
-  ProblemInstance* m_problemInstance;
-  vector<ImplementationStats*>* m_implementationStats;
+}
 
-  vector<ImplementationStats*>* ComputeImplementationStats(ImplementationRuntimeMap* impls);
-
- public:
-  ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);
-  ~ProblemInstanceStats();
-
-  void PrettyPrintPerformanceStats();
-};
+void ImplementationStats::PrettyPrintPerformanceStats()
+{
+  return;
+}
 
 #endif // DOLLDLA

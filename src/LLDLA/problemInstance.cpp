@@ -35,12 +35,20 @@ void ProblemInstance::AddDimension(int val, string dimName) {
   
 }
 
+Cost ProblemInstance::GetCost() {
+  return m_cost;
+}
+
 string ProblemInstance::GetName() {
   return *m_name;
 }
 
 Type ProblemInstance::GetType() {
   return m_type;
+}
+
+void ProblemInstance::SetCost(Cost cost) {
+  m_cost = cost;
 }
 
 void ProblemInstance::SetName(string name) {

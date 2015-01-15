@@ -464,7 +464,8 @@ int main(int argc, const char* argv[])
 
     problemInstance.SetType(precision);
     problemInstance.SetName(opName);
-    RunExample(algNum, algPSet, &problemInstance);
+    ProblemInstanceStats* pStats = RunExample(algNum, algPSet, &problemInstance);
+    pStats->PrettyPrintPerformanceStats();
   }
   return 0;
 }
@@ -496,6 +497,7 @@ ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance*
   GraphIter* graphIter = new GraphIter(startSet->m_posses.begin()->second);
   cout << "Printing evaluation code\n";
   flopCost = graphIter->EvalAndSetBest();
+  problemInstance->SetCost(flopCost);
   // Print abstract implementation to string for use in testing
   // EXTREMELY HACKY, I could not figure out how to redirect an
   // ostream to a string

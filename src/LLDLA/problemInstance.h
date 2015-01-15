@@ -27,6 +27,7 @@ class ProblemInstance {
  private:
   string* m_name;
   Type m_type;
+  Cost m_cost;
 
  public:
   ProblemInstance();
@@ -34,9 +35,11 @@ class ProblemInstance {
 
   void AddDimension(int val, string dimName);
 
+  Cost GetCost();
   string GetName();
   Type GetType();
 
+  void SetCost(Cost cost);
   void SetName(string name);
   void SetType(Type type);
 };
