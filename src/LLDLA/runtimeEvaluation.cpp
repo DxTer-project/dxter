@@ -307,24 +307,25 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest t
 ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp)
 {
   m_numIterations = test.m_numIterations;
-  cout << "******************************* OPERATION NAME *********************\n";
-  cout << test.m_operationName << endl << endl << endl;
-  string executableName = test.m_operationName;
+  string executableName = m_evalDirName + "/" + test.m_operationName;
   string testFileName = executableName + ".c";
-  cout << (m_evalDirName + "/" + testFileName) << endl;
-  std::ofstream outStream(m_evalDirName + "/" + testFileName);
-  outStream << test.MakeTestCodeWithCorrectnessCheck(imps, referenceImp);
-  outStream.close();
-  cout << "All implementations written to files\n";
-  const char *evalDir = (m_evalDirName + "/").c_str();
-  chdir(evalDir);
-  system(arch->CompileString(executableName, testFileName).c_str());
-  string runStr = "./" + executableName;
-  system(runStr.c_str());
-  string removeExecutable = "rm -f " + executableName;
-  system(removeExecutable.c_str());
-  cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
-  return ReadTimeDataFromFile(test.m_dataFileName, imps->size());
+  std::ofstream outStream(testFileName);
+  if (outStream.is_open()) {
+    outStream << test.MakeTestCodeWithCorrectnessCheck(imps, referenceImp) << endl;
+    outStream.close();
+    cout << "All implementations written to files\n";
+    system(arch->CompileString(executableName, testFileName).c_str());
+    string runStr = "./" + executableName;
+    system(runStr.c_str());
+    string removeExecutable = "rm -f " + executableName;
+    system(removeExecutable.c_str());
+    cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
+    ImplementationRuntimeMap impMap = ReadTimeDataFromFile(test.m_dataFileName, imps->size());
+    return impMap;
+  } else {
+    cout << "ERROR: RuntimeEvaluator could not create file " << executableName << endl;
+    throw;
+  }
 }
 
 ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName, int numImpls)
