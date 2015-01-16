@@ -38,7 +38,7 @@ void DotProductBenchmark() {
     dotProd.SetName("dotProd");
     dotProd.SetType(REAL_SINGLE);
     dotProd.AddDimension(m, "m");
-    ProblemInstanceStats* pStats = RunExample(1, test, &dotProd);
+    ProblemInstanceStats* pStats = RunBenchmark(1, test, &dotProd);
     benchStats.AddProblemInstanceStats(pStats);
     m += increment;
   }

@@ -443,7 +443,6 @@ int main(int argc, const char* argv[])
     problemInstance.SetType(precision);
     problemInstance.SetName(opName);
     RunExample(algNum, algPSet, &problemInstance);
-
   }
   return 0;
 }

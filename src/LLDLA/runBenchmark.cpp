@@ -19,11 +19,11 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "exampleRunner.h"
+#include "runBenchmark.h"
 
 #if DOLLDLA
 
-ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
+ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   RegAllLLDLANodes();
   AddTransformations();
 

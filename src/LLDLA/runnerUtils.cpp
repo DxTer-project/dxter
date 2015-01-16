@@ -19,26 +19,21 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "allTransformations.h"
-#include "base.h"
-#include "costs.h"
-#include "DLAReg.h"
-#include "loopSupport.h"
-#include "problemInstanceStats.h"
 #include "runnerUtils.h"
-#include "runtimeEvaluation.h"
-#include "transform.h"
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#include <climits>
-#include <sstream>
-#include <time.h>
 
 #if DOLLDLA
 
-ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+ImplementationMap* ImpStrMap(Universe* uni) {
+  ImplementationMap* impMap = new ImplementationMap();
+  GraphNum i;
+  for (i = 1; i <= uni->TotalCount(); i++) {
+    std::stringbuf sbuf;
+    std::ostream out(&sbuf);
+    IndStream istream = IndStream(&out, LLDLASTREAM);
+    uni->Print(istream, i);
+    impMap->insert(NumImplementationPair(i, sbuf.str()));
+  }
+  return impMap;
+}
 
 #endif // DOLLDLA
