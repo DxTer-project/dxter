@@ -383,7 +383,7 @@ int main(int argc, const char* argv[])
     cout << "Pack optimization phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
     time(&start2);
-    uni.Prop();
+    //uni.Prop();
     uni.CullWorstPerformers(.99, 3);
     time(&end);
     cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
@@ -410,7 +410,7 @@ int main(int argc, const char* argv[])
     cout << "Final optimization phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
     time(&start2);
-    uni.Prop();
+    //    uni.Prop();
     uni.CullAllBut(1);
     time(&end);
     cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
