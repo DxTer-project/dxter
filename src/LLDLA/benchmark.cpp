@@ -28,14 +28,13 @@ using namespace std;
 
 void DotProductBenchmark() {
   cout << "--------------------- dot product benchmark -----------------------------\n\n";
-  int base = 128;
   int increment = 128;
-  int m = base;
+  int m = 128;
   BenchmarkStats benchStats("singlePrecision dot product");
   for (int i = 0; i < 10; i++) {
     RealPSet* test = DotExample(REAL_SINGLE, m);
     ProblemInstance dotProd;
-    dotProd.SetName("dotProdK");
+    dotProd.SetName("dotProdNope");
     dotProd.SetType(REAL_SINGLE);
     dotProd.AddDimension(m, "m");
     ProblemInstanceStats* pStats = RunBenchmark(1, test, &dotProd);

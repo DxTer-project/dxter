@@ -307,11 +307,14 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest t
 ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp)
 {
   m_numIterations = test.m_numIterations;
+  cout << "******************************* OPERATION NAME *********************\n";
+  cout << test.m_operationName << endl << endl << endl;
   string executableName = test.m_operationName;
   string testFileName = executableName + ".c";
+  cout << (m_evalDirName + "/" + testFileName) << endl;
   std::ofstream outStream(m_evalDirName + "/" + testFileName);
   outStream << test.MakeTestCodeWithCorrectnessCheck(imps, referenceImp);
-  outStream.close(); 
+  outStream.close();
   cout << "All implementations written to files\n";
   const char *evalDir = (m_evalDirName + "/").c_str();
   chdir(evalDir);
