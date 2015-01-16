@@ -19,15 +19,30 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
-
 #include "benchmarkStats.h"
-#include "exampleRunner.h"
-#include "problemInstance.h"
-#include "singleOperationExamples.h"
 
 #if DOLLDLA
 
-void RunBenchmark();
+BenchmarkStats::BenchmarkStats(string name) {
+  m_name = new string(name);
+  m_problemInstances = new vector<ProblemInstanceStats*>();
+}
+
+BenchmarkStats::~BenchmarkStats() {
+  delete m_name;
+  delete m_problemInstances;
+}
+
+void BenchmarkStats::AddProblemInstanceStats(ProblemInstanceStats* stats) {
+  m_problemInstances->push_back(stats);
+}
+
+void BenchmarkStats::PrettyPrintStats() {
+  cout << "----------------------------- " << *m_name << " resuts ----------------------------\n";
+  for (auto problemStats : *m_problemInstances) {
+    problemStats->PrettyPrintPerformanceStats();
+  }
+  cout << "----------------------------------------------------------------------------\n";
+}
 
 #endif // DOLLDLA

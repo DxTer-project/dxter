@@ -28,9 +28,21 @@ using namespace std;
 
 void DotProductBenchmark() {
   cout << "--------------------- dot product benchmark -----------------------------\n\n";
-  RealPSet* test = DotExample(REAL_SINGLE, 8);
-  ProblemInstance dotProd;
-  RunExample(1, test, &dotProd);
+  int base = 128;
+  int increment = 128;
+  int m = base;
+  BenchmarkStats benchStats("singlePrecision dot product");
+  for (int i = 0; i < 10; i++) {
+    RealPSet* test = DotExample(REAL_SINGLE, m);
+    ProblemInstance dotProd;
+    dotProd.SetName("dotProd");
+    dotProd.SetType(REAL_SINGLE);
+    dotProd.AddDimension(m, "m");
+    ProblemInstanceStats* pStats = RunExample(1, test, &dotProd);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += increment;
+  }
+  benchStats.PrettyPrintStats();
   cout << "\n------------------- end dot product benchmark ---------------------------\n";
 }
 

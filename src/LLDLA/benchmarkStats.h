@@ -19,15 +19,28 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
+#ifndef BENCHMARK_STATS_H_
+#define BENCHMARK_STATS_H_
 
-#include "benchmarkStats.h"
-#include "exampleRunner.h"
-#include "problemInstance.h"
-#include "singleOperationExamples.h"
+#include "problemInstanceStats.h"
 
 #if DOLLDLA
 
-void RunBenchmark();
+class BenchmarkStats {
+
+ private:
+  string* m_name;
+  vector<ProblemInstanceStats*>* m_problemInstances;
+
+ public:
+  BenchmarkStats(string name);
+  ~BenchmarkStats();
+
+  void AddProblemInstanceStats(ProblemInstanceStats* stats);
+  
+  void PrettyPrintStats();
+};
 
 #endif // DOLLDLA
+
+#endif // BENCHMARK_STATS_H_
