@@ -309,6 +309,7 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnes
   m_numIterations = test.m_numIterations;
   string executableName = m_evalDirName + "/" + test.m_operationName;
   string testFileName = executableName + ".c";
+  string dataFileName = test.m_dataFileName;
   std::ofstream outStream(testFileName);
   if (outStream.is_open()) {
     outStream << test.MakeTestCodeWithCorrectnessCheck(imps, referenceImp) << endl;
@@ -320,7 +321,9 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnes
     string removeExecutable = "rm -f " + executableName;
     system(removeExecutable.c_str());
     cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
-    ImplementationRuntimeMap impMap = ReadTimeDataFromFile(test.m_dataFileName, imps->size());
+    ImplementationRuntimeMap impMap = ReadTimeDataFromFile(dataFileName, imps->size());
+    string removeDataFile = "rm -f " + dataFileName;
+    system(removeDataFile.c_str());
     return impMap;
   } else {
     cout << "ERROR: RuntimeEvaluator could not create file " << executableName << endl;

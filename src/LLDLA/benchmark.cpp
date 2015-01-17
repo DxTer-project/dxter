@@ -34,7 +34,7 @@ void DotProductBenchmark() {
   for (int i = 0; i < 10; i++) {
     RealPSet* test = DotExample(REAL_SINGLE, m);
     ProblemInstance dotProd;
-    dotProd.SetName("dotProdNope");
+    dotProd.SetName("dotProd");
     dotProd.SetType(REAL_SINGLE);
     dotProd.AddDimension(m, "m");
     ProblemInstanceStats* pStats = RunBenchmark(1, test, &dotProd);
