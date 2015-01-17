@@ -25,19 +25,24 @@
 #include "base.h"
 #include "implementationStats.h"
 #include "problemInstance.h"
+#include "runnerUtils.h"
 
 #if DOLLDLA
 
 class ProblemInstanceStats {
 
  private:
+  string* m_name;
+  Type m_type;
+  Cost m_cost;
+
   ImplementationStats* m_bestAvgFlopsPerCycleImpl;
   ImplementationStats* m_bestFlopsPerCycleImpl;
   ImplementationStats* m_worstFlopsPerCycleImpl;
 
-  ProblemInstance* m_problemInstance;
   vector<ImplementationStats*>* m_implementationStats;
 
+  vector<string*>* AllDimNames(ProblemInstance* problemInstance);
   void ComputeBestAndWorstImplementations(Type type);
   vector<ImplementationStats*>* ComputeImplementationStats(ImplementationRuntimeMap* impls);
 
@@ -45,9 +50,11 @@ class ProblemInstanceStats {
   ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);
   ~ProblemInstanceStats();
 
+  string CSVLineColumnTitles();
   double GetBestAvgFlopsPerCycle();
   GraphNum GetBestAvgFlopsPerCycleImpl();
   void PrettyPrintPerformanceStats();
+  string CSVLine();
 };
 
 #endif // DOLLDLA

@@ -19,26 +19,22 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "allTransformations.h"
-#include "base.h"
-#include "costs.h"
-#include "DLAReg.h"
-#include "loopSupport.h"
-#include "problemInstanceStats.h"
-#include "runnerUtils.h"
-#include "runtimeEvaluation.h"
-#include "transform.h"
+#ifndef RUNNER_UTILS_H_
+#define RUNNER_UTILS_H_
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#include <climits>
+#include <ctime>
 #include <sstream>
-#include <time.h>
+
+#include "runtimeEvaluation.h"
+#include "universe.h"
 
 #if DOLLDLA
 
-ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+ImplementationMap* ImpStrMap(Universe* uni);
+string TypeToStr(Type type);
+string VecTypeToStr(VecType vecType);
+string DateAndTimeString();
 
 #endif // DOLLDLA
+
+#endif // RUNNER_UTILS_H_

@@ -21,8 +21,10 @@
 
 #include <iostream>
 
-#include "exampleRunner.h"
+#include "benchmarkStats.h"
+#include "blasExamples.h"
 #include "problemInstance.h"
+#include "runBenchmark.h"
 #include "singleOperationExamples.h"
 
 #if DOLLDLA

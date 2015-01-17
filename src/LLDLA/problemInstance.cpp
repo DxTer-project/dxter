@@ -32,7 +32,9 @@ ProblemInstance::~ProblemInstance() {
 }
 
 void ProblemInstance::AddDimension(int val, string dimName) {
-  
+  string* oldName = m_name;
+  m_name = new string(*oldName + "_" + dimName + std::to_string((long long int) val));
+  delete oldName;
 }
 
 Cost ProblemInstance::GetCost() {

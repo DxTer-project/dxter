@@ -26,12 +26,74 @@
 
 using namespace std;
 
-void DotProductBenchmark() {
+void DotProductBenchmark(Type type) {
   cout << "--------------------- dot product benchmark -----------------------------\n\n";
-  RealPSet* test = DotExample(REAL_SINGLE, 8);
-  ProblemInstance dotProd;
-  RunExample(1, test, &dotProd);
+  int increment = 128;
+  int m = 128;
+  BenchmarkStats benchStats(TypeToStr(type) + " dot product");
+  for (int i = 0; i < 10; i++) {
+    RealPSet* test = DotExample(type, m);
+    ProblemInstance dotProd;
+    dotProd.SetName("dotProd");
+    dotProd.SetType(type);
+    dotProd.AddDimension(m, "m");
+    ProblemInstanceStats* pStats = RunBenchmark(1, test, &dotProd);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += increment;
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
   cout << "\n------------------- end dot product benchmark ---------------------------\n";
+}
+
+void AxpyBenchmark(Type type, VecType vecType) {
+  cout << "--------------------- axpy benchmark -----------------------------\n\n";
+
+  int increment = 128;
+  int m = 128;
+  BenchmarkStats benchStats(TypeToStr(type) + " " + VecTypeToStr(vecType) + " axpy");
+  for (int i = 0; i < 10; i++) {
+    RealPSet* test = Axpy(type, vecType, m);
+    ProblemInstance axpy;
+    axpy.SetName("axpy");
+    axpy.SetType(type);
+    axpy.AddDimension(m, "m");
+    ProblemInstanceStats* pStats = RunBenchmark(1, test, &axpy);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += increment;
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- axpy benchmark ---------------------------\n";
+}
+
+void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, int nInc) {
+  cout << "--------------------- gemv benchmark -----------------------------\n\n";
+
+  int m = mBase;
+  int n = nBase;
+  string benchmarkName;
+  if (transpose) {
+    benchmarkName = TypeToStr(type) + " transposed gemv";
+  } else {
+    benchmarkName = TypeToStr(type) + " gemv";
+  }
+  BenchmarkStats benchStats(benchmarkName);
+  for (int i = 0; i < 10; i++) {
+    RealPSet* test = Gemv(type, transpose, m, n);
+    ProblemInstance gemv;
+    gemv.SetName("gemv");
+    gemv.SetType(type);
+    gemv.AddDimension(m, "m");
+    gemv.AddDimension(n, "n");
+    ProblemInstanceStats* pStats = RunBenchmark(1, test, &gemv);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += mInc;
+    n += nInc;
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- gemv benchmark ---------------------------\n";
 }
 
 void RunBenchmark() {
@@ -39,7 +101,16 @@ void RunBenchmark() {
   cout << "======================== STARTING LLDLA BENCHMARK =======================\n";
   cout << "=========================================================================\n\n";
 
-  DotProductBenchmark();
+  DotProductBenchmark(REAL_SINGLE);
+  DotProductBenchmark(REAL_DOUBLE);
+
+  /*  AxpyBenchmark(REAL_SINGLE, ROWVECTOR);
+  AxpyBenchmark(REAL_SINGLE, COLVECTOR);
+  AxpyBenchmark(REAL_DOUBLE, ROWVECTOR);
+  AxpyBenchmark(REAL_DOUBLE, COLVECTOR);
+
+  GemvBenchmark(REAL_SINGLE, false, 16, 16, 16, 16);
+  GemvBenchmark(REAL_DOUBLE, false, 16, 16, 16, 16);*/
 
   cout << "\n=========================================================================\n";
   cout << "======================== DONE WITH LLDLA BENCHMARK ======================\n";

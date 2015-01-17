@@ -19,11 +19,11 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "exampleRunner.h"
+#include "runBenchmark.h"
 
 #if DOLLDLA
 
-ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
+ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   RegAllLLDLANodes();
   AddTransformations();
 
@@ -34,25 +34,18 @@ ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance*
   string absImpStr;
 
   uni.PrintStats();
-
-  cout << "Creating startSet\n";
-
-  RealPSet *startSet = algPSet;
-  
-  cout << "Created startSet\n";
-
-  uni.Init(startSet);
+  uni.Init(algPSet);
   
   cout << "Initialized universe\n";
   
   uni.Prop();
-  GraphIter* graphIter = new GraphIter(startSet->m_posses.begin()->second);
+  GraphIter* graphIter = new GraphIter(algPSet->m_posses.begin()->second);
   cout << "Printing evaluation code\n";
   flopCost = graphIter->EvalAndSetBest();
   problemInstance->SetCost(flopCost);
   std::stringstream ss;
   IndStream optOut(&ss, LLDLASTREAM);
-  graphIter->PrintRoot(optOut, 0, true, startSet);
+  graphIter->PrintRoot(optOut, 0, true, algPSet);
   absImpStr = ss.str();
 
   cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
@@ -116,33 +109,20 @@ ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance*
 
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
-
   cout << "Writing all implementations to runtime eval files\n";
 
   int numIterations = 100000;
   RuntimeTest rtest(problemInstance->GetType(), problemInstance->GetName(), uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
+
   cout << "About to evaluate\n";
+
   ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni), absImpStr);
 
   cout << "Done evaluating\n";
+
   ProblemInstanceStats* pStats = new ProblemInstanceStats(problemInstance, &impMap);
-  pStats->PrettyPrintPerformanceStats();
-
-  GraphNum best = pStats->GetBestAvgFlopsPerCycleImpl();
-  cout << "Best Avg. flops/cycle = " << pStats->GetBestAvgFlopsPerCycle() << endl;
-
-#if 1
-  uni.PrintAll(algNum, best);
-#else
-  uni.PrintBest();
-#endif
-
-#if PRINTCOSTS
-  uni.PrintCosts(impMap);
-#endif
-
   return pStats;
 }
 

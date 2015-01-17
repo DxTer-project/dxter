@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef RUN_BENCHMARK_H_
+#define RUN_BENCHMARK_H_
+
 #include "allTransformations.h"
 #include "base.h"
 #include "costs.h"
@@ -39,6 +42,8 @@
 
 #if DOLLDLA
 
-ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
 
 #endif // DOLLDLA
+
+#endif // RUN_BENCHMARK_H_

@@ -19,26 +19,42 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "allTransformations.h"
-#include "base.h"
-#include "costs.h"
-#include "DLAReg.h"
-#include "loopSupport.h"
+#ifndef BENCHMARK_STATS_H_
+#define BENCHMARK_STATS_H_
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "problemInstanceStats.h"
 #include "runnerUtils.h"
-#include "runtimeEvaluation.h"
-#include "transform.h"
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#include <climits>
-#include <sstream>
-#include <time.h>
 
 #if DOLLDLA
 
-ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+class BenchmarkStats {
+
+ private:
+  string* m_name;
+  vector<ProblemInstanceStats*>* m_problemInstances;
+
+  void CreateAllBenchmarksDirectory(string benchmarkDirName);
+  string CreateThisBenchmarksDirectory(string benchmarkDirName);
+
+  string CSVColumnTitles();
+
+  void WriteInstanceDataCSV(string benchmarkDirPath);
+  void WriteImplementationDataCSVs(string benchmarkDirPath);
+
+ public:
+  BenchmarkStats(string name);
+  ~BenchmarkStats();
+
+  void AddProblemInstanceStats(ProblemInstanceStats* stats);
+  
+  void PrettyPrintStats();
+  void WriteToFiles(string dirName);
+};
 
 #endif // DOLLDLA
+
+#endif // BENCHMARK_STATS_H_
