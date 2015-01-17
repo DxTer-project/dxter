@@ -46,7 +46,7 @@ void DotProductBenchmark(Type type) {
 }
 
 void AxpyBenchmark(Type type, VecType vecType) {
-  cout << "--------------------- axpy product benchmark -----------------------------\n\n";
+  cout << "--------------------- axpy benchmark -----------------------------\n\n";
 
   int increment = 128;
   int m = 128;
@@ -62,11 +62,35 @@ void AxpyBenchmark(Type type, VecType vecType) {
     m += increment;
   }
   benchStats.PrettyPrintStats();
-  cout << "\n------------------- axpy product benchmark ---------------------------\n";
+  cout << "\n------------------- axpy benchmark ---------------------------\n";
 }
 
-void GemvBenchmark(Type dataType, bool transpose, int mBase, int mInc, int nBase, int nInc) {
-  
+void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, int nInc) {
+  cout << "--------------------- gemv benchmark -----------------------------\n\n";
+
+  int m = mBase;
+  int n = nBase;
+  string benchmarkName;
+  if (transpose) {
+    benchmarkName = TypeToStr(type) + " transposed gemv";
+  } else {
+    benchmarkName = TypeToStr(type) + " gemv";
+  }
+  BenchmarkStats benchStats(benchmarkName);
+  for (int i = 0; i < 10; i++) {
+    RealPSet* test = Gemv(type, transpose, m, n);
+    ProblemInstance gemv;
+    gemv.SetName("gemv");
+    gemv.SetType(type);
+    gemv.AddDimension(m, "m");
+    gemv.AddDimension(n, "n");
+    ProblemInstanceStats* pStats = RunBenchmark(1, test, &gemv);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += mInc;
+    n += nInc;
+  }
+  benchStats.PrettyPrintStats();
+  cout << "\n------------------- gemv benchmark ---------------------------\n";
 }
 
 void RunBenchmark() {
@@ -83,6 +107,7 @@ void RunBenchmark() {
   AxpyBenchmark(REAL_DOUBLE, COLVECTOR);
 
   GemvBenchmark(REAL_SINGLE, false, 16, 16, 16, 16);
+  GemvBenchmark(REAL_DOUBLE, false, 16, 16, 16, 16);
 
   cout << "\n=========================================================================\n";
   cout << "======================== DONE WITH LLDLA BENCHMARK ======================\n";
