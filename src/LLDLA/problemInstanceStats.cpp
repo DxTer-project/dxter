@@ -26,7 +26,7 @@
 void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
   double bestAvgFlopsPerCycle = 0.0;
   double bestFlopsPerCycle = 0.0;
-  double worstFlopsPerCycle = arch->FlopsPerCycle(type);
+  double worstFlopsPerCycle = arch->FlopsPerCycle(m_type);
   for (auto impl : *m_implementationStats) {
     if (impl->GetAvgFlopsPerCycle() > bestAvgFlopsPerCycle) {
       bestAvgFlopsPerCycle = impl->GetAvgFlopsPerCycle();
@@ -46,20 +46,20 @@ void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
 }
 
 vector<ImplementationStats*>* ProblemInstanceStats::ComputeImplementationStats(ImplementationRuntimeMap* impls) {
-  Cost cost = m_problemInstance->GetCost();
-  Type probType = m_problemInstance->GetType();
   vector<ImplementationStats*>* implStats = new vector<ImplementationStats*>();
   for (std::pair<GraphNum, TimeVec> pair : *impls) {
     GraphNum impNum = pair.first;
     TimeVec* times = &(pair.second);
-    ImplementationStats* impStats = new ImplementationStats(impNum, probType, cost, times);
+    ImplementationStats* impStats = new ImplementationStats(impNum, m_type, m_cost, times);
     implStats->push_back(impStats);
   }
   return implStats;
 }
 
 ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls) {
-  m_problemInstance = problemInstance;
+  m_cost = problemInstance->GetCost();
+  m_name = new string(problemInstance->GetName());
+  m_type = problemInstance->GetType();
   m_implementationStats = ComputeImplementationStats(impls);
   ComputeBestAndWorstImplementations(problemInstance->GetType());
 }
@@ -80,7 +80,7 @@ GraphNum ProblemInstanceStats::GetBestAvgFlopsPerCycleImpl() {
 }
 
 void ProblemInstanceStats::PrettyPrintPerformanceStats() {
-  cout << "================== PERFORMANCE RESULTS FOR " << m_problemInstance->GetName() << " =====================\n";
+  cout << "================== PERFORMANCE RESULTS FOR " << *m_name << " =====================\n";
 
   for (auto implStats : *m_implementationStats) {
     implStats->PrettyPrintPerformanceStats();

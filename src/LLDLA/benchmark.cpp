@@ -26,16 +26,16 @@
 
 using namespace std;
 
-void DotProductBenchmark() {
+void DotProductBenchmark(Type type) {
   cout << "--------------------- dot product benchmark -----------------------------\n\n";
   int increment = 128;
   int m = 128;
-  BenchmarkStats benchStats("singlePrecision dot product");
+  BenchmarkStats benchStats(TypeToStr(type) + " dot product");
   for (int i = 0; i < 10; i++) {
-    RealPSet* test = DotExample(REAL_SINGLE, m);
+    RealPSet* test = DotExample(type, m);
     ProblemInstance dotProd;
     dotProd.SetName("dotProd");
-    dotProd.SetType(REAL_SINGLE);
+    dotProd.SetType(type);
     dotProd.AddDimension(m, "m");
     ProblemInstanceStats* pStats = RunBenchmark(1, test, &dotProd);
     benchStats.AddProblemInstanceStats(pStats);
@@ -45,12 +45,44 @@ void DotProductBenchmark() {
   cout << "\n------------------- end dot product benchmark ---------------------------\n";
 }
 
+void AxpyBenchmark(Type type, VecType vecType) {
+  cout << "--------------------- axpy product benchmark -----------------------------\n\n";
+
+  int increment = 128;
+  int m = 128;
+  BenchmarkStats benchStats(TypeToStr(type) + " " + VecTypeToStr(vecType) + " axpy");
+  for (int i = 0; i < 10; i++) {
+    RealPSet* test = Axpy(type, vecType, m);
+    ProblemInstance axpy;
+    axpy.SetName("axpy");
+    axpy.SetType(type);
+    axpy.AddDimension(m, "m");
+    ProblemInstanceStats* pStats = RunBenchmark(1, test, &axpy);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += increment;
+  }
+  benchStats.PrettyPrintStats();
+  cout << "\n------------------- axpy product benchmark ---------------------------\n";
+}
+
+void GemvBenchmark(Type dataType, bool transpose, int mBase, int mInc, int nBase, int nInc) {
+  
+}
+
 void RunBenchmark() {
   cout << "=========================================================================\n";
   cout << "======================== STARTING LLDLA BENCHMARK =======================\n";
   cout << "=========================================================================\n\n";
 
-  DotProductBenchmark();
+  DotProductBenchmark(REAL_SINGLE);
+  DotProductBenchmark(REAL_DOUBLE);
+
+  AxpyBenchmark(REAL_SINGLE, ROWVECTOR);
+  AxpyBenchmark(REAL_SINGLE, COLVECTOR);
+  AxpyBenchmark(REAL_DOUBLE, ROWVECTOR);
+  AxpyBenchmark(REAL_DOUBLE, COLVECTOR);
+
+  GemvBenchmark(REAL_SINGLE, false, 16, 16, 16, 16);
 
   cout << "\n=========================================================================\n";
   cout << "======================== DONE WITH LLDLA BENCHMARK ======================\n";

@@ -31,11 +31,14 @@
 class ProblemInstanceStats {
 
  private:
+  string* m_name;
+  Type m_type;
+  Cost m_cost;
+
   ImplementationStats* m_bestAvgFlopsPerCycleImpl;
   ImplementationStats* m_bestFlopsPerCycleImpl;
   ImplementationStats* m_worstFlopsPerCycleImpl;
 
-  ProblemInstance* m_problemInstance;
   vector<ImplementationStats*>* m_implementationStats;
 
   void ComputeBestAndWorstImplementations(Type type);

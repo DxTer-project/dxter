@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include "benchmarkStats.h"
+#include "blasExamples.h"
 #include "problemInstance.h"
 #include "runBenchmark.h"
 #include "singleOperationExamples.h"

@@ -36,4 +36,28 @@ ImplementationMap* ImpStrMap(Universe* uni) {
   return impMap;
 }
 
+string TypeToStr(Type type) {
+  switch(type) {
+  case(REAL_SINGLE):
+    return "real_single_precision";
+  case(REAL_DOUBLE):
+    return "real_double_precision";
+  default:
+    cout << "ERROR: Bad type in TypeToStr" << endl;
+    throw;
+  }
+}
+
+string VecTypeToStr(VecType vecType) {
+  switch(vecType) {
+  case(ROWVECTOR):
+    return "row_vector";
+  case(COLVECTOR):
+    return "column_vector";
+  default:
+    cout << "ERROR: Bad type in TypeToStr" << endl;
+    throw;
+  }
+}
+
 #endif // DOLLDLA
