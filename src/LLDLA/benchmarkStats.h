@@ -37,6 +37,14 @@ class BenchmarkStats {
   string* m_name;
   vector<ProblemInstanceStats*>* m_problemInstances;
 
+  void CreateAllBenchmarksDirectory(string benchmarkDirName);
+  string CreateThisBenchmarksDirectory(string benchmarkDirName);
+
+  string CSVColumnTitles();
+
+  void WriteInstanceDataCSV(string benchmarkDirPath);
+  void WriteImplementationDataCSVs(string benchmarkDirPath);
+
  public:
   BenchmarkStats(string name);
   ~BenchmarkStats();
@@ -44,7 +52,7 @@ class BenchmarkStats {
   void AddProblemInstanceStats(ProblemInstanceStats* stats);
   
   void PrettyPrintStats();
-  void WriteToFiles();
+  void WriteToFiles(string dirName);
 };
 
 #endif // DOLLDLA

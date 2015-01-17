@@ -42,7 +42,7 @@ void DotProductBenchmark(Type type) {
     m += increment;
   }
   benchStats.PrettyPrintStats();
-  benchStats.WriteToFiles();
+  benchStats.WriteToFiles("benchmarks");
   cout << "\n------------------- end dot product benchmark ---------------------------\n";
 }
 
@@ -63,7 +63,7 @@ void AxpyBenchmark(Type type, VecType vecType) {
     m += increment;
   }
   benchStats.PrettyPrintStats();
-  benchStats.WriteToFiles();
+  benchStats.WriteToFiles("benchmarks");
   cout << "\n------------------- axpy benchmark ---------------------------\n";
 }
 
@@ -92,7 +92,7 @@ void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, in
     n += nInc;
   }
   benchStats.PrettyPrintStats();
-  benchStats.WriteToFiles();
+  benchStats.WriteToFiles("benchmarks");
   cout << "\n------------------- gemv benchmark ---------------------------\n";
 }
 

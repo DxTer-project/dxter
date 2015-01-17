@@ -49,9 +49,11 @@ class ProblemInstanceStats {
   ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);
   ~ProblemInstanceStats();
 
+  string CSVLineColumnTitles();
   double GetBestAvgFlopsPerCycle();
   GraphNum GetBestAvgFlopsPerCycleImpl();
   void PrettyPrintPerformanceStats();
+  string CSVLine();
 };
 
 #endif // DOLLDLA

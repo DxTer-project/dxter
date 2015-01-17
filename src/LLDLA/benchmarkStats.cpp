@@ -45,26 +45,48 @@ void BenchmarkStats::PrettyPrintStats() {
   cout << "----------------------------------------------------------------------------\n";
 }
 
-void BenchmarkStats::WriteToFiles() {
-
+void BenchmarkStats::CreateAllBenchmarksDirectory(string benchmarkDirName) {
   struct stat st = {0};
-
-  if (stat("benchmarkResults", &st) == -1) {
-    mkdir("benchmarkResults", 0700);
-  }
-
-  st = {0};
-  string benchmarkDirName = "benchmarkResults/" + *m_name + DateAndTimeString();
   if (stat(benchmarkDirName.c_str(), &st) == -1) {
     mkdir(benchmarkDirName.c_str(), 0700);
+  }
+}
+
+string BenchmarkStats::CreateThisBenchmarksDirectory(string benchmarkDirName) {
+  struct stat st = {0};
+  string* benchmarkPath = new string(benchmarkDirName + "/" + *m_name + DateAndTimeString());
+  if (stat(benchmarkPath->c_str(), &st) == -1) {
+    mkdir(benchmarkPath->c_str(), 0700);
   } else {
     cout << "ERROR: " << benchmarkDirName << " already exists!" << endl;
     throw;
   }
-  CreateAllBenchmarksDirectory();
-  CreateThisBenchmarksDirectory();
-  WriteInstanceDataCSV(benchmarkDirName);
-  WriteImplementationDataCSVs(benchmarkDirName);
+  return *benchmarkPath;
+}
+
+void BenchmarkStats::WriteToFiles(string dirName) {
+  CreateAllBenchmarksDirectory(dirName);
+  string benchmarkPath = CreateThisBenchmarksDirectory(dirName);
+  WriteInstanceDataCSV(benchmarkPath);
+  WriteImplementationDataCSVs(benchmarkPath);
+}
+
+string BenchmarkStats::CSVColumnTitles() {
+  ProblemInstanceStats* problemInst = m_problemInstances->front();
+  return problemInst->CSVLineColumnTitles();
+}
+
+void BenchmarkStats::WriteInstanceDataCSV(string benchmarkDirPath) {
+  ofstream instanceDataFile(benchmarkDirPath + "/instanceData.csv");
+  instanceDataFile << CSVColumnTitles() << endl;
+  for (auto problemInstStats : *m_problemInstances) {
+    instanceDataFile << problemInstStats->CSVLine() << endl;
+  }
+  instanceDataFile.close();
+}
+
+void BenchmarkStats::WriteImplementationDataCSVs(string benchmarkDirPath) {
+
 }
 
 #endif // DOLLDLA

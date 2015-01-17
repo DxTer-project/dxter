@@ -94,4 +94,12 @@ void ProblemInstanceStats::PrettyPrintPerformanceStats() {
   cout << "=======================================================================================================\n";
 }
 
+string ProblemInstanceStats::CSVLineColumnTitles() {
+  return "DUMMY,COLUMN,TITLES";
+}
+
+string ProblemInstanceStats::CSVLine() {
+  return "123,456,789";
+}
+
 #endif // DOLLDLA
