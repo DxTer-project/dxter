@@ -45,4 +45,26 @@ void BenchmarkStats::PrettyPrintStats() {
   cout << "----------------------------------------------------------------------------\n";
 }
 
+void BenchmarkStats::WriteToFiles() {
+
+  struct stat st = {0};
+
+  if (stat("benchmarkResults", &st) == -1) {
+    mkdir("benchmarkResults", 0700);
+  }
+
+  st = {0};
+  string benchmarkDirName = "benchmarkResults/" + *m_name + DateAndTimeString();
+  if (stat(benchmarkDirName.c_str(), &st) == -1) {
+    mkdir(benchmarkDirName.c_str(), 0700);
+  } else {
+    cout << "ERROR: " << benchmarkDirName << " already exists!" << endl;
+    throw;
+  }
+  CreateAllBenchmarksDirectory();
+  CreateThisBenchmarksDirectory();
+  WriteInstanceDataCSV(benchmarkDirName);
+  WriteImplementationDataCSVs(benchmarkDirName);
+}
+
 #endif // DOLLDLA

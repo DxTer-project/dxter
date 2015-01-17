@@ -22,7 +22,12 @@
 #ifndef BENCHMARK_STATS_H_
 #define BENCHMARK_STATS_H_
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "problemInstanceStats.h"
+#include "runnerUtils.h"
 
 #if DOLLDLA
 
@@ -39,6 +44,7 @@ class BenchmarkStats {
   void AddProblemInstanceStats(ProblemInstanceStats* stats);
   
   void PrettyPrintStats();
+  void WriteToFiles();
 };
 
 #endif // DOLLDLA

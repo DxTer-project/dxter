@@ -42,6 +42,7 @@ void DotProductBenchmark(Type type) {
     m += increment;
   }
   benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles();
   cout << "\n------------------- end dot product benchmark ---------------------------\n";
 }
 
@@ -62,6 +63,7 @@ void AxpyBenchmark(Type type, VecType vecType) {
     m += increment;
   }
   benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles();
   cout << "\n------------------- axpy benchmark ---------------------------\n";
 }
 
@@ -90,6 +92,7 @@ void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, in
     n += nInc;
   }
   benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles();
   cout << "\n------------------- gemv benchmark ---------------------------\n";
 }
 
@@ -101,13 +104,13 @@ void RunBenchmark() {
   DotProductBenchmark(REAL_SINGLE);
   DotProductBenchmark(REAL_DOUBLE);
 
-  AxpyBenchmark(REAL_SINGLE, ROWVECTOR);
+  /*  AxpyBenchmark(REAL_SINGLE, ROWVECTOR);
   AxpyBenchmark(REAL_SINGLE, COLVECTOR);
   AxpyBenchmark(REAL_DOUBLE, ROWVECTOR);
   AxpyBenchmark(REAL_DOUBLE, COLVECTOR);
 
   GemvBenchmark(REAL_SINGLE, false, 16, 16, 16, 16);
-  GemvBenchmark(REAL_DOUBLE, false, 16, 16, 16, 16);
+  GemvBenchmark(REAL_DOUBLE, false, 16, 16, 16, 16);*/
 
   cout << "\n=========================================================================\n";
   cout << "======================== DONE WITH LLDLA BENCHMARK ======================\n";

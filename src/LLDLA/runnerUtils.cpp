@@ -60,4 +60,14 @@ string VecTypeToStr(VecType vecType) {
   }
 }
 
+string DateAndTimeString() {
+  time_t t = time(0);
+  struct tm* now = localtime(&t);
+  return std::to_string((long long int) (now->tm_year + 1900)) + "-"
+    + std::to_string(now->tm_mon + 1) + "-"
+    + std::to_string(now->tm_mday) + "-"
+    + std::to_string(now->tm_hour) + "-"
+    + std::to_string(now->tm_min) + "-"
+    + std::to_string(now->tm_sec);
+}
 #endif // DOLLDLA

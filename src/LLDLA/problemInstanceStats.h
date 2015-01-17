@@ -25,6 +25,7 @@
 #include "base.h"
 #include "implementationStats.h"
 #include "problemInstance.h"
+#include "runnerUtils.h"
 
 #if DOLLDLA
 

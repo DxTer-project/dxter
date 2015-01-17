@@ -81,11 +81,11 @@ GraphNum ProblemInstanceStats::GetBestAvgFlopsPerCycleImpl() {
 
 void ProblemInstanceStats::PrettyPrintPerformanceStats() {
   cout << "================== PERFORMANCE RESULTS FOR " << *m_name << " =====================\n";
-  cout << "&&&&&&&&&&&&&&&&&& Problem Summary &&&&&&&&&&&&&&&&&&&" << endl;
-  cout << "Datatype             : " << m_type << endl;
+  cout << "\n&&&&&&&&&&&&&&&&&& Problem Summary &&&&&&&&&&&&&&&&&&&" << endl;
+  cout << "Datatype             : " << TypeToStr(m_type) << endl;
   cout << "Flop count           : " << m_cost << endl;
-  cout << "# of Implementations : " << m_implementationStats.size() << endl;
-  cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << endl;
+  cout << "# of Implementations : " << m_implementationStats->size() << endl;
+  cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n" << endl;
 
   for (auto implStats : *m_implementationStats) {
     implStats->PrettyPrintPerformanceStats();
