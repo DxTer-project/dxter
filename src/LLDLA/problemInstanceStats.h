@@ -42,6 +42,7 @@ class ProblemInstanceStats {
 
   vector<ImplementationStats*>* m_implementationStats;
 
+  vector<string*>* AllDimNames(ProblemInstance* problemInstance);
   void ComputeBestAndWorstImplementations(Type type);
   vector<ImplementationStats*>* ComputeImplementationStats(ImplementationRuntimeMap* impls);
 

@@ -23,6 +23,7 @@
 
 #if DOLLDLA
 
+
 void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
   double bestAvgFlopsPerCycle = 0.0;
   double bestFlopsPerCycle = 0.0;
