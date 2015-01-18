@@ -321,7 +321,7 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnes
     string removeExecutable = "rm -f " + executableName;
     system(removeExecutable.c_str());
     cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
-    ImplementationRuntimeMap impMap = ReadTimeDataFromFile(dataFileName, imps->size());
+    auto impMap = ReadTimeDataFromFile(dataFileName, imps->size());
     string removeDataFile = "rm -f " + dataFileName;
     system(removeDataFile.c_str());
     return impMap;
