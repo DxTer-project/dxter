@@ -30,7 +30,7 @@ void DotProductBenchmark(Type type) {
   cout << "--------------------- dot product benchmark -----------------------------\n\n";
   int increment = 128;
   int m = 128;
-  BenchmarkStats benchStats(TypeToStr(type) + " dot product");
+  BenchmarkStats benchStats(TypeToStr(type) + "_dot_product");
   for (int i = 0; i < 10; i++) {
     RealPSet* test = DotExample(type, m);
     ProblemInstance dotProd;
@@ -51,7 +51,7 @@ void AxpyBenchmark(Type type, VecType vecType) {
 
   int increment = 128;
   int m = 128;
-  BenchmarkStats benchStats(TypeToStr(type) + " " + VecTypeToStr(vecType) + " axpy");
+  BenchmarkStats benchStats(TypeToStr(type) + "_" + VecTypeToStr(vecType) + "_axpy");
   for (int i = 0; i < 10; i++) {
     RealPSet* test = Axpy(type, vecType, m);
     ProblemInstance axpy;
@@ -74,9 +74,9 @@ void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, in
   int n = nBase;
   string benchmarkName;
   if (transpose) {
-    benchmarkName = TypeToStr(type) + " transposed gemv";
+    benchmarkName = TypeToStr(type) + "_transposed_gemv";
   } else {
-    benchmarkName = TypeToStr(type) + " gemv";
+    benchmarkName = TypeToStr(type) + "_gemv";
   }
   BenchmarkStats benchStats(benchmarkName);
   for (int i = 0; i < 10; i++) {
