@@ -23,6 +23,7 @@
 #define PROBLEM_INSTANCE_H_
 
 #include "LLDLA.h"
+#include "runnerUtils.h"
 
 #if DOLLDLA
 

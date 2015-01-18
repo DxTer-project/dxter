@@ -75,7 +75,7 @@ void ProblemInstance::SetCost(Cost cost) {
 
 void ProblemInstance::SetName(string name) {
   delete m_name;
-  m_name = new string(name);
+  m_name = new string(NoWhitespace(name));
 }
 
 void ProblemInstance::SetType(Type type) {

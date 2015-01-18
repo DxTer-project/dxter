@@ -70,4 +70,15 @@ string DateAndTimeString() {
     + std::to_string(now->tm_min) + "-"
     + std::to_string(now->tm_sec);
 }
+
+string NoWhitespace(string str) {
+  for (auto ch : str) {
+    if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') {
+      cout << "ERROR: Unallowed whitespace in string: " << str;
+      throw;
+    }
+  }
+  return str;
+}
+
 #endif // DOLLDLA

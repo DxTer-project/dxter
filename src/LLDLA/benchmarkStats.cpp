@@ -24,7 +24,7 @@
 #if DOLLDLA
 
 BenchmarkStats::BenchmarkStats(string name) {
-  m_name = new string(name);
+  m_name = new string(NoWhitespace(name));
   m_problemInstances = new vector<ProblemInstanceStats*>();
 }
 

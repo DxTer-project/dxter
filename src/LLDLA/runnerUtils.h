@@ -34,6 +34,7 @@ ImplementationMap* ImpStrMap(Universe* uni);
 string TypeToStr(Type type);
 string VecTypeToStr(VecType vecType);
 string DateAndTimeString();
+string NoWhitespace(string str);
 
 #endif // DOLLDLA
 
