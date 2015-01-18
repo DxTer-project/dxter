@@ -118,11 +118,11 @@ ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstanc
 
   cout << "About to evaluate\n";
 
-  ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni).get(), absImpStr);
+  auto impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni).get(), absImpStr);
 
   cout << "Done evaluating\n";
 
-  ProblemInstanceStats* pStats = new ProblemInstanceStats(problemInstance, &impMap);
+  auto* pStats = new ProblemInstanceStats(problemInstance, &impMap);
   return pStats;
 }
 
