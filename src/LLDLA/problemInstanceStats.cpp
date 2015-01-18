@@ -125,4 +125,13 @@ string ProblemInstanceStats::CSVLine() {
   return line;
 }
 
+void ProblemInstanceStats::WriteImplementationCSV(string impCSVPath) {
+  ofstream implementationCSV(impCSVPath + "/" + *m_name + "_impl_stats.csv");
+  implementationCSV << m_implementationStats->front()->CSVLineColumnTitles() << endl;
+  for (auto implStats : *m_implementationStats) {
+    implementationCSV << implStats->CSVLine() << endl;
+  }
+  implementationCSV.close();
+}
+
 #endif // DOLLDLA

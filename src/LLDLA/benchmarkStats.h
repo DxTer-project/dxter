@@ -42,6 +42,7 @@ class BenchmarkStats {
 
   string CSVColumnTitles();
 
+  string CreateImplCSVDirectory(string benchmarkDirPath);
   void WriteInstanceDataCSV(string benchmarkDirPath);
   void WriteImplementationDataCSVs(string benchmarkDirPath);
 

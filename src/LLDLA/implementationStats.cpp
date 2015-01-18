@@ -90,6 +90,18 @@ double ImplementationStats::GetWorstFlopsPerCycle() {
   return m_worstFlopsPerCycle;
 }
 
+string ImplementationStats::CSVLine() {
+  string line = std::to_string((long long int) GetNum()) + ",";
+  line += std::to_string((long double) GetAvgFlopsPerCycle()) + ",";
+  line += std::to_string((long double) GetAvgPercentOfPeak()) + ",";
+  line += std::to_string((long double) GetBestFlopsPerCycle()) + ",";
+  line += std::to_string((long double) GetBestPercentOfPeak()) + ",";
+  return line;
+}
+
+string ImplementationStats::CSVLineColumnTitles() {
+  return "implementation_number,avg_flops_per_cycle,avg_percent_of_peak,best_flops_per_cycle,best_percent_of_peak,";
+}
 
 void ImplementationStats::PrettyPrintPerformanceStats()
 {

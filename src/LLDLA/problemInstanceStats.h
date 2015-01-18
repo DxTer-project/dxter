@@ -57,6 +57,7 @@ class ProblemInstanceStats {
   GraphNum GetBestAvgFlopsPerCycleImpl();
   void PrettyPrintPerformanceStats();
   string CSVLine();
+  void WriteImplementationCSV(string impCSVPath);
 };
 
 #endif // DOLLDLA

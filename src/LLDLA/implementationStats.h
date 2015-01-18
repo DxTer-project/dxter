@@ -53,6 +53,8 @@ class ImplementationStats {
   double GetBestPercentOfPeak();
   double GetWorstFlopsPerCycle();
 
+  string CSVLine();
+  string CSVLineColumnTitles();
   void PrettyPrintPerformanceStats();
 
 };

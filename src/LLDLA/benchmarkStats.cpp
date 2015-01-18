@@ -85,8 +85,23 @@ void BenchmarkStats::WriteInstanceDataCSV(string benchmarkDirPath) {
   instanceDataFile.close();
 }
 
-void BenchmarkStats::WriteImplementationDataCSVs(string benchmarkDirPath) {
+string BenchmarkStats::CreateImplCSVDirectory(string benchmarkDirPath) {
+  struct stat st = {0};
+  string* implDirPath = new string(benchmarkDirPath + "/implementationData");
+  if (stat(implDirPath->c_str(), &st) == -1) {
+    mkdir(implDirPath->c_str(), 0700);
+  } else {
+    cout << "ERROR: " << implDirPath << " already exists!" << endl;
+    throw;
+  }
+  return *implDirPath;
+}
 
+void BenchmarkStats::WriteImplementationDataCSVs(string benchmarkDirPath) {
+  string impCSVPath = CreateImplCSVDirectory(benchmarkDirPath);
+  for (auto problemInstStats : *m_problemInstances) {
+    problemInstStats->WriteImplementationCSV(impCSVPath);
+  }
 }
 
 #endif // DOLLDLA
