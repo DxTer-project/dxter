@@ -23,8 +23,8 @@
 
 #if DOLLDLA
 
-ImplementationMap* ImpStrMap(Universe* uni) {
-  ImplementationMap* impMap = new ImplementationMap();
+unique_ptr<ImplementationMap> ImpStrMap(Universe* uni) {
+  std::unique_ptr<ImplementationMap> impMap = std::make_unique<ImplementationMap>();
   GraphNum i;
   for (i = 1; i <= uni->TotalCount(); i++) {
     std::stringbuf sbuf;

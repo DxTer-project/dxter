@@ -23,6 +23,7 @@
 #define RUNNER_UTILS_H_
 
 #include <ctime>
+#include <memory>
 #include <sstream>
 
 #include "runtimeEvaluation.h"
@@ -30,7 +31,7 @@
 
 #if DOLLDLA
 
-ImplementationMap* ImpStrMap(Universe* uni);
+unique_ptr<ImplementationMap> ImpStrMap(Universe* uni);
 string TypeToStr(Type type);
 string VecTypeToStr(VecType vecType);
 string DateAndTimeString();
