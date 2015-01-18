@@ -454,15 +454,9 @@ string DistContToLocalContStatC::GetType() const
 Cost DistContToLocalContStatC::RHSCostEstimate(const Node *node) const
 {
   const Contraction *cont = (Contraction*)node;
-  Cost cost1 = 1;
-  for (Dim dim = 0; dim < cont->InputNumDims(0); ++dim) {
-    cost1 *= (*(cont->InputLen(0, dim)))[0];
-  }
-  Cost cost2 = 1;
-  for (Dim dim = 0; dim < cont->InputNumDims(1); ++dim) {
-    cost2 *= (*(cont->InputLen(1, dim)))[0];
-  }
-  return cost1 + cost2;
+  Size aSize = ((DLANode*)(cont->Input(0)))->TotalNumberOfLocalElements(cont->InputConnNum(0));
+  Size bSize = ((DLANode*)(cont->Input(1)))->TotalNumberOfLocalElements(cont->InputConnNum(1));
+  return aSize + bSize;
 }
 
 bool DistContToLocalContStatC::CanApply(const Node *node) const
@@ -560,15 +554,9 @@ bool DistContToLocalContStatASumScatter::CanApply(const Node *node) const
 Cost DistContToLocalContStatASumScatter::RHSCostEstimate(const Node *node) const
 {
   const Contraction *cont = (Contraction*)node;
-  Cost cost1 = 1;
-  for (Dim dim = 0; dim < cont->InputNumDims(1); ++dim) {
-    cost1 *= (*(cont->InputLen(1, dim)))[0];
-  }
-  Cost cost2 = 1;
-  for (Dim dim = 0; dim < cont->InputNumDims(2); ++dim) {
-    cost2 *= (*(cont->InputLen(2, dim)))[0];
-  }
-  return cost1 + cost2;
+  Size bSize = ((DLANode*)(cont->Input(1)))->TotalNumberOfLocalElements(cont->InputConnNum(1));
+  Size cSize = ((DLANode*)(cont->Input(2)))->TotalNumberOfLocalElements(cont->InputConnNum(2));
+  return bSize + cSize;
 }
 
 void DistContToLocalContStatASumScatter::Apply(Node *node) const
@@ -731,15 +719,9 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
 Cost DistContToLocalContStatBSumScatter::RHSCostEstimate(const Node *node) const
 {
   const Contraction *cont = (Contraction*)node;
-  Cost cost1 = 1;
-  for (Dim dim = 0; dim < cont->InputNumDims(0); ++dim) {
-    cost1 *= (*(cont->InputLen(0, dim)))[0];
-  }
-  Cost cost2 = 1;
-  for (Dim dim = 0; dim < cont->InputNumDims(2); ++dim) {
-    cost2 *= (*(cont->InputLen(2, dim)))[0];
-  }
-  return cost1 + cost2;
+  Size aSize = ((DLANode*)(cont->Input(0)))->TotalNumberOfLocalElements(cont->InputConnNum(0));
+  Size cSize = ((DLANode*)(cont->Input(2)))->TotalNumberOfLocalElements(cont->InputConnNum(2));
+  return aSize + cSize;
 }
 
 
