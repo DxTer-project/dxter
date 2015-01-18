@@ -40,6 +40,8 @@ class ProblemInstanceStats {
   ImplementationStats* m_bestFlopsPerCycleImpl;
   ImplementationStats* m_worstFlopsPerCycleImpl;
 
+  vector<string*>* m_dimNames;
+  vector<int>* m_dimValues;
   vector<ImplementationStats*>* m_implementationStats;
 
   vector<string*>* AllDimNames(ProblemInstance* problemInstance);

@@ -32,11 +32,17 @@ class ProblemInstance {
   Type m_type;
   Cost m_cost;
 
+  vector<string*>* m_dimNames;
+  vector<int>* m_dimValues;
+
  public:
   ProblemInstance();
   ~ProblemInstance();
 
   void AddDimension(int val, string dimName);
+
+  vector<string*>* DimensionNames();
+  vector<int>* DimensionValues();
 
   Cost GetCost();
   string GetName();

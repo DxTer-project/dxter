@@ -74,8 +74,16 @@ double ImplementationStats::GetAvgFlopsPerCycle() {
   return m_meanFlopsPerCycle;
 }
 
+double ImplementationStats::GetAvgPercentOfPeak() {
+  return m_meanPercentOfPeak;
+}
+
 double ImplementationStats::GetBestFlopsPerCycle() {
   return m_bestFlopsPerCycle;
+}
+
+double ImplementationStats::GetBestPercentOfPeak() {
+  return m_bestPercentOfPeak;
 }
 
 double ImplementationStats::GetWorstFlopsPerCycle() {

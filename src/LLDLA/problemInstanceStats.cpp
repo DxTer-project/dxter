@@ -23,7 +23,6 @@
 
 #if DOLLDLA
 
-
 void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
   double bestAvgFlopsPerCycle = 0.0;
   double bestFlopsPerCycle = 0.0;
@@ -63,6 +62,8 @@ ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, Imp
   m_type = problemInstance->GetType();
   m_implementationStats = ComputeImplementationStats(impls);
   ComputeBestAndWorstImplementations(problemInstance->GetType());
+  m_dimNames = problemInstance->DimensionNames();
+  m_dimValues = problemInstance->DimensionValues();
 }
 
 ProblemInstanceStats::~ProblemInstanceStats() {
@@ -70,6 +71,11 @@ ProblemInstanceStats::~ProblemInstanceStats() {
     delete implStats;
   }
   delete m_implementationStats;
+  for (auto dimName : *m_dimNames) {
+    delete dimName;
+  }
+  delete m_dimNames;
+  delete m_dimValues;
 }
 
 double ProblemInstanceStats::GetBestAvgFlopsPerCycle() {
@@ -96,11 +102,27 @@ void ProblemInstanceStats::PrettyPrintPerformanceStats() {
 }
 
 string ProblemInstanceStats::CSVLineColumnTitles() {
-  return "DUMMY,COLUMN,TITLES";
+  string line = "";
+  for (auto dimName : *m_dimNames) {
+    line += *dimName + ",";
+  }
+  line += "best_avg_flops_per_cycle,";
+  line += "best_avg_percent_of_peak,";
+  line += "best_flops_per_cycle,";
+  line += "best_percent_of_peak,";
+  return line;
 }
 
 string ProblemInstanceStats::CSVLine() {
-  return "123,456,789";
+  string line = "";
+  for (auto dimValue : *m_dimValues) {
+    line += std::to_string((long long int) dimValue) + ",";
+  }
+  line += std::to_string((long double) m_bestAvgFlopsPerCycleImpl->GetAvgFlopsPerCycle()) + ",";
+  line += std::to_string((long double) m_bestAvgFlopsPerCycleImpl->GetAvgPercentOfPeak()) + ",";
+  line += std::to_string((long double) m_bestFlopsPerCycleImpl->GetBestFlopsPerCycle()) + ",";
+  line += std::to_string((long double) m_bestFlopsPerCycleImpl->GetBestPercentOfPeak()) + ",";
+  return line;
 }
 
 #endif // DOLLDLA

@@ -25,6 +25,8 @@
 
 ProblemInstance::ProblemInstance() {
   m_name = new string("");
+  m_dimNames = new vector<string*>();
+  m_dimValues = new vector<int>();
 }
 
 ProblemInstance::~ProblemInstance() {
@@ -35,6 +37,24 @@ void ProblemInstance::AddDimension(int val, string dimName) {
   string* oldName = m_name;
   m_name = new string(*oldName + "_" + dimName + std::to_string((long long int) val));
   delete oldName;
+  m_dimValues->push_back(val);
+  m_dimNames->push_back(new string(dimName));
+}
+
+vector<string*>* ProblemInstance::DimensionNames() {
+  vector<string*>* dimNames = new vector<string*>();
+  for (auto namePtr : *m_dimNames) {
+    dimNames->push_back(new string(*namePtr));
+  }
+  return dimNames;
+}
+
+vector<int>* ProblemInstance::DimensionValues() {
+  vector<int>* dimVals = new vector<int>();
+  for (auto dimVal : *m_dimValues) {
+    dimVals->push_back(dimVal);
+  }
+  return dimVals;
 }
 
 Cost ProblemInstance::GetCost() {

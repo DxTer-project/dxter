@@ -48,7 +48,9 @@ class ImplementationStats {
 
   GraphNum GetNum();
   double GetAvgFlopsPerCycle();
+  double GetAvgPercentOfPeak();
   double GetBestFlopsPerCycle();
+  double GetBestPercentOfPeak();
   double GetWorstFlopsPerCycle();
 
   void PrettyPrintPerformanceStats();
