@@ -71,7 +71,7 @@ string DateAndTimeString() {
     + std::to_string(now->tm_sec);
 }
 
-string NoWhitespace(string str) {
+string NoWhitespace(const string str) {
   for (auto ch : str) {
     if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') {
       cout << "ERROR: Unallowed whitespace in string: " << str;

@@ -35,7 +35,7 @@ unique_ptr<ImplementationMap> ImpStrMap(Universe* uni);
 string TypeToStr(Type type);
 string VecTypeToStr(VecType vecType);
 string DateAndTimeString();
-string NoWhitespace(string str);
+string NoWhitespace(const string str);
 
 #endif // DOLLDLA
 

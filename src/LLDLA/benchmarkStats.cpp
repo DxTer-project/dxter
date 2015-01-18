@@ -24,13 +24,13 @@
 #if DOLLDLA
 
 BenchmarkStats::BenchmarkStats(string name) {
-  m_name = new string(NoWhitespace(name));
-  m_problemInstances = new vector<ProblemInstanceStats*>();
+  m_name = unique_ptr<string>(new string(NoWhitespace(name)));
+  m_problemInstances = unique_ptr<vector<ProblemInstanceStats*>>(new vector<ProblemInstanceStats*>());
 }
 
 BenchmarkStats::~BenchmarkStats() {
-  delete m_name;
-  delete m_problemInstances;
+  /*  delete m_name;
+      delete m_problemInstances;*/
 }
 
 void BenchmarkStats::AddProblemInstanceStats(ProblemInstanceStats* stats) {

@@ -37,7 +37,7 @@ void DotProductBenchmark(Type type) {
     dotProd.SetName("dotProd");
     dotProd.SetType(type);
     dotProd.AddDimension(m, "m");
-    ProblemInstanceStats* pStats = RunBenchmark(1, test, &dotProd);
+    auto pStats = RunBenchmark(1, test, &dotProd);
     benchStats.AddProblemInstanceStats(pStats);
     m += increment;
   }
@@ -58,7 +58,7 @@ void AxpyBenchmark(Type type, VecType vecType) {
     axpy.SetName("axpy");
     axpy.SetType(type);
     axpy.AddDimension(m, "m");
-    ProblemInstanceStats* pStats = RunBenchmark(1, test, &axpy);
+    auto pStats = RunBenchmark(1, test, &axpy);
     benchStats.AddProblemInstanceStats(pStats);
     m += increment;
   }
@@ -87,7 +87,7 @@ void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, in
     gemv.SetType(type);
     gemv.AddDimension(m, "m");
     gemv.AddDimension(n, "n");
-    ProblemInstanceStats* pStats = RunBenchmark(1, test, &gemv);
+    auto pStats = RunBenchmark(1, test, &gemv);
     benchStats.AddProblemInstanceStats(pStats);
     m += mInc;
     n += nInc;
@@ -103,12 +103,12 @@ void RunBenchmark() {
   cout << "=========================================================================\n\n";
 
   DotProductBenchmark(REAL_SINGLE);
-  DotProductBenchmark(REAL_DOUBLE);
+  /*DotProductBenchmark(REAL_DOUBLE);
 
   AxpyBenchmark(REAL_SINGLE, ROWVECTOR);
   AxpyBenchmark(REAL_SINGLE, COLVECTOR);
   AxpyBenchmark(REAL_DOUBLE, ROWVECTOR);
-  AxpyBenchmark(REAL_DOUBLE, COLVECTOR);
+  AxpyBenchmark(REAL_DOUBLE, COLVECTOR);*/
 
   /*GemvBenchmark(REAL_SINGLE, false, 16, 16, 16, 16);
   GemvBenchmark(REAL_DOUBLE, false, 16, 16, 16, 16);*/

@@ -34,8 +34,8 @@
 class BenchmarkStats {
 
  private:
-  string* m_name;
-  vector<ProblemInstanceStats*>* m_problemInstances;
+  unique_ptr<string> m_name;
+  unique_ptr<vector<ProblemInstanceStats*>> m_problemInstances;
 
   void CreateAllBenchmarksDirectory(string benchmarkDirName);
   string CreateThisBenchmarksDirectory(string benchmarkDirName);
