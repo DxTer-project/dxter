@@ -111,8 +111,8 @@ ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstanc
   cout.flush();
   cout << "Writing all implementations to runtime eval files\n";
 
-  int numIterations = 100000;
-  RuntimeTest rtest(problemInstance->GetType(), problemInstance->GetName(), uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, numIterations);
+  int minCycles = 100000000;
+  RuntimeTest rtest(problemInstance->GetType(), problemInstance->GetName(), uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, minCycles);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
 
