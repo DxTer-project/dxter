@@ -195,32 +195,26 @@ void Poss::InitHelper(const NodeVec &vec, bool outTuns, bool disconnectFromOwner
 
 Poss::~Poss()
 {
-  PSetVecIter iter = m_sets.begin();
-  for(; iter != m_sets.end(); ++iter) {
-    BasePSet *set = *iter;
-    NodeVecIter tunIter = set->m_inTuns.begin();
-    for(; tunIter != set->m_inTuns.end(); ++tunIter) {
-      Node *tun =  *tunIter;
-      NodeConnVecIter connIter = tun->m_inputs.begin();
-      for(; connIter != tun->m_inputs.end(); ++connIter)
-	delete *connIter;
+  for (auto set : m_sets) {
+
+    for (auto tun : set->m_inTuns) {
+      for (auto input : tun->m_inputs) {
+	delete input;
+      }
       tun->m_inputs.clear();
     }
-    tunIter = set->m_outTuns.begin();
-    for(; tunIter != set->m_outTuns.end(); ++tunIter) {
-      Node *tun =  *tunIter;
-      NodeConnVecIter connIter = tun->m_children.begin();
-      for(; connIter != tun->m_children.end(); ++connIter)
-	delete *connIter;
+
+    for (auto tun : set->m_outTuns) {
+      for (auto child : tun->m_children) {
+	delete child;
+      }
       tun->m_children.clear();
     }
 
-    delete *iter;
+    delete set;
   }
   {
-    NodeVecIter iter = m_possNodes.begin();
-    for( ; iter != m_possNodes.end(); ++iter) {
-      Node *node = *iter;
+    for (auto node : m_possNodes) {
       delete node;
     }
     m_possNodes.clear();
