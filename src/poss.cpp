@@ -174,9 +174,10 @@ void Poss::InitHelper(const NodeVec &vec, bool outTuns, bool disconnectFromOwner
   m_flags = POSSISSANEFLAG;
   
   
-  NodeVecConstIter iter = vec.begin();
-  for(; iter != vec.end(); ++iter) {
-    Node *node = *iter;
+  //  NodeVecConstIter iter = vec.begin();
+  //  for(; iter != vec.end(); ++iter) {
+  //    Node *node = *iter;
+  for (auto node : vec) {
     if (outTuns) {
       if (!node->IsTunnel()) {
         Tunnel *out = new Tunnel(POSSTUNOUT);
@@ -227,13 +228,17 @@ void Poss::ForcePrint()
   Prop();
   bool hasPrinted = true;
   ClearNodesPrinted();
-  NodeVecConstIter iter = m_inTuns.begin();
-  for( ; iter != m_inTuns.end(); ++iter)
-    (*iter)->SetPrinted();
+  //  NodeVecConstIter iter = m_inTuns.begin();
+  //  for( ; iter != m_inTuns.end(); ++iter)
+    //    (*iter)->SetPrinted();
+  for (auto tun : m_inTuns)
+    tun->SetPrinted();
+
   while(hasPrinted) {
     hasPrinted = false;
-    NodeVecConstIter nodeIter = m_possNodes.begin();
-    for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
+    //    NodeVecConstIter nodeIter = m_possNodes.begin();
+    //    for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
+      /*
       if (!(*nodeIter)->HasPrinted()) {
 #ifdef DOELEM
         IndStream out(&cout,ELEMSTREAM);
@@ -243,15 +248,28 @@ void Poss::ForcePrint()
         (*nodeIter)->Print(out, 1, NULL);
         hasPrinted |= (*nodeIter)->HasPrinted();
       }
+      */
+    for (auto node : m_possNodes) {
+      if (!node->HasPrinted()) {
+#ifdef DOELEM
+        IndStream out(&cout,ELEMSTREAM);
+#elif DOSQM
+        IndStream out(&cout,BLISSTREAM);
+#endif
+        node->Print(out, 1, NULL);
+        hasPrinted |= node->HasPrinted();
+      }
+
     }
   }
 }
 
 bool Poss::CanPrint() const
 {
-  NodeVecConstIter iter = m_inTuns.begin();
-  for( ; iter != m_inTuns.end(); ++iter) {
-    if (!(*iter)->CanPrintCode(NULL)) {
+  //  NodeVecConstIter iter = m_inTuns.begin();
+  //  for( ; iter != m_inTuns.end(); ++iter) {
+  for (auto tunnel : m_inTuns) {
+    if (!tunnel->CanPrintCode(NULL)) {
       return false;
     }
   }
@@ -267,9 +285,10 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
   Poss *poss = (Poss*)orig;
   m_parent = poss->m_num;
   //If this changes, update PSet::InlinePoss
-  NodeVecConstIter iter = orig->m_possNodes.begin();
-  for( ; iter != orig->m_possNodes.end(); ++iter) {
-    Node *oldNode = *iter;
+  //  NodeVecConstIter iter = orig->m_possNodes.begin();
+  //  for( ; iter != orig->m_possNodes.end(); ++iter) {
+  //    Node *oldNode = *iter;
+  for (auto oldNode : orig->m_possNodes) {
     Node *newNode = oldNode->GetNewInst();
     //    cout << "node " << oldNode << " to " << newNode << endl;
     newNode->Duplicate(oldNode,false, possMerging);
@@ -279,30 +298,33 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
     newNode->m_poss = this;
     map[oldNode] = newNode;
   }
-  PSetVecIter setIter = poss->m_sets.begin();
-  for(; setIter != poss->m_sets.end(); ++setIter) {
+  //  PSetVecIter setIter = poss->m_sets.begin();
+  //  for(; setIter != poss->m_sets.end(); ++setIter) {
+  for (auto set : poss->m_sets) {
     BasePSet *newSet;
     if (useShadows) {
 #if USESHADOWS
-      newSet = (*setIter)->GetNewShadow();
+      newSet = set->GetNewShadow();
 #else
       throw;
 #endif
-      if ((*setIter)->IsLoop() != newSet->IsLoop())
+      if (set->IsLoop() != newSet->IsLoop())
 	throw;
     }
     else {
-      newSet = (*setIter)->GetNewInst();
+      newSet = set->GetNewInst();
     }
-    newSet->Duplicate(*setIter, map, possMerging, useShadows);
+    newSet->Duplicate(set, map, possMerging, useShadows);
     AddPSet(newSet, true);
   }
-  setIter = m_sets.begin();
-  for(; setIter != m_sets.end(); ++setIter) {
-    (*setIter)->PatchAfterDuplicate(map);
+  //  PSetVecIter setIter = m_sets.begin();
+  //  for(; setIter != m_sets.end(); ++setIter) {
+  for (auto set : m_sets) {
+    set->PatchAfterDuplicate(map);
   }
-  iter = poss->m_inTuns.begin();
+  NodeVecConstIter iter = poss->m_inTuns.begin();
   for(; iter != poss->m_inTuns.end(); ++iter)  {
+    //  for (auto tunnel : m_inTuns) {
     Node *node = map[*iter];
     if (!node) {
       cout << "!node in dup\n";
@@ -310,15 +332,16 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
     }
     m_inTuns.push_back(node);
     if (!(*iter)->m_poss) {
-      cout << "!(*iter)->m_poss for " << *iter << endl;
+      cout << "!tunnel->m_poss for " << *iter << endl;
       throw;
     }
   }
   iter = poss->m_outTuns.begin();
   for(; iter != poss->m_outTuns.end(); ++iter) {
+    //  for (auto tunnel : m_outTuns) {
     Node *node = map[*iter];
     if (!(*iter)->m_poss) {
-      cout << "!(*iter)->m_poss\n";
+      cout << "!tunnel>m_poss\n";
       throw;
     }
     if (!node) {
@@ -490,9 +513,10 @@ void Poss::DeleteChildAndCleanUp(Node *output,
     }
   }
   
-  NodeConnVecIter iter = output->m_inputs.begin();
-  for( ; iter != output->m_inputs.end(); ++iter) {
-    Node *input = (*iter)->m_n;
+  //  NodeConnVecIter iter = output->m_inputs.begin();
+  //  for( ; iter != output->m_inputs.end(); ++iter) {
+  for (auto outs : output->m_inputs) {
+    Node *input = outs->m_n;
     if ((input->m_poss != output->m_poss)
         && !input->IsTunnel()
         && !output->IsTunnel())
@@ -500,11 +524,11 @@ void Poss::DeleteChildAndCleanUp(Node *output,
 	throw;
 	cout << "input->m_poss != output->m_poss\n";
       }
-    input->RemoveChild(output,(*iter)->m_num);
+    input->RemoveChild(output,outs->m_num);
     if(input->m_children.empty()) {
       input->m_poss->DeleteChildAndCleanUp(input, goThroughTunnels, handleTunnelsAsNormalNodes, stopAtTunnels);
     }
-    delete *iter;
+    delete outs;
   }
   output->m_inputs.clear();
   DeleteNode(output);
@@ -541,9 +565,10 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
         pset->m_ownerPoss->RemoveFromSets(pset);
       AddPSet(pset, false);
       
-      NodeVecIter iter = pset->m_outTuns.begin();
-      for(; iter != pset->m_outTuns.end(); ++iter) {
-        Node *out = *iter;
+      //      NodeVecIter iter = pset->m_outTuns.begin();
+      //      for(; iter != pset->m_outTuns.end(); ++iter) {
+      //        Node *out = *iter;
+      for (auto out : pset->m_outTuns) {
         if (out->m_poss && out->m_poss != this) {
           if (disconnectFromOwner) {
             Poss *poss = out->m_poss;
@@ -555,7 +580,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
         out->SetPoss(this);
       }
       
-      iter = pset->m_inTuns.begin();
+      NodeVecIter iter = pset->m_inTuns.begin();
       for(; iter != pset->m_inTuns.end(); ++iter) {
         AddUp(vec, *iter, false, disconnectFromOwner);
       }
@@ -722,9 +747,10 @@ Cost Poss::Prop()
 #endif // DOTENSORS
 #endif // CHECKFORSETREUSE
 
-  NodeVecIter nodeIter = m_possNodes.begin();
-  for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
-    Node *node = *nodeIter;
+  //  NodeVecIter nodeIter = m_possNodes.begin();
+  //  for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
+  //    Node *node = *nodeIter;
+  for (auto node : m_possNodes) {
     node->Prop();
     m_cost += node->GetCost();
     if (node->m_poss != this) {
@@ -734,9 +760,10 @@ Cost Poss::Prop()
       throw;
     }
   }
-  PSetVecIter setIter = m_sets.begin();
-  for( ; setIter != m_sets.end(); ++setIter) {
-    BasePSet *set = *setIter;
+  //  PSetVecIter setIter = m_sets.begin();
+  //  for( ; setIter != m_sets.end(); ++setIter) {
+  //    BasePSet *set = *setIter;
+  for (auto set : m_sets) {
     m_cost += set->Prop();
   }
 
@@ -864,9 +891,10 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
   */
   InvalidateHash();
   bool didMerge = false;
-  PSetVecIter iter = m_sets.begin();
-  for(; iter != m_sets.end(); ++iter) {
-    BasePSet *pset = *iter;
+  //  PSetVecIter iter = m_sets.begin();
+  //  for(; iter != m_sets.end(); ++iter) {
+  //    BasePSet *pset = *iter;
+  for (auto pset : m_sets) {
     if (pset->m_ownerPoss != this) {
       cout << "bad owner\n";
       throw;
@@ -1643,9 +1671,10 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
   
   
   
-  NodeVecIter setTunInIter = newInputTunnelsToFix.begin();
-  for(; setTunInIter != newInputTunnelsToFix.end(); ++setTunInIter) {
-    Node *newSetInput = *setTunInIter;
+  //  NodeVecIter setTunInIter = newInputTunnelsToFix.begin();
+  //  for(; setTunInIter != newInputTunnelsToFix.end(); ++setTunInIter) {
+  //    Node *newSetInput = *setTunInIter;
+  for (auto newSetInput : newInputTunnelsToFix) {
     ConnNum inputInputNum = 0;
     NodeConnVecIter inputInputConIter = newSetInput->m_inputs.begin();
     NodeSet set;
@@ -1914,9 +1943,10 @@ RealPSet* Poss::FormSubPSet(NodeVec &outputTuns, bool isCritSect)
 
 void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
 {
-  NodeConnVecIter iter = node->m_children.begin();
-  for(; iter != node->m_children.end(); ++iter) {
-    NodeConn *conn = *iter;
+  //  NodeConnVecIter iter = node->m_children.begin();
+  //  for(; iter != node->m_children.end(); ++iter) {
+  //    NodeConn *conn = *iter;
+  for (auto conn : node->m_children) {
     if (conn->m_num == connNum) {
       Node *child = conn->m_n;
       if (child->IsTunnel(SETTUNIN)) {
@@ -2010,9 +2040,10 @@ void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
 bool CheckPath(Node *node, NodeVec &vec, NodeSet &set)
 {
   bool ret = false;
-  NodeConnVecIter iter = node->m_children.begin();
-  for(; iter != node->m_children.end(); ++iter) {
-    NodeConn *conn = *iter;
+  //  NodeConnVecIter iter = node->m_children.begin();
+  //  for(; iter != node->m_children.end(); ++iter) {
+  //    NodeConn *conn = *iter;
+  for (auto conn : node->m_children) {
     Node *child = conn->m_n;
     if (child->IsTunnel(POSSTUNOUT)) {
       return false;
