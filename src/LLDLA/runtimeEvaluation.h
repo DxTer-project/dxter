@@ -22,10 +22,11 @@
 #ifndef RUNTIME_EVALUATION_H_
 #define RUNTIME_EVALUATION_H_
 
-#include "LLDLA.h"
-#include "base.h"
 #include <map>
 #include <vector>
+
+#include "LLDLA.h"
+#include "base.h"
 
 #if DOLLDLA
 
@@ -33,7 +34,7 @@ using namespace std;
 
 typedef std::map<GraphNum, string> ImplementationMap;
 typedef std::pair<GraphNum, string> NumImplementationPair;
-typedef std::pair<GraphNum, vector<double>> NumRuntimePair;
+typedef std::pair<GraphNum, TimeVec> NumRuntimePair;
 
 class RuntimeTest
 {
@@ -46,7 +47,7 @@ class RuntimeTest
   string m_correctTestFileName;
   vector<string> m_operationArgs;
   vector<string> m_argDeclarations;
-  int m_numIterations;
+  int m_minCycles;
   int m_chunkSize;
   Type m_type;
 
@@ -72,9 +73,13 @@ class RuntimeTest
 
 class RuntimeEvaluator
 {
+
+ private:
+  bool IsImplementationSeparator(string token);
+
  public:
   string m_evalDirName;
-  int m_numIterations;
+  int m_minCycles;
 
   RuntimeEvaluator(string evalDirName);
   ImplementationRuntimeMap EvaluateImplementations(RuntimeTest test, ImplementationMap* imps);
