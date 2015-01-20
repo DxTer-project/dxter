@@ -1,13 +1,14 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef UTILS_H_
+#define UTILS_H_
 
-//#include <malloc.h>
 #include <math.h>
 #include <pmmintrin.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+
+#include "rdtsc.h"
 
 #define VEC_PD_LOAD(ptr) _mm_load_pd((ptr))									// Load array of 2 doubles to vector register
 #define VEC_DUP_LOAD(ptr) _mm_loaddup_pd((ptr))								// Load one double into upper and lower halves of vector register

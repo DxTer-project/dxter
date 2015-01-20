@@ -1,6 +1,6 @@
 CC         := g++
 LINKER     := $(CC)
-CFLAGS	   := -O3 -g -Wall -std=c++0x
+CFLAGS	   := -O3 -g -Wall -mfma -march=native -mavx -std=c++0x
 
 HEADERS :=  $(shell find ./ -type f -name '*.h')
 SOURCES :=  $(shell find ./ -type f -name '*.cpp')

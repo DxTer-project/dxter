@@ -1,9 +1,6 @@
-unsigned long long rdtsc()
-{
-   unsigned long long int x;
-   unsigned a, d;
+#ifndef RDTSC_H_
+#define RDTSC_H_
 
-   __asm__ volatile("rdtsc" : "=a" (a), "=d" (d));
+unsigned long long rdtsc();
 
-   return ((unsigned long long)a) | (((unsigned long long)d) << 32);
-}
+#endif
