@@ -387,10 +387,12 @@ int main(int argc, const char* argv[])
     uni.CullWorstPerformers(.99, 3);
     time(&end);
     cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
+    cout.flush();
     time(&start2);
     uni.InlineAllSets();
     time(&end);
     cout << "Inlining took " << difftime(end,start2) << " seconds\n";
+    cout.flush();
     time(&start2);
     uni.Expand(numIters, PACKOPTPHASE, TenCullRO);
     time(&end);
