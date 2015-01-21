@@ -497,18 +497,22 @@ void MoveIn(Node *node, Node *newSrc, ConnNum newSrcNum, TempVarNode *tempVarNod
   if (node->IsTunnel()) {
     Tunnel *tun = (Tunnel*)node;
     if (tun->m_tunType == SETTUNIN) {
+#if USSHADOWS
       if (tun->m_pset->IsShadow() || !((RealPSet*)(tun->m_pset))->m_shadows.empty())
         throw;
+#endif
       if (tun->IsLoopTunnel()) {
         LoopTunnel *out = ((LoopTunnel*)tun)->GetMatchingOutTun();
         if (out->m_children.empty()) {
           if (!tun->m_pset)
             throw;
+#if USSHADOWS
           if (tun->m_pset->IsShadow())
             throw;
           else if (!((RealPSet*)(tun->m_pset))->m_shadows.empty())
             throw;
           ((RealPSet*)(tun->m_pset))->DisconnectFromSetsForMergingRecord();
+#endif
           LoopTunnel *newSrcTunIn = NULL;
           // If the tempvar goes into this loop, find if the src for the tempvar
           // also goes into the loop in the same way (i.e., split the same way or
