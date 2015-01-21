@@ -362,7 +362,7 @@ void Var::PrintDecl(IndStream &out) const
 	  out.Indent();
 	  *out << name << "[" << i << "] = "
 	       << ModeArrayVarName(entry.DistEntryDims()) 
-	       << ");\n";
+	       << ";\n";
 	}
 	break;
       }
@@ -375,7 +375,7 @@ void Var::PrintDecl(IndStream &out) const
 	for(int i = 0; iter != m_vec->end(); ++iter, ++i) {
 	  out.Indent();
 	  *out << name << "[" << i << "] = "
-	       << *iter << ");\n";
+	       << *iter << ";\n";
 	}
 	break;
       }
@@ -388,7 +388,7 @@ void Var::PrintDecl(IndStream &out) const
 	for(int i = 0; iter != m_vec->end(); ++iter,++i) {
 	  out.Indent();
 	  *out << name << "[" << i << "] = "
-	       << *iter << ");\n";
+	       << *iter << ";\n";
 	}
 	break;
       }
