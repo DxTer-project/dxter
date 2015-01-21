@@ -229,10 +229,10 @@ void InputNode::PrintCode(IndStream &out)
 #if 1
   out.Indent();
   string name = GetNameStr(0) + "_tempShape";
-  *out << "ObjShape " << name << ";\n";
+  *out << "ObjShape " << name << "( " << m_numDims << " );\n";
   for(Dim dim = 0; dim < m_numDims; ++dim) {
     out.Indent();
-    *out << name << ".push_back( " << (m_sizes[dim])[0] << " );\n";
+    *out << name << "[ " << dim << " ] = " << (m_sizes[dim])[0] << ";\n";
   }
   out.Indent();
   *out << GetNameStr(0) << ".ResizeTo( " << name << " );\n";
