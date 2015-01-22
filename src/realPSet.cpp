@@ -32,6 +32,7 @@
 extern unsigned int M_phase;
 
 #define FORMSETSEARLY 0
+#define CHECKIGNORETWICE !DOTENSORS
 
 #if DOTENSORS
 RealPSetMMap RealPSet::m_setMap;
@@ -885,8 +886,10 @@ void RealPSet::CullWorstPerformers(double percentToCull, int ignoreThreshold)
     if (queue.size() != m_posses.size())
       throw;
     int numToKeep = ceil((1.0-percentToCull) * m_posses.size());
+#if CHECKIGNORETWICE
     if (numToKeep < ignoreThreshold)
       numToKeep = ignoreThreshold;
+#endif //CHECKIGNORETWICE
     for(; numToKeep > 0; --numToKeep)
       queue.pop();
     while(!queue.empty()) {
