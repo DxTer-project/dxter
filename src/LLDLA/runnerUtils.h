@@ -31,11 +31,10 @@
 
 #if DOLLDLA
 
-typedef std::map<GraphNum, string> ImplementationMap;
-typedef std::pair<GraphNum, string> NumImplementationPair;
+
+
 typedef std::pair<GraphNum, TimeVec> NumRuntimePair;
 
-unique_ptr<ImplementationMap> ImpStrMap(Universe* uni);
 string TypeToStr(Type type);
 string VecTypeToStr(VecType vecType);
 string DateAndTimeString();

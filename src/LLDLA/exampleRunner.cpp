@@ -124,7 +124,7 @@ ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance*
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
-  ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni).get(), absImpStr);
+  ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, uni.ImpStrMap().get(), absImpStr);
 
   cout << "Done evaluating\n";
   ProblemInstanceStats* pStats = new ProblemInstanceStats(problemInstance, &impMap);

@@ -29,6 +29,8 @@
 #include "graphIter.h"
 
 typedef Node* (*ConstructorFunc)();
+typedef std::map<GraphNum, string> ImplementationMap;
+typedef std::pair<GraphNum, string> NumImplementationPair;
 typedef map<ClassType,ConstructorFunc> ConsFuncMap;
 typedef ConsFuncMap::iterator ConsFuncMapIter;
 typedef ConsFuncMap::const_iterator ConsFuncMapConstIter;
@@ -78,6 +80,8 @@ class Universe
   GraphNum TotalCount() const;
   void ClearFullyExpanded();
   void PrintStats();
+
+  unique_ptr<ImplementationMap> ImpStrMap();
 
   static void RegCons(ClassType type, ConstructorFunc func);
   static Node* GetBlankClassInst(ClassType type);

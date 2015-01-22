@@ -649,6 +649,19 @@ void Universe::PrintStats()
   cout << "\t" << M_transCount[NUMPHASES] << " simplifiers\n";
 }
 
+unique_ptr<ImplementationMap> Universe::ImpStrMap() {
+  std::unique_ptr<ImplementationMap> impMap(new ImplementationMap());
+  GraphNum i;
+  for (i = 1; i <= TotalCount(); i++) {
+    std::stringbuf sbuf;
+    std::ostream out(&sbuf);
+    IndStream istream = IndStream(&out, LLDLASTREAM);
+    Print(istream, i);
+    impMap->insert(NumImplementationPair(i, sbuf.str()));
+  }
+  return impMap;
+}
+
 void Universe::RegCons(ClassType type, ConstructorFunc func)
 {
   if (M_consFuncMap.find(type) != M_consFuncMap.end()) {
