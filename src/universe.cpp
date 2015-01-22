@@ -28,7 +28,7 @@
 #include "realLoop.h"
 #include "critSect.h"
 #include <iomanip>
-#include "graphIter.h"
+#include "linearization/graphIter.h"
 
 //Print out code for all generated implementations
 // This takes a while for large search spaces

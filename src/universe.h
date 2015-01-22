@@ -26,7 +26,7 @@
 #include <vector>
 #include "base.h"
 #include "realPSet.h"
-#include "graphIter.h"
+#include "linearization/graphIter.h"
 
 typedef Node* (*ConstructorFunc)();
 typedef map<ClassType,ConstructorFunc> ConsFuncMap;
