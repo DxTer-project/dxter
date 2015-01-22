@@ -80,6 +80,7 @@ class Poss
   bool m_hashValid;
  public:
   NodeVec m_possNodes;
+  PSetVec m_sets;
   Flags m_flags;
   GraphNum m_parent;
   GraphNum m_num;
@@ -88,7 +89,6 @@ class Poss
   RealPSet *m_pset;
   TransVec m_transVec;
   bool m_fullyExpanded;
-  PSetVec m_sets;
   static StrSet M_fusedSets;
   Cost m_cost;
   Poss();

@@ -24,10 +24,17 @@
 #pragma once
 
 #include "base.h"
-#include "poss.h"
-#include "basePSet.h"
-#include "linearizer.h"
-#include "linearization.h"
 #include "linElem.h"
-#include "nodeLinElem.h"
-#include "setLinElem.h"
+
+typedef std::vector<LinElem*> LinElemVec;
+typedef LinElemVec::iterator LinElemVecIter;
+
+class Linearization
+{
+ public:
+  LinElemVec m_order;
+  LinElemVec m_clears;
+
+  ~Linearization();
+  void InsertVecClearing();
+};

@@ -19,15 +19,25 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-#pragma once
-
-#include "base.h"
-#include "poss.h"
-#include "basePSet.h"
-#include "linearizer.h"
 #include "linearization.h"
-#include "linElem.h"
-#include "nodeLinElem.h"
-#include "setLinElem.h"
+
+Linearization::~Linearization()
+{
+  for(auto clear : m_clears) {
+    delete clear;
+  }
+  m_clears.clear();
+  m_order.clear();
+}
+
+void InsertVecClearing()
+{
+  /*
+    go through the list and find the diff between
+    input and output variables.  add clears
+    after for inputs that aren't output and aren't used later in the list
+
+    ommit if a variable is still found in an outer linearization
+  */
+  throw;  
+}

@@ -19,15 +19,33 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #pragma once
 
 #include "base.h"
-#include "poss.h"
-#include "basePSet.h"
-#include "linearizer.h"
-#include "linearization.h"
-#include "linElem.h"
-#include "nodeLinElem.h"
-#include "setLinElem.h"
+
+class LinElem;
+
+typedef std::vector<LinElem*> LinElemVec;
+typedef LinElemVec::iterator LinElemVecIter;
+typedef LinElemVec::const_iterator LinElemVecConstIter;
+
+class LinElem
+{
+ public:
+  LinElemVec m_children;
+  LinElemVec m_inputs;
+  bool m_hasPrinted;
+
+ LinElem() : m_hasPrinted(false) {}
+  virtual ~LinElem() {}
+
+  void AddInputIfUnique(LinElem *elem);
+  void AddChildIfUnique(LinElem *elem);
+
+  inline bool HasPrinted() const {return m_hasPrinted;}
+  inline void SetPrinted() {m_hasPrinted = true;} 
+  inline void ClearPrinted() {m_hasPrinted = false;} 
+
+  virtual void Print() = 0;
+  virtual bool CanPrint() const;
+};

@@ -20,14 +20,31 @@
 */
 
 
-
-#pragma once
-
-#include "base.h"
-#include "poss.h"
-#include "basePSet.h"
-#include "linearizer.h"
-#include "linearization.h"
 #include "linElem.h"
-#include "nodeLinElem.h"
-#include "setLinElem.h"
+
+bool LinElem::CanPrint() const
+{
+  for(auto input : m_inputs) {
+    if (!input->HasPrinted())
+      return false;
+  }
+  return true;
+}
+
+void LinElem::AddInputIfUnique(LinElem *elem)
+{
+  for(auto input : m_inputs) {
+    if (input == elem)
+      return;
+  }
+  m_inputs.push_back(elem);
+}
+
+void LinElem::AddChildIfUnique(LinElem *elem)
+{
+  for(auto child : m_children) {
+    if (child == elem)
+      return;
+  }
+  m_children.push_back(elem);
+}

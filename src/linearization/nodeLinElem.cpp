@@ -19,15 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-#pragma once
-
-#include "base.h"
-#include "poss.h"
-#include "basePSet.h"
-#include "linearizer.h"
-#include "linearization.h"
-#include "linElem.h"
 #include "nodeLinElem.h"
-#include "setLinElem.h"
+
+void NodeLinElem::Print()
+{
+  throw;
+}

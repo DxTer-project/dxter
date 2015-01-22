@@ -24,10 +24,20 @@
 #pragma once
 
 #include "base.h"
-#include "poss.h"
-#include "basePSet.h"
-#include "linearizer.h"
-#include "linearization.h"
 #include "linElem.h"
-#include "nodeLinElem.h"
-#include "setLinElem.h"
+#include "linearization.h"
+
+typedef std::map<const void*,LinElem*> PtrToLinElemMap;
+typedef PtrToLinElemMap::iterator PtrToLinElemMapIter;
+
+class Linearizer
+{
+ public:
+  LinElemVec m_elems;
+
+  Linearizer(const Poss *poss);
+  ~Linearizer();
+
+  LinElem* FindOrAdd(const Node *node, PtrToLinElemMap &map);
+  LinElem* FindOrAdd(const BasePSet *set, PtrToLinElemMap &map);
+};

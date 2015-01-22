@@ -19,15 +19,20 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #pragma once
 
 #include "base.h"
-#include "poss.h"
-#include "basePSet.h"
-#include "linearizer.h"
-#include "linearization.h"
 #include "linElem.h"
-#include "nodeLinElem.h"
-#include "setLinElem.h"
+
+class BasePSet;
+
+
+class SetLinElem : public LinElem
+{
+ public:
+  const BasePSet *m_set;
+
+ SetLinElem(const BasePSet *set) : LinElem(), m_set(set) {}
+  
+  virtual void Print();
+};

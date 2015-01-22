@@ -20,14 +20,9 @@
 */
 
 
-
-#pragma once
-
-#include "base.h"
-#include "poss.h"
-#include "basePSet.h"
-#include "linearizer.h"
-#include "linearization.h"
-#include "linElem.h"
-#include "nodeLinElem.h"
 #include "setLinElem.h"
+
+void SetLinElem::Print()
+{
+  throw;
+}

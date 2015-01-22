@@ -26,6 +26,7 @@
 #include "base.h"
 #include "poss.h"
 #include "basePSet.h"
+#include "linearize.h"
 
 class GraphIter;
 typedef GraphIter* GraphIterPtr;
