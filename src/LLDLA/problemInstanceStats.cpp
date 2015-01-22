@@ -27,50 +27,45 @@ void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
   double bestAvgFlopsPerCycle = 0.0;
   double bestFlopsPerCycle = 0.0;
   double worstFlopsPerCycle = arch->FlopsPerCycle(m_type);
-  for (auto impl : *m_implementationStats) {
+  for (const auto& impl : m_implementationStats) {
     if (impl->GetAvgFlopsPerCycle() > bestAvgFlopsPerCycle) {
       bestAvgFlopsPerCycle = impl->GetAvgFlopsPerCycle();
-      m_bestAvgFlopsPerCycleImpl = impl;
+      m_bestAvgFlopsPerCycleImpl = impl.get();
     }
 
     if (impl->GetBestFlopsPerCycle() > bestFlopsPerCycle) {
       bestFlopsPerCycle = impl->GetBestFlopsPerCycle();
-      m_bestFlopsPerCycleImpl = impl;
+      m_bestFlopsPerCycleImpl = impl.get();
     }
 
     if (impl->GetWorstFlopsPerCycle() < worstFlopsPerCycle) {
       worstFlopsPerCycle = impl->GetWorstFlopsPerCycle();
-      m_worstFlopsPerCycleImpl = impl;
+      m_worstFlopsPerCycleImpl = impl.get();
     }
   }
 }
 
-vector<ImplementationStats*>* ProblemInstanceStats::ComputeImplementationStats(ImplementationRuntimeMap* impls) {
-  vector<ImplementationStats*>* implStats = new vector<ImplementationStats*>();
+void ProblemInstanceStats::ComputeImplementationStats(ImplementationRuntimeMap* impls) {
   for (std::pair<GraphNum, TimeVec> pair : *impls) {
     GraphNum impNum = pair.first;
     TimeVec* times = &(pair.second);
     ImplementationStats* impStats = new ImplementationStats(impNum, m_type, m_cost, times);
-    implStats->push_back(impStats);
+    m_implementationStats.push_back(unique_ptr<ImplementationStats>(impStats));
   }
-  return implStats;
+  return;
 }
 
 ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls) {
   m_cost = problemInstance->GetCost();
   m_name = unique_ptr<string>(new string(problemInstance->GetName()));
   m_type = problemInstance->GetType();
-  m_implementationStats = ComputeImplementationStats(impls);
+  ComputeImplementationStats(impls);
   ComputeBestAndWorstImplementations(problemInstance->GetType());
   m_dimNames = problemInstance->DimensionNames();
   m_dimValues = problemInstance->DimensionValues();
 }
 
 ProblemInstanceStats::~ProblemInstanceStats() {
-  for (auto implStats : *m_implementationStats) {
-    delete implStats;
-  }
-  delete m_implementationStats;
   for (auto dimName : *m_dimNames) {
     delete dimName;
   }
@@ -91,12 +86,12 @@ void ProblemInstanceStats::PrettyPrintPerformanceStats() {
   cout << "\n&&&&&&&&&&&&&&&&&& Problem Summary &&&&&&&&&&&&&&&&&&&" << endl;
   cout << "Datatype                : " << TypeToStr(m_type) << endl;
   cout << "Flop count              : " << m_cost << endl;
-  cout << "# of Implementations    : " << m_implementationStats->size() << endl;
+  cout << "# of Implementations    : " << m_implementationStats.size() << endl;
   cout << "Best Avg. Flops / Cycle : " << m_bestAvgFlopsPerCycleImpl->GetAvgFlopsPerCycle() << endl;
   cout << "Best Avg. Pct of peak   : " << m_bestAvgFlopsPerCycleImpl->GetAvgPercentOfPeak() << endl;
   cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n" << endl;
 
-  for (auto implStats : *m_implementationStats) {
+  for (const auto& implStats : m_implementationStats) {
     implStats->PrettyPrintPerformanceStats();
   }
 
@@ -129,8 +124,8 @@ string ProblemInstanceStats::CSVLine() {
 
 void ProblemInstanceStats::WriteImplementationCSV(string impCSVPath) {
   ofstream implementationCSV(impCSVPath + "/" + *m_name + "_impl_stats.csv");
-  implementationCSV << m_implementationStats->front()->CSVLineColumnTitles() << endl;
-  for (auto implStats : *m_implementationStats) {
+  implementationCSV << m_implementationStats.front()->CSVLineColumnTitles() << endl;
+  for (const auto& implStats : m_implementationStats) {
     implementationCSV << implStats->CSVLine() << endl;
   }
   implementationCSV.close();
