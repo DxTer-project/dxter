@@ -3,7 +3,7 @@
   DxTer is a prototype using the Design by Transformation (DxT)
   approach to program generation.
  
-  Copyright (C) 2014, The University of Texas and Bryan Marker
+  Copyright (C) 2015, The University of Texas and Bryan Marker
  
   DxTer is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
