@@ -1240,7 +1240,7 @@ RealPSet* z()
   InputNode *r_amef = CreateInput4("r_bmfe", big, small, big, big);
   InputNode *t_am = CreateInput2("t_fj", big, small);
   DLANode *H_me = CreateInput2("H_me", small, big);
-  InputNode *U_mnie = CreateInput4("U_mnje", small, small, small, big);
+  InputNode *U_mnie = CreateInput4("U_mnie", small, small, small, big);
     InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = z_ai_calc(G_mi, 
@@ -1271,7 +1271,7 @@ RealPSet* Z()
   InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
   InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
   InputNode *r_ejab = CreateInput4("r_bmfe", big, small, big, big);
-  InputNode *P_ijmb = CreateInput4("P_ijmb", small, small, small, big);
+  InputNode *P_ijmb = CreateInput4("P_jimb", small, small, small, big);
   InputNode *t_am = CreateInput2("t_fj", big, small);
   InputNode *F_ae = CreateInput2("F_ae", big, big);
   InputNode *G_mi = CreateInput2("G_mi", small, small);
