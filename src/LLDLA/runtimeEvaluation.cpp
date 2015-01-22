@@ -44,10 +44,10 @@ RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argName
 void RuntimeTest::AddIncludes()
 {
   m_headers.push_back("#include <immintrin.h>");
-  m_headers.push_back("#include \"utils.h\"");
-  m_headers.push_back("#include <string.h>");
-  m_headers.push_back("#include <unistd.h>");
   m_headers.push_back("#include \"rdtsc.h\"");
+  m_headers.push_back("#include <string.h>");
+  m_headers.push_back("#include \"utils.h\"");
+  m_headers.push_back("#include <unistd.h>");
   return;
 }
 
@@ -76,7 +76,6 @@ void RuntimeTest::AddMiscellaneousDefines()
     cout << "Error: Unsupported type for runtime test data\n";
     throw;
   }
-
   return;
 }
 
@@ -229,11 +228,11 @@ string RuntimeTest::AllocateArgBuffers(string postfix) {
   }
   return ToCStatements(argAllocs);
 }
+
 string RuntimeTest::ToCStatements(vector<string> lines) {
   string cStatements = "";
-  std::vector<string>::iterator lineIt;
-  for (lineIt = lines.begin(); lineIt != lines.end(); ++lineIt) {
-    cStatements = cStatements + *lineIt + "\n";
+  for (auto line : lines) {
+    cStatements = cStatements + line + "\n";
   }
   return cStatements;
 }

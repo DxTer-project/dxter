@@ -697,9 +697,11 @@ void MoveTempVarNodeIntoLoop::Apply(Node *node) const
 {
   TempVarNode *tmp = (TempVarNode*)node;
   //MoveIn doesn't support this yet
-  if (!tmp->m_sumDims.empty())
+  if (!tmp->m_sumDims.empty()) {
     throw;
+  }
   MoveIn(tmp->Child(0), tmp->Input(0), tmp->InputConnNum(0), tmp);
   tmp->m_poss->DeleteChildAndCleanUp(tmp);
 }
+
 #endif //DOTENSORS

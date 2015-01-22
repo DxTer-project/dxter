@@ -32,7 +32,7 @@
 class ProblemInstanceStats {
 
  private:
-  string* m_name;
+  unique_ptr<string> m_name;
   Type m_type;
   Cost m_cost;
 

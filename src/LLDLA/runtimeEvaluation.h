@@ -27,14 +27,11 @@
 
 #include "LLDLA.h"
 #include "base.h"
+#include "runnerUtils.h"
 
 #if DOLLDLA
 
 using namespace std;
-
-typedef std::map<GraphNum, string> ImplementationMap;
-typedef std::pair<GraphNum, string> NumImplementationPair;
-typedef std::pair<GraphNum, TimeVec> NumRuntimePair;
 
 class RuntimeTest
 {

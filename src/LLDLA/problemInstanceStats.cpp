@@ -58,7 +58,7 @@ vector<ImplementationStats*>* ProblemInstanceStats::ComputeImplementationStats(I
 
 ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls) {
   m_cost = problemInstance->GetCost();
-  m_name = new string(problemInstance->GetName());
+  m_name = unique_ptr<string>(new string(problemInstance->GetName()));
   m_type = problemInstance->GetType();
   m_implementationStats = ComputeImplementationStats(impls);
   ComputeBestAndWorstImplementations(problemInstance->GetType());

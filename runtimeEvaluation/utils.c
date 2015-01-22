@@ -203,9 +203,4 @@ void print_mat(int m, int n, double *a, int a_row_stride, int a_col_stride)	{
 	printf("\n");
 }
 
-void reset_values(int size, double *a, double *b, double *c, double *c_copy)	{
-	rand_doubles(size, a);
-	rand_doubles(size, b);
-	rand_doubles(size, c);
-	copy_buffer(size, c, c_copy);
-}
+void reset_values(int size, double *a, double *b, double *c, double *c_copy)	{	rand_doubles(size, a);	rand_doubles(size, b);	rand_doubles(size, c);	copy_buffer(size, c, c_copy);}
