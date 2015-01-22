@@ -29,12 +29,12 @@
 
 class ProblemInstance {
  private:
-  string* m_name;
+  unique_ptr<string> m_name;
   Type m_type;
   Cost m_cost;
 
-  vector<string*>* m_dimNames;
-  vector<int>* m_dimValues;
+  vector<unique_ptr<string>> m_dimNames;
+  vector<int> m_dimValues;
 
  public:
   ProblemInstance();

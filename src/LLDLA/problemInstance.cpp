@@ -24,26 +24,23 @@
 #if DOLLDLA
 
 ProblemInstance::ProblemInstance() {
-  m_name = new string("");
-  m_dimNames = new vector<string*>();
-  m_dimValues = new vector<int>();
+  m_name = unique_ptr<string>(new string(""));
 }
 
 ProblemInstance::~ProblemInstance() {
-  delete m_name;
 }
 
 void ProblemInstance::AddDimension(int val, string dimName) {
-  string* oldName = m_name;
-  m_name = new string(*oldName + "_" + dimName + std::to_string((long long int) val));
-  delete oldName;
-  m_dimValues->push_back(val);
-  m_dimNames->push_back(new string(dimName));
+  string* oldName = m_name.get();
+  string* newName = new string(*oldName + "_" + dimName + std::to_string((long long int) val));
+  m_name = unique_ptr<string>(newName);
+  m_dimValues.push_back(val);
+  m_dimNames.push_back(unique_ptr<string>(new string(dimName)));
 }
 
 vector<string*>* ProblemInstance::DimensionNames() {
   vector<string*>* dimNames = new vector<string*>();
-  for (auto namePtr : *m_dimNames) {
+  for (const auto& namePtr : m_dimNames) {
     dimNames->push_back(new string(*namePtr));
   }
   return dimNames;
@@ -51,7 +48,7 @@ vector<string*>* ProblemInstance::DimensionNames() {
 
 vector<int>* ProblemInstance::DimensionValues() {
   vector<int>* dimVals = new vector<int>();
-  for (auto dimVal : *m_dimValues) {
+  for (auto dimVal : m_dimValues) {
     dimVals->push_back(dimVal);
   }
   return dimVals;
@@ -74,8 +71,7 @@ void ProblemInstance::SetCost(Cost cost) {
 }
 
 void ProblemInstance::SetName(string name) {
-  delete m_name;
-  m_name = new string(NoWhitespace(name));
+  m_name = unique_ptr<string>(new string(NoWhitespace(name)));
 }
 
 void ProblemInstance::SetType(Type type) {
