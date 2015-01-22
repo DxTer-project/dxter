@@ -4,10 +4,8 @@
 
 RealPSet* Axpy(Type dataType, VecType vType, int m)
 {
-  auto* alphaIn = new InputNode("alpha input", 1, 1, "alpha",
+  auto* alphaIn = new InputNode("alpha", 1, 1,
 				1, m,
-				"alphaNumRows", "alphaNumCols",
-				"alphaRowStride", "alphaColStride",
 				dataType);
 
   int nCols, nRows;
@@ -19,16 +17,12 @@ RealPSet* Axpy(Type dataType, VecType vType, int m)
     nRows = 1;
   }
 
-  auto* xIn = new InputNode("x input", nRows, nCols, "x",
+  auto* xIn = new InputNode("x", nRows, nCols,
 			    nCols, nRows,
-			    "xNumRows", "xNumCols",
-			    "xRowStride", "xColStride",
 			    dataType);
 
-  auto* yIn = new InputNode("y input", nRows, nCols, "y",
+  auto* yIn = new InputNode("y", nRows, nCols,
 			    nCols, nRows,
-			    "yNumRows", "yNumCols",
-			    "yRowStride", "yColStride",
 			    dataType);
 
   auto* tunX = new Tunnel(POSSTUNIN);
@@ -64,44 +58,38 @@ RealPSet* Axpy(Type dataType, VecType vType, int m)
 
 RealPSet* Gemv(Type dataType, bool transpose, int m, int n)
 {
-  auto* xIn = new InputNode("x input", n, 1, "X",
-				 1, n,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
+  auto* xIn = new InputNode("X", n, 1,
+			    1, n,
+			    dataType);
 
-  auto* yIn = new InputNode("y input", m, 1, "Y",
-				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
+  auto* yIn = new InputNode("Y", m, 1,
+			    1, m,
+			    dataType);
 
-  auto* zIn = new InputNode("z input", m, 1, "Z",
-				 1, m,
-				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride", dataType);
+  auto* zIn = new InputNode("Z", m, 1,
+			    1, m,
+			    dataType);
 
 
   InputNode* AIn;
   if (transpose) {
-    AIn = new InputNode("a input", n, m, "A",
+    AIn = new InputNode("A", n, m,
 			1, n,
-			"ANumRows", "ANumCols",
-			"ARowStride", "AColStride", dataType);
+			dataType);
   } else {
-    AIn = new InputNode("a input", m, n, "A",
+    AIn = new InputNode("A", m, n,
 			1, m,
-			"ANumRows", "ANumCols",
-			"ARowStride", "AColStride", dataType);
+			dataType);
   }
 
-  auto* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
-				     1, m,
-				     "AlphaNumRows", "AlphaNumCols",
-				     "AlphaRowStride", "AlphaColStride", dataType);
+  auto* alphaIn = new InputNode("Alpha",
+				1, 1,
+				1, m,
+				dataType);
 
-  auto* betaIn = new InputNode("beta input", 1, 1, "Beta",
-				    1, m,
-				    "BetaNumRows", "BetaNumCols",
-				    "BetaRowStride", "BetaColStride", dataType);
+  auto* betaIn = new InputNode("Beta", 1, 1,
+			       1, m,
+			       dataType);
 
   auto* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
