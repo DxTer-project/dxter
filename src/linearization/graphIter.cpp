@@ -3,7 +3,7 @@
     DxTer is a prototype using the Design by Transformation (DxT)
     approach to program generation.
 
-    Copyright (C) 2014, The University of Texas and Bryan Marker
+    Copyright (C) 2015, The University of Texas and Bryan Marker
 
     DxTer is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -290,20 +290,6 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
       for(; varIter != set.end(); ++varIter) {
 	(*varIter).PrintDecl(out);
       }
-      /*
-	Need to fix the following that came from inside of Poss::Print
-	instead of doing this, BLIS should add variables
-	if (m_pset && m_poss->m_pset->IsLoop()
-	  && ((Loop*)(m_pset))->GetType() == BLISLOOP)
-	{
-	  string loopLevel = out.LoopLevel(1);
-	  string idx = "idx" + loopLevel;
-	  string dimLen = "dimLen" + loopLevel;
-	  string bs = "bs" + loopLevel;
-	  out.Indent();
-	  *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
-	}
-      */
       
       //This actualy sets some stuff so it can print
       if (!m_poss->CanPrint()) {
@@ -397,13 +383,12 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
   m_hasPrinted = true;
   m_poss->ClearPrintedFromGraph();
   unsigned int numPSets = m_poss->m_sets.size();
-  
-  NodeVecConstIter nodeIter = m_poss->m_inTuns.begin();
-  for(; nodeIter != m_poss->m_inTuns.end(); ++nodeIter) {
-    (*nodeIter)->Print(out, graphNum, this);
 
-    if (!(*nodeIter)->HasPrinted()) {
-      cout << "tunnel input " << (*nodeIter)->GetType()
+  for(auto in : m_poss->m_inTuns) {
+    in->Print(out, graphNum, this);
+
+    if (!in->HasPrinted()) {
+      cout << "tunnel input " << in->GetType()
 	   << "hasn't printed even though he should have\n";
     }
   }
@@ -412,9 +397,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
   bool hasPrinted = true;
   while(hasPrinted) {
     hasPrinted = false;
-    NodeVecConstIter nodeIter = m_poss->m_possNodes.begin();
-    for( ; nodeIter != m_poss->m_possNodes.end(); ++nodeIter) {
-      Node *node = *nodeIter;
+    for(auto node : m_poss->m_possNodes) {
       //Don't print the poss out tunnels until the end
       // so the repartitioning code all goes after the loop body
       if (!node->HasPrinted()
@@ -422,10 +405,10 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
           && !node->IsTunnel(SETTUNOUT)
           && node->CanPrintCode(this))
 	{
-	  (*nodeIter)->Print(out, graphNum, this);
-	  hasPrinted |= (*nodeIter)->HasPrinted();
+	  node->Print(out, graphNum, this);
+	  hasPrinted |= node->HasPrinted();
 #if PRINTEMPTY && (DOLLDLA == 0)
-	  (*nodeIter)->PrintEmptyStatementIfOK(out);
+	  node->PrintEmptyStatementIfOK(out);
 #endif
 	
 
@@ -447,9 +430,7 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 #if DOTENSORS
 	out.Indent();
 	*out << "\t//Outputs:\n";
-	NodeVecIter iter = set->m_outTuns.begin();
-	for(; iter != set->m_outTuns.end(); ++iter) {
-	  Node *node = *iter;
+	for(auto node : set->m_outTuns) {
 	  if (!node->m_children.empty()) {
 	    out.Indent();
 	    *out << "\t//  " << node->GetNameStr(0) << endl;
@@ -489,13 +470,11 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
 	}
 
 #if PRINTEMPTY && (DOLLDLA == 0)
-	NodeVecIter tunnelIter = m_poss->m_sets[i]->m_outTuns.begin();
-	for(; tunnelIter != m_poss->m_sets[i]->m_outTuns.end(); ++tunnelIter) {
-	  (*tunnelIter)->PrintEmptyStatementIfOK(out);
+	for (auto outTun : m_poss->m_sets[i]->m_outTuns) {
+	  outTun->PrintEmptyStatementIfOK(out);
 	}
-	tunnelIter = m_poss->m_sets[i]->m_inTuns.begin();
-	for(; tunnelIter != m_poss->m_sets[i]->m_inTuns.end(); ++tunnelIter) {
-	  (*tunnelIter)->PrintEmptyStatementIfOK(out);
+	for (auto inTun : m_poss->m_sets[i]->m_inTuns) { 
+	  inTun->PrintEmptyStatementIfOK(out);
 	}
 #endif
 
@@ -512,25 +491,22 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
   out.Indent();
   *out << "//------------------------------------//" << endl;
   
-  nodeIter = m_poss->m_outTuns.begin();
-  for(; nodeIter != m_poss->m_outTuns.end(); ++nodeIter) {
-    (*nodeIter)->Print(out, graphNum, this);
-    (*nodeIter)->SetPrinted();
+  for(auto outTun : m_poss->m_outTuns) {
+    outTun->Print(out, graphNum, this);
+    outTun->SetPrinted();
   }
   
-  nodeIter = owner->m_outTuns.begin();
-  for(; nodeIter != owner->m_outTuns.end(); ++nodeIter) {
-    (*nodeIter)->Print(out, graphNum, NULL);
-    (*nodeIter)->SetPrinted();
+  for(auto outTun : owner->m_outTuns) {
+    outTun->Print(out, graphNum, NULL);
+    outTun->SetPrinted();
   }
   *out << endl;
 
   bool bad = false;
   
-  nodeIter = m_poss->m_inTuns.begin();
-  for(; nodeIter != m_poss->m_inTuns.end(); ++nodeIter) {
-    if (!(*nodeIter)->HasPrinted()) {
-      cout << (*nodeIter)->GetType() << " hasn't printed\n";
+  for(auto inTun : m_poss->m_inTuns) {
+    if (!inTun->HasPrinted()) {
+      cout << inTun->GetType() << " hasn't printed\n";
       bad = true;
     }
   }
@@ -550,13 +526,12 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
     }
   }
   
-  nodeIter = m_poss->m_possNodes.begin();
-  for(; nodeIter != m_poss->m_possNodes.end(); ++nodeIter) {
-    if (!(*nodeIter)->HasPrinted()) {
-      cout << (*nodeIter)->GetType() << " " << *nodeIter << " hasn't printed\n";
-      cout << "on " << (*nodeIter)->m_poss << endl;
+  for(auto node : m_poss->m_possNodes) {
+    if (!node->HasPrinted()) {
+      cout << node->GetType() << " " << node << " hasn't printed\n";
+      cout << "on " << node->m_poss << endl;
       cout << "Inputs are\n";
-      (*nodeIter)->PrintInputs();
+      node->PrintInputs();
       cout << "Is it possible that the node is read only but ReadOnly doesn't return true?\n\n";
       bad = true;
       //      PrintSetConnections();

@@ -13,6 +13,7 @@ all: dxter.x
 
 obj/%.o: src/%.cpp $(HEADERS)
 	@mkdir  -p obj
+	@mkdir  -p obj/linearization
 	@mkdir  -p obj/DLA
 	@mkdir  -p obj/LLDLA
 	@mkdir  -p obj/tensors
@@ -22,15 +23,15 @@ dxter.x: $(OBJS) $(HEADERS)
 	$(LINKER) $(CFLAGS) $(OBJS) -o $@
 
 clean:
-	rm -f obj/*.o obj/DLA/*.o obj/tensors/*.o obj/LLDLA/*.o
-	rm -f src/*~ src/DLA/*~ src/tensors/*~ src/LLDLA/*~
+	rm -f obj/*.o obj/linearization/*.o obj/DLA/*.o obj/tensors/*.o obj/LLDLA/*.o
+	rm -f src/*~ obj/linearization/* src/DLA/*~ src/tensors/*~ src/LLDLA/*~
 	rm -f *.x *~
 
 open:
-	emacs -nw src/*cpp src/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h src/LLDLA/*cpp src/LLDLA/*h makefile
+	emacs -nw src/*cpp src/*h src/linearization/*cpp src/linearization/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h src/LLDLA/*cpp src/LLDLA/*h makefile
 
 opencpp:
-	emacs -nw src/*cpp src/DLA/*cpp src/tensors/*cpp src/LLDLA/*cpp
+	emacs -nw src/*cpp src/linearization/*cpp src/DLA/*cpp src/tensors/*cpp src/LLDLA/*cpp
 
 openh:
-	emacs -nw src/*h src/DLA/*h src/tensors/*h src/LLDLA/*h
+	emacs -nw src/*h src/linearization/*h src/DLA/*h src/tensors/*h src/LLDLA/*h
