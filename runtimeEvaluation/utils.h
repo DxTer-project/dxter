@@ -1,7 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-//#include <malloc.h>
 #include <math.h>
 #include <pmmintrin.h>
 #include <stdio.h>

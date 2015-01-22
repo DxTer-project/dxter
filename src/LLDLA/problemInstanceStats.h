@@ -22,6 +22,8 @@
 #ifndef PROBLEM_INSTANCE_STATS_H_
 #define PROBLEM_INSTANCE_STATS_H_
 
+#include <memory>
+
 #include "base.h"
 #include "implementationStats.h"
 #include "problemInstance.h"
@@ -32,7 +34,7 @@
 class ProblemInstanceStats {
 
  private:
-  string* m_name;
+  unique_ptr<string> m_name;
   Type m_type;
   Cost m_cost;
 
@@ -42,11 +44,11 @@ class ProblemInstanceStats {
 
   vector<string*>* m_dimNames;
   vector<int>* m_dimValues;
-  vector<ImplementationStats*>* m_implementationStats;
+  vector<unique_ptr<ImplementationStats>> m_implementationStats;
 
-  vector<string*>* AllDimNames(ProblemInstance* problemInstance);
+  vector<string*> AllDimNames(ProblemInstance* problemInstance);
   void ComputeBestAndWorstImplementations(Type type);
-  vector<ImplementationStats*>* ComputeImplementationStats(ImplementationRuntimeMap* impls);
+  void ComputeImplementationStats(ImplementationRuntimeMap* impls);
 
  public:
   ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);

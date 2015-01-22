@@ -105,13 +105,13 @@ void RunBenchmark() {
   DotProductBenchmark(REAL_SINGLE);
   DotProductBenchmark(REAL_DOUBLE);
 
-  AxpyBenchmark(REAL_SINGLE, ROWVECTOR);
+  /*  AxpyBenchmark(REAL_SINGLE, ROWVECTOR);
   AxpyBenchmark(REAL_SINGLE, COLVECTOR);
   AxpyBenchmark(REAL_DOUBLE, ROWVECTOR);
   AxpyBenchmark(REAL_DOUBLE, COLVECTOR);
 
   GemvBenchmark(REAL_SINGLE, false, 16, 16, 16, 16);
-  GemvBenchmark(REAL_DOUBLE, false, 16, 16, 16, 16);
+  GemvBenchmark(REAL_DOUBLE, false, 16, 16, 16, 16);*/
 
   cout << "\n=========================================================================\n";
   cout << "======================== DONE WITH LLDLA BENCHMARK ======================\n";

@@ -46,7 +46,6 @@ enum SizesType { MIDSIZES,
              -> m_valB is end
              -> m_valC is stride  
 */
-  
 
 //Iterator for Sizes
 class SizesIter

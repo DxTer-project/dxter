@@ -81,4 +81,25 @@ string NoWhitespace(const string str) {
   return str;
 }
 
+string UtilsIncludesAndDefines() {
+  return "#include <math.h>\n#include <pmmintrin.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <string.h>\n#define VEC_PD_LOAD(ptr) _mm_load_pd((ptr))\n#define VEC_DUP_LOAD(ptr) _mm_loaddup_pd((ptr))\n#define VEC_D_LOAD(ptr1, ptr2) _mm_loadh_pd(_mm_load_sd((ptr1)), (ptr2));\n#define VEC_PD_STORE(ptr, vec_reg) _mm_store_pd((ptr), (vec_reg))\ntypedef union	{\n__m128d v;\ndouble d[2];\n} v2df_t;\n";
+}
+
+string Rdtsc() {
+  return "unsigned long long rdtsc() {unsigned long long int x;unsigned a, d;__asm__ volatile(\"rdtsc\" : \"=a\" (a), \"=d\" (d));return ((unsigned long long)a) | (((unsigned long long)d) << 32);}";
+}
+
+string UtilFuncs() {
+  cout << "ERROR: UtilFuncs() is not implemented yet." << endl;
+  throw;
+  return "";
+}
+
+string Utils() {
+  string utils = UtilsIncludesAndDefines();
+  utils += Rdtsc();
+  utils += UtilFuncs();
+  return utils;
+}
+
 #endif // DOLLDLA

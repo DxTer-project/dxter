@@ -27,7 +27,6 @@
 #include "DLAOp.h"
 #include "LLDLA.h"
 
-
 class TempVarNode : public DLANode
 {
  public:
@@ -87,7 +86,6 @@ class TempVarNode : public DLANode
   virtual bool IsDataDependencyOfInput() const {return false;}
 };
 
-#if DOTENSORS
 class MoveTempVarNodeIntoLoop : public SingleTrans
 {
  public:
@@ -95,4 +93,3 @@ class MoveTempVarNodeIntoLoop : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };
-#endif //DOTENSORS
