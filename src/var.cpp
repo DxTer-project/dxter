@@ -355,14 +355,14 @@ void Var::PrintDecl(IndStream &out) const
       {
 	out.Indent();
 	string name = GetVarName();
-	*out << "std::vector<ModeArray> " << name << ";\n";
+	*out << "std::vector<ModeArray> " << name << "( " << m_entryVec->size() << " );\n";
 	DistEntryVecIter iter = m_entryVec->begin();
-	for(; iter != m_entryVec->end(); ++iter) {
+	for(int i = 0; iter != m_entryVec->end(); ++iter, ++i) {
 	  DistEntry entry = *iter;
 	  out.Indent();
-	  *out << name << ".push_back(" <<
-	    ModeArrayVarName(entry.DistEntryDims()) 
-	       << ");\n";
+	  *out << name << "[" << i << "] = "
+	       << ModeArrayVarName(entry.DistEntryDims()) 
+	       << ";\n";
 	}
 	break;
       }
@@ -370,12 +370,12 @@ void Var::PrintDecl(IndStream &out) const
       {
 	out.Indent();
 	string name = GetVarName();
-	*out << "ModeArray " << name << ";\n";
+	*out << "ModeArray " << name << "( " << m_vec->size() << " );\n";
 	DimVecConstIter iter = m_vec->begin();
-	for(; iter != m_vec->end(); ++iter) {
+	for(int i = 0; iter != m_vec->end(); ++iter, ++i) {
 	  out.Indent();
-	  *out << name << ".push_back("
-	       << *iter << ");\n";
+	  *out << name << "[" << i << "] = "
+	       << *iter << ";\n";
 	}
 	break;
       }
@@ -383,12 +383,12 @@ void Var::PrintDecl(IndStream &out) const
       {
 	out.Indent();
 	string name = GetVarName();
-	*out << "Permutation " << name << ";\n";
+	*out << "Permutation " << name << "( " << m_vec->size() << " );\n";
 	DimVecConstIter iter = m_vec->begin();
-	for(; iter != m_vec->end(); ++iter) {
+	for(int i = 0; iter != m_vec->end(); ++iter,++i) {
 	  out.Indent();
-	  *out << name << ".push_back("
-	       << *iter << ");\n";
+	  *out << name << "[" << i << "] = "
+	       << *iter << ";\n";
 	}
 	break;
       }
