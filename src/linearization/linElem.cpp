@@ -22,10 +22,10 @@
 
 #include "linElem.h"
 
-bool LinElem::CanPrint() const
+bool LinElem::CanAddToLinearOrder() const
 {
   for(auto input : m_inputs) {
-    if (!input->HasPrinted())
+    if (!input->HasAdded())
       return false;
   }
   return true;

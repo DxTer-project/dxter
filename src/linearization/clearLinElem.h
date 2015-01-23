@@ -21,33 +21,16 @@
 
 #pragma once
 
-#include "base.h"
+#include "linElem.h"
 
-class LinElem;
-
-typedef std::vector<LinElem*> LinElemVec;
-typedef LinElemVec::iterator LinElemVecIter;
-typedef LinElemVec::const_iterator LinElemVecConstIter;
-
-class LinElem
+class ClearLinElem : public LinElem
 {
  public:
-  LinElemVec m_children;
-  LinElemVec m_inputs;
-  bool m_addedToLinOrder;
+  string m_name;
 
- LinElem() : m_addedToLinOrder(false) {}
-  virtual ~LinElem() {}
+ ClearLinElem(string &name) : m_name(name) {}
+ ClearLinElem(const ClearLinElem &clear) : m_name(clear.m_name) {}
+  virtual bool IsClear() const {return true;}
 
-  void AddInputIfUnique(LinElem *elem);
-  void AddChildIfUnique(LinElem *elem);
-
-  inline bool HasAdded() const {return m_addedToLinOrder;}
-  inline void SetAdded() {m_addedToLinOrder = true;} 
-  inline void ClearAdded() {m_addedToLinOrder = false;} 
-
-  virtual void Print() = 0;
-  bool CanAddToLinearOrder() const;
-
-  virtual bool IsClear() const {return false;}
+  virtual void Print();
 };

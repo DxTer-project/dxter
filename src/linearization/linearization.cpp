@@ -20,6 +20,7 @@
 */
 
 #include "linearization.h"
+#include "clearLinElem.h"
 
 Linearization::~Linearization()
 {
@@ -28,9 +29,10 @@ Linearization::~Linearization()
   }
   m_clears.clear();
   m_order.clear();
+  m_cost = 0;
 }
 
-void InsertVecClearing()
+void Linearization::InsertVecClearing()
 {
   /*
     go through the list and find the diff between
@@ -40,4 +42,34 @@ void InsertVecClearing()
     ommit if a variable is still found in an outer linearization
   */
   throw;  
+}
+
+Cost Linearization::Cost() 
+{
+  if (m_cost <= 0) {
+    throw;
+  }
+  else
+    return m_cost;
+}
+
+void Linearization::operator=(const Linearization &rhs)
+{
+  if (m_clears.empty()) {
+    m_order = rhs.m_order;
+  }
+  else {
+    m_order.reserve(rhs.m_order.size());
+    m_clears.reserve(rhs.m_clears.size());
+    for(auto elem : rhs.m_order) {
+      if (elem->IsClear()) {
+	ClearLinElem *clear = new ClearLinElem(*((ClearLinElem*)elem));
+	m_order.push_back(clear);
+	m_clears.push_back(clear);
+      }
+      else {
+	m_order.push_back(elem);
+      }
+    }
+  }
 }

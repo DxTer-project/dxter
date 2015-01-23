@@ -38,6 +38,8 @@ class Linearizer
   Linearizer(const Poss *poss);
   ~Linearizer();
 
+  void FindOptimalLinearization(Linearization &opt);
+
   LinElem* FindOrAdd(const Node *node, PtrToLinElemMap &map);
   LinElem* FindOrAdd(const BasePSet *set, PtrToLinElemMap &map);
 };

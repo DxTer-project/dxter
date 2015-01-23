@@ -26,6 +26,9 @@
 #include "BasePSet.h"
 #include "node.h"
 
+void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt) ;
+void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt) ;
+
 Linearizer::Linearizer(const Poss *poss)
 {
   PtrToLinElemMap map;
@@ -36,7 +39,6 @@ Linearizer::Linearizer(const Poss *poss)
     FindOrAdd(set, map);
   }
 }
-
 
 LinElem* Linearizer::FindOrAdd(const Node *node, PtrToLinElemMap &map)
 {
@@ -104,3 +106,76 @@ LinElem* Linearizer::FindOrAdd(const BasePSet *set, PtrToLinElemMap &map)
   
   return elem;
 }
+
+void Linearizer::FindOptimalLinearization(Linearization &opt)
+{
+  opt.m_cost = 0;
+
+  LinElemVec readyToAdd;
+
+  for(auto elem : m_elems) {
+    if (elem->m_inputs.empty()) {
+      readyToAdd.push_back(elem);
+    }
+  }
+
+  if (readyToAdd.empty())
+    throw;
+
+  Linearization curr;
+
+  RecursivelyFindOpt(curr, readyToAdd, opt);
+
+  if (!curr.m_order.empty())
+    throw;
+
+  if (opt.Cost() <= 0)
+    throw;
+
+  if (opt.m_order.size() != m_elems.size())
+    throw;
+}
+
+void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt) 
+{
+  if (readyToAdd.empty()) {
+    if (opt.m_cost == 0) 
+      opt = curr;
+    else {
+      if (opt.m_order.size() != curr.m_order.size())
+	throw;
+      if (opt.Cost() > curr.Cost())
+	opt = curr;
+    }
+  }
+  else {
+    for(unsigned int i = 0; i < readyToAdd.size(); ++i) {
+      LinElemVec newReadyToAdd = readyToAdd;
+      newReadyToAdd.erase(newReadyToAdd.begin()+i);
+      LinElem *currAdd = readyToAdd[i];
+
+      AddAndRecurse(curr, newReadyToAdd, currAdd, opt); 
+    }
+  }
+}
+
+void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt) 
+{
+  curr.m_order.push_back(currAdd);
+  currAdd->SetAdded();
+  if (currAdd->m_children.size() != 1) {
+    for(auto child : currAdd->m_children) {
+      if (child->CanAddToLinearOrder()) {
+	readyToAdd.push_back(child);
+      }
+    }
+    RecursivelyFindOpt(curr, readyToAdd, opt);
+  }
+  else if (currAdd->m_children.size() == 1) {
+    AddAndRecurse(curr, readyToAdd, currAdd->m_children[0], opt);
+  }
+  currAdd->ClearAdded();
+  curr.m_order.pop_back();
+}
+
+

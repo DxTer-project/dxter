@@ -35,6 +35,14 @@ class Linearization
   LinElemVec m_order;
   LinElemVec m_clears;
 
+  Cost m_cost;
+
   ~Linearization();
+
   void InsertVecClearing();
+  Cost Cost();
+  
+  void Push(LinElem *elem);
+  void PopNonClear();
+  void operator=(const Linearization &rhs);
 };
