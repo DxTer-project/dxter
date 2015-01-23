@@ -70,6 +70,7 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
 
   NodeLinElem *elem = new NodeLinElem(node);
   map[node] = elem;
+  m_elems.push_back(elem);
 
   for(auto inputConn : node->m_inputs) {
     LinElem *inElem = FindOrAdd(inputConn->m_n, map);
@@ -114,6 +115,7 @@ LinElem* Linearizer::FindOrAdd(BasePSet *set, PtrToLinElemMap &map)
   
   SetLinElem *elem = new SetLinElem(set);
   map[set] = elem;
+  m_elems.push_back(elem);
 
   for(auto inTun : set->m_inTuns) {
     for(auto inputConn : inTun->m_inputs) {
@@ -170,7 +172,7 @@ void Linearizer::FindOptimalLinearization()
   LinElemVec readyToAdd;
 
   for(auto elem : m_elems) {
-    if (elem->m_inputs.empty()) {
+    if (elem->CanAddToLinearOrder()) {
       readyToAdd.push_back(elem);
     }
   }
@@ -247,7 +249,7 @@ void Linearizer::FindAnyLinearization()
   LinElemVec readyToAdd;
 
   for(auto elem : m_elems) {
-    if (elem->m_inputs.empty()) {
+    if (elem->CanAddToLinearOrder()) {
       readyToAdd.push_back(elem);
     }
   }
@@ -256,6 +258,7 @@ void Linearizer::FindAnyLinearization()
     LinElem *elem = readyToAdd.back();
     readyToAdd.pop_back();
     m_lin.m_order.push_back(elem);
+    elem->SetAdded();
     for(auto succ : elem->m_succs) {
       if (succ->CanAddToLinearOrder())
 	readyToAdd.push_back(succ);
@@ -266,15 +269,19 @@ void Linearizer::FindAnyLinearization()
     }
   }
 
-  if (m_lin.m_order.size() != m_elems.size())
+  if (m_lin.m_order.size() != m_elems.size()) {
+    PrintConnections();
     throw;
+  }
 }
 
 void Linearizer::ClearCurrLinearization()
 {
   m_lin.Clear();
-  for(auto elem : m_elems)
+  for(auto elem : m_elems) {
     elem->ClearCache();
+    elem->ClearAdded();
+  }
 }
 
 bool Linearizer::HasCurrLinearization() const
@@ -294,4 +301,17 @@ void Linearizer::InsertVecClearing(const StrSet &stillLive)
   if (!HasCurrLinearization())
     throw;
   m_lin.InsertVecClearing(stillLive);
+}
+
+void Linearizer::PrintConnections() const
+{
+  for(auto elem : m_elems) {
+    cout << elem << ":\n";
+    for(auto in : elem->m_inputs) {
+      cout << "\tin:\t" << in << endl;
+    }
+    for(auto child : elem->m_children) {
+      cout << "\tout:\t" << child << endl;
+    }
+  }
 }

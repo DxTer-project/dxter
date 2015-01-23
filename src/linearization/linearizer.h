@@ -51,4 +51,6 @@ class Linearizer
 
   LinElem* FindOrAdd(Node *node, PtrToLinElemMap &map);
   LinElem* FindOrAdd(BasePSet *set, PtrToLinElemMap &map);
+
+  void PrintConnections() const;
 };
