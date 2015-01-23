@@ -20,8 +20,66 @@
 */
 
 #include "nodeLinElem.h"
+#include "node.h"
+#include "DLANode.h"
 
 void NodeLinElem::Print()
 {
   throw;
+}
+
+StrVec NodeLinElem::PossiblyDyingVars() const
+{
+  string out;
+  switch (m_node->NumOutputs())
+    {
+    case (0):
+      break;
+    case (1):
+      if (m_children.size() > 1)
+	out = m_node->GetNameStr(0);
+      break;
+    default:
+      throw;
+    }
+  StrVec list;
+  for(auto conn : m_node->m_inputs) {
+    string name = conn->m_n->GetNameStr(conn->m_num);
+    if (name != out)
+      list.push_back(name);
+  }
+  return list;
+}
+
+VarCostMap NodeLinElem::NewVars() const
+{
+  VarCostMap map;
+  switch (m_node->NumOutputs())
+    {
+    case (0):
+      return map;
+    case (1): 
+      {
+	string out = m_node->GetNameStr(0);
+	for(unsigned int i = 0; i < m_node->m_inputs.size(); ++i) {
+	  if (out == m_node->GetInputNameStr(i)) {
+	    return map;
+	  }
+	}
+	map[m_node->GetNameStr(0)] = ((DLANode*)m_node)->MaxNumberOfLocalElements(0);
+	return map;
+      }
+    default:
+      throw;
+    }
+}
+
+bool NodeLinElem::UsesInputVar(const string &var) const
+{
+  for(auto conn : m_node->m_inputs) {
+    string name = conn->m_n->GetNameStr(conn->m_num);
+    if (name == var)
+      return true;
+  }
+  return false;
 }

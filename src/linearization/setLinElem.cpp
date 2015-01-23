@@ -21,8 +21,64 @@
 
 
 #include "setLinElem.h"
+#include "tunnel.h"
+#include "basePSet.h"
 
 void SetLinElem::Print()
 {
   throw;
+}
+
+
+StrVec SetLinElem::PossiblyDyingVars() const
+{
+  StrVec list;
+  for(auto inTun : m_set->m_inTuns) {
+    string inName = inTun->GetInputNameStr(0);
+    bool alsoOutput = false;
+    for(auto outTun : m_set->m_outTuns) {
+      string outName = outTun->GetNameStr(0);
+      if (inName == outName) {
+	  if (outTun->m_children.size()) {
+	    alsoOutput = true;
+	    break;
+	  }
+      }
+    }
+    if (!alsoOutput)
+      list.push_back(inName);
+  }
+  return list;
+}
+
+VarCostMap SetLinElem::NewVars() const
+{
+  VarCostMap map;
+  for(auto outTun : m_set->m_outTuns) {
+    if (outTun->m_children.size()) {
+      string outName = outTun->GetNameStr(0);
+      bool alsoInput = false;
+      for(auto inTun : m_set->m_inTuns) {
+	string inName = inTun->GetInputNameStr(0);
+	if (inName == outName) {
+	  alsoInput = true;
+	  break;
+	}
+      }
+      if (!alsoInput) {
+	map[outName] = ((DLANode*)outTun)->MaxNumberOfLocalElements(0);
+      }
+    }
+  }
+  return map;
+}
+
+bool SetLinElem::UsesInputVar(const string &var) const
+{
+  for(auto inTun : m_set->m_inTuns) {
+    if (inTun->GetInputNameStr(0) == var) {
+      return true;
+    }
+  }
+  return false;
 }

@@ -35,4 +35,7 @@ class SetLinElem : public LinElem
  SetLinElem(const BasePSet *set) : LinElem(), m_set(set) {}
   
   virtual void Print();
+  virtual StrVec PossiblyDyingVars() const;
+  virtual VarCostMap NewVars() const;
+  virtual bool UsesInputVar(const string &var) const;
 };

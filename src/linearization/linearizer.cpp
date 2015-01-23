@@ -129,7 +129,7 @@ void Linearizer::FindOptimalLinearization(Linearization &opt)
   if (!curr.m_order.empty())
     throw;
 
-  if (opt.Cost() <= 0)
+  if (opt.GetCost() <= 0)
     throw;
 
   if (opt.m_order.size() != m_elems.size())
@@ -144,7 +144,7 @@ void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linea
     else {
       if (opt.m_order.size() != curr.m_order.size())
 	throw;
-      if (opt.Cost() > curr.Cost())
+      if (opt.GetCost() > curr.GetCost())
 	opt = curr;
     }
   }

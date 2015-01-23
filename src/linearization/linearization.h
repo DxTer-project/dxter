@@ -40,7 +40,8 @@ class Linearization
   ~Linearization();
 
   void InsertVecClearing();
-  Cost Cost();
+  Cost GetCost();
+  
   
   void Push(LinElem *elem);
   void PopNonClear();

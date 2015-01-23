@@ -30,7 +30,11 @@ class ClearLinElem : public LinElem
 
  ClearLinElem(string &name) : m_name(name) {}
  ClearLinElem(const ClearLinElem &clear) : m_name(clear.m_name) {}
+  
   virtual bool IsClear() const {return true;}
 
   virtual void Print();
+  virtual StrVec PossiblyDyingVars() const {throw;}
+  virtual VarCostMap NewVars() const {throw;}
+  virtual bool UsesInputVar(const string &var) const {throw;}
 };

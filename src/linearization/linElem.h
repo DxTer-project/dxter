@@ -28,6 +28,9 @@ class LinElem;
 typedef std::vector<LinElem*> LinElemVec;
 typedef LinElemVec::iterator LinElemVecIter;
 typedef LinElemVec::const_iterator LinElemVecConstIter;
+typedef std::map<string, Cost> VarCostMap;
+typedef VarCostMap::iterator VarCostMapIter;
+
 
 class LinElem
 {
@@ -46,8 +49,12 @@ class LinElem
   inline void SetAdded() {m_addedToLinOrder = true;} 
   inline void ClearAdded() {m_addedToLinOrder = false;} 
 
-  virtual void Print() = 0;
   bool CanAddToLinearOrder() const;
 
   virtual bool IsClear() const {return false;}
+
+  virtual void Print() = 0;
+  virtual StrVec PossiblyDyingVars() const = 0;
+  virtual VarCostMap NewVars() const = 0;
+  virtual bool UsesInputVar(const string &var) const = 0;
 };

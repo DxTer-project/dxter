@@ -34,4 +34,7 @@ class NodeLinElem : public LinElem
  NodeLinElem(const Node *node) : LinElem(), m_node(node) {}
   
   virtual void Print();
+  virtual StrVec PossiblyDyingVars() const;
+  virtual VarCostMap NewVars() const;
+  virtual bool UsesInputVar(const string &var) const;
 };

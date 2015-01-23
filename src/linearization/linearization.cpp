@@ -21,6 +21,7 @@
 
 #include "linearization.h"
 #include "clearLinElem.h"
+#include "base.h"
 
 Linearization::~Linearization()
 {
@@ -44,13 +45,62 @@ void Linearization::InsertVecClearing()
   throw;  
 }
 
-Cost Linearization::Cost() 
+Cost Linearization::GetCost() 
 {
   if (m_cost <= 0) {
-    throw;
+    if (!m_clears.empty())
+      throw;
+    m_cost = 0;
+    Cost currCost = 0;
+    VarCostMap map;
+    LinElemVecIter iter = m_order.begin();
+    for( ; iter != m_order.end(); ++iter) {
+      LinElem *elem = *iter;
+
+      VarCostMap newVars = elem->NewVars();
+      map.insert(newVars.begin(), newVars.end());
+      for(auto &var : map) {
+#if !DOTENSORS
+	throw;
+	/*
+	  for domains other than tensors, we could be
+	  in a loop where one variable is increasing
+	  in size while another is decreasing.  If this
+	  is the case, then the summ of their 
+	  max size across iterations is about double
+	  what their actual max size is
+	*/
+#endif
+	currCost += var.second;
+      }
+      if (currCost > m_cost) {
+	m_cost = currCost;
+      }
+
+      StrVec possiblyDyingVars = elem->PossiblyDyingVars();
+      for(int i = 0; i < possiblyDyingVars.size(); ++i) {
+	string var = possiblyDyingVars[i];
+	LinElemVecIter iter2 = iter;
+	++iter2;
+	for(; iter2 != m_order.end(); ++iter2) {
+	  if ((*iter2)->UsesInputVar(var)) {
+	    possiblyDyingVars.erase(possiblyDyingVars.begin()+i);
+	    --i;
+	    break;
+	  }
+	}
+      }
+      //at this point all vars in possiblyDyingVars are actually dying
+      for (auto var : possiblyDyingVars) {
+	VarCostMapIter find = map.find(var);
+	if (find == map.end())
+	  throw;
+	m_cost -= find->second;
+	map.erase(find);
+      }
+    }
   }
-  else
-    return m_cost;
+  return m_cost;
 }
 
 void Linearization::operator=(const Linearization &rhs)
