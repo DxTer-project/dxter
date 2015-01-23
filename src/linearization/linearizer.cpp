@@ -199,8 +199,9 @@ void Linearizer::FindOptimalLinearization()
 void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt) 
 {
   if (readyToAdd.empty()) {
-    if (opt.m_cost == 0) 
+    if (opt.m_cost == 0) {
       opt = curr;
+    }
     else {
       if (opt.m_order.size() != curr.m_order.size())
 	throw;
@@ -223,7 +224,7 @@ void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd
 {
   curr.m_order.push_back(currAdd);
   currAdd->SetAdded();
-  if (currAdd->m_children.size() != 1 || !currAdd->m_succs.empty()) {
+  if (currAdd->m_children.size() > 1 || !currAdd->m_succs.empty()) {
     for(auto child : currAdd->m_children) {
       if (child->CanAddToLinearOrder()) {
 	readyToAdd.push_back(child);
@@ -237,7 +238,14 @@ void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd
     RecursivelyFindOpt(curr, readyToAdd, opt);
   }
   else if (currAdd->m_children.size() == 1) {
-    AddAndRecurse(curr, readyToAdd, currAdd->m_children[0], opt);
+    LinElem *child = currAdd->m_children[0];
+    if (child->CanAddToLinearOrder())
+      AddAndRecurse(curr, readyToAdd, child, opt);
+    else
+      RecursivelyFindOpt(curr, readyToAdd, opt);
+  }
+  else {
+    RecursivelyFindOpt(curr, readyToAdd, opt);
   }
   currAdd->ClearAdded();
   curr.m_order.pop_back();
