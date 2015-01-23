@@ -33,7 +33,7 @@ class ClearLinElem : public LinElem
   
   virtual bool IsClear() const {return true;}
 
-  virtual void Print();
+  virtual void Print(IndStream &out);
   virtual StrVec PossiblyDyingVars() const {throw;}
   virtual StrSet NewVars() const {throw;}
   virtual VarCostMap NewVarsAndCosts() const {throw;}

@@ -1,9 +1,10 @@
 #include "clearLinElem.h"
 
-void ClearLinElem::Print()
+void ClearLinElem::Print(IndStream &out)
 {
 #if DOTENSORS
-  throw;
+  out.Indent();
+  *out << m_name << ".EmptyData();\n";
 #else
   throw;
 #endif  

@@ -57,8 +57,7 @@ class NodeConn {
 };
 
 #define NODEBUILDFLAG (1L<<1)
-#define NODEPRINTEDFLAG (1L<<2)
-#define NODEHASREFINEDFLAG (1L<<3)
+#define NODEHASREFINEDFLAG (1L<<2)
 
 class DataTypeInfo;
 class RealLoop;
@@ -144,8 +143,7 @@ class Node
   virtual bool operator==(const Node &rhs) const;
   virtual bool operator!=(const Node &rhs) const {return !(*this == rhs);}
   void PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound = false);
-  virtual void Print(IndStream &out, GraphNum graphNum, const GraphIter *graphIter);
-  bool CanPrintCode(const GraphIter *graphIter) const;
+  void Print(IndStream &out);
   void AddInput(Node *node);
   void AddInputs(int numArgs, ...);
   void AddInputs0(int numArgs, ...);
@@ -165,15 +163,12 @@ class Node
   string GetNameStr(ConnNum num) const {return GetName(num).str();}
   Name GetInputName(ConnNum num) const;
   string GetInputNameStr(ConnNum num) const {return GetInputName(num).str();}
-  inline void ClearPrinted() {m_flags &= ~NODEPRINTEDFLAG;}
-  inline void SetPrinted() {m_flags |= NODEPRINTEDFLAG;} 
-  inline bool HasPrinted() const {return m_flags & NODEPRINTEDFLAG;}
+
   inline void ClearHasRefined() {m_flags &= ~NODEHASREFINEDFLAG;}
   inline void SetHasRefined() {m_flags |= NODEHASREFINEDFLAG;}
   inline bool HasRefined() const {return m_flags & NODEHASREFINEDFLAG;}
   Node* Input(ConnNum num) const;
   NodeConn* InputConn(ConnNum num) const;
-  void PrintEmptyStatementIfOK(IndStream &out) const;
   //output number of the input taken as input
   ConnNum InputConnNum(ConnNum num) const;
   Node* Child(unsigned int num) const;

@@ -226,54 +226,17 @@ void Poss::ForcePrint()
 {
   ClearBeforeProp();
   Prop();
-  bool hasPrinted = true;
-  ClearNodesPrinted();
-  //  NodeVecConstIter iter = m_inTuns.begin();
-  //  for( ; iter != m_inTuns.end(); ++iter)
-    //    (*iter)->SetPrinted();
-  for (auto tun : m_inTuns)
-    tun->SetPrinted();
 
-  while(hasPrinted) {
-    hasPrinted = false;
-    //    NodeVecConstIter nodeIter = m_possNodes.begin();
-    //    for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
-      /*
-      if (!(*nodeIter)->HasPrinted()) {
+  Linearizer lin(this);
+  lin.FindAnyLinearization();
+
 #ifdef DOELEM
-        IndStream out(&cout,ELEMSTREAM);
+  IndStream out(&cout,ELEMSTREAM);
 #elif DOSQM
-        IndStream out(&cout,BLISSTREAM);
+  IndStream out(&cout,BLISSTREAM);
 #endif
-        (*nodeIter)->Print(out, 1, NULL);
-        hasPrinted |= (*nodeIter)->HasPrinted();
-      }
-      */
-    for (auto node : m_possNodes) {
-      if (!node->HasPrinted()) {
-#ifdef DOELEM
-        IndStream out(&cout,ELEMSTREAM);
-#elif DOSQM
-        IndStream out(&cout,BLISSTREAM);
-#endif
-        node->Print(out, 1, NULL);
-        hasPrinted |= node->HasPrinted();
-      }
 
-    }
-  }
-}
-
-bool Poss::CanPrint() const
-{
-  //  NodeVecConstIter iter = m_inTuns.begin();
-  //  for( ; iter != m_inTuns.end(); ++iter) {
-  for (auto tunnel : m_inTuns) {
-    if (!tunnel->CanPrintCode(NULL)) {
-      return false;
-    }
-  }
-  return true;
+  lin.m_lin.Print(out);
 }
 
 void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useShadows)
@@ -662,12 +625,6 @@ bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
   return didSomething;
 }
 
-void Poss::ClearNodesPrinted()
-{
-  NodeVecConstIter nodeIter = m_possNodes.begin();
-  for( ; nodeIter != m_possNodes.end(); ++nodeIter)
-    (*nodeIter)->ClearPrinted();
-}
 
 
 void Poss::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound)
@@ -2607,14 +2564,6 @@ void Poss::ClearFullyExpanded()
     }
   }
   m_fullyExpanded = false;
-}
-
-
-void Poss::ClearPrintedFromGraph()
-{
-  NodeVecConstIter nodeIter = m_possNodes.begin();
-  for( ; nodeIter != m_possNodes.end(); ++nodeIter)
-    (*nodeIter)->ClearPrinted();
 }
 
 GraphNum Poss::TotalCount() const

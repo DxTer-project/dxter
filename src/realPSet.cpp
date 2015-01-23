@@ -2233,14 +2233,6 @@ void RealPSet::RemoveShadow(ShadowPSet *shadow)
   throw;
 }
 
-void RealPSet::SetInTunsAsPrinted()
-{
-  NodeVecIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter)
-    (*iter)->SetPrinted();  
-}
-
-
 ShadowPSet* RealPSet::GetNewShadowDup(Poss *poss)
 {
   ShadowPSet *shadow = GetNewShadow();

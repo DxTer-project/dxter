@@ -23,9 +23,9 @@
 #include "node.h"
 #include "DLANode.h"
 
-void NodeLinElem::Print()
+void NodeLinElem::Print(IndStream &out)
 {
-  throw;
+  m_node->Print(out);
 }
 
 StrVec NodeLinElem::PossiblyDyingVars() const

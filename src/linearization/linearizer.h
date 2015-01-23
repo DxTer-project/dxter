@@ -29,6 +29,8 @@
 
 typedef std::map<const void*,LinElem*> PtrToLinElemMap;
 typedef PtrToLinElemMap::iterator PtrToLinElemMapIter;
+typedef std::set<LinElem*> LinElemSet;
+typedef LinElemSet::iterator LinElemSetIter;
 
 class Linearizer
 {
@@ -47,6 +49,6 @@ class Linearizer
 
   void InsertVecClearing(const StrSet &stillLive);
 
-  LinElem* FindOrAdd(const Node *node, PtrToLinElemMap &map);
+  LinElem* FindOrAdd(Node *node, PtrToLinElemMap &map);
   LinElem* FindOrAdd(BasePSet *set, PtrToLinElemMap &map);
 };

@@ -40,7 +40,7 @@ Linearizer::Linearizer(const Poss *poss)
   }
 }
 
-LinElem* Linearizer::FindOrAdd(const Node *node, PtrToLinElemMap &map)
+LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
 {
   PtrToLinElemMapIter find = map.find(node);
   if (find != map.end())
@@ -70,10 +70,31 @@ LinElem* Linearizer::FindOrAdd(const Node *node, PtrToLinElemMap &map)
     if (inElem)
       elem->AddInputIfUnique(inElem);
   }
+
+  if (node->NumOutputs() > 1)
+    throw;
+  
+  LinElem *overwriter = NULL;
+  LinElemSet others;
   for(auto childConn : node->m_children) {
     LinElem *outElem = FindOrAdd(childConn->m_n, map);
-    if (outElem)
+    if (outElem) {
       elem->AddChildIfUnique(outElem);
+      if (childConn->m_n->Overwrites(node, 0)) {
+	if (overwriter) {
+	  if (overwriter != outElem) {
+	    cout << "two children of set overwrite output\n";
+	    throw;
+	  }
+	}
+	else {
+	  overwriter = outElem;
+	}
+      }
+      else {
+	others.insert(outElem);
+      }
+    }
   }
   
   return elem;
@@ -97,10 +118,39 @@ LinElem* Linearizer::FindOrAdd(BasePSet *set, PtrToLinElemMap &map)
   }
 
   for(auto outTun : set->m_outTuns) {
+    LinElem *overwriter = NULL;
+    LinElemSet others;
     for(auto childConn : outTun->m_children) {
       LinElem *outElem = FindOrAdd(childConn->m_n, map);
-      if (outElem)
-	elem->AddChildIfUnique(outElem);
+      if (outElem) {
+	elem->AddChildIfUnique(outElem); 
+	if (childConn->m_n->Overwrites(outTun, childConn->m_num)) {
+	  if (overwriter) {
+	    if (overwriter != outElem) {
+	      cout << "two children of set overwrite output\n";
+	      throw;
+	    }
+	  }
+	  else {
+	    overwriter = outElem;
+	  }
+	}
+	else {
+	  others.insert(outElem);
+	}
+      }
+    }
+    if (overwriter) {
+      LinElemSetIter iter = others.find(overwriter);
+      if (iter != others.end()) {
+	others.erase(iter);
+      }
+      overwriter->m_preds.insert(overwriter->m_preds.begin(),
+				 others.begin(),
+				 others.end());
+      for(auto other : others) {
+	other->m_succs.push_back(overwriter);
+      }
     }
   }
   
@@ -163,10 +213,15 @@ void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd
 {
   curr.m_order.push_back(currAdd);
   currAdd->SetAdded();
-  if (currAdd->m_children.size() != 1) {
+  if (currAdd->m_children.size() != 1 || !currAdd->m_succs.empty()) {
     for(auto child : currAdd->m_children) {
       if (child->CanAddToLinearOrder()) {
 	readyToAdd.push_back(child);
+      }
+    }
+    for (auto succ : currAdd->m_succs) {
+      if (succ->CanAddToLinearOrder()) {
+	readyToAdd.push_back(succ);
       }
     }
     RecursivelyFindOpt(curr, readyToAdd, opt);
@@ -195,6 +250,10 @@ void Linearizer::FindAnyLinearization()
     LinElem *elem = readyToAdd.back();
     readyToAdd.pop_back();
     m_lin.m_order.push_back(elem);
+    for(auto succ : elem->m_succs) {
+      if (succ->CanAddToLinearOrder())
+	readyToAdd.push_back(succ);
+    }
     for(auto child : elem->m_children) {
       if (child->CanAddToLinearOrder())
 	readyToAdd.push_back(child);

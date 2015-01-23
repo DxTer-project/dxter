@@ -36,7 +36,6 @@ class ShadowPSet;
 #define SETISDELETINGFLAG (1L<<3)
 #define SETHASMIGRATED    (1L<<4)
 #define SETCHECKEDFORDUP    (1L<<5)
-#define SETHASPRINTEDFLAG    (1L<<6)
 
 class BasePSet
 {
@@ -61,7 +60,6 @@ class BasePSet
   void RemoveInTun(Node *tun);
   void RemoveOutTun(Node *tun);
   void FormSetAround();
-  bool CanPrint(const GraphIter *graphIter) const;
   virtual BasePSet* GetNewInst() = 0;
   virtual ShadowPSet* GetNewShadow() = 0;
   inline bool IsTopLevel() const { return m_flags & SETTOPLEVELFLAG; }

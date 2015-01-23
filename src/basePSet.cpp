@@ -471,16 +471,6 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
   }
 }
 
-bool BasePSet::CanPrint(const GraphIter *graphIter) const
-{
-  NodeVecConstIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
-    const Node *in = *iter;
-    if (!in->CanPrintCode(graphIter))
-      return false;
-  }
-  return true;
-}
 
 
 #if DOBLIS

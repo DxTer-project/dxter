@@ -37,6 +37,8 @@ class LinElem
  public:
   LinElemVec m_children;
   LinElemVec m_inputs;
+  LinElemVec m_preds;
+  LinElemVec m_succs;
   bool m_addedToLinOrder;
 
  LinElem() : m_addedToLinOrder(false) {}
@@ -53,7 +55,7 @@ class LinElem
 
   virtual bool IsClear() const {return false;}
 
-  virtual void Print() = 0;
+  virtual void Print(IndStream &out) = 0;
   virtual StrVec PossiblyDyingVars() const = 0;
   virtual StrSet NewVars() const = 0;
   virtual VarCostMap NewVarsAndCosts() const = 0;

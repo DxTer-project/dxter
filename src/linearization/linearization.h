@@ -43,9 +43,8 @@ class Linearization
   void InsertVecClearing(const StrSet &stillLive);
   Cost GetCost();
 
-  
-  
   void Push(LinElem *elem);
   void PopNonClear();
   void operator=(const Linearization &rhs);
+  void Print(IndStream &out);
 };

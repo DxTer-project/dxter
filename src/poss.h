@@ -103,7 +103,6 @@ class Poss
   void DeleteChildAndCleanUp(Node *output, bool GoThroughTunnels=false, bool handleTunnelsAsNormalNodes=false, bool stopAtTunnels=false);
   virtual void DeleteNode(Node *node);
   void ForcePrint();
-  bool CanPrint() const;
   virtual bool IsBoundary(Node *node) {return node->IsTunnel();}
   virtual void Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useShadows);
   bool operator==(Poss &rhs);
@@ -151,9 +150,7 @@ class Poss
   void CullWorstPerformers(double percentToCull, int ignoreThreshold);
   void CullAllBut(int num);
   virtual void ClearBeforeProp();
-  virtual void ClearNodesPrinted();
   void ClearFullyExpanded();
-  virtual void ClearPrintedFromGraph();
   string GetFunctionalityString() const;
   GraphNum TotalCount() const;
   bool TakeIter(const TransMap &transMap, const TransMap &simplifiers, 

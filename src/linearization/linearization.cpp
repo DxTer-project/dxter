@@ -153,3 +153,9 @@ void Linearization::operator=(const Linearization &rhs)
     }
   }
 }
+
+void Linearization::Print(IndStream &out)
+{
+  for(auto elem : m_order)
+    elem->Print(out);
+}

@@ -29,11 +29,11 @@ class Node;
 class NodeLinElem : public LinElem
 {
  public:
-  const Node *m_node;
+  Node *m_node;
 
- NodeLinElem(const Node *node) : LinElem(), m_node(node) {}
+ NodeLinElem(Node *node) : LinElem(), m_node(node) {}
   
-  virtual void Print();
+  virtual void Print(IndStream &out);
   virtual StrVec PossiblyDyingVars() const;
   virtual StrSet NewVars() const;
   virtual VarCostMap NewVarsAndCosts() const;

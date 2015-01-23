@@ -28,6 +28,10 @@ bool LinElem::CanAddToLinearOrder() const
     if (!input->HasAdded())
       return false;
   }
+  for(auto pred : m_preds) {
+    if (!pred->HasAdded())
+      return false;
+  }
   return true;
 }
 

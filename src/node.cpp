@@ -318,118 +318,15 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
   }
 }
 
-void Node::Print(IndStream &out, GraphNum graphNum, const GraphIter *graphIter)
+void Node::Print(IndStream &out)
 {
-  if (!HasPrinted()) {
-    if(CanPrintCode(graphIter)) {
-      SetPrinted();
-      PrintCode(out);
+  PrintCode(out);
 #ifdef PRINTCOSTS
-      if (((DLANode*)this)->m_cost) {
-	(*out).precision(10);
-	*out << scientific << "cost of previous node: " << ((DLANode*)this)->m_cost << endl;
-      }
-#endif
-      
-      if (!IsTunnel()) {
-        //If there are redist nodes as my child, go ahead
-        // and print them to make less likely a weird situation
-        // that arrises from DAGs turned into code
-        // where you can have something like
-        // opA(A10_D_VR_STAR)
-        // opB(A10_D_STAR_VR)
-        // A10 = A10_D_VR_STAR
-        // A10 = A10_D_STAR_VR
-        // A10_D_MC_STAR = A10
-        // opC(A10_D_MC_STAR)
-        // the 1st, 3rd, 5th, and 6th lines are a stream
-        // of ops and the 2nd and 4th are, where the
-        // 4th should be the final update of A10
-        //I think this will work often, but not always
-        NodeConnVecConstIter childIter;
-#if DOELEM
-	childIter = m_children.begin();
-        for( ; childIter != m_children.end(); ++childIter) {
-          Node *child = (*childIter)->m_n;
-          if (child->GetNodeClass() == RedistNode::GetClass())
-            child->Print(out, graphNum, graphIter);
-        }
-#endif
-        //Try to print the read-only users of this first
-        childIter = m_children.begin();
-        for( ; childIter != m_children.end(); ++childIter) {
-          Node *child = (*childIter)->m_n;
-          if (!child->IsTunnel() &&
-              (child->Input(child->m_inputs.size()-1) != this))
-          {
-            child->Print(out, graphNum, graphIter);
-#if PRINTEMPTY && (DOLLDLA == 0)
-     	    child->PrintEmptyStatementIfOK(out);
-#endif
-          }
-        }
-      }
-    }
+  if (((DLANode*)this)->m_cost) {
+    (*out).precision(10);
+    *out << scientific << "cost of previous node: " << ((DLANode*)this)->m_cost << endl;
   }
-}
-
-bool Node::CanPrintCode(const GraphIter *graphIter) const
-{
-  NodeConnVecConstIter iter = m_inputs.begin();
-  for( ; iter != m_inputs.end(); ++iter) {
-    const NodeConn *conn = *iter;
-    const Node *input = conn->m_n;
-    ConnNum num = conn->m_num;
-    if (!input->HasPrinted()) {
-      return false;
-    }
-    //If input is SETTUNIN, then this is a POSTUNIN
-    // there will be other children of input that 
-    // also overwrite just like this.
-    else if (!input->IsTunnel(SETTUNIN) && Overwrites(input, num))
-    {
-      NodeConnVecConstIter childIter = input->m_children.begin();
-      for(; childIter != input->m_children.end(); ++childIter) {
-        const NodeConn *childConn = *childIter;
-        const Node *child = childConn->m_n;
-        ConnNum childNum = childConn->m_num;
-        if (childNum == num && child != this && !child->IsTunnel(POSSTUNOUT)) {
-          if (child->Overwrites(input, num)) {
-            cout << "two children of " << input->GetNodeClass() << " overwrite output " << childNum << "\n";
-            cout << GetNodeClass() << endl;
-            cout << child->GetNodeClass() << endl;
-            throw;
-          }
-          else {
-            if (!child->HasPrinted()) {
-              if (IsTunnel(SETTUNIN) && child->IsTunnel(SETTUNIN)) {
-                const Tunnel *tun1 = (Tunnel*)this;
-                const Tunnel *tun2 = (Tunnel*)child;
-                if (tun1->m_pset != tun2->m_pset)
-                  return false;
-              }
-              else
-                return false;
-            }
-            else if (child->IsTunnel(SETTUNIN)) {
-              const Tunnel *tun2 = (Tunnel*)child;
-              const BasePSet *set = tun2->m_pset;
-              if (this->IsTunnel(SETTUNIN)) {
-                if (set == ((Tunnel*)this)->m_pset)
-                  continue;
-              }
-	      unsigned int found = FindInSetVec(graphIter->m_poss->m_sets, set);
-	      const GraphIterPtr subGraphIter = graphIter->m_subIters[found];
-              if (!subGraphIter->m_hasPrinted)
-                return false;
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  return true;
+#endif
 }
 
 void Node::AddInput(Node *node)
@@ -1068,73 +965,7 @@ const int Node::GetVecRegWidth() const
 
 #endif
 
-bool StillNeededToPrint(string name, Poss *poss, const BasePSet *ignore)
-{
-  bool checkUp = false;
-  NodeVecConstIter nodeIter = poss->m_possNodes.begin();
-  for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
-    const Node *node = *nodeIter;
-    if (!node->HasPrinted() || node->IsTunnel(POSSTUNOUT) 
-	|| (node->IsTunnel(SETTUNIN) && 
-	    ((Tunnel*)node)->m_pset != ignore &&
-	    (!(((Tunnel*)node)->m_pset->m_flags & SETHASPRINTEDFLAG))))
-      {
-	for(ConnNum inNum = 0; inNum < node->m_inputs.size(); ++inNum) {
-	  if (node->GetInputNameStr(inNum) == name)
-	    return true;
-	}
-      }
-    else if (node->IsTunnel(POSSTUNIN)) {
-      for(ConnNum outNum = 0; outNum < node->NumOutputs(); ++outNum) {
-	//if the variable came in from outside of the poss, then
-	// it shouldn't be cleared here
-	if (node->GetNameStr(outNum) == name)
-	  checkUp = true;
-      }
-    }
-  }
-  if (checkUp) {
-    if (!poss->m_pset || !poss->m_pset->m_ownerPoss)
-      return false;
-    else
-      return StillNeededToPrint(name, poss->m_pset->m_ownerPoss, ignore);
-  }
-  return false;
-}
 
-void Node::PrintEmptyStatementIfOK(IndStream &out) const
-{
-  if (!IsTunnel(SETTUNOUT)) {
-    StrSet set;
-    for(ConnNum num = 0; num < m_inputs.size(); ++num) {
-      set.insert(GetInputNameStr(num));
-    }
-    if (!IsTunnel(SETTUNIN)) {
-      for(ConnNum num = 0; num < NumOutputs(); ++num) {
-	set.erase(GetNameStr(num));
-      }
-    } 
-      
-    StrSetIter iter = set.begin();
-    for(; iter != set.end(); ++iter) {
-      if (!StillNeededToPrint(*iter, m_poss, NULL)) {
-	out.Indent();
-	*out << *iter << ".EmptyData();\n";
-      }
-    }
-  }
-  else {
-    //    cout << "checking " << GetNameStr(0) << endl;
-    if (!m_children.empty())
-      return;
-    else {
-      if (!StillNeededToPrint(GetNameStr(0), m_poss, ((Tunnel*)this)->m_pset)) {
-	out.Indent();
-	*out << GetNameStr(0) << ".EmptyData();\n";
-      }
-    }
-  }
-}
 
 
 

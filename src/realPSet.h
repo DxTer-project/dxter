@@ -102,7 +102,6 @@ class RealPSet : public BasePSet
   bool SamePSetWRTFunctionality(const RealPSet *other) const;
 #endif
 
-  void SetInTunsAsPrinted();
   bool RemoveLoops(bool *doneSomething);
 
 #if DOBLIS

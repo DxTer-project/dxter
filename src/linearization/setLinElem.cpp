@@ -25,8 +25,9 @@
 #include "basePSet.h"
 #include "linearizer.h"
 
-void SetLinElem::Print()
+void SetLinElem::Print(IndStream &out)
 {
+ 
   throw;
 }
 
