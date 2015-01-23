@@ -32,14 +32,12 @@
 GraphIter::GraphIter(Poss *poss)
 {
   m_poss = NULL;
-  m_hasPrinted = false;
   Init(poss);
 }
 
 GraphIter::GraphIter(const GraphIter &iter) 
 {
   m_poss = NULL;
-  m_hasPrinted = false;
   *this = iter;
 }
 
@@ -65,7 +63,6 @@ void GraphIter::Init(Poss *poss)
     delete [] m_subIters;
   }  
   m_poss = poss;
-  m_hasPrinted = false;
   m_setIters = new PossMMapIter[poss->m_sets.size()];
   m_subIters = new GraphIterPtr[poss->m_sets.size()];
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
@@ -84,7 +81,6 @@ GraphIter& GraphIter::operator=(const GraphIter &rhs)
     delete [] m_subIters;
   }
   m_poss = rhs.m_poss;
-  m_hasPrinted = rhs.m_hasPrinted;
   m_setIters = new PossMMapIter[m_poss->m_sets.size()];
   m_subIters = new GraphIterPtr[m_poss->m_sets.size()];
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
@@ -257,14 +253,11 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
   if (!currOnly)
     Init(m_poss);
 
-  unsigned int numPSets = m_poss->m_sets.size();
-
   bool keepGoing = true;
   GraphNum graphNum = 1;
 
   while (keepGoing) {
     if (currOnly || whichGraph == 0 || whichGraph == graphNum) {
-      ClearPrintedRecursively();
       if (!currOnly)
 	*out << "/*** Algorithm " << graphNum << " ***" << endl;
       else
@@ -290,80 +283,11 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
       for(; varIter != set.end(); ++varIter) {
 	(*varIter).PrintDecl(out);
       }
-      
-      //This actualy sets some stuff so it can print
-      if (!m_poss->CanPrint()) {
-	cout << "couldn't print\n";
-	throw;
-      }
-      
-      NodeVecConstIter nodeIter = m_poss->m_inTuns.begin();
-      for(; nodeIter != m_poss->m_inTuns.end(); ++nodeIter) {
-	(*nodeIter)->Print(out, whichGraph, this);
-      }
-      bool hasPrinted = true;
-      while(hasPrinted) {
-	hasPrinted = false;
-	NodeVecConstIter nodeIter = m_poss->m_possNodes.begin();
-	for( ; nodeIter != m_poss->m_possNodes.end(); ++nodeIter) {
-	  //Don't bring the poss out tunnels until the end
-	  // so the repartitioning code all goes after the loop body
-	  if (!(*nodeIter)->HasPrinted() && !(*nodeIter)->IsTunnel(POSSTUNOUT)) {
-	    (*nodeIter)->Print(out, whichGraph, this);
-	    hasPrinted |= (*nodeIter)->HasPrinted();
-#if PRINTEMPTY && (DOLLDLA == 0)
-	    (*nodeIter)->PrintEmptyStatementIfOK(out);
-#endif
-	  }
-	}
-	for(unsigned int i = 0; i < numPSets; ++i) {
-	  if (!m_subIters[i]->m_hasPrinted &&
-	      m_setIters[i]->second->CanPrint()) 
-	    {
-	      out.Indent();
-	      *out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
-	      m_poss->m_sets[i]->PrePrint(out,m_setIters[i]->second);
-	      ++out;
-	      BasePSet *set = m_poss->m_sets[i];
-	      RealPSet *real = set->GetReal();
-	      real->SetInTunsAsPrinted();
-	      //Do this now so printing within here will properly empty variables
-	      m_poss->m_sets[i]->m_flags |= SETHASPRINTEDFLAG;
-	      m_subIters[i]->Print(out, whichGraph, m_poss->m_sets[i]);
-	      --out;
-	      m_poss->m_sets[i]->PostPrint(out,m_setIters[i]->second);
 
-#if PRINTEMPTY && (DOLLDLA == 0)
-	      NodeVecIter tunnelIter = m_poss->m_sets[i]->m_outTuns.begin();
-	      for(; tunnelIter != m_poss->m_sets[i]->m_outTuns.end(); ++tunnelIter) {
-		(*tunnelIter)->PrintEmptyStatementIfOK(out);
-	      }
-	      tunnelIter = m_poss->m_sets[i]->m_inTuns.begin();
-	      for(; tunnelIter != m_poss->m_sets[i]->m_inTuns.end(); ++tunnelIter) {
-		(*tunnelIter)->PrintEmptyStatementIfOK(out);
-	      }
-#endif
+      StrSet live;
+      Print(out, NULL, live);
 
-	      out.Indent();
-	      *out << "//****\n";
-	      hasPrinted = true;
-	    }
-	}
-      }
-      
-      nodeIter = m_poss->m_outTuns.begin();
-      for(; nodeIter != m_poss->m_outTuns.end(); ++nodeIter) {
-	(*nodeIter)->Print(out, whichGraph, this);
-	(*nodeIter)->SetPrinted();
-      }
-      
-      nodeIter = owner->m_outTuns.begin();
-      for(; nodeIter != owner->m_outTuns.end(); ++nodeIter) {
-	(*nodeIter)->Print(out, whichGraph, this);
-	(*nodeIter)->SetPrinted();
-      }
-      *out << endl;
-      
+
       out.Indent();
       *out << "/*****************************************/" << endl;
       if (whichGraph != 0 || currOnly) {
@@ -375,114 +299,35 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
     if (keepGoing)
       keepGoing = !Increment();
   }
-  m_hasPrinted = true;
 }
 
-void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
+void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet)
 {
-  m_hasPrinted = true;
-  m_poss->ClearPrintedFromGraph();
-  unsigned int numPSets = m_poss->m_sets.size();
+  Linearizer lin(m_poss);
+#if DOTENSORS
+  lin.FindOptimalLinearization();
+  lin.InsertVecClearing(liveSet);
+#else
+  lin.FindAnyLinearization();
+#endif
 
   for(auto in : m_poss->m_inTuns) {
-    in->Print(out, graphNum, this);
-
-    if (!in->HasPrinted()) {
-      cout << "tunnel input " << in->GetType()
-	   << "hasn't printed even though he should have\n";
-    }
+    in->Print(out);
   }
   out.Indent();
   *out << "//------------------------------------//\n" << endl;
-  bool hasPrinted = true;
-  while(hasPrinted) {
-    hasPrinted = false;
-    for(auto node : m_poss->m_possNodes) {
-      //Don't print the poss out tunnels until the end
-      // so the repartitioning code all goes after the loop body
-      if (!node->HasPrinted()
-          && !node->IsTunnel(POSSTUNOUT)
-          && !node->IsTunnel(SETTUNOUT)
-          && node->CanPrintCode(this))
-	{
-	  node->Print(out, graphNum, this);
-	  hasPrinted |= node->HasPrinted();
-#if PRINTEMPTY && (DOLLDLA == 0)
-	  node->PrintEmptyStatementIfOK(out);
-#endif
-	
 
-	}
+  for(auto elem : lin.m_lin.m_order) {
+    if (!elem->IsSet()) {
+      elem->Print(out);
     }
-    for(unsigned int i = 0; i < numPSets; ++i) {
-      if (!m_subIters[i]->m_hasPrinted && m_poss->m_sets[i]->CanPrint(this)) {
-	BasePSet *set = m_poss->m_sets[i];
-	out.Indent();
-	*out << "//**** (out of " << m_poss->m_sets[i]->GetPosses().size() << ")\n";
-	out.Indent();
-	*out << "//**** ";
-	if (set->IsReal()) {
-	  *out << "Is real\t" << ((RealPSet*)set)->m_shadows.size() << " shadows\n";
-	}
-	else {
-	  *out << "Is a shadow\t" << "of " << set->GetReal()->m_shadows.size() << " shadows\n";
-	}
-#if DOTENSORS
-	out.Indent();
-	*out << "\t//Outputs:\n";
-	for(auto node : set->m_outTuns) {
-	  if (!node->m_children.empty()) {
-	    out.Indent();
-	    *out << "\t//  " << node->GetNameStr(0) << endl;
-	  }
-	}
-#endif //DOTENSORS
-	
-	RealPSet *real = set->GetReal();
-	set->m_flags |= SETHASPRINTEDFLAG;
-	
-	if (!real->IsLoop() ||
-	    !((RealLoop*)real)->IsUnrolled()) {
-	  real->PrePrint(out,m_setIters[i]->second);
-	  ++out;
-	  real->SetInTunsAsPrinted();
-	  m_subIters[i]->Print(out, graphNum, set);
-	  --out;
-	  real->PostPrint(out,m_setIters[i]->second);
-	}
-	else {
-	  ++out;
-	  RealLoop *loop = (RealLoop*)real;
-	  SplitSingleIter *con = (SplitSingleIter*)(loop->GetControl());
-	  int numIters = con->NumIters(0);
-	  for(int j = 0; j < numIters; ++j) {
-	    loop->SetCurrIter(j);
-	    out.Indent();
-	    *out << "{\n";
-	    m_subIters[i]->ClearPrintedRecursively();
-	    real->PrePrint(out,m_setIters[i]->second);
-	    real->SetInTunsAsPrinted();
-	    m_subIters[i]->Print(out, graphNum, set);
-	    out.Indent();
-	    *out << "}\n";
-	  }
-	  --out;
-	}
-
-#if PRINTEMPTY && (DOLLDLA == 0)
-	for (auto outTun : m_poss->m_sets[i]->m_outTuns) {
-	  outTun->PrintEmptyStatementIfOK(out);
-	}
-	for (auto inTun : m_poss->m_sets[i]->m_inTuns) { 
-	  inTun->PrintEmptyStatementIfOK(out);
-	}
-#endif
-
-	out.Indent();
-	*out << "//****\n";
-
-        hasPrinted = true;
-      }
+    else {
+      SetLinElem *setElem = (SetLinElem*)elem;
+      unsigned int num = FindInSetVec(m_poss->m_sets, setElem->m_set);
+      GraphIter *subIter = m_subIters[num];
+      Poss *poss = m_setIters[num]->second;
+      
+      setElem->Print(out, subIter, poss);
     }
   }
   
@@ -492,68 +337,16 @@ void GraphIter::Print(IndStream &out, GraphNum &graphNum, BasePSet *owner)
   *out << "//------------------------------------//" << endl;
   
   for(auto outTun : m_poss->m_outTuns) {
-    outTun->Print(out, graphNum, this);
-    outTun->SetPrinted();
+    outTun->Print(out);
   }
   
   for(auto outTun : owner->m_outTuns) {
-    outTun->Print(out, graphNum, NULL);
-    outTun->SetPrinted();
+    outTun->Print(out);
   }
+
   *out << endl;
-
-  bool bad = false;
-  
-  for(auto inTun : m_poss->m_inTuns) {
-    if (!inTun->HasPrinted()) {
-      cout << inTun->GetType() << " hasn't printed\n";
-      bad = true;
-    }
-  }
-  
-  for(unsigned int i = 0; i < numPSets; ++i) {
-    if (!m_subIters[i]->m_hasPrinted) {
-      cout << "set not printed\n";
-      for(unsigned int j = 0; j < m_poss->m_sets[i]->m_inTuns.size(); ++j) {
-        Node *tun = m_poss->m_sets[i]->m_inTuns[j];
-        cout << "in tun " << tun << endl;
-        if (!tun->CanPrintCode(this))
-          cout << "can't print\n";
-      }
-      m_subIters[i]->m_poss->CanPrint();
-      m_subIters[i]->m_poss->ForcePrint();
-      bad = true;
-    }
-  }
-  
-  for(auto node : m_poss->m_possNodes) {
-    if (!node->HasPrinted()) {
-      cout << node->GetType() << " " << node << " hasn't printed\n";
-      cout << "on " << node->m_poss << endl;
-      cout << "Inputs are\n";
-      node->PrintInputs();
-      cout << "Is it possible that the node is read only but ReadOnly doesn't return true?\n\n";
-      bad = true;
-      //      PrintSetConnections();
-    }
-  }
-  
-  if (bad) {
-    cout << this << " is bad\n";
-    cout << "contains " << m_poss->m_sets.size() << " posses\n";
-    throw;
-  }
 }
 
-void GraphIter::ClearPrintedRecursively()
-{
-  m_hasPrinted = false;
-  m_poss->ClearPrintedFromGraph();
-  unsigned int numPSets = m_poss->m_sets.size();
-  for(unsigned int i = 0; i < numPSets; ++i) {
-    m_poss->m_sets[i]->m_flags &= ~SETHASPRINTEDFLAG;
-    m_subIters[i]->ClearPrintedRecursively();
-  }
-}
+
 
 

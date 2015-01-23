@@ -40,6 +40,12 @@ Linearizer::Linearizer(const Poss *poss)
   }
 }
 
+Linearizer::~Linearizer()
+{
+  for(auto elem : m_elems)
+    delete elem;
+}
+
 LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
 {
   PtrToLinElemMapIter find = map.find(node);

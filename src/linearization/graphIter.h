@@ -40,7 +40,6 @@ class GraphIter
   Poss *m_poss;
   PossMMapIter *m_setIters;
   GraphIterPtr *m_subIters;
-  bool m_hasPrinted;
 
   GraphIter(Poss *poss);
   GraphIter(const GraphIter &iter);
@@ -48,8 +47,6 @@ class GraphIter
   void Init(Poss *poss);
   bool Increment();
   GraphIter& operator=(const GraphIter &rhs);
-
-  void ClearPrintedRecursively();
 
   void GetCurrTransVec(TransVec &transVec);
   void AddCurrPossVars(VarSet &set) const;
@@ -59,5 +56,5 @@ class GraphIter
   Cost EvalAndSetBest();
 
   void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, BasePSet *owner);
-  void Print(IndStream &out, GraphNum &graphNum, BasePSet *owner);
+  void Print(IndStream &out, BasePSet *owner, StrSet liveSet);
 };

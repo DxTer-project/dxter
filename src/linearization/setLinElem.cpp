@@ -24,11 +24,71 @@
 #include "tunnel.h"
 #include "basePSet.h"
 #include "linearizer.h"
+#include "realPSet.h"
+#include "realLoop.h"
+#include "splitSingleIter.h"
 
 void SetLinElem::Print(IndStream &out)
 {
- 
-  throw;
+  out.Indent();
+  *out << "set for functionality "
+       << m_set->GetFunctionalityString() << endl;
+}
+
+void SetLinElem::Print(IndStream &out, GraphIter *graphIter, Poss *poss)
+{
+  out.Indent();
+  *out << "//**** (out of " << m_set->GetPosses().size() << ")\n";
+  out.Indent();
+  *out << "//**** ";
+  if (m_set->IsReal()) {
+    *out << "Is real\t" << ((RealPSet*)m_set)->m_shadows.size() << " shadows\n";
+  }
+  else {
+    *out << "Is a shadow\t" << "of " << m_set->GetReal()->m_shadows.size() << " shadows\n";
+  }
+
+#if DOTENSORS
+  out.Indent();
+  *out << "\t//Outputs:\n";
+  for(auto node : m_set->m_outTuns) {
+    if (!node->m_children.empty()) {
+      out.Indent();
+      *out << "\t//  " << node->GetNameStr(0) << endl;
+    }
+  }
+#endif //DOTENSORS
+
+
+  RealPSet *real = m_set->GetReal();
+  
+  if (!real->IsLoop() ||
+      !((RealLoop*)real)->IsUnrolled()) {
+    real->PrePrint(out,poss);
+    ++out;
+    graphIter->Print(out, m_set, m_live);
+    --out;
+    real->PostPrint(out,poss);
+  }
+  else {
+    ++out;
+    RealLoop *loop = (RealLoop*)real;
+    SplitSingleIter *con = (SplitSingleIter*)(loop->GetControl());
+    int numIters = con->NumIters(0);
+    for(int j = 0; j < numIters; ++j) {
+      loop->SetCurrIter(j);
+      out.Indent();
+      *out << "{\n";
+      real->PrePrint(out,poss);
+      graphIter->Print(out, m_set, m_live);
+      out.Indent();
+      *out << "}\n";
+    }
+    --out;
+  }
+
+  out.Indent();
+  *out << "//****\n";
 }
 
 

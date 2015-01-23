@@ -568,7 +568,6 @@ void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
     GraphIter graphIter(poss);
-    graphIter.ClearPrintedRecursively();
     graphIter.PrintRoot(out, whichGraph, currOnly, m_pset);
   }
 

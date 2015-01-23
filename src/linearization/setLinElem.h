@@ -23,6 +23,7 @@
 
 #include "base.h"
 #include "linElem.h"
+#include "graphIter.h"
 
 class BasePSet;
 
@@ -36,10 +37,12 @@ class SetLinElem : public LinElem
  SetLinElem(BasePSet *set) : LinElem(), m_set(set) {}
   
   virtual void Print(IndStream &out);
+  void Print(IndStream &out, GraphIter *graphIter, Poss *poss);
   virtual StrVec PossiblyDyingVars() const;
   virtual StrSet NewVars() const;
   virtual VarCostMap NewVarsAndCosts() const;
   virtual bool UsesInputVar(const string &var) const;
   virtual void CacheLiveVars(const StrSet &stillLive);
   virtual void ClearCache();
+  virtual bool IsSet() const {return true;}
 };
