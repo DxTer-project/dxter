@@ -167,6 +167,8 @@ LinElem* Linearizer::FindOrAdd(BasePSet *set, PtrToLinElemMap &map)
 
 void Linearizer::FindOptimalLinearization()
 {
+  ClearCurrLinearization();
+  
   m_lin.m_cost = 0;
 
   LinElemVec readyToAdd;

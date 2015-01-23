@@ -304,8 +304,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
 void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet)
 {
   Linearizer lin(m_poss);
-#if 0
-  //DOTENSORS
+#if DOTENSORS
   lin.FindOptimalLinearization();
   lin.InsertVecClearing(liveSet);
 #else
