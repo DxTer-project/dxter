@@ -35,6 +35,9 @@ class ClearLinElem : public LinElem
 
   virtual void Print();
   virtual StrVec PossiblyDyingVars() const {throw;}
-  virtual VarCostMap NewVars() const {throw;}
+  virtual StrSet NewVars() const {throw;}
+  virtual VarCostMap NewVarsAndCosts() const {throw;}
   virtual bool UsesInputVar(const string &var) const {throw;}
+  virtual void CacheLiveVars(const StrSet &stillLive) {throw;}
+  virtual void ClearCache() {}
 };

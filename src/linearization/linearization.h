@@ -38,9 +38,11 @@ class Linearization
   Cost m_cost;
 
   ~Linearization();
+  void Clear();
 
-  void InsertVecClearing();
+  void InsertVecClearing(const StrSet &stillLive);
   Cost GetCost();
+
   
   
   void Push(LinElem *elem);

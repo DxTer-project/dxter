@@ -25,24 +25,53 @@
 
 Linearization::~Linearization()
 {
+  Clear();
+}
+
+void Linearization::Clear()
+{
   for(auto clear : m_clears) {
     delete clear;
   }
   m_clears.clear();
   m_order.clear();
-  m_cost = 0;
+  m_cost = -1;
 }
 
-void Linearization::InsertVecClearing()
+void Linearization::InsertVecClearing(const StrSet &stillLive)
 {
-  /*
-    go through the list and find the diff between
-    input and output variables.  add clears
-    after for inputs that aren't output and aren't used later in the list
-
-    ommit if a variable is still found in an outer linearization
-  */
-  throw;  
+  if (!m_clears.empty())
+    return;
+  StrSet localLive = stillLive;
+  for(int i = 0; i < m_order.size(); ++i) {
+    LinElem *elem = m_order[i];
+    if (!elem->IsClear()) {
+      StrSet set = elem->NewVars();
+      localLive.insert(set.begin(), set.end());
+      StrVec maybes = elem->PossiblyDyingVars();
+      for(int i = 0; i < maybes.size(); ++i) {
+	string maybe = maybes[i];
+	bool found = false;
+	if (stillLive.find(maybe) != stillLive.end())
+	  found = true;
+	for(int j = i+1; !found && j < m_order.size(); ++j) {
+	  if (m_order[j]->UsesInputVar(maybe)) {
+	    maybes.erase(maybes.begin()+i);
+	    --i;
+	    found = true;
+	  }
+	}
+	if (!found) {
+	  ClearLinElem *clear = new ClearLinElem(maybe);
+	  m_order.insert(m_order.begin()+i, clear);
+	  m_clears.push_back(clear);
+	  localLive.erase(maybe);
+	  ++i;
+	}
+      }
+      elem->CacheLiveVars(localLive);
+    }
+  }
 }
 
 Cost Linearization::GetCost() 
@@ -57,7 +86,7 @@ Cost Linearization::GetCost()
     for( ; iter != m_order.end(); ++iter) {
       LinElem *elem = *iter;
 
-      VarCostMap newVars = elem->NewVars();
+      VarCostMap newVars = elem->NewVarsAndCosts();
       map.insert(newVars.begin(), newVars.end());
       for(auto &var : map) {
 #if !DOTENSORS
@@ -105,7 +134,8 @@ Cost Linearization::GetCost()
 
 void Linearization::operator=(const Linearization &rhs)
 {
-  if (m_clears.empty()) {
+  Clear();
+  if (rhs.m_clears.empty()) {
     m_order = rhs.m_order;
   }
   else {

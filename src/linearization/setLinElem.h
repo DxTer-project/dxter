@@ -30,12 +30,16 @@ class BasePSet;
 class SetLinElem : public LinElem
 {
  public:
-  const BasePSet *m_set;
+  BasePSet *m_set;
+  StrSet m_live;
 
- SetLinElem(const BasePSet *set) : LinElem(), m_set(set) {}
+ SetLinElem(BasePSet *set) : LinElem(), m_set(set) {}
   
   virtual void Print();
   virtual StrVec PossiblyDyingVars() const;
-  virtual VarCostMap NewVars() const;
+  virtual StrSet NewVars() const;
+  virtual VarCostMap NewVarsAndCosts() const;
   virtual bool UsesInputVar(const string &var) const;
+  virtual void CacheLiveVars(const StrSet &stillLive);
+  virtual void ClearCache();
 };

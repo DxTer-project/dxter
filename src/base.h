@@ -329,6 +329,8 @@ class RealPSet;
 typedef unsigned int Flags;
 typedef unsigned long int GraphNum;
 typedef std::string::iterator StringIter;
+typedef std::set<std::string> StrSet;
+typedef StrSet::iterator StrSetIter;
 typedef string ClassType;
 typedef vector<Node*> NodeVec;
 typedef NodeVec::iterator NodeVecIter;

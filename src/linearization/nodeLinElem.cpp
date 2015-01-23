@@ -51,7 +51,7 @@ StrVec NodeLinElem::PossiblyDyingVars() const
   return list;
 }
 
-VarCostMap NodeLinElem::NewVars() const
+VarCostMap NodeLinElem::NewVarsAndCosts() const
 {
   VarCostMap map;
   switch (m_node->NumOutputs())
@@ -68,6 +68,29 @@ VarCostMap NodeLinElem::NewVars() const
 	}
 	map[m_node->GetNameStr(0)] = ((DLANode*)m_node)->MaxNumberOfLocalElements(0);
 	return map;
+      }
+    default:
+      throw;
+    }
+}
+
+StrSet NodeLinElem::NewVars() const
+{
+  StrSet set;
+  switch (m_node->NumOutputs())
+    {
+    case (0):
+      return set;
+    case (1): 
+      {
+	string out = m_node->GetNameStr(0);
+	for(unsigned int i = 0; i < m_node->m_inputs.size(); ++i) {
+	  if (out == m_node->GetInputNameStr(i)) {
+	    return set;
+	  }
+	}
+	set.insert(m_node->GetNameStr(0));
+	return set;
       }
     default:
       throw;

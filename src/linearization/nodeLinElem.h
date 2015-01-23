@@ -35,6 +35,9 @@ class NodeLinElem : public LinElem
   
   virtual void Print();
   virtual StrVec PossiblyDyingVars() const;
-  virtual VarCostMap NewVars() const;
+  virtual StrSet NewVars() const;
+  virtual VarCostMap NewVarsAndCosts() const;
   virtual bool UsesInputVar(const string &var) const;
+  virtual void CacheLiveVars(const StrSet &stillLive) {}
+  virtual void ClearCache() {}
 };

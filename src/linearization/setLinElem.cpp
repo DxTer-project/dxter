@@ -23,6 +23,7 @@
 #include "setLinElem.h"
 #include "tunnel.h"
 #include "basePSet.h"
+#include "linearizer.h"
 
 void SetLinElem::Print()
 {
@@ -51,7 +52,29 @@ StrVec SetLinElem::PossiblyDyingVars() const
   return list;
 }
 
-VarCostMap SetLinElem::NewVars() const
+StrSet SetLinElem::NewVars() const
+{
+  StrSet set;
+  for(auto outTun : m_set->m_outTuns) {
+    if (outTun->m_children.size()) {
+      string outName = outTun->GetNameStr(0);
+      bool alsoInput = false;
+      for(auto inTun : m_set->m_inTuns) {
+	string inName = inTun->GetInputNameStr(0);
+	if (inName == outName) {
+	  alsoInput = true;
+	  break;
+	}
+      }
+      if (!alsoInput) {
+	set.insert(outName);
+      }
+    }
+  }
+  return set;
+}
+
+VarCostMap SetLinElem::NewVarsAndCosts() const
 {
   VarCostMap map;
   for(auto outTun : m_set->m_outTuns) {
@@ -81,4 +104,14 @@ bool SetLinElem::UsesInputVar(const string &var) const
     }
   }
   return false;
+}
+
+void SetLinElem::CacheLiveVars(const StrSet &stillLive)
+{
+  m_live = stillLive;
+}
+
+void SetLinElem::ClearCache()
+{
+  m_live.clear();
 }

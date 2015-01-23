@@ -55,6 +55,9 @@ class LinElem
 
   virtual void Print() = 0;
   virtual StrVec PossiblyDyingVars() const = 0;
-  virtual VarCostMap NewVars() const = 0;
+  virtual StrSet NewVars() const = 0;
+  virtual VarCostMap NewVarsAndCosts() const = 0;
   virtual bool UsesInputVar(const string &var) const = 0;
+  virtual void CacheLiveVars(const StrSet &stillLive) = 0;
+  virtual void ClearCache() = 0;
 };

@@ -34,12 +34,19 @@ class Linearizer
 {
  public:
   LinElemVec m_elems;
+  Linearization m_lin;
 
   Linearizer(const Poss *poss);
   ~Linearizer();
 
-  void FindOptimalLinearization(Linearization &opt);
+  void ClearCurrLinearization();
+  bool HasCurrLinearization() const;
+
+  void FindAnyLinearization();
+  void FindOptimalLinearization();
+
+  void InsertVecClearing(const StrSet &stillLive);
 
   LinElem* FindOrAdd(const Node *node, PtrToLinElemMap &map);
-  LinElem* FindOrAdd(const BasePSet *set, PtrToLinElemMap &map);
+  LinElem* FindOrAdd(BasePSet *set, PtrToLinElemMap &map);
 };

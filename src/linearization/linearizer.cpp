@@ -79,7 +79,7 @@ LinElem* Linearizer::FindOrAdd(const Node *node, PtrToLinElemMap &map)
   return elem;
 }
 
-LinElem* Linearizer::FindOrAdd(const BasePSet *set, PtrToLinElemMap &map)
+LinElem* Linearizer::FindOrAdd(BasePSet *set, PtrToLinElemMap &map)
 {
   PtrToLinElemMapIter find = map.find(set);
   if (find != map.end())
@@ -107,9 +107,9 @@ LinElem* Linearizer::FindOrAdd(const BasePSet *set, PtrToLinElemMap &map)
   return elem;
 }
 
-void Linearizer::FindOptimalLinearization(Linearization &opt)
+void Linearizer::FindOptimalLinearization()
 {
-  opt.m_cost = 0;
+  m_lin.m_cost = 0;
 
   LinElemVec readyToAdd;
 
@@ -124,15 +124,15 @@ void Linearizer::FindOptimalLinearization(Linearization &opt)
 
   Linearization curr;
 
-  RecursivelyFindOpt(curr, readyToAdd, opt);
+  RecursivelyFindOpt(curr, readyToAdd, m_lin);
 
   if (!curr.m_order.empty())
     throw;
 
-  if (opt.GetCost() <= 0)
+  if (m_lin.GetCost() <= 0)
     throw;
 
-  if (opt.m_order.size() != m_elems.size())
+  if (m_lin.m_order.size() != m_elems.size())
     throw;
 }
 
@@ -179,3 +179,54 @@ void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd
 }
 
 
+void Linearizer::FindAnyLinearization()
+{
+  ClearCurrLinearization();
+
+  LinElemVec readyToAdd;
+
+  for(auto elem : m_elems) {
+    if (elem->m_inputs.empty()) {
+      readyToAdd.push_back(elem);
+    }
+  }
+
+  while (!readyToAdd.empty()) {
+    LinElem *elem = readyToAdd.back();
+    readyToAdd.pop_back();
+    m_lin.m_order.push_back(elem);
+    for(auto child : elem->m_children) {
+      if (child->CanAddToLinearOrder())
+	readyToAdd.push_back(child);
+    }
+  }
+
+  if (m_lin.m_order.size() != m_elems.size())
+    throw;
+}
+
+void Linearizer::ClearCurrLinearization()
+{
+  m_lin.Clear();
+  for(auto elem : m_elems)
+    elem->ClearCache();
+}
+
+bool Linearizer::HasCurrLinearization() const
+{
+  if (m_lin.m_cost < 0) {
+    return false;
+  }
+  else {
+    if (m_lin.m_order.size() != m_elems.size())
+      throw;
+    return true;
+  }
+}
+
+void Linearizer::InsertVecClearing(const StrSet &stillLive)
+{
+  if (!HasCurrLinearization())
+    throw;
+  m_lin.InsertVecClearing(stillLive);
+}
