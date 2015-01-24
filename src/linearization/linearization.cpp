@@ -49,21 +49,18 @@ void Linearization::InsertVecClearing(const StrSet &stillLive)
       StrSet set = elem->NewVars();
       localLive.insert(set.begin(), set.end());
       StrVec maybes = elem->PossiblyDyingVars();
-      for(int i = 0; i < maybes.size(); ++i) {
-	string maybe = maybes[i];
+      for(auto maybe : maybes) {
 	bool found = false;
 	if (stillLive.find(maybe) != stillLive.end())
 	  found = true;
 	for(int j = i+1; !found && j < m_order.size(); ++j) {
 	  if (m_order[j]->UsesInputVar(maybe)) {
-	    maybes.erase(maybes.begin()+i);
-	    --i;
 	    found = true;
 	  }
 	}
 	if (!found) {
 	  ClearLinElem *clear = new ClearLinElem(maybe);
-	  m_order.insert(m_order.begin()+i, clear);
+	  m_order.insert(m_order.begin()+i+1, clear);
 	  m_clears.push_back(clear);
 	  localLive.erase(maybe);
 	  ++i;
