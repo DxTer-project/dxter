@@ -47,4 +47,6 @@ class Linearization
   void PopNonClear();
   void operator=(const Linearization &rhs);
   void Print(IndStream &out);
+  
+  bool LiveAfter(unsigned int loc, const string &name) const;
 };

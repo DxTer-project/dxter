@@ -22,6 +22,7 @@
 #include "linearization.h"
 #include "clearLinElem.h"
 #include "base.h"
+#include "setLinElem.h"
 
 Linearization::~Linearization()
 {
@@ -42,31 +43,77 @@ void Linearization::InsertVecClearing(const StrSet &stillLive)
 {
   if (!m_clears.empty())
     return;
-  StrSet localLive = stillLive;
   for(int i = 0; i < m_order.size(); ++i) {
     LinElem *elem = m_order[i];
     if (!elem->IsClear()) {
-      StrSet set = elem->NewVars();
-      localLive.insert(set.begin(), set.end());
-      StrVec maybes = elem->PossiblyDyingVars();
-      for(auto maybe : maybes) {
-	bool found = false;
-	if (stillLive.find(maybe) != stillLive.end())
-	  found = true;
-	for(int j = i+1; !found && j < m_order.size(); ++j) {
-	  if (m_order[j]->UsesInputVar(maybe)) {
-	    found = true;
+      if (elem->IsSet()) {
+	/*
+	  If input and used later, do not clear
+	  If input, not output and not used later, clear within
+	  If input and output but no children and not used later,
+	       clear here
+	  If input and output but has children or used later,
+	       don't clear
+	*/
+	BasePSet *set = ((SetLinElem*)elem)->m_set;
+	//If the variable is output, then it's live within
+	StrSet liveHere;
+
+
+	StrVec needClears;
+	for (auto output : set->m_outTuns) {
+	  string outName = output->GetNameStr(0); 
+	  //if it's output but no children, we might need to add a clear
+	  if (stillLive.find(outName) == stillLive.end()) {
+	    if (output->m_children.empty()) {
+	      if (!LiveAfter(i+1, outName))
+		needClears.push_back(outName);
+	    }
+	  }
+	  liveHere.insert(outName);
+	  if (set->IsLoop()) {
+	    Node *possTunOut = output->Input(0);
+	    for(auto inToOut : possTunOut->m_inputs) {
+	      liveHere.insert(inToOut->m_n->GetNameStr(inToOut->m_num));
+	    }
 	  }
 	}
-	if (!found) {
-	  ClearLinElem *clear = new ClearLinElem(maybe);
-	  m_order.insert(m_order.begin()+i+1, clear);
-	  m_clears.push_back(clear);
-	  localLive.erase(maybe);
+	
+	for (auto input : set->m_inTuns) {
+	  string inName = input->GetInputNameStr(0);
+	  if (liveHere.find(inName) == liveHere.end() &&
+	      (stillLive.find(inName) != stillLive.end() 
+	       || LiveAfter(i+1,inName)))
+	    {
+	      liveHere.insert(inName);
+	    }
+	}
+
+	elem->CacheLiveVars(liveHere);
+
+	for(string clear : needClears) {
+	  ClearLinElem *newClear = new ClearLinElem(clear);
+	  m_order.insert(m_order.begin()+i+1, newClear);
+	  m_clears.push_back(newClear);
 	  ++i;
 	}
       }
-      elem->CacheLiveVars(localLive);
+      else {
+	StrVec maybes = elem->PossiblyDyingVars();
+	for(auto maybe : maybes) {
+	  bool found = false;
+	  if (stillLive.find(maybe) != stillLive.end())
+	    found = true;
+	  if (!found)
+	    found = LiveAfter(i+1, maybe);
+	  if (!found) {
+	    ClearLinElem *clear = new ClearLinElem(maybe);
+	    m_order.insert(m_order.begin()+i+1, clear);
+	    m_clears.push_back(clear);
+	    ++i;
+	  }
+	}
+      }
     }
   }
 }
@@ -162,4 +209,13 @@ void Linearization::Print(IndStream &out)
 {
   for(auto elem : m_order)
     elem->Print(out);
+}
+
+bool Linearization::LiveAfter(unsigned int loc, const string &name) const
+{
+  for(; loc < m_order.size(); ++loc) {
+    if (m_order[loc]->UsesInputVar(name))
+      return true;
+  }
+  return false;
 }

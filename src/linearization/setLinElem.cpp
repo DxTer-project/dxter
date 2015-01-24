@@ -91,7 +91,8 @@ void SetLinElem::Print(IndStream &out, GraphIter *graphIter, Poss *poss)
   *out << "//****\n";
 }
 
-
+//Used for determining cost, but not
+// for when / where to clear variables - see Linearization::InsertVecClearing
 StrVec SetLinElem::PossiblyDyingVars() const
 {
   StrVec list;
@@ -101,10 +102,10 @@ StrVec SetLinElem::PossiblyDyingVars() const
     for(auto outTun : m_set->m_outTuns) {
       string outName = outTun->GetNameStr(0);
       if (inName == outName) {
-	  if (outTun->m_children.size()) {
-	    alsoOutput = true;
-	    break;
-	  }
+	if (outTun->m_children.size()) {
+	  alsoOutput = true;
+	  break;
+	}
       }
     }
     if (!alsoOutput)
