@@ -23,6 +23,14 @@
 
 #if DOLLDLA
 
+#include <climits>
+#include <sstream>
+#include <time.h>
+
+#include "allTransformations.h"
+#include "runnerUtils.h"
+#include "runtimeEvaluation.h"
+
 ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   RegAllLLDLANodes();
   AddTransformations();
