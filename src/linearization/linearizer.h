@@ -45,7 +45,7 @@ class Linearizer
   bool HasCurrLinearization() const;
 
   void FindAnyLinearization();
-  void FindOptimalLinearization();
+  void FindOptimalLinearization(const StrSet &stillLive);
 
   void InsertVecClearing(const StrSet &stillLive);
 

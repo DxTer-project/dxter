@@ -41,7 +41,7 @@ class Linearization
   void Clear();
 
   void InsertVecClearing(const StrSet &stillLive);
-  Cost GetCost();
+  Cost GetCostNoRecursion(const StrSet &stillLive);
 
   void Push(LinElem *elem);
   void PopNonClear();

@@ -26,8 +26,8 @@
 #include "BasePSet.h"
 #include "node.h"
 
-void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt) ;
-void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt) ;
+void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive);
+void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt, const StrSet &stillLive);
 
 Linearizer::Linearizer(const Poss *poss)
 {
@@ -165,11 +165,11 @@ LinElem* Linearizer::FindOrAdd(BasePSet *set, PtrToLinElemMap &map)
   return elem;
 }
 
-void Linearizer::FindOptimalLinearization()
+void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
 {
   ClearCurrLinearization();
   
-  m_lin.m_cost = 0;
+  m_lin.m_cost = -1;
 
   LinElemVec readyToAdd;
 
@@ -184,28 +184,31 @@ void Linearizer::FindOptimalLinearization()
 
   Linearization curr;
 
-  RecursivelyFindOpt(curr, readyToAdd, m_lin);
+  RecursivelyFindOpt(curr, readyToAdd, m_lin, stillLive);
 
   if (!curr.m_order.empty())
     throw;
 
-  if (m_lin.GetCost() <= 0)
-    throw;
-
   if (m_lin.m_order.size() != m_elems.size())
     throw;
+
+  if (m_lin.GetCostNoRecursion(stillLive) < 0) {
+    m_lin.m_cost = -1;
+    cout << m_lin.GetCostNoRecursion(stillLive) << endl;
+    throw;
+  }
 }
 
-void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt) 
+void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt, const StrSet &stillLive)
 {
   if (readyToAdd.empty()) {
-    if (opt.m_cost == 0) {
+    if (opt.m_cost < 0) {
       opt = curr;
     }
     else {
       if (opt.m_order.size() != curr.m_order.size())
 	throw;
-      if (opt.GetCost() > curr.GetCost())
+      if (opt.GetCostNoRecursion(stillLive) > curr.GetCostNoRecursion(stillLive))
 	opt = curr;
     }
   }
@@ -215,12 +218,12 @@ void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linea
       newReadyToAdd.erase(newReadyToAdd.begin()+i);
       LinElem *currAdd = readyToAdd[i];
 
-      AddAndRecurse(curr, newReadyToAdd, currAdd, opt); 
+      AddAndRecurse(curr, newReadyToAdd, currAdd, opt, stillLive); 
     }
   }
 }
 
-void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt) 
+void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive)
 {
   curr.m_order.push_back(currAdd);
   currAdd->SetAdded();
@@ -235,17 +238,17 @@ void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd
 	readyToAdd.push_back(succ);
       }
     }
-    RecursivelyFindOpt(curr, readyToAdd, opt);
+    RecursivelyFindOpt(curr, readyToAdd, opt, stillLive);
   }
   else if (currAdd->m_children.size() == 1) {
     LinElem *child = currAdd->m_children[0];
     if (child->CanAddToLinearOrder())
-      AddAndRecurse(curr, readyToAdd, child, opt);
+      AddAndRecurse(curr, readyToAdd, child, opt, stillLive);
     else
-      RecursivelyFindOpt(curr, readyToAdd, opt);
+      RecursivelyFindOpt(curr, readyToAdd, opt, stillLive);
   }
   else {
-    RecursivelyFindOpt(curr, readyToAdd, opt);
+    RecursivelyFindOpt(curr, readyToAdd, opt, stillLive);
   }
   currAdd->ClearAdded();
   curr.m_order.pop_back();

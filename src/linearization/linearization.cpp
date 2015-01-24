@@ -74,7 +74,7 @@ void Linearization::InsertVecClearing(const StrSet &stillLive)
   }
 }
 
-Cost Linearization::GetCost() 
+Cost Linearization::GetCostNoRecursion(const StrSet &stillLive)
 {
   if (m_cost <= 0) {
     if (!m_clears.empty())
@@ -102,6 +102,7 @@ Cost Linearization::GetCost()
 #endif
 	currCost += var.second;
       }
+
       if (currCost > m_cost) {
 	m_cost = currCost;
       }
@@ -109,23 +110,29 @@ Cost Linearization::GetCost()
       StrVec possiblyDyingVars = elem->PossiblyDyingVars();
       for(int i = 0; i < possiblyDyingVars.size(); ++i) {
 	string var = possiblyDyingVars[i];
-	LinElemVecIter iter2 = iter;
-	++iter2;
-	for(; iter2 != m_order.end(); ++iter2) {
-	  if ((*iter2)->UsesInputVar(var)) {
+	if (stillLive.find(var) != stillLive.end()) {
 	    possiblyDyingVars.erase(possiblyDyingVars.begin()+i);
 	    --i;
-	    break;
+	}
+	else {
+	  LinElemVecIter iter2 = iter;
+	  ++iter2;
+	  for(; iter2 != m_order.end(); ++iter2) {
+	    if ((*iter2)->UsesInputVar(var)) {
+	      possiblyDyingVars.erase(possiblyDyingVars.begin()+i);
+	      --i;
+	      break;
+	    }
 	  }
 	}
       }
       //at this point all vars in possiblyDyingVars are actually dying
       for (auto var : possiblyDyingVars) {
 	VarCostMapIter find = map.find(var);
-	if (find == map.end())
-	  throw;
-	m_cost -= find->second;
-	map.erase(find);
+	if (find != map.end()) {
+	  m_cost -= find->second;
+	  map.erase(find);
+	}
       }
     }
   }
