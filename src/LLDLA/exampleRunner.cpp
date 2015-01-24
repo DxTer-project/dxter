@@ -19,9 +19,16 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "exampleRunner.h"
+#include "allTransformations.h"
 
 #if DOLLDLA
+
+#include <climits>
+#include <sstream>
+#include <time.h>
+
+#include "exampleRunner.h"
+#include "runtimeEvaluation.h"
 
 ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   RegAllLLDLANodes();

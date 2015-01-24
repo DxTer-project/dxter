@@ -19,26 +19,17 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "allTransformations.h"
+#ifndef EXAMPLE_RUNNER_H_
+#define EXAMPLE_RUNNER_H_
+
 #include "base.h"
-#include "costs.h"
 #include "DLAReg.h"
-#include "loopSupport.h"
 #include "problemInstanceStats.h"
-#include "runnerUtils.h"
-#include "runtimeEvaluation.h"
-#include "transform.h"
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#include <climits>
-#include <sstream>
-#include <time.h>
 
 #if DOLLDLA
 
 ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
 
 #endif // DOLLDLA
+
+#endif
