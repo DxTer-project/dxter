@@ -19,8 +19,8 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef RUN_BENCHMARK_H_
-#define RUN_BENCHMARK_H_
+//#ifndef RUN_BENCHMARK_H_
+//#define RUN_BENCHMARK_H_
 
 
 #include "base.h"
@@ -33,4 +33,4 @@ ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstanc
 
 #endif // DOLLDLA
 
-#endif // RUN_BENCHMARK_H_
+//#endif // RUN_BENCHMARK_H_

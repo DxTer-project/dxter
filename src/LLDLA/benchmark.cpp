@@ -19,10 +19,16 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <iostream>
 
 #include "benchmark.h"
 
 #if DOLLDLA
+
+#include "benchmarkStats.h"
+#include "problemInstance.h"
+#include "runBenchmark.h"
+#include "singleOperationExamples.h"
 
 using namespace std;
 
@@ -97,7 +103,7 @@ void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, in
   cout << "\n------------------- gemv benchmark ---------------------------\n";
 }
 
-void RunBenchmark() {
+void RunAllBenchmarks() {
   cout << "=========================================================================\n";
   cout << "======================== STARTING LLDLA BENCHMARK =======================\n";
   cout << "=========================================================================\n\n";
