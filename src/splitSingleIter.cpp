@@ -1687,7 +1687,7 @@ LoopTunnel* SplitSingleIter::GetMatchingOutTun() const
     else {
       LoopTunnel *possTunOut = ((LoopTunnel*)(GetRealTunnel()->Child(0)))->GetMatchingOutTun();
       LoopTunnel *realSetTunOut = (LoopTunnel*)(possTunOut->Child(0));
-      return (LoopTunnel*)(m_pset->m_outTuns[FindInNodeVec(m_pset->GetReal()->m_outTuns, realSetTunOut)]);
+      return (LoopTunnel*)(m_pset->m_outTuns[FindInTunVec(m_pset->GetReal()->m_outTuns, realSetTunOut)]);
     }
   else if (m_tunType != POSSTUNIN) 
     throw;

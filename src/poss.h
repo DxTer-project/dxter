@@ -73,6 +73,8 @@ struct NodeConnAndNumComp {
 typedef map<NodeConnAndNum,vector<int>,NodeConnAndNumComp> NodeConnAndNumIntMap;
 typedef NodeConnAndNumIntMap::iterator NodeConnAndNumIntMapIter;
 
+
+
 class Poss
 {
   static GraphNum M_count;
@@ -134,7 +136,7 @@ class Poss
 		  BasePSet *leftSet, 
 		  BasePSet *rightSet, 
 		  NodeMap &mapLeft, NodeMap &mapRight,
-		  NodeVec &newInputTunnelsToFix);
+		  TunVec &newInputTunnelsToFix);
   void MergePart6(RealPSet *newSet, BasePSet *leftSet, 
 		  BasePSet *rightSet, NodeMap &mapLeft, NodeMap &mapRight);
   void MergePart7(RealPSet *newSet, 
@@ -179,6 +181,7 @@ class Poss
   void PrintSetConnections();
   void ReplaceShadowSetWithReal(unsigned int i);
   void RemoveAndDeleteNodes(NodeVec &vec);
+  void RemoveAndDeleteNodes(TunVec &vec);
   void SetDeletingRecursively();
   void ClearDeletingRecursively();
 };

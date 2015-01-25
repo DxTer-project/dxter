@@ -33,6 +33,16 @@
 
 extern unsigned int M_phase;
 
+unsigned int FindInTunVec(const TunVec &vec, const Tunnel *node)
+{
+  unsigned int i = 0;
+  TunVecConstIter iter = vec.begin();
+  for(; iter != vec.end(); ++iter,++i)
+    if (*iter == node)
+      return i;
+  throw;
+}
+
 BasePSet::BasePSet()
   : m_ownerPoss(NULL), m_flags(0)
 {
@@ -67,7 +77,7 @@ void BasePSet::ClearBeforeProp()
 void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows)
 {
   m_flags = orig->m_flags & ~SETCHECKEDFORDUP;
-  NodeVecConstIter iter  = orig->m_inTuns.begin();
+  TunVecConstIter iter  = orig->m_inTuns.begin();
   for (; iter != orig->m_inTuns.end(); ++iter) {
     Tunnel *tun = (Tunnel*)(map[*iter]);
     //expect set tunnel for this set to be duplicated
@@ -122,7 +132,7 @@ bool FoundPossUp(Node *node, const BasePSet *set, NodeVec &queue)
     }
     else {
       const BasePSet *foundSet = tunOut->m_pset;
-      NodeVecConstIter iter = foundSet->m_inTuns.begin();
+      TunVecConstIter iter = foundSet->m_inTuns.begin();
       for(; iter != foundSet->m_inTuns.end(); ++iter) {
         if (FoundPossUp(*iter, set, queue)) {
           queue.pop_back();
@@ -146,7 +156,7 @@ bool FoundPossUp(Node *node, const BasePSet *set, NodeVec &queue)
 
 bool NothingBetween(const BasePSet *left, const BasePSet *right)
 {
-  NodeVecConstIter iter = right->m_inTuns.begin();
+  TunVecConstIter iter = right->m_inTuns.begin();
   for(; iter != right->m_inTuns.end(); ++iter) {
     Node *input = *iter;
     NodeConnVecConstIter iter2 = input->m_inputs.begin();
@@ -290,7 +300,7 @@ bool BasePSet::CanMerge(BasePSet *pset) const
 
 void BasePSet::RemoveInTun(Node *tun)
 {
-  NodeVecIter iter = m_inTuns.begin();
+  TunVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
     if (*iter == tun) {
       m_inTuns.erase(iter);
@@ -302,7 +312,7 @@ void BasePSet::RemoveInTun(Node *tun)
 
 void BasePSet::RemoveOutTun(Node *tun)
 {
-  NodeVecIter iter = m_outTuns.begin();
+  TunVecIter iter = m_outTuns.begin();
   for(; iter != m_outTuns.end(); ++iter) {
     if (*iter == tun) {
       m_outTuns.erase(iter);
@@ -327,7 +337,7 @@ void BasePSet::FormSetAround()
   
   
   
-  NodeVecIter iter = m_inTuns.begin();
+  TunVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
     Tunnel *tun = (Tunnel*)(*iter);
     Tunnel *newSetTun = new Tunnel(SETTUNIN);
@@ -395,13 +405,15 @@ void BasePSet::Flatten(ofstream &out) const
   FlattenCore(out);
   GraphNum size;
   if (IsTopLevel()) {
-    FullyFlatten(m_inTuns, out);
-    FullyFlatten(m_outTuns, out);
+    throw;
+    //create versions of the following that will work on TunVec's
+    //FullyFlatten(m_inTuns, out);
+    //    FullyFlatten(m_outTuns, out);
   }
   else {
     size = m_inTuns.size();
     WRITE(size);
-    NodeVecConstIter iter = m_inTuns.begin();
+    TunVecConstIter iter = m_inTuns.begin();
     for(; iter != m_inTuns.end(); ++iter)
       WRITE(*iter);
     WRITE(END);
@@ -429,8 +441,10 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
   UnflattenCore(in,info);
   GraphNum size;
   if (IsTopLevel()) {
-    FullyUnflatten(m_inTuns, in, info);
-    FullyUnflatten(m_outTuns, in, info);
+    throw;
+    //create versions of these for tunVec's
+    //    FullyUnflatten(m_inTuns, in, info);
+    //    FullyUnflatten(m_outTuns, in, info);
   }
   else {
     READ(size);
@@ -438,7 +452,7 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
       Node *tun;
       READ(tun);
       Swap(&tun,info.nodeMap);
-      m_inTuns.push_back(tun);
+      m_inTuns.push_back((Tunnel*)tun);
     }
     READ(tmp);
     if (tmp != END)
@@ -448,7 +462,7 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
       Node *tun;
       READ(tun);
       Swap(&tun,info.nodeMap);
-      m_outTuns.push_back(tun);
+      m_outTuns.push_back((Tunnel*)tun);
     }
   }
   READ(m_ownerPoss);
@@ -462,12 +476,10 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
   if (!IsTopLevel())
     Swap(&m_ownerPoss, info.possMap);
   if (IsTopLevel()) {
-    NodeVecIter iter2 = m_inTuns.begin();
-    for(; iter2 != m_inTuns.end(); ++iter2)
-      (*iter2)->PatchAfterDuplicate(*(info.nodeMap));
-    iter2 = m_outTuns.begin();
-    for(; iter2 != m_outTuns.end(); ++iter2)
-      (*iter2)->PatchAfterDuplicate(*(info.nodeMap));
+    for(auto tun : m_inTuns)
+      tun->PatchAfterDuplicate(*(info.nodeMap));
+    for(auto tun : m_outTuns)
+      tun->PatchAfterDuplicate(*(info.nodeMap));
   }
 }
 

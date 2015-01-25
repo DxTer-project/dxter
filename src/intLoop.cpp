@@ -177,9 +177,10 @@ Cost IntLoop<PSetType>::Prop()
   
   if (!hasProped) {
     bool foundControl = false;
-    NodeVecIter iter = PSetType::m_inTuns.begin();
-    for(; iter != PSetType::m_inTuns.end(); ++iter) {
-      Node *in = *iter;
+    //    NodeVecIter iter = PSetType::m_inTuns.begin();
+    //    for(; iter != PSetType::m_inTuns.end(); ++iter) {
+    //      Node *in = *iter;
+    for(auto in : PSetType::m_inTuns) {
       if (!in->IsLoopTunnel()) {
 	cout << "non loop tunnel on loop!\n";
 	throw;
@@ -198,9 +199,10 @@ Cost IntLoop<PSetType>::Prop()
     }
     if (!foundControl)
       throw;
-    iter = PSetType::m_outTuns.begin();
-    for(; iter != PSetType::m_outTuns.end(); ++iter)
-      if (!(*iter)->IsLoopTunnel()) {
+    //    iter = PSetType::m_outTuns.begin();
+    //    for(; iter != PSetType::m_outTuns.end(); ++iter)
+    for(auto tun : PSetType::m_outTuns)
+      if (!tun->IsLoopTunnel()) {
 	cout << "non loop tunnel on loop!\n";
 	throw;
       }
@@ -274,7 +276,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
   const BasePSet *left=NULL, *right=NULL;
   //this is true if the left loop is actually on the left
   //otherwise, the order doesn't matter
-  NodeVecConstIter iter = pset->m_inTuns.begin();
+  TunVecConstIter iter = pset->m_inTuns.begin();
   for(; iter != pset->m_inTuns.end() && !left; ++iter) {
     const Node *inTun = *iter;
     for (ConnNum i = 0; i < inTun->m_inputs.size() && !left; ++i) {
@@ -847,7 +849,7 @@ bool IntLoop<PSetType>::WorthFusing(BasePSet *pset)
   }
 #endif
   
-  NodeVecIter iter = PSetType::m_outTuns.begin();
+  TunVecIter iter = PSetType::m_outTuns.begin();
   for(; iter != PSetType::m_outTuns.end(); ++iter) {
     Node *out = *iter;
     NodeConnVecIter iter2 = out->m_children.begin();
@@ -889,7 +891,7 @@ bool IntLoop<PSetType>::WorthFusing(BasePSet *pset)
  SplitBase* IntLoop<PSetType>::GetControl() const
 {
   SplitBase *control = NULL;
-  NodeVecConstIter iter = PSetType::m_inTuns.begin();
+  TunVecConstIter iter = PSetType::m_inTuns.begin();
   for(; iter != PSetType::m_inTuns.end(); ++iter) {
     LoopTunnel *node = (LoopTunnel*)(*iter);
     if (node->IsSplit()) {

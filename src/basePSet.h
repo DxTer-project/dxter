@@ -37,11 +37,14 @@ class ShadowPSet;
 #define SETHASMIGRATED    (1L<<4)
 #define SETCHECKEDFORDUP    (1L<<5)
 
+unsigned int FindInTunVec(const TunVec &vec, const Tunnel *node);
+
+
 class BasePSet
 {
  public:
-  NodeVec m_inTuns;
-  NodeVec m_outTuns;
+  TunVec m_inTuns;
+  TunVec m_outTuns;
   Poss *m_ownerPoss;
   Flags m_flags;
   BasePSet();

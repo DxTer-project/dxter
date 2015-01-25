@@ -116,17 +116,15 @@ Universe::~Universe()
     M_trans[i].clear();
   }
   if (m_pset != NULL) {
-    NodeVec in = m_pset->m_inTuns;
-    NodeVec out = m_pset->m_outTuns;
+    TunVec in = m_pset->m_inTuns;
+    TunVec out = m_pset->m_outTuns;
     delete m_pset;
-    iter = in.begin();
-    for(; iter != in.end(); ++iter) {
-      delete *iter;
+    for(auto input : in) {
+      delete input;
     }
     in.clear();
-    iter = out.begin();
-    for(; iter != out.end(); ++iter) {
-      delete *iter;
+    for(auto output : out) {
+      delete output;
     }
     out.clear();
   }

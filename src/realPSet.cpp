@@ -298,8 +298,8 @@ void RealPSet::Migrate()
   if (newSet->m_inTuns.size() != m_inTuns.size())
     throw;
 	
-  NodeVecIter nodeIter = newSet->m_inTuns.begin();
-  NodeVecIter oldSetNodeIter = m_inTuns.begin();
+  TunVecIter nodeIter = newSet->m_inTuns.begin();
+  TunVecIter oldSetNodeIter = m_inTuns.begin();
   for( ; nodeIter != newSet->m_inTuns.end(); ++nodeIter, ++oldSetNodeIter) {
     Tunnel *tun = (Tunnel*)(*nodeIter);
     Tunnel *oldTun = (Tunnel*)(*oldSetNodeIter);
@@ -428,7 +428,7 @@ RealPSet::~RealPSet()
   SetDeletingRecursively();
   Migrate();
   if (!m_inTuns.empty()) {
-    NodeVecIter iter = m_inTuns.begin();
+    TunVecIter iter = m_inTuns.begin();
     for(; iter != m_inTuns.end(); ++iter) {
       if (!(*iter)->m_inputs.empty())
 	throw;
@@ -437,7 +437,7 @@ RealPSet::~RealPSet()
     m_inTuns.clear();
   }
   if (!m_outTuns.empty()) {
-    NodeVecIter iter = m_outTuns.begin();
+    TunVecIter iter = m_outTuns.begin();
     for(; iter != m_outTuns.end(); ++iter) {
       if (!(*iter)->m_children.empty())
 	throw;
@@ -1597,7 +1597,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
   
   NodeMap startMap;
   int i = 0;
-  NodeVecIter iter2 = pset->m_inTuns.begin();
+  TunVecIter iter2 = pset->m_inTuns.begin();
   for(; iter2 != pset->m_inTuns.end(); ++iter2) {
     startMap[*iter2] = *iter2;
     tunnelNumMap[*iter2] = i;
@@ -1756,16 +1756,18 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
         newSet->Duplicate(*setIter, map, true, true);
 	if (oldSet->m_inTuns.size() != newSet->m_inTuns.size())
 	  throw;
-	NodeVecIter tunIterNew = newSet->m_inTuns.begin();
-	for(; tunIterNew != newSet->m_inTuns.end(); ++tunIterNew) {
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
+	//	TunVecIter tunIterNew = newSet->m_inTuns.begin();
+	//	for(; tunIterNew != newSet->m_inTuns.end(); ++tunIterNew) {
+	for(auto newTun : newSet->m_inTuns) {
+	  //	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
 	  newTun->m_pset = newSet;
 	}
 	if (oldSet->m_outTuns.size() != newSet->m_outTuns.size())
 	  throw;
-	tunIterNew = newSet->m_outTuns.begin();
-	for(; tunIterNew != newSet->m_outTuns.end(); ++tunIterNew) {
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
+	//tunIterNew = newSet->m_outTuns.begin();
+	//	for(; tunIterNew != newSet->m_outTuns.end(); ++tunIterNew) {
+	//	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
+	for(auto newTun : newSet->m_outTuns) {
 	  newTun->m_pset = newSet;
 	}
 #else
@@ -2240,7 +2242,7 @@ ShadowPSet* RealPSet::GetNewShadowDup(Poss *poss)
     throw;
 
   poss->AddPSet(shadow, true);
-  NodeVecIter iter = m_inTuns.begin();
+  TunVecIter iter = m_inTuns.begin();
   for( ; iter != m_inTuns.end(); ++iter) {
     Tunnel *tun = (Tunnel*)((*iter)->GetNewInst());
     tun->Duplicate(*iter,true,false);

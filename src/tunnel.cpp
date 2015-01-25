@@ -377,7 +377,7 @@ bool Tunnel::Overwrites(const Node *input, ConnNum num) const
     }
     else {
       const RealPSet *real = m_pset->GetReal();
-      unsigned int num = FindInNodeVec(m_pset->m_inTuns, this);
+      unsigned int num = FindInTunVec(m_pset->m_inTuns, this);
       const Node *realTun = real->m_inTuns[num];
       return realTun->Overwrites(NULL,0);
     }
@@ -403,11 +403,11 @@ Tunnel* Tunnel::GetRealTunnel()
     return this;
   RealPSet *real = m_pset->GetReal();
   if (m_tunType == SETTUNIN) {
-    unsigned int num = FindInNodeVec(m_pset->m_inTuns, this);
+    unsigned int num = FindInTunVec(m_pset->m_inTuns, this);
     return (Tunnel*)(real->m_inTuns[num]);
   }
   else if (m_tunType == SETTUNOUT) {
-    unsigned int num = FindInNodeVec(m_pset->m_outTuns, this);
+    unsigned int num = FindInTunVec(m_pset->m_outTuns, this);
     return (Tunnel*)(real->m_outTuns[num]);
   }
   else
@@ -423,11 +423,11 @@ const Tunnel* Tunnel::GetRealTunnel() const
     return this;
   const RealPSet *real = m_pset->GetReal();
   if (m_tunType == SETTUNIN) {
-    unsigned int num = FindInNodeVec(m_pset->m_inTuns, this);
+    unsigned int num = FindInTunVec(m_pset->m_inTuns, this);
     return (Tunnel*)(real->m_inTuns[num]);
   }
   else if (m_tunType == SETTUNOUT) {
-    unsigned int num = FindInNodeVec(m_pset->m_outTuns, this);
+    unsigned int num = FindInTunVec(m_pset->m_outTuns, this);
     return (Tunnel*)(real->m_outTuns[num]);
   }
   else

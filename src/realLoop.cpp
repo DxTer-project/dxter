@@ -91,9 +91,10 @@ RealLoop::RealLoop(LoopType type, Poss *poss, BSSize bsSize)
   AssignNewLabel();
   
   bool foundControl = false;
-  NodeVecIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
-    Node *in = *iter;
+  //  NodeVecIter iter = m_inTuns.begin();
+  //  for(; iter != m_inTuns.end(); ++iter) {
+  //    Node *in = *iter;
+  for(auto in : m_inTuns) {
     if (!in->IsLoopTunnel()) {
       cout << "non loop tunnel on loop!\n";
       throw;
@@ -203,7 +204,7 @@ void RealLoop::FillTunnelSizes()
   if (!control)
     throw;
   bool upToDate = true;
-  NodeVecIter iter = m_inTuns.begin();
+  TunVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
     LoopTunnel *tun = (LoopTunnel*)(*iter);
 #if TWOD

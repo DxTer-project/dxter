@@ -925,9 +925,10 @@ string Node::GetFunctionalityString() const
       str += "(";
       str += set->GetFunctionalityString();
       str += ")";
-      NodeVecConstIter iter2 = set->m_inTuns.begin();
-      for(; iter2 != set->m_inTuns.end(); ++iter2) {
-	str += (*iter2)->GetFunctionalityString();
+      //      NodeVecConstIter iter2 = set->m_inTuns.begin();
+      //      for(; iter2 != set->m_inTuns.end(); ++iter2) {
+      for (auto tun : set->m_inTuns) {
+	str += tun->GetFunctionalityString();
       }
     }
   }

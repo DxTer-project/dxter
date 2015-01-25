@@ -73,4 +73,10 @@ class Tunnel : public DLANode
   virtual void MigrateFromOldTun(Tunnel *tun) {}
 };
 
+typedef vector<Tunnel*> TunVec;
+typedef TunVec::iterator TunVecIter;
+typedef TunVec::const_iterator TunVecConstIter;
+
+
+
 string TunTypeToStr(TunType type);

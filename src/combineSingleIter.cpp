@@ -429,7 +429,7 @@ LoopTunnel* CombineSingleIter::GetMatchingInTun() const
     else {
       LoopTunnel *possTunIn = ((LoopTunnel*)(GetRealTunnel()->Input(0)))->GetMatchingInTun();
       LoopTunnel *realSetTunIn = (LoopTunnel*)(possTunIn->Input(0));
-      return (LoopTunnel*)(m_pset->m_inTuns[FindInNodeVec(m_pset->GetReal()->m_inTuns, realSetTunIn)]);
+      return (LoopTunnel*)(m_pset->m_inTuns[FindInTunVec(m_pset->GetReal()->m_inTuns, realSetTunIn)]);
     }
   else if (m_tunType != POSSTUNOUT)
     throw;

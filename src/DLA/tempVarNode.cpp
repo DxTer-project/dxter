@@ -584,7 +584,7 @@ void MoveIn(Node *node, Node *newSrc, ConnNum newSrcNum, TempVarNode *tempVarNod
           LoopTunnel *setTunOut = setTunIn->GetMatchingOutTun();
           if (setTunIn->IsSplit() && ((SplitBase*)setTunIn)->m_isControlTun) {
             bool found = false;
-            NodeVecIter inIter = tun->m_pset->m_inTuns.begin();
+            TunVecIter inIter = tun->m_pset->m_inTuns.begin();
             for(; !found && inIter != tun->m_pset->m_inTuns.end(); ++inIter) {
               if (*inIter != tun && ((LoopTunnel*)(*inIter))->IsSplit()) {
                 SplitBase *split = ((SplitBase*)(*inIter));
