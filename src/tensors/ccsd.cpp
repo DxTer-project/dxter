@@ -512,8 +512,6 @@ RealPSet* Z_abij_calc(DLANode *v_abij,
   temp1->AddInput(Z_abij,0);
   TempVarNode *temp2 = new TempVarNode(T_aeim->DataType(0).GetDist(), "temp2");
   temp2->AddInput(T_aeim,0);
-  TempVarNode *temp4 = new TempVarNode(T_aeim->DataType(0).GetDist(), "temp4");
-  temp4->AddInput(T_aeim,0);
   TempVarNode *accum = new TempVarNode(Z_abij->DataType(0).GetDist(), "accum");
   accum->AddInput(Z_abij,0);
 
