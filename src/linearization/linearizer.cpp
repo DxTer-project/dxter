@@ -25,6 +25,7 @@
 #include "setLinElem.h"
 #include "basePSet.h"
 #include "node.h"
+#include "helperNodes.h"
 
 void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive);
 void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt, const StrSet &stillLive);
@@ -176,9 +177,12 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
   Linearization curr;
 
   for(auto elem : m_elems) {
-    if (elem->GetNodeClass() == InputNode::GetClass()) {
-      curr.m_order.push_back(elem);
-      elem->SetAdded();
+    if (elem->IsNode()) {
+      NodeLinElem *nodeElem = (NodeLinElem*)elem;
+      if (nodeElem->m_node->GetNodeClass() == InputNode::GetClass()) {
+	curr.m_order.push_back(elem);
+	elem->SetAdded();
+      }
     }
   }
 
@@ -191,10 +195,18 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
   if (readyToAdd.empty())
     throw;
 
+  //  cout << "\n\n\nfinding optimal with " << m_elems.size() << endl;
+  //  cout.flush();
+
   RecursivelyFindOpt(curr, readyToAdd, m_lin, stillLive);
 
   for(auto elem : curr.m_order) {
-    if (elem->GetNodeClass() != InputNode::GetClass())
+    if (elem->IsNode()) {
+      NodeLinElem *nodeElem = (NodeLinElem*)elem;
+      if (nodeElem->m_node->GetNodeClass() != InputNode::GetClass())
+	throw;
+    }
+    else
       throw;
   }
 
