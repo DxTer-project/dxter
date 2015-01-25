@@ -23,7 +23,7 @@
 #include "poss.h"
 #include "nodeLinElem.h"
 #include "setLinElem.h"
-#include "BasePSet.h"
+#include "basePSet.h"
 #include "node.h"
 
 void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive);
@@ -173,6 +173,15 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
 
   LinElemVec readyToAdd;
 
+  Linearization curr;
+
+  for(auto elem : m_elems) {
+    if (elem->GetNodeClass() == InputNode::GetClass()) {
+      curr.m_order.push_back(elem);
+      elem->SetAdded();
+    }
+  }
+
   for(auto elem : m_elems) {
     if (elem->CanAddToLinearOrder()) {
       readyToAdd.push_back(elem);
@@ -182,12 +191,12 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
   if (readyToAdd.empty())
     throw;
 
-  Linearization curr;
-
   RecursivelyFindOpt(curr, readyToAdd, m_lin, stillLive);
 
-  if (!curr.m_order.empty())
-    throw;
+  for(auto elem : curr.m_order) {
+    if (elem->GetNodeClass() != InputNode::GetClass())
+      throw;
+  }
 
   if (m_lin.m_order.size() != m_elems.size())
     throw;
