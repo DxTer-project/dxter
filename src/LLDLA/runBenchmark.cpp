@@ -23,6 +23,14 @@
 
 #if DOLLDLA
 
+#include <climits>
+#include <sstream>
+#include <time.h>
+
+#include "allTransformations.h"
+#include "runnerUtils.h"
+#include "runtimeEvaluation.h"
+
 ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   RegAllLLDLANodes();
   AddTransformations();
@@ -118,7 +126,7 @@ ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstanc
 
   cout << "About to evaluate\n";
 
-  auto impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, ImpStrMap(&uni).get(), absImpStr);
+  auto impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, uni.ImpStrMap().get(), absImpStr);
 
   cout << "Done evaluating\n";
 

@@ -83,7 +83,7 @@ class DuplicateRegLoad : public DLANode
 
   virtual void AddVariables(VarSet &set) const;
   virtual void BuildDataTypeCache();
-  virtual void ClearDataTypeCache();  
+  virtual void ClearDataTypeCache();
 };
 
 class TempVecReg : public DLANode

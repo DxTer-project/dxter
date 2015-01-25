@@ -19,26 +19,13 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef RUN_BENCHMARK_H_
-#define RUN_BENCHMARK_H_
+//#ifndef RUN_BENCHMARK_H_
+//#define RUN_BENCHMARK_H_
 
-#include "allTransformations.h"
+
 #include "base.h"
-#include "costs.h"
 #include "DLAReg.h"
-#include "loopSupport.h"
 #include "problemInstanceStats.h"
-#include "runnerUtils.h"
-#include "runtimeEvaluation.h"
-#include "transform.h"
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#include <climits>
-#include <sstream>
-#include <time.h>
 
 #if DOLLDLA
 
@@ -46,4 +33,4 @@ ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstanc
 
 #endif // DOLLDLA
 
-#endif // RUN_BENCHMARK_H_
+//#endif // RUN_BENCHMARK_H_

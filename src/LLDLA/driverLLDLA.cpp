@@ -181,7 +181,7 @@ int main(int argc, const char* argv[])
   string opName;
 
   if (argc == 2 && *argv[1] == '0') {
-    RunBenchmark();
+    RunAllBenchmarks();
   } else if(argc < 2) {
     Usage();
     return 0;

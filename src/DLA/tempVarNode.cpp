@@ -487,8 +487,10 @@ bool HasDecendentForApplication(const Node *node)
 
 bool MoveTempVarNodeIntoLoop::CanApply(const Node *node) const
 {
-  if (node->m_children.size() > 1)
+  if (node->m_children.size() > 1) {
+    cout << "ERROR: Temp var had more than 1 child" << endl;
     throw;
+  }
   return HasDecendentForApplication(node->Child(0));
 }
 

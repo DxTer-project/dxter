@@ -43,6 +43,39 @@ m_type("InputNode")
 
 #if TWOD
 #if DOLLDLA
+InputNode::InputNode(string name,
+		     Size m, Size n,
+		     Size rowStrideVal, Size colStrideVal,
+		     Type dataType)
+:
+m_msize(NAN), m_nsize(NAN) {
+  Stride rs, cs;
+  if (rowStrideVal == 1) {
+    rs = UNITSTRIDE;
+  } else {
+    rs = NONUNITSTRIDE;
+  }
+  if (colStrideVal == 1) {
+    cs = UNITSTRIDE;
+  } else {
+    cs = NONUNITSTRIDE;
+  }
+  
+  string numRowsVar = name + "NumRows";
+  string numColsVar = name + "NumCols";
+  string rowStrideVar = name + "RowStride";
+  string colStrideVar = name + "ColStride";
+  
+  m_dataTypeInfo = DataTypeInfo(rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
+  
+  m_rowStrideVal = rowStrideVal;
+  m_colStrideVal = colStrideVal;
+  
+  m_msize.AddRepeatedSizes(m, 1, 1);
+  m_nsize.AddRepeatedSizes(n, 1, 1);
+  m_varName.m_name = name;
+}
+
 InputNode::InputNode(NodeType type, Size m, Size n, string name,
                      Size rowStrideVal, Size colStrideVal,
                      string numRowsVar, string numColsVar,

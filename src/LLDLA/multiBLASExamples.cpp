@@ -4,45 +4,45 @@
 
 RealPSet* Gesummv(Type dataType, int m, int n)
 {
-  InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
+  InputNode* alphaIn = new InputNode("Alpha",
+				     1, 1,
 				     1, m,
-				     "AlphaNumRows", "AlphaNumCols",
-				     "AlphaRowStride", "AlphaColStride", dataType);
+				     dataType);
 
-  InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
+  InputNode* betaIn = new InputNode("Beta",
+				    1, 1,
 				    1, m,
-				    "BetaNumRows", "BetaNumCols",
-				    "BetaRowStride", "BetaColStride", dataType);
+				    dataType);
 
-  InputNode* AIn = new InputNode("A input", m, n, "A",
+  InputNode* AIn = new InputNode("A",
+				 m, n,
 				 1, m,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
+				 dataType);
 
-  InputNode* BIn = new InputNode("B input", m, n, "B",
+  InputNode* BIn = new InputNode("B",
+				 m, n,
 				 1, m,
-				 "BNumRows", "BNumCols",
-				 "BRowStride", "BColStride", dataType);
+				 dataType);
 
-  InputNode* YIn = new InputNode("Y input", m, 1, "Y",
+  InputNode* YIn = new InputNode("Y",
+				 m, 1,
 				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
+				 dataType);
 
-  InputNode* XIn = new InputNode("X input", n, 1, "X",
+  InputNode* XIn = new InputNode("X",
+				 n, 1,
 				 1, n,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
+				 dataType);
 
-  InputNode* WIn = new InputNode("W input", m, 1, "W",
+  InputNode* WIn = new InputNode("W",
+				 m, 1,
 				 1, m,
-				 "WNumRows", "WNumCols",
-				 "WRowStride", "WColStride", dataType);
+				 dataType);
 
-  InputNode* VIn = new InputNode("V input", m, 1, "V",
+  InputNode* VIn = new InputNode("V",
+				 m, 1,
 				 1, m,
-				 "VNumRows", "VNumCols",
-				 "VRowStride", "VColStride", dataType);
+				 dataType);
 
   Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
   tunAlpha->AddInput(alphaIn, 0);
@@ -114,35 +114,35 @@ RealPSet* Gesummv(Type dataType, int m, int n)
 
 RealPSet* Gemam(Type dataType, int m, int n, int p)
 {
-  InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
+  InputNode* alphaIn = new InputNode("Alpha",
+				     1, 1,
 				     1, m,
-				     "AlphaNumRows", "AlphaNumCols",
-				     "AlphaRowStride", "AlphaColStride", dataType);
+				     dataType);
 
-  InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
+  InputNode* betaIn = new InputNode("Beta",
+				    1, 1,
 				    1, m,
-				    "BetaNumRows", "BetaNumCols",
-				    "BetaRowStride", "BetaColStride", dataType);
+				    dataType);
 
-  InputNode* A0In = new InputNode("A0 input", m, n, "A0",
+  InputNode* A0In = new InputNode("A0",
+				  m, n,
+				  1, m,
+				  dataType);
+
+  InputNode* A1In = new InputNode("A1",
+				  m, n,
+				  1, m,
+				  dataType);
+
+  InputNode* BIn = new InputNode("B",
+				 m, p,
 				 1, m,
-				 "A0NumRows", "A0NumCols",
-				 "A0RowStride", "A0ColStride", dataType);
+				 dataType);
 
-  InputNode* A1In = new InputNode("A1 input", m, n, "A1",
-				 1, m,
-				 "A1NumRows", "A1NumCols",
-				 "A1RowStride", "A1ColStride", dataType);
-
-  InputNode* BIn = new InputNode("B input", m, p, "B",
-				 1, m,
-				 "BNumRows", "BNumCols",
-				 "BRowStride", "BColStride", dataType);
-
-  InputNode* CIn = new InputNode("C input", n, p, "C",
+  InputNode* CIn = new InputNode("C",
+				 n, p,
 				 1, p,
-				 "CNumRows", "CNumCols",
-				 "CRowStride", "CColStride", dataType);
+				 dataType);
 
   Tunnel* tunA0 = new Tunnel(POSSTUNIN);
   tunA0->AddInput(A0In, 0);
@@ -200,45 +200,45 @@ RealPSet* Gemam(Type dataType, int m, int n, int p)
 
 RealPSet* Gemv2(Type dataType, int m, int n, int k)
 {
-  InputNode* alphaIn = new InputNode("alpha input", 1, 1, "Alpha",
+  InputNode* alphaIn = new InputNode("Alpha",
+				     1, 1,
 				     1, m,
-				     "AlphaNumRows", "AlphaNumCols",
-				     "AlphaRowStride", "AlphaColStride", dataType);
+				     dataType);
 
-  InputNode* betaIn = new InputNode("beta input", 1, 1, "Beta",
+  InputNode* betaIn = new InputNode("Beta",
+				    1, 1,
 				    1, m,
-				    "BetaNumRows", "BetaNumCols",
-				    "BetaRowStride", "BetaColStride", dataType);
+				    dataType);
 
-  InputNode* AIn = new InputNode("A input", m, n, "A",
+  InputNode* AIn = new InputNode("A",
+				 m, n,
 				 n, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
+				 dataType);
 
-  InputNode* BIn = new InputNode("B input", m, k, "B",
+  InputNode* BIn = new InputNode("B",
+				 m, k,
 				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
+				 dataType);
 
-  InputNode* xIn = new InputNode("y input", n, 1, "Y",
+  InputNode* xIn = new InputNode("Y",
+				 n, 1,
 				 1, n,
-				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride", dataType);
+				 dataType);
 
-  InputNode* yIn = new InputNode("w input", k, 1, "Y",
+  InputNode* yIn = new InputNode("W",
+				 k, 1,
 				 1, k,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
+				 dataType);
 
-  InputNode* zIn = new InputNode("z input", m, 1, "Z",
+  InputNode* zIn = new InputNode("Z",
+				 m, 1,
 				 1, m,
-				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride", dataType);
+				 dataType);
 
-  InputNode* wIn = new InputNode("w input", m, 1, "W",
+  InputNode* wIn = new InputNode("W",
+				 m, 1,
 				 1, m,
-				 "WNumRows", "WNumCols",
-				 "WRowStride", "WColStride", dataType);
+				 dataType);
 
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
@@ -305,30 +305,30 @@ RealPSet* Gemv2(Type dataType, int m, int n, int k)
 
 RealPSet* VMVMulExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", m, n, "A",
+  InputNode* Ain = new InputNode("A",
+				 m, n,
 				 1, m,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
+				 dataType);
 
-  InputNode* xIn = new InputNode("x input", n, 1, "X",
+  InputNode* xIn = new InputNode("X",
+				 n, 1,
 				 1, n,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
+				 dataType);
 
-  InputNode* zIn = new InputNode("z input", m, 1, "Z",
+  InputNode* zIn = new InputNode("Z",
+				 m, 1,
 				 1, m,
-				 "ZNumRows", "ZNumCols",
-				 "ZRowStride", "ZColStride", dataType);
+				 dataType);
 
-  InputNode* yIn = new InputNode("y input", 1, m, "Y",
+  InputNode* yIn = new InputNode("Y",
+				 1, m,
 				 1, 1,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
+				 dataType);
 
-  InputNode* wIn = new InputNode("w input", 1, 1, "W",
+  InputNode* wIn = new InputNode("W",
 				 1, 1,
-				 "WNumRows", "WNumCols",
-				 "WRowStride", "WColStride", dataType);
+				 1, 1,
+				 dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);

@@ -19,16 +19,15 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
+#ifndef RUN_BENCHMARK_H_
+#define RUN_BENCHMARK_H_
 
-#include "benchmarkStats.h"
 #include "blasExamples.h"
-#include "problemInstance.h"
-#include "runBenchmark.h"
-#include "singleOperationExamples.h"
 
 #if DOLLDLA
 
-void RunBenchmark();
+void RunAllBenchmarks();
 
 #endif // DOLLDLA
+
+#endif

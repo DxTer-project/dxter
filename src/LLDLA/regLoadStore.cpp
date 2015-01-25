@@ -105,22 +105,25 @@ void LoadToRegs::PrintCode(IndStream &out)
 
 const Sizes* LoadToRegs::GetM(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     throw;
+  }
   return GetInputM(0);
 }
 
 const Sizes* LoadToRegs::GetN(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     throw;
+  }
   return GetInputN(0);
 }
 
 Name LoadToRegs::GetName(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     throw;
+  }
   Name name = GetInputName(0);
   name.m_name += "_regs";
   return name;
@@ -245,22 +248,25 @@ void DuplicateRegLoad::BuildDataTypeCache()
 
 const Sizes* DuplicateRegLoad::GetM(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     throw;
+  }
   return &m_mSizes;
 }
 
 const Sizes* DuplicateRegLoad::GetN(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     throw;
+  }
   return &m_nSizes;
 }
 
 Name DuplicateRegLoad::GetName(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     throw;
+  }
   Name name = GetInputName(0);
   name.m_name += "_regDup";
   return name;
@@ -313,22 +319,25 @@ void TempVecReg::BuildDataTypeCache()
 
 const Sizes* TempVecReg::GetM(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     throw;
+  }
   return &m_mSizes;
 }
 
 const Sizes* TempVecReg::GetN(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     throw;
+  }
   return &m_nSizes;
 }
 
 Name TempVecReg::GetName(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     throw;
+  }
   Name name = GetInputName(0);
   name.m_name += "_regTemp";
   return name;

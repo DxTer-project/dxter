@@ -4,20 +4,17 @@
 
 RealPSet* GemmExample(Type dataType, Trans transA, Trans transB, int m, int n, int p)
 {
-  InputNode *Ain= new InputNode("A input", m, p, "A",
+  InputNode *Ain= new InputNode("A", m, p,
 				 1, m,
-				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride", dataType);
+				dataType);
 
-  InputNode *Bin = new InputNode("B input", p, n, "B",
+  InputNode *Bin = new InputNode("B", p, n,
 				 1, p,
-				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride", dataType);
+				 dataType);
 
-  InputNode *Cin = new InputNode("C input", m, n, "C",
+  InputNode *Cin = new InputNode("C", m, n,
 				 1, m,
-				 "CNumRows","CNumCols",
-				 "CRowStride","CColStride", dataType);
+				 dataType);
 
   Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -48,20 +45,17 @@ RealPSet* GemmExample(Type dataType, Trans transA, Trans transB, int m, int n, i
 
 RealPSet* DotExample(Type dataType, int m)
 {
-  InputNode* Ain = new InputNode("A input", 1, m, "A",
+  InputNode* Ain = new InputNode("A", 1, m,
 				 m, 1,
-				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride", dataType);
+				 dataType);
 
-  InputNode* Bin = new InputNode("B input", m, 1, "B", 
+  InputNode* Bin = new InputNode("B", m, 1,
 				 m, 1,
-				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride", dataType);
+				 dataType);
 
-  InputNode* Cin = new InputNode("C input", 1, 1, "C", 
+  InputNode* Cin = new InputNode("C", 1, 1,
 				 m, 1,
-				 "CNumRows","CNumCols",
-				 "CRowStride","CColStride", dataType);
+				 dataType);
 
   Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain,0);
@@ -94,25 +88,22 @@ RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
 {
   InputNode* Ain;
   if (transpose) {
-    Ain = new InputNode("A input", n, m, "A",
+    Ain = new InputNode("A", n, m,
 			1, n,
-			"ANumRows", "ANumCols",
-			"ARowStride", "AColStride", dataType);
+			dataType);
   } else {
-    Ain = new InputNode("A input", m, n, "A",
+    Ain = new InputNode("A", m, n,
 			1, m,
-			"ANumRows", "ANumCols",
-			"ARowStride", "AColStride", dataType);
+			dataType);
   }
 
-  InputNode* xIn = new InputNode("x input", n, 1, "X",
+  InputNode* xIn = new InputNode("x", n, 1,
 				 1, n,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
-  InputNode* yIn = new InputNode("y input", m, 1, "Y",
+				 dataType);
+
+  InputNode* yIn = new InputNode("y", m, 1,
 				 1, m,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
+				 dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -152,15 +143,13 @@ RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
 
 RealPSet* MAddExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", m, n, "A",
+  InputNode* Ain = new InputNode("A", m, n,
 				 1, m,
-				 "ANumRows","ANumCols",
-				 "ARowStride","AColStride", dataType);
+				 dataType);
 
-  InputNode* Bin = new InputNode("B input", m, n, "B", 
+  InputNode* Bin = new InputNode("B", m, n,
 				 1, m,
-				 "BNumRows","BNumCols",
-				 "BRowStride","BColStride", dataType);
+				 dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -200,15 +189,13 @@ RealPSet* SVMulExample(Type dataType, VecType vecType, int m)
     colStride = m;
   }
 
-  InputNode* Ain = new InputNode("A input", numRows, numCols, "A",
+  InputNode* Ain = new InputNode("A", numRows, numCols,
 				 rowStride, colStride,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
+				 dataType);
 
-  InputNode* xIn = new InputNode("x input", 1, 1, "X",
+  InputNode* xIn = new InputNode("x", 1, 1,
 				 1, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
+				 dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -235,14 +222,13 @@ RealPSet* SVMulExample(Type dataType, VecType vecType, int m)
 
 RealPSet* SMMulExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", m, n, "A",
+  InputNode* Ain = new InputNode("A", m, n,
 				 n, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-  InputNode* xIn = new InputNode("x input", 1, 1, "X",
+				 dataType);
+
+  InputNode* xIn = new InputNode("x", 1, 1,
 				 1, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
+				 dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -269,19 +255,17 @@ RealPSet* SMMulExample(Type dataType, int m, int n)
 
 RealPSet* VMMulExample(Type dataType, int m, int n)
 {
-  InputNode* Ain = new InputNode("A input", m, n, "A",
+  InputNode* Ain = new InputNode("A", m, n,
 				 n, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
-  InputNode* xIn = new InputNode("x input", 1, m, "X",
-				 m, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
+				 dataType);
 
-  InputNode* yIn = new InputNode("y input", 1, n, "Y",
+  InputNode* xIn = new InputNode("x", 1, m,
+				 m, 1,
+				 dataType);
+
+  InputNode* yIn = new InputNode("y", 1, n,
 				 n, 1,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
+				 dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -322,15 +306,13 @@ RealPSet* VAddExample(Type dataType, VecType vecType, int m)
     nCols = 1;
   }
 
-  InputNode* xIn = new InputNode("x input", nRows, nCols, "X",
+  InputNode* xIn = new InputNode("x", nRows, nCols,
 				 nCols, nRows,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
+				 dataType);
 
-  InputNode* yIn = new InputNode("y input", nRows, nCols, "Y",
+  InputNode* yIn = new InputNode("y", nRows, nCols,
 				 nCols, nRows,
-				 "YNumRows", "YNumCols",
-				 "YRowStride", "YColStride", dataType);
+				 dataType);
   
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
