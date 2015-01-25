@@ -24,6 +24,8 @@
 
 bool LinElem::CanAddToLinearOrder() const
 {
+  if (HasAdded())
+    return false;
   for(auto input : m_inputs) {
     if (!input->HasAdded())
       return false;
