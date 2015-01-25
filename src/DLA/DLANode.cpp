@@ -93,6 +93,21 @@ const Sizes* DLANode::GetInputN(ConnNum num) const
   return in->GetN(inNum);
 }
 
+Size DLANode::MaxNumberOfElements(ConnNum num) const
+{
+  Size size = 0;
+  const Sizes *ms = GetM(num);  
+  const Sizes *ns = GetN(num);  
+
+  const unsigned int totNumIters = ms->NumSizes();
+  for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+    Size temp = (*ms)[iteration] * (*ns)[iteration];
+    if (temp > size)
+      size = temp;
+  }
+  return size;
+}
+
 #if DODM
 const Sizes* DLANode::InputLocalM(ConnNum num) const
 {

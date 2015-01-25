@@ -66,7 +66,11 @@ VarCostMap NodeLinElem::NewVarsAndCosts() const
 	    return map;
 	  }
 	}
+#if DODM
 	map[m_node->GetNameStr(0)] = ((DLANode*)m_node)->MaxNumberOfLocalElements(0);
+#else
+	map[m_node->GetNameStr(0)] = ((DLANode*)m_node)->MaxNumberOfElements(0);
+#endif
 	return map;
       }
     default:

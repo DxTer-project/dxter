@@ -53,6 +53,7 @@ class DLANode : public Node
 #if TWOD
   virtual const Sizes* GetM(ConnNum num) const = 0;
   virtual const Sizes* GetN(ConnNum num) const = 0;
+  Size MaxNumberOfElements(ConnNum num) const;
 #if DODM
   virtual const Sizes* LocalM(ConnNum num) const = 0;
   virtual const Sizes* LocalN(ConnNum num) const = 0;

@@ -151,7 +151,11 @@ VarCostMap SetLinElem::NewVarsAndCosts() const
 	}
       }
       if (!alsoInput) {
+#if DOTENSORS
 	map[outName] = ((DLANode*)outTun)->MaxNumberOfLocalElements(0);
+#else
+	map[outName] = ((DLANode*)outTun)->MaxNumberOfElements(0);
+#endif
       }
     }
   }
