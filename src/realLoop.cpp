@@ -549,3 +549,25 @@ ShadowPSet* RealLoop::GetNewShadow()
    cout << "done migrating in real loop " << this << endl;
 #endif
  }
+ 
+Cost RealLoop::Prop()
+{
+  for(auto in : m_inTuns) {
+    if (in->GetNodeClass() == SplitSingleIter::GetClass()) {
+      const SplitSingleIter *split = (SplitSingleIter*)in;
+      for (unsigned int i = 0; i < (split->NumOutputs()-1); ++i) {
+	string name = split->GetNameStr(i);
+	for(auto in2 : m_inTuns) {
+	  //Spliting a variable and one of the partitions has
+	  // the same name as another input
+	  //This can happen with nested loops where an input
+	  // is split twice on different loops
+	  if (!in2->IsSplit() && name == in2->GetInputNameStr(0))
+	    throw;
+	}
+      }
+    }
+  }
+  
+  return IntLoop<RealPSet>::Prop();
+}

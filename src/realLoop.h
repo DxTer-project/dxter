@@ -86,5 +86,5 @@ class RealLoop : public IntLoop<RealPSet>
   int GetCurrIter() const {return m_currIter;}
   void SetCurrIter(int iter) {m_currIter = iter;}
   inline bool IsUnrolled() const {return m_flags & SETLOOPISUNROLLED;}
-  
+  virtual Cost Prop();  
 };
