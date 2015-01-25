@@ -552,7 +552,8 @@ ShadowPSet* RealLoop::GetNewShadow()
  
 Cost RealLoop::Prop()
 {
-  for(auto in : m_inTuns) {
+  const Poss *poss = m_posses.begin()->second;
+  for(auto in : poss->m_inTuns) {
     if (in->GetNodeClass() == SplitSingleIter::GetClass()) {
       const SplitSingleIter *split = (SplitSingleIter*)in;
       for (unsigned int i = 0; i < (split->NumOutputs()-1); ++i) {
@@ -562,7 +563,18 @@ Cost RealLoop::Prop()
 	  // the same name as another input
 	  //This can happen with nested loops where an input
 	  // is split twice on different loops
-	  if (!in2->IsSplit() && name == in2->GetInputNameStr(0))
+	  if (!in2->IsSplit() && name == in2->GetInputNameStr(0)) {
+	    m_ownerPoss->PrintTransVecUp();
+	    m_posses.begin()->second->PrintTransVecUp();
+	    throw;
+	  }
+	}
+      }
+    }
+    else {
+      for (auto in2 : m_inTuns) {
+	if (in != in2 && in2->GetNodeClass() != SplitSingleIter::GetClass()) {
+	  if (in->Input(0) == in2->Input(0))
 	    throw;
 	}
       }
