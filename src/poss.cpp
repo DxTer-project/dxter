@@ -107,10 +107,26 @@ Poss::Poss(Node *node, bool goUp)
       m_outTuns.push_back(out);
     }
     
-    
+    NodeMap nodeMap;
+    bool useMap = true;
     for (ConnNum i = 0; i < node->m_inputs.size(); ++i) {
       NodeConn *conn = node->InputConn(i);
+      if (useMap) {
+	if (conn->m_num == 0) {
+	  if (nodeMap.find(conn->m_n) != nodeMap.end()) {
+	    Node *oldIn = nodeMap.find(conn->m_n)->second;
+	    conn->m_n->RemoveChild(node, conn->m_num);
+	    conn->m_n = oldIn;
+	    oldIn->AddChild(node,0);
+	    continue;
+	  }
+	}
+	else
+	  useMap = false;
+      }
+
       Tunnel *in = new Tunnel(POSSTUNIN);
+      nodeMap[conn->m_n] = in;
       in->AddInput(conn->m_n, conn->m_num);
       conn->m_n->RemoveChild(node, conn->m_num);
       conn->m_n = in;
