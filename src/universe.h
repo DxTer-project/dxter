@@ -24,6 +24,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "base.h"
 #include "realPSet.h"
 #include "linearization/graphIter.h"
