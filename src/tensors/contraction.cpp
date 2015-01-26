@@ -956,25 +956,6 @@ bool ContractionLoopExp::CanApply(const Node *node) const
   return false;
 }
 
-bool NeedIndexes(NodeConn *connA, NodeConn *connB, bool checkSplitOnA)
-{
-  if (connA->m_n->IsTunnel() && connB->m_n->IsTunnel()) {
-    if ((checkSplitOnA && ((Tunnel*)connA->m_n)->IsSplit()) || (!checkSplitOnA && ((Tunnel*)connB->m_n)->IsSplit())) {
-      if (connA->m_n->Input(0)->Input(0) ==
-          connB->m_n->Input(0)->Input(0))
-        {
-          return true;
-        }
-      else
-        return false;
-    }
-    else
-      return false;
-  }
-  else
-    return false;
-}
-
 void ContractionLoopExp::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
@@ -1003,8 +984,6 @@ void ContractionLoopExp::Apply(Node *node) const
   if (isAIndex) {
     ATun = new SplitSingleIter(aDim, POSSTUNIN, isCIndex ? false : true);
     ATunNum = 1;
-    if (NeedIndexes(connA, connB, false))
-      ((SplitSingleIter*)ATun)->m_indices = aIndices;
   }
   else {
     ATun = new LoopTunnel(POSSTUNIN);
@@ -1021,8 +1000,6 @@ void ContractionLoopExp::Apply(Node *node) const
   if (isBIndex) {
     BTun = new SplitSingleIter(bDim, POSSTUNIN, false);
     BTunNum = 1;
-    if (NeedIndexes(connA, connB, true))
-      ((SplitSingleIter*)BTun)->m_indices = bIndices;
   }
   else {
     BTun = new LoopTunnel(POSSTUNIN);

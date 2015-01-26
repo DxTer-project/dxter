@@ -38,9 +38,6 @@ class SplitSingleIter : public SplitBase
  public:
   bool m_addDir;
   DataTypeInfo m_info;
-#if DOTENSORS
-  string m_indices;
-#endif
 
 #if TWOD
   SplitSingleIter();
@@ -117,5 +114,7 @@ class SplitSingleIter : public SplitBase
 #endif
 
   virtual LoopTunnel* GetMatchingOutTun() const;
+
+  string LoopLevel() const;
 };
 
