@@ -256,6 +256,8 @@ void InputNode::PrintCode(IndStream &out)
 {
 #if DOTENSORS
   out.Indent();
+  *out << "//BEGININIT\n";
+  out.Indent();
   *out << "// " << m_type << " has " << m_numDims << " dims\n";
   out.Indent();
   *out << "//\tStarting distribution: " << m_varName.m_type.PrettyStr() << " or " << DistTypeToStr(m_varName.m_type) << endl;
@@ -282,6 +284,8 @@ void InputNode::PrintCode(IndStream &out)
   //  out.Indent();
   //  *out << "GatherAllModes( " << GetNameStr(0) << ", " << m_varName.m_name << "_local );\n";
 #endif
+  out.Indent();
+  *out << "//ENDINIT\n";
 #endif //DOTENSORS
 }
 
