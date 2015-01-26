@@ -144,10 +144,14 @@ NodeType TempVarNode::GetType() const
 void TempVarNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig,shallow, possMerging);
-  m_info = ((TempVarNode*)orig)->m_info;
-  m_name = ((TempVarNode*)orig)->m_name;
+  const TempVarNode *temp = (TempVarNode*)orig;
+  m_info = temp->m_info;
+  m_name = temp->m_name;
 #if DOTENSORS
-  m_sumDims = ((TempVarNode*)orig)->m_sumDims;
+  m_sumDims = temp->m_sumDims;
+  m_align = temp->m_align;
+  m_alignModes = temp->m_alignModes;
+  m_alignModesSrc = temp->m_alignModesSrc;  
 #endif
 }
 
@@ -183,6 +187,13 @@ void TempVarNode::PrintCode(IndStream &out)
    *out << "bli_copym(&" << name << ", &" << GetNameStr(0) << ");\n";
    }*/
 #if DOTENSORS
+  if (!m_align.empty()) {
+    out.Indent();
+    *out << GetNameStr(0) << ".AlignModesWith( "
+	 << ModeArrayVarName(m_alignModes) << ", "
+	 << m_align << ", "
+	 << ModeArrayVarName(m_alignModesSrc) << " );\n";
+  }
   out.Indent();
   *out << "tempShape = " << GetInputNameStr(0) << ".Shape();\n";
   EntryListIter iter = m_sumDims.begin();
@@ -564,6 +575,11 @@ void MoveIn(Node *node, Node *newSrc, ConnNum newSrcNum, TempVarNode *tempVarNod
                 throw;
               }
               tempVarPossTunIn->RedirectChildren(1, newTemp, 0);
+	      if (newTemp->m_children.size() == 1) {
+		((DLANode*)(newTemp->Child(0)))->AlignInfo(newTemp->m_align,
+					     newTemp->m_alignModes,
+					     newTemp->m_alignModesSrc);
+	      }
               tempVarPossTunIn->m_poss->AddNode(newTemp);
               tempVarPossTunIn->m_poss->m_fullyExpanded = false;
             }
@@ -576,6 +592,11 @@ void MoveIn(Node *node, Node *newSrc, ConnNum newSrcNum, TempVarNode *tempVarNod
                 throw;
               }
               tempVarPossTunIn->RedirectChildren(0, newTemp, 0);
+	      if (newTemp->m_children.size() == 1) {
+		((DLANode*)(newTemp->Child(0)))->AlignInfo(newTemp->m_align,
+					     newTemp->m_alignModes,
+					     newTemp->m_alignModesSrc);
+	      }
               tempVarPossTunIn->m_poss->AddNode(newTemp);
               tempVarPossTunIn->m_poss->m_fullyExpanded = false;
             }
@@ -671,6 +692,11 @@ void MoveIn(Node *node, Node *newSrc, ConnNum newSrcNum, TempVarNode *tempVarNod
               throw;
             }
             tempVarPossTunIn->RedirectChildren(0,newTemp,0);
+	    if (newTemp->m_children.size() == 1) {
+	      ((DLANode*)(newTemp->Child(0)))->AlignInfo(newTemp->m_align,
+					   newTemp->m_alignModes,
+					   newTemp->m_alignModesSrc);
+	    }
             newSrcPossTunIn->m_poss->AddNode(newTemp);
 	    newSrcPossTunIn->m_poss->m_fullyExpanded = false;
           }
@@ -706,8 +732,25 @@ void MoveTempVarNodeIntoLoop::Apply(Node *node) const
   if (!tmp->m_sumDims.empty()) {
     throw;
   }
+  if (!tmp->m_align.empty()) {
+    throw;
+  }
   MoveIn(tmp->Child(0), tmp->Input(0), tmp->InputConnNum(0), tmp);
   tmp->m_poss->DeleteChildAndCleanUp(tmp);
+}
+
+void TempVarNode::AddVariables(VarSet &set) const
+{
+  if (!m_align.empty()) {
+    {
+      Var var(ModeArrayVarType, m_alignModes);
+      set.insert(var);
+    }
+    {
+      Var var(ModeArrayVarType, m_alignModesSrc);
+      set.insert(var);
+    }
+  }
 }
 
 #endif //DOTENSORS

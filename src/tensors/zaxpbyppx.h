@@ -52,6 +52,9 @@ class ZAxpBypPx : public DLAOp<4,1>
   //  virtual bool ShouldCullDP() const;
   virtual bool DoNotCullDP() const;
   virtual void AddVariables(VarSet &set) const;
+  virtual void AlignInfo(string &align,
+			 DimVec &alignModes,
+			 DimVec &alignModesSrc);
 };
 
 

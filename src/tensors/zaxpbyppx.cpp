@@ -120,7 +120,17 @@ void ZAxpBypPx::PrintCode(IndStream &out)
 	<< GetInputName(3).str() << " );\n";
 }
 
-
+void ZAxpBypPx::AlignInfo(string &align,
+			  DimVec &alignModes,
+			  DimVec &alignModesSrc)
+{
+  align = GetInputNameStr(0);
+  Dim numDims = InputNumDims(0);
+  DimVec tmp;
+  IdentDimVec(numDims, tmp);
+  alignModes = tmp;
+  alignModesSrc = tmp;
+}
 
 void ZAxpBypPx::AddVariables(VarSet &set) const
 {

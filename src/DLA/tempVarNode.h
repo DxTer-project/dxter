@@ -39,6 +39,9 @@ class TempVarNode : public DLANode
   SizesArray m_sumLens;
   EntryList m_sumDims;
   Sizes m_ones;
+  string m_align;
+  DimVec m_alignModes;
+  DimVec m_alignModesSrc;
 #endif
 
   TempVarNode();
@@ -84,6 +87,9 @@ class TempVarNode : public DLANode
   virtual bool IsReadOnly() const {return true;}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual bool IsDataDependencyOfInput() const {return false;}
+#if DOTENSORS
+  virtual void AddVariables(VarSet &set) const;
+#endif
 };
 
 class MoveTempVarNodeIntoLoop : public SingleTrans

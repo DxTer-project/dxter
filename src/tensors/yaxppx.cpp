@@ -36,6 +36,18 @@ YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta, string start, string end)
   SetLayer(layer);
 }
 
+void YAxpPx::AlignInfo(string &align,
+                          DimVec &alignModes,
+                          DimVec &alignModesSrc)
+{
+  align= GetInputNameStr(0);
+  Dim numDims = InputNumDims(0);
+  DimVec tmp;
+  IdentDimVec(numDims, tmp);
+  alignModes = tmp;
+  alignModesSrc = tmp;
+}
+
 YAxpPx::YAxpPx(Layer layer, Coef alpha, Coef beta)
 : m_alpha(alpha), m_beta(beta)
 {

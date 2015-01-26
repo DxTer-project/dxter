@@ -43,6 +43,9 @@ class Yxpy : public DLAOp<2,1>
   virtual Phase MaxPhase() const;
   //  virtual bool ShouldCullDP() const;
   //  virtual bool DoNotCullDP() const;
+  virtual void AlignInfo(string &align,
+			 DimVec &alignModes,
+			 DimVec &alignModesSrc);
 };
 
 

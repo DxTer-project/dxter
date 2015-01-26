@@ -42,6 +42,18 @@ NodeType ZAxpBy::GetType() const
   return "ZAxpBy " + LayerNumToStr(GetLayer());
 }
 
+void ZAxpBy::AlignInfo(string &align,
+                          DimVec &alignModes,
+                          DimVec &alignModesSrc)
+{
+  align= GetInputNameStr(0);
+  Dim numDims = InputNumDims(0);
+  DimVec tmp;
+  IdentDimVec(numDims, tmp);
+  alignModes = tmp;
+  alignModesSrc = tmp;
+}
+
 void ZAxpBy::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<3,1>::Duplicate(orig, shallow, possMerging);

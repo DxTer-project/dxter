@@ -35,6 +35,18 @@ Yaxpy::Yaxpy(Layer layer, Coef alpha)
   SetLayer(layer);
 }
 
+void Yaxpy::AlignInfo(string &align,
+                          DimVec &alignModes,
+                          DimVec &alignModesSrc)
+{
+  align= GetInputNameStr(0);
+  Dim numDims = InputNumDims(0);
+  DimVec tmp;
+  IdentDimVec(numDims, tmp);
+  alignModes = tmp;
+  alignModesSrc = tmp;
+}
+
 NodeType Yaxpy::GetType() const
 {
   return "Yaxpy " + LayerNumToStr(GetLayer());

@@ -34,6 +34,18 @@ Yxpy::Yxpy(Layer layer)
   SetLayer(layer);
 }
 
+void Yxpy::AlignInfo(string &align,
+                          DimVec &alignModes,
+                          DimVec &alignModesSrc)
+{
+  align= GetInputNameStr(0);
+  Dim numDims = InputNumDims(0);
+  DimVec tmp;
+  IdentDimVec(numDims, tmp);
+  alignModes = tmp;
+  alignModesSrc = tmp;
+}
+
 NodeType Yxpy::GetType() const
 {
   return "Yxpy " + LayerNumToStr(GetLayer());

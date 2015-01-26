@@ -106,6 +106,11 @@ class DLANode : public Node
   virtual bool IsBLISParallelizable() const {return false;}
   virtual void Parallelize(Comm comm) {throw;}
 #endif
+#if DOTENSORS
+  virtual void AlignInfo(string &align,
+			 DimVec &alignModes,
+			 DimVec &alignModesSrc) {}
+#endif
 };
 
 #if TWOD
