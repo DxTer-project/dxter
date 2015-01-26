@@ -1716,14 +1716,29 @@ LoopTunnel* SplitSingleIter::GetMatchingOutTun() const
   throw;
 }
 
+
+//If we're using this to get alignment information
+// during transformation application, this poss
+// won't be part of the PSet yet, so we have to 
+// use node connections to work up/out
 string SplitSingleIter::LoopLevel() const
 {
   Poss *poss = m_poss;
   int level = 0;
-  while (poss && poss->m_pset) {
-    if (poss->m_pset->IsLoop()) 
+  while (poss) {
+    if (poss->m_inTuns.empty())
+      break;
+    Node *in = poss->m_inTuns[0];
+    if (!in)
+      break;
+    if (in->IsLoopTunnel())
       ++level;
-    poss = poss->m_pset->m_ownerPoss;
+    in = in->Input(0);
+    if (!in)
+      throw;
+    if (poss == in->m_poss)
+      throw;
+    poss = in->m_poss;
   }
   return (string)"_lvl" + ((char)(level+48));
 }
