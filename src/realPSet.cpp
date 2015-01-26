@@ -1778,8 +1778,8 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 	//Add to map the poss inputs so each set input will patch properly
 	if (oldSet->m_inTuns.size() != newSet->m_inTuns.size())
 	  throw;
-	NodeVecIter tunIterOld = oldSet->m_inTuns.begin();
-	NodeVecIter tunIterNew = newSet->m_inTuns.begin();
+	TunVecIter tunIterOld = oldSet->m_inTuns.begin();
+	TunVecIter tunIterNew = newSet->m_inTuns.begin();
 	for(; tunIterOld != oldSet->m_inTuns.end(); ++tunIterOld,++tunIterNew) {
 	  Tunnel *oldTun = (Tunnel*)(*tunIterOld);
 	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
