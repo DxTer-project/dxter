@@ -132,6 +132,7 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
     }
   }
   name = GetInputName(0);
+
   if (type == BLISLOOP && name.m_name[name.m_name.length()-1] != '_') {
     //while constructing a new set, you put down a POSSTUNIN.
     // its input might be a POSSTUNIN (since the SETTUNIN is inserted
@@ -199,6 +200,8 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
 #else
     if (m_partDim >= InputNumDims(0))
       throw;
+    if (!m_indices.empty())
+      name.m_name += "_" + m_indices;
     if (num <= 2) 
       name.m_name += "_part" + std::to_string(m_partDim) + "_" + std::to_string(num);
     else if (num > 3)
@@ -214,6 +217,7 @@ void SplitSingleIter::Prop()
 {
   if (!IsValidCost(m_cost)) {
     LoopTunnel::Prop();
+
 
     if (m_tunType == POSSTUNIN 
 	&& !IsSplit()) 
@@ -718,6 +722,7 @@ Tunnel* SplitSingleIter::GetSetTunnel()
     tun = new SplitSingleIter(m_partDim, SETTUNOUT, m_isControlTun);
   else
     throw;
+  tun->m_indices = m_indices;
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -893,6 +898,8 @@ void SplitSingleIter::PrintCode(IndStream &out)
   }
 #elif DOTENSORS
   Name nameT = GetInputName(0);
+  if (!m_indices.empty())
+    nameT.m_name += "_" + m_indices;
   Name nameB = nameT;
   nameT.m_name += "_part" + std::to_string(m_partDim) + "T";
   nameB.m_name += "_part" + std::to_string(m_partDim) + "B";
@@ -923,6 +930,8 @@ void SplitSingleIter::Duplicate(const Node *orig, bool shallow, bool possMerging
   m_addDir = split->m_addDir;
 #if DOLLDLA
   m_info = split->m_info;
+#elif DOTENSORS
+  m_indices = split->m_indices;
 #endif
 }
 
@@ -933,6 +942,8 @@ NodeType SplitSingleIter::GetType() const
 #else
   string tmp = "SplitSingleIter";
   tmp += m_partDim;
+  if (!m_indices.empty()) 
+    tmp += "_" + m_indices;
   return tmp  + "( " + Tunnel::GetType() + " )";
 #endif
 }
@@ -1077,6 +1088,8 @@ void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
   }
 #elif DOTENSORS
   Name nameT = GetInputName(0);
+  if (!m_indices.empty())
+    nameT.m_name += "_" + m_indices;
   Name nameB = nameT;
   nameT.m_name += "_part" + std::to_string(m_partDim) + "T";
   nameB.m_name += "_part" + std::to_string(m_partDim) + "B";
@@ -1159,12 +1172,16 @@ void SplitSingleIter::AddVariables(VarSet &set) const
 #elif DOTENSORS
   {
     Name name = GetInputName(0);
+    if (!m_indices.empty())
+      name.m_name += "_" + m_indices;
     name.m_name += "_part" + std::to_string(m_partDim) + "T";
     Var var(name);
     set.insert(var);
   }
 {
     Name name = GetInputName(0);
+    if (!m_indices.empty())
+      name.m_name += "_" + m_indices;
     name.m_name += "_part" + std::to_string(m_partDim) + "B";
     Var var(name);
     set.insert(var);

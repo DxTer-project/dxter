@@ -38,6 +38,9 @@ class SplitSingleIter : public SplitBase
  public:
   bool m_addDir;
   DataTypeInfo m_info;
+#if DOTENSORS
+  string m_indices;
+#endif
 
 #if TWOD
   SplitSingleIter();
