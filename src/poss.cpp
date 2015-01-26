@@ -904,7 +904,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
                 didMerge = true;
 #else
                 NodeMap nodeMap;
-                NodeVecIter tunIter = m_pset->m_inTuns.begin();
+                TunVecIter tunIter = m_pset->m_inTuns.begin();
                 for(; tunIter != m_pset->m_inTuns.end(); ++tunIter) {
                   nodeMap[*tunIter] = *tunIter;
                 }

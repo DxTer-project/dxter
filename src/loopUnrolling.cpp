@@ -511,7 +511,7 @@ void FullyUnrollLoop::Apply(Node *node) const
     }
   }
 
-  NodeVecIter inIter = base->m_inTuns.begin();
+  TunVecIter inIter = base->m_inTuns.begin();
   for( ; inIter != base->m_inTuns.end(); ++inIter) {
     Node *in = *inIter;
     in->RemoveAllInputs2Way();
@@ -697,11 +697,11 @@ void PartiallyUnrollLoop::Apply(Node *node) const
   RealLoop *newOuter = (RealLoop*)(innerLoop->GetNewInst());
   newOuter->m_functionality = innerLoop->m_functionality + "partunrolled";
 
-  NodeVec newInnerPossInTuns;
+  TunVec newInnerPossInTuns;
 
 
-  NodeVec newSetTunsIn;
-  NodeVecIter tunIter = innerLoop->m_inTuns.begin();
+  TunVec newSetTunsIn;
+  TunVecIter tunIter = innerLoop->m_inTuns.begin();
   for(; tunIter != innerLoop->m_inTuns.end(); ++tunIter) {
     LoopTunnel *oldTun = (LoopTunnel*)(*tunIter);
     LoopTunnel *newTun = (LoopTunnel*)(oldTun->GetSetTunnel());
@@ -730,7 +730,7 @@ void PartiallyUnrollLoop::Apply(Node *node) const
   }
 
 
-  NodeVec newSetTunsOut;
+  TunVec newSetTunsOut;
   NodeVec newPossTunsOut;
   tunIter = innerLoop->m_outTuns.begin();
   for(; tunIter != innerLoop->m_outTuns.end(); ++tunIter) {
@@ -773,7 +773,11 @@ void PartiallyUnrollLoop::Apply(Node *node) const
   if (newInnerPoss->m_inTuns.size() != newInnerPossInTuns.size())
     throw;
 
-  swap(newInnerPoss->m_inTuns, newInnerPossInTuns);
+  newInnerPossInTuns.reserve(newInnerPoss->m_inTuns.size());
+  for(auto tun : newInnerPossInTuns)
+    newInnerPoss->m_inTuns.push_back(tun);
+  newInnerPoss->m_inTuns.empty();
+  //  swap(newInnerPoss->m_inTuns, newInnerPossInTuns);
 
   newOuter->AddPoss(newInnerPoss);
   outerPoss->AddPSet(newOuter, true, true);
