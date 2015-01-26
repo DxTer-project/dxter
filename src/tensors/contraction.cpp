@@ -624,6 +624,9 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
   temp->AddInput(node->Input(2),node->InputConnNum(2));
+  temp->m_align = cont->GetInputNameStr(0);
+  temp->m_alignModes = alignModes;
+  temp->m_alignModesSrc = alignModesSrc;
   
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
 				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
@@ -685,15 +688,19 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
     RealPSet *sumSet = new RealPSet(sumPoss);
     node->m_poss->AddPSet(sumSet,true,true);
 
-
     DimVec ident;
     IdentDimVec(CDestType.m_numDims, ident);
-    
+
+
     RedistNode *finalRedist = new RedistNode(CDestType, node->GetInputNameStr(2), ident, ident);
     finalRedist->AddInput(sumSet->OutTun(0),0);
     Poss *redistPoss = new Poss(finalRedist, false);
     RealPSet *redistSet = new RealPSet(redistPoss);
     node->m_poss->AddPSet(redistSet,true,true);
+
+    temp2->m_align = finalRedist->GetNameStr(0);
+    temp2->m_alignModes = ident;
+    temp2->m_alignModesSrc = ident;
     
     if (cont->m_beta != COEFZERO) {
       YxpBy *yxpby = new YxpBy(SMLAYER, cont->m_beta);
@@ -811,6 +818,10 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
 			      CType, alignModes, alignModesSrc);
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
+  temp->m_align = cont->GetInputNameStr(1);
+  temp->m_alignModes = alignModes;
+  temp->m_alignModesSrc = alignModesSrc;
+    
 
   Contraction *LCont = new Contraction(m_toLayer,  cont->m_alpha, COEFVALZERO, cont->m_type, 
 				       cont->m_AIndices, cont->m_BIndices, cont->m_CIndices+cont->m_contIndices, cont->m_contIndices);
@@ -872,12 +883,16 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
 
     DimVec ident;
     IdentDimVec(CDestType.m_numDims, ident);
-    
+
     RedistNode *finalRedist = new RedistNode(CDestType, cont->GetInputNameStr(2), ident, ident);
     finalRedist->AddInput(sumSet->OutTun(0),0);
     Poss *redistPoss = new Poss(finalRedist, false);
     RealPSet *redistSet = new RealPSet(redistPoss);
     node->m_poss->AddPSet(redistSet,true,true);
+
+    temp2->m_align = finalRedist->GetNameStr(0);
+    temp2->m_alignModes = ident;
+    temp2->m_alignModesSrc = ident;
     
     if (cont->m_beta != COEFZERO) {
       YxpBy *yxpby = new YxpBy(SMLAYER, cont->m_beta);
