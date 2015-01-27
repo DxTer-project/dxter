@@ -47,7 +47,7 @@ RealPSet* Axpy(Type dataType, VecType vType, int m)
   auto* innerPoss = new Poss(axPlusY, true);
   auto* innerSet = new RealPSet(innerPoss);
 
-  auto* Cout = new OutputNode("C output");
+  auto* Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   auto* outerPoss = new Poss(Cout, true);
@@ -143,7 +143,7 @@ RealPSet* Gemv(Type dataType, bool transpose, int m, int n)
   auto* innerPoss = new Poss(sumVecs, true);
   auto* innerSet = new RealPSet(innerPoss);
 
-  auto* Cout = new OutputNode("C output");
+  auto* Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   auto* outerPoss = new Poss(Cout, true);

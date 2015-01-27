@@ -45,7 +45,7 @@ RealPSet* GenSizeColSVMul(Type dataType, int m)
   Poss *innerPoss = new Poss(recombine, true);
   RealPSet *innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   Poss *outerPoss = new Poss(Cout, true);
@@ -111,7 +111,7 @@ RealPSet* MVMul2Example(Type dataType, int m, int n, int p)
   Poss* innerPoss = new Poss(mvmul2, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   Poss *outerPoss = new Poss(Cout, true);
@@ -159,7 +159,7 @@ RealPSet* MAdd2Example(Type dataType, int m, int n)
   Poss* innerPoss = new Poss(madd2, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   Poss *outerPoss = new Poss(Cout, true);
@@ -207,7 +207,7 @@ RealPSet* VAdd2Example(Type dataType, int m)
   Poss* innerPoss = new Poss(vadd2, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   Poss *outerPoss = new Poss(Cout, true);
@@ -258,7 +258,7 @@ RealPSet* DoubleGemmExample(Type dataType, Trans transA, Trans transB, int m, in
   Poss *innerPoss = new Poss(gemm2,true);
   RealPSet *innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(Cout,true);

@@ -103,7 +103,7 @@ RealPSet* Gesummv(Type dataType, int m, int n)
   Poss* innerPoss = new Poss(addY, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   Poss *outerPoss = new Poss(Cout, true);
@@ -189,7 +189,7 @@ RealPSet* Gemam(Type dataType, int m, int n, int p)
   Poss* innerPoss = new Poss(gemm, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   Poss *outerPoss = new Poss(Cout, true);
@@ -294,7 +294,7 @@ RealPSet* Gemv2(Type dataType, int m, int n, int k)
   Poss* innerPoss = new Poss(sum, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   Poss *outerPoss = new Poss(Cout, true);
@@ -360,7 +360,7 @@ RealPSet* VMVMulExample(Type dataType, int m, int n)
   Poss* innerPoss = new Poss(vvdot, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   Poss *outerPoss = new Poss(Cout, true);

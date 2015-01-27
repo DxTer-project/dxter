@@ -472,7 +472,7 @@ RealPSet* RedistExample()
   RedistNode *redist1 = new RedistNode(type1, Ain->GetNameStr(0), ident, ident);
   redist1->AddInput(Ain, 0);
 
-  OutputNode *Cout1 = new OutputNode("C output");
+  OutputNode *Cout1 = new OutputNode;
   Cout1->AddInput(redist1, 0);
 
   Poss *outerPoss = new Poss(1, Cout1);
@@ -616,7 +616,7 @@ RealPSet* RedistExample2()
 
 
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(cont4Set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -715,7 +715,7 @@ RealPSet* MartinsExample()
   Poss *innerPoss = new Poss(cont4);
   RealPSet *innerSet = new RealPSet(innerPoss);
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(innerSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out,true);
@@ -795,7 +795,7 @@ RealPSet* MP2()
   Poss *cont1Poss = new Poss(cont1);
   RealPSet *cont1Set = new RealPSet(cont1Poss);
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(cont1Set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -999,7 +999,7 @@ RealPSet* MP3()
   RealPSet *cont5Set = new RealPSet(cont5Poss);
 
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(cont5Set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1029,7 +1029,7 @@ RealPSet* W()
 			       Tau_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1058,7 +1058,7 @@ RealPSet* X()
 			       Tau_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1082,7 +1082,7 @@ RealPSet* U()
 			      u_mnie, v_femn,
 			      big, small);
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1110,7 +1110,7 @@ RealPSet* Q()
 			       Tau_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1140,7 +1140,7 @@ RealPSet* P()
 			       Tau_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1162,7 +1162,7 @@ RealPSet* H()
   RealPSet *set = H_me_calc(t_fn, v_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1189,7 +1189,7 @@ RealPSet* F()
 			    t_am, v_efmn, T_afmn,
 			    big, small);
   
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1217,7 +1217,7 @@ RealPSet* G()
 			    t_ei, v_efmn, T_efin,
 			    big, small);
   
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1251,7 +1251,7 @@ RealPSet* z()
 			       Tau_efmn,
 			    big, small);
   
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1294,7 +1294,7 @@ RealPSet* Z()
 			       Tau_efmn,
 			      big, small);
   
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
@@ -1351,11 +1351,11 @@ RealPSet* CCSD()
 			    big, small);
 
   
-  OutputNode *zout = new OutputNode("zoutput");
+  OutputNode *zout = new OutputNode;
   zout->AddInput(zset->OutTun(0),0);
 
   
-  OutputNode *Zout = new OutputNode("Zoutput");
+  OutputNode *Zout = new OutputNode;
   Zout->AddInput(ZSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(2, zout, Zout);
@@ -1378,7 +1378,7 @@ RealPSet* Tau()
 				T_bfnj, 
 				big, small);
   
-  OutputNode *out = new OutputNode("output");
+  OutputNode *out = new OutputNode;
   out->AddInput(set->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
