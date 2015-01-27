@@ -510,7 +510,7 @@ void MoveIn(Node *node, Node *newSrc, ConnNum newSrcNum, TempVarNode *tempVarNod
   if (node->IsTunnel()) {
     Tunnel *tun = (Tunnel*)node;
     if (tun->m_tunType == SETTUNIN) {
-#if USSHADOWS
+#if USESHADOWS
       if (tun->m_pset->IsShadow() || !((RealPSet*)(tun->m_pset))->m_shadows.empty())
         throw;
 #endif
@@ -519,7 +519,7 @@ void MoveIn(Node *node, Node *newSrc, ConnNum newSrcNum, TempVarNode *tempVarNod
         if (out->m_children.empty()) {
           if (!tun->m_pset)
             throw;
-#if USSHADOWS
+#if USESHADOWS
           if (tun->m_pset->IsShadow())
             throw;
           else if (!((RealPSet*)(tun->m_pset))->m_shadows.empty())
