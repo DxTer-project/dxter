@@ -39,7 +39,7 @@ void Linearization::Clear()
   m_cost = -1;
 }
 
-void Linearization::InsertVecClearing(const StrSet &stillLive)
+void Linearization::InsertVecClearing(const StrSet &stillLive, const StrSet &alwaysLive)
 {
   if (!m_clears.empty())
     return;
@@ -64,12 +64,14 @@ void Linearization::InsertVecClearing(const StrSet &stillLive)
 	for (auto output : set->m_outTuns) {
 	  string outName = output->GetNameStr(0); 
 	  //if it's output but no children, we might need to add a clear
-	  if (stillLive.find(outName) == stillLive.end()) {
-	    if (output->m_children.empty()) {
-	      if (!LiveAfter(i+1, outName))
-		needClears.push_back(outName);
+	  if (stillLive.find(outName) == stillLive.end() &&
+	      alwaysLive.find(outName) == alwaysLive.end()) 
+	    {
+	      if (output->m_children.empty()) {
+		if (!LiveAfter(i+1, outName, alwaysLive))
+		  needClears.push_back(outName);
+	      }
 	    }
-	  }
 	  liveHere.insert(outName);
 	  if (set->IsLoop()) {
 	    Node *possTunOut = output->Input(0);
@@ -83,7 +85,7 @@ void Linearization::InsertVecClearing(const StrSet &stillLive)
 	  string inName = input->GetInputNameStr(0);
 	  if (liveHere.find(inName) == liveHere.end() &&
 	      (stillLive.find(inName) != stillLive.end() 
-	       || LiveAfter(i+1,inName)))
+	       || LiveAfter(i+1, inName, alwaysLive)))
 	    {
 	      liveHere.insert(inName);
 	    }
@@ -105,7 +107,7 @@ void Linearization::InsertVecClearing(const StrSet &stillLive)
 	  if (stillLive.find(maybe) != stillLive.end())
 	    found = true;
 	  if (!found)
-	    found = LiveAfter(i+1, maybe);
+	    found = LiveAfter(i+1, maybe, alwaysLive);
 	  if (!found) {
 	    ClearLinElem *clear = new ClearLinElem(maybe);
 	    m_order.insert(m_order.begin()+i+1, clear);
@@ -118,7 +120,7 @@ void Linearization::InsertVecClearing(const StrSet &stillLive)
   }
 }
 
-Cost Linearization::GetCostNoRecursion(const StrSet &stillLive)
+Cost Linearization::GetCostNoRecursion(const StrSet &stillLive, const StrSet &alwaysLive)
 {
   if (m_cost <= 0) {
     if (!m_clears.empty())
@@ -154,10 +156,12 @@ Cost Linearization::GetCostNoRecursion(const StrSet &stillLive)
       StrVec possiblyDyingVars = elem->PossiblyDyingVars();
       for(int i = 0; i < possiblyDyingVars.size(); ++i) {
 	string var = possiblyDyingVars[i];
-	if (stillLive.find(var) != stillLive.end()) {
+	if (stillLive.find(var) != stillLive.end()
+	    || alwaysLive.find(var) != alwaysLive.end()) 
+	  {
 	    possiblyDyingVars.erase(possiblyDyingVars.begin()+i);
 	    --i;
-	}
+	  }
 	else {
 	  LinElemVecIter iter2 = iter;
 	  ++iter2;
@@ -211,8 +215,10 @@ void Linearization::Print(IndStream &out)
     elem->Print(out);
 }
 
-bool Linearization::LiveAfter(unsigned int loc, const string &name) const
+bool Linearization::LiveAfter(unsigned int loc, const string &name, const StrSet &alwaysLive) const
 {
+  if (alwaysLive.find(name) != alwaysLive.end())
+    return true;
   for(; loc < m_order.size(); ++loc) {
     if (m_order[loc]->UsesInputVar(name))
       return true;

@@ -40,13 +40,13 @@ class Linearization
   ~Linearization();
   void Clear();
 
-  void InsertVecClearing(const StrSet &stillLive);
-  Cost GetCostNoRecursion(const StrSet &stillLive);
+  void InsertVecClearing(const StrSet &stillLive, const StrSet &alwaysLive);
+  Cost GetCostNoRecursion(const StrSet &stillLive, const StrSet &alwaysLive);
 
   void Push(LinElem *elem);
   void PopNonClear();
   void operator=(const Linearization &rhs);
   void Print(IndStream &out);
   
-  bool LiveAfter(unsigned int loc, const string &name) const;
+  bool LiveAfter(unsigned int loc, const string &name, const StrSet &alwaysLive) const;
 };

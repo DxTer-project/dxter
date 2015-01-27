@@ -1029,10 +1029,38 @@ RealPSet* W()
 			       Tau_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outW = new OutputNode;
+  outW->AddInput(set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out, true);
+  OutputNode *outw = new OutputNode;
+  outw->AddInput(w_bmje, 0);
+
+  OutputNode *outx = new OutputNode;
+  outx->AddInput(x_bmej, 0);
+
+  OutputNode *outr = new OutputNode;
+  outr->AddInput(r_bmef, 0);
+
+  OutputNode *outu = new OutputNode;
+  outu->AddInput(u_mnje, 0);
+
+  OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outTau = new OutputNode;
+  outTau->AddInput(Tau_efmn, 0);
+
+  Poss *outerPoss = new Poss(9, outW, outw,
+			     outx, outr,
+			     outu, outv,
+			     outT, outt,
+			     outTau);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1058,10 +1086,34 @@ RealPSet* X()
 			       Tau_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outX = new OutputNode;
+  outX->AddInput(set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out, true);
+  OutputNode *outx = new OutputNode;
+  outx->AddInput(x_bmej, 0);
+
+  OutputNode *outr = new OutputNode;
+  outr->AddInput(r_bmef, 0);
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outTau = new OutputNode;
+  outTau->AddInput(Tau_efmn, 0);
+
+  OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+  OutputNode *outu = new OutputNode;
+  outu->AddInput(u_mnje, 0);
+
+  Poss *outerPoss = new Poss(8, outX, outx,
+			     outr, outT,
+			     outt, outTau,
+			     outv, outu);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1075,17 +1127,27 @@ RealPSet* U()
   const Size small = 50; //i-p
 
   InputNode *t_fj = CreateInput2("t_fj", big, small);
-  InputNode *u_mnie = CreateInput4("u_mnje", small, small, small, big);
+  InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
 
   RealPSet *set = U_mnie_calc(t_fj, 
-			      u_mnie, v_femn,
+			      u_mnje, v_femn,
 			      big, small);
 
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outU = new OutputNode;
+  outU->AddInput(set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out, true);
+    OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outu = new OutputNode;
+  outu->AddInput(u_mnje, 0);
+
+  OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+
+  Poss *outerPoss = new Poss(4, outU, outt, outu, outv);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1100,20 +1162,42 @@ RealPSet* Q()
 
   InputNode *q_mnij = CreateInput4("q_mnij", small, small, small, small);
   InputNode *t_fj = CreateInput2("t_fj", big, small);
-  InputNode *u_mnie = CreateInput4("u_mnje", small, small, small, big);
+  InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = Q_mnij_calc(q_mnij, t_fj, 
-			      u_mnie, v_femn, T_bfnj, 
+			      u_mnje, v_femn, T_bfnj, 
 			       Tau_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outQ = new OutputNode;
+  outQ->AddInput(set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out, true);
+  OutputNode *outq = new OutputNode;
+  outq->AddInput(q_mnij, 0);
+
+    OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outTau = new OutputNode;
+  outTau->AddInput(Tau_efmn, 0);
+
+  OutputNode *outu = new OutputNode;
+  outu->AddInput(u_mnje, 0);
+
+  OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+
+  Poss *outerPoss = new Poss(7, outQ, outq, 
+			     outT, outt,
+			     outTau, outu,
+			     outv);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1126,24 +1210,49 @@ RealPSet* P()
   const Size big = 500; //a-h
   const Size small = 50; //i-p
 
-  InputNode *u_jimb = CreateInput4("u_mnje", small, small, small, big);
+  InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
   InputNode *t_fj = CreateInput2("t_fj", big, small);
-  InputNode *w_bmie = CreateInput4("w_bmje", big, small, small, big);
-  InputNode *T_efij = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
   InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = P_jimb_calc(r_bmef, t_fj, 
-			      u_jimb, w_bmie, T_efij, 
+			      u_mnje, w_bmje, T_bfnj, 
 			      x_bmej,
 			       Tau_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outP = new OutputNode;
+  outP->AddInput(set->OutTun(0),0);
+  
+    OutputNode *outu = new OutputNode;
+  outu->AddInput(u_mnje, 0);
 
-  Poss *outerPoss = new Poss(out, true);
+  OutputNode *outw = new OutputNode;
+  outw->AddInput(w_bmje, 0);
+
+  OutputNode *outx = new OutputNode;
+  outx->AddInput(x_bmej, 0);
+
+  OutputNode *outr = new OutputNode;
+  outr->AddInput(r_bmef, 0);
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outTau = new OutputNode;
+  outTau->AddInput(Tau_efmn, 0);
+
+
+  Poss *outerPoss = new Poss(8, outP, outu, 
+			     outw, outx,
+			     outr, outT,
+			     outt, outTau);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1156,16 +1265,22 @@ RealPSet* H()
   const Size big = 500; //a-h
   const Size small = 50; //i-p
 
-  InputNode *t_fn = CreateInput2("t_fj", big, small);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *v_efmn = CreateInput4("v_femn", big, big, small, small);
 
-  RealPSet *set = H_me_calc(t_fn, v_efmn,
+  RealPSet *set = H_me_calc(t_fj, v_efmn,
 			      big, small);
 
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outH = new OutputNode;
+  outH->AddInput(set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out, true);
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outv = new OutputNode;
+  outv->AddInput(v_efmn, 0);
+
+  Poss *outerPoss = new Poss(3, outH, outt, outv);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1180,19 +1295,34 @@ RealPSet* F()
   const Size small = 50; //i-p
   
   InputNode *H_me = CreateInput2("H_me", small, big);
-  InputNode *T_afmn = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *r_amef = CreateInput4("r_bmfe", big, small, big, big);
-  InputNode *t_am = CreateInput2("t_fj", big, small);
-  InputNode *v_efmn = CreateInput4("v_femn", big, big, small, small);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   
   RealPSet *set = F_ae_calc(H_me, r_amef, 
-			    t_am, v_efmn, T_afmn,
+			    t_fj, v_femn, T_bfnj,
 			    big, small);
   
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outF = new OutputNode;
+  outF->AddInput(set->OutTun(0),0);
+  
+  OutputNode *outH = new OutputNode;
+  outH->AddInput(H_me, 0);
 
-  Poss *outerPoss = new Poss(out, true);
+    OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+
+  Poss *outerPoss = new Poss(5, outF, outH,
+			     outv, outT,
+			     outt);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1208,19 +1338,38 @@ RealPSet* G()
   const Size small = 50; //i-p
   
   InputNode *H_me = CreateInput2("H_me", small, big);
-  InputNode *T_efin = CreateInput4("T_bfnj", big, big, small, small);
-  InputNode *u_mnie = CreateInput4("u_mnje", small, small, small, big);
-  InputNode *t_ei = CreateInput2("t_fj", big, small);
-  InputNode *v_efmn = CreateInput4("v_femn", big, big, small, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   
-  RealPSet *set = G_mi_calc(H_me, u_mnie,
-			    t_ei, v_efmn, T_efin,
+  RealPSet *set = G_mi_calc(H_me, u_mnje,
+			    t_fj, v_femn, T_bfnj,
 			    big, small);
   
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outG = new OutputNode;
+  outG->AddInput(set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out, true);
+  OutputNode *outH = new OutputNode;
+  outH->AddInput(H_me);
+
+    OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+    OutputNode *outu = new OutputNode;
+  outu->AddInput(u_mnje, 0);
+  
+  
+
+  Poss *outerPoss = new Poss(6, outG, outH,
+			     outv, outT,
+			     outt, outu);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1234,27 +1383,61 @@ RealPSet* z()
   const Size small = 50; //i-p
   
   InputNode *G_mi = CreateInput2("G_mi", small, small);
-  InputNode *w_amie = CreateInput4("w_bmje", big, small, small, big);
-  InputNode *x_amei = CreateInput4("x_bmej", big, small, big, small);
-  InputNode *T_aeim = CreateInput4("T_bfnj", big, big, small, small);
-  InputNode *r_amef = CreateInput4("r_bmfe", big, small, big, big);
-  InputNode *t_am = CreateInput2("t_fj", big, small);
+  InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
+  InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *r_bmfe = CreateInput4("r_bmfe", big, small, big, big);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
   DLANode *H_me = CreateInput2("H_me", small, big);
   InputNode *U_mnie = CreateInput4("U_mnie", small, small, small, big);
     InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
   RealPSet *set = z_ai_calc(G_mi, 
 			    H_me, U_mnie,
-			    w_amie,
-			    x_amei, 
-			    t_am, r_amef, T_aeim,
+			    w_bmje,
+			    x_bmej, 
+			    t_fj, r_bmfe, T_bfnj,
 			       Tau_efmn,
 			    big, small);
   
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outz = new OutputNode;
+  outz->AddInput(set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out, true);
+  OutputNode *outG = new OutputNode;
+  outG->AddInput(set->OutTun(0),0);
+
+  OutputNode *outw = new OutputNode;
+  outw->AddInput(w_bmje, 0);
+
+    OutputNode *outx = new OutputNode;
+  outx->AddInput(x_bmej, 0);
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outTau = new OutputNode;
+  outTau->AddInput(Tau_efmn, 0);
+
+  OutputNode *outH = new OutputNode;
+  outH->AddInput(set->OutTun(0),0);
+
+
+  OutputNode *outr = new OutputNode;
+  outr->AddInput(r_bmfe, 0);
+
+  OutputNode *outU = new OutputNode;
+  outU->AddInput(set->OutTun(0),0);
+
+
+
+  Poss *outerPoss = new Poss(10, outz, outG,
+			     outw, outx,
+			     outT, outt,
+			     outTau, outH,
+			     outr, outU);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1267,37 +1450,80 @@ RealPSet* Z()
   const Size big = 500; //a-h
   const Size small = 50; //i-p
 
-  InputNode *v_abij = CreateInput4("v_femn", big, big, small, small);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
   InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
-  InputNode *r_ejab = CreateInput4("r_bmfe", big, small, big, big);
-  InputNode *P_ijmb = CreateInput4("P_jimb", small, small, small, big);
-  InputNode *t_am = CreateInput2("t_fj", big, small);
+  InputNode *r_bmfe = CreateInput4("r_bmfe", big, small, big, big);
+  InputNode *P_jimb = CreateInput4("P_jimb", small, small, small, big);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *F_ae = CreateInput2("F_ae", big, big);
   InputNode *G_mi = CreateInput2("G_mi", small, small);
   InputNode *W_bmje = CreateInput4("W_bmje", big, small, small, big);
-  InputNode *T_aeim = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
   InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
-  RealPSet *set = Z_abij_calc(v_abij, 
+  RealPSet *set = Z_abij_calc(v_femn,
 			      y_abef,
-			      r_ejab,
-			      t_am,
+			      r_bmfe,
+			      t_fj,
 			      Q_mnij,
-			      P_ijmb,
+			      P_jimb,
 			      F_ae,
 			      G_mi, 
 			      W_bmje,
 			      X_bmej,
-			      T_aeim, 
+			      T_bfnj, 
 			       Tau_efmn,
 			      big, small);
   
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outZ = new OutputNode;
+  outZ->AddInput(set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out, true);
+  OutputNode *outQ = new OutputNode;
+  outQ->AddInput(set->OutTun(0),0);
+
+  OutputNode *outF = new OutputNode;
+  outF->AddInput(set->OutTun(0),0);
+
+  OutputNode *outG = new OutputNode;
+  outG->AddInput(set->OutTun(0),0);
+
+  OutputNode *outW = new OutputNode;
+  outW->AddInput(set->OutTun(0),0);
+
+    OutputNode *outX = new OutputNode;
+  outX->AddInput(set->OutTun(0),0);
+
+  OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+  OutputNode *outy = new OutputNode;
+  outy->AddInput(y_abef, 0);
+
+  OutputNode *outr = new OutputNode;
+  outr->AddInput(r_bmfe, 0);
+
+  OutputNode *outP = new OutputNode;
+  outP->AddInput(set->OutTun(0),0);
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outTau = new OutputNode;
+  outTau->AddInput(Tau_efmn, 0);
+
+
+  Poss *outerPoss = new Poss(13, outZ, outQ,
+			     outF, outG,
+			     outW, outX,
+			     outv, outy,
+			     outr, outP,
+			     outT, outt,
+			     outT);			     
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1311,54 +1537,82 @@ RealPSet* CCSD()
   const Size big = 500; //a-h
   const Size small = 50; //i-p
 
-  InputNode *v_abij = CreateInput4("v_femn", big, big, small, small);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
   InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
   InputNode *r_bmfe = CreateInput4("r_bmfe", big, small, big, big);
   InputNode *P_ijmb = CreateInput4("P_ijmb", small, small, small, big);
-  InputNode *t_am = CreateInput2("t_fj", big, small);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *F_ae = CreateInput2("F_ae", big, big);
   InputNode *G_mi = CreateInput2("G_mi", small, small);
   InputNode *W_bmje = CreateInput4("W_bmje", big, small, small, big);
-  InputNode *T_aeim = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
   InputNode *H_me = CreateInput2("H_me", small, big);
-  InputNode *U_mnie = CreateInput4("U_mnje", small, small, small, big);
-  InputNode *w_amie = CreateInput4("w_amie", big, small, small, big);
-  InputNode *x_amei = CreateInput4("x_bmej", big, small, big, small);
+  InputNode *U_mnje = CreateInput4("U_mnje", small, small, small, big);
+  InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
+  InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
   InputNode *Tau_efmn = CreateInput4("Tau_efmn", big, big, small, small);
 
-  RealPSet *ZSet = Z_abij_calc(v_abij, 
+  RealPSet *ZSet = Z_abij_calc(v_femn, 
 			      y_abef,
 			       r_bmfe,
-			       t_am,
+			       t_fj,
 			       Q_mnij,
 			       P_ijmb,
 			      F_ae,
 			      G_mi, 
 			      W_bmje,
 			      X_bmej,
-			      T_aeim, 
+			       T_bfnj,
 			       Tau_efmn,
 			      big, small);
 
   RealPSet *zset = z_ai_calc( G_mi, 
-			    H_me, U_mnie,
-			    w_amie,
-			    x_amei, 
-			    t_am, r_bmfe, T_aeim,
+			    H_me, U_mnje,
+			    w_bmje,
+			    x_bmej, 
+			      t_fj, r_bmfe, T_bfnj,
 			       Tau_efmn,
 			    big, small);
 
   
-  OutputNode *zout = new OutputNode;
-  zout->AddInput(zset->OutTun(0),0);
+  OutputNode *outz = new OutputNode;
+  outz->AddInput(zset->OutTun(0),0);
 
-  
-  OutputNode *Zout = new OutputNode;
-  Zout->AddInput(ZSet->OutTun(0),0);
+  OutputNode *outZ = new OutputNode;
+  outZ->AddInput(ZSet->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(2, zout, Zout);
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outTau = new OutputNode;
+  outTau->AddInput(Tau_efmn, 0);
+
+  OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+  OutputNode *outy = new OutputNode;
+  outy->AddInput(y_abef, 0);
+
+  OutputNode *outr = new OutputNode;
+  outr->AddInput(r_bmfe, 0);
+
+  OutputNode *outw = new OutputNode;
+  outw->AddInput(w_bmje, 0);
+
+    OutputNode *outx = new OutputNode;
+  outx->AddInput(x_bmej, 0);
+
+  Poss *outerPoss = new Poss(10, outz, outZ,
+			     outT, outt,
+			     outTau, outv,
+			     outy, outr,
+			     outw, outx);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1378,10 +1632,18 @@ RealPSet* Tau()
 				T_bfnj, 
 				big, small);
   
-  OutputNode *out = new OutputNode;
-  out->AddInput(set->OutTun(0),0);
+  OutputNode *outTau = new OutputNode;
+  outTau->AddInput(set->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(out, true);
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+
+  Poss *outerPoss = new Poss(3, outTau, outT,
+			     outt);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
