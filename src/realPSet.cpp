@@ -2326,8 +2326,11 @@ void RealPSet::ClearDeletingRecursively()
 #if DOTENSORS
 bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
 {
-  if (m_functionality != other->m_functionality)
-    throw;
+  if (m_functionality != other->m_functionality) {
+    //It's possible to have the has the same but the functionality strings
+    // are different permutations of the same functionality string. go ahead and say these are different
+    return false;
+  }
   if (IsLoop() != other->IsLoop())
     throw;
   if (m_inTuns.size() != other->m_inTuns.size())
