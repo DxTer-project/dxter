@@ -201,6 +201,20 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
       }
     }
   }
+  /*
+  cout << "********\nscheduling the following\n";
+  for(auto elem : m_elems) {
+    if (!elem->HasAdded()) {
+      if (elem->IsNode()) {
+	cout << ((NodeLinElem*)elem)->m_node->GetNodeClass() << " " <<((NodeLinElem*)elem)->m_node->GetType() << endl;
+	cout << ((NodeLinElem*)elem)->m_node->GetNameStr(0) << endl;
+      }
+      
+      else if (elem->IsSet())
+	cout << "set " << ((SetLinElem*)elem)->m_set->GetFunctionalityString() << endl;
+    }
+  }
+  */
 
   for(auto elem : m_elems) {
     if (elem->CanAddToLinearOrder()) {
@@ -266,9 +280,22 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinE
   curr.m_order.push_back(currAdd);
   currAdd->SetAdded();
   if (currAdd->m_children.size() > 1 || !currAdd->m_succs.empty()) {
+    int printedImmediately = 0;
     for(auto child : currAdd->m_children) {
       if (child->CanAddToLinearOrder()) {
-	readyToAdd.push_back(child);
+	bool done = false;
+	if (child->IsNode()) {
+	  if (((NodeLinElem*)child)->m_node->GetNodeClass() == OutputNode::GetClass()) {
+	    curr.m_order.push_back(child);
+	    child->SetAdded();
+	    ++printedImmediately;
+	    done = true;
+	    if (!child->m_succs.empty())
+	      throw;
+	  }	    
+	}
+	if (!done)
+	  readyToAdd.push_back(child);
       }
     }
     for (auto succ : currAdd->m_succs) {
@@ -277,6 +304,12 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinE
       }
     }
     RecursivelyFindOpt(curr, readyToAdd, opt, stillLive);
+    while (printedImmediately > 0) {
+      LinElem *elem = curr.m_order.back();
+      elem->ClearAdded();
+      curr.m_order.pop_back();
+      --printedImmediately;
+    }
   }
   else if (currAdd->m_children.size() == 1) {
     LinElem *child = currAdd->m_children[0];
