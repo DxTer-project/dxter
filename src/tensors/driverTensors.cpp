@@ -202,7 +202,6 @@ void Usage()
 int main(int argc, const char* argv[])
 {
 #ifdef _OPENMP
-  omp_set_num_threads(1);
   omp_set_nested(true);
   omp_init_lock(&RealPSet::m_lock);
 #endif
