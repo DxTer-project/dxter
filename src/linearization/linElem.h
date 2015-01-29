@@ -52,6 +52,7 @@ class LinElem
   inline void ClearAdded() {m_addedToLinOrder = false;} 
 
   bool CanAddToLinearOrder() const;
+  bool FreeOfDataflowConstraints() const;
 
   virtual bool IsClear() const {return false;}
   virtual bool IsSet() const {return false;}

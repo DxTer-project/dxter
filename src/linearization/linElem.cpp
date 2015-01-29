@@ -20,10 +20,13 @@
 */
 
 
-#include "linElem.h"
+#include "linElem.h" 
+#include "nodeLinElem.h"
+#include "tempVarNode.h"
 
-bool LinElem::CanAddToLinearOrder() const
+bool LinElem::FreeOfDataflowConstraints() const
 {
+
   if (HasAdded())
     return false;
   for(auto input : m_inputs) {
@@ -33,6 +36,51 @@ bool LinElem::CanAddToLinearOrder() const
   for(auto pred : m_preds) {
     if (!pred->HasAdded())
       return false;
+  }
+  return true;
+}
+
+bool LinElem::CanAddToLinearOrder() const
+{
+  if (!FreeOfDataflowConstraints())
+    return false;
+
+  //if temp var node right before a set and there are other temp var nodes, 
+  //  make sure they can all print before printing one since they should
+  //  go right before the set
+
+  if (IsNode()) {
+    if (m_children.size() == 1) {
+      const NodeLinElem *nodeElem = (NodeLinElem*)this;
+      if (nodeElem->m_node->GetNodeClass() == TempVarNode::GetClass()) {
+	if (!m_succs.empty())
+	  throw;
+	else {
+	  const LinElem *child = m_children[0];
+
+	  for (auto pred : child->m_preds) {
+	    if (!pred->HasAdded()) {
+	      return false;
+	    }
+	  }
+	  for (auto input : child->m_inputs) {
+	    if (!input->HasAdded()) {
+	      if (input->IsNode()) {
+		const NodeLinElem *nodeSetInput = (NodeLinElem*)input;
+		if (nodeSetInput->m_node->GetNodeClass() == TempVarNode::GetClass()) {
+		  if (!nodeSetInput->FreeOfDataflowConstraints())
+		    return false;
+		}
+		else
+		  return false;
+	      }
+	      else
+		return false;
+	    }
+	  }
+	}
+      }
+    }
   }
   return true;
 }
