@@ -47,7 +47,7 @@ RealPSet* SetToZeroExample(Type dataType, int m, int n) {
   Poss *innerPoss = new Poss(mvmul, true);
   RealPSet *innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode("C output");
+  OutputNode *Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
   Poss *outerPoss = new Poss(Cout, true);
