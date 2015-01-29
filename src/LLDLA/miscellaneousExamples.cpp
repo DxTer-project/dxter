@@ -58,17 +58,17 @@ RealPSet* SetToZeroExample(Type dataType, int m, int n) {
 
 RealPSet* GenSizeColSVMul(Type dataType, int m)
 {
-  InputNode* Ain = new InputNode("A input", m, 1, "A",
+  auto Ain = new InputNode("A input", m, 1, "A",
 				 m, 1,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
-  InputNode* xIn = new InputNode("x input", 1, 1, "X",
+  auto xIn = new InputNode("x input", 1, 1, "X",
 				 m, 1,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  auto tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
 
   Size partSplitPoint = m - (m % arch->VecRegWidth(dataType));
@@ -77,7 +77,7 @@ RealPSet* GenSizeColSVMul(Type dataType, int m)
     new Partition(ABSLAYER, VERTICAL, partSplitPoint);
   part->AddInput(tunA, 0);
 
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  auto tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
   SVMul* topSVMul = new SVMul(COLVECTOR, ABSLAYER);
@@ -110,44 +110,44 @@ RealPSet* GenSizeColSVMul(Type dataType, int m)
 
 RealPSet* MVMul2Example(Type dataType, int m, int n, int p)
 {
-  InputNode* xIn = new InputNode("x input", p, 1, "X",
+  auto xIn = new InputNode("x input", p, 1, "X",
 				 1, p,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", n, 1, "Y",
+  auto yIn = new InputNode("y input", n, 1, "Y",
 				 1, n,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
-  InputNode* zIn = new InputNode("z input", m, 1, "Z",
+  auto zIn = new InputNode("z input", m, 1, "Z",
 				 1, m,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
 
-  InputNode* AIn = new InputNode("a input", m, n, "A",
+  auto AIn = new InputNode("a input", m, n, "A",
 				 1, m,
 				 "ANumRows", "ANumCols",
 				 "ARowStride", "AColStride", dataType);
 
-  InputNode* BIn = new InputNode("b input", n, p, "B",
+  auto BIn = new InputNode("b input", n, p, "B",
 				 1, n,
 				 "BNumRows", "BNumCols",
 				 "BRowStride", "BColStride", dataType);
   
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  auto tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  auto tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  auto tunZ = new Tunnel(POSSTUNIN);
   tunZ->AddInput(zIn, 0);
 
-  Tunnel* tunA = new Tunnel(POSSTUNIN);
+  auto tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(AIn, 0);
 
-  Tunnel* tunB = new Tunnel(POSSTUNIN);
+  auto tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(BIn, 0);
 
   MVMul* mvmul1 = new MVMul(ABSLAYER);
@@ -176,28 +176,28 @@ RealPSet* MVMul2Example(Type dataType, int m, int n, int p)
 
 RealPSet* MAdd2Example(Type dataType, int m, int n)
 {
-  InputNode* xIn = new InputNode("x input", m, n, "X",
+  auto xIn = new InputNode("x input", m, n, "X",
 				 1, m,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", m, n, "Y",
+  auto yIn = new InputNode("y input", m, n, "Y",
 				 1, m,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
-  InputNode* zIn = new InputNode("z input", m, n, "Z",
+  auto zIn = new InputNode("z input", m, n, "Z",
 				 1, m,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
   
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  auto tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  auto tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  auto tunZ = new Tunnel(POSSTUNIN);
   tunZ->AddInput(zIn, 0);
 
   MAdd* madd1 = new MAdd(ABSLAYER);
@@ -224,28 +224,28 @@ RealPSet* MAdd2Example(Type dataType, int m, int n)
 
 RealPSet* VAdd2Example(Type dataType, int m)
 {
-  InputNode* xIn = new InputNode("x input", m, 1, "X",
+  auto xIn = new InputNode("x input", m, 1, "X",
 				 1, m,
 				 "XNumRows", "XNumCols",
 				 "XRowStride", "XColStride", dataType);
 
-  InputNode* yIn = new InputNode("y input", m, 1, "Y",
+  auto yIn = new InputNode("y input", m, 1, "Y",
 				 1, m,
 				 "YNumRows", "YNumCols",
 				 "YRowStride", "YColStride", dataType);
 
-  InputNode* zIn = new InputNode("z input", m, 1, "Z",
+  auto zIn = new InputNode("z input", m, 1, "Z",
 				 1, m,
 				 "ZNumRows", "ZNumCols",
 				 "ZRowStride", "ZColStride", dataType);
   
-  Tunnel* tunX = new Tunnel(POSSTUNIN);
+  auto tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  Tunnel* tunY = new Tunnel(POSSTUNIN);
+  auto tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  Tunnel* tunZ = new Tunnel(POSSTUNIN);
+  auto tunZ = new Tunnel(POSSTUNIN);
   tunZ->AddInput(zIn, 0);
 
   VAdd* vadd1 = new VAdd(COLVECTOR, ABSLAYER);
