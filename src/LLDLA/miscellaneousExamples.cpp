@@ -35,7 +35,7 @@ RealPSet* SetToZeroExample(Type dataType, int m, int n) {
   auto tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  auto zeroY = new SetToZero();
+  auto zeroY = new SetToZero(ABSLAYER);
   zeroY->AddInput(tunY, 0);
 
   MVMul* mvmul = new MVMul(ABSLAYER);
