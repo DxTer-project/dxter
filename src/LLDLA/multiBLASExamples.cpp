@@ -34,16 +34,6 @@ RealPSet* Gesummv(Type dataType, int m, int n)
 				 1, n,
 				 dataType);
 
-  InputNode* WIn = new InputNode("W",
-				 m, 1,
-				 1, m,
-				 dataType);
-
-  InputNode* VIn = new InputNode("V",
-				 m, 1,
-				 1, m,
-				 dataType);
-
   Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
   tunAlpha->AddInput(alphaIn, 0);
 
@@ -56,12 +46,6 @@ RealPSet* Gesummv(Type dataType, int m, int n)
   Tunnel* tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(BIn, 0);
 
-  Tunnel* tunW = new Tunnel(POSSTUNIN);
-  tunW->AddInput(WIn, 0);
-
-  Tunnel* tunV = new Tunnel(POSSTUNIN);
-  tunV->AddInput(VIn, 0);
-
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(YIn, 0);
 
@@ -72,7 +56,7 @@ RealPSet* Gesummv(Type dataType, int m, int n)
   ax->AddInputs(6,
 		tunA, 0,
 		tunX, 0,
-		tunV, 0);
+		tunY, 0);
 
   SVMul* alphaAX = new SVMul(COLVECTOR, ABSLAYER);
   alphaAX->AddInputs(4,
@@ -83,7 +67,7 @@ RealPSet* Gesummv(Type dataType, int m, int n)
   bx->AddInputs(6,
 		tunB, 0,
 		tunX, 0,
-		tunW, 0);
+		alphaAX, 0);
 
   SVMul* betaBX = new SVMul(COLVECTOR, ABSLAYER);
   betaBX->AddInputs(4,

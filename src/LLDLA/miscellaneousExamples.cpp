@@ -1,6 +1,60 @@
+#include "madd.h"
 #include "miscellaneousExamples.h"
+#include "mvmul.h"
+#include "partition.h"
+#include "recombine.h"
+#include "setToZero.h"
+#include "svmul.h"
+#include "vadd.h"
+#include "vvdot.h"
 
 #if DOLLDLA
+
+RealPSet* SetToZeroExample(Type dataType, int m, int n) {
+  auto Ain = new InputNode("A",
+			   n, m,
+			   1, n,
+			   dataType);
+
+  auto xIn = new InputNode("x",
+			   m, 1,
+			   1, m,
+			   dataType);
+
+  auto yIn = new InputNode("y",
+			   n, 1,
+			   1, n,
+			   dataType);
+
+  auto tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(Ain, 0);
+
+  auto tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  auto tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  auto zeroY = new SetToZero();
+  zeroY->AddInput(tunY, 0);
+
+  MVMul* mvmul = new MVMul(ABSLAYER);
+  mvmul->AddInputs(6,
+		   tunA, 0,
+		   tunX, 0,
+		   zeroY, 0);
+
+  Poss *innerPoss = new Poss(mvmul, true);
+  RealPSet *innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode("C output");
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
 
 RealPSet* GenSizeColSVMul(Type dataType, int m)
 {

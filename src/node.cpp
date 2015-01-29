@@ -964,7 +964,7 @@ const int Node::GetVecRegWidth() const
   return arch->VecRegWidth(GetDataType());
 }
 
-#endif
+#endif // DOLLDLA
 
 
 
