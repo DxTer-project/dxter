@@ -22,6 +22,7 @@
 #include "nodeLinElem.h"
 #include "node.h"
 #include "DLANode.h"
+#include "helperNodes.h"
 
 void NodeLinElem::Print(IndStream &out)
 {
@@ -30,6 +31,10 @@ void NodeLinElem::Print(IndStream &out)
 
 StrVec NodeLinElem::PossiblyDyingVars() const
 {
+  StrVec list;
+
+  if (m_node->GetNodeClass() == OutputNode::GetClass())
+    return list;
   string out;
   switch (m_node->NumOutputs())
     {
@@ -42,7 +47,7 @@ StrVec NodeLinElem::PossiblyDyingVars() const
     default:
       throw;
     }
-  StrVec list;
+
   for(auto conn : m_node->m_inputs) {
     string name = conn->m_n->GetNameStr(conn->m_num);
     if (name != out)

@@ -109,15 +109,11 @@ class InputNode : public DLANode
 
 class OutputNode : public DLANode
 {
-  NodeType m_type;
  public:
-  OutputNode() : m_type("OutputNode") {}
-  OutputNode(NodeType type) : m_type(type) {}
-  virtual NodeType GetType() const {return m_type;}
+  virtual NodeType GetType() const {return "out";}
   static Node* BlankInst() { return  new OutputNode; }
   bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out) {}
@@ -136,8 +132,6 @@ class OutputNode : public DLANode
   virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
 #endif
   virtual Name GetName(ConnNum num) const;
-  virtual void FlattenCore(ofstream &out) const;
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
 

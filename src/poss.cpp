@@ -1000,16 +1000,18 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
   cout << "merging left " << *leftSet << " and right " << *rightSet << endl;
   cout << "real: merging left " << (*leftSet)->GetReal() << " and right " << (*rightSet)->GetReal() << endl;
 #endif
-  m_sets.erase(m_sets.begin()+left);
-  if (*(m_sets.begin()+right-1) != *rightSet) {
-    cout << "error;";
-    throw;
-  }
-  m_sets.erase(m_sets.begin()+right-1);
 
 #if USESHADOWS
   RealPSet *merged = (*leftSet)->GetReal()->HasMergedWith((*rightSet)->GetReal());
   if (merged) {
+    m_sets.erase(m_sets.begin()+left);
+    if (*(m_sets.begin()+right-1) != *rightSet) {
+      cout << "error;";
+      throw;
+    }
+    m_sets.erase(m_sets.begin()+right-1);
+
+
     ShadowPSet *shadow = merged->GetNewShadowDup(this);
     if (shadow->IsLoop() != merged->IsLoop())
       throw;
@@ -1134,7 +1136,26 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
     delete *rightSet;
     return true;
   }
+
+  if ((*leftSet)->IsShadow()  && (*leftSet)->GetReal()->m_ownerPoss == this) {
+    ReplaceShadowSetWithReal(left);
+    *leftSet = m_sets[left];
+  }
+
+  if ((*rightSet)->IsShadow()  && (*rightSet)->GetReal()->m_ownerPoss == this) {
+    ReplaceShadowSetWithReal(right);
+    *rightSet = m_sets[right];
+  }
 #endif //USESHADOWS
+
+  m_sets.erase(m_sets.begin()+left);
+  if (*(m_sets.begin()+right-1) != *rightSet) {
+    cout << "error;";
+    throw;
+  }
+  m_sets.erase(m_sets.begin()+right-1);
+
+
   return false;
 }
 

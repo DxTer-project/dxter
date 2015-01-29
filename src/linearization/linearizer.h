@@ -37,6 +37,7 @@ class Linearizer
  public:
   LinElemVec m_elems;
   Linearization m_lin;
+  StrSet m_alwaysLive;
 
   Linearizer(const Poss *poss);
   ~Linearizer();
@@ -46,6 +47,9 @@ class Linearizer
 
   void FindAnyLinearization();
   void FindOptimalLinearization(const StrSet &stillLive);
+
+  void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt, const StrSet &stillLive) const;
+  void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive) const;
 
   void InsertVecClearing(const StrSet &stillLive);
 

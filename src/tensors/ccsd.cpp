@@ -60,21 +60,14 @@ RealPSet* W_bmje_calc(DLANode *w_bmje, DLANode *x_bmej,
   InputNode *W_bmje = CreateInput4("W_bmje", big, small, small, big);
 
 
-  TempVarNode *temp1 = new TempVarNode(T_bfnj->DataType(0).GetDist(), "temp1");
+  TempVarNode *temp1 = new TempVarNode(T_bfnj->DataType(0).GetDist(), "Wtemp1");
   temp1->AddInput(T_bfnj,0);
-  TempVarNode *temp2 = new TempVarNode(v_femn->DataType(0).GetDist(), "temp2");
+  TempVarNode *temp2 = new TempVarNode(v_femn->DataType(0).GetDist(), "Wtemp2");
   temp2->AddInput(v_femn,0);
-  TempVarNode *temp3 = new TempVarNode(u_mnje->DataType(0).GetDist(), "temp3");
+  TempVarNode *temp3 = new TempVarNode(u_mnje->DataType(0).GetDist(), "Wtemp3");
   temp3->AddInput(u_mnje,0);
-  TempVarNode *temp4 = new TempVarNode(r_bmef->DataType(0).GetDist(), "temp4");
+  TempVarNode *temp4 = new TempVarNode(r_bmef->DataType(0).GetDist(), "Wtemp4");
   temp4->AddInput(r_bmef,0);
-
-/*  
-  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
-  InputNode *temp2 = CreateInput4("temp2", big, big, small, small);
-  InputNode *temp3 = CreateInput4("temp3", small, small, small, big);
-  InputNode *temp4 = CreateInput4("temp4", big, small, big, big);
-*/
 
   YAxpPx *axpy0 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "bmej", "bmje");
   axpy0->AddInputs0(3,
@@ -140,9 +133,8 @@ RealPSet* X_bmej_calc(DLANode *x_bmej, DLANode *r_bmef,
   InputNode *X_bmej = CreateInput4("X_bmej", big, small, big, small);
 
 
-  TempVarNode *temp1 = new TempVarNode(T_bfnj->DataType(0).GetDist(), "temp1");
+  TempVarNode *temp1 = new TempVarNode(T_bfnj->DataType(0).GetDist(), "Xtemp1");
   temp1->AddInput(T_bfnj,0);
-  //  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
 
   Copy *copy1 = new Copy(SMLAYER);
   copy1->AddInputs0(2,
@@ -212,12 +204,8 @@ RealPSet* Q_mnij_calc(DLANode *q_mnij,
 {
   InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
 
-  TempVarNode *temp1 = new TempVarNode(Q_mnij->DataType(0).GetDist(), "temp1");
+  TempVarNode *temp1 = new TempVarNode(Q_mnij->DataType(0).GetDist(), "Qtemp1");
   temp1->AddInput(Q_mnij,0);
-  /*
-  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
-  InputNode *temp2 = CreateInput4("temp2", small, small, small, small);
-  */
 
   Contraction *cont1 = new Contraction(ABSLAYER,COEFONE,COEFZERO,REAL,"mnie","ej","mnij",(string)"e");
   cont1->AddInputs0(3,
@@ -294,9 +282,8 @@ RealPSet* H_me_calc(DLANode *t_fn, DLANode *v_efmn,
   InputNode *H_me = CreateInput2("H_me", small, big);
 
 
-  TempVarNode *temp1 = new TempVarNode(v_efmn->DataType(0).GetDist(), "temp1");
+  TempVarNode *temp1 = new TempVarNode(v_efmn->DataType(0).GetDist(), "Htemp1");
   temp1->AddInput(v_efmn,0);
-  //  InputNode *temp1 = CreateInput4("temp1", big, big, small, small);
 
   YAxpPx *axpy1 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
   axpy1->AddInputs0(3,
@@ -322,9 +309,9 @@ RealPSet* F_ae_calc(DLANode *H_me, DLANode *r_amef,
   InputNode *F_ae = CreateInput2("F_ae", big, big);
 
 
-  TempVarNode *temp1 = new TempVarNode(v_efmn->DataType(0).GetDist(), "temp1");
+  TempVarNode *temp1 = new TempVarNode(v_efmn->DataType(0).GetDist(), "Ftemp1");
   temp1->AddInput(v_efmn,0);
-  TempVarNode *temp2 = new TempVarNode(r_amef->DataType(0).GetDist(), "temp2");
+  TempVarNode *temp2 = new TempVarNode(r_amef->DataType(0).GetDist(), "Ftemp2");
   temp2->AddInput(r_amef,0);
 
   YAxpPx *axpy1 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
@@ -371,9 +358,9 @@ RealPSet* G_mi_calc(DLANode *H_me, DLANode *u_mnie,
   InputNode *G_mi = CreateInput2("G_mi", small, small);
 
 
-  TempVarNode *temp1 = new TempVarNode(v_efmn->DataType(0).GetDist(), "temp1");
+  TempVarNode *temp1 = new TempVarNode(v_efmn->DataType(0).GetDist(), "Gtemp1");
   temp1->AddInput(v_efmn,0);
-  TempVarNode *temp2 = new TempVarNode(u_mnie->DataType(0).GetDist(), "temp2");
+  TempVarNode *temp2 = new TempVarNode(u_mnie->DataType(0).GetDist(), "Gtemp2");
   temp2->AddInput(u_mnie,0);
 
   YAxpPx *axpy1 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "efmn", "efnm");
@@ -423,13 +410,13 @@ RealPSet* z_ai_calc(DLANode *G_mi,
   InputNode *z_ai = CreateInput2("z_ai", big, small);
 
 
-  TempVarNode *temp2 = new TempVarNode(r_amef->DataType(0).GetDist(), "temp2");
+  TempVarNode *temp2 = new TempVarNode(r_amef->DataType(0).GetDist(), "ztemp2");
   temp2->AddInput(r_amef,0);
-  TempVarNode *temp3 = new TempVarNode(T_aeim->DataType(0).GetDist(), "temp3");
+  TempVarNode *temp3 = new TempVarNode(T_aeim->DataType(0).GetDist(), "ztemp3");
   temp3->AddInput(T_aeim,0);
-  TempVarNode *temp4 = new TempVarNode(w_amie->DataType(0).GetDist(), "temp4");
+  TempVarNode *temp4 = new TempVarNode(w_amie->DataType(0).GetDist(), "ztemp4");
   temp4->AddInput(w_amie,0);
-  TempVarNode *temp5 = new TempVarNode(U_mnie->DataType(0).GetDist(), "temp5");
+  TempVarNode *temp5 = new TempVarNode(U_mnie->DataType(0).GetDist(), "ztemp5");
   temp5->AddInput(U_mnie,0);
 
   YAxpPx *axpy1 = new YAxpPx(ABSLAYER, COEFTWO, COEFNEGONE, "amef", "amfe");
@@ -508,11 +495,11 @@ RealPSet* Z_abij_calc(DLANode *v_abij,
   InputNode *Z_abij = CreateInput4("Z_abij", big, big, small, small);
 
 
-  TempVarNode *temp1 = new TempVarNode(Z_abij->DataType(0).GetDist(), "temp1");
+  TempVarNode *temp1 = new TempVarNode(Z_abij->DataType(0).GetDist(), "Ztemp1");
   temp1->AddInput(Z_abij,0);
-  TempVarNode *temp2 = new TempVarNode(T_aeim->DataType(0).GetDist(), "temp2");
+  TempVarNode *temp2 = new TempVarNode(T_aeim->DataType(0).GetDist(), "Ztemp2");
   temp2->AddInput(T_aeim,0);
-  TempVarNode *accum = new TempVarNode(Z_abij->DataType(0).GetDist(), "accum");
+  TempVarNode *accum = new TempVarNode(Z_abij->DataType(0).GetDist(), "Zaccum");
   accum->AddInput(Z_abij,0);
 
 

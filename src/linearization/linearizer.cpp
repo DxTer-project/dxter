@@ -27,9 +27,6 @@
 #include "node.h"
 #include "helperNodes.h"
 
-void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive);
-void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt, const StrSet &stillLive);
-
 Linearizer::Linearizer(const Poss *poss)
 {
   PtrToLinElemMap map;
@@ -72,6 +69,10 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
   NodeLinElem *elem = new NodeLinElem(node);
   map[node] = elem;
   m_elems.push_back(elem);
+
+  if (node->GetNodeClass() == OutputNode::GetClass()) {
+    m_alwaysLive.insert(node->GetInputNameStr(0));
+  }
 
   for(auto inputConn : node->m_inputs) {
     LinElem *inElem = FindOrAdd(inputConn->m_n, map);
@@ -186,6 +187,35 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
     }
   }
 
+  //output nodes don't print any code and for tensors are often just connected to inputs, so
+  // put them in the order now to reduce computation complexity of finding all topological sorts
+  for(auto elem : m_elems) {
+    if (elem->IsNode()) {
+      NodeLinElem *nodeElem = (NodeLinElem*)elem;
+      if (nodeElem->m_node->GetNodeClass() == OutputNode::GetClass()) {
+	if (nodeElem->CanAddToLinearOrder()) 
+	  {
+	    curr.m_order.push_back(elem);
+	    elem->SetAdded();
+	  }
+      }
+    }
+  }
+  /*
+  cout << "********\nscheduling the following\n";
+  for(auto elem : m_elems) {
+    if (!elem->HasAdded()) {
+      if (elem->IsNode()) {
+	cout << ((NodeLinElem*)elem)->m_node->GetNodeClass() << " " <<((NodeLinElem*)elem)->m_node->GetType() << endl;
+	cout << ((NodeLinElem*)elem)->m_node->GetNameStr(0) << endl;
+      }
+      
+      else if (elem->IsSet())
+	cout << "set " << ((SetLinElem*)elem)->m_set->GetFunctionalityString() << endl;
+    }
+  }
+  */
+
   for(auto elem : m_elems) {
     if (elem->CanAddToLinearOrder()) {
       readyToAdd.push_back(elem);
@@ -203,7 +233,8 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
   for(auto elem : curr.m_order) {
     if (elem->IsNode()) {
       NodeLinElem *nodeElem = (NodeLinElem*)elem;
-      if (nodeElem->m_node->GetNodeClass() != InputNode::GetClass())
+      if (nodeElem->m_node->GetNodeClass() != InputNode::GetClass() &&
+          nodeElem->m_node->GetNodeClass() != OutputNode::GetClass())
 	throw;
     }
     else
@@ -213,14 +244,14 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
   if (m_lin.m_order.size() != m_elems.size())
     throw;
 
-  if (m_lin.GetCostNoRecursion(stillLive) < 0) {
+  if (m_lin.GetCostNoRecursion(stillLive, m_alwaysLive) < 0) {
     m_lin.m_cost = -1;
-    cout << m_lin.GetCostNoRecursion(stillLive) << endl;
+    cout << m_lin.GetCostNoRecursion(stillLive, m_alwaysLive) << endl;
     throw;
   }
 }
 
-void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt, const StrSet &stillLive)
+void Linearizer::RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt, const StrSet &stillLive) const
 {
   if (readyToAdd.empty()) {
     if (opt.m_cost < 0) {
@@ -229,7 +260,7 @@ void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linea
     else {
       if (opt.m_order.size() != curr.m_order.size())
 	throw;
-      if (opt.GetCostNoRecursion(stillLive) > curr.GetCostNoRecursion(stillLive))
+      if (opt.GetCostNoRecursion(stillLive, m_alwaysLive) > curr.GetCostNoRecursion(stillLive, m_alwaysLive))
 	opt = curr;
     }
   }
@@ -244,14 +275,27 @@ void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linea
   }
 }
 
-void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive)
+void Linearizer::AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive) const
 {
   curr.m_order.push_back(currAdd);
   currAdd->SetAdded();
   if (currAdd->m_children.size() > 1 || !currAdd->m_succs.empty()) {
+    int printedImmediately = 0;
     for(auto child : currAdd->m_children) {
       if (child->CanAddToLinearOrder()) {
-	readyToAdd.push_back(child);
+	bool done = false;
+	if (child->IsNode()) {
+	  if (((NodeLinElem*)child)->m_node->GetNodeClass() == OutputNode::GetClass()) {
+	    curr.m_order.push_back(child);
+	    child->SetAdded();
+	    ++printedImmediately;
+	    done = true;
+	    if (!child->m_succs.empty())
+	      throw;
+	  }	    
+	}
+	if (!done)
+	  readyToAdd.push_back(child);
       }
     }
     for (auto succ : currAdd->m_succs) {
@@ -260,6 +304,12 @@ void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd
       }
     }
     RecursivelyFindOpt(curr, readyToAdd, opt, stillLive);
+    while (printedImmediately > 0) {
+      LinElem *elem = curr.m_order.back();
+      elem->ClearAdded();
+      curr.m_order.pop_back();
+      --printedImmediately;
+    }
   }
   else if (currAdd->m_children.size() == 1) {
     LinElem *child = currAdd->m_children[0];
@@ -334,7 +384,7 @@ void Linearizer::InsertVecClearing(const StrSet &stillLive)
 {
   if (!HasCurrLinearization())
     throw;
-  m_lin.InsertVecClearing(stillLive);
+  m_lin.InsertVecClearing(stillLive, m_alwaysLive);
 }
 
 void Linearizer::PrintConnections() const

@@ -507,12 +507,6 @@ void InputNode::UnflattenCore(ifstream &in, SaveInfo &info)
 #endif
 }
 
-void OutputNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
-{
-  DLANode::Duplicate(orig, shallow, possMerging);
-  m_type = ((OutputNode*)orig)->m_type;
-}
-
 void OutputNode::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -598,18 +592,6 @@ Name OutputNode::GetName(ConnNum num) const
   if (num > 0)
     throw;
   return GetInputName(0);
-}
-
-void OutputNode::FlattenCore(ofstream &out) const
-{
-  DLANode::FlattenCore(out);
-  out << m_type << endl;
-}
-
-void OutputNode::UnflattenCore(ifstream &in, SaveInfo &info)
-{
-  DLANode::UnflattenCore(in, info);
-  getline(in, m_type);
 }
 
 #if DOLLDLA
