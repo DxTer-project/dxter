@@ -38,10 +38,10 @@ class LinElem
   LinElemVec m_children;
   LinElemVec m_inputs;
   LinElemVec m_preds;
-  LinElemVec m_succs;
+  LinElem *m_succ;
   bool m_addedToLinOrder;
 
- LinElem() : m_addedToLinOrder(false) {}
+  LinElem();
   virtual ~LinElem() {}
 
   void AddInputIfUnique(LinElem *elem);
