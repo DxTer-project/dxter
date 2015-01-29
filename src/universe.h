@@ -65,6 +65,8 @@ class Universe
   vector<string> m_declarationVectors;
   vector<string> m_constantDefines;
   vector<string> m_argNames;
+
+  void SetupFunctionArguments(RealPSet* seed);
 #endif //DOLLDLA
 
   GraphNum Expand(unsigned int numIters, unsigned int phase, CullFunction Cull);

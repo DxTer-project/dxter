@@ -58,6 +58,27 @@ Universe::Universe() {
   m_pset = NULL;
 }
 
+#if DOLLDLA
+
+void Universe::SetupFunctionArguments(RealPSet* seed) {
+  int pSize = seed->m_posses.size();
+  cout << std::to_string((long long int) pSize) << endl;
+  Poss *poss = seed->m_posses.begin()->second;
+  for (auto node : poss->m_possNodes) {
+    if (node->GetNodeClass() == InputNode::GetClass()) {
+      InputNode *inNode = (InputNode*) node;
+      m_declarationVectors.push_back(inNode->DataDeclaration());
+      m_constantDefines.push_back(inNode->NumRowsDefine());
+      m_constantDefines.push_back(inNode->NumColsDefine());
+      m_constantDefines.push_back(inNode->RowStrideDefine());
+      m_constantDefines.push_back(inNode->ColStrideDefine());
+      m_argNames.push_back(inNode->GetName(0).str());
+    }
+  }
+}
+
+#endif
+
 void Universe::Init(RealPSet *seed)
 {
   m_pset = seed;
@@ -71,23 +92,7 @@ void Universe::Init(RealPSet *seed)
 #endif
 
 #if DOLLDLA
-  int pSize = seed->m_posses.size();
-  cout << std::to_string((long long int) pSize) << endl;
-  Poss *poss = seed->m_posses.begin()->second;
-  NodeVecIter nodeIter = poss->m_possNodes.begin();
-  for(; nodeIter != poss->m_possNodes.end(); ++nodeIter) {
-    Node *node = *nodeIter;
-    if (node->GetNodeClass() == InputNode::GetClass()) {
-      InputNode *inNode = (InputNode*) node;
-      m_declarationVectors.push_back(inNode->DataDeclaration());
-      m_constantDefines.push_back(inNode->NumRowsDefine());
-      m_constantDefines.push_back(inNode->NumColsDefine());
-      m_constantDefines.push_back(inNode->RowStrideDefine());
-      m_constantDefines.push_back(inNode->ColStrideDefine());
-      m_argNames.push_back(inNode->GetName(0).str());
-    }
-  }
- 
+  SetupFunctionArguments(seed);
 #endif
 }
 
