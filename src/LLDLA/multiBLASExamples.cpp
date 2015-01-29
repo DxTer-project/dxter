@@ -1,4 +1,12 @@
+#include "LLDLATranspose.h"
+#include "madd.h"
 #include "multiBLASExamples.h"
+#include "mvmul.h"
+#include "setToZero.h"
+#include "smmul.h"
+#include "svmul.h"
+#include "vadd.h"
+#include "vvdot.h"
 
 #if DOLLDLA
 
@@ -6,12 +14,12 @@ RealPSet* Gesummv(Type dataType, int m, int n)
 {
   InputNode* alphaIn = new InputNode("Alpha",
 				     1, 1,
-				     1, m,
+				     1, 1,
 				     dataType);
 
   InputNode* betaIn = new InputNode("Beta",
 				    1, 1,
-				    1, m,
+				    1, 1,
 				    dataType);
 
   InputNode* AIn = new InputNode("A",
@@ -34,16 +42,6 @@ RealPSet* Gesummv(Type dataType, int m, int n)
 				 1, n,
 				 dataType);
 
-  InputNode* WIn = new InputNode("W",
-				 m, 1,
-				 1, m,
-				 dataType);
-
-  InputNode* VIn = new InputNode("V",
-				 m, 1,
-				 1, m,
-				 dataType);
-
   Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
   tunAlpha->AddInput(alphaIn, 0);
 
@@ -56,51 +54,38 @@ RealPSet* Gesummv(Type dataType, int m, int n)
   Tunnel* tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(BIn, 0);
 
-  Tunnel* tunW = new Tunnel(POSSTUNIN);
-  tunW->AddInput(WIn, 0);
-
-  Tunnel* tunV = new Tunnel(POSSTUNIN);
-  tunV->AddInput(VIn, 0);
-
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(YIn, 0);
 
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(XIn, 0);
 
-  MVMul* ax = new MVMul(ABSLAYER);
-  ax->AddInputs(6,
-		tunA, 0,
-		tunX, 0,
-		tunV, 0);
+  auto zeroY = new SetToZero(ABSLAYER);
+  zeroY->AddInput(tunY, 0);
 
-  SVMul* alphaAX = new SVMul(COLVECTOR, ABSLAYER);
-  alphaAX->AddInputs(4,
-		     tunAlpha, 0,
-		     ax, 0);
+  SMMul* alphaA = new SMMul(ABSLAYER);
+  alphaA->AddInputs(4,
+		    tunAlpha, 0,
+		    tunA, 0);
 
-  MVMul* bx = new MVMul(ABSLAYER);
-  bx->AddInputs(6,
-		tunB, 0,
-		tunX, 0,
-		tunW, 0);
+  SMMul* betaB = new SMMul(ABSLAYER);
+  betaB->AddInputs(4,
+		   tunBeta, 0,
+		   tunB, 0);
 
-  SVMul* betaBX = new SVMul(COLVECTOR, ABSLAYER);
-  betaBX->AddInputs(4,
-		    tunBeta, 0,
-		    bx, 0);
+  MVMul* alphaY = new MVMul(ABSLAYER);
+  alphaY->AddInputs(6,
+		    alphaA, 0,
+		    tunX, 0,
+		    zeroY, 0);
 
-  VAdd* alphaAXPlusBetaBX = new VAdd(COLVECTOR, ABSLAYER);
-  alphaAXPlusBetaBX->AddInputs(4,
-			       alphaAX, 0,
-			       betaBX, 0);
+  MVMul* betaBY = new MVMul(ABSLAYER);
+  betaBY->AddInputs(6,
+		    betaB, 0,
+		    tunX, 0,
+		    alphaY, 0);
 
-  VAdd* addY = new VAdd(COLVECTOR, ABSLAYER);
-  addY->AddInputs(4,
-		  alphaAXPlusBetaBX, 0,
-		  tunY, 0);
-
-  Poss* innerPoss = new Poss(addY, true);
+  Poss* innerPoss = new Poss(betaBY, true);
   RealPSet* innerSet = new RealPSet(innerPoss);
 
   OutputNode *Cout = new OutputNode;
@@ -109,7 +94,7 @@ RealPSet* Gesummv(Type dataType, int m, int n)
   Poss *outerPoss = new Poss(Cout, true);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
-  return outerSet;  
+  return outerSet;
 }
 
 RealPSet* Gemam(Type dataType, int m, int n, int p)

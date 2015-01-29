@@ -8,6 +8,28 @@ void *alloc(size_t size)	{
 	return (void *) malloc(size);
 }
 
+void set_to_zero_double(double* a,
+			int m, int n,
+			int a_row_stride, int a_col_stride) {
+  int i, j;
+  for (i = 0; i < m; i++) {
+    for (j = 0; j < n; j++) {
+      A(i, j) = 0;
+    }
+  }
+}
+
+void set_to_zero_float(float* a,
+		       int m, int n,
+		       int a_row_stride, int a_col_stride) {
+  int i, j;
+  for (i = 0; i < m; i++) {
+    for (j = 0; j < n; j++) {
+      A(i, j) = 0;
+    }
+  }
+}
+
 void *alloc_aligned_16(size_t size) {
   void *memptr;
   // Horrible error handling

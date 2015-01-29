@@ -230,7 +230,7 @@ void MVMulLowerLayer::Apply(Node *node) const
 
 string MVMulLowerLayer::GetType() const
 {
-  return "MVMul lower layer " + LayerNumToStr(m_fromLayer)
+  return "lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
 }
 

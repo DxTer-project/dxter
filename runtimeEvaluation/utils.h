@@ -23,6 +23,14 @@ void *alloc(size_t size);
 
 void *alloc_aligned_16(size_t size);
 
+void set_to_zero_double(double* a,
+			int m, int n,
+			int a_row_stride, int a_col_stride);
+
+void set_to_zero_float(float* a,
+		       int m, int n,
+		       int a_row_stride, int a_col_stride);
+
 void rand_doubles(int size, double *rands);
 
 void rand_floats(int size, float *rands);

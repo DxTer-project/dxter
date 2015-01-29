@@ -9,6 +9,7 @@
 #include "mvmul.h"
 #include "partition.h"
 #include "recombine.h"
+#include "setToZero.h"
 #include "smmul.h"
 #include "svmul.h"
 #include "vmmul.h"
@@ -205,6 +206,11 @@ void AddPartitionRecombineTrans()
   Universe::AddTrans(Recombine::GetClass(), new RecombineLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
 }
 
+void AddSetToZeroTrans() {
+  Universe::AddTrans(SetToZero::GetClass(), new SetToZeroLowerLayer(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(SetToZero::GetClass(), new SetToZeroLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
+}
+
 void AddTransformations()
 {
   AddGemmTrans();
@@ -221,6 +227,8 @@ void AddTransformations()
   AddUnrollingTrans();
 
   AddPartitionRecombineTrans();
+
+  AddSetToZeroTrans();
 }
 
 #endif // DOLLDLA
