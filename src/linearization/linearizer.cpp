@@ -242,7 +242,7 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
       }
       
       else if (elem->IsSet())
-        cout << "set " << ((SetLinElem*)elem)->m_set->GetFunctionalityString() << endl;
+        cout << "\\\\set " << ((SetLinElem*)elem)->m_set->GetFunctionalityString() << endl;
     }
   }
 #endif // DOTENSORS
