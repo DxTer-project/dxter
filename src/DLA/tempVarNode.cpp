@@ -753,4 +753,79 @@ void TempVarNode::AddVariables(VarSet &set) const
   }
 }
 
+
+void MoveTempVarNodeIntoSet::Apply(Node *node) const
+{
+  TempVarNode *tmp = (TempVarNode*)node;
+  Poss *poss = tmp->m_poss;
+  Tunnel *tun = (Tunnel*)(tmp->Child(0));
+  RealPSet *set = (RealPSet*)(tun->m_pset);
+  unsigned int oldTunNum = FindInTunVec(set->m_inTuns, tun);
+  Node *input = tmp->Input(0);
+  ConnNum num = tmp->InputConnNum(0);
+  Tunnel *otherTun = NULL;
+  for (auto child : input->m_children) {
+    if (child->m_num == num && child->m_n->IsTunnel(SETTUNIN)) {
+      if (((Tunnel*)(child->m_n))->m_pset == set) {
+	otherTun = (Tunnel*)(child->m_n);
+	break;
+      }
+    }
+  }
+  set->DisconnectFromSetsForMergingRecord();
+  
+  unsigned int tunNum;
+  if (!otherTun) {
+    otherTun = new Tunnel(SETTUNIN);
+    otherTun->AddInput(input, num);
+    otherTun->m_pset = set;
+    poss->AddNode(otherTun);
+    set->m_inTuns.push_back(otherTun);
+    tunNum = set->m_inTuns.size() - 1;
+    for(auto setPoss : set->m_posses) {
+      Tunnel *possTun = new Tunnel(POSSTUNIN);
+      possTun->AddInput(otherTun, 0);
+      setPoss.second->m_inTuns.push_back(possTun);
+      setPoss.second->AddNode(possTun);
+      possTun->m_pset = set;
+    }
+  }
+  else {
+    tunNum = FindInTunVec(set->m_inTuns, otherTun);
+  }
+
+  for(auto setPoss : set->m_posses) {
+    TempVarNode *newTemp = new TempVarNode;
+    newTemp->Duplicate(tmp, true, false);
+    setPoss.second->AddNode(newTemp);
+    newTemp->AddInput(setPoss.second->m_inTuns[tunNum], 0);
+    Node *oldPossTun = setPoss.second->m_inTuns[oldTunNum];
+    oldPossTun->RedirectChildren(newTemp);
+    setPoss.second->DeleteNode(oldPossTun);
+  }
+  
+  set->m_inTuns.erase(set->m_inTuns.begin() + oldTunNum);
+  poss->DeleteChildAndCleanUp(tun);
+}
+
+bool MoveTempVarNodeIntoSet::CanApply(const Node *node) const
+{
+  const TempVarNode *tmp = (TempVarNode*)node;
+  if (tmp->m_children.size() == 1) {
+    if (tmp->Child(0)->IsTunnel(SETTUNIN)) {
+      const Tunnel *tun = (Tunnel*)(tmp->Child(0));
+      BasePSet *set = tun->m_pset;
+      if (set->IsLoop())
+	return false;
+      if (!set->IsReal())
+	throw;
+      if (!((RealPSet*)set)->m_shadows.empty())
+	throw;
+      return true;
+    }
+  }
+  return false;
+}
+
+
 #endif //DOTENSORS

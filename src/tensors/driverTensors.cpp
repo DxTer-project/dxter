@@ -170,6 +170,7 @@ void AddSimplifiers()
    Universe::AddTrans(Permute::GetClass(), new MovePermuteIntoTempVarNode, SIMP);
    Universe::AddTrans(ScaleNode::GetClass(), new RemoveScaleByOne, SIMP);
    Universe::AddTrans(TempVarNode::GetClass(), new MoveTempVarNodeIntoLoop, SIMP);
+   Universe::AddTrans(TempVarNode::GetClass(), new MoveTempVarNodeIntoSet, SIMP);
 }
 
 void Usage()
