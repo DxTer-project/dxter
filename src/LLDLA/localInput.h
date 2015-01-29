@@ -27,7 +27,13 @@ class LocalInput : public InputNode
 {
  public:
   using InputNode::InputNode;
+
+  virtual void Prop();
   virtual void PrintCode(IndStream& out);
+
+  virtual NodeType GetType() const;
+  static ClassType GetClass();
+  virtual ClassType GetNodeClass() const;
 };
 
 #endif // DOLLDLA

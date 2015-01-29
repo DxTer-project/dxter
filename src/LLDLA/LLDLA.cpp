@@ -59,4 +59,11 @@ DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
   return *this;
 }
 
+bool DataTypeInfo::IsGenStride() const {
+  if (m_rowStride != 1 && m_colStride != 1) {
+    return true;
+  }
+  return false;
+}
+
 #endif

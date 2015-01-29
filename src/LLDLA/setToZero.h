@@ -26,8 +26,6 @@
 class SetToZero : public DLAOp<1, 1>
 {
  private:
-  bool InputIsGenStride();
-
   void NaiveZeroPrintout(IndStream& out);
   void MemsetPrintout(IndStream& out);
 

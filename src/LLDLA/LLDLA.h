@@ -74,6 +74,7 @@ class DataTypeInfo
 
   DataTypeInfo& operator=(const DataTypeInfo &rhs);
 
+  bool IsGenStride() const;
 };
 
 #endif // DOLLDLA

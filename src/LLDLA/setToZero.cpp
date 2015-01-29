@@ -58,21 +58,11 @@ Phase SetToZero::MaxPhase() const {
     }
 }
 
-bool SetToZero::InputIsGenStride() {
-  const DataTypeInfo& inputInfo = InputDataType(0);
-  const Stride rowStride = inputInfo.m_rowStride;
-  const Stride colStride = inputInfo.m_colStride;
-  if (rowStride != 1 && colStride != 1) {
-    return true;
-  }
-  return false;
-}
-
 void SetToZero::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<1, 1>::Prop();
     
-    if (InputIsGenStride()) {
+    if (InputDataType(0).IsGenStride()) {
       cout << "ERROR: Currently SetToZero does not support general stride operands" << endl;
       throw;
     }
