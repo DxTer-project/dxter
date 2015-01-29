@@ -195,6 +195,10 @@ class Node
 
   virtual bool IsDataDependencyOfInput() const {return true;}
 
+#if DOTENSORS
+  virtual bool CreatesNewVars() const {return true;}
+#endif
+
   void PrintChildren() const;
   void PrintInputs() const;
 

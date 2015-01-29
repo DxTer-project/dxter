@@ -133,6 +133,10 @@ class OutputNode : public DLANode
 #endif
   virtual Name GetName(ConnNum num) const;
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+
+#if DOTENSORS
+  virtual bool CreatesNewVars() const {return false;}
+#endif
 };
 
 #if DOLLDLA

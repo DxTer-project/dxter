@@ -41,4 +41,5 @@ class NodeLinElem : public LinElem
   virtual void CacheLiveVars(const StrSet &stillLive) {}
   virtual void ClearCache() {}
   virtual bool IsNode() const {return true;}
+  virtual bool CreatesNewVars() const;
 };

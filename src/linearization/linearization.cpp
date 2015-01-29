@@ -205,6 +205,7 @@ void Linearization::operator=(const Linearization &rhs)
       }
     }
   }
+  m_cost = rhs.m_cost;
 }
 
 void Linearization::Print(IndStream &out)

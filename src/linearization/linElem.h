@@ -58,6 +58,8 @@ class LinElem
   virtual bool IsSet() const {return false;}
   virtual bool IsNode() const {return false;}
 
+  virtual bool CreatesNewVars() const {return true;}
+
   virtual void Print(IndStream &out) = 0;
   virtual StrVec PossiblyDyingVars() const = 0;
   virtual StrSet NewVars() const = 0;
