@@ -123,7 +123,12 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
                                others.begin(),
                                others.end());
     for(auto other : others) {
-      other->m_succs.push_back(overwriter);
+      if (other->m_succ) {
+	cout << "already has succesor\n";
+	throw;
+      }
+      else
+	other->m_succ = overwriter;
     }
   }
   
@@ -180,7 +185,12 @@ LinElem* Linearizer::FindOrAdd(BasePSet *set, PtrToLinElemMap &map)
                                  others.begin(),
                                  others.end());
       for(auto other : others) {
-        other->m_succs.push_back(overwriter);
+	if (other->m_succ) {
+	  cout << "has succs\n";
+	  throw;
+	}
+	else
+	  other->m_succ = overwriter;
       }
     }
   }
@@ -222,24 +232,45 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
       }
     }
   }
-  /*
-   cout << "********\nscheduling the following\n";
+
+#if DOTENSORS
+   cout << "\\\\********Scheduling the following\n";
    for(auto elem : m_elems) {
-   if (!elem->HasAdded()) {
-   if (elem->IsNode()) {
-   cout << ((NodeLinElem*)elem)->m_node->GetNodeClass() << " " <<((NodeLinElem*)elem)->m_node->GetType() << endl;
-   cout << ((NodeLinElem*)elem)->m_node->GetNameStr(0) << endl;
-   }
+     if (!elem->HasAdded()) {
+       if (elem->IsNode()) {
+	 cout << "\\\\" << ((NodeLinElem*)elem)->m_node->GetNodeClass() << endl;
+       }
    
-   else if (elem->IsSet())
-   cout << "set " << ((SetLinElem*)elem)->m_set->GetFunctionalityString() << endl;
+       else if (elem->IsSet())
+	 cout << "set " << ((SetLinElem*)elem)->m_set->GetFunctionalityString() << endl;
+     }
    }
-   }
-   */
+#endif // DOTENSORS
   
   for(auto elem : m_elems) {
     if (elem->CanAddToLinearOrder()) {
-      readyToAdd.push_back(elem);
+      bool skip = false;
+      if (elem->m_children.size() == 1
+	  && elem->IsNode() 
+	  && ((NodeLinElem*)elem)->m_node->GetNodeClass() == TempVarNode::GetClass()) 
+	{
+	  LinElem *child = elem->m_children[0];
+	  for(auto in : child->m_inputs) {
+	    if (in != elem) {
+	      if (in->IsNode() 
+		  && in->m_children.size() == 1
+		  && ((NodeLinElem*)in)->m_node->GetNodeClass() == TempVarNode::GetClass()) 
+		{
+		  if (FoundInVec(in, readyToAdd)) {
+		    skip = true;
+		    break;
+		  }
+		}
+	    }
+	  }
+	}
+      if (!skip)
+	readyToAdd.push_back(elem);
     }
   }
   
@@ -305,61 +336,61 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinE
     throw;
   curr.m_order.push_back(currAdd);
   currAdd->SetAdded();
-  if (currAdd->m_children.size() > 1 || !currAdd->m_succs.empty()) {
-    //Go through children and add those that should be added immediately
-    //Keep track of TempVarNodes that may finally be able to add
-    LinElemVec tempVarNodes;
-    int printedImmediately = 0;
-    for(auto child : currAdd->m_children) {
-      if (child->CanAddToLinearOrder()) {
-        bool done = false;
-        if (child->IsNode()) {
-          NodeLinElem *childNode = (NodeLinElem*)child;
-          Node *node = childNode->m_node;
-          if (node->GetNodeClass() == OutputNode::GetClass()) {
-            curr.m_order.push_back(child);
-            child->SetAdded();
-            ++printedImmediately;
-            done = true;
-            if (!child->m_succs.empty())
-              throw;
-          }
-        }
-        if (!done)
-          readyToAdd.push_back(child);
-      }
-      else {
-        //If that was the last input to (e.g.) a set
-        // other than temps, then now the temps can
-        // add, followed by the set
-        for (auto input : child->m_inputs) {
-          if (!input->HasAdded() &&
-	      input != currAdd &&
-              input->CanAddToLinearOrder())
-          {
-	    if (input->IsNode() && ((NodeLinElem*)input)->m_node->GetNodeClass() == TempVarNode::GetClass()) {
-	      if (!FoundInVec(input,readyToAdd)) {
-		readyToAdd.push_back(input);
-		break;
-	      }
+  if (currAdd->m_children.size() > 1 
+      || (currAdd->m_succ && currAdd->m_succ->CanAddToLinearOrder()))
+    {
+      //Go through children and add those that should be added immediately
+      //Keep track of TempVarNodes that may finally be able to add
+      LinElemVec tempVarNodes;
+      int printedImmediately = 0;
+      for(auto child : currAdd->m_children) {
+	if (child->CanAddToLinearOrder()) {
+	  bool done = false;
+	  if (child->IsNode()) {
+	    NodeLinElem *childNode = (NodeLinElem*)child;
+	    Node *node = childNode->m_node;
+	    if (node->GetNodeClass() == OutputNode::GetClass()) {
+	      curr.m_order.push_back(child);
+	      child->SetAdded();
+	      ++printedImmediately;
+	      done = true;
+	      if (child->m_succ)
+		throw;
 	    }
-          }
-        }
+	  }
+	  if (!done)
+	    readyToAdd.push_back(child);
+	}
+	else {
+	  //If that was the last input to (e.g.) a set
+	  // other than temps, then now the temps can
+	  // add, followed by the set
+	  for (auto input : child->m_inputs) {
+	    if (!input->HasAdded() &&
+		input != currAdd &&
+		input->CanAddToLinearOrder())
+	      {
+		if (input->IsNode() && ((NodeLinElem*)input)->m_node->GetNodeClass() == TempVarNode::GetClass()) {
+		  if (!FoundInVec(input,readyToAdd)) {
+		    readyToAdd.push_back(input);
+		    break;
+		  }
+		}
+	      }
+	  }
+	}
+      }
+      if (currAdd->m_succ && currAdd->m_succ->CanAddToLinearOrder()) {
+	readyToAdd.push_back(currAdd->m_succ);
+      }
+      RecursivelyFindOpt(curr, readyToAdd, opt, stillLive);
+      while (printedImmediately > 0) {
+	LinElem *elem = curr.m_order.back();
+	elem->ClearAdded();
+	curr.m_order.pop_back();
+	--printedImmediately;
       }
     }
-    for (auto succ : currAdd->m_succs) {
-      if (succ->CanAddToLinearOrder()) {
-        readyToAdd.push_back(succ);
-      }
-    }
-    RecursivelyFindOpt(curr, readyToAdd, opt, stillLive);
-    while (printedImmediately > 0) {
-      LinElem *elem = curr.m_order.back();
-      elem->ClearAdded();
-      curr.m_order.pop_back();
-      --printedImmediately;
-    }
-  }
   else if (currAdd->m_children.size() == 1) {
     LinElem *child = currAdd->m_children[0];
     if (currAdd->IsNode() && ((NodeLinElem*)currAdd)->m_node->GetNodeClass() == TempVarNode::GetClass()) {
@@ -448,10 +479,8 @@ void Linearizer::FindAnyLinearization()
     readyToAdd.pop_back();
     m_lin.m_order.push_back(elem);
     elem->SetAdded();
-    for(auto succ : elem->m_succs) {
-      if (succ->CanAddToLinearOrder())
-        readyToAdd.push_back(succ);
-    }
+    if (elem->m_succ && elem->m_succ->CanAddToLinearOrder())
+      readyToAdd.push_back(elem->m_succ);
     for(auto child : elem->m_children) {
       if (child->CanAddToLinearOrder())
         readyToAdd.push_back(child);
