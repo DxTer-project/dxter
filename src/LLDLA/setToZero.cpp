@@ -62,7 +62,7 @@ void SetToZero::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<1, 1>::Prop();
     
-    if (InputDataType(0).IsGenStride()) {
+    if (!InputDataType(0).IsContiguous()) {
       cout << "ERROR: Currently SetToZero does not support general stride operands" << endl;
       throw;
     }

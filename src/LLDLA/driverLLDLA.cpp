@@ -157,7 +157,7 @@ void Usage()
   cout <<"        12  -> Matrix add twice F/D M N\n";
   cout <<"        13  -> Matrix vector multiply twice F/D M N P\n";
   cout <<"        17  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
-  cout <<"        18  -> alpha*A*x + beta*B*x + y F/D M N\n";
+  cout <<"        18  -> alpha*A*x + beta*B*x F/D M N\n";
   cout <<"        19  -> y <- Ax F/D M N\n";
   cout <<"\n";
 }

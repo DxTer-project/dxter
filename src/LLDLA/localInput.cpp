@@ -19,14 +19,16 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "localInput.h"
+
 #if DOLLDLA
 
 void LocalInput::Prop() {
   if (!IsValidCost(m_cost)) {
     InputNode::Prop();
 
-    if (m_dataTypeInfo.IsGenStride()) {
-      cout << "ERROR: Local inputs cannot be general stride" << endl;
+    if (!m_dataTypeInfo.IsContiguous()) {
+      cout << "ERROR: Local inputs must be contiguous in memory" << endl;
       throw;
     }
     m_cost = 0;
@@ -37,15 +39,15 @@ void LocalInput::PrintCode(IndStream& out) {
   Type dataType = m_dataTypeInfo.m_type;
   out.Indent();
   if (dataType == REAL_SINGLE) {
-    *out << "float";
+    *out << "float ";
   } else {
-    *out << "double";
+    *out << "double ";
   }
-  string size = dataType.m_numRowsVar + " * " + dataType.m_numColsVar;
-  *out << dataType.m_varName.m_name << "[" << size << "] = {0};" << endl;
+  string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar;
+  *out << m_varName.m_name << "[" << size << "] " << " = {0};" << endl;
 }
 
-NodeType LocalInput::GetType() {
+NodeType LocalInput::GetType() const {
   return "LocalInput " + LayerNumToStr(GetLayer());
 }
 
@@ -53,7 +55,7 @@ ClassType LocalInput::GetClass() {
   return "LocalInput";
 }
 
-ClassType GetNodeClass() const {
+ClassType LocalInput::GetNodeClass() const {
   return GetClass();
 }
 

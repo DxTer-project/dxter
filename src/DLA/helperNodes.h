@@ -31,6 +31,7 @@
 class InputNode : public DLANode
 {
   NodeType m_type;
+ protected:
   DataTypeInfo m_dataTypeInfo;
 #if TWOD
   Sizes m_msize, m_nsize;

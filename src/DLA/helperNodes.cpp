@@ -66,7 +66,7 @@ m_msize(NAN), m_nsize(NAN) {
   string rowStrideVar = name + "RowStride";
   string colStrideVar = name + "ColStride";
   
-  m_dataTypeInfo = DataTypeInfo(rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
+  m_dataTypeInfo = DataTypeInfo(m, n, rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
   
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
@@ -96,7 +96,7 @@ m_msize(NAN), m_nsize(NAN)
     cs = NONUNITSTRIDE;
   }
   
-  m_dataTypeInfo = DataTypeInfo(rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
+  m_dataTypeInfo = DataTypeInfo(m, n, rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
   
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
