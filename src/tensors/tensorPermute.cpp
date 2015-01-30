@@ -212,6 +212,8 @@ bool MovePermuteIntoTempVarNode::CanApply(const Node *node) const
   if (node->GetNodeClass() != Permute::GetClass())
     throw;
   const Permute *perm = (Permute*)node;
+  if (perm->m_zero)
+    return false;
   return (perm->Input(0)->GetNodeClass() == TempVarNode::GetClass());
 }
 
