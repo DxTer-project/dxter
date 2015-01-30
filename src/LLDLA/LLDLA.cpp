@@ -31,24 +31,42 @@ DataTypeInfo::DataTypeInfo()
   m_colStride = BADSTRIDE;
 }
 
-DataTypeInfo::DataTypeInfo(Stride rowStride, Stride colStride,
+DataTypeInfo::DataTypeInfo(Size numRows, Size numCols,
+			   Size rowStrideVal, Size colStrideVal,
 			   string numRowsVar, string numColsVar,
 			   string rowStrideVar, string colStrideVar,
 			   Type type)
-  : m_rowStride(rowStride),
-    m_colStride(colStride),
+  : m_numRows(numRows),
+    m_numCols(numCols),
+    m_rowStrideVal(rowStrideVal),
+    m_colStrideVal(colStrideVal),
     m_numRowsVar(numRowsVar),
     m_numColsVar(numColsVar),
     m_rowStrideVar(rowStrideVar),
     m_colStrideVar(colStrideVar),
     m_type(type)
 {
+  if (m_rowStrideVal == 1) {
+    m_rowStride = UNITSTRIDE;
+  } else {
+    m_rowStride = NONUNITSTRIDE;
+  }
+
+  if (m_colStrideVal == 1) {
+    m_colStride = UNITSTRIDE;
+  } else {
+    m_colStride = NONUNITSTRIDE;
+  }
 
 }
  
 
 DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
 {
+  m_numRows = rhs.m_numRows;
+  m_numCols = rhs.m_numCols;
+  m_rowStrideVal = rhs.m_rowStrideVal;
+  m_colStrideVal = rhs.m_colStrideVal;
   m_rowStride = rhs.m_rowStride;
   m_colStride = rhs.m_colStride;
   m_numRowsVar = rhs.m_numRowsVar;
@@ -57,6 +75,29 @@ DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
   m_colStrideVar = rhs.m_colStrideVar;
   m_type = rhs.m_type;
   return *this;
+}
+
+bool DataTypeInfo::IsGenStride() const {
+  if (m_rowStrideVal != 1 && m_colStrideVal != 1) {
+    return true;
+  }
+  return false;
+}
+
+bool DataTypeInfo::IsContiguous() const {
+  /*  if (IsGenStride()) {
+    return false;
+    }*/
+
+  if (m_rowStrideVal == 1 && m_colStrideVal == m_numRows) {
+    return true;
+  }
+
+  if (m_colStrideVal == 1 && m_rowStrideVal == m_numCols) {
+    return true;
+  }
+
+  return false;
 }
 
 #endif

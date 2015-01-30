@@ -31,6 +31,7 @@
 class InputNode : public DLANode
 {
   NodeType m_type;
+ protected:
   DataTypeInfo m_dataTypeInfo;
 #if TWOD
   Sizes m_msize, m_nsize;
@@ -57,7 +58,7 @@ class InputNode : public DLANode
 	    string rowStrideVar, string colStrideVar,
 	    Type dataType);
 
-  InputNode(string name, Size m, Size n,
+  explicit InputNode(string name, Size m, Size n,
 	    Size rowStrideVal, Size colStrideVal,
 	    Type dataType);
 

@@ -58,22 +58,33 @@ inline bool IsUnitStride(const Stride &stride)
 class DataTypeInfo
 {
  public:
+  Size m_numRows;
+  Size m_numCols;
+
+  Size m_rowStrideVal;
+  Size m_colStrideVal;
+
   Stride m_rowStride;
   Stride m_colStride;
+
   string m_numRowsVar;
   string m_numColsVar;
   string m_rowStrideVar;
   string m_colStrideVar;
+
   Type m_type;
 
   DataTypeInfo();
-  DataTypeInfo(Stride rowStride, Stride colStride,
+  DataTypeInfo(Size numRows, Size numCols,
+	       Size rowStrideVal, Size colStrideVal,
 	       string numRowsVar, string numColsVar,
 	       string rowStrideVar, string colStrideVar,
 	       Type type);
 
   DataTypeInfo& operator=(const DataTypeInfo &rhs);
 
+  bool IsGenStride() const;
+  bool IsContiguous() const;
 };
 
 #endif // DOLLDLA

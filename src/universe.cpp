@@ -19,16 +19,17 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-#include "transform.h"
+#include <iomanip>
 #include <sstream>
 #include <time.h>
-#include "helperNodes.h"
-#include "realLoop.h"
+
 #include "critSect.h"
-#include <iomanip>
+#include "helperNodes.h"
 #include "linearization/graphIter.h"
+#include "localInput.h"
+#include "realLoop.h"
+#include "transform.h"
+
 
 //Print out code for all generated implementations
 // This takes a while for large search spaces
@@ -66,13 +67,19 @@ void Universe::SetupFunctionArguments(RealPSet* seed) {
   Poss *poss = seed->m_posses.begin()->second;
   for (auto node : poss->m_possNodes) {
     if (node->GetNodeClass() == InputNode::GetClass()) {
-      InputNode *inNode = (InputNode*) node;
+      InputNode* inNode = (InputNode*) node;
       m_declarationVectors.push_back(inNode->DataDeclaration());
       m_constantDefines.push_back(inNode->NumRowsDefine());
       m_constantDefines.push_back(inNode->NumColsDefine());
       m_constantDefines.push_back(inNode->RowStrideDefine());
       m_constantDefines.push_back(inNode->ColStrideDefine());
       m_argNames.push_back(inNode->GetName(0).str());
+    } else if (node->GetNodeClass() == LocalInput::GetClass()) {
+      LocalInput* inNode = (LocalInput*) node;
+      m_constantDefines.push_back(inNode->NumRowsDefine());
+      m_constantDefines.push_back(inNode->NumColsDefine());
+      m_constantDefines.push_back(inNode->RowStrideDefine());
+      m_constantDefines.push_back(inNode->ColStrideDefine());
     }
   }
 }

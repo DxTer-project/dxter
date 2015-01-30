@@ -1,9 +1,4 @@
-#include "DLAReg.h"
 #include "LLDLA.h"
-#include "LLDLATranspose.h"
-#include "mvmul.h"
-#include "svmul.h"
-#include "vadd.h"
 
 #ifndef BLAS_EXAMPLES_H_
 #define BLAS_EXAMPLES_H_

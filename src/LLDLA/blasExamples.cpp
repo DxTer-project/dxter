@@ -1,4 +1,11 @@
 #include "blasExamples.h"
+#include "DLAReg.h"
+#include "LLDLATranspose.h"
+#include "localInput.h"
+#include "mvmul.h"
+#include "svmul.h"
+#include "vadd.h"
+
 
 #if DOLLDLA
 
@@ -58,18 +65,18 @@ RealPSet* Axpy(Type dataType, VecType vType, int m)
 
 RealPSet* Gemv(Type dataType, bool transpose, int m, int n)
 {
-  auto* xIn = new InputNode("X", n, 1,
+  auto xIn = new InputNode("X", n, 1,
 			    1, n,
 			    dataType);
 
-  auto* yIn = new InputNode("Y", m, 1,
+  auto yIn = new InputNode("Y", m, 1,
 			    1, m,
 			    dataType);
 
-  auto* zIn = new InputNode("Z", m, 1,
+  auto vIn = new LocalInput("V",
+			    m, 1,
 			    1, m,
 			    dataType);
-
 
   InputNode* AIn;
   if (transpose) {
@@ -82,72 +89,73 @@ RealPSet* Gemv(Type dataType, bool transpose, int m, int n)
 			dataType);
   }
 
-  auto* alphaIn = new InputNode("Alpha",
+  auto alphaIn = new InputNode("Alpha",
 				1, 1,
-				1, m,
+				1, 1,
 				dataType);
 
-  auto* betaIn = new InputNode("Beta", 1, 1,
-			       1, m,
+  auto betaIn = new InputNode("Beta", 1, 1,
+			       1, 1,
 			       dataType);
 
-  auto* tunX = new Tunnel(POSSTUNIN);
+  auto tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  auto* tunY = new Tunnel(POSSTUNIN);
+  auto tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  auto* tunZ = new Tunnel(POSSTUNIN);
-  tunZ->AddInput(zIn, 0);
-
-  auto* tunA = new Tunnel(POSSTUNIN);
+  auto tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(AIn, 0);
 
-  auto* tunAlpha = new Tunnel(POSSTUNIN);
+  auto tunV = new Tunnel(POSSTUNIN);
+  tunV->AddInput(vIn, 0);
+
+  auto tunAlpha = new Tunnel(POSSTUNIN);
   tunAlpha->AddInput(alphaIn, 0);
 
-  auto* tunBeta = new Tunnel(POSSTUNIN);
+  auto tunBeta = new Tunnel(POSSTUNIN);
   tunBeta->AddInput(betaIn, 0);
 
-  auto* by = new SVMul(COLVECTOR, ABSLAYER);
+  auto by = new SVMul(COLVECTOR, ABSLAYER);
   by->AddInputs(4,
 		tunBeta, 0,
 		tunY, 0);
 
-  auto* trans = new LLDLATranspose(ABSLAYER);
-  auto* axMul = new MVMul(ABSLAYER);
+  auto trans = new LLDLATranspose(ABSLAYER);
+  auto axMul = new MVMul(ABSLAYER);
   if (transpose) {
     trans->AddInputs(2,
 		     tunA, 0);
     axMul->AddInputs(6,
 		     trans, 0,
 		     tunX, 0,
-		     tunZ, 0);
+		     tunV, 0);
   } else {
     axMul->AddInputs(6,
 		     tunA, 0,
 		     tunX, 0,
-		     tunZ, 0);
+		     tunV, 0);
+    delete trans;
   }
 
-  auto* alphaAXMul = new SVMul(COLVECTOR, ABSLAYER);
+  auto alphaAXMul = new SVMul(COLVECTOR, ABSLAYER);
   alphaAXMul->AddInputs(4,
 			tunAlpha, 0,
 			axMul, 0);
 
-  auto* sumVecs = new VAdd(COLVECTOR, ABSLAYER);
+  auto sumVecs = new VAdd(COLVECTOR, ABSLAYER);
   sumVecs->AddInputs(4,
 		     alphaAXMul, 0,
 		     by, 0);
 
-  auto* innerPoss = new Poss(sumVecs, true);
-  auto* innerSet = new RealPSet(innerPoss);
+  auto innerPoss = new Poss(sumVecs, true);
+  auto innerSet = new RealPSet(innerPoss);
 
-  auto* Cout = new OutputNode;
+  auto Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0), 0);
 
-  auto* outerPoss = new Poss(Cout, true);
-  auto* outerSet = new RealPSet(outerPoss);
+  auto outerPoss = new Poss(Cout, true);
+  auto outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
