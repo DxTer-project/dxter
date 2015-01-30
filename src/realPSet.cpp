@@ -720,6 +720,8 @@ Cost RealPSet::Prop()
         throw;
       }
     }
+    if (out->m_inputs.size() != m_posses.size())
+      throw;
   }
   
   if (!IsTopLevel() && !m_ownerPoss) {
