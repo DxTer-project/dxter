@@ -34,10 +34,10 @@ class ClearLinElem : public LinElem
   virtual bool IsClear() const {return true;}
 
   virtual void Print(IndStream &out);
-  virtual StrVec PossiblyDyingVars() const {throw;}
+  virtual StrVec PossiblyDyingVars() const {StrVec tmp; return tmp;}
   virtual StrSet NewVars() const {throw;}
-  virtual VarCostMap NewVarsAndCosts() const {throw;}
-  virtual bool UsesInputVar(const string &var) const {throw;}
+  virtual VarCostMap NewVarsAndCosts() const {VarCostMap tmp; return tmp;}
+  virtual bool UsesInputVar(const string &var) const {return false;}
   virtual void CacheLiveVars(const StrSet &stillLive) {throw;}
   virtual void ClearCache() {}
 };

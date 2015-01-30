@@ -24,6 +24,12 @@
 #include "nodeLinElem.h"
 #include "tempVarNode.h"
 
+LinElem::LinElem() 
+  : m_succ(NULL),
+    m_addedToLinOrder(false)    
+{
+}
+
 bool LinElem::FreeOfDataflowConstraints() const
 {
 
@@ -53,7 +59,7 @@ bool LinElem::CanAddToLinearOrder() const
     if (m_children.size() == 1) {
       const NodeLinElem *nodeElem = (NodeLinElem*)this;
       if (nodeElem->m_node->GetNodeClass() == TempVarNode::GetClass()) {
-	if (!m_succs.empty())
+	if (m_succ)
 	  throw;
 	else {
 	  const LinElem *child = m_children[0];

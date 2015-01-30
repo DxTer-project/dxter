@@ -123,8 +123,6 @@ void Linearization::InsertVecClearing(const StrSet &stillLive, const StrSet &alw
 Cost Linearization::GetCostNoRecursion(const StrSet &stillLive, const StrSet &alwaysLive)
 {
   if (m_cost <= 0) {
-    if (!m_clears.empty())
-      throw;
     m_cost = 0;
     Cost currCost = 0;
     VarCostMap map;
@@ -207,6 +205,7 @@ void Linearization::operator=(const Linearization &rhs)
       }
     }
   }
+  m_cost = rhs.m_cost;
 }
 
 void Linearization::Print(IndStream &out)

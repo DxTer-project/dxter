@@ -99,3 +99,12 @@ class MoveTempVarNodeIntoLoop : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };
+
+
+class MoveTempVarNodeIntoSet : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "MoveTempVarNodeIntoSet"; }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};

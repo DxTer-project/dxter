@@ -170,6 +170,7 @@ void AddSimplifiers()
    Universe::AddTrans(Permute::GetClass(), new MovePermuteIntoTempVarNode, SIMP);
    Universe::AddTrans(ScaleNode::GetClass(), new RemoveScaleByOne, SIMP);
    Universe::AddTrans(TempVarNode::GetClass(), new MoveTempVarNodeIntoLoop, SIMP);
+   Universe::AddTrans(TempVarNode::GetClass(), new MoveTempVarNodeIntoSet, SIMP);
 }
 
 void Usage()
@@ -201,7 +202,6 @@ void Usage()
 int main(int argc, const char* argv[])
 {
 #ifdef _OPENMP
-  omp_set_num_threads(1);
   omp_set_nested(true);
   omp_init_lock(&RealPSet::m_lock);
 #endif

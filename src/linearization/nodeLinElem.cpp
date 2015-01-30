@@ -115,3 +115,12 @@ bool NodeLinElem::UsesInputVar(const string &var) const
   }
   return false;
 }
+
+bool NodeLinElem::CreatesNewVars() const
+{
+#if DOTENSORS
+  return m_node->CreatesNewVars();
+#else
+  throw;
+#endif  
+}

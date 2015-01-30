@@ -51,6 +51,10 @@ bool GetAllGatherPattern(const DistType &srcType,
 bool GetLocalRedistPattern(const DistType &srcType,
                            const DistType &destType);
 
+bool GetPermPattern(const DistType &srcType,
+		    const DistType &destType,
+		    DimVec *gridModes);
+
 
 RedistNode::RedistNode()
 {
@@ -203,7 +207,14 @@ void RedistNode::Prop()
       m_cost = (PSIR+PSIW)*(TotalNumberOfLocalElements(0));
       return;
     }
-    
+
+    if (GetPermPattern(m_srcType, m_info.GetDist(),
+			    &gridModesInvolved)) {
+      Size size = TotalNumberOfLocalElements(0);
+      m_cost = PSIR+PSIW*(size);
+      m_cost += SendRecv(size);
+      return;
+    }    
     
     if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
                            &gridModesInvolved)) {
@@ -443,6 +454,10 @@ bool RedistNode::IsPrimitive() const
   
   
   //Check for multi-mode AllToAll
+
+  if (GetPermPattern(m_srcType, m_info.GetDist(),
+			  NULL))
+    return true;
   
   if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
                          NULL))
@@ -685,6 +700,14 @@ void RedistNode::PrintCode(IndStream &out)
     << inName << " );\n";
     return;
   }
+
+  if (GetPermPattern(m_srcType, m_info.GetDist(),
+                         &gridModesInvolved)) {
+    *out << outName << ".PermutationRedistFrom( "
+	 << inName << ", "
+	 << ModeArrayVarName(gridModesInvolved) << " );\n";
+    return;
+  }
   
   if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
                          &gridModesInvolved)) {
@@ -799,6 +822,17 @@ void RedistNode::AddVariables(VarSet &set) const
     return;
   }
   
+  if (GetPermPattern(m_srcType, m_info.GetDist(),
+                         &gridModesInvolved)) {
+    {
+      Var var(ModeArrayVarType, gridModesInvolved);
+      set.insert(var);
+    }
+    
+    return;
+  }
+
+
   if (GetAllToAllPattern(m_srcType, m_info.GetDist(),
                          &gridModesInvolved)) {
     {
@@ -2740,7 +2774,49 @@ void MultiIndexAllToAll::Apply(Node *node) const
   redist->m_poss->DeleteChildAndCleanUp(redist);
 }
 
+bool GetPermPattern(const DistType &srcType,
+                         const DistType &destType,
+                         DimVec *gridModes)
+{
+  Dim numDims = srcType.m_numDims;
+  
+  if (numDims != destType.m_numDims)
+    return false;
+  
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    DistEntry srcDistEntry = srcType.m_dists[dim];
+    DistEntry destDistEntry = destType.m_dists[dim];
+    if (srcDistEntry != destDistEntry) {
+      for (Dim dim2 = dim+1; dim2 < numDims; ++dim2) {
+	DistEntry srcDistEntry2 = srcType.m_dists[dim2];
+	DistEntry destDistEntry2 = destType.m_dists[dim2];
+	if (srcDistEntry2 != destDistEntry2)
+	  return false;
+      }
+      DimVec srcDims = srcDistEntry.DistEntryDims();
+      DimVec destDims = destDistEntry.DistEntryDims();
+      DimVec srcSuff, destSuff;
+      GetDifferentSuffix(srcDims, destDims,
+			 srcSuff, destSuff);
+      if (srcSuff.size() != destSuff.size())
+	return false;
+      
+      if (std::is_permutation(srcSuff.begin(), srcSuff.end(),
+			      destSuff.begin()))
+	{
+	  if (gridModes) {
+	    gridModes->clear();
+	    gridModes->insert(gridModes->begin(), srcSuff.begin(), srcSuff.end());
+	  }
+	  return true;
+	}
+      else
+	return false;
+    }
+  }
 
+  return false;
+}
 #endif
 
 

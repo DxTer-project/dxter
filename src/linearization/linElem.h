@@ -38,10 +38,10 @@ class LinElem
   LinElemVec m_children;
   LinElemVec m_inputs;
   LinElemVec m_preds;
-  LinElemVec m_succs;
+  LinElem *m_succ;
   bool m_addedToLinOrder;
 
- LinElem() : m_addedToLinOrder(false) {}
+  LinElem();
   virtual ~LinElem() {}
 
   void AddInputIfUnique(LinElem *elem);
@@ -57,6 +57,8 @@ class LinElem
   virtual bool IsClear() const {return false;}
   virtual bool IsSet() const {return false;}
   virtual bool IsNode() const {return false;}
+
+  virtual bool CreatesNewVars() const {return true;}
 
   virtual void Print(IndStream &out) = 0;
   virtual StrVec PossiblyDyingVars() const = 0;
