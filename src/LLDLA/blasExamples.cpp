@@ -91,11 +91,11 @@ RealPSet* Gemv(Type dataType, bool transpose, int m, int n)
 
   auto alphaIn = new InputNode("Alpha",
 				1, 1,
-				1, m,
+				1, 1,
 				dataType);
 
   auto betaIn = new InputNode("Beta", 1, 1,
-			       1, m,
+			       1, 1,
 			       dataType);
 
   auto tunX = new Tunnel(POSSTUNIN);

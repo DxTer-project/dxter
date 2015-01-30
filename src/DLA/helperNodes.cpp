@@ -49,24 +49,12 @@ InputNode::InputNode(string name,
 		     Type dataType)
 :
 m_msize(NAN), m_nsize(NAN) {
-  Stride rs, cs;
-  if (rowStrideVal == 1) {
-    rs = UNITSTRIDE;
-  } else {
-    rs = NONUNITSTRIDE;
-  }
-  if (colStrideVal == 1) {
-    cs = UNITSTRIDE;
-  } else {
-    cs = NONUNITSTRIDE;
-  }
-  
   string numRowsVar = name + "NumRows";
   string numColsVar = name + "NumCols";
   string rowStrideVar = name + "RowStride";
   string colStrideVar = name + "ColStride";
   
-  m_dataTypeInfo = DataTypeInfo(m, n, rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
+  m_dataTypeInfo = DataTypeInfo(m, n, rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
   
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
@@ -84,19 +72,7 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
 :
 m_msize(NAN), m_nsize(NAN)
 {
-  Stride rs, cs;
-  if (rowStrideVal == 1) {
-    rs = UNITSTRIDE;
-  } else {
-    rs = NONUNITSTRIDE;
-  }
-  if (colStrideVal == 1) {
-    cs = UNITSTRIDE;
-  } else {
-    cs = NONUNITSTRIDE;
-  }
-  
-  m_dataTypeInfo = DataTypeInfo(m, n, rs, cs, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
+  m_dataTypeInfo = DataTypeInfo(m, n, rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
   
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
