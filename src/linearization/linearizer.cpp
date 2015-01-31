@@ -334,8 +334,6 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
        || (currAdd->m_succ && currAdd->m_succ->CanAddToLinearOrder()))
     {
     //Go through children and add those that should be added immediately
-    //Keep track of TempVarNodes that may finally be able to add
-    LinElemVec tempVarNodes;
     int printedImmediately = 0;
     for(auto child : currAdd->m_children) {
       if (child->CanAddToLinearOrder()) {
@@ -360,18 +358,17 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
         // other than temps, then now the temps can
         // add, followed by the set
         for (auto input : child->m_inputs) {
-          if (!input->HasAdded() &&
-              input != currAdd &&
-              input->CanAddToLinearOrder())
-          {
-            if (input->IsNode() && ((NodeLinElem*)input)->m_node->GetNodeClass() == TempVarNode::GetClass()) {
+          if (!input->HasAdded()
+              && input != currAdd
+              && input->CanAddToLinearOrder()
+	      && input->ShouldClump())
+	    {
               if (readyToAdd.find(input) == readyToAdd.end()) {
                 readyToAdd.insert(input);
                 break;
               }
             }
-          }
-        }
+	}
       }
     }
     if (currAdd->m_succ 
@@ -380,18 +377,14 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
       {
 	LinElem *succ = currAdd->m_succ;
 	bool skip = false;
-	if (succ->IsNode() && ((NodeLinElem*)succ)->m_node->GetNodeClass() == TempVarNode::GetClass()) {
-	  if (succ->m_children.size() == 1) {
-	    for (auto input : succ->m_children[0]->m_inputs) {
-	      if (input->IsNode() 
-		  && ((NodeLinElem*)input)->m_node->GetNodeClass() == TempVarNode::GetClass()
-		  && input->m_children.size() == 1 
-		  && (readyToAdd.find(input) != readyToAdd.end()))
-		{
-		  skip = true;
-		  break;
-		}
-	    }
+	if (succ->ShouldClump()) {
+	  for (auto input : succ->m_children[0]->m_inputs) {
+	    if (input->ShouldClump()
+		&& (readyToAdd.find(input) != readyToAdd.end()))
+	      {
+		skip = true;
+		break;
+	      }
 	  }
 	}
 	if (!skip)
@@ -407,23 +400,22 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
   }
   else if (currAdd->m_children.size() == 1) {
     LinElem *child = currAdd->m_children[0];
-    if (currAdd->IsNode() && ((NodeLinElem*)currAdd)->m_node->GetNodeClass() == TempVarNode::GetClass()) {
+    if (currAdd->ShouldClump()) {
       int countOfAdded = 0;
       //this is a tempvar node
       // if the child is a set, print all of its other input temp var nodes and it
       // if it's not a set, try to print it
       for (auto input : child->m_inputs) {
         if (!input->HasAdded()
-            && input->IsNode()
-            && ((NodeLinElem*)input)->m_node->GetNodeClass() == TempVarNode::GetClass())
-        {
-          if (!input->CanAddToLinearOrder())
-            throw;
-	  readyToAdd.erase(input);
-          ++countOfAdded;
-          curr.m_order.push_back(input);
+            && input->ShouldClump())
+	  {
+	    if (!input->CanAddToLinearOrder())
+	      throw;
+	    readyToAdd.erase(input);
+	    ++countOfAdded;
+	    curr.m_order.push_back(input);
           input->SetAdded();
-        }
+	  }
       }
       if (!child->CanAddToLinearOrder()) {
         cout << child->CanAddToLinearOrder() << endl;
@@ -432,7 +424,7 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
       AddAndRecurse(curr, readyToAdd, child, opt, stillLive, true);
       for(; countOfAdded > 0; --countOfAdded) {
         LinElem *elem = curr.m_order.back();
-        if (!elem->IsNode() || ((NodeLinElem*)elem)->m_node->GetNodeClass() != TempVarNode::GetClass())
+	if (!elem->ShouldClump())
           throw;
         curr.m_order.pop_back();
         elem->ClearAdded();
@@ -446,15 +438,14 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
         // other than temps, then now the temps can
         // add, followed by the set
         for (auto input : child->m_inputs) {
-          if (!input->HasAdded() &&
-              input->CanAddToLinearOrder() &&
-              input->IsNode() &&
-              input != currAdd
-              && ((NodeLinElem*)input)->m_node->GetNodeClass() == TempVarNode::GetClass())
-          {
-	    readyToAdd.insert(input);
-	    break;
-          }
+          if (!input->HasAdded()
+              && input->CanAddToLinearOrder() 
+              && input != currAdd
+	      && input->ShouldClump())
+	    {
+	      readyToAdd.insert(input);
+	      break;
+	    }
         }
         RecursivelyFindOpt(curr, readyToAdd, opt, stillLive);
       }
