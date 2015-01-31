@@ -48,8 +48,8 @@ class Linearizer
   void FindAnyLinearization();
   void FindOptimalLinearization(const StrSet &stillLive);
 
-  void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt, const StrSet &stillLive) const;
-  void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive, bool addSingleChildImmediately) const;
+  void RecursivelyFindOpt(Linearization &curr, const LinElemSet &readyToAdd, Linearization &opt, const StrSet &stillLive) const;
+  void AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive, bool addSingleChildImmediately) const;
 
   void InsertVecClearing(const StrSet &stillLive);
 

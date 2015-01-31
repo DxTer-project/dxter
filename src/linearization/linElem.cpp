@@ -108,3 +108,26 @@ void LinElem::AddChildIfUnique(LinElem *elem)
   }
   m_children.push_back(elem);
 }
+
+bool LinElem::ShouldClump() const
+{
+  if (m_children.size() == 1 && IsNode() && ((NodeLinElem*)this)->m_node->GetNodeClass() == TempVarNode::GetClass())
+    return true;
+  else
+    return false;
+}
+
+bool LinElem::OtherInputInClumpIsAlreadyRead(LinElemSet readyToAdd) const
+{
+  if (!ShouldClump())
+    throw;
+  LinElem *child = m_children[0];
+  for( auto in : child->m_inputs) {
+    if (in != this) {
+      if (in->ShouldClump())
+	if (readyToAdd.find(in) != readyToAdd.end())
+	  return true;
+    }
+  }
+  return false;
+}
