@@ -55,36 +55,22 @@ bool LinElem::CanAddToLinearOrder() const
   //  make sure they can all print before printing one since they should
   //  go right before the set
 
-  if (IsNode()) {
-    if (m_children.size() == 1) {
-      const NodeLinElem *nodeElem = (NodeLinElem*)this;
-      if (nodeElem->m_node->GetNodeClass() == TempVarNode::GetClass()) {
-	if (m_succ)
-	  throw;
-	else {
-	  const LinElem *child = m_children[0];
+  if (ShouldClump()) {
+    const LinElem *child = m_children[0];
 
-	  for (auto pred : child->m_preds) {
-	    if (!pred->HasAdded()) {
-	      return false;
-	    }
-	  }
-	  for (auto input : child->m_inputs) {
-	    if (!input->HasAdded()) {
-	      if (input->IsNode()) {
-		const NodeLinElem *nodeSetInput = (NodeLinElem*)input;
-		if (nodeSetInput->m_node->GetNodeClass() == TempVarNode::GetClass()) {
-		  if (!nodeSetInput->FreeOfDataflowConstraints())
-		    return false;
-		}
-		else
-		  return false;
-	      }
-	      else
-		return false;
-	    }
-	  }
+    for (auto pred : child->m_preds) {
+      if (!pred->HasAdded()) {
+	return false;
+      }
+    }
+    for (auto input : child->m_inputs) {
+      if (!input->HasAdded()) {
+	if (input->ShouldClump())  {
+	  if (!input->FreeOfDataflowConstraints())
+	    return false;
 	}
+	else
+	  return false;
       }
     }
   }
@@ -111,8 +97,13 @@ void LinElem::AddChildIfUnique(LinElem *elem)
 
 bool LinElem::ShouldClump() const
 {
-  if (m_children.size() == 1 && IsNode() && ((NodeLinElem*)this)->m_node->GetNodeClass() == TempVarNode::GetClass())
-    return true;
+  if (!m_succ 
+      && m_children.size() == 1 
+      && IsNode() 
+      && ((NodeLinElem*)this)->m_node->GetNodeClass() == TempVarNode::GetClass())
+    {
+      return true;
+    }
   else
     return false;
 }
