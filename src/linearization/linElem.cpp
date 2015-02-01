@@ -103,7 +103,11 @@ bool LinElem::ShouldClump() const
       && IsNode() )
     {
       ClassType type = ((NodeLinElem*)this)->m_node->GetNodeClass();
+#if DOTENSORS
       if (type ==TempVarNode::GetClass() || type == Permute::GetClass()) {
+#else
+	if (type ==TempVarNode::GetClass()) {
+#endif
 	return true;
       }
     }
