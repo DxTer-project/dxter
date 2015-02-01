@@ -288,7 +288,7 @@ RealPSet* Gemv2(Type dataType, int m, int n, int k)
   return outerSet;
 }
 
-RealPSet* VMVMulExample(Type dataType, int m, int n)
+RealPSet* VMVMul(Type dataType, int m, int n)
 {
   InputNode* Ain = new InputNode("A",
 				 m, n,

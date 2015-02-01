@@ -53,7 +53,7 @@ void RunBenchmarkNumber(unsigned int num) {
     break;
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;
-    throw;
+    break;
   }
 }
 

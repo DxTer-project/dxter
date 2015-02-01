@@ -204,7 +204,7 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
       problemInstance.AddDimension(p, "p");
-      algPSet = GemmExample(precision, transA, transB, m, n, p);
+      algPSet = GemmTest(precision, transA, transB, m, n, p);
       break;
     case(2):
       if (argc != 9) {
@@ -223,7 +223,7 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(n, "n");
       problemInstance.AddDimension(p, "p");
       problemInstance.AddDimension(k, "k");
-      algPSet = DoubleGemmExample(precision, transA, transB, m, n, p, k);
+      algPSet = DoubleGemm(precision, transA, transB, m, n, p, k);
       break;
     case(3):
       if (argc != 4) {
@@ -234,7 +234,7 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       problemInstance.AddDimension(m, "m");
-      algPSet = DotExample(precision, m);
+      algPSet = DotTest(precision, m);
       break;
     case(4):
       if (argc != 5) {
@@ -247,7 +247,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
-      algPSet = MAddExample(precision, m, n);
+      algPSet = MAddTest(precision, m, n);
       break;
     case(5):
       if (argc != 6) {
@@ -261,9 +261,9 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
       if (TRANS == CharToTrans(*argv[2])) {
-	algPSet = MVMulExample(precision, true, m, n);
+	algPSet = MVMulTest(precision, true, m, n);
       } else {
-	algPSet = MVMulExample(precision, false, m, n);
+	algPSet = MVMulTest(precision, false, m, n);
       }
       break;
     case(6):
@@ -276,7 +276,7 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[3]);
       m = atoi(argv[4]);
       problemInstance.AddDimension(m, "m");
-      algPSet = SVMulExample(precision, vecType, m);
+      algPSet = SVMulTest(precision, vecType, m);
       break;
     case(7):
       if (argc != 5) {
@@ -289,7 +289,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
-      algPSet = VMMulExample(precision, m, n);
+      algPSet = VMMulTest(precision, m, n);
       break;
     case(8):
       if (argc != 5) {
@@ -302,7 +302,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
-      algPSet = SMMulExample(precision, m, n);
+      algPSet = SMMulTest(precision, m, n);
       break;
     case(9):
       if (argc != 5) {
@@ -314,7 +314,7 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[3]);
       m = atoi(argv[4]);
       problemInstance.AddDimension(m, "m");
-      algPSet = VAddExample(precision, vecType, m);
+      algPSet = VAddTest(precision, vecType, m);
       break;
     case(10):
       if (argc != 4) {
@@ -325,7 +325,7 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       problemInstance.AddDimension(m, "m");
-      algPSet = VAdd2Example(precision, m);
+      algPSet = VAdd2(precision, m);
       break;
     case(11):
       if (argc != 5) {
@@ -338,7 +338,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
-      algPSet = VMVMulExample(precision, m, n);
+      algPSet = VMVMul(precision, m, n);
       break;
     case(12):
       if (argc != 5) {
@@ -351,7 +351,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
-      algPSet = MAdd2Example(precision, m, n);
+      algPSet = MAdd2(precision, m, n);
       break;
     case(13):
       if (argc != 6) {
@@ -366,7 +366,7 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
       problemInstance.AddDimension(p, "p");
-      algPSet = MVMul2Example(precision, m, n, p);
+      algPSet = MVMul2(precision, m, n, p);
       break;
     case(14):
       if (argc != 6) {
@@ -447,7 +447,7 @@ int main(int argc, const char* argv[])
       n = atoi(argv[4]);
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
-      algPSet = SetToZeroExample(precision, m, n);
+      algPSet = SetToZeroTest(precision, m, n);
       break;
     default:
       Usage();

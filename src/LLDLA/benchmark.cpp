@@ -38,7 +38,7 @@ void DotProductBenchmark(Type type) {
   int m = 128;
   BenchmarkStats benchStats(TypeToStr(type) + "_dot_product");
   for (int i = 0; i < 10; i++) {
-    RealPSet* test = DotExample(type, m);
+    RealPSet* test = DotTest(type, m);
     ProblemInstance dotProd;
     dotProd.SetName("dotProd");
     dotProd.SetType(type);

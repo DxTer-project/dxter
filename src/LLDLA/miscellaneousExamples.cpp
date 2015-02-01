@@ -10,7 +10,7 @@
 
 #if DOLLDLA
 
-RealPSet* SetToZeroExample(Type dataType, int m, int n) {
+RealPSet* SetToZeroTest(Type dataType, int m, int n) {
   auto Ain = new InputNode("A",
 			   n, m,
 			   1, n,
@@ -108,7 +108,7 @@ RealPSet* GenSizeColSVMul(Type dataType, int m)
   return outerSet;
 }
 
-RealPSet* MVMul2Example(Type dataType, int m, int n, int p)
+RealPSet* MVMul2(Type dataType, int m, int n, int p)
 {
   auto xIn = new InputNode("x input", p, 1, "X",
 				 1, p,
@@ -174,7 +174,7 @@ RealPSet* MVMul2Example(Type dataType, int m, int n, int p)
   return outerSet;
 }
 
-RealPSet* MAdd2Example(Type dataType, int m, int n)
+RealPSet* MAdd2(Type dataType, int m, int n)
 {
   auto xIn = new InputNode("x input", m, n, "X",
 				 1, m,
@@ -222,7 +222,7 @@ RealPSet* MAdd2Example(Type dataType, int m, int n)
   return outerSet;
 }
 
-RealPSet* VAdd2Example(Type dataType, int m)
+RealPSet* VAdd2(Type dataType, int m)
 {
   auto xIn = new InputNode("x input", m, 1, "X",
 				 1, m,
@@ -271,7 +271,7 @@ RealPSet* VAdd2Example(Type dataType, int m)
 
 }
 
-RealPSet* DoubleGemmExample(Type dataType, Trans transA, Trans transB, int m, int n, int p, int k)
+RealPSet* DoubleGemm(Type dataType, Trans transA, Trans transB, int m, int n, int p, int k)
 {
   InputNode *Ain = new InputNode("A input",  m, n, "A",
 				 n, 1,

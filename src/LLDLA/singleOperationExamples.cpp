@@ -2,7 +2,7 @@
 
 #if DOLLDLA
 
-RealPSet* GemmExample(Type dataType, Trans transA, Trans transB, int m, int n, int p)
+RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int p)
 {
   InputNode *Ain= new InputNode("A", m, p,
 				 1, m,
@@ -43,7 +43,7 @@ RealPSet* GemmExample(Type dataType, Trans transA, Trans transB, int m, int n, i
   return outerSet;
 }
 
-RealPSet* DotExample(Type dataType, int m)
+RealPSet* DotTest(Type dataType, int m)
 {
   InputNode* Ain = new InputNode("A", 1, m,
 				 m, 1,
@@ -84,7 +84,7 @@ RealPSet* DotExample(Type dataType, int m)
   return outerSet;
 }
 
-RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
+RealPSet* MVMulTest(Type dataType, bool transpose, int m, int n)
 {
   InputNode* Ain;
   if (transpose) {
@@ -141,7 +141,7 @@ RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
   return outerSet;
 }
 
-RealPSet* MAddExample(Type dataType, int m, int n)
+RealPSet* MAddTest(Type dataType, int m, int n)
 {
   InputNode* Ain = new InputNode("A", m, n,
 				 1, m,
@@ -174,7 +174,7 @@ RealPSet* MAddExample(Type dataType, int m, int n)
   return outerSet;
 }
 
-RealPSet* SVMulExample(Type dataType, VecType vecType, int m)
+RealPSet* SVMulTest(Type dataType, VecType vecType, int m)
 {
   int numRows, numCols, rowStride, colStride;
   if (vecType == ROWVECTOR) {
@@ -220,7 +220,7 @@ RealPSet* SVMulExample(Type dataType, VecType vecType, int m)
   return outerSet;
 }
 
-RealPSet* SMMulExample(Type dataType, int m, int n)
+RealPSet* SMMulTest(Type dataType, int m, int n)
 {
   InputNode* Ain = new InputNode("A", m, n,
 				 n, 1,
@@ -253,7 +253,7 @@ RealPSet* SMMulExample(Type dataType, int m, int n)
   return outerSet;
 }
 
-RealPSet* VMMulExample(Type dataType, int m, int n)
+RealPSet* VMMulTest(Type dataType, int m, int n)
 {
   InputNode* Ain = new InputNode("A", m, n,
 				 n, 1,
@@ -294,7 +294,7 @@ RealPSet* VMMulExample(Type dataType, int m, int n)
   return outerSet;
 }
 
-RealPSet* VAddExample(Type dataType, VecType vecType, int m)
+RealPSet* VAddTest(Type dataType, VecType vecType, int m)
 {
 
   int nRows, nCols;

@@ -11,13 +11,13 @@
 
 #if DOLLDLA
 
-RealPSet* GemmExample(Type dataType, Trans transA, Trans transB, int m, int n, int p);
-RealPSet* DotExample(Type dataType, int m);
-RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n);
-RealPSet* MAddExample(Type dataType, int m, int n);
-RealPSet* SVMulExample(Type dataType, VecType vecType, int m);
-RealPSet* SMMulExample(Type dataType, int m, int n);
-RealPSet* VMMulExample(Type dataType, int m, int n);
-RealPSet* VAddExample(Type dataType, VecType vecType, int m);
+RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int p);
+RealPSet* DotTest(Type dataType, int m);
+RealPSet* MVMulTest(Type dataType, bool transpose, int m, int n);
+RealPSet* MAddTest(Type dataType, int m, int n);
+RealPSet* SVMulTest(Type dataType, VecType vecType, int m);
+RealPSet* SMMulTest(Type dataType, int m, int n);
+RealPSet* VMMulTest(Type dataType, int m, int n);
+RealPSet* VAddTest(Type dataType, VecType vecType, int m);
 
 #endif // DOLLDLA
