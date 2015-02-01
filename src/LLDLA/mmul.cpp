@@ -26,8 +26,8 @@
 
 #if DOLLDLA
 
-MMul::MMul(Coef alpha, Coef beta, Type type, Layer layer)
-  : Gemm(layer, NORMAL, NORMAL, alpha, beta, type)
+MMul::MMul(Type type, Layer layer)
+  : Gemm(layer, NORMAL, NORMAL, COEFONE, COEFONE, type)
 {
   m_regWidth = arch->VecRegWidth(type);
 }
@@ -166,7 +166,7 @@ void MMul::Prop()
 
 Node* MMul::BlankInst()
 {
-  return new MMul(COEFONE, COEFONE, REAL_SINGLE, ABSLAYER);
+  return new MMul(REAL_SINGLE, ABSLAYER);
 }
 
 NodeType MMul::GetType() const
@@ -219,9 +219,7 @@ void MMulToPrim::Apply(Node *node) const
   connB = gemm->m_inputs[1];
   connC = gemm->m_inputs[2];
   
-  MMul *prim = new MMul(gemm->m_alpha,
-			gemm->m_beta,
-			gemm->m_type,
+  MMul *prim = new MMul(gemm->m_type,
 			m_toLayer);
 
   prim->AddInputs(6, 

@@ -29,7 +29,7 @@ class MMul : public Gemm
 {
  public:
   int m_regWidth;
-  MMul(Coef alpha, Coef beta, Type type, Layer layer);
+  MMul(Type type, Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
   virtual Phase MaxPhase() const { return NUMPHASES; }
