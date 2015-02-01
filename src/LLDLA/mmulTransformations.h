@@ -28,11 +28,11 @@
 #include "gemmTransformations.h"
 #include "realLoop.h"
 
-class LLDLAGemmLoopExp : public GemmLoopExp
+class MMulLoopExp : public GemmLoopExp
 {
  public:
   Type m_type;
-  LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize, Type type);
+  MMulLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -51,13 +51,13 @@ class GemmTransToNotTrans : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
-class LLDLAGemmToMVMul : public SingleTrans
+class MMulToMVMul : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
   Type m_type;
- LLDLAGemmToMVMul(Layer fromLayer, Layer toLayer)
+ MMulToMVMul(Layer fromLayer, Layer toLayer)
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
@@ -65,13 +65,13 @@ class LLDLAGemmToMVMul : public SingleTrans
   virtual bool IsRef() const {return true;}  
 };
 
-class LLDLAGemmToVMMul : public SingleTrans
+class MMulToVMMul : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   Size m_bs;
   Type m_type;
- LLDLAGemmToVMMul(Layer fromLayer, Layer toLayer)
+ MMulToVMMul(Layer fromLayer, Layer toLayer)
    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;

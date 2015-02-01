@@ -25,11 +25,11 @@
 
 #if DOLLDLA
 
-class LLDLAGemm : public Gemm
+class MMul : public Gemm
 {
  public:
   int m_regWidth;
-  LLDLAGemm(Coef alpha, Coef beta, Type type, Layer layer);
+  MMul(Coef alpha, Coef beta, Type type, Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
   virtual Phase MaxPhase() const { return NUMPHASES; }
@@ -47,13 +47,13 @@ class LLDLAGemm : public Gemm
   void PrintGeneralStride(IndStream &out);
 };
 
-class LLDLAGemmToPrim : public SingleTrans
+class MMulToPrim : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
   Type m_type;
   int m_regWidth;
-  LLDLAGemmToPrim(Layer fromLayer, Layer toLayer, Type type);
+  MMulToPrim(Layer fromLayer, Layer toLayer, Type type);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

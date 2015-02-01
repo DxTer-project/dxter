@@ -26,13 +26,13 @@
 
 #if DOLLDLA
 
-LLDLAGemm::LLDLAGemm(Coef alpha, Coef beta, Type type, Layer layer)
+MMul::MMul(Coef alpha, Coef beta, Type type, Layer layer)
   : Gemm(layer, NORMAL, NORMAL, alpha, beta, type)
 {
   m_regWidth = arch->VecRegWidth(type);
 }
 
-void LLDLAGemm::PrintCode(IndStream &out)
+void MMul::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
 
@@ -61,7 +61,7 @@ void LLDLAGemm::PrintCode(IndStream &out)
   }
 
   if (m_layer != LLDLAPRIMITIVELAYER) {
-    cout << "ERROR: Attempt to generate code from non-primitive LLDLAGemm\n";
+    cout << "ERROR: Attempt to generate code from non-primitive MMul\n";
     throw;
   }
 
@@ -82,7 +82,7 @@ void LLDLAGemm::PrintCode(IndStream &out)
   }
 }
 
-void LLDLAGemm::PrintRowStride(IndStream &out)
+void MMul::PrintRowStride(IndStream &out)
 {
   if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
     *out << "row_stride_mmul_2x2_2x2( " <<
@@ -97,7 +97,7 @@ void LLDLAGemm::PrintRowStride(IndStream &out)
     throw;
 }
 
-void LLDLAGemm::PrintColStride(IndStream &out)
+void MMul::PrintColStride(IndStream &out)
 {
   if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
     *out << "col_stride_mmul_2x2_2x2( " <<
@@ -113,7 +113,7 @@ void LLDLAGemm::PrintColStride(IndStream &out)
 }
 
 // Currently only handles the case where alpha = beta = 1.0
-void LLDLAGemm::PrintGeneralStride(IndStream &out)
+void MMul::PrintGeneralStride(IndStream &out)
 {
   if (m_alpha.m_val == COEFVALONE && m_beta.m_val == COEFVALONE) {
     *out << "gen_stride_mmul_2x2_2x2( " <<
@@ -131,28 +131,28 @@ void LLDLAGemm::PrintGeneralStride(IndStream &out)
     throw;
 }
 
-void LLDLAGemm::Prop()
+void MMul::Prop()
 {
   if (!IsValidCost(m_cost)) {
     Gemm::Prop();
 
     if (m_layer != LLDLAPRIMITIVELAYER) {
-      cout << "ERROR: LLDLAGemm appears in layer " <<  LayerNumToStr(m_layer) << "\n" ;
+      cout << "ERROR: MMul appears in layer " <<  LayerNumToStr(m_layer) << "\n" ;
       throw;
     }
     
     if (*GetInputM(0) != m_regWidth || *GetInputN(0) != m_regWidth) 
-      cout << "ERROR1: LLDLAGemm only operates on m_regWidth by m_regWidth inputs\n";
+      cout << "ERROR1: MMul only operates on m_regWidth by m_regWidth inputs\n";
 
     if (*GetInputM(1) != m_regWidth || *GetInputN(1) != m_regWidth) {
       GetInputM(1)->Print();
       cout << endl;
       GetInputN(1)->Print();
-      cout << "ERROR2: LLDLAGemm only operates on m_regWidth by m_regWidth inputs\n";
+      cout << "ERROR2: MMul only operates on m_regWidth by m_regWidth inputs\n";
     }
 
     if (*GetInputM(2) != m_regWidth || *GetInputN(2) != m_regWidth) 
-      cout << "ERROR3: LLDLAGemm only operates on m_regWidth by m_regWidth inputs\n";
+      cout << "ERROR3: MMul only operates on m_regWidth by m_regWidth inputs\n";
 
     switch(m_layer) {
     case (ABSLAYER):
@@ -164,17 +164,17 @@ void LLDLAGemm::Prop()
   }
 }
 
-Node* LLDLAGemm::BlankInst()
+Node* MMul::BlankInst()
 {
-  return new LLDLAGemm(COEFONE, COEFONE, REAL_SINGLE, ABSLAYER);
+  return new MMul(COEFONE, COEFONE, REAL_SINGLE, ABSLAYER);
 }
 
-NodeType LLDLAGemm::GetType() const
+NodeType MMul::GetType() const
 {
-  return "LLDLAGemm" + LayerNumToStr(GetLayer());
+  return "MMul" + LayerNumToStr(GetLayer());
 }
 
-LLDLAGemmToPrim::LLDLAGemmToPrim(Layer fromLayer, Layer toLayer, Type type)
+MMulToPrim::MMulToPrim(Layer fromLayer, Layer toLayer, Type type)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
@@ -182,12 +182,12 @@ LLDLAGemmToPrim::LLDLAGemmToPrim(Layer fromLayer, Layer toLayer, Type type)
   m_regWidth = arch->VecRegWidth(m_type);
 }
 
-string LLDLAGemmToPrim::GetType() const
+string MMulToPrim::GetType() const
 {
-  return "LLDLAGemmToPrim";
+  return "MMulToPrim";
 }
 
-bool LLDLAGemmToPrim::CanApply(const Node *node) const
+bool MMulToPrim::CanApply(const Node *node) const
 {
   if (CurrPhase == LLDLAPRIMPHASE) {
     if (node->GetNodeClass() == Gemm::GetClass()) {
@@ -210,7 +210,7 @@ bool LLDLAGemmToPrim::CanApply(const Node *node) const
   return false;
 }
 
-void LLDLAGemmToPrim::Apply(Node *node) const
+void MMulToPrim::Apply(Node *node) const
 {
   Gemm *gemm = (Gemm*)node;
 
@@ -219,10 +219,10 @@ void LLDLAGemmToPrim::Apply(Node *node) const
   connB = gemm->m_inputs[1];
   connC = gemm->m_inputs[2];
   
-  LLDLAGemm *prim = new LLDLAGemm(gemm->m_alpha,
-					  gemm->m_beta,
-					  gemm->m_type,
-					  m_toLayer);
+  MMul *prim = new MMul(gemm->m_alpha,
+			gemm->m_beta,
+			gemm->m_type,
+			m_toLayer);
 
   prim->AddInputs(6, 
 		  connA->m_n, connA->m_num,
