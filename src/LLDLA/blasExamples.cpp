@@ -9,6 +9,47 @@
 
 #if DOLLDLA
 
+RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int p)
+{
+  InputNode *Ain= new InputNode("A", m, p,
+				 1, m,
+				dataType);
+
+  InputNode *Bin = new InputNode("B", p, n,
+				 1, p,
+				 dataType);
+
+  InputNode *Cin = new InputNode("C", m, n,
+				 1, m,
+				 dataType);
+
+  Tunnel *tunA = new Tunnel(POSSTUNIN);
+  tunA->AddInput(Ain, 0);
+
+  Tunnel *tunB = new Tunnel(POSSTUNIN);
+  tunB->AddInput(Bin, 0);
+
+  Tunnel *tunC = new Tunnel(POSSTUNIN);
+  tunC->AddInput(Cin, 0);
+
+  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
+  gemm->AddInputs(6,
+		  tunA, 0,
+		  tunB, 0,
+		  tunC, 0);
+
+  Poss *innerPoss = new Poss(gemm,true);
+  RealPSet *innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode;
+  Cout->AddInput(innerSet->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(Cout,true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
+
 RealPSet* Axpy(Type dataType, VecType vType, int m)
 {
   auto* alphaIn = new InputNode("alpha", 1, 1,

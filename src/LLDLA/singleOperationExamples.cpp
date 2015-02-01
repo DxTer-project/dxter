@@ -2,48 +2,7 @@
 
 #if DOLLDLA
 
-RealPSet* GemmExample(Type dataType, Trans transA, Trans transB, int m, int n, int p)
-{
-  InputNode *Ain= new InputNode("A", m, p,
-				 1, m,
-				dataType);
-
-  InputNode *Bin = new InputNode("B", p, n,
-				 1, p,
-				 dataType);
-
-  InputNode *Cin = new InputNode("C", m, n,
-				 1, m,
-				 dataType);
-
-  Tunnel *tunA = new Tunnel(POSSTUNIN);
-  tunA->AddInput(Ain, 0);
-
-  Tunnel *tunB = new Tunnel(POSSTUNIN);
-  tunB->AddInput(Bin, 0);
-
-  Tunnel *tunC = new Tunnel(POSSTUNIN);
-  tunC->AddInput(Cin, 0);
-
-  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
-  gemm->AddInputs(6,
-		  tunA, 0,
-		  tunB, 0,
-		  tunC, 0);
-
-  Poss *innerPoss = new Poss(gemm,true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode;
-  Cout->AddInput(innerSet->OutTun(0),0);
-
-  Poss *outerPoss = new Poss(Cout,true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
-}
-
-RealPSet* DotExample(Type dataType, int m)
+RealPSet* DotTest(Type dataType, int m)
 {
   InputNode* Ain = new InputNode("A", 1, m,
 				 m, 1,
@@ -84,7 +43,7 @@ RealPSet* DotExample(Type dataType, int m)
   return outerSet;
 }
 
-RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
+RealPSet* MVMulTest(Type dataType, bool transpose, int m, int n)
 {
   InputNode* Ain;
   if (transpose) {
@@ -141,7 +100,7 @@ RealPSet* MVMulExample(Type dataType, bool transpose, int m, int n)
   return outerSet;
 }
 
-RealPSet* MAddExample(Type dataType, int m, int n)
+RealPSet* MAddTest(Type dataType, int m, int n)
 {
   InputNode* Ain = new InputNode("A", m, n,
 				 1, m,
@@ -174,7 +133,7 @@ RealPSet* MAddExample(Type dataType, int m, int n)
   return outerSet;
 }
 
-RealPSet* SVMulExample(Type dataType, VecType vecType, int m)
+RealPSet* SVMulTest(Type dataType, VecType vecType, int m)
 {
   int numRows, numCols, rowStride, colStride;
   if (vecType == ROWVECTOR) {
@@ -220,7 +179,7 @@ RealPSet* SVMulExample(Type dataType, VecType vecType, int m)
   return outerSet;
 }
 
-RealPSet* SMMulExample(Type dataType, int m, int n)
+RealPSet* SMMulTest(Type dataType, int m, int n)
 {
   InputNode* Ain = new InputNode("A", m, n,
 				 n, 1,
@@ -253,7 +212,7 @@ RealPSet* SMMulExample(Type dataType, int m, int n)
   return outerSet;
 }
 
-RealPSet* VMMulExample(Type dataType, int m, int n)
+RealPSet* VMMulTest(Type dataType, int m, int n)
 {
   InputNode* Ain = new InputNode("A", m, n,
 				 n, 1,
@@ -294,7 +253,7 @@ RealPSet* VMMulExample(Type dataType, int m, int n)
   return outerSet;
 }
 
-RealPSet* VAddExample(Type dataType, VecType vecType, int m)
+RealPSet* VAddTest(Type dataType, VecType vecType, int m)
 {
 
   int nRows, nCols;

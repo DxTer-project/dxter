@@ -24,24 +24,23 @@
 
 #if DOLLDLA
 
-#include "LLDLAGemmTransformations.h"
+#include "mmulTransformations.h"
 #include "mvmul.h"
 #include "vmmul.h"
 
-
-LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize, Type type)
+MMulLoopExp::MMulLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize, Type type)
   : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5))),bsSize)
 {
   m_type = type;
 }
 
 
-string LLDLAGemmLoopExp::GetType() const
+string MMulLoopExp::GetType() const
 {
   return "LLDLA " + GemmLoopExp::GetType() + ", " + std::to_string((long long int) m_type);
 }
   
-bool LLDLAGemmLoopExp::CanApply(const Node *node) const
+bool MMulLoopExp::CanApply(const Node *node) const
 {
   if (!GemmLoopExp::CanApply(node))
     return false;
@@ -143,7 +142,7 @@ bool LLDLAGemmLoopExp::CanApply(const Node *node) const
   }
 }
 
-void LLDLAGemmLoopExp::Apply(Node *node) const
+void MMulLoopExp::Apply(Node *node) const
 {
   GemmLoopExp::Apply(node);
 }
@@ -198,13 +197,13 @@ string LLDAGemmLowerLayer::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
-string LLDLAGemmToMVMul::GetType() const
+string MMulToMVMul::GetType() const
 {
   return "Gemm to MVMul from " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
 }
 
-bool LLDLAGemmToMVMul::CanApply(const Node* node) const
+bool MMulToMVMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     return true;
@@ -212,7 +211,7 @@ bool LLDLAGemmToMVMul::CanApply(const Node* node) const
   return false;
 }
 
-void LLDLAGemmToMVMul::Apply(Node* node) const
+void MMulToMVMul::Apply(Node* node) const
 {
   Gemm* gemm = (Gemm*) node;
 
@@ -259,13 +258,13 @@ void LLDLAGemmToMVMul::Apply(Node* node) const
   return;
 }
 
-string LLDLAGemmToVMMul::GetType() const
+string MMulToVMMul::GetType() const
 {
   return "Gemm to VMMul from " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
 }
 
-bool LLDLAGemmToVMMul::CanApply(const Node* node) const
+bool MMulToVMMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
     Gemm* gemm = (Gemm*) node;
@@ -276,7 +275,7 @@ bool LLDLAGemmToVMMul::CanApply(const Node* node) const
   return false;
 }
 
-void LLDLAGemmToVMMul::Apply(Node* node) const
+void MMulToVMMul::Apply(Node* node) const
 {
   Gemm* gemm = (Gemm*) node;
 

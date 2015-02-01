@@ -13,24 +13,16 @@
     DxTer is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
+    GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef RUN_BENCHMARK_H_
-#define RUN_BENCHMARK_H_
-
-#include "blasExamples.h"
+#include "LLDLA.h"
 
 #if DOLLDLA
 
-void RunDotProdBenchmarks();
-void RunAxpyBenchmarks();
-void RunGemvBenchmarks();
-void RunAllBenchmarks();
+void BenchmarkMenu();
 
 #endif // DOLLDLA
-
-#endif
