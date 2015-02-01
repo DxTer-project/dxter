@@ -37,6 +37,7 @@ class Linearization
 
   Cost m_cost;
 
+ Linearization() : m_cost(-1) {}
   ~Linearization();
   void Clear();
 
