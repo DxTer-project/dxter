@@ -74,7 +74,7 @@ void Linearization::InsertVecClearing(const StrSet &stillLive, const StrSet &alw
 	    }
 	  liveHere.insert(outName);
 	  if (set->IsLoop()) {
-	    Node *possTunOut = output->Input(0);
+	    Node *possTunOut = output->GetRealTunnel()->Input(0);
 	    for(auto inToOut : possTunOut->m_inputs) {
 	      liveHere.insert(inToOut->m_n->GetNameStr(inToOut->m_num));
 	    }
