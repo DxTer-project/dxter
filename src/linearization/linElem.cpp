@@ -23,6 +23,7 @@
 #include "linElem.h" 
 #include "nodeLinElem.h"
 #include "tempVarNode.h"
+#include "tensorPermute.h"
 
 LinElem::LinElem() 
   : m_succ(NULL),
@@ -99,13 +100,14 @@ bool LinElem::ShouldClump() const
 {
   if (!m_succ 
       && m_children.size() == 1 
-      && IsNode() 
-      && ((NodeLinElem*)this)->m_node->GetNodeClass() == TempVarNode::GetClass())
+      && IsNode() )
     {
-      return true;
+      ClassType type = ((NodeLinElem*)this)->m_node->GetNodeClass();
+      if (type ==TempVarNode::GetClass() || type == Permute::GetClass()) {
+	return true;
+      }
     }
-  else
-    return false;
+  return false;
 }
 
 bool LinElem::OtherInputInClumpIsAlreadyRead(LinElemSet readyToAdd) const
