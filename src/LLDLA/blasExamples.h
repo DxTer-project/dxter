@@ -5,6 +5,7 @@
 
 #if DOLLDLA
 
+RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int p);
 RealPSet* Axpy(Type dataType, VecType vType, int m);
 RealPSet* Gemv(Type dataType, bool transpose, int m, int n);
 

@@ -11,7 +11,6 @@
 
 #if DOLLDLA
 
-RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int p);
 RealPSet* DotTest(Type dataType, int m);
 RealPSet* MVMulTest(Type dataType, bool transpose, int m, int n);
 RealPSet* MAddTest(Type dataType, int m, int n);
