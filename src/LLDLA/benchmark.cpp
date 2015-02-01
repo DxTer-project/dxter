@@ -103,21 +103,31 @@ void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, in
   cout << "\n------------------- gemv benchmark ---------------------------\n";
 }
 
+void RunDotProdBenchmarks() {
+  DotProductBenchmark(REAL_SINGLE);
+  DotProductBenchmark(REAL_DOUBLE);
+}
+
+void RunAxpyBenchmarks() {
+  AxpyBenchmark(REAL_SINGLE, ROWVECTOR);
+  AxpyBenchmark(REAL_SINGLE, COLVECTOR);
+  AxpyBenchmark(REAL_DOUBLE, ROWVECTOR);
+  AxpyBenchmark(REAL_DOUBLE, COLVECTOR);
+}
+
+void RunGemvBenchmarks() {
+  GemvBenchmark(REAL_SINGLE, false, 16, 16, 16, 16);
+  GemvBenchmark(REAL_DOUBLE, false, 16, 16, 16, 16);
+}
+
 void RunAllBenchmarks() {
   cout << "=========================================================================\n";
   cout << "======================== STARTING LLDLA BENCHMARK =======================\n";
   cout << "=========================================================================\n\n";
 
-  DotProductBenchmark(REAL_SINGLE);
-  DotProductBenchmark(REAL_DOUBLE);
-
-  /*  AxpyBenchmark(REAL_SINGLE, ROWVECTOR);
-  AxpyBenchmark(REAL_SINGLE, COLVECTOR);
-  AxpyBenchmark(REAL_DOUBLE, ROWVECTOR);
-  AxpyBenchmark(REAL_DOUBLE, COLVECTOR);
-
-  GemvBenchmark(REAL_SINGLE, false, 16, 16, 16, 16);
-  GemvBenchmark(REAL_DOUBLE, false, 16, 16, 16, 16);*/
+  RunDotProdBenchmarks();
+  RunAxpyBenchmarks();
+  RunGemvBenchmarks();
 
   cout << "\n=========================================================================\n";
   cout << "======================== DONE WITH LLDLA BENCHMARK ======================\n";

@@ -21,7 +21,7 @@
 
 #include "allTransformations.h"
 #include "base.h"
-#include "benchmark.h"
+#include "benchmarkMenu.h"
 #include "blasExamples.h"
 #include "costs.h"
 #include "driverUtils.h"
@@ -133,7 +133,7 @@ void Usage()
   cout <<"\n";
   cout << "./driver arg1 arg2 ...\n";
   cout <<"\n";
-  cout <<"arg1 == 0   -> Run benchmark\n";
+  cout <<"arg1 == 0   -> View benchmarks\n";
   cout <<"\n";
   cout <<"Single Operation Examples\n";
   cout <<"         3  -> Dot prod F/D M\n";
@@ -182,7 +182,7 @@ int main(int argc, const char* argv[])
   string opName;
 
   if (argc == 2 && *argv[1] == '0') {
-    RunAllBenchmarks();
+    BenchmarkMenu();
   } else if(argc < 2) {
     Usage();
     return 0;
