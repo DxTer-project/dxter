@@ -24,10 +24,9 @@
 
 #if DOLLDLA
 
-#include "LLDLAGemmTransformations.h"
+#include "mmulTransformations.h"
 #include "mvmul.h"
 #include "vmmul.h"
-
 
 LLDLAGemmLoopExp::LLDLAGemmLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize, Type type)
   : GemmLoopExp(fromLayer, toLayer, (dim==DIMM ? 0 : (dim==DIMK ? 1 : (dim==DIMN ? 2 : 5))),bsSize)
