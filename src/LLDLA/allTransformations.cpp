@@ -2,8 +2,8 @@
 
 #if DOLLDLA
 
-#include "LLDLAGemm.h"
-#include "LLDLAGemmTransformations.h"
+#include "mmul.h"
+#include "mmulTransformations.h"
 #include "LLDLATranspose.h"
 #include "madd.h"
 #include "mvmul.h"
