@@ -234,17 +234,23 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
   }
   
 #if 1
+  int clumpCount = 0;
+  int count = 0;
   cout << "\\\\  Scheduling the following ( " << m_elems.size() << " )\n";
   for(auto elem : m_elems) {
     if (!elem->HasAdded()) {
+      bool clump = elem->ShouldClump();
+      ++count;
+      if (clump) 
+	++clumpCount;
       if (elem->IsNode()) {
-        cout << "\\\\" << ((NodeLinElem*)elem)->m_node->GetNodeClass() << endl;
+        cout << "\\\\" << ((NodeLinElem*)elem)->m_node->GetNodeClass() << (clump ? " will clump\n" : "\n");
       }
-      
       else if (elem->IsSet())
-        cout << "\\\\set " << ((SetLinElem*)elem)->m_set->GetFunctionalityString() << endl;
+        cout << "\\\\set " << ((SetLinElem*)elem)->m_set->GetFunctionalityString() << (clump ? " will clump\n" : "\n");
     }
   }
+  cout << "\\\\" << count << " to schedule with " << clumpCount << " clumped\n";
 #endif // DOTENSORS
   
   for(auto elem : m_elems) {
