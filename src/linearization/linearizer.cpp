@@ -241,8 +241,8 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
     if (!elem->HasAdded()) {
       bool clump = elem->ShouldClump();
       ++count;
-      if (clump) 
-	++clumpCount;
+      if (clump)
+        ++clumpCount;
       if (elem->IsNode()) {
         cout << "\\\\" << ((NodeLinElem*)elem)->m_node->GetNodeClass() << (clump ? " will clump\n" : "\n");
       }
@@ -256,10 +256,10 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
   for(auto elem : m_elems) {
     if (elem->CanAddToLinearOrder()) {
       if (!elem->ShouldClump() ||
-	  !elem->OtherInputInClumpIsAlreadyRead(readyToAdd)) 
-	{
-	  readyToAdd.insert(elem);
-	}
+          !elem->OtherInputInClumpIsAlreadyRead(readyToAdd))
+      {
+        readyToAdd.insert(elem);
+      }
     }
   }
   
@@ -309,7 +309,7 @@ void Linearizer::RecursivelyFindOpt(Linearization &curr, const LinElemSet &ready
         for(auto n : tmp) {
           cout << n->CanAddToLinearOrder() << endl;
           if (n->IsNode()) {
-              cout << ((NodeLinElem*)n)->m_node->GetType() << endl;
+            cout << ((NodeLinElem*)n)->m_node->GetType() << endl;
           }
           else if (n->IsSet()) {
             cout <<((SetLinElem*)n)->m_set->GetFunctionalityString() << endl;
@@ -350,38 +350,38 @@ void Linearizer::RecursivelyFindOpt(Linearization &curr, const LinElemSet &ready
   else {
     for(auto elem : readyToAdd) {
       if (!elem->CreatesNewVars()) {
-	LinElemSet tmp = readyToAdd;
-	tmp.erase(elem);
-	AddAndRecurse(curr, tmp, elem, opt, stillLive, false);
-	return;
+        LinElemSet tmp = readyToAdd;
+        tmp.erase(elem);
+        AddAndRecurse(curr, tmp, elem, opt, stillLive, false);
+        return;
       }
     }
-
+    
     LinElemSet skip;
-
+    
     LinElemSetIter iter = readyToAdd.begin();
     for(; iter != readyToAdd.end(); ++iter) {
       LinElem *currAdd = *iter;
       if (skip.find(currAdd) != skip.end())
-	continue;
+        continue;
       LinElemSet newReadyToAdd = readyToAdd;
       newReadyToAdd.erase(currAdd);
-
+      
       //matching AddAndRecurse
       if (currAdd->m_children.size() == 1 && !currAdd->m_succ) {
-	LinElem *child = currAdd->m_children[0];
-	LinElemSetIter iter2 = iter;
-	++iter2;
-	for(; iter2 != readyToAdd.end(); ++iter2) {
-	  LinElem *other = *iter2;
-	  //matching in AddAndRecurse
-	  if (other->m_children.size() == 1 && !other->m_succ) {
-	    if (other->m_children[0] == child) {
-	      cout << "skipping " << other << endl;
-	      skip.insert(other);
-	    }
-	  }
-	}
+        LinElem *child = currAdd->m_children[0];
+        LinElemSetIter iter2 = iter;
+        ++iter2;
+        for(; iter2 != readyToAdd.end(); ++iter2) {
+          LinElem *other = *iter2;
+          //matching in AddAndRecurse
+          if (other->m_children.size() == 1 && !other->m_succ) {
+            if (other->m_children[0] == child) {
+              cout << "skipping " << other << endl;
+              skip.insert(other);
+            }
+          }
+        }
       }
       
       AddAndRecurse(curr, newReadyToAdd, currAdd, opt, stillLive, true);
@@ -399,18 +399,72 @@ void Linearizer::AddClumpingInputsToReadyList(LinElemSet &readyToAdd, LinElem *c
   }
 }
 
-void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinElem *currAdd, 
-			       Linearization &opt, const StrSet &stillLive, bool addSingleChildImmediately) const
+bool Linearizer::AddUp(Linearization &curr, LinElemSet &readyToAdd,
+                       LinElem *currAdd, LinElem *ignore,
+                       unsigned int &countOfAdded) const
+{
+  if (currAdd->HasAdded())
+    throw;
+  
+  bool keepGoing = true;
+  while (keepGoing && !currAdd->CanAddToLinearOrder()) {
+    keepGoing = false;
+    for (auto input : currAdd->m_inputs) {
+      if (!input->HasAdded()) {
+        keepGoing |= AddUp(curr, readyToAdd, input, currAdd, countOfAdded);
+      }
+    }
+    for (auto pred : currAdd->m_preds) {
+      if (!pred->HasAdded())
+        keepGoing |= AddUp(curr, readyToAdd,
+                           pred, currAdd,
+                           countOfAdded);
+    }
+  }
+  
+  if (currAdd->CanAddToLinearOrder()) {
+    readyToAdd.erase(currAdd);
+    ++countOfAdded;
+    curr.m_order.push_back(currAdd);
+    currAdd->SetAdded();
+    
+    if (currAdd->m_succ) {
+      if (currAdd->m_succ->CanAddToLinearOrder()) {
+        readyToAdd.insert(currAdd->m_succ);
+      }
+      else {
+        AddClumpingInputsToReadyList(readyToAdd, currAdd->m_succ);
+      }
+    }
+    for(auto child : currAdd->m_children) {
+      if (ignore != child)  {
+        if (child->CanAddToLinearOrder()) {
+          readyToAdd.insert(child);
+        }
+        else {
+          AddClumpingInputsToReadyList(readyToAdd, child);
+        }
+      }
+    }
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinElem *currAdd,
+                               Linearization &opt, const StrSet &stillLive, bool addSingleChildImmediately) const
 {
   if (!currAdd->CanAddToLinearOrder())
     throw;
   curr.m_order.push_back(currAdd);
   currAdd->SetAdded();
-
+  
   //matching RecursivelyFindOpt...
   if (currAdd->m_children.size() > 1 || (currAdd->m_children.size() == 1 && (!addSingleChildImmediately && currAdd->m_children[0]->CreatesNewVars()))
       || currAdd->m_succ)
-    {
+  {
     //Go through children and add those that should be added immediately
     int printedImmediately = 0;
     for(auto child : currAdd->m_children) {
@@ -435,28 +489,28 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
         //If that was the last input to (e.g.) a set
         // other than temps, then now the temps can
         // add, followed by the set
-	AddClumpingInputsToReadyList(readyToAdd, child);
+        AddClumpingInputsToReadyList(readyToAdd, child);
       }
     }
-    if (currAdd->m_succ 
-	&& currAdd->m_succ->CanAddToLinearOrder() 
-	&& readyToAdd.find(currAdd->m_succ) == readyToAdd.end()) 
-      {
-	LinElem *succ = currAdd->m_succ;
-	bool skip = false;
-	if (succ->ShouldClump()) {
-	  for (auto input : succ->m_children[0]->m_inputs) {
-	    if (input->ShouldClump()
-		&& (readyToAdd.find(input) != readyToAdd.end()))
-	      {
-		skip = true;
-		break;
-	      }
-	  }
-	}
-	if (!skip)
-	  readyToAdd.insert(currAdd->m_succ);
+    if (currAdd->m_succ
+        && currAdd->m_succ->CanAddToLinearOrder()
+        && readyToAdd.find(currAdd->m_succ) == readyToAdd.end())
+    {
+      LinElem *succ = currAdd->m_succ;
+      bool skip = false;
+      if (succ->ShouldClump()) {
+        for (auto input : succ->m_children[0]->m_inputs) {
+          if (input->ShouldClump()
+              && (readyToAdd.find(input) != readyToAdd.end()))
+          {
+            skip = true;
+            break;
+          }
+        }
       }
+      if (!skip)
+        readyToAdd.insert(currAdd->m_succ);
+    }
     RecursivelyFindOpt(curr, readyToAdd, opt, stillLive);
     while (printedImmediately > 0) {
       LinElem *elem = curr.m_order.back();
@@ -468,41 +522,18 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
   else if (currAdd->m_children.size() == 1) {
     LinElem *child = currAdd->m_children[0];
     bool keepGoing = true;
-    int countOfAdded = 0;
+    unsigned int countOfAdded = 0;
     while (addSingleChildImmediately && keepGoing) {
       keepGoing = false;
       //this is a tempvar node
       // if the child is a set, print all of its other input temp var nodes and it
       // if it's not a set, try to print it
       for (auto input : child->m_inputs) {
-        if (!input->HasAdded() 
-	    && input != currAdd
-	    && input->CanAddToLinearOrder())
-	  {
-	    readyToAdd.erase(input);
-	    ++countOfAdded;
-	    curr.m_order.push_back(input);
-	    input->SetAdded();
-	    keepGoing = true;
-	    if (input->m_succ) {
-	      if (input->m_succ->CanAddToLinearOrder()) {
-		readyToAdd.insert(input->m_succ);
-	      }
-	      else {
-		AddClumpingInputsToReadyList(readyToAdd, input->m_succ);
-	      }
-	    }
- 	    for(auto otherChild : input->m_children) {
-	      if (otherChild != child)  {
-		if (otherChild->CanAddToLinearOrder()) {
-		  readyToAdd.insert(otherChild);
-		}
-		else {
-		  AddClumpingInputsToReadyList(readyToAdd, otherChild);
-		}	      
-	      }
- 	    }
-	  }
+        if (!input->HasAdded()
+            && input != currAdd)
+        {
+          keepGoing |= AddUp(curr, readyToAdd, input, child, countOfAdded);
+        }
       }
     }
     if (child->CanAddToLinearOrder()) {
@@ -538,7 +569,7 @@ void Linearizer::FindAnyLinearization()
   }
   
   while (!readyToAdd.empty()) {
-    LinElem *elem = *(readyToAdd.begin()); 
+    LinElem *elem = *(readyToAdd.begin());
     readyToAdd.erase(readyToAdd.begin());
     m_lin.m_order.push_back(elem);
     elem->SetAdded();
