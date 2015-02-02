@@ -377,7 +377,6 @@ void Linearizer::RecursivelyFindOpt(Linearization &curr, const LinElemSet &ready
           //matching in AddAndRecurse
           if (other->m_children.size() == 1 && !other->m_succ) {
             if (other->m_children[0] == child) {
-              cout << "skipping " << other << endl;
               skip.insert(other);
             }
           }
