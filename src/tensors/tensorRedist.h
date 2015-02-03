@@ -267,6 +267,14 @@ class SplitAllAllGathers : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+class CombinePermuteRedists : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return (string)"CombinePermuteRedists";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 #if ALLMULTIMODEALLGATHER
 class CombineAllGathers : public SingleTrans
 {
