@@ -23,6 +23,7 @@
 #include "clearLinElem.h"
 #include "base.h"
 #include "setLinElem.h"
+#include "realPSet.h"
 
 Linearization::~Linearization()
 {
@@ -39,6 +40,8 @@ void Linearization::Clear()
   m_cost = -1;
 }
 
+
+//GetCostNoRecursion
 void Linearization::InsertVecClearing(const StrSet &stillLive, const StrSet &alwaysLive)
 {
   if (!m_clears.empty())
@@ -120,6 +123,8 @@ void Linearization::InsertVecClearing(const StrSet &stillLive, const StrSet &alw
   }
 }
 
+
+//Reflect in EnforceMemConstraint
 Cost Linearization::GetCostNoRecursion(const StrSet &stillLive, const StrSet &alwaysLive)
 {
   if (m_cost <= 0) {
@@ -222,5 +227,128 @@ bool Linearization::LiveAfter(unsigned int loc, const string &name, const StrSet
     if (m_order[loc]->UsesInputVar(name))
       return true;
   }
+  return false;
+}
+
+//Reflect in GetCostNoRecursion
+bool Linearization::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, const StrSet &alwaysLive)
+{
+  Cost currCost = 0;
+  VarCostMap map;
+  for(int i = 0; i < m_order.size(); ++i) {
+    LinElem *elem = m_order[i];
+    if (!elem->IsClear()) {
+      if (elem->IsSet() && (((SetLinElem*)elem)->m_set)->IsReal()) {
+	/*
+	  If input and used later, do not clear
+	  If input, not output and not used later, clear within
+	  If input and output but no children and not used later,
+	  clear here
+	  If input and output but has children or used later,
+	  don't clear
+	*/
+	RealPSet *set = (RealPSet*)(((SetLinElem*)elem)->m_set);
+	//If the variable is output, then it's live within
+	StrSet liveHere;
+
+
+	StrVec needClears;
+	for (auto output : set->m_outTuns) {
+	  string outName = output->GetNameStr(0); 
+	  //if it's output but no children, we might need to add a clear
+	  if (stillLive.find(outName) == stillLive.end() &&
+	      alwaysLive.find(outName) == alwaysLive.end()) 
+	    {
+	      if (output->m_children.empty()) {
+		if (!LiveAfter(i+1, outName, alwaysLive))
+		  needClears.push_back(outName);
+	      }
+	    }
+	  liveHere.insert(outName);
+	  if (set->IsLoop()) {
+	    Node *possTunOut = output->GetRealTunnel()->Input(0);
+	    for(auto inToOut : possTunOut->m_inputs) {
+	      liveHere.insert(inToOut->m_n->GetNameStr(inToOut->m_num));
+	    }
+	  }
+	}
+	
+	for (auto input : set->m_inTuns) {
+	  string inName = input->GetInputNameStr(0);
+	  if (liveHere.find(inName) == liveHere.end() &&
+	      (stillLive.find(inName) != stillLive.end() 
+	       || LiveAfter(i+1, inName, alwaysLive)))
+	    {
+	      liveHere.insert(inName);
+	    }
+	}
+
+	if (set->EnforceMemConstraint(maxMem-currCost, liveHere))
+	  return true;
+
+	VarCostMap newVars = elem->NewVarsAndCosts();
+	map.insert(newVars.begin(), newVars.end());
+	for(auto &var : map) {
+#if !DOTENSORS
+	throw;
+	/*
+	  for domains other than tensors, we could be
+	  in a loop where one variable is increasing
+	  in size while another is decreasing.  If this
+	  is the case, then the summ of their 
+	  max size across iterations is about double
+	  what their actual max size is
+	*/
+#endif
+	    currCost += var.second;
+	}
+
+	StrVec possiblyDyingVars = elem->PossiblyDyingVars();
+	for(int i = 0; i < possiblyDyingVars.size(); ++i) {
+	  string var = possiblyDyingVars[i];
+	  if (stillLive.find(var) != stillLive.end())
+	    {
+	      possiblyDyingVars.erase(possiblyDyingVars.begin()+i);
+	      --i;
+	    }
+	  else {
+	    if (LiveAfter(i+1, var, alwaysLive)) {
+	      possiblyDyingVars.erase(possiblyDyingVars.begin()+i);
+	      --i;
+	      break;
+	    }
+	  }
+	}
+	//at this point all vars in possiblyDyingVars are actually dying
+	for (auto var : possiblyDyingVars) {
+	  VarCostMapIter find = map.find(var);
+	  if (find != map.end()) {
+	    currCost -= find->second;
+	    map.erase(find);
+	  }
+	}
+      }
+      else {
+	StrVec maybes = elem->PossiblyDyingVars();
+	for(auto maybe : maybes) {
+	  bool found = false;
+	  if (stillLive.find(maybe) != stillLive.end())
+	    found = true;
+	  if (!found)
+	    found = LiveAfter(i+1, maybe, alwaysLive);
+	  if (!found) {
+	    VarCostMapIter find = map.find(maybe);
+	    if (find != map.end()) {
+	      currCost -= find->second;
+	      map.erase(find);
+	    }
+	  }
+	}
+      }
+      if (currCost >= maxMem)
+	throw;
+    }
+  }
+
   return false;
 }
