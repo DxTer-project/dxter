@@ -47,6 +47,12 @@
 #include "zaxpby.h"
 #include "ccsd.h"
 
+bool M_dontFuseLoops = true;
+
+  //~ 10:1 ratio
+  // 53, 5 for H20
+const Size big = 500; // a-h
+const Size small = 50; //i-p
 
 Size one = 1;
 //Size bs = ELEM_BS;
@@ -161,6 +167,7 @@ void AddSimplifiers()
    Universe::AddTrans(RedistNode::GetClass(), new RemoveNOPRedistribs, SIMP);
    Universe::AddTrans(RedistNode::GetClass(), new RemoveWastedRedist, SIMP);
    Universe::AddTrans(RedistNode::GetClass(), new CombineRedistribs, SIMP);
+   Universe::AddTrans(RedistNode::GetClass(), new CombinePermuteRedists, SIMP);
 #if ALLMULTIMODEALLGATHER
    Universe::AddTrans(RedistNode::GetClass(), new CombineAllGathers, SIMP);
 #endif
@@ -1025,11 +1032,6 @@ RealPSet* MP3()
 
 RealPSet* W()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
   InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
@@ -1083,11 +1085,6 @@ RealPSet* W()
 
 RealPSet* X()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
   InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
   InputNode *t_fj = CreateInput2("t_fj", big, small);
@@ -1136,11 +1133,6 @@ RealPSet* X()
 
 RealPSet* U()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
@@ -1170,11 +1162,6 @@ RealPSet* U()
 
 RealPSet* Q()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *q_mnij = CreateInput4("q_mnij", small, small, small, small);
   InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
@@ -1220,11 +1207,6 @@ RealPSet* Q()
 
 RealPSet* P()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
   InputNode *t_fj = CreateInput2("t_fj", big, small);
@@ -1275,11 +1257,6 @@ RealPSet* P()
 
 RealPSet* H()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *v_efmn = CreateInput4("v_femn", big, big, small, small);
 
@@ -1303,12 +1280,7 @@ RealPSet* H()
 
 
 RealPSet* F()
-{
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-  
+{ 
   InputNode *H_me = CreateInput2("H_me", small, big);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *r_amef = CreateInput4("r_bmfe", big, small, big, big);
@@ -1346,12 +1318,7 @@ RealPSet* F()
 
 
 RealPSet* G()
-{
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-  
+{ 
   InputNode *H_me = CreateInput2("H_me", small, big);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
@@ -1391,12 +1358,7 @@ RealPSet* G()
 }
 
 RealPSet* z()
-{
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-  
+{ 
   InputNode *G_mi = CreateInput2("G_mi", small, small);
   InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
@@ -1460,11 +1422,6 @@ RealPSet* z()
 
 RealPSet* Z()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
   InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
@@ -1547,11 +1504,6 @@ RealPSet* Z()
 
 RealPSet* CCSD()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
   InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
@@ -1635,11 +1587,6 @@ RealPSet* CCSD()
 
 RealPSet* CCSDInlined()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
   InputNode *r_bmfe = CreateInput4("r_bmfe", big, small, big, big);
@@ -1763,12 +1710,6 @@ RealPSet* CCSDInlined()
 
 RealPSet* zInlined()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-  
-
   InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
@@ -1854,11 +1795,6 @@ RealPSet* zInlined()
 
 RealPSet* ZInlined()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
   InputNode *r_bmfe = CreateInput4("r_bmfe", big, small, big, big);
@@ -1992,11 +1928,6 @@ RealPSet* ZInlined()
 
 RealPSet* Tau()
 {
-  //~ 10:1 ratio
-  // 53, 5 for H20
-  const Size big = 500; //a-h
-  const Size small = 50; //i-p
-
   InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
 

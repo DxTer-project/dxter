@@ -37,6 +37,7 @@ class Linearization
 
   Cost m_cost;
 
+ Linearization() : m_cost(-1) {}
   ~Linearization();
   void Clear();
 
@@ -49,4 +50,6 @@ class Linearization
   void Print(IndStream &out);
   
   bool LiveAfter(unsigned int loc, const string &name, const StrSet &alwaysLive) const;
+
+  bool EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, const StrSet &alwaysLive);
 };

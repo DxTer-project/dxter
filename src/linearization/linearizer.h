@@ -48,9 +48,12 @@ class Linearizer
   void FindAnyLinearization();
   void FindOptimalLinearization(const StrSet &stillLive);
 
-  void RecursivelyFindOpt(Linearization &curr, const LinElemVec &readyToAdd, Linearization &opt, const StrSet &stillLive) const;
-  void AddAndRecurse(Linearization &curr, LinElemVec &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive, bool addSingleChildImmediately) const;
-
+  void RecursivelyFindOpt(Linearization &curr, const LinElemSet &readyToAdd, Linearization &opt, const StrSet &stillLive) const;
+  void AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinElem *currAdd, Linearization &opt, const StrSet &stillLive, bool addSingleChildImmediately) const;
+  void AddClumpingInputsToReadyList(LinElemSet &readyToAdd, LinElem *child) const;
+  bool AddUp(Linearization &curr, LinElemSet &readyToAdd, 
+	     LinElem *currAdd, LinElem *ignore,
+	     unsigned int &countOfAdded) const;
   void InsertVecClearing(const StrSet &stillLive);
 
   LinElem* FindOrAdd(Node *node, PtrToLinElemMap &map);

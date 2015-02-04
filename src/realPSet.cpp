@@ -2372,3 +2372,27 @@ bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
   return true;
 }
 #endif
+
+bool RealPSet::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive)
+{
+  PossMMap toRemove;
+  for(auto possEntry : m_posses) {
+    Linearizer lin(possEntry.second);
+    lin.FindOptimalLinearization(stillLive);
+    if (lin.m_lin.GetCostNoRecursion(stillLive, lin.m_alwaysLive) >= maxMem) 
+      toRemove.insert(possEntry);
+    else {
+      if (lin.m_lin.EnforceMemConstraint(maxMem, stillLive, lin.m_alwaysLive)) {
+	toRemove.insert(possEntry);
+      }
+    }
+  }
+  
+  if (toRemove.size() == m_posses.size()) {
+    return true;
+  }
+  for(auto remove : toRemove) {
+    RemoveAndDeletePoss(remove.second, true);
+  }
+  return false;
+}

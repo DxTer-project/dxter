@@ -117,6 +117,8 @@ class RealPSet : public BasePSet
   RealPSet* HasMergedWith(RealPSet *set, bool checkOtherOrder=true);
   void SetDeletingRecursively();
   void ClearDeletingRecursively();
+
+  bool EnforceMemConstraint(Cost maxMem, const StrSet &stillLive);
 };
 
 

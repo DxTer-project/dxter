@@ -28,6 +28,9 @@ class LinElem;
 typedef std::vector<LinElem*> LinElemVec;
 typedef LinElemVec::iterator LinElemVecIter;
 typedef LinElemVec::const_iterator LinElemVecConstIter;
+typedef std::set<LinElem*> LinElemSet;
+typedef LinElemSet::iterator LinElemSetIter;
+typedef LinElemSet::const_iterator LinElemSetConstIter;
 typedef std::map<string, Cost> VarCostMap;
 typedef VarCostMap::iterator VarCostMapIter;
 
@@ -67,4 +70,7 @@ class LinElem
   virtual bool UsesInputVar(const string &var) const = 0;
   virtual void CacheLiveVars(const StrSet &stillLive) = 0;
   virtual void ClearCache() = 0;
+
+  bool ShouldClump() const;
+  bool OtherInputInClumpIsAlreadyRead(LinElemSet readyToAdd) const;
 };

@@ -139,6 +139,10 @@ void RedistNode::Prop()
     
     const DistType &m_srcType = parent->DataType(InputConnNum(0)).GetDist();
     const Dim numDims = m_info.GetDist().m_numDims;
+
+
+    
+
     
     if (m_info.GetDist() == m_srcType)
       throw;
@@ -209,10 +213,20 @@ void RedistNode::Prop()
     }
 
     if (GetPermPattern(m_srcType, m_info.GetDist(),
-			    &gridModesInvolved)) {
-      Size size = TotalNumberOfLocalElements(0);
-      m_cost = PSIR+PSIW*(size);
-      m_cost += SendRecv(size);
+		       &gridModesInvolved)) {
+      Cost comm = 0;
+      Cost mov = 0;
+      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
+        Cost tempOut = 1;
+        for (Dim dim = 0; dim < numDims; ++dim) {
+          tempOut *= m_lsizes[dim][iteration];
+        }
+        comm += SendRecv(tempOut);
+	mov += (PSIR+PSIW)*(2*tempOut);
+      }
+      m_cost = comm + mov;
+      //m_cost = comm;
       return;
     }    
     
@@ -224,16 +238,19 @@ void RedistNode::Prop()
         numProcs *= GridLens[*gridModeIter];
       }
       const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      Cost comm = 0;
+      Cost mov = 0;
       for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
         Cost tempOut = 1;
-	Cost tempIn = 1;
         for (Dim dim = 0; dim < numDims; ++dim) {
           tempOut *= m_lsizes[dim][iteration];
-	  tempIn *= (*InputLocalLen(0, dim))[iteration];
         }
-        m_cost += AllToAll(tempOut, numProcs);
-	m_cost += (PSIR+PSIW)*(tempIn + tempOut);
+        comm += AllToAll(tempOut, numProcs);
+	mov += (PSIR+PSIW)*(2*tempOut);
       }
+      m_cost = comm + mov;
+      //m_cost = comm;
+
       return;
     }
     
@@ -1045,6 +1062,36 @@ void RemoveNOPRedistribs::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+bool CombinePermuteRedists::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
+  if (node->m_children.size() != 1)
+    return false;
+  const DistType &srcType = redist->InputDataType(0).GetDist();
+
+  if (node->Child(0)->GetNodeClass() != RedistNode::GetClass())
+    return false;
+
+  const RedistNode *redist2 = (RedistNode*)(node->Child(0));
+  const DistType &destType2 = redist2->m_info.GetDist();
+  if (!GetPermPattern(srcType, destType2, NULL))
+    return false;
+  else
+    return true;
+  
+}
+
+void CombinePermuteRedists::Apply(Node *node) const
+{
+  RedistNode *redist = (RedistNode*)node;
+  RedistNode *redist2 = (RedistNode*)(node->Child(0));
+  redist2->ChangeInput2Way(redist, 0, 
+			   redist->Input(0), redist->InputConnNum(0));
+  redist->m_poss->DeleteChildAndCleanUp(redist);
+}
+
 bool CombineRedistribs::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
@@ -1100,6 +1147,9 @@ bool SplitRedistribs::CanApply(const Node *node) const
   const RedistNode *redist = (RedistNode*)node;
   const DistType &src = redist->InputDataType(0).GetDist();
   const DistType *dest = &(redist->m_info.GetDist());
+
+  if (GetPermPattern(src, *dest, NULL))
+    return false;      
   
   if (src.m_numDims != dest->m_numDims)
     throw;
@@ -1174,6 +1224,9 @@ bool SingleIndexAllToAll::CanApply(const Node *node) const
   const RedistNode *redist = (RedistNode*)node;
   const DistType &srcType = redist->InputDataType(0).GetDist();
   const DistType &destType = redist->m_info.GetDist();
+
+  if (GetPermPattern(srcType, destType, NULL))
+    return false;
   
   if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
     throw;
@@ -1326,6 +1379,9 @@ bool DoubleIndexAllToAll::CanApply(const Node *node) const
   const RedistNode *redist = (RedistNode*)node;
   const DistType &srcType = redist->InputDataType(0).GetDist();
   const DistType &destType = redist->m_info.GetDist();
+
+  if (GetPermPattern(srcType, destType, NULL))
+    return false;
   
   if (srcType.m_numDims != destType.m_numDims)
     throw;
@@ -1516,6 +1572,9 @@ bool DoubleIndexAllToAllPrefix::CanApply(const Node *node) const
   const RedistNode *redist = (RedistNode*)node;
   const DistType &srcType = redist->InputDataType(0).GetDist();
   const DistType &destType = redist->m_info.GetDist();
+
+  if (GetPermPattern(srcType, destType, NULL))
+    return false;
   
   if (srcType.m_numDims != destType.m_numDims)
     throw;
@@ -1837,42 +1896,72 @@ bool CombineDisappearingModes::CanApply(const Node *node) const
   
   if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
     throw;
-  else if (srcType.m_numDims <= m_srcDim || srcType.m_numDims <= m_destDim)
+  else if (srcType.m_numDims <= m_dim)
+    return false;
+
+  if (destType.m_dists[m_dim] == srcType.m_dists[m_dim] ||
+      destType.m_dists[m_dim].IsStar() ||
+      srcType.m_dists[m_dim].IsStar())
     return false;
   
-  DimSet usedDims = destType.UsedGridDims();
-  
-  DimVec dest = srcType.m_dists[m_destDim].DistEntryDims();
-  DimVec src = srcType.m_dists[m_srcDim].DistEntryDims();
-  
-  if (dest.empty() || src.empty())
-    return false;
-  if (usedDims.find(dest.back()) == usedDims.end()) {
-    return usedDims.find(src.back()) == usedDims.end();
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
+
+  DimVec srcDims = srcEntry.DistEntryDims();
+  DimSet destSet = destEntry.DistEntryDimSet();
+
+  DimVec prefix, suffix;
+
+  DimVecIter iter = srcDims.begin();
+  for( ; iter != srcDims.end(); ++iter) {
+    if (destSet.find(*iter) == destSet.end()) {
+      suffix.push_back(*iter);
+    }
+    else {
+      prefix.push_back(*iter);
+    }
   }
-  return false;
+
+  prefix.insert(prefix.end(),
+		suffix.begin(), suffix.end());
+
+  return (prefix != srcDims);
+    
 }
 
 void CombineDisappearingModes::Apply(Node *node) const
 {
   if (node->GetNodeClass() != RedistNode::GetClass())
     throw;
+
   RedistNode *redist = (RedistNode*)node;
   const DistType &srcType = redist->InputDataType(0).GetDist();
   const DistType &destType = redist->m_info.GetDist();
   
-  if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
-    throw;
-  else if (srcType.m_numDims <= m_srcDim || destType.m_numDims <= m_destDim)
-    throw;
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
+
+  DimVec srcDims = srcEntry.DistEntryDims();
+  DimSet destSet = destEntry.DistEntryDimSet();
+
+
+  DimVec prefix, suffix;
+
+  DimVecIter iter = srcDims.begin();
+  for( ; iter != srcDims.end(); ++iter) {
+    if (destSet.find(*iter) == destSet.end()) {
+      suffix.push_back(*iter);
+    }
+    else {
+      prefix.push_back(*iter);
+    }
+  }
+
+  prefix.insert(prefix.end(),
+		suffix.begin(), suffix.end());
   
   DistType intType = srcType;
-  DimVec dest = intType.m_dists[m_destDim].DistEntryDims();
-  DimVec src = intType.m_dists[m_srcDim].DistEntryDims();
-  dest.push_back(src.back());
-  src.pop_back();
-  intType.m_dists[m_destDim].DimsToDistEntry(dest);
-  intType.m_dists[m_srcDim].DimsToDistEntry(src);
+  intType.m_dists[m_dim].DimsToDistEntry(prefix);
   
   RedistNode *newRedist = new RedistNode(intType, redist->m_info.GetPerm(),
                                          redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
@@ -1884,6 +1973,20 @@ void CombineDisappearingModes::Apply(Node *node) const
   
   redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0),
                           newRedist, 0);
+
+  if (srcDims.size() == 2 && srcDims[0] == 1 && srcDims[1] == 3 &&
+      destType.m_dists[m_dim].DistEntryDims().size() == 1 && destType.m_dists[m_dim].DistEntryDims()[0] == 3) {
+    DistType tmp;
+    tmp.SetToDefault(4);
+    if (tmp == destType) {
+      if (srcType.m_dists[0].m_val == 1 && srcType.m_dists[2].m_val == 3) {
+	if (!redist->IsPrimitive() || !newRedist->IsPrimitive()) {
+	  cout << srcType.PrettyStr() << " -> " << intType.PrettyStr() << " -> " << destType.PrettyStr() << endl;
+	  throw;
+	}
+      }
+    }
+  }
 }
 
 bool PermuteDistribution::CanApply(const Node *node) const
@@ -1895,6 +1998,9 @@ bool PermuteDistribution::CanApply(const Node *node) const
   
   const DistType &srcType = redist->InputDataType(0).GetDist();
   const DistType &destType = redist->m_info.GetDist();
+
+  if (GetPermPattern(srcType, destType, NULL))
+    return false;
   
   if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
     throw;
@@ -2238,6 +2344,10 @@ bool DoubleIndexAllToAll2::CanApply(const Node *node) const
     throw;
   const RedistNode *redist = (RedistNode*)node;
   const DistType &srcType = redist->InputDataType(0).GetDist();
+  const DistType &destType = redist->m_info.GetDist();
+
+  if (GetPermPattern(srcType, destType, NULL))
+    return false;
   
   if (srcType.m_numDims != redist->m_info.GetDist().m_numDims)
     throw;
@@ -2245,13 +2355,13 @@ bool DoubleIndexAllToAll2::CanApply(const Node *node) const
     return false;
   
   DistEntry srcEntry = srcType.m_dists[m_dim];
-  DistEntry destEntry = redist->m_info.GetDist().m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
   if (srcEntry == destEntry)
     return false;
   
   for(Dim dim = m_dim+1; dim < srcType.m_numDims; ++dim) {
     DistEntry srcEntry2 = srcType.m_dists[dim];
-    DistEntry destEntry2 = redist->m_info.GetDist().m_dists[dim];
+    DistEntry destEntry2 = destType.m_dists[dim];
     if (srcEntry2 != destEntry2) {
       DimVec srcVec = srcEntry.DistEntryDims();
       DimVec destVec = destEntry.DistEntryDims();
@@ -2782,17 +2892,16 @@ bool GetPermPattern(const DistType &srcType,
   
   if (numDims != destType.m_numDims)
     return false;
+
+  if (gridModes)
+    gridModes->clear();
+  
+  bool foundPerm = false;
   
   for (Dim dim = 0; dim < numDims; ++dim) {
     DistEntry srcDistEntry = srcType.m_dists[dim];
     DistEntry destDistEntry = destType.m_dists[dim];
     if (srcDistEntry != destDistEntry) {
-      for (Dim dim2 = dim+1; dim2 < numDims; ++dim2) {
-	DistEntry srcDistEntry2 = srcType.m_dists[dim2];
-	DistEntry destDistEntry2 = destType.m_dists[dim2];
-	if (srcDistEntry2 != destDistEntry2)
-	  return false;
-      }
       DimVec srcDims = srcDistEntry.DistEntryDims();
       DimVec destDims = destDistEntry.DistEntryDims();
       DimVec srcSuff, destSuff;
@@ -2805,17 +2914,16 @@ bool GetPermPattern(const DistType &srcType,
 			      destSuff.begin()))
 	{
 	  if (gridModes) {
-	    gridModes->clear();
-	    gridModes->insert(gridModes->begin(), srcSuff.begin(), srcSuff.end());
+	    gridModes->insert(gridModes->end(), srcSuff.begin(), srcSuff.end());
 	  }
-	  return true;
+	  foundPerm = true;
 	}
       else
 	return false;
     }
   }
 
-  return false;
+  return foundPerm;
 }
 #endif
 

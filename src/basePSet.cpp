@@ -33,6 +33,10 @@
 
 extern unsigned int M_phase;
 
+#if DOTENSORS
+extern bool M_dontFuseLoops;
+#endif
+
 unsigned int FindInTunVec(const TunVec &vec, const Tunnel *node)
 {
   unsigned int i = 0;
@@ -191,6 +195,8 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 {
   bool onlyAllowParallelStreams = false;
 #if DOTENSORS
+  if (M_dontFuseLoops && set1->IsLoop())
+    return false;
   if (false && CurrPhase == ROTENSORPHASE) 
   {
     const Poss *poss1 = set1->GetPosses().begin()->second;

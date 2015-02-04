@@ -141,9 +141,9 @@ class SplitRedistribs : public SingleTrans
 class CombineDisappearingModes : public SingleTrans
 {
  public:
-  Dim m_srcDim, m_destDim;
- CombineDisappearingModes(Dim srcDim, Dim destDim) : m_srcDim(srcDim), m_destDim(destDim) {}
-  virtual string GetType() const { return (string)"CombineDisappearingModes " + (char)(m_srcDim+48) + (char)(m_destDim+48); }
+  Dim m_dim;
+ CombineDisappearingModes(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"CombineDisappearingModes " + (char)(m_dim+48); }
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
   virtual bool IsRef() const {return true;}
@@ -263,6 +263,14 @@ class SplitAllAllGathers : public SingleTrans
 {
  public:
   virtual string GetType() const { return (string)"SplitAllAllGathers";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class CombinePermuteRedists : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return (string)"CombinePermuteRedists";}
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };
