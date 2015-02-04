@@ -11,17 +11,34 @@
 
 RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int p)
 {
-  InputNode *Ain= new InputNode("A", m, p,
-				 1, m,
-				dataType);
+  InputNode* Ain;
+  InputNode* Bin;
+  InputNode* Cin;
 
-  InputNode *Bin = new InputNode("B", p, n,
-				 1, p,
-				 dataType);
 
-  InputNode *Cin = new InputNode("C", m, n,
-				 1, m,
-				 dataType);
+  if (transA == NORMAL) {
+    Ain = new InputNode("A", m, p,
+			1, m,
+			dataType);
+  } else {
+    Ain = new InputNode("A", p, m,
+			1, p,
+			dataType);
+  }
+
+  if (transB == NORMAL) {
+    Bin = new InputNode("B", p, n,
+			1, p,
+			dataType);
+  } else {
+    Bin = new InputNode("B", n, p,
+			1, n,
+			dataType);
+  }
+
+  Cin = new InputNode("C", m, n,
+		      1, m,
+		      dataType);
 
   Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
@@ -31,6 +48,9 @@ RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int 
 
   Tunnel *tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin, 0);
+
+  LLDLATranspose* transposeA = new LLDLATranspose(ABSLAYER);
+  LLDLATranspose* transposeB = new LLDLATranspose(ABSLAYER);
 
   Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
   gemm->AddInputs(6,
