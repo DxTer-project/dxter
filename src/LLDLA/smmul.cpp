@@ -150,70 +150,63 @@ NodeType SMMul::GetType() const
   return "SMMul" + LayerNumToStr(GetLayer());
 }
 
-string SMulLoopRef::GetType() const
+
+SMulToSVMul::SMulToSVMul(Layer fromLayer, Layer toLayer, VecType vecType)
 {
-  switch (m_dim)
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+  m_vecType = vecType;
+}
+
+string SMulToSVMul::GetType() const
+{
+  switch (m_vecType)
     {
-    case (DIMM):
-      return "SMulLoopRef - dim m";
-    case (DIMN):
-      return "SMulLoopRef - dim n";
+    case (ROWVECTOR):
+      return "SMulToSVMul - dim m";
+    case (COLVECTOR):
+      return "SMulToSVMul - dim n";
     default:
       throw;
     }  
 }
 
-SMulLoopRef::SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs)
-{
-  m_fromLayer = fromLayer;
-  m_toLayer = toLayer;
-  m_dim = dim;
-  m_bs = bs;
-}
-
-bool SMulLoopRef::CanApply(const Node *node) const
+bool SMulToSVMul::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SMMul::GetClass()) {
-    const SMMul *mul = (SMMul*)node;
-    if (mul->GetLayer() != m_fromLayer)
+    const SMMul *smmul = (SMMul*) node;
+    if (smmul->GetLayer() != m_fromLayer) {
       return false;
-  
-    if (m_dim == DIMM) {
-      if (*(mul->GetInputM(1)) <= m_bs.GetSize())
-	return false;
-      else
-	return true;
     }
-    else if (m_dim == DIMN) {
-      if (*(mul->GetInputN(1)) <= m_bs.GetSize())
-	return false;
-      else
-	return true;
+    if (m_vecType == ROWVECTOR) {
+      return *(smmul->GetInputM(1)) > 1;
+    } else {
+      return *(smmul->GetInputN(1)) > 1;
     }
-    else
-      throw;
   }
-  return false;
+  cout << "ERROR: Applying SMMulToSVMul to non SMMul node\n";
+  cout << "Node has class " << node->GetNodeClass() << endl;
+  throw;
 }
 
-void SMulLoopRef::Apply(Node *node) const
+void SMulToSVMul::Apply(Node *node) const
 {
   SMMul* mul = (SMMul*)node;
 
 
   //Create a split for the input matrix
-  // If we're splitting on the m dimension, then the split moves down 
+  // If we're splitting on the m dimension, then the split moves down
   //    (i.e., it's horizontal)
   // If we're splitting on the n dimension, then the split moves right
   //    (i.e., it's vertical)
-  SplitSingleIter* split = new SplitSingleIter(m_dim==DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
+  SplitSingleIter* split = new SplitSingleIter(m_vecType == ROWVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   // Add input, which is the matrix input to mul
   split->AddInput(mul->Input(1), mul->InputConnNum(1));
   //Set the update statuses
   //If we're moving down, then everything above the thick line is fully updated
-  if (m_dim == DIMM) {
+  if (m_vecType == ROWVECTOR) {
     split->SetUpStats(FULLUP, FULLUP,
-		      NOTUP, NOTUP);		     
+		      NOTUP, NOTUP);
   }
   //If we're moving right, then everything left of the thick line is fully updated
   else {
@@ -235,16 +228,8 @@ void SMulLoopRef::Apply(Node *node) const
   
 
   //Create a new SMul or the same type and in my m_toLayer layer
-  SVMul* newMul;
-  if (m_dim == DIMM) {
-    newMul = new SVMul(ROWVECTOR, m_toLayer);
-  } else {
-    newMul = new SVMul(COLVECTOR, m_toLayer);
-  }
+  SVMul* newMul = new SVMul(m_vecType, m_toLayer);
   newMul->SetLayer(m_toLayer);
-
-  //Wire inputs - the scalar loop tunnel and 
-  //   the 1st (0-based) partition of the matrix split tunnel
   newMul->AddInput(scalarTun, 0);
   newMul->AddInput(split, 1);
 
@@ -257,7 +242,6 @@ void SMulLoopRef::Apply(Node *node) const
   scalarTunOut->AddInput(scalarTun, 1);
   scalarTunOut->CopyTunnelInfo(scalarTun);
 
-  
   //Create an output tunnel for the matrix and overwrite
   // the 1st (0-based) partition of the output matrix
   CombineSingleIter* com = split->CreateMatchingCombine(1,
@@ -272,7 +256,11 @@ void SMulLoopRef::Apply(Node *node) const
   RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
 
   //Set the dimension over which this loop iterates
-  loop->SetDimName(m_dim);
+  if (m_vecType == ROWVECTOR) {
+  loop->SetDimName(DIMM);
+  } else {
+  loop->SetDimName(DIMN);
+  }
   
   //Add the loop to the node's owning Poss
   node->m_poss->AddPSet(loop);

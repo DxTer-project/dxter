@@ -87,8 +87,6 @@ void AddMAddTrans()
 
   Universe::AddTrans(MAdd::GetClass(), new MAddToVAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-  //  Universe::AddTrans(MAdd::GetClass(), new MAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
   return;
 }
 
@@ -110,9 +108,9 @@ void AddMVMulTrans()
 void AddSMMulTrans()
 {
   //Introduces loops in the m and n dimension for SMMul
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulToSVMul(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SMMul::GetClass(), new SMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
+  Universe::AddTrans(SMMul::GetClass(), new SMulToSVMul(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   return;
 }

@@ -50,14 +50,13 @@ class SMMul : public DLAOp<2, 1>
   void PrintGeneralStride(IndStream &out);
 };
 
-class SMulLoopRef : public SingleTrans
+class SMulToSVMul : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  DimName m_dim;
-  BSSize m_bs;
+  VecType m_vecType;
 
-  SMulLoopRef(Layer fromLayer, Layer toLayer, DimName dim, BSSize bs);
+  SMulToSVMul(Layer fromLayer, Layer toLayer, VecType vecType);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
