@@ -22,6 +22,8 @@
 #include <assert.h>
 #include "copy.h"
 
+#if DOLLDLA
+
 const DataTypeInfo& Copy::DataType(ConnNum num) const {
   assert(num == 0);
   return DataType(num);
@@ -31,6 +33,6 @@ bool Copy::Overwrites(const Node* input, ConnNum num) const {
   return true;
 }
 
-#if DOLLDLA
+
 
 #endif // DOLLDLA
