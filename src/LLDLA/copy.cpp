@@ -19,7 +19,17 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <assert.h>
 #include "copy.h"
+
+const DataTypeInfo& Copy::DataType(ConnNum num) const {
+  assert(num == 0);
+  return DataType(num);
+}
+
+bool Copy::Overwrites(const Node* input, ConnNum num) const {
+  return true;
+}
 
 #if DOLLDLA
 
