@@ -46,7 +46,8 @@ void Linearization::InsertVecClearing(const StrSet &stillLive, const StrSet &alw
 {
   if (!m_clears.empty())
     return;
-  for(int i = 0; i < m_order.size(); ++i) {
+  StrSet live;
+  for(int i = m_order.size()-1; i >= 0; --i) {
     LinElem *elem = m_order[i];
     if (!elem->IsClear()) {
       if (elem->IsSet()) {
@@ -60,22 +61,25 @@ void Linearization::InsertVecClearing(const StrSet &stillLive, const StrSet &alw
 	*/
 	BasePSet *set = ((SetLinElem*)elem)->m_set;
 	//If the variable is output, then it's live within
-	StrSet liveHere;
 
-
+	StrSet liveHere = live;
 	StrVec needClears;
 	for (auto output : set->m_outTuns) {
 	  string outName = output->GetNameStr(0); 
-	  //if it's output but no children, we might need to add a clear
 	  if (stillLive.find(outName) == stillLive.end() &&
 	      alwaysLive.find(outName) == alwaysLive.end()) 
 	    {
-	      if (output->m_children.empty()) {
-		if (!LiveAfter(i+1, outName, alwaysLive))
+	      //erase outputs.  
+	      //if they're still live, then will be input, too, and
+	      // re-added below
+	      live.erase(outName);
+	      
+	      if (live.find(outName) == live.end())
+		{
 		  needClears.push_back(outName);
-	      }
+		}
 	    }
-	  liveHere.insert(outName);
+
 	  if (set->IsLoop()) {
 	    Node *possTunOut = output->GetRealTunnel()->Input(0);
 	    for(auto inToOut : possTunOut->m_inputs) {
@@ -83,41 +87,46 @@ void Linearization::InsertVecClearing(const StrSet &stillLive, const StrSet &alw
 	    }
 	  }
 	}
-	
+
 	for (auto input : set->m_inTuns) {
 	  string inName = input->GetInputNameStr(0);
-	  if (liveHere.find(inName) == liveHere.end() &&
-	      (stillLive.find(inName) != stillLive.end() 
-	       || LiveAfter(i+1, inName, alwaysLive)))
+	  if (stillLive.find(inName) == stillLive.end()
+	      && alwaysLive.find(inName) == alwaysLive.end())
 	    {
-	      liveHere.insert(inName);
+	      live.insert(inName);
 	    }
+	  else
+	    liveHere.insert(inName);
 	}
-
+	
+	
 	elem->CacheLiveVars(liveHere);
-
+	
 	for(string clear : needClears) {
 	  ClearLinElem *newClear = new ClearLinElem(clear);
 	  m_order.insert(m_order.begin()+i+1, newClear);
 	  m_clears.push_back(newClear);
-	  ++i;
 	}
       }
       else {
-	StrVec maybes = elem->PossiblyDyingVars();
-	for(auto maybe : maybes) {
-	  bool found = false;
-	  if (stillLive.find(maybe) != stillLive.end())
-	    found = true;
-	  if (!found)
-	    found = LiveAfter(i+1, maybe, alwaysLive);
-	  if (!found) {
-	    ClearLinElem *clear = new ClearLinElem(maybe);
-	    m_order.insert(m_order.begin()+i+1, clear);
-	    m_clears.push_back(clear);
-	    ++i;
+	StrSet goingLive;
+	Node *node = ((NodeLinElem*)elem)->m_node;
+	for (auto inConn : node->m_inputs) {
+	  string inName = inConn->m_n->GetNameStr(inConn->m_num);
+	  if (stillLive.find(inName) == stillLive.end()
+	      && alwaysLive.find(inName) == alwaysLive.end())  {
+	    goingLive.insert(inName);
+	    if (live.find(inName) == live.end()) {
+	      ClearLinElem *clear = new ClearLinElem(inName);
+	      m_order.insert(m_order.begin()+i+1, clear);
+	      m_clears.push_back(clear);
+	    }
 	  }
 	}
+	for (unsigned int i = 0; i < node->NumOutputs(); ++i) {
+	  live.erase(node->GetNameStr(i));
+	}
+	live.insert(goingLive.begin(), goingLive.end());
       }
     }
   }
@@ -234,8 +243,8 @@ bool Linearization::LiveAfter(unsigned int loc, const string &name, const StrSet
 bool Linearization::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, const StrSet &alwaysLive)
 {
   Cost currCost = 0;
-  VarCostMap map;
-  for(int i = 0; i < m_order.size(); ++i) {
+  StrSet live;
+  for(int i = m_order.size() - 1; i >= 0; --i) {
     LinElem *elem = m_order[i];
     if (!elem->IsClear()) {
       if (elem->IsSet() && (((SetLinElem*)elem)->m_set)->IsReal()) {
@@ -249,22 +258,32 @@ bool Linearization::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, c
 	*/
 	RealPSet *set = (RealPSet*)(((SetLinElem*)elem)->m_set);
 	//If the variable is output, then it's live within
-	StrSet liveHere;
 
+	Cost costDiff = 0;
 
-	StrVec needClears;
+	StrSet liveHere = live;
 	for (auto output : set->m_outTuns) {
 	  string outName = output->GetNameStr(0); 
-	  //if it's output but no children, we might need to add a clear
 	  if (stillLive.find(outName) == stillLive.end() &&
 	      alwaysLive.find(outName) == alwaysLive.end()) 
 	    {
-	      if (output->m_children.empty()) {
-		if (!LiveAfter(i+1, outName, alwaysLive))
-		  needClears.push_back(outName);
-	      }
+	      live.erase(outName);
+#if DOTENSORS
+	      costDiff -= ((DLANode*)output)->MaxNumberOfLocalElements(0);
+#else
+	/*
+	  for domains other than tensors, we could be
+	  in a loop where one variable is increasing
+	  in size while another is decreasing.  If this
+	  is the case, then the summ of their 
+	  max size across iterations is about double
+	  what their actual max size is
+	*/
+	      throw;
+	      costDiff -=((DLANode*)output)->MaxNumberOfElements(0);
+#endif
 	    }
-	  liveHere.insert(outName);
+	  
 	  if (set->IsLoop()) {
 	    Node *possTunOut = output->GetRealTunnel()->Input(0);
 	    for(auto inToOut : possTunOut->m_inputs) {
@@ -275,22 +294,14 @@ bool Linearization::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, c
 	
 	for (auto input : set->m_inTuns) {
 	  string inName = input->GetInputNameStr(0);
-	  if (liveHere.find(inName) == liveHere.end() &&
-	      (stillLive.find(inName) != stillLive.end() 
-	       || LiveAfter(i+1, inName, alwaysLive)))
+	  if (stillLive.find(inName) == stillLive.end()
+	      && alwaysLive.find(inName) == alwaysLive.end()
+	      && live.find(inName) == live.end())
 	    {
-	      liveHere.insert(inName);
-	    }
-	}
-
-	if (set->EnforceMemConstraint(maxMem-currCost, liveHere))
-	  return true;
-
-	VarCostMap newVars = elem->NewVarsAndCosts();
-	map.insert(newVars.begin(), newVars.end());
-	for(auto &var : map) {
-#if !DOTENSORS
-	throw;
+	      live.insert(inName);
+#if DOTENSORS
+	      costDiff += ((DLANode*)(input->Input(0)))->MaxNumberOfLocalElements(input->InputConnNum(0));
+#else
 	/*
 	  for domains other than tensors, we could be
 	  in a loop where one variable is increasing
@@ -299,56 +310,68 @@ bool Linearization::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, c
 	  max size across iterations is about double
 	  what their actual max size is
 	*/
+	      throw;
+	      costDiff += ((DLANode*)(input->Input(0)))->MaxNumberOfElements(input->InputConnNum(0));
 #endif
-	    currCost += var.second;
-	}
-
-	StrVec possiblyDyingVars = elem->PossiblyDyingVars();
-	for(int i = 0; i < possiblyDyingVars.size(); ++i) {
-	  string var = possiblyDyingVars[i];
-	  if (stillLive.find(var) != stillLive.end())
-	    {
-	      possiblyDyingVars.erase(possiblyDyingVars.begin()+i);
-	      --i;
 	    }
-	  else {
-	    if (LiveAfter(i+1, var, alwaysLive)) {
-	      possiblyDyingVars.erase(possiblyDyingVars.begin()+i);
-	      --i;
-	      break;
-	    }
-	  }
+	  else
+	    liveHere.insert(inName);
 	}
-	//at this point all vars in possiblyDyingVars are actually dying
-	for (auto var : possiblyDyingVars) {
-	  VarCostMapIter find = map.find(var);
-	  if (find != map.end()) {
-	    currCost -= find->second;
-	    map.erase(find);
-	  }
-	}
+	
+	if (set->EnforceMemConstraint(maxMem-currCost, liveHere))
+	  return true;
+	
+	currCost += costDiff;
       }
       else {
-	StrVec maybes = elem->PossiblyDyingVars();
-	for(auto maybe : maybes) {
-	  bool found = false;
-	  if (stillLive.find(maybe) != stillLive.end())
-	    found = true;
-	  if (!found)
-	    found = LiveAfter(i+1, maybe, alwaysLive);
-	  if (!found) {
-	    VarCostMapIter find = map.find(maybe);
-	    if (find != map.end()) {
-	      currCost -= find->second;
-	      map.erase(find);
+	Node *node = ((NodeLinElem*)elem)->m_node;
+	Cost costDiff = 0;
+	for (unsigned int i = 0; i < node->NumOutputs(); ++i) {
+	  string name = node->GetNameStr(i);
+	  if (stillLive.find(name) == stillLive.end()
+	       && alwaysLive.find(name) == alwaysLive.end())
+            {
+              live.insert(name);
+#if DOTENSORS
+              costDiff -= ((DLANode*)node)->MaxNumberOfLocalElements(i);
+#else
+              throw;
+              costDiff -= ((DLANode*)node)->MaxNumberOfElements(i);
+#endif
 	    }
-	  }
 	}
-      }
+        for(auto inputConn : node->m_inputs) {
+	  string inName = inputConn->m_n->GetInputNameStr(inputConn->m_num);
+	  if (stillLive.find(inName) == stillLive.end()
+	      && alwaysLive.find(inName) == alwaysLive.end()
+	      && live.find(inName) == live.end())
+	    {
+	      live.insert(inName);
+#if DOTENSORS
+	      costDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfLocalElements(inputConn->m_num);
+#else
+	/*
+	  for domains other than tensors, we could be
+	  in a loop where one variable is increasing
+	  in size while another is decreasing.  If this
+	  is the case, then the summ of their 
+	  max size across iterations is about double
+	  what their actual max size is
+	*/
+	      throw;
+	      costDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfElements(inputConn->m_num);
+#endif
+	    }
+	}
+	  currCost += costDiff;
+	  
       if (currCost >= maxMem)
 	throw;
-    }
-  }
-
+	}
+      }
+      }
+      
   return false;
 }
+
+
