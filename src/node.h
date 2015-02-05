@@ -114,10 +114,6 @@ class Node
   virtual Name GetName(ConnNum num) const = 0;
   //Returns true if the node overwrites the variable passed in by Node input
   virtual bool Overwrites(const Node *input, ConnNum num) const = 0;
-  //Returns true if the variable passed in by Node input is also passed
-  // out of the node
-  virtual bool KeepsInputVarLive(Node *input, ConnNum numIn, 
-				 ConnNum &numOut) const = 0;
   //Add any variable declarations for this node (e.g., new
   // variables that are used as temporaries)
   //Should super message

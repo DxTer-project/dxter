@@ -33,7 +33,6 @@ class SetToZero : public DLAOp<1, 1>
   SetToZero(Layer layer);
   virtual NodeType GetType() const;
   static Node* BlankInst();
-  bool KeepsInputVarLive(Node* input, ConnNum numIn, ConnNum& numOut) const;
   virtual Node* GetNewInst();
 
   virtual Phase MaxPhase() const;

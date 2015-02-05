@@ -102,7 +102,6 @@ class LoopTunnel : public Tunnel
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
 
   virtual bool Overwrites(const Node *input, ConnNum num) const;
-  virtual bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const;
 
   string GetLoopLevel(int offset=0) const;
   virtual void MigrateFromOldTun(Tunnel *tun);

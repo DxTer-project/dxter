@@ -56,7 +56,6 @@ class RedistNode : public DLANode
   virtual ~RedistNode();
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   static Node* BlankInst() { return  new RedistNode; }
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual NodeType GetType() const;

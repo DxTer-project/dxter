@@ -133,7 +133,7 @@ bool DLAOp<numIn, numOut>::Overwrites(const Node *input, ConnNum num) const
   }
   return false;
 }
-
+/*
 template<ConnNum numIn, ConnNum numOut>
 bool DLAOp<numIn, numOut>::KeepsInputVarLive(Node *input, ConnNum numInArg, ConnNum &numOutArg) const
 {
@@ -146,6 +146,7 @@ bool DLAOp<numIn, numOut>::KeepsInputVarLive(Node *input, ConnNum numInArg, Conn
   }
   return false;
 }
+*/
 
 template class DLAOp<2,2>;
 template class DLAOp<3,1>;

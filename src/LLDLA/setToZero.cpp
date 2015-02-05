@@ -36,10 +36,6 @@ Node* SetToZero::BlankInst() {
   return new SetToZero(ABSLAYER);
 }
 
-bool SetToZero::KeepsInputVarLive(Node* input, ConnNum numIn, ConnNum& numOut) const {
-  return false;
-}
-
 Node* SetToZero::GetNewInst() {
   return BlankInst();
 }

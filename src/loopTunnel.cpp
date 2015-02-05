@@ -850,7 +850,7 @@ bool LoopTunnel::Overwrites(const Node *input, ConnNum num) const
   else
     return false;
 }
-
+/*
 bool LoopTunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (m_inputs.empty())
@@ -863,6 +863,7 @@ bool LoopTunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) 
     return false;
   }
 }
+*/
 
 string LoopTunnel::GetLoopLevel(int offset) const
 {

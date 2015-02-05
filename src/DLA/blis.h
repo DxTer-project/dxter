@@ -56,7 +56,6 @@ class GetUpToDiag : public DLANode
   virtual void PrintCode(IndStream &out);
   static Node* BlankInst() {return new GetUpToDiag(NOTTRI,PARTDOWN); }
   virtual const DataTypeInfo& DataType(ConnNum num) const {throw;}
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "GetUpToDiag";}

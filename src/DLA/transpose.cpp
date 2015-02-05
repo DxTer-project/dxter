@@ -204,6 +204,7 @@ bool Transpose::Overwrites(const Node *input, ConnNum num) const
 #endif
 }
 
+/*
 bool Transpose::KeepsInputVarLive(Node *input, ConnNum numInArg, ConnNum &numOutArg) const
 {
 #if DOBLIS
@@ -217,6 +218,7 @@ bool Transpose::KeepsInputVarLive(Node *input, ConnNum numInArg, ConnNum &numOut
   return false;
 #endif
 }
+*/
 
 Name Transpose::GetName(ConnNum num) const
 {

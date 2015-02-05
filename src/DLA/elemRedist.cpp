@@ -1451,7 +1451,7 @@ void SumScatterNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
   const SumScatterNode *origNode = (SumScatterNode*)orig;
   m_coeff = origNode->m_coeff;
 }
-
+/*
 bool SumScatterNode::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(1) == input && InputConnNum(1) == numIn) {
@@ -1461,6 +1461,7 @@ bool SumScatterNode::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numO
   else
     return false;
 }
+*/
 
 bool SumScatterNode::Overwrites(const Node *input, ConnNum num) const
 {
@@ -1687,6 +1688,7 @@ bool SumScatterFrom::Overwrites(const Node *input, ConnNum num) const
   return conn->m_n == input && conn->m_num == num;
 }
 
+/*
 bool SumScatterFrom::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(1) == input && InputConnNum(1) == numIn) {
@@ -1696,6 +1698,7 @@ bool SumScatterFrom::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numO
   else
     return false;
 }
+*/
 
 Cost SumScatterFrom::GetCost(DistType destType, DistType srcType, const Sizes *localMs, const Sizes *localNs)
 {
@@ -1793,7 +1796,7 @@ void SumOverCommNode::Duplicate(const Node *orig,bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig, shallow, possMerging);
 }
-
+/*
 bool SumOverCommNode::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(0) == input && InputConnNum(0) == numIn) {
@@ -1803,6 +1806,7 @@ bool SumOverCommNode::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &num
   else
     throw;
 }
+*/
 
 bool SumOverCommNode::Overwrites(const Node *input, ConnNum num) const
 {

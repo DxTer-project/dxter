@@ -80,7 +80,6 @@ class InputNode : public DLANode
   virtual ~InputNode();
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new InputNode; }
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual const DataTypeInfo& DataType(ConnNum num) const;
@@ -113,7 +112,6 @@ class OutputNode : public DLANode
  public:
   virtual NodeType GetType() const {return "out";}
   static Node* BlankInst() { return  new OutputNode; }
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
@@ -152,7 +150,6 @@ class ConstVal : public DLANode
   virtual NodeType GetType() const {return "const val";}
   static Node* BlankInst() { return  new ConstVal("constVal", COEFZERO); }
   virtual const DataTypeInfo& DataType(ConnNum num) const {throw;}
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual void Prop();
@@ -301,7 +298,6 @@ sdlkfj
   virtual NodeType GetType() const {return "ViewPan";}
   static Node* BlankInst() { return new ViewPan(false,""); }
   virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(0);}
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -350,7 +346,6 @@ sdlkjf
   virtual NodeType GetType() const {return "ViewAround";}
   static Node* BlankInst() { return  new ViewAroundDiag(false,""); }
   virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(0);}
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -408,7 +403,6 @@ bljsdf
   virtual unsigned int NumOutputs() const {return 1;}
   static Node* BlankInst() { return  new ViewTL(ABSLAYER); }
   virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(0);}
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void PrintCode(IndStream &out);
   virtual ClassType GetNodeClass() const {return GetClass();}
@@ -438,7 +432,6 @@ class ViewTLCombine : public DLANode
   virtual unsigned int NumOutputs() const {return 1;}
   static Node* BlankInst() { return  new ViewTLCombine(ABSLAYER); }
   virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(1);}
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void PrintCode(IndStream &out) {}
   virtual ClassType GetNodeClass() const {return GetClass();}

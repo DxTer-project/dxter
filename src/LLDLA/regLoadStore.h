@@ -35,7 +35,6 @@ class LoadToRegs : public DLANode
 
   virtual NodeType GetType() const { return "LoadToRegs"; }
   static Node* BlankInst() { return  new LoadToRegs(); }
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 
   virtual void Prop();
@@ -64,7 +63,6 @@ class DuplicateRegLoad : public DLANode
 
   virtual NodeType GetType() const { return "DuplicateRegLoad"; }
   static Node* BlankInst() { return  new DuplicateRegLoad(); }
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 
   virtual void Prop();
@@ -95,7 +93,6 @@ class TempVecReg : public DLANode
   DataTypeInfo m_info;
   virtual NodeType GetType() const { return "TempVecReg"; }
   static Node* BlankInst() { return  new TempVecReg(); }
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
 
   virtual void Prop();

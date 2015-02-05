@@ -1937,6 +1937,7 @@ RealPSet* Poss::FormSubPSet(NodeVec &outputTuns, bool isCritSect)
   return set;
 }
 
+/*
 void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
 {
   //  NodeConnVecIter iter = node->m_children.begin();
@@ -2032,6 +2033,7 @@ void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set)
     }
   }
 }
+*/
 
 bool CheckPath(Node *node, NodeVec &vec, NodeSet &set)
 {

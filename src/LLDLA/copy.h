@@ -28,7 +28,6 @@ class Copy : public DLAOp<2, 1> {
 
  public:
   virtual const DataTypeInfo& DataType(ConnNum num) const;
-  bool KeepsInputVarLive(Node* input, ConnNum numIn, ConnNum& numOut) const { return false; }
   virtual bool Overwrites(const Node* input, ConnNum num) const;
 
   virtual bool IsReadOnly() const { return false; }

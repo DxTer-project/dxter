@@ -69,7 +69,6 @@ class Transpose : public DLAOp<1,1>
   virtual const Sizes* LocalN(ConnNum num) const;
 #endif
   virtual bool Overwrites(const Node *input, ConnNum num) const;
-  virtual bool KeepsInputVarLive(Node *input, ConnNum numInArg, ConnNum &numOutArg) const;
 #if DOLLDLA
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void ClearDataTypeCache();

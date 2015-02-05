@@ -58,7 +58,6 @@ class TempVarNode : public DLANode
  ~TempVarNode();
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new TempVarNode; }
-  bool KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const {return false;}
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 

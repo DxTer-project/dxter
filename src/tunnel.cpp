@@ -65,7 +65,7 @@ void Tunnel::SetPSet(BasePSet *set)
     cout << "bad set\n";
   m_pset = set;
 }
-
+/*
 bool Tunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (Input(0) == input && InputConnNum(0) == numIn) {
@@ -75,6 +75,7 @@ bool Tunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) cons
   else
     throw;
 }
+*/
 
 Tunnel* Tunnel::GetSetTunnel()
 {

@@ -50,7 +50,6 @@ class DLAOp : public DLANode
   virtual void Prop();
   virtual ConnNum NumOutputs() const;
   virtual bool Overwrites(const Node *input, ConnNum num) const;
-  virtual bool KeepsInputVarLive(Node *input, ConnNum numInArg, ConnNum &numOutArg) const;
 #if DOTENSORS
   virtual bool CreatesNewVars() const {return false;}
 #endif
