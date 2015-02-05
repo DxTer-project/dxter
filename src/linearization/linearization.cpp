@@ -72,12 +72,11 @@ void Linearization::InsertVecClearing(const StrSet &stillLive, const StrSet &alw
 	      //erase outputs.  
 	      //if they're still live, then will be input, too, and
 	      // re-added below
-	      live.erase(outName);
-	      
 	      if (live.find(outName) == live.end())
 		{
 		  needClears.push_back(outName);
 		}
+	      live.erase(outName);
 	    }
 
 	  if (set->IsLoop()) {
