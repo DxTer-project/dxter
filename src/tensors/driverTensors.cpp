@@ -454,6 +454,27 @@ int main(int argc, const char* argv[])
 
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
+  
+#if 1
+  cout << "/* BEGINCONFIG\n";
+  cout << "big = " << big << endl;
+  cout << "small = " << small << endl;
+  cout << "grid = {";
+  for(int i = 0; i < NUM_GRID_DIMS; ++i) {
+    if (i)
+      cout << ", ";
+    cout << GridLens[i];
+  }
+  cout << "}\n";
+  if (M_dontFuseLoops) {
+    cout << "Not fusing loops\n";
+  }
+  else {
+    cout << "Fusing loops\n";
+  }
+  //  cout << "opts:\n";
+  cout << "ENDCONFIG */\n";
+#endif
 
 
 #if 0
