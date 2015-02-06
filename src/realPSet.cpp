@@ -657,18 +657,25 @@ Cost RealPSet::Prop()
       }
 
     const int inSize = m_inTuns.size();
-    const int outSize = m_outTuns.size();
-    vector<int>::iterator mapIter;
-    for(mapIter = m_leftInMap.begin(); mapIter != m_leftInMap.end(); ++mapIter) {
-      if (*mapIter >= inSize)
-	throw;
-    }
-    for(mapIter = m_rightInMap.begin(); mapIter != m_rightInMap.end(); ++mapIter) {
-      if (*mapIter >= inSize) {
-	cout << "mapping to " << *mapIter << " out of " << inSize << endl;
-	throw;
+    const int outSize = m_outTuns.size(); 
+    {
+      vector<vector<int>>::iterator mapIter;
+      for(mapIter = m_leftInMap.begin(); mapIter != m_leftInMap.end(); ++mapIter) {
+	for (auto entry : *mapIter) {
+	  if (entry >= inSize)
+	    throw;
+	}
+      }
+      for(mapIter = m_rightInMap.begin(); mapIter != m_rightInMap.end(); ++mapIter) {
+	for (auto entry : *mapIter) {
+	  if (entry >= inSize) {
+	    cout << "mapping to " << entry << " out of " << inSize << endl;
+	    throw;
+	  }
+	}
       }
     }
+    vector<int>::iterator mapIter;
     for(mapIter = m_leftOutMap.begin(); mapIter != m_leftOutMap.end(); ++mapIter) {
       if (*mapIter >= outSize)
 	throw;
@@ -1222,18 +1229,43 @@ void RealPSet::CombineAndRemoveTunnels()
       delete tun;
       m_inTuns.erase(m_inTuns.begin()+i);
       for (unsigned int j = 0; j < m_leftInMap.size(); ++j) {
-	int val = m_leftInMap[j];
-	if (val == (int)i)
-	  m_leftInMap[j] = -1;
-	if (val > (int)i)
-	  m_leftInMap[j] = val-1;
+	throw;
+	vector<int> vec = m_leftInMap[j];
+	bool madeChange = false;
+	for (int i = 0; i < vec.size(); ++i) {
+	  int val = vec[i];
+	  if (val == (int)i) {
+	    vec.erase(vec.begin()+i);
+	    --i;
+	    madeChange = true;
+	  }
+	  if (val > (int)i) {
+	    vec[i] = val-1;
+	    madeChange = true;
+	  }
+	}
+	if (madeChange)
+	  m_leftInMap[j] = vec;
       }
       for (unsigned int j = 0; j < m_rightInMap.size(); ++j) {
-	int val = m_rightInMap[j];
-	if (val == (int)i)
-	  m_rightInMap[j] = -1;
-	else if (val > (int)i)
-	  m_rightInMap[j] = val-1;
+	throw;
+	vector<int> vec = m_rightInMap[j];
+	bool madeChange = false;
+	for (int i = 0; i < vec.size(); ++i) {
+	throw;
+	  int val = vec[i];
+	  if (val == (int)i) {
+	    vec.erase(vec.begin()+i);
+	    --i;
+	    madeChange = true;
+	  }
+	  else if (val > (int)i) {
+	    vec[i] = val-1;
+	    madeChange = true;
+	  }
+	}
+	if (madeChange)
+	  m_rightInMap[j] = vec;
       }
       --i;
     }

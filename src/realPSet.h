@@ -56,7 +56,10 @@ class RealPSet : public BasePSet
   PSetMap m_mergeMap;
   RealPSet *m_mergeLeft, *m_mergeRight;
   Cost m_cost;
-  vector<int>  m_leftInMap, m_rightInMap, m_leftOutMap, m_rightOutMap;
+  //after fusing loops, it's possible we have more input tuns connected to an input
+  // than before since input of loop A could be output of loop B, but they split in different ways
+  vector<vector<int>>  m_leftInMap, m_rightInMap;
+  vector<int> m_leftOutMap, m_rightOutMap;
   virtual ~RealPSet();
   void UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr);
   void RemoveShadow(ShadowPSet *shadow);
