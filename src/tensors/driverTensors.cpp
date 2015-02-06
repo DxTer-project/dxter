@@ -47,7 +47,7 @@
 #include "zaxpby.h"
 #include "ccsd.h"
 
-bool M_dontFuseLoops = true;
+bool M_dontFuseLoops = false;
 
   //~ 10:1 ratio
   // 53, 5 for H20

@@ -147,14 +147,16 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
   }
   PSetMapIter setIter = m_mergeMap.begin();
   for(; setIter != m_mergeMap.end(); ++setIter) {
-    if (setIter->first == oldPtr) {
+    if (setIter->first.m_fused == oldPtr) {
       if (newPtr == NULL) {
 	m_mergeMap.erase(setIter);	
 	return;
       }
+      FusionInformation info = setIter->first;
+      info.m_fused = newPtr;
       RealPSet *second = setIter->second;
       m_mergeMap.erase(setIter);
-      m_mergeMap.insert(PSetMapPair(newPtr, second));
+      m_mergeMap.insert(PSetMapPair(info, second));
       return;
     }
     if (setIter->second == oldPtr) {
@@ -162,7 +164,7 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
 	m_mergeMap.erase(setIter);	
 	return;
       }
-      RealPSet *first = setIter->first;
+      FusionInformation first = setIter->first;
       m_mergeMap.erase(setIter);
       m_mergeMap.insert(PSetMapPair(first, newPtr));
       return;
@@ -272,7 +274,7 @@ void RealPSet::Migrate()
     cout << "updating mergemap first\n";
 #endif
 
-    setIter->first->UpdateRealPSetPointers(this, newSet);
+    setIter->first.m_fused->UpdateRealPSetPointers(this, newSet);
 #if PRINTTRACKING
     cout << "updating mergemap second\n";
 #endif
@@ -404,7 +406,7 @@ void RealPSet::DisconnectFromSetsForMergingRecord()
 #if PRINTTRACKING
       cout << "updating first\n";
 #endif
-      setIter->first->UpdateRealPSetPointers(this, NULL);
+      setIter->first.m_fused->UpdateRealPSetPointers(this, NULL);
 #if PRINTTRACKING
       cout << "updating second\n";
 #endif
@@ -2296,16 +2298,71 @@ ShadowPSet* RealPSet::GetNewShadowDup(Poss *poss)
 }
 
 
-RealPSet* RealPSet::HasMergedWith(RealPSet *set, bool checkOtherOrder)
+void RealPSet::GetFusionInformation(BasePSet *leftSet, BasePSet *rightSet,
+			  RealPSet *realLeft, RealPSet *realRight,
+			  FusionInformation &leftInfo, FusionInformation &rightInfo)
 {
-  PSetMapIter iter = m_mergeMap.find(set);
-  if (iter != m_mergeMap.end())
+  leftInfo.m_fused = realRight;
+  rightInfo.m_fused = realLeft;
+
+  for (int i = 0; i < leftSet->m_inTuns.size(); ++i) {
+    bool connected = false;
+    Tunnel *tun = leftSet->m_inTuns[i];
+    Node *input = tun->Input(0);
+    if (input->IsTunnel()) {
+      Tunnel *tun = (Tunnel*)(input);
+      if (tun->m_pset == rightSet) {
+	connected = true;
+	int tunNum = FindInTunVec(rightSet->m_outTuns, tun);
+	leftInfo.m_map[i] = -tunNum;
+	rightInfo.m_map[-tunNum] = i;
+      }
+    }
+    if (!connected) {
+      for (auto childConn : input->m_children) {
+	Node *child = childConn->m_n;
+	if (child != tun) {
+	  if (child->IsTunnel()) {
+	    Tunnel *tun = (Tunnel*)child;
+	    if (tun->m_pset == rightSet) {
+	      int tunNum = FindInTunVec(rightSet->m_inTuns, tun);
+	      leftInfo.m_map[i] = tunNum;
+	      rightInfo.m_map[tunNum] = i;
+	      break;
+	    }
+	  }
+	}
+      }
+    }
+  }
+  for (int i = 0; i < leftSet->m_outTuns.size(); ++i) {
+    Tunnel *out = leftSet->m_outTuns[i];
+    for(auto childConn : out->m_children) {
+      Node *child = childConn->m_n;
+      if (child->IsTunnel()) {
+	Tunnel *tun = (Tunnel*)child;
+	if (tun->m_pset == rightSet) {
+	  int tunNum = FindInTunVec(rightSet->m_inTuns, tun);
+	  leftInfo.m_map[-i] = tunNum;
+	  rightInfo.m_map[tunNum] = -i;
+	}
+      }
+    }
+  }
+}
+
+RealPSet* RealPSet::HasMergedWith(RealPSet *realLeft, RealPSet *realRight,
+					 FusionInformation &leftInfo, FusionInformation &rightInfo)
+{
+  PSetMapIter iter = realLeft->m_mergeMap.find(leftInfo);
+  if (iter != realLeft->m_mergeMap.end())
     return iter->second;
 
-  if (checkOtherOrder)
-    return set->HasMergedWith(this,false);
-  else
-    return NULL;
+  iter = realRight->m_mergeMap.find(rightInfo);
+  if (iter != realRight->m_mergeMap.end())
+    return iter->second;
+  
+  return NULL;
 }
 
 bool RealPSet::RemoveLoops(bool *doneSomething)
