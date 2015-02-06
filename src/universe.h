@@ -42,7 +42,8 @@ extern unsigned int CurrPhase;
 //Does the generation, evaluation, printing, etc.
 class Universe
 {
- protected:
+
+ public:
   static TransMap M_trans[NUMPHASES];
   static TransMap M_simplifiers;
   static TransPtrMap M_transNames;
@@ -52,7 +53,7 @@ class Universe
   static unsigned int M_transCount[NUMPHASES+2];
   static ConsFuncMap M_consFuncMap;
 
- public:
+
   Universe();
   void Init(RealPSet *seed);
   void Init(string fileName);

@@ -472,7 +472,19 @@ int main(int argc, const char* argv[])
   else {
     cout << "Fusing loops\n";
   }
-  //  cout << "opts:\n";
+  cout << "transformations:\n";
+  for (int i = 0; i < NUMPHASES; ++i) {
+    for (auto transMap : uni.M_trans[i]) {
+      for (auto trans : *(transMap.second)) {
+	cout << "phase " << i << ": on " << transMap.first << ", " << trans->GetType() << endl;
+      }
+    }
+  }
+  for (auto transMap : uni.M_simplifiers) {
+    for (auto trans : *(transMap.second)) {
+      cout << "simplifier: " << trans->GetType() << endl;
+    }
+  }  
   cout << "ENDCONFIG */\n";
 #endif
 
