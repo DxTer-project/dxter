@@ -1002,7 +1002,12 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
 #endif
 
 #if USESHADOWS
-  RealPSet *merged = (*leftSet)->GetReal()->HasMergedWith((*rightSet)->GetReal());
+  FusionInformation leftInfo, rightInfo;
+  RealPSet::GetFusionInformation(*leftSet, *rightSet,
+				 (*leftSet)->GetReal(), (*rightSet)->GetReal(),
+				 leftInfo, rightInfo);
+  RealPSet *merged = RealPSet::HasMergedWith((*leftSet)->GetReal(), (*rightSet)->GetReal(),
+					     leftInfo, rightInfo);
   if (merged) {
     m_sets.erase(m_sets.begin()+left);
     if (*(m_sets.begin()+right-1) != *rightSet) {
@@ -1175,12 +1180,20 @@ void Poss::MergePart2(RealPSet *newSet,
     cout << "realLeft: " << realLeft << endl;
     cout << "realRight: " << realRight << endl;
 #endif
-    if (realLeft->m_mergeMap.find(realRight) != realLeft->m_mergeMap.end())
+
+
+    FusionInformation leftInfo, rightInfo;
+    RealPSet::GetFusionInformation(leftSet, rightSet, realLeft, realRight, leftInfo, rightInfo);
+
+    if (realLeft->m_mergeMap.find(leftInfo) != realLeft->m_mergeMap.end())
       throw;
-    realLeft->m_mergeMap.insert(PSetMapPair(realRight,newSet));
-    if (realRight->m_mergeMap.find(realLeft) != realRight->m_mergeMap.end())
+
+    if (realRight->m_mergeMap.find(rightInfo) != realRight->m_mergeMap.end())
       throw;
-    realRight->m_mergeMap.insert(PSetMapPair(realLeft,newSet));
+
+
+    realLeft->m_mergeMap.insert(PSetMapPair(leftInfo,newSet));
+    realRight->m_mergeMap.insert(PSetMapPair(rightInfo,newSet));
     newSet->m_mergeLeft = realLeft;
     newSet->m_mergeRight = realRight;
   }

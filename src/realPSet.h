@@ -38,6 +38,73 @@
 class Tunnel;
 class ShadowPSet;
 
+
+typedef map<int,int> IntMap;
+typedef std::pair<int,int> IntMapPair;
+typedef IntMap::iterator IntMapIter;
+typedef IntMap::const_iterator IntMapConstIter;
+
+/*
+  this information tracks how two sets are fused w.r.t.
+     connections between tunnels
+  if there is an input of my set that is connected to the
+     output of another set, the input tun number will map
+     to the negative number of the tun of that set
+  if there is an output for my set that is connected to 
+     the input of another set, my negative output tun
+     number is mapped to the positive in tun number of
+     the other set
+  if an input of mine is connected to the same node
+     as the input of the other set, then the positive in tun
+     number is mapped to the other set's positive in tun num
+*/
+class FusionInformation
+{
+ public:
+  RealPSet *m_fused;
+  IntMap m_map;
+};
+
+
+struct FusionInformationCompare {
+  bool operator() (const FusionInformation& lhs, const FusionInformation& rhs) const{
+    if (lhs.m_fused < rhs.m_fused)
+      return true;
+    else if (lhs.m_fused > rhs.m_fused)
+      return false;
+    else {
+      if (lhs.m_map.size() < rhs.m_map.size())
+	return true;
+      else if (lhs.m_map.size() > rhs.m_map.size())
+	return false;
+      else {
+	IntMapConstIter lhsIter = lhs.m_map.begin();
+	IntMapConstIter rhsIter = rhs.m_map.begin();
+	for(; lhsIter != lhs.m_map.end(); ++lhsIter, ++rhsIter) {
+	  if (lhsIter->first < rhsIter->first) {
+	    return true;
+	  }
+	  else if (lhsIter->first > rhsIter->first) {
+	    return false;
+	  }
+	  else {
+	    if (lhsIter->second < rhsIter->second)
+	      return true;
+	    else if (lhsIter->second > rhsIter->second)
+	      return false;
+	  }
+	}
+	return false;
+      }
+    }
+  }
+};
+
+typedef std::pair<FusionInformation, RealPSet*> PSetMapPair;
+typedef std::map<FusionInformation, RealPSet*, FusionInformationCompare> PSetMap;
+typedef PSetMap::iterator PSetMapIter;
+typedef PSetMap::const_iterator PSetMapConstIter;
+
 class RealPSet : public BasePSet
 {
  public:
@@ -113,8 +180,11 @@ class RealPSet : public BasePSet
   virtual bool IsReal() const {return true;}
   virtual const RealPSet* GetReal() const {return this;}
   virtual RealPSet* GetReal() {return this;}
-
-  RealPSet* HasMergedWith(RealPSet *set, bool checkOtherOrder=true);
+  static void GetFusionInformation(BasePSet *leftSet, BasePSet *rightSet,
+				   RealPSet *realLeft, RealPSet *realRight,
+				   FusionInformation &leftInfo, FusionInformation &rightInfo);
+  static RealPSet* HasMergedWith(RealPSet *realLeft, RealPSet *realRight,
+				 FusionInformation &leftInfo, FusionInformation &rightInfo);
   void SetDeletingRecursively();
   void ClearDeletingRecursively();
 
