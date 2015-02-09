@@ -233,7 +233,7 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
     }
   }
   
-#if 1
+#if 0
   int clumpCount = 0;
   int count = 0;
   cout << "\\\\  Scheduling the following ( " << m_elems.size() << " )\n";
@@ -251,7 +251,7 @@ void Linearizer::FindOptimalLinearization(const StrSet &stillLive)
     }
   }
   cout << "\\\\" << count << " to schedule with " << clumpCount << " clumped\n";
-#endif // DOTENSORS
+#endif
   
   for(auto elem : m_elems) {
     if (elem->CanAddToLinearOrder()) {
