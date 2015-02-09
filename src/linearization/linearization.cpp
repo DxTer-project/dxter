@@ -144,7 +144,6 @@ Cost Linearization::GetCostNoRecursion(const StrSet &stillLive, const StrSet &al
       LinElem *elem = *iter;
 
       VarCostMap newVars = elem->NewVarsAndCosts();
-      map.insert(newVars.begin(), newVars.end());
       for(auto &var : map) {
 #if !DOTENSORS
 	throw;
@@ -157,7 +156,13 @@ Cost Linearization::GetCostNoRecursion(const StrSet &stillLive, const StrSet &al
 	  what their actual max size is
 	*/
 #endif
-	currCost += var.second;
+	//If it's in one of these, then its cost is accounted for in higher levels
+	if (stillLive.find(var.first) == stillLive.end() 
+	    && alwaysLive.find(var.first) == alwaysLive.end())
+	  {
+	    currCost += var.second;
+	    map.insert(var);
+	  }
       }
 
       if (currCost > m_cost) {
