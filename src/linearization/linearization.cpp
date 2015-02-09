@@ -340,7 +340,7 @@ bool Linearization::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, c
 	    }
 	}
         for(auto inputConn : node->m_inputs) {
-	  string inName = inputConn->m_n->GetInputNameStr(inputConn->m_num);
+	  string inName = inputConn->m_n->GetNameStr(inputConn->m_num);
 	  if (stillLive.find(inName) == stillLive.end()
 	      && alwaysLive.find(inName) == alwaysLive.end()
 	      && live.find(inName) == live.end())
