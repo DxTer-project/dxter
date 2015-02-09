@@ -499,8 +499,7 @@ bool HasDecendentForApplication(const Node *node)
 bool MoveTempVarNodeIntoLoop::CanApply(const Node *node) const
 {
   if (node->m_children.size() > 1) {
-    cout << "ERROR: Temp var had more than 1 child" << endl;
-    throw;
+    return false;
   }
   return HasDecendentForApplication(node->Child(0));
 }
@@ -828,4 +827,39 @@ bool MoveTempVarNodeIntoSet::CanApply(const Node *node) const
 }
 
 
+bool TempVarFromTempVar::CanApply(const Node *node) const
+{
+  const TempVarNode *tmp = (TempVarNode*)node;
+  if (tmp->Input(0)->GetNodeClass() == TempVarNode::GetClass()) {
+    const TempVarNode *inTmp = (TempVarNode*)(tmp->Input(0));
+    if (!inTmp->m_sumDims.empty())
+      throw;
+    else
+      return true;
+  }
+  else
+    return false;
+}
+
+void TempVarFromTempVar::Apply(Node *node) const
+{
+  TempVarNode *tmp = (TempVarNode*)node;
+  TempVarNode *inTmp = (TempVarNode*)(tmp->Input(0));
+  
+  tmp->ChangeInput2Way(inTmp, 0, 
+		       inTmp->Input(0), inTmp->InputConnNum(0));
+  
+  if (tmp->m_align.empty() && !inTmp->m_align.empty()) {
+    tmp->m_align = inTmp->m_align;
+    tmp->m_alignModes = inTmp->m_alignModes;
+    tmp->m_alignModesSrc = inTmp->m_alignModesSrc;
+  }
+  if (inTmp->m_children.empty()) {
+    tmp->m_poss->DeleteChildAndCleanUp(inTmp);
+  }
+}
+
+
+
 #endif //DOTENSORS
+ 

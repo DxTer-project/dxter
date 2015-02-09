@@ -107,3 +107,11 @@ class MoveTempVarNodeIntoSet : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };
+
+class TempVarFromTempVar : public SingleTrans
+{
+ public:
+  virtual string GetType() const { return "TempVarFromTempVar"; }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
