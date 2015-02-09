@@ -54,13 +54,13 @@ RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int 
   auto tunBeta = new Tunnel(POSSTUNIN);
   tunBeta->AddInput(beta, 0);
 
-  Tunnel *tunA = new Tunnel(POSSTUNIN);
+  auto tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
 
-  Tunnel *tunB = new Tunnel(POSSTUNIN);
+  auto tunB = new Tunnel(POSSTUNIN);
   tunB->AddInput(Bin, 0);
 
-  Tunnel *tunC = new Tunnel(POSSTUNIN);
+  auto tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin, 0);
 
   auto betaC = new SMMul(ABSLAYER);
@@ -78,7 +78,7 @@ RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int 
     transposeB->AddInput(tunB, 0);
   }
 
-  SMMul* alphaA = new SMMul(ABSLAYER);
+  auto alphaA = new SMMul(ABSLAYER);
   if (transA == TRANS) {
     alphaA->AddInputs(4,
 		      tunAlpha, 0,
@@ -89,7 +89,7 @@ RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int 
 		     tunA, 0);
   }
 
-  Gemm *gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
+  auto gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
   gemm->AddInput(alphaA, 0);
   if (transB == NORMAL) {
     gemm->AddInput(tunB, 0);
@@ -98,14 +98,14 @@ RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int 
   }
   gemm->AddInput(betaC, 0);
 
-  Poss *innerPoss = new Poss(gemm,true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
+  auto innerPoss = new Poss(gemm,true);
+  auto innerSet = new RealPSet(innerPoss);
 
-  OutputNode *Cout = new OutputNode;
+  auto Cout = new OutputNode;
   Cout->AddInput(innerSet->OutTun(0),0);
 
-  Poss *outerPoss = new Poss(Cout,true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
+  auto outerPoss = new Poss(Cout,true);
+  auto outerSet = new RealPSet(outerPoss);
   
   return outerSet;
 }
