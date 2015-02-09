@@ -808,6 +808,8 @@ void Universe::InlineAllSets()
 
 void Universe::EnforceMemConstraint(Cost maxMem)
 {
+  if (maxMem <= 0)
+    return;
   StrSet blank;
   if (m_pset->EnforceMemConstraint(maxMem, blank)) {
     cout << "Base PSet is over memory\n";

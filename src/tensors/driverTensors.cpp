@@ -53,6 +53,7 @@ bool M_dontFuseLoops = true;
   // 53, 5 for H20
 const Size big = 500; // a-h
 const Size small = 50; //i-p
+const Cost maxMem = -1; //1e9;
 
 Size one = 1;
 //Size bs = ELEM_BS;
@@ -326,10 +327,11 @@ int main(int argc, const char* argv[])
 
 #if DODPTENSORPHASE
   if (CurrPhase == DPTENSORPHASE) {
+    time(&start2);
     cout << "Expanding DP phase\n";
     uni.Expand(-1, DPTENSORPHASE, TenCullDP);
     time(&end);
-    cout << "DP phase took " << difftime(end,start) << " seconds\n";
+    cout << "DP phase took " << difftime(end,start2) << " seconds\n";
 
     cout << "Propagating\n";
     cout.flush();
@@ -337,6 +339,13 @@ int main(int argc, const char* argv[])
     uni.Prop();
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+
+    cout << "Enforcing memory contstraint\n";
+    cout.flush();
+    time(&start2);
+    uni.EnforceMemConstraint(maxMem);
+    time(&end);
+    cout << "That took " << difftime(end,start2) << " seconds\n";
   }
 #endif
 
@@ -369,7 +378,7 @@ int main(int argc, const char* argv[])
 
     //        uni.PrintAll(algNum);
     //        throw;
-      
+    
     cout << "Propagating\n";
     cout.flush();
     time(&start2);
@@ -377,6 +386,13 @@ int main(int argc, const char* argv[])
     uni.CullWorstPerformers(.99, 3);
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+
+    cout << "Enforcing memory contstraint\n";
+    cout.flush();
+    time(&start2);
+    uni.EnforceMemConstraint(maxMem);
+    time(&end);
+    cout << "That took " << difftime(end,start2) << " seconds\n";
   }
 #endif
 
@@ -452,6 +468,7 @@ int main(int argc, const char* argv[])
   }
 #endif
 
+  time(&end);
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
   
