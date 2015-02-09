@@ -56,5 +56,5 @@ class GraphIter
   Cost EvalAndSetBest();
 
   void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, BasePSet *owner);
-  void Print(IndStream &out, BasePSet *owner, StrSet liveSet);
+  void Print(IndStream &out, BasePSet *owner, StrSet liveSet, Cost currCost);
 };

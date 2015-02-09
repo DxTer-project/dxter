@@ -37,6 +37,7 @@ bool FoundInVec(const LinElem *elem, const LinElemVec &vec)
 
 Linearizer::Linearizer(const Poss *poss)
 {
+  m_alwaysLiveCost = 0;
   PtrToLinElemMap map;
   for(auto node : poss->m_possNodes) {
     FindOrAdd(node, map);
@@ -44,7 +45,6 @@ Linearizer::Linearizer(const Poss *poss)
   for(auto set : poss->m_sets) {
     FindOrAdd(set, map);
   }
-  m_alwaysLiveCost = 0;
 }
 
 Linearizer::~Linearizer()

@@ -27,6 +27,8 @@
 #include "linElem.h"
 #include "linearization.h"
 
+#define PRINTMEMCOSTS 0
+
 typedef std::map<const void*,LinElem*> PtrToLinElemMap;
 typedef PtrToLinElemMap::iterator PtrToLinElemMapIter;
 typedef std::set<LinElem*> LinElemSet;

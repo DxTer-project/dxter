@@ -43,6 +43,7 @@ class LinElem
   LinElemVec m_preds;
   LinElem *m_succ;
   bool m_addedToLinOrder;
+  Cost m_cost;
 
   LinElem();
   virtual ~LinElem() {}
