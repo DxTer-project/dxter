@@ -51,8 +51,8 @@ bool M_dontFuseLoops = true;
 
   //~ 10:1 ratio
   // 53, 5 for H20
-const Size big = 400; // a-h
-const Size small = 40; //i-p
+const Size small = 50; //i-p
+const Size big = 10*small; // a-h
 const Cost maxMem = 1e8;
 
 Size one = 1;
@@ -340,13 +340,6 @@ int main(int argc, const char* argv[])
     uni.Prop();
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-
-    cout << "Enforcing memory contstraint\n";
-    cout.flush();
-    time(&start2);
-    uni.EnforceMemConstraint(maxMem);
-    time(&end);
-    cout << "That took " << difftime(end,start2) << " seconds\n";
   }
 #endif
 
@@ -354,6 +347,15 @@ int main(int argc, const char* argv[])
   if (CurrPhase == SUMSCATTERTENSORPHASE) {
     cout << "SumScatterOpt phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
+
+    cout << "Enforcing memory contstraint\n";
+    cout.flush();
+    time(&start2);
+    uni.EnforceMemConstraint(maxMem);
+    time(&end);
+    cout << "Now there are " << uni.TotalCount() << endl;
+    cout << "That took " << difftime(end,start2) << " seconds\n";
+
     time(&start2);
     uni.Expand(numIters, SUMSCATTERTENSORPHASE, TenCullRO);
     time(&end);
@@ -466,6 +468,14 @@ int main(int argc, const char* argv[])
     uni.Prop();
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+
+    cout << "Enforcing memory contstraint\n";
+    cout.flush();
+    time(&start2);
+    uni.EnforceMemConstraint(maxMem);
+    time(&end);
+    cout << "Now there are " << uni.TotalCount() << endl;
+    cout << "That took " << difftime(end,start2) << " seconds\n";
   }
 #endif
 

@@ -191,7 +191,7 @@ class RealPSet : public BasePSet
   void SetDeletingRecursively();
   void ClearDeletingRecursively();
 
-  bool EnforceMemConstraint(Cost maxMem, const StrSet &stillLive);
+  bool EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet &stillLive);
 };
 
 

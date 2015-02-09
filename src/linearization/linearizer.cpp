@@ -44,6 +44,7 @@ Linearizer::Linearizer(const Poss *poss)
   for(auto set : poss->m_sets) {
     FindOrAdd(set, map);
   }
+  m_alwaysLiveCost = 0;
 }
 
 Linearizer::~Linearizer()
@@ -79,6 +80,7 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
   m_elems.push_back(elem);
   
   if (node->GetNodeClass() == OutputNode::GetClass()) {
+    m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfLocalElements(node->InputConnNum(0));
     m_alwaysLive.insert(node->GetInputNameStr(0));
   }
   

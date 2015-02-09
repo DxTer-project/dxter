@@ -244,137 +244,161 @@ bool Linearization::LiveAfter(unsigned int loc, const string &name, const StrSet
 }
 
 //Reflect in GetCostNoRecursion
-bool Linearization::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, const StrSet &alwaysLive)
+bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet &stillLive, const StrSet &alwaysLive)
 {
-  Cost currCost = 0;
+  Cost currCost = costGoingIn;
   StrSet live;
   for(int i = m_order.size() - 1; i >= 0; --i) {
     LinElem *elem = m_order[i];
-    if (!elem->IsClear()) {
-      if (elem->IsSet() && (((SetLinElem*)elem)->m_set)->IsReal()) {
-	/*
-	  If input and used later, do not clear
-	  If input, not output and not used later, clear within
-	  If input and output but no children and not used later,
-	  clear here
-	  If input and output but has children or used later,
-	  don't clear
-	*/
-	RealPSet *set = (RealPSet*)(((SetLinElem*)elem)->m_set);
-	//If the variable is output, then it's live within
+    if (elem->IsSet() && (((SetLinElem*)elem)->m_set)->IsReal()) {
+      /*
+	If input and used later, do not clear
+	If input, not output and not used later, clear within
+	If input and output but no children and not used later,
+	clear here
+	If input and output but has children or used later,
+	don't clear
+      */
+      RealPSet *set = (RealPSet*)(((SetLinElem*)elem)->m_set);
+      //If the variable is output, then it's live within
 
-	Cost costDiff = 0;
+      Cost costDiff = 0;
 
-	StrSet liveHere = live;
-	for (auto output : set->m_outTuns) {
-	  string outName = output->GetNameStr(0); 
-	  if (stillLive.find(outName) == stillLive.end() &&
-	      alwaysLive.find(outName) == alwaysLive.end()) 
-	    {
-	      live.erase(outName);
+      StrSet liveHere = live;
+      for (auto output : set->m_outTuns) {
+	string outName = output->GetNameStr(0); 
+	if (stillLive.find(outName) == stillLive.end() &&
+	    alwaysLive.find(outName) == alwaysLive.end()) 
+	  {
+	    live.erase(outName);
 #if DOTENSORS
-	      costDiff -= ((DLANode*)output)->MaxNumberOfLocalElements(0);
+	    costDiff -= ((DLANode*)output)->MaxNumberOfLocalElements(0);
 #else
-	/*
-	  for domains other than tensors, we could be
-	  in a loop where one variable is increasing
-	  in size while another is decreasing.  If this
-	  is the case, then the summ of their 
-	  max size across iterations is about double
-	  what their actual max size is
-	*/
-	      throw;
-	      costDiff -=((DLANode*)output)->MaxNumberOfElements(0);
+	    /*
+	      for domains other than tensors, we could be
+	      in a loop where one variable is increasing
+	      in size while another is decreasing.  If this
+	      is the case, then the summ of their 
+	      max size across iterations is about double
+	      what their actual max size is
+	    */
+	    throw;
+	    costDiff -=((DLANode*)output)->MaxNumberOfElements(0);
 #endif
-	    }
+	  }
 	  
-	  if (set->IsLoop()) {
-	    Node *possTunOut = output->GetRealTunnel()->Input(0);
-	    for(auto inToOut : possTunOut->m_inputs) {
-	      liveHere.insert(inToOut->m_n->GetNameStr(inToOut->m_num));
-	    }
+	//so partitions don't look like they can be freed in the recursive call below
+	if (set->IsLoop()) {
+	  Node *possTunOut = output->GetRealTunnel()->Input(0);
+	  for(auto inToOut : possTunOut->m_inputs) {
+	    liveHere.insert(inToOut->m_n->GetNameStr(inToOut->m_num));
 	  }
 	}
-	
-	for (auto input : set->m_inTuns) {
-	  string inName = input->GetInputNameStr(0);
-	  if (stillLive.find(inName) == stillLive.end()
-	      && alwaysLive.find(inName) == alwaysLive.end()
-	      && live.find(inName) == live.end())
-	    {
-	      live.insert(inName);
-#if DOTENSORS
-	      costDiff += ((DLANode*)(input->Input(0)))->MaxNumberOfLocalElements(input->InputConnNum(0));
-#else
-	/*
-	  for domains other than tensors, we could be
-	  in a loop where one variable is increasing
-	  in size while another is decreasing.  If this
-	  is the case, then the summ of their 
-	  max size across iterations is about double
-	  what their actual max size is
-	*/
-	      throw;
-	      costDiff += ((DLANode*)(input->Input(0)))->MaxNumberOfElements(input->InputConnNum(0));
-#endif
-	    }
-	  else
-	    liveHere.insert(inName);
-	}
-	
-	if (set->EnforceMemConstraint(maxMem-currCost, liveHere))
-	  return true;
-	
-	currCost += costDiff;
       }
-      else if (elem->IsNode()) {
-	Node *node = ((NodeLinElem*)elem)->m_node;
-	Cost costDiff = 0;
-	for (unsigned int i = 0; i < node->NumOutputs(); ++i) {
-	  string name = node->GetNameStr(i);
-	  if (stillLive.find(name) == stillLive.end()
-	       && alwaysLive.find(name) == alwaysLive.end())
-            {
-              live.insert(name);
+	
+      for (auto input : set->m_inTuns) {
+	string inName = input->GetInputNameStr(0);
+	if (stillLive.find(inName) == stillLive.end()
+	    && alwaysLive.find(inName) == alwaysLive.end()
+	    && live.find(inName) == live.end())
+	  {
+	    live.insert(inName);
 #if DOTENSORS
-              costDiff -= ((DLANode*)node)->MaxNumberOfLocalElements(i);
+	    costDiff += ((DLANode*)(input->Input(0)))->MaxNumberOfLocalElements(input->InputConnNum(0));
 #else
-              throw;
-              costDiff -= ((DLANode*)node)->MaxNumberOfElements(i);
+	    /*
+	      for domains other than tensors, we could be
+	      in a loop where one variable is increasing
+	      in size while another is decreasing.  If this
+	      is the case, then the summ of their 
+	      max size across iterations is about double
+	      what their actual max size is
+	    */
+	    throw;
+	    costDiff += ((DLANode*)(input->Input(0)))->MaxNumberOfElements(input->InputConnNum(0));
 #endif
-	    }
-	}
-        for(auto inputConn : node->m_inputs) {
-	  string inName = inputConn->m_n->GetNameStr(inputConn->m_num);
-	  if (stillLive.find(inName) == stillLive.end()
-	      && alwaysLive.find(inName) == alwaysLive.end()
-	      && live.find(inName) == live.end())
-	    {
-	      live.insert(inName);
-#if DOTENSORS
-	      costDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfLocalElements(inputConn->m_num);
-#else
-	/*
-	  for domains other than tensors, we could be
-	  in a loop where one variable is increasing
-	  in size while another is decreasing.  If this
-	  is the case, then the summ of their 
-	  max size across iterations is about double
-	  what their actual max size is
-	*/
-	      throw;
-	      costDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfElements(inputConn->m_num);
-#endif
-	    }
-	}
-	  currCost += costDiff;
-	  
-      if (currCost >= maxMem)
+	  }
+      }
+	
+      if (set->EnforceMemConstraint(currCost, maxMem, liveHere))
 	return true;
-	}
+	
+      currCost += costDiff;
+    }
+    else if (elem->IsNode()) {
+      Node *node = ((NodeLinElem*)elem)->m_node;
+      Cost costDiff = 0;
+      Cost costTempDiff = 0;
+
+      for(auto inputConn : node->m_inputs) {
+	string inName = inputConn->m_n->GetNameStr(inputConn->m_num);
+	if (stillLive.find(inName) == stillLive.end()
+	    && alwaysLive.find(inName) == alwaysLive.end()
+	    && live.find(inName) == live.end())
+	  {
+#if DOTENSORS
+	    costTempDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfLocalElements(inputConn->m_num);
+#else
+	    /*
+	      for domains other than tensors, we could be
+	      in a loop where one variable is increasing
+	      in size while another is decreasing.  If this
+	      is the case, then the summ of their 
+	      max size across iterations is about double
+	      what their actual max size is
+	    */
+	    throw;
+	    costTempDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfElements(inputConn->m_num);
+#endif
+	  }
       }
+
+      if (currCost+costTempDiff >= maxMem) {
+	return true;
       }
-      
+
+      for (unsigned int i = 0; i < node->NumOutputs(); ++i) {
+	string name = node->GetNameStr(i);
+	if (stillLive.find(name) == stillLive.end()
+	    && alwaysLive.find(name) == alwaysLive.end())
+	  {
+	    live.erase(name);
+#if DOTENSORS
+	    costDiff -= ((DLANode*)node)->MaxNumberOfLocalElements(i);
+#else
+	    throw;
+	    costDiff -= ((DLANode*)node)->MaxNumberOfElements(i);
+#endif
+	  }
+      }
+
+      for(auto inputConn : node->m_inputs) {
+	string inName = inputConn->m_n->GetNameStr(inputConn->m_num);
+	if (stillLive.find(inName) == stillLive.end()
+	    && alwaysLive.find(inName) == alwaysLive.end()
+	    && live.find(inName) == live.end())
+	  {
+	    live.insert(inName);
+#if DOTENSORS
+	    costDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfLocalElements(inputConn->m_num);
+#else
+	    /*
+	      for domains other than tensors, we could be
+	      in a loop where one variable is increasing
+	      in size while another is decreasing.  If this
+	      is the case, then the summ of their 
+	      max size across iterations is about double
+	      what their actual max size is
+	    */
+	    throw;
+	    costDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfElements(inputConn->m_num);
+#endif
+	  }
+      }
+      currCost += costDiff;
+    }
+  }
+  
   return false;
 }
 

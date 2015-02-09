@@ -2462,16 +2462,16 @@ bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
 }
 #endif
 
-bool RealPSet::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive)
+bool RealPSet::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet &stillLive)
 {
   PossMMap toRemove;
   for(auto possEntry : m_posses) {
     Linearizer lin(possEntry.second);
     lin.FindOptimalLinearization(stillLive);
-    if (lin.m_lin.GetCostNoRecursion(stillLive, lin.m_alwaysLive) >= maxMem) 
+    if (lin.m_lin.GetCostNoRecursion(stillLive, lin.m_alwaysLive)+costGoingIn >= maxMem)
       toRemove.insert(possEntry);
     else {
-      if (lin.m_lin.EnforceMemConstraint(maxMem, stillLive, lin.m_alwaysLive)) {
+      if (lin.m_lin.EnforceMemConstraint(costGoingIn+lin.m_alwaysLiveCost, maxMem, stillLive, lin.m_alwaysLive)) {
 	toRemove.insert(possEntry);
       }
     }

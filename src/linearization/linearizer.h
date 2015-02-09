@@ -38,6 +38,7 @@ class Linearizer
   LinElemVec m_elems;
   Linearization m_lin;
   StrSet m_alwaysLive;
+  Cost m_alwaysLiveCost;
 
   Linearizer(const Poss *poss);
   ~Linearizer();
