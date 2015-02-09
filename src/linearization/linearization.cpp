@@ -322,7 +322,7 @@ bool Linearization::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, c
 	
 	currCost += costDiff;
       }
-      else {
+      else if (elem->IsNode()) {
 	Node *node = ((NodeLinElem*)elem)->m_node;
 	Cost costDiff = 0;
 	for (unsigned int i = 0; i < node->NumOutputs(); ++i) {
