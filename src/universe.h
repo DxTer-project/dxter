@@ -97,4 +97,5 @@ class Universe
   void CullWorstPerformers(double percentToCull, int ignoreThreshold);
   void CullAllBut(int num);
   void InlineAllSets();
+  void EnforceMemConstraint(Cost maxMem);
 };
