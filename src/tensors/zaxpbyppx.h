@@ -84,8 +84,8 @@ class ZAxpBypPxLoopExp : public SingleTrans
 class ZAxpBypPxLowerLayer : public LowerLayer
 {
  public:
-  ZAxpBypPxLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
-    : LowerLayer(fromLayer,  toLayer,  bs) {}
+  ZAxpBypPxLowerLayer(Layer fromLayer, Layer toLayer)
+    : LowerLayer(fromLayer,  toLayer, 0) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

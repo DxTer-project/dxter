@@ -1112,19 +1112,9 @@ bool ContractionLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Contraction::GetClass()) {
     const Contraction *cont = (Contraction*)node;
-    if (cont->GetLayer() != m_fromLayer)
-      return false;
-    for (Dim dim = 0; dim < cont->InputNumDims(0); ++dim) {
-      if (!(*(cont->InputLen(0,dim)) <= m_bs))
-	return false;
-    }
-    for (Dim dim = 0; dim < cont->InputNumDims(2); ++dim) {
-      if (!(*(cont->InputLen(2,dim)) <= m_bs))
-	return false;
-    }
-    return true;
+    return cont->GetLayer() == m_fromLayer;
   }
-  return false;
+  throw;
 }
 
 void ContractionLowerLayer::Apply(Node *node) const

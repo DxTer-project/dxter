@@ -370,13 +370,7 @@ bool YAxpPxLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == YAxpPx::GetClass()) {
     const YAxpPx *axpy = (YAxpPx*)node;
-    if (axpy->GetLayer() == m_fromLayer) {
-      Dim numDims = axpy->InputNumDims(0);
-      for(Dim dim = 0; dim < numDims; ++dim)
-        if (!(*(axpy->InputLen(0,dim)) <= m_bs))
-          return false;
-      return true;
-    }
+    return (axpy->GetLayer() == m_fromLayer);
   }
   return false;  
 }

@@ -53,7 +53,7 @@ bool M_dontFuseLoops = true;
   // 53, 5 for H20
 const Size big = 400; // a-h
 const Size small = 40; //i-p
-const Cost maxMem = -1;
+const Cost maxMem = 1e8;
 
 Size one = 1;
 //Size bs = ELEM_BS;
@@ -98,8 +98,8 @@ void AddTrans()
     Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(DM1LAYER, DM2LAYER, dim), DPTENSORPHASE);
   }
 
-  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DM2LAYER, TensorBS.GetSize()), DPTENSORPHASE);
-  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(DM1LAYER, DM2LAYER, TensorBS.GetSize()), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DM2LAYER), DPTENSORPHASE);
+  Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(DM1LAYER, DM2LAYER), DPTENSORPHASE);
 
 #if 0
   Universe::AddTrans(Contraction::GetClass(), new DistContToLocalContStatAAllReduce(DMLAYER, SMLAYER), DPTENSORPHASE);
@@ -111,13 +111,13 @@ void AddTrans()
 
   Universe::AddTrans(YAxpPx::GetClass(), new DistYAxpPxToDefaultLocalYAxpPx, DPTENSORPHASE);
 
-  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(ABSLAYER,DM1LAYER,TensorBS.GetSize()), DPTENSORPHASE);
-  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(DM1LAYER,DM2LAYER,TensorBS.GetSize()), DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(ABSLAYER,DM1LAYER), DPTENSORPHASE);
+  Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLowerLayer(DM1LAYER,DM2LAYER), DPTENSORPHASE);
 
   Universe::AddTrans(ZAxpBypPx::GetClass(), new DistZAxpBypPxToDefaultLocalZAxpBypPx, DPTENSORPHASE);
 
-  Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLowerLayer(ABSLAYER,DM1LAYER,TensorBS.GetSize()), DPTENSORPHASE);
-  Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLowerLayer(DM1LAYER,DM2LAYER,TensorBS.GetSize()), DPTENSORPHASE);
+  Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLowerLayer(ABSLAYER,DM1LAYER), DPTENSORPHASE);
+  Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLowerLayer(DM1LAYER,DM2LAYER), DPTENSORPHASE);
   
   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 

@@ -385,13 +385,7 @@ bool ZAxpBypPxLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == ZAxpBypPx::GetClass()) {
     const ZAxpBypPx *axpy = (ZAxpBypPx*)node;
-    if (axpy->GetLayer() == m_fromLayer) {
-      Dim numDims = axpy->InputNumDims(0);
-      for(Dim dim = 0; dim < numDims; ++dim)
-        if (!(*(axpy->InputLen(0,dim)) <= m_bs))
-          return false;
-      return true;
-    }
+    return (axpy->GetLayer() == m_fromLayer);
   }
   return false;  
 }

@@ -123,8 +123,8 @@ class ContractionLoopExp : public SingleTrans
 class ContractionLowerLayer : public LowerLayer
 {
  public:
- ContractionLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
-   : LowerLayer(fromLayer, toLayer, bs) {}
+ ContractionLowerLayer(Layer fromLayer, Layer toLayer)
+   : LowerLayer(fromLayer, toLayer, 1) {}
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
