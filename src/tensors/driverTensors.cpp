@@ -51,7 +51,7 @@ bool M_dontFuseLoops = true;
 
   //~ 10:1 ratio
   // 53, 5 for H20
-const Size small = 50; //i-p
+const Size small = 40; //i-p
 const Size big = 10*small; // a-h
 const Cost maxMem = 1e8;
 
@@ -382,20 +382,30 @@ int main(int argc, const char* argv[])
     //        uni.PrintAll(algNum);
     //        throw;
     
+
     cout << "Propagating\n";
     cout.flush();
     time(&start2);
     uni.Prop();
-    uni.CullWorstPerformers(.99, 3);
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
 
-    cout << "Enforcing memory contstraint\n";
+    cout << "Enforcing memory contstraint (from " << uni.TotalCount() << ")\n";
     cout.flush();
     time(&start2);
     uni.EnforceMemConstraint(maxMem);
     time(&end);
     cout << "That took " << difftime(end,start2) << " seconds\n";
+    cout << "Left with " << uni.TotalCount() << endl;
+
+
+    cout << "Culling worst\n";
+    cout.flush();
+    time(&start2);
+    uni.CullWorstPerformers(.99, 3);
+    time(&end);
+    cout << "Culling took " << difftime(end,start2) << " seconds\n";
+    cout << "Left with " << uni.TotalCount();
   }
 #endif
 
@@ -452,6 +462,15 @@ int main(int argc, const char* argv[])
   if (CurrPhase == FINALOPTPHASE) {
     cout << "Final optimization phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
+
+    cout << "Enforcing memory contstraint\n";
+    cout.flush();
+    time(&start2);
+    uni.EnforceMemConstraint(maxMem);
+    time(&end);
+    cout << "Now there are " << uni.TotalCount() << endl;
+    cout << "That took " << difftime(end,start2) << " seconds\n";
+
     time(&start2);
     //    uni.Prop();
     uni.CullAllBut(1);
@@ -468,14 +487,6 @@ int main(int argc, const char* argv[])
     uni.Prop();
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-
-    cout << "Enforcing memory contstraint\n";
-    cout.flush();
-    time(&start2);
-    uni.EnforceMemConstraint(maxMem);
-    time(&end);
-    cout << "Now there are " << uni.TotalCount() << endl;
-    cout << "That took " << difftime(end,start2) << " seconds\n";
   }
 #endif
 
