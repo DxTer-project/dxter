@@ -80,7 +80,11 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
   m_elems.push_back(elem);
   
   if (node->GetNodeClass() == OutputNode::GetClass()) {
+#if DOTENSORS
     m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfLocalElements(node->InputConnNum(0));
+#else
+    m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfElements(node->InputConnNum(0));
+#endif
     m_alwaysLive.insert(node->GetInputNameStr(0));
   }
   
