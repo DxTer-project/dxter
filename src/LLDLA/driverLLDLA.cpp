@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <time.h>
+#include <climits>
+
 #include "allTransformations.h"
 #include "base.h"
 #include "benchmarkMenu.h"
@@ -35,19 +38,11 @@
 #include "multiBLASExamples.h"
 #include "problemInstanceStats.h"
 #include "runtimeEvaluation.h"
-
 #include "singleOperationExamples.h"
 #include "transform.h"
 #include "LLDLATranspose.h"
 #include "transpose.h"
 #include "loopSupport.h"
-#include <time.h>
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#include <climits>
 
 #if DOLLDLA
 

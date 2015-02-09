@@ -3,6 +3,7 @@
 #include "LLDLATranspose.h"
 #include "localInput.h"
 #include "mvmul.h"
+#include "smmul.h"
 #include "svmul.h"
 #include "vadd.h"
 
@@ -14,7 +15,6 @@ RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int 
   InputNode* Ain;
   InputNode* Bin;
   InputNode* Cin;
-
 
   if (transA == NORMAL) {
     Ain = new InputNode("A", m, p,
@@ -40,6 +40,20 @@ RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int 
 		      1, m,
 		      dataType);
 
+  auto alpha = new InputNode("alpha", 1, 1,
+			     1, 1,
+			     dataType);
+
+  auto beta = new InputNode("beta", 1, 1,
+			    1, 1,
+			    dataType);
+
+  auto tunAlpha = new Tunnel(POSSTUNIN);
+  tunAlpha->AddInput(alpha, 0);
+
+  auto tunBeta = new Tunnel(POSSTUNIN);
+  tunBeta->AddInput(beta, 0);
+
   Tunnel *tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);
 
@@ -49,14 +63,40 @@ RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int 
   Tunnel *tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(Cin, 0);
 
-  LLDLATranspose* transposeA = new LLDLATranspose(ABSLAYER);
-  LLDLATranspose* transposeB = new LLDLATranspose(ABSLAYER);
+  auto betaC = new SMMul(ABSLAYER);
+  betaC->AddInputs(4,
+		   tunBeta, 0,
+		   tunC, 0);
 
-  Gemm *gemm = new Gemm(ABSLAYER, transA, transB, COEFONE, COEFONE, dataType);
-  gemm->AddInputs(6,
-		  tunA, 0,
-		  tunB, 0,
-		  tunC, 0);
+  auto transposeA = new LLDLATranspose(ABSLAYER);
+  if (transA == TRANS) {
+    transposeA->AddInput(tunA, 0);
+  }
+
+  auto transposeB = new LLDLATranspose(ABSLAYER);
+  if (transB == TRANS) {
+    transposeB->AddInput(tunB, 0);
+  }
+
+  SMMul* alphaA = new SMMul(ABSLAYER);
+  if (transA == TRANS) {
+    alphaA->AddInputs(4,
+		      tunAlpha, 0,
+		      transposeA, 0);
+  } else {
+    alphaA->AddInputs(4,
+		     tunAlpha, 0,
+		     tunA, 0);
+  }
+
+  Gemm *gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
+  gemm->AddInput(alphaA, 0);
+  if (transB == NORMAL) {
+    gemm->AddInput(tunB, 0);
+  } else {
+    gemm->AddInput(transposeB, 0);
+  }
+  gemm->AddInput(betaC, 0);
 
   Poss *innerPoss = new Poss(gemm,true);
   RealPSet *innerSet = new RealPSet(innerPoss);
