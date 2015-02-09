@@ -51,9 +51,9 @@ bool M_dontFuseLoops = true;
 
   //~ 10:1 ratio
   // 53, 5 for H20
-const Size big = 500; // a-h
-const Size small = 50; //i-p
-const Cost maxMem = -1; //1e9;
+const Size big = 400; // a-h
+const Size small = 40; //i-p
+const Cost maxMem = -1;
 
 Size one = 1;
 //Size bs = ELEM_BS;
@@ -476,6 +476,7 @@ int main(int argc, const char* argv[])
   cout << "/* BEGINCONFIG\n";
   cout << "big = " << big << endl;
   cout << "small = " << small << endl;
+  cout << "maxMem = " << maxMem << endl;
   cout << "grid = {";
   for(int i = 0; i < NUM_GRID_DIMS; ++i) {
     if (i)
@@ -556,8 +557,8 @@ RealPSet* RedistExample()
 
 RealPSet* RedistExample2()
 {
-  const Size bigMP3Size = 500;
-  const Size smallMP3Size = 50;
+  const Size bigMP3Size = big;
+  const Size smallMP3Size = small;
   Size eSize = bigMP3Size;
   Size fSize = bigMP3Size;
   Size gSize = bigMP3Size;
@@ -878,8 +879,8 @@ RealPSet* MP2()
 
 RealPSet* MP3()
 {
-  const Size bigMP3Size = 500;
-  const Size smallMP3Size = 50;
+  const Size bigMP3Size = big;
+  const Size smallMP3Size = small;
   Size eSize = bigMP3Size;
   Size fSize = bigMP3Size;
   Size gSize = bigMP3Size;
