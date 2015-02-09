@@ -2468,7 +2468,7 @@ bool RealPSet::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet 
   for(auto possEntry : m_posses) {
     Linearizer lin(possEntry.second);
     lin.FindOptimalLinearization(stillLive);
-    if (lin.m_lin.GetCostNoRecursion(stillLive, lin.m_alwaysLive)+costGoingIn >= maxMem)
+    if (lin.m_lin.GetCostNoRecursion(stillLive, lin.m_alwaysLive)+costGoingIn+lin.m_alwaysLiveCost >= maxMem)
       toRemove.insert(possEntry);
     else {
       if (lin.m_lin.EnforceMemConstraint(costGoingIn+lin.m_alwaysLiveCost, maxMem, stillLive, lin.m_alwaysLive)) {
