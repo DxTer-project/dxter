@@ -370,7 +370,7 @@ bool Linearization::EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, c
 	  currCost += costDiff;
 	  
       if (currCost >= maxMem)
-	throw;
+	return true;
 	}
       }
       }
