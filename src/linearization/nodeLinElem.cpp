@@ -23,6 +23,9 @@
 #include "node.h"
 #include "DLANode.h"
 #include "helperNodes.h"
+#include "contraction.h"
+#include "tensorRedist.h"
+#include "tensorSumScatter.h"
 
 void NodeLinElem::Print(IndStream &out)
 {
@@ -123,4 +126,39 @@ bool NodeLinElem::CreatesNewVars() const
 #else
   throw;
 #endif  
+}
+
+Cost NodeLinElem::InternalCost() const
+{
+  if (m_node->GetNodeClass() == Contraction::GetClass())
+    {
+      const Contraction *cont = (Contraction*)m_node;
+      if (cont->m_needsPacking) {
+	Size ASize = ((DLANode*)(cont->Input(0)))->MaxNumberOfLocalElements(cont->InputConnNum(0));
+	Size BSize = ((DLANode*)(cont->Input(1)))->MaxNumberOfLocalElements(cont->InputConnNum(1));
+	Size CSize = ((DLANode*)(cont->Input(2)))->MaxNumberOfLocalElements(cont->InputConnNum(2));
+	return ASize + BSize + CSize;
+      }
+      else
+	return 0;
+    }
+  if (m_node->GetNodeClass() == RedistNode::GetClass())
+    {
+      const RedistNode *redist = (RedistNode*)m_node;
+      Size inSize = ((DLANode*)(redist->Input(0)))->MaxNumberOfLocalElements(redist->InputConnNum(0));
+      Size outSize = redist->MaxNumberOfLocalElements(0);
+      return inSize + outSize;
+    }
+  if (m_node->GetNodeClass() == AllReduceNode::GetClass())
+    {
+      throw;      
+    }
+  if (m_node->GetNodeClass() == SumScatterUpdateNode::GetClass())
+    {
+      const SumScatterUpdateNode *redist = (SumScatterUpdateNode*)m_node;
+      Size inSize = ((DLANode*)(redist->Input(0)))->MaxNumberOfLocalElements(redist->InputConnNum(0));
+      Size outSize = redist->MaxNumberOfLocalElements(0);
+      return inSize + outSize;
+    }
+  return 0;
 }
