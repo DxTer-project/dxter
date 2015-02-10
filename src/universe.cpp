@@ -811,7 +811,8 @@ void Universe::EnforceMemConstraint(Cost maxMem)
   if (maxMem <= 0)
     return;
   StrSet blank;
-  if (m_pset->EnforceMemConstraint(0, maxMem, blank)) {
+  Cost highWater = -1;
+  if (m_pset->EnforceMemConstraint(0, maxMem, blank, highWater)) {
     cout << "Base PSet is over memory\n";
     cout.flush();
     throw;

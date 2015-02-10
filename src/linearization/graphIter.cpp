@@ -307,9 +307,10 @@ void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet, Cost curr
 #if DOTENSORS
   lin.FindOptimalLinearization(liveSet);
   lin.InsertVecClearing(liveSet);
-#if PRINTMEMCOSTS
-  lin.m_lin.EnforceMemConstraint(currCost+lin.m_alwaysLiveCost, 1e10, liveSet, lin.m_alwaysLive);
-#endif //PRINTMEMCOSTS
+  //#if PRINTMEMCOSTS
+  Cost highWater = -1;
+  lin.m_lin.EnforceMemConstraint(currCost+lin.m_alwaysLiveCost, 1e10, liveSet, lin.m_alwaysLive, highWater);
+  //#endif //PRINTMEMCOSTS
 
 #else
   lin.FindAnyLinearization();
@@ -320,6 +321,10 @@ void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet, Cost curr
   }
   out.Indent();
   *out << "//------------------------------------//\n" << endl;
+#if DOTENSORS
+  out.Indent();
+  *out << "\t////High water: " << highWater << endl;
+#endif
 
   for(auto elem : lin.m_lin.m_order) {
 #if PRINTMEMCOSTS

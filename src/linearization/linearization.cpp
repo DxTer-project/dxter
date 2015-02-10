@@ -244,7 +244,7 @@ bool Linearization::LiveAfter(unsigned int loc, const string &name, const StrSet
 }
 
 //Reflect in GetCostNoRecursion
-bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet &stillLive, const StrSet &alwaysLive)
+bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet &stillLive, const StrSet &alwaysLive, Cost &highWater)
 {
   Cost currCost = costGoingIn;
   StrSet live;
@@ -321,7 +321,7 @@ bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const St
       }
 	
       elem->m_cost = currCost;
-      if (set->EnforceMemConstraint(currCost, maxMem, liveHere))
+      if (set->EnforceMemConstraint(currCost, maxMem, liveHere, highWater))
 	return true;
 	
       currCost += costDiff;
@@ -355,10 +355,14 @@ bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const St
       }
       
       elem->m_cost = currCost+costTempDiff;
-      if (currCost+costTempDiff+((NodeLinElem*)elem)->InternalCost() >= maxMem) {
+      Cost costInElem = currCost+costTempDiff+((NodeLinElem*)elem)->InternalCost();
+      if (costInElem >= maxMem) {
 	return true;
       }
-
+      if (costInElem > highWater) {
+	highWater = costInElem;
+      }
+	
       for (unsigned int i = 0; i < node->NumOutputs(); ++i) {
 	string name = node->GetNameStr(i);
 	if (stillLive.find(name) == stillLive.end()
