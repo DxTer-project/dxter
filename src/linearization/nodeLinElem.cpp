@@ -130,6 +130,7 @@ bool NodeLinElem::CreatesNewVars() const
 
 Cost NodeLinElem::InternalCost() const
 {
+#if DOTENSORS
   if (m_node->GetNodeClass() == Contraction::GetClass())
     {
       const Contraction *cont = (Contraction*)m_node;
@@ -160,5 +161,6 @@ Cost NodeLinElem::InternalCost() const
       Size outSize = redist->MaxNumberOfLocalElements(0);
       return inSize + outSize;
     }
+#endif
   return 0;
 }
