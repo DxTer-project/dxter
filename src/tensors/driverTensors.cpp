@@ -53,7 +53,7 @@ bool M_dontFuseLoops = true;
   // 53, 5 for H20
 const Size small = 40; //i-p
 const Size big = 10*small; // a-h
-const Cost maxMem = 1e8;
+Cost maxMem = 1e8;
 
 Size one = 1;
 //Size bs = ELEM_BS;
@@ -78,6 +78,144 @@ RealPSet* CCSD();
 RealPSet* zInlined();
 RealPSet* ZInlined();
 RealPSet* CCSDInlined();
+
+void ReduceMaxMem(set<string> &used)
+{
+  Size numProcs = 1;
+  for (int m = 0; m < NUM_GRID_DIMS; ++m) {
+    numProcs *= GridLens[m];
+  }
+  double multiplier = 1.0 / (double)numProcs;
+
+  if (used.find("W") == used.end()) {
+    maxMem -= multiplier * big * small * small * big;
+  }
+  else
+    used.erase(used.find("W"));
+
+  if (used.find("X") == used.end()) {
+    maxMem -= multiplier * big * small * small * big;
+  }
+  else
+    used.erase(used.find("X"));
+  
+  if (used.find("U") == used.end()) {
+    maxMem -= multiplier * small * small * small * big;
+  }
+  else
+    used.erase(used.find("U"));
+
+  if (used.find("Q") == used.end()) {
+    maxMem -= multiplier * small * small * small * small;
+  }
+  else
+    used.erase(used.find("Q"));
+
+  if (used.find("P") == used.end()) {
+    maxMem -= multiplier * small * small * small * big;
+  }
+  else
+    used.erase(used.find("P"));
+
+  if (used.find("H") == used.end()) {
+    maxMem -= multiplier * small * big;
+  }
+  else
+    used.erase(used.find("H"));
+
+  if (used.find("F") == used.end()) {
+    maxMem -= multiplier * big * big;
+  }
+  else
+    used.erase(used.find("F"));
+
+  if (used.find("G") == used.end()) {
+    maxMem -= multiplier * small * small;
+  }
+  else
+    used.erase(used.find("G"));
+
+  if (used.find("z") == used.end()) {
+    maxMem -= multiplier * big * big;
+  }
+  else
+    used.erase(used.find("z"));
+
+  if (used.find("Z") == used.end()) {
+    maxMem -= multiplier * big * big * small * small;
+  }
+  else
+    used.erase(used.find("Z"));
+
+  if (used.find("w") == used.end()) {
+    maxMem -= multiplier * big * small * small * big;
+  }
+  else
+    used.erase(used.find("w"));
+
+  if (used.find("x") == used.end()) {
+    maxMem -= multiplier * big * small * big * small;
+  }
+  else
+    used.erase(used.find("x"));
+
+  if (used.find("r") == used.end()) {
+    maxMem -= multiplier * big * small * big * big;
+  }
+  else
+    used.erase(used.find("r"));
+
+  if (used.find("t") == used.end()) {
+    maxMem -= multiplier * big * small;
+  }
+  else
+    used.erase(used.find("t"));
+
+  if (used.find("u") == used.end()) {
+    maxMem -= multiplier * small * small * small * big;
+  }
+  else
+    used.erase(used.find("u"));
+
+
+  if (used.find("v") == used.end()) {
+    maxMem -= multiplier * big * big * small * small;
+  }
+  else
+    used.erase(used.find("v"));
+
+  if (used.find("T") == used.end()) {
+    maxMem -= multiplier * big * big * small * small;
+  }
+  else
+    used.erase(used.find("T"));
+
+  if (used.find("Tau") == used.end()) {
+    maxMem -= multiplier * big * big * small * small;
+  }
+  else
+    used.erase(used.find("Tau"));
+
+  if (used.find("q") == used.end()) {
+    maxMem -= multiplier * small * small * small * small;
+  }
+  else
+    used.erase(used.find("q"));
+
+
+  if (used.find("y") == used.end()) {
+    maxMem -= multiplier * big * big * big * big;
+  }
+  else
+    used.erase(used.find("y"));
+
+  if (!used.empty()) {
+    for (auto elem : used) {
+      cout << "missing " << elem << endl;
+    }
+    throw;
+  }
+}
 
 void AddTrans()
 {
@@ -1105,6 +1243,18 @@ RealPSet* MP3()
 
 RealPSet* W()
 {
+  set<string> usedSet;
+  usedSet.insert("w");
+  usedSet.insert("x");
+  usedSet.insert("r");
+  usedSet.insert("t");
+  usedSet.insert("u");
+  usedSet.insert("v");
+  usedSet.insert("T");
+  usedSet.insert("Tau");
+  usedSet.insert("W");
+  ReduceMaxMem(usedSet);
+
   InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
   InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
@@ -1152,12 +1302,24 @@ RealPSet* W()
 			     outT, outt,
 			     outTau);
   RealPSet *outerSet = new RealPSet(outerPoss);
+
   
   return outerSet;
 }
 
 RealPSet* X()
 {
+  set<string> usedSet;
+  usedSet.insert("x");
+  usedSet.insert("r");
+  usedSet.insert("t");
+  usedSet.insert("u");
+  usedSet.insert("v");
+  usedSet.insert("T");
+  usedSet.insert("Tau");
+  usedSet.insert("X");
+  ReduceMaxMem(usedSet);
+
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
   InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
   InputNode *t_fj = CreateInput2("t_fj", big, small);
@@ -1206,6 +1368,13 @@ RealPSet* X()
 
 RealPSet* U()
 {
+  set<string> usedSet;
+  usedSet.insert("t");
+  usedSet.insert("u");
+  usedSet.insert("v");
+  usedSet.insert("U");
+  ReduceMaxMem(usedSet);
+
   InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
@@ -1235,6 +1404,16 @@ RealPSet* U()
 
 RealPSet* Q()
 {
+  set<string> usedSet;
+  usedSet.insert("q");
+  usedSet.insert("t");
+  usedSet.insert("u");
+  usedSet.insert("v");
+  usedSet.insert("T");
+  usedSet.insert("Tau");
+  usedSet.insert("Q");
+  ReduceMaxMem(usedSet);
+
   InputNode *q_mnij = CreateInput4("q_mnij", small, small, small, small);
   InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
@@ -1280,6 +1459,17 @@ RealPSet* Q()
 
 RealPSet* P()
 {
+  set<string> usedSet;
+  usedSet.insert("u");
+  usedSet.insert("r");
+  usedSet.insert("t");
+  usedSet.insert("w");
+  usedSet.insert("T");
+  usedSet.insert("x");
+  usedSet.insert("Tau");
+  usedSet.insert("P");
+  ReduceMaxMem(usedSet);
+
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
   InputNode *r_bmef = CreateInput4("r_bmfe", big, small, big, big);
   InputNode *t_fj = CreateInput2("t_fj", big, small);
@@ -1330,6 +1520,12 @@ RealPSet* P()
 
 RealPSet* H()
 {
+  set<string> usedSet;
+  usedSet.insert("t");
+  usedSet.insert("v");
+  usedSet.insert("H");
+  ReduceMaxMem(usedSet);
+
   InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *v_efmn = CreateInput4("v_femn", big, big, small, small);
 
@@ -1353,7 +1549,16 @@ RealPSet* H()
 
 
 RealPSet* F()
-{ 
+{
+  set<string> usedSet;
+  usedSet.insert("H");
+  usedSet.insert("T");
+  usedSet.insert("r");
+  usedSet.insert("t");
+  usedSet.insert("v");
+  usedSet.insert("F");
+  ReduceMaxMem(usedSet);
+ 
   InputNode *H_me = CreateInput2("H_me", small, big);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *r_amef = CreateInput4("r_bmfe", big, small, big, big);
@@ -1366,6 +1571,10 @@ RealPSet* F()
   
   OutputNode *outF = new OutputNode;
   outF->AddInput(set->OutTun(0),0);
+
+
+  OutputNode *outr = new OutputNode;
+  outr->AddInput(r_amef,0);
   
   OutputNode *outH = new OutputNode;
   outH->AddInput(H_me, 0);
@@ -1380,9 +1589,9 @@ RealPSet* F()
   outt->AddInput(t_fj, 0);
 
 
-  Poss *outerPoss = new Poss(5, outF, outH,
+  Poss *outerPoss = new Poss(6, outF, outH,
 			     outv, outT,
-			     outt);
+			     outt, outr);
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
@@ -1391,7 +1600,16 @@ RealPSet* F()
 
 
 RealPSet* G()
-{ 
+{
+  set<string> usedSet;
+  usedSet.insert("H");
+  usedSet.insert("T");
+  usedSet.insert("u");
+  usedSet.insert("t");
+  usedSet.insert("v");
+  usedSet.insert("G");
+  ReduceMaxMem(usedSet);
+ 
   InputNode *H_me = CreateInput2("H_me", small, big);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
   InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
@@ -1431,7 +1649,20 @@ RealPSet* G()
 }
 
 RealPSet* z()
-{ 
+{
+  set<string> usedSet;
+  usedSet.insert("G");
+  usedSet.insert("w");
+  usedSet.insert("x");
+  usedSet.insert("T");
+  usedSet.insert("r");
+  usedSet.insert("t");
+  usedSet.insert("H");
+  usedSet.insert("U");
+  usedSet.insert("Tau");
+  usedSet.insert("z");
+  ReduceMaxMem(usedSet);
+ 
   InputNode *G_mi = CreateInput2("G_mi", small, small);
   InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
   InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
@@ -1495,6 +1726,22 @@ RealPSet* z()
 
 RealPSet* Z()
 {
+  set<string> usedSet;
+  usedSet.insert("v");
+  usedSet.insert("Q");
+  usedSet.insert("y");
+  usedSet.insert("r");
+  usedSet.insert("P");
+  usedSet.insert("t");
+  usedSet.insert("F");
+  usedSet.insert("G");
+  usedSet.insert("W");
+  usedSet.insert("T");
+  usedSet.insert("X");
+  usedSet.insert("Tau");
+  usedSet.insert("Z");
+  ReduceMaxMem(usedSet);
+
   InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
   InputNode *Q_mnij = CreateInput4("Q_mnij", small, small, small, small);
   InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
@@ -2001,6 +2248,12 @@ RealPSet* ZInlined()
 
 RealPSet* Tau()
 {
+  set<string> usedSet;
+  usedSet.insert("t");
+  usedSet.insert("T");
+  usedSet.insert("Tau");
+  ReduceMaxMem(usedSet);
+
   InputNode *t_fj = CreateInput2("t_fj", big, small);
   InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
 
