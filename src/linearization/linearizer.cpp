@@ -422,7 +422,7 @@ bool Linearizer::AddUp(Linearization &curr, LinElemSet &readyToAdd,
 	keepGoing |= AddUp(curr, readyToAdd, input, currAdd, countOfAdded);
       }
 #else
-      if (input->CanAddToLinearOrder())
+      if (input->CanAddToLinearOrder() && input->ShouldClump())
         keepGoing |= AddUp(curr, readyToAdd, input, currAdd, countOfAdded);
 #endif
     }
@@ -433,7 +433,7 @@ bool Linearizer::AddUp(Linearization &curr, LinElemSet &readyToAdd,
 			   pred, currAdd,
 			   countOfAdded);
 #else
-      if (pred->CanAddToLinearOrder())
+      if (pred->CanAddToLinearOrder() && pred->ShouldClump())
         keepGoing |= AddUp(curr, readyToAdd,
                            pred, currAdd,
                            countOfAdded);
