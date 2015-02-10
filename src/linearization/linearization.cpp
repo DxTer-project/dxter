@@ -355,7 +355,7 @@ bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const St
       }
       
       elem->m_cost = currCost+costTempDiff;
-      if (currCost+costTempDiff >= maxMem) {
+      if (currCost+costTempDiff+((NodeLinElem*)elem)->InternalCost() >= maxMem) {
 	return true;
       }
 
