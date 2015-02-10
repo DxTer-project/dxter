@@ -27,6 +27,8 @@
 #include "node.h"
 #include "helperNodes.h"
 
+#define ADDUP 0
+
 bool FoundInVec(const LinElem *elem, const LinElemVec &vec)
 {
   for(auto t : vec)
@@ -410,20 +412,32 @@ bool Linearizer::AddUp(Linearization &curr, LinElemSet &readyToAdd,
 {
   if (currAdd->HasAdded())
     throw;
-  
+
   bool keepGoing = true;
   while (keepGoing && !currAdd->CanAddToLinearOrder()) {
     keepGoing = false;
     for (auto input : currAdd->m_inputs) {
+#if ADDUP
       if (!input->HasAdded()) {
-        keepGoing |= AddUp(curr, readyToAdd, input, currAdd, countOfAdded);
+	keepGoing |= AddUp(curr, readyToAdd, input, currAdd, countOfAdded);
       }
+#else
+      if (input->CanAddToLinearOrder())
+        keepGoing |= AddUp(curr, readyToAdd, input, currAdd, countOfAdded);
+#endif
     }
     for (auto pred : currAdd->m_preds) {
+#if ADDUP
       if (!pred->HasAdded())
+	keepGoing |= AddUp(curr, readyToAdd,
+			   pred, currAdd,
+			   countOfAdded);
+#else
+      if (pred->CanAddToLinearOrder())
         keepGoing |= AddUp(curr, readyToAdd,
                            pred, currAdd,
                            countOfAdded);
+#endif
     }
   }
   
@@ -540,6 +554,7 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
           keepGoing |= AddUp(curr, readyToAdd, input, child, countOfAdded);
         }
       }
+
     }
     if (child->CanAddToLinearOrder()) {
       AddAndRecurse(curr, readyToAdd, child, opt, stillLive, addSingleChildImmediately);
