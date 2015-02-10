@@ -320,11 +320,12 @@ void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet, Cost curr
     in->Print(out);
   }
   out.Indent();
-  *out << "//------------------------------------//\n" << endl;
+  *out << "//------------------------------------//\n";
 #if DOTENSORS
   out.Indent();
   *out << "\t////High water: " << highWater << endl;
 #endif
+  *out << endl;
 
   for(auto elem : lin.m_lin.m_order) {
 #if PRINTMEMCOSTS
