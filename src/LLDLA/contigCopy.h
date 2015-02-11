@@ -19,22 +19,18 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "DLAOp.h"
+#include "copy.h"
 #include "LLDLA.h"
 
 #if DOLLDLA
 
-class Copy : public DLAOp<2, 1> {
+class ContiguousCopy : public Copy {
 
  public:
-  explicit Copy(Layer layer);
-  virtual const DataTypeInfo& DataType(ConnNum num) const;
-  virtual bool Overwrites(const Node* input, ConnNum num) const;
-
-  virtual bool IsReadOnly() const { return false; }
-  virtual bool IsDataDependencyOfInput() const { return true; }
-
+  using Copy::Copy(Layer layer);
+  virtual void PrintCode(IndStream& out);
   virtual void Prop();
+
 };
 
 #endif // DOLLDLA

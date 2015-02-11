@@ -24,6 +24,10 @@
 
 #if DOLLDLA
 
+Copy::Copy(Layer layer) {
+  m_layer = layer;
+}
+
 const DataTypeInfo& Copy::DataType(ConnNum num) const {
   assert(num == 0);
   return DataType(num);
