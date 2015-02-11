@@ -19,6 +19,32 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "pack.h"
+
 #if DOLLDLA
+
+Pack::Pack(Layer layer) {
+  m_layer = layer;
+}
+
+const DataTypeInfo& Pack::DataType(ConnNum num) const {
+  if (num != 0) {
+    throw;
+  }
+  return InputDataType(1);
+}
+
+bool Pack::Overwrites(const Node* input, ConnNum num) const {
+  const NodeConn* conn = m_inputs[1];
+  return conn->m_n == input && conn->m_num == num;
+}
+
+void Pack::PrintCode(IndStream& out) {
+  throw;
+}
+
+void Pack::Prop() {
+
+}
 
 #endif // DOLLDLA

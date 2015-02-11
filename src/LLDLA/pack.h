@@ -19,10 +19,31 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "DLAOp.h"
+#include "LLDLA.h"
+
 #if DOLLDLA
 
 class Pack : public DLAOp<2, 1> {
-  
+ public:
+  explicit Pack(Layer layer);
+  static Node* BlankInst() { return new Pack(ABSLAYER); }
+  virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual NodeType GetType() const { return "Pack"; }
+  virtual ClassType GetNodeClass() const { return GetClass(); }
+  static ClassType GetClass() { return "Pack"; }
+
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
+  virtual bool Overwrites(const Node* input, ConnNum num) const;
+
+  virtual bool IsReadOnly() const { return false; }
+  virtual bool IsDataDependencyOfInput() const { return true; }
+
+  virtual void Prop();
+
+  virtual void PrintCode(IndStream& out);
+
 };
 
 #endif // DOLLDLA
