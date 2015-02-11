@@ -51,9 +51,9 @@ bool M_dontFuseLoops = true;
 
   //~ 10:1 ratio
   // 53, 5 for H20
-const Size small = 40; //i-p
+const Size small = 35; //i-p
 const Size big = 10*small; // a-h
-Cost maxMem = 1e8;
+Cost maxMem = 116000000;
 
 Size one = 1;
 //Size bs = ELEM_BS;
@@ -136,7 +136,7 @@ void ReduceMaxMem(set<string> &used)
     used.erase(used.find("G"));
 
   if (used.find("z") == used.end()) {
-    maxMem -= multiplier * big * big;
+    maxMem -= multiplier * big * small;
   }
   else
     used.erase(used.find("z"));
@@ -219,7 +219,7 @@ void ReduceMaxMem(set<string> &used)
 
 void AddTrans()
 {
-#if 1
+#if 0
   MultiTrans *trans = new MultiTrans;
   trans->AddTrans(new DistContToLocalContStatC(DM2LAYER, SMLAYER));
   trans->AddTrans(new DistContToLocalContStatASumScatter(DM2LAYER, SMLAYER));
@@ -233,7 +233,7 @@ void AddTrans()
 
   for (Dim dim = 0; dim < 10; ++dim) {
     Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DM1LAYER, dim), DPTENSORPHASE);
-    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(DM1LAYER, DM2LAYER, dim), DPTENSORPHASE);
+    //    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(DM1LAYER, DM2LAYER, dim), DPTENSORPHASE);
   }
 
   Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DM2LAYER), DPTENSORPHASE);
