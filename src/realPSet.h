@@ -24,7 +24,7 @@
 #pragma once
 
 #define PRINTTRACKING 0
-#define CHECKFORSETREUSE USESHADOWS
+#define CHECKFORSETREUSE 0
 
 #ifdef _OPENMP
 #include "omp.h"
@@ -191,7 +191,7 @@ class RealPSet : public BasePSet
   void SetDeletingRecursively();
   void ClearDeletingRecursively();
 
-  bool EnforceMemConstraint(Cost maxMem, const StrSet &stillLive);
+  bool EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet &stillLive, Cost &highWater);
 };
 
 

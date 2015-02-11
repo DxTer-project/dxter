@@ -27,6 +27,8 @@
 #include "node.h"
 #include "helperNodes.h"
 
+#define ADDUP 1
+
 bool FoundInVec(const LinElem *elem, const LinElemVec &vec)
 {
   for(auto t : vec)
@@ -37,6 +39,7 @@ bool FoundInVec(const LinElem *elem, const LinElemVec &vec)
 
 Linearizer::Linearizer(const Poss *poss)
 {
+  m_alwaysLiveCost = 0;
   PtrToLinElemMap map;
   for(auto node : poss->m_possNodes) {
     FindOrAdd(node, map);
@@ -79,6 +82,11 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
   m_elems.push_back(elem);
   
   if (node->GetNodeClass() == OutputNode::GetClass()) {
+#if DOTENSORS
+    m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfLocalElements(node->InputConnNum(0));
+#else
+    m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfElements(node->InputConnNum(0));
+#endif
     m_alwaysLive.insert(node->GetInputNameStr(0));
   }
   
@@ -404,20 +412,32 @@ bool Linearizer::AddUp(Linearization &curr, LinElemSet &readyToAdd,
 {
   if (currAdd->HasAdded())
     throw;
-  
+
   bool keepGoing = true;
   while (keepGoing && !currAdd->CanAddToLinearOrder()) {
     keepGoing = false;
     for (auto input : currAdd->m_inputs) {
+#if ADDUP
       if (!input->HasAdded()) {
-        keepGoing |= AddUp(curr, readyToAdd, input, currAdd, countOfAdded);
+	keepGoing |= AddUp(curr, readyToAdd, input, currAdd, countOfAdded);
       }
+#else
+      if (input->CanAddToLinearOrder() && input->ShouldClump())
+        keepGoing |= AddUp(curr, readyToAdd, input, currAdd, countOfAdded);
+#endif
     }
     for (auto pred : currAdd->m_preds) {
+#if ADDUP
       if (!pred->HasAdded())
+	keepGoing |= AddUp(curr, readyToAdd,
+			   pred, currAdd,
+			   countOfAdded);
+#else
+      if (pred->CanAddToLinearOrder() && pred->ShouldClump())
         keepGoing |= AddUp(curr, readyToAdd,
                            pred, currAdd,
                            countOfAdded);
+#endif
     }
   }
   
@@ -534,6 +554,7 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
           keepGoing |= AddUp(curr, readyToAdd, input, child, countOfAdded);
         }
       }
+
     }
     if (child->CanAddToLinearOrder()) {
       AddAndRecurse(curr, readyToAdd, child, opt, stillLive, addSingleChildImmediately);

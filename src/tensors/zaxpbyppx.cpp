@@ -124,7 +124,7 @@ void ZAxpBypPx::AlignInfo(string &align,
 			  DimVec &alignModes,
 			  DimVec &alignModesSrc)
 {
-  align = GetInputNameStr(0);
+  align = GetAlignmentSource(this, 3);
   Dim numDims = InputNumDims(0);
   DimVec tmp;
   IdentDimVec(numDims, tmp);
@@ -234,7 +234,7 @@ void DistZAxpBypPxToDefaultLocalZAxpBypPx::Apply(Node *node) const
       alignModes.push_back(dim);
       newType.m_dists[dim] = inputType.GetDist().m_dists[mode];
     }
-    RedistNode *redist = new RedistNode(newType, node->GetInputNameStr(0), alignModes, alignModesSrc);
+    RedistNode *redist = new RedistNode(newType, GetAlignmentSource(node,3), alignModes, alignModesSrc);
     redist->AddInput(node->Input(2),node->InputConnNum(2));
     
     Poss *poss = new Poss(redist, false);

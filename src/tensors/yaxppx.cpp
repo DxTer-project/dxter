@@ -27,6 +27,7 @@
 #include "string.h"
 #include "helperNodes.h"
 #include "loopSupport.h"
+#include "tensorRedist.h"
 
 using namespace std;
 
@@ -40,7 +41,7 @@ void YAxpPx::AlignInfo(string &align,
                           DimVec &alignModes,
                           DimVec &alignModesSrc)
 {
-  align= GetInputNameStr(0);
+  align= GetAlignmentSource(this, 2);
   Dim numDims = InputNumDims(0);
   DimVec tmp;
   IdentDimVec(numDims, tmp);
@@ -227,7 +228,7 @@ void DistYAxpPxToDefaultLocalYAxpPx::Apply(Node *node) const
       alignModes.push_back(dim);
       newType.m_dists[dim] = inputType.GetDist().m_dists[mode];
     }
-    RedistNode *redist = new RedistNode(newType, node->GetInputNameStr(0), alignModes, alignModesSrc);
+    RedistNode *redist = new RedistNode(newType, GetAlignmentSource(node,2), alignModes, alignModesSrc);
     redist->AddInput(node->Input(1),node->InputConnNum(1));
     
     Poss *poss = new Poss(redist, false);

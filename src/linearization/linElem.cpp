@@ -27,7 +27,8 @@
 
 LinElem::LinElem() 
   : m_succ(NULL),
-    m_addedToLinOrder(false)    
+    m_addedToLinOrder(false),
+    m_cost(-1)
 {
 }
 

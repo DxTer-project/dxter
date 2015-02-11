@@ -285,7 +285,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
       }
 
       StrSet live;
-      Print(out, NULL, live);
+      Print(out, NULL, live, 0);
 
 
       out.Indent();
@@ -301,12 +301,17 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
   }
 }
 
-void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet)
+void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet, Cost currCost)
 {
   Linearizer lin(m_poss);
 #if DOTENSORS
   lin.FindOptimalLinearization(liveSet);
   lin.InsertVecClearing(liveSet);
+  //#if PRINTMEMCOSTS
+  Cost highWater = -1;
+  lin.m_lin.EnforceMemConstraint(currCost+lin.m_alwaysLiveCost, 1e10, liveSet, lin.m_alwaysLive, highWater);
+  //#endif //PRINTMEMCOSTS
+
 #else
   lin.FindAnyLinearization();
 #endif
@@ -315,10 +320,21 @@ void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet)
     in->Print(out);
   }
   out.Indent();
-  *out << "//------------------------------------//\n" << endl;
+  *out << "//------------------------------------//\n";
+#if DOTENSORS
+  out.Indent();
+  *out << "\t////High water: " << highWater << endl;
+#endif
+  *out << endl;
 
   for(auto elem : lin.m_lin.m_order) {
+#if PRINTMEMCOSTS
+    cout << "currMemCost = " << elem->m_cost << endl;
+#endif //PRINTMEMCOSTS
     if (!elem->IsSet()) {
+      if (!elem->IsClear()) {
+	*out << endl;
+      }
       elem->Print(out);
     }
     else {

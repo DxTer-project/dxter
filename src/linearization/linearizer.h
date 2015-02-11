@@ -27,6 +27,8 @@
 #include "linElem.h"
 #include "linearization.h"
 
+#define PRINTMEMCOSTS 0
+
 typedef std::map<const void*,LinElem*> PtrToLinElemMap;
 typedef PtrToLinElemMap::iterator PtrToLinElemMapIter;
 typedef std::set<LinElem*> LinElemSet;
@@ -38,6 +40,7 @@ class Linearizer
   LinElemVec m_elems;
   Linearization m_lin;
   StrSet m_alwaysLive;
+  Cost m_alwaysLiveCost;
 
   Linearizer(const Poss *poss);
   ~Linearizer();

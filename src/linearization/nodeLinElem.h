@@ -42,4 +42,5 @@ class NodeLinElem : public LinElem
   virtual void ClearCache() {}
   virtual bool IsNode() const {return true;}
   virtual bool CreatesNewVars() const;
+  Cost InternalCost() const;
 };

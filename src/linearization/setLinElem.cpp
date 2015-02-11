@@ -66,7 +66,7 @@ void SetLinElem::Print(IndStream &out, GraphIter *graphIter, Poss *poss)
       !((RealLoop*)real)->IsUnrolled()) {
     real->PrePrint(out,poss);
     ++out;
-    graphIter->Print(out, m_set, m_live);
+    graphIter->Print(out, m_set, m_live, m_cost);
     --out;
     real->PostPrint(out,poss);
   }
@@ -80,7 +80,7 @@ void SetLinElem::Print(IndStream &out, GraphIter *graphIter, Poss *poss)
       out.Indent();
       *out << "{\n";
       real->PrePrint(out,poss);
-      graphIter->Print(out, m_set, m_live);
+      graphIter->Print(out, m_set, m_live, m_cost);
       out.Indent();
       *out << "}\n";
     }

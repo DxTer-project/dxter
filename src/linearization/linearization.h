@@ -51,5 +51,7 @@ class Linearization
   
   bool LiveAfter(unsigned int loc, const string &name, const StrSet &alwaysLive) const;
 
-  bool EnforceMemConstraint(Cost maxMem, const StrSet &stillLive, const StrSet &alwaysLive);
+  bool EnforceMemConstraint(Cost costGoingIn, Cost maxMem, 
+			    const StrSet &stillLive, const StrSet &alwaysLive,
+			    Cost &highWater);
 };
