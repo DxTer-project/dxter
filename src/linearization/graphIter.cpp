@@ -332,6 +332,9 @@ void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet, Cost curr
     cout << "currMemCost = " << elem->m_cost << endl;
 #endif //PRINTMEMCOSTS
     if (!elem->IsSet()) {
+      if (!elem->IsClear()) {
+	*out << endl;
+      }
       elem->Print(out);
     }
     else {
