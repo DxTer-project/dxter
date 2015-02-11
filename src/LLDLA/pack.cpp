@@ -44,7 +44,10 @@ void Pack::PrintCode(IndStream& out) {
 }
 
 void Pack::Prop() {
-
+  if (!IsValidCost(m_cost)) {
+    DLAOp<2, 1>::Prop();
+    m_cost = ZERO;
+  }
 }
 
 #endif // DOLLDLA
