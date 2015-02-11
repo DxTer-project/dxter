@@ -19,6 +19,23 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "contigCopy.h"
+
 #if DOLLDLA
+
+void ContiguousCopy::PrintCode(IndStream& out) {
+  
+}
+
+void ContiguousCopy::Prop() {
+  if (!IsValidCost(m_cost)) {
+    Copy::Prop();
+    if (!InputDataType(0).IsContiguous() || !InputDataType(1).IsContiguous()) {
+      cout << "ERROR: Contiguous copy on non-contiguous operands" << endl;
+      throw;
+    }
+    m_cost = ZERO;
+  }
+}
 
 #endif // DOLLDLA

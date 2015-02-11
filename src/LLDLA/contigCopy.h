@@ -27,7 +27,7 @@
 class ContiguousCopy : public Copy {
 
  public:
-  using Copy::Copy(Layer layer);
+  using Copy::Copy;
   virtual void PrintCode(IndStream& out);
   virtual void Prop();
 
