@@ -37,6 +37,7 @@
 void GetSuffix(const DimVec &dims1, const DimVec &dims2, 
 	       DimVec &suff);
 
+string GetAlignmentSource(Node *node, ConnNum inNum);
 
 class RedistNode : public DLANode
 {

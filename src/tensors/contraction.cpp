@@ -469,6 +469,8 @@ bool DistContToLocalContStatC::CanApply(const Node *node) const
   return (cont->GetLayer() == m_fromLayer);
 }
 
+
+
 void DistContToLocalContStatC::Apply(Node *node) const
 {
   Contraction *cont = (Contraction*)node;
@@ -490,7 +492,7 @@ void DistContToLocalContStatC::Apply(Node *node) const
 			      AType, alignModes, alignModesSrc);
 
   
-  RedistNode *node1 = new RedistNode(AType, cont->GetInputNameStr(2), alignModes, alignModesSrc);
+  RedistNode *node1 = new RedistNode(AType, GetAlignmentSource(cont,2), alignModes, alignModesSrc);
   node1->AddInput(node->Input(0),node->InputConnNum(0));
 
   if (AType == node1->InputDataType(0).GetEffectiveDist())
@@ -509,7 +511,7 @@ void DistContToLocalContStatC::Apply(Node *node) const
 			      CType, cont->m_CIndices,
 			      BType, alignModes, alignModesSrc);
 
-  RedistNode *node2 = new RedistNode(BType, cont->GetInputNameStr(2), alignModes, alignModesSrc);
+  RedistNode *node2 = new RedistNode(BType, GetAlignmentSource(cont,2), alignModes, alignModesSrc);
   node2->AddInput(node->Input(1),node->InputConnNum(1));
 
   if (BType == node2->InputDataType(0).GetEffectiveDist())
@@ -600,7 +602,7 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
   RealPSet *BSet = NULL;
 
   if (BType != node->InputDataType(1).GetEffectiveDist()) {
-    node1 = new RedistNode(BType, cont->GetInputNameStr(0), alignModes, alignModesSrc);
+    node1 = new RedistNode(BType, GetAlignmentSource(cont,0), alignModes, alignModesSrc);
     node1->AddInput(node->Input(1),node->InputConnNum(1));
 
     Poss *BPoss = new Poss(node1, false);
@@ -624,7 +626,7 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
   temp->AddInput(node->Input(2),node->InputConnNum(2));
-  temp->m_align = cont->GetInputNameStr(0);
+  temp->m_align = GetAlignmentSource(cont,0);
   temp->m_alignModes = alignModes;
   temp->m_alignModesSrc = alignModesSrc;
   
@@ -692,13 +694,13 @@ void DistContToLocalContStatASumScatter::Apply(Node *node) const
     IdentDimVec(CDestType.m_numDims, ident);
 
 
-    RedistNode *finalRedist = new RedistNode(CDestType, node->GetInputNameStr(2), ident, ident);
+    RedistNode *finalRedist = new RedistNode(CDestType, GetAlignmentSource((DLANode*)node,2), ident, ident);
     finalRedist->AddInput(sumSet->OutTun(0),0);
     Poss *redistPoss = new Poss(finalRedist, false);
     RealPSet *redistSet = new RealPSet(redistPoss);
     node->m_poss->AddPSet(redistSet,true,true);
 
-    temp2->m_align = finalRedist->GetNameStr(0);
+    temp2->m_align = GetAlignmentSource((DLANode*)node,2);
     temp2->m_alignModes = ident;
     temp2->m_alignModesSrc = ident;
     
@@ -793,7 +795,7 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
   if (AInfo.HasPerm())
     throw;
   if (AType != AInfo.GetDist()) {
-    node1 = new RedistNode(AType, cont->GetInputNameStr(1), alignModes, alignModesSrc);
+    node1 = new RedistNode(AType, GetAlignmentSource(cont,1), alignModes, alignModesSrc);
     node1->AddInput(node->Input(0),node->InputConnNum(0));
 
     Poss *APoss = new Poss(node1, false);
@@ -818,7 +820,7 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
 			      CType, alignModes, alignModesSrc);
 
   TempVarNode *temp = new TempVarNode(CType, sumDims);
-  temp->m_align = cont->GetInputNameStr(1);
+  temp->m_align = GetAlignmentSource(cont,1);
   temp->m_alignModes = alignModes;
   temp->m_alignModesSrc = alignModesSrc;
     
@@ -884,13 +886,13 @@ void DistContToLocalContStatBSumScatter::Apply(Node *node) const
     DimVec ident;
     IdentDimVec(CDestType.m_numDims, ident);
 
-    RedistNode *finalRedist = new RedistNode(CDestType, cont->GetInputNameStr(2), ident, ident);
+    RedistNode *finalRedist = new RedistNode(CDestType, GetAlignmentSource(cont,2), ident, ident);
     finalRedist->AddInput(sumSet->OutTun(0),0);
     Poss *redistPoss = new Poss(finalRedist, false);
     RealPSet *redistSet = new RealPSet(redistPoss);
     node->m_poss->AddPSet(redistSet,true,true);
 
-    temp2->m_align = finalRedist->GetNameStr(0);
+    temp2->m_align = GetAlignmentSource(cont,2);
     temp2->m_alignModes = ident;
     temp2->m_alignModesSrc = ident;
     

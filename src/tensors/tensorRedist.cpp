@@ -22,6 +22,7 @@
 #include <ostream>
 #include <sstream>
 #include <algorithm>
+#include "tempVarNode.h"
 
 #if DOTENSORS
 
@@ -2924,6 +2925,17 @@ bool GetPermPattern(const DistType &srcType,
   }
 
   return foundPerm;
+}
+
+string GetAlignmentSource(Node *node, ConnNum inNum)
+{
+  Node *in = node->Input(inNum);
+  if (in->GetNodeClass() == TempVarNode::GetClass()) {
+    TempVarNode *tmp = (TempVarNode*)in;
+    if (tmp->m_sumDims.empty())
+      return GetAlignmentSource(tmp, 0);
+  }
+  return in->GetNameStr(node->InputConnNum(inNum));
 }
 #endif
 
