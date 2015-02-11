@@ -30,9 +30,9 @@ using namespace std;
 
 #define GAMMAVAL 1
 #define BETAVAL 100 * GAMMAVAL
-#define ALPHAVAL 100000*GAMMAVAL
-#define PSIWVAL .25*GAMMAVAL
-#define PSIRVAL .25*GAMMAVAL
+#define ALPHAVAL 120000*GAMMAVAL
+#define PSIWVAL .15*GAMMAVAL
+#define PSIRVAL .1*GAMMAVAL
 #if DOELEM
 #define RVAL 40
 #define CVAL 40
