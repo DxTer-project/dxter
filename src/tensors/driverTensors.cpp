@@ -81,6 +81,9 @@ RealPSet* CCSDInlined();
 
 void ReduceMaxMem(set<string> &used)
 {
+  if (maxMem < 0)
+    return;
+
   Size numProcs = 1;
   for (int m = 0; m < NUM_GRID_DIMS; ++m) {
     numProcs *= GridLens[m];
@@ -215,6 +218,9 @@ void ReduceMaxMem(set<string> &used)
     }
     throw;
   }
+
+  if (maxMem < 0)
+    throw;
 }
 
 void AddTrans()
