@@ -19,34 +19,35 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "DLAOp.h"
-#include "LLDLA.h"
-
-#ifndef PACK_H_
-#define PACK_H_
+#include "unpack.h"
 
 #if DOLLDLA
 
-class Pack : public DLAOp<2, 1> {
- public:
-  explicit Pack(Layer layer);
-  static Node* BlankInst() { return new Pack(ABSLAYER); }
-  virtual Node* GetNewInst() { return BlankInst(); }
+Unpack::Unpack(Layer layer) {
+  m_layer = layer;
+}
 
-  virtual NodeType GetType() const { return "Pack"; }
-  virtual ClassType GetNodeClass() const { return GetClass(); }
-  static ClassType GetClass() { return "Pack"; }
+const DataTypeInfo& Unpack::DataType(ConnNum num) const {
+  if (num != 0) {
+    throw;
+  }
+  return InputDataType(1);
+}
 
-  virtual const DataTypeInfo& DataType(ConnNum num) const;
-  virtual bool Overwrites(const Node* input, ConnNum num) const;
+bool Unpack::Overwrites(const Node* input, ConnNum num) const {
+  const NodeConn* conn = m_inputs[1];
+  return conn->m_n == input && conn->m_num == num;
+}
 
-  virtual bool IsReadOnly() const { return false; }
-  virtual bool IsDataDependencyOfInput() const { return true; }
+void Unpack::PrintCode(IndStream& out) {
+  throw;
+}
 
-  virtual void Prop();
-  virtual void PrintCode(IndStream& out);
-};
+void Unpack::Prop() {
+  if (!IsValidCost(m_cost)) {
+    DLAOp<2, 1>::Prop();
+    m_cost = ZERO;
+  }
+}
 
 #endif // DOLLDLA
-
-#endif // PACK_H_
