@@ -100,4 +100,8 @@ bool DataTypeInfo::IsContiguous() const {
   return false;
 }
 
+bool DataTypeInfo::IsSameSizeAs(const DataTypeInfo& other) const {
+  return m_numRows == other.m_numRows && m_numCols == other.m_numCols;
+}
+
 #endif

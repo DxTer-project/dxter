@@ -32,6 +32,8 @@ class Copy : public DLAOp<2, 1> {
 
   virtual bool IsReadOnly() const { return false; }
   virtual bool IsDataDependencyOfInput() const { return true; }
+
+  virtual void Prop();
 };
 
 #endif // DOLLDLA

@@ -30,7 +30,19 @@ const DataTypeInfo& Copy::DataType(ConnNum num) const {
 }
 
 bool Copy::Overwrites(const Node* input, ConnNum num) const {
-  return true;
+  const NodeConn* conn = m_inputs[1];
+  return conn->m_n == input && conn->m_num == num;
+}
+
+void Copy::Prop() {
+  if (!IsValidCost(m_cost)) {
+    DLAOp<2, 1>::Prop();
+    if (!InputDataType(0).IsSameSizeAs(InputDataType(1))) {
+      cout << "ERROR: Copy operands do not have the same size" << endl;
+      throw;
+    }
+    m_cost = ZERO;
+  }
 }
 
 
