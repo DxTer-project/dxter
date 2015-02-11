@@ -131,6 +131,8 @@ bool NodeLinElem::CreatesNewVars() const
 Cost NodeLinElem::InternalCost() const
 {
 #if DOTENSORS
+  if (CurrPhase < PACKOPTPHASE)
+    return 0;
   if (m_node->GetNodeClass() == Contraction::GetClass())
     {
       const Contraction *cont = (Contraction*)m_node;
