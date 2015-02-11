@@ -27,7 +27,7 @@
 #include "node.h"
 #include "helperNodes.h"
 
-#define ADDUP 0
+#define ADDUP 1
 
 bool FoundInVec(const LinElem *elem, const LinElemVec &vec)
 {
