@@ -24,7 +24,19 @@
 #if DOLLDLA
 
 void ContiguousCopy::PrintCode(IndStream& out) {
-  
+  out.Indent();
+  string inputName = GetInputName(0).m_name;
+  string inputSize = "(" + InputDataType(0).m_numRowsVar + " * " + InputDataType(0).m_numColsVar + ")";
+
+  string receivingName = GetInputName(1).m_name;
+
+  if (Input(0)->GetDataType() == REAL_SINGLE) {
+    inputSize += "* sizeof(float)";
+  } else {
+    inputSize += "* sizeof(double)";
+  }
+  *out << "memcpy( (void*) " << receivingName << ", (void*) " << inputName;
+  *out << inputSize << " );\n";
 }
 
 void ContiguousCopy::Prop() {

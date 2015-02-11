@@ -28,6 +28,13 @@ class Copy : public DLAOp<2, 1> {
 
  public:
   explicit Copy(Layer layer);
+  static Node* BlankInst() { return new Copy(ABSLAYER); }
+  virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual NodeType GetType() const { return "Copy"; }
+  virtual ClassType GetNodeClass() const { return GetClass(); }
+  static ClassType GetClass() { return "Copy"; }
+
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual bool Overwrites(const Node* input, ConnNum num) const;
 
@@ -35,6 +42,8 @@ class Copy : public DLAOp<2, 1> {
   virtual bool IsDataDependencyOfInput() const { return true; }
 
   virtual void Prop();
+
+  virtual void PrintCode(IndStream& out);
 };
 
 #endif // DOLLDLA

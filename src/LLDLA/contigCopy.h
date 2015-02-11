@@ -28,6 +28,13 @@ class ContiguousCopy : public Copy {
 
  public:
   using Copy::Copy;
+  static Node* BlankInst() { return new ContiguousCopy(ABSLAYER); }
+  virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual NodeType GetType() const { return "ContiguousCopy"; }
+  virtual NodeType GetNodeClass() const { return GetClass(); }
+  static ClassType GetClass() { return "ContiguousCopy"; }
+  
   virtual void PrintCode(IndStream& out);
   virtual void Prop();
 

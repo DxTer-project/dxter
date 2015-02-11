@@ -49,6 +49,10 @@ void Copy::Prop() {
   }
 }
 
-
+void Copy::PrintCode(IndStream& out) {
+  cout << "ERROR: Copy is must be refined into a specific implementation.";
+  cout << "It cannot be implemented" << endl;
+  throw;
+}
 
 #endif // DOLLDLA
