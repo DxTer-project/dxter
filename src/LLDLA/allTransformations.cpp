@@ -7,6 +7,7 @@
 #include "LLDLATranspose.h"
 #include "madd.h"
 #include "mvmul.h"
+#include "packToCopyAndZero.h"
 #include "partition.h"
 #include "recombine.h"
 #include "setToZero.h"

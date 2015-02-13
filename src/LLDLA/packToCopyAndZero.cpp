@@ -19,6 +19,11 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "pack.h"
+#include "packToCopyAndZero.h"
+#include "partition.h"
+#include "recombine.h"
+
 #if DOLLDLA
 
 PackToCopyAndZero::PackToCopyAndZero(Layer fromLayer, Layer toLayer) {
@@ -40,7 +45,14 @@ bool PackToCopyAndZero::CanApply(const Node* node) const {
 void PackToCopyAndZero::Apply(Node* node) const {
   Pack* pack = (Pack*) node;
 
-  //  auto partition = new Paritition(m_toLayer, 
+  Partition* partition;
+  if (pack->PackDir() == HORIZONTAL) {
+    partition = new Partition(m_toLayer, pack->PackDir(), pack->PackN());
+  } else {
+    partition = new Partition(m_toLayer, pack->PackDir(), pack->PackM());
+  }
+  
+  Recombine* recombine = new Recombine(m_toLayer, pack->PackDir());
 }
 
 #endif // DOLLDLA
