@@ -22,7 +22,15 @@
 #if DOLLDLA
 
 class PackToCopyAndZero : public SingleTrans {
+  Layer m_fromLayer, m_toLayer;
+ public:
+  PackToCopyAndZero(Layer fromLayer, Layer toLayer);
 
+  virtual bool IsRef() const { return true; }
+
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
 };
 
 #endif // DOLLDLA

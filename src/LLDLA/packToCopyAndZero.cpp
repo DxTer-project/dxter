@@ -21,4 +21,26 @@
 
 #if DOLLDLA
 
+PackToCopyAndZero::PackToCopyAndZero(Layer fromLayer, Layer toLayer) {
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+}
+
+string PackToCopyAndZero::GetType() const {
+  return "PackToCopyAndZero";
+}
+
+bool PackToCopyAndZero::CanApply(const Node* node) const {
+  if (node->GetNodeClass() == Pack::GetClass()) {
+    return true;
+  }
+  throw;
+}
+
+void PackToCopyAndZero::Apply(Node* node) const {
+  Pack* pack = (Pack*) node;
+
+  //  auto partition = new Paritition(m_toLayer, 
+}
+
 #endif // DOLLDLA

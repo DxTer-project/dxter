@@ -273,11 +273,10 @@ bool MVMulLoopRef::CanApply(const Node *node) const
       return !(*(mvmul->GetInputN(0)) <= m_bs.GetSize());
     }
   }
-  return false;
+  throw;
 }
 
-void MVMulLoopRef::Apply(Node *node) const
-{
+void MVMulLoopRef::Apply(Node *node) const {
   if (m_dim == DIMM) {
     ApplyRowSplit(node);
   } else if (m_dim == DIMN) {
@@ -288,8 +287,7 @@ void MVMulLoopRef::Apply(Node *node) const
   }
 }
 
-void MVMulLoopRef::ApplyRowSplit(Node *node) const
-{
+void MVMulLoopRef::ApplyRowSplit(Node *node) const {
   MVMul *mul = (MVMul*) node;
   
   // Split A on m dimension

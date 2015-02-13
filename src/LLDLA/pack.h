@@ -30,8 +30,6 @@
 class Pack : public DLAOp<2, 1> {
  public:
   explicit Pack(Layer layer);
-  static Node* BlankInst() { return new Pack(ABSLAYER); }
-  virtual Node* GetNewInst() { return BlankInst(); }
 
   virtual NodeType GetType() const { return "Pack"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -45,6 +43,8 @@ class Pack : public DLAOp<2, 1> {
 
   virtual int PackM();
   virtual int PackN();
+
+  virtual Dir PackDir() = 0;
 
   virtual void Prop();
   virtual void PrintCode(IndStream& out);
