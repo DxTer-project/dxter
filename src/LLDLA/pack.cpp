@@ -46,8 +46,16 @@ void Pack::PrintCode(IndStream& out) {
 void Pack::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
-    m_cost = GetInputM(1)->SumProds11(*GetInputN(0));
+    m_cost = GetInputM(1)->SumProds11(*GetInputN(1));
   }
+}
+
+int Pack::PackM() {
+  return InputDataType(0).m_numRows;
+}
+
+int Pack::PackN() {
+  return InputDataType(0).m_numCols;
 }
 
 #endif // DOLLDLA

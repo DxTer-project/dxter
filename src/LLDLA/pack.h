@@ -43,6 +43,9 @@ class Pack : public DLAOp<2, 1> {
   virtual bool IsReadOnly() const { return false; }
   virtual bool IsDataDependencyOfInput() const { return true; }
 
+  virtual int PackM();
+  virtual int PackN();
+
   virtual void Prop();
   virtual void PrintCode(IndStream& out);
 };
