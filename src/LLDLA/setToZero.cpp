@@ -63,7 +63,7 @@ void SetToZero::Prop() {
       throw;
     }
 
-    m_cost = 0;
+    m_cost = GetInputM(0)->SumProds11(*GetInputN(0));
   }
 }
 

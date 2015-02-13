@@ -46,7 +46,7 @@ void Unpack::PrintCode(IndStream& out) {
 void Unpack::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
-    m_cost = ZERO;
+    m_cost = GetInputM(1)->SumProds11(*GetInputN(1));
   }
 }
 
