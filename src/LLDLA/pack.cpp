@@ -40,7 +40,34 @@ bool Pack::Overwrites(const Node* input, ConnNum num) const {
 }
 
 void Pack::PrintCode(IndStream& out) {
-  throw;
+  string toPack = GetInputName(0).m_name;
+  string packInto = GetInputName(1).m_name;
+
+  string toPackM = InputDataType(0).m_numRowsVar;
+  string toPackN = InputDataType(0).m_numColsVar;
+
+  string toPackRowStride = InputDataType(0).m_rowStrideVar;
+  string toPackColStride = InputDataType(0).m_colStrideVar;
+
+  string packIntoM = InputDataType(1).m_numRowsVar;
+  string packIntoN = InputDataType(1).m_numColsVar;
+
+  string packIntoRowStride = InputDataType(1).m_rowStrideVar;
+  string packIntoColStride = InputDataType(1).m_colStrideVar;
+
+  out.Indent();
+  if (Input(0)->GetDataType() == REAL_SINGLE) {
+    *out << "pack_float( ";
+  } else {
+    *out << "pack_double( ";
+  }
+
+  *out << toPack << ", " << packInto << ", " <<
+    toPackM << ", " << toPackN << ", " <<
+    toPackRowStride << ", " << toPackColStride;
+  *out << ", " <<
+    packIntoM << ", " << packIntoN << ", " <<
+    packIntoRowStride << ", " << packIntoColStride << ");" << endl;
 }
 
 void Pack::Prop() {

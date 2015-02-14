@@ -19,10 +19,12 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "copy.h"
 #include "pack.h"
 #include "packToCopyAndZero.h"
 #include "partition.h"
 #include "recombine.h"
+#include "setToZero.h"
 
 #if DOLLDLA
 
@@ -51,8 +53,28 @@ void PackToCopyAndZero::Apply(Node* node) const {
   } else {
     partition = new Partition(m_toLayer, pack->PackDir(), pack->PackM());
   }
+  partition->AddInput(pack->Input(1), pack->InputConnNum(1));
+
+  Copy* copy = new Copy(m_toLayer);
+  copy->AddInputs(4,
+		  pack->Input(0), pack->InputConnNum(0),
+		  partition, 0);
+
+  SetToZero* setZero = new SetToZero(m_toLayer);
+  setZero->AddInput(partition, 1);
   
   Recombine* recombine = new Recombine(m_toLayer, pack->PackDir());
+  recombine->AddInputs(6,
+		       copy, 0,
+		       setZero, 0,
+		       pack->Input(0), pack->InputConnNum(0));
+
+  pack->m_poss->AddNode(partition);
+  pack->m_poss->AddNode(copy);
+  pack->m_poss->AddNode(setZero);
+  pack->m_poss->AddNode(recombine);
+  pack->RedirectChildren(recombine, 0);
+  pack->m_poss->DeleteChildAndCleanUp(pack);
 }
 
 #endif // DOLLDLA

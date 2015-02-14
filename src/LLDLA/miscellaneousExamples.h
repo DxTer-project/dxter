@@ -3,6 +3,7 @@
 
 #if DOLLDLA
 
+RealPSet* PackTest(Type dataType, int m);
 RealPSet* SetToZeroTest(Type dataType, int m, int n);
 RealPSet* GenSizeColSVMul(Type dataType, int m);
 RealPSet* TransMVMul(Type dataType, int m, int n);

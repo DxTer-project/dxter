@@ -8,6 +8,23 @@ void *alloc(size_t size)	{
 	return (void *) malloc(size);
 }
 
+void pack_double(double* a, double* b,
+		 int a_rows, int a_cols,
+		 int a_row_stride, int a_col_stride,
+		 int b_rows, int b_cols,
+		 int b_row_stride, int b_col_stride) {
+  int i, j;
+  for (i = 0; i < b_rows; i++) {
+    for (j = 0; j < b_cols; j++) {
+      if (i < a_rows && j < a_cols) {
+	B(i, j) = A(i, j);
+      } else {
+	B(i, j) = 0;
+      }
+    }
+  }
+}
+
 void set_to_zero_double(double* a,
 			int m, int n,
 			int a_row_stride, int a_col_stride) {

@@ -154,6 +154,7 @@ void Usage()
   cout <<"        17  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
   cout <<"        18  -> alpha*A*x + beta*B*x F/D M N\n";
   cout <<"        19  -> y <- Ax F/D M N\n";
+  cout <<"        20  -> Pack test F/D M\n";
   cout <<"\n";
 }
 
@@ -443,6 +444,17 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
       algPSet = SetToZeroTest(precision, m, n);
+      break;
+    case(20):
+      if (argc != 4) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_zeroMVMul";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      problemInstance.AddDimension(m, "m");
+      algPSet = PackTest(precision, m);
       break;
     default:
       Usage();
