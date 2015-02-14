@@ -85,10 +85,6 @@ bool DataTypeInfo::IsGenStride() const {
 }
 
 bool DataTypeInfo::IsContiguous() const {
-  /*  if (IsGenStride()) {
-    return false;
-    }*/
-
   if (m_rowStrideVal == 1 && m_colStrideVal == m_numRows) {
     return true;
   }

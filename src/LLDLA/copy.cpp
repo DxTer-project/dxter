@@ -43,6 +43,11 @@ void Copy::Prop() {
     DLAOp<2, 1>::Prop();
     if (!InputDataType(0).IsSameSizeAs(InputDataType(1))) {
       cout << "ERROR: Copy operands do not have the same size" << endl;
+      cout << "Input 0 # rows = " << InputDataType(0).m_numRows << endl;
+      cout << "Input 0 # cols = " << InputDataType(0).m_numCols << endl;
+      cout << "Input 1 # rows = " << InputDataType(1).m_numRows << endl;
+      cout << "Input 1 # cols = " << InputDataType(1).m_numCols << endl;
+
       throw;
     }
     m_cost = ZERO;

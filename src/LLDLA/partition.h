@@ -98,7 +98,6 @@ class Partition : public DLANode
 
   virtual const Sizes* GetM(ConnNum num) const;
   virtual const Sizes* GetN(ConnNum num) const;
-
 };
 
 class PartitionLowerLayer : public SingleTrans
