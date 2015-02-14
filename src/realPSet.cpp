@@ -1708,48 +1708,6 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 #else
         BasePSet *newSet = oldSet->GetNewInst();
         newSet->Duplicate(*setIter, map, true, false);
-
-	/*
-	//Add to map the poss inputs so each set input will patch properly
-	if (oldSet->m_inTuns.size() != newSet->m_inTuns.size())
-	  throw;
-	NodeVecIter tunIterOld = oldSet->m_inTuns.begin();
-	NodeVecIter tunIterNew = newSet->m_inTuns.begin();
-	for(; tunIterOld != oldSet->m_inTuns.end(); ++tunIterOld,++tunIterNew) {
-	  Tunnel *oldTun = (Tunnel*)(*tunIterOld);
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
-	  cout << "patching " << newTun << endl;
-	  newTun->m_pset = newSet;
-	  cout << "oldTun " << oldTun << " to " << newTun << endl;
-	  if (oldTun->m_children.size() != newTun->m_children.size())
-	    throw;
-	  NodeConnVecIter childIterOld = oldTun->m_children.begin();
-	  NodeConnVecIter childIterNew = newTun->m_children.begin();
-	  for(; childIterOld != oldTun->m_children.end(); ++childIterOld,++childIterNew) {
-	    cout << "map " << (*childIterOld)->m_n << " to " << (*childIterNew)->m_n << endl;
-	    map[(*childIterOld)->m_n] = (*childIterNew)->m_n;
-	  }
-	}
-
-	if (oldSet->m_outTuns.size() != newSet->m_outTuns.size())
-	  throw;
-	//Add to map the poss outputs so each set output will patch properly
-	tunIterOld = oldSet->m_outTuns.begin();
-	tunIterNew = newSet->m_outTuns.begin();
-	for(; tunIterOld != oldSet->m_outTuns.end(); ++tunIterOld,++tunIterNew) {
-	  Tunnel *oldTun = (Tunnel*)(*tunIterOld);
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
-	  cout << "patching " << newTun << endl;
-	  newTun->m_pset = newSet;
-	  if (oldTun->m_inputs.size() != newTun->m_inputs.size())
-	    throw;
-	  NodeConnVecIter inIterOld = oldTun->m_inputs.begin();
-	  NodeConnVecIter inIterNew = newTun->m_inputs.begin();
-	  for(; inIterOld != oldTun->m_inputs.end(); ++inIterOld,++inIterNew) {
-	    map[(*inIterOld)->m_n] = (*inIterNew)->m_n;
-	  }
-	}
-	*/
 #endif
 	
         newPoss->m_sets.push_back(newSet);
@@ -1810,43 +1768,6 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
         BasePSet *newSet = oldSet->GetNewInst();
         newSet->Duplicate(*setIter, map, true, false);
 
-
-	//Add to map the poss inputs so each set input will patch properly
-	if (oldSet->m_inTuns.size() != newSet->m_inTuns.size())
-	  throw;
-	TunVecIter tunIterOld = oldSet->m_inTuns.begin();
-	TunVecIter tunIterNew = newSet->m_inTuns.begin();
-	for(; tunIterOld != oldSet->m_inTuns.end(); ++tunIterOld,++tunIterNew) {
-	  Tunnel *oldTun = (Tunnel*)(*tunIterOld);
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
-	  cout << "patching " << newTun << endl;
-	  newTun->m_pset = newSet;
-	  if (oldTun->m_children.size() != newTun->m_children.size())
-	    throw;
-	  NodeConnVecIter childIterOld = oldTun->m_children.begin();
-	  NodeConnVecIter childIterNew = newTun->m_children.begin();
-	  for(; childIterOld != oldTun->m_children.end(); ++childIterOld,++childIterNew) {
-	    map[(*childIterOld)->m_n] = (*childIterNew)->m_n;
-	  }
-	}
-
-	if (oldSet->m_outTuns.size() != newSet->m_outTuns.size())
-	  throw;
-	//Add to map the poss outputs so each set output will patch properly
-	tunIterOld = oldSet->m_outTuns.begin();
-	tunIterNew = newSet->m_outTuns.begin();
-	for(; tunIterOld != oldSet->m_outTuns.end(); ++tunIterOld,++tunIterNew) {
-	  Tunnel *oldTun = (Tunnel*)(*tunIterOld);
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
-	  newTun->m_pset = newSet;
-	  if (oldTun->m_inputs.size() != newTun->m_inputs.size())
-	    throw;
-	  NodeConnVecIter inIterOld = oldTun->m_inputs.begin();
-	  NodeConnVecIter inIterNew = newTun->m_inputs.begin();
-	  for(; inIterOld != oldTun->m_inputs.end(); ++inIterOld,++inIterNew) {
-	    map[(*inIterOld)->m_n] = (*inIterNew)->m_n;
-	  }
-	}
 #endif
 	
         newPoss->m_sets.push_back(newSet);
