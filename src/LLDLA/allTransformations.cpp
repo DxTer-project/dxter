@@ -7,6 +7,8 @@
 #include "LLDLATranspose.h"
 #include "madd.h"
 #include "mvmul.h"
+#include "pack.h"
+#include "packToCopyAndZero.h"
 #include "partition.h"
 #include "recombine.h"
 #include "setToZero.h"
@@ -209,6 +211,10 @@ void AddSetToZeroTrans() {
   Universe::AddTrans(SetToZero::GetClass(), new SetToZeroLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
 }
 
+void AddPackTrans() {
+  Universe::AddTrans(Pack::GetClass(), new PackToCopyAndZero(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+}
+
 void AddTransformations()
 {
   AddGemmTrans();
@@ -219,14 +225,11 @@ void AddTransformations()
   AddSVMulTrans();
   AddVMMulTrans();
   AddVAddTrans();
-
   AddTransposeTrans();
-
   AddUnrollingTrans();
-
   AddPartitionRecombineTrans();
-
   AddSetToZeroTrans();
+  AddPackTrans();
 }
 
 #endif // DOLLDLA

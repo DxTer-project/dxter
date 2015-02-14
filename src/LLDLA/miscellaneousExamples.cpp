@@ -6,9 +6,57 @@
 #include "setToZero.h"
 #include "svmul.h"
 #include "vadd.h"
+#include "verticalPack.h"
 #include "vvdot.h"
 
 #if DOLLDLA
+
+RealPSet* PackTest(Type dataType, int m) {
+  auto xIn = new InputNode("x",
+			   m - 2, 1,
+			   1, m - 2,
+			   dataType);
+
+  auto yIn = new InputNode("y",
+			   m, 1,
+			   1, m,
+			   dataType);
+
+  auto alpha = new InputNode("alpha",
+			     1, 1,
+			     1, 1,
+			     dataType);
+
+  auto tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn);
+
+  auto tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn);
+
+  auto tunAlpha = new Tunnel(POSSTUNIN);
+  tunAlpha->AddInput(alpha);
+
+  auto pack = new VerticalPack(ABSLAYER);
+  pack->AddInputs(4,
+		  tunX, 0,
+		  tunY, 0);
+
+  auto ax = new SVMul(COLVECTOR, ABSLAYER);
+  ax->AddInputs(4,
+		tunAlpha, 0,
+		pack, 0);
+
+  Poss *innerPoss = new Poss(ax, true);
+  RealPSet *innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode;
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
 
 RealPSet* SetToZeroTest(Type dataType, int m, int n) {
   auto Ain = new InputNode("A",

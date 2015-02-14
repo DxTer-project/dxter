@@ -81,10 +81,11 @@ class DataTypeInfo
 	       string rowStrideVar, string colStrideVar,
 	       Type type);
 
-  DataTypeInfo& operator=(const DataTypeInfo &rhs);
+  DataTypeInfo& operator=(const DataTypeInfo& rhs);
 
   bool IsGenStride() const;
   bool IsContiguous() const;
+  bool IsSameSizeAs(const DataTypeInfo& other) const;
 };
 
 #endif // DOLLDLA

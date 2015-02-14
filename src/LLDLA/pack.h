@@ -22,18 +22,18 @@
 #include "DLAOp.h"
 #include "LLDLA.h"
 
+#ifndef PACK_H_
+#define PACK_H_
+
 #if DOLLDLA
 
-class Copy : public DLAOp<2, 1> {
-
+class Pack : public DLAOp<2, 1> {
  public:
-  explicit Copy(Layer layer);
-  static Node* BlankInst() { return new Copy(ABSLAYER); }
-  virtual Node* GetNewInst() { return BlankInst(); }
+  explicit Pack(Layer layer);
 
-  virtual NodeType GetType() const { return "Copy"; }
+  virtual NodeType GetType() const { return "Pack"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
-  static ClassType GetClass() { return "Copy"; }
+  static ClassType GetClass() { return "Pack"; }
 
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual bool Overwrites(const Node* input, ConnNum num) const;
@@ -41,9 +41,15 @@ class Copy : public DLAOp<2, 1> {
   virtual bool IsReadOnly() const { return false; }
   virtual bool IsDataDependencyOfInput() const { return true; }
 
-  virtual void Prop();
+  virtual int PackM();
+  virtual int PackN();
 
+  virtual Dir PackDir() = 0;
+
+  virtual void Prop();
   virtual void PrintCode(IndStream& out);
 };
 
 #endif // DOLLDLA
+
+#endif // PACK_H_

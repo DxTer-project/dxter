@@ -19,45 +19,35 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <assert.h>
-#include "copy.h"
+#include "unpack.h"
 
 #if DOLLDLA
 
-Copy::Copy(Layer layer) {
+Unpack::Unpack(Layer layer) {
   m_layer = layer;
 }
 
-const DataTypeInfo& Copy::DataType(ConnNum num) const {
-  assert(num == 0);
-  return DataType(num);
+const DataTypeInfo& Unpack::DataType(ConnNum num) const {
+  if (num != 0) {
+    throw;
+  }
+  return InputDataType(1);
 }
 
-bool Copy::Overwrites(const Node* input, ConnNum num) const {
+bool Unpack::Overwrites(const Node* input, ConnNum num) const {
   const NodeConn* conn = m_inputs[1];
   return conn->m_n == input && conn->m_num == num;
 }
 
-void Copy::Prop() {
-  if (!IsValidCost(m_cost)) {
-    DLAOp<2, 1>::Prop();
-    if (!InputDataType(0).IsSameSizeAs(InputDataType(1))) {
-      cout << "ERROR: Copy operands do not have the same size" << endl;
-      cout << "Input 0 # rows = " << InputDataType(0).m_numRows << endl;
-      cout << "Input 0 # cols = " << InputDataType(0).m_numCols << endl;
-      cout << "Input 1 # rows = " << InputDataType(1).m_numRows << endl;
-      cout << "Input 1 # cols = " << InputDataType(1).m_numCols << endl;
-
-      throw;
-    }
-    m_cost = ZERO;
-  }
+void Unpack::PrintCode(IndStream& out) {
+  throw;
 }
 
-void Copy::PrintCode(IndStream& out) {
-  cout << "ERROR: Copy is must be refined into a specific implementation. ";
-  cout << "It cannot be implemented" << endl;
-  throw;
+void Unpack::Prop() {
+  if (!IsValidCost(m_cost)) {
+    DLAOp<2, 1>::Prop();
+    m_cost = GetInputM(1)->SumProds11(*GetInputN(1));
+  }
 }
 
 #endif // DOLLDLA

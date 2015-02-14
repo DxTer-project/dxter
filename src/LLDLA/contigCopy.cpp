@@ -19,31 +19,35 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "DLAOp.h"
-#include "LLDLA.h"
+#include "contigCopy.h"
 
 #if DOLLDLA
 
-class Copy : public DLAOp<2, 1> {
+void ContiguousCopy::PrintCode(IndStream& out) {
+  out.Indent();
+  string inputName = GetInputName(0).m_name;
+  string inputSize = "(" + InputDataType(0).m_numRowsVar + " * " + InputDataType(0).m_numColsVar + ")";
 
- public:
-  explicit Copy(Layer layer);
-  static Node* BlankInst() { return new Copy(ABSLAYER); }
-  virtual Node* GetNewInst() { return BlankInst(); }
+  string receivingName = GetInputName(1).m_name;
 
-  virtual NodeType GetType() const { return "Copy"; }
-  virtual ClassType GetNodeClass() const { return GetClass(); }
-  static ClassType GetClass() { return "Copy"; }
+  if (Input(0)->GetDataType() == REAL_SINGLE) {
+    inputSize += "* sizeof(float)";
+  } else {
+    inputSize += "* sizeof(double)";
+  }
+  *out << "memcpy( (void*) " << receivingName << ", (void*) " << inputName;
+  *out << inputSize << " );\n";
+}
 
-  virtual const DataTypeInfo& DataType(ConnNum num) const;
-  virtual bool Overwrites(const Node* input, ConnNum num) const;
-
-  virtual bool IsReadOnly() const { return false; }
-  virtual bool IsDataDependencyOfInput() const { return true; }
-
-  virtual void Prop();
-
-  virtual void PrintCode(IndStream& out);
-};
+void ContiguousCopy::Prop() {
+  if (!IsValidCost(m_cost)) {
+    Copy::Prop();
+    if (!InputDataType(0).IsContiguous() || !InputDataType(1).IsContiguous()) {
+      cout << "ERROR: Contiguous copy on non-contiguous operands" << endl;
+      throw;
+    }
+    m_cost = ZERO;
+  }
+}
 
 #endif // DOLLDLA

@@ -19,31 +19,20 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "DLAOp.h"
-#include "LLDLA.h"
-
 #if DOLLDLA
 
-class Copy : public DLAOp<2, 1> {
+void HorizontalUnpack::Prop() {
+  if (!IsValidCost(m_cost)) {
+    Unpack::Prop();
 
- public:
-  explicit Copy(Layer layer);
-  static Node* BlankInst() { return new Copy(ABSLAYER); }
-  virtual Node* GetNewInst() { return BlankInst(); }
-
-  virtual NodeType GetType() const { return "Copy"; }
-  virtual ClassType GetNodeClass() const { return GetClass(); }
-  static ClassType GetClass() { return "Copy"; }
-
-  virtual const DataTypeInfo& DataType(ConnNum num) const;
-  virtual bool Overwrites(const Node* input, ConnNum num) const;
-
-  virtual bool IsReadOnly() const { return false; }
-  virtual bool IsDataDependencyOfInput() const { return true; }
-
-  virtual void Prop();
-
-  virtual void PrintCode(IndStream& out);
-};
+    if (InputDataType(0).m_numRows != InputDataType(1).m_numRows) {
+      throw;
+    }
+    if (InputDataType(0).m_numCols <= InputDataType(1).m_numCols) {
+      throw;
+    }
+    m_cost = ZERO;
+  }
+}
 
 #endif // DOLLDLA

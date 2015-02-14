@@ -60,10 +60,12 @@ void SetToZero::Prop() {
     
     if (!InputDataType(0).IsContiguous()) {
       cout << "ERROR: Currently SetToZero does not support general stride operands" << endl;
+      cout << "Input 0 row stride = " << InputDataType(0).m_rowStrideVal << endl;
+      cout << "Input 0 col stride = " << InputDataType(0).m_colStrideVal << endl;
       throw;
     }
 
-    m_cost = 0;
+    m_cost = GetInputM(0)->SumProds11(*GetInputN(0));
   }
 }
 

@@ -24,16 +24,15 @@
 
 #if DOLLDLA
 
-class Copy : public DLAOp<2, 1> {
-
+class Unpack : public DLAOp<2, 1> {
  public:
-  explicit Copy(Layer layer);
-  static Node* BlankInst() { return new Copy(ABSLAYER); }
+  explicit Unpack(Layer layer);
+  static Node* BlankInst() { return new Unpack(ABSLAYER); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
-  virtual NodeType GetType() const { return "Copy"; }
+  virtual NodeType GetType() const { return "Unpack"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
-  static ClassType GetClass() { return "Copy"; }
+  static ClassType GetClass() { return "Unpack"; }
 
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual bool Overwrites(const Node* input, ConnNum num) const;
