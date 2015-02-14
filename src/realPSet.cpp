@@ -2464,24 +2464,83 @@ bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
 
 bool RealPSet::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet &stillLive, Cost &highWater)
 {
+  int size = m_posses.size();
+  Linearizer *lins = new Linearizer[size];
+  bool *rem = new bool[size];
+  PossMMapIter iter;
+  int j = 0;
+  if (size > 1) {
+#pragma omp parallel private(j,iter) 
+    {
+      iter = m_posses.begin();
+      j = 0;
+#pragma omp for schedule(static) 
+      for (int i = 0; i < size; ++i) {
+	if (j > i) {
+	  cout << "uhoh\n";
+	  throw;
+	}
+     
+	while (j < i) {
+	  ++iter;
+	  ++j;
+	}
+      
+	lins[i].Start((*iter).second);
+	lins[i].FindOptimalLinearization(stillLive);
+	if (lins[i].m_lin.GetCostNoRecursion(stillLive, lins[i].m_alwaysLive)+costGoingIn+lins[i].m_alwaysLiveCost >= maxMem)
+	  rem[i] = true;
+	else if (lins[i].m_lin.EnforceMemConstraint(costGoingIn+lins[i].m_alwaysLiveCost, maxMem, stillLive, lins[i].m_alwaysLive, highWater)) 
+	  {
+	    rem[i] = true;
+	  }
+	else
+	  rem[i] = false;
+      }      
+    }
+  }
+
+  else {
+    iter = m_posses.begin();
+    for (int i = 0; i < size; ++i,++iter) {
+      lins[i].Start((*iter).second);
+      lins[i].FindOptimalLinearization(stillLive);
+      if (lins[i].m_lin.GetCostNoRecursion(stillLive, lins[i].m_alwaysLive)+costGoingIn+lins[i].m_alwaysLiveCost >= maxMem)
+	rem[i] = true;
+      else {
+	if (lins[i].m_lin.EnforceMemConstraint(costGoingIn+lins[i].m_alwaysLiveCost, maxMem, stillLive, lins[i].m_alwaysLive, highWater)) 
+	  {
+	    rem[i] = true;
+	  }
+	else
+	  rem[i] = false;
+      }
+
+    }      
+  }
+
+  int i = 0;
   PossMMap toRemove;
   for(auto possEntry : m_posses) {
-    Linearizer lin(possEntry.second);
-    lin.FindOptimalLinearization(stillLive);
-    if (lin.m_lin.GetCostNoRecursion(stillLive, lin.m_alwaysLive)+costGoingIn+lin.m_alwaysLiveCost >= maxMem)
+    if (lins[i].m_elems.empty())
+      throw;
+    if (rem[i]) {
       toRemove.insert(possEntry);
-    else {
-      if (lin.m_lin.EnforceMemConstraint(costGoingIn+lin.m_alwaysLiveCost, maxMem, stillLive, lin.m_alwaysLive, highWater)) {
-	toRemove.insert(possEntry);
-      }
     }
+    ++i;
   }
   
   if (toRemove.size() == m_posses.size()) {
+    delete [] lins;
+    delete [] rem;
     return true;
   }
+
   for(auto remove : toRemove) {
     RemoveAndDeletePoss(remove.second, true);
   }
+
+  delete [] lins;
+  delete [] rem;
   return false;
 }
