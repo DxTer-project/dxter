@@ -1560,7 +1560,7 @@ void RealPSet::InlineAllSets()
     ++iter;
   }
 
-  if (m_ownerPoss) {
+  if (m_ownerPoss && (m_ownerPoss->m_sets.size() > 1 || m_ownerPoss->m_pset->m_ownerPoss)) {
     iter = m_posses.begin();
     while (iter != m_posses.end()) {
       Poss *poss = (*iter).second;
@@ -2390,7 +2390,12 @@ bool RealPSet::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet 
   bool *rem = new bool[size];
   PossMMapIter iter;
   int j = 0;
+#ifdef _OPENMP
   if (size > 1) {
+#else
+    if (false) {
+#endif
+
 #pragma omp parallel private(j,iter) 
     {
       iter = m_posses.begin();
@@ -2420,7 +2425,6 @@ bool RealPSet::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet 
       }      
     }
   }
-
   else {
     iter = m_posses.begin();
     for (int i = 0; i < size; ++i,++iter) {
