@@ -495,6 +495,7 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
 {
   if (!currAdd->CanAddToLinearOrder())
     throw;
+  readyToAdd.erase(currAdd);
   curr.m_order.push_back(currAdd);
   currAdd->SetAdded();
   
