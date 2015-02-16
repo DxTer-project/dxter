@@ -86,6 +86,7 @@ class DataTypeInfo
   bool IsGenStride() const;
   bool IsContiguous() const;
   bool IsSameSizeAs(const DataTypeInfo& other) const;
+  string ToString();
 };
 
 #endif // DOLLDLA

@@ -67,7 +67,7 @@ void PackToCopyAndZero::Apply(Node* node) const {
   recombine->AddInputs(6,
 		       copy, 0,
 		       setZero, 0,
-		       pack->Input(0), pack->InputConnNum(0));
+		       pack->Input(1), pack->InputConnNum(1));
 
   pack->m_poss->AddNode(partition);
   pack->m_poss->AddNode(copy);

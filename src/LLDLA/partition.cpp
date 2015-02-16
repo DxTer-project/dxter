@@ -219,6 +219,7 @@ void Partition::BuildHorizontalDataTypeInfo()
 void Partition::BuildVerticalDataTypeInfo()
 {
   DataTypeInfo inData = InputDataType(0);
+  cout << "DataTypeInfo for parition operand\n" + inData.ToString();
 
   string startNumRowsVar = inData.m_numRowsVar;
   startNumRowsVar = startNumRowsVar + "_TOP";
