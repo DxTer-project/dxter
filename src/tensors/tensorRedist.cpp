@@ -28,6 +28,8 @@
 
 #include "tensorSumScatter.h"
 
+extern bool M_allowSquareGridOpt;
+
 
 DimVec GetCommonPrefix(const DimVec &dims1, const DimVec &dims2);
 void GetCommonPrefix(const DimVec &dims1, const DimVec &dims2,
@@ -2885,6 +2887,59 @@ void MultiIndexAllToAll::Apply(Node *node) const
   redist->m_poss->DeleteChildAndCleanUp(redist);
 }
 
+bool FindPermCycle(const DistType &srcType, const DistType &destType,
+		   DimSet &tensorModesInvolved, 
+		   const DimVec &gridModesToFind,
+		   Size prefixLen,
+		   Size suffixLen,
+		   DimVec *gridModesInvolved)
+{
+  for (Dim dim = 0; dim < srcType.m_numDims; ++dim) {
+    DistEntry srcDistEntry = srcType.m_dists[dim];
+    DistEntry destDistEntry = destType.m_dists[dim];
+    if (srcDistEntry != destDistEntry) {
+      DimVec srcDims = srcDistEntry.DistEntryDims();
+      DimVec destDims = destDistEntry.DistEntryDims();
+      DimVec pref;
+      DimVec srcSuff, destSuff;
+      GetCommonPrefix(srcDims, destDims,
+		      pref,
+		      srcSuff, destSuff);
+      if (!destSuff.empty()
+          && std::is_permutation(destSuff.begin(), destSuff.end(),
+			      gridModesToFind.begin())) 
+	{
+	  if ((pref.empty() ? 0 : GridModeLens(pref)) != prefixLen) {
+	    return false;
+	  }
+	  if (tensorModesInvolved.find(dim) != tensorModesInvolved.end()) {
+	    return true;
+	  }
+	  //If we're not allowing the optimization of use permutation
+	  // for moving (permuted) suffixes around if the suffixes have
+	  // the same number of processes, then recursion isn't allowed
+	  // since we only allow permutation on the single tensor mode
+	  if (!M_allowSquareGridOpt)
+	    return false;
+	  tensorModesInvolved.insert(dim);
+	  if (gridModesInvolved) {
+	    gridModesInvolved->insert(gridModesInvolved->end(),
+				      srcSuff.begin(), srcSuff.end());
+	  }
+    if ((srcSuff.empty() ? 0 : GridModeLens(srcSuff)) != suffixLen)
+	    return false;
+	  return FindPermCycle(srcType, destType,
+			       tensorModesInvolved,
+			       srcSuff,
+			       prefixLen,
+			       suffixLen,
+			       gridModesInvolved);
+	}
+    }
+  }
+  return false;
+}
+
 bool GetPermPattern(const DistType &srcType,
                          const DistType &destType,
                          DimVec *gridModes)
@@ -2893,38 +2948,59 @@ bool GetPermPattern(const DistType &srcType,
   
   if (numDims != destType.m_numDims)
     return false;
-
+  
   if (gridModes)
     gridModes->clear();
-  
-  bool foundPerm = false;
+
+  DimSet tensorModesInvolved;
   
   for (Dim dim = 0; dim < numDims; ++dim) {
-    DistEntry srcDistEntry = srcType.m_dists[dim];
-    DistEntry destDistEntry = destType.m_dists[dim];
-    if (srcDistEntry != destDistEntry) {
-      DimVec srcDims = srcDistEntry.DistEntryDims();
-      DimVec destDims = destDistEntry.DistEntryDims();
-      DimVec srcSuff, destSuff;
-      GetDifferentSuffix(srcDims, destDims,
-			 srcSuff, destSuff);
-      if (srcSuff.size() != destSuff.size())
-	return false;
-      
-      if (std::is_permutation(srcSuff.begin(), srcSuff.end(),
-			      destSuff.begin()))
-	{
-	  if (gridModes) {
-	    gridModes->insert(gridModes->end(), srcSuff.begin(), srcSuff.end());
+    if (tensorModesInvolved.find(dim) == tensorModesInvolved.end())
+      {
+	DistEntry srcDistEntry = srcType.m_dists[dim];
+	DistEntry destDistEntry = destType.m_dists[dim];
+	if (srcDistEntry != destDistEntry) {
+	  DimVec srcDims = srcDistEntry.DistEntryDims();
+	  DimVec destDims = destDistEntry.DistEntryDims();
+	  DimVec pref;
+	  DimVec srcSuff, destSuff;
+	  GetCommonPrefix(srcDims, destDims,
+			  pref,
+			  srcSuff, destSuff);
+	  
+	  if (!srcSuff.empty() && !destSuff.empty()) {
+	    Size suffixLen = GridModeLens(srcSuff);
+	    if (suffixLen != GridModeLens(destSuff))
+	      return false;
+	    Size prefixLen = (pref.empty() ? 0 : GridModeLens(pref));
+	    DimSet localTensorModesInvolved;
+	    localTensorModesInvolved.insert(dim);
+	    if (gridModes) {
+	      gridModes->insert(gridModes->end(),
+					srcSuff.begin(), srcSuff.end());
+	    }	    
+	    if (!FindPermCycle(srcType, destType,
+			       localTensorModesInvolved,
+			       srcSuff,
+			       prefixLen,
+			       suffixLen,
+			       gridModes))
+	      {
+		if (gridModes)
+		  gridModes->clear();
+		return false;
+	      }
+	    else {
+	      tensorModesInvolved.insert(localTensorModesInvolved.begin(), localTensorModesInvolved.end());
+	    }
 	  }
-	  foundPerm = true;
+	  else
+	    return false;
 	}
-      else
-	return false;
-    }
+      }
   }
 
-  return foundPerm;
+  return !tensorModesInvolved.empty();
 }
 
 string GetAlignmentSource(Node *node, ConnNum inNum)

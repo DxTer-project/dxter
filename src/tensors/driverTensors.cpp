@@ -48,6 +48,7 @@
 #include "ccsd.h"
 
 bool M_dontFuseLoops = true;
+bool M_allowSquareGridOpt = true;
 
   //~ 10:1 ratio
   // 53, 5 for H20
