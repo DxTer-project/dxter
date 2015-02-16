@@ -1560,7 +1560,7 @@ void RealPSet::InlineAllSets()
     ++iter;
   }
 
-  if (m_ownerPoss) {
+  if (m_ownerPoss && (m_ownerPoss->m_sets.size() > 1 || m_ownerPoss->m_pset->m_ownerPoss)) {
     iter = m_posses.begin();
     while (iter != m_posses.end()) {
       Poss *poss = (*iter).second;
@@ -1708,48 +1708,6 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 #else
         BasePSet *newSet = oldSet->GetNewInst();
         newSet->Duplicate(*setIter, map, true, false);
-
-	/*
-	//Add to map the poss inputs so each set input will patch properly
-	if (oldSet->m_inTuns.size() != newSet->m_inTuns.size())
-	  throw;
-	NodeVecIter tunIterOld = oldSet->m_inTuns.begin();
-	NodeVecIter tunIterNew = newSet->m_inTuns.begin();
-	for(; tunIterOld != oldSet->m_inTuns.end(); ++tunIterOld,++tunIterNew) {
-	  Tunnel *oldTun = (Tunnel*)(*tunIterOld);
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
-	  cout << "patching " << newTun << endl;
-	  newTun->m_pset = newSet;
-	  cout << "oldTun " << oldTun << " to " << newTun << endl;
-	  if (oldTun->m_children.size() != newTun->m_children.size())
-	    throw;
-	  NodeConnVecIter childIterOld = oldTun->m_children.begin();
-	  NodeConnVecIter childIterNew = newTun->m_children.begin();
-	  for(; childIterOld != oldTun->m_children.end(); ++childIterOld,++childIterNew) {
-	    cout << "map " << (*childIterOld)->m_n << " to " << (*childIterNew)->m_n << endl;
-	    map[(*childIterOld)->m_n] = (*childIterNew)->m_n;
-	  }
-	}
-
-	if (oldSet->m_outTuns.size() != newSet->m_outTuns.size())
-	  throw;
-	//Add to map the poss outputs so each set output will patch properly
-	tunIterOld = oldSet->m_outTuns.begin();
-	tunIterNew = newSet->m_outTuns.begin();
-	for(; tunIterOld != oldSet->m_outTuns.end(); ++tunIterOld,++tunIterNew) {
-	  Tunnel *oldTun = (Tunnel*)(*tunIterOld);
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
-	  cout << "patching " << newTun << endl;
-	  newTun->m_pset = newSet;
-	  if (oldTun->m_inputs.size() != newTun->m_inputs.size())
-	    throw;
-	  NodeConnVecIter inIterOld = oldTun->m_inputs.begin();
-	  NodeConnVecIter inIterNew = newTun->m_inputs.begin();
-	  for(; inIterOld != oldTun->m_inputs.end(); ++inIterOld,++inIterNew) {
-	    map[(*inIterOld)->m_n] = (*inIterNew)->m_n;
-	  }
-	}
-	*/
 #endif
 	
         newPoss->m_sets.push_back(newSet);
@@ -1810,43 +1768,6 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
         BasePSet *newSet = oldSet->GetNewInst();
         newSet->Duplicate(*setIter, map, true, false);
 
-
-	//Add to map the poss inputs so each set input will patch properly
-	if (oldSet->m_inTuns.size() != newSet->m_inTuns.size())
-	  throw;
-	TunVecIter tunIterOld = oldSet->m_inTuns.begin();
-	TunVecIter tunIterNew = newSet->m_inTuns.begin();
-	for(; tunIterOld != oldSet->m_inTuns.end(); ++tunIterOld,++tunIterNew) {
-	  Tunnel *oldTun = (Tunnel*)(*tunIterOld);
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
-	  cout << "patching " << newTun << endl;
-	  newTun->m_pset = newSet;
-	  if (oldTun->m_children.size() != newTun->m_children.size())
-	    throw;
-	  NodeConnVecIter childIterOld = oldTun->m_children.begin();
-	  NodeConnVecIter childIterNew = newTun->m_children.begin();
-	  for(; childIterOld != oldTun->m_children.end(); ++childIterOld,++childIterNew) {
-	    map[(*childIterOld)->m_n] = (*childIterNew)->m_n;
-	  }
-	}
-
-	if (oldSet->m_outTuns.size() != newSet->m_outTuns.size())
-	  throw;
-	//Add to map the poss outputs so each set output will patch properly
-	tunIterOld = oldSet->m_outTuns.begin();
-	tunIterNew = newSet->m_outTuns.begin();
-	for(; tunIterOld != oldSet->m_outTuns.end(); ++tunIterOld,++tunIterNew) {
-	  Tunnel *oldTun = (Tunnel*)(*tunIterOld);
-	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
-	  newTun->m_pset = newSet;
-	  if (oldTun->m_inputs.size() != newTun->m_inputs.size())
-	    throw;
-	  NodeConnVecIter inIterOld = oldTun->m_inputs.begin();
-	  NodeConnVecIter inIterNew = newTun->m_inputs.begin();
-	  for(; inIterOld != oldTun->m_inputs.end(); ++inIterOld,++inIterNew) {
-	    map[(*inIterOld)->m_n] = (*inIterNew)->m_n;
-	  }
-	}
 #endif
 	
         newPoss->m_sets.push_back(newSet);
@@ -2464,24 +2385,87 @@ bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
 
 bool RealPSet::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet &stillLive, Cost &highWater)
 {
+  int size = m_posses.size();
+  Linearizer *lins = new Linearizer[size];
+  bool *rem = new bool[size];
+  PossMMapIter iter;
+  int j = 0;
+#ifdef _OPENMP
+  if (size > 1) {
+#else
+    if (false) {
+#endif
+
+#pragma omp parallel private(j,iter) 
+    {
+      iter = m_posses.begin();
+      j = 0;
+#pragma omp for schedule(static) 
+      for (int i = 0; i < size; ++i) {
+	if (j > i) {
+	  cout << "uhoh\n";
+	  throw;
+	}
+     
+	while (j < i) {
+	  ++iter;
+	  ++j;
+	}
+      
+	lins[i].Start((*iter).second);
+	lins[i].FindOptimalLinearization(stillLive);
+	if (lins[i].m_lin.GetCostNoRecursion(stillLive, lins[i].m_alwaysLive)+costGoingIn+lins[i].m_alwaysLiveCost >= maxMem)
+	  rem[i] = true;
+	else if (lins[i].m_lin.EnforceMemConstraint(costGoingIn+lins[i].m_alwaysLiveCost, maxMem, stillLive, lins[i].m_alwaysLive, highWater)) 
+	  {
+	    rem[i] = true;
+	  }
+	else
+	  rem[i] = false;
+      }      
+    }
+  }
+  else {
+    iter = m_posses.begin();
+    for (int i = 0; i < size; ++i,++iter) {
+      lins[i].Start((*iter).second);
+      lins[i].FindOptimalLinearization(stillLive);
+      if (lins[i].m_lin.GetCostNoRecursion(stillLive, lins[i].m_alwaysLive)+costGoingIn+lins[i].m_alwaysLiveCost >= maxMem)
+	rem[i] = true;
+      else {
+	if (lins[i].m_lin.EnforceMemConstraint(costGoingIn+lins[i].m_alwaysLiveCost, maxMem, stillLive, lins[i].m_alwaysLive, highWater)) 
+	  {
+	    rem[i] = true;
+	  }
+	else
+	  rem[i] = false;
+      }
+
+    }      
+  }
+
+  int i = 0;
   PossMMap toRemove;
   for(auto possEntry : m_posses) {
-    Linearizer lin(possEntry.second);
-    lin.FindOptimalLinearization(stillLive);
-    if (lin.m_lin.GetCostNoRecursion(stillLive, lin.m_alwaysLive)+costGoingIn+lin.m_alwaysLiveCost >= maxMem)
+    if (lins[i].m_elems.empty())
+      throw;
+    if (rem[i]) {
       toRemove.insert(possEntry);
-    else {
-      if (lin.m_lin.EnforceMemConstraint(costGoingIn+lin.m_alwaysLiveCost, maxMem, stillLive, lin.m_alwaysLive, highWater)) {
-	toRemove.insert(possEntry);
-      }
     }
+    ++i;
   }
   
   if (toRemove.size() == m_posses.size()) {
+    delete [] lins;
+    delete [] rem;
     return true;
   }
+
   for(auto remove : toRemove) {
     RemoveAndDeletePoss(remove.second, true);
   }
+
+  delete [] lins;
+  delete [] rem;
   return false;
 }

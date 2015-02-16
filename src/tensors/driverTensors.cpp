@@ -48,10 +48,11 @@
 #include "ccsd.h"
 
 bool M_dontFuseLoops = true;
+bool M_allowSquareGridOpt = true;
 
   //~ 10:1 ratio
   // 53, 5 for H20
-const Size small = 35; //i-p
+const Size small = 15; //i-p
 const Size big = 10*small; // a-h
 Cost maxMem = 116000000;
 
@@ -225,7 +226,7 @@ void ReduceMaxMem(set<string> &used)
 
 void AddTrans()
 {
-#if 0
+#if 1
   MultiTrans *trans = new MultiTrans;
   trans->AddTrans(new DistContToLocalContStatC(DM2LAYER, SMLAYER));
   trans->AddTrans(new DistContToLocalContStatASumScatter(DM2LAYER, SMLAYER));

@@ -481,6 +481,17 @@ DimVec MapIndicesToDims(const string &indices, const string &dimIndices)
   return map;
 }
 
+Size GridModeLens(const DimVec &modes)
+{
+  if (modes.empty())
+    throw;
+  Size size = 1;
+  for(auto mode : modes) {
+    size *= GridLens[mode];
+  }
+  return size;
+}
+
 bool IsPrefix(const DimVec &isPrefix, const DimVec &dims)
 {
   if (dims.empty() || isPrefix.empty())

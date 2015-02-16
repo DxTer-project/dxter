@@ -280,6 +280,8 @@ class DistType
   DistType Permute(const Permutation &perm) const;
   bool FindGridMode(Dim gridMode, Dim &tensorMode) const;
 };
+
+Size GridModeLens(const DimVec &modes);
 #endif
 
 #if DOELEM

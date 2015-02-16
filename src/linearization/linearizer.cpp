@@ -37,6 +37,11 @@ bool FoundInVec(const LinElem *elem, const LinElemVec &vec)
   return false;
 }
 
+Linearizer::Linearizer()
+{
+  m_alwaysLiveCost = 0;
+}
+
 Linearizer::Linearizer(const Poss *poss)
 {
   m_alwaysLiveCost = 0;
@@ -53,6 +58,19 @@ Linearizer::~Linearizer()
 {
   for(auto elem : m_elems)
     delete elem;
+}
+
+void Linearizer::Start(const Poss *poss)
+{
+  if (!m_elems.empty())
+    throw;
+  PtrToLinElemMap map;
+  for(auto node : poss->m_possNodes) {
+    FindOrAdd(node, map);
+  }
+  for(auto set : poss->m_sets) {
+    FindOrAdd(set, map);
+  }
 }
 
 LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
@@ -477,6 +495,7 @@ void Linearizer::AddAndRecurse(Linearization &curr, LinElemSet &readyToAdd, LinE
 {
   if (!currAdd->CanAddToLinearOrder())
     throw;
+  readyToAdd.erase(currAdd);
   curr.m_order.push_back(currAdd);
   currAdd->SetAdded();
   

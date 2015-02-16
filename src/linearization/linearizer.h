@@ -42,8 +42,11 @@ class Linearizer
   StrSet m_alwaysLive;
   Cost m_alwaysLiveCost;
 
+  Linearizer();
   Linearizer(const Poss *poss);
   ~Linearizer();
+
+  void Start(const Poss *poss);
 
   void ClearCurrLinearization();
   bool HasCurrLinearization() const;
