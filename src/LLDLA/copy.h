@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef COPY_H_
+#define COPY_H_
+
 #include "DLAOp.h"
 #include "LLDLA.h"
 
@@ -47,3 +50,5 @@ class Copy : public DLAOp<2, 1> {
 };
 
 #endif // DOLLDLA
+
+#endif // COPY_H_

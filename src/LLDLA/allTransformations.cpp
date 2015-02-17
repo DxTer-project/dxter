@@ -2,6 +2,8 @@
 
 #if DOLLDLA
 
+#include "copy.h"
+#include "copyToContigCopy.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
 #include "LLDLATranspose.h"
@@ -214,6 +216,10 @@ void AddPackTrans() {
   Universe::AddTrans(Pack::GetClass(), new PackToCopyAndZero(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 }
 
+void AddCopyTrans() {
+  Universe::AddTrans(Copy::GetClass(), new CopyToContigCopy(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+}
+
 void AddTransformations()
 {
   AddGemmTrans();
@@ -224,11 +230,13 @@ void AddTransformations()
   AddSVMulTrans();
   AddVMMulTrans();
   AddVAddTrans();
+
   AddTransposeTrans();
   AddUnrollingTrans();
   AddPartitionRecombineTrans();
   AddSetToZeroTrans();
   AddPackTrans();
+  AddCopyTrans();
 }
 
 #endif // DOLLDLA

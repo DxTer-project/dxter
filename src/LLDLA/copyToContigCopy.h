@@ -19,35 +19,21 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "contigCopy.h"
+#include "DLAOp.h"
+#include "LLDLA.h"
 
 #if DOLLDLA
 
-void ContiguousCopy::PrintCode(IndStream& out) {
-  out.Indent();
-  string inputName = GetInputName(0).m_name;
-  string inputSize = "(" + InputDataType(0).m_numRowsVar + " * " + InputDataType(0).m_numColsVar + ")";
+class CopyToContigCopy : public SingleTrans {
+ public:
+  Layer m_toLayer, m_fromLayer;
 
-  string receivingName = GetInputName(1).m_name;
+  CopyToContigCopy(Layer fromLayer, Layer toLayer);
+  virtual string GetType() const { return "CopyToContigCopy"; }
+  virtual bool IsRef() const { return true; }
 
-  if (Input(0)->GetDataType() == REAL_SINGLE) {
-    inputSize += "* sizeof(float)";
-  } else {
-    inputSize += "* sizeof(double)";
-  }
-  *out << "memcpy( (void*) " << receivingName << ", (void*) " << inputName << ", ";
-  *out << inputSize << " );\n";
-}
-
-void ContiguousCopy::Prop() {
-  if (!IsValidCost(m_cost)) {
-    Copy::Prop();
-    if (!InputDataType(0).IsContiguous() || !InputDataType(1).IsContiguous()) {
-      cout << "ERROR: Contiguous copy on non-contiguous operands" << endl;
-      throw;
-    }
-    m_cost = ZERO;
-  }
-}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
 
 #endif // DOLLDLA
