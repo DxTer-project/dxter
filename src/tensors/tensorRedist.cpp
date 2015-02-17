@@ -2890,7 +2890,6 @@ void MultiIndexAllToAll::Apply(Node *node) const
 bool FindPermCycle(const DistType &srcType, const DistType &destType,
 		   DimSet &tensorModesInvolved, 
 		   const DimVec &gridModesToFind,
-		   Size prefixLen,
 		   Size suffixLen,
 		   DimVec *gridModesInvolved)
 {
@@ -2909,9 +2908,6 @@ bool FindPermCycle(const DistType &srcType, const DistType &destType,
           && std::is_permutation(destSuff.begin(), destSuff.end(),
 			      gridModesToFind.begin())) 
 	{
-	  if ((pref.empty() ? 0 : GridModeLens(pref)) != prefixLen) {
-	    return false;
-	  }
 	  if (tensorModesInvolved.find(dim) != tensorModesInvolved.end()) {
 	    return true;
 	  }
@@ -2931,7 +2927,6 @@ bool FindPermCycle(const DistType &srcType, const DistType &destType,
 	  return FindPermCycle(srcType, destType,
 			       tensorModesInvolved,
 			       srcSuff,
-			       prefixLen,
 			       suffixLen,
 			       gridModesInvolved);
 	}
@@ -2972,7 +2967,6 @@ bool GetPermPattern(const DistType &srcType,
 	    Size suffixLen = GridModeLens(srcSuff);
 	    if (suffixLen != GridModeLens(destSuff))
 	      return false;
-	    Size prefixLen = (pref.empty() ? 0 : GridModeLens(pref));
 	    DimSet localTensorModesInvolved;
 	    localTensorModesInvolved.insert(dim);
 	    if (gridModes) {
@@ -2982,7 +2976,6 @@ bool GetPermPattern(const DistType &srcType,
 	    if (!FindPermCycle(srcType, destType,
 			       localTensorModesInvolved,
 			       srcSuff,
-			       prefixLen,
 			       suffixLen,
 			       gridModes))
 	      {
