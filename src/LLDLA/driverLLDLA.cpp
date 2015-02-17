@@ -36,6 +36,7 @@
 #include "mmulTransformations.h"
 #include "miscellaneousExamples.h"
 #include "multiBLASExamples.h"
+#include "nodeTestExamples.h"
 #include "problemInstanceStats.h"
 #include "runtimeEvaluation.h"
 #include "singleOperationExamples.h"
