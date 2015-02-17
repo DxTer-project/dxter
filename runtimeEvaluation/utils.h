@@ -67,6 +67,18 @@ void simple_smul_float(int m, int n,
 	float *scalar,
 	float *a, int a_row_stride, int a_col_stride);
 
+void copy_double(int m, int n,
+		 double* a,
+		 int a_row_stride, int a_col_stride,
+		 double* b,
+		 int b_row_stride, int b_col_stride);
+
+void copy_float(int m, int n,
+		 float* a,
+		 int a_row_stride, int a_col_stride,
+		 float* b,
+		 int b_row_stride, int b_col_stride);
+
 double diff_buffer(int size, double *buf1, double *buf2);
 
 float diff_buffer_float(int size, float *buf1, float *buf2);

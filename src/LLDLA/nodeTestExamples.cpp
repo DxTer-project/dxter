@@ -19,6 +19,7 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "copy.h"
 #include "DLAReg.h"
 #include "MVMul.h"
 #include "nodeTestExamples.h"
@@ -28,6 +29,40 @@
 #include "verticalPack.h"
 
 #if DOLLDLA
+
+RealPSet* CopyTest(Type dataType, int m, int n) {
+  auto xIn = new InputNode("x",
+			   m, n,
+			   1, m,
+			   dataType);
+
+  auto yIn = new InputNode("y",
+			   m, n,
+			   1, m,
+			   dataType);
+
+  auto tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  auto tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  auto copy = new Copy(ABSLAYER);
+  copy->AddInputs(4,
+		  tunX, 0,
+		  tunY, 0);
+
+  Poss *innerPoss = new Poss(copy, true);
+  RealPSet *innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode;
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
 
 RealPSet* PackTest(Type dataType, int m) {
   auto xIn = new InputNode("x",

@@ -55,9 +55,22 @@ void Copy::Prop() {
 }
 
 void Copy::PrintCode(IndStream& out) {
-  cout << "ERROR: Copy is must be refined into a specific implementation. ";
-  cout << "It cannot be implemented" << endl;
-  throw;
+  const DataTypeInfo& src = InputDataType(0);
+  const DataTypeInfo& dst = InputDataType(1);
+
+
+  out.Indent();
+  if (Input(0)->GetDataType() == REAL_SINGLE) {
+    *out << "copy_float(";
+  } else {
+    *out << "copy_double(";
+  }
+
+  *out << src.m_numRowsVar << ", " << src.m_numColsVar << ", ";
+  *out << GetInputName(0).m_name << ", ";
+  *out << src.m_rowStrideVar << ", " << src.m_colStrideVar << ", ";
+  *out << GetInputName(1).m_name << ", ";
+  *out << dst.m_rowStrideVar << ", " << dst.m_colStrideVar << ");" << endl;
 }
 
 #endif // DOLLDLA

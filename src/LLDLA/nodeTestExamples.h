@@ -23,6 +23,7 @@
 
 #if DOLLDLA
 
+RealPSet* CopyTest(Type dataType, int m, int n);
 RealPSet* PackTest(Type dataType, int m);
 RealPSet* SetToZeroTest(Type dataType, int m, int n);
 
