@@ -50,7 +50,7 @@ void Copy::Prop() {
 
       throw;
     }
-    m_cost = ZERO;
+    m_cost = GetInputM(0)->SumProds11(*GetInputN(0));
   }
 }
 
