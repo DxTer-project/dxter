@@ -100,4 +100,16 @@ bool DataTypeInfo::IsSameSizeAs(const DataTypeInfo& other) const {
   return m_numRows == other.m_numRows && m_numCols == other.m_numCols;
 }
 
+string DataTypeInfo::ToString() {
+  string dataStr = "Num rows var name: " + m_numRowsVar + "\n";
+  dataStr += "Num cols var name: " + m_numColsVar + "\n";
+  dataStr += "Row stride var name: " + m_rowStrideVar + "\n";
+  dataStr += "Col stride var name: " + m_colStrideVar + "\n";
+  dataStr += "Num rows = " + std::to_string(m_numRows);
+  dataStr += "\nNum cols = " + std::to_string(m_numCols);
+  dataStr += "\nRow stride = " + std::to_string(m_rowStrideVal);
+  dataStr += "\nColStride = " + std::to_string(m_colStrideVal) + "\n";
+  return dataStr;
+}
+
 #endif

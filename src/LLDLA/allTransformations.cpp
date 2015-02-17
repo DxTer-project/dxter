@@ -161,7 +161,7 @@ void AddSVMulTrans()
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new ResidualPartitionSVMul(ABSLAYER, ABSLAYER, COLVECTOR, arch->VecRegWidth(REAL_SINGLE)), LLDLALOOPPHASE);
+  //Universe::AddTrans(SVMul::GetClass(), new ResidualPartitionSVMul(ABSLAYER, ABSLAYER, COLVECTOR, arch->VecRegWidth(REAL_SINGLE)), LLDLALOOPPHASE);
 
   return;
 }
@@ -217,18 +217,18 @@ void AddPackTrans() {
 
 void AddTransformations()
 {
-  AddGemmTrans();
-  AddVVDotTrans();
-  AddMAddTrans();
-  AddMVMulTrans();
-  AddSMMulTrans();
+  //  AddGemmTrans();
+  //  AddVVDotTrans();
+  //  AddMAddTrans();
+  //  AddMVMulTrans();
+  //  AddSMMulTrans();
   AddSVMulTrans();
-  AddVMMulTrans();
-  AddVAddTrans();
-  AddTransposeTrans();
-  AddUnrollingTrans();
-  AddPartitionRecombineTrans();
-  AddSetToZeroTrans();
+  //  AddVMMulTrans();
+  //  AddVAddTrans();
+  //  AddTransposeTrans();
+  //  AddUnrollingTrans();
+  //  AddPartitionRecombineTrans();
+  //  AddSetToZeroTrans();
   AddPackTrans();
 }
 
