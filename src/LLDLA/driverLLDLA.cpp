@@ -36,6 +36,7 @@
 #include "mmulTransformations.h"
 #include "miscellaneousExamples.h"
 #include "multiBLASExamples.h"
+#include "nodeTestExamples.h"
 #include "problemInstanceStats.h"
 #include "runtimeEvaluation.h"
 #include "singleOperationExamples.h"
@@ -154,7 +155,9 @@ void Usage()
   cout <<"        17  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
   cout <<"        18  -> alpha*A*x + beta*B*x F/D M N\n";
   cout <<"        19  -> y <- Ax F/D M N\n";
+  cout <<"Node test examples\n";
   cout <<"        20  -> Pack test F/D M\n";
+  cout <<"        21  -> Copy test F/D M N\n";
   cout <<"\n";
 }
 
@@ -455,6 +458,19 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       problemInstance.AddDimension(m, "m");
       algPSet = PackTest(precision, m);
+      break;
+    case(21):
+      if (argc != 5) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_zeroMVMul";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      algPSet = CopyTest(precision, m, n);
       break;
     default:
       Usage();

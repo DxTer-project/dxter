@@ -57,6 +57,32 @@ void *alloc_aligned_16(size_t size) {
   return (void *) memptr;
 }
 
+void copy_double(int m, int n,
+		 double* a,
+		 int a_row_stride, int a_col_stride,
+		 double* b,
+		 int b_row_stride, int b_col_stride) {
+  int i, j;
+  for (i = 0; i < m; i++) {
+    for (j = 0; j < n; j++) {
+      B(i, j) = A(i, j);
+    }
+  }
+}
+
+void copy_float(int m, int n,
+		 float* a,
+		 int a_row_stride, int a_col_stride,
+		 float* b,
+		 int b_row_stride, int b_col_stride) {
+  int i, j;
+  for (i = 0; i < m; i++) {
+    for (j = 0; j < n; j++) {
+      B(i, j) = A(i, j);
+    }
+  }
+}
+
 void rand_doubles(int size, double *rands) {
   int i;
   for (i = 0; i < size; i++) {

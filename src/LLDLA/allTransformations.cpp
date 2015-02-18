@@ -2,6 +2,8 @@
 
 #if DOLLDLA
 
+#include "copy.h"
+#include "copyToContigCopy.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
 #include "LLDLATranspose.h"
@@ -161,7 +163,7 @@ void AddSVMulTrans()
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
-  //Universe::AddTrans(SVMul::GetClass(), new ResidualPartitionSVMul(ABSLAYER, ABSLAYER, COLVECTOR, arch->VecRegWidth(REAL_SINGLE)), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMul::GetClass(), new ResidualPartitionSVMul(ABSLAYER, ABSLAYER, COLVECTOR, arch->VecRegWidth(REAL_SINGLE)), LLDLALOOPPHASE);
 
   return;
 }
@@ -197,8 +199,7 @@ void AddTransposeTrans()
   return;
 }
 
-void AddPartitionRecombineTrans()
-{
+void AddPartitionRecombineTrans() {
   Universe::AddTrans(Partition::GetClass(), new PartitionLowerLayer(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
   Universe::AddTrans(Partition::GetClass(), new PartitionLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
 
@@ -215,21 +216,27 @@ void AddPackTrans() {
   Universe::AddTrans(Pack::GetClass(), new PackToCopyAndZero(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 }
 
+void AddCopyTrans() {
+  Universe::AddTrans(Copy::GetClass(), new CopyToContigCopy(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+}
+
 void AddTransformations()
 {
-  //  AddGemmTrans();
-  //  AddVVDotTrans();
-  //  AddMAddTrans();
-  //  AddMVMulTrans();
-  //  AddSMMulTrans();
+  AddGemmTrans();
+  AddVVDotTrans();
+  AddMAddTrans();
+  AddMVMulTrans();
+  AddSMMulTrans();
   AddSVMulTrans();
-  //  AddVMMulTrans();
-  //  AddVAddTrans();
-  //  AddTransposeTrans();
-  //  AddUnrollingTrans();
-  //  AddPartitionRecombineTrans();
-  //  AddSetToZeroTrans();
+  AddVMMulTrans();
+  AddVAddTrans();
+
+  AddTransposeTrans();
+  AddUnrollingTrans();
+  AddPartitionRecombineTrans();
+  AddSetToZeroTrans();
   AddPackTrans();
+  AddCopyTrans();
 }
 
 #endif // DOLLDLA

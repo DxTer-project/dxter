@@ -19,35 +19,12 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "contigCopy.h"
+#include "LLDLA.h"
 
 #if DOLLDLA
 
-void ContiguousCopy::PrintCode(IndStream& out) {
-  out.Indent();
-  string inputName = GetInputName(0).m_name;
-  string inputSize = "(" + InputDataType(0).m_numRowsVar + " * " + InputDataType(0).m_numColsVar + ")";
-
-  string receivingName = GetInputName(1).m_name;
-
-  if (Input(0)->GetDataType() == REAL_SINGLE) {
-    inputSize += "* sizeof(float)";
-  } else {
-    inputSize += "* sizeof(double)";
-  }
-  *out << "memcpy( (void*) " << receivingName << ", (void*) " << inputName << ", ";
-  *out << inputSize << " );\n";
-}
-
-void ContiguousCopy::Prop() {
-  if (!IsValidCost(m_cost)) {
-    Copy::Prop();
-    if (!InputDataType(0).IsContiguous() || !InputDataType(1).IsContiguous()) {
-      cout << "ERROR: Contiguous copy on non-contiguous operands" << endl;
-      throw;
-    }
-    m_cost = ZERO;
-  }
-}
+RealPSet* CopyTest(Type dataType, int m, int n);
+RealPSet* PackTest(Type dataType, int m);
+RealPSet* SetToZeroTest(Type dataType, int m, int n);
 
 #endif // DOLLDLA

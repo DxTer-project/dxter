@@ -19,35 +19,35 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "contigCopy.h"
+#include "copyToContigCopy.h"
 
 #if DOLLDLA
 
-void ContiguousCopy::PrintCode(IndStream& out) {
-  out.Indent();
-  string inputName = GetInputName(0).m_name;
-  string inputSize = "(" + InputDataType(0).m_numRowsVar + " * " + InputDataType(0).m_numColsVar + ")";
+#include "contigCopy.h"
+#include "copy.h"
 
-  string receivingName = GetInputName(1).m_name;
-
-  if (Input(0)->GetDataType() == REAL_SINGLE) {
-    inputSize += "* sizeof(float)";
-  } else {
-    inputSize += "* sizeof(double)";
-  }
-  *out << "memcpy( (void*) " << receivingName << ", (void*) " << inputName << ", ";
-  *out << inputSize << " );\n";
+CopyToContigCopy::CopyToContigCopy(Layer fromLayer, Layer toLayer) {
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
 }
 
-void ContiguousCopy::Prop() {
-  if (!IsValidCost(m_cost)) {
-    Copy::Prop();
-    if (!InputDataType(0).IsContiguous() || !InputDataType(1).IsContiguous()) {
-      cout << "ERROR: Contiguous copy on non-contiguous operands" << endl;
-      throw;
-    }
-    m_cost = ZERO;
+bool CopyToContigCopy::CanApply(const Node* node) const {
+  if (node->GetNodeClass() == Copy::GetClass()) {
+    return node->InputDataType(0).IsContiguous() &&
+      node->InputDataType(1).IsContiguous();
   }
+  throw;
+}
+
+void CopyToContigCopy::Apply(Node* node) const {
+  auto contigCopy = new ContiguousCopy(m_toLayer);
+  contigCopy->AddInputs(4,
+			node->Input(0), node->InputConnNum(0),
+			node->Input(1), node->InputConnNum(1));
+
+  node->m_poss->AddNode(contigCopy);
+  node->RedirectChildren(contigCopy, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 #endif // DOLLDLA
