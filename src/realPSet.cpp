@@ -32,7 +32,7 @@
 extern unsigned int M_phase;
 
 #define FORMSETSEARLY 0
-#define CHECKIGNORETWICE !DOTENSORS
+#define CHECKIGNORETWICE 1
 
 #if DOTENSORS
 RealPSetMMap RealPSet::m_setMap;
