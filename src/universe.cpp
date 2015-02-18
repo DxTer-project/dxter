@@ -199,8 +199,7 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
     m_pset->FormSets(phase);   
   }
 #elif DOSUMSCATTERTENSORPHASE
-
-  if (false && phase == SUMSCATTERTENSORPHASE) {
+  if (false && (phase == SUMSCATTERTENSORPHASE || phase == ROTENSORPHASE)) {
     m_pset->FormSets(phase);
     cout << "\t\tFormed set\n";
     cout << "\t\t\t" << TotalCount() << " impl's\n";
@@ -277,7 +276,8 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
       //We don't want to now get rid of those sets
       if (phase < SOPHASE) {
 #elif DOSUMSCATTERTENSORPHASE
-	if (phase == FUSEANDOPTTENSORPHASE) {
+	//	if (phase == FUSEANDOPTTENSORPHASE) {
+	{
 #endif
 	  //	  cout << "\tDone prop'ing before; now merging\n";
 

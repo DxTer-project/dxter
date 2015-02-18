@@ -197,7 +197,7 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 #if DOTENSORS
   if (M_dontFuseLoops && set1->IsLoop())
     return false;
-  if (false && CurrPhase == ROTENSORPHASE) 
+  if (CurrPhase == ROTENSORPHASE) 
   {
     const Poss *poss1 = set1->GetPosses().begin()->second;
     const Poss *poss2 = set2->GetPosses().begin()->second;
@@ -220,7 +220,10 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 	  return false;
     }
   }
-  else if (!set1->IsLoop())// if (CurrPhase == DPTENSORPHASE) 
+  else
+    return false;
+
+  if (!set1->IsLoop())// if (CurrPhase == DPTENSORPHASE) 
   {
     const Poss *poss1 = set1->GetPosses().begin()->second;
     const Poss *poss2 = set2->GetPosses().begin()->second;

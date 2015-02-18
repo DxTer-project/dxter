@@ -543,7 +543,7 @@ int main(int argc, const char* argv[])
     cout << "That took " << difftime(end,start2) << " seconds\n";
     cout << "Left with " << uni.TotalCount() << endl;
 
-
+    /*
     cout << "Culling worst\n";
     cout.flush();
     time(&start2);
@@ -551,10 +551,12 @@ int main(int argc, const char* argv[])
     time(&end);
     cout << "Culling took " << difftime(end,start2) << " seconds\n";
     cout << "Left with " << uni.TotalCount();
+    */
   }
 #endif
 
 #if DOFUSEANDOPTPHASE
+
   if (CurrPhase == FUSEANDOPTTENSORPHASE) {
     cout << "Fusing and opt phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
@@ -562,7 +564,6 @@ int main(int argc, const char* argv[])
     uni.Expand(numIters, FUSEANDOPTTENSORPHASE, TenCullRO);
     time(&end);
     cout << "Fusing and opt phase took " << difftime(end,start2) << " seconds\n";
-
     
     cout << "Propagating\n";
     cout.flush();
@@ -571,6 +572,8 @@ int main(int argc, const char* argv[])
     time(&end);
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
+
+
 #endif
 
 
