@@ -21,11 +21,11 @@
 
 #include "copy.h"
 #include "DLAReg.h"
-#include "MVMul.h"
+#include "mvmul.h"
 #include "nodeTestExamples.h"
 #include "pack.h"
 #include "setToZero.h"
-#include "SVMul.h"
+#include "svmul.h"
 #include "verticalPack.h"
 
 #if DOLLDLA
