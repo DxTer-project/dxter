@@ -4,13 +4,13 @@ CFLAGS	   := -O3 -g -Wall -std=c++0x -Isrc/ -Isrc/DLA/ -Isrc/tensors -Isrc/LLDLA
 
 HEADERS :=  $(shell find src -type f -name '*.h')
 SOURCES :=  $(shell find src -type f -name '*.cpp')
-OBJS := $(patsubst %.cpp, %.o, $(SOURCES))
-DEPS := $(patsubst %.o, %.dxt_deps, $(OBJS))
+OBJS := $(patsubst src/%.cpp, obj/%.o, $(SOURCES))
+DEPS := $(patsubst obj/%.o, deps/%.dxt_deps, $(OBJS))
 
 all: dxter.x
 
-dxter.x: $(notdir $(OBJS))
-	$(LINKER) $(CFLAGS) $(notdir $(OBJS)) -o $@
+dxter.x: $(OBJS)
+	$(LINKER) $(CFLAGS) $(OBJS) -o $@
 
 include $(DEPS)
 
@@ -22,8 +22,13 @@ include $(DEPS)
 #	@mkdir  -p obj/tensors
 #	$(CC) $(CFLAGS) -c $< -o $@
 
-%.dxt_deps: %.cpp
-	bash depends.sh $(CFLAGS) src/ $*.cpp > $@
+deps/%.dxt_deps: src/%.cpp
+	@mkdir -p deps
+	@mkdir -p deps/linearization
+	@mkdir -p deps/DLA
+	@mkdir -p deps/LLDLA
+	@mkdir -p deps/tensors
+	bash my_depends.sh $*.cpp src obj > $@
 
 clean:
 	find . -type f -name '*.dxt_deps' -delete
