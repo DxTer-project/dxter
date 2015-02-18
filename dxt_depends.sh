@@ -2,7 +2,7 @@
 SOURCE_PREFIX="2"
 DEST_PREFIX="$3"
 DXT_PATH=$(dirname "$1")
-BUILD_RULE=$(gcc -MM -MG -Isrc -Isrc/linearization -Isrc/LLDLA -Isrc/DLA/ -Isrc/tensors/ "$2/$1")
+BUILD_RULE=$(gcc -std=c++11 -MM -MG -Isrc -Isrc/linearization -Isrc/LLDLA -Isrc/DLA/ -Isrc/tensors/ "$2/$1")
 
 if [ $DXT_PATH = "." ]
 then

@@ -1,6 +1,6 @@
 CC         := g++
 LINKER     := $(CC)
-CFLAGS	   := -O3 -g -Wall -std=c++0x -Isrc/ -Isrc/DLA/ -Isrc/tensors -Isrc/LLDLA
+CFLAGS	   := -O3 -g -Wall -std=c++11 -Isrc/ -Isrc/DLA/ -Isrc/tensors -Isrc/LLDLA
 
 HEADERS :=  $(shell find src -type f -name '*.h')
 SOURCES :=  $(shell find src -type f -name '*.cpp')
@@ -29,7 +29,7 @@ clean:
 	find . -type f -name '*.x' -delete
 
 open:
-	emacs -nw src/*cpp src/*h src/linearization/*cpp src/linearization/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h src/LLDLA/*cpp src/LLDLA/*h makefile
+	emacs -nw src/*cpp src/*h src/linearization/*cpp src/linearization/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h src/LLDLA/*cpp src/LLDLA/*h makefile	
 
 opencpp:
 	emacs -nw src/*cpp src/linearization/*cpp src/DLA/*cpp src/tensors/*cpp src/LLDLA/*cpp
