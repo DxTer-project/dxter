@@ -14,21 +14,13 @@ dxter.x: $(OBJS)
 
 include $(DEPS)
 
-#obj/%.o: src/%.cpp $(HEADERS)
-#	@mkdir  -p obj
-#	@mkdir  -p obj/linearization
-#	@mkdir  -p obj/DLA
-#	@mkdir  -p obj/LLDLA
-#	@mkdir  -p obj/tensors
-#	$(CC) $(CFLAGS) -c $< -o $@
-
 deps/%.dxt_deps: src/%.cpp
 	@mkdir -p deps
 	@mkdir -p deps/linearization
 	@mkdir -p deps/DLA
 	@mkdir -p deps/LLDLA
 	@mkdir -p deps/tensors
-	bash my_depends.sh $*.cpp src obj > $@
+	bash dxt_depends.sh $*.cpp src obj > $@
 
 clean:
 	find . -type f -name '*.dxt_deps' -delete
