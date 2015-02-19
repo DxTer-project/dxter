@@ -159,6 +159,7 @@ void Usage()
   cout <<"        20  -> Pack test F/D M\n";
   cout <<"        21  -> Copy test F/D M N\n";
   cout <<"        22  -> Vertical Partition recombine test F/D M\n";
+  cout <<"        23  -> Horizontal Partition recombine test F/D M\n";
   cout <<"\n";
 }
 
@@ -483,6 +484,17 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       problemInstance.AddDimension(m, "m");
       algPSet = VerticalPartitionRecombineTest(precision, m);
+      break;
+    case(23):
+      if (argc != 4) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_horizontal_partition_recombine_test";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      problemInstance.AddDimension(m, "m");
+      algPSet = HorizontalPartitionRecombineTest(precision, m);
       break;
     default:
       Usage();

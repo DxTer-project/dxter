@@ -35,6 +35,27 @@
 
 RealPSet* VerticalPartitionRecombineTest(Type dataType, int m) {
   auto xIn = new InputNode("x",
+			   1, m,
+			   m, 1,
+			   dataType);
+
+  auto tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  auto part = new Partition(ABSLAYER, HORIZONTAL, m - 5);
+  part->AddInput(tunX, 0);
+
+  auto rec = new Recombine(ABSLAYER, HORIZONTAL);
+  rec->AddInputs(6,
+		 part, 0,
+		 part, 1,
+		 tunX, 0);
+
+  return WrapInPSet(rec);
+}
+
+RealPSet* HorizontalPartitionRecombineTest(Type dataType, int m) {
+  auto xIn = new InputNode("x",
 			   m, 1,
 			   1, m,
 			   dataType);
