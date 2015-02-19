@@ -232,7 +232,8 @@ void TempVarNode::Prop()
     }
     Input(0)->Prop();
 #if DOTENSORS
-    //    m_cost = MaxNumberOfLocalElements(0);
+    m_cost = -1;
+    //MaxNumberOfLocalElements(0);
 #else
     m_cost = ZERO;
 #endif
