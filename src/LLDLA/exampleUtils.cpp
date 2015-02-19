@@ -37,4 +37,14 @@ RealPSet* WrapInPSet(Node* node) {
   return outerSet;
 }
 
+Tunnel* InputTunnel(string name, int numRows, int numCols, int rowStride, int colStride, Type dataType) {
+  auto inputNode = new InputNode(name,
+				 numRows, numCols,
+				 rowStride, colStride,
+				 dataType);
+  auto tunIn = new Tunnel(POSSTUNIN);
+  tunIn->AddInput(inputNode, 0);
+  return tunIn;
+}
+
 #endif // DOLLDLA

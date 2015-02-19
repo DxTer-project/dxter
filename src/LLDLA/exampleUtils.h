@@ -24,5 +24,6 @@
 #if DOLLDLA
 
 RealPSet* WrapInPSet(Node* node);
+Tunnel* InputTunnel(string name, int numRows, int numCols, int rowStride, int colStride, Type dataType);
 
 #endif // DOLLDLA

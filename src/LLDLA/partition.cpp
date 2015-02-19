@@ -202,7 +202,7 @@ void Partition::BuildHorizontalDataTypeInfo()
   string startNumColsVar = inData.m_numColsVar;
   startNumColsVar = startNumColsVar + "_LEFT";
   m_startInfo = new DataTypeInfo(inData.m_numRows, (int) m_partSplitPoint,
-				 inData.m_rowStride, inData.m_colStride,
+				 inData.m_rowStrideVal, inData.m_colStrideVal,
 				 inData.m_numRowsVar, startNumColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
 				 inData.m_type);
@@ -210,7 +210,7 @@ void Partition::BuildHorizontalDataTypeInfo()
   string endNumColsVar = inData.m_numColsVar;
   endNumColsVar = endNumColsVar + "_RIGHT";
   m_endInfo = new DataTypeInfo(inData.m_numRows, inData.m_numCols - ((int) m_partSplitPoint),
-			       inData.m_rowStride, inData.m_colStride,
+			       inData.m_rowStrideVal, inData.m_colStrideVal,
 			       inData.m_numRowsVar, endNumColsVar,
 			       inData.m_rowStrideVar, inData.m_colStrideVar,
 			       inData.m_type);
@@ -218,21 +218,25 @@ void Partition::BuildHorizontalDataTypeInfo()
 
 void Partition::BuildVerticalDataTypeInfo()
 {
+  cout << "Building vertical DataTypeInfo for partition" << endl;
+  cout << "Input name is " << GetInputName(0).m_name << endl;
   DataTypeInfo inData = InputDataType(0);
   cout << "DataTypeInfo for parition operand\n" + inData.ToString();
 
   string startNumRowsVar = inData.m_numRowsVar;
   startNumRowsVar = startNumRowsVar + "_TOP";
   m_startInfo = new DataTypeInfo((int) m_partSplitPoint, inData.m_numCols,
-				 inData.m_rowStride, inData.m_colStride,
+				 inData.m_rowStrideVal, inData.m_colStrideVal,
 				 startNumRowsVar, inData.m_numColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
 				 inData.m_type);
 
   string endNumRowsVar = inData.m_numRowsVar;
   endNumRowsVar = endNumRowsVar + "_BOTTOM";
+  cout << "inData.m_rowStride = " << inData.m_rowStride << endl;
+  cout << "inData.m_colStride = " << inData.m_colStride << endl;
   m_endInfo = new DataTypeInfo(inData.m_numRows - ((int) m_partSplitPoint), inData.m_numCols,
-			       inData.m_rowStride, inData.m_colStride,
+			       inData.m_rowStrideVal, inData.m_colStrideVal,
 			       endNumRowsVar, inData.m_numColsVar,
 			       inData.m_rowStrideVar, inData.m_colStrideVar,
 			       inData.m_type);

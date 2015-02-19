@@ -33,14 +33,42 @@
 
 #if DOLLDLA
 
-RealPSet* VerticalPartitionRecombineTest(Type dataType, int m) {
-  auto xIn = new InputNode("x",
-			   1, m,
-			   m, 1,
-			   dataType);
+RealPSet* VerticalRefinedPackTest(Type dataType, int m) {
+  auto tunX = InputTunnel("x",
+			  m - 3, 1,
+			  1, m - 3,
+			  dataType);
 
-  auto tunX = new Tunnel(POSSTUNIN);
-  tunX->AddInput(xIn, 0);
+  auto tunY = InputTunnel("y",
+			  m, 1,
+			  1, m,
+			  dataType);
+
+  auto part = new Partition(ABSLAYER, VERTICAL, m - 3);
+  part->AddInput(tunY, 0);
+
+  auto copy = new Copy(ABSLAYER);
+  copy->AddInputs(4,
+		  tunX, 0,
+		  part, 0);
+
+  auto zero = new SetToZero(ABSLAYER);
+  zero->AddInput(part, 1);
+
+  auto recombine = new Recombine(ABSLAYER, VERTICAL);
+  recombine->AddInputs(6,
+		       copy, 0,
+		       zero, 0,
+		       tunY, 0);
+
+  return WrapInPSet(recombine);
+}
+
+RealPSet* VerticalPartitionRecombineTest(Type dataType, int m) {
+  auto tunX = InputTunnel("x",
+			  1, m,
+			  m, 1,
+			  dataType);
 
   auto part = new Partition(ABSLAYER, HORIZONTAL, m - 5);
   part->AddInput(tunX, 0);
@@ -190,16 +218,7 @@ RealPSet* SetToZeroTest(Type dataType, int m, int n) {
 		   tunX, 0,
 		   zeroY, 0);
 
-  Poss *innerPoss = new Poss(mvmul, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
-
-  OutputNode *Cout = new OutputNode;
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
+  return WrapInPSet(mvmul);
 }
 
 #endif // DOLLDLA
