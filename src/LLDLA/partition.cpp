@@ -218,10 +218,10 @@ void Partition::BuildHorizontalDataTypeInfo()
 
 void Partition::BuildVerticalDataTypeInfo()
 {
-  cout << "Building vertical DataTypeInfo for partition" << endl;
-  cout << "Input name is " << GetInputName(0).m_name << endl;
   DataTypeInfo inData = InputDataType(0);
-  cout << "DataTypeInfo for parition operand\n" + inData.ToString();
+  /*  cout << "Building vertical DataTypeInfo for partition" << endl;
+  cout << "Input name is " << GetInputName(0).m_name << endl;
+  cout << "DataTypeInfo for parition operand\n" + inData.ToString();*/
 
   string startNumRowsVar = inData.m_numRowsVar;
   startNumRowsVar = startNumRowsVar + "_TOP";
@@ -233,8 +233,6 @@ void Partition::BuildVerticalDataTypeInfo()
 
   string endNumRowsVar = inData.m_numRowsVar;
   endNumRowsVar = endNumRowsVar + "_BOTTOM";
-  cout << "inData.m_rowStride = " << inData.m_rowStride << endl;
-  cout << "inData.m_colStride = " << inData.m_colStride << endl;
   m_endInfo = new DataTypeInfo(inData.m_numRows - ((int) m_partSplitPoint), inData.m_numCols,
 			       inData.m_rowStrideVal, inData.m_colStrideVal,
 			       endNumRowsVar, inData.m_numColsVar,

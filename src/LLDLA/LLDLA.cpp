@@ -79,6 +79,9 @@ DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
 
 bool DataTypeInfo::IsGenStride() const {
   if (m_rowStrideVal != 1 && m_colStrideVal != 1) {
+    cout << "NOT GENERAL STRIDE" << endl;
+    cout << "m_rowStrideVal == 1 ? " << (m_rowStrideVal == 1) << endl;
+    cout << "m_colStrideVal == 1 ? " << (m_colStrideVal == 1) << endl;
     return true;
   }
   return false;
@@ -93,7 +96,27 @@ bool DataTypeInfo::IsContiguous() const {
     return true;
   }
 
+  if (IsRowVector() && m_rowStrideVal > m_numRows) {
+    return true;
+  }
+
+  if (IsColVector() && m_colStrideVal > m_numCols) {
+    return true;
+  }
+
   return false;
+}
+
+bool DataTypeInfo::IsRowVector() const {
+  return m_numRows == 1;
+}
+
+bool DataTypeInfo::IsColVector() const {
+  return m_numCols == 1;
+}
+
+bool DataTypeInfo::IsScalar() const {
+  return IsRowVector() && IsColVector();
 }
 
 bool DataTypeInfo::IsSameSizeAs(const DataTypeInfo& other) const {
