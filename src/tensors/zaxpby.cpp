@@ -121,7 +121,7 @@ void ZAxpBy::Prop()
     DLAOp<3,1>::Prop();
 
     if (m_layer == ABSLAYER || m_layer == DM1LAYER || m_layer == DM2LAYER) {
-      m_cost = 3 * TotalNumberOfElements(0);
+      m_cost = 4 * TotalNumberOfElements(0);
       Dim numDims = InputNumDims(0);
       if (InputNumDims(1) != numDims || InputNumDims(2) != numDims)
 	throw;
@@ -133,7 +133,7 @@ void ZAxpBy::Prop()
       }
     }
     else if (m_layer == SMLAYER) {
-      m_cost = 3 * TotalNumberOfLocalElements(0);
+      m_cost = 4 * TotalNumberOfLocalElements(0);
       Dim numDims = InputNumDims(0);
       if (InputNumDims(1) != numDims || InputNumDims(2) != numDims)
 	throw;

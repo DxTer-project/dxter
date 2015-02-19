@@ -75,11 +75,11 @@ void Yxpy::Prop()
     DLAOp<2,1>::Prop();
 
     if (m_layer == ABSLAYER)
-      m_cost = 2 * TotalNumberOfElements(0);
+      m_cost = TotalNumberOfElements(0);
     else if (m_layer == DM1LAYER || m_layer == DM2LAYER)
-      m_cost = 2 * TotalNumberOfElements(0);
+      m_cost = TotalNumberOfElements(0);
     else if (m_layer == SMLAYER) {
-      m_cost = 2 * TotalNumberOfLocalElements(0);
+      m_cost = TotalNumberOfLocalElements(0);
       if (InputDataType(0).GetEffectiveDist() != InputDataType(1).GetEffectiveDist())
 	throw;
 
