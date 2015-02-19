@@ -23,9 +23,6 @@
 
 #if DOLLDLA
 
-RealPSet* CopyTest(Type dataType, int m, int n);
-RealPSet* VerticalPartitionRecombineTest(Type dataType, int m);
-RealPSet* PackTest(Type dataType, int m);
-RealPSet* SetToZeroTest(Type dataType, int m, int n);
+RealPSet* WrapInPSet(Node* node);
 
 #endif // DOLLDLA

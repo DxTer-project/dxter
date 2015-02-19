@@ -158,6 +158,7 @@ void Usage()
   cout <<"Node test examples\n";
   cout <<"        20  -> Pack test F/D M\n";
   cout <<"        21  -> Copy test F/D M N\n";
+  cout <<"        22  -> Vertical Partition recombine test F/D M\n";
   cout <<"\n";
 }
 
@@ -453,7 +454,7 @@ int main(int argc, const char* argv[])
 	Usage();
 	return 0;
       }
-      opName = "dxt_zeroMVMul";
+      opName = "dxt_pack_test";
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       problemInstance.AddDimension(m, "m");
@@ -464,13 +465,24 @@ int main(int argc, const char* argv[])
 	Usage();
 	return 0;
       }
-      opName = "dxt_zeroMVMul";
+      opName = "dxt_copy_test";
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       n = atoi(argv[4]);
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
       algPSet = CopyTest(precision, m, n);
+      break;
+    case(22):
+      if (argc != 4) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_vertical_partition_recombine_test";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      problemInstance.AddDimension(m, "m");
+      algPSet = VerticalPartitionRecombineTest(precision, m);
       break;
     default:
       Usage();

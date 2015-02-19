@@ -19,13 +19,22 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "LLDLA.h"
+#include "DLAReg.h"
+#include "exampleUtils.h"
 
 #if DOLLDLA
 
-RealPSet* CopyTest(Type dataType, int m, int n);
-RealPSet* VerticalPartitionRecombineTest(Type dataType, int m);
-RealPSet* PackTest(Type dataType, int m);
-RealPSet* SetToZeroTest(Type dataType, int m, int n);
+RealPSet* WrapInPSet(Node* node) {
+  Poss *innerPoss = new Poss(node, true);
+  RealPSet *innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode;
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
 
 #endif // DOLLDLA

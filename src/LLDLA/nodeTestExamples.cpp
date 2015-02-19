@@ -21,14 +21,38 @@
 
 #include "copy.h"
 #include "DLAReg.h"
+#include "exampleUtils.h"
 #include "mvmul.h"
 #include "nodeTestExamples.h"
 #include "pack.h"
+#include "partition.h"
+#include "recombine.h"
 #include "setToZero.h"
 #include "svmul.h"
 #include "verticalPack.h"
 
 #if DOLLDLA
+
+RealPSet* VerticalPartitionRecombineTest(Type dataType, int m) {
+  auto xIn = new InputNode("x",
+			   m, 1,
+			   1, m,
+			   dataType);
+
+  auto tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  auto part = new Partition(ABSLAYER, VERTICAL, m - 5);
+  part->AddInput(tunX, 0);
+
+  auto rec = new Recombine(ABSLAYER, VERTICAL);
+  rec->AddInputs(6,
+		 part, 0,
+		 part, 1,
+		 tunX, 0);
+
+  return WrapInPSet(rec);
+}
 
 RealPSet* CopyTest(Type dataType, int m, int n) {
   auto xIn = new InputNode("x",

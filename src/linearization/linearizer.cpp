@@ -114,8 +114,9 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
       elem->AddInputIfUnique(inElem);
   }
   
-  if (node->NumOutputs() > 1)
+  if (node->NumOutputs() > 1) {
     throw;
+  }
   
   LinElem *overwriter = NULL;
   LinElemSet others;
