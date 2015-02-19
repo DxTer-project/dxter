@@ -61,8 +61,13 @@ void Copy::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
 
+    if (CurrPhase <= SUMSCATTERTENSORPHASE) {
+      m_cost = 0;
+      return;
+    }
+
     if (m_layer == ABSLAYER)
-      m_cost = TotalNumberOfElements(0);
+      m_cost = 0;
     else if (m_layer == DM1LAYER || m_layer == DM2LAYER)
       m_cost = TotalNumberOfElements(0);
     else if (m_layer == SMLAYER) {
