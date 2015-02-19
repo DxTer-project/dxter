@@ -1,6 +1,7 @@
 obj
 dxter.x
 results/*
+deps/*
 GraphsOut*
 codeOutput*
 totalCostOutput.m
