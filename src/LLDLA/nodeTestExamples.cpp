@@ -28,11 +28,46 @@
 #include "partition.h"
 #include "recombine.h"
 #include "setToZero.h"
+#include "smmul.h"
 #include "svmul.h"
 #include "verticalUnpack.h"
 #include "verticalPack.h"
 
 #if DOLLDLA
+
+RealPSet* TwoDVerticalPackUnpackTest(Type dataType, int m, int n) {
+  auto tunAlpha = InputTunnel("alpha",
+			      1, 1,
+			      1, 1,
+			      dataType);
+
+  auto tunA = InputTunnel("A",
+			  m - 2, n,
+			  1, m - 2,
+			  dataType);
+
+  auto tunB = LocalInputTunnel("B",
+			       m, n,
+			       1, m,
+			       dataType);
+
+  auto pack = new VerticalPack(ABSLAYER);
+  pack->AddInputs(4,
+		  tunA, 0,
+		  tunB, 0);
+
+  auto smmul = new SMMul(ABSLAYER);
+  smmul->AddInputs(4,
+		   tunAlpha, 0,
+		   pack, 0);
+
+  auto unpack = new VerticalUnpack(ABSLAYER);
+  unpack->AddInputs(4,
+		    smmul, 0,
+		    tunA, 0);
+
+  return WrapInPSet(unpack);
+}
 
 RealPSet* VerticalPackUnpackTest(Type dataType, int m) {
   auto tunX = InputTunnel("x",

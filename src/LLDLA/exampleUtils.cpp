@@ -21,6 +21,7 @@
 
 #include "DLAReg.h"
 #include "exampleUtils.h"
+#include "localInput.h"
 
 #if DOLLDLA
 
@@ -42,6 +43,16 @@ Tunnel* InputTunnel(string name, int numRows, int numCols, int rowStride, int co
 				 numRows, numCols,
 				 rowStride, colStride,
 				 dataType);
+  auto tunIn = new Tunnel(POSSTUNIN);
+  tunIn->AddInput(inputNode, 0);
+  return tunIn;
+}
+
+Tunnel* LocalInputTunnel(string name, int numRows, int numCols, int rowStride, int colStride, Type dataType) {
+  auto inputNode = new LocalInput(name,
+				  numRows, numCols,
+				  rowStride, colStride,
+				  dataType);
   auto tunIn = new Tunnel(POSSTUNIN);
   tunIn->AddInput(inputNode, 0);
   return tunIn;

@@ -163,6 +163,7 @@ void Usage()
   cout <<"        23  -> Horizontal partition recombine test F/D M\n";
   cout <<"        24  -> Vertical refined pack test F/D M\n";
   cout <<"        25  -> Vertical pack unpack test F/D M\n";
+  cout <<"        26  -> 2D vertical pack unpack test F/D M N\n";
   cout <<"\n";
 }
 
@@ -520,6 +521,19 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       problemInstance.AddDimension(m, "m");
       algPSet = VerticalPackUnpackTest(precision, m);
+      break;
+    case(26):
+      if (argc != 5) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_vertical_2D_pack_unpack_test";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      algPSet = TwoDVerticalPackUnpackTest(precision, m, n);
       break;
     default:
       Usage();
