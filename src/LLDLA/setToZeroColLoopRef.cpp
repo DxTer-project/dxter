@@ -33,7 +33,7 @@ SetToZeroColLoopRef::SetToZeroColLoopRef(Layer fromLayer, Layer toLayer) {
 bool SetToZeroColLoopRef::CanApply(const Node* node) const {
   if (node->GetNodeClass() == SetToZero::GetClass()) {
     SetToZero* setZero = (SetToZero*) node;
-    return *(setZero->GetInputM(0)) > 1;
+    return *(setZero->GetInputN(0)) > 1;
   }
   throw;
 }

@@ -14,6 +14,7 @@
 #include "partition.h"
 #include "recombine.h"
 #include "setToZero.h"
+#include "setToZeroColLoopRef.h"
 #include "setToZeroRowLoopRef.h"
 #include "smmul.h"
 #include "svmul.h"
@@ -216,6 +217,9 @@ void AddSetToZeroTrans() {
   Universe::AddTrans(SetToZero::GetClass(), new SetToZeroLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(SetToZero::GetClass(), new SetToZeroRowLoopRef(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SetToZero::GetClass(), new SetToZeroColLoopRef(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+
 }
 
 void AddPackTrans() {
