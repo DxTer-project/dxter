@@ -53,8 +53,7 @@ Name Recombine::GetName(ConnNum num) const
   return GetInputName(2);
 }
 
-const Sizes* Recombine::GetM(ConnNum num) const
-{
+const Sizes* Recombine::GetM(ConnNum num) const {
   if (num != 0) {
     cout << "Error: Invalid connection number for Recombine::GetM" << endl;
     throw;
@@ -62,13 +61,16 @@ const Sizes* Recombine::GetM(ConnNum num) const
   return GetInputM(2);
 }
 
-const Sizes* Recombine::GetN(ConnNum num) const
-{
+const Sizes* Recombine::GetN(ConnNum num) const {
   if (num != 0) {
     cout << "Error: Invalid connection number for Recombine::GetN" << endl;
     throw;
   }
   return GetInputN(2);
+}
+
+const Type Recombine::GetDataType() const {
+  return Input(2)->GetDataType();
 }
 
 void Recombine::Duplicate(const Node* orig, bool shallow, bool possMerging)

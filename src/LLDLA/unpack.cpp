@@ -52,15 +52,19 @@ void Unpack::PrintCode(IndStream& out) {
   string unpackIntoRowStride = InputDataType(1).m_rowStrideVar;
   string unpackIntoColStride = InputDataType(1).m_colStrideVar;
 
+  cout << "Getting Input(0)" << endl;
+  auto in0 = Input(0);
+  cout << "Input(0) class is " << in0->GetNodeClass() << endl;
+  cout << "Getting Input(0) datatype" << endl;
+  cout << in0->GetDataType() << endl;
+  cout << "Done with Input(0)" << endl;
+
   out.Indent();
-  //  *out << "unpack_double( ";
-  cout << "Getting Input(1) datatype..." << endl;
   if (Input(1)->GetDataType() == REAL_SINGLE) {
     *out << "unpack_float( ";
   } else {
     *out << "unpack_double( ";
   }
-  cout << "Done getting Input(1) datatype" << endl;
 
   *out << toUnPack << ", " << unpackInto << ", " <<
     toUnPackRowStride << ", " << toUnPackColStride;

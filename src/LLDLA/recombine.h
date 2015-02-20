@@ -61,6 +61,8 @@ class Recombine : public DLAOp<3, 1>
   virtual const Sizes* GetM(ConnNum num) const;
   virtual const Sizes* GetN(ConnNum num) const;
 
+  virtual const Type GetDataType() const;
+
   virtual const DataTypeInfo& DataType(ConnNum num) const;
 };
 
