@@ -16,6 +16,8 @@
 #include "setToZero.h"
 #include "smmul.h"
 #include "svmul.h"
+#include "unpack.h"
+#include "unpackToPartAndCopy.h"
 #include "vmmul.h"
 #include "vadd.h"
 #include "vvdot.h"
@@ -216,6 +218,10 @@ void AddPackTrans() {
   Universe::AddTrans(Pack::GetClass(), new PackToCopyAndZero(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 }
 
+void AddUnpackTrans() {
+  Universe::AddTrans(Unpack::GetClass(), new UnpackToPartAndCopy(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+}
+
 void AddCopyTrans() {
   Universe::AddTrans(Copy::GetClass(), new CopyToContigCopy(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 }
@@ -236,6 +242,7 @@ void AddTransformations()
   AddPartitionRecombineTrans();
   AddSetToZeroTrans();
   AddPackTrans();
+  AddUnpackTrans();
   AddCopyTrans();
 }
 

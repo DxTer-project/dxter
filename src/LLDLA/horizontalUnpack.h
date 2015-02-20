@@ -30,8 +30,7 @@ class HorizontalUnpack : public Unpack {
   virtual Node* GetNewInst() { return BlankInst(); }
 
   virtual NodeType GetType() const { return "HorizontalUnpack"; }
-  virtual ClassType GetNodeClass() const { return GetClass(); }
-  static ClassType GetClass() { return "HorizontalUnpack"; }
+  virtual Dir UnpackDir() { return HORIZONTAL; }
 
   virtual void Prop();
 };

@@ -30,8 +30,7 @@ class VerticalUnpack : public Unpack {
   virtual Node* GetNewInst() { return BlankInst(); }
 
   virtual NodeType GetType() const { return "VerticalUnpack"; }
-  virtual ClassType GetNodeClass() const { return GetClass(); }
-  static ClassType GetClass() { return "VerticalUnpack"; }
+  virtual Dir UnpackDir() { return VERTICAL; }
 
   virtual void Prop();
 };

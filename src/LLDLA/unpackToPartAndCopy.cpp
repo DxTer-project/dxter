@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "copy.h"
+#include "partition.h"
+#include "unpack.h"
 #include "unpackToPartAndCopy.h"
 
 #if DOLLDLA
@@ -33,13 +36,33 @@ string UnpackToPartAndCopy::GetType() const {
 }
 
 bool UnpackToPartAndCopy::CanApply(const Node* node) const {
-  return false;
+  if (node->GetNodeClass() == Unpack::GetClass()) {
+    return true;
+  }
+  throw;
 }
 
 void UnpackToPartAndCopy::Apply(Node* node) const {
+  Unpack* unpack = (Unpack*) node;
+
+  Partition* part;
+  if (unpack->UnpackDir() == HORIZONTAL) {
+    part = new Partition(m_toLayer, unpack->UnpackDir(), unpack->UnpackN());
+  } else {
+    part = new Partition(m_toLayer, unpack->UnpackDir(), unpack->UnpackM());
+  }
+  part->AddInput(unpack->Input(0), unpack->InputConnNum(0));
+
+  auto copy = new Copy(m_toLayer);
+  copy->AddInputs(4,
+		  part, 0,
+		  unpack->Input(1), unpack->InputConnNum(1));
+
+  unpack->m_poss->AddNode(part);
+  unpack->m_poss->AddNode(copy);
+  unpack->RedirectChildren(copy, 0);
+  unpack->m_poss->DeleteChildAndCleanUp(unpack);
   return;
 }
-
-
 
 #endif // DOLLDLA

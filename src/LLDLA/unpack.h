@@ -27,8 +27,6 @@
 class Unpack : public DLAOp<2, 1> {
  public:
   explicit Unpack(Layer layer);
-  static Node* BlankInst() { return new Unpack(ABSLAYER); }
-  virtual Node* GetNewInst() { return BlankInst(); }
 
   virtual NodeType GetType() const { return "Unpack"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -42,6 +40,8 @@ class Unpack : public DLAOp<2, 1> {
 
   virtual int UnpackM();
   virtual int UnpackN();
+
+  virtual Dir UnpackDir() = 0;
 
   virtual void Prop();
 
