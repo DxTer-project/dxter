@@ -161,7 +161,8 @@ void Usage()
   cout <<"        21  -> Copy test F/D M N\n";
   cout <<"        22  -> Vertical partition recombine test F/D M\n";
   cout <<"        23  -> Horizontal partition recombine test F/D M\n";
-  cout <<"        24  -> Vertical refined pack test test F/D M\n";
+  cout <<"        24  -> Vertical refined pack test F/D M\n";
+  cout <<"        25  -> Vertical pack unpack test F/D M\n";
   cout <<"\n";
 }
 
@@ -508,6 +509,17 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       problemInstance.AddDimension(m, "m");
       algPSet = VerticalRefinedPackTest(precision, m);
+      break;
+    case(25):
+      if (argc != 4) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_vertical_pack_unpack_test";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      problemInstance.AddDimension(m, "m");
+      algPSet = VerticalPackUnpackTest(precision, m);
       break;
     default:
       Usage();

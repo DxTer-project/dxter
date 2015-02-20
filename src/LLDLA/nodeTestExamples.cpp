@@ -29,9 +29,34 @@
 #include "recombine.h"
 #include "setToZero.h"
 #include "svmul.h"
+#include "verticalUnpack.h"
 #include "verticalPack.h"
 
 #if DOLLDLA
+
+RealPSet* VerticalPackUnpackTest(Type dataType, int m) {
+  auto tunX = InputTunnel("x",
+			  m - 3, 1,
+			  1, m - 3,
+			  dataType);
+
+  auto tunY = InputTunnel("y",
+			  m, 1,
+			  1, m,
+			  dataType);
+
+  auto pack = new VerticalPack(ABSLAYER);
+  pack->AddInputs(4,
+		  tunX, 0,
+		  tunY, 0);
+
+  auto unpack = new VerticalUnpack(ABSLAYER);
+  unpack->AddInputs(4,
+		    pack, 0,
+		    tunX, 0);
+
+  return WrapInPSet(unpack);
+}
 
 RealPSet* VerticalRefinedPackTest(Type dataType, int m) {
   auto tunX = InputTunnel("x",

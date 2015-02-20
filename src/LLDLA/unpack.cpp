@@ -40,7 +40,30 @@ bool Unpack::Overwrites(const Node* input, ConnNum num) const {
 }
 
 void Unpack::PrintCode(IndStream& out) {
-  throw;
+  string toUnPack = GetInputName(0).m_name;
+  string unpackInto = GetInputName(1).m_name;
+
+  string toUnPackRowStride = InputDataType(0).m_rowStrideVar;
+  string toUnPackColStride = InputDataType(0).m_colStrideVar;
+
+  string unpackIntoM = InputDataType(1).m_numRowsVar;
+  string unpackIntoN = InputDataType(1).m_numColsVar;
+
+  string unpackIntoRowStride = InputDataType(1).m_rowStrideVar;
+  string unpackIntoColStride = InputDataType(1).m_colStrideVar;
+
+  out.Indent();
+  if (Input(0)->GetDataType() == REAL_SINGLE) {
+    *out << "unpack_float( ";
+  } else {
+    *out << "unpack_double( ";
+  }
+
+  *out << toUnPack << ", " << unpackInto << ", " <<
+    toUnPackRowStride << ", " << toUnPackColStride;
+  *out << ", " <<
+    unpackIntoM << ", " << unpackIntoN << ", " <<
+    unpackIntoRowStride << ", " << unpackIntoColStride << ");" << endl;
 }
 
 void Unpack::Prop() {

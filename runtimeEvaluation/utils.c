@@ -25,6 +25,18 @@ void pack_double(double* a, double* b,
   }
 }
 
+void unpack_double(double* a, double* b,
+		   int a_row_stride, int a_col_stride,
+		   int b_rows, int b_cols,
+		   int b_row_stride, int b_col_stride) {
+  int i, j;
+  for (i = 0; i < b_rows; i++) {
+    for (j = 0; j < b_cols; j++) {
+      B(i, j) = A(i, j);
+    }
+  }
+}
+
 void set_to_zero_double(double* a,
 			int m, int n,
 			int a_row_stride, int a_col_stride) {
