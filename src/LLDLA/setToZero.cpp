@@ -58,14 +58,14 @@ void SetToZero::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<1, 1>::Prop();
     
-    if (!InputDataType(0).IsContiguous()) {
+    /*    if (!InputDataType(0).IsContiguous()) {
       cout << "ERROR: Currently SetToZero does not support general stride operands" << endl;
       cout << "Input 0 # rows = " << InputDataType(0).m_numRows << endl;
       cout << "Input 0 # cols = " << InputDataType(0).m_numCols << endl;
       cout << "Input 0 row stride = " << InputDataType(0).m_rowStrideVal << endl;
       cout << "Input 0 col stride = " << InputDataType(0).m_colStrideVal << endl;
       throw;
-    }
+      }*/
 
     m_cost = GetInputM(0)->SumProds11(*GetInputN(0));
   }
