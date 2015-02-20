@@ -67,7 +67,7 @@ void Pack::PrintCode(IndStream& out) {
     toPackRowStride << ", " << toPackColStride;
   *out << ", " <<
     packIntoM << ", " << packIntoN << ", " <<
-    packIntoRowStride << ", " << packIntoColStride << ");" << endl;
+    packIntoRowStride << ", " << packIntoColStride << " );" << endl;
 }
 
 void Pack::Prop() {

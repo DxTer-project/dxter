@@ -53,17 +53,20 @@ void Unpack::PrintCode(IndStream& out) {
   string unpackIntoColStride = InputDataType(1).m_colStrideVar;
 
   out.Indent();
-  if (Input(0)->GetDataType() == REAL_SINGLE) {
+  //  *out << "unpack_double( ";
+  cout << "Getting Input(1) datatype..." << endl;
+  if (Input(1)->GetDataType() == REAL_SINGLE) {
     *out << "unpack_float( ";
   } else {
     *out << "unpack_double( ";
   }
+  cout << "Done getting Input(1) datatype" << endl;
 
   *out << toUnPack << ", " << unpackInto << ", " <<
     toUnPackRowStride << ", " << toUnPackColStride;
   *out << ", " <<
     unpackIntoM << ", " << unpackIntoN << ", " <<
-    unpackIntoRowStride << ", " << unpackIntoColStride << ");" << endl;
+    unpackIntoRowStride << ", " << unpackIntoColStride << " );" << endl;
 }
 
 void Unpack::Prop() {
