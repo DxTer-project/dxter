@@ -19,33 +19,27 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "DLAOp.h"
-#include "LLDLA.h"
+#include "unpackToPartAndCopy.h"
 
 #if DOLLDLA
 
-class Unpack : public DLAOp<2, 1> {
- public:
-  explicit Unpack(Layer layer);
-  static Node* BlankInst() { return new Unpack(ABSLAYER); }
-  virtual Node* GetNewInst() { return BlankInst(); }
+UnpackToPartAndCopy::UnpackToPartAndCopy(Layer fromLayer, Layer toLayer) {
+  m_fromLayer = fromLayer;
+  m_toLayer = toLayer;
+}
 
-  virtual NodeType GetType() const { return "Unpack"; }
-  virtual ClassType GetNodeClass() const { return GetClass(); }
-  static ClassType GetClass() { return "Unpack"; }
+string UnpackToPartAndCopy::GetType() const {
+  return "UnpackToPartAndCopy";
+}
 
-  virtual const DataTypeInfo& DataType(ConnNum num) const;
-  virtual bool Overwrites(const Node* input, ConnNum num) const;
+bool UnpackToPartAndCopy::CanApply(const Node* node) const {
+  return false;
+}
 
-  virtual bool IsReadOnly() const { return false; }
-  virtual bool IsDataDependencyOfInput() const { return true; }
+void UnpackToPartAndCopy::Apply(Node* node) const {
+  return;
+}
 
-  virtual int UnpackM();
-  virtual int UnpackN();
 
-  virtual void Prop();
-
-  virtual void PrintCode(IndStream& out);
-};
 
 #endif // DOLLDLA
