@@ -3475,7 +3475,7 @@ bool Poss::HasRedist() const
     if (!set->IsLoop()) {
       const PossMMap posses = set->GetPosses();
       for(auto poss : posses)
-	if (poss.second->HasOne())
+	if (poss.second->HasRedist())
 	  return true;
     }
   }
