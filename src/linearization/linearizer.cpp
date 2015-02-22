@@ -54,6 +54,19 @@ Linearizer::Linearizer(const Poss *poss)
   }
 }
 
+Linearizer::Linearizer(const Poss *poss, bool shallow)
+ :m_shallow(shallow)
+{
+  m_alwaysLiveCost = 0;
+  PtrToLinElemMap map;
+  for(auto node : poss->m_possNodes) {
+    FindOrAdd(node, map);
+  }
+  for(auto set : poss->m_sets) {
+    FindOrAdd(set, map);
+  }
+}
+
 Linearizer::~Linearizer()
 {
   for(auto elem : m_elems)
@@ -98,13 +111,15 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
   NodeLinElem *elem = new NodeLinElem(node);
   map[node] = elem;
   m_elems.push_back(elem);
-  
+
   if (node->GetNodeClass() == OutputNode::GetClass()) {
+    if (!m_shallow) {
 #if DOTENSORS
-    m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfLocalElements(node->InputConnNum(0));
+      m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfLocalElements(node->InputConnNum(0));
 #else
-    m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfElements(node->InputConnNum(0));
+      m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfElements(node->InputConnNum(0));
 #endif
+    }
     m_alwaysLive.insert(node->GetInputNameStr(0));
   }
   
@@ -618,12 +633,18 @@ void Linearizer::FindAnyLinearization()
     for(auto child : elem->m_children) {
       if (child->CanAddToLinearOrder())
         readyToAdd.insert(child);
+      else {
+        for (auto inToChild : child->m_inputs)
+          if (inToChild->CanAddToLinearOrder())
+            readyToAdd.insert(inToChild);
+      }
     }
   }
   
   if (m_lin.m_order.size() != m_elems.size()) {
     PrintConnections();
     throw;
+    FindAnyLinearization();
   }
 }
 

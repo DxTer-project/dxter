@@ -41,9 +41,11 @@ class Linearizer
   Linearization m_lin;
   StrSet m_alwaysLive;
   Cost m_alwaysLiveCost;
+  bool m_shallow;
 
   Linearizer();
   Linearizer(const Poss *poss);
+  Linearizer(const Poss *poss,bool shallow);
   ~Linearizer();
 
   void Start(const Poss *poss);
