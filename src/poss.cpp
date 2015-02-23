@@ -3071,6 +3071,26 @@ void Poss::UnflattenStatic(ifstream &in)
 void Poss::BuildDataTypeCache()
 {
   PSetVecIter setIter;
+#if DOTENSORS
+  Linearizer lin(this, true);
+  lin.FindAnyLinearization();
+  for (auto elem:lin.m_lin.m_order) {
+    if(elem->IsNode()) {
+      Node *node = ((NodeLinElem*)elem)->m_node;
+      node->m_flags &= ~NODEBUILDFLAG;
+    }
+  }
+  for (auto elem:lin.m_lin.m_order) {
+    if(elem->IsNode()) {
+      Node *node = ((NodeLinElem*)elem)->m_node;
+      node->BuildDataTypeCacheRecursive();
+    }
+    else if (elem->IsSet()) {
+      BasePSet *set = ((SetLinElem*)elem)->m_set;
+      set->BuildDataTypeCache();
+    }
+  }
+#else
 #if DOBLIS
   setIter = m_sets.begin();
   for(; setIter != m_sets.end(); ++setIter) {
@@ -3095,6 +3115,7 @@ void Poss::BuildDataTypeCache()
 #endif
       (*setIter)->BuildDataTypeCache();
   }
+#endif
 }
 
 void Poss::ClearDataTypeCache()
@@ -3439,3 +3460,25 @@ void Poss::ClearDeletingRecursively()
       ((RealPSet*)set)->ClearDeletingRecursively();
   }
 }
+
+#if DOTENSORS
+bool Poss::HasRedist() const
+{
+  NodeVecConstIter iter = m_possNodes.begin();
+  for( ; iter != m_possNodes.end(); ++iter) {
+    const Node *node = *iter;
+    if (node->GetNodeClass() == RedistNode::GetClass() ||
+	node->GetNodeClass() == SumScatterUpdateNode::GetClass())
+      return true;
+  }
+  for (auto set : m_sets) {
+    if (!set->IsLoop()) {
+      const PossMMap posses = set->GetPosses();
+      for(auto poss : posses)
+	if (poss.second->HasRedist())
+	  return true;
+    }
+  }
+  return false;
+}
+#endif //DOTENSORS

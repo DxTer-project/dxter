@@ -201,6 +201,12 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
   {
     const Poss *poss1 = set1->GetPosses().begin()->second;
     const Poss *poss2 = set2->GetPosses().begin()->second;
+  
+    if (!poss1->HasRedist())
+      return false;
+    if (!poss2->HasRedist())
+      return false;
+    /*
     if (!poss1->m_sets.empty() || !poss2->m_sets.empty())
       return false;
     NodeVecConstIter iter = poss1->m_possNodes.begin();
@@ -219,6 +225,7 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 	if (!node->IsTunnel())
 	  return false;
     }
+*/
   }
   else
     return false;

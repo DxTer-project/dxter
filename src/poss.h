@@ -184,6 +184,10 @@ class Poss
   void RemoveAndDeleteNodes(TunVec &vec);
   void SetDeletingRecursively();
   void ClearDeletingRecursively();
+
+#if DOTENSORS
+  bool HasRedist() const;
+#endif // DOTENSORS
 };
 
 void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set);
