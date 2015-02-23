@@ -3,6 +3,7 @@
 #if DOLLDLA
 
 #include "copy.h"
+#include "copyColLoopRef.h"
 #include "copyToContigCopy.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
@@ -232,6 +233,8 @@ void AddUnpackTrans() {
 
 void AddCopyTrans() {
   Universe::AddTrans(Copy::GetClass(), new CopyToContigCopy(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(Copy::GetClass(), new CopyColLoopRef(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 }
 
 void AddTransformations()
