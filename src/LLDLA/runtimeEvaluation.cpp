@@ -305,12 +305,17 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnes
     outStream << test.MakeTestCodeWithCorrectnessCheck(imps, referenceImp) << endl;
     outStream.close();
     cout << "All implementations written to files\n";
-    system(arch->CompileString(executableName, testFileName).c_str());
+    cout << "Compile string is " << arch->CompileString(executableName, testFileName) << endl;
+    int compileRes = system(arch->CompileString(executableName, testFileName).c_str());
+    cout << "Compile result = " << std::to_string((long long int) compileRes) << endl;
     string runStr = "./" + executableName;
-    system(runStr.c_str());
+    int runRes = system(runStr.c_str());
+    cout << "Run string is " << runStr << endl;
+    cout << "Run result = " << std::to_string((long long int) runRes) << endl;
     string removeExecutable = "rm -f " + executableName;
     system(removeExecutable.c_str());
     cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
+    cout << "Calling ReadTimeDataFromFile" << endl;
     auto impMap = ReadTimeDataFromFile(dataFileName, imps->size());
     string removeDataFile = "rm -f " + dataFileName;
     system(removeDataFile.c_str());
@@ -338,6 +343,7 @@ ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName,
   std::vector<string> runtimeStrings;
   Tokenize(timeData, runtimeStrings, "\n");
   cout << "Num impls " << std::to_string((long long int) numImpls) << endl;
+  cout << "Number of tokens " << std::to_string((long long int) runtimeStrings.size()) << endl;
   int i = 1;
   TimeVec* impTimes = new TimeVec();
   for (auto token : runtimeStrings) {

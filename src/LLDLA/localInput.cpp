@@ -37,15 +37,19 @@ void LocalInput::Prop() {
 
 void LocalInput::PrintCode(IndStream& out) {
   Type dataType = m_dataTypeInfo.m_type;
+  string size = "";
   if (dataType == REAL_SINGLE) {
     out.Indent();
-    *out << "float ";
+    *out << "float* ";
+    size += "sizeof(float)";
   } else {
     out.Indent();
-    *out << "double ";
+    *out << "double* ";
+    size += "sizeof(double)";
   }
-  string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar;
-  *out << m_varName.m_name << "[" << size << "]" << " = {0};" << endl;
+  size += "*(" + m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + ")";
+  *out << m_varName.m_name << " = alloc_aligned_16( " << size << " );\n" << endl;
+  //  *out << m_varName.m_name << "[" << size << "]" << " = {0};" << endl;
 }
 
 NodeType LocalInput::GetType() const {
