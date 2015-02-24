@@ -42,7 +42,7 @@ Size P(PVAL);
 Size R(RVAL);
 Size C(CVAL);
 #elif DOTENSORS
-Size GridLens[NUM_GRID_DIMS] = {8, 4, 4, 4};
+Size GridLens[NUM_GRID_DIMS] = {8, 8, 8, 8};
 #endif
 #if DOELEM
 Size ELEM_BS(ELEM_BSVAL);
