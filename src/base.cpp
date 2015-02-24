@@ -31,6 +31,11 @@
 #include <ostream>
 #include <sstream>
 
+#if DOTENSORS
+DistType M_Default2;
+DistType M_Default4;
+#endif DOTENSORS
+
 using namespace std;
 
 #if DOELEM
@@ -110,6 +115,24 @@ bool DistType::FindGridMode(Dim gridMode, Dim &tensorMode) const
 
   return false;
 }
+
+bool DistType::IsDefault() const
+{
+  static bool inited = false;
+  if (!inited) {
+    default2.SetToDefault(2);
+    default4.SetToDefault(4);
+  }
+  if (m_numDims == 2) {
+    return *this == default2;
+  }
+  else if (m_numDims == 4) {
+    return *this == default4;
+  }
+  else 
+    throw;
+}
+
 
 DistType DistType::Permute(const Permutation &perm) const
 {
