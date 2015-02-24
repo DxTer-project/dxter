@@ -23,6 +23,7 @@
 
 #if DOLLDLA
 
+RealPSet* TwoDVerticalUnpackTest(Type dataType, int m, int n);
 RealPSet* TwoDVerticalPackUnpackTest(Type dataType, int m, int n);
 RealPSet* VerticalPackUnpackTest(Type dataType, int m);
 RealPSet* VerticalRefinedPackTest(Type dataType, int m);
