@@ -10,6 +10,11 @@ DEPS := $(patsubst obj/%.o, deps/%.dxt_deps, $(OBJS))
 all: dxter.x
 
 dxter.x: $(OBJS)
+	@mkdir -p obj
+	@mkdir -p obj/linearization
+	@mkdir -p obj/DLA
+	@mkdir -p obj/LLDLA
+	@mkdir -p obj/tensors
 	$(LINKER) $(CFLAGS) $(OBJS) -o $@
 
 include $(DEPS)
