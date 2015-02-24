@@ -31,7 +31,6 @@ void HorizontalUnpack::Prop() {
     if (InputDataType(0).m_numCols <= InputDataType(1).m_numCols) {
       throw;
     }
-    m_cost = ZERO;
   }
 }
 

@@ -33,8 +33,6 @@ void VerticalPack::Prop() {
     if (InputDataType(0).m_numRows >= InputDataType(1).m_numRows) {
       throw;
     }
-
-    m_cost = ZERO;
   }
 }
 
