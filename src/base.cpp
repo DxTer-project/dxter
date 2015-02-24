@@ -34,7 +34,7 @@
 #if DOTENSORS
 DistType M_Default2;
 DistType M_Default4;
-#endif DOTENSORS
+#endif //DOTENSORS
 
 using namespace std;
 
@@ -120,14 +120,14 @@ bool DistType::IsDefault() const
 {
   static bool inited = false;
   if (!inited) {
-    default2.SetToDefault(2);
-    default4.SetToDefault(4);
+    M_Default2.SetToDefault(2);
+    M_Default4.SetToDefault(4);
   }
   if (m_numDims == 2) {
-    return *this == default2;
+    return *this == M_Default2;
   }
   else if (m_numDims == 4) {
-    return *this == default4;
+    return *this == M_Default4;
   }
   else 
     throw;
