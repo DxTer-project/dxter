@@ -10,11 +10,6 @@ DEPS := $(patsubst obj/%.o, deps/%.dxt_deps, $(OBJS))
 all: dxter.x
 
 dxter.x: $(OBJS)
-	@mkdir -p obj
-	@mkdir -p obj/linearization
-	@mkdir -p obj/DLA
-	@mkdir -p obj/LLDLA
-	@mkdir -p obj/tensors
 	$(LINKER) $(CFLAGS) $(OBJS) -o $@
 
 include $(DEPS)
@@ -25,6 +20,11 @@ deps/%.dxt_deps: src/%.cpp
 	@mkdir -p deps/DLA
 	@mkdir -p deps/LLDLA
 	@mkdir -p deps/tensors
+	@mkdir -p obj
+	@mkdir -p obj/linearization
+	@mkdir -p obj/DLA
+	@mkdir -p obj/LLDLA
+	@mkdir -p obj/tensors
 	bash dxt_depends.sh $*.cpp src obj > $@
 
 clean:
