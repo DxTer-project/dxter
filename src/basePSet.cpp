@@ -198,18 +198,8 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 #if DOTENSORS
   if (M_dontFuseLoops && set1->IsLoop())
     return false;
-  bool print = false;
   if (CurrPhase == ROTENSORPHASE) 
     {
-      cout << "Doing extra work\n";
-      if (set1->m_outTuns.size() == 1 && set2->m_outTuns.size() == 1) {
-	if (set1->m_outTuns[0]->GetNameStr(0) == "t_fj__D_2__S" && set2->m_outTuns[0]->GetNameStr(0) == "t_fj__D_3__S") {
-    print = true;
-	}
-	if (set2->m_outTuns[0]->GetNameStr(0) == "t_fj__D_2__S" && set1->m_outTuns[0]->GetNameStr(0) == "t_fj__D_3__S") {
-    print = true;
-	}
-      }
       /*
       StrSet typeSet1;
       set1->GetDistTypeSet(typeSet1);
@@ -322,17 +312,9 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 #if DOTENSORS
   if (should) {
     StrSet typeSet1;
-    if (print)
-        cout << "here\n";
     set1->GetDistTypeSet(typeSet1);
     if (typeSet1.empty())
       return false;
-    if (print) {
-      cout << set1->m_outTuns[0]->GetNameStr(0) << endl;
-      cout << set2->m_outTuns[0]->GetNameStr(0) << endl;
-      for(auto elem : typeSet1)
-        cout << elem << endl;
-    }
     if (!set2->CheckDistTypeSet(typeSet1))
       return false;
   }
