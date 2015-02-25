@@ -197,7 +197,8 @@ void Partition::BuildStartAndEndSizes(const Sizes* toSplit)
 
 void Partition::BuildHorizontalDataTypeInfo()
 {
-  DataTypeInfo inData = InputDataType(0);
+  throw;
+  /*  DataTypeInfo inData = InputDataType(0);
 
   string startNumColsVar = inData.m_numColsVar;
   startNumColsVar = startNumColsVar + "_LEFT";
@@ -213,12 +214,13 @@ void Partition::BuildHorizontalDataTypeInfo()
 			       inData.m_rowStrideVal, inData.m_colStrideVal,
 			       inData.m_numRowsVar, endNumColsVar,
 			       inData.m_rowStrideVar, inData.m_colStrideVar,
-			       inData.m_type);
+			       inData.m_type);*/
 }
 
 void Partition::BuildVerticalDataTypeInfo()
 {
-  DataTypeInfo inData = InputDataType(0);
+  throw;
+  /*  DataTypeInfo inData = InputDataType(0);
 
   string startNumRowsVar = inData.m_numRowsVar;
   startNumRowsVar = startNumRowsVar + "_TOP";
@@ -234,7 +236,7 @@ void Partition::BuildVerticalDataTypeInfo()
 			       inData.m_rowStrideVal, inData.m_colStrideVal,
 			       endNumRowsVar, inData.m_numColsVar,
 			       inData.m_rowStrideVar, inData.m_colStrideVar,
-			       inData.m_type);
+			       inData.m_type);*/
 }
 
 void Partition::ClearDataTypeCache()

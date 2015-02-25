@@ -36,17 +36,17 @@ DataTypeInfo::DataTypeInfo(Size numRows, Size numCols,
 			   string numRowsVar, string numColsVar,
 			   string rowStrideVar, string colStrideVar,
 			   Type type)
-  : m_numRows(numRows),
-    m_numCols(numCols),
-    m_rowStrideVal(rowStrideVal),
-    m_colStrideVal(colStrideVal),
+  : //m_numRows(numRows),
+    //m_numCols(numCols),
+    //    m_rowStrideVal(rowStrideVal),
+    //    m_colStrideVal(colStrideVal),
     m_numRowsVar(numRowsVar),
     m_numColsVar(numColsVar),
     m_rowStrideVar(rowStrideVar),
     m_colStrideVar(colStrideVar),
     m_type(type)
 {
-  if (m_rowStrideVal == 1) {
+  /*  if (m_rowStrideVal == 1) {
     m_rowStride = UNITSTRIDE;
   } else {
     m_rowStride = NONUNITSTRIDE;
@@ -56,17 +56,16 @@ DataTypeInfo::DataTypeInfo(Size numRows, Size numCols,
     m_colStride = UNITSTRIDE;
   } else {
     m_colStride = NONUNITSTRIDE;
-  }
+    }*/
 
 }
- 
 
 DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
 {
-  m_numRows = rhs.m_numRows;
+  /*  m_numRows = rhs.m_numRows;
   m_numCols = rhs.m_numCols;
   m_rowStrideVal = rhs.m_rowStrideVal;
-  m_colStrideVal = rhs.m_colStrideVal;
+  m_colStrideVal = rhs.m_colStrideVal;*/
   m_rowStride = rhs.m_rowStride;
   m_colStride = rhs.m_colStride;
   m_numRowsVar = rhs.m_numRowsVar;
@@ -78,17 +77,18 @@ DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
 }
 
 bool DataTypeInfo::IsGenStride() const {
-  if (m_rowStrideVal != 1 && m_colStrideVal != 1) {
+  /*  if (m_rowStrideVal != 1 && m_colStrideVal != 1) {
     cout << "NOT GENERAL STRIDE" << endl;
     cout << "m_rowStrideVal == 1 ? " << (m_rowStrideVal == 1) << endl;
     cout << "m_colStrideVal == 1 ? " << (m_colStrideVal == 1) << endl;
     return true;
-  }
-  return false;
+    }*/
+  //  return false;
+  throw;
 }
 
 bool DataTypeInfo::IsContiguous() const {
-  if (m_rowStrideVal == 1 && m_colStrideVal == m_numRows) {
+  /*  if (m_rowStrideVal == 1 && m_colStrideVal == m_numRows) {
     return true;
   }
 
@@ -102,17 +102,20 @@ bool DataTypeInfo::IsContiguous() const {
 
   if (IsColVector() && m_colStrideVal > m_numCols) {
     return true;
-  }
+    }*/
 
-  return false;
+  //  return false;
+  throw;
 }
 
 bool DataTypeInfo::IsRowVector() const {
-  return m_numRows == 1;
+  //  return m_numRows == 1;
+  throw;
 }
 
 bool DataTypeInfo::IsColVector() const {
-  return m_numCols == 1;
+  //  return m_numCols == 1;
+  throw;
 }
 
 bool DataTypeInfo::IsScalar() const {
@@ -120,7 +123,8 @@ bool DataTypeInfo::IsScalar() const {
 }
 
 bool DataTypeInfo::IsSameSizeAs(const DataTypeInfo& other) const {
-  return m_numRows == other.m_numRows && m_numCols == other.m_numCols;
+  //  return m_numRows == other.m_numRows && m_numCols == other.m_numCols;
+  throw;
 }
 
 string DataTypeInfo::ToString() {
@@ -128,10 +132,10 @@ string DataTypeInfo::ToString() {
   dataStr += "Num cols var name: " + m_numColsVar + "\n";
   dataStr += "Row stride var name: " + m_rowStrideVar + "\n";
   dataStr += "Col stride var name: " + m_colStrideVar + "\n";
-  dataStr += "Num rows = " + std::to_string(m_numRows);
+  /*  dataStr += "Num rows = " + std::to_string(m_numRows);
   dataStr += "\nNum cols = " + std::to_string(m_numCols);
   dataStr += "\nRow stride = " + std::to_string(m_rowStrideVal);
-  dataStr += "\nColStride = " + std::to_string(m_colStrideVal) + "\n";
+  dataStr += "\nColStride = " + std::to_string(m_colStrideVal) + "\n";*/
   return dataStr;
 }
 

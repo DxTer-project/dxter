@@ -19,11 +19,14 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "LLDLA.h"
+#include "pack.h"
+
 #if DOLLDLA
 
 class HorizontalPack : public Pack {
  public:
-  explicit Pack(Layer layer);
+  using Pack::Pack;
   static Node* BlankInst() { return new HorizontalPack(ABSLAYER); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
@@ -32,4 +35,5 @@ class HorizontalPack : public Pack {
   virtual Dir PackDir() { return HORIZONTAL; }
   virtual void Prop();
 };
+
 #endif // DOLLDLA

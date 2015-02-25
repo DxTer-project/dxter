@@ -58,11 +58,11 @@ inline bool IsUnitStride(const Stride &stride)
 class DataTypeInfo
 {
  public:
-  Size m_numRows;
+  /*  Size m_numRows;
   Size m_numCols;
 
   Size m_rowStrideVal;
-  Size m_colStrideVal;
+  Size m_colStrideVal;*/
 
   Stride m_rowStride;
   Stride m_colStride;

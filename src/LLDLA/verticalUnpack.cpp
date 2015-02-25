@@ -26,13 +26,14 @@
 void VerticalUnpack::Prop() {
   if (!IsValidCost(m_cost)) {
     Unpack::Prop();
-
+    /*
     if (InputDataType(0).m_numCols != InputDataType(1).m_numCols) {
       throw;
     }
     if (InputDataType(0).m_numRows <= InputDataType(1).m_numRows) {
       throw;
-    }
+      }*/
+    throw;
   }
 }
 
