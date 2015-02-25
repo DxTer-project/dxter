@@ -93,6 +93,14 @@ class BasePSet
   virtual bool IsShadow() const {return false;}
   virtual const RealPSet* GetReal() const = 0;
   virtual RealPSet* GetReal() = 0;
+
+#if DOTENSORS
+  void GetDistTypeSet(StrSet &set) const;
+  bool CheckDistTypeSet(StrSet &set) const;
+  bool HasRedist() const;
+  bool HasPermutableOut(unsigned int tunNum) const;
+  bool HasPermutableIn(unsigned int tunNum) const;
+#endif
 };
 
 

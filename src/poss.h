@@ -186,6 +186,8 @@ class Poss
   void ClearDeletingRecursively();
 
 #if DOTENSORS
+  bool CheckDistTypeSet(StrSet &set) const;
+  void GetDistTypeSet(StrSet &set) const;
   bool HasRedist() const;
 #endif // DOTENSORS
 };
