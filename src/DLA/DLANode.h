@@ -78,6 +78,7 @@ class DLANode : public Node
   const Sizes* InputLen(ConnNum num, Dim dim) const;
   const Sizes* InputLocalLen(ConnNum num, Dim dim) const;
   Size TotalNumberOfLocalElements(ConnNum num) const;
+  Size TotalNumberOfInputLocalElements(ConnNum num) const;
   Size TotalNumberOfElements(ConnNum num) const;
   Size MaxNumberOfLocalElements(ConnNum num) const;
 #endif
