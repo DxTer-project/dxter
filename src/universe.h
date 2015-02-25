@@ -84,6 +84,7 @@ class Universe
   GraphNum TotalCount() const;
   void ClearFullyExpanded();
   void PrintStats();
+  void Simplify();
 
   unique_ptr<ImplementationMap> ImpStrMap();
 

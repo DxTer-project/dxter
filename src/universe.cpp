@@ -86,6 +86,11 @@ void Universe::SetupFunctionArguments(RealPSet* seed) {
 
 #endif
 
+void Universe::Simplify()
+{
+  m_pset->Simplify(M_simplifiers, true);
+}
+
 void Universe::Init(RealPSet *seed)
 {
   m_pset = seed;
