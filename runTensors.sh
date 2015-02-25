@@ -1,7 +1,6 @@
 #!/bin/sh
 
 
-time ./dxter.x 5 | tee tensorTest/tensorResults_MP3
 time ./dxter.x 6 | tee tensorTest/tensorResults_W
 time ./dxter.x 7 | tee tensorTest/tensorResults_X
 time ./dxter.x 8 | tee tensorTest/tensorResults_U

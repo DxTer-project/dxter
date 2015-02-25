@@ -279,6 +279,7 @@ class DistType
   bool operator!=(const DistType &rhs) const {return DistTypeNotEqual(*this,rhs);}
   DistType Permute(const Permutation &perm) const;
   bool FindGridMode(Dim gridMode, Dim &tensorMode) const;
+  bool IsDefault() const;
 };
 
 Size GridModeLens(const DimVec &modes);
