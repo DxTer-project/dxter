@@ -20,17 +20,21 @@
 */
 
 #include "LLDLA.h"
+#include "transform.h"
 
 #if DOLLDLA
 
-RealPSet* TwoDVerticalUnpackTest(Type dataType, int m, int n);
-RealPSet* TwoDVerticalPackUnpackTest(Type dataType, int m, int n);
-RealPSet* VerticalPackUnpackTest(Type dataType, int m);
-RealPSet* VerticalRefinedPackTest(Type dataType, int m);
-RealPSet* CopyTest(Type dataType, int m, int n);
-RealPSet* VerticalPartitionRecombineTest(Type dataType, int m);
-RealPSet* HorizontalPartitionRecombineTest(Type dataType, int m);
-RealPSet* PackTest(Type dataType, int m);
-RealPSet* SetToZeroTest(Type dataType, int m, int n);
+class CopyColLoopRef : public SingleTrans {
+ private:
+  Layer m_fromLayer, m_toLayer;
+
+ public:
+  CopyColLoopRef(Layer fromLayer, Layer toLayer);
+  virtual string GetType() const { return "CopyToColLoopRef"; }
+  virtual bool IsRef() const { return true; }
+
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+};
 
 #endif // DOLLDLA

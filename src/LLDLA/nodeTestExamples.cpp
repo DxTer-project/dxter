@@ -35,6 +35,25 @@
 
 #if DOLLDLA
 
+RealPSet* TwoDVerticalUnpackTest(Type dataType, int m, int n) {
+  auto tunX = InputTunnel("x",
+			  m - 2, n,
+			  n, 1,
+			  dataType);
+
+  auto tunY = InputTunnel("y",
+			  m, n,
+			  n, 1,
+			  dataType);
+
+  auto unpack = new VerticalUnpack(ABSLAYER);
+  unpack->AddInputs(4,
+		    tunY, 0,
+		    tunX, 0);
+
+  return WrapInPSet(unpack);
+}
+
 RealPSet* TwoDVerticalPackUnpackTest(Type dataType, int m, int n) {
   auto tunAlpha = InputTunnel("alpha",
 			      1, 1,
