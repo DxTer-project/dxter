@@ -67,13 +67,11 @@ class DLANode : public Node
   bool IsInputRowVector(ConnNum num) const;
   bool IsInputColVector(ConnNum num) const;
   bool IsInputScalar(ConnNum num) const;
-#if DOLLDLA
-  bool InputIsMuByMu(ConnNum num);
-#endif//DOLLDLA
+
 #elif DOTENSORS
   virtual const Dim NumDims(ConnNum num) const = 0;
   virtual const Sizes* Len(ConnNum num, Dim dim) const = 0;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const = 0;  
+  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const = 0;
   virtual const Dim InputNumDims(ConnNum num) const;
   const Sizes* InputLen(ConnNum num, Dim dim) const;
   const Sizes* InputLocalLen(ConnNum num, Dim dim) const;
@@ -111,6 +109,19 @@ class DLANode : public Node
 			 DimVec &alignModes,
 			 DimVec &alignModesSrc) {}
 #endif
+
+#if DOLLDLA
+
+  int GetInputNumCols(ConnNum num) const;
+  int GetInputNumRows(ConnNum num) const;
+
+  int GetInputRowStride(ConnNum num) const;
+  int GetInputColStride(ConnNum num) const;
+
+  bool InputIsContiguous(ConnNum num) const;
+  bool InputsAreSameSize(ConnNum left, ConnNum right) const;
+
+#endif // DOLLDLA
 };
 
 #if TWOD

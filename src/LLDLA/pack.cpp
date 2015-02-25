@@ -78,13 +78,11 @@ void Pack::Prop() {
 }
 
 int Pack::PackM() {
-  //  return InputDataType(0).m_numRows;
-  throw;
+  return (int) GetInputNumRows(0);
 }
 
 int Pack::PackN() {
-  //  return InputDataType(0).m_numCols;
-  throw;
+  return (int) GetInputNumCols(0);
 }
 
 #endif // DOLLDLA

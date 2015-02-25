@@ -33,6 +33,7 @@ template<ConnNum numIn, ConnNum numOut>
 class DLAOp : public DLANode
 {
  public:
+
 #if TWOD
   virtual const Sizes* GetM(ConnNum num) const;
   virtual const Sizes* GetN(ConnNum num) const;

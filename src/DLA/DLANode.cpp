@@ -22,6 +22,7 @@
 
 
 #include "DLANode.h"
+#include "LLDLA.h"
 #include "poss.h"
 #include "elemRedist.h"
 #include <sstream>
@@ -523,10 +524,55 @@ bool DLANode::IsInputScalar(ConnNum num) const
     *GetInputN(num) == 1;
 }
 
-#if DOLLDLA
-/*bool DLANode::InputIsMuByMu(ConnNum num) {
-  return *GetInputM(num) == LLDLA_MU &&
-    *GetInputN(num) == LLDLA_MU;
-    }*/
-#endif //DOLLDLA
 #endif //TWOD
+
+#if DOLLDLA
+
+int DLANode::GetInputNumCols(ConnNum num) const {
+  auto size = GetInputN(num);
+  return size->OnlyEntry();
+}
+
+int DLANode::GetInputNumRows(ConnNum num) const {
+  auto size = GetInputM(num);
+  return size->OnlyEntry();
+}
+
+int DLANode::GetInputRowStride(ConnNum num) const {
+  return InputDataType(num).m_rowStrideVal;
+}
+
+int DLANode::GetInputColStride(ConnNum num) const {
+  return InputDataType(num).m_colStrideVal;
+}
+
+bool DLANode::InputIsContiguous(ConnNum num) const {
+  auto data = InputDataType(num);
+  auto numRows = GetInputNumRows(num);
+  auto numCols = GetInputNumCols(num);
+
+  if (data.m_rowStrideVal == 1 && data.m_colStrideVal == numRows) {
+    return true;
+  }
+
+  if (data.m_colStrideVal == 1 && data.m_rowStrideVal == numCols) {
+    return true;
+  }
+
+  if (IsInputRowVector(num) && data.m_rowStrideVal > numRows) {
+    return true;
+  }
+
+  if (IsInputColVector(num) && data.m_colStrideVal > numCols) {
+    return true;
+  }
+
+  return false;
+}
+
+bool DLANode::InputsAreSameSize(ConnNum left, ConnNum right) const {
+  return ((*GetInputM(left)) == (*GetInputM(right)))
+    && ((*GetInputN(left)) == (*GetInputN(right)));
+}
+
+#endif // DOLLDLA

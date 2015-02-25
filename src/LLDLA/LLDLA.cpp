@@ -36,17 +36,15 @@ DataTypeInfo::DataTypeInfo(Size numRows, Size numCols,
 			   string numRowsVar, string numColsVar,
 			   string rowStrideVar, string colStrideVar,
 			   Type type)
-  : //m_numRows(numRows),
-    //m_numCols(numCols),
-    //    m_rowStrideVal(rowStrideVal),
-    //    m_colStrideVal(colStrideVal),
+  : m_rowStrideVal(rowStrideVal),
+    m_colStrideVal(colStrideVal),
     m_numRowsVar(numRowsVar),
     m_numColsVar(numColsVar),
     m_rowStrideVar(rowStrideVar),
     m_colStrideVar(colStrideVar),
     m_type(type)
 {
-  /*  if (m_rowStrideVal == 1) {
+  if (m_rowStrideVal == 1) {
     m_rowStride = UNITSTRIDE;
   } else {
     m_rowStride = NONUNITSTRIDE;
@@ -56,16 +54,14 @@ DataTypeInfo::DataTypeInfo(Size numRows, Size numCols,
     m_colStride = UNITSTRIDE;
   } else {
     m_colStride = NONUNITSTRIDE;
-    }*/
+  }
 
 }
 
 DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
 {
-  /*  m_numRows = rhs.m_numRows;
-  m_numCols = rhs.m_numCols;
   m_rowStrideVal = rhs.m_rowStrideVal;
-  m_colStrideVal = rhs.m_colStrideVal;*/
+  m_colStrideVal = rhs.m_colStrideVal;
   m_rowStride = rhs.m_rowStride;
   m_colStride = rhs.m_colStride;
   m_numRowsVar = rhs.m_numRowsVar;
@@ -76,19 +72,18 @@ DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
   return *this;
 }
 
-bool DataTypeInfo::IsGenStride() const {
-  /*  if (m_rowStrideVal != 1 && m_colStrideVal != 1) {
+/*bool DataTypeInfo::IsGenStride() const {
+  if (m_rowStrideVal != 1 && m_colStrideVal != 1) {
     cout << "NOT GENERAL STRIDE" << endl;
     cout << "m_rowStrideVal == 1 ? " << (m_rowStrideVal == 1) << endl;
     cout << "m_colStrideVal == 1 ? " << (m_colStrideVal == 1) << endl;
     return true;
-    }*/
-  //  return false;
-  throw;
+  }
+  return false;
 }
 
 bool DataTypeInfo::IsContiguous() const {
-  /*  if (m_rowStrideVal == 1 && m_colStrideVal == m_numRows) {
+  if (m_rowStrideVal == 1 && m_colStrideVal == m_numRows) {
     return true;
   }
 
@@ -102,7 +97,7 @@ bool DataTypeInfo::IsContiguous() const {
 
   if (IsColVector() && m_colStrideVal > m_numCols) {
     return true;
-    }*/
+    }
 
   //  return false;
   throw;
@@ -126,7 +121,7 @@ bool DataTypeInfo::IsSameSizeAs(const DataTypeInfo& other) const {
   //  return m_numRows == other.m_numRows && m_numCols == other.m_numCols;
   throw;
 }
-
+*/
 string DataTypeInfo::ToString() {
   string dataStr = "Num rows var name: " + m_numRowsVar + "\n";
   dataStr += "Num cols var name: " + m_numColsVar + "\n";

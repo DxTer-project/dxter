@@ -33,8 +33,9 @@ CopyToContigCopy::CopyToContigCopy(Layer fromLayer, Layer toLayer) {
 
 bool CopyToContigCopy::CanApply(const Node* node) const {
   if (node->GetNodeClass() == Copy::GetClass()) {
-    return node->InputDataType(0).IsContiguous() &&
-      node->InputDataType(1).IsContiguous();
+    Copy* copy = (Copy*) node;
+    return copy->InputIsContiguous(0) &&
+      copy->InputIsContiguous(1);
   }
   throw;
 }

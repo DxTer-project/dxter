@@ -58,11 +58,8 @@ inline bool IsUnitStride(const Stride &stride)
 class DataTypeInfo
 {
  public:
-  /*  Size m_numRows;
-  Size m_numCols;
-
   Size m_rowStrideVal;
-  Size m_colStrideVal;*/
+  Size m_colStrideVal;
 
   Stride m_rowStride;
   Stride m_colStride;
@@ -83,12 +80,12 @@ class DataTypeInfo
 
   DataTypeInfo& operator=(const DataTypeInfo& rhs);
 
-  bool IsGenStride() const;
+  /*  bool IsGenStride() const;
   bool IsContiguous() const;
   bool IsRowVector() const;
   bool IsColVector() const;
   bool IsScalar() const;
-  bool IsSameSizeAs(const DataTypeInfo& other) const;
+  bool IsSameSizeAs(const DataTypeInfo& other) const;*/
   string ToString();
 };
 

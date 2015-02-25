@@ -41,12 +41,12 @@ bool Copy::Overwrites(const Node* input, ConnNum num) const {
 void Copy::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
-    if (!InputDataType(0).IsSameSizeAs(InputDataType(1))) {
-      /*      cout << "ERROR: Copy operands do not have the same size" << endl;
-      cout << "Input 0 # rows = " << InputDataType(0).m_numRows << endl;
-      cout << "Input 0 # cols = " << InputDataType(0).m_numCols << endl;
-      cout << "Input 1 # rows = " << InputDataType(1).m_numRows << endl;
-      cout << "Input 1 # cols = " << InputDataType(1).m_numCols << endl;*/
+    if (!InputsAreSameSize(0, 1)) {
+      cout << "ERROR: Copy operands do not have the same size" << endl;
+      cout << "Input 0 # rows = " << GetInputNumRows(0) << endl;
+      cout << "Input 0 # cols = " << GetInputNumCols(0) << endl;
+      cout << "Input 1 # rows = " << GetInputNumRows(1) << endl;
+      cout << "Input 1 # cols = " << GetInputNumCols(1) << endl;
 
       throw;
     }
