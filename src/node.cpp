@@ -19,8 +19,6 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #include "transform.h"
 #include "poss.h"
 #include "elemRedist.h"

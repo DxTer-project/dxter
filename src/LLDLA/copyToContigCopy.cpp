@@ -41,14 +41,15 @@ bool CopyToContigCopy::CanApply(const Node* node) const {
 }
 
 void CopyToContigCopy::Apply(Node* node) const {
+  Copy* copy = (Copy*) node;
   auto contigCopy = new ContiguousCopy(m_toLayer);
   contigCopy->AddInputs(4,
-			node->Input(0), node->InputConnNum(0),
-			node->Input(1), node->InputConnNum(1));
+			copy->Input(0), copy->InputConnNum(0),
+			copy->Input(1), copy->InputConnNum(1));
 
-  node->m_poss->AddNode(contigCopy);
-  node->RedirectChildren(contigCopy, 0);
-  node->m_poss->DeleteChildAndCleanUp(node);
+  copy->m_poss->AddNode(contigCopy);
+  copy->RedirectChildren(contigCopy, 0);
+  copy->m_poss->DeleteChildAndCleanUp(copy);
 }
 
 #endif // DOLLDLA

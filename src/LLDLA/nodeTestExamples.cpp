@@ -22,6 +22,7 @@
 #include "copy.h"
 #include "DLAReg.h"
 #include "exampleUtils.h"
+#include "madd.h"
 #include "mvmul.h"
 #include "nodeTestExamples.h"
 #include "pack.h"
@@ -204,16 +205,12 @@ RealPSet* CopyTest(Type dataType, int m, int n) {
 		  tunX, 0,
 		  tunY, 0);
 
-  Poss *innerPoss = new Poss(copy, true);
-  RealPSet *innerSet = new RealPSet(innerPoss);
+  auto sumX = new MAdd(ABSLAYER);
+  sumX->AddInputs(4,
+		  copy, 0,
+		  tunX, 0);
 
-  OutputNode *Cout = new OutputNode;
-  Cout->AddInput(innerSet->OutTun(0), 0);
-
-  Poss *outerPoss = new Poss(Cout, true);
-  RealPSet *outerSet = new RealPSet(outerPoss);
-  
-  return outerSet;
+  return WrapInPSet(sumX);
 }
 
 RealPSet* PackTest(Type dataType, int m) {

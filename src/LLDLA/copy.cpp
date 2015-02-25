@@ -30,7 +30,7 @@ Copy::Copy(Layer layer) {
 
 const DataTypeInfo& Copy::DataType(ConnNum num) const {
   assert(num == 0);
-  return DataType(num);
+  return InputDataType(1);
 }
 
 bool Copy::Overwrites(const Node* input, ConnNum num) const {

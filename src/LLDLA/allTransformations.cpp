@@ -234,7 +234,7 @@ void AddUnpackTrans() {
 void AddCopyTrans() {
   Universe::AddTrans(Copy::GetClass(), new CopyToContigCopy(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(Copy::GetClass(), new CopyColLoopRef(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(Copy::GetClass(), new CopyColLoopRef(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 }
 
 void AddTransformations()
