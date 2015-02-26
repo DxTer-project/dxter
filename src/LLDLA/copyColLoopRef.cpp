@@ -45,8 +45,8 @@ void CopyColLoopRef::Apply(Node* node) const {
 
   auto splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(copy->Input(0), copy->InputConnNum(0));
-  splitA->SetUpStats(FULLUP, NOTUP,
-		     FULLUP, NOTUP);
+  splitA->SetUpStats(FULLUP, FULLUP,
+		     FULLUP, FULLUP);
   splitA->SetIndepIters();
 
   auto splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
