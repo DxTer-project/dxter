@@ -52,7 +52,7 @@ bool M_allowSquareGridOpt = true;
 
   //~ 10:1 ratio
   // 53, 5 for H20
-const Size small = 15; //i-p
+const Size small = 50; //i-p
 const Size big = 10*small; // a-h
 Cost maxMem = 116000000;
 
@@ -239,7 +239,7 @@ void AddTrans()
 #endif
 
   for (Dim dim = 0; dim < 10; ++dim) {
-    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DM1LAYER, dim), DPTENSORPHASE);
+    //    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DM1LAYER, dim), DPTENSORPHASE);
     //    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(DM1LAYER, DM2LAYER, dim), DPTENSORPHASE);
   }
 
@@ -267,36 +267,38 @@ void AddTrans()
   Universe::AddTrans(ZAxpBy::GetClass(), new ZAxpByLowerLayer(ABSLAYER,SMLAYER), DPTENSORPHASE);
 
 #if ALLMULTIMODEALLGATHER
-    Universe::AddTrans(RedistNode::GetClass(), new SplitAllAllGathers, ROTENSORPHASE);
+  //  Universe::AddTrans(RedistNode::GetClass(), new SplitAllAllGathers, ROTENSORPHASE);
 #endif
 
+
+
 #if DOPACKOPTPHASE
-    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(0), PACKOPTPHASE);
-    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(1), PACKOPTPHASE);
-    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking(2), PACKOPTPHASE);
+    Universe::AddTrans(Contraction::GetClass(), new PermuteWhileUnpacking, SIMP);
 #endif
 
 #if DOFINALOPTPHASE
     Universe::AddTrans(LoopTunnel::GetClass(), new PermuteLoopHoist, SIMP);
 #endif
   
-#if 1
+  
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
-    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
+    //    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
     //    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
-    Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
+    //    Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
     //    Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SingleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll2(dim), ROTENSORPHASE);
-    Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAllPrefix(dim), ROTENSORPHASE);
-    Universe::AddTrans(RedistNode::GetClass(), new MultiIndexAllToAll(dim), ROTENSORPHASE);
+    //    Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAllPrefix(dim), ROTENSORPHASE);
+    //    Universe::AddTrans(RedistNode::GetClass(), new MultiIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitAllGathers(dim), ROTENSORPHASE);
+    //    Universe::AddTrans(RedistNode::GetClass(), new SplitAllGathersInMode(dim), ROTENSORPHASE);
 
 #if SPLITMULTIMODESCATTER
     Universe::AddTrans(SumScatterUpdateNode::GetClass(), new SplitSumScatter(dim), SUMSCATTERTENSORPHASE);
 #endif
+
 
     for(Dim dim2 = 0; dim2 < NUM_GRID_DIMS; ++dim2) {
       if (dim2 != dim) {
@@ -305,6 +307,8 @@ void AddTrans()
       }
     }
   }
+#if ALLMULTIMODEALLGATHER
+  Universe::AddTrans(RedistNode::GetClass(), new CombineAllGathers, ROTENSORPHASE);
 #endif
 }
 
@@ -313,10 +317,6 @@ void AddSimplifiers()
    Universe::AddTrans(RedistNode::GetClass(), new RemoveNOPRedistribs, SIMP);
    Universe::AddTrans(RedistNode::GetClass(), new RemoveWastedRedist, SIMP);
    Universe::AddTrans(RedistNode::GetClass(), new CombineRedistribs, SIMP);
-   Universe::AddTrans(RedistNode::GetClass(), new CombinePermuteRedists, SIMP);
-#if ALLMULTIMODEALLGATHER
-   Universe::AddTrans(RedistNode::GetClass(), new CombineAllGathers, SIMP);
-#endif
    Universe::AddTrans(ScaleNode::GetClass(), new CombineScaleAndPermutation, SIMP);
    Universe::AddTrans(Permute::GetClass(), new LowerPermute, SIMP);
    Universe::AddTrans(Permute::GetClass(), new CombinePermutations, SIMP);
@@ -325,6 +325,8 @@ void AddSimplifiers()
    Universe::AddTrans(TempVarNode::GetClass(), new TempVarFromTempVar, SIMP);
    Universe::AddTrans(TempVarNode::GetClass(), new MoveTempVarNodeIntoLoop, SIMP);
    Universe::AddTrans(TempVarNode::GetClass(), new MoveTempVarNodeIntoSet, SIMP);
+   Universe::AddTrans(RedistNode::GetClass(), new CombinePermuteRedists, SIMP);
+
 }
 
 void Usage()
@@ -538,7 +540,7 @@ int main(int argc, const char* argv[])
     cout << "Enforcing memory contstraint (from " << uni.TotalCount() << ")\n";
     cout.flush();
     time(&start2);
-    uni.EnforceMemConstraint(maxMem);
+    //    uni.EnforceMemConstraint(maxMem);
     time(&end);
     cout << "That took " << difftime(end,start2) << " seconds\n";
     cout << "Left with " << uni.TotalCount() << endl;
@@ -581,6 +583,7 @@ int main(int argc, const char* argv[])
   if (CurrPhase == PACKOPTPHASE) {
     cout << "Pack optimization phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
+    /*
     time(&start2);
     //uni.Prop();
     uni.CullWorstPerformers(.99, 3);
@@ -592,7 +595,9 @@ int main(int argc, const char* argv[])
     time(&end);
     cout << "Inlining took " << difftime(end,start2) << " seconds\n";
     cout.flush();
+    */
     time(&start2);
+    uni.Simplify();
     uni.Expand(numIters, PACKOPTPHASE, TenCullRO);
     time(&end);
     cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
@@ -614,7 +619,7 @@ int main(int argc, const char* argv[])
     cout << "Enforcing memory contstraint\n";
     cout.flush();
     time(&start2);
-    uni.EnforceMemConstraint(maxMem);
+    //    uni.EnforceMemConstraint(maxMem);
     time(&end);
     cout << "Now there are " << uni.TotalCount() << endl;
     cout << "That took " << difftime(end,start2) << " seconds\n";
@@ -622,6 +627,9 @@ int main(int argc, const char* argv[])
     time(&start2);
     //    uni.Prop();
     uni.CullAllBut(1);
+
+    uni.InlineAllSets();
+    uni.Simplify();
     time(&end);
     cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
     time(&start2);

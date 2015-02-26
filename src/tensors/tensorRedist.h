@@ -51,6 +51,7 @@ class RedistNode : public DLANode
   DimVec m_alignModesSrc;
   
   RedistNode();
+  RedistNode(const DistType &destType);
   RedistNode(const DistType &destType, const string &align, const DimVec &alignModes, const DimVec &alignModesSrc);
   RedistNode(const DistType &destType, const Permutation &perm, const string &align, 
 	     const DimVec &alignModes, const DimVec &alignModesSrc);
@@ -76,6 +77,10 @@ class RedistNode : public DLANode
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual Phase MaxPhase() const;
   virtual void AddVariables(VarSet &set) const;
+  bool HasSamePermAndAlign(const RedistNode *redist) const;
+  bool HasSameAlign(const RedistNode *redist) const;
+  bool HasSamePerm(const RedistNode *redist) const;
+  bool HasNoAlign() const;
 };
 
 class AllReduceNode : public DLAOp<1,1>
