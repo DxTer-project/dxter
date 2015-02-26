@@ -60,7 +60,7 @@ void CopyColLoopRef::Apply(Node* node) const {
   copyCol->AddInput(splitB, 1);
 
   auto comA = splitA->CreateMatchingCombine(0);
-  auto comB = splitB->CreateMatchingCombine(1, 1, copyCol, 1);
+  auto comB = splitB->CreateMatchingCombine(1, 1, copyCol, 0);
 
   Poss* loopPoss = new Poss(2, comA, comB);
   RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);

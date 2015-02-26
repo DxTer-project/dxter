@@ -235,7 +235,7 @@ void SplitSingleIter::Prop()
 
 #if TWOD
     if ((m_dir == PARTDOWN || m_dir == PARTUPWARD)
-	&& (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR))) 
+	&& (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR)))
       {
 	cout << "bad statuses\n";
 	throw;
@@ -256,11 +256,13 @@ void SplitSingleIter::Prop()
     }
     else if (m_tunType == SETTUNIN) {
       if (!m_pset->IsLoop()) {
-	if (m_pset->IsReal())
+	if (m_pset->IsReal()) {
 	  cout << "m_pset is real\n";
-	else
+	} else {
 	  cout << "m_pset is shadow\n";
+	}
 	cout << m_pset << endl;
+	
 	throw;
       }
       if (m_inputs.size() != 1) {
