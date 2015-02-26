@@ -947,8 +947,8 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
           for (unsigned int right = left + 1; right < m_sets.size(); ++right) {
             if (m_sets[right]->IsTransparent()) {
               if (m_sets[left]->CanMerge(m_sets[right])) {
-		cout << m_sets[right]->NumPosses() << " times " << m_sets[left]->NumPosses() << endl;
-		cout << m_sets[right]->GetFunctionalityString() << " times " << m_sets[left]->GetFunctionalityString() << endl;
+		//		cout << m_sets[right]->NumPosses() << " times " << m_sets[left]->NumPosses() << endl;
+		//		cout << m_sets[right]->GetFunctionalityString() << " times " << m_sets[left]->GetFunctionalityString() << endl;
 #if PRINTTRACKING
                 cout << "merging non-loops " << m_sets[left] << " and " << m_sets[right] << endl;
 #endif
@@ -3506,8 +3506,8 @@ bool Poss::CheckDistTypeSet(StrSet &set) const
       const RedistNode *redist = (RedistNode*)node;
       //      if (set.find(redist->InputDataType(0).GetDist().QuickStr()+redist->m_info.GetDist().QuickStr()) != set.end()) {
       if (set.find(redist->GetType()) != set.end()) {
-       	cout << redist->InputDataType(0).GetDist().QuickStr()+ " -> " +redist->m_info.GetDist().QuickStr() << endl;
-	cout << redist->GetType() << endl;
+	//       	cout << redist->InputDataType(0).GetDist().QuickStr()+ " -> " +redist->m_info.GetDist().QuickStr() << endl;
+	//	cout << redist->GetType() << endl;
 	/*		cout << redist->InputDataType(0).GetDist().QuickStr()+redist->m_info.GetDist().QuickStr() << endl;
 	for(auto node2 : m_possNodes) {
 	  cout << node2->GetType() << endl;
