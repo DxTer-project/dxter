@@ -30,6 +30,7 @@
 #endif
 #include "loopSupport.h"
 #include "contraction.h"
+#include "tensorPermute.h"
 
 extern unsigned int M_phase;
 
@@ -198,112 +199,127 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
   if (M_dontFuseLoops && set1->IsLoop())
     return false;
   if (CurrPhase == ROTENSORPHASE) 
-  {
-    const Poss *poss1 = set1->GetPosses().begin()->second;
-    const Poss *poss2 = set2->GetPosses().begin()->second;
-  
-    if (!poss1->HasRedist())
-      return false;
-    if (!poss2->HasRedist())
-      return false;
-    /*
-    if (!poss1->m_sets.empty() || !poss2->m_sets.empty())
-      return false;
-    NodeVecConstIter iter = poss1->m_possNodes.begin();
-    for( ; iter != poss1->m_possNodes.end(); ++iter) {
-      const Node *node = *iter;
-      if (node->GetNodeClass() != RedistNode::GetClass() &&
-	  node->GetNodeClass() != SumScatterUpdateNode::GetClass())
-	if (!node->IsTunnel())
-	  return false;
-    }
-    iter = poss2->m_possNodes.begin();
-    for( ; iter != poss2->m_possNodes.end(); ++iter) {
-      const Node *node = *iter;
-      if (node->GetNodeClass() != RedistNode::GetClass() &&
-	  node->GetNodeClass() != SumScatterUpdateNode::GetClass())
-	if (!node->IsTunnel())
-	  return false;
-    }
+    {
+      /*
+      StrSet typeSet1;
+      set1->GetDistTypeSet(typeSet1);
+      if (typeSet1.empty())
+	return false;
+      if (!set2->CheckDistTypeSet(typeSet1))
+	return false;
 */
-  }
+
+      /*
+	if (!poss1->m_sets.empty() || !poss2->m_sets.empty())
+	return false;
+	NodeVecConstIter iter = poss1->m_possNodes.begin();
+	for( ; iter != poss1->m_possNodes.end(); ++iter) {
+	const Node *node = *iter;
+	if (node->GetNodeClass() != RedistNode::GetClass() &&
+	node->GetNodeClass() != SumScatterUpdateNode::GetClass())
+	if (!node->IsTunnel())
+	return false;
+	}
+	iter = poss2->m_possNodes.begin();
+	for( ; iter != poss2->m_possNodes.end(); ++iter) {
+	const Node *node = *iter;
+	if (node->GetNodeClass() != RedistNode::GetClass() &&
+	node->GetNodeClass() != SumScatterUpdateNode::GetClass())
+	if (!node->IsTunnel())
+	return false;
+	}
+      */
+    }
   else
     return false;
-
-  if (!set1->IsLoop())// if (CurrPhase == DPTENSORPHASE) 
-  {
+  /*
+    if (!set1->IsLoop())// if (CurrPhase == DPTENSORPHASE) 
+    {
     const Poss *poss1 = set1->GetPosses().begin()->second;
     const Poss *poss2 = set2->GetPosses().begin()->second;
     if (poss1->m_sets.empty() || poss2->m_sets.empty()) {
-      NodeVecConstIter iter = poss1->m_possNodes.begin();
-      for( ; iter != poss1->m_possNodes.end(); ++iter) {
-	const Node *node = *iter;
-	if (node->GetNodeClass() != RedistNode::GetClass() &&
-	    node->GetNodeClass() != SumScatterUpdateNode::GetClass() &&
-	    node->GetNodeClass() != AllReduceNode::GetClass()) 
-	  {
-	    if (node->GetNodeClass() == Contraction::GetClass()) {
-	      onlyAllowParallelStreams = true;
-	      break;
-	    }
-	    else if (!node->IsTunnel()) {
-	      //	      cout << "node is " << node->GetType() << endl;
-	      return false;
-	    }
-	  }
-      }
-      iter = poss2->m_possNodes.begin();
-      for( ; iter != poss2->m_possNodes.end(); ++iter) {
-	const Node *node = *iter;
-	if (node->GetNodeClass() != RedistNode::GetClass() &&
-	    node->GetNodeClass() != SumScatterUpdateNode::GetClass() &&
-	    node->GetNodeClass() != AllReduceNode::GetClass())
-	  {
-	    if (node->GetNodeClass() == Contraction::GetClass()) {
-	      onlyAllowParallelStreams = true;
-	      break;
-	    }
-	    else if (!node->IsTunnel()) {
-	      //	      cout << "node is " << node->GetType() << endl;
-	      return false;
-	    }
-	  }
-      }
+    NodeVecConstIter iter = poss1->m_possNodes.begin();
+    for( ; iter != poss1->m_possNodes.end(); ++iter) {
+    const Node *node = *iter;
+    if (node->GetNodeClass() != RedistNode::GetClass() &&
+    node->GetNodeClass() != SumScatterUpdateNode::GetClass() &&
+    node->GetNodeClass() != AllReduceNode::GetClass()) 
+    {
+    if (node->GetNodeClass() == Contraction::GetClass()) {
+    onlyAllowParallelStreams = true;
+    break;
     }
-  }
-  
+    else if (!node->IsTunnel()) {
+    //      cout << "node is " << node->GetType() << endl;
+    return false;
+    }
+    }
+    }
+    iter = poss2->m_possNodes.begin();
+    for( ; iter != poss2->m_possNodes.end(); ++iter) {
+    const Node *node = *iter;
+    if (node->GetNodeClass() != RedistNode::GetClass() &&
+    node->GetNodeClass() != SumScatterUpdateNode::GetClass() &&
+    node->GetNodeClass() != AllReduceNode::GetClass())
+    {
+    if (node->GetNodeClass() == Contraction::GetClass()) {
+    onlyAllowParallelStreams = true;
+    break;
+    }
+    else if (!node->IsTunnel()) {
+    //      cout << "node is " << node->GetType() << endl;
+    return false;
+    }
+    }
+    }
+    }
+    }
+  */
 #endif
+  
+  bool should = false;
   unsigned int i, j, k;
-  for(i = 0; i < set1->m_inTuns.size(); ++i) {
+  for(i = 0; !should && i < set1->m_inTuns.size(); ++i) {
     const Node *in = set1->m_inTuns[i];
-    for(j = 0; j < in->m_inputs.size(); ++j) {
+    for(j = 0; !should && j < in->m_inputs.size(); ++j) {
       const Node *inInput = in->Input(j);
       if (!onlyAllowParallelStreams && inInput->IsTunnel()) {
         if (((Tunnel*)inInput)->m_pset == set2)
-          return true;
+          should = true;
       }
-      for(k = 0; k < inInput->m_children.size(); ++k) {
+      for(k = 0; !should && k < inInput->m_children.size(); ++k) {
         const Node *child = inInput->Child(k);
         if (child->IsTunnel()) {
           if (((Tunnel*)child)->m_pset == set2)
-            return true;
+            should = true;
         }
       }
     }
   }
-  if (!onlyAllowParallelStreams) {
-    for(i = 0; i < set1->m_outTuns.size(); ++i) {
+  if (!onlyAllowParallelStreams && !should) {
+    for(i = 0; !should && i < set1->m_outTuns.size(); ++i) {
       const Node *out = set1->m_outTuns[i];
       for(j = 0; j < out->m_children.size(); ++j) {
 	const Node *child = out->Child(j);
 	if (child->IsTunnel()) {
 	  if (((Tunnel*)child)->m_pset == set2)
-	    return true;
+	    should = true;
 	}
       }
     }
   }
-  return false;
+  
+#if DOTENSORS
+  if (should) {
+    StrSet typeSet1;
+    set1->GetDistTypeSet(typeSet1);
+    if (typeSet1.empty())
+      return false;
+    if (!set2->CheckDistTypeSet(typeSet1))
+      return false;
+  }
+#endif
+  return should;
 }
 
 bool BasePSet::CanMerge(BasePSet *pset) const
@@ -528,3 +544,71 @@ Comm PSet::ParallelismWithinCurrentPosses() const
 #endif //DOBLIS
 
 
+#if DOTENSORS
+void BasePSet::GetDistTypeSet(StrSet &set) const
+{
+  const PossMMap &map = GetPosses();
+  for(auto possElem : map) {
+    const Poss *poss = possElem.second;
+    poss->GetDistTypeSet(set);
+  }
+}
+
+bool BasePSet::CheckDistTypeSet(StrSet &set) const
+{
+  const PossMMap &map = GetPosses();
+  for(auto possElem : map) {
+    const Poss *poss = possElem.second;
+    if (poss->CheckDistTypeSet(set))
+      return true;
+  }
+  return false;
+}
+
+bool BasePSet::HasRedist() const
+{
+  if (IsLoop())
+    return false;
+  const PossMMap &posses = GetPosses();
+  for(auto poss : posses) {
+    if (poss.second->HasRedist())
+      return true;
+  }
+  return false;
+}
+
+bool BasePSet::HasPermutableIn(unsigned int tunNum) const
+{
+  if (IsLoop())
+    return false;
+  Tunnel *tun = m_inTuns[tunNum]->GetRealTunnel();
+  Tunnel *possTunIn = (Tunnel*)(tun->Child(0));
+  if (possTunIn->m_children.size() != 1)
+    return false;
+  Node *child = possTunIn->Child(0);
+  if (child->GetNodeClass() == RedistNode::GetClass()
+      || child->GetNodeClass() == Permute::GetClass())
+    return true;
+  else if (child->GetNodeClass() == SumScatterUpdateNode::GetClass()) {
+    return child->Input(0) == possTunIn;
+  }
+  else
+    return false;
+}
+
+bool BasePSet::HasPermutableOut(unsigned int tunNum) const
+{
+  if (IsLoop())
+    return false;
+  Tunnel *tun = m_outTuns[tunNum]->GetRealTunnel();
+  Tunnel *possTunOut = (Tunnel*)(tun->Input(0));
+  if (possTunOut->m_inputs.size() != 1)
+    return false;
+  Node *input = possTunOut->Input(0);
+  if (input->GetNodeClass() == RedistNode::GetClass()
+      || input->GetNodeClass() == Permute::GetClass())
+    return true;
+  else
+    return false;
+}
+#endif // DOTENSORS

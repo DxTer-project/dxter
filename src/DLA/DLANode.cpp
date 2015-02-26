@@ -188,6 +188,13 @@ Size DLANode::TotalNumberOfLocalElements(ConnNum num) const
   return totSize;
 }
 
+
+Size DLANode::TotalNumberOfInputLocalElements(ConnNum num) const
+{
+  DLANode *node = (DLANode*)Input(num);
+  return node->TotalNumberOfLocalElements(InputConnNum(num));
+}
+
 Size DLANode::TotalNumberOfElements(ConnNum num) const
 {
   Dim numDims = NumDims(num);

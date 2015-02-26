@@ -1132,10 +1132,10 @@ string ContractionLowerLayer::GetType() const
 }
 
 
-void UpdateWithPermutation(Contraction *cont, ConnNum contInput, Permutation &perm)
+void UpdateWithPermutation(Node *node, ConnNum nodeInput, Permutation &perm)
 {
-  Node *inNode = cont->Input(contInput);
-  ConnNum inNum = cont->InputConnNum(contInput);
+  Node *inNode = node->Input(nodeInput);
+  ConnNum inNum = node->InputConnNum(nodeInput);
 
   if (inNode->GetNodeClass() == RedistNode::GetClass()) {
     RedistNode *oldRedist = (RedistNode*)inNode;
@@ -1143,11 +1143,11 @@ void UpdateWithPermutation(Contraction *cont, ConnNum contInput, Permutation &pe
       throw;
     RedistNode *newInput = new RedistNode(oldRedist->m_info.GetDist(), perm, 
 					  oldRedist->m_align, oldRedist->m_alignModes, oldRedist->m_alignModesSrc);
-    cont->m_poss->AddNode(newInput);
+    node->m_poss->AddNode(newInput);
     newInput->AddInput(inNode->Input(0),inNode->InputConnNum(0));
-    cont->ChangeInput2Way(inNode, inNum, newInput, 0);
+    node->ChangeInput2Way(inNode, inNum, newInput, 0);
     if (oldRedist->m_children.empty()) {
-      cont->m_poss->DeleteChildAndCleanUp(oldRedist);
+      node->m_poss->DeleteChildAndCleanUp(oldRedist);
     }
   }
   else if (inNode->GetClass() == Permute::GetClass()) {
@@ -1155,126 +1155,319 @@ void UpdateWithPermutation(Contraction *cont, ConnNum contInput, Permutation &pe
     Permutation composedPerm = oldPerm->m_permutation.ComposeWith(perm);
     Permute *newInput = new Permute(composedPerm, oldPerm->GetLayer());
     newInput->AddInput(inNode->Input(0),inNode->InputConnNum(0));
-    cont->m_poss->AddNode(newInput);
-    cont->ChangeInput2Way(inNode, inNum, newInput, 0);
+    node->m_poss->AddNode(newInput);
+    node->ChangeInput2Way(inNode, inNum, newInput, 0);
     if (oldPerm->m_children.empty()) {
-      cont->m_poss->DeleteChildAndCleanUp(oldPerm);
+      node->m_poss->DeleteChildAndCleanUp(oldPerm);
+    }
+  }
+  else if (inNode->IsTunnel(SETTUNOUT) && !((Tunnel*)inNode)->m_pset->IsLoop()) {
+    bool updatedOne = false;
+    bool needExternal = false;
+    Tunnel *tun = (Tunnel*)inNode;
+    for(auto possTunOut : tun->m_inputs) {
+      if (possTunOut->m_n->m_inputs.size() != 1) {
+	throw;
+      }
+      Node *in = possTunOut->m_n->Input(0);
+      if (in->GetNodeClass() == RedistNode::GetClass()) {
+	UpdateWithPermutation(possTunOut->m_n, 0, perm);
+	updatedOne = true;
+      }
+      else if (in->GetNodeClass() == Permute::GetClass()) {
+	throw;
+      }
+      else {
+	needExternal = true;
+      }
+      if (needExternal && updatedOne)
+	throw;
+      if (needExternal) {
+	Permute *newInput = new Permute(perm, SMLAYER);
+	newInput->AddInput(inNode, 0);
+	inNode->m_poss->AddNode(newInput);
+	node->ChangeInput2Way(inNode, inNum, newInput, 0);
+      }
+      else if (!updatedOne) 
+	throw;
     }
   }
   else {
     Permute *newInput = new Permute(perm, SMLAYER);
     newInput->AddInput(inNode,inNum);
-    cont->m_poss->AddNode(newInput);
-    cont->ChangeInput2Way(inNode, inNum, newInput, 0);
+    node->m_poss->AddNode(newInput);
+    node->ChangeInput2Way(inNode, inNum, newInput, 0);
+  }
+}
+
+
+bool PermIsFree(Contraction *cont, ConnNum contInput)
+{
+  Node *inNode = cont->Input(contInput);
+  //  ConnNum inNum = cont->InputConnNum(contInput);
+
+  if (inNode->GetNodeClass() == RedistNode::GetClass()) {
+    return inNode->m_children.size() == 1;
+  }
+  else if (inNode->IsTunnel(SETTUNOUT)) {
+    Tunnel *tun = (Tunnel*)inNode;
+    if (tun->m_children.size() != 1)
+      return false;
+    return tun->m_pset->HasRedist();
+  }
+  else if (inNode->GetClass() == Permute::GetClass()) {
+    return inNode->m_children.size() == 1;
+  }
+  else {
+    return false;
   }
 }
 
 bool PermuteWhileUnpacking::CanApply(const Node *node) const
 {
+  if (CurrPhase != PACKOPTPHASE)
+    return false;
   const Contraction *cont = (Contraction*)node;
-  if (m_type > 2)
-    throw;
   if (!cont->m_needsPacking)
     return false;
-  if (cont->Input(m_type)->GetNodeClass() == RedistNode::GetClass() ||
-      cont->Input(m_type)->GetNodeClass() == Permute::GetClass())
-    return true;
+  for(ConnNum num = 0; num < 3; ++num) {
+    const Node *in = cont->Input(num);
+    if (in->GetNodeClass() == RedistNode::GetClass() ||
+	in->GetNodeClass() == Permute::GetClass() ||
+	in->GetNodeClass() == TempVarNode::GetClass())
+      return true;
+    if (in->IsTunnel(SETTUNOUT)) {
+      BasePSet *set = ((Tunnel*)in)->m_pset;
+      if (set->HasPermutableOut(FindInTunVec(set->m_outTuns,(Tunnel*)in)))
+	return true; 
+    }
+  }
   return false;
 }
 
+
+
 void PermuteWhileUnpacking::Apply(Node *node) const
+
 {
   Contraction *cont = (Contraction*)node;
-  string newA, newB, newC;
-  string inner;
-  if (m_type == 0) {
+
+  if (!cont->m_needsPacking)
+    throw;
+
+  string newAForA, newBForA, newCForA;
+  string newAForB, newBForB, newCForB;
+  string newAForC, newBForC, newCForC;
+  string innerForA, innerForB, innerForC;
+  Size aSize = 0;
+  Size bSize = 0;
+  Size cSize = 0;
+  {
     string aOuter;
     string bOuter;
     StringIter aIter = cont->m_AIndices.begin();
     for(; aIter != cont->m_AIndices.end(); ++aIter) {
       if (cont->m_contIndices.find(*aIter) != string::npos) {
-	inner += (*aIter);
+	innerForA += (*aIter);
       }
       else {
 	aOuter += (*aIter);
       }
     }
-    newA = aOuter;
-    newA += inner;
+    newAForA = aOuter;
+    newAForA += innerForA;
 	
 	
     StringIter bIter = cont->m_BIndices.begin();
     for(; bIter != cont->m_BIndices.end(); ++bIter) {
-      if (inner.find(*bIter) == string::npos) {
-	bOuter += (*bIter);
+      if (innerForA.find(*bIter) == string::npos)
+	{
+	  bOuter += (*bIter);
+	}
+    }
+    newBForA = innerForA;
+    newBForA += bOuter;
+
+    newCForA = aOuter + bOuter;
+    if (newCForA != cont->m_CIndices) {
+      if (newCForA.size() < cont->InputDataType(2).GetDist().m_numDims)
+	newCForA += innerForA;
+    }
+
+    if (newAForA != cont->m_AIndices
+	&& !PermIsFree(cont, 0)) 
+      {
+	aSize += cont->TotalNumberOfInputLocalElements(0);
+      }
+    if (newBForA != cont->m_BIndices
+	&& !PermIsFree(cont, 1)) 
+      {
+	aSize += cont->TotalNumberOfInputLocalElements(1);
+      }
+    if (newCForA != cont->m_CIndices) {
+      if (!PermIsFree(cont, 2)) 
+	{
+	  aSize += cont->TotalNumberOfInputLocalElements(2);
+	}
+      if (cont->m_children.size() != 1) {
+	aSize += cont->TotalNumberOfInputLocalElements(2);
+      }
+      else {
+	Node *child = cont->Child(0);
+	if ((child->IsTunnel(SETTUNIN) && !((Tunnel*)child)->m_pset->HasPermutableIn(FindInTunVec(((Tunnel*)child)->m_pset->m_inTuns,(Tunnel*)child)))
+	    || (child->GetNodeClass() != RedistNode::GetClass() && child->GetNodeClass() != Permute::GetClass())) 
+	  {
+	    aSize += cont->TotalNumberOfInputLocalElements(2);
+	  }
       }
     }
-    newB = inner;
-    newB += bOuter;
-
-    newC = aOuter + bOuter;
   }
-  else if (m_type == 1) {
+  {
     string aOuter, bOuter;
     StringIter bIter = cont->m_BIndices.begin();
     for(; bIter != cont->m_BIndices.end(); ++bIter) {
       if (cont->m_contIndices.find(*bIter) != string::npos) {
-	inner += (*bIter);
+	innerForB += (*bIter);
       }
       else {
 	bOuter += (*bIter);
       }
     }
-    newB = inner;
-    newB += bOuter;
+    newBForB = innerForB;
+    newBForB += bOuter;
 
     StringIter aIter = cont->m_AIndices.begin();
     for(; aIter != cont->m_AIndices.end(); ++aIter) {
-      if (inner.find(*aIter) == string::npos) {
+      if (innerForB.find(*aIter) == string::npos) {
 	aOuter += (*aIter);
       }
     }
-    newA = aOuter;
-    newA += inner;
+    newAForB = aOuter;
+    newAForB += innerForB;
 	
-    newC = aOuter + bOuter;
-  }
-  else if (m_type == 2) {
-    newC = cont->m_CIndices;
-    string aOuter, bOuter;
-
-    StringIter cIter = cont->m_CIndices.begin();
-    for(; cIter != cont->m_CIndices.end(); ++cIter) {
-      if (cont->m_AIndices.find(*cIter) != string::npos) {	
-	aOuter += (*cIter);
-      } 
-      else if (cont->m_BIndices.find(*cIter) != string::npos) {	
-	bOuter += (*cIter);
-      }
-      else
-	throw;
+    newCForB = aOuter + bOuter;
+    if (newCForB != cont->m_CIndices) {
+      if (newCForB.size() < cont->InputDataType(2).GetDist().m_numDims)
+	newCForB += innerForB;
     }
+
+
+    if (newAForB != cont->m_AIndices
+	&& !PermIsFree(cont, 0)) 
+      {
+	bSize += cont->TotalNumberOfInputLocalElements(0);
+      }
+    if (newBForB != cont->m_BIndices
+	&& !PermIsFree(cont, 1)) 
+      {
+	bSize += cont->TotalNumberOfInputLocalElements(1);
+      }
+    if (newCForB != cont->m_CIndices) {
+      if (!PermIsFree(cont, 2)) 
+	{
+	  bSize += cont->TotalNumberOfInputLocalElements(2);
+	}
+      if (cont->m_children.size() != 1) {
+	bSize += cont->TotalNumberOfInputLocalElements(2);
+      }
+      else {
+	Node *child = cont->Child(0);
+	if ((child->IsTunnel(SETTUNIN) && !((Tunnel*)child)->m_pset->HasPermutableIn(FindInTunVec(((Tunnel*)child)->m_pset->m_inTuns,(Tunnel*)child)))
+	    || (child->GetNodeClass() != RedistNode::GetClass() && child->GetNodeClass() != Permute::GetClass())) 
+	  {
+	    bSize += cont->TotalNumberOfInputLocalElements(2);
+	  }
+      }
+    }
+  }
+  {
+    string aOuter, bOuter;
 
     StringIter aIter = cont->m_AIndices.begin();
     for(; aIter != cont->m_AIndices.end(); ++aIter) {
-      if (aOuter.find(*aIter) == string::npos) {
-	inner += (*aIter);
+      if (cont->m_contIndices.find(*aIter) != string::npos) {
+	innerForC += (*aIter);
       }
     }
-    newA = aOuter;
-    newA += inner;
+
+    StringIter cIter = cont->m_CIndices.begin();
+    for(; cIter != cont->m_CIndices.end(); ++cIter) {
+      if (innerForC.find(*cIter) == string::npos) {
+	if (cont->m_AIndices.find(*cIter) != string::npos) {	
+	  aOuter += (*cIter);
+	} 
+	else if (cont->m_BIndices.find(*cIter) != string::npos) {	
+	  bOuter += (*cIter);
+	}
+	else
+	  throw;
+      }
+    }
+
+    newAForC = aOuter;
+    newAForC += innerForC;
     
-    newB = inner;
-    newB += bOuter;
+    newBForC = innerForC;
+    newBForC += bOuter;
 
-    newC = aOuter + bOuter;
+    newCForC = aOuter + bOuter;
+    if (newCForC != cont->m_CIndices) {
+      if (newCForC.size() < cont->InputDataType(2).GetDist().m_numDims)
+	newCForC += innerForC;
+    }
+
+    if (newAForC != cont->m_AIndices
+	&& !PermIsFree(cont, 0)) 
+      {
+	cSize += cont->TotalNumberOfInputLocalElements(0);
+      }
+    if (newBForC != cont->m_BIndices
+	&& !PermIsFree(cont, 1)) 
+      {
+	cSize += cont->TotalNumberOfInputLocalElements(1);
+      }
+    if (newCForC != cont->m_CIndices) {
+      if (!PermIsFree(cont, 2)) 
+	{
+	  cSize += cont->TotalNumberOfInputLocalElements(2);
+	}
+      if (cont->m_children.size() != 1) {
+	cSize += cont->TotalNumberOfInputLocalElements(2);
+      }
+      else {
+	Node *child = cont->Child(0);
+	if ((child->IsTunnel(SETTUNIN) && !((Tunnel*)child)->m_pset->HasPermutableIn(FindInTunVec(((Tunnel*)child)->m_pset->m_inTuns,(Tunnel*)child)))
+	    || (child->GetNodeClass() != RedistNode::GetClass() && child->GetNodeClass() != Permute::GetClass())) 
+	  {
+	    cSize += cont->TotalNumberOfInputLocalElements(2);
+	  }
+      }
+    }
   }
-  else
-    throw;
 
+  string newA, newB, newC, inner;
 
-  
-
+  bool fixC = false;
+  if (cSize <= aSize && cSize <= bSize) {
+    newA = newAForC;
+    newB = newBForC;
+    newC = newCForC;
+    inner = innerForC;
+  }
+  else if (aSize <= bSize) {
+    newA = newAForA;
+    newB = newBForA;
+    newC = newCForA;
+    inner = innerForA;
+    fixC = true;
+  }
+  else {
+    newA = newAForB;
+    newB = newBForB;
+    newC = newCForB;
+    inner = innerForB;
+    fixC = true;
+  }
       
   if (newA != cont->m_AIndices) {
     Permutation perm(cont->m_AIndices, newA);
@@ -1286,16 +1479,8 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     UpdateWithPermutation(cont, 1, perm);
   }
 
-
-
-  if (newC != cont->m_CIndices) {
-    if (newC.size() < cont->InputDataType(2).GetDist().m_numDims)
-      newC += inner;
-  }
-
   if (newC != cont->m_CIndices)
   {
-
     Permutation perm(cont->m_CIndices, newC);
     UpdateWithPermutation(cont, 2, perm);
   }
@@ -1306,7 +1491,8 @@ void PermuteWhileUnpacking::Apply(Node *node) const
       Node *child = (*iter)->m_n;
       if (child->GetNodeClass() != SumScatterUpdateNode::GetClass()
 	  && child->GetNodeClass() != RedistNode::GetClass()
-	  && child->GetNodeClass() != AllReduceNode::GetClass()) 
+	  && child->GetNodeClass() != AllReduceNode::GetClass()
+	  && (!child->IsTunnel(SETTUNIN) || !((Tunnel*)child)->m_pset->HasPermutableIn(FindInTunVec(((Tunnel*)child)->m_pset->m_inTuns,(Tunnel*)child))))
 	{
 	  Permute *newPermute = new Permute(newC, cont->m_CIndices, SMLAYER);
 	  cont->m_poss->AddNode(newPermute);
@@ -1316,10 +1502,9 @@ void PermuteWhileUnpacking::Apply(Node *node) const
     }
   }
 
-  if (m_type == 0 || m_type == 1) {
+  if (fixC) {
     if (newC.size() < cont->m_CIndices.size())
       newC += cont->m_contIndices;
-
   }
 
   cont->m_AIndices = newA;

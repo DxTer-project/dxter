@@ -75,6 +75,14 @@ RedistNode::RedistNode(const DistType &destType, const string &align,
   m_alignModesSrc = alignModesSrc;
 }
 
+
+RedistNode::RedistNode(const DistType &destType)
+{
+  m_info.SetDistAndClearPerm(destType);
+  m_lsizes = NULL;
+  m_align = "NONE";
+}
+
 RedistNode::RedistNode(const DistType &destType, const Permutation &perm, const string &align,
                        const DimVec &alignModes, const DimVec &alignModesSrc)
 : RedistNode(destType, align, alignModes, alignModesSrc)
@@ -304,6 +312,44 @@ void RedistNode::Prop()
   }
 }
 
+bool RedistNode::HasSamePerm(const RedistNode *redist) const
+{
+  if (m_info.GetPerm() != redist->m_info.GetPerm())
+    {
+      return false;
+    }
+  else
+    return true;
+
+}
+
+bool RedistNode::HasSamePermAndAlign(const RedistNode *redist) const
+{
+  if (!HasSamePerm(redist)
+      || !HasSameAlign(redist))
+    {
+      return false;
+      
+    }
+  else
+    return true;
+
+}
+
+
+bool RedistNode::HasSameAlign(const RedistNode *redist) const
+{
+  if (m_align != redist->m_align
+      || m_alignModes != redist->m_alignModes
+      || m_alignModesSrc != redist->m_alignModesSrc)
+    {
+      return false;
+      
+    }
+  else
+    return true;
+
+}
 
 
 DimVec GetCommonPrefix(const DimVec &dims1, const DimVec &dims2)
@@ -647,19 +693,7 @@ void RedistNode::PrintCode(IndStream &out)
   if (m_alignModes.size() != m_alignModesSrc.size())
     throw;
   
-  
-  bool align = false;
-  if (m_alignModes.empty())
-    align = false; // to superscede any of the following
-  else if (m_align != GetInputNameStr(0))
-    align = true;
-  else {
-    //aligning to input, so make sure the alignment isn't the identity
-    if (m_alignModes != m_alignModesSrc)
-      align = true;
-  }
-  
-  if (align) {
+  if (!HasNoAlign()) {
     out.Indent();
     *out << outName << ".AlignModesWith( "
     << ModeArrayVarName(m_alignModes) << ", "
@@ -796,6 +830,21 @@ void RedistNode::PrintCode(IndStream &out)
   }
   else
     throw;
+}
+
+bool RedistNode::HasNoAlign() const
+{
+  if (m_alignModes.empty() || m_align == "NONE")
+    return true; // to superscede any of the following
+  else if (m_align != GetInputNameStr(0))
+    return false;
+  else {
+    //aligning to input, so make sure the alignment isn't the identity
+    if (m_alignModes != m_alignModesSrc)
+      return false;
+    else
+      return true;
+  }
 }
 
 void RedistNode::AddVariables(VarSet &set) const
@@ -986,23 +1035,37 @@ bool RemoveWastedRedist::CanApply(const Node *node) const
   const DistType* type = &(redistNode->m_info.GetDist());
   if (node->m_children.size() == 0)
     throw;
+  bool onlyOneChild = true;
   while(redistNode->Input(0)
         && (redistNode->Input(0)->GetNodeClass() == RedistNode::GetClass()))
   {
+    if (redistNode->m_children.size() > 1)
+      onlyOneChild = false;
     redistNode = (RedistNode*)redistNode->Input(0);
-    if (DistTypeEqual(redistNode->m_info.GetDist(),*type))
-      return true;
+    if (DistTypeEqual(redistNode->m_info.GetDist(),*type) 
+	&& redistNode->HasSamePerm((RedistNode*)node)) 
+      {
+	if (!onlyOneChild) {
+	  return redistNode->HasSameAlign((RedistNode*)node);
+	}
+	else {
+	  return redistNode->HasNoAlign() || redistNode->HasSameAlign((RedistNode*)node);
+	}
+      }
     for(ConnNum i = 0; i < redistNode->m_children.size(); ++i) {
       Node *tmp = redistNode->Child(i);
       if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
         RedistNode *redist = ((RedistNode*)tmp);
-        if (DistTypeEqual(redist->m_info.GetDist(), *type))
-          return redist->m_info.GetPerm() == redistNode->m_info.GetPerm();
+        if (DistTypeEqual(redist->m_info.GetDist(), *type)) {
+	  return redistNode->HasSamePermAndAlign((RedistNode*)node);
+	}
       }
     }
   }
   if (redistNode->Input(0)
-      && DistTypeEqual(((DLANode*)(redistNode->Input(0)))->DataType(redistNode->InputConnNum(0)).GetDist(),*type))
+      && DistTypeEqual(((DLANode*)(redistNode->Input(0)))->DataType(redistNode->InputConnNum(0)).GetDist(),*type)
+      && ((RedistNode*)node)->HasNoAlign()
+      && !((RedistNode*)node)->m_info.HasPerm())
     return true;
   return false;
 }
@@ -1011,12 +1074,26 @@ void RemoveWastedRedist::Apply(Node *node) const
 {
   RedistNode *redistNode = (RedistNode*)node;
   const DistType* type = &(redistNode->m_info.GetDist());
+  bool onlyOneChild = true;
   while(redistNode->Input(0)
         && (redistNode->Input(0)->GetNodeClass() == RedistNode::GetClass()))
   {
+    if (redistNode->m_children.size() > 1)
+      onlyOneChild = false;
     redistNode = (RedistNode*)redistNode->Input(0);
-    if (DistTypeEqual(redistNode->m_info.GetDist(), *type)) {
+    if (DistTypeEqual(redistNode->m_info.GetDist(), *type)
+	&& redistNode->HasSamePerm((RedistNode*)node))
+    {
       node->RedirectChildren(redistNode, 0);
+      if (!redistNode->HasSameAlign((RedistNode*)node)) {
+	if (!onlyOneChild)
+	  throw;
+	else {
+	  redistNode->m_align = ((RedistNode*)node)->m_align;
+	  redistNode->m_alignModes = ((RedistNode*)node)->m_alignModes;
+	  redistNode->m_alignModesSrc = ((RedistNode*)node)->m_alignModesSrc;	  
+	}
+      }
       node->m_poss->DeleteChildAndCleanUp(node);
       return;
     }
@@ -1025,11 +1102,9 @@ void RemoveWastedRedist::Apply(Node *node) const
       if (tmp != node && tmp->GetNodeClass() == RedistNode::GetClass()) {
         RedistNode *redist = ((RedistNode*)tmp);
         if (DistTypeEqual(redist->m_info.GetDist(),*type)) {
-          if (redist->m_info.GetPerm() == redistNode->m_info.GetPerm()) {
-            node->RedirectChildren(tmp, 0);
-            node->m_poss->DeleteChildAndCleanUp(node);
-            return;
-          }
+	  node->RedirectChildren(tmp, 0);
+	  node->m_poss->DeleteChildAndCleanUp(node);
+	  return;
         }
       }
     }
@@ -1079,6 +1154,8 @@ bool CombinePermuteRedists::CanApply(const Node *node) const
 
   const RedistNode *redist2 = (RedistNode*)(node->Child(0));
   const DistType &destType2 = redist2->m_info.GetDist();
+  if (!redist->HasNoAlign() && !redist->HasSameAlign(redist2))
+    return false;
   if (!GetPermPattern(srcType, destType2, NULL))
     return false;
   else
@@ -1110,7 +1187,7 @@ bool CombineRedistribs::CanApply(const Node *node) const
         && (output->GetNodeClass() == RedistNode::GetClass())
         && (output->InputConnNum(0) == node->InputConnNum(0))
         && DistTypeEqual(((RedistNode*)output)->m_info.GetDist(), redist->m_info.GetDist())
-        && ((RedistNode*)output)->m_info.GetPerm() == redist->m_info.GetPerm())
+	&& redist->HasSamePermAndAlign((RedistNode*)output))
     {
       return true;
     }
@@ -1133,7 +1210,7 @@ void CombineRedistribs::Apply(Node *node) const
         && (output->GetNodeClass() == RedistNode::GetClass())
         && (output->InputConnNum(0) == node->InputConnNum(0))
         && DistTypeEqual(((RedistNode*)output)->m_info.GetDist(), redist->m_info.GetDist())
-        && ((RedistNode*)output)->m_info.GetPerm() == redist->m_info.GetPerm())
+	&& redist->HasSamePermAndAlign((RedistNode*)output))
     {
       output->RedirectChildren(node,0);
       output->m_poss->DeleteChildAndCleanUp(output);
@@ -1194,9 +1271,7 @@ void SplitRedistribs::Apply(Node *node) const
   
   one.m_dists[m_dim] = two->m_dists[m_dim];
   
-  
-  RedistNode *newRedist = new RedistNode(one, orig->m_info.GetPerm(),
-                                         orig->m_align, orig->m_alignModes, orig->m_alignModesSrc);
+  RedistNode *newRedist = new RedistNode(one);
   newRedist->AddInput(orig->Input(0), orig->InputConnNum(0));
   node->m_poss->AddNode(newRedist);
   
@@ -1315,15 +1390,15 @@ void SingleIndexAllToAll::Apply(Node *node) const
     }
   }
   type1.m_dists[m_dim].DimsToDistEntry(vec1);
-  
+
+
   bool skipFirstRedist = false;
   RedistNode *redist1 = NULL;
   if (type1 == srcType) {
     skipFirstRedist = true;
   }
   else {
-    redist1 = new RedistNode(type1, redist->m_info.GetPerm(),
-                             redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+    redist1 = new RedistNode(type1);
     redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
     node->m_poss->AddNode(redist1);
   }
@@ -1344,8 +1419,7 @@ void SingleIndexAllToAll::Apply(Node *node) const
   }
   type2.m_dists[m_dim].DimsToDistEntry(vec2);
   
-  RedistNode *redist2 = new RedistNode(type2, redist->m_info.GetPerm(),
-                                       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+  RedistNode *redist2 = new RedistNode(type2);
   if (skipFirstRedist)
     redist2->AddInput(redist->Input(0), redist->InputConnNum(0));
   else
@@ -1542,8 +1616,7 @@ void DoubleIndexAllToAll::Apply(Node *node) const
         }
         
         if (srcType != intType) {
-          RedistNode *intRedist = new RedistNode(intType,
-                                                 redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+          RedistNode *intRedist = new RedistNode(intType);
           intRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
           
           RedistNode *finalRedist = new RedistNode(destType,
@@ -1642,8 +1715,8 @@ void DoubleIndexAllToAllPrefix::Apply(Node *node) const
         DistType intType = srcType;
         intType.m_dists[m_dim] = srcEntry2;
         intType.m_dists[dim] = srcEntry;
-        
-        RedistNode *newRedist = new RedistNode(intType, redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+
+        RedistNode *newRedist = new RedistNode(intType);
         newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
         
         redist->m_poss->AddNode(newRedist);
@@ -1729,9 +1802,8 @@ void SplitAllGathers::Apply(Node *node) const
   
   DistType intType = srcType;
   intType.m_dists[m_dim].DimsToDistEntry(srcDims);
-  
-  RedistNode *redist1 = new RedistNode(intType, redist->m_info.GetPerm(),
-                                       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+
+  RedistNode *redist1 = new RedistNode(intType);
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
   node->m_poss->AddNode(redist1);
   
@@ -1807,9 +1879,8 @@ void SplitAllAllGathers::Apply(Node *node) const
       }
     }
   }
-  
-  RedistNode *redist1 = new RedistNode(intType, redist->m_info.GetPerm(),
-                                       redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+
+  RedistNode *redist1 = new RedistNode(intType);
   redist1->AddInput(redist->Input(0), redist->InputConnNum(0));
   node->m_poss->AddNode(redist1);
   
@@ -1852,6 +1923,12 @@ bool CombineAllGathers::CanApply(const Node *node) const
     return false;
   
   const RedistNode *childRedist = (RedistNode*)child;
+
+  //  if (!redist->HasSamePerm(childRedist))
+  //    return false;
+
+  if (!redist->HasNoAlign() && !redist->HasSameAlign(childRedist))
+    return false;
   
   return GetAllGatherPattern(srcType, childRedist->m_info.GetDist(), NULL);
 }
@@ -1965,9 +2042,8 @@ void CombineDisappearingModes::Apply(Node *node) const
   
   DistType intType = srcType;
   intType.m_dists[m_dim].DimsToDistEntry(prefix);
-  
-  RedistNode *newRedist = new RedistNode(intType, redist->m_info.GetPerm(),
-                                         redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+
+  RedistNode *newRedist = new RedistNode(intType);
   newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   redist->m_poss->AddNode(newRedist);
   
@@ -1976,20 +2052,6 @@ void CombineDisappearingModes::Apply(Node *node) const
   
   redist->ChangeInput2Way(redist->Input(0), redist->InputConnNum(0),
                           newRedist, 0);
-
-  if (srcDims.size() == 2 && srcDims[0] == 1 && srcDims[1] == 3 &&
-      destType.m_dists[m_dim].DistEntryDims().size() == 1 && destType.m_dists[m_dim].DistEntryDims()[0] == 3) {
-    DistType tmp;
-    tmp.SetToDefault(4);
-    if (tmp == destType) {
-      if (srcType.m_dists[0].m_val == 1 && srcType.m_dists[2].m_val == 3) {
-	if (!redist->IsPrimitive() || !newRedist->IsPrimitive()) {
-	  cout << srcType.PrettyStr() << " -> " << intType.PrettyStr() << " -> " << destType.PrettyStr() << endl;
-	  throw;
-	}
-      }
-    }
-  }
 }
 
 bool PermuteDistribution::CanApply(const Node *node) const
@@ -2117,13 +2179,12 @@ void PermuteDistribution::Apply(Node *node) const
   
   DistType type = srcType;
   type.m_dists[m_srcDim].DimsToDistEntry(vec);
-  
-  RedistNode *newRedist = new RedistNode(type,
-                                         redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+
+  RedistNode *newRedist = new RedistNode(type);
   newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   redist->m_poss->AddNode(newRedist);
   
-  RedistNode *newRedist2 = new RedistNode(redist->m_info.GetDist(),
+  RedistNode *newRedist2 = new RedistNode(redist->m_info.GetDist(), redist->m_info.GetPerm(),
                                           redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   newRedist2->AddInput(newRedist,0);
   redist->m_poss->AddNode(newRedist2);
@@ -2542,8 +2603,7 @@ void DoubleIndexAllToAll2::Apply(Node *node) const
           //	  PrintVec(newDims2);
           intType.m_dists[dim].DimsToDistEntry(newDims2);
           if (DistTypeNotEqual(intType, redist->m_info.GetDist())) {
-            RedistNode *newRedist = new RedistNode(intType, redist->m_info.GetPerm(),
-                                                   redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+            RedistNode *newRedist = new RedistNode(intType);
             newRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
             node->m_poss->AddNode(newRedist);
             
@@ -2870,12 +2930,11 @@ void MultiIndexAllToAll::Apply(Node *node) const
   DistType finalIntType = srcType;
   if (!RecursivelyUpdateWithIntType(m_dim, m_dim,srcType, intType, finalIntType))
     throw;
-  
-  RedistNode *intRedist = new RedistNode(finalIntType,
-                                         redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+
+  RedistNode *intRedist = new RedistNode(finalIntType);
   intRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
   
-  RedistNode *finalRedist = new RedistNode(destType,
+  RedistNode *finalRedist = new RedistNode(destType, redist->m_info.GetPerm(),
                                            redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
   finalRedist->AddInput(intRedist, 0);
   
