@@ -81,8 +81,7 @@ GraphNum ProblemInstanceStats::GetBestAvgFlopsPerCycleImpl() {
   return m_bestAvgFlopsPerCycleImpl->GetNum();
 }
 
-void ProblemInstanceStats::PrettyPrintPerformanceStats() {
-  cout << "================== PERFORMANCE RESULTS FOR " << *m_name << " =====================\n";
+void ProblemInstanceStats::PrintProblemSummary() {
   cout << "\n&&&&&&&&&&&&&&&&&& Problem Summary &&&&&&&&&&&&&&&&&&&" << endl;
   cout << "Datatype                : " << TypeToStr(m_type) << endl;
   cout << "Flop count              : " << m_cost << endl;
@@ -90,11 +89,14 @@ void ProblemInstanceStats::PrettyPrintPerformanceStats() {
   cout << "Best Avg. Flops / Cycle : " << m_bestAvgFlopsPerCycleImpl->GetAvgFlopsPerCycle() << endl;
   cout << "Best Avg. Pct of peak   : " << m_bestAvgFlopsPerCycleImpl->GetAvgPercentOfPeak() << endl;
   cout << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n" << endl;
+}
 
+void ProblemInstanceStats::PrettyPrintPerformanceStats() {
+  cout << "================== PERFORMANCE RESULTS FOR " << *m_name << " =====================\n";
   for (const auto& implStats : m_implementationStats) {
     implStats->PrettyPrintPerformanceStats();
   }
-
+  PrintProblemSummary();
   cout << "=======================================================================================================\n";
 }
 
