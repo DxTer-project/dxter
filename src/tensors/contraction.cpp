@@ -1537,7 +1537,6 @@ void FillIn(const DistEntry &CDestEntry, DistEntry &CTypeEntry, DimSet &sumSet, 
 	  DimVecIter sumDimEntryIter = sumDimEntry.begin();
 	  for(; sumDimEntryIter != sumDimEntry.end(); ++sumDimEntryIter)
 	    sumSet.erase(*sumDimEntryIter);
-	  didSomething = true;
 	}
       }
     }
