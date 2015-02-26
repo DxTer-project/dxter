@@ -126,7 +126,7 @@ GraphNum PrintImpMapStats(Type type, ImplementationRuntimeMap &impTimes, double 
 
 void Usage()
 {
-  cout <<"\n";
+  cout <<"\n\nWelcome to DxTer LLDLA! Please choose an option below:\n\n";
   cout << "./driver arg1 arg2 ...\n";
   cout <<"\n";
   cout <<"arg1 == 0   -> View benchmarks\n";
