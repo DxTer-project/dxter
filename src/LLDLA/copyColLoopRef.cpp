@@ -66,7 +66,7 @@ void CopyColLoopRef::Apply(Node* node) const {
   RealLoop* loop = new RealLoop(LLDLALOOP, loopPoss, UnitBS);
 
   node->m_poss->AddPSet(loop);
-  node->RedirectChildren(loop->OutTun(1), 0);
+  node->RedirectChildren(loop->OutTun(0), 0);
   node->m_poss->DeleteChildAndCleanUp(node);
   return;
 }
