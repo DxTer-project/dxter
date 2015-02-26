@@ -262,7 +262,6 @@ void SplitSingleIter::Prop()
 	  cout << "m_pset is shadow\n";
 	}
 	cout << m_pset << endl;
-	
 	throw;
       }
       if (m_inputs.size() != 1) {
