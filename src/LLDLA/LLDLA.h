@@ -79,13 +79,6 @@ class DataTypeInfo
 	       Type type);
 
   DataTypeInfo& operator=(const DataTypeInfo& rhs);
-
-  /*  bool IsGenStride() const;
-  bool IsContiguous() const;
-  bool IsRowVector() const;
-  bool IsColVector() const;
-  bool IsScalar() const;
-  bool IsSameSizeAs(const DataTypeInfo& other) const;*/
   string ToString();
 };
 
