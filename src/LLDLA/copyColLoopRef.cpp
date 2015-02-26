@@ -34,13 +34,13 @@ CopyColLoopRef::CopyColLoopRef(Layer fromLayer, Layer toLayer) {
 bool CopyColLoopRef::CanApply(const Node* node) const {
   if (node->GetNodeClass() == Copy::GetClass()) {
     Copy* copy = (Copy*) node;
-    return *(copy->GetInputN(0)) > 1;
+    return *(copy->GetInputN(0)) > 1 &&
+      *(copy->GetInputM(0)) > 1;
   }
   throw;
 }
 
 void CopyColLoopRef::Apply(Node* node) const {
-  cout << "Applying set to zero row loop ref" << endl;
   Copy* copy = (Copy*) node;
 
   auto splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
