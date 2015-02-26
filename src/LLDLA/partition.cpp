@@ -197,24 +197,23 @@ void Partition::BuildStartAndEndSizes(const Sizes* toSplit)
 
 void Partition::BuildHorizontalDataTypeInfo()
 {
-  throw;
-  /*  DataTypeInfo inData = InputDataType(0);
+  DataTypeInfo inData = InputDataType(0);
 
   string startNumColsVar = inData.m_numColsVar;
   startNumColsVar = startNumColsVar + "_LEFT";
-  m_startInfo = new DataTypeInfo(inData.m_numRows, (int) m_partSplitPoint,
-				 inData.m_rowStrideVal, inData.m_colStrideVal,
+  m_startInfo = new DataTypeInfo(GetInputNumRows(0), (int) m_partSplitPoint,
+				 GetInputRowStride(0), GetInputColStride(0),
 				 inData.m_numRowsVar, startNumColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
 				 inData.m_type);
 
   string endNumColsVar = inData.m_numColsVar;
   endNumColsVar = endNumColsVar + "_RIGHT";
-  m_endInfo = new DataTypeInfo(inData.m_numRows, inData.m_numCols - ((int) m_partSplitPoint),
-			       inData.m_rowStrideVal, inData.m_colStrideVal,
+  m_endInfo = new DataTypeInfo(GetInputNumRows(0), GetInputNumCols(0) - ((int) m_partSplitPoint),
+			       GetInputRowStride(0), GetInputColStride(0),
 			       inData.m_numRowsVar, endNumColsVar,
 			       inData.m_rowStrideVar, inData.m_colStrideVar,
-			       inData.m_type);*/
+			       inData.m_type);
 }
 
 void Partition::BuildVerticalDataTypeInfo()
