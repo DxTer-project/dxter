@@ -19,16 +19,18 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "horizontalUnpack.h"
+
 #if DOLLDLA
 
 void HorizontalUnpack::Prop() {
   if (!IsValidCost(m_cost)) {
     Unpack::Prop();
 
-    if (InputDataType(0).m_numRows != InputDataType(1).m_numRows) {
+    if (GetInputNumRows(0) != GetInputNumRows(1)) {
       throw;
     }
-    if (InputDataType(0).m_numCols <= InputDataType(1).m_numCols) {
+    if (GetInputNumCols(0) <= GetInputNumCols(1)) {
       throw;
     }
   }

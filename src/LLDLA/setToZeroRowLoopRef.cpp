@@ -39,7 +39,6 @@ bool SetToZeroRowLoopRef::CanApply(const Node* node) const {
 }
 
 void SetToZeroRowLoopRef::Apply(Node* node) const {
-  cout << "Applying set to zero row loop ref" << endl;
   SetToZero* setZero = (SetToZero*) node;
 
   auto splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);

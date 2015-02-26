@@ -64,17 +64,15 @@ void Unpack::PrintCode(IndStream& out) {
   *out << ", " <<
     unpackIntoM << ", " << unpackIntoN << ", " <<
     unpackIntoRowStride << ", " << unpackIntoColStride << " );" << endl;
-  throw;
 }
 
 int Unpack::UnpackM() {
+  return GetInputNumRows(1);
   //  return InputDataType(1).m_numRows;
-  throw;
 }
 
 int Unpack::UnpackN() {
-  //  return InputDataType(1).m_numCols;
-  throw;
+  return GetInputNumCols(1);
 }
 
 void Unpack::Prop() {

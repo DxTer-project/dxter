@@ -72,65 +72,11 @@ DataTypeInfo& DataTypeInfo::operator=(const DataTypeInfo &rhs)
   return *this;
 }
 
-/*bool DataTypeInfo::IsGenStride() const {
-  if (m_rowStrideVal != 1 && m_colStrideVal != 1) {
-    cout << "NOT GENERAL STRIDE" << endl;
-    cout << "m_rowStrideVal == 1 ? " << (m_rowStrideVal == 1) << endl;
-    cout << "m_colStrideVal == 1 ? " << (m_colStrideVal == 1) << endl;
-    return true;
-  }
-  return false;
-}
-
-bool DataTypeInfo::IsContiguous() const {
-  if (m_rowStrideVal == 1 && m_colStrideVal == m_numRows) {
-    return true;
-  }
-
-  if (m_colStrideVal == 1 && m_rowStrideVal == m_numCols) {
-    return true;
-  }
-
-  if (IsRowVector() && m_rowStrideVal > m_numRows) {
-    return true;
-  }
-
-  if (IsColVector() && m_colStrideVal > m_numCols) {
-    return true;
-    }
-
-  //  return false;
-  throw;
-}
-
-bool DataTypeInfo::IsRowVector() const {
-  //  return m_numRows == 1;
-  throw;
-}
-
-bool DataTypeInfo::IsColVector() const {
-  //  return m_numCols == 1;
-  throw;
-}
-
-bool DataTypeInfo::IsScalar() const {
-  return IsRowVector() && IsColVector();
-}
-
-bool DataTypeInfo::IsSameSizeAs(const DataTypeInfo& other) const {
-  //  return m_numRows == other.m_numRows && m_numCols == other.m_numCols;
-  throw;
-}
-*/
 string DataTypeInfo::ToString() {
   string dataStr = "Num rows var name: " + m_numRowsVar + "\n";
   dataStr += "Num cols var name: " + m_numColsVar + "\n";
   dataStr += "Row stride var name: " + m_rowStrideVar + "\n";
   dataStr += "Col stride var name: " + m_colStrideVar + "\n";
-  /*  dataStr += "Num rows = " + std::to_string(m_numRows);
-  dataStr += "\nNum cols = " + std::to_string(m_numCols);
-  dataStr += "\nRow stride = " + std::to_string(m_rowStrideVal);
-  dataStr += "\nColStride = " + std::to_string(m_colStrideVal) + "\n";*/
   return dataStr;
 }
 

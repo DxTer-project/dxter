@@ -58,7 +58,7 @@ void SetToZero::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<1, 1>::Prop();
     
-    if (InputIsContiguous(0)) {
+    if (!InputIsContiguous(0)) {
       cout << "ERROR: Currently SetToZero does not support general stride operands" << endl;
       cout << "Input 0 # rows = " << GetInputNumRows(0) << endl;
       cout << "Input 0 # cols = " << GetInputNumCols(0) << endl;

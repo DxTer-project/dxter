@@ -22,6 +22,7 @@
 #include "copy.h"
 #include "DLAReg.h"
 #include "exampleUtils.h"
+#include "horizontalUnpack.h"
 #include "madd.h"
 #include "mvmul.h"
 #include "nodeTestExamples.h"
@@ -31,10 +32,29 @@
 #include "setToZero.h"
 #include "smmul.h"
 #include "svmul.h"
-#include "verticalUnpack.h"
 #include "verticalPack.h"
+#include "verticalUnpack.h"
 
 #if DOLLDLA
+
+RealPSet* TwoDHorizontalUnpackTest(Type dataType, int m, int n) {
+  auto tunX = InputTunnel("x",
+			  m, n - 2,
+			  1, m,
+			  dataType);
+
+  auto tunY = InputTunnel("y",
+			  m, n,
+			  1, m,
+			  dataType);
+
+  auto unpack = new HorizontalUnpack(ABSLAYER);
+  unpack->AddInputs(4,
+		    tunY, 0,
+		    tunX, 0);
+
+  return WrapInPSet(unpack);
+}
 
 RealPSet* TwoDVerticalUnpackTest(Type dataType, int m, int n) {
   auto tunX = InputTunnel("x",

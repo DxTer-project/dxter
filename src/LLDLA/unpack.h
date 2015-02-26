@@ -22,6 +22,9 @@
 #include "DLAOp.h"
 #include "LLDLA.h"
 
+#ifndef UNPACK_H_
+#define UNPACK_H_
+
 #if DOLLDLA
 
 class Unpack : public DLAOp<2, 1> {
@@ -49,3 +52,5 @@ class Unpack : public DLAOp<2, 1> {
 };
 
 #endif // DOLLDLA
+
+#endif // UNPACK_H_

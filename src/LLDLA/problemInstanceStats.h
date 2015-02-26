@@ -38,6 +38,8 @@ class ProblemInstanceStats {
   Type m_type;
   Cost m_cost;
 
+  void PrintProblemSummary();
+
   ImplementationStats* m_bestAvgFlopsPerCycleImpl;
   ImplementationStats* m_bestFlopsPerCycleImpl;
   ImplementationStats* m_worstFlopsPerCycleImpl;
