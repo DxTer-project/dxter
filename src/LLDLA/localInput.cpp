@@ -27,7 +27,7 @@ void LocalInput::Prop() {
   if (!IsValidCost(m_cost)) {
     InputNode::Prop();
 
-    if (!m_dataTypeInfo.IsContiguous()) {
+    if (!IsContiguous()) {
       cout << "ERROR: Local inputs must be contiguous in memory" << endl;
       throw;
     }

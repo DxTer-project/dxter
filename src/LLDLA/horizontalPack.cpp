@@ -19,18 +19,21 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "horizontalPack.h"
+
 #if DOLLDLA
 
 void HorizontalPack::Prop() {
   if (!IsValidCost(m_cost)) {
     Pack::Prop();
-
+    /*
     if (InputDataType(0).m_numRows != InputDataType(1).m_numRows) {
       throw;
     }
     if (InputDataType(0).m_numCols >= InputDataType(1).m_numCols) {
       throw;
-    }
+      }*/
+    throw;
   }
 }
 

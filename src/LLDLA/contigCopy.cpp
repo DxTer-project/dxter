@@ -42,7 +42,7 @@ void ContiguousCopy::PrintCode(IndStream& out) {
 void ContiguousCopy::Prop() {
   if (!IsValidCost(m_cost)) {
     Copy::Prop();
-    if (!InputDataType(0).IsContiguous() || !InputDataType(1).IsContiguous()) {
+    if (!InputIsContiguous(0) || !InputIsContiguous(1)) {
       cout << "ERROR: Contiguous copy on non-contiguous operands" << endl;
       throw;
     }

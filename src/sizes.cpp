@@ -1147,6 +1147,10 @@ bool Sizes::IsPartitionable(const Size partitionPoint) const
     return false;
   }
 
+  return IsSingleRepeatedSize();
+}
+
+bool Sizes::IsSingleRepeatedSize() const {
   if (this->m_entries.size() != 1) {
     return false;
   }
@@ -1157,4 +1161,11 @@ bool Sizes::IsPartitionable(const Size partitionPoint) const
   }
 
   return true;
+}
+
+Size Sizes::OnlyEntry() const {
+  if (!IsSingleRepeatedSize()) {
+    throw;
+  }
+  return (*this)[0];
 }

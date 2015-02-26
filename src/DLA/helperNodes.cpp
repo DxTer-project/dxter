@@ -113,6 +113,30 @@ string InputNode::NumColsDefine()
   return "#define " + m_dataTypeInfo.m_numColsVar + " " +  std::to_string((long long int)m_nsize[0]);
 }
 
+bool InputNode::IsContiguous() {
+  auto data = m_dataTypeInfo;
+  auto numRows = m_msize.OnlyEntry();
+  auto numCols = m_nsize.OnlyEntry();
+
+  if (data.m_rowStrideVal == 1 && data.m_colStrideVal == numRows) {
+    return true;
+  }
+
+  if (data.m_colStrideVal == 1 && data.m_rowStrideVal == numCols) {
+    return true;
+  }
+
+  if (numRows == 1 && data.m_rowStrideVal > numRows) {
+    return true;
+  }
+
+  if (numCols == 1 && data.m_colStrideVal > numCols) {
+    return true;
+  }
+
+  return false;
+}
+
 #endif //DOLLDLA
 #endif //TWODO
 

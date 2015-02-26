@@ -67,6 +67,8 @@ class InputNode : public DLANode
   string ColStrideDefine();
   string NumRowsDefine();
   string NumColsDefine();
+
+  bool IsContiguous();
 #else
   InputNode(NodeType type, Size m, Size n, string name);
 #endif

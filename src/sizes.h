@@ -156,6 +156,8 @@ class Sizes
   void SetParFactor(int parFactor);
 
   bool IsPartitionable(const Size partitionPoint) const;
+  bool IsSingleRepeatedSize() const;
+  Size OnlyEntry() const;
 };
 
 extern Sizes *ONES;
