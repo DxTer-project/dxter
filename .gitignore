@@ -1,3 +1,4 @@
+*~
 obj
 dxter.x
 results/*
@@ -8,11 +9,9 @@ totalCostOutput.m
 xcode/DxTer.xcodeproj/xcuserdata/bamarker.xcuserdatad/xcdebugger/Breakpoints.xcbkptlist
 xcode/DxTer.xcodeproj/project.xcworkspace/xcuserdata/bamarker.xcuserdatad/UserInterfaceState.xcuserstate
 .hgignore~
-glob:*~
-glob:*.orig
-glob:*.x
-glob:*.o
-glob:tmp*
+*.orig
+*.x
+*.o
 xcode/DxTer.xcodeproj/project.xcworkspace/xcuserdata/bamarker.xcuserdatad/UserInterfaceState.xcuserstate
 xcode/DxTer.xcodeproj/xcuserdata/bamarker.xcuserdatad/xcschemes/DxTer.xcscheme
 clustering/clusterInitResults.mat
