@@ -1,20 +1,24 @@
-DxTer is a prototype system for researching Design by Transformation (DxT).
-DxTer takes as input a set of software design transformations and a graph
-representing functionality to be implemented. DxTer generates a search space
-of implementations from the input transformations, estimates their
-costs, and outputs DSL code.
+DxTer is a system for researching Design by Transformation (DxT).
+DxTer takes as input a knowledge base of software design transformations and a graph
+representing functionality to be implemented. It generates a search space
+of implementations from the transformations, estimates their
+costs, and outputs the best code.
 
-For information on DxTer, see
+For information on DxT, see
 http://www.cs.utexas.edu/users/schwartz/DxT/
-
-For a list of related DxT publications, see
 http://www.cs.utexas.edu/~bamarker/
 
-Bryan Marker is the developer of DxTer.
-Email him at
+Bryan Marker is the lead developer of DxTer.
+Contact him at
 bamarker@cs.utexas.edu
 
+Dillon Huff is a contributor developing "low-level dense linear algebra" code generation functionality.
 
-Bryan Marker is currently supported by NSF grant CCF-1212683. He was previously supported by NSF grant CCF-0917167, a fellowship from Sandia National Laboratories, and an NSF Graduate Research Fellowship under grant DGE-1110007.
+
+
+
+Bryan is currently supported by NSF grant CCF-1212683. He was previously supported by NSF grant CCF-0917167, a fellowship from Sandia National Laboratories, and an NSF Graduate Research Fellowship under grant DGE-1110007.
+
+Dillon is supported by NSF grant CCF-1212683.
 
 Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
