@@ -2076,17 +2076,6 @@ bool PermuteDistribution::CanApply(const Node *node) const
   const DistEntry &srcEntry = srcType.m_dists[m_srcDim];
   const DistEntry &destEntry = destType.m_dists[m_destDim];
   
-  /*
-   if (m_srcDim == 1 && m_destDim == 0) {
-   if (srcEntry.m_val == 8 && destEntry.m_val == 6 && srcType.m_dists[0].m_val == 11) {
-   cout << srcEntry.PrettyStr() << endl;
-   cout << destEntry.PrettyStr() << endl;
-   cout << srcType.PrettyStr() << endl;
-   cout << destType.PrettyStr() << endl;
-   }
-   }
-   */
-  
   
   if (srcEntry.IsStar() || destEntry.IsStar())
     return false;
@@ -2121,13 +2110,7 @@ bool PermuteDistribution::CanApply(const Node *node) const
   DistType type = srcType;
   type.m_dists[m_srcDim].DimsToDistEntry(vec);
   
-  /*
-   cout << srcType.PrettyStr() << endl;
-   cout << type.PrettyStr() << endl;
-   cout << destType.PrettyStr() << endl;
-   */
-  
-  return DistTypeNotEqual(type, srcType);
+  return DistTypeNotEqual(type, srcType) && DistTypeNotEqual(type,destType);
 }
 
 void PermuteDistribution::Apply(Node *node) const
