@@ -24,7 +24,7 @@
 #include "unpackToPartAndCopy.h"
 #include "vmmul.h"
 #include "vadd.h"
-#include "vaddPackToMultipleOfVecRegWidth.h"
+#include "verticalPackToMultipleOfVecRegWidth.h"
 #include "vvdot.h"
 
 void AddGemmTrans()
@@ -195,9 +195,7 @@ void AddVAddTrans()
 {
   Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new VAddPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, DIMN), LLDLALOOPPHASE);
-
-  Universe::AddTrans(VAdd::GetClass(), new VAddPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, DIMM), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VerticalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }

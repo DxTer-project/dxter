@@ -58,7 +58,7 @@ int ComputePackedWidth(int length, int multiple) {
   return length + (multiple - (length % multiple));
 }
 
-Pack* PackToMultipleOf(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple) {
+Pack* PackToMultipleOf(Layer layer, Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple) {
   cout << "Entering PackToMultipleOf" << endl;
   cout << "In Node class is " << inNode->GetNodeClass() << endl;
   cout << "Out Node class is " << outNode->GetNodeClass() << endl;
@@ -77,7 +77,7 @@ Pack* PackToMultipleOf(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNu
 			   packedOperandWidth, dlaInNode->GetInputNumCols(inNum),
 			   1, packedOperandWidth,
 			   dlaInNode->GetDataType());
-    pack = new VerticalPack(ABSLAYER);
+    pack = new VerticalPack(layer);
   } else {
     cout << "Calling Compute packed width DIMN" << endl;
     packDimLength = dlaInNode->GetInputNumCols(inNum);
@@ -86,7 +86,7 @@ Pack* PackToMultipleOf(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNu
 			   dlaInNode->GetInputNumRows(inNum), packedOperandWidth,
 			   1, dlaInNode->GetInputNumRows(inNum),
 			   dlaInNode->GetDataType());
-    pack = new HorizontalPack(ABSLAYER);
+    pack = new HorizontalPack(layer);
   }
 
   pack->AddInputs(4,
@@ -95,9 +95,9 @@ Pack* PackToMultipleOf(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNu
   return pack;
 }
 
-Unpack* PackBinarySymmetricOperation(Node* binop, DimName dim, int multiple) {
-  auto operand0Pack = PackToMultipleOf(binop->Input(0), binop->InputConnNum(0), binop, 0, dim, multiple);
-  auto operand1Pack = PackToMultipleOf(binop->Input(1), binop->InputConnNum(1), binop, 1, dim, multiple);
+Unpack* PackBinarySymmetricOperation(Layer layer, Node* binop, DimName dim, int multiple) {
+  auto operand0Pack = PackToMultipleOf(layer, binop->Input(0), binop->InputConnNum(0), binop, 0, dim, multiple);
+  auto operand1Pack = PackToMultipleOf(layer, binop->Input(1), binop->InputConnNum(1), binop, 1, dim, multiple);
 
   auto newBinop = CopySymmetricBinop(binop);
   newBinop->AddInputs(4,
@@ -106,9 +106,9 @@ Unpack* PackBinarySymmetricOperation(Node* binop, DimName dim, int multiple) {
 
   Unpack* unpack;
   if (dim == DIMM) {
-    unpack = new VerticalUnpack(ABSLAYER);
+    unpack = new VerticalUnpack(layer);
   } else {
-    unpack = new HorizontalUnpack(ABSLAYER);
+    unpack = new HorizontalUnpack(layer);
   }
   unpack->AddInputs(4,
 		    newBinop, 0,
