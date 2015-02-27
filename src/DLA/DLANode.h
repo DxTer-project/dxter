@@ -98,6 +98,7 @@ class DLANode : public Node
 #endif
   DLANode* FindSideEffectingUser(ConnNum num);
 #if TWOD
+  void CheckInputNum(ConnNum num) const;
   bool IsScalar(ConnNum num) const;
 #endif
 #if DOBLIS
@@ -129,6 +130,7 @@ class DLANode : public Node
 };
 
 #if TWOD
+
 #if DOELEM
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 void DLACullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);
