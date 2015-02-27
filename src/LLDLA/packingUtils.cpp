@@ -67,7 +67,7 @@ Pack* PackToMultipleOf(Layer layer, Node* outNode, ConnNum outNum, Node* inNode,
   DLANode* dlaInNode = (DLANode*) inNode;
   int packDimLength;
   int packedOperandWidth;
-  string locName = dlaInNode->GetInputName(inNum).m_name + std::to_string((long long int) outNum);
+  string locName = dlaInNode->GetInputName(inNum).m_name + std::to_string((long long int) outNode);
 
   if (dim == DIMM) {
     packDimLength = dlaInNode->GetInputNumRows(inNum);

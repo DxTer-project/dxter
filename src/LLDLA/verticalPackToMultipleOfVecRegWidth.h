@@ -19,21 +19,24 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "helperNodes.h"
+#include "LLDLA.h"
+#include "transform.h"
 
 #if DOLLDLA
 
-class LocalInput : public InputNode
-{
+class VerticalPackToMultipleOfVecRegWidth : public SingleTrans {
+ private:
+  Layer m_fromLayer, m_toLayer;
+
  public:
-  using InputNode::InputNode;
+  VerticalPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const { return "VerticalPackToMultipleOfVecRegWidth"; }
+  virtual bool IsRef() const { return true; }
 
-  virtual void Prop();
-  virtual void PrintCode(IndStream& out);
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
 
-  virtual NodeType GetType() const;
-
-  virtual void AddVariables(VarSet& set) const;
 };
 
 #endif // DOLLDLA
