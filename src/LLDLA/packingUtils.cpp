@@ -23,9 +23,12 @@
 
 #if DOLLDLA
 
+#include "horizontalPack.h"
 #include "horizontalUnpack.h"
+#include "localInput.h"
 #include "madd.h"
 #include "vadd.h"
+#include "verticalPack.h"
 #include "vvdot.h"
 #include "verticalUnpack.h"
 
@@ -45,25 +48,42 @@ Node* CopySymmetricBinop(Node* binop) {
   return copy;
 }
 
-Partition* PartitionIntoMainAndResidual(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple) {
-  Partition* part;
+int ComputePackedWidth(int length, int multiple) {
+  if (length - (length % multiple) == 0) {
+    return multiple;
+  } else {
+    return length - (length % multiple);
+  }
+}
+
+Pack* PackToMultipleOf(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple) {
+  /*  Pack* pack;
+  LocalInput* locIn;
   DLANode* inN = (DLANode*) inNode;
+
   if (dim == DIMM) {
     int nRows = inN->GetInputNumRows(inNum);
-    Size splitPoint = nRows - (nRows % multiple);
-    part = new Partition(ABSLAYER, VERTICAL, splitPoint);
+    Size packDim = ComputePackedWidth(nRows, multiple);
+    //    locIn = new LocalInput(inN->GetName(inNum) + std::to_string((unsigned long long) outNode),
+			   
+    pack = new VerticalPack(ABSLAYER);
   } else {
     int nCols = inN->GetInputNumCols(inNum);
-    Size splitPoint = nCols - (nCols % multiple);
-    part = new Partition(ABSLAYER, HORIZONTAL, splitPoint);
+    Size packDim = ComputePackedWidth(nCols, multiple);
+    
+    pack = new HorizontalPack(ABSLAYER);
   }
-  part->AddInput(outNode, outNum);
-  return part;
+
+  pack->AddInputs(4,
+		  outNode, outNum,
+		  locIn, 0);
+		  return pack;*/
+  throw;
 }
 
 Unpack* PackBinarySymmetricOperation(Node* binop, DimName dim, int multiple) {
-  auto operand0Pack = PartitionIntoMainAndResidual(binop->Input(0), binop->InputConnNum(0), binop, 0, dim, multiple);
-  auto operand1Pack = PartitionIntoMainAndResidual(binop->Input(1), binop->InputConnNum(1), binop, 1, dim, multiple);
+  auto operand0Pack = PackToMultipleOf(binop->Input(0), binop->InputConnNum(0), binop, 0, dim, multiple);
+  auto operand1Pack = PackToMultipleOf(binop->Input(1), binop->InputConnNum(1), binop, 1, dim, multiple);
 
   auto mainBinop = CopySymmetricBinop(binop);
   mainBinop->AddInputs(4,

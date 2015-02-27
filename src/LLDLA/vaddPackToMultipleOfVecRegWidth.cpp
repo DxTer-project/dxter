@@ -37,10 +37,13 @@ VAddPackToMultipleOfVecRegWidth::VAddPackToMultipleOfVecRegWidth(Layer fromLayer
 bool VAddPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
   if (node->GetNodeClass() == VAdd::GetClass()) {
     VAdd* vadd = (VAdd*) node;
+    
     if (vadd->GetVecType() == ROWVECTOR) {
-      return !(vadd->InputNIsMultipleOfVecRegWidth(0));
+      return !(vadd->InputNIsMultipleOfVecRegWidth(0))
+	&& vadd->GetInputM(0) > 0;
     } else {
-      return !(vadd->InputMIsMultipleOfVecRegWidth(0));
+      return !(vadd->InputMIsMultipleOfVecRegWidth(0))
+	&& vadd->GetInputN(0) > 0;
     }
     return false;
   }
@@ -49,7 +52,7 @@ bool VAddPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
 
 void VAddPackToMultipleOfVecRegWidth::Apply(Node* node) const {
   Unpack* unpack = PackBinarySymmetricOperation(node, m_dim, node->GetVecRegWidth());
-  node->m_poss->AddNode(unpack);
+  node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
   node->RedirectChildren(unpack, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
   return;
