@@ -27,9 +27,11 @@
 class VAddPackToMultipleOfVecRegWidth : public SingleTrans {
  private:
   Layer m_fromLayer, m_toLayer;
+  DimName m_dim;
+  VecType m_vecType;
 
  public:
-  VAddPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer);
+  VAddPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer, DimName dim);
   virtual string GetType() const { return "VAddPackToVecRegWidth"; }
   virtual bool IsRef() const { return true; }
 

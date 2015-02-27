@@ -122,6 +122,9 @@ class DLANode : public Node
   bool InputIsContiguous(ConnNum num) const;
   bool InputsAreSameSize(ConnNum left, ConnNum right) const;
 
+  bool InputNIsMultipleOfVecRegWidth(ConnNum num) const;
+  bool InputMIsMultipleOfVecRegWidth(ConnNum num) const;
+
 #endif // DOLLDLA
 };
 

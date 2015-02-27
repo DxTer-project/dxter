@@ -582,4 +582,12 @@ bool DLANode::InputsAreSameSize(ConnNum left, ConnNum right) const {
     && ((*GetInputN(left)) == (*GetInputN(right)));
 }
 
+bool DLANode::InputNIsMultipleOfVecRegWidth(ConnNum num) const {
+  return GetInputN(0)->EvenlyDivisibleBy(GetVecRegWidth());
+}
+
+bool DLANode::InputMIsMultipleOfVecRegWidth(ConnNum num) const {
+  return GetInputM(0)->EvenlyDivisibleBy(GetVecRegWidth());
+}
+
 #endif // DOLLDLA

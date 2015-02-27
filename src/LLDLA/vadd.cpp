@@ -194,6 +194,10 @@ NodeType VAdd::GetType() const
   return "VADD" + LayerNumToStr(GetLayer()) + (char)m_vecType;
 }
 
+VecType VAdd::GetVecType() const {
+  return m_vecType;
+}
+
 Phase VAdd::MaxPhase() const
 {
   switch (m_layer)
@@ -278,7 +282,7 @@ void VAddLoopRef::Apply(Node *node) const
   split0->SetIndepIters();
   split1->SetIndepIters();
 
-  VAdd *newVAdd = new VAdd(vadd->m_vecType, vadd->m_layer);
+  VAdd *newVAdd = new VAdd(vadd->GetVecType(), vadd->m_layer);
   newVAdd->SetLayer(m_toLayer);
 
   newVAdd->AddInput(split0, 1);
@@ -319,14 +323,14 @@ bool VAddLowerLayer::CanApply(const Node *node) const
       return false;
     }
 
-    if (vadd->m_vecType == ROWVECTOR) {
+    if (vadd->GetVecType() == ROWVECTOR) {
       if (*vadd->GetInputN(0) <= m_bs &&
 	  *vadd->GetInputN(1) <= m_bs) {
 	return true;
       } else {
 	return false;
       }
-    } else if (vadd->m_vecType == COLVECTOR) {
+    } else if (vadd->GetVecType() == COLVECTOR) {
       if (*vadd->GetInputM(0) <= m_bs &&
 	  *vadd->GetInputM(1) <= m_bs) {
 	return true;

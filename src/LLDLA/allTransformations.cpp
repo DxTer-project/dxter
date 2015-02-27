@@ -195,7 +195,10 @@ void AddVAddTrans()
 {
   Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new VAddPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, DIMN), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VAdd::GetClass(), new VAddPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, DIMM), LLDLALOOPPHASE);
+
   return;
 }
 

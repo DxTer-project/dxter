@@ -23,16 +23,32 @@
 
 #if DOLLDLA
 
-VAddPackToMultipleOfVecRegWidth::VAddPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer) {
+#include "packingUtils.h"
+#include "vadd.h"
+
+
+VAddPackToMultipleOfVecRegWidth::VAddPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer, DimName dim) {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
+  m_dim = dim;
+  m_vecType = dim == DIMM ? ROWVECTOR : COLVECTOR;
 }
 
 bool VAddPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
-  return false;
+  if (node->GetNodeClass() == VAdd::GetClass()) {
+    VAdd* vadd = (VAdd*) node;
+    if (vadd->GetVecType() == ROWVECTOR) {
+      return !(vadd->InputNIsMultipleOfVecRegWidth(0));
+    } else {
+      return !(vadd->InputMIsMultipleOfVecRegWidth(0));
+    }
+    return false;
+  }
+  throw;
 }
 
 void VAddPackToMultipleOfVecRegWidth::Apply(Node* node) const {
+  Unpack* unpack = PackBinarySymmetricOperation(node, m_dim, node->GetVecRegWidth());
   return;
 }
 
