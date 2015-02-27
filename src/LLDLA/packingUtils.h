@@ -28,7 +28,7 @@
 #include "recombine.h"
 #include "unpack.h"
 
-Partition* PartitionIntoMainAndResidual(Node* node, ConnNum outNum, DimName dim, int multiple);
+Partition* PartitionIntoMainAndResidual(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple);
 Pack* PackToMultipleOf(Node* node, ConnNum outNum, DimName dim, int multiple);
 Recombine* PartitionBinarySymmetricOperation(Node* node, ConnNum outNum, DimName dim, int multiple);
 Unpack* PackBinarySymmetricOperation(Node* binop, DimName dim, int multiple);

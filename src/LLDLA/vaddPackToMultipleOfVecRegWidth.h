@@ -32,7 +32,7 @@ class VAddPackToMultipleOfVecRegWidth : public SingleTrans {
 
  public:
   VAddPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer, DimName dim);
-  virtual string GetType() const { return "VAddPackToVecRegWidth"; }
+  virtual string GetType() const { return "VAddPackToVecRegWidth" + std::to_string(m_dim); }
   virtual bool IsRef() const { return true; }
 
   virtual bool CanApply(const Node* node) const;

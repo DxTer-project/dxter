@@ -45,26 +45,35 @@ Node* CopySymmetricBinop(Node* binop) {
   return copy;
 }
 
-Partition* PartitionIntoMainAndResidual(Node* node, ConnNum outNum, DimName dim, int multiple) {
+Partition* PartitionIntoMainAndResidual(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple) {
   Partition* part;
+  DLANode* inN = (DLANode*) inNode;
   if (dim == DIMM) {
-    part = new Partition(ABSLAYER, VERTICAL, 0);
-    //    Size splitPoint = node->GetInput
+    int nRows = inN->GetInputNumRows(inNum);
+    Size splitPoint = nRows - (nRows % multiple);
+    part = new Partition(ABSLAYER, VERTICAL, splitPoint);
   } else {
-    part = new Partition(ABSLAYER, HORIZONTAL, 0);
+    int nCols = inN->GetInputNumCols(inNum);
+    Size splitPoint = nCols - (nCols % multiple);
+    part = new Partition(ABSLAYER, HORIZONTAL, splitPoint);
   }
-  part->AddInput(node, outNum);
-  throw;
+  part->AddInput(outNode, outNum);
+  return part;
 }
 
 Unpack* PackBinarySymmetricOperation(Node* binop, DimName dim, int multiple) {
-  auto operand0Pack = PartitionIntoMainAndResidual(binop->Input(0), binop->InputConnNum(0), dim, multiple);
-  auto operand1Pack = PartitionIntoMainAndResidual(binop->Input(1), binop->InputConnNum(1), dim, multiple);
+  auto operand0Pack = PartitionIntoMainAndResidual(binop->Input(0), binop->InputConnNum(0), binop, 0, dim, multiple);
+  auto operand1Pack = PartitionIntoMainAndResidual(binop->Input(1), binop->InputConnNum(1), binop, 1, dim, multiple);
 
-  auto newBinop = CopySymmetricBinop(binop);
-  newBinop->AddInputs(4,
-		      operand0Pack, 0,
-		      operand1Pack, 0);
+  auto mainBinop = CopySymmetricBinop(binop);
+  mainBinop->AddInputs(4,
+		       operand0Pack, 0,
+		       operand1Pack, 0);
+
+  auto residualBinop = CopySymmetricBinop(binop);
+  residualBinop->AddInputs(4,
+			   operand0Pack, 1,
+			   operand1Pack, 1);
 
   Unpack* unpack;
   if (dim == DIMM) {
@@ -72,7 +81,9 @@ Unpack* PackBinarySymmetricOperation(Node* binop, DimName dim, int multiple) {
   } else {
     unpack = new HorizontalUnpack(ABSLAYER);
   }
-  unpack->AddInput(newBinop, 0);
+  unpack->AddInputs(4,
+		    mainBinop, 0,
+		    residualBinop, 0);
 
   return unpack;
 }

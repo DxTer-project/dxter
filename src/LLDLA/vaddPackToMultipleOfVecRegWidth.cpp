@@ -49,6 +49,9 @@ bool VAddPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
 
 void VAddPackToMultipleOfVecRegWidth::Apply(Node* node) const {
   Unpack* unpack = PackBinarySymmetricOperation(node, m_dim, node->GetVecRegWidth());
+  node->m_poss->AddNode(unpack);
+  node->RedirectChildren(unpack, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
   return;
 }
 
