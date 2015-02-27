@@ -82,6 +82,7 @@ Name Partition::GetName(ConnNum num) const
 
 void Partition::AddVariables(VarSet &set) const
 {
+  //  cout << "ADDING PARTITION VARIABLES" << endl;
   string startVarDecl;
   string endVarDecl;
   string typeName;
