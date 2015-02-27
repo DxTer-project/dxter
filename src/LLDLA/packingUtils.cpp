@@ -49,10 +49,19 @@ Node* CopySymmetricBinop(Node* binop) {
 }
 
 int ComputePackedWidth(int length, int multiple) {
-  return length + (length % multiple);
+  if (length % multiple == 0) {
+    cout << "Error: Computing packing width for operand that does not need to be packed" << endl;
+    cout << "Length = " << length << endl;
+    cout << "Multiple = " << multiple << endl;
+    throw;
+  }
+  return length + (multiple - (length % multiple));
 }
 
 Pack* PackToMultipleOf(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple) {
+  cout << "Entering PackToMultipleOf" << endl;
+  cout << "In Node class is " << inNode->GetNodeClass() << endl;
+  cout << "Out Node class is " << outNode->GetNodeClass() << endl;
   Pack* pack;
   LocalInput* locIn;
   DLANode* dlaInNode = (DLANode*) inNode;
@@ -62,6 +71,7 @@ Pack* PackToMultipleOf(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNu
 
   if (dim == DIMM) {
     packDimLength = dlaInNode->GetInputNumRows(inNum);
+    cout << "Calling Compute packed width DIMM" << endl;
     packedOperandWidth = ComputePackedWidth(packDimLength, multiple);
     locIn = new LocalInput(locName,
 			   packedOperandWidth, dlaInNode->GetInputNumCols(inNum),
@@ -69,11 +79,12 @@ Pack* PackToMultipleOf(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNu
 			   dlaInNode->GetDataType());
     pack = new VerticalPack(ABSLAYER);
   } else {
+    cout << "Calling Compute packed width DIMN" << endl;
     packDimLength = dlaInNode->GetInputNumCols(inNum);
     packedOperandWidth = ComputePackedWidth(packDimLength, multiple);
     locIn = new LocalInput(locName,
 			   dlaInNode->GetInputNumRows(inNum), packedOperandWidth,
-			   packedOperandWidth, 1,
+			   1, dlaInNode->GetInputNumRows(inNum),
 			   dlaInNode->GetDataType());
     pack = new HorizontalPack(ABSLAYER);
   }

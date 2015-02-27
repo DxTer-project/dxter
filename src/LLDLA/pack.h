@@ -41,6 +41,9 @@ class Pack : public DLAOp<2, 1> {
   virtual bool IsReadOnly() const { return false; }
   virtual bool IsDataDependencyOfInput() const { return true; }
 
+  /*  virtual Sizes* GetInputM(ConnNum num) const;
+      virtual Sizes* GetInputN(ConnNum num) const;*/
+
   virtual int PackM();
   virtual int PackN();
 

@@ -26,14 +26,12 @@
 void HorizontalPack::Prop() {
   if (!IsValidCost(m_cost)) {
     Pack::Prop();
-    /*
-    if (InputDataType(0).m_numRows != InputDataType(1).m_numRows) {
+    if (GetInputNumRows(0) != GetInputNumRows(1)) {
       throw;
     }
-    if (InputDataType(0).m_numCols >= InputDataType(1).m_numCols) {
+    if (GetInputNumCols(0) >= GetInputNumCols(1)) {
       throw;
-      }*/
-    throw;
+      }
   }
 }
 

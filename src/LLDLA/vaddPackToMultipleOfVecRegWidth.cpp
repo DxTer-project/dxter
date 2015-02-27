@@ -31,7 +31,7 @@ VAddPackToMultipleOfVecRegWidth::VAddPackToMultipleOfVecRegWidth(Layer fromLayer
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_dim = dim;
-  m_vecType = dim == DIMM ? ROWVECTOR : COLVECTOR;
+  m_vecType = dim == DIMM ? COLVECTOR : ROWVECTOR;
 }
 
 bool VAddPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
@@ -40,10 +40,12 @@ bool VAddPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
     
     if (vadd->GetVecType() == ROWVECTOR) {
       return !(vadd->InputNIsMultipleOfVecRegWidth(0))
-	&& vadd->GetInputM(0) > 0;
+	&& vadd->GetInputNumRows(0) == 1
+	&& (((int) vadd->GetInputNumCols(0)) % vadd->GetVecRegWidth() != 0);
     } else {
       return !(vadd->InputMIsMultipleOfVecRegWidth(0))
-	&& vadd->GetInputN(0) > 0;
+	&& vadd->GetInputNumCols(0) == 1
+	&& (((int) vadd->GetInputNumRows(0)) % vadd->GetVecRegWidth() != 0);
     }
     return false;
   }
@@ -51,7 +53,15 @@ bool VAddPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
 }
 
 void VAddPackToMultipleOfVecRegWidth::Apply(Node* node) const {
+  cout << "Applying VAddPackToMultipleOfVecRegWidth" << endl;
+  DLANode* dlaNode = (DLANode*) node;
+  cout << "Node input 0 # rows = " << dlaNode->GetInputNumRows(0) << endl;
+  cout << "Node input 0 # cols = " << dlaNode->GetInputNumCols(0) << endl;
+  cout << "Node input 1 # rows = " << dlaNode->GetInputNumRows(1) << endl;
+  cout << "Node input 1 # cols = " << dlaNode->GetInputNumCols(1) << endl;
+  cout << "Calling PackBinarySymmetricOperation" << endl;
   Unpack* unpack = PackBinarySymmetricOperation(node, m_dim, node->GetVecRegWidth());
+  cout << "Done with PackBinarySymmetricOperation" << endl;
   node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
   node->RedirectChildren(unpack, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
