@@ -65,6 +65,7 @@ NodeType LocalInput::GetType() const {
 }
 
 void LocalInput::AddVariables(VarSet& set) const {
+  cout << "ADDING LOCALINPUT VARIABLES" << endl;
   string typeName;
   if (GetDataType() == REAL_SINGLE) {
     typeName = "float* ";
@@ -93,4 +94,5 @@ void LocalInput::AddVariables(VarSet& set) const {
   set.insert(rowStrideVar);
   set.insert(colStrideVar);
 }
+
 #endif // DOLLDLA
