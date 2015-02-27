@@ -31,6 +31,7 @@
 #include "debug.h"
 #include "DLAReg.h"
 #include "exampleRunner.h"
+#include "LLDLATranspose.h"
 #include "loopUnrolling.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
@@ -41,7 +42,7 @@
 #include "runtimeEvaluation.h"
 #include "singleOperationExamples.h"
 #include "transform.h"
-#include "LLDLATranspose.h"
+#include "uniqueNumSource.h"
 #include "transpose.h"
 #include "loopSupport.h"
 
@@ -67,6 +68,7 @@ do you really want to do compact unrolling and partial unrolling?
 Trans transA, transB;
 
 Architecture* arch;
+UniqueNumSource* globalNumSource;
 
 double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
@@ -184,6 +186,7 @@ int main(int argc, const char* argv[])
   ProblemInstance problemInstance;
 
   arch = new HaswellMacbook();
+  globalNumSource = new UniqueNumSource();
 
   RealPSet* algPSet;
   int algNum;
@@ -585,6 +588,7 @@ int main(int argc, const char* argv[])
     problemInstance.SetType(precision);
     problemInstance.SetName(opName);
     RunExample(algNum, algPSet, &problemInstance);
+
   }
   return 0;
 }
