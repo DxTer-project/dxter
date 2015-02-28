@@ -444,7 +444,7 @@ int main(int argc, const char* argv[])
       algFunc = HFG;
       break;
     case(22):
-      algFunc = HFG;
+      algFunc = TermsInlined;
       break;
     default:
       Usage();
