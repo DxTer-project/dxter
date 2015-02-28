@@ -322,6 +322,7 @@ void AddSimplifiers()
    Universe::AddTrans(Permute::GetClass(), new LowerPermute, SIMP);
    Universe::AddTrans(Permute::GetClass(), new CombinePermutations, SIMP);
    Universe::AddTrans(Permute::GetClass(), new MovePermuteIntoTempVarNode, SIMP);
+   Universe::AddTrans(Permute::GetClass(), new MovePermuteIntoRedist, SIMP);
    Universe::AddTrans(ScaleNode::GetClass(), new RemoveScaleByOne, SIMP);
    Universe::AddTrans(TempVarNode::GetClass(), new TempVarFromTempVar, SIMP);
    Universe::AddTrans(TempVarNode::GetClass(), new MoveTempVarNodeIntoLoop, SIMP);
@@ -639,6 +640,7 @@ int main(int argc, const char* argv[])
     cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
     time(&start2);
     uni.Expand(numIters, FINALOPTPHASE, TenCullRO);
+    uni.Simplify();
     time(&end);
     cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
 
