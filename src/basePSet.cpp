@@ -198,7 +198,7 @@ bool ShouldMerge(const BasePSet *set1, const BasePSet *set2)
 #if DOTENSORS
   if (M_dontFuseLoops && set1->IsLoop())
     return false;
-  if (CurrPhase == ROTENSORPHASE) 
+  if (CurrPhase == FUSEANDOPTTENSORPHASE)
     {
       /*
       StrSet typeSet1;
