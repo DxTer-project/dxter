@@ -79,6 +79,7 @@ RealPSet* CCSD();
 RealPSet* zInlined();
 RealPSet* ZInlined();
 RealPSet* CCSDInlined();
+RealPSet* HFG();
 
 void ReduceMaxMem(set<string> &used)
 {
@@ -353,6 +354,7 @@ void Usage()
   cout <<"        18  -> CCSD Inlined\n";
   cout <<"        19  -> z_ai Inlined\n";
   cout <<"        20  -> Z_abij Inlined\n";
+  cout <<"        21  -> HFG Inlined\n";
 }
 
 int main(int argc, const char* argv[])
@@ -434,6 +436,9 @@ int main(int argc, const char* argv[])
       break;
     case(20):
       algFunc = ZInlined;
+      break;
+    case(21):
+      algFunc = HFG;
       break;
     default:
       Usage();
@@ -2297,5 +2302,75 @@ RealPSet* Tau()
 }
 
 
+
+
+RealPSet* HFG()
+{
+  set<string> usedSet;
+  usedSet.insert("t");
+  usedSet.insert("v");
+  usedSet.insert("H");
+  usedSet.insert("T");
+  usedSet.insert("r");
+  usedSet.insert("F");
+  usedSet.insert("u");
+  usedSet.insert("G");
+  ReduceMaxMem(usedSet);
+
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *u_mnje = CreateInput4("u_mnje", small, small, small, big);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
+  InputNode *r_amef = CreateInput4("r_bmfe", big, small, big, big);
+
+  RealPSet *Hset = H_me_calc(t_fj, v_femn,
+			      big, small);
+
+  RealPSet *Gset = G_mi_calc(Hset->OutTun(0), u_mnje,
+			    t_fj, v_femn, T_bfnj,
+			    big, small);
+
+  RealPSet *Fset = F_ae_calc(Hset->OutTun(0), r_amef, 
+			     t_fj, v_femn, T_bfnj,
+			     big, small);
+  
+
+
+  OutputNode *outH = new OutputNode;
+  outH->AddInput(Hset->OutTun(0),0);
+
+  OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+  OutputNode *outF = new OutputNode;
+  outF->AddInput(Fset->OutTun(0),0);
+
+  OutputNode *outr = new OutputNode;
+  outr->AddInput(r_amef,0);
+  
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+
+  OutputNode *outG = new OutputNode;
+  outG->AddInput(Gset->OutTun(0),0);
+
+  OutputNode *outu = new OutputNode;
+  outu->AddInput(u_mnje, 0);
+  
+  
+
+  Poss *outerPoss = new Poss(8, outG, outH,
+			     outF, outr,
+			     outv, outT,
+			     outt, outu);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+}
 
 #endif //DOTENSORS
