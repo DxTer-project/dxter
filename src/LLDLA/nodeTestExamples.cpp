@@ -233,6 +233,36 @@ RealPSet* CopyTest(Type dataType, int m, int n) {
   return WrapInPSet(sumX);
 }
 
+RealPSet* HorizontalCopyTest(Type dataType, int m, int n) {
+  auto xIn = new InputNode("x",
+			   m, n,
+			   n, 1,
+			   dataType);
+
+  auto yIn = new InputNode("y",
+			   m, n,
+			   n, 1,
+			   dataType);
+
+  auto tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(xIn, 0);
+
+  auto tunY = new Tunnel(POSSTUNIN);
+  tunY->AddInput(yIn, 0);
+
+  auto copy = new Copy(ABSLAYER);
+  copy->AddInputs(4,
+		  tunX, 0,
+		  tunY, 0);
+
+  auto sumX = new MAdd(ABSLAYER);
+  sumX->AddInputs(4,
+		  copy, 0,
+		  tunX, 0);
+
+  return WrapInPSet(sumX);
+}
+
 RealPSet* PackTest(Type dataType, int m) {
   auto xIn = new InputNode("x",
 			   m - 2, 1,

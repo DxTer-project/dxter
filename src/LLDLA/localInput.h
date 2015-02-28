@@ -32,8 +32,8 @@ class LocalInput : public InputNode
   virtual void PrintCode(IndStream& out);
 
   virtual NodeType GetType() const;
-  static ClassType GetClass();
-  virtual ClassType GetNodeClass() const;
+
+  virtual void AddVariables(VarSet& set) const;
 };
 
 #endif // DOLLDLA

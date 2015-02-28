@@ -70,6 +70,16 @@ void DLANode::UnflattenCore(ifstream &in, SaveInfo &info)
 }
 
 #if TWOD
+
+void DLANode::CheckInputNum(ConnNum num) const {
+  if (num >= m_inputs.size()) {
+    cout << "bad size 2\n";
+    cout << "Node class is " << this->GetNodeClass() << endl;
+    cout << num << " >= " << m_inputs.size() << endl;
+    throw;
+  }
+}
+
 const Sizes* DLANode::GetInputM(ConnNum num) const
 {
   if (num >= m_inputs.size()) {
@@ -536,24 +546,30 @@ bool DLANode::IsInputScalar(ConnNum num) const
 #if DOLLDLA
 
 int DLANode::GetInputNumCols(ConnNum num) const {
+  CheckInputNum(num);
   auto size = GetInputN(num);
   return size->OnlyEntry();
 }
 
 int DLANode::GetInputNumRows(ConnNum num) const {
+  CheckInputNum(num);
   auto size = GetInputM(num);
   return size->OnlyEntry();
 }
 
 int DLANode::GetInputRowStride(ConnNum num) const {
+  CheckInputNum(num);
   return InputDataType(num).m_rowStrideVal;
 }
 
 int DLANode::GetInputColStride(ConnNum num) const {
+  CheckInputNum(num);
   return InputDataType(num).m_colStrideVal;
 }
 
 bool DLANode::InputIsContiguous(ConnNum num) const {
+  CheckInputNum(num);
+
   auto data = InputDataType(num);
   auto numRows = GetInputNumRows(num);
   auto numCols = GetInputNumCols(num);
@@ -578,8 +594,21 @@ bool DLANode::InputIsContiguous(ConnNum num) const {
 }
 
 bool DLANode::InputsAreSameSize(ConnNum left, ConnNum right) const {
+  CheckInputNum(left);
+  CheckInputNum(right);
+
   return ((*GetInputM(left)) == (*GetInputM(right)))
     && ((*GetInputN(left)) == (*GetInputN(right)));
+}
+
+bool DLANode::InputNIsMultipleOfVecRegWidth(ConnNum num) const {
+  CheckInputNum(num);
+  return GetInputN(0)->EvenlyDivisibleBy(GetVecRegWidth());
+}
+
+bool DLANode::InputMIsMultipleOfVecRegWidth(ConnNum num) const {
+  CheckInputNum(num);
+  return GetInputM(0)->EvenlyDivisibleBy(GetVecRegWidth());
 }
 
 #endif // DOLLDLA

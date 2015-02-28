@@ -64,12 +64,35 @@ NodeType LocalInput::GetType() const {
   return "LocalInput " + LayerNumToStr(GetLayer());
 }
 
-ClassType LocalInput::GetClass() {
-  return "LocalInput";
-}
+void LocalInput::AddVariables(VarSet& set) const {
+  cout << "ADDING LOCALINPUT VARIABLES" << endl;
+  string typeName;
+  if (GetDataType() == REAL_SINGLE) {
+    typeName = "float* ";
+  } else if (GetDataType() == REAL_DOUBLE) {
+    typeName = "double* ";
+  } else {
+    cout << "Unsupported datatype: " << GetDataType() << endl;
+  }
+  string inputVarDecl = typeName + m_varName.m_name + ";";
 
-ClassType LocalInput::GetNodeClass() const {
-  return GetClass();
+  string uint = "unsigned int ";
+  string nRowsVarName = uint + m_dataTypeInfo.m_numRowsVar + ";";
+  string nColsVarName = uint + m_dataTypeInfo.m_numRowsVar + ";";
+  string rowStrideVarName = uint + m_dataTypeInfo.m_rowStrideVar + ";";
+  string colStrideVarName = uint + m_dataTypeInfo.m_colStrideVar + ";";
+
+  Var inputNameVar(DirectVarDeclType, inputVarDecl, GetDataType());
+  Var nRowsVar(DirectVarDeclType, nRowsVarName, GetDataType());
+  Var nColsVar(DirectVarDeclType, nColsVarName, GetDataType());
+  Var rowStrideVar(DirectVarDeclType, rowStrideVarName, GetDataType());
+  Var colStrideVar(DirectVarDeclType, colStrideVarName, GetDataType());
+
+  set.insert(inputNameVar);
+  set.insert(nRowsVar);
+  set.insert(nColsVar);
+  set.insert(rowStrideVar);
+  set.insert(colStrideVar);
 }
 
 #endif // DOLLDLA

@@ -19,20 +19,22 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "horizontalPack.h"
+#include "LLDLA.h"
+#include "transform.h"
 
 #if DOLLDLA
 
-void HorizontalPack::Prop() {
-  if (!IsValidCost(m_cost)) {
-    Pack::Prop();
-    if (GetInputNumRows(0) != GetInputNumRows(1)) {
-      throw;
-    }
-    if (GetInputNumCols(0) >= GetInputNumCols(1)) {
-      throw;
-      }
-  }
-}
+class CopyRowLoopRef : public SingleTrans {
+ private:
+  Layer m_fromLayer, m_toLayer;
+
+ public:
+  CopyRowLoopRef(Layer fromLayer, Layer toLayer);
+  virtual string GetType() const { return "CopyToRowLoopRef"; }
+  virtual bool IsRef() const { return true; }
+
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+};
 
 #endif // DOLLDLA

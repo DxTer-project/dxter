@@ -98,6 +98,7 @@ class DLANode : public Node
 #endif
   DLANode* FindSideEffectingUser(ConnNum num);
 #if TWOD
+  void CheckInputNum(ConnNum num) const;
   bool IsScalar(ConnNum num) const;
 #endif
 #if DOBLIS
@@ -122,10 +123,14 @@ class DLANode : public Node
   bool InputIsContiguous(ConnNum num) const;
   bool InputsAreSameSize(ConnNum left, ConnNum right) const;
 
+  bool InputNIsMultipleOfVecRegWidth(ConnNum num) const;
+  bool InputMIsMultipleOfVecRegWidth(ConnNum num) const;
+
 #endif // DOLLDLA
 };
 
 #if TWOD
+
 #if DOELEM
 void DLACullDP(Poss *poss, bool &cullIfPossible, bool &doNotCull);
 void DLACullRO(Poss *poss, bool &cullIfPossible, bool &doNotCull);

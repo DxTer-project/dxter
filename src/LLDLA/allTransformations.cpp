@@ -4,6 +4,7 @@
 
 #include "copy.h"
 #include "copyColLoopRef.h"
+#include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
@@ -23,6 +24,7 @@
 #include "unpackToPartAndCopy.h"
 #include "vmmul.h"
 #include "vadd.h"
+#include "verticalPackToMultipleOfVecRegWidth.h"
 #include "vvdot.h"
 
 void AddGemmTrans()
@@ -193,6 +195,8 @@ void AddVAddTrans()
 {
   Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
+  Universe::AddTrans(VAdd::GetClass(), new VerticalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
   return;
 }
 
@@ -235,6 +239,8 @@ void AddCopyTrans() {
   Universe::AddTrans(Copy::GetClass(), new CopyToContigCopy(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(Copy::GetClass(), new CopyColLoopRef(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(Copy::GetClass(), new CopyRowLoopRef(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 }
 
 void AddTransformations()

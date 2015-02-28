@@ -19,40 +19,39 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "copyColLoopRef.h"
+#include "copy.h"
+#include "copyRowLoopRef.h"
+#include "loopSupport.h"
 
 #if DOLLDLA
 
-#include "copy.h"
-#include "loopSupport.h"
-
-CopyColLoopRef::CopyColLoopRef(Layer fromLayer, Layer toLayer) {
+CopyRowLoopRef::CopyRowLoopRef(Layer fromLayer, Layer toLayer) {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
 }
 
-bool CopyColLoopRef::CanApply(const Node* node) const {
+bool CopyRowLoopRef::CanApply(const Node* node) const {
   if (node->GetNodeClass() == Copy::GetClass()) {
     Copy* copy = (Copy*) node;
-    return *(copy->GetInputN(0)) > 1 &&
-      *(copy->GetInputM(0)) > 1;
+    return *(copy->GetInputM(0)) > 1 &&
+      *(copy->GetInputN(0)) > 1;
   }
   throw;
 }
 
-void CopyColLoopRef::Apply(Node* node) const {
+void CopyRowLoopRef::Apply(Node* node) const {
   Copy* copy = (Copy*) node;
 
-  auto splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
+  auto splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(copy->Input(0), copy->InputConnNum(0));
   splitA->SetUpStats(FULLUP, FULLUP,
 		     FULLUP, FULLUP);
   splitA->SetIndepIters();
 
-  auto splitB = new SplitSingleIter(PARTRIGHT, POSSTUNIN, false);
+  auto splitB = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitB->AddInput(copy->Input(1), copy->InputConnNum(1));
-  splitB->SetUpStats(FULLUP, NOTUP,
-		     FULLUP, NOTUP);
+  splitB->SetUpStats(FULLUP, FULLUP,
+		     NOTUP, NOTUP);
   splitB->SetIndepIters();
 
   auto copyCol = new Copy(m_toLayer);

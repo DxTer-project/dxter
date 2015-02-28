@@ -30,9 +30,11 @@
 
 class VAdd : public DLAOp<2, 1>
 {
- public:
+
+ private:
   VecType m_vecType;
 
+ public:
   VAdd(VecType vecType, Layer layer);
 
   virtual void PrintCode(IndStream &out);
@@ -46,6 +48,7 @@ class VAdd : public DLAOp<2, 1>
   virtual ClassType GetNodeClass() const { return GetClass(); }
 
   virtual NodeType GetType() const;
+  virtual VecType GetVecType() const;
 
  private:
   void PrintRowStride(IndStream &out);

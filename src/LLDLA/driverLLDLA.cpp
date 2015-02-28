@@ -31,6 +31,7 @@
 #include "debug.h"
 #include "DLAReg.h"
 #include "exampleRunner.h"
+#include "LLDLATranspose.h"
 #include "loopUnrolling.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
@@ -41,7 +42,7 @@
 #include "runtimeEvaluation.h"
 #include "singleOperationExamples.h"
 #include "transform.h"
-#include "LLDLATranspose.h"
+#include "uniqueNumSource.h"
 #include "transpose.h"
 #include "loopSupport.h"
 
@@ -67,6 +68,7 @@ do you really want to do compact unrolling and partial unrolling?
 Trans transA, transB;
 
 Architecture* arch;
+UniqueNumSource* globalNumSource;
 
 double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
@@ -166,6 +168,7 @@ void Usage()
   cout <<"        26  -> 2D vertical pack unpack test F/D M N\n";
   cout <<"        27  -> 2D vertical unpack test F/D M N\n";
   cout <<"        28  -> 2D horizontal unpack test F/D M N\n";
+  cout <<"        29  -> 2D horizontal copy test F/D M N\n";
   cout <<"\n";
 }
 
@@ -183,6 +186,7 @@ int main(int argc, const char* argv[])
   ProblemInstance problemInstance;
 
   arch = new HaswellMacbook();
+  globalNumSource = new UniqueNumSource();
 
   RealPSet* algPSet;
   int algNum;
@@ -563,6 +567,19 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(n, "n");
       algPSet = TwoDHorizontalUnpackTest(precision, m, n);
       break;
+    case(29):
+      if (argc != 5) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_horizontal_2D_copy_test";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      algPSet = HorizontalCopyTest(precision, m, n);
+      break;
     default:
       Usage();
       return 0;
@@ -571,6 +588,7 @@ int main(int argc, const char* argv[])
     problemInstance.SetType(precision);
     problemInstance.SetName(opName);
     RunExample(algNum, algPSet, &problemInstance);
+
   }
   return 0;
 }

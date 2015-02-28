@@ -19,20 +19,19 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "horizontalPack.h"
+#include "LLDLA.h"
 
 #if DOLLDLA
 
-void HorizontalPack::Prop() {
-  if (!IsValidCost(m_cost)) {
-    Pack::Prop();
-    if (GetInputNumRows(0) != GetInputNumRows(1)) {
-      throw;
-    }
-    if (GetInputNumCols(0) >= GetInputNumCols(1)) {
-      throw;
-      }
-  }
-}
+class UniqueNumSource {
+ private:
+  unsigned int current;
+
+ public:
+  UniqueNumSource();
+  unsigned int Next();
+};
+
+extern UniqueNumSource* globalNumSource;
 
 #endif // DOLLDLA

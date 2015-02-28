@@ -19,20 +19,27 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "horizontalPack.h"
+#include "verticalPackToMultipleOfVecRegWidth.h"
 
 #if DOLLDLA
 
-void HorizontalPack::Prop() {
-  if (!IsValidCost(m_cost)) {
-    Pack::Prop();
-    if (GetInputNumRows(0) != GetInputNumRows(1)) {
-      throw;
-    }
-    if (GetInputNumCols(0) >= GetInputNumCols(1)) {
-      throw;
-      }
+#include "packingUtils.h"
+
+bool VerticalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
+  DLANode* dlaNode = (DLANode*) node;
+  if (dlaNode->GetLayer() != m_fromLayer) {
+    return false;
   }
+
+  return !(dlaNode->InputMIsMultipleOfVecRegWidth(0))
+    && dlaNode->GetInputNumRows(0) > 0;
+}
+
+void VerticalPackToMultipleOfVecRegWidth::Apply(Node* node) const {
+  Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, DIMM, node->GetVecRegWidth());
+  node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
+  node->RedirectChildren(unpack, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
 }
 
 #endif // DOLLDLA

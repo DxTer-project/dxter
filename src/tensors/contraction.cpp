@@ -1521,7 +1521,6 @@ void PermuteWhileUnpacking::Apply(Node *node) const
 // with it to the intermediate C type mode with that grid mode
 void FillIn(const DistEntry &CDestEntry, DistEntry &CTypeEntry, DimSet &sumSet, EntryList &sumDims)
 {
-  bool didSomething = false;
   DimVec destTmp = CDestEntry.DistEntryDims();
   DimVec dest = CTypeEntry.DistEntryDims();
   DimVecIter destIter = destTmp.begin();
@@ -1538,7 +1537,6 @@ void FillIn(const DistEntry &CDestEntry, DistEntry &CTypeEntry, DimSet &sumSet, 
 	  DimVecIter sumDimEntryIter = sumDimEntry.begin();
 	  for(; sumDimEntryIter != sumDimEntry.end(); ++sumDimEntryIter)
 	    sumSet.erase(*sumDimEntryIter);
-	  didSomething = true;
 	}
       }
     }
