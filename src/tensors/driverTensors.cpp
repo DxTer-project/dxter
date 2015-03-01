@@ -82,6 +82,7 @@ RealPSet* CCSDInlined();
 RealPSet* HFG();
 RealPSet* TermsInlined();
 RealPSet* UQP();
+RealPSet* XUQP();
 
 void ReduceMaxMem(set<string> &used)
 {
@@ -360,6 +361,7 @@ void Usage()
   cout <<"        21  -> HFG Inlined\n";
   cout <<"        22  -> Terms Inlined\n";
   cout <<"        23  -> UQP\n";
+  cout <<"        24  -> XUQP\n";
 }
 
 int main(int argc, const char* argv[])
@@ -450,6 +452,9 @@ int main(int argc, const char* argv[])
       break;
     case(23):
       algFunc = UQP;
+      break;
+    case(24):
+      algFunc = XUQP;
       break;
     default:
       Usage();
@@ -2621,6 +2626,117 @@ RealPSet* UQP()
 			     outw, outx,
 			     outq, outu,
 			     outQ,
+			     outP, outU);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+    
+  return outerSet;
+}
+
+RealPSet* XUQP()
+{
+  InputNode *v_femn = CreateInput4("v_femn", big, big, small, small);
+  InputNode *y_abef = CreateInput4("y_abef", big, big, big, big);
+  InputNode *r_bmfe = CreateInput4("r_bmfe", big, small, big, big);
+  InputNode *t_fj = CreateInput2("t_fj", big, small);
+  InputNode *T_bfnj = CreateInput4("T_bfnj", big, big, small, small);
+  InputNode *u_mnie = CreateInput4("u_mnje", small, small, small, big);
+  InputNode *w_bmje = CreateInput4("w_bmje", big, small, small, big);
+  InputNode *x_bmej = CreateInput4("x_bmej", big, small, big, small);
+  InputNode *q_mnij = CreateInput4("q_mnij", small, small, small, small);
+
+  set<string> usedSet;
+  usedSet.insert("T");
+  usedSet.insert("t");
+  usedSet.insert("Tau");
+  usedSet.insert("v");
+  usedSet.insert("y");
+  usedSet.insert("r");
+  usedSet.insert("w");
+  usedSet.insert("x");
+  usedSet.insert("q");
+  usedSet.insert("u");
+  usedSet.insert("Q");
+  usedSet.insert("X");
+  usedSet.insert("P");
+  usedSet.insert("U");
+  ReduceMaxMem(usedSet);
+
+
+  RealPSet *Tau_efmn = Tau_efmn_calc(t_fj,
+				     T_bfnj,
+				big, small);
+
+
+  RealPSet *P_ijmb = P_jimb_calc(r_bmfe, t_fj, 
+				 u_mnie, w_bmje, T_bfnj, 
+				 x_bmej,
+				 Tau_efmn->OutTun(0),
+				 big, small);
+
+  RealPSet *X_bmej = X_bmej_calc(x_bmej, r_bmfe, t_fj, 
+				 u_mnie, v_femn, T_bfnj,
+				 Tau_efmn->OutTun(0),
+				 big, small);
+
+  RealPSet *Q_mnij = Q_mnij_calc(q_mnij, t_fj, 
+				 u_mnie, v_femn, T_bfnj, 
+				 Tau_efmn->OutTun(0),
+				 big, small);
+
+  RealPSet *U_mnie = U_mnie_calc(t_fj,
+			      u_mnie, v_femn,
+			      big, small);
+
+  OutputNode *outT = new OutputNode;
+  outT->AddInput(T_bfnj, 0);
+
+  OutputNode *outt = new OutputNode;
+  outt->AddInput(t_fj, 0);
+
+  OutputNode *outu = new OutputNode;
+  outu->AddInput(u_mnie, 0);
+
+  OutputNode *outTau = new OutputNode;
+  outTau->AddInput(Tau_efmn->OutTun(0), 0);
+
+  OutputNode *outv = new OutputNode;
+  outv->AddInput(v_femn, 0);
+
+  OutputNode *outy = new OutputNode;
+  outy->AddInput(y_abef, 0);
+
+  OutputNode *outr = new OutputNode;
+  outr->AddInput(r_bmfe, 0);
+
+  OutputNode *outw = new OutputNode;
+  outw->AddInput(w_bmje, 0);
+
+  OutputNode *outx = new OutputNode;
+  outx->AddInput(x_bmej, 0);
+
+  OutputNode *outq = new OutputNode;
+  outq->AddInput(q_mnij, 0);
+
+  OutputNode *outQ = new OutputNode;
+  outQ->AddInput(Q_mnij->OutTun(0),0);
+  
+  OutputNode *outX = new OutputNode;
+  outX->AddInput(X_bmej->OutTun(0),0);
+
+  OutputNode *outP = new OutputNode;
+  outP->AddInput(P_ijmb->OutTun(0),0);
+
+  OutputNode *outU = new OutputNode;
+  outU->AddInput(U_mnie->OutTun(0),0);
+
+  Poss *outerPoss = new Poss(14,
+			     outT, outt,
+			     outTau, outv,
+			     outy, outr,
+			     outw, outx,
+			     outq, outu,
+			     outQ,
+			     outX,
 			     outP, outU);
   RealPSet *outerSet = new RealPSet(outerPoss);
     
