@@ -369,6 +369,17 @@ void Poss::AddNode(Node *node)
   m_possNodes.push_back(node);
 }
 
+void Poss::RecursiveAddNodes(Node* node) {
+  if (node->m_poss) {
+    return;
+  }
+  AddNode(node);
+  for (auto nodeConn : node->m_inputs) {
+    auto inputNode = nodeConn->m_n;
+    RecursiveAddNodes(inputNode);
+  }
+}
+
 void Poss::TakeOverNode(Node *node)
 {
   Poss *oldOwner = node->m_poss;

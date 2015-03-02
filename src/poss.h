@@ -111,6 +111,7 @@ class Poss
   bool operator!=(Poss &rhs) {return !(*this == rhs);}
   inline bool IsSane() const {return m_flags & POSSISSANEFLAG; }
   void AddNode(Node *node);
+  void RecursiveAddNodes(Node* node);
   void TakeOverNode(Node *node);
   void AddNodes(int numNodes, ...);
   virtual void AddPSet(BasePSet *pset, bool expectToBeNew, bool addTuns = false);
