@@ -26,6 +26,7 @@
 #include "loopTunnel.h"
 #include "tempVarNode.h"
 #include "helperNodes.h"
+#include "tensorRedist.h"
 
 Permute::Permute(string start, string end, Layer layer)
   : m_permutation(start,end),
@@ -214,7 +215,9 @@ bool MovePermuteIntoTempVarNode::CanApply(const Node *node) const
   const Permute *perm = (Permute*)node;
   if (perm->m_zero)
     return false;
-  return (perm->Input(0)->GetNodeClass() == TempVarNode::GetClass());
+  if (perm->Input(0)->GetNodeClass() == TempVarNode::GetClass())
+    return perm->Input(0)->m_children.size() == 1;
+  return false;
 }
 
 
@@ -224,6 +227,34 @@ void MovePermuteIntoTempVarNode::Apply(Node *node) const
   TempVarNode *temp = (TempVarNode*)(perm->Input(0));
   temp->m_info.SetPerm(temp->m_info.GetPerm().ComposeWith(perm->m_permutation));
   perm->RedirectAllChildren(temp);
+  perm->m_poss->DeleteChildAndCleanUp(perm);
+}
+
+bool MovePermuteIntoRedist::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != Permute::GetClass())
+    throw;
+  const Permute *perm = (Permute*)node;
+  if (perm->m_zero)
+    return false;
+  if (perm->Input(0)->GetNodeClass() == RedistNode::GetClass())
+    return perm->Input(0)->m_children.size() == 1;
+  return false;
+}
+
+
+void MovePermuteIntoRedist::Apply(Node *node) const
+{
+  Permute *perm = (Permute*)node;
+  RedistNode *temp = (RedistNode*)(perm->Input(0));
+
+  RedistNode *redist = new RedistNode(temp->m_info.GetDist(), temp->m_info.GetPerm().ComposeWith(perm->m_permutation),
+				      temp->m_align, temp->m_alignModes, temp->m_alignModesSrc);
+  
+  redist->AddInput(temp->Input(0), temp->InputConnNum(0));
+
+  perm->m_poss->AddNode(redist);
+  perm->RedirectAllChildren(redist);
   perm->m_poss->DeleteChildAndCleanUp(perm);
 }
 

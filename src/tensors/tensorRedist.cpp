@@ -142,19 +142,11 @@ void RedistNode::Prop()
     DLANode *parent = (DLANode*)Input(0);
     parent->Prop();
     
-    //if the input has a permutation, then some of the below might need to be
-    // redone
-    if (parent->DataType(InputConnNum(0)).HasPerm())
-      throw;
-    
     
     const DistType &m_srcType = parent->DataType(InputConnNum(0)).GetDist();
     const Dim numDims = m_info.GetDist().m_numDims;
 
 
-    
-
-    
     if (m_info.GetDist() == m_srcType)
       throw;
     
@@ -168,6 +160,7 @@ void RedistNode::Prop()
       cout << m_info.GetDist().PrettyStr() << endl;
       throw;
     }
+
     if (m_srcType.m_numDims != numDims)
       throw;
     
@@ -195,24 +188,18 @@ void RedistNode::Prop()
       for(; gridModeIter != gridModesInvolved.end(); ++gridModeIter) {
         numProcs *= GridLens[*gridModeIter];
       }
-      /*
-       cout << "***\n";
-       cout << "For " << InputDataType(0).m_dist.PrettyStr() << " -> "
-       << m_info.m_dist.PrettyStr() << endl;
-       */
+
       const unsigned int totNumIters = m_lsizes[0].NumSizes();
       for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
         Cost temp = 1;
         for (Dim dim = 0; dim < numDims; ++dim) {
           temp *= m_lsizes[dim][iteration];
         }
-        //	cout << "AllGather( " << std::scientific << temp * numProcs << ", " << numProcs << " )\n";
-        //	cout << "\t" << temp << " data\n";
+
         m_cost += AllGather(temp, numProcs);
         m_cost += (PSIR+PSIW)*(temp + temp / numProcs);
-        //	cout << "cost " << m_cost << endl;
       }
-      //      cout << "***\n";
+
       return;
     }
     
@@ -589,8 +576,9 @@ const Sizes* RedistNode::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
-  if (InputDataType(0).HasPerm())
-    throw;
+  //Input perm is accounted for in building the cache
+  //  if (InputDataType(0).HasPerm())
+  //    throw;
   if (!m_isArray) {
     return m_lsizes;
   }
@@ -620,17 +608,21 @@ void RedistNode::BuildDataTypeCache()
   if (m_lsizes)
     return;
   
-  //  cout << "For " << InputDataType(0).m_dist.PrettyStr() << " -> "
-  //       << m_info.m_dist.PrettyStr() << endl;
-  
+  //If the input has a permutation, 
+  //it has to be undone to get local sizes of inputs
+
   DLANode *in = (DLANode*)Input(0);
   ConnNum num = InputConnNum(0);
   Dim numDims = in->NumDims(num);
+
+  Permutation perm = in->DataType(num).GetPerm();
+
   if (numDims) {
     m_isArray = true;
     m_lsizes = new Sizes[numDims];
     for (Dim dim = 0; dim < numDims; ++dim) {
-      GetLocalSizes(m_info.GetDist(), dim, in->Len(num,dim), m_lsizes+dim);
+      GetLocalSizes(m_info.GetDist(), dim, 
+		    in->Len(num,perm.MapStartToFinish(dim)), m_lsizes+dim);
       //      cout << "dim " << dim << ": ";
       //      in->Len(num,dim)->Print();
       //      cout << "*to*\n";

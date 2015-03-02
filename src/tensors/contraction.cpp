@@ -346,6 +346,7 @@ void Contraction::CheckInputTypesAlign() const
         cout << GetInputNameStr(2) << endl;
         cout << m_CIndices << endl;
         cout << Input(2)->GetType() << endl;  
+	m_poss->PrintTransVecUp();
         throw;
       }
       if (m_contIndices.find(index) == string::npos && 
@@ -1137,7 +1138,7 @@ void UpdateWithPermutation(Node *node, ConnNum nodeInput, Permutation &perm)
   Node *inNode = node->Input(nodeInput);
   ConnNum inNum = node->InputConnNum(nodeInput);
 
-  if (inNode->GetNodeClass() == RedistNode::GetClass()) {
+  if (inNode->GetNodeClass() == RedistNode::GetClass() && inNode->m_children.size() == 1) {
     RedistNode *oldRedist = (RedistNode*)inNode;
     if (oldRedist->m_info.HasPerm())
       throw;
@@ -1150,7 +1151,7 @@ void UpdateWithPermutation(Node *node, ConnNum nodeInput, Permutation &perm)
       node->m_poss->DeleteChildAndCleanUp(oldRedist);
     }
   }
-  else if (inNode->GetClass() == Permute::GetClass()) {
+  else if (inNode->GetClass() == Permute::GetClass()  && inNode->m_children.size() == 1) {
     Permute *oldPerm = (Permute*)inNode;
     Permutation composedPerm = oldPerm->m_permutation.ComposeWith(perm);
     Permute *newInput = new Permute(composedPerm, oldPerm->GetLayer());
@@ -1161,8 +1162,9 @@ void UpdateWithPermutation(Node *node, ConnNum nodeInput, Permutation &perm)
       node->m_poss->DeleteChildAndCleanUp(oldPerm);
     }
   }
-  else if (inNode->IsTunnel(SETTUNOUT) && !((Tunnel*)inNode)->m_pset->IsLoop()) {
-    bool updatedOne = false;
+  else if (inNode->IsTunnel(SETTUNOUT) 
+	   && !((Tunnel*)inNode)->m_pset->IsLoop()
+	   && inNode->m_children.size() == 1) {
     bool needExternal = false;
     Tunnel *tun = (Tunnel*)inNode;
     for(auto possTunOut : tun->m_inputs) {
@@ -1171,25 +1173,30 @@ void UpdateWithPermutation(Node *node, ConnNum nodeInput, Permutation &perm)
       }
       Node *in = possTunOut->m_n->Input(0);
       if (in->GetNodeClass() == RedistNode::GetClass()) {
-	UpdateWithPermutation(possTunOut->m_n, 0, perm);
-	updatedOne = true;
+	if (in->m_children.size() != 1) {
+	  needExternal = true;
+	}
       }
       else if (in->GetNodeClass() == Permute::GetClass()) {
 	throw;
       }
-      else {
+      else 
 	needExternal = true;
+    }
+      
+    if (!needExternal) {
+      for(auto possTunOut : tun->m_inputs) {
+	Node *in = possTunOut->m_n->Input(0);
+	if (in->GetNodeClass() == RedistNode::GetClass()) {
+	  UpdateWithPermutation(possTunOut->m_n, 0, perm);
+	}
       }
-      if (needExternal && updatedOne)
-	throw;
-      if (needExternal) {
-	Permute *newInput = new Permute(perm, SMLAYER);
-	newInput->AddInput(inNode, 0);
-	inNode->m_poss->AddNode(newInput);
-	node->ChangeInput2Way(inNode, inNum, newInput, 0);
-      }
-      else if (!updatedOne) 
-	throw;
+    }
+    else {
+      Permute *newInput = new Permute(perm, SMLAYER);
+      newInput->AddInput(inNode, 0);
+      inNode->m_poss->AddNode(newInput);
+      node->ChangeInput2Way(inNode, inNum, newInput, 0);
     }
   }
   else {
