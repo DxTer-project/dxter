@@ -179,7 +179,7 @@ NodeType MVMul::GetType() const
 void MVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
-  const MVMul *rhs = (MVMul*)orig;
+  const MVMul *rhs = (MVMul*) orig;
   m_layer = rhs->m_layer;
   return;
 }
@@ -194,7 +194,7 @@ MVMulLowerLayer::MVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 bool MVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
-    const MVMul *mvmul = (MVMul*) node;
+    const MVMul *mvmul = static_cast<const MVMul*>(node);
     if (mvmul->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -224,7 +224,7 @@ bool MVMulLowerLayer::CanApply(const Node *node) const
 
 void MVMulLowerLayer::Apply(Node *node) const
 {
-  MVMul *svmul = (MVMul*) node;
+  MVMul *svmul = static_cast<MVMul*>(node);
   svmul->SetLayer(m_toLayer);
 }
 
@@ -258,7 +258,7 @@ string MVMulLoopRef::GetType() const
 bool MVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
-    const MVMul *mvmul = (MVMul*) node;
+    const MVMul *mvmul = static_cast<const MVMul*>(node);
 
     if (m_dim == DIMM && (mvmul->Input(0)->GetVecRegWidth() > ((int) m_bs.GetSize()))) {
       return false;
@@ -288,7 +288,7 @@ void MVMulLoopRef::Apply(Node *node) const {
 }
 
 void MVMulLoopRef::ApplyRowSplit(Node *node) const {
-  MVMul *mul = (MVMul*) node;
+  MVMul *mul = static_cast<MVMul*>(node);
   
   // Split A on m dimension
   SplitSingleIter *splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
@@ -339,7 +339,7 @@ void MVMulLoopRef::ApplyRowSplit(Node *node) const {
 
 void MVMulLoopRef::ApplyColSplit(Node *node) const
 {
-  MVMul *mul = (MVMul*) node;
+  MVMul *mul = static_cast<MVMul*>(node);
 
   // Split a on n dimension
   SplitSingleIter *splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
@@ -402,7 +402,7 @@ string MVMulToRegArith::GetType() const
 bool MVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == MVMul::GetClass()) {
-    MVMul* mvmul = (MVMul*) node;
+    const MVMul* mvmul = static_cast<const MVMul*>(node);
     return *mvmul->GetInputM(0) == mvmul->GetVecRegWidth();
   }
   return false;
@@ -410,7 +410,7 @@ bool MVMulToRegArith::CanApply(const Node* node) const
 
 void MVMulToRegArith::Apply(Node* node) const
 {
-  MVMul* mvmul = (MVMul*) node;
+  MVMul* mvmul = static_cast<MVMul*>(node);
   
   // Split matrix A into mu x 1 column vectors
   SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
