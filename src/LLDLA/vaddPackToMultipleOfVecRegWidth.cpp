@@ -36,7 +36,7 @@ VAddPackToMultipleOfVecRegWidth::VAddPackToMultipleOfVecRegWidth(Layer fromLayer
 
 bool VAddPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
   if (node->GetNodeClass() == VAdd::GetClass()) {
-    VAdd* vadd = (VAdd*) node;
+    VAdd* vadd = static_cast<VAdd*>(node);
     
     if (vadd->GetVecType() == ROWVECTOR) {
       return !(vadd->InputNIsMultipleOfVecRegWidth(0))
@@ -54,7 +54,7 @@ bool VAddPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
 
 void VAddPackToMultipleOfVecRegWidth::Apply(Node* node) const {
   cout << "Applying VAddPackToMultipleOfVecRegWidth" << endl;
-  DLANode* dlaNode = (DLANode*) node;
+  DLANode* dlaNode = static_cast<DLANode*>(node);
   cout << "Node input 0 # rows = " << dlaNode->GetInputNumRows(0) << endl;
   cout << "Node input 0 # cols = " << dlaNode->GetInputNumCols(0) << endl;
   cout << "Node input 1 # rows = " << dlaNode->GetInputNumRows(1) << endl;

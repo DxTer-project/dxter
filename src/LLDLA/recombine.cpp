@@ -76,7 +76,7 @@ const Type Recombine::GetDataType() const {
 void Recombine::Duplicate(const Node* orig, bool shallow, bool possMerging)
 {
   DLAOp<3, 1>::Duplicate(orig, shallow, possMerging);
-  const Recombine* rec = (Recombine*) orig;
+  const Recombine* rec = static_cast<const Recombine*>(orig);
   m_layer = rec->m_layer;
   m_partType = rec->m_partType;
 }
@@ -99,7 +99,7 @@ RecombineLowerLayer::RecombineLowerLayer(Layer fromLayer, Layer toLayer)
 bool RecombineLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Recombine::GetClass()) {
-    const Recombine *recombine = (Recombine*) node;
+    const Recombine *recombine = static_cast<const Recombine*>(node);
     if (recombine->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -113,7 +113,7 @@ bool RecombineLowerLayer::CanApply(const Node *node) const
 
 void RecombineLowerLayer::Apply(Node *node) const
 {
-  Recombine *recombine = (Recombine*) node;
+  Recombine *recombine = static_cast<Recombine*>(node);
   recombine->SetLayer(m_toLayer);
 }
 

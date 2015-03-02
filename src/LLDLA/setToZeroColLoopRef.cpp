@@ -32,7 +32,7 @@ SetToZeroColLoopRef::SetToZeroColLoopRef(Layer fromLayer, Layer toLayer) {
 
 bool SetToZeroColLoopRef::CanApply(const Node* node) const {
   if (node->GetNodeClass() == SetToZero::GetClass()) {
-    SetToZero* setZero = (SetToZero*) node;
+    const SetToZero* setZero = static_cast<const SetToZero*>(node);
     return *(setZero->GetInputN(0)) > 1;
   }
   throw;
@@ -40,7 +40,7 @@ bool SetToZeroColLoopRef::CanApply(const Node* node) const {
 
 void SetToZeroColLoopRef::Apply(Node* node) const {
   cout << "Applying set to zero row loop ref" << endl;
-  SetToZero* setZero = (SetToZero*) node;
+  const SetToZero* setZero = static_cast<const SetToZero*>(node);
 
   auto splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(setZero->Input(0), setZero->InputConnNum(0));

@@ -33,7 +33,7 @@ CopyColLoopRef::CopyColLoopRef(Layer fromLayer, Layer toLayer) {
 
 bool CopyColLoopRef::CanApply(const Node* node) const {
   if (node->GetNodeClass() == Copy::GetClass()) {
-    Copy* copy = (Copy*) node;
+    const Copy* copy = static_cast<const Copy*>(node);
     return *(copy->GetInputN(0)) > 1 &&
       *(copy->GetInputM(0)) > 1;
   }
@@ -41,7 +41,7 @@ bool CopyColLoopRef::CanApply(const Node* node) const {
 }
 
 void CopyColLoopRef::Apply(Node* node) const {
-  Copy* copy = (Copy*) node;
+  Copy* copy = static_cast<Copy*>(node);
 
   auto splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(copy->Input(0), copy->InputConnNum(0));

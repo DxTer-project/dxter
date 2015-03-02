@@ -32,14 +32,14 @@ SetToZeroRowLoopRef::SetToZeroRowLoopRef(Layer fromLayer, Layer toLayer) {
 
 bool SetToZeroRowLoopRef::CanApply(const Node* node) const {
   if (node->GetNodeClass() == SetToZero::GetClass()) {
-    SetToZero* setZero = (SetToZero*) node;
+    const SetToZero* setZero = static_cast<const SetToZero*>(node);
     return *(setZero->GetInputM(0)) > 1;
   }
   throw;
 }
 
 void SetToZeroRowLoopRef::Apply(Node* node) const {
-  SetToZero* setZero = (SetToZero*) node;
+  SetToZero* setZero = static_cast<SetToZero*>(node);
 
   auto splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(setZero->Input(0), setZero->InputConnNum(0));

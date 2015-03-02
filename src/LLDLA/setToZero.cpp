@@ -152,7 +152,7 @@ string SetToZeroLowerLayer::GetType() const {
 
 bool SetToZeroLowerLayer::CanApply(const Node* node) const {
   if (node->GetNodeClass() == SetToZero::GetClass()) {
-    const SetToZero* stz = (SetToZero*) node;
+    const SetToZero* stz = static_cast<const SetToZero*>(node);
     if (stz->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -162,7 +162,7 @@ bool SetToZeroLowerLayer::CanApply(const Node* node) const {
 }
 
 void SetToZeroLowerLayer::Apply(Node* node) const {
-  SetToZero* stz = (SetToZero*) node;
+  SetToZero* stz = static_cast<SetToZero*>(node);
   stz->SetLayer(m_toLayer);
 }
 

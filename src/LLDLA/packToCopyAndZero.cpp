@@ -45,7 +45,7 @@ bool PackToCopyAndZero::CanApply(const Node* node) const {
 }
 
 void PackToCopyAndZero::Apply(Node* node) const {
-  Pack* pack = (Pack*) node;
+  Pack* pack = static_cast<Pack*>(node);
 
   Partition* partition;
   if (pack->PackDir() == HORIZONTAL) {

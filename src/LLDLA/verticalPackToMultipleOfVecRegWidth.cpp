@@ -26,7 +26,7 @@
 #include "packingUtils.h"
 
 bool VerticalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
-  DLANode* dlaNode = (DLANode*) node;
+  const DLANode* dlaNode = static_cast<const DLANode*>(node);
   if (dlaNode->GetLayer() != m_fromLayer) {
     return false;
   }

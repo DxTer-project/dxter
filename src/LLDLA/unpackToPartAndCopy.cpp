@@ -43,7 +43,7 @@ bool UnpackToPartAndCopy::CanApply(const Node* node) const {
 }
 
 void UnpackToPartAndCopy::Apply(Node* node) const {
-  Unpack* unpack = (Unpack*) node;
+  Unpack* unpack = static_cast<Unpack*>(node);
 
   Partition* part;
   if (unpack->UnpackDir() == HORIZONTAL) {

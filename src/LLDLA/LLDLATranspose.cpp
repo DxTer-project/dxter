@@ -78,7 +78,7 @@ LLDLATransposeLowerLayer::LLDLATransposeLowerLayer(Layer toLayer, Layer fromLaye
 bool LLDLATransposeLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == LLDLATranspose::GetClass()) {
-    const LLDLATranspose *trans = (LLDLATranspose*) node;
+    const LLDLATranspose *trans = static_cast<const LLDLATranspose*>(node);
     if (trans->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -90,7 +90,7 @@ bool LLDLATransposeLowerLayer::CanApply(const Node *node) const
 
 void LLDLATransposeLowerLayer::Apply(Node *node) const
 {
-  LLDLATranspose* trans = (LLDLATranspose*) node;
+  LLDLATranspose* trans = static_cast<LLDLATranspose*>(node);
   trans->SetLayer(m_toLayer);
 }
 

@@ -32,7 +32,7 @@ CopyRowLoopRef::CopyRowLoopRef(Layer fromLayer, Layer toLayer) {
 
 bool CopyRowLoopRef::CanApply(const Node* node) const {
   if (node->GetNodeClass() == Copy::GetClass()) {
-    Copy* copy = (Copy*) node;
+    const Copy* copy = static_cast<const Copy*>(node);
     return *(copy->GetInputM(0)) > 1 &&
       *(copy->GetInputN(0)) > 1;
   }
@@ -40,7 +40,7 @@ bool CopyRowLoopRef::CanApply(const Node* node) const {
 }
 
 void CopyRowLoopRef::Apply(Node* node) const {
-  Copy* copy = (Copy*) node;
+  Copy* copy = static_cast<Copy*>(node);
 
   auto splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(copy->Input(0), copy->InputConnNum(0));

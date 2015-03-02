@@ -179,7 +179,7 @@ NodeType MVMul::GetType() const
 void MVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<3,1>::Duplicate(orig, shallow, possMerging);
-  const MVMul *rhs = (MVMul*) orig;
+  const MVMul *rhs = static_cast<const MVMul*>(orig);
   m_layer = rhs->m_layer;
   return;
 }

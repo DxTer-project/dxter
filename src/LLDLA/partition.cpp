@@ -268,7 +268,7 @@ const DataTypeInfo& Partition::DataType(ConnNum num) const
 void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging)
 {
   DLANode::Duplicate(orig, shallow, possMerging);
-  const Partition* part = (Partition*) orig;
+  const Partition* part = static_cast<const Partition*>(orig);
 
   m_layer = part->m_layer;
 
@@ -329,7 +329,7 @@ PartitionLowerLayer::PartitionLowerLayer(Layer fromLayer, Layer toLayer)
 bool PartitionLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == Partition::GetClass()) {
-    const Partition *part = (Partition*) node;
+    const Partition *part = static_cast<const Partition*>(node);
     if (part->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -341,7 +341,7 @@ bool PartitionLowerLayer::CanApply(const Node *node) const
 
 void PartitionLowerLayer::Apply(Node *node) const
 {
-  Partition *part = (Partition*) node;
+  Partition *part = static_cast<Partition*>(node);
   part->SetLayer(m_toLayer);
 }
 

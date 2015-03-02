@@ -65,7 +65,7 @@ Pack* PackToMultipleOf(Layer layer, Node* outNode, ConnNum outNum, Node* inNode,
   cout << "Out Node class is " << outNode->GetNodeClass() << endl;
   Pack* pack;
   LocalInput* locIn;
-  DLANode* dlaInNode = (DLANode*) inNode;
+  DLANode* dlaInNode = static_cast<DLANode*>(inNode);
   int packDimLength;
   int packedOperandWidth;
   string locName = dlaInNode->GetInputName(inNum).m_name + std::to_string(globalNumSource->Next());
