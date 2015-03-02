@@ -189,7 +189,7 @@ NodeType SVMul::GetType() const
 void SVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
-  const SVMul *rhs = (SVMul*)orig;
+  const SVMul *rhs = static_cast<const SVMul*>(orig);
   m_vecType = rhs->m_vecType;
 }
 
@@ -232,7 +232,7 @@ string SVMulLoopRef::GetType() const
 bool SVMulLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
-    const SVMul *svmul = (SVMul*) node;
+    const SVMul *svmul = static_cast<const SVMul*>(node);
     if (svmul->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -255,7 +255,7 @@ bool SVMulLoopRef::CanApply(const Node *node) const
 
 void SVMulLoopRef::Apply(Node *node) const
 {
-  SVMul *svmul = (SVMul*) node;
+  SVMul *svmul = static_cast<SVMul*>(node);
 
   SplitSingleIter *split = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split->AddInput(svmul->Input(1), svmul->InputConnNum(1));
@@ -320,7 +320,7 @@ SVMulLowerLayer::SVMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 bool SVMulLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
-    const SVMul *svmul = (SVMul*) node;
+    const SVMul *svmul = static_cast<const SVMul*>(node);
     if (svmul->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -339,7 +339,7 @@ bool SVMulLowerLayer::CanApply(const Node *node) const
 
 void SVMulLowerLayer::Apply(Node *node) const
 {
-  SVMul *svmul = (SVMul*) node;
+  SVMul *svmul = static_cast<SVMul*>(node);
   svmul->SetLayer(m_toLayer);
 }
 
@@ -359,7 +359,7 @@ SVMulToRegArith::SVMulToRegArith(Layer fromLayer, Layer toLayer, VecType vtype)
 bool SVMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
-    SVMul* svmul = (SVMul*) node;
+    const SVMul* svmul = static_cast<const SVMul*>(node);
     if (svmul->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -381,7 +381,7 @@ bool SVMulToRegArith::CanApply(const Node* node) const
 
 void SVMulToRegArith::Apply(Node* node) const
 {
-  SVMul* svmul = (SVMul*) node;
+  SVMul* svmul = static_cast<SVMul*>(node);
 
   // Split up the input vector
   SplitSingleIter* splitVec;
@@ -476,7 +476,7 @@ SVMulToScalarArith::SVMulToScalarArith(Layer fromLayer, Layer toLayer, VecType v
 bool SVMulToScalarArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
-    SVMul* svmul = (SVMul*) node;
+    const SVMul* svmul = static_cast<const SVMul*>(node);
     if (svmul->GetLayer() == m_fromLayer) {
       if ((*(svmul->GetInputM(1)) == 1 && m_vType == ROWVECTOR) ||
 	  (*(svmul->GetInputN(1)) == 1 && m_vType == COLVECTOR)) {
@@ -491,7 +491,7 @@ bool SVMulToScalarArith::CanApply(const Node* node) const
 
 void SVMulToScalarArith::Apply(Node* node) const
 {
-  SVMul* svmul = (SVMul*) node;
+  SVMul* svmul = static_cast<SVMul*>(node);
 
   // Split up the input vector
   SplitSingleIter* splitVec;
@@ -569,7 +569,7 @@ string ResidualPartitionSVMul::GetType() const
 bool ResidualPartitionSVMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
-    SVMul* svmul = (SVMul*) node;
+    const SVMul* svmul = static_cast<const SVMul*>(node);
     if (m_vType == ROWVECTOR && svmul->m_vecType == ROWVECTOR) {
       return !(svmul->GetInputN(1)->EvenlyDivisibleBy(m_blockSize));
     } else if (m_vType == COLVECTOR && svmul->m_vecType == COLVECTOR) {
@@ -585,7 +585,7 @@ bool ResidualPartitionSVMul::CanApply(const Node* node) const
 void ResidualPartitionSVMul::Apply(Node* node) const
 {
   Dir partType = m_vType == ROWVECTOR ? HORIZONTAL : VERTICAL;
-  SVMul* svmul = (SVMul*) node;
+  SVMul* svmul = static_cast<SVMul*>(node);
 
   Size splitPoint = ResidualSplitPoint(svmul);
 

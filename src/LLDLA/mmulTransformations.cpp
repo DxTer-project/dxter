@@ -44,7 +44,7 @@ bool MMulLoopExp::CanApply(const Node *node) const
 {
   if (!GemmLoopExp::CanApply(node))
     return false;
-  const Gemm *gemm = (Gemm*)node;
+  const Gemm *gemm = static_cast<const Gemm*>(node);
 
   const BasePSet *loop = gemm->FindClosestLoop();
   if (loop) {
@@ -187,7 +187,7 @@ bool LLDAGemmLowerLayer::CanApply(const Node *node) const
 
 void LLDAGemmLowerLayer::Apply(Node *node) const
 {
-  Gemm *gemm = (Gemm*) node;
+  Gemm *gemm = static_cast<Gemm*>(node);
   gemm->SetLayer(m_toLayer);
 }
 
@@ -213,7 +213,7 @@ bool MMulToMVMul::CanApply(const Node* node) const
 
 void MMulToMVMul::Apply(Node* node) const
 {
-  Gemm* gemm = (Gemm*) node;
+  Gemm* gemm = static_cast<Gemm*>(node);
 
   // Create tunnel for A
   LoopTunnel* aTun = new LoopTunnel(POSSTUNIN);
@@ -267,7 +267,7 @@ string MMulToVMMul::GetType() const
 bool MMulToVMMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == Gemm::GetClass()) {
-    Gemm* gemm = (Gemm*) node;
+    const Gemm* gemm = static_cast<const Gemm*>(node);
     if (gemm->m_alpha == COEFONE && gemm->m_beta == COEFONE) {
       return true;
     }
@@ -277,7 +277,7 @@ bool MMulToVMMul::CanApply(const Node* node) const
 
 void MMulToVMMul::Apply(Node* node) const
 {
-  Gemm* gemm = (Gemm*) node;
+  Gemm* gemm = static_cast<Gemm*>(node);
 
   // Split A into row vectors
   SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);

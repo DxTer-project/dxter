@@ -174,7 +174,7 @@ string SMulToSVMul::GetType() const
 bool SMulToSVMul::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == SMMul::GetClass()) {
-    const SMMul *smmul = (SMMul*) node;
+    const SMMul *smmul = static_cast<const SMMul*>(node);
     if (smmul->GetLayer() != m_fromLayer) {
       return false;
     }

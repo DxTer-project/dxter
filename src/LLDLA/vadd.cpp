@@ -236,7 +236,7 @@ string VAddLoopRef::GetType() const
 
 bool VAddLoopRef::CanApply(const Node *node) const
 {
-  const VAdd *vadd = (VAdd*) node;
+  const VAdd *vadd = static_cast<const VAdd*>(node);
   if (vadd->GetLayer() != m_fromLayer) {
     return false;
   }
@@ -262,7 +262,7 @@ bool VAddLoopRef::CanApply(const Node *node) const
 
 void VAddLoopRef::Apply(Node *node) const
 {
-  VAdd *vadd = (VAdd*) node;
+  VAdd *vadd = static_cast<VAdd*>(node);
 
   SplitSingleIter *split1 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split1->AddInput(vadd->Input(1), vadd->InputConnNum(1));
@@ -318,7 +318,7 @@ VAddLowerLayer::VAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 bool VAddLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == VAdd::GetClass()) {
-    const VAdd *vadd = (VAdd*) node;
+    const VAdd *vadd = static_cast<const VAdd*>(node);
     if (vadd->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -345,7 +345,7 @@ bool VAddLowerLayer::CanApply(const Node *node) const
 
 void VAddLowerLayer::Apply(Node *node) const
 {
-  VAdd *vadd = (VAdd*) node;
+  VAdd *vadd = static_cast<VAdd*>(node);
   vadd->SetLayer(m_toLayer);
   return;
 }
@@ -365,7 +365,7 @@ VAddToRegArith::VAddToRegArith(Layer fromLayer, Layer toLayer)
 bool VAddToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VAdd::GetClass()) {
-    VAdd* vadd = (VAdd*) node;
+    const VAdd* vadd = static_cast<const VAdd*>(node);
     if (*(vadd->GetInputM(0)) > 1 &&
 	vadd->GetInputM(0)->EvenlyDivisibleBy(vadd->GetVecRegWidth())) {
       return true;
@@ -381,7 +381,7 @@ bool VAddToRegArith::CanApply(const Node* node) const
 
 void VAddToRegArith::Apply(Node* node) const
 {
-  VAdd* vadd = (VAdd*) node;
+  VAdd* vadd = static_cast<VAdd*>(node);
 
   bool splitDown = *vadd->GetInputN(0) == ONE;
 

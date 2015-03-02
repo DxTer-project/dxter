@@ -178,7 +178,7 @@ NodeType VMMul::GetType() const
 void VMMul::Duplicate(const Node* orig, bool shallow, bool possMerging)
 {
   DLAOp<3, 1>::Duplicate(orig, shallow, possMerging);
-  const VMMul* rhs = (VMMul*) orig;
+  const VMMul* rhs = static_cast<const VMMul*>(orig);
   m_layer = rhs->m_layer;
   return;
 }
@@ -212,7 +212,7 @@ string VMMulLoopRef::GetType() const
 bool VMMulLoopRef::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
-    const VMMul* vmmul = (VMMul*) node;
+    const VMMul* vmmul = static_cast<const VMMul*>(node);
     if (vmmul->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -245,7 +245,7 @@ void VMMulLoopRef::Apply(Node* node) const
 
 void VMMulLoopRef::ApplyDimK(Node* node) const
 {
-  VMMul* vmmul = (VMMul*) node;
+  VMMul* vmmul = static_cast<VMMul*>(node);
 
   SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
@@ -286,7 +286,7 @@ void VMMulLoopRef::ApplyDimK(Node* node) const
 
 void VMMulLoopRef::ApplyDimN(Node* node) const
 {
-  VMMul* vmmul = (VMMul*) node;
+  VMMul* vmmul = static_cast<VMMul*>(node);
 
   SplitSingleIter* splitA = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));
@@ -340,7 +340,7 @@ VMMulLowerLayer::VMMulLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 bool VMMulLowerLayer::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
-    const VMMul* vmmul = (VMMul*) node;
+    const VMMul* vmmul = static_cast<const VMMul*>(node);
     if (vmmul->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -366,7 +366,7 @@ bool VMMulLowerLayer::CanApply(const Node* node) const
 
 void VMMulLowerLayer::Apply(Node* node) const
 {
-  VMMul* vmmul = (VMMul*) node;
+  VMMul* vmmul = static_cast<VMMul*>(node);
   vmmul->SetLayer(m_toLayer);
   return;
 }
@@ -392,7 +392,7 @@ string VMMulToRegArith::GetType() const
 bool VMMulToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VMMul::GetClass()) {
-    VMMul* vmmul = (VMMul*) node;
+    const VMMul* vmmul = static_cast<const VMMul*>(node);
     return (*vmmul->GetInputN(1) == vmmul->GetVecRegWidth());
   }
   return false;
@@ -400,7 +400,7 @@ bool VMMulToRegArith::CanApply(const Node* node) const
 
 void VMMulToRegArith::Apply(Node* node) const
 {
-  VMMul* vmmul = (VMMul*) node;
+  VMMul* vmmul = static_cast<VMMul*>(node);
 
   SplitSingleIter* splitA = new SplitSingleIter(PARTDOWN, POSSTUNIN, false);
   splitA->AddInput(vmmul->Input(1), vmmul->InputConnNum(1));

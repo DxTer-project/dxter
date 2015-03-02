@@ -176,7 +176,7 @@ string MAddLoopRef::GetType() const
 bool MAddLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
-    const MAdd *madd = (MAdd*) node;
+    const MAdd *madd = static_cast<const MAdd*>(node);
     if (madd->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -195,7 +195,7 @@ bool MAddLoopRef::CanApply(const Node *node) const
 
 void MAddLoopRef::Apply(Node *node) const
 {
-  MAdd *madd = (MAdd*) node;
+  MAdd *madd = static_cast<MAdd*>(node);
   
   SplitSingleIter *split0 = new SplitSingleIter(m_dim == DIMM ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split0->AddInput(madd->Input(0), madd->InputConnNum(0));
@@ -256,7 +256,7 @@ string MAddToVAddLoopRef::GetType() const
 bool MAddToVAddLoopRef::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
-    const MAdd *madd = (MAdd*) node;
+    const MAdd *madd = static_cast<const MAdd*>(node);
     if (madd->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -273,7 +273,7 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
 
 void MAddToVAddLoopRef::Apply(Node *node) const
 {
-  MAdd *madd = (MAdd*) node;
+  MAdd *madd = static_cast<MAdd*>(node);
 
   SplitSingleIter *split0 = new SplitSingleIter(m_vecType == ROWVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
   split0->AddInput(madd->Input(0), madd->InputConnNum(0));
@@ -319,7 +319,7 @@ MAddLowerLayer::MAddLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 bool MAddLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
-    const MAdd *madd = (MAdd*) node;
+    const MAdd *madd = static_cast<const MAdd*>(node);
     if (madd->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -339,7 +339,7 @@ bool MAddLowerLayer::CanApply(const Node *node) const
 
 void MAddLowerLayer::Apply(Node *node) const
 {
-  MAdd *madd = (MAdd*) node;
+  MAdd *madd = static_cast<MAdd*>(node);
   madd->SetLayer(m_toLayer);
 }
 
@@ -364,7 +364,7 @@ MAddToRegArith::MAddToRegArith(Layer fromLayer, Layer toLayer)
 bool MAddToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == MAdd::GetClass()) {
-    MAdd* madd = (MAdd*) node;
+    const MAdd* madd = static_cast<const MAdd*>(node);
     if (madd->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -380,7 +380,7 @@ bool MAddToRegArith::CanApply(const Node* node) const
 
 void MAddToRegArith::Apply(Node* node) const
 {
-  MAdd* madd = (MAdd*) node;
+  MAdd* madd = static_cast<MAdd*>(node);
 
   // Set direction of split
   bool splitIntoRows = *(madd->GetInputM(0)) > madd->GetVecRegWidth();

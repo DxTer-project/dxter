@@ -184,7 +184,7 @@ string VVDotLoopRef::GetType() const
 
 bool VVDotLoopRef::CanApply(const Node *node) const
 {
-  const VVDot *dot = (VVDot*) node;
+  const VVDot *dot = static_cast<const VVDot*>(node);
   if (dot->GetLayer() != m_fromLayer) {
     return false;
   }
@@ -199,7 +199,7 @@ bool VVDotLoopRef::CanApply(const Node *node) const
 
 void VVDotLoopRef::Apply(Node *node) const
 {
-  VVDot *dot = (VVDot*) node;
+  VVDot *dot = static_cast<VVDot*>(node);
   Type dataType = dot->GetDataType();
 
   // Split for row vector
@@ -265,7 +265,7 @@ VVDotLowerLayer::VVDotLowerLayer(Layer fromLayer, Layer toLayer, Size bs)
 bool VVDotLowerLayer::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
-    const VVDot *vvdot = (VVDot*) node;
+    const VVDot *vvdot = static_cast<const VVDot*>(node);
     if (vvdot->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -284,7 +284,7 @@ bool VVDotLowerLayer::CanApply(const Node *node) const
 
 void VVDotLowerLayer::Apply(Node *node) const
 {
- VVDot *svmul = (VVDot*) node;
+ VVDot *svmul = static_cast<VVDot*>(node);
   svmul->SetLayer(m_toLayer);
   return;
 }
@@ -304,7 +304,7 @@ VVDotToRegArith::VVDotToRegArith(Layer fromLayer, Layer toLayer)
 bool VVDotToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
-    const VVDot* vvdot = (VVDot*) node;
+    const VVDot* vvdot = static_cast<const VVDot*>(node);
     int regWidth = arch->VecRegWidth(vvdot->GetDataType());
     if (vvdot->GetLayer() != m_fromLayer) {
       return false;
@@ -321,7 +321,7 @@ bool VVDotToRegArith::CanApply(const Node* node) const
 
 void VVDotToRegArith::Apply(Node *node) const
 {
-  VVDot* vvdot = (VVDot*) node;
+  VVDot* vvdot = static_cast<VVDot*>(node);
   Type dataType = vvdot->GetDataType();
 
   // Split A on N dimension
