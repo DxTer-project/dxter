@@ -1502,7 +1502,7 @@ bool DoubleIndexAllToAll::CanApply(const Node *node) const
           
           DistType intType = srcType;
           
-          int size = suff1.size();
+          unsigned int size = suff1.size();
           if (size) {
             DimVec int1;
             if (size < srcVec.size())
@@ -1589,7 +1589,7 @@ void DoubleIndexAllToAll::Apply(Node *node) const
         
         DistType intType = srcType;
         
-        int size = suff1.size();
+        unsigned int size = suff1.size();
         if (size) {
           DimVec int1;
           if (size < srcVec.size())

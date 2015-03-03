@@ -282,7 +282,9 @@ Phase SumScatterUpdateNode::MaxPhase() const
       return SUMSCATTERTENSORPHASE;
 #else
       if (inType.m_notReped == outType.m_notReped) {
+#if !ALLOWMULTIPLESCATTERSINONEMODE
 	bool multiSumScatterInSameMode = false;
+#endif
 
 	EntrySet sumSet;
 	sumSet.insert(m_sumDims.begin(), m_sumDims.end());
@@ -296,8 +298,9 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	    if (inEntry.IsStar()) {
 	      //[*] -> ...
 	      if (!sumSet.erase(outEntry)) {
+#if !ALLOWMULTIPLESCATTERSINONEMODE
 		multiSumScatterInSameMode = true;
-
+#endif
 		//now try subsets
 		DimVec vec = outEntry.DistEntryDims();
 		while (!vec.empty()) {
@@ -348,7 +351,9 @@ Phase SumScatterUpdateNode::MaxPhase() const
 	      entry.DimsToDistEntry(suff);
 
 	      if (!sumSet.erase(entry)) {
+#if !ALLOWMULTIPLESCATTERSINONEMODE
 		multiSumScatterInSameMode = true;
+#endif
 		//now try subsets
 		DimVec vec = suff;
 		while (!vec.empty()) {

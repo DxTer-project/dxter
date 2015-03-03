@@ -208,7 +208,7 @@ void TempVarNode::PrintCode(IndStream &out)
     }
     else {
       *out << "tempShape.push_back( ";
-      for( int i = 0; i < vec.size(); ++i) {
+      for( unsigned int i = 0; i < vec.size(); ++i) {
         if (i)
           *out << " * ";
         *out << "g.Shape()[" << vec[i] << "]";
@@ -609,8 +609,8 @@ void MoveIn(Node *node, Node *newSrc, ConnNum newSrcNum, TempVarNode *tempVarNod
               if (*inIter != tun && ((LoopTunnel*)(*inIter))->IsSplit()) {
                 SplitBase *split = ((SplitBase*)(*inIter));
                 split->m_isControlTun = true;
-                for (int i = 0; i < split->m_children.size(); ++i)
-                  ((SplitBase*)(split->Child(i)))->m_isControlTun = true;
+		for(auto childConn : split->m_children)
+                  ((SplitBase*)(childConn->m_n))->m_isControlTun = true;
                 found = true;
               }
             }

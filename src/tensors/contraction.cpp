@@ -935,7 +935,7 @@ void MatchDistsAndFillInWithStar(string indices,
 }
 
 
-ContractionLoopExp::ContractionLoopExp(Layer fromLayer, Layer toLayer, int dim)
+ContractionLoopExp::ContractionLoopExp(Layer fromLayer, Layer toLayer, unsigned int dim)
   : 
   m_fromLayer(fromLayer), 
   m_toLayer(toLayer), 

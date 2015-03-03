@@ -772,12 +772,7 @@ RealPSet* RedistExample2()
   InputNode *t_efmn;
   InputNode *v_opmn;
   InputNode *v_efgh;
-  InputNode *v_oegm;
-  InputNode *v2_oegm;
   InputNode *accum_temp;
-  InputNode *cont1_temp;
-  InputNode *axppx2_temp;
-  InputNode *axppx3_temp;
 
   {
     Sizes sizes[4];
@@ -811,26 +806,6 @@ RealPSet* RedistExample2()
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(mSize,1,1);
-    v_oegm = new InputNode("v_oegm", sizes, "v_oegm", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(mSize,1,1);
-    v2_oegm = new InputNode("v2_oegm", sizes, "v2_oegm", 4);
-  }
-
-
-
-  {
-    Sizes sizes[4];
     sizes[0].AddRepeatedSizes(eSize,1,1);
     sizes[1].AddRepeatedSizes(fSize,1,1);
     sizes[2].AddRepeatedSizes(mSize,1,1);
@@ -839,35 +814,6 @@ RealPSet* RedistExample2()
 			       sizes, "accum_temp", 4);
   }
 
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    cont1_temp = new InputNode("cont1_temp", 
-			       sizes, "cont1_temp", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(gSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(oSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    axppx2_temp = new InputNode("axppx2_temp", 
-			       sizes, "axppx2_temp", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(mSize,1,1);
-    axppx3_temp = new InputNode("axppx3_temp", 
-			       sizes, "axppx3_temp", 4);
-  }
 
 
 

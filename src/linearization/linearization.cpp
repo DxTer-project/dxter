@@ -170,7 +170,7 @@ Cost Linearization::GetCostNoRecursion(const StrSet &stillLive, const StrSet &al
       }
 
       StrVec possiblyDyingVars = elem->PossiblyDyingVars();
-      for(int i = 0; i < possiblyDyingVars.size(); ++i) {
+      for(int i = 0; i < (int)possiblyDyingVars.size(); ++i) {
 	string var = possiblyDyingVars[i];
 	if (stillLive.find(var) != stillLive.end()
 	    || alwaysLive.find(var) != alwaysLive.end()) 
