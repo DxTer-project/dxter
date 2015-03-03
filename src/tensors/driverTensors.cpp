@@ -60,7 +60,7 @@ Size one = 1;
 //Size bs = ELEM_BS;
 
 RealPSet* RedistExample();
-RealPSet* RedistExample2();
+RealPSet* ContExample();
 RealPSet* MartinsExample();
 RealPSet* MP2();
 RealPSet* MP3();
@@ -339,7 +339,7 @@ void Usage()
   cout << "./driver arg1 arg2 arg3 arg4\n";
   cout <<" arg1 == 0  -> Load from file arg1\n";
   cout <<"         1  -> Redist example\n";
-  cout <<"         2  -> Redist Example2\n";
+  cout <<"         2  -> Contraction Example\n";
   cout <<"         3  -> Martin's Example\n";
   cout <<"         4  -> MP2\n";
   cout <<"         5  -> MP3\n";
@@ -388,7 +388,7 @@ int main(int argc, const char* argv[])
       algFunc = RedistExample;
       break;
     case(2):
-      algFunc = RedistExample2;
+      algFunc = ContExample;
       break;
     case(3):
       algFunc = MartinsExample;
@@ -755,88 +755,23 @@ RealPSet* RedistExample()
 
 }
 
-RealPSet* RedistExample2()
+RealPSet* ContExample()
 {
-  const Size bigMP3Size = big;
-  const Size smallMP3Size = small;
-  Size eSize = bigMP3Size;
-  Size fSize = bigMP3Size;
-  Size gSize = bigMP3Size;
-  Size hSize = bigMP3Size;
-  Size mSize = smallMP3Size;
-  Size nSize = smallMP3Size;
-  Size oSize = smallMP3Size;
-  Size pSize = smallMP3Size;
+  InputNode *AIn = CreateInput4("r_bmef", big, small, big, big);
+  InputNode *BIn = CreateInput2("t_fj", big, small);
+  InputNode *CIn = CreateInput4("X_bmej", big, small, big, small);
 
 
-  InputNode *t_efmn;
-  InputNode *v_opmn;
-  InputNode *v_efgh;
-  InputNode *accum_temp;
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    t_efmn = new InputNode("t_efmn", sizes, "t_efmn", 4);
-  }
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(pSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    v_opmn = new InputNode("v_opmn", sizes, "v_opmn", 4);
-  }
-
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(hSize,1,1);
-    v_efgh = new InputNode("v_efgh", sizes, "v_efgh", 4);
-  }
-
-
-
-  {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
-    accum_temp = new InputNode("accum_temp", 
-			       sizes, "accum_temp", 4);
-  }
-
-
-
-
-  Contraction *cont3 = new Contraction(ABSLAYER,COEFONEHALF,COEFONE,REAL,"efgh","ghmn","efmn",(string)"gh");
-  cont3->AddInputs(6,
-		   v_efgh, 0,
-		   t_efmn, 0,
-		   accum_temp,0);
-  Poss *cont3Poss = new Poss(cont3);
-  RealPSet *cont3Set = new RealPSet(cont3Poss);
-
-  Contraction *cont4 = new Contraction(ABSLAYER,COEFONEHALF,COEFONE,REAL,"opmn","efop","efmn",(string)"op");
-  cont4->AddInputs(6,
-		   v_opmn, 0,
-		   t_efmn, 0,
-		   cont3Set->OutTun(0),0);
-  Poss *cont4Poss = new Poss(cont4);
-  RealPSet *cont4Set = new RealPSet(cont4Poss);
-
-
+  Contraction *cont = new Contraction(ABSLAYER,COEFONE,COEFONE,REAL,"bmef","fj","bmej",(string)"f");
+  cont->AddInputs0(3,
+		    AIn,
+		    BIn,
+		    CIn);
+  Poss *contPoss = new Poss(cont);
+  RealPSet *contSet = new RealPSet(contPoss);
 
   OutputNode *out = new OutputNode;
-  out->AddInput(cont4Set->OutTun(0),0);
+  out->AddInput(contSet->OutTun(0),0);
 
   Poss *outerPoss = new Poss(out, true);
   RealPSet *outerSet = new RealPSet(outerPoss);
