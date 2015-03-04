@@ -27,11 +27,12 @@
 class HorizontalPackToMultipleOfVecRegWidth : public SingleTrans {
  private:
   Layer m_fromLayer, m_toLayer;
+  string m_nodeTypeName;
 
  public:
-  HorizontalPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer)
-    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
-  virtual string GetType() const { return "HorizontalPackToMultipleOfVecRegWidth"; }
+ HorizontalPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer, string nodeTypeName)
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_nodeTypeName(nodeTypeName) {}
+  virtual string GetType() const { return "HorizontalPackToMultipleOfVecRegWidth " + m_nodeTypeName; }
   virtual bool IsRef() const { return true; }
 
   virtual bool CanApply(const Node* node) const;

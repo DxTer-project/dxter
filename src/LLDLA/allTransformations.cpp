@@ -27,6 +27,7 @@
 #include "vadd.h"
 #include "verticalPackToMultipleOfVecRegWidth.h"
 #include "vvdot.h"
+#include "vvdotPackToMultipleOfMu.h"
 
 void AddGemmTrans()
 {
@@ -81,6 +82,8 @@ void AddGemmTrans()
 void AddVVDotTrans()
 {
   Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VVDot::GetClass(), new VVDotPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }
@@ -196,9 +199,9 @@ void AddVAddTrans()
 {
   Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new VerticalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VerticalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, VAdd::GetClass()), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new HorizontalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new HorizontalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, VAdd::GetClass()), LLDLALOOPPHASE);
 
   return;
 }

@@ -309,6 +309,9 @@ bool VVDotToRegArith::CanApply(const Node* node) const
     if (vvdot->GetLayer() != m_fromLayer) {
       return false;
     }
+    if (!(vvdot->GetInputN(0)->EvenlyDivisibleBy(vvdot->GetVecRegWidth()))) {
+      return false;
+    }
     if (!(*(vvdot->GetInputN(0)) <= regWidth) &&
 	!(*(vvdot->GetInputM(1)) <= regWidth)) {
       return true;

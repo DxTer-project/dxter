@@ -19,18 +19,24 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "partition.h"
+#include "LLDLA.h"
+#include "transform.h"
 
 #if DOLLDLA
 
-#include "pack.h"
-#include "partition.h"
-#include "recombine.h"
-#include "unpack.h"
+class VVDotPackToMultipleOfMu : public SingleTrans {
+ private:
+  Layer m_fromLayer, m_toLayer;
 
-Partition* PartitionIntoMainAndResidual(Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple);
-Pack* PackToMultipleOf(Layer layer, Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple);
-Recombine* PartitionBinarySymmetricOperation(Node* node, ConnNum outNum, DimName dim, int multiple);
-Unpack* PackBinarySymmetricOperation(Layer layer, Node* binop, DimName dim, int multiple);
+ public:
+  VVDotPackToMultipleOfMu(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+
+  virtual string GetType() const { return "VVDotPackToMultipleOfMu"; }
+  virtual bool IsRef() const { return true; }
+
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+};
 
 #endif // DOLLDLA
