@@ -19,28 +19,24 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "verticalPackToMultipleOfVecRegWidth.h"
+#include "LLDLA.h"
+#include "transform.h"
 
 #if DOLLDLA
 
-#include "packingUtils.h"
+class HorizontalPackToMultipleOfVecRegWidth : public SingleTrans {
+ private:
+  Layer m_fromLayer, m_toLayer;
 
-bool VerticalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
-  const DLANode* dlaNode = static_cast<const DLANode*>(node);
-  if (dlaNode->GetLayer() != m_fromLayer) {
-    return false;
-  }
+ public:
+  HorizontalPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const { return "HorizontalPackToMultipleOfVecRegWidth"; }
+  virtual bool IsRef() const { return true; }
 
-  return !(dlaNode->InputMIsMultipleOfVecRegWidth(0))
-    && dlaNode->GetInputNumRows(0) > 1
-    && dlaNode->GetInputNumCols(0) > 0;
-}
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
 
-void VerticalPackToMultipleOfVecRegWidth::Apply(Node* node) const {
-  Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, DIMM, node->GetVecRegWidth());
-  node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
-  node->RedirectChildren(unpack, 0);
-  node->m_poss->DeleteChildAndCleanUp(node);
-}
+};
 
 #endif // DOLLDLA

@@ -19,25 +19,25 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "verticalPackToMultipleOfVecRegWidth.h"
+#include "horizontalPackToMultipleOfVecRegWidth.h"
 
 #if DOLLDLA
 
 #include "packingUtils.h"
 
-bool VerticalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
+bool HorizontalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
   const DLANode* dlaNode = static_cast<const DLANode*>(node);
   if (dlaNode->GetLayer() != m_fromLayer) {
     return false;
   }
 
-  return !(dlaNode->InputMIsMultipleOfVecRegWidth(0))
-    && dlaNode->GetInputNumRows(0) > 1
-    && dlaNode->GetInputNumCols(0) > 0;
+  return !(dlaNode->InputNIsMultipleOfVecRegWidth(0))
+    && dlaNode->GetInputNumCols(0) > 1
+    && dlaNode->GetInputNumRows(0) > 0;
 }
 
-void VerticalPackToMultipleOfVecRegWidth::Apply(Node* node) const {
-  Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, DIMM, node->GetVecRegWidth());
+void HorizontalPackToMultipleOfVecRegWidth::Apply(Node* node) const {
+  Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, DIMN, node->GetVecRegWidth());
   node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
   node->RedirectChildren(unpack, 0);
   node->m_poss->DeleteChildAndCleanUp(node);

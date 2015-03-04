@@ -60,9 +60,6 @@ int ComputePackedWidth(int length, int multiple) {
 }
 
 Pack* PackToMultipleOf(Layer layer, Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple) {
-  cout << "Entering PackToMultipleOf" << endl;
-  cout << "In Node class is " << inNode->GetNodeClass() << endl;
-  cout << "Out Node class is " << outNode->GetNodeClass() << endl;
   Pack* pack;
   LocalInput* locIn;
   DLANode* dlaInNode = static_cast<DLANode*>(inNode);
@@ -72,7 +69,6 @@ Pack* PackToMultipleOf(Layer layer, Node* outNode, ConnNum outNum, Node* inNode,
 
   if (dim == DIMM) {
     packDimLength = dlaInNode->GetInputNumRows(inNum);
-    cout << "Calling Compute packed width DIMM" << endl;
     packedOperandWidth = ComputePackedWidth(packDimLength, multiple);
     locIn = new LocalInput(locName,
 			   packedOperandWidth, dlaInNode->GetInputNumCols(inNum),
@@ -80,7 +76,6 @@ Pack* PackToMultipleOf(Layer layer, Node* outNode, ConnNum outNum, Node* inNode,
 			   dlaInNode->GetDataType());
     pack = new VerticalPack(layer);
   } else {
-    cout << "Calling Compute packed width DIMN" << endl;
     packDimLength = dlaInNode->GetInputNumCols(inNum);
     packedOperandWidth = ComputePackedWidth(packDimLength, multiple);
     locIn = new LocalInput(locName,
