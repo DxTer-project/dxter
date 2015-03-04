@@ -45,7 +45,7 @@ void LocalInput::PrintCode(IndStream& out) {
     *out << "double ";
   }
   string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + " + 1";
-  *out << m_varName.m_name << "_array[" << size << "]" << " = {0};" << endl;
+  *out << m_varName.m_name << "_array[" << size << "] = {0};" << endl;
   out.Indent();
   *out << m_varName.m_name << " = (((unsigned long long)" << m_varName.m_name << "_array) % 16) != 0 ? &(" << m_varName.m_name << "_array[1]) : &(" << m_varName.m_name << "_array[0]);" << endl;
 }
@@ -66,11 +66,15 @@ void LocalInput::AddVariables(VarSet& set) const {
   }
   string inputVarDecl = typeName + m_varName.m_name + ";";
 
-  string uint = "unsigned int ";
-  string nRowsVarName = uint + m_dataTypeInfo.m_numRowsVar + ";";
-  string nColsVarName = uint + m_dataTypeInfo.m_numColsVar + ";";
-  string rowStrideVarName = uint + m_dataTypeInfo.m_rowStrideVar + ";";
-  string colStrideVarName = uint + m_dataTypeInfo.m_colStrideVar + ";";
+  string uint = "const unsigned int ";
+  string nRowsVarName = uint + m_dataTypeInfo.m_numRowsVar + " = ";
+  nRowsVarName += std::to_string((long long int) m_msize.OnlyEntry()) + ";";
+  string nColsVarName = uint + m_dataTypeInfo.m_numColsVar + " = ";
+  nColsVarName += std::to_string((long long int) m_nsize.OnlyEntry()) + ";";
+  string rowStrideVarName = uint + m_dataTypeInfo.m_rowStrideVar + " = ";
+  rowStrideVarName += std::to_string((long long int) m_dataTypeInfo.m_rowStrideVal) + ";";
+  string colStrideVarName = uint + m_dataTypeInfo.m_colStrideVar + " = ";
+  colStrideVarName += std::to_string((long long int) m_dataTypeInfo.m_colStrideVal) + ";";
 
   Var inputNameVar(DirectVarDeclType, inputVarDecl, GetDataType());
   Var nRowsVar(DirectVarDeclType, nRowsVarName, GetDataType());
