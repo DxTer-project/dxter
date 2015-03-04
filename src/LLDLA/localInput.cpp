@@ -37,26 +37,16 @@ void LocalInput::Prop() {
 
 void LocalInput::PrintCode(IndStream& out) {
   Type dataType = m_dataTypeInfo.m_type;
-  //  string size = "";
   if (dataType == REAL_SINGLE) {
     out.Indent();
     *out << "float ";
-    //    size += "sizeof(float)";
   } else {
     out.Indent();
     *out << "double ";
-    //    size += "sizeof(double)";
   }
   string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + " + 1";
-  //  *out << m_varName.m_name << " = alloc_aligned_16( " << size << " );\n" << endl;
   *out << m_varName.m_name << "_array[" << size << "]" << " = {0};" << endl;
-  if (dataType == REAL_SINGLE) {
-    out.Indent();
-    *out << "float* ";
-  } else {
-    out.Indent();
-    *out << "double* ";
-  }
+  out.Indent();
   *out << m_varName.m_name << " = (((unsigned long long)" << m_varName.m_name << "_array) % 16) != 0 ? &(" << m_varName.m_name << "_array[1]) : &(" << m_varName.m_name << "_array[0]);" << endl;
 }
 

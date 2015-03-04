@@ -25,10 +25,11 @@
 
 UniqueNameSource::UniqueNameSource(string prefix) {
   m_numSource = UniqueNumSource();
+  m_prefix = prefix;
 }
 
-string UniqueNameSource::Next() {
-  return m_prefix + std::to_string((long long int) m_numSource.Next());
+string UniqueNameSource::Next(string name) {
+  return m_prefix + name + std::to_string((long long int) m_numSource.Next());
 }
 
 #endif // DOLLDLA

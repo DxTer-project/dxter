@@ -42,7 +42,7 @@
 #include "runtimeEvaluation.h"
 #include "singleOperationExamples.h"
 #include "transform.h"
-#include "uniqueNumSource.h"
+#include "uniqueNameSource.h"
 #include "transpose.h"
 #include "loopSupport.h"
 
@@ -68,7 +68,7 @@ do you really want to do compact unrolling and partial unrolling?
 Trans transA, transB;
 
 Architecture* arch;
-UniqueNumSource* globalNumSource;
+UniqueNameSource* localInputNames;
 
 double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
@@ -186,7 +186,7 @@ int main(int argc, const char* argv[])
   ProblemInstance problemInstance;
 
   arch = new HaswellMacbook();
-  globalNumSource = new UniqueNumSource();
+  localInputNames = new UniqueNameSource("local_input_");
 
   RealPSet* algPSet;
   int algNum;

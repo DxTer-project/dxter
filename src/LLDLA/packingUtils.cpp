@@ -27,7 +27,7 @@
 #include "horizontalUnpack.h"
 #include "localInput.h"
 #include "madd.h"
-#include "uniqueNumSource.h"
+#include "uniqueNameSource.h"
 #include "vadd.h"
 #include "verticalPack.h"
 #include "vvdot.h"
@@ -68,7 +68,7 @@ Pack* PackToMultipleOf(Layer layer, Node* outNode, ConnNum outNum, Node* inNode,
   DLANode* dlaInNode = static_cast<DLANode*>(inNode);
   int packDimLength;
   int packedOperandWidth;
-  string locName = dlaInNode->GetInputName(inNum).m_name + std::to_string(globalNumSource->Next());
+  string locName = localInputNames->Next(dlaInNode->GetInputName(inNum).m_name);
 
   if (dim == DIMM) {
     packDimLength = dlaInNode->GetInputNumRows(inNum);

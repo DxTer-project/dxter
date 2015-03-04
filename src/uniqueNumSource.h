@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef UNIQUE_NUM_SOURCE_H_
+#define UNIQUE_NUM_SOURCE_H_
+
 #include "layers.h"
 
 #if DOLLDLA
@@ -32,6 +35,6 @@ class UniqueNumSource {
   unsigned int Next();
 };
 
-extern UniqueNumSource* globalNumSource;
-
 #endif // DOLLDLA
+
+#endif

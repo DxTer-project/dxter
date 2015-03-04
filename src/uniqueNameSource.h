@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef UNIQUE_NAME_SOURCE_H_
+#define UNIQUE_NAME_SOURCE_H_
+
 #include <string>
 
 #include "uniqueNumSource.h"
@@ -34,7 +37,11 @@ class UniqueNameSource {
 
  public:
   UniqueNameSource(string prefix);
-  string Next();
+  string Next(string name);
 };
 
+extern UniqueNameSource* localInputNames;
+
 #endif // DOLLDLA
+
+#endif
