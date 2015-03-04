@@ -1143,7 +1143,6 @@ void Sizes::SetParFactor(int parFactor)
 
 bool Sizes::IsPartitionable(const Size partitionPoint) const
 {
-  cout << "Checking partionability\n" << endl;
   if (*this <= partitionPoint) {
     cout << "FAILED: partition point is outside size" << endl;
     cout << (*this)[0] << endl;

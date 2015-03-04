@@ -37,12 +37,7 @@ bool VerticalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
 
 void VerticalPackToMultipleOfVecRegWidth::Apply(Node* node) const {
   Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, DIMM, node->GetVecRegWidth());
-  //  node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
-  //  node->m_poss->RecursiveAddNodes(unpack);
-  //  node->m_poss->AddNode(unpack);
-  //  node->m_poss->AddNode(unpack->Input(0));
-  //  node->m_poss->AddNode(unpack->Input(1));
-  //  node->m_poss->AddNode(
+  node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
   node->RedirectChildren(unpack, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
 }
