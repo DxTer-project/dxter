@@ -78,7 +78,7 @@ void LocalInput::AddVariables(VarSet& set) const {
 
   string uint = "unsigned int ";
   string nRowsVarName = uint + m_dataTypeInfo.m_numRowsVar + ";";
-  string nColsVarName = uint + m_dataTypeInfo.m_numRowsVar + ";";
+  string nColsVarName = uint + m_dataTypeInfo.m_numColsVar + ";";
   string rowStrideVarName = uint + m_dataTypeInfo.m_rowStrideVar + ";";
   string colStrideVarName = uint + m_dataTypeInfo.m_colStrideVar + ";";
 

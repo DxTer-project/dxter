@@ -24,12 +24,12 @@
 #if DOLLDLA
 
 UniqueNumSource::UniqueNumSource() {
-  current = 0;
+  m_current = 0;
 }
 
 unsigned int UniqueNumSource::Next() {
-  auto retVal = current;
-  current++;
+  auto retVal = m_current;
+  m_current++;
   return retVal;
 }
 

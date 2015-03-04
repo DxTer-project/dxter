@@ -19,19 +19,16 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "layers.h"
+#include "uniqueNameSource.h"
 
 #if DOLLDLA
 
-class UniqueNumSource {
- private:
-  unsigned int m_current;
+UniqueNameSource::UniqueNameSource(string prefix) {
+  m_numSource = UniqueNumSource();
+}
 
- public:
-  UniqueNumSource();
-  unsigned int Next();
-};
-
-extern UniqueNumSource* globalNumSource;
+string UniqueNameSource::Next() {
+  return m_prefix + std::to_string((long long int) m_numSource.Next());
+}
 
 #endif // DOLLDLA

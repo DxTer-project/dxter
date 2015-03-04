@@ -81,6 +81,7 @@ class InputNode : public DLANode
 #endif
   virtual ~InputNode();
   virtual NodeType GetType() const {return m_type;}
+  virtual const Type GetDataType() const { return m_dataTypeInfo.m_type; }
   static Node* BlankInst() { return  new InputNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
