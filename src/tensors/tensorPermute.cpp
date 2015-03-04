@@ -373,7 +373,7 @@ bool CombinePermutations::CanApply(const Node *node) const
 void CombinePermutations::Apply(Node *node) const
 {
   Permute *perm = (Permute*)node;
-  for(int i = 0; i < perm->m_children.size(); ++i) {
+  for(int i = 0; i < (int)perm->m_children.size(); ++i) {
     Node *tmp = perm->Child(i);
     if (tmp->GetNodeClass() == Permute::GetClass()) {
       Permute *child = (Permute*)tmp;

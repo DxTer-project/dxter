@@ -629,7 +629,7 @@ bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
         ((RealPSet*)(*iter))->Simplify(simplifiers, recursive);
     }
   }
-  for(int nodeIdx = 0; nodeIdx < m_possNodes.size(); ++nodeIdx) {
+  for(int nodeIdx = 0; nodeIdx < (int)m_possNodes.size(); ++nodeIdx) {
     Node *node = m_possNodes[nodeIdx];
     TransMapConstIter iter = simplifiers.find(node->GetNodeClass());
     if (iter != simplifiers.end()) {
@@ -1601,7 +1601,7 @@ void Poss::MergePart7(RealPSet *newSet,
       val = -1*val - 1;
       if (val < 0)
         throw;
-      if (val >= newSet->m_leftInMap.size())
+      if (val >= (int)newSet->m_leftInMap.size())
         throw;
       vector<int> tmp = newSet->m_leftInMap[val];
       tmp.push_back(i);
@@ -1611,7 +1611,7 @@ void Poss::MergePart7(RealPSet *newSet,
       val -= 1;
       if (val < 0)
         throw;
-      if (val >= newSet->m_rightInMap.size())
+      if (val >= (int)newSet->m_rightInMap.size())
         throw;
       vector<int> tmp = newSet->m_rightInMap[val];
       tmp.push_back(i);
@@ -1626,7 +1626,7 @@ void Poss::MergePart7(RealPSet *newSet,
   iter = newSet->m_outTuns.begin();
   for(; iter != newSet->m_outTuns.end(); ++iter, ++i) {
     Node *tun = *iter;
-    for(int j = 0; j < tun->m_children.size(); ++j) {
+    for(int j = 0; j < (int)tun->m_children.size(); ++j) {
       NodeConnAndNum entry;
       entry.m_conn = *(tun->m_children[j]);
       

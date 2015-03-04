@@ -888,7 +888,7 @@ void RealPSet::Cull(Phase phase)
 
 void RealPSet::CullWorstPerformers(double percentToCull, int ignoreThreshold)
 {
-  if (m_posses.size() > ignoreThreshold) {
+  if ((int)m_posses.size() > ignoreThreshold) {
     SortedPossQueue queue;
     PossMMapIter iter = m_posses.begin();
     for(; iter != m_posses.end(); ++iter) {
@@ -932,7 +932,7 @@ void RealPSet::CullWorstPerformers(double percentToCull, int ignoreThreshold)
 
 void RealPSet::CullAllBut(int num)
 {
-  if (m_posses.size() > num) {
+  if ((int)m_posses.size() > num) {
     SortedPossQueue queue;
     PossMMapIter iter = m_posses.begin();
     for(; iter != m_posses.end(); ++iter) {
@@ -1234,7 +1234,7 @@ void RealPSet::CombineAndRemoveTunnels()
 	throw;
 	vector<int> vec = m_leftInMap[j];
 	bool madeChange = false;
-	for (int i = 0; i < vec.size(); ++i) {
+	for (int i = 0; i < (int)vec.size(); ++i) {
 	  int val = vec[i];
 	  if (val == (int)i) {
 	    vec.erase(vec.begin()+i);
@@ -1253,7 +1253,7 @@ void RealPSet::CombineAndRemoveTunnels()
 	throw;
 	vector<int> vec = m_rightInMap[j];
 	bool madeChange = false;
-	for (int i = 0; i < vec.size(); ++i) {
+	for (int i = 0; i < (int)vec.size(); ++i) {
 	throw;
 	  int val = vec[i];
 	  if (val == (int)i) {
@@ -1568,7 +1568,7 @@ void RealPSet::InlineAllSets()
       //This poss has only a single PSet on it
       // Make new posses for me, each containing the posses in
       // poss->m_posses[0];
-      for(int i = 0; !inlined && i < poss->m_sets.size(); ++i) {
+      for(int i = 0; !inlined && i < (int) poss->m_sets.size(); ++i) {
 	if (poss->m_sets[i]->IsTransparent())
 	  {
 	    PossMMap newPosses;
@@ -1699,7 +1699,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
       int i = 0;
       PSetVecIter setIter = inliningPoss->m_sets.begin();
       for(; setIter != inliningPoss->m_sets.end(); ++setIter,++i) {
-	if (i == num)
+	if (i == (int)num)
 	  continue;
 	BasePSet *oldSet = (*setIter);
 #if USESHADOWS
@@ -2226,7 +2226,7 @@ void RealPSet::GetFusionInformation(BasePSet *leftSet, BasePSet *rightSet,
   leftInfo.m_fused = realRight;
   rightInfo.m_fused = realLeft;
 
-  for (int i = 0; i < leftSet->m_inTuns.size(); ++i) {
+  for (int i = 0; i < (int)leftSet->m_inTuns.size(); ++i) {
     bool connected = false;
     Tunnel *tun = leftSet->m_inTuns[i];
     Node *input = tun->Input(0);
@@ -2256,7 +2256,7 @@ void RealPSet::GetFusionInformation(BasePSet *leftSet, BasePSet *rightSet,
       }
     }
   }
-  for (int i = 0; i < leftSet->m_outTuns.size(); ++i) {
+  for (int i = 0; i < (int)leftSet->m_outTuns.size(); ++i) {
     Tunnel *out = leftSet->m_outTuns[i];
     for(auto childConn : out->m_children) {
       Node *child = childConn->m_n;
@@ -2349,7 +2349,7 @@ bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
     return false;
   if (m_outTuns.size() != other->m_outTuns.size())
     return false;
-  for (int i = 0; i < m_inTuns.size(); ++i) {
+  for (int i = 0; i < (int)m_inTuns.size(); ++i) {
     const Tunnel *in1 = (Tunnel*)(InTun(i));
     const Tunnel *in2 = (Tunnel*)(other->InTun(i));
     if (in1->GetType() != in2->GetType())
@@ -2357,7 +2357,7 @@ bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
     Dim numDims = in1->InputNumDims(0);
     if (numDims != in2->InputNumDims(0))
       return false;       
-    for (int dim = 0; dim < numDims; ++dim) {
+    for (int dim = 0; dim < (int)numDims; ++dim) {
       const Sizes *sizes1 = in1->InputLen(0,dim);
       const Sizes *sizes2 = in2->InputLen(0,dim);
       if (sizes1->m_entries.size() != sizes2->m_entries.size())

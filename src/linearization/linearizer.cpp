@@ -153,7 +153,7 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
     }
   }
 
-  for (int i = 0; i < node->NumOutputs(); ++i) {
+  for (unsigned int i = 0; i < node->NumOutputs(); ++i) {
     if (overwriter[i]) {
       LinElemSetIter iter = others[i].find(overwriter[i]);
       if (iter != others[i].end()) {

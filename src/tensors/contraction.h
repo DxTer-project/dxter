@@ -111,8 +111,8 @@ class ContractionLoopExp : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  int m_dim;
-  ContractionLoopExp(Layer fromLayer, Layer toLayer, int dim);
+  unsigned int m_dim;
+  ContractionLoopExp(Layer fromLayer, Layer toLayer, unsigned int dim);
   
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
