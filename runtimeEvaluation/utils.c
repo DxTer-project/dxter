@@ -25,10 +25,39 @@ void pack_double(double* a, double* b,
   }
 }
 
+void pack_float(float* a, float* b,
+		int a_rows, int a_cols,
+		int a_row_stride, int a_col_stride,
+		int b_rows, int b_cols,
+		int b_row_stride, int b_col_stride) {
+  int i, j;
+  for (i = 0; i < b_rows; i++) {
+    for (j = 0; j < b_cols; j++) {
+      if (i < a_rows && j < a_cols) {
+	B(i, j) = A(i, j);
+      } else {
+	B(i, j) = 0;
+      }
+    }
+  }
+}
+
 void unpack_double(double* a, double* b,
 		   int a_row_stride, int a_col_stride,
 		   int b_rows, int b_cols,
 		   int b_row_stride, int b_col_stride) {
+  int i, j;
+  for (i = 0; i < b_rows; i++) {
+    for (j = 0; j < b_cols; j++) {
+      B(i, j) = A(i, j);
+    }
+  }
+}
+
+void unpack_float(float* a, float* b,
+		  int a_row_stride, int a_col_stride,
+		  int b_rows, int b_cols,
+		  int b_row_stride, int b_col_stride) {
   int i, j;
   for (i = 0; i < b_rows; i++) {
     for (j = 0; j < b_cols; j++) {
