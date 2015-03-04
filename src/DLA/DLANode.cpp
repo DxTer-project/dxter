@@ -597,8 +597,10 @@ bool DLANode::InputsAreSameSize(ConnNum left, ConnNum right) const {
   CheckInputNum(left);
   CheckInputNum(right);
 
-  return ((*GetInputM(left)) == (*GetInputM(right)))
-    && ((*GetInputN(left)) == (*GetInputN(right)));
+  return GetInputNumRows(left) == GetInputNumRows(right)
+    && GetInputNumCols(left) == GetInputNumCols(right);
+  //  return ((*GetInputM(left)) == (*GetInputM(right)))
+  //    && ((*GetInputN(left)) == (*GetInputN(right)));
 }
 
 bool DLANode::InputNIsMultipleOfVecRegWidth(ConnNum num) const {
