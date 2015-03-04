@@ -98,6 +98,16 @@ void *alloc_aligned_16(size_t size) {
   return (void *) memptr;
 }
 
+void *alloc_aligned_32(size_t size) {
+  void *memptr;
+  // Horrible error handling
+  if (posix_memalign(&memptr, 32, size))	{
+  	printf("FAILED TO ALLOCATE\n");
+  	return (void *) -1;
+  }
+  return (void *) memptr;
+}
+
 void copy_double(int m, int n,
 		 double* a,
 		 int a_row_stride, int a_col_stride,

@@ -22,6 +22,7 @@ typedef union	{
 void *alloc(size_t size);
 
 void *alloc_aligned_16(size_t size);
+void *alloc_aligned_32(size_t size);
 
 void pack_double(double* a, double* b,
 		 int a_rows, int a_cols,
