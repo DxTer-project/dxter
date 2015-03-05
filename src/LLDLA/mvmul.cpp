@@ -260,7 +260,7 @@ bool MVMulLoopRef::CanApply(const Node *node) const
   if (node->GetNodeClass() == MVMul::GetClass()) {
     const MVMul *mvmul = static_cast<const MVMul*>(node);
 
-    if (m_dim == DIMM && (mvmul->Input(0)->GetVecRegWidth() > ((int) m_bs.GetSize()))) {
+    if ((mvmul->Input(0)->GetVecRegWidth() > ((int) m_bs.GetSize()))) {
       return false;
     }
     if (mvmul->GetLayer() != m_fromLayer) {
