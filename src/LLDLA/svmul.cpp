@@ -36,6 +36,10 @@ SVMul::SVMul(VecType vecType, Layer layer)
   m_layer = layer;
 }
 
+VecType SVMul::GetVecType() const {
+  return m_vecType;
+}
+
 void SVMul::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
@@ -44,7 +48,7 @@ void SVMul::PrintCode(IndStream &out)
     } else if (GetDataType() == REAL_SINGLE) {
       *out << "simple_smul_float( ";
     }
-    if (m_vecType == COLVECTOR) {
+    if (GetVecType() == COLVECTOR) {
       *out << InputDataType(1).m_numRowsVar << ", " <<
 	" 1, " <<
 	GetInputName(0).str() << ", " <<
@@ -86,7 +90,7 @@ void SVMul::PrintCode(IndStream &out)
 
 void SVMul::PrintRowStride(IndStream &out)
 {
-  if (m_vecType == COLVECTOR) {
+  if (GetVecType() == COLVECTOR) {
     *out << "row_stride_smul_2x1( " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ", " <<
@@ -102,7 +106,7 @@ void SVMul::PrintRowStride(IndStream &out)
 
 void SVMul::PrintColStride(IndStream &out)
 {
-  if (m_vecType == COLVECTOR) {
+  if (GetVecType() == COLVECTOR) {
     *out << "col_stride_smul_2x1( " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ", " <<
@@ -117,7 +121,7 @@ void SVMul::PrintColStride(IndStream &out)
 
 void SVMul::PrintGeneralStride(IndStream &out)
 {
-  if (m_vecType == COLVECTOR) {
+  if (GetVecType() == COLVECTOR) {
     *out << "gen_stride_smul_2x1( " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ", " <<
@@ -145,7 +149,7 @@ void SVMul::Prop()
     VectorOpInputDimensionCheck(1);
 
     if (m_layer == ABSLAYER) {
-      if (m_vecType == ROWVECTOR) {
+      if (GetVecType() == ROWVECTOR) {
 	m_cost = GetInputN(1)->Sum();
       } else {
 	m_cost = GetInputM(1)->Sum();
@@ -158,18 +162,18 @@ void SVMul::Prop()
 
 void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
 {
-  if (m_vecType == ROWVECTOR && *GetInputM(inputNum) != 1) {
+  if (GetVecType() == ROWVECTOR && *GetInputM(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum << " has more than 1 row\n";
     throw;
-  } else if (m_vecType == COLVECTOR && *GetInputN(inputNum) != 1) {
+  } else if (GetVecType() == COLVECTOR && *GetInputN(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum  << " has more than 1 column\n";
   }
   int regWidth = GetVecRegWidth();
   if (m_layer == LLDLAPRIMITIVELAYER) {
-    if (m_vecType == ROWVECTOR && *GetInputN(inputNum) != regWidth) {
+    if (GetVecType() == ROWVECTOR && *GetInputN(inputNum) != regWidth) {
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have regWidth columns\n";
       throw;
-    } else if(m_vecType == COLVECTOR && *GetInputM(inputNum) != regWidth) {
+    } else if(GetVecType() == COLVECTOR && *GetInputM(inputNum) != regWidth) {
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have regWidth rows\n";
       throw;
     }
@@ -275,7 +279,7 @@ void SVMulLoopRef::Apply(Node *node) const
   scalarTun->SetAllStats(FULLUP);
   scalarTun->SetIndepIters();
 
-  SVMul *newMul = new SVMul(svmul->m_vecType, svmul->m_layer);
+  SVMul *newMul = new SVMul(svmul->GetVecType(), svmul->m_layer);
   newMul->SetLayer(m_toLayer);
 
   newMul->AddInput(scalarTun, 0);
@@ -349,11 +353,11 @@ string SVMulLowerLayer::GetType() const
     + " to " + LayerNumToStr(m_toLayer);
 }
 
-SVMulToRegArith::SVMulToRegArith(Layer fromLayer, Layer toLayer, VecType vtype)
+SVMulToRegArith::SVMulToRegArith(Layer fromLayer, Layer toLayer, VecType vecType)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
-  m_vType = vtype;
+  m_vecType = vecType;
 }
 
 bool SVMulToRegArith::CanApply(const Node* node) const
@@ -364,12 +368,12 @@ bool SVMulToRegArith::CanApply(const Node* node) const
       return false;
     }
     if ((!(*(svmul->GetInputM(1)) <= svmul->GetVecRegWidth()) &&
-	 m_vType == COLVECTOR) &&
+	 m_vecType == COLVECTOR) &&
 	svmul->GetInputM(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth())) {
       return true;
     }
     if (!(*(svmul->GetInputN(1)) <= svmul->GetVecRegWidth()) &&
-	m_vType == ROWVECTOR &&
+	m_vecType == ROWVECTOR &&
 	svmul->GetInputN(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth())) {
       return true;
     }
@@ -385,7 +389,7 @@ void SVMulToRegArith::Apply(Node* node) const
 
   // Split up the input vector
   SplitSingleIter* splitVec;
-  if (m_vType == ROWVECTOR) {
+  if (m_vecType == ROWVECTOR) {
     splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   } else {
     splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
@@ -393,7 +397,7 @@ void SVMulToRegArith::Apply(Node* node) const
 
   splitVec->AddInput(svmul->Input(1), svmul->InputConnNum(1));
 
-  if (m_vType == ROWVECTOR) {
+  if (m_vecType == ROWVECTOR) {
     splitVec->SetUpStats(FULLUP, NOTUP,
 			  FULLUP, NOTUP);
   } else {
@@ -456,7 +460,7 @@ void SVMulToRegArith::Apply(Node* node) const
 
 string SVMulToRegArith::GetType() const
 {
-  if (m_vType == ROWVECTOR) {
+  if (m_vecType == ROWVECTOR) {
     return "SVMul register arith - Row vector " + LayerNumToStr(m_fromLayer)
       + " to " + LayerNumToStr(m_fromLayer);
   } else {
@@ -470,7 +474,7 @@ SVMulToScalarArith::SVMulToScalarArith(Layer fromLayer, Layer toLayer, VecType v
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
-  m_vType = vtype;
+  m_vecType = vtype;
 }
 
 bool SVMulToScalarArith::CanApply(const Node* node) const
@@ -478,8 +482,8 @@ bool SVMulToScalarArith::CanApply(const Node* node) const
   if (node->GetNodeClass() == SVMul::GetClass()) {
     const SVMul* svmul = static_cast<const SVMul*>(node);
     if (svmul->GetLayer() == m_fromLayer) {
-      if ((*(svmul->GetInputM(1)) == 1 && m_vType == ROWVECTOR) ||
-	  (*(svmul->GetInputN(1)) == 1 && m_vType == COLVECTOR)) {
+      if ((*(svmul->GetInputM(1)) == 1 && m_vecType == ROWVECTOR) ||
+	  (*(svmul->GetInputN(1)) == 1 && m_vecType == COLVECTOR)) {
 	return true;
       }
     }
@@ -495,7 +499,7 @@ void SVMulToScalarArith::Apply(Node* node) const
 
   // Split up the input vector
   SplitSingleIter* splitVec;
-  if (m_vType == ROWVECTOR) {
+  if (m_vecType == ROWVECTOR) {
     splitVec = new SplitSingleIter(PARTRIGHT, POSSTUNIN, true);
   } else {
     splitVec = new SplitSingleIter(PARTDOWN, POSSTUNIN, true);
@@ -503,7 +507,7 @@ void SVMulToScalarArith::Apply(Node* node) const
 
   splitVec->AddInput(svmul->Input(1), svmul->InputConnNum(1));
 
-  if (m_vType == ROWVECTOR) {
+  if (m_vecType == ROWVECTOR) {
     splitVec->SetUpStats(FULLUP, NOTUP,
 			  FULLUP, NOTUP);
   } else {
@@ -541,7 +545,7 @@ void SVMulToScalarArith::Apply(Node* node) const
 
 string SVMulToScalarArith::GetType() const
 {
-  if (m_vType == ROWVECTOR) {
+  if (m_vecType == ROWVECTOR) {
     return "SVMul scalar arith - Row vector " + LayerNumToStr(m_fromLayer)
       + " to " + LayerNumToStr(m_fromLayer);
   } else {
@@ -553,13 +557,13 @@ string SVMulToScalarArith::GetType() const
 ResidualPartitionSVMul::ResidualPartitionSVMul(Layer fromLayer, Layer toLayer, VecType vType, Size blockSize) {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
-  m_vType = vType;
+  m_vecType = vType;
   m_blockSize = blockSize;
 }
 
 string ResidualPartitionSVMul::GetType() const
 {
-  if (m_vType == ROWVECTOR) {
+  if (m_vecType == ROWVECTOR) {
     return "Row vector ResidualPartitionSVMul " + LayerNumToStr(m_fromLayer) + " to " + LayerNumToStr(m_toLayer) + " with dim = " + std::to_string((long long int) m_blockSize);
   } else {
     return "Col vector ResidualPartitionSVMul " + LayerNumToStr(m_fromLayer) + " to " + LayerNumToStr(m_toLayer) + " with dim = " + std::to_string((long long int) m_blockSize);
@@ -570,9 +574,9 @@ bool ResidualPartitionSVMul::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == SVMul::GetClass()) {
     const SVMul* svmul = static_cast<const SVMul*>(node);
-    if (m_vType == ROWVECTOR && svmul->m_vecType == ROWVECTOR) {
+    if (m_vecType == ROWVECTOR && svmul->GetVecType() == ROWVECTOR) {
       return !(svmul->GetInputN(1)->EvenlyDivisibleBy(m_blockSize));
-    } else if (m_vType == COLVECTOR && svmul->m_vecType == COLVECTOR) {
+    } else if (m_vecType == COLVECTOR && svmul->GetVecType() == COLVECTOR) {
       return !(svmul->GetInputM(1)->EvenlyDivisibleBy(m_blockSize));
     } else {
       return false;
@@ -584,7 +588,7 @@ bool ResidualPartitionSVMul::CanApply(const Node* node) const
 
 void ResidualPartitionSVMul::Apply(Node* node) const
 {
-  Dir partType = m_vType == ROWVECTOR ? HORIZONTAL : VERTICAL;
+  Dir partType = m_vecType == ROWVECTOR ? HORIZONTAL : VERTICAL;
   SVMul* svmul = static_cast<SVMul*>(node);
 
   Size splitPoint = ResidualSplitPoint(svmul);
@@ -592,11 +596,11 @@ void ResidualPartitionSVMul::Apply(Node* node) const
   Partition* part = new Partition(m_toLayer, partType, splitPoint);
   part->AddInput(svmul->Input(1), 0);
 
-  SVMul* startSVMul = new SVMul(svmul->m_vecType, m_toLayer);
+  SVMul* startSVMul = new SVMul(svmul->GetVecType(), m_toLayer);
   startSVMul->AddInput(svmul->Input(0), 0);
   startSVMul->AddInput(part, 0);
 
-  SVMul* endSVMul = new SVMul(svmul->m_vecType, m_toLayer);
+  SVMul* endSVMul = new SVMul(svmul->GetVecType(), m_toLayer);
   endSVMul->AddInput(svmul->Input(0), 0);
   endSVMul->AddInput(part, 1);
 
@@ -620,7 +624,7 @@ void ResidualPartitionSVMul::Apply(Node* node) const
 Size ResidualPartitionSVMul::ResidualSplitPoint(const SVMul* svmul) const
 {
   const Sizes* splittingDimSizes;
-  if (m_vType == ROWVECTOR) {
+  if (m_vecType == ROWVECTOR) {
     splittingDimSizes = svmul->GetInputN(1);
   } else {
     splittingDimSizes = svmul->GetInputM(1);

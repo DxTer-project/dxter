@@ -29,10 +29,14 @@
 
 class SVMul : public DLAOp<2, 1>
 {
- public:
+ private:
   VecType m_vecType;
 
+ public:
+
   SVMul(VecType vecType, Layer layer);
+
+  VecType GetVecType() const;
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
@@ -73,9 +77,9 @@ class SVMulToRegArith : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  VecType m_vType;
+  VecType m_vecType;
 
-  SVMulToRegArith(Layer fromLayer, Layer toLayer, VecType vType);
+  SVMulToRegArith(Layer fromLayer, Layer toLayer, VecType vecType);
   virtual string GetType() const;
   virtual bool CanApply(const Node* node) const;
   virtual void Apply(Node* node) const;
@@ -86,9 +90,9 @@ class SVMulToScalarArith : public SingleTrans
 {
  public:
   Layer m_fromLayer, m_toLayer;
-  VecType m_vType;
+  VecType m_vecType;
 
-  SVMulToScalarArith(Layer fromLayer, Layer toLayer, VecType vType);
+  SVMulToScalarArith(Layer fromLayer, Layer toLayer, VecType vecType);
   virtual string GetType() const;
   virtual bool CanApply(const Node* node) const;
   virtual void Apply(Node* node) const;
@@ -112,10 +116,10 @@ class ResidualPartitionSVMul : public SingleTrans
 {
  private:
   Size ResidualSplitPoint(const SVMul* svmul) const;
+  VecType m_vecType;
 
  public:
   Layer m_fromLayer, m_toLayer;
-  VecType m_vType;
   Size m_blockSize;
 
   ResidualPartitionSVMul(Layer fromLayer, Layer toLayer, VecType vType, Size blockSize);
@@ -123,6 +127,8 @@ class ResidualPartitionSVMul : public SingleTrans
   virtual bool CanApply(const Node* node) const;
   virtual void Apply(Node* node) const;
   virtual bool IsRef() const { return true; }
+
+  VecType GetVecType() const;
 };
 
 
