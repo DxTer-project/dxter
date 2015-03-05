@@ -103,11 +103,11 @@ RealPSet* MVMulTest(Type dataType, bool transpose, int m, int n)
 RealPSet* MAddTest(Type dataType, int m, int n)
 {
   InputNode* Ain = new InputNode("A", m, n,
-				 1, m,
+				 n, 1,
 				 dataType);
 
   InputNode* Bin = new InputNode("B", m, n,
-				 1, m,
+				 n, 1,
 				 dataType);
 
   Tunnel* tunA = new Tunnel(POSSTUNIN);

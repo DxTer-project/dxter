@@ -19,36 +19,36 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "scalarMulVerticalPackToMultipleOfMu.h"
+#include "scalarMulHorizontalPackToMultipleOfMu.h"
 
 #if DOLLDLA
 
 #include "packingUtils.h"
 #include "smmul.h"
-#include "verticalUnpack.h"
+#include "horizontalUnpack.h"
 
-bool ScalarMulVerticalPackToMultipleOfMu::CanApply(const Node* node) const {
+bool ScalarMulHorizontalPackToMultipleOfMu::CanApply(const Node* node) const {
   if (node->GetNodeClass() == SMMul::GetClass()) {
     const SMMul* smmul = static_cast<const SMMul*>(node);
     if (smmul->GetLayer() != m_fromLayer) {
       return false;
     }
-    return !(smmul->InputMIsMultipleOfVecRegWidth(1))
-      && smmul->GetInputNumRows(1) > 1
-      && smmul->GetInputNumCols(1) > 1;
+    return !(smmul->InputNIsMultipleOfVecRegWidth(1))
+      && smmul->GetInputNumCols(1) > 1
+      && smmul->GetInputNumRows(1) > 1;
   }
   throw;
 }
 
-void ScalarMulVerticalPackToMultipleOfMu::Apply(Node* node) const {
-  Pack* packA = PackToMultipleOf(m_toLayer, node->Input(1), node->InputConnNum(1), node, 1, DIMM, node->GetVecRegWidth());
+void ScalarMulHorizontalPackToMultipleOfMu::Apply(Node* node) const {
+  Pack* packA = PackToMultipleOf(m_toLayer, node->Input(1), node->InputConnNum(1), node, 1, DIMN, node->GetVecRegWidth());
 
   SMMul* newSMMul = new SMMul(ABSLAYER);
   newSMMul->AddInputs(4,
 		      node->Input(0), node->InputConnNum(0),
 		      packA, 0);
 
-  Unpack* unpack = new VerticalUnpack(ABSLAYER);
+  Unpack* unpack = new HorizontalUnpack(ABSLAYER);
   unpack->AddInputs(4,
 		    newSMMul, 0,
 		    node->Input(1), node->InputConnNum(1));
