@@ -1160,6 +1160,9 @@ bool Sizes::IsSingleRepeatedSize() const {
 
   SizeEntry* firstSizeEntry = this->m_entries[0];
   if (firstSizeEntry->m_type != REPEATEDSIZES) {
+    cout << "Not repeated sizes" << endl;
+    firstSizeEntry->Print();
+    cout << "m_type == MIDSIZES ? " << std::to_string(firstSizeEntry->m_type == MIDSIZES) << endl;
     return false;
   }
 
@@ -1168,6 +1171,8 @@ bool Sizes::IsSingleRepeatedSize() const {
 
 Size Sizes::OnlyEntry() const {
   if (!IsSingleRepeatedSize()) {
+    cout << "ERROR: Not single repeated size in OnlyEntry" << endl;
+    cout << "# entries = " << m_entries.size()  << endl;
     throw;
   }
   return (*this)[0];
