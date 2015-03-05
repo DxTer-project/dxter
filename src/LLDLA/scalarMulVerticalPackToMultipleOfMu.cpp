@@ -33,11 +33,6 @@ bool ScalarMulVerticalPackToMultipleOfMu::CanApply(const Node* node) const {
     if (smmul->GetLayer() != m_fromLayer) {
       return false;
     }
-
-    cout << "Checking dims for SMMulVerticalPack" << endl;
-    cout << "Node input 1 # rows = " << smmul->GetInputNumRows(1) << endl;
-    cout << "Vec reg width = " << smmul->GetVecRegWidth() << endl;
-    cout << "smmul->InputMIsMultipleOfVecRegWidth(1) ? " << smmul->InputMIsMultipleOfVecRegWidth(1) << endl;
     return !(smmul->InputMIsMultipleOfVecRegWidth(1))
       && smmul->GetInputNumRows(1) > 1
       && smmul->GetInputNumCols(1) > 0;
