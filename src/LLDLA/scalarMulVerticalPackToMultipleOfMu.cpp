@@ -24,22 +24,43 @@
 #if DOLLDLA
 
 #include "packingUtils.h"
+#include "smmul.h"
+#include "verticalUnpack.h"
 
 bool ScalarMulVerticalPackToMultipleOfMu::CanApply(const Node* node) const {
-  const DLANode* dlaNode = static_cast<const DLANode*>(node);
-  if (dlaNode->GetLayer() != m_fromLayer) {
-    return false;
+  if (node->GetNodeClass() == SMMul::GetClass()) {
+    const SMMul* smmul = static_cast<const SMMul*>(node);
+    if (smmul->GetLayer() != m_fromLayer) {
+      return false;
+    }
+
+    cout << "Checking dims for SMMulVerticalPack" << endl;
+    cout << "Node input 1 # rows = " << smmul->GetInputNumRows(1) << endl;
+    cout << "Vec reg width = " << smmul->GetVecRegWidth() << endl;
+    cout << "smmul->InputMIsMultipleOfVecRegWidth(1) ? " << smmul->InputMIsMultipleOfVecRegWidth(1) << endl;
+    return !(smmul->InputMIsMultipleOfVecRegWidth(1))
+      && smmul->GetInputNumRows(1) > 1
+      && smmul->GetInputNumCols(1) > 0;
   }
-  if (dlaNode->GetNodeClass() != m_nodeTypeName) {
-    return false;
-  }
-  return !(dlaNode->InputMIsMultipleOfVecRegWidth(1))
-    && dlaNode->GetInputNumRows(1) > 1
-    && dlaNode->GetInputNumCols(1) > 0;
+  throw;
 }
 
 void ScalarMulVerticalPackToMultipleOfMu::Apply(Node* node) const {
-  //  Pack* packA = PackToMultipleOf(m_toLayer, node->Input(1), node->InputConnNum(1), node, 1, DIMM, node->GetVecRegWidth());
+  Pack* packA = PackToMultipleOf(m_toLayer, node->Input(1), node->InputConnNum(1), node, 1, DIMM, node->GetVecRegWidth());
+
+  SMMul* newSMMul = new SMMul(ABSLAYER);
+  newSMMul->AddInputs(4,
+		      node->Input(0), node->InputConnNum(0),
+		      packA, 0);
+
+  Unpack* unpack = new VerticalUnpack(ABSLAYER);
+  unpack->AddInputs(4,
+		    newSMMul, 0,
+		    node->Input(1), node->InputConnNum(1));
+
+  node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
+  node->RedirectChildren(unpack, 0);
+  node->m_poss->DeleteChildAndCleanUp(node);
 
   
   return;

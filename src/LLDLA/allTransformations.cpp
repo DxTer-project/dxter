@@ -16,6 +16,7 @@
 #include "packToCopyAndZero.h"
 #include "partition.h"
 #include "recombine.h"
+#include "scalarMulVerticalPackToMultipleOfMu.h"
 #include "setToZero.h"
 #include "setToZeroColLoopRef.h"
 #include "setToZeroRowLoopRef.h"
@@ -126,6 +127,8 @@ void AddSMMulTrans()
   Universe::AddTrans(SMMul::GetClass(), new SMulToSVMul(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(SMMul::GetClass(), new SMulToSVMul(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SMMul::GetClass(), new ScalarMulVerticalPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }

@@ -27,13 +27,12 @@
 class ScalarMulVerticalPackToMultipleOfMu : public SingleTrans {
  private:
   Layer m_fromLayer, m_toLayer;
-  string m_nodeTypeName;
 
  public:
- ScalarMulVerticalPackToMultipleOfMu(Layer fromLayer, Layer toLayer, string nodeTypeName)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_nodeTypeName(nodeTypeName) {}
+ ScalarMulVerticalPackToMultipleOfMu(Layer fromLayer, Layer toLayer)
+   : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
 
-  virtual string GetType() const { return "ScalarMulVerticalPackToMultipleOfMu " + m_nodeTypeName; }
+  virtual string GetType() const { return "ScalarMulVerticalPackToMultipleOfMu"; }
   virtual bool IsRef() const { return true; }
 
   virtual bool CanApply(const Node* node) const;
