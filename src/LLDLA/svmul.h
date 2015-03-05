@@ -29,12 +29,9 @@
 
 class SVMul : public DLAOp<2, 1>
 {
- private:
-  VecType m_vecType;
-
  public:
 
-  SVMul(VecType vecType, Layer layer);
+  SVMul(Layer layer);
 
   VecType GetVecType() const;
 

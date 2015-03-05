@@ -162,7 +162,7 @@ RealPSet* SVMulTest(Type dataType, VecType vecType, int m)
   Tunnel* tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  SVMul* svmul = new SVMul(vecType, ABSLAYER);
+  SVMul* svmul = new SVMul(ABSLAYER);
   svmul->AddInputs(4,
 		   tunX, 0,
 		   tunA, 0);

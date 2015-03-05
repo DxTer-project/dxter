@@ -33,12 +33,12 @@ RealPSet* GenSizeColSVMul(Type dataType, int m)
   auto tunX = new Tunnel(POSSTUNIN);
   tunX->AddInput(xIn, 0);
 
-  SVMul* topSVMul = new SVMul(COLVECTOR, ABSLAYER);
+  SVMul* topSVMul = new SVMul(ABSLAYER);
   topSVMul->AddInputs(4,
 		      tunX, 0,
 		      part, 0);
 
-  SVMul* bottomSVMul = new SVMul(COLVECTOR, ABSLAYER);
+  SVMul* bottomSVMul = new SVMul(ABSLAYER);
   bottomSVMul->AddInputs(4,
 			 tunX, 0,
 			 part, 1);

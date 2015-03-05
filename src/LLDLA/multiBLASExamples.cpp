@@ -261,12 +261,12 @@ RealPSet* Gemv2(Type dataType, int m, int n, int k)
 		tunY, 0,
 		tunW, 0);
 
-  SVMul* alphaAX = new SVMul(COLVECTOR, ABSLAYER);
+  SVMul* alphaAX = new SVMul(ABSLAYER);
   alphaAX->AddInputs(4,
 		    tunAlpha, 0,
 		    aX, 0);
 
-  SVMul* betaBY = new SVMul(COLVECTOR, ABSLAYER);
+  SVMul* betaBY = new SVMul(ABSLAYER);
   betaBY->AddInputs(4,
 		    tunBeta, 0,
 		    bY, 0);

@@ -64,6 +64,7 @@ class DLANode : public Node
   const Sizes* InputLocalM(ConnNum num) const;
   const Sizes* InputLocalN(ConnNum num) const;
 #endif
+
   bool IsInputRowVector(ConnNum num) const;
   bool IsInputColVector(ConnNum num) const;
   bool IsInputScalar(ConnNum num) const;

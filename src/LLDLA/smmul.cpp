@@ -228,7 +228,7 @@ void SMulToSVMul::Apply(Node *node) const
   
 
   //Create a new SMul or the same type and in my m_toLayer layer
-  SVMul* newMul = new SVMul(m_vecType, m_toLayer);
+  SVMul* newMul = new SVMul(m_toLayer);
   newMul->SetLayer(m_toLayer);
   newMul->AddInput(scalarTun, 0);
   newMul->AddInput(split, 1);

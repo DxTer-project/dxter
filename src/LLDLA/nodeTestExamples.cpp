@@ -293,7 +293,7 @@ RealPSet* PackTest(Type dataType, int m) {
 		  tunX, 0,
 		  tunY, 0);
 
-  auto ax = new SVMul(COLVECTOR, ABSLAYER);
+  auto ax = new SVMul(ABSLAYER);
   ax->AddInputs(4,
 		tunAlpha, 0,
 		pack, 0);

@@ -142,7 +142,7 @@ RealPSet* Axpy(Type dataType, VecType vType, int m)
   auto* tunAlpha = new Tunnel(POSSTUNIN);
   tunAlpha->AddInput(alphaIn, 0);
 
-  auto* axMul = new SVMul(vType, ABSLAYER);
+  auto* axMul = new SVMul(ABSLAYER);
   axMul->AddInputs(4,
 		   tunAlpha, 0,
 		   tunX, 0);
@@ -217,7 +217,7 @@ RealPSet* Gemv(Type dataType, bool transpose, int m, int n)
   auto tunBeta = new Tunnel(POSSTUNIN);
   tunBeta->AddInput(betaIn, 0);
 
-  auto by = new SVMul(COLVECTOR, ABSLAYER);
+  auto by = new SVMul(ABSLAYER);
   by->AddInputs(4,
 		tunBeta, 0,
 		tunY, 0);
@@ -239,7 +239,7 @@ RealPSet* Gemv(Type dataType, bool transpose, int m, int n)
     delete trans;
   }
 
-  auto alphaAXMul = new SVMul(COLVECTOR, ABSLAYER);
+  auto alphaAXMul = new SVMul(ABSLAYER);
   alphaAXMul->AddInputs(4,
 			tunAlpha, 0,
 			axMul, 0);

@@ -30,14 +30,19 @@
 
 #if DOLLDLA
 
-SVMul::SVMul(VecType vecType, Layer layer)
+SVMul::SVMul(Layer layer)
 {
-  m_vecType = vecType;
   m_layer = layer;
 }
 
 VecType SVMul::GetVecType() const {
-  return m_vecType;
+  if (IsInputRowVector(0) && IsInputRowVector(1)) {
+    return ROWVECTOR;
+  }
+  if (IsInputColVector(0) && IsInputColVector(1)) {
+    return COLVECTOR;
+  }
+  throw;
 }
 
 void SVMul::PrintCode(IndStream &out)
@@ -182,7 +187,7 @@ void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
 
 Node* SVMul::BlankInst()
 {
-  return new SVMul(ROWVECTOR, LLDLAPRIMITIVELAYER);
+  return new SVMul(LLDLAPRIMITIVELAYER);
 }
 
 NodeType SVMul::GetType() const
@@ -194,7 +199,6 @@ void SVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
   const SVMul *rhs = static_cast<const SVMul*>(orig);
-  m_vecType = rhs->m_vecType;
 }
 
 Phase SVMul::MaxPhase() const 
@@ -279,7 +283,7 @@ void SVMulLoopRef::Apply(Node *node) const
   scalarTun->SetAllStats(FULLUP);
   scalarTun->SetIndepIters();
 
-  SVMul *newMul = new SVMul(svmul->GetVecType(), svmul->m_layer);
+  SVMul *newMul = new SVMul(svmul->m_layer);
   newMul->SetLayer(m_toLayer);
 
   newMul->AddInput(scalarTun, 0);
@@ -596,11 +600,11 @@ void ResidualPartitionSVMul::Apply(Node* node) const
   Partition* part = new Partition(m_toLayer, partType, splitPoint);
   part->AddInput(svmul->Input(1), 0);
 
-  SVMul* startSVMul = new SVMul(svmul->GetVecType(), m_toLayer);
+  SVMul* startSVMul = new SVMul(m_toLayer);
   startSVMul->AddInput(svmul->Input(0), 0);
   startSVMul->AddInput(part, 0);
 
-  SVMul* endSVMul = new SVMul(svmul->GetVecType(), m_toLayer);
+  SVMul* endSVMul = new SVMul(m_toLayer);
   endSVMul->AddInput(svmul->Input(0), 0);
   endSVMul->AddInput(part, 1);
 
