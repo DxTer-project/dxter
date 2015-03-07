@@ -45,6 +45,7 @@ RealPSet* DotTest(Type dataType, int m)
 
 RealPSet* MVMulTest(Type dataType, bool transpose, int m, int n)
 {
+
   InputNode* Ain;
   if (transpose) {
     Ain = new InputNode("A", n, m,
@@ -88,6 +89,15 @@ RealPSet* MVMulTest(Type dataType, bool transpose, int m, int n)
 		     tunX, 0,
 		     tunY, 0);
   }
+
+  if (!mvmul->InputDimsAreOneRepeatedSizeEach(0)
+      || !mvmul->InputDimsAreOneRepeatedSizeEach(1)
+      || !mvmul->InputDimsAreOneRepeatedSizeEach(2)) {
+    cout << "ERROR IN THE INITIAL EXAMPLE CODE!" << endl;
+    cout << "ERROR: MVMul input dimensions are not single, repeated sizes" << endl;
+    throw;
+  }
+
   Poss *innerPoss = new Poss(mvmul, true);
   RealPSet *innerSet = new RealPSet(innerPoss);
 

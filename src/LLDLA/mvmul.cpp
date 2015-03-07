@@ -109,7 +109,7 @@ void MVMul::PrintGeneralStride(IndStream &out)
   *out << "gen_stride_mmul_2x2_2x1( " <<
     GetInputName(0).str() << ", " <<
     GetInputName(1).str() << ", " <<
-    GetInputName(2).str() << ");\n";
+    GetInputName(2).str() << " );\n";
 }
 
 Node* MVMul::BlankInst()

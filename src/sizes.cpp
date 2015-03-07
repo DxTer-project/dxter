@@ -204,6 +204,8 @@ void SizeEntry::SetSizeRange(Size start, int stride, Size end, int parFactor)
 
 void SizeEntry::SetMidSizes(Size size, Size totalSize, int parFactor)
 {
+  //  cout << "ERROR: calling SetMidSizes" << endl;
+  //  throw;
   m_valA = size;
   m_valB = totalSize;
   m_type = MIDSIZES;
