@@ -545,6 +545,12 @@ bool DLANode::IsInputScalar(ConnNum num) const
 
 #if DOLLDLA
 
+bool DLANode::InputDimsAreOneRepeatedSizeEach(ConnNum num) const {
+  CheckInputNum(num);
+  return GetInputM(num)->IsSingleRepeatedSize()
+    && GetInputN(num)->IsSingleRepeatedSize();
+}
+
 int DLANode::GetInputNumCols(ConnNum num) const {
   CheckInputNum(num);
   auto size = GetInputN(num);

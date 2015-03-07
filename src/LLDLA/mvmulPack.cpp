@@ -41,6 +41,12 @@ bool MVMulPackOutput::CanApply(const Node* node) const {
 }
 
 void MVMulPackOutput::Apply(Node* node) const {
+  cout << endl << "Calling Prop on node" << endl;
+  node->Prop();
+  cout << "Done with node->Prop()" << endl << endl;
+  //  cout << "Input node input 0 num rows = ";
+  //  DLANode* dla = static_cast<DLANode*>(node);
+  //  cout << dla->GetInputNumRows(0) << endl;
   Pack* packA = PackToMultipleOf(m_toLayer, node->Input(0), node->InputConnNum(0), node, 0, DIMM, node->GetVecRegWidth());
 
   Pack* packY = PackToMultipleOf(m_toLayer, node->Input(2), node->InputConnNum(2), node, 2, DIMM, node->GetVecRegWidth());

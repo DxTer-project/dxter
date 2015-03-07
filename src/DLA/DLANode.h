@@ -127,6 +127,8 @@ class DLANode : public Node
   bool InputNIsMultipleOfVecRegWidth(ConnNum num) const;
   bool InputMIsMultipleOfVecRegWidth(ConnNum num) const;
 
+  bool InputDimsAreOneRepeatedSizeEach(ConnNum num) const;
+
 #endif // DOLLDLA
 };
 

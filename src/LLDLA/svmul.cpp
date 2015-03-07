@@ -198,7 +198,6 @@ NodeType SVMul::GetType() const
 void SVMul::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   DLAOp<2,1>::Duplicate(orig, shallow, possMerging);
-  const SVMul *rhs = static_cast<const SVMul*>(orig);
 }
 
 Phase SVMul::MaxPhase() const 

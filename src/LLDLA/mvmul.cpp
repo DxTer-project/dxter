@@ -137,6 +137,13 @@ void MVMul::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<3, 1>::Prop();
 
+    if (!InputDimsAreOneRepeatedSizeEach(0)
+	|| !InputDimsAreOneRepeatedSizeEach(1)
+	|| !InputDimsAreOneRepeatedSizeEach(2)) {
+      cout << "ERROR: MVMul input dimensions are not single, repeated sizes" << endl;
+      throw;
+    }
+
     if (*GetInputN(0) != *GetInputM(1)) {
       cout << "ERROR: Input dimensions don't match\n";
       throw;
