@@ -26,6 +26,7 @@
 
 #if DOLLDLA
 
+void DotProductBenchmark(Type type, int m, int increment, int numIters);
 void RunDotProdBenchmarks();
 void RunAxpyBenchmarks();
 void RunGemvBenchmarks();

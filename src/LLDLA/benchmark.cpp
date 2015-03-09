@@ -32,12 +32,10 @@
 
 using namespace std;
 
-void DotProductBenchmark(Type type) {
+void DotProductBenchmark(Type type, int m, int increment, int numIters) {
   cout << "--------------------- dot product benchmark -----------------------------\n\n";
-  int increment = 128;
-  int m = 128;
   BenchmarkStats benchStats(TypeToStr(type) + "_dot_product");
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < numIters; i++) {
     RealPSet* test = DotTest(type, m);
     ProblemInstance dotProd;
     dotProd.SetName("dotProd");
@@ -104,8 +102,8 @@ void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, in
 }
 
 void RunDotProdBenchmarks() {
-  DotProductBenchmark(REAL_SINGLE);
-  DotProductBenchmark(REAL_DOUBLE);
+  DotProductBenchmark(REAL_SINGLE, 128, 128, 10);
+  DotProductBenchmark(REAL_DOUBLE, 128, 128, 10);
 }
 
 void RunAxpyBenchmarks() {

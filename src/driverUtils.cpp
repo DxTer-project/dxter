@@ -19,22 +19,79 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DRIVER_UTILS_H_
-#define DRIVER_UTILS_H_
-
 #pragma once
 
-#include "base.h"
-#include "LLDLA.h"
+#include "driverUtils.h"
 
-Trans CharToTrans(char c);
-Tri CharToTri(char c);
-Side CharToSide(char c);
+Trans CharToTrans(char c) 
+{
+  switch (c) {
+  case('N'):
+    return NORMAL;
+  case('T'):
+    return TRANS;
+  case ('C'):
+    return CONJTRANS;
+  default:
+    throw;
+  }
+}
+
+Tri CharToTri(char c)
+{
+  switch (c) {
+  case('L'):
+    return LOWER;
+  case('U'):
+    return UPPER;
+  default:
+    throw;
+  }
+}
+
+Side CharToSide(char c)
+{
+  switch (c) {
+  case('L'):
+    return LEFT;
+  case('R'):
+    return RIGHT;
+  default:
+    throw;
+  }
+}
 
 #if DOLLDLA
-VecType CharToVecType(char c);
+
+VecType CharToVecType(char c)
+{
+switch(c) {
+ case('C'):
+return COLVECTOR;
+ case('R'):
+return ROWVECTOR;
+ default:
+throw;
+}
+}
+
 #endif // DOLLDLA
 
-Type CharToType(char c);
-
-#endif // DRIVER_UTILS_H_
+Type CharToType(char c)
+{
+  switch(c) {
+#if DOLLDLA
+ case('F'):
+    return REAL_SINGLE;
+ case('D'):
+    return REAL_DOUBLE;
+#else
+  case('R'):
+    return REAL;
+#endif // DOLLDLA
+  case('C'):
+    return COMPLEX;
+  default:
+    throw;
+  }
+}

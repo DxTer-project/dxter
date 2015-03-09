@@ -24,11 +24,12 @@
 #if DOLLDLA
 
 #include "benchmark.h"
+#include "driverUtils.h"
 
 unsigned int GetBenchmarkNumber() {
   cout << "---------------------- BENCHMARKS --------------------------" << endl;
   cout << "     0 -> Run all benchmarks" << endl;
-  cout << "     1 -> Dot product benchmarks" << endl;
+  cout << "     1 -> Dot product benchmark" << endl;
   cout << "     2 -> Axpy benchmarks" << endl;
   cout << "     3 -> Gemv benchmarks" << endl << endl;
   cout << "select one of the options listed above: ";
@@ -37,13 +38,25 @@ unsigned int GetBenchmarkNumber() {
   return benchmarkOption;
 }
 
+void DotProductBenchmarkMenu() {
+  Type type;
+  int m, inc, iters;
+
+  cout << "What kind of data should be used (F = single precision float) (D = double precisions float): ";
+  int typeChar;
+  cin >> typeChar;
+  type = CharToType(typeChar);
+
+  DotProductBenchmark(type, m, inc, iters);
+}
+
 void RunBenchmarkNumber(unsigned int num) {
   switch(num) {
   case(0):
     RunAllBenchmarks();
     break;
   case(1):
-    RunDotProdBenchmarks();
+    DotProductBenchmarkMenu();
     break;
   case(2):
     RunAxpyBenchmarks();

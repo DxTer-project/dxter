@@ -51,15 +51,10 @@ void LocalInput::PrintCode(IndStream& out) {
     //    *out << "double ";
   }
   string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + " + 1";
-  out.Indent();
   /*  *out << "unsigned char " << m_varName.m_name << "_array[" << size << "] = {0};" << endl;
    *out << "unsigned char* " << m_varName.m_name << "_array_ptr = &("m_varNam*/
 
   *out << m_varName.m_name << " = alloc_aligned_32(sizeof(" + typeName + ")*" + size + ");";
-
-  //  *out << m_varName.m_name << "_array[" << size << "] = {0};" << endl;
-  //  out.Indent();
-  //  *out << m_varName.m_name << " = (((unsigned long long)" << m_varName.m_name << "_array) % 16) != 0 ? &(" << m_varName.m_name << "_array[1]) : &(" << m_varName.m_name << "_array[0]);" << endl;
 }
 
 NodeType LocalInput::GetType() const {
