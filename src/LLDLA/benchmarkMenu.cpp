@@ -42,11 +42,16 @@ void DotProductBenchmarkMenu() {
   Type type;
   int m, inc, iters;
 
-  cout << "What kind of data should be used (F = single precision float) (D = double precisions float): ";
-  int typeChar;
+  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
+  char typeChar;
   cin >> typeChar;
   type = CharToType(typeChar);
-
+  cout << "Starting M value: ";
+  cin >> m;
+  cout << "M increment: ";
+  cin >> inc;
+  cout << "Number of iterations: ";
+  cin >> iters;
   DotProductBenchmark(type, m, inc, iters);
 }
 
