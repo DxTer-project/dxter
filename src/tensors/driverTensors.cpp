@@ -55,6 +55,8 @@ bool M_allowSquareGridOpt = true;
 const Size small = 50; //i-p
 const Size big = 10*small; // a-h
 Cost maxMem = 116000000;
+#define DOONELOOP 1
+#define DOTWOLOOPS 1
 
 Size one = 1;
 //Size bs = ELEM_BS;
@@ -243,8 +245,12 @@ void AddTrans()
 #endif
 
   for (Dim dim = 0; dim < 10; ++dim) {
-    //    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DM1LAYER, dim), DPTENSORPHASE);
-    //    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(DM1LAYER, DM2LAYER, dim), DPTENSORPHASE);
+#if (DOONELOOP||DOTWOLOOPS)
+    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(ABSLAYER, DM1LAYER, dim), DPTENSORPHASE);
+#endif
+#if DOTWOLOOPS
+    Universe::AddTrans(Contraction::GetClass(), new ContractionLoopExp(DM1LAYER, DM2LAYER, dim), DPTENSORPHASE);
+#endif
   }
 
   Universe::AddTrans(Contraction::GetClass(), new ContractionLowerLayer(ABSLAYER, DM2LAYER), DPTENSORPHASE);
@@ -286,10 +292,14 @@ void AddTrans()
   
   
   for(Dim dim = 0; dim < NUM_GRID_DIMS; ++dim) {
-    //    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
-    //    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
-    //    Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
-    //    Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
+#if (DOONELOOP||DOTWOLOOPS)
+    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
+    Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(ABSLAYER,DM1LAYER,dim), DPTENSORPHASE);
+#endif
+#if DOTWOLOOPS
+    Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
+    Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
+#endif
     Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SingleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);
