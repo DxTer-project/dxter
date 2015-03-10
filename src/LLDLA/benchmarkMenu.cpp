@@ -31,7 +31,8 @@ unsigned int GetBenchmarkNumber() {
   cout << "     0 -> Run all benchmarks" << endl;
   cout << "     1 -> Dot product benchmark" << endl;
   cout << "     2 -> Axpy benchmarks" << endl;
-  cout << "     3 -> Gemv benchmarks" << endl << endl;
+  cout << "     3 -> Gemv benchmarks" << endl;
+  cout << "     4 -> MAdd benchmarks" << endl << endl;
   cout << "select one of the options listed above: ";
   unsigned int benchmarkOption;
   cin >> benchmarkOption;
@@ -55,6 +56,27 @@ void DotProductBenchmarkMenu() {
   DotProductBenchmark(type, m, inc, iters);
 }
 
+void MAddBenchmarkMenu() {
+  Type type;
+  int m, n, mInc, nInc, iters;
+
+  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
+  char typeChar;
+  cin >> typeChar;
+  type = CharToType(typeChar);
+  cout << "Starting M value: ";
+  cin >> m;
+  cout << "M increment: ";
+  cin >> mInc;
+  cout << "Starting N value: ";
+  cin >> n;
+  cout << "N increment: ";
+  cin >> nInc;
+  cout << "Number of iterations: ";
+  cin >> iters;
+  MAddBenchmark(type, m, mInc, n, nInc, iters);
+}
+
 void RunBenchmarkNumber(unsigned int num) {
   switch(num) {
   case(0):
@@ -69,6 +91,8 @@ void RunBenchmarkNumber(unsigned int num) {
   case(3):
     RunGemvBenchmarks();
     break;
+  case(4):
+    MAddBenchmarkMenu();
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;
     break;

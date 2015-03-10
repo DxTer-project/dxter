@@ -101,6 +101,30 @@ void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, in
   cout << "\n------------------- gemv benchmark ---------------------------\n";
 }
 
+void MAddBenchmark(Type type, int mBase, int mInc, int nBase, int nInc, int numIters) {
+  cout << "--------------------- madd benchmark -----------------------------\n\n";
+
+  int m = mBase;
+  int n = nBase;
+  string benchmarkName = TypeToStr(type) + "_madd";
+  BenchmarkStats benchStats(benchmarkName);
+  for (int i = 0; i < numIters; i++) {
+    RealPSet* test = MAddTest(type, m, n);
+    ProblemInstance madd;
+    madd.SetName("madd");
+    madd.SetType(type);
+    madd.AddDimension(m, "m");
+    madd.AddDimension(n, "n");
+    auto pStats = RunBenchmark(1, test, &madd);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += mInc;
+    n += nInc;
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- madd benchmark ---------------------------\n";
+}
+
 void RunDotProdBenchmarks() {
   DotProductBenchmark(REAL_SINGLE, 128, 128, 10);
   DotProductBenchmark(REAL_DOUBLE, 128, 128, 10);
