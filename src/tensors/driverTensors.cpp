@@ -230,7 +230,7 @@ void ReduceMaxMem(set<string> &used)
 
 void AddTrans()
 {
-#if 0
+#if 1
   MultiTrans *trans = new MultiTrans;
   trans->AddTrans(new DistContToLocalContStatC(DM2LAYER, SMLAYER));
   trans->AddTrans(new DistContToLocalContStatASumScatter(DM2LAYER, SMLAYER));
