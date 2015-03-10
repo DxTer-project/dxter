@@ -50,6 +50,24 @@ void DotProductBenchmark(Type type, int m, int increment, int numIters) {
   cout << "\n------------------- end dot product benchmark ---------------------------\n";
 }
 
+void ColVAddBenchmark(Type type, int m, int increment, int numIters) {
+  cout << "--------------------- column vector add benchmark -----------------------------\n\n";
+  BenchmarkStats benchStats(TypeToStr(type) + "_col_vector_add");
+  for (int i = 0; i < numIters; i++) {
+    RealPSet* test = VAddTest(type, ROWVECTOR, m);
+    ProblemInstance vadd;
+    vadd.SetName("vadd");
+    vadd.SetType(type);
+    vadd.AddDimension(m, "m");
+    auto pStats = RunBenchmark(1, test, &vadd);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += increment;
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- end vector add benchmark ---------------------------\n";
+}
+
 void AxpyBenchmark(Type type, VecType vecType) {
   cout << "--------------------- axpy benchmark -----------------------------\n\n";
 

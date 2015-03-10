@@ -26,6 +26,7 @@
 
 #if DOLLDLA
 
+void ColVAddBenchmark(Type type, int m, int increment, int numIters);
 void MAddBenchmark(Type type, int mBase, int mInc, int nBase, int nInc, int numIters);
 void DotProductBenchmark(Type type, int m, int increment, int numIters);
 void RunDotProdBenchmarks();

@@ -32,7 +32,8 @@ unsigned int GetBenchmarkNumber() {
   cout << "     1 -> Dot product benchmark" << endl;
   cout << "     2 -> Axpy benchmarks" << endl;
   cout << "     3 -> Gemv benchmarks" << endl;
-  cout << "     4 -> MAdd benchmarks" << endl << endl;
+  cout << "     4 -> MAdd benchmark" << endl;
+  cout << "     5 -> Column VAdd benchmark" << endl << endl;
   cout << "select one of the options listed above: ";
   unsigned int benchmarkOption;
   cin >> benchmarkOption;
@@ -54,6 +55,23 @@ void DotProductBenchmarkMenu() {
   cout << "Number of iterations: ";
   cin >> iters;
   DotProductBenchmark(type, m, inc, iters);
+}
+
+void ColVAddBenchmarkMenu() {
+  Type type;
+  int m, inc, iters;
+
+  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
+  char typeChar;
+  cin >> typeChar;
+  type = CharToType(typeChar);
+  cout << "Starting M value: ";
+  cin >> m;
+  cout << "M increment: ";
+  cin >> inc;
+  cout << "Number of iterations: ";
+  cin >> iters;
+  ColVAddBenchmark(type, m, inc, iters);
 }
 
 void MAddBenchmarkMenu() {
@@ -93,6 +111,8 @@ void RunBenchmarkNumber(unsigned int num) {
     break;
   case(4):
     MAddBenchmarkMenu();
+  case(5):
+    ColVAddBenchmarkMenu();
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;
     break;
