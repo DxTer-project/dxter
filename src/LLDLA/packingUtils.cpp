@@ -33,6 +33,28 @@
 #include "vvdot.h"
 #include "verticalUnpack.h"
 
+Partition* PartitionIntoMainAndResidual(Layer layer, Node* outNode, ConnNum outNum, Node* inNode, ConnNum inNum, DimName dim, int multiple) {
+  DLANode* dlaNode = static_cast<DLANode*>(inNode);
+  int totalSize;
+  Dir partDir;
+  if (dim == DIMM) {
+    totalSize = dlaNode->GetInputNumRows(inNum);
+    partDir = VERTICAL;
+  } else {
+    totalSize = dlaNode->GetInputNumCols(inNum);
+    partDir = HORIZONTAL;
+  }
+  int residualSize = totalSize % multiple;
+  int mainSize = totalSize - residualSize;
+  if (residualSize == 0) {
+    cout << "Error: residualSize == 0" << endl;
+    throw;
+  }
+  auto part = new Partition(layer, partDir, mainSize);
+  part->AddInput(outNode, outNum);
+  return part;
+}
+
 Node* CopySymmetricBinop(Node* binop) {
   Node* copy;
   if (binop->GetNodeClass() == MAdd::GetClass()) {
@@ -89,6 +111,29 @@ Pack* PackToMultipleOf(Layer layer, Node* outNode, ConnNum outNum, Node* inNode,
 		  outNode, outNum,
 		  locIn, 0);
   return pack;
+}
+
+Recombine* SplitBinarySymmetricOperationIntoMainAndResidual(Layer layer, Node* binop, DimName dim, int multiple) {
+  auto operand0Part = PartitionIntoMainAndResidual(layer, binop->Input(0), binop->InputConnNum(0), binop, 0, dim, multiple);
+  auto operand1Part = PartitionIntoMainAndResidual(layer, binop->Input(1), binop->InputConnNum(1), binop, 1, dim, multiple);
+
+  auto mainBinop = CopySymmetricBinop(binop);
+  mainBinop->AddInputs(4,
+		       operand0Part, 0,
+		       operand1Part, 0);
+
+  auto residualBinop = CopySymmetricBinop(binop);
+  residualBinop->AddInputs(4,
+			  operand0Part, 1,
+			  operand1Part, 1);
+
+  Dir partDir = dim == DIMM ? VERTICAL : HORIZONTAL;
+  auto recombine = new Recombine(layer, partDir);
+  recombine->AddInputs(4,
+		       mainBinop, 0,
+		       residualBinop, 0);
+
+  return recombine;
 }
 
 Unpack* PackBinarySymmetricOperation(Layer layer, Node* binop, DimName dim, int multiple) {
