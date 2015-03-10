@@ -55,8 +55,8 @@ bool M_allowSquareGridOpt = true;
 const Size small = 50; //i-p
 const Size big = 10*small; // a-h
 Cost maxMem = 116000000;
-#define DOONELOOP 1
-#define DOTWOLOOPS 1
+#define DOONELOOP 0
+#define DOTWOLOOPS 0
 
 Size one = 1;
 //Size bs = ELEM_BS;
