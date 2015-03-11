@@ -28,9 +28,8 @@
 #include "regLoadStore.h"
 #include "vadd.h"
 
-VAdd::VAdd(VecType vecType, Layer layer)
+VAdd::VAdd(Layer layer)
 {
-  m_vecType = vecType;
   m_layer = layer;
 }
 
@@ -43,7 +42,7 @@ void VAdd::PrintCode(IndStream &out)
     } else if (GetDataType() == REAL_SINGLE) {
       *out << "simple_add_float( ";
     }
-    if (m_vecType == COLVECTOR) {
+    if (GetVecType() == COLVECTOR) {
       *out << InputDataType(1).m_numRowsVar << ", " <<
 	" 1, " <<
 	GetInputName(0).str() << ", " <<
@@ -86,7 +85,7 @@ void VAdd::PrintCode(IndStream &out)
 
 void VAdd::PrintRowStride(IndStream &out)
 {
-  if (m_vecType == COLVECTOR) {
+  if (GetVecType() == COLVECTOR) {
     *out << "row_stride_add_2x1( " <<
       GetInputName(0).str() << ", " <<
       InputDataType(0).m_rowStrideVar << ", " <<
@@ -103,7 +102,7 @@ void VAdd::PrintRowStride(IndStream &out)
 
 void VAdd::PrintColStride(IndStream &out)
 {
-  if (m_vecType == COLVECTOR) {
+  if (GetVecType() == COLVECTOR) {
     *out << "col_stride_add_2x1( " <<
       GetInputName(0).str() << ", " <<
       InputDataType(0).m_colStrideVar << ", " <<
@@ -121,7 +120,7 @@ void VAdd::PrintColStride(IndStream &out)
 
 void VAdd::PrintGeneralStride(IndStream &out)
 {
-  if (m_vecType == COLVECTOR) {
+  if (GetVecType() == COLVECTOR) {
     *out << "gen_stride_add_2x1( " <<
       GetInputName(0).str() << ", " <<
       GetInputName(1).str() << ");\n";
@@ -146,7 +145,7 @@ void VAdd::Prop()
     }
 
     if (m_layer == ABSLAYER) {
-      if (m_vecType == ROWVECTOR) {
+      if (GetVecType() == ROWVECTOR) {
 	m_cost = GetInputN(1)->Sum();
       } else {
 	m_cost = GetInputM(1)->Sum();
@@ -160,19 +159,19 @@ void VAdd::Prop()
 
 void VAdd::VectorOpInputDimensionCheck(ConnNum inputNum)
 {
-  if (m_vecType == ROWVECTOR && *GetInputM(inputNum) != 1) {
+  if (GetVecType() == ROWVECTOR && *GetInputM(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum << " has more than 1 row\n";
     throw;
-  } else if (m_vecType == COLVECTOR && *GetInputN(inputNum) != 1) {
+  } else if (GetVecType() == COLVECTOR && *GetInputN(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum  << " has more than 1 column\n";
     throw;
   }
   int regWidth = GetVecRegWidth();
   if (m_layer == LLDLAPRIMITIVELAYER) {
-    if (m_vecType == ROWVECTOR && *GetInputN(inputNum) != regWidth) {
+    if (GetVecType() == ROWVECTOR && *GetInputN(inputNum) != regWidth) {
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth columns\n";
       throw;
-    } else if(m_vecType == COLVECTOR && *GetInputM(inputNum) != regWidth) {
+    } else if(GetVecType() == COLVECTOR && *GetInputM(inputNum) != regWidth) {
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth rows\n";
       throw;
     }
@@ -181,21 +180,27 @@ void VAdd::VectorOpInputDimensionCheck(ConnNum inputNum)
 
 Node* VAdd::BlankInst()
 {
-  return new VAdd(COLVECTOR, LLDLAPRIMITIVELAYER);
+  return new VAdd(LLDLAPRIMITIVELAYER);
 }
 
 Node* VAdd::GetNewInst()
 {
-  return new VAdd(m_vecType, m_layer);
+  return new VAdd(m_layer);
 }
 
 NodeType VAdd::GetType() const
 {
-  return "VADD" + LayerNumToStr(GetLayer()) + (char)m_vecType;
+  return "VADD" + LayerNumToStr(GetLayer()) + (char)GetVecType();
 }
 
 VecType VAdd::GetVecType() const {
-  return m_vecType;
+  if (IsInputRowVector(0) && IsInputRowVector(1)) {
+    return ROWVECTOR;
+  }
+  if (IsInputColVector(0) && IsInputColVector(1)) {
+    return COLVECTOR;
+  }
+  throw;
 }
 
 Phase VAdd::MaxPhase() const
@@ -282,7 +287,7 @@ void VAddLoopRef::Apply(Node *node) const
   split0->SetIndepIters();
   split1->SetIndepIters();
 
-  VAdd *newVAdd = new VAdd(vadd->GetVecType(), vadd->m_layer);
+  VAdd *newVAdd = new VAdd(vadd->m_layer);
   newVAdd->SetLayer(m_toLayer);
 
   newVAdd->AddInput(split0, 1);

@@ -201,12 +201,12 @@ RealPSet* VAdd2(Type dataType, int m)
   auto tunZ = new Tunnel(POSSTUNIN);
   tunZ->AddInput(zIn, 0);
 
-  VAdd* vadd1 = new VAdd(COLVECTOR, ABSLAYER);
+  VAdd* vadd1 = new VAdd(ABSLAYER);
   vadd1->AddInputs(4,
 		  tunX, 0,
 		  tunY, 0);
 
-  VAdd* vadd2 = new VAdd(COLVECTOR, ABSLAYER);
+  VAdd* vadd2 = new VAdd(ABSLAYER);
   vadd2->AddInputs(4,
 		   tunZ, 0,
 		   vadd1, 0);

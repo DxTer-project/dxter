@@ -293,7 +293,7 @@ void MAddToVAddLoopRef::Apply(Node *node) const
   split0->SetIndepIters();
   split1->SetIndepIters();
 
-  VAdd *newVAdd = new VAdd(m_vecType, m_toLayer);
+  VAdd *newVAdd = new VAdd(m_toLayer);
   newVAdd->AddInput(split0, 1);
   newVAdd->AddInput(split1, 1);
 
