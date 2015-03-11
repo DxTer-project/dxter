@@ -177,6 +177,14 @@ SizeEntry::SizeEntry()
 {
 }
 
+SizesType SizeEntry::GetType() const {
+  return m_type;
+}
+
+bool SizeEntry::ConstantMidSizeEntry() const {
+  return (((int) m_valB) % ((int) m_valA)) == 0;
+}
+
 void SizeEntry::SetRepeatedSizes(Size size, int repeats, int parFactor)
 {
   m_valA = size;
@@ -1152,28 +1160,37 @@ bool Sizes::IsPartitionable(const Size partitionPoint) const
     return false;
   }
 
-  return IsSingleRepeatedSize();
+  return IsConstant();
 }
 
-bool Sizes::IsSingleRepeatedSize() const {
-  if (this->m_entries.size() != 1) {
-    return false;
-  }
+bool Sizes::IsConstant() const {
 
-  SizeEntry* firstSizeEntry = this->m_entries[0];
+  for (auto entry : this->m_entries) {
+    SizesType entryType = entry->GetType();
+    if (entryType == RANGESIZES) {
+      return false;
+    } else if (entryType == MIDSIZES) {
+      if (!(entry->ConstantMidSizeEntry())) {
+	return false;
+      }
+    }
+  }
+  /*  SizeEntry* firstEntry = this->m_entries[0];
+  if (firstEntry->m_type == REPEATEDSIZES) {
+    return 
+  }
   if (firstSizeEntry->m_type != REPEATEDSIZES) {
     cout << "Not repeated sizes" << endl;
     firstSizeEntry->Print();
     cout << "m_type == MIDSIZES ? " << std::to_string(firstSizeEntry->m_type == MIDSIZES) << endl;
     return false;
-  }
-
+    }*/
   return true;
 }
 
 Size Sizes::OnlyEntry() const {
-  if (!IsSingleRepeatedSize()) {
-    cout << "ERROR: Not single repeated size in OnlyEntry" << endl;
+  if (!IsConstant()) {
+    cout << "ERROR: sizes not a constant" << endl;
     cout << "# entries = " << m_entries.size()  << endl;
     throw;
   }

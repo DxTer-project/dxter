@@ -83,6 +83,10 @@ class SizeEntry
   int m_parFactor;
   int m_repeats;
   SizeEntry();
+
+  SizesType GetType() const;
+  bool ConstantMidSizeEntry() const;
+
   void SetRepeatedSizes(Size size, int repeats, int parFactor);
   void SetSizeRange(Size start, int stride, Size end, int parFactor);
   void SetMidSizes(Size size, Size totalSize, int parFactor);
@@ -156,7 +160,7 @@ class Sizes
   void SetParFactor(int parFactor);
 
   bool IsPartitionable(const Size partitionPoint) const;
-  bool IsSingleRepeatedSize() const;
+  bool IsConstant() const;
   Size OnlyEntry() const;
 };
 
