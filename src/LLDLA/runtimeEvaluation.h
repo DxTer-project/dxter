@@ -49,13 +49,13 @@ class RuntimeTest
   Type m_type;
 
   RuntimeTest(Type m_type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations);
-  string MakeTestCode(ImplementationMap* imps);
+  //  string MakeTestCode(ImplementationMap* imps);
   string MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImp);
   string ToCStatements(vector<string> lines);
   string CArgList(vector<string> args);
   string MakeImpFuncs(ImplementationMap* imps);
   string MakeFunc(string funcName, string funcBody);
-  string MainFuncCode(ImplementationMap* imps);
+  //  string MainFuncCode(ImplementationMap* imps);
   string MainFuncCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImpName);
   string CorrectnessCheck(ImplementationMap* imps, string referenceImpName);
   string AllocateArgBuffers(string postfix);
@@ -79,7 +79,7 @@ class RuntimeEvaluator
   int m_minCycles;
 
   RuntimeEvaluator(string evalDirName);
-  ImplementationRuntimeMap EvaluateImplementations(RuntimeTest test, ImplementationMap* imps);
+  //  ImplementationRuntimeMap EvaluateImplementations(RuntimeTest test, ImplementationMap* imps);
   ImplementationRuntimeMap EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp);
   ImplementationRuntimeMap ReadTimeDataFromFile(string fileName, int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);

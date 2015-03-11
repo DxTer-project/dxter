@@ -6,7 +6,7 @@
     Copyright (C) 2015, The University of Texas and Bryan Marker
 
     DxTer is free software: you can redistribute it and/or modify
-n    it under the terms of the GNU General Public License as published by
+    it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
@@ -79,7 +79,7 @@ void RuntimeTest::AddMiscellaneousDefines()
   return;
 }
 
-string RuntimeTest::MakeTestCode(ImplementationMap* imps)
+/*string RuntimeTest::MakeTestCode(ImplementationMap* imps)
 {
   int numImplementations = imps->size();
   m_defines.push_back("#define NUM_ALGS " + std::to_string((long long int) numImplementations));
@@ -88,7 +88,7 @@ string RuntimeTest::MakeTestCode(ImplementationMap* imps)
   string driverCode = MainFuncCode(imps);
   string testCode = headersAndDefines + "\n" + implementationFunctions + "\n" + driverCode;
   return testCode;
-}
+  }*/
 
 string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImp)
 {
@@ -102,7 +102,7 @@ string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, st
   return testCode;
 }
 
-string RuntimeTest::MainFuncCode(ImplementationMap* imps)
+/*string RuntimeTest::MainFuncCode(ImplementationMap* imps)
 {
   string prototype = "int main() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
@@ -115,7 +115,7 @@ string RuntimeTest::MainFuncCode(ImplementationMap* imps)
   timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
   mainFunc = mainFunc + "\n" + timingLoop + "\n}";
   return mainFunc;
-}
+  }*/
 
 string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImpName)
 {
@@ -276,7 +276,7 @@ RuntimeEvaluator::RuntimeEvaluator(string evalDirName) {
   m_minCycles = 0;
 }
 
-ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest test, ImplementationMap* imps) {
+/*ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest test, ImplementationMap* imps) {
   m_minCycles = test.m_minCycles;
   string executableName = test.m_operationName;
   string testFileName = executableName + ".c";
@@ -294,7 +294,7 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest t
   system(removeExecutable.c_str());
   return ReadTimeDataFromFile(test.m_dataFileName, imps->size());
 }
-
+*/
 ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp) {
   m_minCycles = test.m_minCycles;
   string executableName = m_evalDirName + "/" + test.m_operationName;
