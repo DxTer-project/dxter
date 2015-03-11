@@ -79,17 +79,6 @@ void RuntimeTest::AddMiscellaneousDefines()
   return;
 }
 
-/*string RuntimeTest::MakeTestCode(ImplementationMap* imps)
-{
-  int numImplementations = imps->size();
-  m_defines.push_back("#define NUM_ALGS " + std::to_string((long long int) numImplementations));
-  string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
-  string implementationFunctions = MakeImpFuncs(imps);
-  string driverCode = MainFuncCode(imps);
-  string testCode = headersAndDefines + "\n" + implementationFunctions + "\n" + driverCode;
-  return testCode;
-  }*/
-
 string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImp)
 {
   int numImplementations = imps->size();
@@ -101,21 +90,6 @@ string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, st
   string testCode = headersAndDefines + "\n" + implementationFunctions + "\n" + driverCode;
   return testCode;
 }
-
-/*string RuntimeTest::MainFuncCode(ImplementationMap* imps)
-{
-  string prototype = "int main() {\n";
-  string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
-  argBufferAllocation += AllocateArgBuffers("");
-  argBufferAllocation += "FILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
-  argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
-  string timingSetup = "\tint i, j, k;\n\tlong long start_time, end_time, exec_time, total_cycles;\n";
-  string mainFunc = prototype + argBufferAllocation + "\n" + timingSetup;
-  string timingLoop = TimingLoop(imps);
-  timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
-  mainFunc = mainFunc + "\n" + timingLoop + "\n}";
-  return mainFunc;
-  }*/
 
 string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImpName)
 {
@@ -210,10 +184,8 @@ string RuntimeTest::FillBuffersWithRandValues(string postfix) {
 
 string RuntimeTest::CopyArgBuffersTo(string postfix) {
   std::vector<string> bufferFills;
-  std::vector<string>::iterator argIter;
-  for (argIter = m_argNames.begin(); argIter != m_argNames.end(); ++argIter) {
-    string srcBuffer = *argIter;
-    string destBuffer = *argIter + postfix;
+  for (auto srcBuffer : m_argNames) {
+    string destBuffer = srcBuffer + postfix;
     bufferFills.push_back("\tCOPY_BUFFER(BUF_SIZE, " + srcBuffer + ", " + destBuffer + ");");
   }
   return ToCStatements(bufferFills);
@@ -276,25 +248,6 @@ RuntimeEvaluator::RuntimeEvaluator(string evalDirName) {
   m_minCycles = 0;
 }
 
-/*ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(RuntimeTest test, ImplementationMap* imps) {
-  m_minCycles = test.m_minCycles;
-  string executableName = test.m_operationName;
-  string testFileName = executableName + ".c";
-  std::ofstream outStream(m_evalDirName + "/" + testFileName);
-  outStream << test.MakeTestCode(imps);
-  outStream.close();
-  cout << "All implementations written to files\n";
-  const char *evalDir = (m_evalDirName + "/").c_str();
-  chdir(evalDir);
-  system(arch->CompileString(executableName, testFileName).c_str());
-  cout << "Compiled\n";
-  string runStr = "./" + executableName;
-  system(runStr.c_str());
-  string removeExecutable = "rm -f " + executableName;
-  system(removeExecutable.c_str());
-  return ReadTimeDataFromFile(test.m_dataFileName, imps->size());
-}
-*/
 ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp) {
   m_minCycles = test.m_minCycles;
   string executableName = m_evalDirName + "/" + test.m_operationName;
