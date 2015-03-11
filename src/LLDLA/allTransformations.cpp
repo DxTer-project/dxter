@@ -29,6 +29,7 @@
 #include "unpackToPartAndCopy.h"
 #include "vmmul.h"
 #include "vadd.h"
+#include "vaddSplitToMainAndResidual.h"
 #include "verticalPackToMultipleOfVecRegWidth.h"
 #include "vvdot.h"
 #include "vvdotPackToMultipleOfMu.h"
@@ -216,6 +217,10 @@ void AddVAddTrans()
   Universe::AddTrans(VAdd::GetClass(), new VerticalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, VAdd::GetClass()), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new HorizontalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, VAdd::GetClass()), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   return;
 }

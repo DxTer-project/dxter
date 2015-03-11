@@ -19,8 +19,6 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "driverUtils.h"
 
 Trans CharToTrans(char c) 
