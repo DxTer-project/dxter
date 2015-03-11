@@ -61,7 +61,7 @@ InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size si
 
 InputNode *CreateInput6(string name, Size size1, Size size2, Size size3, Size size4, Size size5, Size size6)
 {
-    Sizes sizes[4];
+    Sizes sizes[6];
     sizes[0].AddRepeatedSizes(size1,1,1);
     sizes[1].AddRepeatedSizes(size2,1,1);
     sizes[2].AddRepeatedSizes(size3,1,1);
