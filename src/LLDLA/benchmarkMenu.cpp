@@ -111,8 +111,10 @@ void RunBenchmarkNumber(unsigned int num) {
     break;
   case(4):
     MAddBenchmarkMenu();
+    break;
   case(5):
     ColVAddBenchmarkMenu();
+    break;
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;
     break;
