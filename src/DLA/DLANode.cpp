@@ -547,8 +547,8 @@ bool DLANode::IsInputScalar(ConnNum num) const
 
 bool DLANode::InputDimsAreOneRepeatedSizeEach(ConnNum num) const {
   CheckInputNum(num);
-  return GetInputM(num)->IsSingleRepeatedSize()
-    && GetInputN(num)->IsSingleRepeatedSize();
+  return GetInputM(num)->IsConstant()
+    && GetInputN(num)->IsConstant();
 }
 
 int DLANode::GetInputNumCols(ConnNum num) const {
@@ -608,13 +608,21 @@ bool DLANode::InputsAreSameSize(ConnNum left, ConnNum right) const {
 }
 
 bool DLANode::InputNIsMultipleOfVecRegWidth(ConnNum num) const {
-  CheckInputNum(num);
-  return GetInputN(num)->EvenlyDivisibleBy(GetVecRegWidth());
+  return InputNIsMultipleOf(num, GetVecRegWidth());
 }
 
 bool DLANode::InputMIsMultipleOfVecRegWidth(ConnNum num) const {
+  return InputMIsMultipleOf(num, GetVecRegWidth());
+}
+
+bool DLANode::InputNIsMultipleOf(ConnNum num, Size s) const {
   CheckInputNum(num);
-  return GetInputM(num)->EvenlyDivisibleBy(GetVecRegWidth());
+  return GetInputN(num)->EvenlyDivisibleBy(s);
+}
+
+bool DLANode::InputMIsMultipleOf(ConnNum num, Size s) const {
+  CheckInputNum(num);
+  return GetInputM(num)->EvenlyDivisibleBy(s);
 }
 
 #endif // DOLLDLA

@@ -38,23 +38,28 @@ void LocalInput::Prop() {
 void LocalInput::PrintCode(IndStream& out) {
   Type dataType = m_dataTypeInfo.m_type;
   string typeName;
-  //  string varName = m_varName.m_name;
-  //  string byteArray = varName + "_name";
-  //  string 
+  string varName = m_varName.m_name;
+  string byteArray = varName + "_name";
   if (dataType == REAL_SINGLE) {
     out.Indent();
     typeName = "float";
-    //    *out << "float ";
   } else {
     out.Indent();
     typeName = "double";
-    //    *out << "double ";
   }
-  string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + " + 1";
-  /*  *out << "unsigned char " << m_varName.m_name << "_array[" << size << "] = {0};" << endl;
-   *out << "unsigned char* " << m_varName.m_name << "_array_ptr = &("m_varNam*/
-
-  *out << m_varName.m_name << " = alloc_aligned_32(sizeof(" + typeName + ")*" + size + ");";
+  string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + " + 32";
+  string arrName = m_varName.m_name + "_char_array";
+  string arrPtrName = arrName + "_array_ptr";
+  out.Indent();
+  *out << typeName << " " << arrName << "[" << size << "*sizeof(" << typeName << ") + 32" << "] = {0};" << endl;
+  out.Indent();
+  *out << "unsigned char* " << arrPtrName << " = (unsigned char*)" << arrName << ";" << endl;
+  string shiftStr = "32 - (((unsigned int) " + arrPtrName + ") % 32)";
+  out.Indent();
+  *out << arrPtrName << " = " << arrPtrName << " + " << shiftStr << ";" << endl;
+  out.Indent();
+  *out << m_varName.m_name << " = (" << typeName << "*)" << arrPtrName << ";" << endl;
+     //  *out << m_varName.m_name << " = alloc_aligned_32(sizeof(" + typeName + ")*" + size + ");";
 }
 
 NodeType LocalInput::GetType() const {

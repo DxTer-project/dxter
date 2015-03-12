@@ -271,7 +271,7 @@ RealPSet* Gemv2(Type dataType, int m, int n, int k)
 		    tunBeta, 0,
 		    bY, 0);
   
-  VAdd* sum = new VAdd(COLVECTOR, ABSLAYER);
+  VAdd* sum = new VAdd(ABSLAYER);
   sum->AddInputs(4,
 		 alphaAX, 0,
 		 betaBY, 0);

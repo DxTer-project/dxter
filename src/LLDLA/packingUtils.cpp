@@ -129,9 +129,10 @@ Recombine* SplitBinarySymmetricOperationIntoMainAndResidual(Layer layer, Node* b
 
   Dir partDir = dim == DIMM ? VERTICAL : HORIZONTAL;
   auto recombine = new Recombine(layer, partDir);
-  recombine->AddInputs(4,
+  recombine->AddInputs(6,
 		       mainBinop, 0,
-		       residualBinop, 0);
+		       residualBinop, 0,
+		       binop->Input(1), binop->InputConnNum(1));
 
   return recombine;
 }
