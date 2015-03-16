@@ -663,16 +663,37 @@ bool Linearizer::HasCurrLinearization() const
     return false;
   }
   else {
-    if (m_lin.m_order.size() != m_elems.size())
+    if (m_lin.m_order.size() != m_elems.size()) {
+      for (auto elem : m_elems) {
+	bool found = false;
+	for(auto other : m_lin.m_order) {
+	  if (other == elem) {
+	    found = true;
+	    break;
+	  }
+	}
+	if (!found) {
+	  if (elem->IsSet()) {
+	    cout << "missing " << ((SetLinElem*)elem)->m_set->GetFunctionalityString() << endl;
+	  }
+	  else if (elem->IsNode()) {
+	    cout << "missing2 " << ((NodeLinElem*)elem)->m_node->GetType() << endl;
+	  }
+	  else
+	    cout << "clear missing\n";
+	}
+      }
       throw;
+    }
     return true;
   }
 }
 
 void Linearizer::InsertVecClearing(const StrSet &stillLive)
 {
-  if (!HasCurrLinearization())
+  if (!HasCurrLinearization()) {
     throw;
+  }
   m_lin.InsertVecClearing(stillLive, m_alwaysLive);
 }
 
