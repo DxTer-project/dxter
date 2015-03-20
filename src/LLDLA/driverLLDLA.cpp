@@ -22,30 +22,16 @@
 #include <time.h>
 #include <climits>
 
-#include "allTransformations.h"
-#include "base.h"
 #include "benchmarkMenu.h"
 #include "blasExamples.h"
-#include "costs.h"
 #include "costModel.h"
 #include "driverUtils.h"
-#include "debug.h"
-#include "DLAReg.h"
 #include "exampleRunner.h"
-#include "LLDLATranspose.h"
-#include "loopUnrolling.h"
-#include "mmul.h"
-#include "mmulTransformations.h"
 #include "miscellaneousExamples.h"
 #include "multiBLASExamples.h"
 #include "nodeTestExamples.h"
-#include "problemInstanceStats.h"
-#include "runtimeEvaluation.h"
 #include "singleOperationExamples.h"
-#include "transform.h"
 #include "uniqueNameSource.h"
-#include "transpose.h"
-#include "loopSupport.h"
 
 #if DOLLDLA
 
@@ -72,61 +58,6 @@ Architecture* arch;
 UniqueNameSource* localInputNames;
 CostModel* costModel;
 
-double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
-  double peakFlopsPerCycle = arch->FlopsPerCycle(type);
-  double bestFlopsPerCycle = 0;
-  ImplementationRuntimeMapIter mit;
-  for (mit = impTimes.begin(); mit != impTimes.end(); ++mit) {
-    TimeVecIter vit;
-    for (vit = mit->second.begin(); vit != mit->second.end(); ++vit) {
-      double totalTimeInCycles = *vit;
-      double actualFlopsPerCycle = flopCost / totalTimeInCycles;
-      double pctPeak = (actualFlopsPerCycle / peakFlopsPerCycle) * 100;
-      if (actualFlopsPerCycle > bestFlopsPerCycle) {
-	bestFlopsPerCycle = actualFlopsPerCycle;
-      }
-      if (pctPeak > 100) {
-	cout << "pctPeak > 100\n";
-	throw;
-      }
-    }
-  }
-  return bestFlopsPerCycle;
-}
-
-GraphNum PrintImpMapStats(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
-
-  double peakFlopsPerCycle = arch->FlopsPerCycle(type);
-  GraphNum bestImpNum = 0;
-  double overallBestAvgFlopsPerCycle = 0;
-
-  for (auto mit : impTimes) {
-    double avgFlopsPerCycle = 0.0;
-    double numRuns = 0.0;
-
-    cout << "IMPLEMENTATION # " << std::to_string((long long int) mit.first) << endl;
-    for (auto vit : mit.second) {
-      double timeInCycles = vit;
-      double actualFlopsPerCycle = flopCost / timeInCycles;
-      avgFlopsPerCycle += actualFlopsPerCycle;
-      numRuns += 1.0;
-    }
-
-    avgFlopsPerCycle = avgFlopsPerCycle / numRuns;
-
-    if (avgFlopsPerCycle > overallBestAvgFlopsPerCycle) {
-      overallBestAvgFlopsPerCycle = avgFlopsPerCycle;
-      bestImpNum = mit.first;
-    }
-
-    cout << "Avg. Flops per cycle = " << std::to_string((long double) avgFlopsPerCycle);
-    double avgPctPeak = (avgFlopsPerCycle / peakFlopsPerCycle) * 100;
-    cout << "\t%Peak = " << std::to_string((long double) avgPctPeak) << endl;
-  }
-  cout << "Best avg. flops/cycle achieved: " << std::to_string((long double) overallBestAvgFlopsPerCycle) << endl;
-  cout << "Best avg. percent of peak: " << std::to_string((long double) (overallBestAvgFlopsPerCycle / peakFlopsPerCycle) * 100) << endl;
-  return bestImpNum;
-}
 
 void Usage()
 {

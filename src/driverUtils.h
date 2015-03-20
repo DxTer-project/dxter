@@ -33,6 +33,10 @@ Side CharToSide(char c);
 
 #if DOLLDLA
 VecType CharToVecType(char c);
+
+double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost);
+GraphNum PrintImpMapStats(Type type, ImplementationRuntimeMap &impTimes, double flopCost);
+
 #endif // DOLLDLA
 
 Type CharToType(char c);
