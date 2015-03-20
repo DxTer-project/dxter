@@ -81,9 +81,6 @@ class Architecture
   string ZeroVar(Type type, string varName);
   double FlopsPerCycle(Type type);
 
-  // Cost model
-  virtual int ContigVecLoadCost() = 0;
-  virtual int ContigVecStoreCost() = 0;
 };
 
 class AMDEngSample : public Architecture
@@ -124,9 +121,6 @@ class AMDEngSample : public Architecture
   virtual string CompileString(string executableName, string testFileName);
   virtual double CyclesPerSecond();
 
-  // Cost model
-  virtual int ContigVecLoadCost();
-  virtual int ContigVecStoreCost();
 };
 
 class Stampede : public Architecture
@@ -168,9 +162,6 @@ class Stampede : public Architecture
   virtual string CompileString(string executableName, string testFileName);
   virtual double CyclesPerSecond();
 
-  // Cost model
-  virtual int ContigVecLoadCost();
-  virtual int ContigVecStoreCost();
 };
 
 class HaswellMacbook : public Stampede
@@ -188,9 +179,6 @@ class HaswellMacbook : public Stampede
   virtual string CompileString(string executableName, string testFileName);
   virtual double CyclesPerSecond();
 
-  // Cost model
-  virtual int ContigVecLoadCost();
-  virtual int ContigVecStoreCost();
 };
 
 extern Architecture* arch;

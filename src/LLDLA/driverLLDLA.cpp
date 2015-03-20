@@ -27,6 +27,7 @@
 #include "benchmarkMenu.h"
 #include "blasExamples.h"
 #include "costs.h"
+#include "costModel.h"
 #include "driverUtils.h"
 #include "debug.h"
 #include "DLAReg.h"
@@ -69,6 +70,7 @@ Trans transA, transB;
 
 Architecture* arch;
 UniqueNameSource* localInputNames;
+CostModel* costModel;
 
 double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost) {
   double peakFlopsPerCycle = arch->FlopsPerCycle(type);
@@ -172,6 +174,12 @@ void Usage()
   cout <<"\n";
 }
 
+void SetUpGlobalState() {
+  arch = new HaswellMacbook();
+  costModel = new BasicCostModel();
+  localInputNames = new UniqueNameSource("local_input_");
+}
+
 int main(int argc, const char* argv[])
 {
 
@@ -185,8 +193,7 @@ int main(int argc, const char* argv[])
   VecType vecType;
   ProblemInstance problemInstance;
 
-  arch = new HaswellMacbook();
-  localInputNames = new UniqueNameSource("local_input_");
+  SetUpGlobalState();
 
   RealPSet* algPSet;
   int algNum;

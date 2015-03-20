@@ -361,16 +361,6 @@ string AMDEngSample::DZeroVar(string varName)
   return varName + ".v = _mm_setzero_pd();\n";
 }
 
-int AMDEngSample::ContigVecLoadCost()
-{
-  return 20;
-}
-
-int AMDEngSample::ContigVecStoreCost()
-{
-  return 100;
-}
-
 string Stampede::CompileString(string executableName, string testFileName)
 {
   string compileStr = "icc -O3 -xhost -fno-alias -o ";
@@ -557,16 +547,6 @@ string Stampede::DZeroVar(string varName)
   return varName + ".v = _mm256_setzero_pd();\n";
 }
 
-int Stampede::ContigVecLoadCost()
-{
-  return 20;
-}
-
-int Stampede::ContigVecStoreCost()
-{
-  return 100;
-}
-
 string HaswellMacbook::CompileString(string executableName, string testFileName)
 {
   string compileStr = "clang -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o ";
@@ -596,16 +576,6 @@ string HaswellMacbook::SFMACode(string operand1, string operand2, string operand
 string HaswellMacbook::DFMACode(string operand1, string operand2, string operand3, string result)
 {
   return result + ".v = _mm256_fmadd_pd( " + operand1 + ".v, " + operand2 + ".v, " + operand3 + ".v );\n";
-}
-
-int HaswellMacbook::ContigVecLoadCost()
-{
-  return 20;
-}
-
-int HaswellMacbook::ContigVecStoreCost()
-{
-  return 100;
 }
 
 #endif // DOLLDLA

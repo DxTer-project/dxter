@@ -23,11 +23,13 @@
 
 #if DOLLDLA
 
+#include "costModel.h"
+
 void AddScalars::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
-    m_cost = arch->ContigVecLoadCost() + arch->ContigVecStoreCost();
+    m_cost = costModel->ContigVecLoadCost() + costModel->ContigVecStoreCost();
   }
 }
 
@@ -44,7 +46,7 @@ void MulScalars::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
-    m_cost = arch->ContigVecLoadCost() + arch->ContigVecStoreCost();
+    m_cost = costModel->ContigVecLoadCost() + costModel->ContigVecStoreCost();
   }
 }
 
@@ -61,7 +63,7 @@ void SetScalarToZero::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<1, 1>::Prop();
-    m_cost = arch->ContigVecStoreCost();
+    m_cost = costModel->ContigVecStoreCost();
   }
   return;
 }
