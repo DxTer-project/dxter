@@ -526,13 +526,17 @@ int main(int argc, const char* argv[])
     cout << "SumScatterOpt phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
 
-    cout << "Enforcing memory contstraint\n";
-    cout.flush();
-    time(&start2);
-    uni.EnforceMemConstraint(maxMem);
-    time(&end);
-    cout << "Now there are " << uni.TotalCount() << endl;
-    cout << "That took " << difftime(end,start2) << " seconds\n";
+    if (maxMem > 0) {
+      cout << "Enforcing memory contstraint\n";
+      cout.flush();
+      time(&start2);
+      uni.EnforceMemConstraint(maxMem);
+      time(&end);
+      cout << "Now there are " << uni.TotalCount() << endl;
+      cout << "That took " << difftime(end,start2) << " seconds\n";
+    }
+    else if (maxMem < 0)
+      throw;
 
     time(&start2);
     uni.Expand(numIters, SUMSCATTERTENSORPHASE, TenCullRO);

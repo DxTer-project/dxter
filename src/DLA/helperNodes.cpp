@@ -185,8 +185,10 @@ InputNode::InputNode(NodeType type, const SizesArray sizes, string name, Dim num
 :
 m_type(type), m_numDims(numDims), m_lsizes(NULL)
 {
-  if (m_numDims > NUM_GRID_DIMS)
+  if (m_numDims > NUM_GRID_DIMS) {
+    cout << "change NUM_GRID_DIMS in costs.h\n";
     throw;
+  }
   if (m_numDims) {
     m_sizes = new Sizes[m_numDims];
     for(Dim i = 0; i < m_numDims; ++i)

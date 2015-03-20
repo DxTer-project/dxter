@@ -40,6 +40,15 @@ InputNode *CreateInput2(string name, Size size1, Size size2)
     return new InputNode(name, sizes, name, 2);
 }
 
+InputNode *CreateInput3(string name, Size size1, Size size2, Size size3)
+{
+    Sizes sizes[3];
+    sizes[0].AddRepeatedSizes(size1,1,1);
+    sizes[1].AddRepeatedSizes(size2,1,1);
+    sizes[2].AddRepeatedSizes(size3,1,1);
+    return new InputNode(name, sizes, name, 3);
+}
+
 InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size size4)
 {
     Sizes sizes[4];
@@ -48,6 +57,18 @@ InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size si
     sizes[2].AddRepeatedSizes(size3,1,1);
     sizes[3].AddRepeatedSizes(size4,1,1);
     return new InputNode(name, sizes, name, 4);
+}
+
+InputNode *CreateInput6(string name, Size size1, Size size2, Size size3, Size size4, Size size5, Size size6)
+{
+    Sizes sizes[6];
+    sizes[0].AddRepeatedSizes(size1,1,1);
+    sizes[1].AddRepeatedSizes(size2,1,1);
+    sizes[2].AddRepeatedSizes(size3,1,1);
+    sizes[3].AddRepeatedSizes(size4,1,1);
+    sizes[4].AddRepeatedSizes(size5,1,1);
+    sizes[5].AddRepeatedSizes(size6,1,1);
+    return new InputNode(name, sizes, name, 6);
 }
 
 #if 1

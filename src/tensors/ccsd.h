@@ -110,6 +110,8 @@ RealPSet* Tau_efmn_calc(DLANode *t_am,
 
 InputNode *CreateInput2(string name, Size size1, Size size2);
 InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size size4);
+InputNode *CreateInput6(string name, Size size1, Size size2, Size size3, Size size4, Size size5, Size size6);
+InputNode *CreateInput3(string name, Size size1, Size size2, Size size3);
 
 
 #endif //DOTENSORS
