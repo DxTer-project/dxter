@@ -19,9 +19,6 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <time.h>
-#include <climits>
-
 #include "benchmarkMenu.h"
 #include "blasExamples.h"
 #include "costModel.h"
