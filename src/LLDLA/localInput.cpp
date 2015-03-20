@@ -48,7 +48,7 @@ void LocalInput::PrintCode(IndStream& out) {
     typeName = "double";
   }
   string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + " + 32";
-  string arrName = m_varName.m_name + "_char_array";
+  /*  string arrName = m_varName.m_name + "_char_array";
   string arrPtrName = arrName + "_array_ptr";
   out.Indent();
   *out << typeName << " " << arrName << "[" << size << "*sizeof(" << typeName << ") + 32" << "] = {0};" << endl;
@@ -58,8 +58,8 @@ void LocalInput::PrintCode(IndStream& out) {
   out.Indent();
   *out << arrPtrName << " = " << arrPtrName << " + " << shiftStr << ";" << endl;
   out.Indent();
-  *out << m_varName.m_name << " = (" << typeName << "*)" << arrPtrName << ";" << endl;
-     //  *out << m_varName.m_name << " = alloc_aligned_32(sizeof(" + typeName + ")*" + size + ");";
+  *out << m_varName.m_name << " = (" << typeName << "*)" << arrPtrName << ";" << endl;*/
+  *out << m_varName.m_name << " = alloc_aligned_32(sizeof(" + typeName + ")*" + size + ");";
 }
 
 NodeType LocalInput::GetType() const {
