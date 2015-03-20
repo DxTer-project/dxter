@@ -26,7 +26,7 @@
 #include "horizontalUnpack.h"
 #include "packingUtils.h"
 #include "verticalUnpack.h"
-#include "SVMul.h"
+#include "svmul.h"
 
 bool SVMulVerticalPackToMultipleOfMu::CanApply(const Node* node) const {
   if (node->GetNodeClass() == SVMul::GetClass()) {
