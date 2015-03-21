@@ -268,9 +268,9 @@ string AMDEngSample::SDuplicateLoad(string memPtr, string receivingLoc)
 
 string AMDEngSample::SStridedLoad(string memPtr, string receivingLoc, string stride)
 {
-  return receivingLoc + ".f[0] = *(" + memPtr + ");\n"
-    + receivingLoc + ".f[1] = *(" + memPtr + " + " + stride + " );\n"
-    + receivingLoc + ".f[2] = *(" + memPtr + " + 2 * " + stride + " );\n"
+  return receivingLoc + ".f[0] = *(" + memPtr + "); "
+    + receivingLoc + ".f[1] = *(" + memPtr + " + " + stride + " ); "
+    + receivingLoc + ".f[2] = *(" + memPtr + " + 2 * " + stride + " ); "
     + receivingLoc + ".f[3] = *(" + memPtr + " + 3 * " + stride + " );\n";
 }
 
@@ -281,9 +281,9 @@ string AMDEngSample::SContiguousStore(string memPtr, string startingLoc)
 
 string AMDEngSample::SStridedStore(string memPtr, string startingLoc, string stride)
 {
-  return "*" + memPtr + " = " + startingLoc + ".f[0];\n"
-    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".f[1];\n"
-    + "*(" + memPtr + " + 2 * " + stride + ") = " + startingLoc + ".f[2];\n"
+  return "*" + memPtr + " = " + startingLoc + ".f[0]; "
+    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".f[1]; "
+    + "*(" + memPtr + " + 2 * " + stride + ") = " + startingLoc + ".f[2]; "
     + "*(" + memPtr + " + 3 * " + stride + ") = " + startingLoc + ".f[3];\n";
 }
 
@@ -336,7 +336,7 @@ string AMDEngSample::DContiguousLoad(string memPtr, string receivingLoc)
 
 string AMDEngSample::DStridedLoad(string memPtr, string receivingLoc, string stride)
 {
-  return receivingLoc + ".d[0] = *(" + memPtr + ");\n"
+  return receivingLoc + ".d[0] = *(" + memPtr + "); "
     + receivingLoc + ".d[1] = *(" + memPtr + " + " + stride + " );\n";
 }
 
@@ -352,23 +352,13 @@ string AMDEngSample::DContiguousStore(string memPtr, string startingLoc)
 
 string AMDEngSample::DStridedStore(string memPtr, string startingLoc, string stride)
 {
-  return "*" + memPtr + " = " + startingLoc + ".d[0];\n"
+  return "*" + memPtr + " = " + startingLoc + ".d[0]; "
     + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".d[1];\n";
 }
 
 string AMDEngSample::DZeroVar(string varName)
 {
   return varName + ".v = _mm_setzero_pd();\n";
-}
-
-int AMDEngSample::ContigVecLoadCost()
-{
-  return 20;
-}
-
-int AMDEngSample::ContigVecStoreCost()
-{
-  return 100;
 }
 
 string Stampede::CompileString(string executableName, string testFileName)
@@ -449,13 +439,13 @@ string Stampede::SDuplicateLoad(string memPtr, string receivingLoc)
 
 string Stampede::SStridedLoad(string memPtr, string receivingLoc, string stride)
 {
-  return receivingLoc + ".f[0] = *(" + memPtr + ");\n"
-    + receivingLoc + ".f[1] = *(" + memPtr + " + " + stride + " );\n"
-    + receivingLoc + ".f[2] = *(" + memPtr + " + 2 * " + stride + " );\n"
-    + receivingLoc + ".f[3] = *(" + memPtr + " + 3 * " + stride + " );\n"
-    + receivingLoc + ".f[4] = *(" + memPtr + " + 4 * " + stride + " );\n"
-    + receivingLoc + ".f[5] = *(" + memPtr + " + 5 * " + stride + " );\n"
-    + receivingLoc + ".f[6] = *(" + memPtr + " + 6 * " + stride + " );\n"
+  return receivingLoc + ".f[0] = *(" + memPtr + "); "
+    + receivingLoc + ".f[1] = *(" + memPtr + " + " + stride + " ); "
+    + receivingLoc + ".f[2] = *(" + memPtr + " + 2 * " + stride + " ); "
+    + receivingLoc + ".f[3] = *(" + memPtr + " + 3 * " + stride + " ); "
+    + receivingLoc + ".f[4] = *(" + memPtr + " + 4 * " + stride + " ); "
+    + receivingLoc + ".f[5] = *(" + memPtr + " + 5 * " + stride + " ); "
+    + receivingLoc + ".f[6] = *(" + memPtr + " + 6 * " + stride + " ); "
     + receivingLoc + ".f[7] = *(" + memPtr + " + 7 * " + stride + " );\n";
 }
 
@@ -466,13 +456,13 @@ string Stampede::SContiguousStore(string memPtr, string startingLoc)
 
 string Stampede::SStridedStore(string memPtr, string startingLoc, string stride)
 {
-  return "*" + memPtr + " = " + startingLoc + ".f[0];\n"
-    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".f[1];\n"
-    + "*(" + memPtr + " + 2 * " + stride + ") = " + startingLoc + ".f[2];\n"
-    + "*(" + memPtr + " + 3 * " + stride + ") = " + startingLoc + ".f[3];\n"
-    + "*(" + memPtr + " + 4 * " + stride + ") = " + startingLoc + ".f[4];\n"
-    + "*(" + memPtr + " + 5 * " + stride + ") = " + startingLoc + ".f[5];\n"
-    + "*(" + memPtr + " + 6 * " + stride + ") = " + startingLoc + ".f[6];\n"
+  return "*" + memPtr + " = " + startingLoc + ".f[0]; "
+    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".f[1]; "
+    + "*(" + memPtr + " + 2 * " + stride + ") = " + startingLoc + ".f[2]; "
+    + "*(" + memPtr + " + 3 * " + stride + ") = " + startingLoc + ".f[3]; "
+    + "*(" + memPtr + " + 4 * " + stride + ") = " + startingLoc + ".f[4]; "
+    + "*(" + memPtr + " + 5 * " + stride + ") = " + startingLoc + ".f[5]; "
+    + "*(" + memPtr + " + 6 * " + stride + ") = " + startingLoc + ".f[6]; "
     + "*(" + memPtr + " + 7 * " + stride + ") = " + startingLoc + ".f[7];\n";
 }
 
@@ -528,9 +518,9 @@ string Stampede::DContiguousLoad(string memPtr, string receivingLoc)
 
 string Stampede::DStridedLoad(string memPtr, string receivingLoc, string stride)
 {
-  return receivingLoc + ".d[0] = *(" + memPtr + ");\n"
-    + receivingLoc + ".d[1] = *(" + memPtr + " + " + stride + " );\n"
-    + receivingLoc + ".d[2] = *(" + memPtr + " + 2 * " + stride + " );\n"
+  return receivingLoc + ".d[0] = *(" + memPtr + "); "
+    + receivingLoc + ".d[1] = *(" + memPtr + " + " + stride + " ); "
+    + receivingLoc + ".d[2] = *(" + memPtr + " + 2 * " + stride + " ); "
     + receivingLoc + ".d[3] = *(" + memPtr + " + 3 * " + stride + " );\n";
 }
 
@@ -546,25 +536,15 @@ string Stampede::DContiguousStore(string memPtr, string startingLoc)
 
 string Stampede::DStridedStore(string memPtr, string startingLoc, string stride)
 {
-  return "*" + memPtr + " = " + startingLoc + ".d[0];\n"
-    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".d[1];\n"
-    + "*(" + memPtr + " + 2 * " + stride + ") = " + startingLoc + ".d[2];\n"
+  return "*" + memPtr + " = " + startingLoc + ".d[0]; "
+    + "*(" + memPtr + " + " + stride + ") = " + startingLoc + ".d[1]; "
+    + "*(" + memPtr + " + 2 * " + stride + ") = " + startingLoc + ".d[2]; "
     + "*(" + memPtr + " + 3 * " + stride + ") = " + startingLoc + ".d[3];\n";
 }
 
 string Stampede::DZeroVar(string varName)
 {
   return varName + ".v = _mm256_setzero_pd();\n";
-}
-
-int Stampede::ContigVecLoadCost()
-{
-  return 20;
-}
-
-int Stampede::ContigVecStoreCost()
-{
-  return 100;
 }
 
 string HaswellMacbook::CompileString(string executableName, string testFileName)
@@ -596,16 +576,6 @@ string HaswellMacbook::SFMACode(string operand1, string operand2, string operand
 string HaswellMacbook::DFMACode(string operand1, string operand2, string operand3, string result)
 {
   return result + ".v = _mm256_fmadd_pd( " + operand1 + ".v, " + operand2 + ".v, " + operand3 + ".v );\n";
-}
-
-int HaswellMacbook::ContigVecLoadCost()
-{
-  return 20;
-}
-
-int HaswellMacbook::ContigVecStoreCost()
-{
-  return 100;
 }
 
 #endif // DOLLDLA

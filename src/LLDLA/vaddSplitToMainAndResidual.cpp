@@ -25,7 +25,7 @@
 
 #include "base.h"
 #include "packingUtils.h"
-#include "VAdd.h"
+#include "vadd.h"
 
 VAddSplitToMainAndResidual::VAddSplitToMainAndResidual(Layer fromLayer, Layer toLayer, VecType vecType) {
   m_fromLayer = fromLayer;

@@ -13,32 +13,26 @@
     DxTer is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
+    GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef DRIVER_UTILS_H_
-#define DRIVER_UTILS_H_
-
-#pragma once
-
-#include "base.h"
-#include "LLDLA.h"
-
-Trans CharToTrans(char c);
-Tri CharToTri(char c);
-Side CharToSide(char c);
-
 #if DOLLDLA
-VecType CharToVecType(char c);
 
-double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double flopCost);
-GraphNum PrintImpMapStats(Type type, ImplementationRuntimeMap &impTimes, double flopCost);
+class CostModel {
+ public:
+  virtual int ContigVecLoadCost() = 0;
+  virtual int ContigVecStoreCost() = 0;
+};
+
+class BasicCostModel : public CostModel {
+ public:
+  virtual int ContigVecLoadCost() { return 20; }
+  virtual int ContigVecStoreCost() { return 100; }
+};
+
+extern CostModel* costModel;
 
 #endif // DOLLDLA
-
-Type CharToType(char c);
-
-#endif // DRIVER_UTILS_H_
