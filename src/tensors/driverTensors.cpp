@@ -91,8 +91,8 @@ typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
 
 double difftime(AccurateTime &end, AccurateTime &start)
 {
-  std::chrono::duration<double> elapsed_seconds = end-start;
-  return elapsed_seconds.count();
+  ///  std::chrono::duration<double> elapsed_seconds = end-start;
+  return (std::chrono::duration_cast<std::chrono::milliseconds>(end-start)).count()/1000.0;
 }
 
 void ReduceMaxMem(set<string> &used)
