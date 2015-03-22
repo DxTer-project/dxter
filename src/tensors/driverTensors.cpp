@@ -521,6 +521,12 @@ int main(int argc, const char* argv[])
     end = std::chrono::system_clock::now();
     cout << "DP phase took " << difftime(end,start2) << " seconds\n";
 
+#if 0
+    uni.InlineAllSets();
+    uni.InlineAllSets();
+    uni.InlineAllSets();
+#endif
+
     cout << "Propagating\n";
     cout.flush();
     start2 = std::chrono::system_clock::now();
