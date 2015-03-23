@@ -38,6 +38,7 @@
 #include "contraction.h"
 #include "tensorRedist.h"
 #include "tensorPermute.h"
+#include <chrono>
 
 
 #if DOTENSORS
@@ -85,6 +86,14 @@ RealPSet* HFG();
 RealPSet* TermsInlined();
 RealPSet* UQP();
 RealPSet* XUQP();
+
+typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
+
+double difftime(AccurateTime &end, AccurateTime &start)
+{
+  ///  std::chrono::duration<double> elapsed_seconds = end-start;
+  return (std::chrono::duration_cast<std::chrono::milliseconds>(end-start)).count()/1000.0;
+}
 
 void ReduceMaxMem(set<string> &used)
 {
@@ -477,19 +486,19 @@ int main(int argc, const char* argv[])
   AddSimplifiers();
 
   Universe uni;
-  time_t start, start2, end;
+  AccurateTime start, start2, end;
   uni.PrintStats();
 
   if (algNum==0) {
-    time(&start);
+    start = std::chrono::system_clock::now();
     uni.Init(fileName);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Unflatten took " << difftime(end,start) << " seconds\n";
     cout << "Propagating\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Prop();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
   else {
@@ -500,23 +509,29 @@ int main(int argc, const char* argv[])
     //    cout << "Printing evaluation code\n";
     Cost flopCost = graphIter.EvalAndSetBest();
     cout << "*****FLOPS = " << setprecision(15) << flopCost << endl;
-    time(&start);
+    start = std::chrono::system_clock::now();
   }
 
 
 #if DODPTENSORPHASE
   if (CurrPhase == DPTENSORPHASE) {
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     cout << "Expanding DP phase\n";
     uni.Expand(-1, DPTENSORPHASE, TenCullDP);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "DP phase took " << difftime(end,start2) << " seconds\n";
+
+#if 0
+    uni.InlineAllSets();
+    uni.InlineAllSets();
+    uni.InlineAllSets();
+#endif
 
     cout << "Propagating\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Prop();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
 #endif
@@ -529,25 +544,25 @@ int main(int argc, const char* argv[])
     if (maxMem > 0) {
       cout << "Enforcing memory contstraint\n";
       cout.flush();
-      time(&start2);
+      start2 = std::chrono::system_clock::now();
       uni.EnforceMemConstraint(maxMem);
-      time(&end);
+      end = std::chrono::system_clock::now();
       cout << "Now there are " << uni.TotalCount() << endl;
       cout << "That took " << difftime(end,start2) << " seconds\n";
     }
     else if (maxMem < 0)
       throw;
 
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Expand(numIters, SUMSCATTERTENSORPHASE, TenCullRO);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "SumScatter phase took " << difftime(end,start2) << " seconds\n";
     
     cout << "Propagating\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Prop();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
 #endif
@@ -556,9 +571,9 @@ int main(int argc, const char* argv[])
   if (CurrPhase == ROTENSORPHASE) {
     cout << "Expanding RO phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Expand(numIters, ROTENSORPHASE, TenCullRO);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "RO phase took " << difftime(end,start2) << " seconds\n";
 
     //        uni.PrintAll(algNum);
@@ -567,25 +582,25 @@ int main(int argc, const char* argv[])
 
     cout << "Propagating\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Prop();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
 
     cout << "Enforcing memory contstraint (from " << uni.TotalCount() << ")\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     //    uni.EnforceMemConstraint(maxMem);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "That took " << difftime(end,start2) << " seconds\n";
     cout << "Left with " << uni.TotalCount() << endl;
 
     /*
     cout << "Culling worst\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.CullWorstPerformers(.99, 3);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Culling took " << difftime(end,start2) << " seconds\n";
     cout << "Left with " << uni.TotalCount();
     */
@@ -597,16 +612,16 @@ int main(int argc, const char* argv[])
   if (CurrPhase == FUSEANDOPTTENSORPHASE) {
     cout << "Fusing and opt phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Expand(numIters, FUSEANDOPTTENSORPHASE, TenCullRO);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Fusing and opt phase took " << difftime(end,start2) << " seconds\n";
     
     cout << "Propagating\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Prop();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
 
@@ -619,29 +634,29 @@ int main(int argc, const char* argv[])
     cout << "Pack optimization phase\n";
     cout << "Starting with " << uni.TotalCount() << endl;
     /*
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     //uni.Prop();
     uni.CullWorstPerformers(.99, 3);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.InlineAllSets();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Inlining took " << difftime(end,start2) << " seconds\n";
     cout.flush();
     */
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Simplify();
     uni.Expand(numIters, PACKOPTPHASE, TenCullRO);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
 
     cout << "Propagating\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Prop();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
 #endif
@@ -653,36 +668,36 @@ int main(int argc, const char* argv[])
 
     cout << "Enforcing memory contstraint\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     //    uni.EnforceMemConstraint(maxMem);
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Now there are " << uni.TotalCount() << endl;
     cout << "That took " << difftime(end,start2) << " seconds\n";
 
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     //    uni.Prop();
     uni.CullAllBut(1);
 
     uni.InlineAllSets();
     uni.Simplify();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "After culling worst (" << difftime(end,start2) << " secs), left with " << uni.TotalCount() << endl;
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Expand(numIters, FINALOPTPHASE, TenCullRO);
     uni.Simplify();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Pack optimization phase took " << difftime(end,start2) << " seconds\n";
 
     cout << "Propagating\n";
     cout.flush();
-    time(&start2);
+    start2 = std::chrono::system_clock::now();
     uni.Prop();
-    time(&end);
+    end = std::chrono::system_clock::now();
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
 #endif
 
-  time(&end);
+  end = std::chrono::system_clock::now();
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
   
