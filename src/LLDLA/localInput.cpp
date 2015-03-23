@@ -23,6 +23,16 @@
 
 #if DOLLDLA
 
+LocalInput::LocalInput(string name, Size m, Size n,
+		       Size rowStrideVal, Size colStrideVal,
+		       Type dataType)
+: InputNode::InputNode(name, m, n, rowStrideVal, colStrideVal, dataType) {
+}
+
+LocalInput::LocalInput()
+  : InputNode::InputNode() {
+}
+
 void LocalInput::Prop() {
   if (!IsValidCost(m_cost)) {
     InputNode::Prop();

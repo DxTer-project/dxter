@@ -26,7 +26,12 @@
 class LocalInput : public InputNode
 {
  public:
-  using InputNode::InputNode;
+  //  using InputNode::InputNode;
+  LocalInput(string name, Size m, Size n,
+	     Size rowStrideVal, Size colStrideVal,
+	     Type dataType);
+
+  LocalInput();
 
   virtual void Prop();
   virtual void PrintCode(IndStream& out);
