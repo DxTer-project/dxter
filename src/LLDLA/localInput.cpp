@@ -41,13 +41,14 @@ void LocalInput::PrintCode(IndStream& out) {
   string varName = m_varName.m_name;
   string byteArray = varName + "_name";
   if (dataType == REAL_SINGLE) {
-    out.Indent();
     typeName = "float";
   } else {
-    out.Indent();
     typeName = "double";
   }
   string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + " + 32";
+  out.Indent();
+  *out << typeName << " " << varName << "[" << size << "*sizeof(" << typeName << ")] __attribute__((aligned(32))) = {0};" << endl;
+
   /*  string arrName = m_varName.m_name + "_char_array";
   string arrPtrName = arrName + "_array_ptr";
   out.Indent();
@@ -59,7 +60,7 @@ void LocalInput::PrintCode(IndStream& out) {
   *out << arrPtrName << " = " << arrPtrName << " + " << shiftStr << ";" << endl;
   out.Indent();
   *out << m_varName.m_name << " = (" << typeName << "*)" << arrPtrName << ";" << endl;*/
-  *out << m_varName.m_name << " = alloc_aligned_32(sizeof(" + typeName + ")*" + size + ");";
+  //  *out << m_varName.m_name << " = alloc_aligned_32(sizeof(" + typeName + ")*" + size + ");";
 }
 
 NodeType LocalInput::GetType() const {
@@ -74,7 +75,7 @@ void LocalInput::AddVariables(VarSet& set) const {
     typeName = "double* ";
   } else {
     cout << "Unsupported datatype: " << GetDataType() << endl;
-  }
+    }
   string inputVarDecl = typeName + m_varName.m_name + ";";
 
   string uint = "const unsigned int ";
@@ -93,7 +94,7 @@ void LocalInput::AddVariables(VarSet& set) const {
   Var rowStrideVar(DirectVarDeclType, rowStrideVarName, GetDataType());
   Var colStrideVar(DirectVarDeclType, colStrideVarName, GetDataType());
 
-  set.insert(inputNameVar);
+  //  set.insert(inputNameVar);
   set.insert(nRowsVar);
   set.insert(nColsVar);
   set.insert(rowStrideVar);
