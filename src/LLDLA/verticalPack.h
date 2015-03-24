@@ -26,7 +26,9 @@
 
 class VerticalPack : public Pack {
  public:
-  using Pack::Pack;
+  //  using Pack::Pack;
+ VerticalPack(Layer layer)
+   : Pack::Pack(layer) {}
   static Node* BlankInst() { return new VerticalPack(ABSLAYER); }
   virtual Node* GetNewInst() { return BlankInst(); }
 

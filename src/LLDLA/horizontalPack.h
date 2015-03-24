@@ -26,7 +26,9 @@
 
 class HorizontalPack : public Pack {
  public:
-  using Pack::Pack;
+  //  using Pack::Pack;
+ HorizontalPack(Layer layer)
+   : Pack::Pack(layer) {}
   static Node* BlankInst() { return new HorizontalPack(ABSLAYER); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
