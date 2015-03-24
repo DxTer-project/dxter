@@ -27,7 +27,9 @@
 class ContiguousCopy : public Copy {
 
  public:
-  using Copy::Copy;
+  //  using Copy::Copy;
+  ContiguousCopy(Layer layer)
+    : Copy::Copy(layer) {}
   static Node* BlankInst() { return new ContiguousCopy(ABSLAYER); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
