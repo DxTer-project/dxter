@@ -38,7 +38,7 @@ void Partition::PrintCode(IndStream &out)
   out.Indent();
   *out << m_startName.m_name << " = " << GetInputName(0).m_name << ";\n";
   out.Indent();
-  string splitPoint = std::to_string((int) m_partSplitPoint);
+  string splitPoint = std::to_string((long long int) m_partSplitPoint);
   if (m_partType == HORIZONTAL) {
     *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << splitPoint + ";\n";
 
