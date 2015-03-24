@@ -55,7 +55,8 @@ void LocalInput::PrintCode(IndStream& out) {
   } else {
     typeName = "double";
   }
-  string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + " + 32";
+  //  string size = m_dataTypeInfo.m_numRowsVar + " * " + m_dataTypeInfo.m_numColsVar + " + 32";
+  string size = std::to_string((long long int) m_msize.OnlyEntry()) + " * " + std::to_string((long long int) m_nsize.OnlyEntry());
   out.Indent();
   *out << typeName << " " << varName << "[" << size << "*sizeof(" << typeName << ")] __attribute__((aligned(32))) = {0};" << endl;
 
