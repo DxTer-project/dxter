@@ -25,7 +25,9 @@
 
 class HorizontalUnpack : public Unpack {
  public:
-  using Unpack::Unpack;
+  //  using Unpack::Unpack;
+  HorizontalUnpack(Layer layer)
+    : Unpack(layer) {}
   static Node* BlankInst() { return new HorizontalUnpack(ABSLAYER); }
   virtual Node* GetNewInst() { return BlankInst(); }
 

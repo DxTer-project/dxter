@@ -25,7 +25,9 @@
 
 class VerticalUnpack : public Unpack {
  public:
-  using Unpack::Unpack;
+  //  using Unpack::Unpack;
+ VerticalUnpack(Layer layer)
+   : Unpack(layer) {}
   static Node* BlankInst() { return new VerticalUnpack(ABSLAYER); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
