@@ -60,6 +60,10 @@ class SplitSingleIter : public SplitBase
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "split";}
 #if TWOD
+  void SanityCheckExecNum(unsigned int execNum, unsigned int length, unsigned int length2);
+  void SanityCheckSizes(const Sizes* ms, const Sizes* ns);
+  void SanityCheckNumIters(Size bs, Size m, Size n, unsigned int numIters);
+
   virtual const Sizes* GetM(ConnNum num) const;
   virtual const Sizes* GetN(ConnNum num) const;
 #if DODM

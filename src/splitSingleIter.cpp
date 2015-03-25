@@ -1406,18 +1406,21 @@ void SplitSingleIter::ClearDataTypeCache()
 }
 
 #if TWOD
-void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
-{
-  if (m_tunType != SETTUNIN)
-    return;
-  if (m_pset && !m_pset->IsReal())
-    return;
-  if (!m_msizes)
-    throw;
 
-  const Sizes *ms = GetInputM(0);
-  const Sizes *ns = GetInputN(0);
-  
+void SplitSingleIter::SanityCheckExecNum(unsigned int execNum, unsigned int length, unsigned int length2) {
+  if (length <= execNum || length2 <= execNum) {
+    cout << "Execution number of loop is greater than number of size entries" << endl;
+    cout << "length = " << std::to_string((long long int) length) << endl;
+    cout << "length2 = " << std::to_string((long long int) length2) << endl;
+    cout << "execNum = " << std::to_string((long long int) execNum) << endl;
+    cout << "Input 0 class: " << Input(0)->GetNodeClass() << endl;
+    cout << "Input(0)->Input(0) class: " << Input(0)->Input(0)->GetNodeClass() << endl;
+    cout << "Input(0)->Input(0) name: " << Input(0)->Input(0)->GetName(0).m_name << endl;
+    throw;
+  }
+}
+
+void SplitSingleIter::SanityCheckSizes(const Sizes* ms, const Sizes* ns) {
   if (!ms || !ns) {
     if (Input(0)->m_flags & NODEBUILDFLAG)
       cout << "has built\n";
@@ -1428,23 +1431,9 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     cout << Input(0) << endl;
     throw;
   }
+}
 
-  unsigned int length = ms->NumSizes();
-  unsigned int length2 = ns->NumSizes();
-
-
-  if (length <= execNum || length2 <= execNum)
-    {
-      cout << "length = " << std::to_string((long long int) length) << endl;
-      cout << "length2 = " << std::to_string((long long int) length2) << endl;
-      cout << "execNum = " << std::to_string((long long int) execNum) << endl;
-      throw;
-    }
-  const Size m = (*ms)[execNum];
-  const Size n = (*ns)[execNum];
-  const Size bs = GetMyLoop()->GetBS();
-  const unsigned int numElems = GetNumElems(m_dir);
-
+void SplitSingleIter::SanityCheckNumIters(Size bs, Size m, Size n, unsigned int numIters) {
   if (NumIters(bs, m, n) != numIters) {
     //    InputLocalN(0)->Print();
     //    cout << endl;
@@ -1456,6 +1445,34 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     }
     throw;
   }
+}
+
+void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
+{
+  if (m_tunType != SETTUNIN)
+    return;
+  if (m_pset && !m_pset->IsReal())
+    return;
+  if (!m_msizes)
+    throw;
+
+  const Sizes *ms = GetInputM(0);
+  const Sizes *ns = GetInputN(0);
+
+  SanityCheckSizes(ms, ns);
+
+  unsigned int length = ms->NumSizes();
+  unsigned int length2 = ns->NumSizes();
+
+  SanityCheckExecNum(execNum, length, length2);
+
+  const Size m = (*ms)[execNum];
+  const Size n = (*ns)[execNum];
+  const Size bs = GetMyLoop()->GetBS();
+  const unsigned int numElems = GetNumElems(m_dir);
+
+  SanityCheckNumIters(bs, m, n, numIters);
+
   bool foundOne = false;
   for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
     bool found = false;
@@ -1463,8 +1480,9 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     for(; tunIter != m_children.end() && !found; ++tunIter) {
       NodeConn *conn = *tunIter;
       Node *tun = conn->m_n;
-      if (!tun->IsTunnel(POSSTUNIN))
+      if (!tun->IsTunnel(POSSTUNIN)) {
 	throw;
+      }
       NodeConnVecIter iter = tun->m_children.begin();
       for(; iter != tun->m_children.end() && !found; ++iter) {
 	NodeConn *childConn = *iter;
@@ -1481,8 +1499,9 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
       }
     }
   }
-  if (!foundOne)
+  if (!foundOne) {
     throw;
+  }
 }
 #else
 void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)

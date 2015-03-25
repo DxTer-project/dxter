@@ -41,13 +41,6 @@ bool MVMulPackOutput::CanApply(const Node* node) const {
 }
 
 void MVMulPackOutput::Apply(Node* node) const {
-  cout << endl << endl << "APPLYING MVMULPACKOUTPUT" << endl << endl;
-  cout << endl << "Calling Prop on node" << endl;
-  node->Prop();
-  cout << "Done with node->Prop()" << endl << endl;
-  //  cout << "Input node input 0 num rows = ";
-  //  DLANode* dla = static_cast<DLANode*>(node);
-  //  cout << dla->GetInputNumRows(0) << endl;
   Pack* packA = PackToMultipleOf(m_toLayer, node->Input(0), node->InputConnNum(0), node, 0, DIMM, node->GetVecRegWidth());
 
   Pack* packY = PackToMultipleOf(m_toLayer, node->Input(2), node->InputConnNum(2), node, 2, DIMM, node->GetVecRegWidth());
@@ -57,16 +50,6 @@ void MVMulPackOutput::Apply(Node* node) const {
 		      packA, 0,
 		      node->Input(1), node->InputConnNum(1),
 		      packY, 0);
-
-  cout << "CHECKING THAT MVMULPACKOUTPUT DOESN'T INTRODUCE MIDSIZES" << endl;
-  if (!newMVMul->InputDimsAreOneRepeatedSizeEach(0)
-      || !newMVMul->InputDimsAreOneRepeatedSizeEach(1)
-      || !newMVMul->InputDimsAreOneRepeatedSizeEach(2)) {
-    cout << "ERROR IN THE MVMulPackOutput transformation" << endl;
-    cout << "ERROR: MVMul input dimensions are not single, repeated sizes" << endl;
-    throw;
-  }
-  cout << "DONE, MVMULPACKOUTPUT DID NOT INTRODUCE A MIDSIZE" << endl;
 
   Unpack* unpack = new VerticalUnpack(m_toLayer);
   unpack->AddInputs(4,

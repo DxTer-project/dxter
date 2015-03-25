@@ -280,10 +280,8 @@ bool MVMulLoopRef::CanApply(const Node *node) const
       	&& *(mvmul->GetInputM(0)) > m_bs.GetSize();
     } else {
       return mvmul->InputNIsMultipleOf(0, m_bs.GetSize())
-      	&& *(mvmul->GetInputN(0)) > m_bs.GetSize()
-	//	&& *(mvmul->GetInputM(0)) > mvmul->GetVecRegWidth()
-	&& mvmul->InputMIsMultipleOf(0, m_bs.GetSize());
-	//	&& *(mvmul->GetInputM(0)) > m_bs.GetSize();
+      	&& *(mvmul->GetInputN(0)) > m_bs.GetSize();
+	//	&& mvmul->InputMIsMultipleOf(0, m_bs.GetSize());
     }
   }
   throw;
