@@ -25,6 +25,8 @@
 #include <cmath>
 #include "LLDLA.h"
 
+#include "helperNodes.h"
+
 
 #if TWOD
 SplitSingleIter::SplitSingleIter() 
@@ -372,8 +374,15 @@ const Sizes* SplitSingleIter::GetN(ConnNum num) const
     case (POSSTUNIN):
       if (num < GetNumElems(m_dir)) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_nsizes)
+        if (!input->m_nsizes) {
+	  cout << "intput->m_nsizes == NULL ? " << std::to_string((long long int) (input->m_nsizes == NULL)) << endl;
+	  cout << "Input node name: " << input->GetNodeClass() << endl;
+	  cout << "Tunnel input name: " << input->Input(0)->Input(0)->GetNodeClass() << endl;
+	  InputNode* inNode = (InputNode*) input->Input(0)->Input(0);
+	  cout << "In node n " << endl;
+	  inNode->GetN(0)->Print();
           throw;
+	}
         return &(input->m_nsizes[num]);
       }
       else if (num == GetNumElems(m_dir)) {
