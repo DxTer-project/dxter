@@ -19,13 +19,20 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "problemInstanceStats.h"
+#include "lldlaUniverse.h"
 
 #if DOLLDLA
 
-#include "lldlaUniverse.h"
+#include <sstream>
 
-LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
-ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemInstance* problemInstance);
+void LLDLAUniverse::SetUpOperation(RealPSet* startSet) {
+  this->Prop();
+  GraphIter* graphIter = new GraphIter(startSet->m_posses.begin()->second);
+  m_flopCost = graphIter->EvalAndSetBest();
+  std::stringstream ss;
+  IndStream optOut(&ss, LLDLASTREAM);
+  graphIter->PrintRoot(optOut, 0, true, startSet);
+  m_sanityCheckImplStr = ss.str();
+}
 
 #endif // DOLLDLA

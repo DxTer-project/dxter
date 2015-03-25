@@ -23,16 +23,110 @@
 
 #if DOLLDLA
 
+#include "allTransformations.h"
+#include "DLAReg.h"
 #include "runtimeEvaluation.h"
 
-ProblemInstanceStats* RuntimeEvaluation(int algNum, Universe* uni, ProblemInstance* problemInstance, string absImpStr) {
+LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
+  RegAllLLDLANodes();
+  AddTransformations();
+
+  int numIters = -1;
+  auto uni = new LLDLAUniverse();
+  time_t start, start2, end;
+
+  uni->PrintStats();
+
+  cout << "Creating startSet\n";
+
+  RealPSet *startSet = algPSet;
+  
+  cout << "Created startSet\n";
+
+  uni->Init(startSet);
+  
+  cout << "Initialized universe\n";
+
+  cout << "Setting up problem" << endl;
+
+  uni->SetUpOperation(startSet);
+
+  cout << "Done with problem setup" << endl;
+
+  problemInstance->SetCost(uni->GetOperationFlopCost());
+  cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << uni->GetSanityCheckImplStr();
+  cout << "Flops for operation = " << std::to_string((long double) uni->GetOperationFlopCost()) << endl;
+
+  time(&start);
+
+#if DOLLDLALOOPPHASE
+  if (CurrPhase == LLDLALOOPPHASE) {
+
+    cout << "Expanding LLDLA loop phase\n";
+
+    uni->Expand(-1, LLDLALOOPPHASE, LLDLACull);
+    time(&end);
+
+    cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
+    cout << "Propagating\n";
+
+    cout.flush();
+    time(&start2);
+    uni->Prop();
+    time(&end);
+
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+
+  }
+#endif
+
+#if DOLLDLALOOPUNROLLPHASE
+  if (CurrPhase == LLDLALOOPUNROLLPHASE) {
+    cout << "LLDLALOOPUNROLL phase\n";
+    uni->Expand(-1, LLDLALOOPUNROLLPHASE, LLDLACull);
+    time(&end);
+    cout << "LLDLALOOPUNROLL phase took " << difftime(end,start) << " seconds\n";
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni->Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
+#if DOLLDLAPRIMPHASE
+  if (CurrPhase == LLDLAPRIMPHASE) {
+    cout << "Expanding LL DLA prim phase\n";
+    cout << "Starting with " << uni->TotalCount() << endl;
+    time(&start2);
+    uni->Expand(numIters, LLDLAPRIMPHASE, LLDLACull);
+    time(&end);
+    cout << "LLDLAPRIM phase took " << difftime(end,start2) << " seconds\n";
+
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni->Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
+  cout << "Full expansion took " << difftime(end,start) << " seconds\n";
+  cout.flush();
+
+  return uni;
+}
+
+ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemInstance* problemInstance) {
   cout << "Writing all implementations to runtime eval files\n";
   int minCycles = 100000000;
   RuntimeTest rtest(problemInstance->GetType(), problemInstance->GetName(), uni->m_argNames, uni->m_declarationVectors, uni->m_constantDefines, minCycles);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
-  ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, uni->ImpStrMap().get(), absImpStr);
+ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
 
   cout << "Done evaluating\n";
   ProblemInstanceStats* pStats = new ProblemInstanceStats(problemInstance, &impMap);

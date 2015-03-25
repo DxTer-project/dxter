@@ -19,13 +19,23 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "problemInstanceStats.h"
+#include "universe.h"
 
 #if DOLLDLA
 
-#include "lldlaUniverse.h"
+class LLDLAUniverse : public Universe {
+ private:
+  string m_sanityCheckImplStr;
+  Cost m_flopCost;
 
-LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
-ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemInstance* problemInstance);
+ public:
+  LLDLAUniverse()
+    : Universe::Universe() {}
+
+  string GetSanityCheckImplStr() { return m_sanityCheckImplStr; }
+  Cost GetOperationFlopCost() { return m_flopCost; }
+
+  void SetUpOperation(RealPSet* startSet);
+};
 
 #endif // DOLLDLA
