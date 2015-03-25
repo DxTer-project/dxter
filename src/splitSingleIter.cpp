@@ -375,15 +375,7 @@ const Sizes* SplitSingleIter::GetN(ConnNum num) const
       if (num < GetNumElems(m_dir)) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         if (!input->m_nsizes) {
-	  cout << "intput->m_nsizes == NULL ? " << std::to_string((long long int) (input->m_nsizes == NULL)) << endl;
-	  cout << "Input node name: " << input->GetNodeClass() << endl;
-	  cout << "Tunnel input name: " << input->Input(0)->Input(0)->GetNodeClass() << endl;
-	  cout << "Input tunnel n: " << endl;
-	  ((DLANode*) input->Input(0))->GetN(0)->Print();
-	  InputNode* inNode = (InputNode*) input->Input(0)->Input(0);
-	  cout << "In node n " << endl;
-	  inNode->GetN(0)->Print();
-	  cout << "In node name " << inNode->GetName(0).m_name << endl;
+	  cout << "Error: m_nsizes is null for POSSTUNIN" << endl;
           throw;
 	}
         return &(input->m_nsizes[num]);
@@ -1320,8 +1312,9 @@ void SplitSingleIter::UnflattenCore(ifstream &in, SaveInfo &info)
 
 unsigned int SplitSingleIter::NumberOfLoopExecs() const
 {
-  if (!m_isControlTun)
+  if (!m_isControlTun) {
     throw;
+  }
 #if TWOD
   //  return min(GetInputM(0)->NumSizes(), GetInputN(0)->NumSizes());
   unsigned int one = GetInputM(0)->NumSizes();
@@ -1331,7 +1324,7 @@ unsigned int SplitSingleIter::NumberOfLoopExecs() const
     cout.flush();
     throw;
   }
-  return min(one,two);
+  return one;
 #else
   return InputLen(0,0)->NumSizes();
 #endif
