@@ -29,7 +29,7 @@
 
 #if DOLLDLA
 
-ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+//ProblemInstanceStats* RunBenchmark(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
 
 #endif // DOLLDLA
 

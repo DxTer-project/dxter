@@ -27,7 +27,7 @@
 
 #include "benchmarkStats.h"
 #include "problemInstance.h"
-#include "runBenchmark.h"
+#include "problemRunner.h"
 #include "singleOperationExamples.h"
 
 using namespace std;
@@ -41,7 +41,7 @@ void DotProductBenchmark(Type type, int m, int increment, int numIters) {
     dotProd.SetName("dotProd");
     dotProd.SetType(type);
     dotProd.AddDimension(m, "m");
-    auto pStats = RunBenchmark(1, test, &dotProd);
+    auto pStats = RunProblemWithRTE(1, test, &dotProd);
     benchStats.AddProblemInstanceStats(pStats);
     m += increment;
   }
@@ -59,7 +59,7 @@ void ColVAddBenchmark(Type type, int m, int increment, int numIters) {
     vadd.SetName("vadd");
     vadd.SetType(type);
     vadd.AddDimension(m, "m");
-    auto pStats = RunBenchmark(1, test, &vadd);
+    auto pStats = RunProblemWithRTE(1, test, &vadd);
     benchStats.AddProblemInstanceStats(pStats);
     m += increment;
   }
@@ -80,7 +80,7 @@ void AxpyBenchmark(Type type, VecType vecType) {
     axpy.SetName("axpy");
     axpy.SetType(type);
     axpy.AddDimension(m, "m");
-    auto pStats = RunBenchmark(1, test, &axpy);
+    auto pStats = RunProblemWithRTE(1, test, &axpy);
     benchStats.AddProblemInstanceStats(pStats);
     m += increment;
   }
@@ -109,7 +109,7 @@ void GemvBenchmark(Type type, bool transpose, int mBase, int mInc, int nBase, in
     gemv.SetType(type);
     gemv.AddDimension(m, "m");
     gemv.AddDimension(n, "n");
-    auto pStats = RunBenchmark(1, test, &gemv);
+    auto pStats = RunProblemWithRTE(1, test, &gemv);
     benchStats.AddProblemInstanceStats(pStats);
     m += mInc;
     n += nInc;
@@ -133,7 +133,7 @@ void MAddBenchmark(Type type, int mBase, int mInc, int nBase, int nInc, int numI
     madd.SetType(type);
     madd.AddDimension(m, "m");
     madd.AddDimension(n, "n");
-    auto pStats = RunBenchmark(1, test, &madd);
+    auto pStats = RunProblemWithRTE(1, test, &madd);
     benchStats.AddProblemInstanceStats(pStats);
     m += mInc;
     n += nInc;

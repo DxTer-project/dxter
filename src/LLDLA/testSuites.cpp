@@ -23,7 +23,6 @@
 
 #if DOLLDLA
 
-#include "exampleRunner.h"
 #include "problemInstance.h"
 #include "problemRunner.h"
 #include "singleOperationExamples.h"

@@ -29,8 +29,14 @@ class LLDLAUniverse : public Universe {
   Cost m_flopCost;
 
  public:
+  vector<string> m_declarationVectors;
+  vector<string> m_constantDefines;
+  vector<string> m_argNames;
+
   LLDLAUniverse()
     : Universe::Universe() {}
+
+  void SetupFunctionArguments(RealPSet* seed);
 
   string GetSanityCheckImplStr() { return m_sanityCheckImplStr; }
   Cost GetOperationFlopCost() { return m_flopCost; }
