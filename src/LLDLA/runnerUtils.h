@@ -31,8 +31,6 @@
 
 #if DOLLDLA
 
-
-
 typedef std::pair<GraphNum, TimeVec> NumRuntimePair;
 
 string TypeToStr(Type type);

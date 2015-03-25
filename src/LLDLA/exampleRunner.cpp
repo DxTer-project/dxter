@@ -28,7 +28,8 @@
 #include <time.h>
 
 #include "exampleRunner.h"
-#include "runtimeEvaluation.h"
+#include "problemRunner.h"
+
 
 ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   RegAllLLDLANodes();
@@ -124,33 +125,105 @@ ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance*
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-  cout << "Writing all implementations to runtime eval files\n";
-
-  int minCycles = 100000000;
-  RuntimeTest rtest(problemInstance->GetType(), problemInstance->GetName(), uni.m_argNames, uni.m_declarationVectors, uni.m_constantDefines, minCycles);
-  string evalDirName = "runtimeEvaluation";
-  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
-  cout << "About to evaluate\n";
-  ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, uni.ImpStrMap().get(), absImpStr);
-
-  cout << "Done evaluating\n";
-  ProblemInstanceStats* pStats = new ProblemInstanceStats(problemInstance, &impMap);
-  pStats->PrettyPrintPerformanceStats();
-
-  GraphNum best = pStats->GetBestAvgFlopsPerCycleImpl();
-  cout << "Best Avg. flops/cycle = " << pStats->GetBestAvgFlopsPerCycle() << endl;
-
-#if 1
-  uni.PrintAll(algNum, best);
-#else
-  uni.PrintBest();
-#endif
-
-#if PRINTCOSTS
-  uni.PrintCosts(impMap);
-#endif
-
+  auto pStats = RuntimeEvaluation(algNum, &uni, problemInstance, absImpStr);
   return pStats;
+}
+
+void RunExampleNoRuntimeEval(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
+  RegAllLLDLANodes();
+  AddTransformations();
+
+  int numIters = -1;
+  Cost flopCost = 0;
+  Universe uni;
+  time_t start, start2, end;
+  string absImpStr;
+
+  uni.PrintStats();
+
+  cout << "Creating startSet\n";
+
+  RealPSet *startSet = algPSet;
+  
+  cout << "Created startSet\n";
+
+  uni.Init(startSet);
+  
+  cout << "Initialized universe\n";
+  
+  uni.Prop();
+  GraphIter* graphIter = new GraphIter(startSet->m_posses.begin()->second);
+  cout << "Printing evaluation code\n";
+  flopCost = graphIter->EvalAndSetBest();
+  problemInstance->SetCost(flopCost);
+  std::stringstream ss;
+  IndStream optOut(&ss, LLDLASTREAM);
+  graphIter->PrintRoot(optOut, 0, true, startSet);
+  absImpStr = ss.str();
+
+  cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << absImpStr;
+  cout << "Flops for operation = " << std::to_string((long double) flopCost) << endl;
+
+  time(&start);
+
+#if DOLLDLALOOPPHASE
+  if (CurrPhase == LLDLALOOPPHASE) {
+
+    cout << "Expanding LLDLA loop phase\n";
+
+    uni.Expand(-1, LLDLALOOPPHASE, LLDLACull);
+    time(&end);
+
+    cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
+    cout << "Propagating\n";
+
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+
+  }
+#endif
+
+#if DOLLDLALOOPUNROLLPHASE
+  if (CurrPhase == LLDLALOOPUNROLLPHASE) {
+    cout << "LLDLALOOPUNROLL phase\n";
+    uni.Expand(-1, LLDLALOOPUNROLLPHASE, LLDLACull);
+    time(&end);
+    cout << "LLDLALOOPUNROLL phase took " << difftime(end,start) << " seconds\n";
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
+#if DOLLDLAPRIMPHASE
+  if (CurrPhase == LLDLAPRIMPHASE) {
+    cout << "Expanding LL DLA prim phase\n";
+    cout << "Starting with " << uni.TotalCount() << endl;
+    time(&start2);
+    uni.Expand(numIters, LLDLAPRIMPHASE, LLDLACull);
+    time(&end);
+    cout << "LLDLAPRIM phase took " << difftime(end,start2) << " seconds\n";
+
+    cout << "Propagating\n";
+    cout.flush();
+    time(&start2);
+    uni.Prop();
+    time(&end);
+    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  }
+#endif
+
+  cout << "Full expansion took " << difftime(end,start) << " seconds\n";
+  cout.flush();
+
+  return;
 }
 
 #endif // DOLLDLA

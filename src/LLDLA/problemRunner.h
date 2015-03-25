@@ -19,38 +19,10 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "testSuites.h"
+#include "problemInstanceStats.h"
 
 #if DOLLDLA
 
-#include "exampleRunner.h"
-#include "problemInstance.h"
-#include "singleOperationExamples.h"
-
-void RunSimpleSDotProductNoRuntimeEval() {
-  int simpleSize = 128;
-  Type singlePrec = REAL_SINGLE;
-  RealPSet* simpleSDot = DotTest(singlePrec, simpleSize);
-  ProblemInstance sDotProd;
-  sDotProd.SetName("single_precision_dot_product");
-  sDotProd.SetType(singlePrec);
-  sDotProd.AddDimension(simpleSize, "m");
-  RunExampleNoRuntimeEval(1, simpleSDot, &sDotProd);
-}
-
-void RunDotProductExamplesNoRuntimeEval() {
-  RunSimpleSDotProductNoRuntimeEval();
-}
-
-void RunVectorExamplesNoRuntimeEval() {
-  RunDotProductExamplesNoRuntimeEval();
-}
-
-void BasicNoRuntimeEvalTests() {
-  cout << "Running several examples with no rutime evaluation" << endl;
-  RunVectorExamplesNoRuntimeEval();
-  cout << "Done" << endl;
-  return;
-}
+ProblemInstanceStats* RuntimeEvaluation(int algNum, Universe* uni, ProblemInstance* problemInstance, string absImpStr);
 
 #endif // DOLLDLA

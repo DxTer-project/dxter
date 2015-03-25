@@ -30,6 +30,8 @@
 
 ProblemInstanceStats* RunExample(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
 
+void RunExampleNoRuntimeEval(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+
 #endif // DOLLDLA
 
 #endif
