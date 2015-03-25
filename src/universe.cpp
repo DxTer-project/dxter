@@ -75,10 +75,6 @@ void Universe::Init(RealPSet *seed)
 #if DOTENSORS
   CheckMaxDims();
 #endif
-
-#if DOLLDLA
-  SetupFunctionArguments(seed);
-#endif
 }
 
 void Universe::Init(string fileName)

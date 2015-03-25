@@ -27,6 +27,11 @@
 
 #include "helperNodes.h"
 
+void LLDLAUniverse::Init(RealPSet* seed) {
+Universe::Init(seed);
+  SetupFunctionArguments(seed);
+}
+
 void LLDLAUniverse::SetupFunctionArguments(RealPSet* seed) {
   int pSize = seed->m_posses.size();
   cout << std::to_string((long long int) pSize) << endl;

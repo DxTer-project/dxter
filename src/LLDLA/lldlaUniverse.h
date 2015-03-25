@@ -36,6 +36,7 @@ class LLDLAUniverse : public Universe {
   LLDLAUniverse()
     : Universe::Universe() {}
 
+  void Init(RealPSet* seed);
   void SetupFunctionArguments(RealPSet* seed);
 
   string GetSanityCheckImplStr() { return m_sanityCheckImplStr; }
