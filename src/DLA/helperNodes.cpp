@@ -408,7 +408,6 @@ const Sizes* InputNode::LocalLen(ConnNum num,Dim dim) const
 }
 #endif
 
-
 Name InputNode::GetName(ConnNum num) const
 {
   if (num > 0)

@@ -378,9 +378,12 @@ const Sizes* SplitSingleIter::GetN(ConnNum num) const
 	  cout << "intput->m_nsizes == NULL ? " << std::to_string((long long int) (input->m_nsizes == NULL)) << endl;
 	  cout << "Input node name: " << input->GetNodeClass() << endl;
 	  cout << "Tunnel input name: " << input->Input(0)->Input(0)->GetNodeClass() << endl;
+	  cout << "Input tunnel n: " << endl;
+	  ((DLANode*) input->Input(0))->GetN(0)->Print();
 	  InputNode* inNode = (InputNode*) input->Input(0)->Input(0);
 	  cout << "In node n " << endl;
 	  inNode->GetN(0)->Print();
+	  cout << "In node name " << inNode->GetName(0).m_name << endl;
           throw;
 	}
         return &(input->m_nsizes[num]);

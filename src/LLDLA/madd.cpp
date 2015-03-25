@@ -261,9 +261,11 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
       return false;
     }
     if (m_vecType == ROWVECTOR) {
-      return *(madd->GetInputM(0)) > 1 && *(madd->GetInputM(0)) > 1;
+      return *(madd->GetInputM(0)) > 1
+	&& *(madd->GetInputN(0)) > madd->GetVecRegWidth();
     } else {
-      return *(madd->GetInputN(0)) > 1 && *(madd->GetInputN(0)) > 1;
+      return *(madd->GetInputM(0)) > madd->GetVecRegWidth()
+	&& *(madd->GetInputN(0)) > 1;
     }
   }
   cout << "ERROR: Applying MAddToVAddLoopRef to non MAdd node\n";
