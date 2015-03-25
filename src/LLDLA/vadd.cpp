@@ -28,9 +28,10 @@
 #include "regLoadStore.h"
 #include "vadd.h"
 
-VAdd::VAdd(Layer layer)
+VAdd::VAdd(Layer layer, VecType vecType)
 {
   m_layer = layer;
+  m_vecType = vecType;
 }
 
 void VAdd::PrintCode(IndStream &out)
@@ -180,12 +181,12 @@ void VAdd::VectorOpInputDimensionCheck(ConnNum inputNum)
 
 Node* VAdd::BlankInst()
 {
-  return new VAdd(LLDLAPRIMITIVELAYER);
+  return new VAdd(LLDLAPRIMITIVELAYER, COLVECTOR);
 }
 
 Node* VAdd::GetNewInst()
 {
-  return new VAdd(m_layer);
+  return new VAdd(m_layer, COLVECTOR);
 }
 
 NodeType VAdd::GetType() const
@@ -194,13 +195,14 @@ NodeType VAdd::GetType() const
 }
 
 VecType VAdd::GetVecType() const {
-  if (IsInputRowVector(0) && IsInputRowVector(1)) {
+  /*  if (IsInputRowVector(0) && IsInputRowVector(1)) {
     return ROWVECTOR;
   }
   if (IsInputColVector(0) && IsInputColVector(1)) {
     return COLVECTOR;
-  }
-  throw;
+    }*/
+  ///  throw;
+  return m_vecType;
 }
 
 Phase VAdd::MaxPhase() const
@@ -287,7 +289,7 @@ void VAddLoopRef::Apply(Node *node) const
   split0->SetIndepIters();
   split1->SetIndepIters();
 
-  VAdd *newVAdd = new VAdd(vadd->m_layer);
+  VAdd *newVAdd = new VAdd(vadd->m_layer, m_vtype);
   newVAdd->SetLayer(m_toLayer);
 
   newVAdd->AddInput(split0, 1);

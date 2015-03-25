@@ -289,7 +289,7 @@ RealPSet* VAddTest(Type dataType, VecType vecType, int m)
   Tunnel* tunY = new Tunnel(POSSTUNIN);
   tunY->AddInput(yIn, 0);
 
-  VAdd* vadd = new VAdd(ABSLAYER);
+  VAdd* vadd = new VAdd(ABSLAYER, vecType);
   vadd->AddInputs(4,
 		  tunX, 0,
 		  tunY, 0);

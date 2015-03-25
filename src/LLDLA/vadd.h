@@ -30,8 +30,11 @@
 
 class VAdd : public DLAOp<2, 1>
 {
+ private:
+  VecType m_vecType;
+
  public:
-  VAdd(Layer layer);
+  VAdd(Layer layer, VecType vecType);
 
   virtual void PrintCode(IndStream &out);
   virtual void Prop();

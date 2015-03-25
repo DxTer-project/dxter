@@ -147,7 +147,7 @@ RealPSet* Axpy(Type dataType, VecType vType, int m)
 		   tunAlpha, 0,
 		   tunX, 0);
 
-  auto* axPlusY = new VAdd(ABSLAYER);
+  auto* axPlusY = new VAdd(ABSLAYER, vType);
   axPlusY->AddInputs(4,
 		     axMul, 0,
 		     tunY, 0);
@@ -244,7 +244,7 @@ RealPSet* Gemv(Type dataType, bool transpose, int m, int n)
 			tunAlpha, 0,
 			axMul, 0);
 
-  auto sumVecs = new VAdd(ABSLAYER);
+  auto sumVecs = new VAdd(ABSLAYER, COLVECTOR);
   sumVecs->AddInputs(4,
 		     alphaAXMul, 0,
 		     by, 0);
