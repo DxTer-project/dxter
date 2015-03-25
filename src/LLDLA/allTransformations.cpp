@@ -258,20 +258,20 @@ void AddCopyTrans() {
 
 void AddTransformations()
 {
-  //  AddGemmTrans();
-  //  AddVVDotTrans();
-  //  AddMAddTrans();
+  AddGemmTrans();
+  AddVVDotTrans();
+  AddMAddTrans();
   AddMVMulTrans();
-  //  AddSMMulTrans();
-  //  AddSVMulTrans();
-  //  AddVMMulTrans();
-  //  AddVAddTrans();
+  AddSMMulTrans();
+  AddSVMulTrans();
+  AddVMMulTrans();
+  AddVAddTrans();
 
-  //  AddTransposeTrans();
-  //  AddUnrollingTrans();
+  AddTransposeTrans();
+  AddUnrollingTrans();
   AddPartitionRecombineTrans();
-  //  AddSetToZeroTrans();
-  //  AddPackTrans();
+  AddSetToZeroTrans();
+  AddPackTrans();
   AddUnpackTrans();
   AddCopyTrans();
 }

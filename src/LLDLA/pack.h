@@ -28,6 +28,10 @@
 #if DOLLDLA
 
 class Pack : public DLAOp<2, 1> {
+
+ private:
+  void SanityCheckReceivingDimension();
+
  public:
   explicit Pack(Layer layer);
 

@@ -70,9 +70,19 @@ void Pack::PrintCode(IndStream& out) {
     packIntoRowStride << ", " << packIntoColStride << " );" << endl;
 }
 
+void Pack::SanityCheckReceivingDimension() {
+  if (IsInputScalar(1)) {
+    cout << "Error: Trying to pack into a scalar" << endl;
+    throw;
+  }
+}
+
 void Pack::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
+
+    SanityCheckReceivingDimension();
+
     m_cost = GetInputM(1)->SumProds11(*GetInputN(1));
   }
 }
