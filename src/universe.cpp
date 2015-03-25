@@ -64,6 +64,20 @@ void Universe::Simplify()
   m_pset->Simplify(M_simplifiers, true);
 }
 
+void Universe::ClearTransformations() {
+  M_simplifiers.clear();
+  M_transNames.clear();
+  M_transPtrs.clear();
+  M_consFuncMap.clear();
+  for (int i = 0; i < NUMPHASES; i++) {
+    M_trans[i].clear();
+  }
+  for (int i = 0; i < NUMPHASES+2; i++) {
+    M_transCount[i] = 0;
+  }
+  return;
+}
+
 void Universe::Init(RealPSet *seed)
 {
   m_pset = seed;

@@ -78,6 +78,8 @@ class Universe
   void PrintStats();
   void Simplify();
 
+  void ClearTransformations();
+
   unique_ptr<ImplementationMap> ImpStrMap();
 
   static void RegCons(ClassType type, ConstructorFunc func);
