@@ -74,13 +74,13 @@ void Universe::SetupFunctionArguments(RealPSet* seed) {
       m_constantDefines.push_back(inNode->RowStrideDefine());
       m_constantDefines.push_back(inNode->ColStrideDefine());
       m_argNames.push_back(inNode->GetName(0).str());
-    } else if (node->GetNodeClass() == LocalInput::GetClass()) {
+    } /*else if (node->GetNodeClass() == LocalInput::GetClass()) {
       LocalInput* inNode = (LocalInput*) node;
       m_constantDefines.push_back(inNode->NumRowsDefine());
       m_constantDefines.push_back(inNode->NumColsDefine());
       m_constantDefines.push_back(inNode->RowStrideDefine());
       m_constantDefines.push_back(inNode->ColStrideDefine());
-    }
+      }*/
   }
 }
 

@@ -23,7 +23,7 @@
 
 #if DOLLDLA
 
-/*LocalInput::LocalInput(string name, Size m, Size n,
+LocalInput::LocalInput(string name, Size m, Size n,
 		       Size rowStrideVal, Size colStrideVal,
 		       Type dataType)
 : InputNode::InputNode(name, m, n, rowStrideVal, colStrideVal, dataType) {
@@ -31,7 +31,7 @@
 
 LocalInput::LocalInput()
   : InputNode::InputNode() {
-  }*/
+}
 
 void LocalInput::Prop() {
   if (!IsValidCost(m_cost)) {
@@ -79,15 +79,15 @@ NodeType LocalInput::GetType() const {
 }
 
 void LocalInput::AddVariables(VarSet& set) const {
-  string typeName;
+  /*  string typeName;
   if (GetDataType() == REAL_SINGLE) {
     typeName = "float* ";
   } else if (GetDataType() == REAL_DOUBLE) {
     typeName = "double* ";
   } else {
     cout << "Unsupported datatype: " << GetDataType() << endl;
-    }
-  string inputVarDecl = typeName + m_varName.m_name + ";";
+    }*/
+  //  string inputVarDecl = typeName + m_varName.m_name + ";";
 
   string uint = "const unsigned int ";
   string nRowsVarName = uint + m_dataTypeInfo.m_numRowsVar + " = ";
@@ -99,7 +99,7 @@ void LocalInput::AddVariables(VarSet& set) const {
   string colStrideVarName = uint + m_dataTypeInfo.m_colStrideVar + " = ";
   colStrideVarName += std::to_string((long long int) m_dataTypeInfo.m_colStrideVal) + ";";
 
-  Var inputNameVar(DirectVarDeclType, inputVarDecl, GetDataType());
+  //  Var inputNameVar(DirectVarDeclType, inputVarDecl, GetDataType());
   Var nRowsVar(DirectVarDeclType, nRowsVarName, GetDataType());
   Var nColsVar(DirectVarDeclType, nColsVarName, GetDataType());
   Var rowStrideVar(DirectVarDeclType, rowStrideVarName, GetDataType());

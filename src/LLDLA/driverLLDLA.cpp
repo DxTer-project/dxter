@@ -29,6 +29,7 @@
 #include "nodeTestExamples.h"
 #include "singleOperationExamples.h"
 #include "uniqueNameSource.h"
+#include "testSuites.h"
 
 #if DOLLDLA
 
@@ -99,13 +100,15 @@ void Usage()
   cout <<"        27  -> 2D vertical unpack test F/D M N\n";
   cout <<"        28  -> 2D horizontal unpack test F/D M N\n";
   cout <<"        29  -> 2D horizontal copy test F/D M N\n";
+  cout <<"Automated tests\n";
+  cout <<"        30  -> Basic examples, no runtime evaluation\n";
   cout <<"\n";
 }
 
 void SetUpGlobalState() {
   arch = new HaswellMacbook();
   costModel = new BasicCostModel();
-  localInputNames = new UniqueNameSource("local_input_");
+  localInputNames = new UniqueNameSource("u_local_input_");
 }
 
 int main(int argc, const char* argv[])
@@ -515,6 +518,13 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(n, "n");
       algPSet = HorizontalCopyTest(precision, m, n);
       break;
+    case(30):
+      if (argc != 2) {
+	Usage();
+	return 0;
+      }
+      BasicNoRuntimeEvalTests();
+      return 0;
     default:
       Usage();
       return 0;
