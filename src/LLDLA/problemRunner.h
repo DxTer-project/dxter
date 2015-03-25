@@ -25,7 +25,10 @@
 
 #include "lldlaUniverse.h"
 
+ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+
 LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+
 ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemInstance* problemInstance);
 
 #endif // DOLLDLA

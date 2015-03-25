@@ -25,6 +25,7 @@
 
 #include "exampleRunner.h"
 #include "problemInstance.h"
+#include "problemRunner.h"
 #include "singleOperationExamples.h"
 
 void RunSimpleSDotProductNoRuntimeEval() {
@@ -35,7 +36,7 @@ void RunSimpleSDotProductNoRuntimeEval() {
   sDotProd.SetName("single_precision_dot_product");
   sDotProd.SetType(singlePrec);
   sDotProd.AddDimension(simpleSize, "m");
-  RunExampleNoRuntimeEval(1, simpleSDot, &sDotProd);
+  RunProblem(1, simpleSDot, &sDotProd);
 }
 
 void RunDotProductExamplesNoRuntimeEval() {

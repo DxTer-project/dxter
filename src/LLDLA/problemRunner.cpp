@@ -27,6 +27,12 @@
 #include "DLAReg.h"
 #include "runtimeEvaluation.h"
 
+ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
+  auto uni = RunProblem(algNum, algPSet, problemInstance);
+  auto pStats = RuntimeEvaluation(algNum, uni, problemInstance);
+  return pStats;
+}
+
 LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   RegAllLLDLANodes();
   AddTransformations();

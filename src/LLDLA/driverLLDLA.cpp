@@ -23,10 +23,10 @@
 #include "blasExamples.h"
 #include "costModel.h"
 #include "driverUtils.h"
-#include "exampleRunner.h"
 #include "miscellaneousExamples.h"
 #include "multiBLASExamples.h"
 #include "nodeTestExamples.h"
+#include "problemRunner.h"
 #include "singleOperationExamples.h"
 #include "uniqueNameSource.h"
 #include "testSuites.h"
@@ -532,7 +532,7 @@ int main(int argc, const char* argv[])
 
     problemInstance.SetType(precision);
     problemInstance.SetName(opName);
-    RunExample(algNum, algPSet, &problemInstance);
+    RunProblemWithRTE(algNum, algPSet, &problemInstance);
 
   }
   return 0;
