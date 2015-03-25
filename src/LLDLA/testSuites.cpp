@@ -36,6 +36,7 @@ void RunSimpleSDotProductNoRuntimeEval() {
   sDotProd.SetType(singlePrec);
   sDotProd.AddDimension(simpleSize, "m");
   RunProblem(1, simpleSDot, &sDotProd);
+  delete simpleSDot;
 }
 
 void RunDotProductExamplesNoRuntimeEval() {
@@ -46,9 +47,28 @@ void RunVectorExamplesNoRuntimeEval() {
   RunDotProductExamplesNoRuntimeEval();
 }
 
+void RunUnevenSizeMatrixAdd() {
+  int mSize = 33;
+  int nSize = 35;
+  Type dFloat = REAL_DOUBLE;
+  RealPSet* matProb = MAddTest(dFloat, mSize, nSize);
+  ProblemInstance matProbInst;
+  matProbInst.SetName("double_precision_matrix_add");
+  matProbInst.SetType(dFloat);
+  matProbInst.AddDimension(mSize, "m");
+  matProbInst.AddDimension(nSize, "n");
+  RunProblem(1, matProb, &matProbInst);
+  delete matProb;
+}
+
+void RunMatrixExamplesNoRTE() {
+  RunUnevenSizeMatrixAdd();
+}
+
 void BasicNoRuntimeEvalTests() {
   cout << "Running several examples with no rutime evaluation" << endl;
   RunVectorExamplesNoRuntimeEval();
+  RunMatrixExamplesNoRTE();
   cout << "Done" << endl;
   return;
 }
