@@ -1310,20 +1310,27 @@ void SplitSingleIter::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_addDir);
 }
 
-unsigned int SplitSingleIter::NumberOfLoopExecs() const
-{
+void SplitSingleIter::SanityCheckControlTunnel() const {
   if (!m_isControlTun) {
     throw;
   }
-#if TWOD
-  //  return min(GetInputM(0)->NumSizes(), GetInputN(0)->NumSizes());
-  unsigned int one = GetInputM(0)->NumSizes();
-  unsigned int two = GetInputN(0)->NumSizes();
+}
+
+void SplitSingleIter::SanityCheckNumberOfSizes(unsigned int one, unsigned int two) const {
   if (one != two) {
     cout << one << " vs. " << two << endl;
     cout.flush();
     throw;
   }
+}
+unsigned int SplitSingleIter::NumberOfLoopExecs() const
+{
+  SanityCheckControlTunnel();
+
+#if TWOD
+  unsigned int one = GetInputM(0)->NumSizes();
+  unsigned int two = GetInputN(0)->NumSizes();
+  SanityCheckNumberOfSizes(one, two);
   return one;
 #else
   return InputLen(0,0)->NumSizes();
