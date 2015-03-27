@@ -20,21 +20,20 @@
 */
 
 #include <assert.h>
+
 #include "LLDLA.h"
 #include "partition.h"
 
 #if DOLLDLA
 
-Partition::Partition(Layer layer, Dir partType, Size partSplitPoint)
-{
+Partition::Partition(Layer layer, Dir partType, Size partSplitPoint) {
   m_layer = layer;
   m_partType = partType;
   m_partSplitPoint = partSplitPoint;
   return;
 }
 
-void Partition::PrintCode(IndStream &out)
-{
+void Partition::PrintCode(IndStream &out) {
   out.Indent();
   *out << m_startName.m_name << " = " << GetInputName(0).m_name << ";\n";
   out.Indent();
@@ -57,8 +56,7 @@ void Partition::PrintCode(IndStream &out)
   return;
 }
 
-void Partition::Prop()
-{
+void Partition::Prop() {
   if (!IsValidCost(m_cost)) {
     DLANode::Prop();
     m_cost = 0;
@@ -66,8 +64,7 @@ void Partition::Prop()
   return;
 }
 
-Name Partition::GetName(ConnNum num) const
-{
+Name Partition::GetName(ConnNum num) const {
   if (num > 1) {
     cout << "num > 1 in Partition::GetName" << endl;
     throw;
@@ -80,8 +77,7 @@ Name Partition::GetName(ConnNum num) const
   }
 }
 
-void Partition::AddVariables(VarSet &set) const
-{
+void Partition::AddVariables(VarSet &set) const {
   //  cout << "ADDING PARTITION VARIABLES" << endl;
   string startVarDecl;
   string endVarDecl;
@@ -117,8 +113,7 @@ void Partition::AddVariables(VarSet &set) const
   set.insert(endDimVar);
 }
 
-void Partition::BuildDataTypeCache()
-{
+void Partition::BuildDataTypeCache() {
   if (m_partType == HORIZONTAL) {
     SetHorizontalNames();
     BuildHorizontalDataTypeCache();
@@ -128,8 +123,7 @@ void Partition::BuildDataTypeCache()
   }
 }
 
-void Partition::SetHorizontalNames()
-{
+void Partition::SetHorizontalNames() {
   m_startName = GetInputName(0);
   m_startName.m_name += "_LEFT";
 
@@ -141,8 +135,7 @@ void Partition::SetHorizontalNames()
   m_endDim.m_name = inData.m_numColsVar + "_RIGHT";
 }
 
-void Partition::SetVerticalNames()
-{
+void Partition::SetVerticalNames() {
   m_startName = GetInputName(0);
   m_startName.m_name += "_TOP";
 
@@ -154,34 +147,29 @@ void Partition::SetVerticalNames()
   m_endDim.m_name = inData.m_numRowsVar + "_BOTTOM";
 }
 
-void Partition::BuildHorizontalDataTypeCache()
-{
+void Partition::BuildHorizontalDataTypeCache() {
   BuildHorizontalDataTypeInfo();
   BuildHorizontalSizes();
 }
 
-void Partition::BuildVerticalDataTypeCache()
-{
+void Partition::BuildVerticalDataTypeCache() {
   BuildVerticalDataTypeInfo();
   BuildVerticalSizes();
 }
 
-void Partition::BuildHorizontalSizes()
-{
+void Partition::BuildHorizontalSizes() {
   const Sizes* colSizes = GetInputN(0);
   assert(colSizes->IsPartitionable(m_partSplitPoint));
   BuildStartAndEndSizes(colSizes);
 }
 
-void Partition::BuildVerticalSizes()
-{
+void Partition::BuildVerticalSizes() {
   const Sizes* rowSizes = GetInputM(0);
   assert(rowSizes->IsPartitionable(m_partSplitPoint));
   BuildStartAndEndSizes(rowSizes);
 }
 
-void Partition::BuildStartAndEndSizes(const Sizes* toSplit)
-{
+void Partition::BuildStartAndEndSizes(const Sizes* toSplit) {
   SizeEntry* sizeEnt = toSplit->m_entries[0];
   int numIterations = sizeEnt->m_repeats;
   int parFactor = sizeEnt->m_parFactor;
@@ -196,8 +184,7 @@ void Partition::BuildStartAndEndSizes(const Sizes* toSplit)
   return;
 }
 
-void Partition::BuildHorizontalDataTypeInfo()
-{
+void Partition::BuildHorizontalDataTypeInfo() {
   DataTypeInfo inData = InputDataType(0);
 
   string startNumColsVar = inData.m_numColsVar;
@@ -217,8 +204,7 @@ void Partition::BuildHorizontalDataTypeInfo()
 			       inData.m_type);
 }
 
-void Partition::BuildVerticalDataTypeInfo()
-{
+void Partition::BuildVerticalDataTypeInfo() {
   DataTypeInfo inData = InputDataType(0);
 
   string startNumRowsVar = inData.m_numRowsVar;
@@ -238,8 +224,7 @@ void Partition::BuildVerticalDataTypeInfo()
 			       inData.m_type);
 }
 
-void Partition::ClearDataTypeCache()
-{
+void Partition::ClearDataTypeCache() {
   m_startInfo = NULL;
   m_endInfo = NULL;
 
@@ -247,13 +232,11 @@ void Partition::ClearDataTypeCache()
   m_endSizes = NULL;
 }
 
-ConnNum Partition::NumOutputs() const
-{
+ConnNum Partition::NumOutputs() const {
   return 2;
 }
 
-const DataTypeInfo& Partition::DataType(ConnNum num) const
-{
+const DataTypeInfo& Partition::DataType(ConnNum num) const {
   if (num > 1) {
     cout << "Error: argument to DataType is too large\n";
     throw;
@@ -265,8 +248,7 @@ const DataTypeInfo& Partition::DataType(ConnNum num) const
   }
 }
 
-void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging)
-{
+void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging) {
   DLANode::Duplicate(orig, shallow, possMerging);
   const Partition* part = static_cast<const Partition*>(orig);
 
@@ -320,14 +302,12 @@ const Sizes* Partition::GetN(ConnNum num) const {
   }
 }
 
-PartitionLowerLayer::PartitionLowerLayer(Layer fromLayer, Layer toLayer)
-{
+PartitionLowerLayer::PartitionLowerLayer(Layer fromLayer, Layer toLayer) {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
 }
 
-bool PartitionLowerLayer::CanApply(const Node *node) const
-{
+bool PartitionLowerLayer::CanApply(const Node *node) const {
   if (node->GetNodeClass() == Partition::GetClass()) {
     const Partition *part = static_cast<const Partition*>(node);
     if (part->GetLayer() != m_fromLayer) {
@@ -339,14 +319,12 @@ bool PartitionLowerLayer::CanApply(const Node *node) const
   throw;
 }
 
-void PartitionLowerLayer::Apply(Node *node) const
-{
+void PartitionLowerLayer::Apply(Node *node) const {
   Partition *part = static_cast<Partition*>(node);
   part->SetLayer(m_toLayer);
 }
 
-string PartitionLowerLayer::GetType() const
-{
+string PartitionLowerLayer::GetType() const {
   return "Partition lower layer " + LayerNumToStr(m_fromLayer)
     + " to " + LayerNumToStr(m_toLayer);
 }
