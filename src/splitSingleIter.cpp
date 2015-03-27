@@ -1416,6 +1416,10 @@ void SplitSingleIter::SanityCheckExecNum(unsigned int execNum, unsigned int leng
     cout << "Input 0 class: " << Input(0)->GetNodeClass() << endl;
     cout << "Input(0)->Input(0) class: " << Input(0)->Input(0)->GetNodeClass() << endl;
     cout << "Input(0)->Input(0) name: " << Input(0)->Input(0)->GetName(0).m_name << endl;
+    cout << "Input(0)->Input(0) m: ";
+    ((DLANode*) Input(0)->Input(0))->GetM(0)->Print();
+    cout << "Input(0)->Input(0) n: ";
+    ((DLANode*) Input(0)->Input(0))->GetN(0)->Print();
     throw;
   }
 }

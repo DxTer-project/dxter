@@ -70,6 +70,8 @@ class RealLoop : public IntLoop<RealPSet>
   DimName GetDimName() const {return m_dim;}
 #endif
 
+  void ClearTunnelCaches();
+  void StartFillingTunnels();
   void FillTunnelSizes();
   virtual void BuildDataTypeCache();
 

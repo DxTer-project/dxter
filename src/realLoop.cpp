@@ -198,11 +198,26 @@ void RealLoop::UnflattenStatic(ifstream &in)
   READ(M_currLabel);
 }
 
+void RealLoop::StartFillingTunnels() {
+  for (auto in : m_inTuns) {
+    if (!in->IsLoopTunnel())
+      throw;
+    ((LoopTunnel*)in)->StartFillingSizes();
+  }
+}
+
+void RealLoop::ClearTunnelCaches() {
+  for (auto tun : m_inTuns) {
+    tun->ClearDataTypeCache();
+  }
+}
+
 void RealLoop::FillTunnelSizes()
 {
   SplitBase *control = GetControl();
-  if (!control)
+  if (!control) {
     throw;
+  }
   bool upToDate = true;
   TunVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
@@ -215,21 +230,14 @@ void RealLoop::FillTunnelSizes()
       upToDate = false;
       break;
     }
-  }
-  if (upToDate)
+    }
+    if (upToDate) {
     return;
-  iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
-    LoopTunnel *tun = (LoopTunnel*)(*iter);
-    tun->ClearDataTypeCache();
-  }
-  iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
-    Node *in = *iter;
-    if (!in->IsLoopTunnel())
-      throw;
-    ((LoopTunnel*)in)->StartFillingSizes();
-  }
+    }
+
+  ClearTunnelCaches();
+  StartFillingTunnels();
+
   //  cout << "Bs " << GetBS() << endl;
   unsigned int numExecs = control->NumberOfLoopExecs();
   //  cout << "numExecs " << numExecs << endl;
@@ -240,7 +248,7 @@ void RealLoop::FillTunnelSizes()
       iter = m_inTuns.begin();
       for (; iter != m_inTuns.end(); ++iter) {
         LoopTunnel *in = (LoopTunnel*)(*iter);
-	//	cout << "appending for " << in << endl;
+	//cout << "appending for " << in << endl;
 #if DOBLIS
         in->AppendSizes(i, numIters, NumGroupsInComm(m_comm));
 #else
