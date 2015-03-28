@@ -1323,6 +1323,7 @@ void SplitSingleIter::SanityCheckNumberOfSizes(unsigned int one, unsigned int tw
     throw;
   }
 }
+
 unsigned int SplitSingleIter::NumberOfLoopExecs() const
 {
   SanityCheckControlTunnel();

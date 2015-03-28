@@ -58,6 +58,12 @@ enum VarType {
 
 class Var
 {
+ protected:
+  string m_part;
+  string m_varDecl;
+  Type m_dataType;
+  string m_compStr;
+
  public:
   VarType m_type;
   union {
@@ -78,10 +84,8 @@ class Var
     string *m_transVar;
 #endif
   };
-  string m_part;
-  string m_varDecl;
-  Type m_dataType;
-  string m_compStr;
+
+ public:
  Var() : m_type(InvalidType) {}
 #if DOTENSORS
   Var(const Name &name);
