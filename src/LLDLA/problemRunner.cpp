@@ -23,6 +23,8 @@
 
 #if DOLLDLA
 
+#include <string>
+
 #include "allTransformations.h"
 #include "DLAReg.h"
 #include "runtimeEvaluation.h"
@@ -33,15 +35,28 @@ ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemIn
   return pStats;
 }
 
-void RunPhase(Universe* uni, int numIters, LLDLAPHASE phase) {
+std::string LLDLAPhaseString(LLDLAPhase phase) {
+  switch(phase) {
+  case(LLDLALOOPPHASE):
+    return "LLDLA loop phase";
+  case(LLDLALOOPUNROLLPHASE):
+    return "LLDLA loop unroll phase";
+  case(LLDLAPRIMPHASE):
+    return "LLDLA primitive phase";
+  }
+  throw;
+}
+
+void RunPhase(Universe* uni, int numIters, LLDLAPhase phase) {
   time_t start, end;
-  cout << "Expanding LLDLA loop phase\n";
+
+  cout << "Expanding " << LLDLAPhaseString(phase) << endl;
 
   time(&start);
   uni->Expand(numIters, phase, LLDLACull);
   time(&end);
 
-  cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
+  cout << LLDLAPhaseString(phase) << " took " << difftime(end,start) << " seconds\n";
   cout << "Propagating\n";
 
   cout.flush();
@@ -52,7 +67,7 @@ void RunPhase(Universe* uni, int numIters, LLDLAPHASE phase) {
   cout << "Propagation took " << difftime(end,start) << " seconds\n";
 }
 
-LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
+LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* problemInstance) {
   RegAllLLDLANodes();
   AddTransformations();
 
@@ -62,23 +77,16 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* proble
 
   uni->PrintStats();
 
-  cout << "Creating startSet\n";
-
-  RealPSet *startSet = algPSet;
-  
-  cout << "Created startSet\n";
-
+  cout << "Initializing universe with start set" << endl;
   uni->Init(startSet);
-  
   cout << "Initialized universe\n";
+
   cout << "Setting up problem" << endl;
-
   uni->SetUpOperation(startSet);
-
   cout << "Done with problem setup" << endl;
 
   problemInstance->SetCost(uni->GetOperationFlopCost());
-  cout << "IMPLEMENTATION FOR CORRECTNESS CHECK:\n" << uni->GetSanityCheckImplStr();
+  cout << "Implementation for correctness check:\n" << uni->GetSanityCheckImplStr();
   cout << "Flops for operation = " << std::to_string((long double) uni->GetOperationFlopCost()) << endl;
 
   time(&start);

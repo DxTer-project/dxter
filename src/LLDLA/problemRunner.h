@@ -27,7 +27,7 @@
 
 ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
 
-LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
+LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* problemInstance);
 
 ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemInstance* problemInstance);
 

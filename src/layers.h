@@ -19,8 +19,6 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #pragma once
 
 #define DOELEM 0
@@ -150,10 +148,7 @@ enum Layers {
 
 #elif DOLLDLA
 // Layering for LLDLA operations
-enum LLDLAPHASE { LLDLALOOPPHASE, LLDLALOOPUNROLLPHASE, LLDLAPRIMPHASE };
-/*#define LLDLALOOPPHASE 0
-#define LLDLALOOPUNROLLPHASE 1
-#define LLDLAPRIMPHASE 2*/
+enum LLDLAPhase { LLDLALOOPPHASE, LLDLALOOPUNROLLPHASE, LLDLAPRIMPHASE };
 
 #define FIRSTPHASE LLDLALOOPPHASE
 
