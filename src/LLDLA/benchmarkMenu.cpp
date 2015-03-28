@@ -33,7 +33,8 @@ unsigned int GetBenchmarkNumber() {
   cout << "     2 -> Axpy benchmarks" << endl;
   cout << "     3 -> Gemv benchmarks" << endl;
   cout << "     4 -> MAdd benchmark" << endl;
-  cout << "     5 -> Column VAdd benchmark" << endl << endl;
+  cout << "     5 -> Column VAdd benchmark" << endl;
+  cout << "     6 -> SVMul benchmark" << endl << endl;
   cout << "select one of the options listed above: ";
   unsigned int benchmarkOption;
   cin >> benchmarkOption;
@@ -57,23 +58,6 @@ void DotProductBenchmarkMenu() {
   DotProductBenchmark(type, m, inc, iters);
 }
 
-void ColVAddBenchmarkMenu() {
-  Type type;
-  int m, inc, iters;
-
-  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
-  char typeChar;
-  cin >> typeChar;
-  type = CharToType(typeChar);
-  cout << "Starting M value: ";
-  cin >> m;
-  cout << "M increment: ";
-  cin >> inc;
-  cout << "Number of iterations: ";
-  cin >> iters;
-  ColVAddBenchmark(type, m, inc, iters);
-}
-
 void MAddBenchmarkMenu() {
   Type type;
   int m, n, mInc, nInc, iters;
@@ -95,6 +79,45 @@ void MAddBenchmarkMenu() {
   MAddBenchmark(type, m, mInc, n, nInc, iters);
 }
 
+void ColVAddBenchmarkMenu() {
+  Type type;
+  int m, inc, iters;
+
+  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
+  char typeChar;
+  cin >> typeChar;
+  type = CharToType(typeChar);
+  cout << "Starting M value: ";
+  cin >> m;
+  cout << "M increment: ";
+  cin >> inc;
+  cout << "Number of iterations: ";
+  cin >> iters;
+  ColVAddBenchmark(type, m, inc, iters);
+}
+
+void SVMulBenchmarkMenu() {
+  Type type;
+  VecType vecType;
+  int m, mInc, iters;
+
+  cout << "Enter vector type (C = column) (R = row): ";
+  char vecTypeChar;
+  cin >> vecTypeChar;
+  vecType = CharToVecType(vecTypeChar);
+  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
+  char typeChar;
+  cin >> typeChar;
+  type = CharToType(typeChar);
+  cout << "Starting M value: ";
+  cin >> m;
+  cout << "M increment: ";
+  cin >> mInc;
+  cout << "Number of iterations: ";
+  cin >> iters;
+  SVMulBenchmark(type, vecType, m, mInc, iters);
+}
+
 void RunBenchmarkNumber(unsigned int num) {
   switch(num) {
   case(0):
@@ -114,6 +137,8 @@ void RunBenchmarkNumber(unsigned int num) {
     break;
   case(5):
     ColVAddBenchmarkMenu();
+  case(6):
+    SVMulBenchmarkMenu();
     break;
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;

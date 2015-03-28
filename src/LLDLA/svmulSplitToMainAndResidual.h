@@ -13,28 +13,31 @@
     DxTer is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.               
+    GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef RUN_BENCHMARK_H_
-#define RUN_BENCHMARK_H_
-
-#include "blasExamples.h"
+#include "LLDLA.h"
 
 #if DOLLDLA
 
-void SVMulBenchmark(Type type, VecType vecType, int m, int mInc, int iters);
-void ColVAddBenchmark(Type type, int m, int increment, int numIters);
-void MAddBenchmark(Type type, int mBase, int mInc, int nBase, int nInc, int numIters);
-void DotProductBenchmark(Type type, int m, int increment, int numIters);
-void RunDotProdBenchmarks();
-void RunAxpyBenchmarks();
-void RunGemvBenchmarks();
-void RunAllBenchmarks();
+#include "transform.h"
+
+class SVMulSplitToMainAndResidual : public SingleTrans {
+ private:
+  Layer m_fromLayer, m_toLayer;
+  VecType m_vecType;
+
+ public:
+  SVMulSplitToMainAndResidual(Layer fromLayer, Layer toLayer, VecType vecType);
+
+  virtual string GetType() const { return "SVMulSplitToMainAndResidual" + std::to_string((long long int) m_vecType); }
+  virtual bool IsRef() const { return true; }
+
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+};
 
 #endif // DOLLDLA
-
-#endif

@@ -25,6 +25,7 @@
 #include "smmul.h"
 #include "svmul.h"
 #include "svmulPackToMultipleOfMu.h"
+#include "svmulSplitToMainAndResidual.h"
 #include "unpack.h"
 #include "unpackToPartAndCopy.h"
 #include "vmmul.h"
@@ -130,6 +131,7 @@ void AddSMMulTrans()
 
   Universe::AddTrans(SMMul::GetClass(), new ScalarMulHorizontalPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
+
   return;
 }
 
@@ -176,6 +178,10 @@ void AddSVMulTrans()
   Universe::AddTrans(SVMul::GetClass(), new SVMulVerticalPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulHorizontalPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   //  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 

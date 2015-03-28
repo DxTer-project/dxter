@@ -32,6 +32,24 @@
 
 using namespace std;
 
+void SVMulBenchmark(Type type, VecType vecType, int m, int increment, int numIters) {
+  cout << "--------------------- scalar vector multiply benchmark -----------------------------\n\n";
+  BenchmarkStats benchStats(TypeToStr(type) + "_svmul");
+  for (int i = 0; i < numIters; i++) {
+    RealPSet* test = SVMulTest(type, vecType, m);
+    ProblemInstance svmul;
+    svmul.SetName("svmul");
+    svmul.SetType(type);
+    svmul.AddDimension(m, "m");
+    auto pStats = RunProblemWithRTE(1, test, &svmul);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += increment;
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- end scalar vector multiply benchmark ---------------------------\n";
+}
+
 void DotProductBenchmark(Type type, int m, int increment, int numIters) {
   cout << "--------------------- dot product benchmark -----------------------------\n\n";
   BenchmarkStats benchStats(TypeToStr(type) + "_dot_product");

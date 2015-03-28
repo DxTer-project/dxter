@@ -370,13 +370,16 @@ bool SVMulToRegArith::CanApply(const Node* node) const
     if (svmul->GetLayer() != m_fromLayer) {
       return false;
     }
-    if ((!(*(svmul->GetInputM(1)) <= svmul->GetVecRegWidth()) &&
-	 m_vecType == COLVECTOR) &&
+    if (svmul->GetVecType() != m_vecType) {
+      return false;
+    }
+    //    if ((!(*(svmul->GetInputM(1)) <= svmul->GetVecRegWidth()) &&
+    if ((m_vecType == COLVECTOR) &&
 	svmul->GetInputM(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth())) {
       return true;
     }
-    if (!(*(svmul->GetInputN(1)) <= svmul->GetVecRegWidth()) &&
-	m_vecType == ROWVECTOR &&
+    //    if (!(*(svmul->GetInputN(1)) <= svmul->GetVecRegWidth()) &&
+    if ((m_vecType == ROWVECTOR) &&
 	svmul->GetInputN(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth())) {
       return true;
     }
