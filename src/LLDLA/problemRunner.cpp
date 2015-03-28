@@ -33,13 +33,32 @@ ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemIn
   return pStats;
 }
 
+void RunPhase(Universe* uni, int numIters, LLDLAPHASE phase) {
+  time_t start, end;
+  cout << "Expanding LLDLA loop phase\n";
+
+  time(&start);
+  uni->Expand(numIters, phase, LLDLACull);
+  time(&end);
+
+  cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
+  cout << "Propagating\n";
+
+  cout.flush();
+  time(&start);
+  uni->Prop();
+  time(&end);
+
+  cout << "Propagation took " << difftime(end,start) << " seconds\n";
+}
+
 LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   RegAllLLDLANodes();
   AddTransformations();
 
   int numIters = -1;
   auto uni = new LLDLAUniverse();
-  time_t start, start2, end;
+  time_t start, end;
 
   uni->PrintStats();
 
@@ -52,7 +71,6 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* proble
   uni->Init(startSet);
   
   cout << "Initialized universe\n";
-
   cout << "Setting up problem" << endl;
 
   uni->SetUpOperation(startSet);
@@ -65,60 +83,19 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* algPSet, ProblemInstance* proble
 
   time(&start);
 
-#if DOLLDLALOOPPHASE
-  if (CurrPhase == LLDLALOOPPHASE) {
-
-    cout << "Expanding LLDLA loop phase\n";
-
-    uni->Expand(-1, LLDLALOOPPHASE, LLDLACull);
-    time(&end);
-
-    cout << "LLDLALOOP phase took " << difftime(end,start) << " seconds\n";
-    cout << "Propagating\n";
-
-    cout.flush();
-    time(&start2);
-    uni->Prop();
-    time(&end);
-
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
-
+  if ((CurrPhase == LLDLALOOPPHASE) && DOLLDLALOOPPHASE) {
+    RunPhase(uni, numIters, LLDLALOOPPHASE);
   }
-#endif
 
-#if DOLLDLALOOPUNROLLPHASE
-  if (CurrPhase == LLDLALOOPUNROLLPHASE) {
-    cout << "LLDLALOOPUNROLL phase\n";
-    uni->Expand(-1, LLDLALOOPUNROLLPHASE, LLDLACull);
-    time(&end);
-    cout << "LLDLALOOPUNROLL phase took " << difftime(end,start) << " seconds\n";
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni->Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  if ((CurrPhase == LLDLALOOPUNROLLPHASE) && DOLLDLALOOPUNROLLPHASE) {
+    RunPhase(uni, numIters, LLDLALOOPUNROLLPHASE);
   }
-#endif
 
-#if DOLLDLAPRIMPHASE
-  if (CurrPhase == LLDLAPRIMPHASE) {
-    cout << "Expanding LL DLA prim phase\n";
-    cout << "Starting with " << uni->TotalCount() << endl;
-    time(&start2);
-    uni->Expand(numIters, LLDLAPRIMPHASE, LLDLACull);
-    time(&end);
-    cout << "LLDLAPRIM phase took " << difftime(end,start2) << " seconds\n";
-
-    cout << "Propagating\n";
-    cout.flush();
-    time(&start2);
-    uni->Prop();
-    time(&end);
-    cout << "Propagation took " << difftime(end,start2) << " seconds\n";
+  if ((CurrPhase == LLDLAPRIMPHASE) && DOLLDLAPRIMPHASE) {
+    RunPhase(uni, numIters, LLDLAPRIMPHASE);
   }
-#endif
 
+  time(&end);
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
