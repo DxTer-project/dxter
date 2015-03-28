@@ -35,7 +35,7 @@ bool SVMulVerticalPackToMultipleOfMu::CanApply(const Node* node) const {
       return false;
     }
     return !(svmul->InputMIsMultipleOfVecRegWidth(1))
-      && svmul->GetInputNumRows(1) > 1
+      && svmul->GetInputNumRows(1) >= 1
       && svmul->GetInputNumCols(1) == 1;
   }
   throw;
@@ -68,7 +68,7 @@ bool SVMulHorizontalPackToMultipleOfMu::CanApply(const Node* node) const {
       return false;
     }
     return !(svmul->InputNIsMultipleOfVecRegWidth(1))
-      && svmul->GetInputNumCols(1) > 1
+      && svmul->GetInputNumCols(1) >= 1
       && svmul->GetInputNumRows(1) == 1;
   }
   throw;
