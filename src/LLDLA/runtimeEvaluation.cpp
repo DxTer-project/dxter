@@ -105,7 +105,7 @@ string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap* imps, st
   correctnessCheck += CorrectnessCheck(imps, referenceImpName);
   string timingSetup = "\tint i, j, k;\n\tlong long start_time, end_time, exec_time, total_cycles;\n";
   string mainFunc = prototype + correctnessCheck + "\n" + timingSetup;
-  string timingLoop = TimingLoop(imps);
+  string timingLoop = TimingLoops(imps);
   timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
   mainFunc = mainFunc + "\n" + timingLoop + "\n}";
   return mainFunc;
@@ -150,11 +150,30 @@ vector<string> RuntimeTest::ArgBuffers(string postfix) {
   return argBufs;
 }
 
-string RuntimeTest::TimingLoop(ImplementationMap* imps) {
+string RuntimeTest::TimingLoop(int i) {
+  string loopBody = "";
+  string opName = m_operationName + "_" + std::to_string((long long int) i);
+  loopBody += "\ttotal_cycles = 0;\n";
+  loopBody += "\twhile (total_cycles < MIN_CYCLES) {\n";
+  loopBody += "\t\tstart_time = rdtsc();\n";
+  loopBody += "\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
+  loopBody += "\t\tend_time = rdtsc();\n";
+  loopBody += "\t\texec_time = end_time - start_time;\n";
+  loopBody += "\t\ttotal_cycles += exec_time;\n";
+  loopBody += "\t\tchar exec_time_str[100];\n";
+  loopBody += "\t\tsprintf(exec_time_str, \"%lld\\n\", exec_time);\n";
+  loopBody += "\t\tsize_t trash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
+  loopBody += "\t}\n";
+  loopBody += "\tfprintf(" + m_dataFileName + ", \"#\\n\");\n";
+  loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";
+  return loopBody;
+}
+
+string RuntimeTest::TimingLoops(ImplementationMap* imps) {
   unsigned int i;
   string loopBody = "";
   for (i = 1; i <= imps->size(); i++) {
-    string opName = m_operationName + "_" + std::to_string((long long int) i);
+    /*    string opName = m_operationName + "_" + std::to_string((long long int) i);
     loopBody += "\ttotal_cycles = 0;\n";
     loopBody += "\twhile (total_cycles < MIN_CYCLES) {\n";
     loopBody += "\t\tstart_time = rdtsc();\n";
@@ -167,7 +186,8 @@ string RuntimeTest::TimingLoop(ImplementationMap* imps) {
     loopBody += "\t\tsize_t trash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
     loopBody += "\t}\n";
     loopBody += "\tfprintf(" + m_dataFileName + ", \"#\\n\");\n";
-    loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";
+    loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";*/
+    loopBody += TimingLoop(i);
   }
   return loopBody;
 }

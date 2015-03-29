@@ -61,7 +61,8 @@ class RuntimeTest
   string CopyArgBuffersTo(string postfix);
   vector<string> ArgBuffers(string postfix);
   string CheckArgBufferDiffs(string refPostfix, string testPostfix, string testName);
-  string TimingLoop(ImplementationMap* imps);
+  string TimingLoop(int i);
+  string TimingLoops(ImplementationMap* imps);
   void AddIncludes();
   void AddMiscellaneousDefines();
 };

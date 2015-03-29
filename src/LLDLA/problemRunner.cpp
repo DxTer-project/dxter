@@ -119,7 +119,7 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
   cout << "About to evaluate\n";
-ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
+  ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
 
   cout << "Done evaluating\n";
   ProblemInstanceStats* pStats = new ProblemInstanceStats(problemInstance, &impMap);
