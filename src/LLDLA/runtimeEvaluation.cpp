@@ -299,7 +299,6 @@ string RuntimeTest::MakeFunc(string funcName, string funcBody) {
 
 RuntimeEvaluator::RuntimeEvaluator(string evalDirName) {
   m_evalDirName = evalDirName;
-  m_minCycles = 0;
 }
 
 void RuntimeEvaluator::WriteTestCodeToFile(string testFileName, string testCode) {
@@ -313,7 +312,8 @@ void RuntimeEvaluator::WriteTestCodeToFile(string testFileName, string testCode)
   }
 }
 
-void RuntimeEvaluator::CompileTest(string executableName, string testFileName) {
+void RuntimeEvaluator::CompileTest(string executableName) {
+  string testFileName = executableName + ".c";
   cout << "All implementations written to files\n";
   cout << "Compile string is " << arch->CompileString(executableName, testFileName) << endl;
   int compileRes = system(arch->CompileString(executableName, testFileName).c_str());
@@ -332,25 +332,26 @@ void RuntimeEvaluator::CleanUpTest(string executableName) {
   system(removeExecutable.c_str());
 }
 
-ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp) {
-  m_minCycles = test.m_minCycles;
+ImplementationRuntimeMap RuntimeEvaluator::ReadTimingData(string dataFileName, int numImpls) {
+  cout << "Size of imps = " << std::to_string((long long int) numImpls) << endl;
+  cout << "Calling ReadTimeDataFromFile" << endl;
 
+  auto impMap = ReadTimeDataFromFile(dataFileName, numImpls);
+  string removeDataFile = "rm -f " + dataFileName;
+  system(removeDataFile.c_str());
+  return impMap;
+}
+
+ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp) {
   string executableName = m_evalDirName + "/" + test.m_operationName;
-  string testFileName = executableName + ".c";
   string testCode = test.MakeTestCode(sanityCheckSetting, timingSetting, imps, referenceImp);
 
-  WriteTestCodeToFile(testFileName, testCode);
-  CompileTest(executableName, testFileName);
+  WriteTestCodeToFile(executableName, testCode);
+  CompileTest(executableName);
   RunTest(executableName);
   CleanUpTest(executableName);
 
-  cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
-  cout << "Calling ReadTimeDataFromFile" << endl;
-
-  string dataFileName = test.m_dataFileName;
-  auto impMap = ReadTimeDataFromFile(dataFileName, imps->size());
-  string removeDataFile = "rm -f " + dataFileName;
-  system(removeDataFile.c_str());
+  auto impMap = ReadTimingData(test.m_dataFileName, imps->size());
   return impMap;
 }
 

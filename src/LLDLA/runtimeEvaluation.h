@@ -87,15 +87,15 @@ class RuntimeEvaluator
 
  private:
   bool IsImplementationSeparator(string token);
-  void CompileTest(string executableName, string testFileName);
+  void CompileTest(string executableName);
   void RunTest(string executableName);
   void CleanUpTest(string executableName);
+  ImplementationRuntimeMap ReadTimingData(string dataFileName, int numImpls);
   void WriteTestCodeToFile(string testFileName, string testCode);
   void WriteTestCodeToFile(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, string executableName, string testFileName);
 
  public:
   string m_evalDirName;
-  int m_minCycles;
 
   RuntimeEvaluator(string evalDirName);
   ImplementationRuntimeMap EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp);
