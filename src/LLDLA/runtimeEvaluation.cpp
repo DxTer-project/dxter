@@ -320,6 +320,18 @@ void RuntimeEvaluator::CompileTest(string executableName, string testFileName) {
   cout << "Compile result = " << std::to_string((long long int) compileRes) << endl;
 }
 
+void RuntimeEvaluator::RunTest(string executableName) {
+  string runStr = "./" + executableName;
+  int runRes = system(runStr.c_str());
+  cout << "Run string is " << runStr << endl;
+  cout << "Run result = " << std::to_string((long long int) runRes) << endl;
+}
+
+void RuntimeEvaluator::CleanUpTest(string executableName) {
+  string removeExecutable = "rm -f " + executableName;
+  system(removeExecutable.c_str());
+}
+
 ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp) {
   m_minCycles = test.m_minCycles;
 
@@ -328,16 +340,9 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(SanityCheckSe
   string testCode = test.MakeTestCode(sanityCheckSetting, timingSetting, imps, referenceImp);
 
   WriteTestCodeToFile(testFileName, testCode);
-
   CompileTest(executableName, testFileName);
-
-  string runStr = "./" + executableName;
-  int runRes = system(runStr.c_str());
-  cout << "Run string is " << runStr << endl;
-  cout << "Run result = " << std::to_string((long long int) runRes) << endl;
-
-  string removeExecutable = "rm -f " + executableName;
-  system(removeExecutable.c_str());
+  RunTest(executableName);
+  CleanUpTest(executableName);
 
   cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
   cout << "Calling ReadTimeDataFromFile" << endl;

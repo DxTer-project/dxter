@@ -88,6 +88,8 @@ class RuntimeEvaluator
  private:
   bool IsImplementationSeparator(string token);
   void CompileTest(string executableName, string testFileName);
+  void RunTest(string executableName);
+  void CleanUpTest(string executableName);
   void WriteTestCodeToFile(string testFileName, string testCode);
   void WriteTestCodeToFile(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, string executableName, string testFileName);
 
