@@ -53,6 +53,11 @@ class RuntimeTest
   string ToCStatements(vector<string> lines);
   string CArgList(vector<string> args);
   string MakeImpFuncs(ImplementationMap* imps);
+  string ImplementationFunctions(ImplementationMap* imps, string referenceImp);
+  string MainFunction();
+  string SanityChecks(ImplementationMap* imps, string referenceImpName);
+  string TimingCode(ImplementationMap* imps, string operationName);
+  string HeadersAndDefines(ImplementationMap* imps);
   string MakeFunc(string funcName, string funcBody);
   string MainFuncCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImpName);
   string CorrectnessCheck(ImplementationMap* imps, string referenceImpName);

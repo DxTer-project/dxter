@@ -79,15 +79,66 @@ void RuntimeTest::AddMiscellaneousDefines()
   return;
 }
 
-string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImp)
-{
+string RuntimeTest::HeadersAndDefines(ImplementationMap* imps) {
   int numImplementations = imps->size();
   m_defines.push_back("#define NUM_ALGS " + std::to_string((long long int) numImplementations));
   string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
+  return headersAndDefines;
+}
+
+string RuntimeTest::ImplementationFunctions(ImplementationMap* imps, string referenceImp) {
   string refFuncName = m_operationName + "_test";
   string implementationFunctions = MakeImpFuncs(imps) + MakeFunc(refFuncName, referenceImp);
-  string driverCode = MainFuncCodeWithCorrectnessCheck(imps, m_operationName + "_test");
-  string testCode = headersAndDefines + "\n" + implementationFunctions + "\n" + driverCode;
+  return implementationFunctions;
+}
+
+string RuntimeTest::MainFunction() {
+  string mainFunc = "";
+  mainFunc += "int main() {\n";
+  mainFunc += "\tsanity_check_implementations();\n";
+  mainFunc += "\ttime_implementations();\n";
+  mainFunc += "}";
+  return mainFunc;
+}
+
+string RuntimeTest::SanityChecks(ImplementationMap* imps, string referenceImpName) {
+  string prototype = "void sanity_check_implementations() {\n";
+  string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
+  argBufferAllocation += AllocateArgBuffers("") + "\n";
+  argBufferAllocation += AllocateArgBuffers("_ref") + "\n";
+  argBufferAllocation += AllocateArgBuffers("_test") + "\n";
+  argBufferAllocation += FillBuffersWithRandValues("") + "\n";
+  argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
+  string correctnessCheck = prototype + argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
+  correctnessCheck += CorrectnessCheck(imps, referenceImpName);
+  correctnessCheck += "}\n";
+  return correctnessCheck;
+}
+
+string RuntimeTest::TimingCode(ImplementationMap* imps, string operationName) {
+  string prototype = "void time_implementations() {\n";
+  string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
+  argBufferAllocation += AllocateArgBuffers("") + "\n";
+  argBufferAllocation += FillBuffersWithRandValues("") + "\n";
+  argBufferAllocation += "\tFILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
+  argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
+
+  string timingSetup = "\tint i, j, k;\n\tlong long start_time, end_time, exec_time, total_cycles;\n";
+  string timingFunc = prototype + argBufferAllocation + "\n" + timingSetup;
+  string timingLoop = TimingLoops(imps);
+  timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
+  timingFunc += "\n" + timingLoop + "\n}\n";
+  return timingFunc;
+}
+
+string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImp) {
+  string hds = HeadersAndDefines(imps);
+  string impFuncs = ImplementationFunctions(imps, referenceImp);
+  string sanityCheckFunc = SanityChecks(imps, m_operationName + "_test");
+  string timingFunc = TimingCode(imps, m_operationName + "_test");
+  string mainFunc = MainFunction();
+  //  string driverCode = MainFuncCodeWithCorrectnessCheck(imps, m_operationName + "_test");
+  string testCode = hds + "\n" + impFuncs + "\n" + sanityCheckFunc + "\n" + timingFunc + "\n" + mainFunc;
   return testCode;
 }
 
@@ -173,20 +224,6 @@ string RuntimeTest::TimingLoops(ImplementationMap* imps) {
   unsigned int i;
   string loopBody = "";
   for (i = 1; i <= imps->size(); i++) {
-    /*    string opName = m_operationName + "_" + std::to_string((long long int) i);
-    loopBody += "\ttotal_cycles = 0;\n";
-    loopBody += "\twhile (total_cycles < MIN_CYCLES) {\n";
-    loopBody += "\t\tstart_time = rdtsc();\n";
-    loopBody += "\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
-    loopBody += "\t\tend_time = rdtsc();\n";
-    loopBody += "\t\texec_time = end_time - start_time;\n";
-    loopBody += "\t\ttotal_cycles += exec_time;\n";
-    loopBody += "\t\tchar exec_time_str[100];\n";
-    loopBody += "\t\tsprintf(exec_time_str, \"%lld\\n\", exec_time);\n";
-    loopBody += "\t\tsize_t trash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
-    loopBody += "\t}\n";
-    loopBody += "\tfprintf(" + m_dataFileName + ", \"#\\n\");\n";
-    loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";*/
     loopBody += TimingLoop(i);
   }
   return loopBody;
