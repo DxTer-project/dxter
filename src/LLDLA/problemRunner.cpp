@@ -118,11 +118,12 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
   RuntimeTest rtest(problemInstance->GetType(), problemInstance->GetName(), uni->m_argNames, uni->m_declarationVectors, uni->m_constantDefines, minCycles);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
-  cout << "About to evaluate\n";
-  ImplementationRuntimeMap impMap = evaler.EvaluateImplementationsWithCorrectnessCheck(rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
 
+  cout << "About to evaluate\n";
+  auto impMap = evaler.EvaluateImplementations(CHECKALLBUFFERS, ONEPHASETIMING, rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
   cout << "Done evaluating\n";
-  ProblemInstanceStats* pStats = new ProblemInstanceStats(problemInstance, &impMap);
+
+  auto pStats = new ProblemInstanceStats(problemInstance, &impMap);
   pStats->PrettyPrintPerformanceStats();
 
   GraphNum best = pStats->GetBestAvgFlopsPerCycleImpl();

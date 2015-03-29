@@ -31,35 +31,37 @@
 
 #if DOLLDLA
 
+#include "problemInstanceStats.h"
+
 using namespace std;
+
+enum SanityCheckSetting { CHECKALLBUFFERS, NONE };
+enum TimingSetting { ONEPHASETIMING, TWOPHASETIMING };
 
 class RuntimeTest
 {
- public:
+ protected:
   vector<string> m_defines;
   vector<string> m_argNames;
   vector<string> m_headers;
-  string m_operationName;
-  string m_dataFileName;
   string m_correctTestFileName;
   vector<string> m_operationArgs;
   vector<string> m_argDeclarations;
-  int m_minCycles;
+
   int m_chunkSize;
   Type m_type;
 
-  RuntimeTest(Type m_type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations);
-  string MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImp);
   string ToCStatements(vector<string> lines);
   string CArgList(vector<string> args);
   string MakeImpFuncs(ImplementationMap* imps);
   string ImplementationFunctions(ImplementationMap* imps, string referenceImp);
   string MainFunction();
-  string SanityChecks(ImplementationMap* imps, string referenceImpName);
-  string TimingCode(ImplementationMap* imps, string operationName);
+  string AllBufferSanityChecks(ImplementationMap* imps, string referenceImpName);
+  string SanityChecks(SanityCheckSetting sanityCheckSetting, ImplementationMap* imps, string referenceImpName);
+  string OnePhaseTimingCode(ImplementationMap* imps, string operationName);
+  string TimingCode(TimingSetting timingSetting, ImplementationMap* imps, string operationName);
   string HeadersAndDefines(ImplementationMap* imps);
   string MakeFunc(string funcName, string funcBody);
-  string MainFuncCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImpName);
   string CorrectnessCheck(ImplementationMap* imps, string referenceImpName);
   string AllocateArgBuffers(string postfix);
   string FillBuffersWithRandValues(string postfix);
@@ -70,6 +72,14 @@ class RuntimeTest
   string TimingLoops(ImplementationMap* imps);
   void AddIncludes();
   void AddMiscellaneousDefines();
+
+ public:
+  int m_minCycles;
+  string m_dataFileName;
+  string m_operationName;
+
+  RuntimeTest(Type m_type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations);
+  string MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, ImplementationMap* imps, string referenceImp);
 };
 
 class RuntimeEvaluator
@@ -77,13 +87,17 @@ class RuntimeEvaluator
 
  private:
   bool IsImplementationSeparator(string token);
+  void CompileTest(string executableName, string testFileName);
+  void WriteTestCodeToFile(string testFileName, string testCode);
+  void WriteTestCodeToFile(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, string executableName, string testFileName);
 
  public:
   string m_evalDirName;
   int m_minCycles;
 
   RuntimeEvaluator(string evalDirName);
-  ImplementationRuntimeMap EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp);
+  ImplementationRuntimeMap EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp);
+
   ImplementationRuntimeMap ReadTimeDataFromFile(string fileName, int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
 };

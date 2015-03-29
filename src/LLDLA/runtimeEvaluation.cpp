@@ -101,7 +101,16 @@ string RuntimeTest::MainFunction() {
   return mainFunc;
 }
 
-string RuntimeTest::SanityChecks(ImplementationMap* imps, string referenceImpName) {
+string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, ImplementationMap* imps, string referenceImpName) {
+  if (sanityCheckSetting == CHECKALLBUFFERS) {
+    return AllBufferSanityChecks(imps, referenceImpName);
+  } else {
+    cout << "SanityCheckSetting NONE is not yet supported" << endl;
+    throw;
+  }
+}
+
+string RuntimeTest::AllBufferSanityChecks(ImplementationMap* imps, string referenceImpName) {
   string prototype = "void sanity_check_implementations() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
   argBufferAllocation += AllocateArgBuffers("") + "\n";
@@ -115,7 +124,16 @@ string RuntimeTest::SanityChecks(ImplementationMap* imps, string referenceImpNam
   return correctnessCheck;
 }
 
-string RuntimeTest::TimingCode(ImplementationMap* imps, string operationName) {
+string RuntimeTest::TimingCode(TimingSetting timingSetting, ImplementationMap* imps, string operationName) {
+  if (timingSetting == ONEPHASETIMING) {
+    return OnePhaseTimingCode(imps, operationName);
+  } else {
+    cout << "TWOPHASETIMING not supported yet" << endl;
+    throw;
+  }
+}
+
+string RuntimeTest::OnePhaseTimingCode(ImplementationMap* imps, string operationName) {
   string prototype = "void time_implementations() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
   argBufferAllocation += AllocateArgBuffers("") + "\n";
@@ -131,35 +149,14 @@ string RuntimeTest::TimingCode(ImplementationMap* imps, string operationName) {
   return timingFunc;
 }
 
-string RuntimeTest::MakeTestCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImp) {
+string RuntimeTest::MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, ImplementationMap* imps, string referenceImp) {
   string hds = HeadersAndDefines(imps);
   string impFuncs = ImplementationFunctions(imps, referenceImp);
-  string sanityCheckFunc = SanityChecks(imps, m_operationName + "_test");
-  string timingFunc = TimingCode(imps, m_operationName + "_test");
+  string sanityCheckFunc = SanityChecks(sanityCheckSetting, imps, m_operationName + "_test");
+  string timingFunc = TimingCode(timingSetting, imps, m_operationName + "_test");
   string mainFunc = MainFunction();
-  //  string driverCode = MainFuncCodeWithCorrectnessCheck(imps, m_operationName + "_test");
   string testCode = hds + "\n" + impFuncs + "\n" + sanityCheckFunc + "\n" + timingFunc + "\n" + mainFunc;
   return testCode;
-}
-
-string RuntimeTest::MainFuncCodeWithCorrectnessCheck(ImplementationMap* imps, string referenceImpName)
-{
-  string prototype = "int main() {\n";
-  string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
-  argBufferAllocation += AllocateArgBuffers("") + "\n";
-  argBufferAllocation += AllocateArgBuffers("_ref") + "\n";
-  argBufferAllocation += AllocateArgBuffers("_test") + "\n";
-  argBufferAllocation += FillBuffersWithRandValues("") + "\n";
-  argBufferAllocation += "\tFILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
-  argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
-  string correctnessCheck = argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
-  correctnessCheck += CorrectnessCheck(imps, referenceImpName);
-  string timingSetup = "\tint i, j, k;\n\tlong long start_time, end_time, exec_time, total_cycles;\n";
-  string mainFunc = prototype + correctnessCheck + "\n" + timingSetup;
-  string timingLoop = TimingLoops(imps);
-  timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
-  mainFunc = mainFunc + "\n" + timingLoop + "\n}";
-  return mainFunc;
 }
 
 string RuntimeTest::CorrectnessCheck(ImplementationMap* imps, string referenceImpName)
@@ -305,35 +302,51 @@ RuntimeEvaluator::RuntimeEvaluator(string evalDirName) {
   m_minCycles = 0;
 }
 
-ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementationsWithCorrectnessCheck(RuntimeTest test, ImplementationMap* imps, string referenceImp) {
-  m_minCycles = test.m_minCycles;
-  string executableName = m_evalDirName + "/" + test.m_operationName;
-  string testFileName = executableName + ".c";
-  string dataFileName = test.m_dataFileName;
+void RuntimeEvaluator::WriteTestCodeToFile(string testFileName, string testCode) {
   std::ofstream outStream(testFileName);
   if (outStream.is_open()) {
-    outStream << test.MakeTestCodeWithCorrectnessCheck(imps, referenceImp) << endl;
+    outStream << testCode << endl;
     outStream.close();
-    cout << "All implementations written to files\n";
-    cout << "Compile string is " << arch->CompileString(executableName, testFileName) << endl;
-    int compileRes = system(arch->CompileString(executableName, testFileName).c_str());
-    cout << "Compile result = " << std::to_string((long long int) compileRes) << endl;
-    string runStr = "./" + executableName;
-    int runRes = system(runStr.c_str());
-    cout << "Run string is " << runStr << endl;
-    cout << "Run result = " << std::to_string((long long int) runRes) << endl;
-    string removeExecutable = "rm -f " + executableName;
-    system(removeExecutable.c_str());
-    cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
-    cout << "Calling ReadTimeDataFromFile" << endl;
-    auto impMap = ReadTimeDataFromFile(dataFileName, imps->size());
-    string removeDataFile = "rm -f " + dataFileName;
-    system(removeDataFile.c_str());
-    return impMap;
   } else {
-    cout << "ERROR: RuntimeEvaluator could not create file " << executableName << endl;
+    cout << "ERROR: RuntimeEvaluator could not create file " << testFileName << endl;
     throw;
   }
+}
+
+void RuntimeEvaluator::CompileTest(string executableName, string testFileName) {
+  cout << "All implementations written to files\n";
+  cout << "Compile string is " << arch->CompileString(executableName, testFileName) << endl;
+  int compileRes = system(arch->CompileString(executableName, testFileName).c_str());
+  cout << "Compile result = " << std::to_string((long long int) compileRes) << endl;
+}
+
+ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp) {
+  m_minCycles = test.m_minCycles;
+
+  string executableName = m_evalDirName + "/" + test.m_operationName;
+  string testFileName = executableName + ".c";
+  string testCode = test.MakeTestCode(sanityCheckSetting, timingSetting, imps, referenceImp);
+
+  WriteTestCodeToFile(testFileName, testCode);
+
+  CompileTest(executableName, testFileName);
+
+  string runStr = "./" + executableName;
+  int runRes = system(runStr.c_str());
+  cout << "Run string is " << runStr << endl;
+  cout << "Run result = " << std::to_string((long long int) runRes) << endl;
+
+  string removeExecutable = "rm -f " + executableName;
+  system(removeExecutable.c_str());
+
+  cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
+  cout << "Calling ReadTimeDataFromFile" << endl;
+
+  string dataFileName = test.m_dataFileName;
+  auto impMap = ReadTimeDataFromFile(dataFileName, imps->size());
+  string removeDataFile = "rm -f " + dataFileName;
+  system(removeDataFile.c_str());
+  return impMap;
 }
 
 bool RuntimeEvaluator::IsImplementationSeparator(string token) {
