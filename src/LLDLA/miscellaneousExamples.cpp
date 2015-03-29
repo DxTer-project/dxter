@@ -9,17 +9,68 @@
 
 #if DOLLDLA
 
+#include "exampleUtils.h"
+
+RealPSet* VMulAddBenchmark(Type dataType, int m) {
+  auto alpha = new InputNode("alpha",
+			     1, 1,
+			     1, 1,
+			     dataType);
+
+  auto beta = new InputNode("beta",
+			    1, 1,
+			    1, 1,
+			    dataType);
+
+  auto x = new InputNode("X",
+			 m, 1,
+			 1, m,
+			 dataType);
+
+  auto y = new InputNode("Y",
+			 m, 1,
+			 1, m,
+			 dataType);
+
+  auto z = new InputNode("Z",
+			 m, 1,
+			 1, m,
+			 dataType);
+
+  auto zPlusY = new VAdd(ABSLAYER, COLVECTOR);
+  zPlusY->AddInputs(4,
+		    z, 0,
+		    y, 0);
+
+  auto betaZY = new SVMul(ABSLAYER);
+  betaZY->AddInputs(4,
+		    beta, 0,
+		    zPlusY, 0);
+
+  auto alphaX = new SVMul(ABSLAYER);
+  alphaX->AddInputs(4,
+		    alpha, 0,
+		    x, 0);
+
+  auto finalY = new VAdd(ABSLAYER, COLVECTOR);
+  finalY->AddInputs(4,
+		    alphaX, 0,
+		    betaZY, 0);
+
+  return WrapInPSet(finalY);
+}
+
 RealPSet* GenSizeColSVMul(Type dataType, int m)
 {
   auto Ain = new InputNode("A input", m, 1, "A",
-				 m, 1,
-				 "ANumRows", "ANumCols",
-				 "ARowStride", "AColStride", dataType);
+			   m, 1,
+			   "ANumRows", "ANumCols",
+			   "ARowStride", "AColStride", dataType);
 
   auto xIn = new InputNode("x input", 1, 1, "X",
-				 m, 1,
-				 "XNumRows", "XNumCols",
-				 "XRowStride", "XColStride", dataType);
+			   m, 1,
+			   "XNumRows", "XNumCols",
+			   "XRowStride", "XColStride", dataType);
 
   auto tunA = new Tunnel(POSSTUNIN);
   tunA->AddInput(Ain, 0);

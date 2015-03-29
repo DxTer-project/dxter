@@ -87,6 +87,7 @@ void Usage()
   cout <<"        13  -> Matrix vector multiply twice F/D M N P\n";
   cout <<"        17  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
   cout <<"        18  -> alpha*A*x + beta*B*x F/D M N\n";
+  cout <<"        31  -> y = alpha*x + beta*(z + y) F/D M\n";
   cout <<"\n";
   cout <<"Node test examples\n";
   cout <<"        19  -> Set to zero test (y <- Ax) F/D M N\n";
@@ -100,6 +101,7 @@ void Usage()
   cout <<"        27  -> 2D vertical unpack test F/D M N\n";
   cout <<"        28  -> 2D horizontal unpack test F/D M N\n";
   cout <<"        29  -> 2D horizontal copy test F/D M N\n";
+  cout <<"\n";
   cout <<"Automated tests\n";
   cout <<"        30  -> Basic examples, no runtime evaluation\n";
   cout <<"\n";
@@ -525,6 +527,17 @@ int main(int argc, const char* argv[])
       }
       BasicNoRuntimeEvalTests();
       return 0;
+    case(31):
+      if (argc != 4) {
+	Usage();
+	return 0;
+      }
+      opName = "dxt_vmuladd_benchmark";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      problemInstance.AddDimension(m, "m");
+      algPSet = VMulAddBenchmark(precision, m);
+      break;
     default:
       Usage();
       return 0;
