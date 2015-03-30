@@ -33,7 +33,7 @@ enum LogLevel { ALL, INFO, DEBUG, FATAL };
 #define LOG_I(msg) LogMessage(INFO, (msg))
 #define LOG_D(msg) LogMessage(DEBUG, (msg))
 #define LOG_F(msg) LogMessage(FATAL, (msg))
-#define LOG_FAIL(failMsg) LogFailMessageAndThrow((failMsg))
+#define LOG_FAIL(failMsg) LogMessage(FATAL, (failMsg)); throw;
 
 void OpenLog(string logName);
 void CloseLog();

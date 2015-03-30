@@ -31,6 +31,8 @@ Trans CharToTrans(char c);
 Tri CharToTri(char c);
 Side CharToSide(char c);
 
+string DateAndTimeString();
+
 #if DOLLDLA
 VecType CharToVecType(char c);
 

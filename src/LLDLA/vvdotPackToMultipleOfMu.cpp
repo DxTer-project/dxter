@@ -38,7 +38,7 @@ bool VVDotPackToMultipleOfMu::CanApply(const Node* node) const {
 
 void VVDotPackToMultipleOfMu::Apply(Node* node) const {
   cout << "Applying vvdot pack" << endl;
-  //  throw;
+  //  LOG_FAIL("replacement for throw call");
   Pack* packX = PackToMultipleOf(m_toLayer, node->Input(0), node->InputConnNum(0), node, 0, DIMN, node->GetVecRegWidth());
 
   Pack* packY = PackToMultipleOf(m_toLayer, node->Input(1), node->InputConnNum(1), node, 1, DIMM, node->GetVecRegWidth());

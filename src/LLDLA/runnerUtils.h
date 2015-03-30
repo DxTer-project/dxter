@@ -35,7 +35,6 @@ typedef std::pair<GraphNum, TimeVec> NumRuntimePair;
 
 string TypeToStr(Type type);
 string VecTypeToStr(VecType vecType);
-string DateAndTimeString();
 string NoWhitespace(const string str);
 
 string Utils();

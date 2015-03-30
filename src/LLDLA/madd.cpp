@@ -26,6 +26,8 @@
 
 #if DOLLDLA
 
+#include "logging.h"
+
 MAdd::MAdd(Layer layer)
 {
   m_layer = layer;
@@ -54,7 +56,7 @@ void MAdd::PrintCode(IndStream &out)
   }
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive matrix add\n";
-    throw;
+    LOG_FAIL("Replacement for call to throw");
   }
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
@@ -109,7 +111,7 @@ void MAdd::Prop()
 
     if ((*GetInputM(0) != *GetInputM(1)) || (*GetInputN(0) != *GetInputN(1))) {
       cout << "ERROR: Cannot MAdd two matrices of different dimension\n";
-      throw;
+      LOG_FAIL("Replacement for call to throw;");
     }
 
     if (m_layer == LLDLAPRIMITIVELAYER) {
@@ -148,7 +150,7 @@ Phase MAdd::MaxPhase() const
     case (LLDLAPRIMITIVELAYER):
       return NUMPHASES; 
     default:
-      throw;
+      LOG_FAIL("Replacement for call to throw;");
     }
 }
 
@@ -249,7 +251,7 @@ string MAddToVAddLoopRef::GetType() const
     return "MAddToVAddLoopRef from " + LayerNumToStr(m_fromLayer) + " to " +
       LayerNumToStr(m_toLayer) + " of type ROWVECTOR";    
   default:
-    throw;
+    LOG_FAIL("Replacement for call to throw;");
   }
 }
 
@@ -270,7 +272,7 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
   }
   cout << "ERROR: Applying MAddToVAddLoopRef to non MAdd node\n";
   cout << "Node has class " << node->GetNodeClass() << endl;
-  throw;
+  LOG_FAIL("Replacement for call to throw;");
 }
 
 void MAddToVAddLoopRef::Apply(Node *node) const
@@ -335,7 +337,7 @@ bool MAddLowerLayer::CanApply(const Node *node) const
     }
   }
   else {
-    throw;
+    LOG_FAIL("Replacement for call to throw;");
   }
 }
 
