@@ -48,7 +48,7 @@ void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
 void ProblemInstanceStats::ComputeImplementationStats(vector<OneStageTimingResult*>* implTimes) {
   for (auto timeRes : *implTimes) {
     GraphNum impNum = timeRes->GetNum();
-    TimeVec* times = timeRes->GetTimes();
+    vector<double>* times = timeRes->GetTimes();
     ImplementationStats* impStats = new ImplementationStats(impNum, m_type, m_cost, times);
     m_implementationStats.push_back(unique_ptr<ImplementationStats>(impStats));
   }

@@ -19,32 +19,16 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ONE_STAGE_TIMING_RESULT_H
-#define ONE_STAGE_TIMING_RESULT_H
-
-#include "timingResult.h"
+#include "LLDLA.h"
+#include "oneStageTimingResult.h"
 
 #if DOLLDLA
 
-class OneStageTimingResult : public TimingResult {
- private:
-  GraphNum m_implNum;
-  vector<double> m_runtimes;
-
- public:
-  OneStageTimingResult(GraphNum implNum, TimeVec* runtimes);
-
-  virtual GraphNum GetNum() { return m_implNum; }
-  virtual double GetAvgFlopsPerCycle() { return 0.0; }
-  virtual double GetAvgPercentOfPeak() { return 0.0; }
-
-  virtual string CSVLine() { return ""; }
-  virtual string CSVLineColumnTitles() { return ""; }
-  virtual void PrettyPrintPerformanceStats() { return; }
-
-  virtual vector<double>* GetTimes() { return &m_runtimes; }
-};
+OneStageTimingResult::OneStageTimingResult(GraphNum implNum, TimeVec* runtimes) {
+  m_implNum = implNum;
+  for (auto time : *runtimes) {
+    m_runtimes.push_back(time);
+  }
+}
 
 #endif // DOLLDLA
-
-#endif // ONE_STAGE_TIMING_RESULT_H
