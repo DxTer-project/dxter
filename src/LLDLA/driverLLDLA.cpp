@@ -108,14 +108,14 @@ void Usage()
 }
 
 void SetUpGlobalState() {
-  START_LOG("LLDLA");
+  LOG_START("LLDLA");
   arch = new HaswellMacbook();
   costModel = new BasicCostModel();
   localInputNames = new UniqueNameSource("u_local_input_");
 }
 
 void TearDownGlobalState() {
-  END_LOG();
+  LOG_END();
 }
 
 int main(int argc, const char* argv[])

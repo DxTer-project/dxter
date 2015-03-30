@@ -27,6 +27,7 @@
 #include "omp.h"
 #endif
 #include "transform.h"
+#include "logging.h"
 #include "loopSupport.h"
 #include "helperNodes.h"
 #include <time.h>
@@ -389,6 +390,7 @@ int main(int argc, const char* argv[])
   omp_set_nested(true);
   omp_init_lock(&RealPSet::m_lock);
 #endif
+  LOG_START("tensors");
   //  PrintType printType = CODE;
   int numIters = -1;
   RealPSet* (*algFunc)();
@@ -747,6 +749,7 @@ int main(int argc, const char* argv[])
       else
       uni.Print(cout, CODE, whichGraph); */
 
+  LOG_END();
   return 0;
 }
 

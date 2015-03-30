@@ -28,8 +28,8 @@ using namespace std;
 
 enum LogLevel { ALL, INFO, DEBUG, FATAL };
 
-#define START_LOG(name) OpenLog((name))
-#define END_LOG() CloseLog()
+#define LOG_START(name) OpenLog((name))
+#define LOG_END() CloseLog()
 #define LOG_A(msg) LogMessage(ALL, (msg))
 #define LOG_I(msg) LogMessage(INFO, (msg))
 #define LOG_D(msg) LogMessage(DEBUG, (msg))

@@ -67,6 +67,6 @@ void LogMessage(LogLevel level, string message) {
 
 void LogFailMessageAndThrow(string message) {
   LOG_F(message);
-  END_LOG();
+  LOG_END();
   throw;
 }
