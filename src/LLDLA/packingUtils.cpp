@@ -48,7 +48,7 @@ Partition* PartitionIntoMainAndResidual(Layer layer, Node* outNode, ConnNum outN
   int mainSize = totalSize - residualSize;
   if (residualSize == 0) {
     cout << "Error: residualSize == 0" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   auto part = new Partition(layer, partDir, mainSize);
   part->AddInput(outNode, outNum);
@@ -76,7 +76,7 @@ int ComputePackedWidth(int length, int multiple) {
     cout << "Error: Computing packing width for operand that does not need to be packed" << endl;
     cout << "Length = " << length << endl;
     cout << "Multiple = " << multiple << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return length + (multiple - (length % multiple));
 }

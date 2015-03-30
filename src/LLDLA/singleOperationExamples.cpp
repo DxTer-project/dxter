@@ -95,7 +95,7 @@ RealPSet* MVMulTest(Type dataType, bool transpose, int m, int n)
       || !mvmul->InputDimsAreOneRepeatedSizeEach(2)) {
     cout << "ERROR IN THE INITIAL EXAMPLE CODE!" << endl;
     cout << "ERROR: MVMul input dimensions are not single, repeated sizes" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   Poss *innerPoss = new Poss(mvmul, true);

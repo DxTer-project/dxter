@@ -42,7 +42,7 @@ VecType SVMul::GetVecType() const {
   if (IsInputColVector(0) && IsInputColVector(1)) {
     return COLVECTOR;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SVMul::PrintCode(IndStream &out)
@@ -73,7 +73,7 @@ void SVMul::PrintCode(IndStream &out)
   }
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive scalar vector multiply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
@@ -148,7 +148,7 @@ void SVMul::Prop()
 
     if (!((DLANode*) Input(0))->IsScalar(InputConnNum(0))) {
       cout << "ERROR: SVMul input 0 is not a scalar\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 
     VectorOpInputDimensionCheck(1);
@@ -169,7 +169,7 @@ void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
 {
   if (GetVecType() == ROWVECTOR && *GetInputM(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum << " has more than 1 row\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   } else if (GetVecType() == COLVECTOR && *GetInputN(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum  << " has more than 1 column\n";
   }
@@ -177,10 +177,10 @@ void SVMul::VectorOpInputDimensionCheck(ConnNum inputNum)
   if (m_layer == LLDLAPRIMITIVELAYER) {
     if (GetVecType() == ROWVECTOR && *GetInputN(inputNum) != regWidth) {
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have regWidth columns\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     } else if(GetVecType() == COLVECTOR && *GetInputM(inputNum) != regWidth) {
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have regWidth rows\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
 }
@@ -211,7 +211,7 @@ Phase SVMul::MaxPhase() const
     case (LLDLAPRIMITIVELAYER):
       return NUMPHASES; 
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -232,7 +232,7 @@ string SVMulLoopRef::GetType() const
     case(COLVECTOR):
       return "SVMulLoopRef - column vector";
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -252,12 +252,12 @@ bool SVMulLoopRef::CanApply(const Node *node) const
 	svmul->GetInputM(1)->EvenlyDivisibleBy(m_bs.GetSize());
     } 
     else {
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
 
   cout << "ERROR: Cannot apply SVMulLoopRef to a non SVMul node" << endl;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SVMulLoopRef::Apply(Node *node) const
@@ -305,7 +305,7 @@ void SVMulLoopRef::Apply(Node *node) const
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
     cout << "Error: Bad data type in vadd apply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   // Row vectors are partitioned in the N dimension, column vectors in the M dimension
@@ -340,7 +340,7 @@ bool SVMulLowerLayer::CanApply(const Node *node) const
     return true;
   }
   else {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -386,7 +386,7 @@ bool SVMulToRegArith::CanApply(const Node* node) const
     return false;
   }
   cout << "ERROR: Trying to apply SVMulToRegArith to non SVMul node" << endl;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SVMulToRegArith::Apply(Node* node) const
@@ -454,7 +454,7 @@ void SVMulToRegArith::Apply(Node* node) const
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
     cout << "Error: Bad data type in vadd apply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   
   // Adding loop to poss and cleanup
@@ -496,7 +496,7 @@ bool SVMulToScalarArith::CanApply(const Node* node) const
     return false;
   }
   cout << "ERROR: SVMulToScalarArith applied to non SVMul node" << endl;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SVMulToScalarArith::Apply(Node* node) const
@@ -589,7 +589,7 @@ bool ResidualPartitionSVMul::CanApply(const Node* node) const
     }
   }
   cout << "ERROR: Cannot apply ResidualPartitionSVMul to non SVMul node" << endl;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void ResidualPartitionSVMul::Apply(Node* node) const

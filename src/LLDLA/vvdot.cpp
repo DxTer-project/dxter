@@ -63,7 +63,7 @@ void VVDot::PrintCode(IndStream &out)
 
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive dot product\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
@@ -122,18 +122,18 @@ void VVDot::Prop()
     if (m_layer == LLDLAPRIMITIVELAYER) {
       //      if (*GetInputN(0) != m_regWidth) {
       //cout << "ERROR: First argument to primitive dot prod must be 1x2\n";
-      //throw;
+      //LOG_FAIL("replacement for throw call");
       //      } else if (*GetInputN(1) != 1) {
       //cout << "ERROR: Second argument to primitive dot prod must be 2x1\n";
-      //throw;
+      //LOG_FAIL("replacement for throw call");
       //      }
     } else {
       if (*GetInputM(0) != 1) {
 	cout << "ERROR: First argument to dot prod must be a row vector\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       } else if (*GetInputN(1) != 1) {
 	cout << "ERROR: Second argument to primitive dot prod must be a column vector\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     }
     if (m_layer == ABSLAYER) {
@@ -161,7 +161,7 @@ Phase VVDot::MaxPhase() const
     case (LLDLAPRIMITIVELAYER):
       return NUMPHASES; 
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -245,7 +245,7 @@ void VVDotLoopRef::Apply(Node *node) const
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
     cout << "Error: Bad dataType in vadd apply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   loop->SetDimName(DIMK);
   
@@ -278,7 +278,7 @@ bool VVDotLowerLayer::CanApply(const Node *node) const
     }
   }
   else {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -382,7 +382,7 @@ void VVDotToRegArith::Apply(Node *node) const
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
     cout << "Error: Bad dataType in vadd apply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   // Add needed components to poss

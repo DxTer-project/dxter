@@ -60,23 +60,23 @@ void CombineSingleIter::Prop()
 	&& (GetUpStat(TL) != GetUpStat(TR) || GetUpStat(BL) != GetUpStat(BR))) 
       {
 	cout << "bad statuses\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     else if ((m_dir == PARTRIGHT || m_dir == PARTLEFT)
 	     && (GetUpStat(TL) != GetUpStat(BL) || GetUpStat(TR) != GetUpStat(BR)))
       {
 	cout << "bad statuses\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
 #endif
   
     if (m_tunType == SETTUNOUT) {
       if (!m_pset->IsLoop())
-	throw;
+	LOG_FAIL("replacement for throw call");
 
       for(ConnNum i = 0; i < m_inputs.size(); ++i) {
 	if (Input(i)->GetNodeClass() != CombineSingleIter::GetClass()) {
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	}
       }
     }
@@ -89,7 +89,7 @@ void CombineSingleIter::Prop()
 	  int num = m_inputs.size();
 	  cout << "combine has wrong number of inputs\n";
 	  cout << num <<endl;
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	}
         NodeConn *conn = m_inputs[m_inputs.size()-1];
 #if TWOD
@@ -97,10 +97,10 @@ void CombineSingleIter::Prop()
 #else
 	  if (conn->m_num != 3) {
 #endif
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  }
 	  else if (conn->m_n->GetNodeClass() != SplitSingleIter::GetClass())
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	
 	if (Input(m_inputs.size()-1)->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  cout << "Last input isn't the right size\n";
@@ -108,12 +108,12 @@ void CombineSingleIter::Prop()
 	for (unsigned int i = 0; i < m_children.size(); ++i) {
 	  if (Child(i)->GetNodeClass() != CombineSingleIter::GetClass()) {
 	    cout << Child(i)->GetType() << endl;
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  }
 	}
       }
     else
-	throw;
+	LOG_FAIL("replacement for throw call");
 
 #if DODM
 	const DataTypeInfo &type = GetRealTunnel()->InputDataType(0);
@@ -125,7 +125,7 @@ void CombineSingleIter::Prop()
 	    //From when we just used DistType w/out perm
 	    //	    cout << DistTypeToStr(type) << endl;
 	    //	    cout << DistTypeToStr(InputDataType(i).m_dist) << endl;
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  }
 	}
 #endif
@@ -142,14 +142,14 @@ const DataTypeInfo& CombineSingleIter::DataType(ConnNum num) const
   else if (m_tunType == SETTUNOUT)
     return GetRealTunnel()->InputDataType(0);
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 #if TWOD
 const Sizes* CombineSingleIter::GetM(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(GetNumElems(m_dir))->Input(0)))->GetInputM(0);
   }
@@ -164,7 +164,7 @@ const Sizes* CombineSingleIter::GetM(ConnNum num) const
 const Sizes* CombineSingleIter::GetN(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(GetNumElems(m_dir))->Input(0)))->GetInputN(0);
   }
@@ -180,7 +180,7 @@ const Sizes* CombineSingleIter::GetN(ConnNum num) const
 const Sizes* CombineSingleIter::LocalM(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
     DLANode *possTunIn = (DLANode*)(possTunOut->Input(GetNumElems(m_dir)));
@@ -198,7 +198,7 @@ const Sizes* CombineSingleIter::LocalM(ConnNum num) const
 const Sizes* CombineSingleIter::LocalN(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(GetNumElems(m_dir))->Input(0)))->InputLocalN(0);
   }
@@ -217,7 +217,7 @@ const Sizes* CombineSingleIter::LocalN(ConnNum num) const
 const Dim CombineSingleIter::NumDims(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(3)->Input(0)))->NumDims(0);
   }
@@ -232,7 +232,7 @@ const Dim CombineSingleIter::NumDims(ConnNum num) const
 const Sizes* CombineSingleIter::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(3)->Input(0)))->Len(0,dim);
   }
@@ -247,7 +247,7 @@ const Sizes* CombineSingleIter::Len(ConnNum num, Dim dim) const
 const Sizes* CombineSingleIter::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
 #if TWOD
@@ -272,7 +272,7 @@ const Sizes* CombineSingleIter::LocalLen(ConnNum num, Dim dim) const
 Name CombineSingleIter::GetName(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == POSSTUNOUT)
     return ((SplitSingleIter*)Input(m_inputs.size()-1))->GetOrigName();
   else
@@ -297,7 +297,7 @@ else*/
     tun = new CombineSingleIter(m_partDim, SETTUNOUT);
 #endif
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -405,7 +405,7 @@ void CombineSingleIter::PrintCode(IndStream &out)
 	   << "  " << nameB.str() << ", " << GetInputNameStr(2) << ", " 
 	   << m_partDim << " );\n";
 #else
-  throw;
+  LOG_FAIL("replacement for throw call");
 #endif
 }
 
@@ -432,7 +432,7 @@ LoopTunnel* CombineSingleIter::GetMatchingInTun() const
       return (LoopTunnel*)(m_pset->m_inTuns[FindInTunVec(m_pset->GetReal()->m_inTuns, realSetTunIn)]);
     }
   else if (m_tunType != POSSTUNOUT)
-    throw;
+    LOG_FAIL("replacement for throw call");
   
 #if DOTENSORS
   const Node *in = Input(3);
@@ -444,6 +444,6 @@ LoopTunnel* CombineSingleIter::GetMatchingInTun() const
   }
   else {
     cout << "Didn't find matching in tun\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }

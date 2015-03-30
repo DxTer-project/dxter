@@ -38,7 +38,7 @@ bool SVMulVerticalPackToMultipleOfMu::CanApply(const Node* node) const {
       && svmul->GetInputNumRows(1) >= 1
       && svmul->GetInputNumCols(1) == 1;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SVMulVerticalPackToMultipleOfMu::Apply(Node* node) const {
@@ -71,7 +71,7 @@ bool SVMulHorizontalPackToMultipleOfMu::CanApply(const Node* node) const {
       && svmul->GetInputNumCols(1) >= 1
       && svmul->GetInputNumRows(1) == 1;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SVMulHorizontalPackToMultipleOfMu::Apply(Node* node) const {

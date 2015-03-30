@@ -39,7 +39,7 @@ bool UnpackToPartAndCopy::CanApply(const Node* node) const {
   if (node->GetNodeClass() == Unpack::GetClass()) {
     return true;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void UnpackToPartAndCopy::Apply(Node* node) const {

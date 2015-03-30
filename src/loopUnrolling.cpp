@@ -31,14 +31,14 @@ FullyUnrollLoop::FullyUnrollLoop(int maxNumIters)
   : m_numIters(maxNumIters) 
 {
   if (m_numIters <= 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 bool FullyUnrollLoop::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
     cout << "Error: Attempted to apply FullyUnrollLoop to non SplitSingleIter node\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (!node->IsTunnel(SETTUNIN))
@@ -54,7 +54,7 @@ bool FullyUnrollLoop::CanApply(const Node *node) const
   unsigned int numExecs = split->NumberOfLoopExecs();
   if (!numExecs) {
     cout << "Error: Attempted to unroll loop with 0 executions\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   for(unsigned int i = 0; i < numExecs; ++i) {
@@ -105,7 +105,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
     newPoss->PatchAfterDuplicate(*(map[dupNum]), true);
     bool trash;
     if (newPoss->RemoveLoops(&trash))
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   
   Poss *rootPoss = newPosses[0];
@@ -132,7 +132,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
       }
     }
     if (outTuns.size() > 1)
-      throw;
+      LOG_FAIL("replacement for throw call");
 
     if (!possTunIn->IsSplit()) {
       newTun = new Tunnel(POSSTUNIN);
@@ -147,9 +147,9 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	for(; outIter != outTuns.end(); ++outIter) {
 	  Tunnel *outTun = (Tunnel*)(*outIter);
 	  if (!outTun->IsTunnel(POSSTUNOUT))
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  if (outTun->IsCombine())
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  
 	  Node *input = outTun->Input(0);
 	  inputToOutTuns.push_back(input);
@@ -170,7 +170,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
       }
       else {
 	if (outTuns.size() > 1)
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	prev = NULL;
 	ConnNum inputNumToOutTun = inputNumToOutTuns[0];
 	Node *inputToOutTun = inputToOutTuns[0];
@@ -185,9 +185,9 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	  }
 	  //	  RedirectChildrenThatArentTuns(possTunIn, 0, newTun, 0);
 	  NodeMapIter find = map[dupNum]->find(inputToOutTun);
-	  if (find == map[dupNum]->end())
-	    throw;
-	  else {
+	  if (find == map[dupNum]->end()) {
+	    LOG_FAIL("replacement for throw call");
+	  } else {
 	    prev = find->second;
 	  }
 	}
@@ -196,7 +196,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
       if (!outTuns.empty()) {
 	if (prev) {
 	  if (outTuns.size() > 1)
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  Node *newOutTun = new Tunnel (POSSTUNOUT);
 	  newOutTuns.push_back(newOutTun);
 	  newOutTun->AddInput(prev, inputNumToOutTuns[0]);
@@ -215,12 +215,12 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
       newTun = new Tunnel(POSSTUNIN);
 
       if (possTunIn->GetNodeClass() != SplitSingleIter::GetClass())
-	throw;
+	LOG_FAIL("replacement for throw call");
       SplitSingleIter *split = (SplitSingleIter*)possTunIn;
 
       if (split->m_dir != PARTDOWN &&
 	  split->m_dir != PARTRIGHT)
-	throw;
+	LOG_FAIL("replacement for throw call");
       
       ViewMultipleIters *view = new ViewMultipleIters(split->m_dir,
 						      split->GetMyLoop()->GetBSSize(),
@@ -238,14 +238,14 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
       ConnNum inputNumToOutTun = 99999;
 
       if (outTuns.empty())
-	throw;
+	LOG_FAIL("replacement for throw call");
       if (outTuns.size() > 1)
-	throw;
+	LOG_FAIL("replacement for throw call");
       Tunnel *outTun = (Tunnel*)(outTuns[0]);
       if (outTun->GetNodeClass() != CombineSingleIter::GetClass())
-	throw;
+	LOG_FAIL("replacement for throw call");
       if (!outTun->IsTunnel(POSSTUNOUT))
-	throw;
+	LOG_FAIL("replacement for throw call");
 
       inputToOutTun = outTun->Input(1);
       inputNumToOutTun = outTun->InputConnNum(1);
@@ -280,7 +280,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	  if ((*iter)->m_num != 3) {
 	    if (!(*iter)->m_n->IsTunnel(POSSTUNOUT)) {
 	      cout << "num " << (*iter)->m_num << endl;
-	      throw;
+	      LOG_FAIL("replacement for throw call");
 	    }
 	  }
 	}
@@ -289,9 +289,9 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	//That's handled below
 	if (!passThrough) {
 	  NodeMapIter find = map[dupNum]->find(inputToOutTun);
-	  if (find == map[dupNum]->end())
-	    throw;
-	  else {
+	  if (find == map[dupNum]->end()) {
+	    LOG_FAIL("replacement for throw call");
+	  } else {
 	    com->AddInput(find->second, inputNumToOutTun);
 	  }
 	}
@@ -315,7 +315,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 
     if (!newOutTuns.empty()) {
       if (newOutTuns.size() != outTuns.size())
-	throw;
+	LOG_FAIL("replacement for throw call");
       NodeVecIter newOutIter = newOutTuns.begin();
       NodeVecIter outIter = outTuns.begin();
       for(; outIter != outTuns.end(); ++outIter,++newOutIter) {
@@ -325,26 +325,26 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	NodeVecIter outIter = rootPoss->m_outTuns.begin();
 	Node *mappedOutTun = (*(map[0]))[outTun];
 	if (!mappedOutTun)
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	mappedOutTun->RemoveAllInputs2Way();
 	for(; outIter != rootPoss->m_outTuns.end(); ++outIter) {
 	  if (*outIter == mappedOutTun)
 	    break;
 	}
 	if (outIter == rootPoss->m_outTuns.end())
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	NodeVecIter inserted = rootPoss->m_outTuns.insert(outIter, newOutTun);
 	inserted++;
 	if (*inserted != mappedOutTun)
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	rootPoss->m_outTuns.erase(inserted);
 	rootPoss->DeleteNode(mappedOutTun);
 	//      newOutTun->AddInput(newTun, 1);
 	for(int dupNum = 1; dupNum < numIters; ++dupNum) {
 	  NodeMapIter find = map[dupNum]->find(outTun);
-	  if (find == map[dupNum]->end())
-	    throw;
-	  else {
+	  if (find == map[dupNum]->end()) {
+	    LOG_FAIL("replacement for throw call");
+	  } else {
 	    Node *possOutTun = find->second;
 	    possOutTun->RemoveAllInputs2Way();
 	    newPosses[dupNum]->DeleteNode(possOutTun);
@@ -353,7 +353,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
       }
     }
     else if (!outTuns.empty())
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 
   for(int dupNum = 0; dupNum < numIters; ++dupNum) {
@@ -375,7 +375,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	    cout << "using output " << (*iter)->m_num << endl;
 	    cout << "child " << child << endl;
 	    cout << "tun " << tun << endl;
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  }
 	}
       }
@@ -401,7 +401,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	cout << "input is " << outTun->m_inputs[i]->m_n << endl;
 	cout << outTun->m_inputs[i]->m_n->GetType() << endl;
       }
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }    
 
@@ -419,7 +419,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	Tunnel *tun = (Tunnel*)node;
 	if (tun->m_tunType == POSSTUNIN ||
 	    tun->m_tunType == POSSTUNOUT)
-	  throw;
+	  LOG_FAIL("replacement for throw call");
       }
       node->m_poss = NULL;
       rootPoss->AddNode(node);
@@ -427,7 +427,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
       for(; iter2 != node->m_children.end(); ++iter2) {
 	NodeConn *conn = *iter2;
 	if (conn->m_n->IsLoopTunnel())
-	  throw;
+	  LOG_FAIL("replacement for throw call");
       }
     }
     dup->m_possNodes.clear();
@@ -445,7 +445,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 
   if (rootPoss->m_outTuns.size() != poss->m_outTuns.size()) {
     cout << "bad size\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   delete [] newPosses;
@@ -459,7 +459,7 @@ void FullyUnrollLoop::Apply(Node *node) const
 {
   if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
     cout << "Error: Unrolling node other than SplitSingleIter\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   
   SplitSingleIter *split = (SplitSingleIter*)node;
@@ -477,7 +477,7 @@ void FullyUnrollLoop::Apply(Node *node) const
   ++possIter;
 
   if (rootPoss->m_inTuns.size() != base->m_inTuns.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
 
   for (unsigned int i = 0; i < rootPoss->m_inTuns.size(); ++i) {
     Node *possInTun = rootPoss->m_inTuns[i];
@@ -492,7 +492,7 @@ void FullyUnrollLoop::Apply(Node *node) const
     cout << newSet->m_outTuns.size() << endl;
     cout << base->m_outTuns.size() << endl;
     cout << rootPoss->m_outTuns.size() << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   for(unsigned int i = 0; i < base->m_outTuns.size(); ++i) {
@@ -524,7 +524,7 @@ void FullyUnrollLoop::Apply(Node *node) const
   for(unsigned int i = 0; i < base->m_outTuns.size(); ++i) {
     Tunnel *loopTun = (Tunnel*)(base->m_outTuns[i]);
     if (!loopTun->m_children.empty())
-      throw;
+      LOG_FAIL("replacement for throw call");
     base->m_ownerPoss->DeleteNode(loopTun);
   }
   base->m_outTuns.clear();
@@ -534,7 +534,7 @@ void FullyUnrollLoop::Apply(Node *node) const
   delete base;
 
   if (newSet->m_posses.empty()) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -542,14 +542,14 @@ CompactlyUnrollLoop::CompactlyUnrollLoop(int maxNumIters)
   : m_numIters(maxNumIters) 
 {
   if (m_numIters <= 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 bool CompactlyUnrollLoop::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
     cout << "Error: Attempted to apply FullyUnrollLoop to non SplitSingleIter node\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (!node->IsTunnel(SETTUNIN))
@@ -563,7 +563,7 @@ bool CompactlyUnrollLoop::CanApply(const Node *node) const
   const BasePSet *loop = dynamic_cast<const BasePSet*>(split->GetMyLoop());
   if (!loop->IsReal()) {
     cout << "might be able to apply, but this is a shadow\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (loop->m_flags & SETLOOPISUNROLLED)
@@ -572,7 +572,7 @@ bool CompactlyUnrollLoop::CanApply(const Node *node) const
   unsigned int numExecs = split->NumberOfLoopExecs();
   if (!numExecs) {
     cout << "Error: Attempted to unroll loop with 0 executions\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   for(unsigned int i = 0; i < numExecs; ++i) {
@@ -601,7 +601,7 @@ void CompactlyUnrollLoop::Apply(Node *node) const
 {
   if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
     cout << "Error: Unrolling node other than SplitSingleIter\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   
   SplitSingleIter *split = (SplitSingleIter*)node;
@@ -626,7 +626,7 @@ bool PartiallyUnrollLoop::CanApply(const Node *node) const
 {
   if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
     cout << "Error: Attempted to apply FullyUnrollLoop to non SplitSingleIter node\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (!node->IsTunnel(SETTUNIN))
@@ -641,7 +641,7 @@ bool PartiallyUnrollLoop::CanApply(const Node *node) const
   const BasePSet *loop = dynamic_cast<const BasePSet*>(loopInt);
   if (!loop->IsReal()) {
     cout << "might be able to apply, but this is a shadow\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (loopInt->GetBSSize().m_multiple != 1)
@@ -653,7 +653,7 @@ bool PartiallyUnrollLoop::CanApply(const Node *node) const
   unsigned int numExecs = split->NumberOfLoopExecs();
   if (!numExecs) {
     cout << "Error: Attempted to unroll loop with 0 executions\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   //  unsigned int size = m_unrollingFactor * loopInt->GetBS();
@@ -679,7 +679,7 @@ void PartiallyUnrollLoop::Apply(Node *node) const
 {
   if (node->GetNodeClass() != SplitSingleIter::GetClass()) {
     cout << "Error: Unrolling node other than SplitSingleIter\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   
   SplitSingleIter *split = (SplitSingleIter*)node;
@@ -721,7 +721,7 @@ void PartiallyUnrollLoop::Apply(Node *node) const
 
     if (oldTun->IsSplit()) {
       if (oldTun->NumOutputs() != 4)
-	throw;
+	LOG_FAIL("replacement for throw call");
       oldTun->AddInput(newTun, 1);
     }
     else
@@ -771,7 +771,7 @@ void PartiallyUnrollLoop::Apply(Node *node) const
   Poss *newInnerPoss = new Poss(newPossTunsOut, true, true);
 
   if (newInnerPoss->m_inTuns.size() != newInnerPossInTuns.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
 
   newInnerPossInTuns.reserve(newInnerPoss->m_inTuns.size());
   for(auto tun : newInnerPossInTuns)
@@ -808,10 +808,10 @@ void ViewMultipleIters::Prop()
 {
   if (!IsValidCost(m_cost)) {
     if (m_inputs.size() != 1)
-      throw;
+      LOG_FAIL("replacement for throw call");
     Input(0)->Prop();
     if (m_numIters <= 1)
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -854,14 +854,14 @@ void ViewMultipleIters::BuildDataTypeCache()
       break;
     }
   default:
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
 const Sizes* ViewMultipleIters::GetM(ConnNum num) const
 {
   if (num > m_numIters) 
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (num == m_numIters) {
     return GetInputM(0);
   }
@@ -873,13 +873,13 @@ const Sizes* ViewMultipleIters::GetM(ConnNum num) const
     return GetInputM(0);
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 const Sizes* ViewMultipleIters::GetN(ConnNum num) const
 {
   if (num > m_numIters)
-    throw;
+    LOG_FAIL("replacement for throw call");
 
   if (num == m_numIters) {
     return GetInputN(0);
@@ -892,13 +892,13 @@ const Sizes* ViewMultipleIters::GetN(ConnNum num) const
     return GetInputN(0);
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 Name ViewMultipleIters::GetName(ConnNum num) const
 {
   if (num > m_numIters)
-    throw;
+    LOG_FAIL("replacement for throw call");
 
   Name name = GetInputName(0);
 
@@ -915,7 +915,7 @@ Name ViewMultipleIters::GetName(ConnNum num) const
       name.m_name += "_HorzSplit_";
       break;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   name.m_name += std::to_string((long long int) num);
   return name;
@@ -933,7 +933,7 @@ void ViewMultipleIters::PrintCode(IndStream &out)
     else if (m_partDir == PARTRIGHT)
       *out << "_HorzSplit_";
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
     *out << i << " = " << inName;
 
 
@@ -948,7 +948,7 @@ void ViewMultipleIters::PrintCode(IndStream &out)
 	  *out << type.m_colStrideVar << " * ";
       }
       else
-	throw;
+	LOG_FAIL("replacement for throw call");
       *out << m_bs.VarName();
 
     }
@@ -964,7 +964,7 @@ void ViewMultipleIters::AddVariables(VarSet &set) const
   else if (m_partDir == PARTRIGHT)
     inName += "_HorzSplit_";
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
   for(int i = 0; i < m_numIters; ++i) {
     Var var(inName, i, m_info.m_type);
     set.insert(var);
@@ -992,7 +992,7 @@ const DataTypeInfo& ViewMultipleIters::DataType(ConnNum num) const
 {
   if (num < m_numIters) {
     if (!m_sizes)
-      throw;
+      LOG_FAIL("replacement for throw call");
     return m_info;
   }
   else
@@ -1004,22 +1004,22 @@ void CombineMultipleIters::Prop()
 {
   if (!IsValidCost(m_cost)) {
     if (m_inputs.size() != m_numIters+1)
-      throw;
+      LOG_FAIL("replacement for throw call");
 
     if (m_numIters <= 1)
-      throw;
+      LOG_FAIL("replacement for throw call");
 
     for (int i = 0; i < m_numIters+1; ++i)
       Input(i)->Prop();
 
     Node *in = Input(m_numIters);
     if (in->GetNodeClass() != ViewMultipleIters::GetClass())
-      throw;
+      LOG_FAIL("replacement for throw call");
     ViewMultipleIters *inView = (ViewMultipleIters*)in;
     if (inView->m_bs != m_bs 
 	|| inView->m_numIters != m_numIters
 	|| inView->m_partDir != m_partDir)
-      throw;
+      LOG_FAIL("replacement for throw call");
 
 
     switch (m_partDir) {
@@ -1029,7 +1029,7 @@ void CombineMultipleIters::Prop()
 	for (int i = 0; i < m_numIters; ++i) {
 	  if (*GetInputM(i) != bs) {
 	    (*GetInputM(i)).Print();
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  }
 	}	  
 	break;
@@ -1046,13 +1046,13 @@ void CombineMultipleIters::Prop()
 	    }
 	    (*GetInputN(i)).Print();
 	    cout << bs << endl;
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  }
 	}
 	break;
       }
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
 }
@@ -1070,21 +1070,21 @@ void CombineMultipleIters::Duplicate(const Node *orig, bool shallow, bool possMe
 const Sizes* CombineMultipleIters::GetM(ConnNum num) const
 {
   if (num > 0) 
-    throw;
+    LOG_FAIL("replacement for throw call");
   return GetInputM(m_numIters);
 }
 
 const Sizes* CombineMultipleIters::GetN(ConnNum num) const
 {
   if (num > 0) 
-    throw;
+    LOG_FAIL("replacement for throw call");
   return GetInputN(m_numIters);
 }
 
 Name CombineMultipleIters::GetName(ConnNum num) const
 {
   if (num > 0) 
-    throw;
+    LOG_FAIL("replacement for throw call");
   return GetInputName(m_numIters);
 }
 

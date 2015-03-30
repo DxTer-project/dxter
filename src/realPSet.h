@@ -201,9 +201,9 @@ class PossCostComparison
   bool operator() (const Poss* lhs, const Poss* rhs) const
   {
     if (lhs->m_cost < 0)
-      throw;
+      LOG_FAIL("replacement for throw call");
     if (rhs->m_cost < 0)
-      throw;
+      LOG_FAIL("replacement for throw call");
     return lhs->m_cost > rhs->m_cost;
   }
 };

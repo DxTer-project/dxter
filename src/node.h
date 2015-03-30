@@ -182,10 +182,10 @@ class Node
   const BasePSet* FindClosestLoop() const;
 
 #if DOBLIS
-  virtual Comm ParallelComm() const {throw;}
+  virtual Comm ParallelComm() const {LOG_FAIL("replacement for throw call");}
   virtual Comm WithinParallelism() const;
   virtual Comm HasBarrier() const {return CORECOMM;}
-  virtual bool RemoveParallelization() {throw;}
+  virtual bool RemoveParallelization() {LOG_FAIL("replacement for throw call");}
   bool InCriticalSection() const;
 #endif
 

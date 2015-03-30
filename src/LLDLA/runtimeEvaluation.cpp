@@ -74,7 +74,7 @@ void RuntimeTest::AddMiscellaneousDefines()
     m_defines.push_back("#define COPY_BUFFER(size, b1, b2) copy_buffer((size), (b1), (b2))");
   } else {
     cout << "Error: Unsupported type for runtime test data\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return;
 }
@@ -106,7 +106,7 @@ string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, Implemen
     return AllBufferSanityChecks(imps, referenceImpName);
   } else {
     cout << "SanityCheckSetting NONE is not yet supported" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -129,7 +129,7 @@ string RuntimeTest::TimingCode(TimingSetting timingSetting, ImplementationMap* i
     return OnePhaseTimingCode(imps, operationName);
   } else {
     cout << "TWOPHASETIMING not supported yet" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -309,7 +309,7 @@ void RuntimeEvaluator::WriteTestCodeToFile(string executableName, string testCod
     outStream.close();
   } else {
     cout << "ERROR: RuntimeEvaluator could not create file " << testFileName << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -389,7 +389,7 @@ ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName,
   if (i != numImpls + 1) {
     cout << "ERROR: In RuntimeEvaluator::ReadDataFromFile i = " << i;
     cout << " numImpls = " << numImpls << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return runtimeMap;
 }

@@ -30,7 +30,7 @@ void LoadToRegs::Prop()
   if (!IsValidCost(m_cost)) {
     DLANode::Prop();
     if (m_inputs.size() != 1)
-      throw;
+      LOG_FAIL("replacement for throw call");
 
     if (*(GetInputM(0)) != GetVecRegWidth()) {
       // this isn't 1 x GetVecRegWidth()
@@ -42,12 +42,12 @@ void LoadToRegs::Prop()
 	cout << "GetDataType() == REAL_DOUBLE ? " << std::to_string((long long int) (GetDataType() == REAL_DOUBLE)) << endl;
 	cout << "*GetInputM(0) != 1 ? " << std::to_string((long long int) (*GetInputM(0) != 1)) << endl;
 	cout << "*GetInputN(0) != GetVecRegWidth() ? " << std::to_string((long long int) (*GetInputN(0) != GetVecRegWidth())) << endl;
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     } else if (*(GetInputN(0)) != 1) {
       GetInputN(0)->Print();
       // GetVecRegWidth() rows but not 1 column
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 
     Input(0)->Prop();
@@ -108,7 +108,7 @@ void LoadToRegs::PrintCode(IndStream &out)
 const Sizes* LoadToRegs::GetM(ConnNum num) const
 {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return GetInputM(0);
 }
@@ -116,7 +116,7 @@ const Sizes* LoadToRegs::GetM(ConnNum num) const
 const Sizes* LoadToRegs::GetN(ConnNum num) const
 {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return GetInputN(0);
 }
@@ -124,7 +124,7 @@ const Sizes* LoadToRegs::GetN(ConnNum num) const
 Name LoadToRegs::GetName(ConnNum num) const
 {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   Name name = GetInputName(0);
   name.m_name += "_regs";
@@ -214,10 +214,10 @@ void DuplicateRegLoad::Prop()
 {
   if (!IsValidCost(m_cost)) {
     if (m_inputs.size() != 1)
-      throw;
+      LOG_FAIL("replacement for throw call");
     if ((*(GetInputM(0)) != 1) ||
 	(*(GetInputN(0)) != 1))
-      throw;
+      LOG_FAIL("replacement for throw call");
     Input(0)->Prop();
     m_cost = 0;
   }
@@ -251,7 +251,7 @@ void DuplicateRegLoad::BuildDataTypeCache()
 const Sizes* DuplicateRegLoad::GetM(ConnNum num) const
 {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return &m_mSizes;
 }
@@ -259,7 +259,7 @@ const Sizes* DuplicateRegLoad::GetM(ConnNum num) const
 const Sizes* DuplicateRegLoad::GetN(ConnNum num) const
 {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return &m_nSizes;
 }
@@ -267,7 +267,7 @@ const Sizes* DuplicateRegLoad::GetN(ConnNum num) const
 Name DuplicateRegLoad::GetName(ConnNum num) const
 {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   Name name = GetInputName(0);
   name.m_name += "_regDup";
@@ -285,10 +285,10 @@ void TempVecReg::Prop()
 {
   if (!IsValidCost(m_cost)) {
     if (m_inputs.size() != 1)
-      throw;
+      LOG_FAIL("replacement for throw call");
     if ((*(GetInputM(0)) != 1) ||
 	(*(GetInputN(0)) != 1))
-      throw;
+      LOG_FAIL("replacement for throw call");
     Input(0)->Prop();
     m_cost = 0;
   }
@@ -322,7 +322,7 @@ void TempVecReg::BuildDataTypeCache()
 const Sizes* TempVecReg::GetM(ConnNum num) const
 {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return &m_mSizes;
 }
@@ -330,7 +330,7 @@ const Sizes* TempVecReg::GetM(ConnNum num) const
 const Sizes* TempVecReg::GetN(ConnNum num) const
 {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return &m_nSizes;
 }
@@ -338,7 +338,7 @@ const Sizes* TempVecReg::GetN(ConnNum num) const
 Name TempVecReg::GetName(ConnNum num) const
 {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   Name name = GetInputName(0);
   name.m_name += "_regTemp";

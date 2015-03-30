@@ -33,7 +33,7 @@ class ShadowPSet : public BasePSet
  public:
   RealPSet *m_realPSet;
   ShadowPSet();
-  ShadowPSet(Poss *poss) {throw;}
+  ShadowPSet(Poss *poss) {LOG_FAIL("replacement for throw call");}
   virtual ~ShadowPSet();
   virtual GraphNum NumPosses() const {return m_realPSet->NumPosses();}
   bool operator==(const BasePSet &rhs) const;

@@ -52,7 +52,7 @@ void SMMul::PrintCode(IndStream &out)
 
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive scalar matrix multiply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   const DataTypeInfo &inInfo = InputDataType(1);
@@ -136,7 +136,7 @@ Phase SMMul::MaxPhase() const
     case (LLDLAPRIMITIVELAYER):
       return NUMPHASES; 
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -167,7 +167,7 @@ string SMulToSVMul::GetType() const
     case (COLVECTOR):
       return "SMulToSVMul - dim n";
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }  
 }
 
@@ -186,7 +186,7 @@ bool SMulToSVMul::CanApply(const Node *node) const
   }
   cout << "ERROR: Applying SMMulToSVMul to non SMMul node\n";
   cout << "Node has class " << node->GetNodeClass() << endl;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SMulToSVMul::Apply(Node *node) const
@@ -288,7 +288,7 @@ string SMulToScalarArith::GetType() const
     return "SMulToScalarArithNDIM";
   default:
     cout << "Invalid dimension in SMulToScalarArith::GetType()" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -302,7 +302,7 @@ bool SMulToScalarArith::CanApply(const Node* node) const
     return true;
   }
   cout << "ERROR: Called SMulToScalarArith::CanApply on non SMul node" << endl;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SMulToScalarArith::Apply(Node* node) const
@@ -330,7 +330,7 @@ bool SMulLowerLayer::CanApply(const Node *node) const
       return false;
   }
   else
-    throw;  
+    LOG_FAIL("replacement for throw call");  
 }
 
 void SMulLowerLayer::Apply(Node *node) const

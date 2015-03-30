@@ -19,12 +19,12 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-#include "coef.h"
 #include <stdio.h>
 #include <ostream>
 #include <iostream>
+
+#include "coef.h"
+#include "logging.h"
 
 Coef COEFALPHA(COEFVALALPHA);
 Coef COEFBETA(COEFVALBETA);
@@ -54,7 +54,7 @@ string Coef::BLISStr() const
     case (COEFVALNEGONEHALF):
       return "&BLIS_MINUS_ONE_HALF";
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -77,7 +77,7 @@ string Coef::ElemStr() const
     case (COEFVALNEGONEHALF):
       return "-0.5";
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -102,7 +102,7 @@ string Coef::TenStr() const
     case (COEFVALNEGONEHALF):
       return "-0.5";
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -125,7 +125,7 @@ string Coef::LLDLAStr() const
     case(COEFVALNEGONEHALF):
       return "&LLDLA_NEG_ONE_HALF";
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -141,7 +141,7 @@ Coef Coef::operator*(const Coef &coef) const
     return coef;
   else {
     cout << "Coef*Coef = " << ElemStr() << " * " << coef.ElemStr() << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
 }
@@ -154,11 +154,11 @@ Coef Coef::operator/(const Coef &coef) const
     return *this;
   if (coef.m_val == COEFVALZERO) {
     cout << "operator/ divide by zero\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   else {
     cout << "Coef/Coef = " << ElemStr() << " / " << coef.ElemStr() << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 

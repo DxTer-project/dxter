@@ -36,7 +36,7 @@ bool SetToZeroColLoopRef::CanApply(const Node* node) const {
     return *(setZero->GetInputN(0)) > 1
       && *(setZero->GetInputM(0)) > 1;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SetToZeroColLoopRef::Apply(Node* node) const {

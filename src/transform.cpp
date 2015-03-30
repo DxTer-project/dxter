@@ -29,7 +29,7 @@ void MultiTrans::AddTrans(SingleTrans *trans)
     m_isRef = trans->IsRef();
   else {
     if (m_isRef != trans->IsRef())
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   m_trans.push_back(trans);
 }
@@ -41,7 +41,7 @@ TransConstVec* MultiTrans::GetApplicableTrans(const Node *node) const
   TransConstVecIter iter = m_trans.begin();
   for(; iter != m_trans.end(); ++iter) {
     if (!(*iter)->IsSingle())
-      throw;
+      LOG_FAIL("replacement for throw call");
     const SingleTrans *trans = (SingleTrans*)(*iter);
     if (trans->CanApply(node) && trans->WorthApplying(node)) {
       applicable->push_back(trans);
@@ -51,7 +51,7 @@ TransConstVec* MultiTrans::GetApplicableTrans(const Node *node) const
   }
   
   if (costs.size() != applicable->size())
-    throw;
+    LOG_FAIL("replacement for throw call");
 
   if (applicable->size() < MAXNUMBEROFREFINEMENTS)
     return applicable;
@@ -114,10 +114,10 @@ void MultiTrans::Apply(int num, Node *node, void **cache) const
 {
   TransConstVec *vec = (TransConstVec*)(*cache);
   if ((unsigned int)num >= vec->size())
-    throw;
+    LOG_FAIL("replacement for throw call");
   const Transformation *trans = (*vec)[num];
   if (!trans->IsSingle())
-    throw;
+    LOG_FAIL("replacement for throw call");
   ((SingleTrans*)trans)->Apply(node);
 }
 
@@ -126,6 +126,6 @@ const Transformation* MultiTrans::GetTrans(void **cache, int num) const
 {
   TransConstVec *vec = (TransConstVec*)(*cache);
   if ((unsigned int)num >= vec->size())
-    throw;
+    LOG_FAIL("replacement for throw call");
   return (*vec)[num];
 }

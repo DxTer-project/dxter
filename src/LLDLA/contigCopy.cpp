@@ -44,7 +44,7 @@ void ContiguousCopy::Prop() {
     Copy::Prop();
     if (!InputIsContiguous(0) || !InputIsContiguous(1)) {
       cout << "ERROR: Contiguous copy on non-contiguous operands" << endl;
-      throw;
+      LOG_FAIL("Replacement for call to throw;");
     }
     m_cost = ZERO;
   }

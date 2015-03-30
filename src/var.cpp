@@ -113,7 +113,7 @@ string LLDLATransVarName(const string &var, Trans trans)
     case (CONJTRANS):
       return var+"H";
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 #endif //DOLLDLA
@@ -233,7 +233,7 @@ Var::Var(VarType type, const string &str)
       }
 #endif //DOTENSORS
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 #endif // !DOLLDLA
@@ -262,7 +262,7 @@ Var::Var(VarType type, const string &str, Type dataType)
     default:
     {
       cout << "Error: Bad var type\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     }
 }
@@ -325,7 +325,7 @@ Var::~Var()
       break;
     case (InvalidType) :
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -484,7 +484,7 @@ void Var::PrintDecl(IndStream &out) const
 	  *out << "double *" << m_part << ";\n";
 	} else {
 	  cout << "ERROR: Var " << m_part << " has invalid m_dataType\n";
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	}
 	break;
       }
@@ -497,7 +497,7 @@ void Var::PrintDecl(IndStream &out) const
 	  *out << "double *" << m_part << ";\n";
 	} else {
 	  cout << "ERROR: Var " << m_part << " has invalid m_dataType\n";
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	}
 	break;
       }
@@ -513,7 +513,7 @@ void Var::PrintDecl(IndStream &out) const
     case (InvalidType):
       {
 	cout << "Error: Invalid var type\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     }
 }
@@ -576,12 +576,12 @@ string Var::GetVarName() const
       }
 #endif
     case (DirectVarDeclType):
-      throw;
+      LOG_FAIL("replacement for throw call");
     case (InvalidType):
-      throw;
+      LOG_FAIL("replacement for throw call");
       return "";
     }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 
@@ -625,7 +625,7 @@ Var& Var::operator=(const Var &rhs)
 	//	delete m_varDecl;
 	break;
       case (InvalidType):
-	throw;
+	LOG_FAIL("replacement for throw call");
       }    
   }
   m_type = rhs.m_type;
@@ -671,7 +671,7 @@ Var& Var::operator=(const Var &rhs)
       m_varDecl = rhs.m_varDecl;//new string ((rhs.m_varDecl));
       break;
     case (InvalidType):
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   return *this;
 }

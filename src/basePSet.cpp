@@ -45,7 +45,7 @@ unsigned int FindInTunVec(const TunVec &vec, const Tunnel *node)
   for(; iter != vec.end(); ++iter,++i)
     if (*iter == node)
       return i;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 BasePSet::BasePSet()
@@ -57,7 +57,7 @@ Tunnel* BasePSet::InTun(unsigned int num) const
 {
   if (num >= m_inTuns.size()) {
     cout << num << " >= " << m_inTuns.size() << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return (Tunnel*)(m_inTuns[num]);
 }
@@ -65,7 +65,7 @@ Tunnel* BasePSet::InTun(unsigned int num) const
 Tunnel* BasePSet::OutTun(unsigned int num) const
 {
   if (num >= m_outTuns.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
   return (Tunnel*)(m_outTuns[num]);
 }
 
@@ -88,7 +88,7 @@ void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, b
     //expect set tunnel for this set to be duplicated
     // as part of the owning poss's duplication
     if (!tun)
-      throw;
+      LOG_FAIL("replacement for throw call");
     m_inTuns.push_back(tun);
     tun->m_pset = this;
     if (useShadows) {
@@ -102,7 +102,7 @@ void BasePSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, b
   for (; iter != orig->m_outTuns.end(); ++iter) {
     Tunnel *tun = (Tunnel*)(map[*iter]);
     if (!tun)
-      throw;
+      LOG_FAIL("replacement for throw call");
     m_outTuns.push_back(tun);
     tun->m_pset = this;
     if (useShadows) {
@@ -121,7 +121,7 @@ bool FoundPossUp(Node *node, const BasePSet *set, NodeVec &queue)
   for(; checkIter != queue.end(); ++checkIter) {
     if (*checkIter == node) {
       cout << "recursion on node " << node << " " << node->GetNodeClass() << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
   queue.push_back(node);
@@ -174,7 +174,7 @@ bool NothingBetween(const BasePSet *left, const BasePSet *right)
             return false;
           if (!queue.empty()) {
             cout << "queue not empty!\n";
-            throw;
+            LOG_FAIL("replacement for throw call");
           }
         }
       }
@@ -184,7 +184,7 @@ bool NothingBetween(const BasePSet *left, const BasePSet *right)
           return false;
         if (!queue.empty()) {
           cout << "queue not empty!\n";
-          throw;
+          LOG_FAIL("replacement for throw call");
         }
       }
     }
@@ -339,7 +339,7 @@ void BasePSet::RemoveInTun(Node *tun)
       return;
     }
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void BasePSet::RemoveOutTun(Node *tun)
@@ -351,7 +351,7 @@ void BasePSet::RemoveOutTun(Node *tun)
       return;
     }
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 
@@ -378,7 +378,7 @@ void BasePSet::FormSetAround()
     newPoss->m_inTuns.push_back(newTun);
     newTun->AddInput(newSetTun,0);
     if (tun->m_inputs.size() != 1) {
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     NodeConn *in = tun->m_inputs[0];
     newSetTun->AddInput(in->m_n, in->m_num);
@@ -420,7 +420,7 @@ void BasePSet::FormSetAround()
     }
   }
   if (!found)
-    throw;
+    LOG_FAIL("replacement for throw call");
   newPoss->m_sets.push_back(this);
   m_ownerPoss = newPoss;
   newSet->m_functionality = newPoss->GetFunctionalityString();
@@ -437,7 +437,7 @@ void BasePSet::Flatten(ofstream &out) const
   FlattenCore(out);
   GraphNum size;
   if (IsTopLevel()) {
-    throw;
+    LOG_FAIL("replacement for throw call");
     //create versions of the following that will work on TunVec's
     //FullyFlatten(m_inTuns, out);
     //    FullyFlatten(m_outTuns, out);
@@ -468,12 +468,12 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
   char tmp;
   READ(tmp);
   if (tmp != START)
-    throw;
+    LOG_FAIL("replacement for throw call");
   READ(m_flags);
   UnflattenCore(in,info);
   GraphNum size;
   if (IsTopLevel()) {
-    throw;
+    LOG_FAIL("replacement for throw call");
     //create versions of these for tunVec's
     //    FullyUnflatten(m_inTuns, in, info);
     //    FullyUnflatten(m_outTuns, in, info);
@@ -488,7 +488,7 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
     }
     READ(tmp);
     if (tmp != END)
-      throw;
+      LOG_FAIL("replacement for throw call");
     READ(size);
     for(GraphNum i = 0; i < size; ++i) {
       Node *tun;
@@ -501,10 +501,10 @@ void BasePSet::Unflatten(ifstream &in, SaveInfo &info)
 
   READ(tmp);
   if (tmp != END)
-    throw;
+    LOG_FAIL("replacement for throw call");
   READ(tmp);
   if (tmp != END)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (!IsTopLevel())
     Swap(&m_ownerPoss, info.possMap);
   if (IsTopLevel()) {

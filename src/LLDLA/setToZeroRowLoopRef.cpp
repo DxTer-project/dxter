@@ -35,7 +35,7 @@ bool SetToZeroRowLoopRef::CanApply(const Node* node) const {
     const SetToZero* setZero = static_cast<const SetToZero*>(node);
     return *(setZero->GetInputM(0)) > 1;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SetToZeroRowLoopRef::Apply(Node* node) const {

@@ -65,5 +65,5 @@ class CombineUnrolled : public CombineBase
   virtual Name GetName(ConnNum num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  virtual bool IsCombine() const {throw;return true;}
+  virtual bool IsCombine() const {LOG_FAIL("replacement for throw call");return true;}
 };

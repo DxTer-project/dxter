@@ -50,7 +50,7 @@ Phase SetToZero::MaxPhase() const {
     case (LLDLAPRIMITIVELAYER):
       return NUMPHASES; 
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -64,7 +64,7 @@ void SetToZero::Prop() {
       cout << "Input 0 # cols = " << GetInputNumCols(0) << endl;
       cout << "Input 0 row stride = " << InputDataType(0).m_rowStrideVal << endl;
       cout << "Input 0 col stride = " << InputDataType(0).m_colStrideVal << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
       }*/
 
     m_cost = GetInputM(0)->SumProds11(*GetInputN(0));
@@ -123,7 +123,7 @@ ClassType SetToZero::GetClass() {
 Name SetToZero::GetName(ConnNum num) const {
   if (num != 0) {
     cout << "ERROR: Bad ConnNum in SetToZero::GetName" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return GetInputName(0);
 }
@@ -158,7 +158,7 @@ bool SetToZeroLowerLayer::CanApply(const Node* node) const {
     }
     return true;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void SetToZeroLowerLayer::Apply(Node* node) const {

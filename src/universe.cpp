@@ -152,7 +152,7 @@ void Universe::CheckMaxDims()
     cout << "maxDims = " << maxDims << endl;
     cout << "NUM_GRID_DIMS = " << NUM_GRID_DIMS << endl;
     cout << "update it!\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 #endif
@@ -240,12 +240,12 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
     if (prevAlgs) {
       double percent =  100.0 * (total / prevAlgs - 1 );
       if (percent < 0)
-	throw;
+	LOG_FAIL("replacement for throw call");
       cout << ";   increase of " << percent << "%";
     }
     else {
       if (m_pset->m_posses.empty())
-	throw;
+	LOG_FAIL("replacement for throw call");
       cout << ";   0 algorithms, but there are still posses at the high level\n";
     }
     cout << ";   took " << difftime(end,start) << " seconds";
@@ -312,7 +312,7 @@ void Universe::AddToMaps(Transformation *trans)
   if (M_transPtrs.find(trans->GetType()) != M_transPtrs.end()) {
     cout << "duplicate trans name " << trans->GetType() << endl;
     cout.flush();
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   M_transPtrs.insert(pair<string,Transformation*>(trans->GetType(),trans));
 }
@@ -339,7 +339,7 @@ void Universe::AddTrans(const ClassType &classType, Transformation *trans, int p
       AddToMaps(trans);
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (phase == SIMP) {
     if (trans->IsSingle()) 
       M_transCount[NUMPHASES]++;
@@ -355,9 +355,9 @@ void Universe::AddTrans(const ClassType &classType, Transformation *trans, int p
       M_simplifiers[classType] = vec;
     }
   }
-  else if (phase < 0 || phase >= NUMPHASES) 
-    throw;
-  else {
+  else if (phase < 0 || phase >= NUMPHASES) {
+    LOG_FAIL("replacement for throw call");
+  } else {
     if (trans->IsSingle()) 
       M_transCount[phase]++;
     else 
@@ -393,7 +393,7 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
 #ifdef MATLAB
     out.open("totalCostOutput.m");
 #else
-    throw;
+    LOG_FAIL("replacement for throw call");
     out.open("totalCostOutput.r");
 #endif
     IndStream costOut(&out, OTHERSTREAM);
@@ -427,7 +427,7 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
 	graphIter.GetCurrTransVec(transList);
 	ImplementationRuntimeMapConstIter found = impTimes.find(graphNum);
 	if (found == impTimes.end())
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	Cost tot = (Cost)MinTime(found->second);
 	
 	*costOut << "cost(" << graphNum << ") = "
@@ -663,7 +663,7 @@ void Universe::RegCons(ClassType type, ConstructorFunc func)
 {
   if (M_consFuncMap.find(type) != M_consFuncMap.end()) {
     cout << "dup constructor for " << type << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   M_consFuncMap[type] = func;
 }
@@ -673,7 +673,7 @@ Node* Universe::GetBlankClassInst(ClassType type)
   ConsFuncMapIter iter = M_consFuncMap.find(type);
   if (iter == M_consFuncMap.end()) {
     cout << "didn't find node type " << type << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   ConstructorFunc func = iter->second;
   return func();
@@ -727,7 +727,7 @@ void Universe::Unflatten(ifstream &in)
   if (version != CURRENTSAVEVERSION) {
     cout << version << " vs. " 
 	 << CURRENTSAVEVERSION << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   unsigned int numTrans;
   READ(numTrans);
@@ -741,7 +741,7 @@ void Universe::Unflatten(ifstream &in)
     if (iter == M_transPtrs.end()) {
       cout << "Missing transformation "
 	   << name << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     transMap[old] = (*iter).second;
   }
@@ -774,7 +774,7 @@ void Universe::Unflatten(ifstream &in)
   READ(tmp);
   if (tmp != END) {
     cout << "Bad end!\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -803,6 +803,6 @@ void Universe::EnforceMemConstraint(Cost maxMem)
   if (m_pset->EnforceMemConstraint(0, maxMem, blank, highWater)) {
     cout << "Base PSet is over memory\n";
     cout.flush();
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }

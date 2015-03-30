@@ -91,7 +91,7 @@ Name SplitUnrolled::GetName(ConnNum num, LoopType type) const
     if (num < m_unrollFactor)
       name.m_name += std::to_string((long long int) num);
     else if (num != m_unrollFactor)
-      throw;
+      LOG_FAIL("replacement for throw call");
     return name;
   }
   else
@@ -103,7 +103,7 @@ void SplitUnrolled::Prop()
   if (!IsValidCost(m_cost)) {
     Tunnel::Prop();
     if (!m_unrollFactor)
-      throw;
+      LOG_FAIL("replacement for throw call");
     m_cost = ZERO;
   }
 }
@@ -116,7 +116,7 @@ const Sizes* SplitUnrolled::GetM(ConnNum num) const
     case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return GetInputM(0);
     case (SETTUNOUT):
       return GetRealTunnel()->GetInputM(0);
@@ -124,16 +124,16 @@ const Sizes* SplitUnrolled::GetM(ConnNum num) const
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         if (!input->m_msizes)
-          throw;
+          LOG_FAIL("replacement for throw call");
         return input->m_msizes;
       }
       else if (num == m_unrollFactor) {
         return GetInputM(0);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -144,7 +144,7 @@ const Sizes* SplitUnrolled::GetN(ConnNum num) const
     case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return GetInputN(0);
     case (SETTUNOUT):
       return GetRealTunnel()->GetInputN(0);
@@ -152,16 +152,16 @@ const Sizes* SplitUnrolled::GetN(ConnNum num) const
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         if (!input->m_nsizes)
-          throw;
+          LOG_FAIL("replacement for throw call");
         return input->m_nsizes+num;
       }
       else if (num == m_unrollFactor) {
         return GetInputN(0);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -173,7 +173,7 @@ const Sizes* SplitUnrolled::LocalM(ConnNum num) const
     case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return InputLocalM(0);
     case (SETTUNOUT):
       GetRealTunnel()->InputLocalM(0);
@@ -181,16 +181,16 @@ const Sizes* SplitUnrolled::LocalM(ConnNum num) const
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         if (!input->m_mlsizes)
-          throw;
+          LOG_FAIL("replacement for throw call");
         return input->m_mlsizes;
       }
       else if (num == m_unrollFactor) {
         return InputLocalM(0);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -201,7 +201,7 @@ const Sizes* SplitUnrolled::LocalN(ConnNum num) const
     case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return InputLocalN(0);
     case (SETTUNOUT):
       return GetRealTunnel()->InputLocalN(0);
@@ -209,16 +209,16 @@ const Sizes* SplitUnrolled::LocalN(ConnNum num) const
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         if (!input->m_nlsizes)
-          throw;
+          LOG_FAIL("replacement for throw call");
         return input->m_nlsizes;
       }
       else if (num == m_unrollFactor) {
         return InputLocalN(0);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 #endif
@@ -233,16 +233,16 @@ const Sizes* SplitUnrolled::LocalN(ConnNum num) const
     case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return InputNumDims(0);
     case (SETTUNOUT):
       GetRealTunnel()->InputNumDims(0);
     case (POSSTUNIN):
       if (num > m_unrollFactor)
-	throw;
+	LOG_FAIL("replacement for throw call");
       return InputNumDims(0);
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -253,7 +253,7 @@ const Sizes* SplitUnrolled::Len(ConnNum num, Dim dim) const
     case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return InputLen(0,dim);
     case (SETTUNOUT):
       return GetRealTunnel()->InputLen(0,dim);
@@ -261,7 +261,7 @@ const Sizes* SplitUnrolled::Len(ConnNum num, Dim dim) const
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         if (!input->m_sizes)
-          throw;
+          LOG_FAIL("replacement for throw call");
 	return &(input->m_sizes[dim]);
       }
       else if (num == m_unrollFactor) {
@@ -269,9 +269,9 @@ const Sizes* SplitUnrolled::Len(ConnNum num, Dim dim) const
       }
       
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -282,7 +282,7 @@ const Sizes* SplitUnrolled::LocalLen(ConnNum num, Dim dim) const
     case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return InputLocalLen(0,dim);
     case (SETTUNOUT):
       GetRealTunnel()->InputLocalLen(0,dim);
@@ -290,16 +290,16 @@ const Sizes* SplitUnrolled::LocalLen(ConnNum num, Dim dim) const
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
         if (!input->m_lsizes)
-          throw;
+          LOG_FAIL("replacement for throw call");
 	return &(input->m_lsizes[dim]);
       }
       else if (num == m_unrollFactor) {
         return InputLocalLen(0,dim);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 #endif
@@ -313,7 +313,7 @@ Tunnel* SplitUnrolled::GetSetTunnel()
   else if (m_tunType == POSSTUNOUT)
     tun = new SplitUnrolled(m_dir, m_unrollFactor, SETTUNOUT);
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -326,7 +326,7 @@ Tunnel* SplitUnrolled::GetSetTunnel()
   else if (m_tunType == POSSTUNOUT)
     tun = new SplitUnrolled(m_partDim, m_unrollFactor, SETTUNOUT);
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -339,14 +339,14 @@ void SplitUnrolled::PrintCode(IndStream &out)
 #if TWOD
   LoopType loopType = GetLoopType();
   if (loopType == ELEMLOOP) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   else if (loopType == BLISLOOP) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 #else
   *out << "need split print code\n";
-  throw;
+  LOG_FAIL("replacement for throw call");
 #endif
 }
 
@@ -379,12 +379,12 @@ NodeType SplitUnrolled::GetType() const
 #if TWOD
 bool SplitUnrolled::QuadInUse(Quad quad, bool atEnd) const
 {
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 #else
 bool SplitUnrolled::QuadInUse(Quad quad, bool atEnd) const
 {
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 #endif
 
@@ -392,9 +392,9 @@ void SplitUnrolled::PrintVarDeclarations(BSSize bs, IndStream &out) const
 {
 #if DOLLDLA
   if (m_tunType != POSSTUNIN)
-    throw;
+    LOG_FAIL("replacement for throw call");
   const string name = GetInputNameStr(0);
-  throw;
+  LOG_FAIL("replacement for throw call");
   for (unsigned int i = 0; i < m_unrollFactor; ++i) {
     out.Indent();
     *out << LLDLAPartVarName(name, i) << " = " 
@@ -416,13 +416,13 @@ void SplitUnrolled::AddVariables(VarSet &set) const
     }
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 #endif
 }
 
 CombineUnrolled* SplitUnrolled::CreateMatchingCombine(int numArgs, ...)
 {
-  throw;
+  LOG_FAIL("replacement for throw call");
   int numComIns = NumOutputs();
   int j = 0;
 #if TWOD
@@ -442,7 +442,7 @@ CombineUnrolled* SplitUnrolled::CreateMatchingCombine(int numArgs, ...)
       ++j;
     }
     if (j >= numComIns)
-      throw;
+      LOG_FAIL("replacement for throw call");
     com->AddInput(node, num);
     ++j;
   }
@@ -458,7 +458,7 @@ CombineUnrolled* SplitUnrolled::CreateMatchingCombine(int numArgs, ...)
 unsigned int SplitUnrolled::NumIters(Size bs, Size m, Size n) const
 {
   if (!bs)
-    throw;
+    LOG_FAIL("replacement for throw call");
   switch (m_dir) {
     case(PARTDOWN):
     case(PARTDIAG):
@@ -466,35 +466,38 @@ unsigned int SplitUnrolled::NumIters(Size bs, Size m, Size n) const
     case(PARTDIAGBACK):
       {
 	double tmp = ((double)m)/bs;
-	if (fmod(tmp, m_unrollFactor))
-	  throw;
-	else
+	if (fmod(tmp, m_unrollFactor)) {
+	  LOG_FAIL("replacement for throw call");
+	} else {
 	  return tmp / m_unrollFactor;
+	}
       }
     case(PARTLEFT):
     case(PARTRIGHT):
       {
 	double tmp = ((double)n)/bs;
-	if (fmod(tmp, m_unrollFactor))
-	  throw;
-	else
+	if (fmod(tmp, m_unrollFactor)) {
+	  LOG_FAIL("replacement for throw call");
+	} else {
 	  return tmp / m_unrollFactor;
+	}
       }
     case(LASTPARTDIR):
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 #else
 unsigned int SplitUnrolled::NumIters(Size bs, Size size) const
 {
   if (!bs)
-    throw;
+    LOG_FAIL("replacement for throw call");
   double tmp = ((double)size)/bs;
-  if (fmod(tmp, m_unrollFactor))
-    throw;
-  else
+  if (fmod(tmp, m_unrollFactor)) {
+    LOG_FAIL("replacement for throw call");
+  } else {
     return tmp / m_unrollFactor;
+  }
 }
 #endif
 
@@ -512,7 +515,7 @@ unsigned int SplitUnrolled::NumIters(unsigned int iterNum) const
       cout << "hasn't built\n";
     cout << Input(0)->GetNodeClass() << endl;
     cout << Input(0) << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   const Size m = (*ms)[iterNum];
   const Size n = (*ns)[iterNum];
@@ -530,7 +533,7 @@ unsigned int SplitUnrolled::NumIters(unsigned int iterNum) const
       cout << "hasn't built\n";
     cout << Input(0)->GetNodeClass() << endl;
     cout << Input(0) << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   const Size m = (*sizes)[iterNum];
   return NumIters(bs,m);
@@ -553,14 +556,14 @@ void SplitUnrolled::UnflattenCore(ifstream &in, SaveInfo &info)
 unsigned int SplitUnrolled::NumberOfLoopExecs() const
 {
   if (!m_isControlTun)
-    throw;
+    LOG_FAIL("replacement for throw call");
 #if TWOD
   unsigned int one = GetInputM(0)->NumSizes();
   unsigned int two = GetInputN(0)->NumSizes();
   if (one != two) {
     cout << one << " vs. " << two << endl;
     cout.flush();
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return min(one,two);
 #else
@@ -572,7 +575,7 @@ unsigned int SplitUnrolled::NumberOfLoopExecs() const
 void SplitUnrolled::StartFillingSizes()
 {
   if (m_msizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType != SETTUNIN)
     return;
   if (!m_pset->IsReal())
@@ -588,7 +591,7 @@ void SplitUnrolled::StartFillingSizes()
 void SplitUnrolled::StartFillingSizes()
 {
   if (m_sizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType != SETTUNIN)
     return;
   if (!m_pset->IsReal())
@@ -634,7 +637,7 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, uns
   if (!m_pset->IsReal())
     return;
   if (!m_msizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   const Sizes *ms = GetInputM(0);
   const Sizes *ns = GetInputN(0);
   
@@ -646,7 +649,7 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, uns
 
     cout << Input(0)->GetNodeClass() << endl;
     cout << Input(0) << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   unsigned int length = ms->NumSizes();
@@ -655,7 +658,7 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, uns
 
   if (length <= execNum || length2 <= execNum)
     {
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   const Size m = (*ms)[execNum];
   const Size n = (*ns)[execNum];
@@ -668,7 +671,7 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, uns
     for (unsigned int i = m_children.size(); i < m_children.size(); ++i) {
       cout << m_children[i]->m_n->GetNodeClass() << endl;
     }
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   m_msizes->AddRepeatedSizes(bs, numIters, 1);
 }
@@ -680,14 +683,14 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, uns
   if (!m_pset->IsReal())
     return;
   if (!m_sizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   const Size bs = GetMyLoop()->GetBS();
   Dim numDims = InputNumDims(0);
   for (Dim dim = 0; dim < numDims; ++dim) {
     const Sizes *sizes = InputLen(0,dim);
     unsigned int length = sizes->NumSizes();
     if (length <= execNum) {
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     const Size len = (*sizes)[execNum];
     
@@ -710,12 +713,12 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, uns
 #if TWOD&&DODM
 void SplitUnrolled::UpdateLocalSizes()
 {
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 #elif DOTENSORS
 void SplitUnrolled::UpdateLocalSizes()
 {
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 #endif
 
@@ -744,20 +747,20 @@ string SplitUnrolled::LoopBound()
 	break;
       }
     case (PARTDIAG):
-      throw;
+      LOG_FAIL("replacement for throw call");
       break;
     case (PARTUPWARD):
-      throw;
+      LOG_FAIL("replacement for throw call");
       break;
     case (PARTLEFT):     
-      throw;
+      LOG_FAIL("replacement for throw call");
       break;
 
     case (PARTDIAGBACK):
-      throw;
+      LOG_FAIL("replacement for throw call");
       break;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 #endif
@@ -766,9 +769,9 @@ string SplitUnrolled::LoopBound()
 void SplitUnrolled::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 {
   if (m_tunType != POSSTUNIN)
-    throw;
+    LOG_FAIL("replacement for throw call");
 #if DOLLDLA
-  throw;
+  LOG_FAIL("replacement for throw call");
   //need bs
   out.Indent(1);
   const DataTypeInfo &type = InputDataType(0);
@@ -785,7 +788,7 @@ void SplitUnrolled::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
       *out << MU_VAR_NAME << ";\n";
     }
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 #endif
 }

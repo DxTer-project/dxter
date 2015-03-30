@@ -37,7 +37,7 @@ bool CopyToContigCopy::CanApply(const Node* node) const {
     return copy->InputIsContiguous(0) &&
       copy->InputIsContiguous(1);
   }
-  throw;
+  LOG_FAIL("Replacement for call to throw;");
 }
 
 void CopyToContigCopy::Apply(Node* node) const {

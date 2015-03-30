@@ -26,11 +26,11 @@
 void CritSect::PrintCurrPoss(IndStream &out, GraphNum &graphNum)
 {
   if (!m_ownerPoss->m_pset->IsLoop())
-    throw;
+    LOG_FAIL("replacement for throw call");
   Loop *loop = (Loop*)(m_ownerPoss->m_pset);
   Comm comm = loop->m_comm;
   if (comm == CORECOMM)
-    throw;
+    LOG_FAIL("replacement for throw call");
   *out << "Critical section with communicator " << CommToStr(comm) << "; need correct output code\n";
   out.Indent();
   *out << "GetMutex(" << CommToStr(comm) << ");\n";
@@ -81,10 +81,10 @@ void CritSect::BuildDataTypeCache()
 
 void CritSect::SanityCheck()
 {
-  //  throw;
+  //  LOG_FAIL("replacement for throw call");
   PSet::SanityCheck();
   if (!m_ownerPoss->m_pset->IsLoop())
-    throw;
+    LOG_FAIL("replacement for throw call");
   PossVecIter iter = m_posses.begin();
   for( ; iter != m_posses.end(); ++iter) {
     Poss *poss = *iter;
@@ -96,7 +96,7 @@ void CritSect::SanityCheck()
       }
       cout.flush();
       poss->ForcePrint();
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
   NodeVecIter iter2 = m_inTuns.begin();
@@ -104,14 +104,14 @@ void CritSect::SanityCheck()
     if ((*iter2)->GetNodeClass() !=
         CritSectTunnel::GetClass()) {
       cout << (*iter2)->GetNodeClass() << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
   iter2 = m_outTuns.begin();
   for(; iter2 != m_outTuns.end(); ++iter2) {
     if ((*iter2)->GetNodeClass() !=
         CritSectTunnel::GetClass())
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -149,7 +149,7 @@ CritSectTunnel::~CritSectTunnel()
 const Sizes* CritSectTunnel::GetM(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   switch(m_tunType)
   {
     case (POSSTUNOUT):
@@ -161,7 +161,7 @@ const Sizes* CritSectTunnel::GetM(ConnNum num) const
     case (SETTUNIN):
       return m_msizes;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -169,7 +169,7 @@ const Sizes* CritSectTunnel::GetM(ConnNum num) const
 const Sizes* CritSectTunnel::GetN(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   switch(m_tunType)
   {
     case (POSSTUNOUT):
@@ -181,14 +181,14 @@ const Sizes* CritSectTunnel::GetN(ConnNum num) const
     case (SETTUNIN):
       return m_nsizes;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
 const Sizes* CritSectTunnel::LocalM(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   switch(m_tunType)
   {
     case (POSSTUNOUT):
@@ -200,14 +200,14 @@ const Sizes* CritSectTunnel::LocalM(ConnNum num) const
     case (SETTUNIN):
       return m_mlsizes;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
 const Sizes* CritSectTunnel::LocalN(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   switch(m_tunType)
   {
     case (POSSTUNOUT):
@@ -219,7 +219,7 @@ const Sizes* CritSectTunnel::LocalN(ConnNum num) const
     case (SETTUNIN):
       return m_nlsizes;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -241,7 +241,7 @@ void CritSectTunnel::BuildDataTypeCache()
   }
   else {
     if (!m_poss->m_pset->IsLoop())
-      throw;
+      LOG_FAIL("replacement for throw call");
     Loop *loop = (Loop*)(m_poss->m_pset);
     unsigned int p = NumGroupsInComm(loop->m_comm);
     m_msizes->AddParFactor(p);
@@ -270,11 +270,11 @@ void CritSectTunnel::SanityCheck()
   Tunnel::SanityCheck();
   if (m_tunType == SETTUNIN || m_tunType == SETTUNOUT) {
     if (!m_pset->IsCritSect())
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   else {
     if (!m_poss->m_pset->IsCritSect())
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 #endif

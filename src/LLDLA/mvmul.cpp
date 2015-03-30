@@ -66,7 +66,7 @@ void MVMul::PrintCode(IndStream &out)
 
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive matrix vector multiply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
@@ -128,7 +128,7 @@ Phase MVMul::MaxPhase() const
     case (LLDLAPRIMITIVELAYER):
       return NUMPHASES; 
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -141,32 +141,32 @@ void MVMul::Prop()
 	|| !InputDimsAreOneRepeatedSizeEach(1)
 	|| !InputDimsAreOneRepeatedSizeEach(2)) {
       cout << "ERROR: MVMul input dimensions are not single, repeated sizes" << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 
     if (*GetInputN(0) != *GetInputM(1)) {
       cout << "ERROR: Input dimensions don't match\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     } else if (*GetInputM(0) != *GetInputM(2)) {
       cout << "ERROR: Input dimensions don't match\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     } else if (!IsInputColVector(1) || !IsInputColVector(2)) {
       cout << "Error: MVMul inputs that should be column vectors are not\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
       if (*GetInputM(0) != GetVecRegWidth() || *GetInputN(0) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive matrix must be 2 x 2 for MVMul\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
       if (*GetInputM(1) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive vector must be 2 x 1 MVMul\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
       if (*GetInputM(2) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive vector must be 2 x 1 MVMul\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     }
 
@@ -226,7 +226,7 @@ bool MVMulLowerLayer::CanApply(const Node *node) const
     }
   }
   cout << "Error: Applying MVMulLowerLayer to non-MVMul node\n";
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void MVMulLowerLayer::Apply(Node *node) const
@@ -258,7 +258,7 @@ string MVMulLoopRef::GetType() const
     case (DIMN):
       return "MVMulLoopRef - dim n " + std::to_string((long long int) m_bs.GetSize());
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }  
 }
 
@@ -284,7 +284,7 @@ bool MVMulLoopRef::CanApply(const Node *node) const
 	//	&& mvmul->InputMIsMultipleOf(0, m_bs.GetSize());
     }
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void MVMulLoopRef::Apply(Node *node) const {
@@ -294,7 +294,7 @@ void MVMulLoopRef::Apply(Node *node) const {
     ApplyColSplit(node);
   } else {
     cout << "ERROR: Not refining mvmul loop around m or n dimension\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 

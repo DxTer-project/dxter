@@ -67,7 +67,7 @@ void VAdd::PrintCode(IndStream &out)
 
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive vector add\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   const DataTypeInfo &inInfo = InputDataType(1);
   const Stride rowStride = inInfo.m_rowStride;
@@ -142,7 +142,7 @@ void VAdd::Prop()
 
     if ((*GetInputM(0) != *GetInputM(1)) || (*GetInputN(0) != *GetInputN(1))) {
       cout << "ERROR: Cannot VAdd two vectors of different dimension\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 
     if (m_layer == ABSLAYER) {
@@ -162,19 +162,19 @@ void VAdd::VectorOpInputDimensionCheck(ConnNum inputNum)
 {
   if (GetVecType() == ROWVECTOR && *GetInputM(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum << " has more than 1 row\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   } else if (GetVecType() == COLVECTOR && *GetInputN(inputNum) != 1) {
     cout << "ERROR: " << GetType() << " input # " << inputNum  << " has more than 1 column\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   int regWidth = GetVecRegWidth();
   if (m_layer == LLDLAPRIMITIVELAYER) {
     if (GetVecType() == ROWVECTOR && *GetInputN(inputNum) != regWidth) {
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth columns\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     } else if(GetVecType() == COLVECTOR && *GetInputM(inputNum) != regWidth) {
       cout << "ERROR: " << GetType() << " input # " << inputNum << " does not have m_regWidth rows\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
 }
@@ -201,7 +201,7 @@ VecType VAdd::GetVecType() const {
   if (IsInputColVector(0) && IsInputColVector(1)) {
     return COLVECTOR;
     }*/
-  ///  throw;
+  ///  LOG_FAIL("replacement for throw call");
   return m_vecType;
 }
 
@@ -216,7 +216,7 @@ Phase VAdd::MaxPhase() const
     case (LLDLAPRIMITIVELAYER):
       return NUMPHASES; 
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -237,7 +237,7 @@ string VAddLoopRef::GetType() const
     case(COLVECTOR):
       return "VAddLoopRef - column vector";
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -262,7 +262,7 @@ bool VAddLoopRef::CanApply(const Node *node) const
       return false;
     }
   } else {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return false;
 }
@@ -306,7 +306,7 @@ void VAddLoopRef::Apply(Node *node) const
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
     cout << "Error: Bad GetDataType in vadd apply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
   
@@ -347,7 +347,7 @@ bool VAddLowerLayer::CanApply(const Node *node) const
     }
   }
   cout << "Error: Applying VAddLowerLayer to non-VAdd node\n";
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void VAddLowerLayer::Apply(Node *node) const
@@ -383,7 +383,7 @@ bool VAddToRegArith::CanApply(const Node* node) const
     return false;
   }
   cout << "ERROR: Applying VAddToRegArith to non-VAdd node\n";
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void VAddToRegArith::Apply(Node* node) const
@@ -442,7 +442,7 @@ void VAddToRegArith::Apply(Node* node) const
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
     cout << "Error: Bad GetDataType() in vadd apply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   loop->SetDimName(splitDown ? DIMM : DIMN);
 

@@ -44,7 +44,7 @@ string TypeToStr(Type type) {
     return "real_double_precision";
   default:
     cout << "ERROR: Bad type in TypeToStr" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -56,26 +56,15 @@ string VecTypeToStr(VecType vecType) {
     return "column_vector";
   default:
     cout << "ERROR: Bad type in TypeToStr" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
-}
-
-string DateAndTimeString() {
-  time_t t = time(0);
-  struct tm* now = localtime(&t);
-  return std::to_string((long long int) (now->tm_year + 1900)) + "-"
-    + std::to_string((long long int) now->tm_mon + 1) + "-"
-    + std::to_string((long long int) now->tm_mday) + "-"
-    + std::to_string((long long int) now->tm_hour) + "-"
-    + std::to_string((long long int) now->tm_min) + "-"
-    + std::to_string((long long int) now->tm_sec);
 }
 
 string NoWhitespace(const string str) {
   for (auto ch : str) {
     if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') {
       cout << "ERROR: Unallowed whitespace in string: " << str;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
   return str;
@@ -91,7 +80,7 @@ string Rdtsc() {
 
 string UtilFuncs() {
   cout << "ERROR: UtilFuncs() is not implemented yet." << endl;
-  throw;
+  LOG_FAIL("replacement for throw call");
   return "";
 }
 

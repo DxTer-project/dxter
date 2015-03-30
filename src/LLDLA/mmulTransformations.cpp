@@ -109,7 +109,7 @@ bool MMulLoopExp::CanApply(const Node *node) const
 	  return false;
       }
       else
-	throw;
+	LOG_FAIL("replacement for throw call");
       if ((m_bsSize != mu)
 	  && (*(gemm->GetInputN(2)) <= mu.GetSize())
 	  && (*(gemm->GetInputM(2)) <= mu.GetSize()))
@@ -138,7 +138,7 @@ bool MMulLoopExp::CanApply(const Node *node) const
 	return true;
     }
   default:
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -182,7 +182,7 @@ bool LLDAGemmLowerLayer::CanApply(const Node *node) const
     else
       return false;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void LLDAGemmLowerLayer::Apply(Node *node) const

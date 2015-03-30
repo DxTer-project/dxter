@@ -41,7 +41,7 @@ bool PackToCopyAndZero::CanApply(const Node* node) const {
   if (node->GetNodeClass() == Pack::GetClass()) {
     return true;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void PackToCopyAndZero::Apply(Node* node) const {

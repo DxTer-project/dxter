@@ -19,9 +19,6 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-#include "sizes.h"
 #include <cmath>
 #include <cstring>
 #include <math.h>
@@ -36,6 +33,9 @@
 #include <list>
 #include <fstream>
 #include <cstdlib>
+
+#include "logging.h"
+#include "sizes.h"
 
 using namespace std;
 
@@ -56,13 +56,13 @@ m_type(type),
  m_parFactor(parFactor)
 {
   if (m_parFactor == 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 void SizesIter::operator++()
 {
   if (m_currPos < 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_parFactor < 0) {
     m_currPos += m_parFactor;
   }
@@ -78,9 +78,9 @@ void SizesIter::operator++()
 Size SizesIter::operator*() const
 {
   if (m_currPos < 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (AtEnd())
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_type == REPEATEDSIZES) {
     return Update(m_valA);
   }
@@ -91,13 +91,13 @@ Size SizesIter::operator*() const
     else if (numFullIters+1 > m_currPos)
       return Update(m_valB - numFullIters*m_valA);
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   else if (m_type == RANGESIZES) {
     return Update(m_valA + m_currPos * m_valC);
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 Size SizesIter::Update(Size size) const
@@ -131,7 +131,7 @@ bool SizesIter::AtCurrRepeatEnd() const
 {
   if (m_type == MIDSIZES) {
     if (m_valB == 0)
-      throw;
+      LOG_FAIL("replacement for throw call");
     if (m_currPos == 0)
       return false;
     if (m_parFactor < 0) {
@@ -169,7 +169,7 @@ bool SizesIter::AtCurrRepeatEnd() const
     }
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 SizeEntry::SizeEntry()
@@ -191,35 +191,36 @@ void SizeEntry::SetRepeatedSizes(Size size, int repeats, int parFactor)
   m_valC = repeats;
   m_type = REPEATEDSIZES;
   m_parFactor = parFactor;
-  if (m_parFactor == 0)
-    throw;
+  if (m_parFactor == 0) {
+    LOG_FAIL("m_parFactor == 0");
+  }
   m_repeats = 1;
 }
 
 void SizeEntry::SetSizeRange(Size start, int stride, Size end, int parFactor)
 {
   if (start == 0 && end == 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   m_valA = start;
   m_valB = end;
   m_valC = stride;
   m_type = RANGESIZES;
   m_parFactor = parFactor;
   if (m_parFactor == 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   m_repeats = 1;
 }
 
 void SizeEntry::SetMidSizes(Size size, Size totalSize, int parFactor)
 {
   //  cout << "ERROR: calling SetMidSizes" << endl;
-  //  throw;
+  //  LOG_FAIL("replacement for throw call");
   m_valA = size;
   m_valB = totalSize;
   m_type = MIDSIZES;
   m_parFactor = parFactor;
   if (m_parFactor == 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   m_repeats = 1;
 }
 
@@ -238,7 +239,7 @@ void SizeEntry::Print() const
     << m_valC << ":"
     << m_valB << endl;
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
   cout << "\tParallelization factor: " << m_parFactor << endl;
 }
 
@@ -257,7 +258,7 @@ void SizeEntry::Print(IndStream &out) const
     << m_valC << ":"
     << m_valB << endl;
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
   *out << "\tParallelization factor: " << m_parFactor << endl;
 }
   
@@ -285,13 +286,13 @@ bool SizeEntry::operator==(const SizeEntry &rhs) const
     m_valC == rhs.m_valC;
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 Size SizeEntry::operator[] (unsigned int n) const
 {
   if ((int)(n / NumSizesPerRepeat()) > m_repeats)
-    throw;
+    LOG_FAIL("replacement for throw call");
   n = n % NumSizesPerRepeat();
   unsigned int iter = n;
   if (m_parFactor < 0)
@@ -299,12 +300,12 @@ Size SizeEntry::operator[] (unsigned int n) const
   if (m_type == REPEATEDSIZES) {
     if (m_parFactor < 0) {
       if ((int)iter >= m_valC)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return m_valA;
     }
     else {
       if ((int)iter >= ceil((double)m_valC / abs(m_parFactor)))
-	throw;
+	LOG_FAIL("replacement for throw call");
       return m_valA;
     }
   }
@@ -322,15 +323,15 @@ Size SizeEntry::operator[] (unsigned int n) const
     else if (numFullIters+1 > iter)
       return adjustedValB - numFullIters*m_valA;
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   else if (m_type == RANGESIZES) {
     if (iter >= NumSizes())
-      throw;
+      LOG_FAIL("replacement for throw call");
     return m_valA + ((Size)iter) * m_valC;
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 void SizeEntry::operator= (const SizeEntry &rhs)
@@ -368,7 +369,7 @@ bool SizeEntry::operator==(const Size &rhs) const
 	break;
       }
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -393,7 +394,7 @@ bool SizeEntry::EvenlyDivisibleBy(const Size &size) const
 	break;
       }
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -417,7 +418,7 @@ bool SizeEntry::operator<= (const Size &rhs) const
 	return m_valA <= rhs;
     }
   default:
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -448,7 +449,7 @@ unsigned int SizeEntry::NumSizesPerRepeat() const
     }
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 unsigned int SizeEntry::NumSizes() const
@@ -473,11 +474,11 @@ SizesIter SizeEntry::GetIter(double coeff) const
 SizeEntry SizeEntry::SumWith(const SizeEntry &rhs) const
 {
   if (NumSizes() != rhs.NumSizes())
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_parFactor != rhs.m_parFactor)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_repeats != rhs.m_repeats)
-    throw;
+    LOG_FAIL("replacement for throw call");
   SizeEntry entry;
   if (m_type == MIDSIZES) {
     if (rhs.m_type == MIDSIZES) {
@@ -497,7 +498,7 @@ SizeEntry SizeEntry::SumWith(const SizeEntry &rhs) const
       return entry;
     }
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   else if (m_type == REPEATEDSIZES) {
     if (rhs.m_type == REPEATEDSIZES) {
@@ -528,8 +529,8 @@ SizeEntry SizeEntry::SumWith(const SizeEntry &rhs) const
     }
   }
   else
-    throw;
-  throw;
+    LOG_FAIL("replacement for throw call");
+  LOG_FAIL("replacement for throw call");
 }
 
 Sizes::Sizes()
@@ -633,7 +634,7 @@ void Sizes::AddMidSizes(Size size, Size totalSize, int parFactor)
 void Sizes::AddSizesWithLimit(Size start, int stride, Size end, int parFactor)
 {
   if (stride == 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (stride < 0) {
     int mod = (int)start % (-1*stride);
     if (mod)
@@ -679,7 +680,7 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end, int parFactor)
 void Sizes::SetCoeff(double coeff)
 {
   if (coeff == 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (coeff == 1)
     return;
   m_coeff = coeff;
@@ -706,7 +707,7 @@ Size Sizes::operator[] (unsigned int n) const
       currLoc += numSizes;
   }
   cout << n << " of " << NumSizes() << endl;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 
@@ -731,7 +732,7 @@ bool Sizes::operator==(const Sizes &rhs) const
 {
   if ((!std::isnan((double)m_constVal) && std::isnan((double)(rhs.m_constVal)))
       || (std::isnan((double)m_constVal) && !std::isnan((double)(rhs.m_constVal))))
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (!std::isnan((double)m_constVal) && (m_constVal != rhs.m_constVal))
     return false;
   if (m_entries.size() != rhs.m_entries.size()) {
@@ -740,7 +741,7 @@ bool Sizes::operator==(const Sizes &rhs) const
     Print();
   cout << "****\n";
     rhs.Print();
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   EntryVecConstIter iter1 = m_entries.begin();
   EntryVecConstIter iter2 = rhs.m_entries.begin();
@@ -800,7 +801,7 @@ unsigned int Sizes::NumSizes() const
 Cost Sizes::Sum() const
 {
   if (!std::isnan((double)m_constVal))
-    throw;
+    LOG_FAIL("replacement for throw call");
   Cost cost = 0;
   EntryVecConstIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
@@ -829,7 +830,7 @@ Cost Sizes::Sum() const
       }
     }
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   return cost;
 }
@@ -842,7 +843,7 @@ bool Sizes::IsZero(unsigned int n) const
 Cost Sizes::SumSquares() const
 {
   if (!std::isnan((double)m_constVal))
-    throw;
+    LOG_FAIL("replacement for throw call");
   Cost cost = 0;
   EntryVecConstIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
@@ -873,7 +874,7 @@ Cost Sizes::SumSquares() const
       }
     }
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   return cost;
 }
@@ -889,7 +890,7 @@ Size Sizes::Update(Size size) const
 Cost Sizes::SumCubes() const
 {
   if (!std::isnan((double)m_constVal))
-    throw;
+    LOG_FAIL("replacement for throw call");
   Cost cost = 0;
   EntryVecConstIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
@@ -920,7 +921,7 @@ Cost Sizes::SumCubes() const
       }
     }
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   return cost;
 }
@@ -934,7 +935,7 @@ Cost Sizes::SumProds11(const Sizes &sizes) const
     return sizes.m_constVal * Sum();
   }
   if (NumSizes() != sizes.NumSizes()) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   Cost cost = 0;
   unsigned int j = 0;
@@ -963,9 +964,9 @@ Cost Sizes::SumProds21(const Sizes &sizes) const
     return sizes.m_constVal * SumSquares();
   }
   if (m_entries.size() != sizes.m_entries.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (NumSizes() != sizes.NumSizes())
-    throw;
+    LOG_FAIL("replacement for throw call");
   Cost cost = 0;
   for(unsigned int i = 0; i < m_entries.size(); ++i) {
     SizesIter iter1 = GetIter(i);
@@ -976,7 +977,7 @@ Cost Sizes::SumProds21(const Sizes &sizes) const
       ++iter2;
     }
     if (!iter2.AtEnd())
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   return cost;
 }
@@ -994,7 +995,7 @@ Cost Sizes::SumProds111(const Sizes &sizes1, const Sizes &sizes2) const
   }
   if (m_entries.size() != sizes1.m_entries.size() || m_entries.size() != sizes2.m_entries.size()) {
     if (NumSizes() != sizes1.NumSizes() || NumSizes() != sizes2.NumSizes()) {
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     else {
       Cost cost = 0;
@@ -1022,10 +1023,10 @@ Cost Sizes::SumProds111(const Sizes &sizes1, const Sizes &sizes2) const
       cout << iter1.m_currPos << endl;
       cout << iter2.m_currPos << endl;
       cout << iter3.m_currPos << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     if (!iter3.AtEnd())
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   return cost;
 }
@@ -1035,7 +1036,7 @@ bool Sizes::AllOnes() const
   if (m_constVal == 1)
     return true;
   if (!m_entries.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
   EntryVecConstIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
     if ((*iter)->m_type == REPEATEDSIZES) {
@@ -1051,7 +1052,7 @@ bool Sizes::AllOnes() const
 SizesIter Sizes::GetIter(unsigned int sizeNum) const
 {
   if (sizeNum >= m_entries.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   return m_entries[sizeNum]->GetIter(m_coeff);
 }
@@ -1059,9 +1060,9 @@ SizesIter Sizes::GetIter(unsigned int sizeNum) const
 void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
 {
   if (sizes1.NumSizes() != sizes2.NumSizes())
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (sizes1.m_coeff || sizes2.m_coeff)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (!std::isnan((double)(sizes1.m_constVal))) {
     if (sizes1.m_constVal == 1) {
       *this = sizes2;
@@ -1092,7 +1093,7 @@ void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
 	  newEntry->m_repeats = entry->m_repeats;
         }
         else
-          throw;
+          LOG_FAIL("replacement for throw call");
         m_entries.push_back(newEntry);
       }
     }
@@ -1105,7 +1106,7 @@ void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
   EntryVecConstIter iter2 = sizes2.m_entries.begin();
   for(; iter1 != sizes1.m_entries.end(); ++iter1, ++iter2) {
     if ((*iter1)->m_parFactor != (*iter2)->m_parFactor)
-      throw;
+      LOG_FAIL("replacement for throw call");
     SizeEntry *entry = new SizeEntry;
     *entry = (*iter1)->SumWith(**iter2);
     m_entries.push_back(entry);
@@ -1130,13 +1131,13 @@ bool Sizes::operator>(const Size &rhs) const
 void Sizes::AddParFactor(int parFactor)
 {
   if (parFactor == 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   EntryVecIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
     if ((*iter)->m_parFactor < 0 && parFactor > 0)
-      throw;
+      LOG_FAIL("replacement for throw call");
     if ((*iter)->m_parFactor > 0 && parFactor < 0)
-      throw;
+      LOG_FAIL("replacement for throw call");
     (*iter)->m_parFactor *= abs(parFactor);
   }
 }
@@ -1144,7 +1145,7 @@ void Sizes::AddParFactor(int parFactor)
 void Sizes::SetParFactor(int parFactor)
 {
   if (parFactor == 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   EntryVecIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
     (*iter)->m_parFactor = parFactor;
@@ -1192,7 +1193,7 @@ Size Sizes::OnlyEntry() const {
   if (!IsConstant()) {
     cout << "ERROR: sizes not a constant" << endl;
     cout << "# entries = " << m_entries.size()  << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return (*this)[0];
 }

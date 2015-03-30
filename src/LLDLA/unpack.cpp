@@ -29,7 +29,7 @@ Unpack::Unpack(Layer layer) {
 
 const DataTypeInfo& Unpack::DataType(ConnNum num) const {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return InputDataType(1);
 }

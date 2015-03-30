@@ -97,23 +97,24 @@ RealLoop::RealLoop(LoopType type, Poss *poss, BSSize bsSize)
   for(auto in : m_inTuns) {
     if (!in->IsLoopTunnel()) {
       cout << "non loop tunnel on loop!\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     if (((LoopTunnel*)in)->IsSplit())
     {
       SplitBase *split = (SplitBase*)in;
       
       if (split->m_isControlTun) {
-        if (foundControl)
-          throw;
-        else
+        if (foundControl) {
+          LOG_FAIL("replacement for throw call");
+	} else {
           foundControl = true;
+	}
       }
     }
   }
   if (!foundControl) {
     cout << "ERROR: Could not find loop control\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -132,7 +133,7 @@ void RealLoop::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, b
 #endif
   if (GetBS() == 0) {
     cout << "duplicating a loop with zero blocksize\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -201,7 +202,7 @@ void RealLoop::UnflattenStatic(ifstream &in)
 void RealLoop::StartFillingTunnels() {
   for (auto in : m_inTuns) {
     if (!in->IsLoopTunnel())
-      throw;
+      LOG_FAIL("replacement for throw call");
     ((LoopTunnel*)in)->StartFillingSizes();
   }
 }
@@ -216,7 +217,7 @@ void RealLoop::FillTunnelSizes()
 {
   SplitBase *control = GetControl();
   if (!control) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   bool upToDate = true;
   TunVecIter iter = m_inTuns.begin();
@@ -282,7 +283,7 @@ void RealLoop::FillTunnelSizes()
 //       cout << "in " << in->GetInputM(0)->NumSizes() << endl;
 //       cout << "in2 " << (*(in->GetInputM(0)))[0] << endl;
 //       cout.flush();
-//       throw;
+//       LOG_FAIL("replacement for throw call");
 //     }
       
 //   }
@@ -318,13 +319,13 @@ void HardDeleteNode(Node *node)
 void RealLoop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
 {
   if (!m_shadows.empty())
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (tun->GetNodeClass() != LoopTunnel::GetClass()) {
     cout << "only handling LoopTunnels specifically, not splits\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   if (tun->m_tunType != POSSTUNIN)
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   LoopTunnel *setTunIn = (LoopTunnel*)(tun->Input(0));
   
@@ -354,12 +355,12 @@ void RealLoop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
     }
   }
   if (tunNum == UINT_MAX)
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   Node *setTunOut = m_outTuns[tunNum];
   
   if (setTunOut->m_children.size() > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   NodeConnVecIter outIter = setTunOut->m_inputs.begin();
   for(; outIter != setTunOut->m_inputs.end(); ++outIter) {
@@ -386,9 +387,9 @@ void RealLoop::TryToDeleteLoopTunnelSetAndCleanUp(LoopTunnel *tun)
 void RealLoop::Parallelize(Comm comm)
 {
   if (NumGroupsInComm(comm) <= 1)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (RemoveParallelization(comm))
-    throw;
+    LOG_FAIL("replacement for throw call");
   m_comm = comm;
   m_hasProped = false;
   if (!HasIndepIters()) {
@@ -399,12 +400,12 @@ void RealLoop::Parallelize(Comm comm)
       LoopTunnel *tun = (LoopTunnel*)(*iter);
       if (!tun->IndepIters() && !tun->InputIsTemp()) {
         if (found)
-          throw;
+          LOG_FAIL("replacement for throw call");
         found = true;
         unsigned int numOut = tun->NumOutputs();
         if (tun->IsSplit()) {
 	  if (tun->GetNodeClass() != SplitSingleIter::GetClass())
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  --numOut;
 	}
         int i;
@@ -416,9 +417,9 @@ void RealLoop::Parallelize(Comm comm)
             AddUsersOfLiveOutput(possTun, j, nodeSet);
           }
           if (!nodeSet.size())
-            throw;
+            LOG_FAIL("replacement for throw call");
           poss->FillClique(nodeSet);
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 #if 0
           CritSect *crit = (CritSect*)(poss->FormSetForClique(nodeSet, true));
           if (crit->RemoveParallelization(CORECOMM)) {
@@ -429,7 +430,7 @@ void RealLoop::Parallelize(Comm comm)
             --i;
           }
           if (HasParallelCode(crit->m_posses[0])) {
-            throw;
+            LOG_FAIL("replacement for throw call");
           }
 #endif
         }
@@ -574,7 +575,7 @@ Cost RealLoop::Prop()
 	  if (!in2->IsSplit() && name == in2->GetInputNameStr(0)) {
 	    m_ownerPoss->PrintTransVecUp();
 	    m_posses.begin()->second->PrintTransVecUp();
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  }
 	}
       }
@@ -583,7 +584,7 @@ Cost RealLoop::Prop()
       for (auto in2 : m_inTuns) {
 	if (in != in2 && in2->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  if (in->Input(0) == in2->Input(0))
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	}
       }
     }

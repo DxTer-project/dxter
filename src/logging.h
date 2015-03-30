@@ -22,6 +22,7 @@
 #include <string>
 
 #ifndef LOGGING_H
+#define LOGGING_H
 
 using namespace std;
 
@@ -33,7 +34,7 @@ enum LogLevel { ALL, INFO, DEBUG, FATAL };
 #define LOG_I(msg) LogMessage(INFO, (msg))
 #define LOG_D(msg) LogMessage(DEBUG, (msg))
 #define LOG_F(msg) LogMessage(FATAL, (msg))
-#define LOG_FAIL(failMsg) LogMessage(FATAL, (failMsg)); throw;
+#define LOG_FAIL(failMsg) LogFailMessageAndThrow((failMsg));
 
 void OpenLog(string logName);
 void CloseLog();

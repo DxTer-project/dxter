@@ -66,7 +66,7 @@ void VMMul::PrintCode(IndStream &out)
 
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive vector matrix multiply\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (rowStride == NONUNITSTRIDE && colStride == NONUNITSTRIDE) {
@@ -128,7 +128,7 @@ Phase VMMul::MaxPhase() const
     case (LLDLAPRIMITIVELAYER):
       return NUMPHASES; 
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -139,30 +139,30 @@ void VMMul::Prop()
 
     if (*GetInputN(0) != *GetInputM(1)) {
       cout << "ERROR: Input dimensions for vmmul don't match\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     } else if (*GetInputM(0) != *GetInputM(2)) {
       cout << "ERROR: Input dimensions don't match\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     } else if (*GetInputM(2) != 1) {
       cout << "Error: VMMul result vector must have 1 row\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     } else if (*GetInputM(0) != 1) {
       cout << "Error: VMMul input vector must have 1 row\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     
     if (m_layer == LLDLAPRIMITIVELAYER) {
       if (*GetInputM(0) != 1 || *GetInputN(0) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive vector for vmmul must be 1 x 2\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
       if (*GetInputN(1) != GetVecRegWidth() || *GetInputM(1) != GetVecRegWidth()) {
 	cout << "ERROR: Primitive matrix must be 2 x 2\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
       if (*GetInputM(2) != 1) {
 	cout << "ERROR: Primitive vector must be 1 x 2\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     }
     m_cost = ZERO;
@@ -198,15 +198,15 @@ string VMMulLoopRef::GetType() const
     return "VMMulLoopRef N dim" + std::to_string((long long int) m_bs.GetSize());
   case(DIMM):
     cout << "Error: DIMN is not valid dimension for  VMMulLoopRef\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   case(DIMK):
     return "VMMulLoopRef K dim" + std::to_string((long long int) m_bs.GetSize());
   case(BADDIM):
     cout << "Error: VMMulLoopRef has BADDIM\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   cout << "No matching dimension case for VMMulLoopRef\n";
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 bool VMMulLoopRef::CanApply(const Node* node) const
@@ -227,7 +227,7 @@ bool VMMulLoopRef::CanApply(const Node* node) const
       return !((*vmmul->GetInputM(1)) <= m_bs.GetSize());
     } else {
       cout << "Error: No matching VMMulLoopRef for given dimension\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
   return false;
@@ -360,7 +360,7 @@ bool VMMulLowerLayer::CanApply(const Node* node) const
       }
     }
   } else {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 

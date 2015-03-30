@@ -42,7 +42,7 @@ Trans CharToTrans(char c)
   case ('C'):
     return CONJTRANS;
   default:
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -54,7 +54,7 @@ Tri CharToTri(char c)
   case('U'):
     return UPPER;
   default:
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -66,7 +66,7 @@ Side CharToSide(char c)
   case('R'):
     return RIGHT;
   default:
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -79,7 +79,7 @@ VecType CharToVecType(char c) {
   case('R'):
     return ROWVECTOR;
   default:
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -98,7 +98,7 @@ double BestFlopsPerCycle(Type type, ImplementationRuntimeMap &impTimes, double f
       }
       if (pctPeak > 100) {
 	cout << "pctPeak > 100\n";
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     }
   }
@@ -156,6 +156,6 @@ Type CharToType(char c)
   case('C'):
     return COMPLEX;
   default:
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }

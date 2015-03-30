@@ -112,7 +112,7 @@ Tunnel* LoopTunnel::GetSetTunnel()
   else if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT)
     tun = new LoopTunnel(SETTUNOUT);
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -129,10 +129,11 @@ void LoopTunnel::Prop()
 	NodeConnVecIter iter = m_children.begin();
 	for( ; iter != m_children.end(); ++iter) {
 	  if ((*iter)->m_num == 1) {
-	    if (found)
-	      throw;
-	    else
+	    if (found) {
+	      LOG_FAIL("replacement for throw call");
+	    } else {
 	      found = (*iter)->m_n;
+	    }
 	  }
 	}
       }
@@ -142,14 +143,14 @@ void LoopTunnel::Prop()
       {
 	cout << "update status not set for " << GetType() << " " << this << endl;
 	cout << "it's a " << TunTypeToStr(m_tunType) << endl;
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     if (m_tunType == POSSTUNOUT) {
       Node *in = m_inputs[m_inputs.size()-1]->m_n;
       if (!in->IsLoopTunnel())
-	throw;
+	LOG_FAIL("replacement for throw call");
       if (((LoopTunnel*)in)->m_tunType != POSSTUNIN)
-	throw;
+	LOG_FAIL("replacement for throw call");
     }
 
 
@@ -158,19 +159,19 @@ void LoopTunnel::Prop()
       for(ConnNum i = 0; i < m_inputs.size(); ++i) {
         cout << Input(i)->GetType() << " " << Input(i)->GetNameStr(0) << endl;
       }
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     if (m_tunType == POSSTUNOUT && !IsCombine() && m_inputs.size() != 2) {
       if (Input(1)->GetNodeClass() != LoopTunnel::GetClass())
-        throw;
+        LOG_FAIL("replacement for throw call");
       cout << "2 m_inputs.size() = " << m_inputs.size() << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
       Input(1)->Prop();
     }
     else if (m_tunType == POSSTUNIN && !IsSplit()) {
       if (Input(0)->GetNodeClass() != LoopTunnel::GetClass()) {
         cout << Input(0)->GetNodeClass() << endl;
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
     }
     m_cost = ZERO;
@@ -194,11 +195,11 @@ const Sizes* LoopTunnel::GetM(ConnNum num) const
     {
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return ((DLANode*)(Input(1)->Input(0)))->GetInputM(0);
     case (SETTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return GetRealTunnel()->GetInputM(0);
     case (POSSTUNIN):
       if (num == 0 || num == 1) {
@@ -206,9 +207,9 @@ const Sizes* LoopTunnel::GetM(ConnNum num) const
         return input->m_msizes;
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -219,11 +220,11 @@ const Sizes* LoopTunnel::GetN(ConnNum num) const
     //    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return ((DLANode*)(Input(1)->Input(0)))->GetInputN(0);
     case (SETTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return GetRealTunnel()->GetInputN(0);
     case (POSSTUNIN):
       if (num == 0 || num == 1) {
@@ -231,9 +232,9 @@ const Sizes* LoopTunnel::GetN(ConnNum num) const
         return input->m_nsizes;
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -245,11 +246,11 @@ const Sizes* LoopTunnel::LocalM(ConnNum num) const
     //    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return ((DLANode*)(Input(1)->Input(0)))->InputLocalM(0);
     case (SETTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return GetRealTunnel()->InputLocalM(0);
     case (POSSTUNIN):
       if (num == 0) {
@@ -260,9 +261,9 @@ const Sizes* LoopTunnel::LocalM(ConnNum num) const
         return InputLocalM(0);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -273,11 +274,11 @@ const Sizes* LoopTunnel::LocalN(ConnNum num) const
     //    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return ((DLANode*)(Input(1)->Input(0)))->InputLocalN(0);
     case (SETTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return GetRealTunnel()->InputLocalN(0);
     case (POSSTUNIN):
       if (num == 0) {
@@ -288,9 +289,9 @@ const Sizes* LoopTunnel::LocalN(ConnNum num) const
         return InputLocalN(0);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 #endif
@@ -303,11 +304,11 @@ const Sizes* LoopTunnel::Len(ConnNum num,Dim dim) const
     //    case (SETTUNIN):
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return ((DLANode*)(Input(1)->Input(0)))->InputLen(0,dim);
     case (SETTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return GetRealTunnel()->InputLen(0,dim);
     case (POSSTUNIN):
       if (num == 0) {
@@ -318,9 +319,9 @@ const Sizes* LoopTunnel::Len(ConnNum num,Dim dim) const
         return InputLen(0,dim);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -330,15 +331,15 @@ const Dim LoopTunnel::NumDims(ConnNum num) const
   {
     case (SETTUNIN):
       if (num > 0)
-	throw;
+	LOG_FAIL("replacement for throw call");
       return InputNumDims(0);
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return ((DLANode*)(Input(1)->Input(0)))->InputNumDims(0);
     case (SETTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return GetRealTunnel()->InputNumDims(0);
     case (POSSTUNIN):
       if (num == 0) {
@@ -346,9 +347,9 @@ const Dim LoopTunnel::NumDims(ConnNum num) const
 	return input->InputNumDims(0);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -358,11 +359,11 @@ const Sizes* LoopTunnel::LocalLen(ConnNum num,Dim dim) const
   {
     case (POSSTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return ((DLANode*)(Input(1)->Input(0)))->InputLocalLen(0,dim);
     case (SETTUNOUT):
       if (num > 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       return GetRealTunnel()->InputLocalLen(0,dim);
     case (POSSTUNIN):
       if (num == 0) {
@@ -370,9 +371,9 @@ const Sizes* LoopTunnel::LocalLen(ConnNum num,Dim dim) const
         return input->m_lsizes+dim;
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 #endif
@@ -389,7 +390,7 @@ unsigned int LoopTunnel::NumOutputs() const
       return 2;
     default:
       cout << "bad tunnel type\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
       return -1;
   } 
 }
@@ -397,7 +398,7 @@ unsigned int LoopTunnel::NumOutputs() const
 Name LoopTunnel::GetName(ConnNum num) const
 {
   if (num != 0 && num != 1)
-    throw;
+    LOG_FAIL("replacement for throw call");
   Name name;
   if (GetLoopType() == BLISLOOP) {
     if (m_tunType == SETTUNOUT)
@@ -425,7 +426,7 @@ Name LoopTunnel::GetOrigName() const
   else if (m_tunType == SETTUNIN)
     return ((LoopTunnel*)Input(0))->GetName(InputConnNum(0));
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 LoopInterface* LoopTunnel::GetMyLoop() const
@@ -440,7 +441,7 @@ LoopInterface* LoopTunnel::GetMyLoop() const
   else if (m_tunType == POSSTUNOUT)
     set = ((Tunnel*)Child(0))->m_pset;
   else 
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (!set->IsLoop()) {
     cout << "Loop Tunnel doesn't have Loop as PSet\n";
     if ( set->IsReal())
@@ -448,7 +449,7 @@ LoopInterface* LoopTunnel::GetMyLoop() const
     if ( set->IsShadow())
       cout << "is shadow\n";
     cout << TunTypeToStr(m_tunType) << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return dynamic_cast<LoopInterface*>(set);
 }
@@ -480,7 +481,7 @@ UpStat LoopTunnel::GetUpStat(Quad quad) const
       case(BR):
         return m_statBR;
       default:
-        throw;
+        LOG_FAIL("replacement for throw call");
     }
   }
   else if (m_tunType == POSSTUNIN) {
@@ -490,7 +491,7 @@ UpStat LoopTunnel::GetUpStat(Quad quad) const
     return ((LoopTunnel*)Child(0))->GetUpStat(quad);
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 bool LoopTunnel::AllFullyUpdated() const
@@ -506,7 +507,7 @@ bool LoopTunnel::QuadInUse(Quad quad, bool atEnd) const
   if (m_tunType == SETTUNIN) {
     Node *child = GetRealTunnel()->Child(0);
     if (!child->IsLoopTunnel())
-      throw;
+      LOG_FAIL("replacement for throw call");
     return ((LoopTunnel*)child)->QuadInUse(quad, atEnd);
   }
   else if (m_tunType == POSSTUNIN) {
@@ -519,7 +520,7 @@ bool LoopTunnel::QuadInUse(Quad quad, bool atEnd) const
   }
   else {
     cout << TunTypeToStr(m_tunType) << endl;
-    throw; 
+    LOG_FAIL("replacement for throw call"); 
   }
 }
 
@@ -534,7 +535,7 @@ LoopTunnel* LoopTunnel::GetMatchingOutTun() const
       return (LoopTunnel*)(m_pset->m_outTuns[FindInTunVec(m_pset->GetReal()->m_outTuns, realSetTunOut)]);
     }
   else if (m_tunType != POSSTUNIN) 
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   NodeConnVecConstIter iter = m_children.begin();
   for(; iter != m_children.end(); ++iter) {
@@ -546,7 +547,7 @@ LoopTunnel* LoopTunnel::GetMatchingOutTun() const
     }
   }
   cout << "Didn't find matching out tun\n";
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 LoopTunnel* LoopTunnel::GetMatchingInTun() const
@@ -560,7 +561,7 @@ LoopTunnel* LoopTunnel::GetMatchingInTun() const
       return (LoopTunnel*)(m_pset->m_inTuns[FindInTunVec(m_pset->GetReal()->m_inTuns, realSetTunIn)]);
     }
   else if (m_tunType != POSSTUNOUT)
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   const Node *in = Input(1);
   if (in->IsTunnel(POSSTUNIN) && in->IsLoopTunnel()) {
@@ -568,7 +569,7 @@ LoopTunnel* LoopTunnel::GetMatchingInTun() const
   }
   else {
     cout << "Didn't find matching in tun\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -597,7 +598,7 @@ bool LoopTunnel::InputIsTemp() const
     return false;
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 LoopType LoopTunnel::GetLoopType() const
@@ -605,17 +606,17 @@ LoopType LoopTunnel::GetLoopType() const
   if (m_tunType == POSSTUNIN) {
     const Node *in = Input(0);
       if (!in->IsLoopTunnel())
-        throw;
+        LOG_FAIL("replacement for throw call");
     return ((LoopTunnel*)in)->GetLoopType();
   }
   else if (m_tunType == POSSTUNOUT) {
     const Node *child = Child(0);
     if (!child->IsLoopTunnel())
-      throw;
+      LOG_FAIL("replacement for throw call");
     return ((LoopTunnel*)child)->GetLoopType();
   }
   if (!m_pset) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return (dynamic_cast<LoopInterface*>(m_pset))->GetType();
 }
@@ -654,7 +655,7 @@ void LoopTunnel::StartFillingSizes()
     return;
 #if TWOD
   if (m_msizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   m_msizes = new Sizes;
   m_nsizes = new Sizes;
 #if DODM
@@ -663,7 +664,7 @@ void LoopTunnel::StartFillingSizes()
 #endif
 #else
   if (m_sizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   Dim numDims = InputNumDims(0);
   if (numDims) {
     m_sizes = new Sizes[numDims]();
@@ -685,16 +686,16 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
   if (!m_pset->IsReal())
     return;
   /*  if (!execNum) {
-    throw;
+    LOG_FAIL("replacement for throw call");
     }*/
   if (!m_msizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   const DLANode *input = (DLANode*)Input(0);
   ConnNum num = InputConnNum(0);
   const Sizes *ms = input->GetM(num);
   if (!ms) {
     cout << "!ms\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   const Sizes *ns = input->GetN(num);
 #if DODM
@@ -730,7 +731,7 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     cout << "outer loop bs " << loop->GetBS() << endl;
     cout << "inner loop bs " << GetMyLoop()->GetBS() << endl;
     
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   const Size m = (*ms)[execNum];
   const Size n = (*ns)[execNum];
@@ -754,7 +755,7 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     return;
 
   if (!m_sizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   const DLANode *input = (DLANode*)Input(0);
   ConnNum num = InputConnNum(0);
   Dim numDims = input->NumDims(num);
@@ -762,13 +763,13 @@ void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsign
     const Sizes *sizes = input->Len(num,i);
     if (!sizes) {
       cout << "!sizes\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     unsigned int length = sizes->NumSizes();
     if (length <= execNum) 
       {
 	cout << sizes->NumSizes() << endl;
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     const Size size = (*sizes)[execNum];
     m_sizes[i].AddRepeatedSizes(size, numIters, parFactor);
@@ -794,7 +795,7 @@ void LoopTunnel::UpdateLocalSizes()
     return;
 
   if (!m_sizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
 
   const DLANode *input = (DLANode*)Input(0);
   ConnNum num = InputConnNum(0);
@@ -854,7 +855,7 @@ bool LoopTunnel::Overwrites(const Node *input, ConnNum num) const
 bool LoopTunnel::KeepsInputVarLive(Node *input, ConnNum numIn, ConnNum &numOut) const
 {
   if (m_inputs.empty())
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (Input(m_inputs.size()-1) == input && InputConnNum(m_inputs.size()-1) == numIn) {
     numOut = numIn;
     return true;
@@ -870,7 +871,7 @@ string LoopTunnel::GetLoopLevel(int offset) const
   int level = 0;
   Poss *poss = m_poss;
   if (!poss)
-    throw;
+    LOG_FAIL("replacement for throw call");
   BasePSet *set = poss->m_pset;
   while (set) {
     if (set->IsLoop()) {
@@ -888,14 +889,14 @@ string LoopTunnel::GetLoopLevel(int offset) const
 void LoopTunnel::MigrateFromOldTun(Tunnel *tunIn)
 {
   if (!tunIn->IsLoopTunnel())
-    throw;
+    LOG_FAIL("replacement for throw call");
   LoopTunnel *tun = (LoopTunnel*)tunIn;
   Tunnel::MigrateFromOldTun(tun);
   if (m_tunType != tun->m_tunType)
-    throw;
+    LOG_FAIL("replacement for throw call");
 #if TWOD
   if (m_msizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   m_msizes = tun->m_msizes;
   tun->m_msizes = NULL;
   m_nsizes = tun->m_nsizes;
@@ -908,7 +909,7 @@ void LoopTunnel::MigrateFromOldTun(Tunnel *tunIn)
 #endif
 #else
   if (m_sizes)
-    throw;
+    LOG_FAIL("replacement for throw call");
   m_sizes = tun->m_sizes;
   tun->m_sizes = NULL;
   m_lsizes = tun->m_lsizes;

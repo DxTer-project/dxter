@@ -37,7 +37,7 @@ bool MVMulPackOutput::CanApply(const Node* node) const {
     return !(mvmul->InputMIsMultipleOfVecRegWidth(0))
       && mvmul->GetInputM(0) > 0;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void MVMulPackOutput::Apply(Node* node) const {

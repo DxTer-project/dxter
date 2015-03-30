@@ -37,7 +37,7 @@ bool ScalarMulHorizontalPackToMultipleOfMu::CanApply(const Node* node) const {
       && smmul->GetInputNumCols(1) > 1
       && smmul->GetInputNumRows(1) > 1;
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void ScalarMulHorizontalPackToMultipleOfMu::Apply(Node* node) const {

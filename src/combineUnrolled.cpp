@@ -62,14 +62,14 @@ void CombineUnrolled::Prop()
     
     if (m_tunType == POSSTUNOUT) {
       if (m_inputs.size() != m_unrollFactor+1)
-	throw;
+	LOG_FAIL("replacement for throw call");
       
       if (Input(m_unrollFactor)->GetNodeClass() != SplitUnrolled::GetClass())
-	throw;
+	LOG_FAIL("replacement for throw call");
     }
 
     if (!m_unrollFactor)
-      throw;
+      LOG_FAIL("replacement for throw call");
 
     m_cost = ZERO;
   }
@@ -84,7 +84,7 @@ const DataTypeInfo& CombineUnrolled::DataType(ConnNum num) const
 const Sizes* CombineUnrolled::GetM(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->GetInputM(0);
   }
@@ -99,7 +99,7 @@ const Sizes* CombineUnrolled::GetM(ConnNum num) const
 const Sizes* CombineUnrolled::GetN(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->GetInputN(0);
   }
@@ -115,7 +115,7 @@ const Sizes* CombineUnrolled::GetN(ConnNum num) const
 const Sizes* CombineUnrolled::LocalM(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
     DLANode *possTunIn = (DLANode*)(possTunOut->Input(m_unrollFactor));
@@ -133,7 +133,7 @@ const Sizes* CombineUnrolled::LocalM(ConnNum num) const
 const Sizes* CombineUnrolled::LocalN(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->InputLocalN(0);
   }
@@ -152,7 +152,7 @@ const Sizes* CombineUnrolled::LocalN(ConnNum num) const
 const Dim CombineUnrolled::NumDims(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->NumDims(0);
   }
@@ -167,7 +167,7 @@ const Dim CombineUnrolled::NumDims(ConnNum num) const
 const Sizes* CombineUnrolled::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(m_unrollFactor)->Input(0)))->Len(0,dim);
   }
@@ -182,7 +182,7 @@ const Sizes* CombineUnrolled::Len(ConnNum num, Dim dim) const
 const Sizes* CombineUnrolled::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == SETTUNOUT) {
     DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
     DLANode *possTunIn = (DLANode*)(possTunOut->Input(m_unrollFactor));
@@ -203,7 +203,7 @@ const Sizes* CombineUnrolled::LocalLen(ConnNum num, Dim dim) const
 Name CombineUnrolled::GetName(ConnNum num) const
 {
   if (num > 0)
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (m_tunType == POSSTUNOUT)
     return ((SplitUnrolled*)Input(m_unrollFactor))->GetOrigName();
   else
@@ -227,7 +227,7 @@ else */
     tun = new CombineUnrolled(m_partDim, m_unrollFactor, SETTUNOUT);
 #endif
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -241,10 +241,10 @@ void CombineUnrolled::PrintCode(IndStream &out)
 #if TWOD
   LoopType loopType = GetLoopType();
   if (loopType == ELEMLOOP) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 #else
-  throw;
+  LOG_FAIL("replacement for throw call");
 #endif
 }
 

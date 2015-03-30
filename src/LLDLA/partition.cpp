@@ -67,7 +67,7 @@ void Partition::Prop() {
 Name Partition::GetName(ConnNum num) const {
   if (num > 1) {
     cout << "num > 1 in Partition::GetName" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (num == 0) {
@@ -239,7 +239,7 @@ ConnNum Partition::NumOutputs() const {
 const DataTypeInfo& Partition::DataType(ConnNum num) const {
   if (num > 1) {
     cout << "Error: argument to DataType is too large\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   if (num == 0) {
     return *m_startInfo;
@@ -270,7 +270,7 @@ void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging) {
 const Sizes* Partition::GetM(ConnNum num) const {
   if (num > 1) {
     cout << "Bad connection number in Partition::GetM" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (m_partType == HORIZONTAL) {
@@ -282,13 +282,13 @@ const Sizes* Partition::GetM(ConnNum num) const {
       return m_endSizes;
     }
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 const Sizes* Partition::GetN(ConnNum num) const {
   if (num > 1) {
     cout << "Bad connection number in partition::GetN" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   if (m_partType == VERTICAL) {
@@ -316,7 +316,7 @@ bool PartitionLowerLayer::CanApply(const Node *node) const {
     return true;
   }
   cout << "Error: Applying PartitionLowerLayer to non-Partition node\n";
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void PartitionLowerLayer::Apply(Node *node) const {

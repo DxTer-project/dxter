@@ -58,7 +58,7 @@ inline Comm GetSubComm(Comm comm)
   switch(comm)
     {
 #if DOELEM
-      throw;
+      LOG_FAIL("replacement for throw call");
 #elif DOSM||DOSQM
 #if NUMPROCS>1
     case(ALLPROCCOMM):
@@ -75,9 +75,9 @@ inline Comm GetSubComm(Comm comm)
       return L1COMM;
 #endif
     case(CORECOMM):
-      throw;
+      LOG_FAIL("replacement for throw call");
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -113,7 +113,7 @@ inline unsigned int NumCoresInComm(Comm comm)
     case(CORECOMM):
       return 1;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 
@@ -138,7 +138,7 @@ inline unsigned int NumGroupsInComm(Comm comm)
       case(CORECOMM):
         return 1;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 }
 

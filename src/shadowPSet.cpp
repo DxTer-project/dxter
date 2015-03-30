@@ -35,7 +35,7 @@ ShadowPSet::ShadowPSet()
   : m_realPSet(NULL)
 {
 #if !USESHADOWS
-  throw;
+  LOG_FAIL("replacement for throw call");
 #endif
 }
 
@@ -56,19 +56,19 @@ Cost ShadowPSet::Prop()
     return m_realPSet->m_cost;
 
   if (!m_realPSet)
-    throw;
+    LOG_FAIL("replacement for throw call");
 
   if (!m_realPSet->IsReal())
-    throw;
+    LOG_FAIL("replacement for throw call");
 
   if (m_realPSet->IsLoop() != IsLoop()) {
     cout << "real and shadow loop status don't agree\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   
 
   if (m_inTuns.size() != m_realPSet->m_inTuns.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
 
 
   //BAM Par + check for > 1
@@ -79,7 +79,7 @@ Cost ShadowPSet::Prop()
       cout << in->GetInputNameStr(0) << endl;
       cout << m_realPSet->InTun(i)->GetInputNameStr(0) << endl;
       
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     
 
@@ -87,11 +87,11 @@ Cost ShadowPSet::Prop()
       Node *child = in->m_children[j]->m_n;
       if (child->m_inputs.size() != 1) {
         cout << "child->m_inputs.size() != 1\n";
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
       if (child->Input(0) != in) {
         cout << "child->m_inputs[0]->m_n != in\n";
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
     }
   }
@@ -102,18 +102,18 @@ Cost ShadowPSet::Prop()
       Node *parent = out->Input(j);
       if (parent->m_children.size() != 1) {
         cout << "parent->m_children.size() != 1\n";
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
       if (parent->m_children[0]->m_n != out) {
         cout << "parent->m_children[0]->m_n != out\n";
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
     }
   }
   
   if (!IsTopLevel() && !m_ownerPoss) {
     cout << "no owner\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   for(unsigned int i = 0; i < m_inTuns.size(); ++i) {
@@ -149,7 +149,7 @@ void ShadowPSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging,
 #if DOBLIS
 bool PSet::RemoveParallelization(Comm comm)
 {
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 

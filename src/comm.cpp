@@ -53,7 +53,7 @@ string CommToStr(Comm comm)
     case(CORECOMM):
       return "Seq";
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -86,10 +86,10 @@ bool CommAllowedWithin(Comm comm1, Comm comm2)
       return true;
       
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 #else
-  throw;
+  LOG_FAIL("replacement for throw call");
 #endif
 }
 
@@ -99,19 +99,19 @@ Comm MaxComm(Comm comm1, Comm comm2)
   switch(comm1)
   {
 #if DOELEM
-      throw;
+      LOG_FAIL("replacement for throw call");
 #elif DOSM||DOSQM
 #if NUMPROCS>1
     case(ALLPROCCOMM):
       if (comm1 == ALLL2COMM)
-        throw;
+        LOG_FAIL("replacement for throw call");
       else
         return ALLPROCCOMM;
 #endif //NUMPROCS>1
 #if NUML2PERPROC>1
     case (ALLL2COMM):
       if (comm1 == ALLPROCCOMM)
-        throw;
+        LOG_FAIL("replacement for throw call");
       else
         return ALLL2COMM;
 #endif //NUML2PERPROC > 1
@@ -123,7 +123,7 @@ Comm MaxComm(Comm comm1, Comm comm2)
         return PROCCOMM;
     case(L2COMM):
       if (comm2 == ALLL2COMM)
-        throw;
+        LOG_FAIL("replacement for throw call");
       else if (comm2 == ALLPROCCOMM
                || comm2 == PROCCOMM)
         return comm2;
@@ -146,12 +146,12 @@ Comm MaxComm(Comm comm1, Comm comm2)
       // all codes), so this workaround is horribly nasty so we can print SOMETHING
       // BAM TODO - fix this somehow
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
 #endif
     case(CORECOMM):
       return comm2;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 

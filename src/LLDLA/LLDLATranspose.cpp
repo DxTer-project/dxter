@@ -85,7 +85,7 @@ bool LLDLATransposeLowerLayer::CanApply(const Node *node) const
     return true;
   }
   cout << "Error: Applying LLDLATransposeLowerLayer to non LLDLATranspose node\n";
-  throw;
+  LOG_FAIL("Replacement for call to throw;");
 }
 
 void LLDLATransposeLowerLayer::Apply(Node *node) const
@@ -126,7 +126,7 @@ void LLDLATranspose::BuildDataTypeCache()
 const Sizes* LLDLATranspose::GetN(ConnNum num) const
 {
   if (num > 0) {
-    throw;
+    LOG_FAIL("Replacement for call to throw;");
   }
   return GetInputM(0);
 }
@@ -134,7 +134,7 @@ const Sizes* LLDLATranspose::GetN(ConnNum num) const
 const Sizes* LLDLATranspose::GetM(ConnNum num) const
 {
   if (num > 0) {
-    throw;
+    LOG_FAIL("Replacement for call to throw;");
   }
   return GetInputN(0);
 }

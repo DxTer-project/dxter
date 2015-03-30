@@ -48,7 +48,7 @@ Name Recombine::GetName(ConnNum num) const
 {
   if (num != 0) {
     cout << "Error: Invalid connection number for Recombine::GetName" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return GetInputName(2);
 }
@@ -56,7 +56,7 @@ Name Recombine::GetName(ConnNum num) const
 const Sizes* Recombine::GetM(ConnNum num) const {
   if (num != 0) {
     cout << "Error: Invalid connection number for Recombine::GetM" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return GetInputM(2);
 }
@@ -64,7 +64,7 @@ const Sizes* Recombine::GetM(ConnNum num) const {
 const Sizes* Recombine::GetN(ConnNum num) const {
   if (num != 0) {
     cout << "Error: Invalid connection number for Recombine::GetN" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return GetInputN(2);
 }
@@ -85,7 +85,7 @@ const DataTypeInfo& Recombine::DataType(ConnNum num) const
 {
   if (num != 0) {
     cout << "Error: num > 0 in Recombine::DataType\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return InputDataType(2);
 }
@@ -108,7 +108,7 @@ bool RecombineLowerLayer::CanApply(const Node *node) const
   cout << "Error: Applying RecombineLowerLayer to non-Recombine node\n";
   cout << "Node class is: " << node->GetClass() << endl;
   cout << "GetNodeClass is: " << node->GetNodeClass() << endl;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void RecombineLowerLayer::Apply(Node *node) const

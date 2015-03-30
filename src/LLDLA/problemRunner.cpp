@@ -44,7 +44,7 @@ std::string LLDLAPhaseString(LLDLAPhase phase) {
   case(LLDLAPRIMPHASE):
     return "LLDLA primitive phase";
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void RunPhase(Universe* uni, int numIters, LLDLAPhase phase) {

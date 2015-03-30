@@ -39,7 +39,7 @@ void LocalInput::Prop() {
 
     if (!IsContiguous()) {
       cout << "ERROR: Local inputs must be contiguous in memory" << endl;
-      throw;
+      LOG_FAIL("Replacement for call to throw;");
     }
     m_cost = 0;
   }

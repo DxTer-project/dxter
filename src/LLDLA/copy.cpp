@@ -48,7 +48,7 @@ void Copy::Prop() {
       cout << "Input 1 # rows = " << GetInputNumRows(1) << endl;
       cout << "Input 1 # cols = " << GetInputNumCols(1) << endl;
 
-      throw;
+      LOG_FAIL("Replacement for call to throw;");
     }
     m_cost = GetInputM(0)->SumProds11(*GetInputN(0));
   }

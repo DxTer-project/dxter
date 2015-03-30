@@ -28,10 +28,10 @@ void HorizontalUnpack::Prop() {
     Unpack::Prop();
 
     if (GetInputNumRows(0) != GetInputNumRows(1)) {
-      throw;
+      LOG_FAIL("Replacement for call to throw;");
     }
     if (GetInputNumCols(0) <= GetInputNumCols(1)) {
-      throw;
+      LOG_FAIL("Replacement for call to throw;");
     }
   }
 }

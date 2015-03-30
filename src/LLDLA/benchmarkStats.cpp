@@ -23,6 +23,8 @@
 
 #if DOLLDLA
 
+#include "driverUtils.h"
+
 BenchmarkStats::BenchmarkStats(string name) {
   m_name = unique_ptr<string>(new string(NoWhitespace(name)));
   m_problemInstances = unique_ptr<vector<ProblemInstanceStats*>>(new vector<ProblemInstanceStats*>());
@@ -59,7 +61,7 @@ string BenchmarkStats::CreateThisBenchmarksDirectory(string benchmarkDirName) {
     mkdir(benchmarkPath->c_str(), 0700);
   } else {
     cout << "ERROR: " << benchmarkDirName << " already exists!" << endl;
-    throw;
+    LOG_FAIL("Replacement for call to throw;");
   }
   return *benchmarkPath;
 }
@@ -92,7 +94,7 @@ string BenchmarkStats::CreateImplCSVDirectory(string benchmarkDirPath) {
     mkdir(implDirPath->c_str(), 0700);
   } else {
     cout << "ERROR: " << implDirPath << " already exists!" << endl;
-    throw;
+    LOG_FAIL("Replacement for call to throw;");
   }
   return *implDirPath;
 }

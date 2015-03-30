@@ -57,12 +57,12 @@ void MMul::PrintCode(IndStream &out)
       return;
     }
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 
   if (m_layer != LLDLAPRIMITIVELAYER) {
     cout << "ERROR: Attempt to generate code from non-primitive MMul\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 
   const DataTypeInfo &inInfo = InputDataType(2);
@@ -94,7 +94,7 @@ void MMul::PrintRowStride(IndStream &out)
       InputDataType(2).m_rowStrideVar << " );\n";
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 void MMul::PrintColStride(IndStream &out)
@@ -109,7 +109,7 @@ void MMul::PrintColStride(IndStream &out)
       InputDataType(2).m_rowStrideVar << " );\n";
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 // Currently only handles the case where alpha = beta = 1.0
@@ -128,7 +128,7 @@ void MMul::PrintGeneralStride(IndStream &out)
       InputDataType(2).m_colStrideVar << ");\n";
   }
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 void MMul::Prop()
@@ -138,7 +138,7 @@ void MMul::Prop()
 
     if (m_layer != LLDLAPRIMITIVELAYER) {
       cout << "ERROR: MMul appears in layer " <<  LayerNumToStr(m_layer) << "\n" ;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     
     if (*GetInputM(0) != m_regWidth || *GetInputN(0) != m_regWidth) 

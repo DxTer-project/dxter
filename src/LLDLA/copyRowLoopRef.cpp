@@ -36,7 +36,7 @@ bool CopyRowLoopRef::CanApply(const Node* node) const {
     return *(copy->GetInputM(0)) > 1 &&
       *(copy->GetInputN(0)) > 1;
   }
-  throw;
+  LOG_FAIL("Replacement for call to throw;");
 }
 
 void CopyRowLoopRef::Apply(Node* node) const {

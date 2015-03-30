@@ -32,11 +32,11 @@ void FMAdd::Prop()
 // are registers
 
 /*    if (*GetInputM(0) != *GetInputM(1) || *GetInputM(0) != *GetInputM(2)) {
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 
     if (*GetInputN(0) != *GetInputN(1) || *GetInputN(0) != *GetInputN(2)) {
-      throw;
+      LOG_FAIL("replacement for throw call");
       }*/
 
     m_cost = 0;

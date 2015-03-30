@@ -50,7 +50,7 @@ Cost ShadowLoop::Prop()
 {
   if (!(BasePSet::m_flags & SETHASPROPEDFLAG)) {
     if (!m_realPSet || !m_realPSet->IsLoop())
-      throw;
+      LOG_FAIL("replacement for throw call");
     return IntLoop<ShadowPSet>::Prop();
   }
   else

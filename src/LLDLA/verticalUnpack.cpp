@@ -28,10 +28,10 @@ void VerticalUnpack::Prop() {
     Unpack::Prop();
 
     if (GetInputNumCols(0) != GetInputNumCols(1)) {
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     if (GetInputNumRows(0) <= GetInputNumRows(1)) {
-      throw;
+      LOG_FAIL("replacement for throw call");
       }
   }
 }

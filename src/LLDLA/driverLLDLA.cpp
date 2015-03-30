@@ -23,7 +23,6 @@
 #include "blasExamples.h"
 #include "costModel.h"
 #include "driverUtils.h"
-#include "logging.h"
 #include "miscellaneousExamples.h"
 #include "multiBLASExamples.h"
 #include "nodeTestExamples.h"

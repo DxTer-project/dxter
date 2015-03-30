@@ -29,7 +29,7 @@ Pack::Pack(Layer layer) {
 
 const DataTypeInfo& Pack::DataType(ConnNum num) const {
   if (num != 0) {
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return InputDataType(1);
 }
@@ -73,7 +73,7 @@ void Pack::PrintCode(IndStream& out) {
 void Pack::SanityCheckReceivingDimension() {
   if (IsInputScalar(1)) {
     cout << "Error: Trying to pack into a scalar" << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 

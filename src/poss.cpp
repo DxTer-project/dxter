@@ -71,7 +71,7 @@ Poss::Poss(Tunnel *tunn)
 {
   if (tunn->m_tunType != POSSTUNOUT) {
     cout << "tunn->m_tunType != POSSTUNOUT\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   m_num = M_count;
   m_parent = 0;
@@ -174,7 +174,7 @@ void Poss::MarkInsane(bool wrongPhase)
   if (!wrongPhase) {
     cout << "!!!!!!!wrongPhase but is insane\n";
     this->PrintTransVec();
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   m_flags &= ~POSSISSANEFLAG;
 }
@@ -272,7 +272,7 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
     //    cout << "node " << oldNode << " to " << newNode << endl;
     newNode->Duplicate(oldNode,false, possMerging);
     if (newNode->m_inputs.size() != oldNode->m_inputs.size())
-      throw;
+      LOG_FAIL("replacement for throw call");
     m_possNodes.push_back(newNode);
     newNode->m_poss = this;
     map[oldNode] = newNode;
@@ -285,10 +285,10 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
 #if USESHADOWS
       newSet = set->GetNewShadow();
 #else
-      throw;
+      LOG_FAIL("replacement for throw call");
 #endif
       if (set->IsLoop() != newSet->IsLoop())
-        throw;
+        LOG_FAIL("replacement for throw call");
     }
     else {
       newSet = set->GetNewInst();
@@ -307,12 +307,12 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
     Node *node = map[*iter];
     if (!node) {
       cout << "!node in dup\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     m_inTuns.push_back(node);
     if (!(*iter)->m_poss) {
       cout << "!tunnel->m_poss for " << *iter << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
   iter = poss->m_outTuns.begin();
@@ -321,11 +321,11 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
     Node *node = map[*iter];
     if (!(*iter)->m_poss) {
       cout << "!tunnel>m_poss\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     if (!node) {
       cout << "!node in dup\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     m_outTuns.push_back(node);
   }
@@ -354,7 +354,7 @@ void Poss::AddNode(Node *node)
   InvalidateHash();
   if (node->m_poss) {
     cout << "node already has a poss\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   node->m_poss = this;
 #if 0
@@ -362,7 +362,7 @@ void Poss::AddNode(Node *node)
   for(; iter != m_possNodes.end(); ++iter) {
     if (*iter == node)  {
       cout << "node already in my list\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
 #endif
@@ -384,7 +384,7 @@ void Poss::TakeOverNode(Node *node)
 {
   Poss *oldOwner = node->m_poss;
   if (!oldOwner)
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   bool found = false;
   NodeVecIter iter = oldOwner->m_possNodes.begin();
@@ -395,7 +395,7 @@ void Poss::TakeOverNode(Node *node)
     }
   }
   if (!found)
-    throw;
+    LOG_FAIL("replacement for throw call");
   node->m_poss = NULL;
   AddNode(node);
 }
@@ -415,12 +415,12 @@ void Poss::AddPSet(BasePSet *pset, bool expectToBeNew, bool addTuns)
   bool isNew = AddElemToVec(m_sets,pset,false);
   if (!isNew && expectToBeNew) {
     cout << "didn't add\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   else {
     if (pset->m_ownerPoss && pset->m_ownerPoss != this) {
       cout << "already has an owner!\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     pset->m_ownerPoss = this;
     if (addTuns) {
@@ -469,7 +469,7 @@ void Poss::DeleteNode(Node *node)
     ++i;
   }
   printf("node %s %p not found in %p\n", node->GetType().c_str(), node, this);
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void Poss::DeleteChildAndCleanUp(Node *output,
@@ -487,21 +487,21 @@ void Poss::DeleteChildAndCleanUp(Node *output,
     }
   if (!found) {
     cout << "DeleteChildAndCleanUp called on wrong poss!\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   if (output->IsLoopTunnel() && !handleTunnelsAsNormalNodes) {
     if (!output->IsTunnel(SETTUNIN)) {
       if (!goThroughTunnels) {
         cout << "calling DeleteChildAndCleanUp on Tunnel!\n";
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
       else if (output->GetNodeClass() == LoopTunnel::GetClass()){
         if (!((LoopTunnel*)output)->m_pset->IsReal())
-          throw;
+          LOG_FAIL("replacement for throw call");
         ((RealLoop*)((LoopTunnel*)output)->m_pset)->TryToDeleteLoopTunnelSetAndCleanUp((LoopTunnel*)output);
       }
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     }
   }
   
@@ -513,7 +513,7 @@ void Poss::DeleteChildAndCleanUp(Node *output,
         && !input->IsTunnel()
         && !output->IsTunnel())
     {
-      throw;
+      LOG_FAIL("replacement for throw call");
       cout << "input->m_poss != output->m_poss\n";
     }
     input->RemoveChild(output,outs->m_num);
@@ -532,7 +532,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
   if (node->IsTunnel(POSSTUNIN) && !start && !node->m_poss) {
     if (node->m_poss && node->m_poss != this) {
       cout << "node already on a poss\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     if (AddElemToVec(vec, node, false)) {
       m_inTuns.push_back(node);
@@ -541,7 +541,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
           node->m_poss->RemoveFromGraphNodes(node);
         }
         else
-          throw;
+          LOG_FAIL("replacement for throw call");
       }
       node->SetPoss(this);
     }
@@ -567,7 +567,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
             poss->RemoveFromGraphNodes(out);
           }
           else
-            throw;
+            LOG_FAIL("replacement for throw call");
         }
         out->SetPoss(this);
       }
@@ -584,7 +584,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
               node->m_poss->RemoveFromGraphNodes(node);
             }
             else
-              throw;
+              LOG_FAIL("replacement for throw call");
           }
           (*iter)->SetPoss(this);
         }
@@ -600,7 +600,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
           node->m_poss->RemoveFromGraphNodes(node);
         }
         else
-          throw;
+          LOG_FAIL("replacement for throw call");
       }
       node->SetPoss(this);
       NodeConnVecIter iter = node->m_inputs.begin();
@@ -637,7 +637,7 @@ bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
       for(; transIter != (*iter).second->end(); ++transIter) {
         const Transformation *trans = *transIter;
         if (!trans->IsSingle())
-          throw;
+          LOG_FAIL("replacement for throw call");
         if (((SingleTrans*)trans)->CanApply(node)) {
           didSomething = true;
           InvalidateHash();
@@ -743,7 +743,7 @@ Cost Poss::Prop()
       cout << node->GetType() << endl;
       cout << node->GetNameStr(0) << endl;
       cout << node->GetNodeClass() << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
   //  PSetVecIter setIter = m_sets.begin();
@@ -757,7 +757,7 @@ Cost Poss::Prop()
     cout << m_inTuns.size() << endl;
     cout << m_pset->m_inTuns.size() << endl;
     cout << this << " " << m_pset << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   
   
@@ -767,7 +767,7 @@ Cost Poss::Prop()
 void Poss::Cull(Phase phase)
 {
   if (!IsSane())
-    throw;
+    LOG_FAIL("replacement for throw call");
   NodeVecIter nodeIter = m_possNodes.begin();
   for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
     (*nodeIter)->Cull(phase);
@@ -786,7 +786,7 @@ void Poss::PrintTransVec()
     cout << (*iter)->GetType() << endl;
   if (m_sets.size()) {
     //    cout << "not supported for hierarchical posses\n";
-    //    throw;
+    //    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -824,7 +824,7 @@ void Poss::RemoveConnectionToSet()
  if (m_pset) {
  cout << "m_pset is set\n";
  cout << m_pset << endl;
- throw;
+ LOG_FAIL("replacement for throw call");
  }
  for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
  Node *tunIn = InTun(i);
@@ -849,7 +849,7 @@ void Poss::RemoveConnectionToSet()
  while (tunOut->m_inputs.size() > 1 && !tunOut->IsLoopTunnel()) {
  if (tunOut->m_children.size()) {
  cout << "tunOut has children\n";
- throw;
+ LOG_FAIL("replacement for throw call");
  }
  cout << "splitting out\n";
  Tunnel *tun = (Tunnel*)(tunOut->GetNewInst());
@@ -883,7 +883,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
   for (auto pset : m_sets) {
     if (pset->m_ownerPoss != this) {
       cout << "bad owner\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     if (pset->IsReal())
       didMerge |= ((RealPSet*)pset)->MergePosses(simplifiers, cullFunc);
@@ -995,18 +995,18 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
   unsigned int size = m_sets.size();
   if (left >= size || right >= size) {
     cout << "left or right is too big\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   if (left >= right) {
     cout << "left >= right\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   *leftSet = m_sets[left];
   *rightSet = m_sets[right];
   if ((*leftSet)->m_ownerPoss != this ||
       (*rightSet)->m_ownerPoss != this) {
     cout << "Bad owner\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   
 #if PRINTTRACKING
@@ -1025,14 +1025,14 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
     m_sets.erase(m_sets.begin()+left);
     if (*(m_sets.begin()+right-1) != *rightSet) {
       cout << "error;";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     m_sets.erase(m_sets.begin()+right-1);
     
     
     ShadowPSet *shadow = merged->GetNewShadowDup(this);
     if (shadow->IsLoop() != merged->IsLoop())
-      throw;
+      LOG_FAIL("replacement for throw call");
 #if PRINTTRACKING
     cout << "reusing " << merged << endl;
     cout << "forming shadow " << shadow << endl;
@@ -1040,23 +1040,23 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
     if (merged->m_mergeLeft != (*leftSet)->GetReal()) {
       if (merged->m_mergeRight != (*leftSet)->GetReal() ||
 	  merged->m_mergeLeft != (*rightSet)->GetReal())
-	throw;
+	LOG_FAIL("replacement for throw call");
       BasePSet *tmp = *rightSet;
       *rightSet = *leftSet;
       *leftSet = tmp;
     }
     if (merged->m_leftInMap.size() != (*leftSet)->m_inTuns.size()) {
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     if (merged->m_rightInMap.size() != (*rightSet)->m_inTuns.size())
-      throw;
+      LOG_FAIL("replacement for throw call");
     if (merged->m_leftOutMap.size() != (*leftSet)->m_outTuns.size()) {
       cout << merged->m_leftOutMap.size() << endl;
       cout << (*leftSet)->m_outTuns.size() << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     if (merged->m_rightOutMap.size() != (*rightSet)->m_outTuns.size())
-      throw;
+      LOG_FAIL("replacement for throw call");
     
     TunVecIter tunIter = (*leftSet)->m_inTuns.begin();
     {
@@ -1071,21 +1071,21 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
 	  if (conn->m_n->IsTunnel()) {
 	    Tunnel *tun = (Tunnel*)(conn->m_n);
 	    if (tun->m_pset == *leftSet)
-	      throw;
+	      LOG_FAIL("replacement for throw call");
 	    if (tun->m_pset == *rightSet) {
 	      cout << tun->m_pset << endl;
 	      cout << *leftSet << " " << (*leftSet)->IsReal() << endl;
 	      cout << *rightSet << " " << (*rightSet)->IsReal() << endl;
-	      throw;
+	      LOG_FAIL("replacement for throw call");
 	    }
 	    if (tun->m_pset == shadow)
-	      throw;
+	      LOG_FAIL("replacement for throw call");
             
 	  }
 	}
 	delete conn;
 	if (!tun->m_inputs.empty())
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	RemoveFromGraphNodes(tun);
       }
       
@@ -1104,13 +1104,13 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
 	    if (tun->m_pset == *leftSet || tun->m_pset == *rightSet
 		|| tun->m_pset == shadow)
 	      {
-		throw;
+		LOG_FAIL("replacement for throw call");
 	      }
 	  }
 	}
 	delete conn;
 	if (!tun->m_inputs.empty())
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	RemoveFromGraphNodes(tun);
       }
       
@@ -1125,7 +1125,7 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
 	  for (int i = 0; i < shadow->m_inTuns.size(); ++i)
 	    cout << shadow->m_inTuns[i]->m_inputs.size() << endl;
 	  cout << "left\n";
-	  throw;
+	  LOG_FAIL("replacement for throw call");
 	}
       
     }
@@ -1140,7 +1140,7 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
 	for(unsigned int j = 0; j < tun->m_children.size(); ++j) {
 	  if (!tun->Child(j)->IsTunnel(SETTUNIN)) {
 	    cout << "isn't set tun in\n";
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  }
 	}
 	tun->RemoveAllChildren2Way();
@@ -1160,7 +1160,7 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
 	for(unsigned int j = 0; j < tun->m_children.size(); ++j) {
 	  if (!tun->Child(j)->IsTunnel(SETTUNIN)) {
 	    cout << "isn't set tun in\n";
-	    throw;
+	    LOG_FAIL("replacement for throw call");
 	  }
 	}
 	tun->RemoveAllChildren2Way();
@@ -1186,7 +1186,7 @@ bool Poss::MergePart1(unsigned int left, unsigned int right,
   m_sets.erase(m_sets.begin()+left);
   if (*(m_sets.begin()+right-1) != *rightSet) {
     cout << "error;";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   m_sets.erase(m_sets.begin()+right-1);
   
@@ -1216,10 +1216,10 @@ void Poss::MergePart2(RealPSet *newSet,
     RealPSet::GetFusionInformation(leftSet, rightSet, realLeft, realRight, leftInfo, rightInfo);
 
     if (realLeft->m_mergeMap.find(leftInfo) != realLeft->m_mergeMap.end())
-      throw;
+      LOG_FAIL("replacement for throw call");
     
     if (realRight->m_mergeMap.find(rightInfo) != realRight->m_mergeMap.end())
-      throw;
+      LOG_FAIL("replacement for throw call");
     
 
     realLeft->m_mergeMap.insert(PSetMapPair(leftInfo,newSet));
@@ -1259,7 +1259,7 @@ void Poss::MergePart2(RealPSet *newSet,
                                     (*iter)->m_num,
                                     child->m_inputs);
       if (inNum < 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       
       NodeConnAndNum entry;
       entry.m_conn = **iter;
@@ -1270,14 +1270,14 @@ void Poss::MergePart2(RealPSet *newSet,
 	if (tun->m_pset == rightSet)
 	  continue;
 	if (tun->m_pset == leftSet)
-	  throw;
+	  LOG_FAIL("replacement for throw call");
       }
       
       NodeConnAndNumIntMapIter found = outMap.find(entry);
       if (found != outMap.end()) {
         vector<int> vec = found->second;
         if (vec.size() != 1 || vec[0] != -j-1) {
-          throw;
+          LOG_FAIL("replacement for throw call");
         }
       }
       vector<int> tmp;
@@ -1311,7 +1311,7 @@ void Poss::MergePart2(RealPSet *newSet,
                                     (*iter)->m_num,
                                     child->m_inputs);
       if (inNum < 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       
       entry.m_num = inNum;
 
@@ -1321,14 +1321,14 @@ void Poss::MergePart2(RealPSet *newSet,
 	if (tun->m_pset == leftSet)
 	  continue;
 	if (tun->m_pset == rightSet)
-	  throw;
+	  LOG_FAIL("replacement for throw call");
       }
       
       NodeConnAndNumIntMapIter found = outMap.find(entry);
       if (found != outMap.end()) {
         vector<int> vec = found->second;
         if (vec.size() != 1 || vec[0] != j+1) {
-          throw;
+          LOG_FAIL("replacement for throw call");
         }
       }
       vector<int> tmp;
@@ -1366,7 +1366,7 @@ void Poss::MergePart2(RealPSet *newSet,
         ++count;
       }
       else if (tun->m_pset == leftSet) {
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
     }
     
@@ -1419,7 +1419,7 @@ void Poss::MergePart2(RealPSet *newSet,
         skip = true;
       }
       else if (tun->m_pset == rightSet) {
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
     }
     
@@ -1447,7 +1447,7 @@ void Poss::MergePart2(RealPSet *newSet,
   }
   for (auto entry : inMap) {
     if (entry.second.empty())
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -1468,7 +1468,7 @@ void Poss::MergePart4(RealPSet *newSet,
         if (!mapRight[child]->IsTunnel() ||
             ((Tunnel*)mapRight[child])->m_tunType != SETTUNIN) {
           cout << "mapped child not of expected type\n";
-          throw;
+          LOG_FAIL("replacement for throw call");
         }
         newInputTunnelsToFix.push_back((Tunnel*)(mapRight[child]));
       }
@@ -1482,7 +1482,7 @@ void Poss::MergePart4(RealPSet *newSet,
     if (!(*iter)->m_children.empty()) {
       cout << "!(*iter)->m_children.empty() 1\n";
       cout << (*iter)->m_children.size() << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
   
@@ -1496,7 +1496,7 @@ void Poss::MergePart4(RealPSet *newSet,
         if (!mapLeft[child]->IsTunnel() ||
             ((Tunnel*)mapLeft[child])->m_tunType != SETTUNIN) {
           cout << "mapped child not of expected type\n";
-          throw;
+          LOG_FAIL("replacement for throw call");
         }
         newInputTunnelsToFix.push_back((Tunnel*)(mapLeft[child]));
       }
@@ -1510,7 +1510,7 @@ void Poss::MergePart4(RealPSet *newSet,
     if (!(*iter)->m_children.empty()) {
       cout << "!(*iter)->m_children.empty() 1\n";
       cout << (*iter)->m_children.size() << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
   }
 }
@@ -1581,16 +1581,16 @@ void Poss::MergePart7(RealPSet *newSet,
   TunVecIter iter = newSet->m_inTuns.begin();
   for(; iter != newSet->m_inTuns.end(); ++iter, ++i) {
     if ((*iter)->m_inputs.empty())
-      throw;
+      LOG_FAIL("replacement for throw call");
     NodeConnAndNum entry;
     entry.m_conn = *((*iter)->m_inputs[0]);
     entry.m_num = 999;
     
     NodeConnAndNumIntMapIter find = inMap.find(entry);
     if (find == inMap.end())
-      throw;
+      LOG_FAIL("replacement for throw call");
     if (find->second.empty())
-      throw;
+      LOG_FAIL("replacement for throw call");
     vector<int> tmp = find->second;
     int val = tmp.back();
     if (tmp.size() > 1) {
@@ -1600,9 +1600,9 @@ void Poss::MergePart7(RealPSet *newSet,
     if (val < 0) {
       val = -1*val - 1;
       if (val < 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       if (val >= (int)newSet->m_leftInMap.size())
-        throw;
+        LOG_FAIL("replacement for throw call");
       vector<int> tmp = newSet->m_leftInMap[val];
       tmp.push_back(i);
       newSet->m_leftInMap[val] = tmp;
@@ -1610,15 +1610,15 @@ void Poss::MergePart7(RealPSet *newSet,
     else if (val > 0) {
       val -= 1;
       if (val < 0)
-        throw;
+        LOG_FAIL("replacement for throw call");
       if (val >= (int)newSet->m_rightInMap.size())
-        throw;
+        LOG_FAIL("replacement for throw call");
       vector<int> tmp = newSet->m_rightInMap[val];
       tmp.push_back(i);
       newSet->m_rightInMap[val] = tmp;
     }
     else
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
   
   
@@ -1633,23 +1633,24 @@ void Poss::MergePart7(RealPSet *newSet,
       int inNum = FindInNodeConnVec(tun,
                                     entry.m_conn.m_num,
                                     entry.m_conn.m_n->m_inputs);
-      if (inNum < 0)
-        throw;
-      else
+      if (inNum < 0) {
+        LOG_FAIL("replacement for throw call");
+      } else {
         entry.m_num = inNum;
+      }
       
       NodeConnAndNumIntMapIter find = outMap.find(entry);
       if (find == outMap.end())
-        throw;
+        LOG_FAIL("replacement for throw call");
       if (find->second.size() != 1)
-        throw;
+        LOG_FAIL("replacement for throw call");
       int val = find->second.back();
       if (val < 0)
         newSet->m_leftOutMap[-1*val - 1] = i;
       else if (val > 0)
         newSet->m_rightOutMap[val - 1] = i;
       else
-        throw;
+        LOG_FAIL("replacement for throw call");
     }
   }
 }
@@ -1663,7 +1664,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
     return;
   
   if (leftSet->IsLoop() || rightSet->IsLoop())
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   NodeMap mapLeft, mapRight;
   
@@ -1747,7 +1748,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
           
           if (newRight->m_sets.size()) {
             cout << "are the sets getting copied?\n";
-            throw;
+            LOG_FAIL("replacement for throw call");
           }
           
           newSet->m_posses.insert(PossMMapPair(newLeft->GetHash(),newLeft));
@@ -1781,11 +1782,11 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
       if (newSetOutput) {
         if (!newSetOutput->IsTunnel()) {
           cout << "!newSetOutput->IsTunnel()\n";
-          throw;
+          LOG_FAIL("replacement for throw call");
         }
         if (((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT) {
           cout << "((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT\n";
-          throw;
+          LOG_FAIL("replacement for throw call");
         }
         NodeConnVecIter newSetInputChildIter = newSetInput->m_children.begin();
         NodeConnVecIter newSetOutputInputIter = newSetOutput->m_inputs.begin();
@@ -1801,14 +1802,14 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
           if (possInput->m_poss != possOutput->m_poss) {
             cout << "(possInput->m_poss != possOutput->m_poss)\n";
             cout << possInput->m_poss << " != " << possOutput->m_poss << endl;
-            throw;
+            LOG_FAIL("replacement for throw call");
           }
           for(unsigned int j = 0; j < possInput->m_children.size(); ++j) {
             if (possInput->m_children[j]->m_num == inputInputNum) {
               Node *userOfInput = possInput->m_children[j]->m_n;
               if (userOfInput->m_poss != inputToPossOutput->m_poss) {
                 cout << "userOfInput->m_poss != inputToPossOutput->m_poss\n";
-                throw;
+                LOG_FAIL("replacement for throw call");
               }
               userOfInput->ChangeInput1Way(possInput, inputInputNum, inputToPossOutput, inputToPossOutputNum);
               possInput->m_children.erase(possInput->m_children.begin()+j);
@@ -1826,7 +1827,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
               if ((*inputsIter)->m_n == possInput) {
                 if ((*inputsIter)->m_num == inputInputNum) {
                   cout << "(*inputsIter)->m_num == inputInputNum\n";
-                  throw;
+                  LOG_FAIL("replacement for throw call");
                 }
                 else if ((*inputsIter)->m_num > inputInputNum) {
                   --((*inputsIter)->m_num);
@@ -1839,7 +1840,7 @@ void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &si
             || newSetOutputInputIter != newSetOutput->m_inputs.end())
         {
           cout << "unbalanced posses\n";
-          throw;
+          LOG_FAIL("replacement for throw call");
         }
         newSetInput->m_inputs.erase(newSetInput->m_inputs.begin()+i);
         --i;
@@ -1882,7 +1883,7 @@ bool AddNodesDown(Node *edgeStart, ConnNum childNum, TunVec &outputTuns, NodeSet
       child->IsTunnel()) {
     if (child->IsTunnel(POSSTUNIN)) {
       cout << "Whoa!\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     //The child will be grouped with another poss set
     Tunnel *tun = new Tunnel(POSSTUNOUT);
@@ -2009,7 +2010,7 @@ RealPSet* Poss::FormSubPSet(NodeVec &outputTuns, bool isCritSect)
   Poss *newPoss = new Poss(outputTuns, true, true);
   RealPSet *set;
   if (isCritSect)
-    throw;
+    LOG_FAIL("replacement for throw call");
 #if 0
   if (isCritSect)
     set = new CritSect(newPoss);
@@ -2022,14 +2023,14 @@ RealPSet* Poss::FormSubPSet(NodeVec &outputTuns, bool isCritSect)
   for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
     Node *tun = set->m_inTuns[j];
     if (!AddElemToVec(m_possNodes, tun, false))
-      throw;
+      LOG_FAIL("replacement for throw call");
     tun->SetPoss(this);
   }
   
   for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
     Node *tun = set->m_outTuns[j];
     if (!AddElemToVec(m_possNodes, tun, false))
-      throw;
+      LOG_FAIL("replacement for throw call");
     tun->SetPoss(this);
   }
   
@@ -2079,7 +2080,7 @@ RealPSet* Poss::FormSubPSet(NodeVec &outputTuns, bool isCritSect)
  if (found) {
  if (!childConn->m_n->IsTunnel(POSSTUNOUT)) {
  childConn->m_n->m_poss->PrintSetConnections();
- throw;
+ LOG_FAIL("replacement for throw call");
  }
  }
  else {
@@ -2092,7 +2093,7 @@ RealPSet* Poss::FormSubPSet(NodeVec &outputTuns, bool isCritSect)
  }
  if (found) {
  if (!nextNode)
- throw;
+ LOG_FAIL("replacement for throw call");
  currNode = nextNode;
  numIn = numOut;
  if (currNode->IsTunnel(POSSTUNOUT))
@@ -2101,14 +2102,14 @@ RealPSet* Poss::FormSubPSet(NodeVec &outputTuns, bool isCritSect)
  if (currNode->IsLoopTunnel()) {
  nextNode = ((LoopTunnel*)currNode)->GetMatchingOutTun();
  if (!nextNode)
- throw;
+ LOG_FAIL("replacement for throw call");
  currNode = nextNode;
  numIn = 0;
  }
  else if (currNode->GetNodeClass() == Tunnel::GetClass()) {
  nextNode = currNode->Child(0);
  if (!nextNode)
- throw;
+ LOG_FAIL("replacement for throw call");
  currNode = nextNode;
  numIn = 0;
  }
@@ -2211,11 +2212,11 @@ void Poss::FormSets(unsigned int phase)
       if (FoundLoop(m_possNodes[i],vec)) {
         cout << "Found loop 1\n";
         cout.flush();
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
       if (!vec.empty()) {
         cout << "vec not empty\n";
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
     }
 #endif
@@ -2278,7 +2279,7 @@ void Poss::FormSets(unsigned int phase)
           } while (newNode);
         }
 #else
-        throw;
+        LOG_FAIL("replacement for throw call");
 #endif
         
         NodeSetIter nodeIter = possNodes.begin();
@@ -2303,14 +2304,14 @@ void Poss::FormSets(unsigned int phase)
         for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
           Node *tun = set->m_inTuns[j];
           if (!AddElemToVec(m_possNodes, tun, false))
-            throw;
+            LOG_FAIL("replacement for throw call");
           tun->SetPoss(this);
         }
         
         for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
           Node *tun = set->m_outTuns[j];
           if (!AddElemToVec(m_possNodes, tun, false))
-            throw;
+            LOG_FAIL("replacement for throw call");
           tun->SetPoss(this);
         }
         
@@ -2336,7 +2337,7 @@ void Poss::FormSets(unsigned int phase)
         }
         
         if (node->NumOutputs() != 1)
-          throw;
+          LOG_FAIL("replacement for throw call");
         
         Tunnel *tun = new Tunnel(POSSTUNOUT);
         node->RedirectAllChildren(tun);
@@ -2352,14 +2353,14 @@ void Poss::FormSets(unsigned int phase)
         for (unsigned int j = 0; j < set->m_inTuns.size(); ++j) {
           Node *tun = set->m_inTuns[j];
           if (!AddElemToVec(m_possNodes, tun, false))
-            throw;
+            LOG_FAIL("replacement for throw call");
           tun->SetPoss(this);
         }
         
         for (unsigned int j = 0; j < set->m_outTuns.size(); ++j) {
           Node *tun = set->m_outTuns[j];
           if (!AddElemToVec(m_possNodes, tun, false))
-            throw;
+            LOG_FAIL("replacement for throw call");
           tun->SetPoss(this);
         }
         
@@ -2372,11 +2373,11 @@ void Poss::FormSets(unsigned int phase)
       if (FoundLoop(m_outTuns[k],vec)) {
         cout << "Found loop 3\n";
         cout.flush();
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
       if (!vec.empty()) {
         cout << "vec not empty\n";
-        throw;
+        LOG_FAIL("replacement for throw call");
       }
     }
 #endif
@@ -2391,7 +2392,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   if (MergePart1(left, right, &leftSet, &rightSet))
     return;
   if (!leftSet->IsLoop() || !rightSet->IsLoop())
-    throw;
+    LOG_FAIL("replacement for throw call");
   
 #if PRINTTRACKING
   cout << "fusing left " << leftSet << " and right " << rightSet << endl;
@@ -2526,31 +2527,31 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
         }
         else if (newSetOutput->IsCombine() != newSetInput->IsSplit()) {
           if (!newSetOutput->IsLoopTunnel() || !newSetInput->IsLoopTunnel())
-            throw;
+            LOG_FAIL("replacement for throw call");
           if (!((LoopTunnel*)newSetOutput)->IsConst() || !((LoopTunnel*)newSetInput)->IsConst()) {
 #if DOTENSORS
             if (!((LoopTunnel*)newSetOutput)->m_justAdditive || !((LoopTunnel*)newSetInput)->m_justAdditive)
 #endif
-              throw;
+              LOG_FAIL("replacement for throw call");
           }
           Node *temp = ((LoopTunnel*)(newSetOutput->Input(0)))->GetMatchingInTun()->Input(0);
           newSetInput->ChangeInput1Way(newSetOutput, 0, temp->Input(0), temp->InputConnNum(0));
           //	  cout << "Changing input to " << newSetInput << " to be " << temp->Input(0) << endl;
           //	  cout << "\tIt was " << newSetOutput << endl;
           //	  cout << newSetInput->GetNameStr(0) << endl;
-          //	  throw;
+          //	  LOG_FAIL("replacement for throw call");
         }
         else {
           if (!newSetOutput->IsTunnel()) {
             cout << "!newSetOutput->IsTunnel()\n";
-            throw;
+            LOG_FAIL("replacement for throw call");
           }
           if (((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT) {
             cout << "((Tunnel*)newSetOutput)->m_tunType != SETTUNOUT\n";
-            throw;
+            LOG_FAIL("replacement for throw call");
           }
           if (newSetInput->m_children.size() != newSetOutput->m_inputs.size())
-            throw;
+            LOG_FAIL("replacement for throw call");
           
           outTunToInTun.insert(std::pair<Node*,Node*>(newSetOutput,((LoopTunnel*)newSetOutput)->GetMatchingInTun()));
           
@@ -2562,7 +2563,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
             if (possInput->m_poss != possOutput->m_poss) {
               cout << "(possInput->m_poss != possOutput->m_poss)\n";
               cout << possInput->m_poss << " != " << possOutput->m_poss << endl;
-              throw;
+              LOG_FAIL("replacement for throw call");
             }
             
             while (!possInput->m_children.empty()) {
@@ -2570,7 +2571,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
               ConnNum inputUseNum = possInput->m_children[0]->m_num;
               if (userOfInput->m_poss != possInput->m_poss) {
                 cout << "userOfInput->m_poss != possInput->m_poss\n";
-                throw;
+                LOG_FAIL("replacement for throw call");
               }
               userOfInput->ChangeInput1Way(possInput, inputUseNum,
                                            possOutput->Input(inputUseNum), possOutput->InputConnNum(inputUseNum));
@@ -2597,7 +2598,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
           
           if (newSetOutput->m_children.size()) {
             if (!newOutputToUse)
-              throw;
+              LOG_FAIL("replacement for throw call");
             newSetOutput->RedirectChildren(newOutputToUse);
           }
           unsigned int find = FindInTunVec(newSet->m_outTuns, newSetOutput);
@@ -2615,7 +2616,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
           
           newSet->RemoveInTun(newSetInput);
           if (newSetInput->m_inputs.size() > 1) {
-            throw;
+            LOG_FAIL("replacement for throw call");
           }
           delete newSetInput->m_inputs[0];
           newSetInput->m_inputs.clear();
@@ -2643,7 +2644,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
     }
   }
   if (!foundControl)
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   tunIter = newSet->m_outTuns.begin();
   for(; tunIter != newSet->m_outTuns.end(); ++tunIter) {
@@ -2663,12 +2664,12 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
             SplitSingleIter *split1 = (SplitSingleIter*)tun;
             SplitSingleIter *split2 = (SplitSingleIter*)tun2;
 #if TWOD
-            if (split1->m_dir == split2->m_dir)
+            if (split1->m_dir == split2->m_dir) {
 #else
-              if (split1->m_partDim == split2->m_partDim)
+              if (split1->m_partDim == split2->m_partDim) {
 #endif
-                throw;
-              else {
+                LOG_FAIL("replacement for throw call");
+              } else {
                 split1->SetAddDir();
                 split2->SetAddDir();
               }
@@ -2832,7 +2833,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
             }
           }
           else {
-            throw;
+            LOG_FAIL("replacement for throw call");
           }
         }
         
@@ -2865,7 +2866,7 @@ bool Poss::HasFused(const BasePSet *left, const BasePSet *right) const
 {
   //Only mantain list for loops
   if (!left->IsLoop() || !right->IsLoop())
-    throw;
+    LOG_FAIL("replacement for throw call");
   const IntSet &label1 = (dynamic_cast<const LoopInterface*>(left))->GetLabel();
   const IntSet &label2 = (dynamic_cast<const LoopInterface*>(right))->GetLabel();
   IntSet fusedSet(label1.begin(), label1.end());
@@ -2877,7 +2878,7 @@ bool Poss::HasFused(const BasePSet *left, const BasePSet *right) const
 void Poss::SetFused(const BasePSet *left, const BasePSet *right)
 {
   if (!left->IsLoop() || !right->IsLoop())
-    throw;
+    LOG_FAIL("replacement for throw call");
   const IntSet &label1 = (dynamic_cast<const LoopInterface*>(left))->GetLabel();
   const IntSet &label2 = (dynamic_cast<const LoopInterface*>(right))->GetLabel();
   IntSet fusedSet(label1.begin(), label1.end());
@@ -2932,7 +2933,7 @@ void Poss::RemoveFromGraphNodes(Node *node)
     }
   }
   cout << "node not found\n";
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void Poss::RemoveFromSets(BasePSet *set)
@@ -2947,7 +2948,7 @@ void Poss::RemoveFromSets(BasePSet *set)
     }
   }
   cout << "set not found\n";
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void Poss::PrintNodeAddresses() const
@@ -3010,7 +3011,7 @@ void Poss::Unflatten(ifstream &in, SaveInfo &info)
   char tmp;
   READ(tmp);
   if (tmp != START)
-    throw;
+    LOG_FAIL("replacement for throw call");
   unsigned int size;
   READ(m_pset);
   Swap(&m_pset,info.psetMap);
@@ -3066,7 +3067,7 @@ void Poss::Unflatten(ifstream &in, SaveInfo &info)
   }
   READ(tmp);
   if (tmp != END)
-    throw;
+    LOG_FAIL("replacement for throw call");
   PatchAfterDuplicate(*(info.nodeMap));
 }
 
@@ -3155,9 +3156,9 @@ void PrintSetOrNodeInputs(Node *node)
       cout << "\tInput: TunIn " << input << " ("
       << (*iter)->m_num << ") " << input->GetNodeClass() << endl;
     }
-    else if (input->IsTunnel())
-      throw;
-    else {
+    else if (input->IsTunnel()) {
+      LOG_FAIL("replacement for throw call");
+    } else {
       cout << "\tInput: Node " << input << " ("
       << (*iter)->m_num << ") " << input->GetNodeClass() << endl;
     }
@@ -3176,9 +3177,9 @@ void PrintSetOrNodeChildren(Node *node)
       << " (" << (*iter)->m_num << ")" << endl;
       cout << "\t\t" << node->GetNameStr((*iter)->m_num) << endl;
     }
-    else if (child->IsTunnel())
-      throw;
-    else {
+    else if (child->IsTunnel()) {
+      LOG_FAIL("replacement for throw call");
+    } else {
       cout << "\tChild: Node " << child << " ("
       << (*iter)->m_num << ") " << child->GetNodeClass() << endl;
       cout << "\t\t" << node->GetNameStr((*iter)->m_num) << endl;
@@ -3213,7 +3214,7 @@ void Poss::PrintSetConnections()
             {
               BasePSet *set = tun->m_pset;
               if(psetSet.find(set) != psetSet.end())
-                throw;
+                LOG_FAIL("replacement for throw call");
               psetSet.insert(set);
               cout << "Set " << set << "\t" << set->GetFunctionalityString() << endl;
               if (set->IsLoop())
@@ -3237,7 +3238,7 @@ void Poss::PrintSetConnections()
             }
               break;
             default:
-              throw;
+              LOG_FAIL("replacement for throw call");
           }
           
         }
@@ -3252,9 +3253,9 @@ void Poss::PrintSetConnections()
     }
   }
   if (psetSet.size() != m_sets.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
   if (nodeSet.size() != m_possNodes.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 bool Poss::ContainsNonLoopCode() const
@@ -3317,9 +3318,9 @@ bool Poss::RemoveLoops(bool *doneSomething)
         return true;
     }
     if (!set->IsReal()) {
-      if (ContainsLoops())
-        throw;
-      else {
+      if (ContainsLoops()) {
+        LOG_FAIL("replacement for throw call");
+      } else {
         *doneSomething = false;
         return false;
       }
@@ -3334,10 +3335,10 @@ bool Poss::RemoveLoops(bool *doneSomething)
 void Poss::ReplaceShadowSetWithReal(unsigned int i)
 {
   if (i >= m_sets.size())
-    throw;
+    LOG_FAIL("replacement for throw call");
   BasePSet *set = m_sets[i];
   if (!set->IsShadow())
-    throw;
+    LOG_FAIL("replacement for throw call");
   
   ShadowPSet *shadow = (ShadowPSet*)set;
   RealPSet *real = shadow->m_realPSet;
@@ -3428,7 +3429,7 @@ void Poss::RemoveAndDeleteNodes(NodeVec &vec)
       }
     }
     if (!found)
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -3448,7 +3449,7 @@ void Poss::RemoveAndDeleteNodes(TunVec &vec)
       }
     }
     if (!found)
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 

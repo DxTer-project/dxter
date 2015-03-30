@@ -132,7 +132,7 @@ class BSSize
     //Just a sanity check; upperbound can be changed
 #if DOLLDLA
     if (m_multiple == 0 || m_multiple > 32)
-      throw;
+      LOG_FAIL("replacement for throw call");
 #endif
     switch(m_val)
       {
@@ -172,7 +172,7 @@ class BSSize
 	return ONE;
 #endif
       default:
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
   }
 };
@@ -246,6 +246,6 @@ class LoopFusionStubTrans : public SingleTrans
  public:
   virtual string GetType() const {return "Loop Fusion";}
   virtual bool IsSingle() const {return true;}
-  virtual bool CanApply(const Node *node) const {throw;}
-  virtual void Apply(Node *node) const {throw;}
+  virtual bool CanApply(const Node *node) const {LOG_FAIL("replacement for throw call");}
+  virtual void Apply(Node *node) const {LOG_FAIL("replacement for throw call");}
 };

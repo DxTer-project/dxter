@@ -24,6 +24,7 @@
 #pragma once
 
 #include "layers.h"
+#include "logging.h"
 #include "sizes.h"
 #include <cstring>
 
@@ -515,7 +516,7 @@ inline void Swap(T **ptr, PtrMap *map)
   PtrMapIter iter = map->find(*ptr);
   if (iter == map->end()) {
     cout << "didn't find swap pointer\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   *ptr = (T*)(iter->second);  
 }
@@ -528,7 +529,7 @@ inline void Swap(Node **ptr, NodeMap *map)
   NodeMapIter iter = map->find(*ptr);
   if (iter == map->end()) {
     cout << "didn't find swap pointer\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   *ptr = (Node*)(iter->second);  
 }

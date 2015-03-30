@@ -59,8 +59,8 @@ void CloseLog() {
 
 void LogMessage(LogLevel level, string message) {
   string msg = "";
-  msg += LogLevelToString(level);
-  msg += " at " + DateAndTimeString();
+  msg += LogLevelToString(level) + "\t";
+  msg += DateAndTimeString();
   msg += ": " + message;
   *logStream << msg << endl;
 }

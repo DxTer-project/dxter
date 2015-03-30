@@ -69,7 +69,7 @@ Cost AllGather(Size totalSize, Size numProcs)
     return 0;
   if (totalSize < 0) {
     cout << "totalSize in AllGather\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return ( log2(numProcs) * ALPHA )
     + (((numProcs - ONE) / numProcs) * totalSize * BETA);
@@ -81,7 +81,7 @@ Cost AllReduce(Size totalSize, Size numProcs)
     return 0;
   if (totalSize < 0) {
     cout << "totalSize in AllReduce\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return ( log2(numProcs) * ALPHA )
     + (TWO * ((numProcs - ONE) / numProcs) * totalSize * BETA)
@@ -94,7 +94,7 @@ Cost ReduceScatter(Size totalSize, Size numProcs)
     return 0;
   if (totalSize < 0) {
     cout << "totalSize in ReduceScatter\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
       
   return (log2(numProcs) * ALPHA)
@@ -107,7 +107,7 @@ Cost SendRecv(Size totalSize)
     return 0;
   if (totalSize < 0) {
     cout << "totalSize in SendRecv\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return ALPHA + (totalSize * BETA);
 }
@@ -118,11 +118,11 @@ Cost AllToAll(Size totalSize, Size numProcs)
     return 0;
   if (totalSize < 0) {
     cout << "totalSize in AllToAll\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   if (!(totalSize/numProcs)){
     cout << "nope\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return (numProcs - 1) * SendRecv(totalSize/numProcs);
 }
@@ -133,7 +133,7 @@ Cost CopyCost(Size inner, Size outer, Size readLdim, Size writeLdim, bool readCa
     return 0;
   if (outer < 0 || inner < 0 || readLdim < 0 || writeLdim < 0) {
     cout << "Copy Cost problem\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
       
   Cost cost = 0;

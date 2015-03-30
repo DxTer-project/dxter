@@ -91,7 +91,7 @@ DistType& DistType::operator=(const DistType &rhs)
     delete [] m_dists;
   if (m_numDims == 99) {
     m_dists = NULL;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
  else if (m_numDims) {
     m_dists = new DistEntry[m_numDims];
@@ -130,7 +130,7 @@ bool DistType::IsDefault() const
     return *this == M_Default4;
   }
   else 
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 
@@ -176,7 +176,7 @@ DimSet DistType::UsedGridDims() const
     for(; iter != vec.end(); ++iter) {
       if (!set.insert(*iter).second) {
 	cout << DistTypeToStr(*this) << endl;
-	throw;
+	LOG_FAIL("replacement for throw call");
       }
     }
   }
@@ -212,7 +212,7 @@ bool DistType::IsSane() const
 void DistType::SetToDefault(Dim numDims)
 {
   if (numDims > NUM_GRID_DIMS)
-    throw;
+    LOG_FAIL("replacement for throw call");
   m_numDims = numDims;
   if (m_dists)
     delete [] m_dists;
@@ -262,7 +262,7 @@ void DistType::SetToScalarNoRep()
 void DistType::SetToStar(Dim numDims)
 {
   if (numDims > NUM_GRID_DIMS)
-    throw;
+    LOG_FAIL("replacement for throw call");
   m_numDims = numDims;
   if (m_dists)
     delete [] m_dists;
@@ -317,7 +317,7 @@ string DistType::QuickStr() const
     return "";
   std::stringstream ret;
   if (!m_dists)
-    throw;
+    LOG_FAIL("replacement for throw call");
   for(Dim dim = 0; dim < m_numDims; ++dim) {
     ret << m_dists[dim].m_val << " ";
   }
@@ -330,7 +330,7 @@ DimVec DistEntry::DistEntryDims() const
 #if 0
   if (dist > 3000) {
     cout << "big dist to start: " << dist << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   cout << "\n\nstarting with dist = " << dist << endl;
 #endif
@@ -346,7 +346,7 @@ DimVec DistEntry::DistEntryDims() const
       cout << "starting dist " << m_val << endl;
       cout << "numDists " << numDists << endl;
       cout << "!currStage\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 #if 0
     cout << "distVal bef " << distVal << endl;
@@ -354,7 +354,7 @@ DimVec DistEntry::DistEntryDims() const
     cout << "currStage bef " << currStage << endl;
     if ((distVal - currStage) >= distVal) {
       cout << "problem with current\n";
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
 #endif
     distVal -= currStage;
@@ -380,7 +380,7 @@ DimVec DistEntry::DistEntryDims() const
   if (distVal != 0) {
     cout << endl << distVal << " != 0\n";
     cout << "dist = " << m_val << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return vec;
 }
@@ -401,7 +401,7 @@ void DistEntry::DimsToDistEntry(const DimVec &dims)
   for(; iter != dims.rend(); ++iter) {
     if (*iter > NUM_GRID_DIMS) {
       cout << *iter << endl;
-      throw;
+      LOG_FAIL("replacement for throw call");
     }
     //offset coming from the left
     distVal += currStage;
@@ -413,7 +413,7 @@ void DistEntry::DimsToDistEntry(const DimVec &dims)
 
   if (distVal > 1410273309) {
     cout << "big distVal: " << distVal << endl;
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
     
   m_val = distVal;
@@ -507,7 +507,7 @@ DimVec MapIndicesToDims(const string &indices, const string &dimIndices)
 Size GridModeLens(const DimVec &modes)
 {
   if (modes.empty())
-    throw;
+    LOG_FAIL("replacement for throw call");
   Size size = 1;
   for(auto mode : modes) {
     size *= GridLens[mode];
@@ -645,7 +645,7 @@ string DistTypeToStr(const DistType &distType)
       return "STAR_VR";
       break;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
       break;
   }
 }
@@ -693,7 +693,7 @@ template<>
 bool AddElemToVec(std::vector<BasePSet*> &vec, BasePSet *elem, bool deep)
 {
   if (deep)
-    throw;
+    LOG_FAIL("replacement for throw call");
   std::vector<BasePSet*>::iterator iter = vec.begin();
   for( ; iter != vec.end(); ++iter) {
     if (*iter == elem) {
@@ -736,7 +736,7 @@ string DiagToStr(Diag diag)
   else if (diag == NONUNIT)
     return "NONUNIT";
   else
-    throw;
+    LOG_FAIL("replacement for throw call");
 }
 
 
@@ -826,7 +826,7 @@ Tri SwapTri(Tri tri)
   case(UPPER):
     return LOWER;
   default:
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
 }
 
@@ -902,7 +902,7 @@ void Name::Flatten(ofstream &out) const
   WRITE(m_type);
 #endif
 #if DOTENSORS
-  throw;
+  LOG_FAIL("replacement for throw call");
   //m_permutation
 #endif
   out << m_name << endl;
@@ -915,7 +915,7 @@ void Name::Unflatten(ifstream &in)
   READ(m_type);
 #endif
 #if DOTENSORS
-  throw;
+  LOG_FAIL("replacement for throw call");
   //m_permutation
 #endif
   getline(in, m_name);
@@ -941,7 +941,7 @@ bool NodeConn::operator==(const NodeConn &rhs) const
     return false;
   if (!m_n || !rhs.m_n) {
     cout << "bad conn\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   return *m_n == *(rhs.m_n);
 }
@@ -950,7 +950,7 @@ void NodeConn::SetNode(Node *node)
 {
   if (!node) {
     cout << "SetNode(null)\n";
-    throw;
+    LOG_FAIL("replacement for throw call");
   }
   m_n = node;
 }
@@ -983,7 +983,7 @@ unsigned int FindInNodeVec(const NodeVec &vec, const Node *node)
   for(; iter != vec.end(); ++iter,++i)
     if (*iter == node)
       return i;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 #if DOTENSORS
@@ -1004,7 +1004,7 @@ unsigned int FindInSetVec(const PSetVec &vec, const BasePSet *set)
   for(; iter != vec.end(); ++iter,++i)
     if (*iter == set)
       return i;
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 
@@ -1104,7 +1104,7 @@ void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM,
       localN = *m;
       break;
     default:
-      throw;
+      LOG_FAIL("replacement for throw call");
   }
 }
 #endif

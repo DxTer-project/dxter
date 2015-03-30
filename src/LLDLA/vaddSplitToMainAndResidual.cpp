@@ -50,7 +50,7 @@ bool VAddSplitToMainAndResidual::CanApply(const Node* node) const {
 	&& (vadd->GetInputNumRows(0) > vadd->GetVecRegWidth());
     }
   }
-  throw;
+  LOG_FAIL("replacement for throw call");
 }
 
 void VAddSplitToMainAndResidual::Apply(Node* node) const {
