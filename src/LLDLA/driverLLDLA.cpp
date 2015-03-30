@@ -23,6 +23,7 @@
 #include "blasExamples.h"
 #include "costModel.h"
 #include "driverUtils.h"
+#include "logging.h"
 #include "miscellaneousExamples.h"
 #include "multiBLASExamples.h"
 #include "nodeTestExamples.h"
@@ -108,14 +109,18 @@ void Usage()
 }
 
 void SetUpGlobalState() {
+  START_LOG("LLDLA");
   arch = new HaswellMacbook();
   costModel = new BasicCostModel();
   localInputNames = new UniqueNameSource("u_local_input_");
 }
 
+void TearDownGlobalState() {
+  END_LOG();
+}
+
 int main(int argc, const char* argv[])
 {
-
 #ifdef _OPENMP
   omp_set_num_threads(1);
   omp_set_nested(true);
@@ -136,14 +141,14 @@ int main(int argc, const char* argv[])
     BenchmarkMenu();
   } else if(argc < 2) {
     Usage();
-    return 0;
+    TearDownGlobalState(); return 0;
   } else {
     algNum = atoi(argv[1]);
     switch(algNum) {
     case(1):
       if (argc != 8) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_gemm";
       transA = CharToTrans(*argv[2]);
@@ -160,7 +165,7 @@ int main(int argc, const char* argv[])
     case(2):
       if (argc != 9) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_double_gemm";
       precision = CharToType(*argv[4]);
@@ -179,7 +184,7 @@ int main(int argc, const char* argv[])
     case(3):
       if (argc != 4) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_dot";
       precision = CharToType(*argv[2]);
@@ -190,7 +195,7 @@ int main(int argc, const char* argv[])
     case(4):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_madd";
       precision = CharToType(*argv[2]);
@@ -203,7 +208,7 @@ int main(int argc, const char* argv[])
     case(5):
       if (argc != 6) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_mvmul";
       precision = CharToType(*argv[3]);
@@ -220,7 +225,7 @@ int main(int argc, const char* argv[])
     case(6):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_sv_mul";
       vecType = CharToVecType(*argv[2]);
@@ -232,7 +237,7 @@ int main(int argc, const char* argv[])
     case(7):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vmmul";
       precision = CharToType(*argv[2]);
@@ -245,7 +250,7 @@ int main(int argc, const char* argv[])
     case(8):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_smmul";
       precision = CharToType(*argv[2]);
@@ -258,7 +263,7 @@ int main(int argc, const char* argv[])
     case(9):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vadd";
       vecType = CharToVecType(*argv[2]);
@@ -270,7 +275,7 @@ int main(int argc, const char* argv[])
     case(10):
       if (argc != 4) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vadd2";
       precision = CharToType(*argv[2]);
@@ -281,7 +286,7 @@ int main(int argc, const char* argv[])
     case(11):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vmvmul";
       precision = CharToType(*argv[2]);
@@ -294,7 +299,7 @@ int main(int argc, const char* argv[])
     case(12):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_madd2";
       precision = CharToType(*argv[2]);
@@ -307,7 +312,7 @@ int main(int argc, const char* argv[])
     case(13):
       if (argc != 6) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_mvmul2";
       precision = CharToType(*argv[2]);
@@ -322,7 +327,7 @@ int main(int argc, const char* argv[])
     case(14):
       if (argc != 6) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_gemv";
       precision = CharToType(*argv[3]);
@@ -339,7 +344,7 @@ int main(int argc, const char* argv[])
     case(15):
       if (argc != 4) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_sv_col_mul_gen";
       precision = CharToType(*argv[2]);
@@ -350,7 +355,7 @@ int main(int argc, const char* argv[])
     case(16):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_saxpy";
       vecType = CharToVecType(*argv[2]);
@@ -362,7 +367,7 @@ int main(int argc, const char* argv[])
     case(17):
       if (argc != 6) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_sgemam";
       precision = CharToType(*argv[2]);
@@ -377,7 +382,7 @@ int main(int argc, const char* argv[])
     case(18):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_sgemam";
       precision = CharToType(*argv[2]);
@@ -390,7 +395,7 @@ int main(int argc, const char* argv[])
     case(19):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_zeroMVMul";
       precision = CharToType(*argv[2]);
@@ -403,7 +408,7 @@ int main(int argc, const char* argv[])
     case(20):
       if (argc != 4) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_pack_test";
       precision = CharToType(*argv[2]);
@@ -414,7 +419,7 @@ int main(int argc, const char* argv[])
     case(21):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_copy_test";
       precision = CharToType(*argv[2]);
@@ -427,7 +432,7 @@ int main(int argc, const char* argv[])
     case(22):
       if (argc != 4) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_partition_recombine_test";
       precision = CharToType(*argv[2]);
@@ -438,7 +443,7 @@ int main(int argc, const char* argv[])
     case(23):
       if (argc != 4) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_horizontal_partition_recombine_test";
       precision = CharToType(*argv[2]);
@@ -449,7 +454,7 @@ int main(int argc, const char* argv[])
     case(24):
       if (argc != 4) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_refined_pack_test";
       precision = CharToType(*argv[2]);
@@ -460,7 +465,7 @@ int main(int argc, const char* argv[])
     case(25):
       if (argc != 4) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_pack_unpack_test";
       precision = CharToType(*argv[2]);
@@ -471,7 +476,7 @@ int main(int argc, const char* argv[])
     case(26):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_2D_pack_unpack_test";
       precision = CharToType(*argv[2]);
@@ -484,7 +489,7 @@ int main(int argc, const char* argv[])
     case(27):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_2D_unpack_test";
       precision = CharToType(*argv[2]);
@@ -497,7 +502,7 @@ int main(int argc, const char* argv[])
     case(28):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_horizontal_2D_unpack_test";
       precision = CharToType(*argv[2]);
@@ -510,7 +515,7 @@ int main(int argc, const char* argv[])
     case(29):
       if (argc != 5) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_horizontal_2D_copy_test";
       precision = CharToType(*argv[2]);
@@ -523,14 +528,14 @@ int main(int argc, const char* argv[])
     case(30):
       if (argc != 2) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       BasicNoRuntimeEvalTests();
-      return 0;
+      TearDownGlobalState(); return 0;
     case(31):
       if (argc != 4) {
 	Usage();
-	return 0;
+	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vmuladd_benchmark";
       precision = CharToType(*argv[2]);
@@ -540,14 +545,16 @@ int main(int argc, const char* argv[])
       break;
     default:
       Usage();
+      TearDownGlobalState();
       return 0;
     }
 
     problemInstance.SetType(precision);
     problemInstance.SetName(opName);
     RunProblemWithRTE(algNum, algPSet, &problemInstance);
-
   }
+
+  TearDownGlobalState();
   return 0;
 }
 

@@ -906,9 +906,10 @@ string Node::GetFunctionalityString() const
   string str;
   if (!IsTunnel())
     str = GetType();
-  NodeConnVecConstIter iter = m_inputs.begin();
-  for( ;iter != m_inputs.end(); ++iter) {
-    const NodeConn *conn = *iter;
+  //  NodeConnVecConstIter iter = m_inputs.begin();
+  //  for( ;iter != m_inputs.end(); ++iter) {
+  //    const NodeConn *conn = *iter;
+  for (auto conn : m_inputs) {
     const Node *in = conn->m_n;
     if (!in->IsTunnel()) {
       str += (char)(conn->m_num + 48);

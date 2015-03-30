@@ -12,27 +12,27 @@
 #include "exampleUtils.h"
 
 RealPSet* VMulAddBenchmark(Type dataType, int m) {
-  auto alpha = new InputNode("alpha",
+  auto alpha = InputTunnel("alpha",
 			     1, 1,
 			     1, 1,
 			     dataType);
 
-  auto beta = new InputNode("beta",
+  auto beta = InputTunnel("beta",
 			    1, 1,
 			    1, 1,
 			    dataType);
 
-  auto x = new InputNode("X",
+  auto x = InputTunnel("X",
 			 m, 1,
 			 1, m,
 			 dataType);
 
-  auto y = new InputNode("Y",
+  auto y = InputTunnel("Y",
 			 m, 1,
 			 1, m,
 			 dataType);
 
-  auto z = new InputNode("Z",
+  auto z = InputTunnel("Z",
 			 m, 1,
 			 1, m,
 			 dataType);
@@ -57,7 +57,17 @@ RealPSet* VMulAddBenchmark(Type dataType, int m) {
 		    alphaX, 0,
 		    betaZY, 0);
 
-  return WrapInPSet(finalY);
+  Poss *innerPoss = new Poss(finalY, true);
+  RealPSet *innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode;
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+
+  return outerSet;
+  //  return WrapInPSet(finalY);
 }
 
 RealPSet* GenSizeColSVMul(Type dataType, int m)

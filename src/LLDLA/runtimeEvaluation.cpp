@@ -301,7 +301,8 @@ RuntimeEvaluator::RuntimeEvaluator(string evalDirName) {
   m_evalDirName = evalDirName;
 }
 
-void RuntimeEvaluator::WriteTestCodeToFile(string testFileName, string testCode) {
+void RuntimeEvaluator::WriteTestCodeToFile(string executableName, string testCode) {
+  string testFileName = executableName + ".c";
   std::ofstream outStream(testFileName);
   if (outStream.is_open()) {
     outStream << testCode << endl;

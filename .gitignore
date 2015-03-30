@@ -2,6 +2,7 @@
 obj
 dxter.x
 results/*
+logs/*
 benchmarks/*
 deps/*
 GraphsOut*

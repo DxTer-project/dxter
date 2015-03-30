@@ -20,6 +20,7 @@ deps/%.dxt_deps: src/%.cpp
 	@mkdir -p deps/DLA
 	@mkdir -p deps/LLDLA
 	@mkdir -p deps/tensors
+	@mkdir -p deps/logging
 	@mkdir -p obj
 	@mkdir -p obj/linearization
 	@mkdir -p obj/DLA
