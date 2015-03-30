@@ -28,6 +28,7 @@
 #include "LLDLA.h"
 #include "base.h"
 #include "runnerUtils.h"
+#include "timingResult.h"
 
 #if DOLLDLA
 
@@ -90,7 +91,7 @@ class RuntimeEvaluator
   void CompileTest(string executableName);
   void RunTest(string executableName);
   void CleanUpTest(string executableName);
-  ImplementationRuntimeMap ReadTimingData(string dataFileName, int numImpls);
+  vector<TimingResult*>* ReadTimingData(TimingSetting timingSetting, string dataFileName, int numImpls);
   void WriteTestCodeToFile(string testFileName, string testCode);
   void WriteTestCodeToFile(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, string executableName, string testFileName);
 
@@ -98,9 +99,9 @@ class RuntimeEvaluator
   string m_evalDirName;
 
   RuntimeEvaluator(string evalDirName);
-  ImplementationRuntimeMap EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp);
+  vector<TimingResult*>* EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp);
 
-  ImplementationRuntimeMap ReadTimeDataFromFile(string fileName, int numImpls);
+  vector<TimingResult*>* ReadTimeDataFromFile(TimingSetting timingSetting, string fileName, int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);
 };
 

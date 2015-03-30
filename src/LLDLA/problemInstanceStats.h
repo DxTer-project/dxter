@@ -31,6 +31,9 @@
 
 #if DOLLDLA
 
+#include "oneStageTimingResult.h"
+#include "timingResult.h"
+
 class ProblemInstanceStats {
 
  private:
@@ -53,7 +56,8 @@ class ProblemInstanceStats {
   void ComputeImplementationStats(ImplementationRuntimeMap* impls);
 
  public:
-  ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);
+  //  ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);
+  ProblemInstanceStats(ProblemInstance* problemInstance, vector<OneStageTimingResult*>* implTimes) {}
   ~ProblemInstanceStats();
 
   string CSVLineColumnTitles();

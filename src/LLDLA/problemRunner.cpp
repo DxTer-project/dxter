@@ -27,6 +27,7 @@
 
 #include "allTransformations.h"
 #include "DLAReg.h"
+#include "oneStageTimingResult.h"
 #include "runtimeEvaluation.h"
 
 ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
@@ -121,10 +122,11 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
 
   cout << "About to evaluate\n";
-  auto impMap = evaler.EvaluateImplementations(CHECKALLBUFFERS, ONEPHASETIMING, rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
+  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKALLBUFFERS, ONEPHASETIMING, rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
   cout << "Done evaluating\n";
 
-  auto pStats = new ProblemInstanceStats(problemInstance, &impMap);
+  vector<OneStageTimingResult*>* oneStageResults = reinterpret_cast<vector<OneStageTimingResult*>*>(timingResults);
+  auto pStats = new ProblemInstanceStats(problemInstance, oneStageResults);
   pStats->PrettyPrintPerformanceStats();
 
   GraphNum best = pStats->GetBestAvgFlopsPerCycleImpl();
@@ -139,6 +141,7 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
 #if PRINTCOSTS
   uni->PrintCosts(impMap);
 #endif
+  delete oneStageResults;
   LOG_A("Done with runtime evaluation of " + problemInstance->GetName());
   return pStats;
 }

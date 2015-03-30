@@ -19,40 +19,29 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TIMING_RESULT_H
-#define TIMING_RESULT_H
+#ifndef ONE_STAGE_TIMING_RESULT_H
+#define ONE_STAGE_TIMING_RESULT_H
+
+#include "timingResult.h"
 
 #if DOLLDLA
 
-class TimingResult {
- public:
-  virtual GraphNum GetNum() {
-    LOG_FAIL("TimingResult::GetNum() cannot be called");
-    throw;
-  }
-  virtual double GetAvgFlopsPerCycle() {
-    LOG_FAIL("TimingResult::GetAvgFlopsPerCycle() cannot be called");
-    throw;
-  }
-  virtual double GetAvgPercentOfPeak() {
-    LOG_FAIL("TimingResult::GetAvgPercentOfPeak() cannot be called");
-    throw;
-  }
+class OneStageTimingResult : public TimingResult {
+ private:
+  GraphNum m_implNum;
 
-  virtual string CSVLine() {
-    LOG_FAIL("TimingResult::CSVLine() cannot be called");
-    throw;
-  }
-  virtual string CSVLineColumnTitles() {
-    LOG_FAIL("TimingResult::CSVLineColumnTitles() cannot be called");
-    throw;
-  }
-  virtual void PrettyPrintPerformanceStats() {
-    LOG_FAIL("TimingResult::PrettyPrintPerformanceStats() cannot be called");
-    throw;
-  }
+ public:
+  OneStageTimingResult(GraphNum implNum, TimeVec* runtimes) {}
+
+  virtual GraphNum GetNum() { return m_implNum; }
+  virtual double GetAvgFlopsPerCycle() { return 0.0; }
+  virtual double GetAvgPercentOfPeak() { return 0.0; }
+
+  virtual string CSVLine() { return ""; }
+  virtual string CSVLineColumnTitles() { return ""; }
+  virtual void PrettyPrintPerformanceStats() { return; }
 };
 
 #endif // DOLLDLA
 
-#endif // TIMING_RESULT_H
+#endif // ONE_STAGE_TIMING_RESULT_H

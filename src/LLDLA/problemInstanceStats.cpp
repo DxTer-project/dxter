@@ -55,7 +55,7 @@ void ProblemInstanceStats::ComputeImplementationStats(ImplementationRuntimeMap* 
   return;
 }
 
-ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls) {
+/*ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls) {
   m_cost = problemInstance->GetCost();
   m_name = unique_ptr<string>(new string(problemInstance->GetName()));
   m_type = problemInstance->GetType();
@@ -63,7 +63,7 @@ ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, Imp
   ComputeBestAndWorstImplementations(problemInstance->GetType());
   m_dimNames = problemInstance->DimensionNames();
   m_dimValues = problemInstance->DimensionValues();
-}
+  }*/
 
 ProblemInstanceStats::~ProblemInstanceStats() {
   for (auto dimName : *m_dimNames) {

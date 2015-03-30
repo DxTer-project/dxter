@@ -27,6 +27,8 @@
 
 #if DOLLDLA
 
+#include "oneStageTimingResult.h"
+
 RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int minCycles)
 {
   m_type = type;
@@ -75,6 +77,7 @@ void RuntimeTest::AddMiscellaneousDefines()
   } else {
     cout << "Error: Unsupported type for runtime test data\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   return;
 }
@@ -107,6 +110,7 @@ string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, Implemen
   } else {
     cout << "SanityCheckSetting NONE is not yet supported" << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -130,6 +134,7 @@ string RuntimeTest::TimingCode(TimingSetting timingSetting, ImplementationMap* i
   } else {
     cout << "TWOPHASETIMING not supported yet" << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -310,6 +315,7 @@ void RuntimeEvaluator::WriteTestCodeToFile(string executableName, string testCod
   } else {
     cout << "ERROR: RuntimeEvaluator could not create file " << testFileName << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -333,17 +339,17 @@ void RuntimeEvaluator::CleanUpTest(string executableName) {
   system(removeExecutable.c_str());
 }
 
-ImplementationRuntimeMap RuntimeEvaluator::ReadTimingData(string dataFileName, int numImpls) {
+vector<TimingResult*>* RuntimeEvaluator::ReadTimingData(TimingSetting timingSetting, string dataFileName, int numImpls) {
   cout << "Size of imps = " << std::to_string((long long int) numImpls) << endl;
   cout << "Calling ReadTimeDataFromFile" << endl;
 
-  auto impMap = ReadTimeDataFromFile(dataFileName, numImpls);
+  auto timingResults = ReadTimeDataFromFile(timingSetting, dataFileName, numImpls);
   string removeDataFile = "rm -f " + dataFileName;
   system(removeDataFile.c_str());
-  return impMap;
+  return timingResults;
 }
 
-ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp) {
+vector<TimingResult*>* RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp) {
   string executableName = m_evalDirName + "/" + test.m_operationName;
   string testCode = test.MakeTestCode(sanityCheckSetting, timingSetting, imps, referenceImp);
 
@@ -352,8 +358,8 @@ ImplementationRuntimeMap RuntimeEvaluator::EvaluateImplementations(SanityCheckSe
   RunTest(executableName);
   CleanUpTest(executableName);
 
-  auto impMap = ReadTimingData(test.m_dataFileName, imps->size());
-  return impMap;
+  auto timeResults = ReadTimingData(timingSetting, test.m_dataFileName, imps->size());
+  return timeResults;
 }
 
 bool RuntimeEvaluator::IsImplementationSeparator(string token) {
@@ -363,22 +369,22 @@ bool RuntimeEvaluator::IsImplementationSeparator(string token) {
   return false;
 }
 
-ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName, int numImpls) {
+vector<TimingResult*>* RuntimeEvaluator::ReadTimeDataFromFile(TimingSetting timingSetting, string fileName, int numImpls) {
   std::ifstream dataStream(fileName);
   std::stringstream buffer;
   buffer << dataStream.rdbuf();
   dataStream.close();
   string timeData = buffer.str();
-  ImplementationRuntimeMap runtimeMap;
   std::vector<string> runtimeStrings;
   Tokenize(timeData, runtimeStrings, "\n");
   cout << "Num impls " << std::to_string((long long int) numImpls) << endl;
   cout << "Number of tokens " << std::to_string((long long int) runtimeStrings.size()) << endl;
+  vector<TimingResult*>* timingResults = new vector<TimingResult*>();
   int i = 1;
   TimeVec* impTimes = new TimeVec();
   for (auto token : runtimeStrings) {
     if (IsImplementationSeparator(token)) {
-      runtimeMap.insert(NumRuntimePair(i, *impTimes));
+      timingResults->push_back(new OneStageTimingResult(i, impTimes));
       i++;
       impTimes = new TimeVec();
     } else {
@@ -390,8 +396,9 @@ ImplementationRuntimeMap RuntimeEvaluator::ReadTimeDataFromFile(string fileName,
     cout << "ERROR: In RuntimeEvaluator::ReadDataFromFile i = " << i;
     cout << " numImpls = " << numImpls << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
-  return runtimeMap;
+  return timingResults;
 }
 
 void RuntimeEvaluator::Tokenize(const string& str, vector<string>& tokens, const string& delimiters = " ") {
