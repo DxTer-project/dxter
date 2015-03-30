@@ -53,11 +53,10 @@ class ProblemInstanceStats {
 
   vector<string*> AllDimNames(ProblemInstance* problemInstance);
   void ComputeBestAndWorstImplementations(Type type);
-  void ComputeImplementationStats(ImplementationRuntimeMap* impls);
+  void ComputeImplementationStats(vector<OneStageTimingResult*>* implTimes);
 
  public:
-  //  ProblemInstanceStats(ProblemInstance* problemInstance, ImplementationRuntimeMap* impls);
-  ProblemInstanceStats(ProblemInstance* problemInstance, vector<OneStageTimingResult*>* implTimes) {}
+  ProblemInstanceStats(ProblemInstance* problemInstance, vector<OneStageTimingResult*>* implTimes);
   ~ProblemInstanceStats();
 
   string CSVLineColumnTitles();

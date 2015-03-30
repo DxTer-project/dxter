@@ -45,10 +45,10 @@ void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
   }
 }
 
-void ProblemInstanceStats::ComputeImplementationStats(ImplementationRuntimeMap* impls) {
-  for (std::pair<GraphNum, TimeVec> pair : *impls) {
-    GraphNum impNum = pair.first;
-    TimeVec* times = &(pair.second);
+void ProblemInstanceStats::ComputeImplementationStats(vector<OneStageTimingResult*>* implTimes) {
+  for (auto timeRes : *implTimes) {
+    GraphNum impNum = timeRes->GetNum();
+    TimeVec* times = timeRes->GetTimes();
     ImplementationStats* impStats = new ImplementationStats(impNum, m_type, m_cost, times);
     m_implementationStats.push_back(unique_ptr<ImplementationStats>(impStats));
   }
@@ -64,6 +64,16 @@ void ProblemInstanceStats::ComputeImplementationStats(ImplementationRuntimeMap* 
   m_dimNames = problemInstance->DimensionNames();
   m_dimValues = problemInstance->DimensionValues();
   }*/
+
+ProblemInstanceStats::ProblemInstanceStats(ProblemInstance* problemInstance, vector<OneStageTimingResult*>* implTimes) {
+  m_cost = problemInstance->GetCost();
+  m_name = unique_ptr<string>(new string(problemInstance->GetName()));
+  m_type = problemInstance->GetType();
+  ComputeImplementationStats(implTimes);
+  ComputeBestAndWorstImplementations(problemInstance->GetType());
+  m_dimNames = problemInstance->DimensionNames();
+  m_dimValues = problemInstance->DimensionValues();
+}
 
 ProblemInstanceStats::~ProblemInstanceStats() {
   for (auto dimName : *m_dimNames) {

@@ -29,9 +29,13 @@
 class OneStageTimingResult : public TimingResult {
  private:
   GraphNum m_implNum;
+  TimeVec* m_runtimes;
 
  public:
-  OneStageTimingResult(GraphNum implNum, TimeVec* runtimes) {}
+  OneStageTimingResult(GraphNum implNum, TimeVec* runtimes) {
+    m_implNum = implNum;
+    m_runtimes = runtimes;
+  }
 
   virtual GraphNum GetNum() { return m_implNum; }
   virtual double GetAvgFlopsPerCycle() { return 0.0; }
@@ -40,6 +44,8 @@ class OneStageTimingResult : public TimingResult {
   virtual string CSVLine() { return ""; }
   virtual string CSVLineColumnTitles() { return ""; }
   virtual void PrettyPrintPerformanceStats() { return; }
+
+  virtual TimeVec* GetTimes() { return m_runtimes; }
 };
 
 #endif // DOLLDLA
