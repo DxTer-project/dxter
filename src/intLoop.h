@@ -246,6 +246,6 @@ class LoopFusionStubTrans : public SingleTrans
  public:
   virtual string GetType() const {return "Loop Fusion";}
   virtual bool IsSingle() const {return true;}
-  virtual bool CanApply(const Node *node) const {LOG_FAIL("replacement for throw call");}
-  virtual void Apply(Node *node) const {LOG_FAIL("replacement for throw call");}
+  virtual bool CanApply(const Node *node) const {LOG_FAIL("replacement for throw call"); throw;}
+  virtual void Apply(Node *node) const {LOG_FAIL("replacement for throw call"); throw;}
 };

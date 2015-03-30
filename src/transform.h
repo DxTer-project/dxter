@@ -51,7 +51,7 @@ class SingleTrans : public Transformation
   virtual bool CanApply(const Node *node) const = 0;
   virtual void Apply(Node *node) const = 0;
   virtual bool WorthApplying(const Node *node) const {return true;}
-  virtual Cost RHSCostEstimate(const Node *node) const {LOG_FAIL("replacement for throw call");}
+  virtual Cost RHSCostEstimate(const Node *node) const {LOG_FAIL("replacement for throw call"); throw;}
 };
 
 //Holds one transformation
@@ -66,7 +66,7 @@ class VarTrans : public Transformation
   virtual int CanApply(const Node *node, void **cache) const = 0;
   virtual void Apply(int num, Node *node, void **cache) const = 0;
   virtual bool WorthApplying(const Node *node) const {return true;}
-  virtual Cost RHSCostEstimate(const Node *node) const {LOG_FAIL("replacement for throw call");}
+  virtual Cost RHSCostEstimate(const Node *node) const {LOG_FAIL("replacement for throw call"); throw;}
   virtual void CleanCache(void **cache) const = 0;
 };
 
