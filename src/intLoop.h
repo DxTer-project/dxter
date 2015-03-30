@@ -131,8 +131,10 @@ class BSSize
   inline Size GetSize() const {
     //Just a sanity check; upperbound can be changed
 #if DOLLDLA
-    if (m_multiple == 0 || m_multiple > 32)
+    if (m_multiple == 0 || m_multiple > 32) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
 #endif
     switch(m_val)
       {
@@ -173,6 +175,7 @@ class BSSize
 #endif
       default:
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
   }
 };

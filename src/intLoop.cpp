@@ -82,6 +82,7 @@ string BSSize::VarName() const
 #endif
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -92,6 +93,7 @@ string BSSize::Str() const
 #if DOELEM
     case (USEELEMBS):
       LOG_FAIL("replacement for throw call");
+      throw;
 #elif DOBLIS
     case (USEBLISMC):
       return "gemm_mc";
@@ -104,6 +106,7 @@ string BSSize::Str() const
 #endif
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
   }
 }
 
@@ -114,6 +117,7 @@ string BSSize::SubSizeStr() const
 #if DOELEM
     case (USEELEMBS):
       LOG_FAIL("replacement for throw call");
+      throw;
 #elif DOBLIS
     case (USEBLISMC):
       return "gemm_mr";
@@ -123,9 +127,11 @@ string BSSize::SubSizeStr() const
       return "gemm_nr";
     case (USEBLISOUTERBS):
       LOG_FAIL("replacement for throw call");
+      throw;
 #endif
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
   }
 }
 
@@ -184,6 +190,7 @@ Cost IntLoop<PSetType>::Prop()
       if (!in->IsLoopTunnel()) {
 	cout << "non loop tunnel on loop!\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       if (((LoopTunnel*)in)->IsSplit()) {
 	SplitBase *split = (SplitBase*)in;
@@ -191,20 +198,24 @@ Cost IntLoop<PSetType>::Prop()
 	  if (foundControl) {
 	    cout << "Multiple different control tunnels for the same loop\n";
 	    LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
 	  else
 	    foundControl = true;
 	}
       }
     }
-    if (!foundControl)
+    if (!foundControl) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     //    iter = PSetType::m_outTuns.begin();
     //    for(; iter != PSetType::m_outTuns.end(); ++iter)
     for(auto tun : PSetType::m_outTuns)
       if (!tun->IsLoopTunnel()) {
 	cout << "non loop tunnel on loop!\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
   }
   return cost;
@@ -377,6 +388,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
             ((Tunnel*)outTun->Child(0))->m_pset == left) {
           cout << "found cycle\n";
           LOG_FAIL("replacement for throw call");
+	  throw;
         }
       }
     }
@@ -389,6 +401,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
     for(; iter != right->m_inTuns.end(); ++iter) {
       if (!(*iter)->IsLoopTunnel()) {
         LOG_FAIL("replacement for throw call");
+	throw;
       }
       const LoopTunnel *rightInTun = (LoopTunnel*)*iter;
       for (ConnNum i = 0; i < rightInTun->m_inputs.size() && left; ++i) {
@@ -415,6 +428,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
     for(; iter != left->m_inTuns.end(); ++iter) {
       if (!(*iter)->IsLoopTunnel()) {
         LOG_FAIL("replacement for throw call");
+	throw;
       }
       const LoopTunnel *leftInTun = (LoopTunnel*)*iter;
       const LoopTunnel *leftOutTun = leftInTun->GetMatchingOutTun();
@@ -468,6 +482,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
                   if (outTun->m_children.size()) {
                     cout << "out tun has children\n";
                     LOG_FAIL("replacement for throw call");
+		    throw;
                   }
                 }
               }
@@ -485,6 +500,7 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
                   if (outTun->m_children.size()) {
                     cout << "out tun has children\n";
                     LOG_FAIL("replacement for throw call");
+		    throw;
                   }
                 }
               }
@@ -493,10 +509,13 @@ bool IntLoop<PSetType>::CanMerge(BasePSet *pset) const
                 //Here, we might be able to fuse these two loops
                 // that both use the same input...
                 LOG_FAIL("replacement for throw call");
+		throw;
               }
               
-              if (!leftSet)
+              if (!leftSet) {
                 LOG_FAIL("replacement for throw call");
+		throw;
+	      }
               
               LoopTunnel *leftTun;
               LoopTunnel *rightTun;
@@ -572,8 +591,10 @@ template<class PSetType>
     string bs = "bs" + loopLevel;
     
     SplitBase *splitBase = GetControl();
-    if (splitBase->GetNodeClass() != SplitSingleIter::GetClass())
+    if (splitBase->GetNodeClass() != SplitSingleIter::GetClass()) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     SplitSingleIter *split = (SplitSingleIter*)splitBase;
     
     string inputName = split->Input(0)->GetName(split->InputConnNum(0)).str();
@@ -603,6 +624,7 @@ template<class PSetType>
         break;
       default:
         LOG_FAIL("replacement for throw call");
+	throw;
     }
     out.Indent();
     if (m_comm != CORECOMM) {
@@ -632,6 +654,7 @@ template<class PSetType>
           outerComm = split->WithinParallelism();
           innerComm = ParallelismWithinCurrentPosses();
           LOG_FAIL("replacement for throw call");
+	  throw;
         }
         else {  
           *out << "if (th_group_id( " << CommToStr(innerComm) << " ) != 0)\n";
@@ -659,6 +682,7 @@ template<class PSetType>
         break;
       default:
         LOG_FAIL("replacement for throw call");
+	throw;
     }
     
     *out << idx << ", " << dimLen
@@ -672,8 +696,10 @@ template<class PSetType>
     *out << "dim_t " << idx << ", " << dimLen << ", " << bs << ";\n";
   }
 #elif DOLLDLA
-  if (GetType() != LLDLALOOP)
+  if (GetType() != LLDLALOOP) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   switch(GetBSSize().m_val)
     {
     case (USEUNITBS):
@@ -686,6 +712,7 @@ template<class PSetType>
       break;
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
   if (!PSetType::IsReal() || !((RealLoop*)this)->IsUnrolled()) {
     SplitBase *split = GetControl();
@@ -718,8 +745,10 @@ template<class PSetType>
     out.Indent();
     *out << "for( " << lcv << " = ";
   
-    if (split->GetNodeClass() != SplitSingleIter::GetClass())
+    if (split->GetNodeClass() != SplitSingleIter::GetClass()) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
 
     bool needMin = false;
     if (split->m_dir == PARTDOWN) {
@@ -732,8 +761,10 @@ template<class PSetType>
       if (!split->GetInputN(0)->EvenlyDivisibleBy(GetBSSize().GetSize()))
 	needMin = true;
     }
-    else
+    else {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
   
     *out << "; " << lcv << " > 0; " << lcv << " -= ";
 
@@ -752,8 +783,10 @@ template<class PSetType>
 	else if (splitTun->m_dir == PARTRIGHT) {
 	  *out << splitTun->DataType(1).m_numColsVar;
 	}
-	else
+	else {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
+	}
       
 	if (needMin)
 	  *out << " = min( " << lcv << ", ";
@@ -777,8 +810,10 @@ template<class PSetType>
 	  else if (splitTun->m_dir == PARTRIGHT) {
 	    *out << splitTun->DataType(1).m_numColsVar;
 	  }
-	  else
+	  else {
 	    LOG_FAIL("replacement for throw call");
+	    throw;
+	  }
       
 	  *out << " = " << GetBSSize().VarName() << ";\n";
 	}
@@ -827,8 +862,10 @@ unsigned int IntLoop<PSetType>::LoopLevel() const
   unsigned int level = 0;
   Poss *poss = BasePSet::m_ownerPoss;
   while (poss) {
-    if (!poss->m_pset)
+    if (!poss->m_pset) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     if (poss->m_pset->IsLoop())
       ++level;
     poss = poss->m_pset->m_ownerPoss;
@@ -902,8 +939,10 @@ bool IntLoop<PSetType>::WorthFusing(BasePSet *pset)
       }
     }
   }
-  if (!control)
+  if (!control) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   return control;
 }
 

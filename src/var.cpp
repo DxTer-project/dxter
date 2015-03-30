@@ -114,6 +114,7 @@ string LLDLATransVarName(const string &var, Trans trans)
       return var+"H";
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 #endif //DOLLDLA
@@ -672,6 +673,7 @@ Var& Var::operator=(const Var &rhs)
       break;
     case (InvalidType):
       LOG_FAIL("replacement for throw call");
+      throw;
     }
   return *this;
 }

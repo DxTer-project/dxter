@@ -52,6 +52,7 @@ inline bool IsUnitStride(const Stride &stride)
     case (BADSTRIDE):
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 

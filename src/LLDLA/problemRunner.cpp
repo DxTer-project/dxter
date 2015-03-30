@@ -113,6 +113,7 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
 }
 
 ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemInstance* problemInstance) {
+  LOG_A("Starting runtime evaluation for " + problemInstance->GetName());
   cout << "Writing all implementations to runtime eval files\n";
   int minCycles = 100000000;
   RuntimeTest rtest(problemInstance->GetType(), problemInstance->GetName(), uni->m_argNames, uni->m_declarationVectors, uni->m_constantDefines, minCycles);
@@ -138,7 +139,7 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
 #if PRINTCOSTS
   uni->PrintCosts(impMap);
 #endif
-
+  LOG_A("Done with runtime evaluation of " + problemInstance->GetName());
   return pStats;
 }
 
