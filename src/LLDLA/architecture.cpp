@@ -38,6 +38,7 @@ int Architecture::VecRegWidth(Type type)
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -50,6 +51,7 @@ string Architecture::VecRegTypeDec(Type type)
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -62,6 +64,7 @@ string Architecture::TypeName(Type type)
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -74,6 +77,7 @@ string Architecture::AddCode(Type type, string operand1, string operand2, string
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -86,6 +90,7 @@ string Architecture::MulCode(Type type, string operand1, string operand2, string
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -98,6 +103,7 @@ string Architecture::FMACode(Type type, string operand1, string operand2, string
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -110,6 +116,7 @@ string Architecture::StridedLoad(Type type, string memPtr, string receivingLoc, 
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -122,6 +129,7 @@ string Architecture::ContiguousLoad(Type type, string memPtr, string receivingLo
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -134,6 +142,7 @@ string Architecture::DuplicateLoad(Type type, string memPtr, string receivingLoc
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -146,6 +155,7 @@ string Architecture::AccumCode(Type type, string memPtr, string startingLoc)
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -158,6 +168,7 @@ string Architecture::ContiguousStore(Type type, string memPtr, string startingLo
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -170,6 +181,7 @@ string Architecture::StridedStore(Type type, string memPtr, string startingLoc, 
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -182,6 +194,7 @@ string Architecture::ZeroVar(Type type, string varName)
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
@@ -194,6 +207,7 @@ double Architecture::FlopsPerCycle(Type type)
   } else {
     cout << "Error: VecRegWidth bad type\n";
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 
