@@ -60,6 +60,7 @@ void RealPSet::Init(Poss *poss)
   if (m_functionality.empty()) {
     cout << "starting PSet without functionality\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   if (IsLoop()) {
     //    Loop *loop = (Loop*)this;
@@ -78,6 +79,7 @@ void RealPSet::Init(Poss *poss)
     if (!possTun->IsTunnel(POSSTUNIN)) {
       cout << "bad poss tunnel\n";
       LOG_FAIL("replacement for throw call");
+      throw;
     }
     Tunnel *setTun = possTun->GetSetTunnel();
     for(ConnNum j = 0; j < possTun->m_inputs.size(); ++j) {
@@ -142,8 +144,10 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
   if (m_mergeMap.empty()) {
     if (!newPtr)
       return;
-    else 
+    else {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
   }
   PSetMapIter setIter = m_mergeMap.begin();
   for(; setIter != m_mergeMap.end(); ++setIter) {
@@ -171,6 +175,7 @@ void RealPSet::UpdateRealPSetPointers(RealPSet *oldPtr, RealPSet *newPtr)
     }
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void RealPSet::Migrate()
@@ -210,8 +215,10 @@ void RealPSet::Migrate()
     omp_unset_lock(&m_lock);
 #endif //_OPENMP
     m_flags &= ~SETCHECKEDFORDUP;
-    if (!found)
+    if (!found) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
   }
 #endif //DOTENSORS
 #endif //CHECKFORSETREUSE
@@ -229,19 +236,24 @@ void RealPSet::Migrate()
 
 
   BasePSet *newBase = GetNewInst();
-  if (!newBase->IsReal())
+  if (!newBase->IsReal()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 
   RealPSet *newSet = (RealPSet*)newBase;
 
   //  cout << "migrating " << this << " to shadow " << shadowToReplace << ", replaced with " << newSet << endl;
 
-  if (shadowToReplace->IsLoop() != IsLoop())
+  if (shadowToReplace->IsLoop() != IsLoop()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 
   if (shadowToReplace->m_realPSet != this) {
     cout << "shadow doesn't point to me\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 
 
@@ -297,8 +309,10 @@ void RealPSet::Migrate()
   }
 
   newSet->m_inTuns.swap(shadowToReplace->m_inTuns);
-  if (newSet->m_inTuns.size() != m_inTuns.size())
+  if (newSet->m_inTuns.size() != m_inTuns.size()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 	
   TunVecIter nodeIter = newSet->m_inTuns.begin();
   TunVecIter oldSetNodeIter = m_inTuns.begin();
@@ -317,8 +331,10 @@ void RealPSet::Migrate()
   m_inTuns.clear();
 
   newSet->m_outTuns.swap(shadowToReplace->m_outTuns);
-  if (newSet->m_outTuns.size() != m_outTuns.size())
+  if (newSet->m_outTuns.size() != m_outTuns.size()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 
   nodeIter = newSet->m_outTuns.begin();
   oldSetNodeIter = m_outTuns.begin();
@@ -338,8 +354,10 @@ void RealPSet::Migrate()
   PossMMapIter possIter = newSet->m_posses.begin();
   for( ; possIter != newSet->m_posses.end(); ++possIter) {
     Poss *poss = possIter->second;
-    if (newSet->m_inTuns.size() != poss->m_inTuns.size())
+    if (newSet->m_inTuns.size() != poss->m_inTuns.size()) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     for(unsigned int i = 0; i < newSet->m_inTuns.size(); ++i) {
       Tunnel *setTun = (Tunnel*)(newSet->m_inTuns[i]);
       Tunnel *possTun = (Tunnel*)(poss->m_inTuns[i]);
@@ -353,14 +371,17 @@ void RealPSet::Migrate()
 	cout.flush();
 	cout << "is " << possTun->Input(0)->GetNodeClass() << endl;
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       possTun->AddInput(setTun,0);
     }
     for(unsigned int i = 0; i < newSet->m_outTuns.size(); ++i) {
       Tunnel *setTun = (Tunnel*)(newSet->m_outTuns[i]);
       Tunnel *possTun = (Tunnel*)(poss->m_outTuns[i]);
-      if (!possTun->m_children.empty())
+      if (!possTun->m_children.empty()) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
       setTun->AddInput(possTun,0);
     }
     poss->m_pset = newSet;
@@ -425,15 +446,19 @@ RealPSet::~RealPSet()
   cout << "deleting " << this << endl;
 #endif
   if (!(m_flags & SETTOPLEVELFLAG) && !(m_flags & SETHASMIGRATED)
-      && (m_inTuns.empty() || m_outTuns.empty()))
+      && (m_inTuns.empty() || m_outTuns.empty())) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   SetDeletingRecursively();
   Migrate();
   if (!m_inTuns.empty()) {
     TunVecIter iter = m_inTuns.begin();
     for(; iter != m_inTuns.end(); ++iter) {
-      if (!(*iter)->m_inputs.empty())
+      if (!(*iter)->m_inputs.empty()) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
       (*iter)->RemoveAllChildren2Way();
     }
     m_inTuns.clear();
@@ -441,8 +466,10 @@ RealPSet::~RealPSet()
   if (!m_outTuns.empty()) {
     TunVecIter iter = m_outTuns.begin();
     for(; iter != m_outTuns.end(); ++iter) {
-      if (!(*iter)->m_children.empty())
+      if (!(*iter)->m_children.empty()) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
       (*iter)->RemoveAllInputs2Way();
     }
     m_outTuns.clear();
@@ -462,8 +489,10 @@ RealPSet::~RealPSet()
 
 void RealPSet::AddPossesOrDispose(PossMMap &mmap, PossMMap *added)
 {
-  if (m_functionality.empty())
+  if (m_functionality.empty()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   PossMMapIter newIter = mmap.begin();
   for( ; newIter != mmap.end(); ++newIter) {
     Poss *poss = (*newIter).second;
@@ -472,6 +501,7 @@ void RealPSet::AddPossesOrDispose(PossMMap &mmap, PossMMap *added)
     if (poss->m_inTuns.size() != m_inTuns.size()) {
       cout << "wrong number\n";
       LOG_FAIL("replacement for throw call");
+      throw;
     }
     
     for(unsigned int i = 0; i < poss->m_inTuns.size(); ++i) {
@@ -502,24 +532,29 @@ void RealPSet::AddPoss(Poss *poss)
   if (m_functionality.empty()) {
     if (m_posses.size()) {
       LOG_FAIL("replacement for throw call");
+      throw;
     } else {
       m_functionality = poss->GetFunctionalityString();
       if (IsLoop()) {
 	//	Loop *loop = (Loop*)this;
 	m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize().GetSize());
       }
-      if (m_functionality.empty())
+      if (m_functionality.empty()) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
     }
   }
   if (m_inTuns.size() != poss->m_inTuns.size()) {
     cout << "New poss doesn't have same number of inputs\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   if (m_outTuns.size() != poss->m_outTuns.size()) {
     cout << "New poss doesn't have same number of outputs\n";
     cout << m_outTuns.size() << " != " << poss->m_outTuns.size() << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   
   for(unsigned int i = 0; i < m_inTuns.size(); ++i) {
@@ -528,6 +563,7 @@ void RealPSet::AddPoss(Poss *poss)
     if (!possTun->m_inputs.empty()) {
       cout << "(!possTun->m_inTuns.empty()\n";
       LOG_FAIL("replacement for throw call");
+      throw;
     }
     possTun->AddInput(setTun,0);
   }
@@ -541,6 +577,7 @@ void RealPSet::AddPoss(Poss *poss)
 	   << possTun->Child(0)->GetType() << endl;
       cout << possTun << endl;
       LOG_FAIL("replacement for throw call");
+      throw;
     }
     setTun->AddInput(possTun,0);
   }
@@ -555,8 +592,10 @@ bool RealPSet::operator==(const BasePSet &rhs) const
     return *this == *(rhs.GetReal());
     //    return (*this)==(*(((ShadowPSet&)rhs).m_realPSet));
   }
-  if (!rhs.IsReal())
+  if (!rhs.IsReal()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   const RealPSet &realRhs = (RealPSet&)rhs;
   if (m_inTuns.size() != realRhs.m_inTuns.size()
       || m_outTuns.size() != realRhs.m_outTuns.size())
@@ -583,6 +622,7 @@ bool RealPSet::operator==(const BasePSet &rhs) const
 	  cout << "BS bs\n";
 	  cout << loop1->GetBSSize().GetSize() << endl;
 	  LOG_FAIL("replacement for throw call");
+	  throw;
 	}
         for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
           const LoopTunnel *tun1 = (LoopTunnel*)(m_inTuns[i]);
@@ -637,18 +677,24 @@ Cost RealPSet::Prop()
   if (m_posses.empty()) {
     cout << "I'm empty\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 
   if (m_functionality.empty()) {
     cout << m_posses.size() << endl;
     (*(m_posses.begin())).second->PrintSetConnections();
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 
-  if (m_mergeLeft && !m_mergeRight)
+  if (m_mergeLeft && !m_mergeRight) {
     LOG_FAIL("replacement for throw call");
-  if (m_mergeRight && !m_mergeLeft)
+    throw;
+  }
+  if (m_mergeRight && !m_mergeLeft) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_mergeLeft) {
     if (m_leftInMap.empty()
 	|| m_rightInMap.empty()
@@ -656,6 +702,7 @@ Cost RealPSet::Prop()
 	|| m_rightOutMap.empty())
       {
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
 
     const int inSize = m_inTuns.size();
@@ -664,8 +711,10 @@ Cost RealPSet::Prop()
       vector<vector<int>>::iterator mapIter;
       for(mapIter = m_leftInMap.begin(); mapIter != m_leftInMap.end(); ++mapIter) {
 	for (auto entry : *mapIter) {
-	  if (entry >= inSize)
+	  if (entry >= inSize) {
 	    LOG_FAIL("replacement for throw call");
+	    throw;
+	  }
 	}
       }
       for(mapIter = m_rightInMap.begin(); mapIter != m_rightInMap.end(); ++mapIter) {
@@ -673,19 +722,23 @@ Cost RealPSet::Prop()
 	  if (entry >= inSize) {
 	    cout << "mapping to " << entry << " out of " << inSize << endl;
 	    LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
 	}
       }
     }
     vector<int>::iterator mapIter;
     for(mapIter = m_leftOutMap.begin(); mapIter != m_leftOutMap.end(); ++mapIter) {
-      if (*mapIter >= outSize)
+      if (*mapIter >= outSize) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
     }
     for(mapIter = m_rightOutMap.begin(); mapIter != m_rightOutMap.end(); ++mapIter) {
       if (*mapIter >= outSize) {
 	cout << *mapIter << " >= " << outSize << endl;
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
   }
@@ -696,6 +749,7 @@ Cost RealPSet::Prop()
 	|| !m_rightOutMap.empty())
       {
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
   }
 
@@ -708,10 +762,12 @@ Cost RealPSet::Prop()
       if (child->m_inputs.size() != 1) {
         cout << "child->m_inputs.size() != 1\n";
         LOG_FAIL("replacement for throw call");
+	throw;
       }
       if (child->Input(0) != in) {
         cout << "child->m_inputs[0]->m_n != in\n";
         LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
   }
@@ -723,19 +779,24 @@ Cost RealPSet::Prop()
       if (parent->m_children.size() != 1) {
         cout << "parent->m_children.size() != 1\n";
         LOG_FAIL("replacement for throw call");
+	throw;
       }
       if (parent->m_children[0]->m_n != out) {
         cout << "parent->m_children[0]->m_n != out\n";
         LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
-    if (out->m_inputs.size() != m_posses.size())
+    if (out->m_inputs.size() != m_posses.size()) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
   }
   
   if (!IsTopLevel() && !m_ownerPoss) {
     cout << "no owner\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 
 
@@ -758,6 +819,7 @@ Cost RealPSet::Prop()
       if (j > i) {
 	cout << "uhoh\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       while (j < i) {
 	++iter;
@@ -779,6 +841,7 @@ Cost RealPSet::Prop()
       if (!m_posses.size()) {
 	cout << "Ran out of posses in set " << this << endl;
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
     else {
@@ -819,11 +882,14 @@ Cost RealPSet::Prop()
 
   PSetVecIter shadowIter = m_shadows.begin();
   for(; shadowIter != m_shadows.end(); ++shadowIter) {
-    if (((ShadowPSet*)(*shadowIter))->m_realPSet != this)
+    if (((ShadowPSet*)(*shadowIter))->m_realPSet != this) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     if ((*shadowIter)->IsLoop() != IsLoop()) {
       cout << "shadow and real loop satus don't agree\n";
       LOG_FAIL("replacement for throw call");
+      throw;
     }
   }
   
@@ -851,14 +917,17 @@ void RealPSet::Cull(Phase phase)
 	cout << "uhoh";
 	cout.flush();
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       while (j < i) {
 	++iter;
 	++j;
       }
       Poss *poss = (*iter).second;
-      if (poss->IsSane())
+      if (poss->IsSane()) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
       poss->m_flags |= POSSISSANEFLAG;
       poss->Cull(phase);
     }
@@ -878,6 +947,7 @@ void RealPSet::Cull(Phase phase)
       if (!m_posses.size()) {
         cout << "Ran out of posses in set " << this << endl;
         LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
     else {
@@ -894,8 +964,10 @@ void RealPSet::CullWorstPerformers(double percentToCull, int ignoreThreshold)
     for(; iter != m_posses.end(); ++iter) {
       queue.push(iter->second);
     }
-    if (queue.size() != m_posses.size())
+    if (queue.size() != m_posses.size()) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     int numToKeep = ceil((1.0-percentToCull) * m_posses.size());
 #if CHECKIGNORETWICE
     if (numToKeep < ignoreThreshold)
@@ -920,6 +992,7 @@ void RealPSet::CullWorstPerformers(double percentToCull, int ignoreThreshold)
       if (j > i) {
 	cout << "uhoh\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       while (j < i) {
 	++iter;
@@ -938,8 +1011,10 @@ void RealPSet::CullAllBut(int num)
     for(; iter != m_posses.end(); ++iter) {
       queue.push(iter->second);
     }
-    if (queue.size() != m_posses.size())
+    if (queue.size() != m_posses.size()) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     int numToKeep = num;
     for(; numToKeep > 0; --numToKeep)
       queue.pop();
@@ -960,6 +1035,7 @@ void RealPSet::CullAllBut(int num)
       if (j > i) {
 	cout << "uhoh\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       while (j < i) {
 	++iter;
@@ -977,6 +1053,7 @@ void RealPSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
       poss->ForcePrint();
     }
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   if (removeFromMyList) {
     PossMMapIter possIter = m_posses.begin();
@@ -988,13 +1065,16 @@ void RealPSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
 	break;
       }
     }
-    if (!found)
+    if (!found) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
   }
   
   if (poss->m_inTuns.size() != m_inTuns.size()) {
     cout << "(poss->m_inTuns.size() != m_inTuns.size())\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   for (unsigned int i = 0; i < m_inTuns.size(); ++i)
     InTun(i)->RemoveChild(poss->InTun(i),0);
@@ -1002,6 +1082,7 @@ void RealPSet::RemoveAndDeletePoss(Poss *poss, bool removeFromMyList)
   if (poss->m_outTuns.size() != m_outTuns.size()) {
     cout << "(poss->m_outTuns.size() != m_outTuns.size())\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   for (unsigned int i = 0; i < m_outTuns.size(); ++i)
     OutTun(i)->RemoveInput(poss->OutTun(i),0);
@@ -1107,12 +1188,16 @@ bool RealPSet::TakeIter(const TransMap &transMap,
 void RealPSet::Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows)
 {
   BasePSet::Duplicate(orig, map, possMerging,useShadows);
-  if (!orig->IsReal())
+  if (!orig->IsReal()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   const RealPSet *real = (RealPSet*)orig;
   m_functionality = real->m_functionality;
-  if (m_functionality.empty())
+  if (m_functionality.empty()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   PossMMapConstIter iter2 = real->m_posses.begin();
   for( ; iter2 != real->m_posses.end(); ++iter2) {
     const Poss *oldPoss = (*iter2).second;
@@ -1133,6 +1218,7 @@ void RealPSet::PatchAfterDuplicate(NodeMap &map)
     if ((*iter2).first != (*iter2).second->GetHash()) {
       cout << "different hash in PatchAfterDuplicate\n";
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 
   }
@@ -1140,8 +1226,10 @@ void RealPSet::PatchAfterDuplicate(NodeMap &map)
 
 void RealPSet::CombineAndRemoveTunnels()
 {
-  if (!m_shadows.empty())
+  if (!m_shadows.empty()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   for(unsigned int inIdx1 = 0; inIdx1 < m_inTuns.size(); ++inIdx1) {
     for(unsigned int inIdx2 = inIdx1+1; inIdx2 < m_inTuns.size(); ++inIdx2) {
       Node *setInput1 = InTun(inIdx1);
@@ -1151,6 +1239,7 @@ void RealPSet::CombineAndRemoveTunnels()
         cout << setInput1->m_inputs.size() << endl;
         cout << setInput2->m_inputs.size() << endl;
         LOG_FAIL("replacement for throw call");
+	throw;
       }
       if (setInput1->m_inputs.size()
           && setInput2->m_inputs.size()
@@ -1186,6 +1275,7 @@ void RealPSet::CombineAndRemoveTunnels()
 	    cout << setInput2 << endl;
 	    setInput2->PrintChildren();
 	    LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
 	  NodeConnVecIter connIter1 = setInput1->m_children.begin();
 	  NodeConnVecIter connIter2 = setInput2->m_children.begin();
@@ -1197,6 +1287,7 @@ void RealPSet::CombineAndRemoveTunnels()
 	  if (connIter2 != setInput2->m_children.end()) {
 	    cout << "connIter2 != setInput2->m_children.end()\n";
 	    LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
 	  setInput2->Input(0)->RemoveChild(setInput2,setInput2->InputConnNum(0));
 	  delete setInput2->InputConn(0);
@@ -1223,6 +1314,7 @@ void RealPSet::CombineAndRemoveTunnels()
         if (!child->IsTunnel()) {
           cout << "!child->IsTunnel()\n";
           LOG_FAIL("replacement for throw call");
+	  throw;
         }
         child->m_poss->DeleteNode(child);
         delete *inChildIter;
@@ -1232,6 +1324,7 @@ void RealPSet::CombineAndRemoveTunnels()
       m_inTuns.erase(m_inTuns.begin()+i);
       for (unsigned int j = 0; j < m_leftInMap.size(); ++j) {
 	LOG_FAIL("replacement for throw call");
+	throw;
 	vector<int> vec = m_leftInMap[j];
 	bool madeChange = false;
 	for (int i = 0; i < (int)vec.size(); ++i) {
@@ -1251,10 +1344,12 @@ void RealPSet::CombineAndRemoveTunnels()
       }
       for (unsigned int j = 0; j < m_rightInMap.size(); ++j) {
 	LOG_FAIL("replacement for throw call");
+	throw;
 	vector<int> vec = m_rightInMap[j];
 	bool madeChange = false;
 	for (int i = 0; i < (int)vec.size(); ++i) {
 	LOG_FAIL("replacement for throw call");
+	throw;
 	  int val = vec[i];
 	  if (val == (int)i) {
 	    vec.erase(vec.begin()+i);
@@ -1419,8 +1514,10 @@ void RealPSet::Simplify(const TransMap &simplifiers, bool recursive)
       if (!existing)
 	m_posses.insert(PossMMapPair(poss->GetHash(),poss));
       else {
-	if (m_posses.size() == 0)
+	if (m_posses.size() == 0) {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
+	}
       }
 
       iter = m_posses.begin();
@@ -1626,8 +1723,10 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 
   RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[num]);
 
-  if (pset->IsLoop() || !pset->IsTransparent())
+  if (pset->IsLoop() || !pset->IsTransparent()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   
   NodeIntMap tunnelNumMap;
   
@@ -1748,16 +1847,20 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 #if USESHADOWS
         BasePSet *newSet = oldSet->GetNewShadow();
         newSet->Duplicate(*setIter, map, true, true);
-	if (oldSet->m_inTuns.size() != newSet->m_inTuns.size())
+	if (oldSet->m_inTuns.size() != newSet->m_inTuns.size()) {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
+	}
 	//	TunVecIter tunIterNew = newSet->m_inTuns.begin();
 	//	for(; tunIterNew != newSet->m_inTuns.end(); ++tunIterNew) {
 	for(auto newTun : newSet->m_inTuns) {
 	  //	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
 	  newTun->m_pset = newSet;
 	}
-	if (oldSet->m_outTuns.size() != newSet->m_outTuns.size())
+	if (oldSet->m_outTuns.size() != newSet->m_outTuns.size()) {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
+	}
 	//tunIterNew = newSet->m_outTuns.begin();
 	//	for(; tunIterNew != newSet->m_outTuns.end(); ++tunIterNew) {
 	//	  Tunnel *newTun = (Tunnel*)(*tunIterNew);
@@ -1795,19 +1898,25 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
         NodeConn *conn = *connIter;
         NodeIntMapIter mapIter = tunnelNumMap.find(conn->m_n);
         if (mapIter != tunnelNumMap.end()) {
-	  if (!conn->m_n->IsTunnel(SETTUNOUT))
+	  if (!conn->m_n->IsTunnel(SETTUNOUT)) {
 	    LOG_FAIL("replacement for throw call");
+	    throw;
+	  }
 	  //check for multiple in/out
-	  if (conn->m_num)
+	  if (conn->m_num) {
 	    LOG_FAIL("replacement for throw call");
+	    throw;
+	  }
           Node *newParent = map[currPoss->OutTun(mapIter->second)->Input(conn->m_num)];
           unsigned int newNum = currPoss->OutTun(mapIter->second)->InputConnNum(conn->m_num);
 	  if (newParent->IsTunnel(POSSTUNIN)) {
 	    newParent = newParent->Input(0); // SetTunIn;
 	    newNum = newParent->InputConnNum(0);
 	    newParent = map[newParent->Input(0)];
-	    if (!newParent)
+	    if (!newParent) {
 	      LOG_FAIL("replacement for throw call");
+	      throw;
+	    }
 	  }
 	  else {
 	    for(unsigned int i = 0; i < newParent->m_children.size(); ++i) {
@@ -1844,12 +1953,14 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
           if (setInputNum >= setInput->m_inputs.size()) {
             cout << "didn't find setInput that is the child\n";
             LOG_FAIL("replacement for throw call");
+	    throw;
           }
           
           Node *inTun = currPoss->InTun(mapIter->second);
           if (inTun->Input(0) != setInput) {
             cout <<"inTun->Input(0) != setInput\n";
             LOG_FAIL("replacement for throw call");
+	    throw;
           }
 
           connIter = inTun->m_children.begin();
@@ -1894,8 +2005,10 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
     NodeSetIter cleanupIter = cleanupNodes.begin();
     for(; cleanupIter != cleanupNodes.end(); ++cleanupIter) {
       Node *node = *cleanupIter;
-      if (!node->m_children.empty())
+      if (!node->m_children.empty()) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
       newPoss->DeleteChildAndCleanUp(node,false,false,true);
     }
 
@@ -1905,11 +2018,13 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
       if (!node) {
         cout << "!node in dup\n";
         LOG_FAIL("replacement for throw call");
+	throw;
       }
       newPoss->m_inTuns.push_back(node);
       if (!(*iter)->m_poss) {
         cout << "!(*iter)->m_poss for " << *iter << endl;
         LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
     
@@ -1919,10 +2034,12 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
       if (!(*iter)->m_poss) {
         cout << "!(*iter)->m_poss\n";
         LOG_FAIL("replacement for throw call");
+	throw;
       }
       if (!node) {
         cout << "!node in dup\n";
         LOG_FAIL("replacement for throw call");
+	throw;
       }
       newPoss->m_outTuns.push_back(node);
     }
@@ -1934,8 +2051,10 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 	Node *in = node->Input(i);
 	if (tunnelNumMap.find(in) != tunnelNumMap.end()) {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
 	} else if (in->m_poss != node->m_poss) {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
 	}
       }
     }
@@ -1963,6 +2082,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 	  cout << node << " " << node->GetType() << endl;
 	  cout << "child " << i << " is " << child << " " << child->GetType() << endl;
 	  LOG_FAIL("replacement for throw call");
+	  throw;
 	}
       }
     }
@@ -1988,6 +2108,7 @@ void RealPSet::Cull(CullFunction cullFunc)
   if (iter == m_posses.end()){
     cout << "starting with nothing\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   while (iter != m_posses.end()) {
     Poss *poss = (*iter).second;
@@ -2008,6 +2129,7 @@ void RealPSet::Cull(CullFunction cullFunc)
   if (m_posses.size() == 0) {
     cout << "Ran out of posses\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -2046,13 +2168,16 @@ void RealPSet::UnflattenCore(ifstream &in, SaveInfo &info)
   }
   char tmp;
   READ(tmp);
-  if (tmp != END)
+  if (tmp != END) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   iter = m_posses.begin();
   for(; iter != m_posses.end(); ++iter) {
     if ((*iter).second->GetHash() != (*iter).first) {
       cout << "not same hash while reading\n";
       LOG_FAIL("replacement for throw call");
+      throw;
     }
   }
 }
@@ -2165,6 +2290,7 @@ const string& RealPSet::GetFunctionalityString() const
   if (m_functionality.empty()) {
     cout << m_posses.size() << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   else
     return m_functionality;
@@ -2175,8 +2301,10 @@ ShadowPSet* RealPSet::GetNewShadow()
 {
   ShadowPSet *shadow = new ShadowPSet;
   shadow->m_realPSet = this;
-  if (shadow->IsLoop() != IsLoop())
+  if (shadow->IsLoop() != IsLoop()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   m_shadows.push_back(shadow);
   return shadow;
 }
@@ -2191,13 +2319,16 @@ void RealPSet::RemoveShadow(ShadowPSet *shadow)
     }
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 ShadowPSet* RealPSet::GetNewShadowDup(Poss *poss)
 {
   ShadowPSet *shadow = GetNewShadow();
-  if (IsLoop() != shadow->IsLoop())
+  if (IsLoop() != shadow->IsLoop()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 
   poss->AddPSet(shadow, true);
   TunVecIter iter = m_inTuns.begin();
@@ -2344,8 +2475,10 @@ bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
     // are different permutations of the same functionality string. go ahead and say these are different
     return false;
   }
-  if (IsLoop() != other->IsLoop())
+  if (IsLoop() != other->IsLoop()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_inTuns.size() != other->m_inTuns.size())
     return false;
   if (m_outTuns.size() != other->m_outTuns.size())
@@ -2378,6 +2511,7 @@ bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
       cout << in2->GetInputNameStr(0) << endl;
       cout << (name1 != name2);
       LOG_FAIL("replacement for throw call");
+      throw;
     }
   }
   return true;
@@ -2406,6 +2540,7 @@ bool RealPSet::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet 
 	if (j > i) {
 	  cout << "uhoh\n";
 	  LOG_FAIL("replacement for throw call");
+	  throw;
 	}
      
 	while (j < i) {
@@ -2448,8 +2583,10 @@ bool RealPSet::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet 
   int i = 0;
   PossMMap toRemove;
   for(auto possEntry : m_posses) {
-    if (lins[i].m_elems.empty())
+    if (lins[i].m_elems.empty()) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     if (rem[i]) {
       toRemove.insert(possEntry);
     }

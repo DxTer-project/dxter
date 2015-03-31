@@ -92,6 +92,7 @@ Tunnel* Tunnel::GetSetTunnel()
   else {
     cout << "GetSetTunnel on wrong tunnel type\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -100,8 +101,10 @@ void Tunnel::Prop()
   if (!IsValidCost(m_cost)) {
     DLANode::Prop();
 
-    if ((m_tunType == SETTUNIN || m_tunType == SETTUNOUT) && !m_pset)
+    if ((m_tunType == SETTUNIN || m_tunType == SETTUNOUT) && !m_pset) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     if ((m_tunType == POSSTUNIN && m_inputs.size() != 1)
 	|| (m_tunType == POSSTUNOUT && m_children.size() != 1))
       {
@@ -112,10 +115,12 @@ void Tunnel::Prop()
 	else
 	  cout << "m_tunType == POSSTUNOUT\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
     if (m_tunType == LASTTUNNEL) {
       cout << "bad tunnel type!\n";
       LOG_FAIL("replacement for throw call");
+      throw;
     }
     if (m_tunType == SETTUNIN || m_tunType == POSSTUNIN)
       if (!m_inputs.size()) {
@@ -125,6 +130,7 @@ void Tunnel::Prop()
 	else 
 	  cout << "m_tunType == SETTUNIN is on " << m_pset << endl;
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
 
 
@@ -132,17 +138,20 @@ void Tunnel::Prop()
       if (m_inputs.size() != 1) {
 	cout << "m_inputs.size() != 1\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
     }    
     else if (m_tunType == POSSTUNOUT) {
       if (!IsLoopTunnel() && m_inputs.size() != 1) {
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
     if (m_tunType == SETTUNIN || m_tunType == POSSTUNIN)
       if (!m_inputs.size()) {
 	cout << "!m_inputs.size() on " << this << "\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
 
     m_cost = ZERO;
@@ -159,8 +168,10 @@ void Tunnel::Prop()
 
 const DataTypeInfo& Tunnel::DataType(ConnNum num) const
 {
-  if (num != 0)
+  if (num != 0) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
     return GetRealTunnel()->DataType(num);
   }
@@ -297,8 +308,10 @@ Name Tunnel::GetName(ConnNum num) const
     return GetInputName(num);
   }
   else {
-    if (num > 0)
+    if (num > 0) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     return GetInputName(0);
   }
 }
@@ -321,6 +334,7 @@ unsigned int Tunnel::NumOutputs() const
     default:
       cout << "bad tunnel type\n";
       LOG_FAIL("replacement for throw call");
+      throw;
       return -1;
   } 
 }
@@ -371,8 +385,10 @@ bool Tunnel::Overwrites(const Node *input, ConnNum num) const
 {
   if (m_tunType == SETTUNIN) {
     if (m_pset->IsReal()) {
-      if (!m_children.size())
+      if (!m_children.size()) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
       const NodeConn *conn = m_children[0];
       return conn->m_n->Overwrites(this, 0);
     }
@@ -411,8 +427,10 @@ Tunnel* Tunnel::GetRealTunnel()
     unsigned int num = FindInTunVec(m_pset->m_outTuns, this);
     return (Tunnel*)(real->m_outTuns[num]);
   }
-  else
+  else {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 }
 
 
@@ -431,6 +449,8 @@ const Tunnel* Tunnel::GetRealTunnel() const
     unsigned int num = FindInTunVec(m_pset->m_outTuns, this);
     return (Tunnel*)(real->m_outTuns[num]);
   }
-  else
+  else {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 }

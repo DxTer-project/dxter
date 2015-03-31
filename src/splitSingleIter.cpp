@@ -725,14 +725,18 @@ const Sizes* SplitSingleIter::Len(ConnNum num, Dim dim) const
     case (SETTUNIN):
     case (POSSTUNOUT):
     case (SETTUNOUT):
-      if (num > 0)
+      if (num > 0) {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       return InputLen(0,dim);
     case (POSSTUNIN):
       if (num < 3) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_sizes)
+        if (!input->m_sizes) {
           LOG_FAIL("replacement for throw call");
+	  throw;
+	}
 	if (dim < m_partDim)
 	  return &(input->m_sizes[dim]);
 	else if (dim == m_partDim)
@@ -743,10 +747,13 @@ const Sizes* SplitSingleIter::Len(ConnNum num, Dim dim) const
       else if (num == 3) {
         return InputLen(0,dim);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -757,14 +764,18 @@ const Sizes* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
     case (SETTUNIN):
     case (POSSTUNOUT):
     case (SETTUNOUT):
-      if (num > 0)
+      if (num > 0) {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       return InputLocalLen(0,dim);
     case (POSSTUNIN):
       if (num < 3) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_lsizes)
+        if (!input->m_lsizes) {
           LOG_FAIL("replacement for throw call");
+	  throw;
+	}
 	if (dim < m_partDim)
 	  return &(input->m_lsizes[dim]);
 	else if (dim == m_partDim)
@@ -775,10 +786,13 @@ const Sizes* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
       else if (num == 3) {
         return InputLocalLen(0,dim);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 #endif
@@ -791,8 +805,10 @@ Tunnel* SplitSingleIter::GetSetTunnel()
     tun = new SplitSingleIter(m_dir, SETTUNIN, m_isControlTun);
   else if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT)
     tun = new SplitSingleIter(m_dir, SETTUNOUT, m_isControlTun);
-  else
+  else {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -804,8 +820,10 @@ Tunnel* SplitSingleIter::GetSetTunnel()
     tun = new SplitSingleIter(m_partDim, SETTUNIN, m_isControlTun);
   else if (m_tunType == POSSTUNOUT)
     tun = new SplitSingleIter(m_partDim, SETTUNOUT, m_isControlTun);
-  else
+  else {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -930,6 +948,7 @@ void SplitSingleIter::PrintCode(IndStream &out)
 	    break;
 	  default:
 	    LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
 	  string part;
 	  switch(m_dir) {
@@ -943,8 +962,10 @@ void SplitSingleIter::PrintCode(IndStream &out)
 	      part = "BLIS_SUBPART1";
 	    else if (num == 2)
 	      part = "BLIS_SUBPART2";
-	    else
+	    else {
 	      LOG_FAIL("replacement for throw call");
+	      throw;
+	    }
 	    break;
 	  case (PARTDIAG):
 	  case (PARTDIAGBACK):
@@ -966,11 +987,14 @@ void SplitSingleIter::PrintCode(IndStream &out)
 	      part = "BLIS_SUBPART12";
 	    else if (num == 8)
 	      part = "BLIS_SUBPART22";
-	    else
+	    else {
 	      LOG_FAIL("replacement for throw call");
+	      throw;
+	    }
 	    break;
 	  default:
 	    LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
 	  string loopLevel = out.LoopLevel();
 	  *out << "( " << part << ", idx" << loopLevel << ", bs" << loopLevel
@@ -1002,6 +1026,7 @@ void SplitSingleIter::PrintCode(IndStream &out)
 #else
   *out << "need split print code\n";
   LOG_FAIL("replacement for throw call");
+  throw;
 #endif
 }
 
@@ -1042,8 +1067,10 @@ bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
     return ((SplitSingleIter*)GetRealTunnel())->QuadInUse(quad,atEnd);
   if (m_tunType == SETTUNIN) {
     Node *child = Child(0);
-    if (!child->IsLoopTunnel())
+    if (!child->IsLoopTunnel()) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     return ((LoopTunnel*)child)->QuadInUse(quad, atEnd);
   }
   else if (m_tunType == POSSTUNIN) {
@@ -1114,27 +1141,36 @@ bool SplitSingleIter::QuadInUse(Quad quad, bool atEnd) const
 	break;
       default:
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       if (check && !(*iter)->m_n->IsTunnel(POSSTUNOUT))
         return true;
     }
     return false;
   }
-  else
+    else {
     LOG_FAIL("replacement for throw call");
+    throw;
+    }
 }
 
 void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
 {
   //update PrintIncrementAtEndOfLoop, too
 #if DOLLDLA
-  if (m_tunType != POSSTUNIN)
+  if (m_tunType != POSSTUNIN) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   const string name = GetInputNameStr(0);
-  if (m_dir != PARTDOWN && m_dir != PARTRIGHT)
+  if (m_dir != PARTDOWN && m_dir != PARTRIGHT) {
     LOG_FAIL("replacement for throw call");
-  if (PartInUse(0) || PartInUse(2))
+    throw;
+  }
+  if (PartInUse(0) || PartInUse(2)) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   out.Indent();
 
   BasePSet *pset = ((Tunnel*)Input(0))->m_pset;
@@ -1156,8 +1192,10 @@ void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
 	*out << type.m_colStrideVar << " * ";
       *out << bs.VarName();
     }
-    else
+    else {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
 
     *out << ");\n";
   }
@@ -1181,8 +1219,10 @@ void SplitSingleIter::PrintVarDeclarations(BSSize bs, IndStream &out) const
 
 bool SplitSingleIter::PartInUse(unsigned int partNum) const
 {
-  if (m_tunType != POSSTUNIN)
+  if (m_tunType != POSSTUNIN) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   NodeConnVecConstIter iter = m_children.begin();
   for(; iter != m_children.end(); ++iter) {
     const NodeConn *conn = *iter;
@@ -1199,10 +1239,14 @@ void SplitSingleIter::AddVariables(VarSet &set) const
 #if DOLLDLA
   if (m_tunType != POSSTUNIN)
     return;
-  if (GetLoopType() != LLDLALOOP) 
+  if (GetLoopType() != LLDLALOOP) {
     LOG_FAIL("replacement for throw call");
-  if (m_dir != PARTDOWN && m_dir != PARTRIGHT)
+    throw;
+  }
+  if (m_dir != PARTDOWN && m_dir != PARTRIGHT) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 
   const string name = GetInputNameStr(0);
 
@@ -1214,6 +1258,7 @@ void SplitSingleIter::AddVariables(VarSet &set) const
   } else {
     cout << "Error: Bad type, var " << name << " in SplitSingleIter::AddVariables\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   if (!pset->IsReal() || !((RealLoop*)pset)->IsUnrolled()) {
     if (PartInUse(0)) {
@@ -1234,8 +1279,10 @@ void SplitSingleIter::AddVariables(VarSet &set) const
     }
   }
   else if (pset->IsReal()) {
-    if (PartInUse(0) || PartInUse(2))
+    if (PartInUse(0) || PartInUse(2)) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     unsigned int numIters = NumIters(0);
     for(unsigned int i = 0; i < numIters; ++i) {
       if (GetDataType() == REAL_DOUBLE) {
@@ -1297,8 +1344,10 @@ CombineSingleIter* SplitSingleIter::CreateMatchingCombine(int numArgs, ...)
       com->AddInput(this, j);
       ++j;
     }
-    if (j >= numComIns)
+    if (j >= numComIns) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     com->AddInput(node, num);
     ++j;
   }
@@ -1313,8 +1362,10 @@ CombineSingleIter* SplitSingleIter::CreateMatchingCombine(int numArgs, ...)
 #if TWOD
 unsigned int SplitSingleIter::NumIters(Size bs, Size m, Size n) const
 {
-  if (!bs)
+  if (!bs) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   switch (m_dir) {
     case(PARTDOWN):
     case(PARTDIAG):
@@ -1326,14 +1377,18 @@ unsigned int SplitSingleIter::NumIters(Size bs, Size m, Size n) const
       return ceil(((double)n)/bs);
     case(LASTPARTDIR):
       LOG_FAIL("replacement for throw call");
+      throw;
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 #else
 unsigned int SplitSingleIter::NumIters(Size bs, Size size) const
 {
-  if (!bs)
+  if (!bs) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   return ceil(((double)size)/bs);
 }
 #endif
@@ -1353,6 +1408,7 @@ unsigned int SplitSingleIter::NumIters(unsigned int iterNum) const
     cout << Input(0)->GetNodeClass() << endl;
     cout << Input(0) << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   const Size m = (*ms)[iterNum];
   const Size n = (*ns)[iterNum];
@@ -1371,6 +1427,7 @@ unsigned int SplitSingleIter::NumIters(unsigned int iterNum) const
     cout << Input(0)->GetNodeClass() << endl;
     cout << Input(0) << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   const Size m = (*sizes)[iterNum];
   return NumIters(bs,m);
@@ -1393,6 +1450,7 @@ void SplitSingleIter::UnflattenCore(ifstream &in, SaveInfo &info)
 void SplitSingleIter::SanityCheckControlTunnel() const {
   if (!m_isControlTun) {
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -1401,6 +1459,7 @@ void SplitSingleIter::SanityCheckNumberOfSizes(unsigned int one, unsigned int tw
     cout << one << " vs. " << two << endl;
     cout.flush();
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -1433,8 +1492,10 @@ unsigned int SplitSingleIter::NumberOfLoopExecs() const
 #if TWOD
 void SplitSingleIter::StartFillingSizes()
 {
-  if (m_msizes)
+  if (m_msizes) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType != SETTUNIN)
     return;
   if (m_pset && !m_pset->IsReal())
@@ -1467,8 +1528,10 @@ void SplitSingleIter::StartFillingSizes()
 #else
 void SplitSingleIter::StartFillingSizes()
 {
-  if (m_sizes)
+  if (m_sizes) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType != SETTUNIN)
     return;
   if (m_pset && !m_pset->IsReal())
@@ -1522,6 +1585,7 @@ void SplitSingleIter::SanityCheckExecNum(unsigned int execNum, unsigned int leng
     cout << "Input(0)->Input(0) n: ";
     ((DLANode*) Input(0)->Input(0))->GetN(0)->Print();
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -1535,6 +1599,7 @@ void SplitSingleIter::SanityCheckSizes(const Sizes* ms, const Sizes* ns) {
     cout << Input(0)->GetNodeClass() << endl;
     cout << Input(0) << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -1549,6 +1614,7 @@ void SplitSingleIter::SanityCheckNumIters(Size bs, Size m, Size n, unsigned int 
       cout << m_children[i]->m_n->GetNodeClass() << endl;
     }
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -1558,8 +1624,10 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     return;
   if (m_pset && !m_pset->IsReal())
     return;
-  if (!m_msizes)
+  if (!m_msizes) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 
   const Sizes *ms = GetInputM(0);
   const Sizes *ns = GetInputN(0);
@@ -1587,6 +1655,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
       Node *tun = conn->m_n;
       if (!tun->IsTunnel(POSSTUNIN)) {
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       NodeConnVecIter iter = tun->m_children.begin();
       for(; iter != tun->m_children.end() && !found; ++iter) {
@@ -1606,6 +1675,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
   }
   if (!foundOne) {
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 #else
@@ -1615,8 +1685,10 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     return;
   if (m_pset && !m_pset->IsReal())
     return;
-  if (!m_sizes)
+  if (!m_sizes) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   const Size bs = GetMyLoop()->GetBS();
   Dim numDims = InputNumDims(0);
   for (Dim dim = 0; dim < numDims; ++dim) {
@@ -1624,6 +1696,7 @@ void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, u
     unsigned int length = sizes->NumSizes();
     if (length <= execNum) {
       LOG_FAIL("replacement for throw call");
+      throw;
     }
     const Size len = (*sizes)[execNum];
 
@@ -1665,6 +1738,7 @@ void SplitSingleIter::UpdateLocalSizes()
   else {
     cout << loopType << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 #elif DOTENSORS
@@ -1714,19 +1788,24 @@ string SplitSingleIter::LoopBound()
       }
     case (PARTDIAG):
       LOG_FAIL("replacement for throw call");
+      throw;
       break;
     case (PARTUPWARD):
       LOG_FAIL("replacement for throw call");
+      throw;
       break;
     case (PARTLEFT):     
       LOG_FAIL("replacement for throw call");
+      throw;
       break;
 
     case (PARTDIAGBACK):
       LOG_FAIL("replacement for throw call");
+      throw;
       break;
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 #endif
@@ -1735,8 +1814,10 @@ string SplitSingleIter::LoopBound()
 void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 {
   // Update PrintVarDeclarations, too
-  if (m_tunType != POSSTUNIN)
+  if (m_tunType != POSSTUNIN) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 #if DOLLDLA
   out.Indent(1);
   const DataTypeInfo &type = InputDataType(0);
@@ -1751,10 +1832,14 @@ void SplitSingleIter::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
       *out << type.m_colStrideVar << " * ";
     *out << bs.VarName() << ";\n";
   }
-  else
+  else {
     LOG_FAIL("replacement for throw call");
-  if (PartInUse(0) || PartInUse(2))
+    throw;
+  }
+  if (PartInUse(0) || PartInUse(2)) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 
 #endif
 }
@@ -1776,6 +1861,7 @@ void SplitSingleIter::BuildDataTypeCache()
       break;
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
   }
 }
@@ -1795,8 +1881,10 @@ const DataTypeInfo& SplitSingleIter::DataType(ConnNum num) const
       else if (num == numElems) {
 	return InputDataType(0);
       }
-      else
+      else {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
     }
   }
   else {
@@ -1810,8 +1898,10 @@ const DataTypeInfo& SplitSingleIter::DataType(ConnNum num) const
 void SplitSingleIter::MigrateFromOldTun(Tunnel *tun)
 {
   LoopTunnel::MigrateFromOldTun(tun);
-  if (!tun->IsSplit())
+  if (!tun->IsSplit()) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   m_info = ((SplitSingleIter*)tun)->m_info;
 }
 #endif
@@ -1827,8 +1917,10 @@ LoopTunnel* SplitSingleIter::GetMatchingOutTun() const
       LoopTunnel *realSetTunOut = (LoopTunnel*)(possTunOut->Child(0));
       return (LoopTunnel*)(m_pset->m_outTuns[FindInTunVec(m_pset->GetReal()->m_outTuns, realSetTunOut)]);
     }
-  else if (m_tunType != POSSTUNIN) 
+  else if (m_tunType != POSSTUNIN) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   
 
   //BAMTODO : instead of doing this search, the child connected to the 
@@ -1844,6 +1936,7 @@ LoopTunnel* SplitSingleIter::GetMatchingOutTun() const
   }
   cout << "Didn't find matching out tun\n";
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 
@@ -1864,10 +1957,14 @@ string SplitSingleIter::LoopLevel() const
     if (in->IsLoopTunnel())
       ++level;
     in = in->Input(0);
-    if (!in)
+    if (!in) {
       LOG_FAIL("replacement for throw call");
-    if (poss == in->m_poss)
+      throw;
+    }
+    if (poss == in->m_poss) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     poss = in->m_poss;
   }
   return (string)"_lvl" + ((char)(level+48));

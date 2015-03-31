@@ -112,6 +112,7 @@ void Node::Cull(Phase phase)
       
       m_poss->PrintTransVec();
       LOG_FAIL("replacement for throw call");
+      throw;
     }
     else
       m_poss->MarkInsane(true);
@@ -143,6 +144,7 @@ void Node::RemoveChild(Node *node, ConnNum num)
   }
   fflush(stdout);
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void Node::RemoveInput(Node *node, ConnNum num)
@@ -164,6 +166,7 @@ void Node::RemoveInput(Node *node, ConnNum num)
   cout << "Input(0) = " << Input(0) << " " << Input(0)->GetType() << endl;
   
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void Node::RemoveAllInputs2Way()
@@ -271,6 +274,7 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
     if (!Input(i)) {
       cout<<"!m_inputs[i]->m_n\n";
       LOG_FAIL("replacement for throw call");
+      throw;
     }
     NodeMapIter find = map.find(Input(i));
     if (find == map.end()) {
@@ -284,6 +288,7 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
 	cout << "my poss = " << m_poss << endl;
 	printf("didn't find input %s, %p for %s, %p\n", Input(i)->GetType().c_str(), Input(i), GetType().c_str(), this);
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
     else {
@@ -308,6 +313,7 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
 	cout << "m_poss = " << m_poss << endl;
 	cout << "child's poss = " << m_children[i]->m_n->m_poss << endl;
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
     else {
@@ -338,6 +344,7 @@ void Node::AddInput(Node *node)
   else {
     cout << "bad call to AddInput on " << node->GetType() << "\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -373,8 +380,10 @@ void Node::AddInputs0(int numArgs, ...)
 void Node::ChangeInput1Way(Node *oldInput, ConnNum oldNum, Node *newInput, ConnNum newNum)
 {
   //Reflect in 2Way
-  if (oldInput == newInput && oldNum == newNum)
+  if (oldInput == newInput && oldNum == newNum) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   ConnNum i = 0;
   NodeConnVecIter iter = m_inputs.begin();
   for ( ; iter != m_inputs.end(); ++iter) {
@@ -391,13 +400,16 @@ void Node::ChangeInput1Way(Node *oldInput, ConnNum oldNum, Node *newInput, ConnN
   for (ConnNum i = 0; i < m_inputs.size(); ++i)
     cout << "input " << i << " is " << m_inputs[i]->m_n->GetType() << " " <<  m_inputs[i] << " on " << m_inputs[i]->m_n->m_poss << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void Node::ChangeInput2Way(Node *oldInput, ConnNum oldNum, Node *newInput, ConnNum newNum)
 {
   //Reflect in 1Way
-  if (oldInput == newInput && oldNum == newNum)
+  if (oldInput == newInput && oldNum == newNum) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   ConnNum i = 0;
   NodeConnVecIter iter = m_inputs.begin();
   for ( ; iter != m_inputs.end(); ++iter) {
@@ -416,6 +428,7 @@ void Node::ChangeInput2Way(Node *oldInput, ConnNum oldNum, Node *newInput, ConnN
   for (ConnNum i = 0; i < m_inputs.size(); ++i)
     cout << "input " << i << " is " << m_inputs[i]->m_n->GetType() << " " <<  m_inputs[i] << " on " << m_inputs[i]->m_n->m_poss << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void Node::RedirectChildren(Node *newInput)
@@ -423,6 +436,7 @@ void Node::RedirectChildren(Node *newInput)
   if (newInput->NumOutputs() != 1) {
     cout << "Bad call to RedirectChildren 1\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   else
     RedirectChildren(newInput, 0);
@@ -433,6 +447,7 @@ void Node::RedirectChildren(Node *newInput, ConnNum newNum)
   if (NumOutputs() != 1) {
     cout << "Bad call to RedirectChildren 2\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   else
     RedirectChildren(0, newInput, newNum);
@@ -444,6 +459,7 @@ void Node::RedirectChildren(ConnNum oldNum, Node *newInput, ConnNum newNum)
   if (!m_children.size()) {
     cout << "no children for " << this << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   for(unsigned int i = 0; i < m_children.size(); ++i) {
     NodeConn *output = m_children[i];
@@ -456,6 +472,7 @@ void Node::RedirectChildren(ConnNum oldNum, Node *newInput, ConnNum newNum)
   if (!found) {
     cout << "!found\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -495,6 +512,7 @@ void Node::CheckConnections()
       if ((*iter1)->m_n->m_poss != m_poss) {
         cout << "Input to " << GetType() << " isn't in the same poss (" << (*iter1)->m_n->GetType() << ")\n";
         LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
     
@@ -506,8 +524,10 @@ void Node::CheckConnections()
         if (*iter == tun->m_pset)
           found = true;
       }
-      if (!found)
+      if (!found) {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
     }
     
     
@@ -521,6 +541,7 @@ void Node::CheckConnections()
       if (!found) {
         cout << "Input " << (*iter1)->m_n->GetType() << " not in Alg's list\n";
         LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
     
@@ -542,6 +563,7 @@ void Node::CheckConnections()
       m_poss->PrintTransVecUp();
 
       LOG_FAIL("replacement for throw call");
+      throw;
     }
   }
   
@@ -551,6 +573,7 @@ void Node::CheckConnections()
       cout << "m_children->m_num >= NumOutputs()\n";
       cout << "m_children->m_num = " << (*iter2)->m_num << "   NumOutputs() = " << NumOutputs() << endl;
       LOG_FAIL("replacement for throw call");
+      throw;
     }
     if ((*iter2)->m_n->m_poss) {
       NodeVecConstIter nodeIter = (*iter2)->m_n->m_poss->m_possNodes.begin();
@@ -568,6 +591,7 @@ void Node::CheckConnections()
 	cout << "child is " << (*iter2)->m_n << endl;
 	cout << "child is a " << (*iter2)->m_n->GetType() << endl;
         LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
   }
@@ -582,6 +606,7 @@ void Node::CheckConnections()
         cout << "Didn't find " << this << " " << GetType() << " as input to child " << child << " " << child->GetType() << " input list\n";
 	m_poss->PrintTransVec();
         LOG_FAIL("replacement for throw call");
+	throw;
       }
     }
   }
@@ -598,6 +623,7 @@ void Node::CheckConnections()
     if (!found) {
       cout << "Poss doesn't know about " << GetType() << endl;
       LOG_FAIL("replacement for throw call");
+      throw;
     }
   }
 }
@@ -606,6 +632,7 @@ NodeType Node::GetType() const
 {
   cout << GetNodeClass() << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 Name Node::GetInputName(ConnNum num) const
@@ -629,10 +656,12 @@ Node* Node::Input(ConnNum num) const
     cout << num << " >= " << m_inputs.size() << endl;
     cout << "node " << this << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   if (!(m_inputs[num]->m_n)) {
     cout << "(!(m_inputs[num]->m_n))\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   NodeConn *conn = m_inputs[num];
   return conn->m_n;
@@ -644,18 +673,22 @@ NodeConn* Node::InputConn(ConnNum num) const
     cout << "num bad size on " << GetType() << "\n";
     cout << "num " << num << " >= " << m_inputs.size() << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   if (!(m_inputs[num]->m_n)) {
     cout << "(!(m_inputs[num]->m_n))\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   return m_inputs[num];
 }
 
 ConnNum Node::InputConnNum(ConnNum num) const
 {
-  if (m_inputs.size() <= num)
+  if (m_inputs.size() <= num) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   return m_inputs[num]->m_num;
 }
 
@@ -810,8 +843,10 @@ void FullyUnflatten(NodeVec &vec, ifstream &in, SaveInfo &info)
   for(; iter != vec.end(); ++iter) {
     (*iter)->Unflatten(in, info);
     READ(tmp);
-    if (tmp != END)
+    if (tmp != END) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
   }
 }
 
@@ -920,6 +955,7 @@ string Node::GetFunctionalityString() const
       if (!set) {
 	cout << in->GetType() << endl;
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       str += "(";
       str += set->GetFunctionalityString();
