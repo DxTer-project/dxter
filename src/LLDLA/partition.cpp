@@ -170,6 +170,19 @@ void Partition::BuildVerticalSizes() {
 }
 
 void Partition::BuildStartAndEndSizes(const Sizes* toSplit) {
+  /*  SizeEntry* sizeEnt = toSplit->m_entries[0];
+  int numIterations = sizeEnt->m_repeats;
+  int parFactor = sizeEnt->m_parFactor;
+  Size sizeOfEachIteration = sizeEnt->m_valA;
+  Size sizeOfEndIterations = sizeOfEachIteration - m_partSplitPoint;
+  
+  m_startSizes = new Sizes();
+  m_startSizes->AddRepeatedSizes(m_partSplitPoint, numIterations, parFactor);
+
+  m_endSizes = new Sizes();
+  m_endSizes->AddRepeatedSizes(sizeOfEndIterations, numIterations, parFactor);
+  return;
+*/
   m_startSizes = new Sizes();
   m_endSizes = new Sizes();
 
@@ -180,7 +193,7 @@ void Partition::BuildStartAndEndSizes(const Sizes* toSplit) {
     Size sizeOfEndIterations = sizeOfEachIteration - m_partSplitPoint;
 
     auto startEnt = new SizeEntry();
-    startEnt->SetRepeatedSizes(sizeOfEachIteration, numIterations, parFactor);
+    startEnt->SetRepeatedSizes(m_partSplitPoint, numIterations, parFactor);
     startEnt->m_repeats = entry->m_repeats;
     m_startSizes->m_entries.push_back(startEnt);
 

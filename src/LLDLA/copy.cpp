@@ -51,6 +51,7 @@ void Copy::Prop() {
       cout << "Input 0 # cols = " << GetInputNumCols(0) << endl;
       cout << "Input 1 # rows = " << GetInputNumRows(1) << endl;
       cout << "Input 1 # cols = " << GetInputNumCols(1) << endl;
+      this->m_poss->PrintTransVecUp();
 
       LOG_FAIL("Copy::Prop failed, inputs are not the same size");
       throw;
