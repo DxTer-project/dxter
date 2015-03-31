@@ -42,10 +42,13 @@ unsigned int FindInTunVec(const TunVec &vec, const Tunnel *node)
 {
   unsigned int i = 0;
   TunVecConstIter iter = vec.begin();
-  for(; iter != vec.end(); ++iter,++i)
-    if (*iter == node)
+  for(; iter != vec.end(); ++iter,++i) {
+    if (*iter == node) {
       return i;
+    }
+  }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 BasePSet::BasePSet()

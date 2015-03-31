@@ -126,11 +126,14 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
 	break;
       default:
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
   }
 #else
-  if (m_addDir)
+  if (m_addDir) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 #endif
       return name;
     }
@@ -163,8 +166,10 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
           name.m_name += "2";
         else if (num == 3)
           break;
-        else 
+        else {
           LOG_FAIL("replacement for throw call");
+	  throw;
+	}
 	break;
       case (PARTDIAG):
       case (PARTDIAGBACK):
@@ -188,12 +193,15 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
           name.m_name += "22";
         else if (num == 9)
           break;
-        else
+        else {
           LOG_FAIL("replacement for throw call");
+	  throw;
+	}
 	break;
       default:
         cout << "bad dir\n";
         LOG_FAIL("replacement for throw call");
+	throw;
         break;
       }
 
@@ -202,13 +210,17 @@ Name SplitSingleIter::GetName(ConnNum num, LoopType type) const
       name.m_name += "_iter" + std::to_string((long long int) loop->GetCurrIter());
     return name;
 #else
-    if (m_partDim >= InputNumDims(0))
+    if (m_partDim >= InputNumDims(0)) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     name.m_name += LoopLevel();
     if (num <= 2) 
       name.m_name += "_part" + std::to_string(m_partDim) + "_" + std::to_string(num);
-    else if (num > 3)
+    else if (num > 3) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
 #endif
     return name;
   }
@@ -231,6 +243,7 @@ void SplitSingleIter::Prop()
 	  if ((*iter)->m_num == (NumOutputs()-1)) {
 	    if (found) {
 	      LOG_FAIL("replacement for throw call");
+	      throw;
 	    } else {
 	      found = (*iter)->m_n;
 	    }
@@ -244,18 +257,21 @@ void SplitSingleIter::Prop()
       {
 	cout << "bad statuses\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
     else if ((m_dir == PARTRIGHT ||m_dir == PARTLEFT)
 	     && (GetUpStat(TL) != GetUpStat(BL) || GetUpStat(TR) != GetUpStat(BR)))
       {
 	cout << "bad statuses\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
 #endif  
     if (m_tunType == POSSTUNIN) {
       for(ConnNum i = 0; i < m_inputs.size(); ++i) {
 	if (Input(i)->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
 	}
       }
     }
@@ -268,28 +284,36 @@ void SplitSingleIter::Prop()
 	}
 	cout << m_pset << endl;
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       if (m_inputs.size() != 1) {
 	cout << "split has wrong number of inputs\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
       for (unsigned int i = 0; i < m_children.size(); ++i) {
 	if (Child(i)->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
 	}
       }
     }
     else {
       cout << "bad tunType\n";
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 
     m_cost = ZERO;
-    if ((dynamic_cast<const LoopInterface*>(GetMyLoop()))->GetBS() == ZERO)
+    if ((dynamic_cast<const LoopInterface*>(GetMyLoop()))->GetBS() == ZERO) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     if (m_tunType == POSSTUNIN) {
-      if (Input(0)->GetNodeClass() != SplitSingleIter::GetClass())
+      if (Input(0)->GetNodeClass() != SplitSingleIter::GetClass()) {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       Node *child = NULL;
       unsigned int size = m_children.size();  
       for (unsigned int i = 0; i < size; ++i) {
@@ -304,6 +328,7 @@ void SplitSingleIter::Prop()
 	    cout << m_children[i]->m_n->GetType() << endl;
 	    cout << m_children[i]->m_n << endl;
             LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
           else
             child = m_children[i]->m_n;
@@ -313,17 +338,21 @@ void SplitSingleIter::Prop()
         cout << GetNameStr(0) << endl;
         //m_poss->ForcePrint();
         LOG_FAIL("replacement for throw call");
+	throw;
       }
       else if (child->GetNodeClass() != CombineSingleIter::GetClass()) {
         LOG_FAIL("replacement for throw call");
+	throw;
       } else {
         CombineSingleIter* com = (CombineSingleIter*)child;
 #if TWOD
-        if (com->m_dir != m_dir)
+        if (com->m_dir != m_dir) {
 #else
-	if (com->m_partDim != m_partDim)
+	  if (com->m_partDim != m_partDim) {
 #endif
           LOG_FAIL("replacement for throw call");
+	  throw;
+	  }
       }
     }
   }
@@ -337,8 +366,10 @@ const Sizes* SplitSingleIter::GetM(ConnNum num) const
     case (SETTUNIN):
     case (POSSTUNOUT):
     case (SETTUNOUT):
-      if (num > 0)
+      if (num > 0) {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       return GetInputM(0);
     case (POSSTUNIN):
       if (num < GetNumElems(m_dir)) {
@@ -351,16 +382,20 @@ const Sizes* SplitSingleIter::GetM(ConnNum num) const
 	  cout << "loop " << input->m_pset << endl;
 	  
           LOG_FAIL("replacement for throw call");
+	  throw;
 	}
         return &(input->m_msizes[num]);
       }
       else if (num == GetNumElems(m_dir)) {
         return GetInputM(0);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -371,8 +406,10 @@ const Sizes* SplitSingleIter::GetN(ConnNum num) const
     case (SETTUNIN):
     case (POSSTUNOUT):
     case (SETTUNOUT):
-      if (num > 0)
+      if (num > 0) {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       return GetInputN(0);
     case (POSSTUNIN):
       if (num < GetNumElems(m_dir)) {
@@ -380,16 +417,20 @@ const Sizes* SplitSingleIter::GetN(ConnNum num) const
         if (!input->m_nsizes) {
 	  cout << "Error: m_nsizes is null for POSSTUNIN" << endl;
           LOG_FAIL("replacement for throw call");
+	  throw;
 	}
         return &(input->m_nsizes[num]);
       }
       else if (num == GetNumElems(m_dir)) {
         return GetInputN(0);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -401,23 +442,30 @@ const Sizes* SplitSingleIter::LocalM(ConnNum num) const
     case (SETTUNIN):
     case (POSSTUNOUT):
     case (SETTUNOUT):
-      if (num > 0)
+      if (num > 0) {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       return InputLocalM(0);
     case (POSSTUNIN):
       if (num < GetNumElems(m_dir)) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_mlsizes)
+        if (!input->m_mlsizes) {
           LOG_FAIL("replacement for throw call");
+	  throw;
+	}
         return input->m_mlsizes+num;
       }
       else if (num == GetNumElems(m_dir)) {
         return InputLocalM(0);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -428,23 +476,30 @@ const Sizes* SplitSingleIter::LocalN(ConnNum num) const
     case (SETTUNIN):
     case (POSSTUNOUT):
     case (SETTUNOUT):
-      if (num > 0)
+      if (num > 0) {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       return InputLocalN(0);
     case (POSSTUNIN):
       if (num < GetNumElems(m_dir)) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_nlsizes)
+        if (!input->m_nlsizes) {
           LOG_FAIL("replacement for throw call");
+	  throw;
+	}
         return input->m_nlsizes+num;
       }
       else if (num == GetNumElems(m_dir)) {
         return InputLocalN(0);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 #endif
@@ -455,8 +510,10 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
 		     Size m, Size n,
 		     Sizes &ms, Sizes &ns)
 {
-  if (m_tunType != SETTUNIN)
+  if (m_tunType != SETTUNIN) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   //  if (GetLoopType() != ELEMLOOP) {
   //    cout << "check that the m and n values are actually local sizes\n";
   //    cout << "also use currlm = currm...\n";
@@ -470,8 +527,10 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
 	ns.AddRepeatedSizes(n,numIters, parFactor);
       }
       else if (num ==1) {
-	if (ceil(m/bs) != numIters)
+	if (ceil(m/bs) != numIters) {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
+	}
 	ms.AddMidSizes(bs, m, parFactor);
 	ns.AddRepeatedSizes(n,numIters, parFactor);
       }
@@ -479,8 +538,10 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
 	ms.AddSizesWithLimit(m,-1*bs,0, parFactor);
 	ns.AddRepeatedSizes(n,numIters, parFactor);
       }
-      else 
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       break;
     case (PARTUPWARD):
       if (num == 0) {
@@ -495,8 +556,10 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
 	ms.AddSizesWithLimit(0,bs,m, parFactor);
 	ns.AddRepeatedSizes(n,numIters, parFactor);
       }
-      else 
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       break;
     case (PARTRIGHT):
       if (num == 0) {
@@ -511,8 +574,10 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
 	ms.AddRepeatedSizes(m,numIters, parFactor);
 	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       break;
     case (PARTLEFT):
       if (num == 0) {
@@ -527,8 +592,10 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
 	ms.AddRepeatedSizes(m,numIters, parFactor);
 	ns.AddSizesWithLimit(0,bs,n, parFactor);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       break;
     case (PARTDIAG):
       //First column
@@ -570,8 +637,10 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
 	ms.AddSizesWithLimit(m,-1*bs,0, parFactor);
 	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       break;
     case (PARTDIAGBACK):
       //First column
@@ -613,11 +682,14 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
 	ms.AddSizesWithLimit(0,bs,m, parFactor);
 	ns.AddSizesWithLimit(0,bs,n, parFactor);
       }
-      else
+      else {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       break;
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
       break;
     }
 }
@@ -629,15 +701,20 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
     case (SETTUNIN):
     case (POSSTUNOUT):
     case (SETTUNOUT):
-      if (num > 0)
+      if (num > 0) {
         LOG_FAIL("replacement for throw call");
+	throw;
+      }
       return InputNumDims(0);
     case (POSSTUNIN):
-      if (num > 3)
+      if (num > 3) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
       return InputNumDims(0);
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 

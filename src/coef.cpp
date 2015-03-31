@@ -55,6 +55,7 @@ string Coef::BLISStr() const
       return "&BLIS_MINUS_ONE_HALF";
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -78,6 +79,7 @@ string Coef::ElemStr() const
       return "-0.5";
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -103,6 +105,7 @@ string Coef::TenStr() const
       return "-0.5";
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -126,6 +129,7 @@ string Coef::LLDLAStr() const
       return "&LLDLA_NEG_ONE_HALF";
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -142,6 +146,7 @@ Coef Coef::operator*(const Coef &coef) const
   else {
     cout << "Coef*Coef = " << ElemStr() << " * " << coef.ElemStr() << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 
 }
@@ -155,10 +160,12 @@ Coef Coef::operator/(const Coef &coef) const
   if (coef.m_val == COEFVALZERO) {
     cout << "operator/ divide by zero\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   else {
     cout << "Coef/Coef = " << ElemStr() << " / " << coef.ElemStr() << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
