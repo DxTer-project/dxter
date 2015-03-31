@@ -33,6 +33,8 @@ class Recombine : public DLAOp<3, 1>
  private:
   Dir m_partType;
 
+  void SanityCheckDimensions();
+
  public:
   Layer m_layer;
   

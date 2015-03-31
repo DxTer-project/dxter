@@ -42,13 +42,18 @@ void Copy::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<2, 1>::Prop();
     if (!InputsAreSameSize(0, 1)) {
+      cout << "Input(0)" << endl;
+      cout << Input(0)->GetNodeClass() << endl;
+      cout << "Input(1)" << endl;
+      cout << Input(1)->GetNodeClass() << endl;
       cout << "ERROR: Copy operands do not have the same size" << endl;
       cout << "Input 0 # rows = " << GetInputNumRows(0) << endl;
       cout << "Input 0 # cols = " << GetInputNumCols(0) << endl;
       cout << "Input 1 # rows = " << GetInputNumRows(1) << endl;
       cout << "Input 1 # cols = " << GetInputNumCols(1) << endl;
 
-      LOG_FAIL("Replacement for call to throw;");
+      LOG_FAIL("Copy::Prop failed, inputs are not the same size");
+      throw;
     }
     m_cost = GetInputM(0)->SumProds11(*GetInputN(0));
   }

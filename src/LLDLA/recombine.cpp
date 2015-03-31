@@ -29,10 +29,25 @@ Recombine::Recombine(Layer layer, Dir partType)
   m_partType = partType;
 }
 
+void Recombine::SanityCheckDimensions() {
+  if ((m_partType == VERTICAL) &&
+      (GetInputNumRows(0) + GetInputNumRows(1) != GetInputNumRows(2))) {
+    LOG_FAIL("Bad dimension in VERTICAL Recombine::SanityCheckDimensions");
+    throw;
+  }
+  if ((m_partType == HORIZONTAL) &&
+      (GetInputNumCols(0) + GetInputNumCols(1) != GetInputNumCols(2))) {
+    LOG_FAIL("Bad dimension in HORIZONTAL Recombine::SanityCheckDimensions");
+    throw;
+  }
+
+}
+
 void Recombine::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLAOp<3, 1>::Prop();
+    SanityCheckDimensions();
     m_cost = 0;
   }
 
