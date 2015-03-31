@@ -755,8 +755,10 @@ string DiagToStr(Diag diag)
     return "UNIT";
   else if (diag == NONUNIT)
     return "NONUNIT";
-  else
+  else {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 }
 
 
@@ -847,6 +849,7 @@ Tri SwapTri(Tri tri)
     return LOWER;
   default:
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -923,6 +926,7 @@ void Name::Flatten(ofstream &out) const
 #endif
 #if DOTENSORS
   LOG_FAIL("replacement for throw call");
+  throw;
   //m_permutation
 #endif
   out << m_name << endl;
@@ -936,6 +940,7 @@ void Name::Unflatten(ifstream &in)
 #endif
 #if DOTENSORS
   LOG_FAIL("replacement for throw call");
+  throw;
   //m_permutation
 #endif
   getline(in, m_name);
@@ -962,6 +967,7 @@ bool NodeConn::operator==(const NodeConn &rhs) const
   if (!m_n || !rhs.m_n) {
     cout << "bad conn\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   return *m_n == *(rhs.m_n);
 }
@@ -971,6 +977,7 @@ void NodeConn::SetNode(Node *node)
   if (!node) {
     cout << "SetNode(null)\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   m_n = node;
 }
@@ -1004,6 +1011,7 @@ unsigned int FindInNodeVec(const NodeVec &vec, const Node *node)
     if (*iter == node)
       return i;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 #if DOTENSORS
@@ -1025,6 +1033,7 @@ unsigned int FindInSetVec(const PSetVec &vec, const BasePSet *set)
     if (*iter == set)
       return i;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 
@@ -1125,6 +1134,7 @@ void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM,
       break;
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
   }
 }
 #endif

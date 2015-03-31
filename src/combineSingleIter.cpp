@@ -61,22 +61,27 @@ void CombineSingleIter::Prop()
       {
 	cout << "bad statuses\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
     else if ((m_dir == PARTRIGHT || m_dir == PARTLEFT)
 	     && (GetUpStat(TL) != GetUpStat(BL) || GetUpStat(TR) != GetUpStat(BR)))
       {
 	cout << "bad statuses\n";
 	LOG_FAIL("replacement for throw call");
+	throw;
       }
 #endif
   
     if (m_tunType == SETTUNOUT) {
-      if (!m_pset->IsLoop())
+      if (!m_pset->IsLoop()) {
 	LOG_FAIL("replacement for throw call");
+	throw;
+      }
 
       for(ConnNum i = 0; i < m_inputs.size(); ++i) {
 	if (Input(i)->GetNodeClass() != CombineSingleIter::GetClass()) {
 	  LOG_FAIL("replacement for throw call");
+	  throw;
 	}
       }
     }
@@ -90,6 +95,7 @@ void CombineSingleIter::Prop()
 	  cout << "combine has wrong number of inputs\n";
 	  cout << num <<endl;
 	  LOG_FAIL("replacement for throw call");
+	  throw;
 	}
         NodeConn *conn = m_inputs[m_inputs.size()-1];
 #if TWOD
@@ -98,10 +104,12 @@ void CombineSingleIter::Prop()
 	  if (conn->m_num != 3) {
 #endif
 	    LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
-	  else if (conn->m_n->GetNodeClass() != SplitSingleIter::GetClass())
+	  else if (conn->m_n->GetNodeClass() != SplitSingleIter::GetClass()) {
 	    LOG_FAIL("replacement for throw call");
-	
+	    throw;
+	  }
 	if (Input(m_inputs.size()-1)->GetNodeClass() != SplitSingleIter::GetClass()) {
 	  cout << "Last input isn't the right size\n";
 	}
@@ -109,11 +117,13 @@ void CombineSingleIter::Prop()
 	  if (Child(i)->GetNodeClass() != CombineSingleIter::GetClass()) {
 	    cout << Child(i)->GetType() << endl;
 	    LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
 	}
       }
-    else
-	LOG_FAIL("replacement for throw call");
+	else {
+	  LOG_FAIL("replacement for throw call");
+	}
 
 #if DODM
 	const DataTypeInfo &type = GetRealTunnel()->InputDataType(0);
@@ -126,6 +136,7 @@ void CombineSingleIter::Prop()
 	    //	    cout << DistTypeToStr(type) << endl;
 	    //	    cout << DistTypeToStr(InputDataType(i).m_dist) << endl;
 	    LOG_FAIL("replacement for throw call");
+	    throw;
 	  }
 	}
 #endif
@@ -141,15 +152,19 @@ const DataTypeInfo& CombineSingleIter::DataType(ConnNum num) const
     return InputDataType(m_inputs.size()-1);
   else if (m_tunType == SETTUNOUT)
     return GetRealTunnel()->InputDataType(0);
-  else
+  else {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 }
 
 #if TWOD
 const Sizes* CombineSingleIter::GetM(ConnNum num) const
 {
-  if (num > 0)
+  if (num > 0) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(GetNumElems(m_dir))->Input(0)))->GetInputM(0);
   }
@@ -163,8 +178,10 @@ const Sizes* CombineSingleIter::GetM(ConnNum num) const
 
 const Sizes* CombineSingleIter::GetN(ConnNum num) const
 {
-  if (num > 0)
+  if (num > 0) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(GetNumElems(m_dir))->Input(0)))->GetInputN(0);
   }
@@ -179,8 +196,10 @@ const Sizes* CombineSingleIter::GetN(ConnNum num) const
 #if DODM
 const Sizes* CombineSingleIter::LocalM(ConnNum num) const
 {
-  if (num > 0)
+  if (num > 0) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType == SETTUNOUT) {
     DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
     DLANode *possTunIn = (DLANode*)(possTunOut->Input(GetNumElems(m_dir)));
@@ -197,8 +216,10 @@ const Sizes* CombineSingleIter::LocalM(ConnNum num) const
 
 const Sizes* CombineSingleIter::LocalN(ConnNum num) const
 {
-  if (num > 0)
+  if (num > 0) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(GetNumElems(m_dir))->Input(0)))->InputLocalN(0);
   }
@@ -216,8 +237,10 @@ const Sizes* CombineSingleIter::LocalN(ConnNum num) const
 #else
 const Dim CombineSingleIter::NumDims(ConnNum num) const
 {
-  if (num > 0)
+  if (num > 0) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(3)->Input(0)))->NumDims(0);
   }
@@ -231,8 +254,10 @@ const Dim CombineSingleIter::NumDims(ConnNum num) const
 
 const Sizes* CombineSingleIter::Len(ConnNum num, Dim dim) const
 {
-  if (num > 0)
+  if (num > 0) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType == SETTUNOUT) {
     return ((DLANode*)(GetRealTunnel()->Input(0)->Input(3)->Input(0)))->Len(0,dim);
   }
@@ -246,8 +271,10 @@ const Sizes* CombineSingleIter::Len(ConnNum num, Dim dim) const
 
 const Sizes* CombineSingleIter::LocalLen(ConnNum num, Dim dim) const
 {
-  if (num > 0)
+  if (num > 0) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType == SETTUNOUT) {
     DLANode *possTunOut = (DLANode*)(GetRealTunnel()->Input(0));
 #if TWOD
@@ -271,8 +298,10 @@ const Sizes* CombineSingleIter::LocalLen(ConnNum num, Dim dim) const
 
 Name CombineSingleIter::GetName(ConnNum num) const
 {
-  if (num > 0)
+  if (num > 0) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   if (m_tunType == POSSTUNOUT)
     return ((SplitSingleIter*)Input(m_inputs.size()-1))->GetOrigName();
   else
@@ -290,14 +319,16 @@ Tunnel* CombineSingleIter::GetSetTunnel()
     tun = new CombineSingleIter(m_partDim, SETTUNIN);
 #endif
 else*/
-  if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT)
+  if (m_tunType == POSSTUNOUT || m_tunType == SETTUNOUT) {
 #if TWOD
     tun = new CombineSingleIter(m_dir, SETTUNOUT);
 #else
     tun = new CombineSingleIter(m_partDim, SETTUNOUT);
 #endif
-  else
+  } else {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   tun->CopyTunnelInfo(this);
   return tun;
 }
@@ -406,6 +437,7 @@ void CombineSingleIter::PrintCode(IndStream &out)
 	   << m_partDim << " );\n";
 #else
   LOG_FAIL("replacement for throw call");
+  throw;
 #endif
 }
 
@@ -431,8 +463,10 @@ LoopTunnel* CombineSingleIter::GetMatchingInTun() const
       LoopTunnel *realSetTunIn = (LoopTunnel*)(possTunIn->Input(0));
       return (LoopTunnel*)(m_pset->m_inTuns[FindInTunVec(m_pset->GetReal()->m_inTuns, realSetTunIn)]);
     }
-  else if (m_tunType != POSSTUNOUT)
+  else if (m_tunType != POSSTUNOUT) {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
   
 #if DOTENSORS
   const Node *in = Input(3);
@@ -445,5 +479,6 @@ LoopTunnel* CombineSingleIter::GetMatchingInTun() const
   else {
     cout << "Didn't find matching in tun\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }

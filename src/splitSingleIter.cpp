@@ -28,6 +28,7 @@
 
 #include "helperNodes.h"
 
+#include "partition.h"
 
 #if TWOD
 SplitSingleIter::SplitSingleIter() 
@@ -1333,6 +1334,19 @@ unsigned int SplitSingleIter::NumberOfLoopExecs() const
 #if TWOD
   unsigned int one = GetInputM(0)->NumSizes();
   unsigned int two = GetInputN(0)->NumSizes();
+
+  /*  cout << "Input sizes" << endl;
+  GetInputM(0)->Print();
+  GetInputN(0)->Print();
+  cout << endl;
+
+  cout << "Input to splitSingleIter" << endl;
+  cout << Input(0)->GetNodeClass() << endl;
+  cout << "Sizes of inputs to splitSingleIter input" << endl;
+  Partition* in = (Partition*) Input(0);
+  cout << "Partition name" << in->GetType() << endl;
+  in->GetInputM(0)->Print();
+  in->GetInputN(0)->Print();*/
   SanityCheckNumberOfSizes(one, two);
   return one;
 #else

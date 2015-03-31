@@ -26,11 +26,30 @@
 #if DOLLDLA
 
 #include "benchmarkStats.h"
+#include "miscellaneousExamples.h"
 #include "problemInstance.h"
 #include "problemRunner.h"
 #include "singleOperationExamples.h"
 
 using namespace std;
+
+void SVMulAddBenchmark(Type type, int m, int mInc, int numIters) {
+  cout << "--------------------- svmul add benchmark -----------------------------\n\n";
+  BenchmarkStats benchStats(TypeToStr(type) + "_svmul_add");
+  for (int i = 0; i < numIters; i++) {
+    RealPSet* test = VMulAddBenchmark(type, m);
+    ProblemInstance dotProd;
+    dotProd.SetName("dotProd");
+    dotProd.SetType(type);
+    dotProd.AddDimension(m, "m");
+    auto pStats = RunProblemWithRTE(1, test, &dotProd);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += mInc;
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- svmul add benchmark ---------------------------\n";
+}
 
 void SVMulBenchmark(Type type, VecType vecType, int m, int increment, int numIters) {
   cout << "--------------------- scalar vector multiply benchmark -----------------------------\n\n";

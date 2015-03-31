@@ -34,11 +34,29 @@ unsigned int GetBenchmarkNumber() {
   cout << "     3 -> Gemv benchmarks" << endl;
   cout << "     4 -> MAdd benchmark" << endl;
   cout << "     5 -> Column VAdd benchmark" << endl;
-  cout << "     6 -> SVMul benchmark" << endl << endl;
+  cout << "     6 -> SVMul benchmark" << endl;
+  cout << "     7 -> SVMulAdd benchmark" << endl;
   cout << "select one of the options listed above: ";
   unsigned int benchmarkOption;
   cin >> benchmarkOption;
   return benchmarkOption;
+}
+
+void SVMulAddBenchmarkMenu() {
+ Type type;
+  int m, inc, iters;
+
+  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
+  char typeChar;
+  cin >> typeChar;
+  type = CharToType(typeChar);
+  cout << "Starting M value: ";
+  cin >> m;
+  cout << "M increment: ";
+  cin >> inc;
+  cout << "Number of iterations: ";
+  cin >> iters;
+  SVMulAddBenchmark(type, m, inc, iters);
 }
 
 void DotProductBenchmarkMenu() {
@@ -139,6 +157,9 @@ void RunBenchmarkNumber(unsigned int num) {
     ColVAddBenchmarkMenu();
   case(6):
     SVMulBenchmarkMenu();
+    break;
+  case(7):
+    SVMulAddBenchmarkMenu();
     break;
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;

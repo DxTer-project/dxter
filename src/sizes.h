@@ -87,6 +87,8 @@ class SizeEntry
   SizesType GetType() const;
   bool ConstantMidSizeEntry() const;
 
+
+
   void SetRepeatedSizes(Size size, int repeats, int parFactor);
   void SetSizeRange(Size start, int stride, Size end, int parFactor);
   void SetMidSizes(Size size, Size totalSize, int parFactor);
@@ -128,6 +130,8 @@ class Sizes
   Sizes(double constVal);
   Sizes(const Sizes &rhs);
   virtual ~Sizes();
+
+  Sizes* PartitionedSize(int splitPoint);
 
   void Print() const;
   void Print(IndStream &out) const;

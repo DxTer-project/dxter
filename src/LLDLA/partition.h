@@ -74,7 +74,7 @@ class Partition : public DLANode
   virtual bool IsReadOnly() const { return false; }
   virtual bool CanTrans() const { return false; }
 
-  virtual NodeType GetType() const { return "Partition"; }
+  virtual NodeType GetType() const { return "Partition" + std::to_string((long long int) m_partType); }
   static ClassType GetClass() {return "partitionNode";}
   virtual ClassType GetNodeClass() const { return GetClass(); }
   virtual Name GetName(ConnNum num) const;

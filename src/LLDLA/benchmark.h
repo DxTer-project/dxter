@@ -26,6 +26,7 @@
 
 #if DOLLDLA
 
+void SVMulAddBenchmark(Type type, int m, int mInc, int numIters);
 void SVMulBenchmark(Type type, VecType vecType, int m, int mInc, int iters);
 void ColVAddBenchmark(Type type, int m, int increment, int numIters);
 void MAddBenchmark(Type type, int mBase, int mInc, int nBase, int nInc, int numIters);
