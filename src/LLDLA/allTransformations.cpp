@@ -35,6 +35,21 @@
 #include "vvdot.h"
 #include "vvdotPackToMultipleOfMu.h"
 
+#define DOCOMPACTLOOPUNROLLING 0
+#define DO2MUTRANSFORMATIONS 1
+#define DO3MUTRANSFORMATIONS 1
+#define DO16MUTRANSFORMATIONS 1
+#define DOLARGEMUTRANSFORMATIONS 0
+
+#define DOPARTIALLOOPUNROLLING 1
+#define PARTIALUNROLLINGSTARTCOEF 2
+#define PARTIALUNROLLINGENDCOEF 16
+
+#if DOCOMPACTLOOPUNROLLING + DOPARTIALLOOPUNROLLING > 1
+do you really want to do compact unrolling and partial unrolling?
+#endif
+
+
 void AddGemmTrans()
 {
     // Convert gemm into loop over mvmul
@@ -48,19 +63,19 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
 
-#if DOCOMPACTLOOPUNROLLING
+  if (DOCOMPACTLOOPUNROLLING) {
 #if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
 #endif
 
 #if DO3MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
 #endif
-#endif // DOCOMPACTLOOPUNROLLING
+  }
 
 
 #if DOCOMPACTLOOPUNROLLING
@@ -216,9 +231,9 @@ void AddVAddTrans()
 
   Universe::AddTrans(VAdd::GetClass(), new HorizontalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, VAdd::GetClass()), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+  //Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  //Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   return;
 }
