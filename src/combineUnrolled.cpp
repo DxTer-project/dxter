@@ -226,8 +226,10 @@ else */
 #else
     tun = new CombineUnrolled(m_partDim, m_unrollFactor, SETTUNOUT);
 #endif
-    else
+    else {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
   tun->CopyTunnelInfo(this);
   return tun;
 }
