@@ -6,7 +6,6 @@
 #include "copyColLoopRef.h"
 #include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
-#include "horizontalPackToMultipleOfVecRegWidth.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
 #include "LLDLATranspose.h"
@@ -30,8 +29,9 @@
 #include "unpackToPartAndCopy.h"
 #include "vmmul.h"
 #include "vadd.h"
+#include "vaddPackResidualToVRW.h"
 #include "vaddSplitToMainAndResidual.h"
-#include "verticalPackToMultipleOfVecRegWidth.h"
+#include "vrwVAddToRegArith.h"
 #include "vvdot.h"
 #include "vvdotPackToMultipleOfMu.h"
 
@@ -224,15 +224,19 @@ void AddVMMulTrans()
 
 void AddVAddTrans()
 {
-  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMuSingle), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new VerticalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, VAdd::GetClass()), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new HorizontalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, VAdd::GetClass()), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMuDouble), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMuDouble), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-
   Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VAdd::GetClass(), new VRWVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }

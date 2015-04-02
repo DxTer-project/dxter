@@ -60,14 +60,13 @@ Node* CopySymmetricBinop(Node* binop) {
   if (binop->GetNodeClass() == MAdd::GetClass()) {
     copy = MAdd::BlankInst();
   } else if (binop->GetNodeClass() == VAdd::GetClass()) {
-    copy = VAdd::BlankInst();
-  } else if (binop->GetNodeClass() == VVDot::GetClass()) {
-    copy = VVDot::BlankInst();
+    VAdd* vadd = static_cast<VAdd*>(binop);
+    copy = new VAdd(vadd->m_layer, vadd->GetVecType());
   } else {
-    copy = VVDot::BlankInst();
-    cout << "Error: " << binop->GetNodeClass() << " is not a symmetric, binary operation" << endl;
+    LOG_FAIL("Bad operand to CopySymmetricBinop");
+    throw;
   }
-  copy->Duplicate(binop, true, false);
+  //  copy->Duplicate(binop, true, false);
   return copy;
 }
 

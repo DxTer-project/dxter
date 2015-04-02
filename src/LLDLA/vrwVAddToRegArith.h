@@ -19,29 +19,25 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "horizontalPackToMultipleOfVecRegWidth.h"
+#include "LLDLA.h"
 
 #if DOLLDLA
 
-#include "packingUtils.h"
+#include "vadd.h"
+#include "transform.h"
 
-bool HorizontalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
-  const DLANode* dlaNode = static_cast<const DLANode*>(node);
-  if (dlaNode->GetLayer() != m_fromLayer) {
-    return false;
-  }
+class VRWVAddToRegArith : public SingleTrans {
+ private:
+  bool IsExactSizeVAdd(const VAdd* vadd) const;
 
-  return !(dlaNode->InputNIsMultipleOfVecRegWidth(0))
-    && dlaNode->GetInputNumCols(0) < dlaNode->GetVecRegWidth()
-    //    && dlaNode->GetInputNumCols(0) > 1
-    && dlaNode->GetInputNumRows(0) > 0;
-}
+ public:
+  Layer m_fromLayer, m_toLayer;
 
-void HorizontalPackToMultipleOfVecRegWidth::Apply(Node* node) const {
-  Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, DIMN, node->GetVecRegWidth());
-  node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
-  node->RedirectChildren(unpack, 0);
-  node->m_poss->DeleteChildAndCleanUp(node);
-}
+  VRWVAddToRegArith(Layer fromLayer, Layer toLayer);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+  virtual bool IsRef() const { return true; }
+};
 
 #endif // DOLLDLA

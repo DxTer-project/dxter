@@ -19,29 +19,42 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "horizontalPackToMultipleOfVecRegWidth.h"
+#include "vaddPackResidualToVRW.h"
 
 #if DOLLDLA
 
 #include "packingUtils.h"
+#include "unpack.h"
+#include "vadd.h"
 
-bool HorizontalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
-  const DLANode* dlaNode = static_cast<const DLANode*>(node);
-  if (dlaNode->GetLayer() != m_fromLayer) {
-    return false;
+bool VAddPackResidualToVRW::CanApply(const Node* node) const {
+  if (node->GetNodeClass() == VAdd::GetClass()) {
+    const VAdd* vadd = static_cast<const VAdd*>(node);
+
+    if (vadd->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if (vadd->GetVecType() != m_vecType) {
+      return false;
+    }
+
+    if (m_vecType == ROWVECTOR) {
+      return vadd->GetInputNumCols(0) < vadd->GetVecRegWidth();
+    } else {
+      return vadd->GetInputNumRows(0) < vadd->GetVecRegWidth();
+    }
   }
-
-  return !(dlaNode->InputNIsMultipleOfVecRegWidth(0))
-    && dlaNode->GetInputNumCols(0) < dlaNode->GetVecRegWidth()
-    //    && dlaNode->GetInputNumCols(0) > 1
-    && dlaNode->GetInputNumRows(0) > 0;
+  LOG_FAIL("Bad node type in VAddPackResidualToVRW");
+  throw;
 }
 
-void HorizontalPackToMultipleOfVecRegWidth::Apply(Node* node) const {
-  Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, DIMN, node->GetVecRegWidth());
+void VAddPackResidualToVRW::Apply(Node* node) const {
+  DimName packDim = m_vecType == ROWVECTOR ? DIMN : DIMM;
+  Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, packDim, node->GetVecRegWidth());
   node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
   node->RedirectChildren(unpack, 0);
   node->m_poss->DeleteChildAndCleanUp(node);
+  return;
 }
 
 #endif // DOLLDLA
