@@ -300,6 +300,7 @@ bool VAddLoopRef::CanApply(const Node *node) const
 
 void VAddLoopRef::Apply(Node *node) const
 {
+  cout << "Applying vadd loop ref" << endl;
   VAdd *vadd = static_cast<VAdd*>(node);
 
   SplitSingleIter *split1 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);

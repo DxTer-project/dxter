@@ -54,6 +54,7 @@ bool VAddSplitToMainAndResidual::CanApply(const Node* node) const {
 }
 
 void VAddSplitToMainAndResidual::Apply(Node* node) const {
+  cout << "Applying VAddSplit" << endl;
   DimName splitDim = m_vecType == ROWVECTOR ? DIMN : DIMM;
   auto recombine = SplitBinarySymmetricOperationIntoMainAndResidual(m_toLayer, node, splitDim, node->GetVecRegWidth());
   node->m_poss->AddUp(node->m_poss->m_possNodes, recombine, false, true);

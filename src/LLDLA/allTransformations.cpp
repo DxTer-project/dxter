@@ -108,13 +108,11 @@ void AddVVDotTrans()
   return;
 }
 
-void AddMAddTrans()
-{
-  Universe::AddTrans(MAdd::GetClass(), new MAddToVAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+void AddMAddTrans() {
+    Universe::AddTrans(MAdd::GetClass(), new MAddToVAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+    Universe::AddTrans(MAdd::GetClass(), new MAddToVAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-   Universe::AddTrans(MAdd::GetClass(), new MAddToVAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
-
-  return;
+    return;
 }
 
 void AddMVMulTrans()
@@ -286,22 +284,22 @@ void AddCopyTrans() {
 
 void AddTransformations()
 {
-  AddGemmTrans();
-  AddVVDotTrans();
+  /*  AddGemmTrans();
+      AddVVDotTrans();*/
   AddMAddTrans();
-  AddMVMulTrans();
+  /*  AddMVMulTrans();
   AddSMMulTrans();
   AddSVMulTrans();
-  AddVMMulTrans();
+  AddVMMulTrans();*/
   AddVAddTrans();
 
-  AddTransposeTrans();
+  /*  AddTransposeTrans();
   AddUnrollingTrans();
   AddPartitionRecombineTrans();
   AddSetToZeroTrans();
   AddPackTrans();
   AddUnpackTrans();
-  AddCopyTrans();
+  AddCopyTrans();*/
 }
 
 #endif // DOLLDLA

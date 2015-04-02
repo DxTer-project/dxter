@@ -263,20 +263,19 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
       return false;
     }
     if (m_vecType == ROWVECTOR) {
-      return *(madd->GetInputM(0)) > 1
-	&& *(madd->GetInputN(0)) > madd->GetVecRegWidth();
+      return *(madd->GetInputM(0)) > 1;
     } else {
-      return *(madd->GetInputM(0)) > madd->GetVecRegWidth()
-	&& *(madd->GetInputN(0)) > 1;
+      return *(madd->GetInputN(0)) > 1;
     }
   }
   cout << "ERROR: Applying MAddToVAddLoopRef to non MAdd node\n";
   cout << "Node has class " << node->GetNodeClass() << endl;
-  LOG_FAIL("Replacement for call to throw;");
+  LOG_FAIL("Applying MAddToVAddLoopRef to non MAdd node\n");
+  throw;
 }
 
-void MAddToVAddLoopRef::Apply(Node *node) const
-{
+void MAddToVAddLoopRef::Apply(Node *node) const {
+  cout << "Applying MAddToVAddLoopRef" << endl;
   MAdd *madd = static_cast<MAdd*>(node);
 
   SplitSingleIter *split0 = new SplitSingleIter(m_vecType == ROWVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);

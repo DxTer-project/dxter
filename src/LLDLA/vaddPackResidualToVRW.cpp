@@ -49,6 +49,7 @@ bool VAddPackResidualToVRW::CanApply(const Node* node) const {
 }
 
 void VAddPackResidualToVRW::Apply(Node* node) const {
+  cout << "Applying VAddPackResidualToVRW" << endl;
   DimName packDim = m_vecType == ROWVECTOR ? DIMN : DIMM;
   Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, packDim, node->GetVecRegWidth());
   node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
