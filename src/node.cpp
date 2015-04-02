@@ -83,6 +83,9 @@ void Node::Cull(Phase phase)
 #endif
       cout << "skipping culling for invalid node type " << GetType() << endl;
       cout << MaxPhase() << " is MaxPhase\n";
+      DLANode* dlaNode = static_cast<DLANode*>(this);
+      dlaNode->GetInputM(0)->Print();
+      dlaNode->GetInputN(0)->Print();
 #if DOTENSORS
       if (GetNodeClass() == SumScatterUpdateNode::GetClass()) {
 	SumScatterUpdateNode *sum = (SumScatterUpdateNode*)this;

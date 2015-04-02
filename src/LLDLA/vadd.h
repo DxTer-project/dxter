@@ -42,6 +42,7 @@ class VAdd : public DLAOp<2, 1>
 
   static Node* BlankInst();
   virtual Node* GetNewInst();
+  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
 
   static ClassType GetClass() { return "LLDLAVAdd"; }
   virtual ClassType GetNodeClass() const { return GetClass(); }
@@ -58,6 +59,10 @@ class VAdd : public DLAOp<2, 1>
 
 class VAddLoopRef : public SingleTrans
 {
+ private:
+  bool CheckRowVectorDimension(const VAdd* vadd) const;
+  bool CheckColVectorDimension(const VAdd* vadd) const;
+
  public:
   Layer m_fromLayer, m_toLayer;
   VecType m_vtype;

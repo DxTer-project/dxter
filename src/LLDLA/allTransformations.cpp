@@ -6,7 +6,6 @@
 #include "copyColLoopRef.h"
 #include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
-#include "horizontalPackToMultipleOfVecRegWidth.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
 #include "LLDLATranspose.h"
@@ -30,14 +29,29 @@
 #include "unpackToPartAndCopy.h"
 #include "vmmul.h"
 #include "vadd.h"
+#include "vaddPackResidualToVRW.h"
 #include "vaddSplitToMainAndResidual.h"
-#include "verticalPackToMultipleOfVecRegWidth.h"
+#include "vrwVAddToRegArith.h"
 #include "vvdot.h"
 #include "vvdotPackToMultipleOfMu.h"
 
-void AddGemmTrans()
-{
-    // Convert gemm into loop over mvmul
+#define DOCOMPACTLOOPUNROLLING 0
+#define DO2MUTRANSFORMATIONS 0
+#define DO3MUTRANSFORMATIONS 0
+#define DO16MUTRANSFORMATIONS 0
+#define DOLARGEMUTRANSFORMATIONS 0
+
+#define DOPARTIALLOOPUNROLLING 0
+#define PARTIALUNROLLINGSTARTCOEF 0
+#define PARTIALUNROLLINGENDCOEF 0
+
+#if DOCOMPACTLOOPUNROLLING + DOPARTIALLOOPUNROLLING > 1
+do you really want to do compact unrolling and partial unrolling?
+#endif
+
+
+void AddGemmTrans() {
+  // Convert gemm into loop over mvmul
   Universe::AddTrans(Gemm::GetClass(), new MMulToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   // Transform gemm into loop over vmmuls
@@ -48,42 +62,42 @@ void AddGemmTrans()
   Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
 
-#if DOCOMPACTLOOPUNROLLING
-#if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-#endif
+  if (DOCOMPACTLOOPUNROLLING) {
+    if (DO2MUTRANSFORMATIONS) {
+      Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+      Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+      Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+    }
 
-#if DO3MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
-#endif
-#endif // DOCOMPACTLOOPUNROLLING
+    if (DO3MUTRANSFORMATIONS) {
+      Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+      Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+      Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_SINGLE), LLDLALOOPPHASE);
+    }
+  }
 
 
-#if DOCOMPACTLOOPUNROLLING
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
+    if (DOCOMPACTLOOPUNROLLING) {
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLAMuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
 
-#if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-#endif
+    if (DO2MUTRANSFORMATIONS) {
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA2MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA2MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
+    Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA2MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
+  }
 
-#if DO3MUTRANSFORMATIONS
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-  Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
-#endif
+    if(DO3MUTRANSFORMATIONS) {
+      Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
+      Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
+      Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMK, LLDLA3MuSingle, REAL_DOUBLE), LLDLALOOPPHASE);
+    }
 
-#endif // DOCOMPACTLOOPUNROLLING
+  }
 
-  return;
-}
+    return;
+  }
 
 void AddVVDotTrans()
 {
@@ -94,13 +108,11 @@ void AddVVDotTrans()
   return;
 }
 
-void AddMAddTrans()
-{
-  Universe::AddTrans(MAdd::GetClass(), new MAddToVAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+void AddMAddTrans() {
+    Universe::AddTrans(MAdd::GetClass(), new MAddToVAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+    Universe::AddTrans(MAdd::GetClass(), new MAddToVAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-   Universe::AddTrans(MAdd::GetClass(), new MAddToVAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
-
-  return;
+    return;
 }
 
 void AddMVMulTrans()
@@ -210,15 +222,19 @@ void AddVMMulTrans()
 
 void AddVAddTrans()
 {
-  Universe::AddTrans(VAdd::GetClass(), new VAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMuSingle), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new VerticalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, VAdd::GetClass()), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VAdd::GetClass(), new HorizontalPackToMultipleOfVecRegWidth(ABSLAYER, ABSLAYER, VAdd::GetClass()), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMuDouble), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMuDouble), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-
   Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VAdd::GetClass(), new VRWVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }
@@ -268,22 +284,22 @@ void AddCopyTrans() {
 
 void AddTransformations()
 {
-  AddGemmTrans();
-  AddVVDotTrans();
+  /*  AddGemmTrans();
+      AddVVDotTrans();*/
   AddMAddTrans();
-  AddMVMulTrans();
+  /*  AddMVMulTrans();
   AddSMMulTrans();
   AddSVMulTrans();
-  AddVMMulTrans();
+  AddVMMulTrans();*/
   AddVAddTrans();
 
-  AddTransposeTrans();
+  /*  AddTransposeTrans();
   AddUnrollingTrans();
   AddPartitionRecombineTrans();
   AddSetToZeroTrans();
   AddPackTrans();
   AddUnpackTrans();
-  AddCopyTrans();
+  AddCopyTrans();*/
 }
 
 #endif // DOLLDLA

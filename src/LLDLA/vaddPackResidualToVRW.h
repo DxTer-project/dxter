@@ -19,28 +19,25 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "horizontalPackToMultipleOfVecRegWidth.h"
+#include "LLDLA.h"
 
 #if DOLLDLA
 
-#include "packingUtils.h"
+#include "transform.h"
 
-bool HorizontalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
-  const DLANode* dlaNode = static_cast<const DLANode*>(node);
-  if (dlaNode->GetLayer() != m_fromLayer) {
-    return false;
-  }
+class VAddPackResidualToVRW : public SingleTrans {
+ private:
+  Layer m_fromLayer, m_toLayer;
+  VecType m_vecType;
 
-  return !(dlaNode->InputNIsMultipleOfVecRegWidth(0))
-    && dlaNode->GetInputNumCols(0) > 1
-    && dlaNode->GetInputNumRows(0) > 0;
-}
+ public:
+ VAddPackResidualToVRW(Layer fromLayer, Layer toLayer, VecType vecType)
+   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vecType(vecType) {}
+  virtual string GetType() const { return "HorizontalPackToMultipleOfVecRegWidth " + std::to_string(m_vecType); }
+  virtual bool IsRef() const { return true; }
 
-void HorizontalPackToMultipleOfVecRegWidth::Apply(Node* node) const {
-  Unpack* unpack = PackBinarySymmetricOperation(m_toLayer, node, DIMN, node->GetVecRegWidth());
-  node->m_poss->AddUp(node->m_poss->m_possNodes, unpack, false, true);
-  node->RedirectChildren(unpack, 0);
-  node->m_poss->DeleteChildAndCleanUp(node);
-}
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+};
 
 #endif // DOLLDLA

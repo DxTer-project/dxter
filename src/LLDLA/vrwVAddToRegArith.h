@@ -20,24 +20,24 @@
 */
 
 #include "LLDLA.h"
-#include "transform.h"
 
 #if DOLLDLA
 
-class HorizontalPackToMultipleOfVecRegWidth : public SingleTrans {
+#include "vadd.h"
+#include "transform.h"
+
+class VRWVAddToRegArith : public SingleTrans {
  private:
-  Layer m_fromLayer, m_toLayer;
-  string m_nodeTypeName;
+  bool IsExactSizeVAdd(const VAdd* vadd) const;
 
  public:
- HorizontalPackToMultipleOfVecRegWidth(Layer fromLayer, Layer toLayer, string nodeTypeName)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_nodeTypeName(nodeTypeName) {}
-  virtual string GetType() const { return "HorizontalPackToMultipleOfVecRegWidth " + m_nodeTypeName; }
-  virtual bool IsRef() const { return true; }
+  Layer m_fromLayer, m_toLayer;
 
+  VRWVAddToRegArith(Layer fromLayer, Layer toLayer);
+  virtual string GetType() const;
   virtual bool CanApply(const Node* node) const;
   virtual void Apply(Node* node) const;
-
+  virtual bool IsRef() const { return true; }
 };
 
 #endif // DOLLDLA
