@@ -19,7 +19,7 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "svmulPackToMultipleOfMu.h"
+#include "svmulPackResidualToVRW.h"
 
 #if DOLLDLA
 

@@ -23,7 +23,7 @@
 #include "setToZeroRowLoopRef.h"
 #include "smmul.h"
 #include "svmul.h"
-#include "svmulPackToMultipleOfMu.h"
+#include "svmulPackResidualToVRW.h"
 #include "svmulSplitToMainAndResidual.h"
 #include "unpack.h"
 #include "unpackToPartAndCopy.h"
@@ -187,13 +187,12 @@ void AddSVMulTrans() {
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulPackResidualToVRW(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-  //  Universe::AddTrans(SVMul::GetClass(), new SVMulPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMul::GetClass(), new SVMulPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   //  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
-
   //  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   // Universe::AddTrans(SVMul::GetClass(), new ResidualPartitionSVMul(ABSLAYER, ABSLAYER, COLVECTOR, arch->VecRegWidth(REAL_SINGLE)), LLDLALOOPPHASE);
