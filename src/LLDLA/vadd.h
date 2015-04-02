@@ -28,6 +28,8 @@
 
 #if DOLLDLA
 
+string VecTypeToString(VecType vType);
+
 class VAdd : public DLAOp<2, 1>
 {
  private:

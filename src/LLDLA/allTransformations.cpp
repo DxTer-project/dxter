@@ -181,18 +181,15 @@ void AddUnrollingTrans()
 
 }
 
-void AddSVMulTrans()
-{
+void AddSVMulTrans() {
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMul::GetClass(), new SVMulVerticalPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  Universe::AddTrans(SVMul::GetClass(), new SVMulHorizontalPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMul::GetClass(), new SVMulPackResidualToVRW(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+  //  Universe::AddTrans(SVMul::GetClass(), new SVMulPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
-
   Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   //  Universe::AddTrans(SVMul::GetClass(), new SVMulToScalarArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
@@ -204,8 +201,7 @@ void AddSVMulTrans()
   return;
 }
 
-void AddVMMulTrans()
-{
+void AddVMMulTrans() {
   // Transformers for vector matrix multiply
   Universe::AddTrans(VMMul::GetClass(), new VMMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
@@ -228,8 +224,8 @@ void AddVAddTrans()
   Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
-  /*  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMuDouble), LLDLALOOPPHASE);
-      Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMuDouble), LLDLALOOPPHASE);*/
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR, LLDLAMuDouble), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR, LLDLAMuDouble), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
@@ -239,8 +235,7 @@ void AddVAddTrans()
   return;
 }
 
-void AddTransposeTrans()
-{
+void AddTransposeTrans() {
   Universe::AddTrans(LLDLATranspose::GetClass(), new LLDLATransposeLowerLayer(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
   Universe::AddTrans(LLDLATranspose::GetClass(), new LLDLATransposeLowerLayer(LLDLAMIDLAYER, LLDLAPRIMITIVELAYER), LLDLALOOPPHASE);
 
@@ -282,24 +277,23 @@ void AddCopyTrans() {
   Universe::AddTrans(Copy::GetClass(), new CopyRowLoopRef(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 }
 
-void AddTransformations()
-{
-  /*  AddGemmTrans();
-      AddVVDotTrans();*/
+void AddTransformations() {
+  AddGemmTrans();
+  AddVVDotTrans();
   AddMAddTrans();
-  /*  AddMVMulTrans();
+  AddMVMulTrans();
   AddSMMulTrans();
   AddSVMulTrans();
-  AddVMMulTrans();*/
+  AddVMMulTrans();
   AddVAddTrans();
 
-  /*  AddTransposeTrans();
+  AddTransposeTrans();
   AddUnrollingTrans();
   AddPartitionRecombineTrans();
   AddSetToZeroTrans();
   AddPackTrans();
   AddUnpackTrans();
-  AddCopyTrans();*/
+  AddCopyTrans();
 }
 
 #endif // DOLLDLA

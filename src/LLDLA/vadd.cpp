@@ -252,20 +252,16 @@ VAddLoopRef::VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize b
 
 string VAddLoopRef::GetType() const
 {
-  string name;
   switch(m_vtype)
     {
     case(ROWVECTOR):
-      return "VAddLoopRef - row vector";
-      break;
+      return "VAddLoopRef - row vector"+ std::to_string((long long int) m_bs.GetSize());
     case(COLVECTOR):
-      return "VAddLoopRef - column vector";
-      break;
+      return "VAddLoopRef - column vector" + std::to_string((long long int) m_bs.GetSize());
     default:
       LOG_FAIL("replacement for throw call");
       throw;
     }
-  //  return name + std::to_string((long long int) m_bs.GetSize());
 }
 
 bool VAddLoopRef::CheckRowVectorDimension(const VAdd* vadd) const {
