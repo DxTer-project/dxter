@@ -241,28 +241,32 @@ string VAddLoopRef::GetType() const
     }
 }
 
+bool VAddLoopRef::CheckRowVectorDimension(const VAdd* vadd) const {
+  return *(vadd->GetInputN(0)) > m_bs.GetSize() &&
+    vadd->GetInputN(0)->EvenlyDivisibleBy(m_bs.GetSize());
+}
+
+bool VAddLoopRef::CheckColVectorDimension(const VAdd* vadd) const {
+  return *(vadd->GetInputM(0)) > m_bs.GetSize() &&
+    vadd->GetInputM(0)->EvenlyDivisibleBy(m_bs.GetSize());
+}
+
 bool VAddLoopRef::CanApply(const Node *node) const
 {
   const VAdd *vadd = static_cast<const VAdd*>(node);
   if (vadd->GetLayer() != m_fromLayer) {
     return false;
   }
+  if (vadd->GetVecType() != m_vtype) {
+    return false;
+  }
   if (m_vtype == ROWVECTOR) {
-    if (!(*(vadd->GetInputN(0)) <= m_bs.GetSize())
-	&& !(*(vadd->GetInputN(1)) <= m_bs.GetSize())) {
-      return true;
-    } else {
-      return false;
-    }
+    return CheckRowVectorDimension(vadd);
   } else if (m_vtype == COLVECTOR) {
-    if (!(*(vadd->GetInputM(0)) <= m_bs.GetSize())
-	&& !(*(vadd->GetInputM(1)) <= m_bs.GetSize())) {
-      return true;
-    } else {
-      return false;
-    }
+    return CheckColVectorDimension(vadd);
   } else {
-    LOG_FAIL("replacement for throw call");
+    LOG_FAIL("bad vector type in VAddLoopRef::CanApply");
+    throw;
   }
   return false;
 }
@@ -305,8 +309,8 @@ void VAddLoopRef::Apply(Node *node) const
   } else if (vadd->GetDataType() == REAL_DOUBLE) {
     loop = new RealLoop(LLDLALOOP, loopPoss, LLDLAMuDouble);
   } else {
-    cout << "Error: Bad GetDataType in vadd apply\n";
-    LOG_FAIL("replacement for throw call");
+    LOG_FAIL("Error: Bad GetDataType in vadd apply\n");
+    throw;
   }
   loop->SetDimName(m_vtype == COLVECTOR ? DIMM : DIMN);
   

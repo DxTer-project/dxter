@@ -58,6 +58,10 @@ class VAdd : public DLAOp<2, 1>
 
 class VAddLoopRef : public SingleTrans
 {
+ private:
+  bool CheckRowVectorDimension(const VAdd* vadd) const;
+  bool CheckColVectorDimension(const VAdd* vadd) const;
+
  public:
   Layer m_fromLayer, m_toLayer;
   VecType m_vtype;

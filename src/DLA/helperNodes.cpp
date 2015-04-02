@@ -88,9 +88,10 @@ string InputNode::DataDeclaration()
     return "double *" + m_varName.str();
   } else if (m_dataTypeInfo.m_type == REAL_SINGLE) {
     return "float *" + m_varName.str();
-  }
-  else
+  } else {
+    LOG_FAIL("bad datatype in InputNode::DataDeclaration");
     throw;
+  }
 }
 
 string InputNode::RowStrideDefine()

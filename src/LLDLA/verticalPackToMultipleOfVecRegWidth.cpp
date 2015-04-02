@@ -32,6 +32,7 @@ bool VerticalPackToMultipleOfVecRegWidth::CanApply(const Node* node) const {
   }
 
   return !(dlaNode->InputMIsMultipleOfVecRegWidth(0))
+    && dlaNode->GetInputNumRows(0) < dlaNode->GetVecRegWidth()
     && dlaNode->GetInputNumRows(0) > 1
     && dlaNode->GetInputNumCols(0) > 0;
 }
