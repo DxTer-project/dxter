@@ -256,16 +256,16 @@ string VAddLoopRef::GetType() const
   switch(m_vtype)
     {
     case(ROWVECTOR):
-      name = "VAddLoopRef - row vector";
+      return "VAddLoopRef - row vector";
       break;
     case(COLVECTOR):
-      name = "VAddLoopRef - column vector";
+      return "VAddLoopRef - column vector";
       break;
     default:
       LOG_FAIL("replacement for throw call");
       throw;
     }
-  return name + std::to_string((long long int) m_bs.GetSize());
+  //  return name + std::to_string((long long int) m_bs.GetSize());
 }
 
 bool VAddLoopRef::CheckRowVectorDimension(const VAdd* vadd) const {
