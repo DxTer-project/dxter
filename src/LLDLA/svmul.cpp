@@ -215,12 +215,11 @@ Phase SVMul::MaxPhase() const
     }
 }
 
-SVMulLoopRef::SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs)
+SVMulLoopRef::SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vtype)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_vtype = vtype;
-  m_bs = bs;
 }
 
 string SVMulLoopRef::GetType() const
@@ -244,20 +243,22 @@ bool SVMulLoopRef::CanApply(const Node *node) const
       return false;
     }
     if (m_vtype == ROWVECTOR) {
-      return !(*(svmul->GetInputN(1)) <= m_bs.GetSize()) &&
-	svmul->GetInputN(1)->EvenlyDivisibleBy(m_bs.GetSize());
+      return *(svmul->GetInputN(1)) > svmul->GetVecRegWidth() &&
+	svmul->GetInputN(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth());
     } 
     else if (m_vtype == COLVECTOR) {
-      return !(*(svmul->GetInputM(1)) <= m_bs.GetSize()) &&
-	svmul->GetInputM(1)->EvenlyDivisibleBy(m_bs.GetSize());
+      return *(svmul->GetInputM(1)) > svmul->GetVecRegWidth() &&
+	svmul->GetInputM(1)->EvenlyDivisibleBy(svmul->GetVecRegWidth());
     } 
     else {
       LOG_FAIL("replacement for throw call");
+      throw;
     }
   }
 
   cout << "ERROR: Cannot apply SVMulLoopRef to a non SVMul node" << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void SVMulLoopRef::Apply(Node *node) const

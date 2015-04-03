@@ -273,24 +273,27 @@ bool VAddLoopRef::CheckColVectorDimension(const VAdd* vadd) const {
     vadd->GetInputM(0)->EvenlyDivisibleBy(vadd->GetVecRegWidth());
 }
 
-bool VAddLoopRef::CanApply(const Node *node) const
-{
-  const VAdd *vadd = static_cast<const VAdd*>(node);
-  if (vadd->GetLayer() != m_fromLayer) {
+bool VAddLoopRef::CanApply(const Node *node) const {
+  if (node->GetNodeClass() == VAdd::GetClass()) {
+    const VAdd *vadd = static_cast<const VAdd*>(node);
+    if (vadd->GetLayer() != m_fromLayer) {
+      return false;
+    }
+    if (vadd->GetVecType() != m_vtype) {
+      return false;
+    }
+    if (m_vtype == ROWVECTOR) {
+      return CheckRowVectorDimension(vadd);
+    } else if (m_vtype == COLVECTOR) {
+      return CheckColVectorDimension(vadd);
+    } else {
+      LOG_FAIL("bad vector type in VAddLoopRef::CanApply");
+      throw;
+    }
     return false;
   }
-  if (vadd->GetVecType() != m_vtype) {
-    return false;
-  }
-  if (m_vtype == ROWVECTOR) {
-    return CheckRowVectorDimension(vadd);
-  } else if (m_vtype == COLVECTOR) {
-    return CheckColVectorDimension(vadd);
-  } else {
-    LOG_FAIL("bad vector type in VAddLoopRef::CanApply");
-    throw;
-  }
-  return false;
+  LOG_FAIL("bad node in VAddLoopRef::CanApply");
+  throw;
 }
 
 void VAddLoopRef::Apply(Node *node) const

@@ -55,7 +55,6 @@ bool VRWVAddToRegArith::CanApply(const Node* node) const {
 }
 
 void VRWVAddToRegArith::Apply(Node* node) const {
-  cout << "Applying VRWAddToRegArith" << endl;
   LoadToRegs* loadX = new LoadToRegs();
   loadX->AddInput(node->Input(0), node->InputConnNum(0));
 

@@ -63,7 +63,7 @@ class SVMulLoopRef : public SingleTrans
   VecType m_vtype;
   BSSize m_bs;
 
-  SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vType, BSSize bs);
+  SVMulLoopRef(Layer fromLayer, Layer toLayer, VecType vType);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
