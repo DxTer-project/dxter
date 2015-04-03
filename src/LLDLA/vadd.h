@@ -68,9 +68,8 @@ class VAddLoopRef : public SingleTrans
  public:
   Layer m_fromLayer, m_toLayer;
   VecType m_vtype;
-  BSSize m_bs;
 
-  VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs); 
+  VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype);
   virtual string GetType() const;
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;

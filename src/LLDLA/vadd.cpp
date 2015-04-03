@@ -242,12 +242,11 @@ Phase VAdd::MaxPhase() const
     }
 }
 
-VAddLoopRef::VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype, BSSize bs)
+VAddLoopRef::VAddLoopRef(Layer fromLayer, Layer toLayer, VecType vtype)
 {
   m_fromLayer = fromLayer;
   m_toLayer = toLayer;
   m_vtype = vtype;
-  m_bs = bs;
 }
 
 string VAddLoopRef::GetType() const
@@ -255,9 +254,9 @@ string VAddLoopRef::GetType() const
   switch(m_vtype)
     {
     case(ROWVECTOR):
-      return "VAddLoopRef - row vector"+ std::to_string((long long int) m_bs.GetSize());
+      return "VAddLoopRef - row vector";
     case(COLVECTOR):
-      return "VAddLoopRef - column vector" + std::to_string((long long int) m_bs.GetSize());
+      return "VAddLoopRef - column vector";
     default:
       LOG_FAIL("replacement for throw call");
       throw;
@@ -265,13 +264,13 @@ string VAddLoopRef::GetType() const
 }
 
 bool VAddLoopRef::CheckRowVectorDimension(const VAdd* vadd) const {
-  return *(vadd->GetInputN(0)) > m_bs.GetSize() &&
-    vadd->GetInputN(0)->EvenlyDivisibleBy(m_bs.GetSize());
+  return *(vadd->GetInputN(0)) > vadd->GetVecRegWidth() &&
+    vadd->GetInputN(0)->EvenlyDivisibleBy(vadd->GetVecRegWidth());
 }
 
 bool VAddLoopRef::CheckColVectorDimension(const VAdd* vadd) const {
-  return *(vadd->GetInputM(0)) > m_bs.GetSize() &&
-    vadd->GetInputM(0)->EvenlyDivisibleBy(m_bs.GetSize());
+  return *(vadd->GetInputM(0)) > vadd->GetVecRegWidth() &&
+    vadd->GetInputM(0)->EvenlyDivisibleBy(vadd->GetVecRegWidth());
 }
 
 bool VAddLoopRef::CanApply(const Node *node) const
@@ -296,7 +295,7 @@ bool VAddLoopRef::CanApply(const Node *node) const
 
 void VAddLoopRef::Apply(Node *node) const
 {
-  cout << "Applying vadd loop ref" << endl;
+  cout << this->GetType() << endl;
   VAdd *vadd = static_cast<VAdd*>(node);
 
   SplitSingleIter *split1 = new SplitSingleIter(m_vtype == COLVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);
