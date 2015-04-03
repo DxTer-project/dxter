@@ -33,6 +33,7 @@
 #include "vaddSplitToMainAndResidual.h"
 #include "vrwSVMulToRegArith.h"
 #include "vrwVAddToRegArith.h"
+#include "vrwVVDotToRegArith.h"
 #include "vvdot.h"
 #include "vvdotPackToMultipleOfMu.h"
 
@@ -105,6 +106,8 @@ void AddVVDotTrans()
   Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VVDot::GetClass(), new VVDotPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VVDot::GetClass(), new VRWVVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }
