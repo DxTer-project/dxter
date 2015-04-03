@@ -312,8 +312,8 @@ bool VVDotToRegArith::CanApply(const Node* node) const
     if (!(vvdot->GetInputN(0)->EvenlyDivisibleBy(vvdot->GetVecRegWidth()))) {
       return false;
     }
-    if (!(*(vvdot->GetInputN(0)) <= regWidth) &&
-	!(*(vvdot->GetInputM(1)) <= regWidth)) {
+    if (*(vvdot->GetInputN(0)) > 0 &&
+	*(vvdot->GetInputM(1)) > 0) {
       return true;
     } else {
       return false;

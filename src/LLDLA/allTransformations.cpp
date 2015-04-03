@@ -12,6 +12,7 @@
 #include "madd.h"
 #include "mvmul.h"
 #include "mvmulToSVMul.h"
+#include "mvmulToVVDot.h"
 #include "mvmulPack.h"
 #include "pack.h"
 #include "packToCopyAndZero.h"
@@ -123,6 +124,8 @@ void AddMVMulTrans()
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
 
   //  Universe::AddTrans(MVMul::GetClass(), new MVMulToSVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(MVMul::GetClass(), new MVMulToVVDot(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 

@@ -274,41 +274,44 @@ Name DuplicateRegLoad::GetName(ConnNum num) const
   return name;
 }
 
-void DuplicateRegLoad::AddVariables(VarSet &set) const
-{
+void DuplicateRegLoad::AddVariables(VarSet &set) const {
   string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regDup;";
   Var var(DirectVarDeclType, varDecl, GetDataType());
   set.insert(var);
 }
 
-void TempVecReg::Prop()
-{
+void TempVecReg::Prop() {
   if (!IsValidCost(m_cost)) {
-    if (m_inputs.size() != 1)
+    if (m_inputs.size() != 1) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     if ((*(GetInputM(0)) != 1) ||
-	(*(GetInputN(0)) != 1))
+	(*(GetInputN(0)) != 1)) {
+      cout << "TempVecReg bad Prop" << endl;
+      cout << Input(0)->GetNodeClass() << endl;
+      GetInputM(0)->Print();
+      GetInputN(0)->Print();
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     Input(0)->Prop();
     m_cost = 0;
   }
 }
 
-void TempVecReg::PrintCode(IndStream &out)
-{
+void TempVecReg::PrintCode(IndStream &out) {
   out.Indent();
   *out << arch->ZeroVar(GetDataType(), GetNameStr(0));
   return;
 }
 
-void TempVecReg::ClearDataTypeCache()
-{
+void TempVecReg::ClearDataTypeCache() {
   m_mSizes.ClearSizes();
   m_nSizes.ClearSizes();
 }
 
-void TempVecReg::BuildDataTypeCache()
-{
+void TempVecReg::BuildDataTypeCache() {
   if (m_mSizes.m_entries.empty()) {
     m_info = InputDataType(0);
     m_info.m_numRowsVar = "vector register size";
