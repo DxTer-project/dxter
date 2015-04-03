@@ -1279,6 +1279,7 @@ bool Sizes::IsConstant() const {
   for (auto entry : this->m_entries) {
     SizesType entryType = entry->GetType();
     if (entryType == RANGESIZES) {
+      cout << "FOUND RANGESIZES" << endl;
       return false;
     } else if (entryType == MIDSIZES) {
       if (!(entry->ConstantMidSizeEntry())) {
