@@ -277,8 +277,8 @@ string RuntimeTest::TwoPhaseTimingLoop(int i) {
   loopBody += "\t\tend_time = rdtsc();\n";
   loopBody += "\t\texec_time = end_time - start_time;\n";
   loopBody += "\t\tavg_exec_time = exec_time / num_runs;\n";
-  loopBody += "\t\tprintf(\"exec cycles = %lld\", exec_time);\n";
-  loopBody += "\t\tprintf(\"avg exec cycles = %lld\", avg_exec_time);\n";
+  loopBody += "\t\tprintf(\"exec cycles = %lld\\n\", exec_time);\n";
+  loopBody += "\t\tprintf(\"avg exec cycles = %lld\\n\", avg_exec_time);\n";
   loopBody += "\t\tmemset(exec_time_str, 0, 100);\n";
   loopBody += "\t\tsprintf(exec_time_str, \"%lld\\n\", avg_exec_time);\n";
   loopBody += "\t\ttrash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";

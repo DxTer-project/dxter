@@ -36,6 +36,7 @@
 #include "vrwVVDotToRegArith.h"
 #include "vvdot.h"
 #include "vvdotPackToMultipleOfMu.h"
+#include "vvdotSplitToMainAndResidual.h"
 
 #define DOCOMPACTLOOPUNROLLING 0
 #define DO2MUTRANSFORMATIONS 0
@@ -108,6 +109,8 @@ void AddVVDotTrans()
   Universe::AddTrans(VVDot::GetClass(), new VVDotPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VVDot::GetClass(), new VRWVVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VVDot::GetClass(), new VVDotSplitToMainAndResidual(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }

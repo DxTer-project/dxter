@@ -19,19 +19,19 @@
 */
 
 #include "LLDLA.h"
-#include "transform.h"
 
 #if DOLLDLA
 
-class VAddSplitToMainAndResidual : public SingleTrans {
+#include "transform.h"
+
+class VVDotSplitToMainAndResidual : public SingleTrans {
  private:
   Layer m_fromLayer, m_toLayer;
-  VecType m_vecType;
 
  public:
-  VAddSplitToMainAndResidual(Layer fromLayer, Layer toLayer, VecType vecType);
+  VVDotSplitToMainAndResidual(Layer fromLayer, Layer toLayer);
 
-  virtual string GetType() const { return "VAddSplitToMainAndResidual" + std::to_string((long long int) m_vecType); }
+  virtual string GetType() const { return "VVDotSplitToMainAndResidual"; }
   virtual bool IsRef() const { return true; }
 
   virtual bool CanApply(const Node* node) const;
