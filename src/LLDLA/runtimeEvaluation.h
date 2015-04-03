@@ -60,6 +60,7 @@ class RuntimeTest
   string AllBufferSanityChecks(ImplementationMap* imps, string referenceImpName);
   string SanityChecks(SanityCheckSetting sanityCheckSetting, ImplementationMap* imps, string referenceImpName);
   string OnePhaseTimingCode(ImplementationMap* imps, string operationName);
+  string TwoPhaseTimingCode(ImplementationMap* imps, string operationName);
   string TimingCode(TimingSetting timingSetting, ImplementationMap* imps, string operationName);
   string HeadersAndDefines(ImplementationMap* imps);
   string MakeFunc(string funcName, string funcBody);
@@ -71,6 +72,8 @@ class RuntimeTest
   string CheckArgBufferDiffs(string refPostfix, string testPostfix, string testName);
   string TimingLoop(int i);
   string TimingLoops(ImplementationMap* imps);
+  string TwoPhaseTimingLoop(int i);
+  string TwoPhaseTimingLoops(ImplementationMap* imps);
   void AddIncludes();
   void AddMiscellaneousDefines();
 

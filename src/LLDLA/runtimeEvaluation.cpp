@@ -132,9 +132,7 @@ string RuntimeTest::TimingCode(TimingSetting timingSetting, ImplementationMap* i
   if (timingSetting == ONEPHASETIMING) {
     return OnePhaseTimingCode(imps, operationName);
   } else {
-    cout << "TWOPHASETIMING not supported yet" << endl;
-    LOG_FAIL("replacement for throw call");
-    throw;
+    return TwoPhaseTimingCode(imps, operationName);
   }
 }
 
@@ -149,6 +147,24 @@ string RuntimeTest::OnePhaseTimingCode(ImplementationMap* imps, string operation
   string timingSetup = "\tint i, j, k;\n\tlong long start_time, end_time, exec_time, total_cycles;\n";
   string timingFunc = prototype + argBufferAllocation + "\n" + timingSetup;
   string timingLoop = TimingLoops(imps);
+  timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
+  timingFunc += "\n" + timingLoop + "\n}\n";
+  return timingFunc;
+}
+
+string RuntimeTest::TwoPhaseTimingCode(ImplementationMap* imps, string operationName) {
+  string prototype = "void time_implementations() {\n";
+  string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
+  argBufferAllocation += AllocateArgBuffers("") + "\n";
+  argBufferAllocation += FillBuffersWithRandValues("") + "\n";
+  argBufferAllocation += "\tFILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
+  argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
+
+  string timingSetup = "\tint i, j, k;\n\tlong long start_time, end_time, exec_time, num_runs, total_cycles, avg_exec_time;\n";
+  timingSetup += "\tchar exec_time_str[100];\n";
+  timingSetup += "\tsize_t trash;\n";
+  string timingFunc = prototype + argBufferAllocation + "\n" + timingSetup;
+  string timingLoop = TwoPhaseTimingLoops(imps);
   timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
   timingFunc += "\n" + timingLoop + "\n}\n";
   return timingFunc;
@@ -228,6 +244,47 @@ string RuntimeTest::TimingLoops(ImplementationMap* imps) {
   for (i = 1; i <= imps->size(); i++) {
     loopBody += TimingLoop(i);
   }
+  return loopBody;
+}
+
+string RuntimeTest::TwoPhaseTimingLoops(ImplementationMap* imps) {
+  unsigned int i;
+  string loopBody = "";
+  for (i = 1; i <= imps->size(); i++) {
+    loopBody += TwoPhaseTimingLoop(i);
+  }
+  return loopBody;
+}
+
+string RuntimeTest::TwoPhaseTimingLoop(int i) {
+  string loopBody = "";
+  string opName = m_operationName + "_" + std::to_string((long long int) i);
+  loopBody += "\ttotal_cycles = 0;\n";
+  loopBody += "\tnum_runs = 0;\n";
+  loopBody += "\twhile (total_cycles < MIN_CYCLES) {\n";
+  loopBody += "\tnum_runs++;\n";
+  loopBody += "\t\tstart_time = rdtsc();\n";
+  loopBody += "\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
+  loopBody += "\t\tend_time = rdtsc();\n";
+  loopBody += "\t\texec_time = end_time - start_time;\n";
+  loopBody += "\t\ttotal_cycles += exec_time;\n";
+  loopBody += "\t}\n";
+  loopBody += "\tfor (j = 0; j < 20; j++) {\n";
+  loopBody += "\t\tstart_time = rdtsc();\n";
+  loopBody += "\t\tfor (i = 0; i < num_runs; i++) {\n";
+  loopBody += "\t\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
+  loopBody += "\t\t}\n";
+  loopBody += "\t\tend_time = rdtsc();\n";
+  loopBody += "\t\texec_time = end_time - start_time;\n";
+  loopBody += "\t\tavg_exec_time = exec_time / num_runs;\n";
+  loopBody += "\t\tprintf(\"exec cycles = %lld\", exec_time);\n";
+  loopBody += "\t\tprintf(\"avg exec cycles = %lld\", avg_exec_time);\n";
+  loopBody += "\t\tmemset(exec_time_str, 0, 100);\n";
+  loopBody += "\t\tsprintf(exec_time_str, \"%lld\\n\", avg_exec_time);\n";
+  loopBody += "\t\ttrash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
+  loopBody += "\t}\n";
+  loopBody += "\tfprintf(" + m_dataFileName + ", \"#\\n\");\n";
+  loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";
   return loopBody;
 }
 
