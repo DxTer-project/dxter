@@ -6,6 +6,7 @@
 #include "copyColLoopRef.h"
 #include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
+#include "eliminateStoreLoad.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
 #include "LLDLATranspose.h"
@@ -18,6 +19,7 @@
 #include "packToCopyAndZero.h"
 #include "partition.h"
 #include "recombine.h"
+#include "regLoadStore.h"
 #include "residualSVMulToRegArith.h"
 #include "residualVAddToRegArith.h"
 #include "residualVVDotToRegArith.h"
@@ -266,6 +268,10 @@ void AddCopyTrans() {
   Universe::AddTrans(Copy::GetClass(), new CopyRowLoopRef(ABSLAYER, LLDLAMIDLAYER), LLDLALOOPPHASE);
 }
 
+void AddRTLOptimizations() {
+  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+}
+
 void AddTransformations() {
   AddGemmTrans();
   AddVVDotTrans();
@@ -276,13 +282,11 @@ void AddTransformations() {
   AddVMMulTrans();
   AddVAddTrans();
 
+  AddRTLOptimizations();
+
   AddTransposeTrans();
   AddUnrollingTrans();
   AddPartitionRecombineTrans();
-  AddSetToZeroTrans();
-  AddPackTrans();
-  AddUnpackTrans();
-  AddCopyTrans();
 }
 
 #endif // DOLLDLA

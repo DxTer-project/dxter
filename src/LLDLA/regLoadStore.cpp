@@ -320,8 +320,7 @@ void UnpackStoreFromRegs::PrintCode(IndStream &out)
 {
   string regVarName = GetInputNameStr(0);
   string storeLocation = GetInputNameStr(1);
-  // Decide which store instruction is needed based on
-  // dimension and stride of input vector
+
   Stride inputRowStride = InputDataType(1).m_rowStride;
   Stride inputColStride = InputDataType(1).m_colStride;
 
