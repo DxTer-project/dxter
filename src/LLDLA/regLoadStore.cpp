@@ -161,9 +161,7 @@ int PackedLoadToRegs::ComputeResidual() {
   return residual;
 }
 
-void PackedLoadToRegs::PrintCode(IndStream &out)
-{
-  out.Indent();
+void PackedLoadToRegs::PrintCode(IndStream &out) {
   string toLoadName = GetInputNameStr(0);
   string loadStr = GetNameStr(0);
 

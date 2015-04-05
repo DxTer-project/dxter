@@ -44,6 +44,8 @@ std::string LLDLAPhaseString(LLDLAPhase phase) {
     return "LLDLA loop unroll phase";
   case(LLDLAPRIMPHASE):
     return "LLDLA primitive phase";
+  case(LLDLARTLPHASE):
+    return "LLDLA RTL phase";
   }
   LOG_FAIL("replacement for throw call");
 }
@@ -94,6 +96,10 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
 
   if ((CurrPhase == LLDLALOOPPHASE) && DOLLDLALOOPPHASE) {
     RunPhase(uni, numIters, LLDLALOOPPHASE);
+  }
+
+  if ((CurrPhase == LLDLARTLPHASE) && DOLLDLARTLPHASE) {
+    RunPhase(uni, numIters, LLDLARTLPHASE);
   }
 
   if ((CurrPhase == LLDLALOOPUNROLLPHASE) && DOLLDLALOOPUNROLLPHASE) {

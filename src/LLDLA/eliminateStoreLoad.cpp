@@ -36,6 +36,10 @@ bool EliminateStoreLoad::CanApply(const Node* node) const {
       } else {
 	cout << "Child of store is not Load" << endl;
 	cout << node->Child(0)->GetNodeClass() << endl;
+	cout << node->Child(0)->Child(0)->GetNodeClass() << endl;
+	cout << node->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
+	cout << node->Child(0)->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
+	cout << node->Child(0)->Child(0)->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
 	return false;
       }
     }
