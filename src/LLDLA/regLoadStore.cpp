@@ -329,16 +329,14 @@ void UnpackStoreFromRegs::PrintCode(IndStream &out)
 
   if (IsInputColVector(1)) {
     if (IsUnitStride(inputRowStride)) {
-      isStridedLoad = false;
+      strideVar = "1";
     } else {
-      isStridedLoad = true;
       strideVar = InputDataType(1).m_rowStrideVar;
     }
   } else {
     if (IsUnitStride(inputColStride)) {
-      isStridedLoad = false;
+      strideVar = "1";
     } else {
-      isStridedLoad = true;
       strideVar = InputDataType(0).m_colStrideVar;
     }    
   }
