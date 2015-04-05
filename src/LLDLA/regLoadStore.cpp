@@ -311,6 +311,7 @@ int UnpackStoreFromRegs::ComputeResidual() {
   }
   if (residual >= GetVecRegWidth()) {
     cout << "Error: PackedLoadToRegs::ComputeResidual gives bad residual" << endl;
+    throw;
   }
   return residual;
 }

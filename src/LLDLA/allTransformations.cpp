@@ -18,7 +18,9 @@
 #include "packToCopyAndZero.h"
 #include "partition.h"
 #include "recombine.h"
+#include "residualSVMulToRegArith.h"
 #include "residualVAddToRegArith.h"
+#include "residualVVDotToRegArith.h"
 #include "setToZero.h"
 #include "setToZeroColLoopRef.h"
 #include "setToZeroRowLoopRef.h"
@@ -103,15 +105,15 @@ void AddGemmTrans() {
     return;
   }
 
-void AddVVDotTrans()
-{
+void AddVVDotTrans() {
+  Universe::AddTrans(VVDot::GetClass(), new VVDotSplitToMainAndResidual(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
   Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VVDot::GetClass(), new VVDotPackToMultipleOfMu(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(VVDot::GetClass(), new ResidualVVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VVDot::GetClass(), new VRWVVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VVDot::GetClass(), new VVDotSplitToMainAndResidual(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }
@@ -123,8 +125,7 @@ void AddMAddTrans() {
     return;
 }
 
-void AddMVMulTrans()
-{
+void AddMVMulTrans() {
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble), LLDLALOOPPHASE);
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
@@ -141,16 +142,14 @@ void AddMVMulTrans()
   return;
 }
 
-void AddSMMulTrans()
-{
+void AddSMMulTrans() {
   Universe::AddTrans(SMMul::GetClass(), new SMulToSVMul(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(SMMul::GetClass(), new SMulToSVMul(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
   return;
 }
 
-void AddUnrollingTrans()
-{
+void AddUnrollingTrans() {
 
 #if DOCOMPACTLOOPUNROLLING
 #if DO2MUTRANSFORMATIONS
@@ -189,8 +188,7 @@ void AddSVMulTrans() {
 
     Universe::AddTrans(SVMul::GetClass(), new VRWSVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-    Universe::AddTrans(SVMul::GetClass(), new SVMulPackResidualToVRW(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-    Universe::AddTrans(SVMul::GetClass(), new SVMulPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+    Universe::AddTrans(SVMul::GetClass(), new ResidualSVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
     Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
     Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
@@ -212,17 +210,14 @@ void AddVMMulTrans() {
   return;
 }
 
-void AddVAddTrans()
-{
-  //  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
-  //  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-  Universe::AddTrans(VAdd::GetClass(), new ResidualVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
+void AddVAddTrans() {
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(VAdd::GetClass(), new ResidualVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VRWVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
