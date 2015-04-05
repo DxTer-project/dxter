@@ -54,6 +54,33 @@ class LoadToRegs : public DLANode
   virtual void AddVariables(VarSet &set) const;
 };
 
+class PackedLoadToRegs : public DLANode {
+ private:
+  int ComputeResidual();
+ public:
+
+  virtual NodeType GetType() const { return "PackedLoadToRegs"; }
+  static Node* BlankInst() { return  new PackedLoadToRegs(); }
+  virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "PackedLoadtoRegs";}
+  virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(0);}
+
+  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+  virtual bool IsDataDependencyOfInput() const {return true;}
+  virtual bool IsReadOnly() const {return true;}
+
+  virtual void Prop();
+  virtual void PrintCode(IndStream &out);
+  virtual const Sizes* GetM(ConnNum num) const;
+  virtual const Sizes* GetN(ConnNum num) const;
+
+  virtual Name GetName(ConnNum num) const;
+
+  virtual void AddVariables(VarSet &set) const;
+};
+
 class DuplicateRegLoad : public DLANode
 {
  public:
@@ -131,6 +158,25 @@ class StoreFromRegs : public DLAOp<2,1>
   virtual bool IsDataDependencyOfInput() const {return true;}
 
   void StoreNonContigLocations(IndStream &out, string regVarName, string storePtr, string strideVar);
+};
+
+class UnpackStoreFromRegs : public DLAOp<2,1>
+{
+ private:
+  int ComputeResidual();
+
+ public:
+  virtual NodeType GetType() const {return "UnpackStoreFromRegs";}
+  static Node* BlankInst() { return  new UnpackStoreFromRegs(); }
+  virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual void Prop();
+  virtual void PrintCode(IndStream &out);
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "UnpackStoreFromRegs";}
+
+  virtual bool IsReadOnly() const {return false;}
+  virtual bool IsDataDependencyOfInput() const {return true;}
 };
 
 #endif //DOLLDLA

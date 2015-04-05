@@ -18,6 +18,7 @@
 #include "packToCopyAndZero.h"
 #include "partition.h"
 #include "recombine.h"
+#include "residualVAddToRegArith.h"
 #include "setToZero.h"
 #include "setToZeroColLoopRef.h"
 #include "setToZeroRowLoopRef.h"
@@ -213,8 +214,9 @@ void AddVMMulTrans() {
 
 void AddVAddTrans()
 {
-  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
-  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VAdd::GetClass(), new VAddPackResidualToVRW(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new ResidualVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);

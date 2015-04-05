@@ -76,7 +76,7 @@ void LoadToRegs::PrintCode(IndStream &out)
   // dimension and stride of input vector
   Stride inputRowStride = InputDataType(0).m_rowStride;
   Stride inputColStride = InputDataType(0).m_colStride;
-  
+   
   string strideVar = "ERROR: STRIDE NOT DEFINED\n";
   bool isStridedLoad;
 
@@ -134,6 +134,92 @@ Name LoadToRegs::GetName(ConnNum num) const
 void LoadToRegs::AddVariables(VarSet &set) const
 {
   string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regs;\n";
+  Var var(DirectVarDeclType, varDecl, GetDataType());
+  set.insert(var);
+}
+
+void PackedLoadToRegs::Prop() {
+  if (!IsValidCost(m_cost)) {
+    if (!(IsInputRowVector(0) || IsInputColVector(0))) {
+      cout << "Input to PackedLoadToRegs is not a row or column vector" << endl;
+      throw;
+    }
+    m_cost = GetVecRegWidth() * costModel->ContigVecLoadCost();
+  }
+}
+
+int PackedLoadToRegs::ComputeResidual() {
+  int residual;
+  if (IsInputColVector(0)) {
+    residual = GetInputNumRows(0);
+  } else {
+    residual = GetInputNumCols(0);
+  }
+  if (residual >= GetVecRegWidth()) {
+    cout << "Error: PackedLoadToRegs::ComputeResidual gives bad residual" << endl;
+  }
+  return residual;
+}
+
+void PackedLoadToRegs::PrintCode(IndStream &out)
+{
+  out.Indent();
+  string toLoadName = GetInputNameStr(0);
+  string loadStr = GetNameStr(0);
+
+  Stride inputRowStride = InputDataType(0).m_rowStride;
+  Stride inputColStride = InputDataType(0).m_colStride;
+   
+  string strideVar = "ERROR: STRIDE NOT DEFINED\n";
+
+  if (IsInputColVector(0)) {
+    if (IsUnitStride(inputRowStride)) {
+      strideVar = "1";
+    } else {
+      strideVar = InputDataType(0).m_rowStrideVar;
+    }
+  } else {
+    if (IsUnitStride(inputColStride)) {
+      strideVar = "1";
+    } else {
+      strideVar = InputDataType(0).m_colStrideVar;
+    }    
+  }
+  int residual = ComputeResidual();
+  out.Indent();
+  *out << arch->PackedLoad(GetDataType(), toLoadName, loadStr, strideVar, residual);
+  return;
+}
+
+const Sizes* PackedLoadToRegs::GetM(ConnNum num) const
+{
+  if (num != 0) {
+    LOG_FAIL("replacement for throw call");
+  }
+  return GetInputM(0);
+}
+
+const Sizes* PackedLoadToRegs::GetN(ConnNum num) const
+{
+  if (num != 0) {
+    LOG_FAIL("replacement for throw call");
+  }
+  return GetInputN(0);
+}
+
+Name PackedLoadToRegs::GetName(ConnNum num) const
+{
+  if (num != 0) {
+    LOG_FAIL("replacement for throw call");
+  }
+  Name name = GetInputName(0);
+  name.m_name += "_regs_packed";
+  return name;
+}
+
+void PackedLoadToRegs::AddVariables(VarSet &set) const
+{
+  string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regs_packed;\n";
   Var var(DirectVarDeclType, varDecl, GetDataType());
   set.insert(var);
 }
@@ -208,6 +294,60 @@ void StoreFromRegs::StoreNonContigLocations(IndStream &out, string regVarName, s
     string storePtrStr = storePtr + " + " + std::to_string((long long int) i) + " * " + strideVar;
     *out << "VEC_PTR_PD_SET( " + std::to_string((long long int) i) + ", " + regVarName + ", " + storePtrStr + " );\n";
   }
+}
+
+void UnpackStoreFromRegs::Prop() {
+  if (!IsValidCost(m_cost)) {
+    m_cost = GetVecRegWidth() * costModel->ContigVecStoreCost();
+  }
+}
+
+int UnpackStoreFromRegs::ComputeResidual() {
+  int residual;
+  if (IsInputColVector(1)) {
+    residual = GetInputNumRows(1);
+  } else {
+    residual = GetInputNumCols(1);
+  }
+  if (residual >= GetVecRegWidth()) {
+    cout << "Error: PackedLoadToRegs::ComputeResidual gives bad residual" << endl;
+  }
+  return residual;
+}
+
+void UnpackStoreFromRegs::PrintCode(IndStream &out)
+{
+  string regVarName = GetInputNameStr(0);
+  string storeLocation = GetInputNameStr(1);
+  // Decide which store instruction is needed based on
+  // dimension and stride of input vector
+  Stride inputRowStride = InputDataType(1).m_rowStride;
+  Stride inputColStride = InputDataType(1).m_colStride;
+
+  string strideVar = "ERROR: STRIDE NOT DEFINED\n";
+  bool isStridedLoad;
+
+  if (IsInputColVector(1)) {
+    if (IsUnitStride(inputRowStride)) {
+      isStridedLoad = false;
+    } else {
+      isStridedLoad = true;
+      strideVar = InputDataType(1).m_rowStrideVar;
+    }
+  } else {
+    if (IsUnitStride(inputColStride)) {
+      isStridedLoad = false;
+    } else {
+      isStridedLoad = true;
+      strideVar = InputDataType(0).m_colStrideVar;
+    }    
+  }
+
+  int residual = ComputeResidual();
+
+  out.Indent();
+  *out << arch->UnpackStore(GetDataType(), storeLocation, regVarName, strideVar, residual);
+  return;
 }
 
 void DuplicateRegLoad::Prop()

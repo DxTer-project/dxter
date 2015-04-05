@@ -37,9 +37,11 @@ class Architecture
   virtual string SAccumCode(string memPtr, string startinLoc) = 0;
   virtual string SContiguousLoad(string memPtr, string receivingLoc) = 0;
   virtual string SStridedLoad(string memPtr, string receivingLoc, string stride) = 0;
+  virtual string SPackedLoad(string memPtr, string receivingLoc, string stride, int residual);
   virtual string SDuplicateLoad(string memPtr, string receivingLoc) = 0;
   virtual string SContiguousStore(string memPtr, string startingLoc) = 0;
   virtual string SStridedStore(string memPtr, string startingLoc, string stride) = 0;
+  virtual string SUnpackStore(string memPtr, string startingLoc, string stride, int residual);
   virtual string SZeroVar(string varName) = 0;
   virtual double SFlopsPerCycle() = 0;
 
@@ -53,9 +55,11 @@ class Architecture
   virtual string DAccumCode(string memPtr, string startinLoc) = 0;
   virtual string DContiguousLoad(string memPtr, string receivingLoc) = 0;
   virtual string DStridedLoad(string memPtr, string receivingLoc, string stride) = 0;
+  virtual string DPackedLoad(string memPtr, string receivingLoc, string stride, int residual);
   virtual string DDuplicateLoad(string memPtr, string receivingLoc) = 0;
   virtual string DContiguousStore(string memPtr, string startingLoc) = 0;
   virtual string DStridedStore(string memPtr, string startingLoc, string stride) = 0;
+  virtual string DUnpackStore(string memPtr, string startingLoc, string stride, int residual);
   virtual string DZeroVar(string varName) = 0;
   virtual double DFlopsPerCycle() = 0;
 
@@ -75,9 +79,11 @@ class Architecture
   string AccumCode(Type type, string memPtr, string startingLoc);
   string ContiguousLoad(Type type, string memPtr, string receivingLoc);
   string StridedLoad(Type type, string memPtr, string receivingLoc, string stride);
+  string PackedLoad(Type type, string memPtr, string receivingLoc, string stride, int residual);
   string DuplicateLoad(Type type, string memPtr, string receivingLoc);
   string ContiguousStore(Type type, string memPtr, string startingLoc);
   string StridedStore(Type type, string memPtr, string startingLoc, string stride);
+  string UnpackStore(Type type, string memPtr, string startingLoc, string stride, int residual);
   string ZeroVar(Type type, string varName);
   double FlopsPerCycle(Type type);
 

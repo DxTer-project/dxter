@@ -120,6 +120,19 @@ string Architecture::StridedLoad(Type type, string memPtr, string receivingLoc, 
   }
 }
 
+string Architecture::PackedLoad(Type type, string memPtr, string receivingLoc, string stride, int residual)
+{
+  if (type == REAL_SINGLE) {
+    return SPackedLoad(memPtr, receivingLoc, stride, residual);
+  } else if (type == REAL_DOUBLE) {
+    return DPackedLoad(memPtr, receivingLoc, stride, residual);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    LOG_FAIL("Replacement for call to throw;");
+    throw;
+  }
+}
+
 string Architecture::ContiguousLoad(Type type, string memPtr, string receivingLoc)
 {
   if (type == REAL_SINGLE) {
@@ -185,6 +198,18 @@ string Architecture::StridedStore(Type type, string memPtr, string startingLoc, 
   }
 }
 
+string Architecture::UnpackStore(Type type, string memPtr, string startingLoc, string stride, int residual) {
+  if (type == REAL_SINGLE) {
+    return SUnpackStore(memPtr, startingLoc, stride, residual);
+  } else if (type == REAL_DOUBLE) {
+    return DUnpackStore(memPtr, startingLoc, stride, residual);
+  } else {
+    cout << "Error: VecRegWidth bad type\n";
+    LOG_FAIL("Replacement for call to throw;");
+    throw;
+  }
+}
+
 string Architecture::ZeroVar(Type type, string varName)
 {
   if (type == REAL_SINGLE) {
@@ -209,6 +234,42 @@ double Architecture::FlopsPerCycle(Type type)
     LOG_FAIL("Replacement for call to throw;");
     throw;
   }
+}
+
+string Architecture::SPackedLoad(string memPtr, string receivingLoc, string stride, int residual) {
+  string loadCode = DZeroVar(receivingLoc);
+  for (int i = 0; i < residual; i++) {
+    string indStr = std::to_string((long long int) i);
+    loadCode += receivingLoc + ".f[" + indStr + "] = *(" + memPtr + " + " + indStr + " * " + stride + "); ";
+  }
+  return loadCode;
+}
+
+string Architecture::DPackedLoad(string memPtr, string receivingLoc, string stride, int residual) {
+  string loadCode = SZeroVar(receivingLoc);
+  for (int i = 0; i < residual; i++) {
+    string indStr = std::to_string((long long int) i);
+    loadCode += receivingLoc + ".d[" + indStr + "] = *(" + memPtr + " + " + indStr + " * " + stride + "); ";
+  }
+  return loadCode;
+}
+
+string Architecture::SUnpackStore(string memPtr, string startingLoc, string stride, int residual) {
+  string storeCode = "";
+  for (int i = 0; i < residual; i++) {
+    auto resInd = std::to_string((long long int) i);
+    storeCode += "*(" + memPtr + " + " + resInd + " * " + stride + ") = " + startingLoc + ".f[" + resInd + "]; ";
+  }
+  return storeCode;
+}
+
+string Architecture::DUnpackStore(string memPtr, string startingLoc, string stride, int residual) {
+  string storeCode = "";
+  for (int i = 0; i < residual; i++) {
+    auto resInd = std::to_string((long long int) i);
+    storeCode += "*(" + memPtr + " + " + resInd + " * " + stride + ") = " + startingLoc + ".d[" + resInd + "]; ";
+  }
+  return storeCode;
 }
 
 string AMDEngSample::CompileString(string executableName, string testFileName)
