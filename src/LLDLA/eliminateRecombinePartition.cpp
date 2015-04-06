@@ -26,16 +26,29 @@
 #include "partition.h"
 #include "recombine.h"
 
-bool EliminateRecombinePartition::CanApply(const Node* node) const {
-  if (node->GetNodeClass() == Recombine::GetClass()) {
-    if (node->NumChildrenOfOutput(0) == 2) {
-      if (node->Child(0)->GetNodeClass() == Partition::GetClass()) {
-	return true;
+bool EliminateRecombinePartition::PartitionsAreIdentical(const Node* node) const {
+  auto firstRecombine = static_cast<const Recombine*>(node);
+  //  auto firstPartition = firstRecombine->Input(2)->
+  return false;
+}
+
+bool EliminateRecombinePartition::OutputIsSuperfluousPartition(const Node* node) const {
+  if (node->NumChildrenOfOutput(0) == 2) {
+    if (node->Child(0)->GetNodeClass() == Partition::GetClass()) {
+      if (node->Child(1)->GetNodeClass() == Recombine::GetClass()) {
+	return node == node->Child(1) && PartitionsAreIdentical(node);
       } else {
 	return false;
       }
+    } else {
+      return false;
     }
-    return false;
+  }
+}
+
+bool EliminateRecombinePartition::CanApply(const Node* node) const {
+  if (node->GetNodeClass() == Recombine::GetClass()) {
+    return OutputIsSuperfluousPartition(node);
   }
   throw;
 }

@@ -26,6 +26,9 @@
 #include "transform.h"
 
 class EliminateRecombinePartition : public SingleTrans {
+ private:
+  bool PartitionsAreIdentical(const Node* node) const;
+  bool OutputIsSuperfluousPartition(const Node* node) const;
  public:
   Layer m_fromLayer, m_toLayer;
 
