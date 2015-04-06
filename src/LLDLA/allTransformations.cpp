@@ -269,7 +269,7 @@ void AddCopyTrans() {
 }
 
 void AddRTLOptimizations() {
-  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
 }
 
 void AddTransformations() {
@@ -286,7 +286,6 @@ void AddTransformations() {
 
   AddTransposeTrans();
   AddUnrollingTrans();
-  AddPartitionRecombineTrans();
 }
 
 #endif // DOLLDLA
