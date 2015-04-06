@@ -280,7 +280,7 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
   //  PSetVecIter setIter = poss->m_sets.begin();
   //  for(; setIter != poss->m_sets.end(); ++setIter) {
   for (auto set : poss->m_sets) {
-    BasePSet *newSet;
+    BasePSet *newSet = NULL;
     if (useShadows) {
 #if USESHADOWS
       newSet = set->GetNewShadow();
@@ -2831,6 +2831,8 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
                 }
               }
             }
+	    var->CleanCache(&cache);
+
           }
           else {
             LOG_FAIL("replacement for throw call");
