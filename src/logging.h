@@ -26,13 +26,13 @@
 
 using namespace std;
 
-enum LogLevel { ALL, INFO, DEBUG, FATAL };
+enum LogLevel { ALL, INFO, DEBUGVAL, FATAL };
 
 #define LOG_START(name) OpenLog((name))
 #define LOG_END() CloseLog()
 #define LOG_A(msg) LogMessage(ALL, (msg))
 #define LOG_I(msg) LogMessage(INFO, (msg))
-#define LOG_D(msg) LogMessage(DEBUG, (msg))
+#define LOG_D(msg) LogMessage(DEBUGVAL, (msg))
 #define LOG_F(msg) LogMessage(FATAL, (msg))
 #define LOG_FAIL(failMsg) LogFailMessageAndThrow((failMsg));
 
