@@ -7,9 +7,10 @@
 #include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
 #include "eliminateStoreLoad.h"
+#include "LLDLATranspose.h"
+#include "loadToContigLoad.h"
 #include "mmul.h"
 #include "mmulTransformations.h"
-#include "LLDLATranspose.h"
 #include "madd.h"
 #include "mvmul.h"
 #include "mvmulToSVMul.h"
@@ -272,6 +273,10 @@ void AddRTLOptimizations() {
   Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
 }
 
+void AddPrimPhaseConversions() {
+  Universe::AddTrans(LoadToRegs::GetClass(), new LoadToContigLoad(ABSLAYER, ABSLAYER), LLDLAPRIMPHASE);
+}
+
 void AddTransformations() {
   AddGemmTrans();
   AddVVDotTrans();
@@ -283,6 +288,7 @@ void AddTransformations() {
   AddVAddTrans();
 
   AddRTLOptimizations();
+  AddPrimPhaseConversions();
 
   AddTransposeTrans();
   AddUnrollingTrans();

@@ -29,8 +29,10 @@ void LoadToRegs::Prop()
 {
   if (!IsValidCost(m_cost)) {
     DLANode::Prop();
-    if (m_inputs.size() != 1)
+    if (m_inputs.size() != 1) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
 
     if (*(GetInputM(0)) != GetVecRegWidth()) {
       // this isn't 1 x GetVecRegWidth()
@@ -67,8 +69,7 @@ void LoadToRegs::Prop()
   }
 }
 
-void LoadToRegs::PrintCode(IndStream &out)
-{
+void LoadToRegs::PrintCode(IndStream &out) {
   out.Indent();
   string toLoadName = GetInputNameStr(0);
   string loadStr = GetNameStr(0);
@@ -105,24 +106,21 @@ void LoadToRegs::PrintCode(IndStream &out)
   return;
 }
 
-const Sizes* LoadToRegs::GetM(ConnNum num) const
-{
+const Sizes* LoadToRegs::GetM(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
   return GetInputM(0);
 }
 
-const Sizes* LoadToRegs::GetN(ConnNum num) const
-{
+const Sizes* LoadToRegs::GetN(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
   return GetInputN(0);
 }
 
-Name LoadToRegs::GetName(ConnNum num) const
-{
+Name LoadToRegs::GetName(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
@@ -131,8 +129,7 @@ Name LoadToRegs::GetName(ConnNum num) const
   return name;
 }
 
-void LoadToRegs::AddVariables(VarSet &set) const
-{
+void LoadToRegs::AddVariables(VarSet &set) const {
   string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regs;\n";
   Var var(DirectVarDeclType, varDecl, GetDataType());
   set.insert(var);
@@ -189,24 +186,21 @@ void PackedLoadToRegs::PrintCode(IndStream &out) {
   return;
 }
 
-const Sizes* PackedLoadToRegs::GetM(ConnNum num) const
-{
+const Sizes* PackedLoadToRegs::GetM(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
   return GetInputM(0);
 }
 
-const Sizes* PackedLoadToRegs::GetN(ConnNum num) const
-{
+const Sizes* PackedLoadToRegs::GetN(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
   return GetInputN(0);
 }
 
-Name PackedLoadToRegs::GetName(ConnNum num) const
-{
+Name PackedLoadToRegs::GetName(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
@@ -215,15 +209,13 @@ Name PackedLoadToRegs::GetName(ConnNum num) const
   return name;
 }
 
-void PackedLoadToRegs::AddVariables(VarSet &set) const
-{
+void PackedLoadToRegs::AddVariables(VarSet &set) const {
   string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regs_packed;\n";
   Var var(DirectVarDeclType, varDecl, GetDataType());
   set.insert(var);
 }
 
-void StoreFromRegs::Prop()
-{
+void StoreFromRegs::Prop() {
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
 
@@ -245,8 +237,7 @@ void StoreFromRegs::Prop()
   }
 }
 
-void StoreFromRegs::PrintCode(IndStream &out)
-{
+void StoreFromRegs::PrintCode(IndStream &out) {
   string regVarName = GetInputNameStr(0);
   string storeLocation = GetInputNameStr(1);
   // Decide which store instruction is needed based on

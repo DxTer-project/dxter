@@ -28,6 +28,15 @@
 
 bool EliminateRecombinePartition::PartitionsAreIdentical(const Node* node) const {
   auto firstRecombine = static_cast<const Recombine*>(node);
+  auto nodeBeingPartitioned = firstRecombine->Input(2);
+  auto nodeBeingPartitionedOutNum = firstRecombine->InputConnNum(2);
+  if (nodeBeingPartitioned->NumChildrenOfOutput(nodeBeingPartitionedOutNum) != 2) {
+    return false;
+  }
+  if (nodeBeingPartitioned->Child(0)->GetNodeClass() != Partition::GetClass() ||
+      nodeBeingPartitioned->Child(1)->GetNodeClass() != Recombine::GetClass()) {
+    return false;
+  }
   //  auto firstPartition = firstRecombine->Input(2)->
   return false;
 }
@@ -36,7 +45,7 @@ bool EliminateRecombinePartition::OutputIsSuperfluousPartition(const Node* node)
   if (node->NumChildrenOfOutput(0) == 2) {
     if (node->Child(0)->GetNodeClass() == Partition::GetClass()) {
       if (node->Child(1)->GetNodeClass() == Recombine::GetClass()) {
-	return node == node->Child(1) && PartitionsAreIdentical(node);
+	return *node == *(node->Child(1)) && PartitionsAreIdentical(node);
       } else {
 	return false;
       }
