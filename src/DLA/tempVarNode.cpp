@@ -170,6 +170,8 @@ TempVarNode::~TempVarNode()
   if (m_lsizes) {
     delete [] m_lsizes;
     m_lsizes = NULL;
+    delete [] m_sumLens;
+    m_sumLens = NULL;
   }
 #endif
 }
@@ -369,7 +371,7 @@ void TempVarNode::ClearDataTypeCache()
   delete m_nlsize;
   m_nlsize = NULL;
 #elif DOTENSORS
-  if (m_lsizes)
+  if (!m_lsizes)
     return;
   delete [] m_lsizes;
   m_lsizes = NULL;
