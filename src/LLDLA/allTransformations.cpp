@@ -272,7 +272,11 @@ void AddCopyTrans() {
 
 void AddRTLOptimizations() {
   Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
+<<<<<<< HEAD
 Universe::AddTrans(Recombine::GetClass(), new EliminateRecombinePartition(ABSLAYER, ABSLAYER), SIMP);
+=======
+  Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoad, LLDLARTLPHASE);
+>>>>>>> 6f22a06149c43520d6ae145d4157345e43753fe1
 }
 
 void AddPrimPhaseConversions() {
@@ -280,6 +284,7 @@ void AddPrimPhaseConversions() {
 }
 
 void AddTransformations() {
+<<<<<<< HEAD
   AddGemmTrans();
   AddVVDotTrans();
   AddMAddTrans();
@@ -287,6 +292,15 @@ void AddTransformations() {
   AddSMMulTrans();
   AddSVMulTrans();
   AddVMMulTrans();
+=======
+  //  AddGemmTrans();
+  //  AddVVDotTrans();
+  //  AddMAddTrans();
+  //  AddMVMulTrans();
+  //  AddSMMulTrans();
+  //   AddSVMulTrans();
+  //  AddVMMulTrans();
+>>>>>>> 6f22a06149c43520d6ae145d4157345e43753fe1
   AddVAddTrans();
 
   AddRTLOptimizations();
