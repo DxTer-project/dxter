@@ -28,30 +28,44 @@
 
 bool EliminateRecombinePartition::PartitionsAreIdentical(const Node* node) const {
   auto firstRecombine = static_cast<const Recombine*>(node);
-  auto nodeBeingPartitioned = firstRecombine->Input(2);
-  auto nodeBeingPartitionedOutNum = firstRecombine->InputConnNum(2);
-  if (nodeBeingPartitioned->NumChildrenOfOutput(nodeBeingPartitionedOutNum) != 2) {
+  auto part = static_cast<const Partition*>(firstRecombine->Child(0));
+  if (*part->GetM(0) == firstRecombine->GetInputNumRows(0)
+      && *part->GetN(0) == firstRecombine->GetInputNumCols(0)
+      && *part->GetM(1) == firstRecombine->GetInputNumRows(1)
+      && *part->GetN(1) == firstRecombine->GetInputNumCols(1)) {
+    cout << "Partitions are identical" << endl;
+    return true;
+  } else {
+    //    cout << *part->GetM(0) << endl;
+    cout << firstRecombine->GetInputNumRows(0) << endl;
+    //    cout << *part->GetN(0) << endl;
+    cout << firstRecombine->GetInputNumCols(0) << endl;
+    //    cout << *part->GetM(1) << endl;
+    cout << firstRecombine->GetInputNumRows(1) << endl;
+    //    cout << *part->GetN(1) << endl;
+    cout << firstRecombine->GetInputNumCols(1) << endl;
     return false;
   }
-  if (nodeBeingPartitioned->Child(0)->GetNodeClass() != Partition::GetClass() ||
-      nodeBeingPartitioned->Child(1)->GetNodeClass() != Recombine::GetClass()) {
-    return false;
-  }
-  //  auto firstPartition = firstRecombine->Input(2)->
-  return false;
 }
 
 bool EliminateRecombinePartition::OutputIsSuperfluousPartition(const Node* node) const {
   if (node->NumChildrenOfOutput(0) == 2) {
     if (node->Child(0)->GetNodeClass() == Partition::GetClass()) {
       if (node->Child(1)->GetNodeClass() == Recombine::GetClass()) {
-	return *node == *(node->Child(1)) && PartitionsAreIdentical(node);
+	auto er = node->Child(1);
+	cout << "Child(1) name" << endl;
+	cout << er->GetNodeClass() << endl;
+	return PartitionsAreIdentical(node);
       } else {
+	cout << "CANT APPLY" << endl;
 	return false;
       }
     } else {
+      cout << "CANT APPLY" << endl;
       return false;
     }
+  } else {
+    return false;
   }
 }
 
@@ -63,10 +77,27 @@ bool EliminateRecombinePartition::CanApply(const Node* node) const {
 }
 
 void EliminateRecombinePartition::Apply(Node* node) const {
-  auto superfluousLoad = node->Child(0);
-  superfluousLoad->RedirectChildren(node->Input(0), node->InputConnNum(0));
-  node->m_poss->DeleteChildAndCleanUp(node);
-  node->m_poss->DeleteChildAndCleanUp(superfluousLoad);
+  cout << "Applying EliminateRecombinePartition" << endl;
+  auto superfluousPart = node->Child(0);
+  auto er = node->Child(1);
+  auto endRecombine = static_cast<Recombine*>(er);
+
+  auto newEndRecombine = new Recombine(m_toLayer, endRecombine->GetDir());			     
+  newEndRecombine->AddInputs(6,
+			     endRecombine->Input(0), endRecombine->InputConnNum(0),
+			     endRecombine->Input(1), endRecombine->InputConnNum(1),
+			     node->Input(2), node->InputConnNum(2));
+
+  endRecombine->RedirectChildren(newEndRecombine, 0);
+
+  node->m_poss->DeleteChildAndCleanUp(endRecombine);
+
+  superfluousPart->RedirectChildren(0, node->Input(0), node->InputConnNum(0));
+  superfluousPart->RedirectChildren(1, node->Input(1), node->InputConnNum(1));
+
+  node->m_poss->AddNode(newEndRecombine);
+			    
+  node->m_poss->DeleteChildAndCleanUp(superfluousPart);
   return;
 }
 
