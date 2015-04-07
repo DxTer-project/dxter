@@ -102,12 +102,12 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
     RunPhase(uni, numIters, LLDLARTLPHASE);
   }
 
-  if ((CurrPhase == LLDLALOOPUNROLLPHASE) && DOLLDLALOOPUNROLLPHASE) {
-    RunPhase(uni, numIters, LLDLALOOPUNROLLPHASE);
-  }
-
   if ((CurrPhase == LLDLAPRIMPHASE) && DOLLDLAPRIMPHASE) {
     RunPhase(uni, numIters, LLDLAPRIMPHASE);
+  }
+
+  if ((CurrPhase == LLDLALOOPUNROLLPHASE) && DOLLDLALOOPUNROLLPHASE) {
+    RunPhase(uni, numIters, LLDLALOOPUNROLLPHASE);
   }
 
   time(&end);

@@ -26,7 +26,7 @@
 #include "costModel.h"
 
 void ContiguousLoad::SanityCheckInputDimensions() {
-  if (!(IsInputRowVector(0) || IsInputColVector(0))) {
+  if (!(IsInputRowVector(0) || IsInputColVector(0)) || !InputIsContiguous(0)) {
     throw;
   }
 }

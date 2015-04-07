@@ -262,7 +262,7 @@ string RuntimeTest::TwoPhaseTimingLoop(int i) {
   loopBody += "\ttotal_cycles = 0;\n";
   loopBody += "\tnum_runs = 0;\n";
   loopBody += "\twhile (total_cycles < MIN_CYCLES) {\n";
-  loopBody += "\tnum_runs++;\n";
+  loopBody += "\t\tnum_runs++;\n";
   loopBody += "\t\tstart_time = rdtsc();\n";
   loopBody += "\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
   loopBody += "\t\tend_time = rdtsc();\n";

@@ -52,6 +52,8 @@ class LoadToRegs : public DLANode
   virtual bool IsDataDependencyOfInput() const {return true;}
 
   virtual void AddVariables(VarSet &set) const;
+
+  //  virtual Phase MaxPhase() const;
 };
 
 class PackedLoadToRegs : public DLANode {
