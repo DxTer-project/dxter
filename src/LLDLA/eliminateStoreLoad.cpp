@@ -26,26 +26,20 @@
 #include "regLoadStore.h"
 
 bool EliminateStoreLoad::CanApply(const Node* node) const {
-  cout << "EliminateStoreLoad::CanApply" << endl;
   if (node->GetNodeClass() == StoreFromRegs::GetClass()) {
-    if (node->NumChildrenOfOutput(0) == 1) {
-      cout << "Store has only one child" << endl;
-      if (node->Child(0)->GetNodeClass() == LoadToRegs::GetClass()) {
-	cout << "EliminateStoreLoad can be applied!" << endl;
+    if (node->NumChildrenOfOutput(0) == 2) {
+      if (node->Child(0)->GetNodeClass() == LoadToRegs::GetClass()
+	  && node->Child(1)->GetNodeClass() == StoreFromRegs::GetClass()) {
 	return true;
       } else {
-	cout << "Child of store is not Load" << endl;
-	cout << node->Child(0)->GetNodeClass() << endl;
+	/*	cout << node->Child(0)->GetNodeClass() << endl;
 	cout << node->Child(0)->Child(0)->GetNodeClass() << endl;
 	cout << node->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
 	cout << node->Child(0)->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
-	cout << node->Child(0)->Child(0)->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
+	cout << node->Child(0)->Child(0)->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;*/
 	return false;
       }
     }
-    cout << "Node has more than 1 child" << endl;
-    cout << node->Child(0)->GetNodeClass() << endl;
-    cout << node->Child(1)->GetNodeClass() << endl;
     return false;
   }
   throw;
@@ -53,8 +47,20 @@ bool EliminateStoreLoad::CanApply(const Node* node) const {
 
 void EliminateStoreLoad::Apply(Node* node) const {
   auto superfluousLoad = node->Child(0);
+  auto finalStore = node->Child(1);
+
+  auto newFinalStore = new StoreFromRegs();
+  newFinalStore->AddInputs(4,
+			   finalStore->Input(0), finalStore->InputConnNum(0),
+			   node->Input(1), node->InputConnNum(1));
+
+  finalStore->RedirectChildren(newFinalStore, 0);
+
+  node->m_poss->AddNode(newFinalStore);
+  node->m_poss->DeleteChildAndCleanUp(finalStore);
+
   superfluousLoad->RedirectChildren(node->Input(0), node->InputConnNum(0));
-  node->m_poss->DeleteChildAndCleanUp(node);
+
   node->m_poss->DeleteChildAndCleanUp(superfluousLoad);
   return;
 }
