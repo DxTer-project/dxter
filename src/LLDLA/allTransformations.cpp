@@ -271,6 +271,7 @@ void AddCopyTrans() {
 
 void AddRTLOptimizations() {
   Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
+  Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoad, LLDLARTLPHASE);
 }
 
 void AddPrimPhaseConversions() {
@@ -283,7 +284,7 @@ void AddTransformations() {
   //  AddMAddTrans();
   //  AddMVMulTrans();
   //  AddSMMulTrans();
-  //  AddSVMulTrans();
+  //   AddSVMulTrans();
   //  AddVMMulTrans();
   AddVAddTrans();
 
