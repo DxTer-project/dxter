@@ -33,17 +33,8 @@ bool EliminateRecombinePartition::PartitionsAreIdentical(const Node* node) const
       && *part->GetN(0) == firstRecombine->GetInputNumCols(0)
       && *part->GetM(1) == firstRecombine->GetInputNumRows(1)
       && *part->GetN(1) == firstRecombine->GetInputNumCols(1)) {
-    cout << "Partitions are identical" << endl;
     return true;
   } else {
-    //    cout << *part->GetM(0) << endl;
-    cout << firstRecombine->GetInputNumRows(0) << endl;
-    //    cout << *part->GetN(0) << endl;
-    cout << firstRecombine->GetInputNumCols(0) << endl;
-    //    cout << *part->GetM(1) << endl;
-    cout << firstRecombine->GetInputNumRows(1) << endl;
-    //    cout << *part->GetN(1) << endl;
-    cout << firstRecombine->GetInputNumCols(1) << endl;
     return false;
   }
 }
@@ -53,15 +44,11 @@ bool EliminateRecombinePartition::OutputIsSuperfluousPartition(const Node* node)
     if (node->Child(0)->GetNodeClass() == Partition::GetClass()) {
       if (node->Child(1)->GetNodeClass() == Recombine::GetClass()) {
 	auto er = node->Child(1);
-	cout << "Child(1) name" << endl;
-	cout << er->GetNodeClass() << endl;
 	return PartitionsAreIdentical(node);
       } else {
-	cout << "CANT APPLY" << endl;
 	return false;
       }
     } else {
-      cout << "CANT APPLY" << endl;
       return false;
     }
   } else {
