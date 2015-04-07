@@ -246,7 +246,7 @@ string Architecture::SPackedLoad(string memPtr, string receivingLoc, string stri
 }
 
 string Architecture::DPackedLoad(string memPtr, string receivingLoc, string stride, int residual) {
-  string loadCode = SZeroVar(receivingLoc);
+  string loadCode = DZeroVar(receivingLoc);
   for (int i = 0; i < residual; i++) {
     string indStr = std::to_string((long long int) i);
     loadCode += receivingLoc + ".d[" + indStr + "] = *(" + memPtr + " + " + indStr + " * " + stride + "); ";
