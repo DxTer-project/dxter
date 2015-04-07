@@ -181,4 +181,13 @@ class UnpackStoreFromRegs : public DLAOp<2,1>
   virtual bool IsDataDependencyOfInput() const {return true;}
 };
 
+class HoistLoad : public SingleTrans
+{
+  virtual string GetType() const {return "HoistLoad";}
+  virtual bool IsRef() const {return false;}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+
 #endif //DOLLDLA
