@@ -43,6 +43,7 @@ bool EliminateStoreLoad::CanApply(const Node* node) const {
 	return false;
       }
     }
+    cout << "Node has more than 1 child" << endl;
     return false;
   }
   throw;
