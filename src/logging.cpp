@@ -36,7 +36,7 @@ string LogLevelToString(LogLevel level) {
     return "ALL";
   case(INFO):
     return "INFO";
-  case(DEBUG):
+  case(DEBUGVAL):
     return "DEBUG";
   case(FATAL):
     return "FATAL";
