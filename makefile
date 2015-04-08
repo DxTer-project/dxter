@@ -33,6 +33,7 @@ clean:
 	find . -type f -name '*.o' -delete
 	find . -type f -name '*~' -delete
 	find . -type f -name '*.x' -delete
+	find . -type f -name '#*' -delete
 
 open:
 	emacs -nw src/*cpp src/*h src/linearization/*cpp src/linearization/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h src/LLDLA/*cpp src/LLDLA/*h makefile	
