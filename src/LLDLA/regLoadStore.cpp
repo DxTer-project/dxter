@@ -338,14 +338,15 @@ void UnpackStoreFromRegs::PrintCode(IndStream &out)
   return;
 }
 
-void DuplicateRegLoad::Prop()
-{
+void DuplicateRegLoad::Prop() {
   if (!IsValidCost(m_cost)) {
-    if (m_inputs.size() != 1)
+    if (m_inputs.size() != 1) {
       LOG_FAIL("replacement for throw call");
+    }
     if ((*(GetInputM(0)) != 1) ||
-	(*(GetInputN(0)) != 1))
+	(*(GetInputN(0)) != 1)) {
       LOG_FAIL("replacement for throw call");
+    }
     Input(0)->Prop();
     m_cost = 0;
   }

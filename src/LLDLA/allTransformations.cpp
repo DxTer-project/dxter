@@ -6,6 +6,7 @@
 #include "copyColLoopRef.h"
 #include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
+#include "eliminateRecombine.h"
 #include "eliminateRecombinePartition.h"
 #include "eliminateStoreLoad.h"
 #include "LLDLATranspose.h"
@@ -135,13 +136,13 @@ void AddMVMulTrans() {
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  // Universe::AddTrans(MVMul::GetClass(), new MVMulToSVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(MVMul::GetClass(), new MVMulToSVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(MVMul::GetClass(), new MVMulToVVDot(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulPackOutput(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(MVMul::GetClass(), new MVMulPackOutput(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }
@@ -272,7 +273,8 @@ void AddCopyTrans() {
 
 void AddRTLOptimizations() {
   Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), SIMP);
-Universe::AddTrans(Recombine::GetClass(), new EliminateRecombinePartition(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddTrans(Recombine::GetClass(), new EliminateRecombinePartition(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddTrans(Recombine::GetClass(), new EliminateRecombine(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoad, SIMP);
 }
 
