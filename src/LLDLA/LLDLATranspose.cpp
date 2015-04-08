@@ -86,6 +86,7 @@ bool LLDLATransposeLowerLayer::CanApply(const Node *node) const
   }
   cout << "Error: Applying LLDLATransposeLowerLayer to non LLDLATranspose node\n";
   LOG_FAIL("Replacement for call to throw;");
+  throw;
 }
 
 void LLDLATransposeLowerLayer::Apply(Node *node) const

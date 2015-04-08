@@ -137,6 +137,7 @@ Phase SMMul::MaxPhase() const
       return NUMPHASES; 
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -187,6 +188,7 @@ bool SMulToSVMul::CanApply(const Node *node) const
   cout << "ERROR: Applying SMMulToSVMul to non SMMul node\n";
   cout << "Node has class " << node->GetNodeClass() << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void SMulToSVMul::Apply(Node *node) const
@@ -289,6 +291,7 @@ string SMulToScalarArith::GetType() const
   default:
     cout << "Invalid dimension in SMulToScalarArith::GetType()" << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -303,6 +306,7 @@ bool SMulToScalarArith::CanApply(const Node* node) const
   }
   cout << "ERROR: Called SMulToScalarArith::CanApply on non SMul node" << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void SMulToScalarArith::Apply(Node* node) const
@@ -329,8 +333,10 @@ bool SMulLowerLayer::CanApply(const Node *node) const
     else
       return false;
   }
-  else
+  else {
     LOG_FAIL("replacement for throw call");  
+    throw;
+  }
 }
 
 void SMulLowerLayer::Apply(Node *node) const

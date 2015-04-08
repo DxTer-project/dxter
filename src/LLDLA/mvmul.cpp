@@ -129,6 +129,7 @@ Phase MVMul::MaxPhase() const
       return NUMPHASES; 
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -227,6 +228,7 @@ bool MVMulLowerLayer::CanApply(const Node *node) const
   }
   cout << "Error: Applying MVMulLowerLayer to non-MVMul node\n";
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void MVMulLowerLayer::Apply(Node *node) const
@@ -259,6 +261,7 @@ string MVMulLoopRef::GetType() const
       return "MVMulLoopRef - dim n " + std::to_string((long long int) m_bs.GetSize());
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }  
 }
 
@@ -285,6 +288,7 @@ bool MVMulLoopRef::CanApply(const Node *node) const
     }
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void MVMulLoopRef::Apply(Node *node) const {

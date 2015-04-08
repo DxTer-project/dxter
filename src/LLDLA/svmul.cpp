@@ -43,6 +43,7 @@ VecType SVMul::GetVecType() const {
     return COLVECTOR;
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void SVMul::PrintCode(IndStream &out)
@@ -212,6 +213,7 @@ Phase SVMul::MaxPhase() const
       return NUMPHASES; 
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -307,6 +309,7 @@ void SVMulLoopRef::Apply(Node *node) const
   } else {
     cout << "Error: Bad data type in vadd apply\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 
   // Row vectors are partitioned in the N dimension, column vectors in the M dimension
@@ -342,6 +345,7 @@ bool SVMulLowerLayer::CanApply(const Node *node) const
   }
   else {
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -388,6 +392,7 @@ bool SVMulToRegArith::CanApply(const Node* node) const
   }
   cout << "ERROR: Trying to apply SVMulToRegArith to non SVMul node" << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void SVMulToRegArith::Apply(Node* node) const
@@ -456,6 +461,7 @@ void SVMulToRegArith::Apply(Node* node) const
   } else {
     cout << "Error: Bad data type in vadd apply\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   
   // Adding loop to poss and cleanup
@@ -498,6 +504,7 @@ bool SVMulToScalarArith::CanApply(const Node* node) const
   }
   cout << "ERROR: SVMulToScalarArith applied to non SVMul node" << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void SVMulToScalarArith::Apply(Node* node) const
@@ -591,6 +598,7 @@ bool ResidualPartitionSVMul::CanApply(const Node* node) const
   }
   cout << "ERROR: Cannot apply ResidualPartitionSVMul to non SVMul node" << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void ResidualPartitionSVMul::Apply(Node* node) const

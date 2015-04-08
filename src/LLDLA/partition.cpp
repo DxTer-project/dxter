@@ -325,6 +325,7 @@ bool PartitionLowerLayer::CanApply(const Node *node) const {
   }
   cout << "Error: Applying PartitionLowerLayer to non-Partition node\n";
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void PartitionLowerLayer::Apply(Node *node) const {

@@ -139,6 +139,7 @@ bool MMulLoopExp::CanApply(const Node *node) const
     }
   default:
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -183,6 +184,7 @@ bool LLDAGemmLowerLayer::CanApply(const Node *node) const
       return false;
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void LLDAGemmLowerLayer::Apply(Node *node) const

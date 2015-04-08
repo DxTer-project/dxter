@@ -38,6 +38,7 @@ bool ScalarMulVerticalPackToMultipleOfMu::CanApply(const Node* node) const {
       && smmul->GetInputNumCols(1) > 1;
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void ScalarMulVerticalPackToMultipleOfMu::Apply(Node* node) const {

@@ -43,7 +43,7 @@ bool EliminateRecombinePartition::OutputIsSuperfluousPartition(const Node* node)
   if (node->NumChildrenOfOutput(0) == 2) {
     if (node->Child(0)->GetNodeClass() == Partition::GetClass()) {
       if (node->Child(1)->GetNodeClass() == Recombine::GetClass()) {
-	auto er = node->Child(1);
+	//auto er = node->Child(1);
 	return PartitionsAreIdentical(node);
       } else {
 	return false;

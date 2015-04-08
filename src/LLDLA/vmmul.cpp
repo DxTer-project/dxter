@@ -129,6 +129,7 @@ Phase VMMul::MaxPhase() const
       return NUMPHASES; 
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -207,6 +208,7 @@ string VMMulLoopRef::GetType() const
   }
   cout << "No matching dimension case for VMMulLoopRef\n";
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 bool VMMulLoopRef::CanApply(const Node* node) const
@@ -361,6 +363,7 @@ bool VMMulLowerLayer::CanApply(const Node* node) const
     }
   } else {
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 

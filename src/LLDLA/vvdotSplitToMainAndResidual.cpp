@@ -43,6 +43,7 @@ bool VVDotSplitToMainAndResidual::CanApply(const Node* node) const {
   }
 
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void VVDotSplitToMainAndResidual::Apply(Node* node) const {

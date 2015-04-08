@@ -239,6 +239,7 @@ Phase VAdd::MaxPhase() const
       return NUMPHASES; 
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -377,6 +378,7 @@ bool VAddLowerLayer::CanApply(const Node *node) const
   }
   cout << "Error: Applying VAddLowerLayer to non-VAdd node\n";
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void VAddLowerLayer::Apply(Node *node) const
@@ -413,6 +415,7 @@ bool VAddToRegArith::CanApply(const Node* node) const
   }
   cout << "ERROR: Applying VAddToRegArith to non-VAdd node\n";
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void VAddToRegArith::Apply(Node* node) const
@@ -472,6 +475,7 @@ void VAddToRegArith::Apply(Node* node) const
   } else {
     cout << "Error: Bad GetDataType() in vadd apply\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   loop->SetDimName(splitDown ? DIMM : DIMN);
 

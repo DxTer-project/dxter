@@ -42,6 +42,7 @@ bool PackToCopyAndZero::CanApply(const Node* node) const {
     return true;
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void PackToCopyAndZero::Apply(Node* node) const {

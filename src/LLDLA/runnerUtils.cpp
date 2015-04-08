@@ -45,6 +45,7 @@ string TypeToStr(Type type) {
   default:
     cout << "ERROR: Bad type in TypeToStr" << endl;
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 

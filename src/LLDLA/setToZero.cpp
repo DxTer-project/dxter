@@ -51,6 +51,7 @@ Phase SetToZero::MaxPhase() const {
       return NUMPHASES; 
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -159,6 +160,7 @@ bool SetToZeroLowerLayer::CanApply(const Node* node) const {
     return true;
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void SetToZeroLowerLayer::Apply(Node* node) const {
