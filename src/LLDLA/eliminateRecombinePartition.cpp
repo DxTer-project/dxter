@@ -64,7 +64,6 @@ bool EliminateRecombinePartition::CanApply(const Node* node) const {
 }
 
 void EliminateRecombinePartition::Apply(Node* node) const {
-  cout << "Applying EliminateRecombinePartition" << endl;
   auto superfluousPart = node->Child(0);
   auto er = node->Child(1);
   auto endRecombine = static_cast<Recombine*>(er);
