@@ -2,12 +2,14 @@
 
 #if DOLLDLA
 
+#include "addMulToFMA.h"
 #include "copy.h"
 #include "copyColLoopRef.h"
 #include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
 #include "eliminateRecombine.h"
 #include "eliminateRecombinePartition.h"
+#include "eliminateStore.h"
 #include "eliminateStoreLoad.h"
 #include "LLDLATranspose.h"
 #include "loadToContigLoad.h"
@@ -113,7 +115,8 @@ void AddGemmTrans() {
 void AddVVDotTrans() {
   Universe::AddTrans(VVDot::GetClass(), new VVDotSplitToMainAndResidual(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VVDot::GetClass(), new ResidualVVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
@@ -138,7 +141,7 @@ void AddMVMulTrans() {
 
   Universe::AddTrans(MVMul::GetClass(), new MVMulToSVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulToVVDot(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(MVMul::GetClass(), new MVMulToVVDot(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   //Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
@@ -195,8 +198,8 @@ void AddSVMulTrans() {
 
     Universe::AddTrans(SVMul::GetClass(), new ResidualSVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-    Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
-    Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+    //    Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+    //    Universe::AddTrans(SVMul::GetClass(), new SVMulSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 
     return;
 }
@@ -273,9 +276,11 @@ void AddCopyTrans() {
 
 void AddRTLOptimizations() {
   Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStore(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombinePartition(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombine(ABSLAYER, ABSLAYER), SIMP);
-  Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoad, SIMP);
+  Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoad(), SIMP);
+  Universe::AddTrans(Mul::GetClass(), new AddMulToFMA(ABSLAYER, ABSLAYER), SIMP);
 }
 
 void AddPrimPhaseConversions() {
