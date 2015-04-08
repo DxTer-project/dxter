@@ -52,8 +52,8 @@ void MVMulToSVMul::Apply(Node* node) const {
 
   auto svmul = new SVMul(m_toLayer);
   svmul->AddInputs(4,
-		   splitA, 0,
-		   splitX, 0);
+		   splitX, 1,
+		   splitA, 1);
 
   auto vadd = new VAdd(m_toLayer, COLVECTOR);
   vadd->AddInputs(4,

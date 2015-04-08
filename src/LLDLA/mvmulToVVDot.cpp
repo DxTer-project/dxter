@@ -53,9 +53,9 @@ void MVMulToVVDot::Apply(Node* node) const {
 
   auto vvdot = new VVDot(m_toLayer);
   vvdot->AddInputs(6,
-		   splitA, 0,
+		   splitA, 1,
 		   tunX, 0,
-		   splitY, 0);
+		   splitY, 1);
 
   auto comA = splitA->CreateMatchingCombine(0);
   auto comY = splitY->CreateMatchingCombine(1, 1, vvdot, 0);

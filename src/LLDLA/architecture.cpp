@@ -246,7 +246,7 @@ string Architecture::SPackedLoad(string memPtr, string receivingLoc, string stri
 }
 
 string Architecture::DPackedLoad(string memPtr, string receivingLoc, string stride, int residual) {
-  string loadCode = SZeroVar(receivingLoc);
+  string loadCode = DZeroVar(receivingLoc);
   for (int i = 0; i < residual; i++) {
     string indStr = std::to_string((long long int) i);
     loadCode += receivingLoc + ".d[" + indStr + "] = *(" + memPtr + " + " + indStr + " * " + stride + "); ";
@@ -440,7 +440,7 @@ string AMDEngSample::DZeroVar(string varName)
 
 string Stampede::CompileString(string executableName, string testFileName)
 {
-  string compileStr = "icc -O3 -xhost -fnoargument-noalias-global -o ";
+  string compileStr = "icc -O3 -xhost -fargument-noalias-global -o ";
   compileStr += executableName + " " + testFileName + " runtimeEvaluation/utils.c";
   return compileStr;
 }

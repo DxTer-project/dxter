@@ -2,10 +2,14 @@
 
 #if DOLLDLA
 
+#include "addMulToFMA.h"
 #include "copy.h"
 #include "copyColLoopRef.h"
 #include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
+#include "eliminateRecombine.h"
+#include "eliminateRecombinePartition.h"
+#include "eliminateStore.h"
 #include "eliminateStoreLoad.h"
 #include "LLDLATranspose.h"
 #include "loadToContigLoad.h"
@@ -111,7 +115,8 @@ void AddGemmTrans() {
 void AddVVDotTrans() {
   Universe::AddTrans(VVDot::GetClass(), new VVDotSplitToMainAndResidual(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VVDot::GetClass(), new ResidualVVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
@@ -134,13 +139,13 @@ void AddMVMulTrans() {
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle), LLDLALOOPPHASE);
 
-  //  Universe::AddTrans(MVMul::GetClass(), new MVMulToSVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(MVMul::GetClass(), new MVMulToSVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulToVVDot(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(MVMul::GetClass(), new MVMulToVVDot(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(MVMul::GetClass(), new MVMulPackOutput(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  //  Universe::AddTrans(MVMul::GetClass(), new MVMulPackOutput(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }
@@ -217,10 +222,10 @@ void AddVAddTrans() {
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-  //  Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-//  Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-//  Universe::AddTrans(VAdd::GetClass(), new ResidualVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+Universe::AddTrans(VAdd::GetClass(), new ResidualVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VRWVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
@@ -270,8 +275,12 @@ void AddCopyTrans() {
 }
 
 void AddRTLOptimizations() {
-  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
-  Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoad, LLDLARTLPHASE);
+  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStore(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddTrans(Recombine::GetClass(), new EliminateRecombinePartition(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddTrans(Recombine::GetClass(), new EliminateRecombine(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoad(), SIMP);
+  Universe::AddTrans(Mul::GetClass(), new AddMulToFMA(ABSLAYER, ABSLAYER), SIMP);
 }
 
 void AddPrimPhaseConversions() {
@@ -279,20 +288,20 @@ void AddPrimPhaseConversions() {
 }
 
 void AddTransformations() {
-  //  AddGemmTrans();
-  //  AddVVDotTrans();
-  //  AddMAddTrans();
-  //  AddMVMulTrans();
-  //  AddSMMulTrans();
-  //   AddSVMulTrans();
-  //  AddVMMulTrans();
+  AddGemmTrans();
+  AddVVDotTrans();
+  AddMAddTrans();
+  AddMVMulTrans();
+  AddSMMulTrans();
+  AddSVMulTrans();
+  AddVMMulTrans();
   AddVAddTrans();
 
   AddRTLOptimizations();
-  //  AddPrimPhaseConversions();
+  AddPrimPhaseConversions();
 
-  //  AddTransposeTrans();
-  //  AddUnrollingTrans();
+  AddTransposeTrans();
+  AddUnrollingTrans();
 }
 
 #endif // DOLLDLA

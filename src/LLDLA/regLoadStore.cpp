@@ -338,14 +338,20 @@ void UnpackStoreFromRegs::PrintCode(IndStream &out)
   return;
 }
 
-void DuplicateRegLoad::Prop()
-{
+void DuplicateRegLoad::Prop() {
   if (!IsValidCost(m_cost)) {
-    if (m_inputs.size() != 1)
+    if (m_inputs.size() != 1) {
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     if ((*(GetInputM(0)) != 1) ||
-	(*(GetInputN(0)) != 1))
+	(*(GetInputN(0)) != 1)) {
+      cout << "Bad duplicate load arg, dimensions are: " << endl;
+      GetInputM(0)->Print();
+      GetInputN(0)->Print();
       LOG_FAIL("replacement for throw call");
+      throw;
+    }
     Input(0)->Prop();
     m_cost = 0;
   }

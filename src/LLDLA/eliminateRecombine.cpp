@@ -19,14 +19,14 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "eliminateRecombinePartition.h"
+#include "eliminateRecombine.h"
 
 #if DOLLDLA
 
 #include "partition.h"
 #include "recombine.h"
 
-bool EliminateRecombinePartition::PartitionsAreIdentical(const Node* node) const {
+bool EliminateRecombine::PartitionsAreIdentical(const Node* node) const {
   auto firstRecombine = static_cast<const Recombine*>(node);
   auto part = static_cast<const Partition*>(firstRecombine->Child(0));
   if (*part->GetM(0) == firstRecombine->GetInputNumRows(0)
@@ -39,15 +39,10 @@ bool EliminateRecombinePartition::PartitionsAreIdentical(const Node* node) const
   }
 }
 
-bool EliminateRecombinePartition::OutputIsSuperfluousPartition(const Node* node) const {
-  if (node->NumChildrenOfOutput(0) == 2) {
+bool EliminateRecombine::OutputIsSuperfluous(const Node* node) const {
+  if (node->NumChildrenOfOutput(0) == 1) {
     if (node->Child(0)->GetNodeClass() == Partition::GetClass()) {
-      if (node->Child(1)->GetNodeClass() == Recombine::GetClass()) {
-	auto er = node->Child(1);
-	return PartitionsAreIdentical(node);
-      } else {
-	return false;
-      }
+      return PartitionsAreIdentical(node);
     } else {
       return false;
     }
@@ -56,33 +51,19 @@ bool EliminateRecombinePartition::OutputIsSuperfluousPartition(const Node* node)
   }
 }
 
-bool EliminateRecombinePartition::CanApply(const Node* node) const {
+bool EliminateRecombine::CanApply(const Node* node) const {
   if (node->GetNodeClass() == Recombine::GetClass()) {
-    return OutputIsSuperfluousPartition(node);
+    return OutputIsSuperfluous(node);
   }
   throw;
 }
 
-void EliminateRecombinePartition::Apply(Node* node) const {
+void EliminateRecombine::Apply(Node* node) const {
   auto superfluousPart = node->Child(0);
-  auto er = node->Child(1);
-  auto endRecombine = static_cast<Recombine*>(er);
-
-  auto newEndRecombine = new Recombine(m_toLayer, endRecombine->GetDir());			     
-  newEndRecombine->AddInputs(6,
-			     endRecombine->Input(0), endRecombine->InputConnNum(0),
-			     endRecombine->Input(1), endRecombine->InputConnNum(1),
-			     node->Input(2), node->InputConnNum(2));
-
-  endRecombine->RedirectChildren(newEndRecombine, 0);
-
-  node->m_poss->DeleteChildAndCleanUp(endRecombine);
 
   superfluousPart->RedirectChildren(0, node->Input(0), node->InputConnNum(0));
   superfluousPart->RedirectChildren(1, node->Input(1), node->InputConnNum(1));
 
-  node->m_poss->AddNode(newEndRecombine);
-			    
   node->m_poss->DeleteChildAndCleanUp(superfluousPart);
   return;
 }

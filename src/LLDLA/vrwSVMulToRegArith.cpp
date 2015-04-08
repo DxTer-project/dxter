@@ -55,19 +55,19 @@ bool VRWSVMulToRegArith::CanApply(const Node* node) const {
 }
 
 void VRWSVMulToRegArith::Apply(Node* node) const {
-  SVMul* svmul = static_cast<SVMul*>(node);
+  auto svmul = static_cast<SVMul*>(node);
 
-  DuplicateRegLoad* dup = new DuplicateRegLoad();
+  auto dup = new DuplicateRegLoad();
   dup->AddInput(svmul->Input(0), svmul->InputConnNum(0));
 
-  LoadToRegs* loadA = new LoadToRegs();
+  auto loadA = new LoadToRegs();
   loadA->AddInput(svmul->Input(1), svmul->InputConnNum(1));
 
-  Mul* mul = new Mul();
+  auto mul = new Mul();
   mul->AddInput(dup, 0);
   mul->AddInput(loadA, 0);
 
-  StoreFromRegs* storeVec = new StoreFromRegs();
+  auto storeVec = new StoreFromRegs();
   storeVec->AddInput(mul, 0);
   storeVec->AddInput(node->Input(1), node->InputConnNum(1));
 

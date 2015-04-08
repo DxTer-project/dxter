@@ -57,6 +57,7 @@ class Recombine : public DLAOp<3, 1>
   virtual void Duplicate(const Node* orig, bool shallow, bool possMerging);
 
   virtual Name GetName(ConnNum num) const;
+  virtual Dir GetDir() const { return m_partType; }
 
   virtual void Prop();
 

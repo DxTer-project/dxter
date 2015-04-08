@@ -19,24 +19,18 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "eliminateStoreLoad.h"
+#include "eliminateStore.h"
 
 #if DOLLDLA
 
 #include "regLoadStore.h"
 
-bool EliminateStoreLoad::CanApply(const Node* node) const {
+bool EliminateStore::CanApply(const Node* node) const {
   if (node->GetNodeClass() == StoreFromRegs::GetClass()) {
-    if (node->NumChildrenOfOutput(0) == 2) {
-      if (node->Child(0)->GetNodeClass() == LoadToRegs::GetClass()
-	  && node->Child(1)->GetNodeClass() == StoreFromRegs::GetClass()) {
+    if (node->NumChildrenOfOutput(0) == 1) {
+      if (node->Child(0)->GetNodeClass() == LoadToRegs::GetClass()) {
 	return true;
       } else {
-	/*	cout << node->Child(0)->GetNodeClass() << endl;
-	cout << node->Child(0)->Child(0)->GetNodeClass() << endl;
-	cout << node->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
-	cout << node->Child(0)->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
-	cout << node->Child(0)->Child(0)->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;*/
 	return false;
       }
     }
@@ -45,19 +39,8 @@ bool EliminateStoreLoad::CanApply(const Node* node) const {
   throw;
 }
 
-void EliminateStoreLoad::Apply(Node* node) const {
+void EliminateStore::Apply(Node* node) const {
   auto superfluousLoad = node->Child(0);
-  auto finalStore = node->Child(1);
-
-  auto newFinalStore = new StoreFromRegs();
-  newFinalStore->AddInputs(4,
-			   finalStore->Input(0), finalStore->InputConnNum(0),
-			   node->Input(1), node->InputConnNum(1));
-
-  finalStore->RedirectChildren(newFinalStore, 0);
-
-  node->m_poss->AddNode(newFinalStore);
-  node->m_poss->DeleteChildAndCleanUp(finalStore);
 
   superfluousLoad->RedirectChildren(node->Input(0), node->InputConnNum(0));
 
