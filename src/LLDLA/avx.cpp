@@ -23,7 +23,14 @@
 
 #if DOLLDLA
 
+#include "packedLoadToMaskedLoad.h"
+#include "regLoadStore.h"
 
+AVX::AVX() {
+  m_name = "AVX";
+  auto maskedLoad = new pair<string, SingleTrans*>(PackedLoadToRegs::GetClass(), new PackedLoadToMaskedLoad());
+  m_archTrans.push_back(*maskedLoad);
+}
 string AVX::GlobalDeclarations() {
   
   string decls = "\n//--------------- AVX Declarations ----------------\n";
@@ -32,6 +39,7 @@ string AVX::GlobalDeclarations() {
   decls += "\n";
   decls += "#define SLI 0xff00000000000000\n";
   decls += "#define SI 0xff00000\n";
+  decls += "\n";
   decls += "intvec_reg lsm00;\n";
   decls += "intvec_reg lsm01;\n";
   decls += "intvec_reg lsm02;\n";
@@ -57,6 +65,7 @@ string AVX::SetupFunc() {
     string rName = "lsm0" + ind;
     func += "\t" + rName + ".v = _mm256_setzero_si256();\n";
     for (int j = 0; j <= i; j++) {
+      ind = std::to_string((long long int) j);
       func += "\t" + rName + ".i[" + ind + "] = SI;\n";
     }
   }
@@ -66,6 +75,7 @@ string AVX::SetupFunc() {
     string rName = "llsm0" + ind;
     func += "\t" + rName + ".v = _mm256_setzero_si256();\n";
     for (int j = 0; j <= i; j++) {
+      ind = std::to_string((long long int) j);
       func += "\t" + rName + ".i[" + ind + "] = SLI;\n";
     }
   }

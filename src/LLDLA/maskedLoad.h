@@ -19,26 +19,26 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ISA_EXTENSION_H_
-#define ISA_EXTENSION_H_
-
-#include "transform.h"
+#include "DLANode.h"
 
 #if DOLLDLA
 
-class ISAExtension {
-protected:
-string m_name;
-vector<pair<string, SingleTrans*>> m_archTrans;
+#include "regLoadStore.h"
 
-public:
-string SetupFuncName() { return m_name + "_setup"; }
-vector<pair<string, SingleTrans*>> GetArchTrans() { return m_archTrans; }
-  
-virtual string SetupFunc() = 0;
-virtual string GlobalDeclarations() = 0;
+class MaskedLoad : public LoadToRegs {
+ protected:
+  void SanityCheckInputDimensions();
+
+ public:
+  virtual NodeType GetType() const { return "MaskedLoadToRegs"; }
+  static Node* BlankInst() { return new MaskedLoad(); }
+  virtual Node* GetNewInst() { return BlankInst(); }
+
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "MaskedLoadToRegs";}
+
+  void Prop();
+  void PrintCode(IndStream& out);
 };
 
 #endif // DOLLDLA
-
-#endif

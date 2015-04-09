@@ -19,26 +19,33 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ISA_EXTENSION_H_
-#define ISA_EXTENSION_H_
-
-#include "transform.h"
+#include "packedLoadToMaskedLoad.h"
 
 #if DOLLDLA
 
-class ISAExtension {
-protected:
-string m_name;
-vector<pair<string, SingleTrans*>> m_archTrans;
+#include "maskedLoad.h"
+#include "regLoadStore.h"
 
-public:
-string SetupFuncName() { return m_name + "_setup"; }
-vector<pair<string, SingleTrans*>> GetArchTrans() { return m_archTrans; }
-  
-virtual string SetupFunc() = 0;
-virtual string GlobalDeclarations() = 0;
-};
+bool PackedLoadToMaskedLoad::CanApply(const Node* node) const {
+  if (node->GetNodeClass() == PackedLoadToRegs::GetClass()) {
+    auto load = static_cast<const LoadToRegs*>(node);
+    auto rs = load->InputDataType(0).m_rowStride;
+    auto cs = load->InputDataType(0).m_colStride;
+    return (load->IsInputColVector(0) && IsUnitStride(rs)) ||
+      (load->IsInputRowVector(0) && IsUnitStride(cs));
+  }
+  throw;
+}
+
+void PackedLoadToMaskedLoad::Apply(Node* node) const {
+  auto maskedLoad = new MaskedLoad();
+  maskedLoad->AddInput(node->Input(0), node->InputConnNum(0));
+
+  node->RedirectChildren(maskedLoad, 0);
+
+  node->m_poss->AddNode(maskedLoad);
+  node->m_poss->DeleteChildAndCleanUp(node);
+  return;
+}
 
 #endif // DOLLDLA
-
-#endif

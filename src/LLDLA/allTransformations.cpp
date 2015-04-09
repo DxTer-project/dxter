@@ -287,6 +287,14 @@ void AddPrimPhaseConversions() {
   Universe::AddTrans(LoadToRegs::GetClass(), new LoadToContigLoad(ABSLAYER, ABSLAYER), LLDLAPRIMPHASE);
 }
 
+void AddArchSpecificTrans() {
+  for (auto ext : *arch->SupportedExtensions()) {
+    for (auto simp : ext->GetArchTrans()) {
+      Universe::AddTrans(simp.first, simp.second, SIMP);
+    }
+  }
+}
+
 void AddTransformations() {
   AddGemmTrans();
   AddVVDotTrans();
@@ -299,6 +307,7 @@ void AddTransformations() {
 
   AddRTLOptimizations();
   AddPrimPhaseConversions();
+  AddArchSpecificTrans();
 
   AddTransposeTrans();
   AddUnrollingTrans();

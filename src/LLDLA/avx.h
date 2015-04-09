@@ -28,7 +28,7 @@
 
 class AVX : public ISAExtension {
  public:
-  AVX() { m_name = "AVX"; }
+AVX();
 
   virtual string SetupFunc();
   virtual string GlobalDeclarations();

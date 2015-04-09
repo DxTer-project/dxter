@@ -82,9 +82,8 @@ string RuntimeTest::HeadersAndDefines(unsigned int numImplementations) {
   m_defines.push_back("#define NUM_ALGS " + std::to_string((long long int) numImplementations));
   string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
   for (auto ext : *arch->SupportedExtensions()) {
-    auto avx = (AVX*) ext;
     cout << "EXTENSION NAME = " + ext->SetupFuncName() << endl;
-    headersAndDefines += avx->GlobalDeclarations();
+    headersAndDefines += ext->GlobalDeclarations();
   }
   return headersAndDefines;
 }

@@ -19,26 +19,18 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ISA_EXTENSION_H_
-#define ISA_EXTENSION_H_
-
-#include "transform.h"
+#include "LLDLA.h"
 
 #if DOLLDLA
 
-class ISAExtension {
-protected:
-string m_name;
-vector<pair<string, SingleTrans*>> m_archTrans;
+#include "transform.h"
 
-public:
-string SetupFuncName() { return m_name + "_setup"; }
-vector<pair<string, SingleTrans*>> GetArchTrans() { return m_archTrans; }
-  
-virtual string SetupFunc() = 0;
-virtual string GlobalDeclarations() = 0;
+class PackedLoadToMaskedLoad : public SingleTrans {
+ public:
+  virtual string GetType() const { return "PackedLoadToMaskedLoad"; }
+
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
 };
 
 #endif // DOLLDLA
-
-#endif
