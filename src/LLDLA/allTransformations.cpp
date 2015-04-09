@@ -7,6 +7,8 @@
 #include "copyColLoopRef.h"
 #include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
+#include "eliminatePackedStore.h"
+#include "eliminatePackedStoreLoad.h"
 #include "eliminateRecombine.h"
 #include "eliminateRecombinePartition.h"
 #include "eliminateStore.h"
@@ -277,9 +279,15 @@ void AddCopyTrans() {
 void AddRTLOptimizations() {
   Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStore(ABSLAYER, ABSLAYER), SIMP);
+
+  Universe::AddTrans(UnpackStoreFromRegs::GetClass(), new EliminatePackedStoreLoad(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddTrans(UnpackStoreFromRegs::GetClass(), new EliminatePackedStore(ABSLAYER, ABSLAYER), SIMP);
+
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombinePartition(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombine(ABSLAYER, ABSLAYER), SIMP);
+
   Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoad(), SIMP);
+
   Universe::AddTrans(Mul::GetClass(), new AddMulToFMA(ABSLAYER, ABSLAYER), SIMP);
 }
 

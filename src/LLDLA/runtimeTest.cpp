@@ -289,7 +289,7 @@ string RuntimeTest::TwoPhaseTimingLoop(int i) {
   loopBody += "\t\texec_time = end_time - start_time;\n";
   loopBody += "\t\ttotal_cycles += exec_time;\n";
   loopBody += "\t}\n";
-  loopBody += "\tfor (j = 0; j < 20; j++) {\n";
+  loopBody += "\tfor (j = 0; j < 1; j++) {\n";
   loopBody += "\t\tstart_time = rdtsc();\n";
   loopBody += "\t\tfor (i = 0; i < num_runs; i++) {\n";
   loopBody += "\t\t\t" + opName + "(" + CArgList(m_argNames) + ");\n";
