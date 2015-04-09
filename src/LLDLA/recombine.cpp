@@ -124,6 +124,7 @@ bool RecombineLowerLayer::CanApply(const Node *node) const
   cout << "Node class is: " << node->GetClass() << endl;
   cout << "GetNodeClass is: " << node->GetNodeClass() << endl;
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void RecombineLowerLayer::Apply(Node *node) const

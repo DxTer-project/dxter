@@ -38,6 +38,7 @@ bool MVMulPackOutput::CanApply(const Node* node) const {
       && mvmul->GetInputM(0) > 0;
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void MVMulPackOutput::Apply(Node* node) const {

@@ -162,6 +162,7 @@ Phase VVDot::MaxPhase() const
       return NUMPHASES; 
     default:
       LOG_FAIL("replacement for throw call");
+      throw;
     }
 }
 
@@ -246,6 +247,7 @@ void VVDotLoopRef::Apply(Node *node) const
   } else {
     cout << "Error: Bad dataType in vadd apply\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
   loop->SetDimName(DIMK);
   
@@ -279,6 +281,7 @@ bool VVDotLowerLayer::CanApply(const Node *node) const
   }
   else {
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 
@@ -305,7 +308,7 @@ bool VVDotToRegArith::CanApply(const Node* node) const
 {
   if (node->GetNodeClass() == VVDot::GetClass()) {
     const VVDot* vvdot = static_cast<const VVDot*>(node);
-    int regWidth = arch->VecRegWidth(vvdot->GetDataType());
+    //    int regWidth = arch->VecRegWidth(vvdot->GetDataType());
     if (vvdot->GetLayer() != m_fromLayer) {
       return false;
     }
@@ -383,6 +386,7 @@ void VVDotToRegArith::Apply(Node *node) const
   } else {
     cout << "Error: Bad dataType in vadd apply\n";
     LOG_FAIL("replacement for throw call");
+    throw;
   }
 
   // Add needed components to poss

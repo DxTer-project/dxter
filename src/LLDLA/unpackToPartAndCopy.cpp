@@ -40,6 +40,7 @@ bool UnpackToPartAndCopy::CanApply(const Node* node) const {
     return true;
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void UnpackToPartAndCopy::Apply(Node* node) const {

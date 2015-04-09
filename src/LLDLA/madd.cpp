@@ -151,6 +151,7 @@ Phase MAdd::MaxPhase() const
       return NUMPHASES; 
     default:
       LOG_FAIL("Replacement for call to throw;");
+      throw;
     }
 }
 
@@ -337,6 +338,7 @@ bool MAddLowerLayer::CanApply(const Node *node) const
   }
   else {
     LOG_FAIL("Replacement for call to throw;");
+    throw;
   }
 }
 

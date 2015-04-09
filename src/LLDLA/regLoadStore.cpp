@@ -315,7 +315,7 @@ void UnpackStoreFromRegs::PrintCode(IndStream &out)
   Stride inputColStride = InputDataType(1).m_colStride;
 
   string strideVar = "ERROR: STRIDE NOT DEFINED\n";
-  bool isStridedLoad;
+  //  bool isStridedLoad;
 
   if (IsInputColVector(1)) {
     if (IsUnitStride(inputRowStride)) {

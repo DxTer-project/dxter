@@ -872,8 +872,10 @@ const Sizes* ViewMultipleIters::GetM(ConnNum num) const
   else if (m_partDir == PARTRIGHT) {
     return GetInputM(0);
   }
-  else
+  else {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 }
 
 const Sizes* ViewMultipleIters::GetN(ConnNum num) const
@@ -891,8 +893,10 @@ const Sizes* ViewMultipleIters::GetN(ConnNum num) const
   else if (m_partDir == PARTDOWN) {
     return GetInputN(0);
   }
-  else
+  else {
     LOG_FAIL("replacement for throw call");
+    throw;
+  }
 }
 
 Name ViewMultipleIters::GetName(ConnNum num) const
