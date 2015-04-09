@@ -36,10 +36,8 @@ string VRWVVDotToRegArith::GetType() const {
 }
 
 bool VRWVVDotToRegArith::IsExactSizeVVDot(const VVDot* vvdot) const {
-    return *vvdot->GetInputM(0) == ONE &&
-      vvdot->GetInputNumCols(0) == vvdot->GetVecRegWidth() &&
-      *vvdot->GetInputN(1) == ONE &&
-      vvdot->GetInputNumRows(1) == vvdot->GetVecRegWidth();
+  return vvdot->IsInputRowVector(0) && vvdot->InputIsVRW(0) &&
+    vvdot->IsInputColVector(1) && vvdot->InputIsVRW(1);
 }
 
 bool VRWVVDotToRegArith::CanApply(const Node* node) const {

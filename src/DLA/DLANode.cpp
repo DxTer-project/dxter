@@ -573,6 +573,18 @@ int DLANode::GetInputColStride(ConnNum num) const {
   return InputDataType(num).m_colStrideVal;
 }
 
+bool DLANode::InputIsVRW(ConnNum num) const {
+  CheckInputNum(num);
+  return (IsInputColVector(num) && (GetInputNumRows(num) == GetVecRegWidth()))
+    || (IsInputRowVector(num) && (GetInputNumCols(num) == GetVecRegWidth()));
+}
+
+bool DLANode::InputIsResidual(ConnNum num) const {
+  CheckInputNum(num);
+  return (IsInputColVector(num) && (GetInputNumRows(num) < GetVecRegWidth()))
+    || (IsInputRowVector(num) && (GetInputNumCols(num) < GetVecRegWidth()));
+}
+
 bool DLANode::InputIsContiguous(ConnNum num) const {
   CheckInputNum(num);
 
