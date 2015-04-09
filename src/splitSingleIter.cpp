@@ -1447,43 +1447,15 @@ void SplitSingleIter::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_addDir);
 }
 
-void SplitSingleIter::SanityCheckControlTunnel() const {
-  if (!m_isControlTun) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-}
-
-void SplitSingleIter::SanityCheckNumberOfSizes(unsigned int one, unsigned int two) const {
-  if (one != two) {
-    cout << one << " vs. " << two << endl;
-    cout.flush();
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-}
 
 unsigned int SplitSingleIter::NumberOfLoopExecs() const
 {
-  SanityCheckControlTunnel();
-
 #if TWOD
   unsigned int one = GetInputM(0)->NumSizes();
   unsigned int two = GetInputN(0)->NumSizes();
 
-  /*  cout << "Input sizes" << endl;
-  GetInputM(0)->Print();
-  GetInputN(0)->Print();
-  cout << endl;
-
-  cout << "Input to splitSingleIter" << endl;
-  cout << Input(0)->GetNodeClass() << endl;
-  cout << "Sizes of inputs to splitSingleIter input" << endl;
-  Partition* in = (Partition*) Input(0);
-  cout << "Partition name" << in->GetType() << endl;
-  in->GetInputM(0)->Print();
-  in->GetInputN(0)->Print();*/
-  SanityCheckNumberOfSizes(one, two);
+  if (one != two)
+    throw;
   return one;
 #else
   return InputLen(0,0)->NumSizes();
@@ -1568,156 +1540,6 @@ void SplitSingleIter::ClearDataTypeCache()
   m_lsizes = NULL;
 #endif
 }
-
-#if TWOD
-
-void SplitSingleIter::SanityCheckExecNum(unsigned int execNum, unsigned int length, unsigned int length2) {
-  if (length <= execNum || length2 <= execNum) {
-    cout << "Execution number of loop is greater than number of size entries" << endl;
-    cout << "length = " << std::to_string((long long int) length) << endl;
-    cout << "length2 = " << std::to_string((long long int) length2) << endl;
-    cout << "execNum = " << std::to_string((long long int) execNum) << endl;
-    cout << "Input 0 class: " << Input(0)->GetNodeClass() << endl;
-    cout << "Input(0)->Input(0) class: " << Input(0)->Input(0)->GetNodeClass() << endl;
-    cout << "Input(0)->Input(0) name: " << Input(0)->Input(0)->GetName(0).m_name << endl;
-    cout << "Input(0)->Input(0) m: ";
-    ((DLANode*) Input(0)->Input(0))->GetM(0)->Print();
-    cout << "Input(0)->Input(0) n: ";
-    ((DLANode*) Input(0)->Input(0))->GetN(0)->Print();
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-}
-
-void SplitSingleIter::SanityCheckSizes(const Sizes* ms, const Sizes* ns) {
-  if (!ms || !ns) {
-    if (Input(0)->m_flags & NODEBUILDFLAG)
-      cout << "has built\n";
-    else
-      cout << "hasn't built\n";
-
-    cout << Input(0)->GetNodeClass() << endl;
-    cout << Input(0) << endl;
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-}
-
-void SplitSingleIter::SanityCheckNumIters(Size bs, Size m, Size n, unsigned int numIters) {
-  if (NumIters(bs, m, n) != numIters) {
-    GetInputN(0)->Print();
-    cout << endl;
-    cout << NumIters(bs, m, n) << " vs. " << numIters << endl;
-    for (unsigned int i = m_children.size(); i < m_children.size(); ++i) {
-      cout << m_children[i]->m_n->GetNodeClass() << endl;
-    }
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-}
-
-void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
-{
-  if (m_tunType != SETTUNIN)
-    return;
-  if (m_pset && !m_pset->IsReal())
-    return;
-  if (!m_msizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-
-  const Sizes *ms = GetInputM(0);
-  const Sizes *ns = GetInputN(0);
-
-  SanityCheckSizes(ms, ns);
-
-  unsigned int length = ms->NumSizes();
-  unsigned int length2 = ns->NumSizes();
-
-  SanityCheckExecNum(execNum, length, length2);
-
-  const Size m = (*ms)[execNum];
-  const Size n = (*ns)[execNum];
-  const Size bs = GetMyLoop()->GetBS();
-  const unsigned int numElems = GetNumElems(m_dir);
-
-  SanityCheckNumIters(bs, m, n, numIters);
-
-  bool foundOne = false;
-  for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
-    bool found = false;
-    NodeConnVecIter tunIter = m_children.begin();
-    for(; tunIter != m_children.end() && !found; ++tunIter) {
-      NodeConn *conn = *tunIter;
-      Node *tun = conn->m_n;
-      if (!tun->IsTunnel(POSSTUNIN)) {
-	LOG_FAIL("replacement for throw call");
-	throw;
-      }
-      NodeConnVecIter iter = tun->m_children.begin();
-      for(; iter != tun->m_children.end() && !found; ++iter) {
-	NodeConn *childConn = *iter;
-	if (childConn->m_num == subMat) {
-	  if (!(childConn->m_n->IsTunnel(POSSTUNOUT))) {
-	    found = true;
-	    foundOne = true;
-	    GetSizes(subMat, numIters,
-		     bs, parFactor,
-		     m, n,
-		     m_msizes[subMat], m_nsizes[subMat]);
-	  }
-	}
-      }
-    }
-  }
-  if (!foundOne) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-}
-#else
-void SplitSingleIter::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
-{
-  if (m_tunType != SETTUNIN)
-    return;
-  if (m_pset && !m_pset->IsReal())
-    return;
-  if (!m_sizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  const Size bs = GetMyLoop()->GetBS();
-  Dim numDims = InputNumDims(0);
-  for (Dim dim = 0; dim < numDims; ++dim) {
-    const Sizes *sizes = InputLen(0,dim);
-    unsigned int length = sizes->NumSizes();
-    if (length <= execNum) {
-      LOG_FAIL("replacement for throw call");
-      throw;
-    }
-    const Size len = (*sizes)[execNum];
-
-    if (dim < m_partDim) {
-      m_sizes[dim].AddRepeatedSizes(len, numIters, parFactor);
-    }
-    else if (dim == m_partDim) {
-      if (NumIters(bs, len) != numIters)  {
-	sizes->Print();
-	cout << endl;
-	cout << NumIters(bs, len) << " vs. " << numIters << endl;
-	
-      }
-      m_sizes[dim].AddSizesWithLimit(0,bs,len, parFactor);
-      m_sizes[dim+1].AddMidSizes(bs, len, parFactor);
-      m_sizes[dim+2].AddSizesWithLimit(len,-1*bs,0, parFactor);
-    }
-    else {
-      m_sizes[dim+2].AddRepeatedSizes(len, numIters, parFactor);
-    }
-  }
-}
-#endif
 
 #if TWOD&&DODM
 void SplitSingleIter::UpdateLocalSizes()
@@ -1968,29 +1790,160 @@ string SplitSingleIter::LoopLevel() const
   return (string)"_lvl" + ((char)(level+48));
 }
 
+#if TWOD
 void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
 {
+  if (m_tunType != SETTUNIN)
+    return;
+  if (m_pset && !m_pset->IsReal())
+    return;
+  if (!m_msizes) {
+    LOG_FAIL("replacement for throw call");
+    throw;
+  }
+
+  const Sizes *ms = GetInputM(0);
+  const Sizes *ns = GetInputN(0);
+
+  if (!ms || !ns) {
+    LOG_FAIL("replacement for throw call");
+    throw;
+  }
+
+  unsigned int length = ms->NumSizes();
+  unsigned int length2 = ns->NumSizes();
+
+  if (length != length2)
+      LOG_FAIL("replacement for throw call");
+
   unsigned int numExecs;
   if (buildCache) {
-    numExecs = NumberOfLoopExecs();
+    if (!m_isControlTun)
+      LOG_FAIL("replacement for throw call");
+    numExecs = length;
     numItersVec.reserve(numExecs);
   }
   else {
+    if (m_isControlTun)
+      LOG_FAIL("replacement for throw call");
     numExecs = numItersVec.size();
+    if (numExecs != length)
+      LOG_FAIL("replacement for throw call");
   }
-  for(unsigned int i = 0; i < numExecs; ++i) {
-    unsigned int numIters;
+
+  const Size bs = GetMyLoop()->GetBS();
+  const unsigned int numElems = GetNumElems(m_dir);
+
+  for(unsigned int execNum = 0; execNum < numExecs; ++execNum) {
+    const Size m = (*ms)[execNum];
+    const Size n = (*ns)[execNum];
+
+    unsigned int numIters = NumIters(bs, m, n);
     if (buildCache) {
-      numIters = NumIters(i);
       numItersVec.push_back(numIters);
     }
     else {
-      numIters = NumIters(i);
-      if (numIters != numItersVec[i])
+      if (numIters != numItersVec[execNum])
 	throw;
     }
+
     if (numIters) {
-      AppendSizes(i, numIters, parFactor);
+      bool foundOne = false;
+      for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
+	bool found = false;
+	NodeConnVecIter tunIter = m_children.begin();
+	for(; tunIter != m_children.end() && !found; ++tunIter) {
+	  NodeConn *conn = *tunIter;
+	  Node *tun = conn->m_n;
+	  if (!tun->IsTunnel(POSSTUNIN)) {
+	    LOG_FAIL("replacement for throw call");
+	    throw;
+	  }
+	  NodeConnVecIter iter = tun->m_children.begin();
+	  for(; iter != tun->m_children.end() && !found; ++iter) {
+	    NodeConn *childConn = *iter;
+	    if (childConn->m_num == subMat) {
+	      if (!(childConn->m_n->IsTunnel(POSSTUNOUT))) {
+		found = true;
+		foundOne = true;
+		GetSizes(subMat, numIters,
+			 bs, parFactor,
+			 m, n,
+			 m_msizes[subMat], m_nsizes[subMat]);
+	      }
+	    }
+	  }
+	}
+      }
+      if (!foundOne) {
+	LOG_FAIL("replacement for throw call");
+	throw;
+      }
     }
   }
 }
+#else
+void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
+{
+  if (m_tunType != SETTUNIN)
+    return;
+  if (m_pset && !m_pset->IsReal())
+    return;
+  if (!m_sizes) {
+    LOG_FAIL("replacement for throw call");
+    throw;
+  }
+
+  const Size bs = GetMyLoop()->GetBS();
+  Dim numDims = InputNumDims(0);
+
+  
+  unsigned int numExecs = InputLen(0,dim)->NumSizes();
+
+  if (buildCache) {
+    numItersVec.reserve(numExecs);
+  }
+  else {
+    if (numExecs != numItersVec.size())
+      LOG_FAIL("replacement for throw call");
+  }
+
+
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    const Sizes *sizes = InputLen(0,dim);
+    unsigned int length = sizes->NumSizes();
+    if (length != numExecs) {
+      LOG_FAIL("replacement for throw call");
+    }
+    for(unsigned int execNum = 0; execNum < numExecs; ++execNum) {
+      unsigned int numIters;
+      if (buildCache && dim == 0) {
+	numIters = NumIters(execNum);
+	NumitersVec.push_back(numIters);
+      }
+      else if (!buildCache || dim != 0) {
+	numIters = numItersVec[execNum];
+      }
+      else {
+	numIters = NumIters(execNum);
+	if (numIters != numItersVec[execNum])
+	  LOG_FAIL("replacement for throw call"); 
+      }
+      if (numIters) {
+	const Size len = (*sizes)[execNum];
+	if (dim < m_partDim) {
+	  m_sizes[dim].AddRepeatedSizes(len, numIters, parFactor);
+	}
+	else if (dim == m_partDim) {
+	  m_sizes[dim].AddSizesWithLimit(0,bs,len, parFactor);
+	  m_sizes[dim+1].AddMidSizes(bs, len, parFactor);
+	  m_sizes[dim+2].AddSizesWithLimit(len,-1*bs,0, parFactor);
+	}
+	else {
+	  m_sizes[dim+2].AddRepeatedSizes(len, numIters, parFactor);
+	}
+      }
+    }
+  }
+}
+#endif

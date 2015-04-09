@@ -92,13 +92,10 @@ class SplitSingleIter : public SplitBase
   virtual unsigned int NumIters(unsigned int iterNum) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
-  void SanityCheckControlTunnel() const;
-  void SanityCheckNumberOfSizes(unsigned int one, unsigned int two) const;
   virtual unsigned int NumberOfLoopExecs() const;
   void SetAddDir() {m_addDir = true;}
   virtual void StartFillingSizes();
   virtual void ClearDataTypeCache();
-  virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
 #if DODM
   virtual void UpdateLocalSizes();
 #endif
