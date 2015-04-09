@@ -138,17 +138,13 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
   GraphNum best = pStats->GetBestAvgFlopsPerCycleImpl();
   cout << "Best Avg. flops/cycle = " << pStats->GetBestAvgFlopsPerCycle() << endl;
 
-#if 1
   uni->PrintAll(algNum, best);
-#else
-  uni->PrintBest();
-#endif
 
-#if PRINTCOSTS
-  uni->PrintCosts(impMap);
-#endif
   delete oneStageResults;
+  delete pStats;
+
   LOG_A("Done with runtime evaluation of " + problemInstance->GetName());
+
   return pStats;
 }
 

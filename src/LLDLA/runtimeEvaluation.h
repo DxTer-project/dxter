@@ -28,68 +28,15 @@
 #include "LLDLA.h"
 #include "base.h"
 #include "runnerUtils.h"
+#include "runtimeTest.h"
 #include "timingResult.h"
 
 #if DOLLDLA
 
-#include "problemInstanceStats.h"
-
-using namespace std;
-
-enum SanityCheckSetting { CHECKALLBUFFERS, NONE };
-enum TimingSetting { ONEPHASETIMING, TWOPHASETIMING };
-
-class RuntimeTest
-{
- protected:
-  vector<string> m_defines;
-  vector<string> m_argNames;
-  vector<string> m_headers;
-  string m_correctTestFileName;
-  vector<string> m_operationArgs;
-  vector<string> m_argDeclarations;
-
-  int m_chunkSize;
-  Type m_type;
-
-  string ToCStatements(vector<string> lines);
-  string CArgList(vector<string> args);
-  string MakeImpFuncs(ImplementationMap* imps);
-  string ImplementationFunctions(ImplementationMap* imps, string referenceImp);
-  string MainFunction();
-  string AllBufferSanityChecks(ImplementationMap* imps, string referenceImpName);
-  string SanityChecks(SanityCheckSetting sanityCheckSetting, ImplementationMap* imps, string referenceImpName);
-  string OnePhaseTimingCode(ImplementationMap* imps, string operationName);
-  string TwoPhaseTimingCode(ImplementationMap* imps, string operationName);
-  string TimingCode(TimingSetting timingSetting, ImplementationMap* imps, string operationName);
-  string HeadersAndDefines(ImplementationMap* imps);
-  string MakeFunc(string funcName, string funcBody);
-  string CorrectnessCheck(ImplementationMap* imps, string referenceImpName);
-  string AllocateArgBuffers(string postfix);
-  string FillBuffersWithRandValues(string postfix);
-  string CopyArgBuffersTo(string postfix);
-  vector<string> ArgBuffers(string postfix);
-  string CheckArgBufferDiffs(string refPostfix, string testPostfix, string testName);
-  string TimingLoop(int i);
-  string TimingLoops(ImplementationMap* imps);
-  string TwoPhaseTimingLoop(int i);
-  string TwoPhaseTimingLoops(ImplementationMap* imps);
-  void AddIncludes();
-  void AddMiscellaneousDefines();
-
- public:
-  int m_minCycles;
-  string m_dataFileName;
-  string m_operationName;
-
-  RuntimeTest(Type m_type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations);
-  string MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, ImplementationMap* imps, string referenceImp);
-};
-
 class RuntimeEvaluator
 {
 
- private:
+ protected:
   bool IsImplementationSeparator(string token);
   void CompileTest(string executableName);
   void RunTest(string executableName);

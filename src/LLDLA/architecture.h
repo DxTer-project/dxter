@@ -24,9 +24,18 @@
 
 #if DOLLDLA
 
+#include "avx.h"
+#include "isaExtension.h"
+
 class Architecture
 {
+ protected:
+  vector<ISAExtension*> m_supportedExtensions;
+
  public:
+  // ISA extensions
+  vector<ISAExtension*>* SupportedExtensions() { return &m_supportedExtensions; }
+
   // Single precision
   virtual int SVecRegWidth() = 0;
   virtual string SVecRegTypeDec() = 0;
@@ -132,6 +141,8 @@ class AMDEngSample : public Architecture
 class Stampede : public Architecture
 {
  public:
+  Stampede() { m_supportedExtensions.push_back(new AVX()); }
+
   // Single precision
   virtual int SVecRegWidth();
   virtual string SVecRegTypeDec();
