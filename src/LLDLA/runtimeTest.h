@@ -50,8 +50,8 @@ class RuntimeTest {
   string MakeImpFuncs(ImplementationMap* imps);
   string ImplementationFunctions(ImplementationMap* imps, string referenceImp);
   string MainFunction();
-  string AllBufferSanityChecks(ImplementationMap* imps, string referenceImpName);
-  string SanityChecks(SanityCheckSetting sanityCheckSetting, ImplementationMap* imps, string referenceImpName);
+  string AllBufferSanityChecks(unsigned int numImpls, string referenceImpName);
+  string SanityChecks(SanityCheckSetting sanityCheckSetting, unsigned int numImpls, string referenceImpName);
   string OnePhaseTimingCode(unsigned int numImpls, string operationName);
   string TwoPhaseTimingCode(unsigned int numImpls, string operationName);
   string TimingCode(TimingSetting timingSetting, unsigned int numImpls, string operationName);

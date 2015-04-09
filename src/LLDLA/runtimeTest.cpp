@@ -97,9 +97,9 @@ string RuntimeTest::MainFunction() {
   return mainFunc;
 }
 
-string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, ImplementationMap* imps, string referenceImpName) {
+string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, unsigned int numImpls, string referenceImpName) {
   if (sanityCheckSetting == CHECKALLBUFFERS) {
-    return AllBufferSanityChecks(imps, referenceImpName);
+    return AllBufferSanityChecks(numImpls, referenceImpName);
   } else {
     cout << "SanityCheckSetting NONE is not yet supported" << endl;
     LOG_FAIL("replacement for throw call");
@@ -107,8 +107,7 @@ string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, Implemen
   }
 }
 
-string RuntimeTest::AllBufferSanityChecks(ImplementationMap* imps, string referenceImpName) {
-  unsigned int numImpls = imps->size();
+string RuntimeTest::AllBufferSanityChecks(unsigned int numImpls, string referenceImpName) {
   string prototype = "void sanity_check_implementations() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
   argBufferAllocation += AllocateArgBuffers("") + "\n";
@@ -168,7 +167,7 @@ string RuntimeTest::MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSe
   unsigned int numImpls = imps->size();
   string hds = HeadersAndDefines(numImpls);
   string impFuncs = ImplementationFunctions(imps, referenceImp);
-  string sanityCheckFunc = SanityChecks(sanityCheckSetting, imps, m_operationName + "_test");
+  string sanityCheckFunc = SanityChecks(sanityCheckSetting, numImpls, m_operationName + "_test");
   string timingFunc = TimingCode(timingSetting, imps->size(), m_operationName + "_test");
   string mainFunc = MainFunction();
   string testCode = hds + "\n" + impFuncs + "\n" + sanityCheckFunc + "\n" + timingFunc + "\n" + mainFunc;
