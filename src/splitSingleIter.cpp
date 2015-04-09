@@ -1904,7 +1904,7 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsi
   Dim numDims = InputNumDims(0);
 
   
-  unsigned int numExecs = InputLen(0,dim)->NumSizes();
+  unsigned int numExecs = InputLen(0,0)->NumSizes();
 
   if (buildCache) {
     numItersVec.reserve(numExecs);
@@ -1925,7 +1925,7 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsi
       unsigned int numIters;
       if (buildCache && dim == 0) {
 	numIters = NumIters(execNum);
-	NumitersVec.push_back(numIters);
+	numItersVec.push_back(numIters);
       }
       else if (!buildCache || dim != 0) {
 	numIters = numItersVec[execNum];

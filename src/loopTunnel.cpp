@@ -1003,7 +1003,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned 
   Dim numDims = input->NumDims(num);
   unsigned int numExecs = numItersVec.size();
 
-  for (Dim dim = 0; dim < numDims; ++i) {
+  for (Dim dim = 0; dim < numDims; ++dim) {
     const Sizes *sizes = input->Len(num,dim);
     if (!sizes) {
       cout << "!sizes\n";
@@ -1011,7 +1011,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned 
       throw;
     }
     unsigned int length = sizes->NumSizes();
-    if (length != execNum) 
+    if (length != numExecs) 
       {
 	cout << sizes->NumSizes() << endl;
 	LOG_FAIL("replacement for throw call");
@@ -1022,7 +1022,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned 
       unsigned int numIters = numItersVec[i];
       if (numIters) {
 	const Size size = (*sizes)[i];
-	m_sizes[dimNum].AddRepeatedSizes(size, numIters, parFactor);
+	m_sizes[dim].AddRepeatedSizes(size, numIters, parFactor);
       }
     }
   }
