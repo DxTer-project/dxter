@@ -893,3 +893,9 @@ void SplitUnrolled::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
   }
 #endif
 }
+
+
+void SplitUnrolled::BuildSizes(bool buildCache, vector<int> &numIters, unsigned int parFactor)
+{
+  throw;
+}
