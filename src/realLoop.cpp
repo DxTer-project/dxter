@@ -224,76 +224,43 @@ void RealLoop::FillTunnelSizes()
   for(; iter != m_inTuns.end(); ++iter) {
     LoopTunnel *tun = (LoopTunnel*)(*iter);
 #if TWOD
-    if (!tun->m_msizes) {
+    if (!tun->m_msizes)
 #else
-    if (!tun->m_sizes) {
+      if (!tun->m_sizes)
 #endif
-      upToDate = false;
-      break;
-    }
-    }
-    if (upToDate) {
+	{
+	  upToDate = false;
+	  break;
+	}
+  }
+  if (upToDate)
     return;
-    }
-
+    
   ClearTunnelCaches();
   StartFillingTunnels();
 
-  //  cout << "Bs " << GetBS() << endl;
-  unsigned int numExecs = control->NumberOfLoopExecs();
-  //  cout << "numExecs " << numExecs << endl;
-  for(unsigned int i = 0; i < numExecs; ++i) {
-    unsigned int numIters = control->NumIters(i);
-    //    cout << "numIters " << numIters << endl;
-    if (numIters) {
-      iter = m_inTuns.begin();
-      for (; iter != m_inTuns.end(); ++iter) {
-        LoopTunnel *in = (LoopTunnel*)(*iter);
-	//cout << "appending for " << in << endl;
+  vector<int> numIters;
 #if DOBLIS
-        in->AppendSizes(i, numIters, NumGroupsInComm(m_comm));
+  control->BuildSizes(true, numIters, NumGroupsInComm(m_comm));
 #else
-        in->AppendSizes(i, numIters, 1);
+  control->BuildSizes(true, numIters, 1);
 #endif
-      }
+#if DODM
+      ((LoopTunnel*)control)->UpdateLocalSizes();
+#endif
+
+  for (auto inTun : m_inTuns) {
+    if (inTun != control) {
+#if DOBLIS
+      ((LoopTunnel*)inTun)->BuildSizes(false, numIters,  NumGroupsInComm(m_comm));
+#else
+      ((LoopTunnel*)inTun)->BuildSizes(false, numIters, 1);
+#endif
+#if DODM
+      ((LoopTunnel*)inTun)->UpdateLocalSizes();
+#endif
     }
   }
-//   int num = -1;
-//   iter = m_inTuns.begin();
-//   for(; iter != m_inTuns.end(); ++iter) {
-//     DLANode *in = (DLANode*)(*iter);
-//     if (num < 0) { 
-//       cout << "For " << in << endl;
-//       cout << in->GetType() << endl;
-
-//       num = ((DLANode*)(in->Child(0)))->GetM(0)->NumSizes();
-//       cout << "setting num2 " << ((DLANode*)(in->Child(0)))->GetM(0)->NumSizes() << endl;
-//       cout << "setting in " << in->GetInputM(0)->NumSizes() << endl;
-//       cout << "setting in2 " << (*(in->GetInputM(0)))[0] << endl;
-
-//       cout << "setting num2 n " << ((DLANode*)(in->Child(0)))->GetN(0)->NumSizes() << endl;
-//       cout << "setting in n " << in->GetInputN(0)->NumSizes() << endl;
-//       cout << "setting in2 n " << (*(in->GetInputN(0)))[0] << endl;
-//     }
-//     else if (num != ((DLANode*)(in->Child(0)))->GetM(0)->NumSizes()) {
-//       cout << "For " << in << endl;
-//       cout << in->GetType() << endl;
-//       cout << "num " << num << endl;
-//       cout << "num2 " << ((DLANode*)(in->Child(0)))->GetM(0)->NumSizes() << endl;
-//       cout << "in " << in->GetInputM(0)->NumSizes() << endl;
-//       cout << "in2 " << (*(in->GetInputM(0)))[0] << endl;
-//       cout.flush();
-//       LOG_FAIL("replacement for throw call");
-//     }
-      
-//   }
-#if DODM
-  iter = m_inTuns.begin();
-  for (; iter != m_inTuns.end(); ++iter) {
-    LoopTunnel *in = (LoopTunnel*)(*iter);
-    in->UpdateLocalSizes();
-  }
-#endif
 }
 
 void RealLoop::BuildDataTypeCache()

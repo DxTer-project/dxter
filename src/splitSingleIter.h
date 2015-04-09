@@ -122,5 +122,7 @@ class SplitSingleIter : public SplitBase
   virtual LoopTunnel* GetMatchingOutTun() const;
 
   string LoopLevel() const;
+
+  virtual void BuildSizes(bool buildCache, vector<int> &numIters, unsigned int parFactor);
 };
 

@@ -108,4 +108,6 @@ class LoopTunnel : public Tunnel
 #if DOTENSORS
   void SetAdditive() {m_justAdditive = true;}
 #endif
+
+  virtual void BuildSizes(bool buildCache, vector<int> &numIters, unsigned int parFactor);
 };

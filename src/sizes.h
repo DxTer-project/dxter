@@ -30,6 +30,7 @@ using namespace std;
 typedef double Size;
 typedef double Cost;
 
+
 enum SizesType { MIDSIZES,
 		 REPEATEDSIZES,
 		 RANGESIZES,

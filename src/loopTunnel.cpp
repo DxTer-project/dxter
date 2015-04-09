@@ -1032,3 +1032,17 @@ void LoopTunnel::MigrateFromOldTun(Tunnel *tunIn)
   tun->m_lsizes = NULL;
 #endif
 }
+
+
+void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
+{
+  if (buildCache)
+    throw;
+  unsigned int numExecs = numItersVec.size();
+  for(unsigned int i = 0; i < numExecs; ++i) {
+    unsigned int numIters = numItersVec[i];
+    if (numIters) {
+      AppendSizes(i, numIters, parFactor);
+    }
+  }
+}

@@ -1605,8 +1605,6 @@ void SplitSingleIter::SanityCheckSizes(const Sizes* ms, const Sizes* ns) {
 
 void SplitSingleIter::SanityCheckNumIters(Size bs, Size m, Size n, unsigned int numIters) {
   if (NumIters(bs, m, n) != numIters) {
-    //    InputLocalN(0)->Print();
-    //    cout << endl;
     GetInputN(0)->Print();
     cout << endl;
     cout << NumIters(bs, m, n) << " vs. " << numIters << endl;
@@ -1968,4 +1966,31 @@ string SplitSingleIter::LoopLevel() const
     poss = in->m_poss;
   }
   return (string)"_lvl" + ((char)(level+48));
+}
+
+void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
+{
+  unsigned int numExecs;
+  if (buildCache) {
+    numExecs = NumberOfLoopExecs();
+    numItersVec.reserve(numExecs);
+  }
+  else {
+    numExecs = numItersVec.size();
+  }
+  for(unsigned int i = 0; i < numExecs; ++i) {
+    unsigned int numIters;
+    if (buildCache) {
+      numIters = NumIters(i);
+      numItersVec.push_back(numIters);
+    }
+    else {
+      numIters = NumIters(i);
+      if (numIters != numItersVec[i])
+	throw;
+    }
+    if (numIters) {
+      AppendSizes(i, numIters, parFactor);
+    }
+  }
 }
