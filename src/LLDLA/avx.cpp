@@ -24,12 +24,16 @@
 #if DOLLDLA
 
 #include "packedLoadToMaskedLoad.h"
+#include "unpackStoreToMaskedStore.h"
 #include "regLoadStore.h"
 
 AVX::AVX() {
   m_name = "AVX";
   auto maskedLoad = new pair<string, SingleTrans*>(PackedLoadToRegs::GetClass(), new PackedLoadToMaskedLoad());
   m_archTrans.push_back(*maskedLoad);
+  auto maskedStore = new pair<string, SingleTrans*>(UnpackStoreFromRegs::GetClass(), new UnpackStoreToMaskedStore());
+  m_archTrans.push_back(*maskedStore);
+
 }
 string AVX::GlobalDeclarations() {
   
@@ -38,7 +42,7 @@ string AVX::GlobalDeclarations() {
   decls += "typedef union { __m256i v; long int i[4]; } lintvec_reg;\n";
   decls += "\n";
   decls += "#define SLI 0xff00000000000000\n";
-  decls += "#define SI 0xff00000\n";
+  decls += "#define SI 0xff000000\n";
   decls += "\n";
   decls += "intvec_reg lsm00;\n";
   decls += "intvec_reg lsm01;\n";
