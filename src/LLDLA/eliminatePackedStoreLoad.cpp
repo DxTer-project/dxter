@@ -23,12 +23,14 @@
 
 #if DOLLDLA
 
+#include "maskedLoad.h"
 #include "regLoadStore.h"
 
 bool EliminatePackedStoreLoad::CanApply(const Node* node) const {
   if (node->GetNodeClass() == UnpackStoreFromRegs::GetClass()) {
     if (node->NumChildrenOfOutput(0) == 2) {
-      if (node->Child(0)->GetNodeClass() == PackedLoadToRegs::GetClass()
+      if ((node->Child(0)->GetNodeClass() == PackedLoadToRegs::GetClass() ||
+	   node->Child(0)->GetNodeClass() == MaskedLoad::GetClass())
 	  && node->Child(1)->GetNodeClass() == UnpackStoreFromRegs::GetClass()) {
 	return true;
       } else {
