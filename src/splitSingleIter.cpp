@@ -1833,53 +1833,59 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsi
 
   const Size bs = GetMyLoop()->GetBS();
   const unsigned int numElems = GetNumElems(m_dir);
-
-  for(unsigned int execNum = 0; execNum < numExecs; ++execNum) {
-    const Size m = (*ms)[execNum];
-    const Size n = (*ns)[execNum];
-
-    unsigned int numIters = NumIters(bs, m, n);
-    if (buildCache) {
-      numItersVec.push_back(numIters);
-    }
-    else {
-      if (numIters != numItersVec[execNum])
+  
+  bool foundOne = false;
+  for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
+    bool found = false;
+    NodeConnVecIter tunIter = m_children.begin();
+    for(; tunIter != m_children.end() && !found; ++tunIter) {
+      NodeConn *conn = *tunIter;
+      Node *tun = conn->m_n;
+      if (!tun->IsTunnel(POSSTUNIN)) {
+	LOG_FAIL("replacement for throw call");
 	throw;
-    }
-
-    if (numIters) {
-      bool foundOne = false;
-      for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
-	bool found = false;
-	NodeConnVecIter tunIter = m_children.begin();
-	for(; tunIter != m_children.end() && !found; ++tunIter) {
-	  NodeConn *conn = *tunIter;
-	  Node *tun = conn->m_n;
-	  if (!tun->IsTunnel(POSSTUNIN)) {
-	    LOG_FAIL("replacement for throw call");
-	    throw;
-	  }
-	  NodeConnVecIter iter = tun->m_children.begin();
-	  for(; iter != tun->m_children.end() && !found; ++iter) {
-	    NodeConn *childConn = *iter;
-	    if (childConn->m_num == subMat) {
-	      if (!(childConn->m_n->IsTunnel(POSSTUNOUT))) {
-		found = true;
-		foundOne = true;
+      }
+      NodeConnVecIter iter = tun->m_children.begin();
+      for(; iter != tun->m_children.end() && !found; ++iter) {
+	NodeConn *childConn = *iter;
+	if (childConn->m_num == subMat) {
+	  if (!(childConn->m_n->IsTunnel(POSSTUNOUT))) {
+	    found = true;
+	    for(unsigned int execNum = 0; execNum < numExecs; ++execNum) {
+	      const Size m = (*ms)[execNum];
+	      const Size n = (*ns)[execNum];
+	      
+	      unsigned int numIters;
+	      if (buildCache && !foundOne) {
+		numIters = NumIters(bs, m, n);
+		numItersVec.push_back(numIters);
+	      }
+	      else if (!foundOne) {
+		numIters = NumIters(bs, m, n);
+		if (numIters != numItersVec[execNum])
+		  throw;
+	      }
+	      else {
+		numIters = numItersVec[execNum];
+	      }
+	      
+	      if (numIters) {
 		GetSizes(subMat, numIters,
 			 bs, parFactor,
 			 m, n,
 			 m_msizes[subMat], m_nsizes[subMat]);
 	      }
 	    }
+	    foundOne = true;
+
 	  }
 	}
       }
-      if (!foundOne) {
-	LOG_FAIL("replacement for throw call");
-	throw;
-      }
     }
+  }
+  if (!foundOne) {
+    LOG_FAIL("replacement for throw call");
+    throw;
   }
 }
 #else
