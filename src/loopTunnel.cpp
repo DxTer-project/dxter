@@ -775,116 +775,6 @@ void LoopTunnel::StartFillingSizes()
 #endif
 }
 
-#if TWOD
-void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
-{
-  if (m_tunType != SETTUNIN)
-    return;
-  if (!m_pset->IsReal())
-    return;
-  /*  if (!execNum) {
-    LOG_FAIL("replacement for throw call");
-    }*/
-  if (!m_msizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  const DLANode *input = (DLANode*)Input(0);
-  ConnNum num = InputConnNum(0);
-  const Sizes *ms = input->GetM(num);
-  if (!ms) {
-    cout << "!ms\n";
-    LOG_FAIL("replacement for throw call");
-  }
-  const Sizes *ns = input->GetN(num);
-#if DODM
-  const Sizes *lms = input->LocalM(num);
-  const Sizes *lns = input->LocalN(num);
-#endif
-  unsigned int length = ms->NumSizes();
-  if (length != ns->NumSizes() 
-#if DODM
-      || length != lms->NumSizes() 
-      || length != lns->NumSizes() 
-#endif
-      || length <= execNum) 
-  {
-    cout << ms->NumSizes() << endl;
-    cout << ns->NumSizes() << endl;
-#if DODM
-    cout << lms->NumSizes() << endl;
-    cout << lns->NumSizes() << endl;
-#endif
-    //    (*(((Loop*)m_pset)->m_posses.begin())).second->ForcePrint();
-    cout << "Error: Cannot append sizes\n";
-    cout << "length = " << std::to_string((long long int) length) << endl;
-    cout << "ns->NumSizes() = " << std::to_string((long long int) ns->NumSizes()) << endl;
-    cout << "execNum = " << std::to_string((long long int) execNum) << endl;
-    cout << "length != ns->NumSizes() ? " << (length != ns->NumSizes()) << endl;
-    cout << "length <= execNum ? " << (length <= execNum) << endl;
-
-    cout << Input(0)->Input(0)->GetType() << endl;
-    LoopInterface *loop = ((LoopTunnel*)(Input(0)->Input(0)))->GetMyLoop();
-    SplitSingleIter *split = (SplitSingleIter*)(loop->GetControl());
-    cout << split->NumberOfLoopExecs() << endl;
-    cout << "outer loop bs " << loop->GetBS() << endl;
-    cout << "inner loop bs " << GetMyLoop()->GetBS() << endl;
-    
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  const Size m = (*ms)[execNum];
-  const Size n = (*ns)[execNum];
-#if DODM
-  const Size lm = (*lms)[execNum];
-  const Size ln = (*lns)[execNum];
-#endif
-  m_msizes->AddRepeatedSizes(m, numIters, parFactor);
-  m_nsizes->AddRepeatedSizes(n, numIters, parFactor);
-#if DODM
-  m_mlsizes->AddRepeatedSizes(lm, numIters, parFactor);
-  m_nlsizes->AddRepeatedSizes(ln, numIters, parFactor);
-#endif
-}
-#else
-void LoopTunnel::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
-{
-  if (m_tunType != SETTUNIN)
-    return;
-  if (!m_pset->IsReal())
-    return;
-
-  if (!m_sizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  const DLANode *input = (DLANode*)Input(0);
-  ConnNum num = InputConnNum(0);
-  Dim numDims = input->NumDims(num);
-  for (Dim i = 0; i < numDims; ++i) {
-    const Sizes *sizes = input->Len(num,i);
-    if (!sizes) {
-      cout << "!sizes\n";
-      LOG_FAIL("replacement for throw call");
-      throw;
-    }
-    unsigned int length = sizes->NumSizes();
-    if (length <= execNum) 
-      {
-	cout << sizes->NumSizes() << endl;
-	LOG_FAIL("replacement for throw call");
-	throw;
-      }
-    const Size size = (*sizes)[execNum];
-    m_sizes[i].AddRepeatedSizes(size, numIters, parFactor);
-  }
-  if (!numDims) {
-    //scalar
-    m_sizes[0].AddRepeatedSizes(1, numIters, parFactor);
-  }
-}
-#endif
-
 #if DOELEM
 void LoopTunnel::UpdateLocalSizes()
 {
@@ -1033,16 +923,118 @@ void LoopTunnel::MigrateFromOldTun(Tunnel *tunIn)
 #endif
 }
 
-
+#if TWOD
 void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
 {
-  if (buildCache)
+  if (m_tunType != SETTUNIN)
+    return;
+  if (!m_pset->IsReal())
+    return;
+  if (!m_msizes) {
+    LOG_FAIL("replacement for throw call");
     throw;
+  }
+  if (buildCache)
+    LOG_FAIL("replacement for throw call");
+
   unsigned int numExecs = numItersVec.size();
-  for(unsigned int i = 0; i < numExecs; ++i) {
-    unsigned int numIters = numItersVec[i];
+
+  const DLANode *input = (DLANode*)Input(0);
+  ConnNum num = InputConnNum(0);
+  const Sizes *ms = input->GetM(num);
+  const Sizes *ns = input->GetN(num);
+  if (!ms || !ns) {
+    LOG_FAIL("replacement for throw call");
+  }
+
+#if DODM
+  const Sizes *lms = input->LocalM(num);
+  const Sizes *lns = input->LocalN(num);
+#endif
+
+
+  unsigned int length = ms->NumSizes();
+
+  if (length != ns->NumSizes() 
+#if DODM
+      || length != lms->NumSizes() 
+      || length != lns->NumSizes() 
+#endif
+      || length != numExecs)
+  {
+    LOG_FAIL("replacement for throw call");
+    throw;
+  }
+
+  for(unsigned int execNum = 0; execNum < numExecs; ++execNum) {
+    unsigned int numIters = numItersVec[execNum];
     if (numIters) {
-      AppendSizes(i, numIters, parFactor);
+      const Size m = (*ms)[execNum];
+      const Size n = (*ns)[execNum];
+#if DODM
+      const Size lm = (*lms)[execNum];
+      const Size ln = (*lns)[execNum];
+#endif
+      m_msizes->AddRepeatedSizes(m, numIters, parFactor);
+      m_nsizes->AddRepeatedSizes(n, numIters, parFactor);
+#if DODM
+      m_mlsizes->AddRepeatedSizes(lm, numIters, parFactor);
+      m_nlsizes->AddRepeatedSizes(ln, numIters, parFactor);
+#endif
     }
   }
 }
+#else
+void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
+{
+  if (m_tunType != SETTUNIN)
+    return;
+  if (!m_pset->IsReal())
+    return;
+  if (!m_sizes) {
+    LOG_FAIL("replacement for throw call");
+    throw;
+  }
+  if (buildCache)
+    throw;
+
+  const DLANode *input = (DLANode*)Input(0);
+  ConnNum num = InputConnNum(0);
+  Dim numDims = input->NumDims(num);
+  unsigned int numExecs = numItersVec.size();
+
+  for (Dim dim = 0; dim < numDims; ++i) {
+    const Sizes *sizes = input->Len(num,dim);
+    if (!sizes) {
+      cout << "!sizes\n";
+      LOG_FAIL("replacement for throw call");
+      throw;
+    }
+    unsigned int length = sizes->NumSizes();
+    if (length != execNum) 
+      {
+	cout << sizes->NumSizes() << endl;
+	LOG_FAIL("replacement for throw call");
+	throw;
+      }
+
+    for(unsigned int i = 0; i < numExecs; ++i) {
+      unsigned int numIters = numItersVec[i];
+      if (numIters) {
+	const Size size = (*sizes)[i];
+	m_sizes[dimNum].AddRepeatedSizes(size, numIters, parFactor);
+      }
+    }
+  }
+
+  if (!numDims) {
+    for(unsigned int i = 0; i < numExecs; ++i) {
+      unsigned int numIters = numItersVec[i];
+      if (numIters) {
+	m_sizes[0].AddRepeatedSizes(1, numIters, parFactor);
+      }
+    }
+  }
+
+}
+#endif

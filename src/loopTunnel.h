@@ -92,7 +92,6 @@ class LoopTunnel : public Tunnel
   LoopType GetLoopType() const;
 
   virtual void StartFillingSizes();
-  virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
 #if DODM
   virtual void UpdateLocalSizes();
 #endif
