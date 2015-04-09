@@ -49,6 +49,8 @@ class RuntimeTest {
   string CArgList(vector<string> args);
   string MakeImpFuncs(ImplementationMap* imps);
   string ImplementationFunctions(ImplementationMap* imps, string referenceImp);
+  string SetupFunction();
+  string SetupFunctions();
   string MainFunction();
   string AllBufferSanityChecks(unsigned int numImpls, string referenceImpName);
   string SanityChecks(SanityCheckSetting sanityCheckSetting, unsigned int numImpls, string referenceImpName);

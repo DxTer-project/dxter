@@ -23,6 +23,8 @@
 
 #if DOLLDLA
 
+#include "avx.h"
+
 RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int minCycles)
 {
   m_type = type;
@@ -79,6 +81,11 @@ void RuntimeTest::AddMiscellaneousDefines()
 string RuntimeTest::HeadersAndDefines(unsigned int numImplementations) {
   m_defines.push_back("#define NUM_ALGS " + std::to_string((long long int) numImplementations));
   string headersAndDefines = ToCStatements(m_headers) + "\n" + ToCStatements(m_defines);
+  for (auto ext : *arch->SupportedExtensions()) {
+    auto avx = (AVX*) ext;
+    cout << "EXTENSION NAME = " + ext->SetupFuncName() << endl;
+    headersAndDefines += avx->GlobalDeclarations();
+  }
   return headersAndDefines;
 }
 
@@ -91,6 +98,7 @@ string RuntimeTest::ImplementationFunctions(ImplementationMap* imps, string refe
 string RuntimeTest::MainFunction() {
   string mainFunc = "";
   mainFunc += "int main() {\n";
+  mainFunc += "\tset_up_test();\n";
   mainFunc += "\tsanity_check_implementations();\n";
   mainFunc += "\ttime_implementations();\n";
   mainFunc += "}";
@@ -163,14 +171,33 @@ string RuntimeTest::TwoPhaseTimingCode(unsigned int numImpls, string operationNa
   return timingFunc;
 }
 
+string RuntimeTest::SetupFunction() {
+  string decl = "void set_up_test() {\n";
+  for (auto extension : *arch->SupportedExtensions()) {
+    decl += "\t" + extension->SetupFuncName() + "();\n";
+  }
+  decl += "}\n";
+  return decl;
+}
+
+string RuntimeTest::SetupFunctions() {
+  string setupFuncs = "";
+  for (auto ext : *arch->SupportedExtensions()) {
+    setupFuncs += ext->SetupFunc() + "\n";
+  }
+  return setupFuncs;
+}
 string RuntimeTest::MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, ImplementationMap* imps, string referenceImp) {
   unsigned int numImpls = imps->size();
   string hds = HeadersAndDefines(numImpls);
+  string extSetupFuncs = SetupFunctions();
+  hds += "\n" + SetupFunctions();
   string impFuncs = ImplementationFunctions(imps, referenceImp);
+  string setupFunc = SetupFunction();
   string sanityCheckFunc = SanityChecks(sanityCheckSetting, numImpls, m_operationName + "_test");
   string timingFunc = TimingCode(timingSetting, imps->size(), m_operationName + "_test");
   string mainFunc = MainFunction();
-  string testCode = hds + "\n" + impFuncs + "\n" + sanityCheckFunc + "\n" + timingFunc + "\n" + mainFunc;
+  string testCode = hds + "\n" + setupFunc + "\n" + impFuncs + "\n" + sanityCheckFunc + "\n" + timingFunc + "\n" + mainFunc;
   return testCode;
 }
 
