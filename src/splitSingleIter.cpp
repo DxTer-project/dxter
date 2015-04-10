@@ -1909,10 +1909,10 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
   unsigned int numExecs = InputLen(0,0)->NumSizes();
 
   if (buildCache) {
-    numItersVec.reserve(numExecs);
+    numItersVec->reserve(numExecs);
   }
   else {
-    if (numExecs != numItersVec.size())
+    if (numExecs != numItersVec->size())
       LOG_FAIL("replacement for throw call");
   }
 
@@ -1927,7 +1927,7 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
       unsigned int numIters;
       if (buildCache && dim == 0) {
 	numIters = NumIters(execNum);
-	numItersVec.push_back(numIters);
+	numItersVec->push_back(numIters);
       }
       else if (!buildCache || dim != 0) {
 	numIters = (*numItersVec)[execNum];
@@ -1984,6 +1984,6 @@ const Sizes* SplitSingleIter::GetControlSizes() const
   if (m_tunType != SETTUNIN)
     throw;
   
-  return InputLen(0,m_partdim);
+  return InputLen(0,m_partDim);
 }
 #endif

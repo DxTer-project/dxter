@@ -1003,7 +1003,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> *numItersVec,
   const DLANode *input = (DLANode*)Input(0);
   ConnNum num = InputConnNum(0);
   Dim numDims = input->NumDims(num);
-  unsigned int numExecs = numItersVec.size();
+  unsigned int numExecs = numItersVec->size();
 
   for (Dim dim = 0; dim < numDims; ++dim) {
     const Sizes *sizes = input->Len(num,dim);
@@ -1021,7 +1021,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> *numItersVec,
       }
 
     for(unsigned int i = 0; i < numExecs; ++i) {
-      unsigned int numIters = numItersVec[i];
+      unsigned int numIters = (*numItersVec)[i];
       if (numIters) {
 	const Size size = (*sizes)[i];
 	m_sizes[dim].AddRepeatedSizes(size, numIters);
@@ -1031,7 +1031,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> *numItersVec,
 
   if (!numDims) {
     for(unsigned int i = 0; i < numExecs; ++i) {
-      unsigned int numIters = numItersVec[i];
+      unsigned int numIters = (*numItersVec)[i];
       if (numIters) {
 	m_sizes[0].AddRepeatedSizes(1, numIters);
       }
