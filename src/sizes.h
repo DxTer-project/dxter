@@ -61,11 +61,8 @@ class SizesIter
   double m_coeff;
   int m_repeatNum;
   int m_repeats;
-  //negative for round-robin
-  //positive for blocks
-  int m_parFactor;
  SizesIter() : m_currPos(-1) {}
-  SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int parFactor, int repeats);
+  SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int repeats);
   void operator++();
   Size operator*() const;
   void operator=(const SizesIter &rhs);
@@ -79,9 +76,6 @@ class SizeEntry
   Size m_valA, m_valB;
   int m_valC;
   SizesType m_type;
-  //negative for round-robin
-  //positive for blocks
-  int m_parFactor;
   int m_repeats;
   SizeEntry();
 
@@ -90,9 +84,9 @@ class SizeEntry
 
 
 
-  void SetRepeatedSizes(Size size, int repeats, int parFactor);
-  void SetSizeRange(Size start, int stride, Size end, int parFactor);
-  void SetMidSizes(Size size, Size totalSize, int parFactor);
+  void SetRepeatedSizes(Size size, int repeats);
+  void SetSizeRange(Size start, int stride, Size end);
+  void SetMidSizes(Size size, Size totalSize);
   Size operator[] (unsigned int n) const;
   void operator= (const SizeEntry &rhs);
   bool operator==(const SizeEntry &rhs) const;
@@ -136,9 +130,9 @@ class Sizes
 
   void Print() const;
   void Print(IndStream &out) const;
-  void AddRepeatedSizes(Size size, int repeats, int parFactor);
-  void AddSizesWithLimit(Size start, int stride, Size end, int parFactor);
-  void AddMidSizes(Size size, Size totalSize, int parFactor);
+  void AddRepeatedSizes(Size size, int repeats);
+  void AddSizesWithLimit(Size start, int stride, Size end);
+  void AddMidSizes(Size size, Size totalSize);
   void ClearSizes();
   void SetCoeff(double coeff);
   unsigned int NumSizes() const;
@@ -161,8 +155,6 @@ class Sizes
   bool AllOnes() const;
   SizesIter GetIter(unsigned int sizeNum) const;
   bool IsZero(unsigned int n) const;
-  void AddParFactor(int parFactor);
-  void SetParFactor(int parFactor);
 
   bool IsPartitionable(const Size partitionPoint) const;
   bool IsConstant() const;

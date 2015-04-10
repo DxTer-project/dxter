@@ -843,13 +843,13 @@ void ViewMultipleIters::BuildDataTypeCache()
   switch (m_partDir) {
   case (PARTDOWN):
     {
-      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputM(0)->NumSizes(), 1);
+      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputM(0)->NumSizes());
       m_info.m_numRowsVar = m_bs.VarName();
       break;
     }
   case (PARTRIGHT):
     {
-      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputN(0)->NumSizes(), 1);
+      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputN(0)->NumSizes());
       m_info.m_numColsVar = m_bs.VarName();
       break;
     }

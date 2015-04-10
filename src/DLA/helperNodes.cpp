@@ -59,8 +59,8 @@ m_msize(NAN), m_nsize(NAN) {
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
   
-  m_msize.AddRepeatedSizes(m, 1, 1);
-  m_nsize.AddRepeatedSizes(n, 1, 1);
+  m_msize.AddRepeatedSizes(m, 1);
+  m_nsize.AddRepeatedSizes(n, 1);
   m_varName.m_name = name;
 }
 
@@ -77,8 +77,8 @@ m_msize(NAN), m_nsize(NAN)
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
   
-  m_msize.AddRepeatedSizes(m, 1, 1);
-  m_nsize.AddRepeatedSizes(n, 1, 1);
+  m_msize.AddRepeatedSizes(m, 1);
+  m_nsize.AddRepeatedSizes(n, 1);
   m_varName.m_name = name;
 }
 
@@ -500,9 +500,9 @@ void InputNode::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_type);
   Size size;
   READ(size);
-  m_msize.AddRepeatedSizes(size,1,1);
+  m_msize.AddRepeatedSizes(size,1);
   READ(size);
-  m_nsize.AddRepeatedSizes(size,1,1);
+  m_nsize.AddRepeatedSizes(size,1);
   m_varName.Unflatten(in);
 #else
   throw;
@@ -666,7 +666,7 @@ void ConstVal::BuildDataTypeCache()
 {
   const Sizes *sizes = GetInputM(0);
   m_sizes = new Sizes;
-  m_sizes->AddRepeatedSizes(1, sizes->NumSizes(), 1);
+  m_sizes->AddRepeatedSizes(1, sizes->NumSizes());
 }
 
 #if TWOD

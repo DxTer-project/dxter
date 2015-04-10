@@ -175,17 +175,16 @@ void Partition::BuildStartAndEndSizes(const Sizes* toSplit) {
 
   for (auto entry : toSplit->m_entries) {
     int numIterations = entry->NumSizesPerRepeat();
-    int parFactor = entry->m_parFactor;
     Size sizeOfEachIteration = entry->m_valA;
     Size sizeOfEndIterations = sizeOfEachIteration - m_partSplitPoint;
 
     auto startEnt = new SizeEntry();
-    startEnt->SetRepeatedSizes(m_partSplitPoint, numIterations, parFactor);
+    startEnt->SetRepeatedSizes(m_partSplitPoint, numIterations);
     startEnt->m_repeats = entry->m_repeats;
     m_startSizes->m_entries.push_back(startEnt);
 
     auto endEnt = new SizeEntry();
-    endEnt->SetRepeatedSizes(sizeOfEndIterations, numIterations, parFactor);
+    endEnt->SetRepeatedSizes(sizeOfEndIterations, numIterations);
     endEnt->m_repeats = entry->m_repeats;
     m_endSizes->m_entries.push_back(endEnt);
   }

@@ -71,7 +71,7 @@ class SplitSingleIter : public SplitBase
   virtual const Sizes* LocalN(ConnNum num) const;
 #endif
   void GetSizes(ConnNum num, unsigned int numIters,
-		Size bs, unsigned int parFactor,
+		Size bs, 
 		   Size m, Size n,
 		   Sizes &ms, Sizes &ns);
 #else
@@ -120,6 +120,6 @@ class SplitSingleIter : public SplitBase
 
   string LoopLevel() const;
 
-  virtual void BuildSizes(bool buildCache, vector<int> &numIters, unsigned int parFactor);
+  virtual void BuildSizes(bool buildCache, vector<int> &numIters);
 };
 

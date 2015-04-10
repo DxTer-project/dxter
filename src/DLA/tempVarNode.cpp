@@ -403,7 +403,7 @@ void TempVarNode::BuildDataTypeCache()
   
   
   m_sumLens = new Sizes[m_sumDims.size()];
-  m_ones.AddRepeatedSizes(1, InputLen(0,0)->NumSizes(), 1);
+  m_ones.AddRepeatedSizes(1, InputLen(0,0)->NumSizes());
   EntryListIter iter = m_sumDims.begin();
   for(Dim dim = 0; iter != m_sumDims.end(); ++dim, ++iter) {
     DimVec vec = (*iter).DistEntryDims();
@@ -411,7 +411,7 @@ void TempVarNode::BuildDataTypeCache()
     DimVecIter iter2 = vec.begin();
     for(; iter2 != vec.end(); ++iter2)
       numProcs *= GridLens[*iter2];
-    m_sumLens[dim].AddRepeatedSizes(numProcs, InputLen(0,0)->NumSizes(), 1);
+    m_sumLens[dim].AddRepeatedSizes(numProcs, InputLen(0,0)->NumSizes());
   }
   
 #endif
