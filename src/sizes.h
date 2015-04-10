@@ -19,6 +19,7 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
 
 
 #include <vector>
@@ -29,6 +30,8 @@ using namespace std;
 
 typedef double Size;
 typedef double Cost;
+
+class SizesCache;
 
 
 enum SizesType { MIDSIZES,
@@ -61,6 +64,8 @@ class SizesIter
   double m_coeff;
   int m_repeatNum;
   int m_repeats;
+  static SizesCache m_cache;
+
  SizesIter() : m_currPos(-1) {}
   SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int repeats);
   void operator++();
@@ -131,8 +136,8 @@ class Sizes
   void Print() const;
   void Print(IndStream &out) const;
   void AddRepeatedSizes(Size size, int repeats);
-  void AddSizesWithLimit(Size start, int stride, Size end);
-  void AddMidSizes(Size size, Size totalSize);
+  unsigned int AddSizesWithLimit(Size start, int stride, Size end);
+  unsigned int AddMidSizes(Size size, Size totalSize);
   void ClearSizes();
   void SetCoeff(double coeff);
   unsigned int NumSizes() const;

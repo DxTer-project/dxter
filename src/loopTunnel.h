@@ -108,5 +108,6 @@ class LoopTunnel : public Tunnel
   void SetAdditive() {m_justAdditive = true;}
 #endif
 
-  virtual void BuildSizes(bool buildCache, vector<int> &numIters);
+  virtual void BuildSizes(bool buildCache, vector<int> *numIters,
+			  const Sizes *controlSizes, int stride);
 };

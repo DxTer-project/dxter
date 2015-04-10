@@ -1791,7 +1791,8 @@ string SplitSingleIter::LoopLevel() const
 }
 
 #if TWOD
-void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec)
+void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
+			  const Sizes *controlSizes, int stride)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -1821,12 +1822,12 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec)
     if (!m_isControlTun)
       LOG_FAIL("replacement for throw call");
     numExecs = length;
-    numItersVec.reserve(numExecs);
+    numItersVec->reserve(numExecs);
   }
   else {
     if (m_isControlTun)
       LOG_FAIL("replacement for throw call");
-    numExecs = numItersVec.size();
+    numExecs = numItersVec->size();
     if (numExecs != length)
       LOG_FAIL("replacement for throw call");
   }
@@ -1858,15 +1859,15 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec)
 	      unsigned int numIters;
 	      if (buildCache && !foundOne) {
 		numIters = NumIters(bs, m, n);
-		numItersVec.push_back(numIters);
+		numItersVec->push_back(numIters);
 	      }
 	      else if (!foundOne) {
 		numIters = NumIters(bs, m, n);
-		if (numIters != numItersVec[execNum])
+		if (numIters != (*numItersVec)[execNum])
 		  throw;
 	      }
 	      else {
-		numIters = numItersVec[execNum];
+		numIters = (*numItersVec)[execNum];
 	      }
 	      
 	      if (numIters) {
@@ -1889,7 +1890,8 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec)
   }
 }
 #else
-void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec)
+void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
+			  const Sizes *controlSizes, int stride)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -1928,11 +1930,11 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec)
 	numItersVec.push_back(numIters);
       }
       else if (!buildCache || dim != 0) {
-	numIters = numItersVec[execNum];
+	numIters = (*numItersVec)[execNum];
       }
       else {
 	numIters = NumIters(execNum);
-	if (numIters != numItersVec[execNum])
+	if (numIters != (*numItersVec)[execNum])
 	  LOG_FAIL("replacement for throw call"); 
       }
       if (numIters) {
@@ -1951,5 +1953,37 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec)
       }
     }
   }
+}
+#endif
+
+
+#if TWOD
+const Sizes* SplitSingleIter::GetControlSizes() const
+{
+  if (m_tunType != SETTUNIN)
+    throw;
+
+    switch(m_dir)
+      {
+      case (PARTDOWN):
+      case (PARTUPWARD):
+	return GetInputM(0);
+      case (PARTRIGHT):
+      case (PARTLEFT):     
+      case (PARTDIAG):
+      case (PARTDIAGBACK):
+	return GetInputN(0);
+      default:
+	LOG_FAIL("replacement for throw call");
+	throw;
+      }
+}
+#else
+const Sizes* SplitSingleIter::GetControlSizes() const
+{
+  if (m_tunType != SETTUNIN)
+    throw;
+  
+  return InputLen(0,m_partdim);
 }
 #endif

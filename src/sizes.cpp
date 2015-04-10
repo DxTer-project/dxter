@@ -582,12 +582,12 @@ void Sizes::AddRepeatedSizes(Size size, int repeats)
   m_entries.push_back(entry);
 }
 
-void Sizes::AddMidSizes(Size size, Size totalSize)
+unsigned int Sizes::AddMidSizes(Size size, Size totalSize)
 {
 #if COMBINESIZEENTRIES
   if (!fmod(totalSize, size)){
     AddRepeatedSizes(size, totalSize / size);
-    return;
+    return totalSize / size;
   }
   if (!m_entries.empty()) {
     SizeEntry *oldEntry = m_entries.back();
@@ -595,7 +595,7 @@ void Sizes::AddMidSizes(Size size, Size totalSize)
       if (oldEntry->m_valA == size) {
 	if (oldEntry->m_valB == totalSize) {
 	  oldEntry->m_repeats++;
-	  return;
+	  return oldEntry->NumSizesPerRepeat();
 	}
       }
     }
@@ -604,9 +604,10 @@ void Sizes::AddMidSizes(Size size, Size totalSize)
   SizeEntry *entry = new SizeEntry;
   entry->SetMidSizes(size, totalSize);
   m_entries.push_back(entry);
+  return entry->NumSizesPerRepeat();
 }
 
-void Sizes::AddSizesWithLimit(Size start, int stride, Size end)
+unsigned int Sizes::AddSizesWithLimit(Size start, int stride, Size end)
 {
   if (stride == 0) {
     LOG_FAIL("replacement for throw call");
@@ -628,9 +629,9 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end)
   }
   if (start == 0 && end == 0) {
     AddRepeatedSizes(0, 1);
+    return 1;
   }
   else {
-
 #if COMBINESIZEENTRIES
     if (!m_entries.empty()) {
       SizeEntry *oldEntry = m_entries.back();
@@ -639,7 +640,7 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end)
 	  if (oldEntry->m_valB == end) {
 	    if (oldEntry->m_valC == stride) {
 	      oldEntry->m_repeats++;
-	      return;
+	      return oldEntry->NumSizesPerRepeat();
 	    }
 	  }
 	}
@@ -649,6 +650,7 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end)
     SizeEntry *entry = new SizeEntry;
     entry->SetSizeRange(start, stride, end);
     m_entries.push_back(entry);
+    return entry->NumSizesPerRepeat();
   }
 }
 

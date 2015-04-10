@@ -895,7 +895,13 @@ void SplitUnrolled::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 }
 
 
-void SplitUnrolled::BuildSizes(bool buildCache, vector<int> &numIters)
+void SplitUnrolled::BuildSizes(bool buildCache, vector<int> *numIters,
+			  const Sizes *controlSizes, int stride)
+{
+  throw;
+}
+
+const Sizes* SplitUnrolled::GetControlSizes() const
 {
   throw;
 }

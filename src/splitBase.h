@@ -61,4 +61,5 @@ class SplitBase : public LoopTunnel
 #if DOLLDLA
   virtual string LoopBound() = 0;
 #endif
+  virtual const Sizes* GetControlSizes() const = 0;
 };

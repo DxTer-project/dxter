@@ -924,7 +924,8 @@ void LoopTunnel::MigrateFromOldTun(Tunnel *tunIn)
 }
 
 #if TWOD
-void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
+void LoopTunnel::BuildSizes(bool buildCache, vector<int> *numItersVec,
+			  const Sizes *controlSizes, int stride)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -937,7 +938,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
   if (buildCache)
     LOG_FAIL("replacement for throw call");
 
-  unsigned int numExecs = numItersVec.size();
+  unsigned int numExecs = numItersVec->size();
 
   const DLANode *input = (DLANode*)Input(0);
   ConnNum num = InputConnNum(0);
@@ -967,7 +968,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
   }
 
   for(unsigned int execNum = 0; execNum < numExecs; ++execNum) {
-    unsigned int numIters = numItersVec[execNum];
+    unsigned int numIters = (*numItersVec)[execNum];
     if (numIters) {
       const Size m = (*ms)[execNum];
       const Size n = (*ns)[execNum];
@@ -985,7 +986,8 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
   }
 }
 #else
-void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
+void LoopTunnel::BuildSizes(bool buildCache, vector<int> *numItersVec,
+			  const Sizes *controlSizes, int stride)
 {
   if (m_tunType != SETTUNIN)
     return;

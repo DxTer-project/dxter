@@ -92,5 +92,7 @@ class SplitUnrolled : public SplitBase
   virtual void AddVariables(VarSet &set) const;
 
   virtual void PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const;
-  virtual void BuildSizes(bool buildCache, vector<int> &numIters);
+  virtual void BuildSizes(bool buildCache, vector<int> *numIters,
+			  const Sizes *controlSizes, int stride);
+  virtual const Sizes* GetControlSizes() const;
 };

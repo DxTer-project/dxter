@@ -239,12 +239,15 @@ void RealLoop::FillTunnelSizes()
   ClearTunnelCaches();
   StartFillingTunnels();
 
+  const Sizes *controlSizes = control->GetControlSizes();
+  int stride = GetBS();
+
   vector<int> numIters;
 #if DOBLIS
   this needs to be changed everywhere; sizes no longer have the par factor, so they need to be calculated
   control->BuildSizes(true, numIters, NumGroupsInComm(m_comm));
 #else
-  control->BuildSizes(true, numIters);
+  control->BuildSizes(true, &numIters, controlSizes, stride);
 #endif
 #if DODM
       ((LoopTunnel*)control)->UpdateLocalSizes();
@@ -255,7 +258,7 @@ void RealLoop::FillTunnelSizes()
 #if DOBLIS
       ((LoopTunnel*)inTun)->BuildSizes(false, numIters);
 #else
-      ((LoopTunnel*)inTun)->BuildSizes(false, numIters);
+      ((LoopTunnel*)inTun)->BuildSizes(false, &numIters, controlSizes, stride);
 #endif
 #if DODM
       ((LoopTunnel*)inTun)->UpdateLocalSizes();
