@@ -24,7 +24,6 @@
 #if DOLLDLA
 
 #include "costModel.h"
-#include "loopTunnel.h"
 
 void LoadToRegs::Prop()
 {
@@ -138,7 +137,7 @@ void LoadToRegs::AddVariables(VarSet &set) const {
 
 void PackedLoadToRegs::Prop() {
   if (!IsValidCost(m_cost)) {
-    if (!(IsInputRowVector(0) || IsInputColVector(0))) {
+    if (!(IsInputRowVector(0) || IsInputColVector(0)) || !InputIsResidual(0)) {
       cout << "Input to PackedLoadToRegs is not a row or column vector" << endl;
       throw;
     }
@@ -288,7 +287,9 @@ void StoreFromRegs::StoreNonContigLocations(IndStream &out, string regVarName, s
 
 void UnpackStoreFromRegs::Prop() {
   if (!IsValidCost(m_cost)) {
-    m_cost = GetVecRegWidth() * costModel->ContigVecStoreCost();
+    if (!(IsInputRowVector(1) || IsInputColVector(1)) || !InputIsResidual(1)) {
+      m_cost = GetVecRegWidth() * costModel->ContigVecStoreCost();
+    }
   }
 }
 
@@ -489,51 +490,64 @@ void TempVecReg::AddVariables(VarSet &set) const
   set.insert(var);
 }
 
+bool HoistLoad::OnlyFoundLoad(const LoopTunnel* setTunIn) const {
+  for(auto childConn : setTunIn->m_children) {
+    const LoopTunnel *possTunIn = (LoopTunnel*)(childConn->m_n);
+    if (PossChildrenAreOnlyLoads(possTunIn)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool HoistLoad::PossChildrenAreOnlyLoads(const LoopTunnel* possTunIn) const {
+  bool foundLoad = false;
+  bool foundSomethingElse = false;
+  for(auto tunChildConn : possTunIn->m_children) {
+    if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
+      if (tunChildConn->m_n->GetNodeClass() == DuplicateRegLoad::GetClass()) {
+	foundLoad = true;
+      }
+      else {
+	foundSomethingElse = true;
+      }
+    }
+  }
+  return foundLoad && !foundSomethingElse;
+}
+
 bool HoistLoad::CanApply(const Node *node) const
 {
-  if (node->GetNodeClass() != LoopTunnel::GetClass())
+  if (node->GetNodeClass() != LoopTunnel::GetClass()) {
     throw;
+  }
+
   const LoopTunnel *setTunIn = (LoopTunnel*)node;
 
   //Only apply to SETTUNIN
-  if (setTunIn->m_tunType != SETTUNIN)
+  if (setTunIn->m_tunType != SETTUNIN) {
     return false;
-
-  if (!setTunIn->m_pset->IsReal())
-    throw;
-
-  for(auto childConn : setTunIn->m_children) {
-    const LoopTunnel *possTunIn = (LoopTunnel*)(childConn->m_n);
-    bool foundLoad = false;
-    bool foundSomethingElse = false;
-    for(auto tunChildConn : possTunIn->m_children) {
-      if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
-	if (tunChildConn->m_n->GetNodeClass() == DuplicateRegLoad::GetClass()) {
-	  foundLoad = true;
-	}
-	else {
-	  foundSomethingElse = true;
-	}
-      }
-    }
-    //Found a tunnel where the data is loaded into register and not
-    //used for anything else
-    if (foundLoad && !foundSomethingElse)
-      return true;
   }
-  return false;
+
+  if (!setTunIn->m_pset->IsReal()) {
+    throw;
+  }
+
+  return OnlyFoundLoad(setTunIn);
 }
 
 void HoistLoad::Apply(Node *node) const
 {
   LoopTunnel *setTunIn = (LoopTunnel*)node;
-  if (!setTunIn->m_pset->IsReal())
+  if (!setTunIn->m_pset->IsReal()) {
     throw;
+  }
+
   RealPSet *set = (RealPSet*)(setTunIn->m_pset);
   for(int possNum = 0; possNum < setTunIn->m_children.size(); ++possNum) {
     LoopTunnel *possTunIn = (LoopTunnel*)(setTunIn->Child(possNum));
     Poss *poss = possTunIn->m_poss;
-    bool foundLoad = false;
+    /*    bool foundLoad = false;
     bool foundSomethingElse = false;
     for(auto tunChildConn : possTunIn->m_children) {
       if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
@@ -544,10 +558,11 @@ void HoistLoad::Apply(Node *node) const
 	  foundSomethingElse = true;
 	}
       }
-    }
+      }*/
     //Found a tunnel where the data is loaded into register and not
     //used for anything else
-    if (foundLoad && !foundSomethingElse) {
+    //    if (foundLoad && !foundSomethingElse) {
+     if (PossChildrenAreOnlyLoads(possTunIn)) {
       for(auto tunChildConn : possTunIn->m_children) {
 	if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
 	  DuplicateRegLoad *oldLoad = (DuplicateRegLoad*)(tunChildConn->m_n);

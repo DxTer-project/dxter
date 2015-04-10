@@ -29,6 +29,8 @@
 
 #if DOLLDLA
 
+#include "loopTunnel.h"
+
 class LoadToRegs : public DLANode
 {
  public:
@@ -183,6 +185,11 @@ class UnpackStoreFromRegs : public DLAOp<2,1>
 
 class HoistLoad : public SingleTrans
 {
+ protected:
+  bool OnlyFoundLoad(const LoopTunnel* setTunIn) const;
+  bool PossChildrenAreOnlyLoads(const LoopTunnel* possTunIn) const;
+
+ public:
   virtual string GetType() const {return "HoistLoad";}
   virtual bool IsRef() const {return false;}
   virtual bool CanApply(const Node *node) const;
