@@ -24,7 +24,6 @@
 #if DOLLDLA
 
 #include "costModel.h"
-#include "loopTunnel.h"
 
 void LoadToRegs::Prop()
 {
@@ -138,7 +137,7 @@ void LoadToRegs::AddVariables(VarSet &set) const {
 
 void PackedLoadToRegs::Prop() {
   if (!IsValidCost(m_cost)) {
-    if (!(IsInputRowVector(0) || IsInputColVector(0))) {
+    if (!(IsInputRowVector(0) || IsInputColVector(0)) || !InputIsResidual(0)) {
       cout << "Input to PackedLoadToRegs is not a row or column vector" << endl;
       throw;
     }
@@ -288,7 +287,9 @@ void StoreFromRegs::StoreNonContigLocations(IndStream &out, string regVarName, s
 
 void UnpackStoreFromRegs::Prop() {
   if (!IsValidCost(m_cost)) {
-    m_cost = GetVecRegWidth() * costModel->ContigVecStoreCost();
+    if (!(IsInputRowVector(1) || IsInputColVector(1)) || !InputIsResidual(1)) {
+      m_cost = GetVecRegWidth() * costModel->ContigVecStoreCost();
+    }
   }
 }
 
@@ -489,96 +490,5 @@ void TempVecReg::AddVariables(VarSet &set) const
   set.insert(var);
 }
 
-bool HoistLoad::CanApply(const Node *node) const
-{
-  if (node->GetNodeClass() != LoopTunnel::GetClass())
-    throw;
-  const LoopTunnel *setTunIn = (LoopTunnel*)node;
-
-  //Only apply to SETTUNIN
-  if (setTunIn->m_tunType != SETTUNIN)
-    return false;
-
-  if (!setTunIn->m_pset->IsReal())
-    throw;
-
-  for(auto childConn : setTunIn->m_children) {
-    const LoopTunnel *possTunIn = (LoopTunnel*)(childConn->m_n);
-    bool foundLoad = false;
-    bool foundSomethingElse = false;
-    for(auto tunChildConn : possTunIn->m_children) {
-      if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
-	if (tunChildConn->m_n->GetNodeClass() == DuplicateRegLoad::GetClass()) {
-	  foundLoad = true;
-	}
-	else {
-	  foundSomethingElse = true;
-	}
-      }
-    }
-    //Found a tunnel where the data is loaded into register and not
-    //used for anything else
-    if (foundLoad && !foundSomethingElse)
-      return true;
-  }
-  return false;
-}
-
-void HoistLoad::Apply(Node *node) const
-{
-  LoopTunnel *setTunIn = (LoopTunnel*)node;
-  if (!setTunIn->m_pset->IsReal())
-    throw;
-  RealPSet *set = (RealPSet*)(setTunIn->m_pset);
-  for(int possNum = 0; possNum < setTunIn->m_children.size(); ++possNum) {
-    LoopTunnel *possTunIn = (LoopTunnel*)(setTunIn->Child(possNum));
-    Poss *poss = possTunIn->m_poss;
-    bool foundLoad = false;
-    bool foundSomethingElse = false;
-    for(auto tunChildConn : possTunIn->m_children) {
-      if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
-	if (tunChildConn->m_n->GetNodeClass() == DuplicateRegLoad::GetClass()) {
-	  foundLoad = true;
-	}
-	else {
-	  foundSomethingElse = true;
-	}
-      }
-    }
-    //Found a tunnel where the data is loaded into register and not
-    //used for anything else
-    if (foundLoad && !foundSomethingElse) {
-      for(auto tunChildConn : possTunIn->m_children) {
-	if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
-	  DuplicateRegLoad *oldLoad = (DuplicateRegLoad*)(tunChildConn->m_n);
-	  oldLoad->RedirectChildren(possTunIn, 0);
-	  poss->DeleteChildAndCleanUp(oldLoad);
-	}
-	else {
-	  LoopTunnel *possTunOut = (LoopTunnel*)(tunChildConn->m_n);
-	  for(auto inputConn : possTunOut->m_inputs) {
-	    if (!inputConn->m_n->IsTunnel(POSSTUNIN)) {
-	      throw;
-	      //handle this case by removing any stores
-	    }
-	  }
-	}
-      }
-    }
-    else {
-      set->RemoveAndDeletePoss(poss, true);
-      --possNum;
-    }
-  }
-  DuplicateRegLoad *newLoad = new DuplicateRegLoad;
-  setTunIn->m_poss->AddNode(newLoad);
-  newLoad->AddInput(setTunIn->Input(0), setTunIn->InputConnNum(0));
-  setTunIn->ChangeInput2Way(setTunIn->Input(0), setTunIn->InputConnNum(0), 
-			    newLoad, 0);
-  if (setTunIn->GetMatchingOutTun()->m_children.size()) {
-    //handle this case by adding a store between the set tun out and its children
-    throw;
-  }    
-}
 
 #endif //DOLLDLA
