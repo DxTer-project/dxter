@@ -13,6 +13,8 @@
 #include "eliminateRecombinePartition.h"
 #include "eliminateStore.h"
 #include "eliminateStoreLoad.h"
+#include "hoistDuplicateLoad.h"
+#include "hoistLoadToRegs.h"
 #include "LLDLATranspose.h"
 #include "loadToContigLoad.h"
 #include "mmul.h"
@@ -286,13 +288,14 @@ void AddRTLOptimizations() {
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombinePartition(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombine(ABSLAYER, ABSLAYER), SIMP);
 
-  Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoad(), SIMP);
+  Universe::AddTrans(LoopTunnel::GetClass(), new HoistDuplicateLoad(), SIMP);
+  Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoadToRegs(), SIMP);
 
   Universe::AddTrans(Mul::GetClass(), new AddMulToFMA(ABSLAYER, ABSLAYER), SIMP);
 }
 
 void AddPrimPhaseConversions() {
-  Universe::AddTrans(LoadToRegs::GetClass(), new LoadToContigLoad(ABSLAYER, ABSLAYER), LLDLAPRIMPHASE);
+  //  Universe::AddTrans(LoadToRegs::GetClass(), new LoadToContigLoad(ABSLAYER, ABSLAYER), LLDLAPRIMPHASE);
 }
 
 void AddArchSpecificTrans() {

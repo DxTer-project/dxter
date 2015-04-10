@@ -188,6 +188,8 @@ class HoistLoad : public SingleTrans
  protected:
   bool OnlyFoundLoad(const LoopTunnel* setTunIn) const;
   bool PossChildrenAreOnlyLoads(const LoopTunnel* possTunIn) const;
+  void RemoveLoadsFromPosses(LoopTunnel* setTunIn) const;
+  void AddOneOuterLoad(LoopTunnel* setTunIn) const;
 
  public:
   virtual string GetType() const {return "HoistLoad";}
