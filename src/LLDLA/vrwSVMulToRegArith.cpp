@@ -36,13 +36,14 @@ string VRWSVMulToRegArith::GetType() const {
 }
 
 bool VRWSVMulToRegArith::IsExactSizeSVMul(const SVMul* svmul) const {
-  if (svmul->GetVecType() == ROWVECTOR) {
+  return svmul->InputIsVRW(1);
+  /*  if (svmul->GetVecType() == ROWVECTOR) {
     return *svmul->GetInputM(1) == ONE &&
       svmul->GetInputNumCols(1) == svmul->GetVecRegWidth();
   } else {
     return *svmul->GetInputN(1) == ONE &&
       svmul->GetInputNumRows(1) == svmul->GetVecRegWidth();
-  }
+      }*/
 }
 
 bool VRWSVMulToRegArith::CanApply(const Node* node) const {

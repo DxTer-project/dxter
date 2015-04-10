@@ -130,6 +130,9 @@ class DLANode : public Node
   bool InputNIsMultipleOf(ConnNum num, Size s) const;
   bool InputMIsMultipleOf(ConnNum num, Size s) const;
 
+  bool InputIsVRW(ConnNum num) const;
+  bool InputIsResidual(ConnNum num) const;
+
   bool InputDimsAreOneRepeatedSizeEach(ConnNum num) const;
 
 #endif // DOLLDLA

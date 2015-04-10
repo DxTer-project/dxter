@@ -36,13 +36,7 @@ string VRWVAddToRegArith::GetType() const {
 }
 
 bool VRWVAddToRegArith::IsExactSizeVAdd(const VAdd* vadd) const {
-  if (vadd->GetVecType() == ROWVECTOR) {
-    return *vadd->GetInputM(0) == ONE &&
-      vadd->GetInputNumCols(0) == vadd->GetVecRegWidth();
-  } else {
-    return *vadd->GetInputN(0) == ONE &&
-      vadd->GetInputNumRows(0) == vadd->GetVecRegWidth();
-  }
+  return vadd->InputIsVRW(0) && vadd->InputIsVRW(1);
 }
 
 bool VRWVAddToRegArith::CanApply(const Node* node) const {
