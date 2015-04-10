@@ -276,7 +276,6 @@ bool MAddToVAddLoopRef::CanApply(const Node *node) const
 }
 
 void MAddToVAddLoopRef::Apply(Node *node) const {
-  cout << "Applying MAddToVAddLoopRef" << endl;
   MAdd *madd = static_cast<MAdd*>(node);
 
   SplitSingleIter *split0 = new SplitSingleIter(m_vecType == ROWVECTOR ? PARTDOWN : PARTRIGHT, POSSTUNIN, true);

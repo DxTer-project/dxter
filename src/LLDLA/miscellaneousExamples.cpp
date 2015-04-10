@@ -1,15 +1,79 @@
+/*
+    This file is part of DxTer.
+    DxTer is a prototype using the Design by Transformation (DxT)
+    approach to program generation.
+
+    Copyright (C) 2015, The University of Texas and Bryan Marker
+
+    DxTer is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    DxTer is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.               
+
+    You should have received a copy of the GNU General Public License
+    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "madd.h"
-#include "miscellaneousExamples.h"
-#include "mvmul.h"
-#include "partition.h"
-#include "recombine.h"
-#include "svmul.h"
-#include "vadd.h"
-#include "vvdot.h"
 
 #if DOLLDLA
 
 #include "exampleUtils.h"
+#include "miscellaneousExamples.h"
+#include "mvmul.h"
+#include "partition.h"
+#include "recombine.h"
+#include "setToZero.h"
+#include "svmul.h"
+#include "LLDLATranspose.h"
+#include "vadd.h"
+#include "vvdot.h"
+
+RealPSet* LGenCompareL2(Type dataType, int m, int n) {
+  auto x = InputTunnel("X",
+		       n, 1,
+		       1, n,
+		       dataType);
+
+  auto a = InputTunnel("A",
+		       m, n,
+		       1, m,
+		       dataType);
+
+  auto b = InputTunnel("B",
+		       n, m,
+		       1, n,
+		       dataType);
+
+  auto y = InputTunnel("Y",
+		       m, 1,
+		       1, m,
+		       dataType);
+
+  auto bTrans = new LLDLATranspose(ABSLAYER);
+  bTrans->AddInput(b, 0);
+
+  auto aPlusBTrans = new MAdd(ABSLAYER);
+  aPlusBTrans->AddInputs(4,
+			 a, 0,
+			 bTrans, 0);
+
+  auto zeroY = new SetToZero(ABSLAYER);
+  zeroY->AddInput(y, 0);
+
+  auto result = new MVMul(ABSLAYER);
+  result->AddInputs(6,
+		    aPlusBTrans, 0,
+		    x, 0,
+		    zeroY, 0);
+
+  return WrapInPSet(result);
+}
 
 RealPSet* VMulAddBenchmark(Type dataType, int m) {
   auto alpha = InputTunnel("alpha",

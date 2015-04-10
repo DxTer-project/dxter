@@ -319,6 +319,7 @@ void AddTransformations() {
 
   AddTransposeTrans();
   AddUnrollingTrans();
+  AddSetToZeroTrans();
 }
 
 #endif // DOLLDLA

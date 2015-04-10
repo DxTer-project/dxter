@@ -74,6 +74,7 @@ void Usage()
   cout <<"        17  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
   cout <<"        18  -> alpha*A*x + beta*B*x F/D M N\n";
   cout <<"        31  -> y = alpha*x + beta*(z + y) F/D M\n";
+  cout <<"        32  -> y = (A + B^T)*x F/D M N\n";
   cout <<"\n";
   cout <<"Node test examples\n";
   cout <<"        19  -> Set to zero test (y <- Ax) F/D M N\n";
@@ -527,6 +528,19 @@ int main(int argc, const char* argv[])
       m = atoi(argv[3]);
       problemInstance.AddDimension(m, "m");
       algPSet = VMulAddBenchmark(precision, m);
+      break;
+    case(32):
+      if (argc != 5) {
+	Usage();
+	TearDownGlobalState(); return 0;
+      }
+      opName = "lgen_comparison_l2";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      algPSet = LGenCompareL2(precision, m, n);
       break;
     default:
       Usage();
