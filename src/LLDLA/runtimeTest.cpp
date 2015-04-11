@@ -39,20 +39,6 @@ RuntimeTest::RuntimeTest(ProblemInstance* prob, LLDLAUniverse* uni, unsigned int
   AddMiscellaneousDefines();
 }
 
-/*RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int minCycles)
-{
-  m_type = type;
-  m_operationName = operationName;
-  m_argNames = argNames;
-  m_argDeclarations = argDeclarations;
-  m_defines = defines;
-  m_minCycles = minCycles;
-  m_dataFileName = m_operationName + "_time_data";
-  m_correctTestFileName = m_operationName + "_correctness_test_results";
-  AddIncludes();
-  AddMiscellaneousDefines();
-}
-*/
 void RuntimeTest::AddIncludes()
 {
   m_headers.push_back("#include <immintrin.h>");

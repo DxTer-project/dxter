@@ -83,7 +83,6 @@ class RuntimeTest {
   string m_operationName;
 
   RuntimeTest(ProblemInstance* prob, LLDLAUniverse* uni, unsigned int minCycles);
-  //  RuntimeTest(Type m_type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations);
   string MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, ImplementationMap* imps, string referenceImp);
 };
 
