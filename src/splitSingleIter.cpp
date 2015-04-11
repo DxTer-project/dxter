@@ -506,7 +506,7 @@ const Sizes* SplitSingleIter::LocalN(ConnNum num) const
 
 
 void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
-		     Size bs, unsigned int parFactor,
+		     Size bs,
 		     Size m, Size n,
 		     Sizes &ms, Sizes &ns)
 {
@@ -523,20 +523,20 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
     {
     case (PARTDOWN):
       if (num == 0) {
-	ms.AddSizesWithLimit(0,bs,m, parFactor);
-	ns.AddRepeatedSizes(n,numIters, parFactor);
+	ms.AddSizesWithLimit(0,bs,m);
+	ns.AddRepeatedSizes(n,numIters);
       }
       else if (num ==1) {
 	if (ceil(m/bs) != numIters) {
 	  LOG_FAIL("replacement for throw call");
 	  throw;
 	}
-	ms.AddMidSizes(bs, m, parFactor);
-	ns.AddRepeatedSizes(n,numIters, parFactor);
+	ms.AddMidSizes(bs, m);
+	ns.AddRepeatedSizes(n,numIters);
       }
       else if (num == 2) {
-	ms.AddSizesWithLimit(m,-1*bs,0, parFactor);
-	ns.AddRepeatedSizes(n,numIters, parFactor);
+	ms.AddSizesWithLimit(m,-1*bs,0);
+	ns.AddRepeatedSizes(n,numIters);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -545,16 +545,16 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
       break;
     case (PARTUPWARD):
       if (num == 0) {
-	ms.AddSizesWithLimit(m, -1*bs, 0, parFactor);
-	ns.AddRepeatedSizes(n,numIters, parFactor);
+	ms.AddSizesWithLimit(m, -1*bs, 0);
+	ns.AddRepeatedSizes(n,numIters);
       }
       else if (num ==1) {
-	ms.AddMidSizes(bs,m, parFactor);
-	ns.AddRepeatedSizes(n,numIters, parFactor);
+	ms.AddMidSizes(bs,m);
+	ns.AddRepeatedSizes(n,numIters);
       }
       else if (num == 2) {
-	ms.AddSizesWithLimit(0,bs,m, parFactor);
-	ns.AddRepeatedSizes(n,numIters, parFactor);
+	ms.AddSizesWithLimit(0,bs,m);
+	ns.AddRepeatedSizes(n,numIters);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -563,16 +563,16 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
       break;
     case (PARTRIGHT):
       if (num == 0) {
-	ms.AddRepeatedSizes(m,numIters, parFactor);
-	ns.AddSizesWithLimit(0,bs,n, parFactor);
+	ms.AddRepeatedSizes(m,numIters);
+	ns.AddSizesWithLimit(0,bs,n);
       }
       else if (num == 1) {
-	ms.AddRepeatedSizes(m,numIters, parFactor);
-	ns.AddMidSizes(bs,n, parFactor);
+	ms.AddRepeatedSizes(m,numIters);
+	ns.AddMidSizes(bs,n);
       }
       else if (num == 2) {
-	ms.AddRepeatedSizes(m,numIters, parFactor);
-	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
+	ms.AddRepeatedSizes(m,numIters);
+	ns.AddSizesWithLimit(n,-1*bs,0);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -581,16 +581,16 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
       break;
     case (PARTLEFT):
       if (num == 0) {
-	ms.AddRepeatedSizes(m,numIters, parFactor);
-	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
+	ms.AddRepeatedSizes(m,numIters);
+	ns.AddSizesWithLimit(n,-1*bs,0);
       }
       else if (num == 1) {
-	ms.AddRepeatedSizes(m,numIters, parFactor);
-	ns.AddMidSizes(bs,n, parFactor);
+	ms.AddRepeatedSizes(m,numIters);
+	ns.AddMidSizes(bs,n);
       }
       else if (num == 2) {
-	ms.AddRepeatedSizes(m,numIters, parFactor);
-	ns.AddSizesWithLimit(0,bs,n, parFactor);
+	ms.AddRepeatedSizes(m,numIters);
+	ns.AddSizesWithLimit(0,bs,n);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -600,42 +600,42 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
     case (PARTDIAG):
       //First column
       if (num == 0) {
-	ms.AddSizesWithLimit(0,bs,m, parFactor);
-	ns.AddSizesWithLimit(0,bs,n, parFactor);
+	ms.AddSizesWithLimit(0,bs,m);
+	ns.AddSizesWithLimit(0,bs,n);
       }
       else if (num == 1) {
-	ms.AddMidSizes(bs,m, parFactor);
-	ns.AddSizesWithLimit(0,bs,n, parFactor);
+	ms.AddMidSizes(bs,m);
+	ns.AddSizesWithLimit(0,bs,n);
       }
       else if (num == 2) {
-	ms.AddSizesWithLimit(m,-1*bs,0, parFactor);
-	ns.AddSizesWithLimit(0,bs,n, parFactor);
+	ms.AddSizesWithLimit(m,-1*bs,0);
+	ns.AddSizesWithLimit(0,bs,n);
       }
       //Second column
       else if (num == 3) {
-	ms.AddSizesWithLimit(0,bs,m, parFactor);
-	ns.AddMidSizes(bs,n, parFactor);
+	ms.AddSizesWithLimit(0,bs,m);
+	ns.AddMidSizes(bs,n);
       }
       else if (num == 4) {
-	ms.AddMidSizes(bs,m, parFactor);
-	ns.AddMidSizes(bs,n, parFactor);
+	ms.AddMidSizes(bs,m);
+	ns.AddMidSizes(bs,n);
       }
       else if (num == 5) {
-	ms.AddSizesWithLimit(m,-1*bs,0, parFactor);
-	ns.AddMidSizes(bs,n, parFactor);
+	ms.AddSizesWithLimit(m,-1*bs,0);
+	ns.AddMidSizes(bs,n);
       }
       //Third column
       else if (num == 6) {
-	ms.AddSizesWithLimit(0,bs,m, parFactor);
-	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
+	ms.AddSizesWithLimit(0,bs,m);
+	ns.AddSizesWithLimit(n,-1*bs,0);
       }
       else if (num == 7) {
-	ms.AddMidSizes(bs,m, parFactor);
-	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
+	ms.AddMidSizes(bs,m);
+	ns.AddSizesWithLimit(n,-1*bs,0);
       }
       else if (num == 8) {
-	ms.AddSizesWithLimit(m,-1*bs,0, parFactor);
-	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
+	ms.AddSizesWithLimit(m,-1*bs,0);
+	ns.AddSizesWithLimit(n,-1*bs,0);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -645,42 +645,42 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
     case (PARTDIAGBACK):
       //First column
       if (num == 0) {
-	ms.AddSizesWithLimit(m,-1*bs,0, parFactor);
-	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
+	ms.AddSizesWithLimit(m,-1*bs,0);
+	ns.AddSizesWithLimit(n,-1*bs,0);
       }
       else if (num == 1) {
-	ms.AddMidSizes(bs,m, parFactor);
-	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
+	ms.AddMidSizes(bs,m);
+	ns.AddSizesWithLimit(n,-1*bs,0);
       }
       else if (num == 2) {
-	ms.AddSizesWithLimit(0,bs,m, parFactor);
-	ns.AddSizesWithLimit(n,-1*bs,0, parFactor);
+	ms.AddSizesWithLimit(0,bs,m);
+	ns.AddSizesWithLimit(n,-1*bs,0);
       }
       //Second column
       else if (num == 3) {
-	ms.AddSizesWithLimit(m,-1*bs,0, parFactor);
-	ns.AddMidSizes(bs,n, parFactor);
+	ms.AddSizesWithLimit(m,-1*bs,0);
+	ns.AddMidSizes(bs,n);
       }
       else if (num == 4) {
-	ms.AddMidSizes(bs,m, parFactor);
-	ns.AddMidSizes(bs,n, parFactor);
+	ms.AddMidSizes(bs,m);
+	ns.AddMidSizes(bs,n);
       }
       else if (num == 5) {
-	ms.AddSizesWithLimit(0,bs,m, parFactor);
-	ns.AddMidSizes(bs,n, parFactor);
+	ms.AddSizesWithLimit(0,bs,m);
+	ns.AddMidSizes(bs,n);
       }
       //Third column
       else if (num == 6) {
-	ms.AddSizesWithLimit(m,-1*bs,0, parFactor);
-	ns.AddSizesWithLimit(0,bs,n, parFactor);
+	ms.AddSizesWithLimit(m,-1*bs,0);
+	ns.AddSizesWithLimit(0,bs,n);
       }
       else if (num == 7) {
-	ms.AddMidSizes(bs,m, parFactor);
-	ns.AddSizesWithLimit(0,bs,n, parFactor);
+	ms.AddMidSizes(bs,m);
+	ns.AddSizesWithLimit(0,bs,n);
       }
       else if (num == 8) {
-	ms.AddSizesWithLimit(0,bs,m, parFactor);
-	ns.AddSizesWithLimit(0,bs,n, parFactor);
+	ms.AddSizesWithLimit(0,bs,m);
+	ns.AddSizesWithLimit(0,bs,n);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -1791,7 +1791,7 @@ string SplitSingleIter::LoopLevel() const
 }
 
 #if TWOD
-void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
+void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -1871,7 +1871,7 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsi
 	      
 	      if (numIters) {
 		GetSizes(subMat, numIters,
-			 bs, parFactor,
+			 bs, 
 			 m, n,
 			 m_msizes[subMat], m_nsizes[subMat]);
 	      }
@@ -1889,7 +1889,7 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsi
   }
 }
 #else
-void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
+void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -1938,15 +1938,15 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> &numItersVec, unsi
       if (numIters) {
 	const Size len = (*sizes)[execNum];
 	if (dim < m_partDim) {
-	  m_sizes[dim].AddRepeatedSizes(len, numIters, parFactor);
+	  m_sizes[dim].AddRepeatedSizes(len, numIters);
 	}
 	else if (dim == m_partDim) {
-	  m_sizes[dim].AddSizesWithLimit(0,bs,len, parFactor);
-	  m_sizes[dim+1].AddMidSizes(bs, len, parFactor);
-	  m_sizes[dim+2].AddSizesWithLimit(len,-1*bs,0, parFactor);
+	  m_sizes[dim].AddSizesWithLimit(0,bs,len);
+	  m_sizes[dim+1].AddMidSizes(bs, len);
+	  m_sizes[dim+2].AddSizesWithLimit(len,-1*bs,0);
 	}
 	else {
-	  m_sizes[dim+2].AddRepeatedSizes(len, numIters, parFactor);
+	  m_sizes[dim+2].AddRepeatedSizes(len, numIters);
 	}
       }
     }

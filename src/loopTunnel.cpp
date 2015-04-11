@@ -924,7 +924,7 @@ void LoopTunnel::MigrateFromOldTun(Tunnel *tunIn)
 }
 
 #if TWOD
-void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
+void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -975,17 +975,17 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned 
       const Size lm = (*lms)[execNum];
       const Size ln = (*lns)[execNum];
 #endif
-      m_msizes->AddRepeatedSizes(m, numIters, parFactor);
-      m_nsizes->AddRepeatedSizes(n, numIters, parFactor);
+      m_msizes->AddRepeatedSizes(m, numIters);
+      m_nsizes->AddRepeatedSizes(n, numIters);
 #if DODM
-      m_mlsizes->AddRepeatedSizes(lm, numIters, parFactor);
-      m_nlsizes->AddRepeatedSizes(ln, numIters, parFactor);
+      m_mlsizes->AddRepeatedSizes(lm, numIters);
+      m_nlsizes->AddRepeatedSizes(ln, numIters);
 #endif
     }
   }
 }
 #else
-void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned int parFactor)
+void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -1022,7 +1022,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned 
       unsigned int numIters = numItersVec[i];
       if (numIters) {
 	const Size size = (*sizes)[i];
-	m_sizes[dim].AddRepeatedSizes(size, numIters, parFactor);
+	m_sizes[dim].AddRepeatedSizes(size, numIters);
       }
     }
   }
@@ -1031,7 +1031,7 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec, unsigned 
     for(unsigned int i = 0; i < numExecs; ++i) {
       unsigned int numIters = numItersVec[i];
       if (numIters) {
-	m_sizes[0].AddRepeatedSizes(1, numIters, parFactor);
+	m_sizes[0].AddRepeatedSizes(1, numIters);
       }
     }
   }

@@ -44,7 +44,7 @@ using namespace std;
 Sizes ONEVAL(1);
 Sizes *ONES = &ONEVAL;
 
-SizesIter::SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int parFactor, int repeats)
+SizesIter::SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int repeats)
 :m_currPos(0),
 m_valA(valA),
 m_valB(valB),
@@ -52,14 +52,8 @@ m_valC(valC),
 m_type(type),
  m_coeff(coeff),
  m_repeatNum(0),
- m_repeats(repeats),
- m_parFactor(parFactor)
-{
-  if (m_parFactor == 0) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  
+ m_repeats(repeats)
+{  
 }
 
 void SizesIter::operator++()
@@ -68,12 +62,7 @@ void SizesIter::operator++()
     LOG_FAIL("replacement for throw call");
     throw;
   }
-  if (m_parFactor < 0) {
-    m_currPos += m_parFactor;
-  }
-  else {
-    ++m_currPos;
-  }
+  ++m_currPos;
   if (AtCurrRepeatEnd()) {
     ++m_repeatNum;
     m_currPos = 0;
@@ -128,7 +117,6 @@ void SizesIter::operator=(const SizesIter &rhs)
   m_currPos = rhs.m_currPos;
   m_coeff = rhs.m_coeff;
   m_type = rhs.m_type;
-  m_parFactor = rhs.m_parFactor;
   m_repeatNum = rhs.m_repeatNum;
   m_repeats = rhs.m_repeats;
 }
@@ -150,39 +138,20 @@ bool SizesIter::AtCurrRepeatEnd() const
     if (m_currPos == 0) {
       return false;
     }
-    if (m_parFactor < 0) {
-      double done = m_currPos * m_valA;
-      return done >= m_valB;
-    }
-    else {
-      double size = ceil((double)m_valB / (double)m_parFactor);
-      double iters = ceil(size / (double)m_valA);
-      return m_currPos >= iters;
-    }
+    double size = (double)m_valB;
+    double iters = ceil(size / (double)m_valA);
+    return m_currPos >= iters;
   }
   else if (m_type == REPEATEDSIZES) {
-    if (m_parFactor < 0)
-      return (m_currPos >= m_valC);
-    else
-      return m_currPos >= ceil(((double)m_valC) / m_parFactor);
+    return m_currPos >= ((double)m_valC);
   }
   else if (m_type == RANGESIZES) {
-    if (m_parFactor < 0) {
-      Size val = m_valA + m_valC * m_currPos;
-      if (m_valC < 0) {
-        return val < m_valB;
-      }
-      else
-        return val > m_valB;
-    }
-    else {
-      //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
-      //the corner case of it being 0:B:n*B-1 is unlikely, so this is faster
-      double sizeDiff = abs((double)m_valB - m_valA);
-      double eachPortion = ceil(sizeDiff / (double)m_parFactor)+1;
-      double iters = ceil(eachPortion / abs((double)m_valC));
-      return m_currPos >= iters;
-    }
+    //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
+    //the corner case of it being 0:B:n*B-1 is unlikely, so this is faster
+    double sizeDiff = abs((double)m_valB - m_valA);
+    double eachPortion = sizeDiff +1;
+    double iters = ceil(eachPortion / abs((double)m_valC));
+    return m_currPos >= iters;
   }
   else {
     LOG_FAIL("replacement for throw call");
@@ -191,7 +160,7 @@ bool SizesIter::AtCurrRepeatEnd() const
 }
 
 SizeEntry::SizeEntry()
-  : m_type(BADSIZE), m_parFactor(1), m_repeats(-1)
+  : m_type(BADSIZE), m_repeats(-1)
 {
 }
 
@@ -203,20 +172,15 @@ bool SizeEntry::ConstantMidSizeEntry() const {
   return (((int) m_valB) % ((int) m_valA)) == 0;
 }
 
-void SizeEntry::SetRepeatedSizes(Size size, int repeats, int parFactor)
+void SizeEntry::SetRepeatedSizes(Size size, int repeats)
 {
   m_valA = size;
   m_valC = repeats;
   m_type = REPEATEDSIZES;
-  m_parFactor = parFactor;
-  if (m_parFactor == 0) {
-    LOG_FAIL("m_parFactor == 0");
-    throw;
-  }
   m_repeats = 1;
 }
 
-void SizeEntry::SetSizeRange(Size start, int stride, Size end, int parFactor)
+void SizeEntry::SetSizeRange(Size start, int stride, Size end)
 {
   if (start == 0 && end == 0) {
     LOG_FAIL("replacement for throw call");
@@ -226,26 +190,16 @@ void SizeEntry::SetSizeRange(Size start, int stride, Size end, int parFactor)
   m_valB = end;
   m_valC = stride;
   m_type = RANGESIZES;
-  m_parFactor = parFactor;
-  if (m_parFactor == 0) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
   m_repeats = 1;
 }
 
-void SizeEntry::SetMidSizes(Size size, Size totalSize, int parFactor)
+void SizeEntry::SetMidSizes(Size size, Size totalSize)
 {
   //  cout << "ERROR: calling SetMidSizes" << endl;
   //  LOG_FAIL("replacement for throw call");
   m_valA = size;
   m_valB = totalSize;
   m_type = MIDSIZES;
-  m_parFactor = parFactor;
-  if (m_parFactor == 0) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
   m_repeats = 1;
 }
 
@@ -267,7 +221,6 @@ void SizeEntry::Print() const
     LOG_FAIL("replacement for throw call");
     throw;
   }
-  cout << "\tParallelization factor: " << m_parFactor << endl;
 }
 
 void SizeEntry::Print(IndStream &out) const
@@ -288,15 +241,12 @@ void SizeEntry::Print(IndStream &out) const
     LOG_FAIL("replacement for throw call");
     throw;
   }
-  *out << "\tParallelization factor: " << m_parFactor << endl;
 }
   
 
 bool SizeEntry::operator==(const SizeEntry &rhs) const
 {
   if (m_repeats != rhs.m_repeats)
-    return false;
-  if (m_parFactor != rhs.m_parFactor)
     return false;
   if (m_type != rhs.m_type)
     return false;
@@ -328,31 +278,17 @@ Size SizeEntry::operator[] (unsigned int n) const
   }
   n = n % NumSizesPerRepeat();
   unsigned int iter = n;
-  if (m_parFactor < 0)
-    iter *= m_parFactor;
   if (m_type == REPEATEDSIZES) {
-    if (m_parFactor < 0) {
-      if ((int)iter >= m_valC) {
-        LOG_FAIL("replacement for throw call");
-	throw;
-      }
-      return m_valA;
+    if ((int)iter >= (double)m_valC) {
+      LOG_FAIL("replacement for throw call");
+      throw;
     }
-    else {
-      if ((int)iter >= ceil((double)m_valC / abs(m_parFactor))) {
-	LOG_FAIL("replacement for throw call");
-	throw;
-      }
-      return m_valA;
-    }
+    return m_valA;
   }
   else if (m_type == MIDSIZES) {
     double adjustedValB;
     
-    if (m_parFactor < 0)
-      adjustedValB = m_valB;
-    else
-      adjustedValB = ceil((double)m_valB / m_parFactor);
+    adjustedValB = (double)m_valB;
     
     unsigned int numFullIters = (int)floor(adjustedValB / m_valA);
     if (numFullIters > iter)
@@ -383,7 +319,6 @@ void SizeEntry::operator= (const SizeEntry &rhs)
   m_valB = rhs.m_valB;
   m_valC = rhs.m_valC;
   m_type = rhs.m_type;
-  m_parFactor = rhs.m_parFactor;
   m_repeats = rhs.m_repeats;
 }
 
@@ -471,28 +406,17 @@ bool SizeEntry::operator<= (const Size &rhs) const
 unsigned int SizeEntry::NumSizesPerRepeat() const
 {
   if (m_type == MIDSIZES) {
-    if (m_parFactor < 0)
-      return (unsigned int)ceil(((double)m_valB) / m_valA);
-    else
-      return (unsigned int)ceil(ceil(m_valB / ((double)m_parFactor)) / (double)m_valA);
+    return (unsigned int)ceil(m_valB / (double)m_valA);
   }
   else if (m_type == REPEATEDSIZES) {
-    return (unsigned int)ceil((double)m_valC / abs(m_parFactor));
+    return (unsigned int)m_valC;
   }
   else if (m_type == RANGESIZES) {
-    if (m_parFactor < 0) {
-      //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
-      double diff = abs(m_valA - m_valB)+1;
-      double num = ceil(diff / abs(m_valC));
-      return (unsigned int)ceil(num / (double)m_parFactor);
-    }
-    else {
-      //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
-      double sizeDiff = abs((double)m_valB - m_valA);
-      double eachPortion = ceil(sizeDiff / (double)m_parFactor)+1;
-      double num = ceil(eachPortion / abs((double)m_valC));
-      return (unsigned int)num;
-    }
+    //Add one so if it's something like 0:B:n*B we calc n+1 iterations not n
+    double sizeDiff = abs((double)m_valB - m_valA);
+    double eachPortion = sizeDiff+1;
+    double num = ceil(eachPortion / abs((double)m_valC));
+    return (unsigned int)num;
   }
   else {
     LOG_FAIL("replacement for throw call");
@@ -515,17 +439,13 @@ bool SizeEntry::IsZero() const
 
 SizesIter SizeEntry::GetIter(double coeff) const
 {
-  SizesIter iter(m_valA,m_valB,m_valC,m_type,coeff,m_parFactor,m_repeats);
+  SizesIter iter(m_valA,m_valB,m_valC,m_type,coeff,m_repeats);
   return iter;
 }
 
 SizeEntry SizeEntry::SumWith(const SizeEntry &rhs) const
 {
   if (NumSizes() != rhs.NumSizes()) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  if (m_parFactor != rhs.m_parFactor) {
     LOG_FAIL("replacement for throw call");
     throw;
   }
@@ -537,18 +457,18 @@ SizeEntry SizeEntry::SumWith(const SizeEntry &rhs) const
   if (m_type == MIDSIZES) {
     if (rhs.m_type == MIDSIZES) {
       entry.SetMidSizes(m_valA+rhs.m_valA,
-                        m_valB+rhs.m_valB, m_parFactor);
+                        m_valB+rhs.m_valB);
       return entry;
     }
     else if (rhs.m_type == REPEATEDSIZES) {
       entry.SetMidSizes(m_valA+rhs.m_valA,
-                        m_valB+rhs.m_valA*rhs.m_valC, m_parFactor);
+                        m_valB+rhs.m_valA*rhs.m_valC);
       return entry;
     }
     else if (rhs.m_type == RANGESIZES) {
       entry.SetSizeRange(rhs.m_valA+m_valA,
                          rhs.m_valC,
-                         rhs.m_valB+m_valA, m_parFactor);
+                         rhs.m_valB+m_valA);
       return entry;
     }
     else {
@@ -559,13 +479,13 @@ SizeEntry SizeEntry::SumWith(const SizeEntry &rhs) const
   else if (m_type == REPEATEDSIZES) {
     if (rhs.m_type == REPEATEDSIZES) {
       entry.SetRepeatedSizes(m_valA+rhs.m_valA,
-                             m_valC, m_parFactor);
+                             m_valC);
       return entry;
     }
     else if (rhs.m_type == RANGESIZES) {
       entry.SetSizeRange(rhs.m_valA+m_valA,
                          rhs.m_valC,
-                         rhs.m_valB+m_valA, m_parFactor);
+                         rhs.m_valB+m_valA);
       return entry;
     }
     else {
@@ -577,7 +497,7 @@ SizeEntry SizeEntry::SumWith(const SizeEntry &rhs) const
     if (rhs.m_type == RANGESIZES) {
       entry.SetSizeRange(rhs.m_valA+m_valA,
                          rhs.m_valC+m_valC,
-                         rhs.m_valB+m_valB, m_parFactor);
+                         rhs.m_valB+m_valB);
       return entry;
     }
     else {
@@ -642,7 +562,7 @@ void Sizes::Print(IndStream &out) const
   }
 }
 
-void Sizes::AddRepeatedSizes(Size size, int repeats, int parFactor)
+void Sizes::AddRepeatedSizes(Size size, int repeats)
 {
 #if COMBINESIZEENTRIES
   if (!m_entries.empty()) {
@@ -650,25 +570,23 @@ void Sizes::AddRepeatedSizes(Size size, int repeats, int parFactor)
     if (oldEntry->m_type == REPEATEDSIZES) {
       if (oldEntry->m_valA == size) {
 	if (oldEntry->m_valC == repeats) {
-	  if (oldEntry->m_parFactor == parFactor) {
-	    oldEntry->m_repeats++;
-	    return;
-	  }
+	  oldEntry->m_repeats++;
+	  return;
 	}
       }
     }
   }
 #endif
   SizeEntry *entry = new SizeEntry;
-  entry->SetRepeatedSizes(size, repeats, parFactor);
+  entry->SetRepeatedSizes(size, repeats);
   m_entries.push_back(entry);
 }
 
-void Sizes::AddMidSizes(Size size, Size totalSize, int parFactor)
+void Sizes::AddMidSizes(Size size, Size totalSize)
 {
 #if COMBINESIZEENTRIES
   if (!fmod(totalSize, size)){
-    AddRepeatedSizes(size, totalSize / size, parFactor);
+    AddRepeatedSizes(size, totalSize / size);
     return;
   }
   if (!m_entries.empty()) {
@@ -676,21 +594,19 @@ void Sizes::AddMidSizes(Size size, Size totalSize, int parFactor)
     if (oldEntry->m_type == MIDSIZES) {
       if (oldEntry->m_valA == size) {
 	if (oldEntry->m_valB == totalSize) {
-	  if (oldEntry->m_parFactor == parFactor) {
-	    oldEntry->m_repeats++;
-	    return;
-	  }
+	  oldEntry->m_repeats++;
+	  return;
 	}
       }
     }
   }
 #endif
   SizeEntry *entry = new SizeEntry;
-  entry->SetMidSizes(size, totalSize, parFactor);
+  entry->SetMidSizes(size, totalSize);
   m_entries.push_back(entry);
 }
 
-void Sizes::AddSizesWithLimit(Size start, int stride, Size end, int parFactor)
+void Sizes::AddSizesWithLimit(Size start, int stride, Size end)
 {
   if (stride == 0) {
     LOG_FAIL("replacement for throw call");
@@ -711,7 +627,7 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end, int parFactor)
       end -= stride;
   }
   if (start == 0 && end == 0) {
-    AddRepeatedSizes(0, 1, parFactor);
+    AddRepeatedSizes(0, 1);
   }
   else {
 
@@ -722,10 +638,8 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end, int parFactor)
 	if (oldEntry->m_valA == start) {
 	  if (oldEntry->m_valB == end) {
 	    if (oldEntry->m_valC == stride) {
-	      if (oldEntry->m_parFactor == parFactor) {
-		oldEntry->m_repeats++;
-		return;
-	      }
+	      oldEntry->m_repeats++;
+	      return;
 	    }
 	  }
 	}
@@ -733,7 +647,7 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end, int parFactor)
     }
 #endif
     SizeEntry *entry = new SizeEntry;
-    entry->SetSizeRange(start, stride, end, parFactor);
+    entry->SetSizeRange(start, stride, end);
     m_entries.push_back(entry);
   }
 }
@@ -876,20 +790,13 @@ Cost Sizes::Sum() const
   for(; iter != m_entries.end(); ++iter) {
     const SizeEntry *entry = *iter;
     if (entry->m_type == REPEATEDSIZES) {
-      cost += entry->m_repeats * ceil(((double)(entry->m_valC))/abs(entry->m_parFactor))
+      cost += entry->m_repeats * entry->m_valC
 	* Update(entry->m_valA);
     }
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = (int)floor(numIters);
-      if (numFullIters % entry->m_parFactor == 0)
-	cost += entry->m_repeats * ceil(((double)numFullIters)/abs(entry->m_parFactor)) * Update(entry->m_valA);
-      else {
-	cost += entry->m_repeats * ((double)numFullIters)/abs(entry->m_parFactor) * Update(entry->m_valA);
-	int numPartIters = (int)ceil(numIters)-numFullIters;
-	if (numPartIters)
-	  cost += entry->m_repeats * Update(entry->m_valB - numFullIters * entry->m_valA);
-      }
+      cost += entry->m_repeats * numFullIters * Update(entry->m_valA);
     }
     else if (entry->m_type == RANGESIZES) {
       SizesIter iter2 = entry->GetIter(m_coeff);
@@ -922,22 +829,12 @@ Cost Sizes::SumSquares() const
   for(; iter != m_entries.end(); ++iter) {
     const SizeEntry *entry = *iter;
     if (entry->m_type == REPEATEDSIZES) {
-      cost += entry->m_repeats * 
-	(ceil(((double)entry->m_valC) / abs(entry->m_parFactor))) * pow(Update(entry->m_valA),2);
+      cost += entry->m_repeats * entry->m_valC * pow(Update(entry->m_valA),2);
     }
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = (int)floor(numIters);
-      if (numFullIters % abs(entry->m_parFactor) == 0)
-	cost += entry->m_repeats * 
-	  (ceil(((double)numFullIters)/abs(entry->m_parFactor))) * pow(Update(entry->m_valA),2);
-      else {
-	cost += entry->m_repeats * (((double)numFullIters)/abs(entry->m_parFactor))
-	  * pow(Update(entry->m_valA),2);
-	int numPartIters = (int)ceil(numIters)-numFullIters;
-	if (numPartIters)
-	  cost += entry->m_repeats * pow(Update(entry->m_valB - numFullIters * entry->m_valA),2);
-      }
+      cost += entry->m_repeats * numFullIters * pow(Update(entry->m_valA),2);
     }
     else if (entry->m_type == RANGESIZES) {
       SizesIter iter2 = entry->GetIter(m_coeff);
@@ -973,22 +870,14 @@ Cost Sizes::SumCubes() const
   for(; iter != m_entries.end(); ++iter) {
     const SizeEntry *entry = *iter;
     if (entry->m_type == REPEATEDSIZES) {
-      cost += entry->m_repeats * (ceil(((double)entry->m_valC) / abs(entry->m_parFactor))) 
+      cost += entry->m_repeats * (double)entry->m_valC
 	* pow(Update(entry->m_valA),3);
     }
     else if (entry->m_type == MIDSIZES) {
       double numIters = entry->m_valB/((double)(entry->m_valA));
       int numFullIters = (int)floor(numIters);
-      if (numFullIters % abs(entry->m_parFactor) == 0)
-	cost += entry->m_repeats * (ceil(((double)numFullIters)/abs(entry->m_parFactor))) 
-	  * pow(Update(entry->m_valA),3);
-      else {
-	cost += entry->m_repeats * (((double)numFullIters)/abs(entry->m_parFactor)) 
-	  * pow(Update(entry->m_valA),3);
-	int numPartIters = (int)ceil(numIters)-numFullIters;
-	if (numPartIters)
-	  cost += entry->m_repeats * pow(Update(entry->m_valB - numFullIters * entry->m_valA),3);
-      }
+      cost += entry->m_repeats * numFullIters
+	* pow(Update(entry->m_valA),3);
     }
     else if (entry->m_type == RANGESIZES) {
       SizesIter iter2 = entry->GetIter(m_coeff);
@@ -1174,20 +1063,17 @@ void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
         double constVal = sizes1.m_constVal;
         if (entry->m_type == MIDSIZES) {
           int numIters = (int)ceil(entry->m_valB/((double)(entry->m_valA)));
-          newEntry->SetMidSizes(entry->m_valA+constVal,entry->m_valB+constVal*numIters,
-				entry->m_parFactor);
+          newEntry->SetMidSizes(entry->m_valA+constVal,entry->m_valB+constVal*numIters);
 	  newEntry->m_repeats = entry->m_repeats;
         }
         else if (entry->m_type == REPEATEDSIZES) {
-          newEntry->SetRepeatedSizes(entry->m_valA+constVal,entry->m_valC,
-				     entry->m_parFactor);
+          newEntry->SetRepeatedSizes(entry->m_valA+constVal,entry->m_valC);
 	  newEntry->m_repeats = entry->m_repeats;
         }
         else if (entry->m_type == RANGESIZES) {
           newEntry->SetSizeRange(entry->m_valA+constVal,
                                  entry->m_valC+constVal,
-                                 entry->m_valB+constVal,
-				 entry->m_parFactor);
+                                 entry->m_valB+constVal);
 	  newEntry->m_repeats = entry->m_repeats;
         }
         else {
@@ -1205,10 +1091,6 @@ void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
   EntryVecConstIter iter1 = sizes1.m_entries.begin();
   EntryVecConstIter iter2 = sizes2.m_entries.begin();
   for(; iter1 != sizes1.m_entries.end(); ++iter1, ++iter2) {
-    if ((*iter1)->m_parFactor != (*iter2)->m_parFactor) {
-      LOG_FAIL("replacement for throw call");
-      throw;
-    }
     SizeEntry *entry = new SizeEntry;
     *entry = (*iter1)->SumWith(**iter2);
     m_entries.push_back(entry);
@@ -1228,38 +1110,6 @@ bool Sizes::operator<= (const Size &rhs) const
 bool Sizes::operator>(const Size &rhs) const
 {
   return !(*this <= rhs);
-}
-
-void Sizes::AddParFactor(int parFactor)
-{
-  if (parFactor == 0) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  EntryVecIter iter = m_entries.begin();
-  for(; iter != m_entries.end(); ++iter) {
-    if ((*iter)->m_parFactor < 0 && parFactor > 0) {
-      LOG_FAIL("replacement for throw call");
-      throw;
-    }
-    if ((*iter)->m_parFactor > 0 && parFactor < 0) {
-      LOG_FAIL("replacement for throw call");
-      throw;
-    }
-    (*iter)->m_parFactor *= abs(parFactor);
-  }
-}
-
-void Sizes::SetParFactor(int parFactor)
-{
-  if (parFactor == 0) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  EntryVecIter iter = m_entries.begin();
-  for(; iter != m_entries.end(); ++iter) {
-    (*iter)->m_parFactor = parFactor;
-  }
 }
 
 bool Sizes::IsPartitionable(const Size partitionPoint) const

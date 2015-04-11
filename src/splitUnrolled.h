@@ -81,7 +81,7 @@ class SplitUnrolled : public SplitBase
   virtual unsigned int NumberOfLoopExecs() const;
   virtual void StartFillingSizes();
   virtual void ClearDataTypeCache();
-  virtual void AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor);
+  virtual void AppendSizes(unsigned int execNum, unsigned int numIters);
 #if DODM
   virtual void UpdateLocalSizes();
 #endif
@@ -92,5 +92,5 @@ class SplitUnrolled : public SplitBase
   virtual void AddVariables(VarSet &set) const;
 
   virtual void PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const;
-  virtual void BuildSizes(bool buildCache, vector<int> &numIters, unsigned int parFactor);
+  virtual void BuildSizes(bool buildCache, vector<int> &numIters);
 };

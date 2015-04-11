@@ -716,7 +716,7 @@ void SplitUnrolled::ClearDataTypeCache()
 }
 
 #if TWOD
-void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
+void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -764,10 +764,10 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, uns
     LOG_FAIL("replacement for throw call");
     throw;
   }
-  m_msizes->AddRepeatedSizes(bs, numIters, 1);
+  m_msizes->AddRepeatedSizes(bs, numIters);
 }
 #else
-void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, unsigned int parFactor)
+void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters)
 {
   if (m_tunType != SETTUNIN)
     return;
@@ -795,10 +795,10 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters, uns
 	cout << NumIters(bs, len) << " vs. " << numIters << endl;
 	
       }
-      m_sizes[dim].AddRepeatedSizes(bs, numIters, 1);
+      m_sizes[dim].AddRepeatedSizes(bs, numIters);
     }
     else {
-      m_sizes[dim].AddRepeatedSizes(len, numIters, parFactor);
+      m_sizes[dim].AddRepeatedSizes(len, numIters);
     }
   }
 }
@@ -895,7 +895,7 @@ void SplitUnrolled::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 }
 
 
-void SplitUnrolled::BuildSizes(bool buildCache, vector<int> &numIters, unsigned int parFactor)
+void SplitUnrolled::BuildSizes(bool buildCache, vector<int> &numIters)
 {
   throw;
 }

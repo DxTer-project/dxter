@@ -760,7 +760,7 @@ RealPSet* RedistExample()
   Sizes sizes[4];
 
   for (Dim dim = 0; dim < 4; ++dim)
-    sizes[dim].AddRepeatedSizes(bigSize, 1, 1);
+    sizes[dim].AddRepeatedSizes(bigSize, 1);
 
   InputNode *Ain = new InputNode("A input",  sizes, "A", 4);
 
@@ -823,24 +823,24 @@ RealPSet* MartinsExample()
   //i-l = big
 
   for (Dim dim = 0; dim < 4; ++dim)
-    sizes[dim].AddRepeatedSizes(bigSize, 1, 1);
+    sizes[dim].AddRepeatedSizes(bigSize, 1);
 
   InputNode *Uin = new InputNode("U input",  sizes, "U", 4);
   
 
   sizes[2].ClearSizes();
-  sizes[2].AddRepeatedSizes(medSize,1,1);
+  sizes[2].AddRepeatedSizes(medSize,1);
   sizes[3].ClearSizes();
-  sizes[3].AddRepeatedSizes(medSize,1,1);
+  sizes[3].AddRepeatedSizes(medSize,1);
   
   InputNode *Vin = new InputNode("V input",  sizes, "V", 4);
   InputNode *Tin = new InputNode("T input",  sizes, "T", 4);
 
 
   sizes[0].ClearSizes();
-  sizes[0].AddRepeatedSizes(medSize,1,1);
+  sizes[0].AddRepeatedSizes(medSize,1);
   sizes[1].ClearSizes();
-  sizes[1].AddRepeatedSizes(medSize,1,1);
+  sizes[1].AddRepeatedSizes(medSize,1);
 
   InputNode *Win = new InputNode("W input",  sizes, "W", 4);
   
@@ -848,7 +848,7 @@ RealPSet* MartinsExample()
   Sizes ones[2];
 
   for (Dim dim = 0; dim < 2; ++dim)
-    ones[dim].AddRepeatedSizes(one, 1, 1);
+    ones[dim].AddRepeatedSizes(one, 1);
 
   DistType epDist;
   epDist.SetToScalarNoRep();
@@ -857,9 +857,9 @@ RealPSet* MartinsExample()
   //InputNode *epIn = new InputNode("ep input",  ones, "epsilon", 0);
 
   sizes[0].ClearSizes();
-  sizes[0].AddRepeatedSizes(bigSize,1,1);
+  sizes[0].AddRepeatedSizes(bigSize,1);
   sizes[1].ClearSizes();
-  sizes[1].AddRepeatedSizes(bigSize,1,1);
+  sizes[1].AddRepeatedSizes(bigSize,1);
 
   InputNode *tempIn = new InputNode("Temp input",  sizes, "Accum", 4);
 
@@ -927,28 +927,28 @@ RealPSet* MP2()
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
+    sizes[0].AddRepeatedSizes(eSize,1);
+    sizes[1].AddRepeatedSizes(fSize,1);
+    sizes[2].AddRepeatedSizes(mSize,1);
+    sizes[3].AddRepeatedSizes(nSize,1);
     t_efmn = new InputNode("t_efmn", sizes, "t_efmn", 4);
   }
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
+    sizes[0].AddRepeatedSizes(eSize,1);
+    sizes[1].AddRepeatedSizes(fSize,1);
+    sizes[2].AddRepeatedSizes(mSize,1);
+    sizes[3].AddRepeatedSizes(nSize,1);
     v_efmn = new InputNode("v_efmn", sizes, "v_efmn", 4);
   }
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
+    sizes[0].AddRepeatedSizes(eSize,1);
+    sizes[1].AddRepeatedSizes(fSize,1);
+    sizes[2].AddRepeatedSizes(mSize,1);
+    sizes[3].AddRepeatedSizes(nSize,1);
     axppx1_temp = new InputNode("axppx1_temp", 
 				sizes, "axppx1_temp", 4);
   }
@@ -956,7 +956,7 @@ RealPSet* MP2()
 
   Sizes ones[2];
   for (Dim dim = 0; dim < 2; ++dim)
-    ones[dim].AddRepeatedSizes(one, 1, 1);
+    ones[dim].AddRepeatedSizes(one, 1);
 
   DistType scalarDist;
   scalarDist.SetToScalarNoRep();
@@ -1016,29 +1016,29 @@ RealPSet* MP3()
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
+    sizes[0].AddRepeatedSizes(eSize,1);
+    sizes[1].AddRepeatedSizes(fSize,1);
+    sizes[2].AddRepeatedSizes(mSize,1);
+    sizes[3].AddRepeatedSizes(nSize,1);
     t_efmn = new InputNode("t_efmn", sizes, "t_efmn", 4);
   }
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(pSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
+    sizes[0].AddRepeatedSizes(oSize,1);
+    sizes[1].AddRepeatedSizes(pSize,1);
+    sizes[2].AddRepeatedSizes(mSize,1);
+    sizes[3].AddRepeatedSizes(nSize,1);
     v_opmn = new InputNode("v_opmn", sizes, "v_opmn", 4);
   }
 
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(hSize,1,1);
+    sizes[0].AddRepeatedSizes(eSize,1);
+    sizes[1].AddRepeatedSizes(fSize,1);
+    sizes[2].AddRepeatedSizes(gSize,1);
+    sizes[3].AddRepeatedSizes(hSize,1);
     v_efgh = new InputNode("v_efgh", sizes, "v_efgh", 4);
   }
 
@@ -1046,19 +1046,19 @@ RealPSet* MP3()
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(mSize,1,1);
+    sizes[0].AddRepeatedSizes(oSize,1);
+    sizes[1].AddRepeatedSizes(eSize,1);
+    sizes[2].AddRepeatedSizes(gSize,1);
+    sizes[3].AddRepeatedSizes(mSize,1);
     v_oegm = new InputNode("v_oegm", sizes, "v_oegm", 4);
   }
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(mSize,1,1);
+    sizes[0].AddRepeatedSizes(oSize,1);
+    sizes[1].AddRepeatedSizes(eSize,1);
+    sizes[2].AddRepeatedSizes(gSize,1);
+    sizes[3].AddRepeatedSizes(mSize,1);
     v2_oegm = new InputNode("v2_oegm", sizes, "v2_oegm", 4);
   }
 
@@ -1066,40 +1066,40 @@ RealPSet* MP3()
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
+    sizes[0].AddRepeatedSizes(eSize,1);
+    sizes[1].AddRepeatedSizes(fSize,1);
+    sizes[2].AddRepeatedSizes(mSize,1);
+    sizes[3].AddRepeatedSizes(nSize,1);
     accum_temp = new InputNode("accum_temp", 
 			       sizes, "accum_temp", 4);
   }
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(eSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(mSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
+    sizes[0].AddRepeatedSizes(eSize,1);
+    sizes[1].AddRepeatedSizes(fSize,1);
+    sizes[2].AddRepeatedSizes(mSize,1);
+    sizes[3].AddRepeatedSizes(nSize,1);
     cont1_temp = new InputNode("cont1_temp", 
 			       sizes, "cont1_temp", 4);
   }
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(gSize,1,1);
-    sizes[1].AddRepeatedSizes(fSize,1,1);
-    sizes[2].AddRepeatedSizes(oSize,1,1);
-    sizes[3].AddRepeatedSizes(nSize,1,1);
+    sizes[0].AddRepeatedSizes(gSize,1);
+    sizes[1].AddRepeatedSizes(fSize,1);
+    sizes[2].AddRepeatedSizes(oSize,1);
+    sizes[3].AddRepeatedSizes(nSize,1);
     axppx2_temp = new InputNode("axppx2_temp", 
 			       sizes, "axppx2_temp", 4);
   }
 
   {
     Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(oSize,1,1);
-    sizes[1].AddRepeatedSizes(eSize,1,1);
-    sizes[2].AddRepeatedSizes(gSize,1,1);
-    sizes[3].AddRepeatedSizes(mSize,1,1);
+    sizes[0].AddRepeatedSizes(oSize,1);
+    sizes[1].AddRepeatedSizes(eSize,1);
+    sizes[2].AddRepeatedSizes(gSize,1);
+    sizes[3].AddRepeatedSizes(mSize,1);
     axppx3_temp = new InputNode("axppx3_temp", 
 			       sizes, "axppx3_temp", 4);
   }
@@ -1111,7 +1111,7 @@ RealPSet* MP3()
 
   Sizes ones[2];
   for (Dim dim = 0; dim < 2; ++dim)
-    ones[dim].AddRepeatedSizes(one, 1, 1);
+    ones[dim].AddRepeatedSizes(one, 1);
 
   DistType scalarDist;
   scalarDist.SetToScalarNoRep();

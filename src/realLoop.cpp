@@ -241,9 +241,10 @@ void RealLoop::FillTunnelSizes()
 
   vector<int> numIters;
 #if DOBLIS
+  this needs to be changed everywhere; sizes no longer have the par factor, so they need to be calculated
   control->BuildSizes(true, numIters, NumGroupsInComm(m_comm));
 #else
-  control->BuildSizes(true, numIters, 1);
+  control->BuildSizes(true, numIters);
 #endif
 #if DODM
       ((LoopTunnel*)control)->UpdateLocalSizes();
@@ -252,9 +253,9 @@ void RealLoop::FillTunnelSizes()
   for (auto inTun : m_inTuns) {
     if (inTun != control) {
 #if DOBLIS
-      ((LoopTunnel*)inTun)->BuildSizes(false, numIters,  NumGroupsInComm(m_comm));
+      ((LoopTunnel*)inTun)->BuildSizes(false, numIters);
 #else
-      ((LoopTunnel*)inTun)->BuildSizes(false, numIters, 1);
+      ((LoopTunnel*)inTun)->BuildSizes(false, numIters);
 #endif
 #if DODM
       ((LoopTunnel*)inTun)->UpdateLocalSizes();

@@ -108,5 +108,5 @@ class LoopTunnel : public Tunnel
   void SetAdditive() {m_justAdditive = true;}
 #endif
 
-  virtual void BuildSizes(bool buildCache, vector<int> &numIters, unsigned int parFactor);
+  virtual void BuildSizes(bool buildCache, vector<int> &numIters);
 };

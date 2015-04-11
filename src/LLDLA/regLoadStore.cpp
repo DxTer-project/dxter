@@ -378,8 +378,8 @@ void DuplicateRegLoad::BuildDataTypeCache()
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "1";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(GetVecRegWidth(), num, 1);
-    m_nSizes.AddRepeatedSizes(1, num, 1);
+    m_mSizes.AddRepeatedSizes(GetVecRegWidth(), num);
+    m_nSizes.AddRepeatedSizes(1, num);
   }
 }
 
@@ -452,8 +452,8 @@ void TempVecReg::BuildDataTypeCache() {
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "vector register size";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(GetVecRegWidth(), num, 1);
-    m_nSizes.AddRepeatedSizes(1, num, 1);
+    m_mSizes.AddRepeatedSizes(GetVecRegWidth(), num);
+    m_nSizes.AddRepeatedSizes(1, num);
   }
 }
 
