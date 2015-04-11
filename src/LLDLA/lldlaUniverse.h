@@ -35,6 +35,7 @@ class LLDLAUniverse : public Universe {
   vector<string> m_declarationVectors;
   vector<string> m_constantDefines;
   vector<string> m_argNames;
+  vector<string> m_outputNames;
 
   LLDLAUniverse()
     : Universe::Universe() {}
