@@ -25,7 +25,20 @@
 
 #include "avx.h"
 
-RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int minCycles)
+RuntimeTest::RuntimeTest(ProblemInstance* prob, LLDLAUniverse* uni, unsigned int minCycles) {
+  m_type = prob->GetType();
+  m_operationName = prob->GetName();
+  m_argNames = uni->m_argNames;
+  m_argDeclarations = uni->m_declarationVectors;
+  m_defines = uni->m_constantDefines;
+  m_minCycles = minCycles;
+  m_dataFileName = m_operationName + "_time_data";
+  m_correctTestFileName = m_operationName + "_correctness_test_results";
+  AddIncludes();
+  AddMiscellaneousDefines();
+}
+
+/*RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int minCycles)
 {
   m_type = type;
   m_operationName = operationName;
@@ -38,7 +51,7 @@ RuntimeTest::RuntimeTest(Type type, string operationName, vector<string> argName
   AddIncludes();
   AddMiscellaneousDefines();
 }
-
+*/
 void RuntimeTest::AddIncludes()
 {
   m_headers.push_back("#include <immintrin.h>");
@@ -107,6 +120,8 @@ string RuntimeTest::MainFunction() {
 string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, unsigned int numImpls, string referenceImpName) {
   if (sanityCheckSetting == CHECKALLBUFFERS) {
     return AllBufferSanityChecks(numImpls, referenceImpName);
+  } else if (sanityCheckSetting == CHECKOUTPUTBUFFERS) {
+    return OutputBufferSanityChecks(numImpls, referenceImpName);
   } else {
     cout << "SanityCheckSetting NONE is not yet supported" << endl;
     LOG_FAIL("replacement for throw call");
@@ -114,15 +129,28 @@ string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, unsigned
   }
 }
 
-string RuntimeTest::AllBufferSanityChecks(unsigned int numImpls, string referenceImpName) {
-  string prototype = "void sanity_check_implementations() {\n";
-  string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
-  argBufferAllocation += AllocateArgBuffers("") + "\n";
-  argBufferAllocation += AllocateArgBuffers("_ref") + "\n";
-  argBufferAllocation += AllocateArgBuffers("_test") + "\n";
-  argBufferAllocation += FillBuffersWithRandValues("") + "\n";
+string RuntimeTest::SanityCheckBufferAllocation() {
+  string argBufferAllocation = "void sanity_check_implementations() {\n";
+  argBufferAllocation += "\tprintf(\"Starting buffer allocation\\n\");\n";
+  argBufferAllocation += AllocateArgBuffers(m_argDeclarations, "") + "\n";
+  argBufferAllocation += AllocateArgBuffers(m_argDeclarations, "_ref") + "\n";
+  argBufferAllocation += AllocateArgBuffers(m_argDeclarations, "_test") + "\n";
+  argBufferAllocation += FillBuffersWithRandValues(m_argNames, "") + "\n";
   argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
-  string correctnessCheck = prototype + argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
+  return argBufferAllocation;
+}
+
+string RuntimeTest::OutputBufferSanityChecks(unsigned int numImpls, string referenceImpName) {
+  auto argBufferAllocation = SanityCheckBufferAllocation();
+  string correctnessCheck = argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
+  correctnessCheck += CorrectnessCheck(numImpls, referenceImpName);
+  correctnessCheck += "}\n";
+  return correctnessCheck;
+}
+
+string RuntimeTest::AllBufferSanityChecks(unsigned int numImpls, string referenceImpName) {
+  auto argBufferAllocation = SanityCheckBufferAllocation();
+  string correctnessCheck = argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
   correctnessCheck += CorrectnessCheck(numImpls, referenceImpName);
   correctnessCheck += "}\n";
   return correctnessCheck;
@@ -139,8 +167,8 @@ string RuntimeTest::TimingCode(TimingSetting timingSetting, unsigned int numImpl
 string RuntimeTest::OnePhaseTimingCode(unsigned int numImpls, string operationName) {
   string prototype = "void time_implementations() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
-  argBufferAllocation += AllocateArgBuffers("") + "\n";
-  argBufferAllocation += FillBuffersWithRandValues("") + "\n";
+  argBufferAllocation += AllocateArgBuffers(m_argDeclarations, "") + "\n";
+  argBufferAllocation += FillBuffersWithRandValues(m_argNames, "") + "\n";
   argBufferAllocation += "\tFILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
   argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
 
@@ -155,8 +183,8 @@ string RuntimeTest::OnePhaseTimingCode(unsigned int numImpls, string operationNa
 string RuntimeTest::TwoPhaseTimingCode(unsigned int numImpls, string operationName) {
   string prototype = "void time_implementations() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
-  argBufferAllocation += AllocateArgBuffers("") + "\n";
-  argBufferAllocation += FillBuffersWithRandValues("") + "\n";
+  argBufferAllocation += AllocateArgBuffers(m_argDeclarations, "") + "\n";
+  argBufferAllocation += FillBuffersWithRandValues(m_argNames, "") + "\n";
   argBufferAllocation += "\tFILE *" + m_dataFileName + " = fopen(\"" + m_dataFileName + "\", \"w\");\n";
   argBufferAllocation += "\tprintf(\"Done with allocation\\n\");\n";
 
@@ -306,11 +334,10 @@ string RuntimeTest::TwoPhaseTimingLoop(int i) {
   return loopBody;
 }
 
-string RuntimeTest::FillBuffersWithRandValues(string postfix) {
+string RuntimeTest::FillBuffersWithRandValues(const vector<string> argNames, string postfix) {
   std::vector<string> bufferFills;
   std::vector<string>::iterator argIter;
-  for (argIter = m_argNames.begin(); argIter != m_argNames.end(); ++argIter) {
-    string bufName = *argIter;
+  for (auto bufName : argNames) {
     bufferFills.push_back("\tFILL_WITH_RAND_VALUES(BUF_SIZE, " + bufName + ");");
   }
   return ToCStatements(bufferFills);
@@ -325,11 +352,11 @@ string RuntimeTest::CopyArgBuffersTo(string postfix) {
   return ToCStatements(bufferFills);
 }
 
-string RuntimeTest::AllocateArgBuffers(string postfix) {
+string RuntimeTest::AllocateArgBuffers(const vector<string> args, string postfix) {
   std::vector<string> argAllocs;
   std::vector<string>::iterator argIter;
-  for (argIter = m_argDeclarations.begin(); argIter != m_argDeclarations.end(); ++argIter) {
-    string bufName = *argIter + postfix;
+  for (auto argName : args) {
+    string bufName = argName + postfix;
     argAllocs.push_back("\t" + bufName + " = ALLOC_BUFFER(BUF_SIZE * sizeof(NUM_SIZE));");
   }
   return ToCStatements(argAllocs);

@@ -19,6 +19,9 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef LLDLA_UNIVERSE_H_
+#define LLDLA_UNIVERSE_H_
+
 #include "universe.h"
 
 #if DOLLDLA
@@ -46,3 +49,5 @@ class LLDLAUniverse : public Universe {
 };
 
 #endif // DOLLDLA
+
+#endif
