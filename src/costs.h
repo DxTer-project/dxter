@@ -24,7 +24,7 @@
 #pragma once
 
 #include <string>
-#include "base.h"
+#include "sizes.h"
 
 using namespace std;
 
@@ -95,3 +95,9 @@ Cost ReduceScatter(Size totalSize, Size numProcs);
 Cost SendRecv(Size totalSize);
 Cost AllToAll(Size totalSize, Size numProcs);
 Cost CopyCost(Size inner, Size outer, Size readLdim, Size writeLdim, bool cacheMissOnOuterLoop = false, bool writeCacheMissOnOuterLoop = false);
+
+typedef vector<Cost> CostVec;
+typedef CostVec::iterator CostVecIter;
+
+
+Size GridModeLens(const DimVec &modes);

@@ -68,7 +68,7 @@ Name Recombine::GetName(ConnNum num) const
   return GetInputName(2);
 }
 
-const Sizes* Recombine::GetM(ConnNum num) const {
+const SizeList* Recombine::GetM(ConnNum num) const {
   if (num != 0) {
     cout << "Error: Invalid connection number for Recombine::GetM" << endl;
     LOG_FAIL("replacement for throw call");
@@ -76,7 +76,7 @@ const Sizes* Recombine::GetM(ConnNum num) const {
   return GetInputM(2);
 }
 
-const Sizes* Recombine::GetN(ConnNum num) const {
+const SizeList* Recombine::GetN(ConnNum num) const {
   if (num != 0) {
     cout << "Error: Invalid connection number for Recombine::GetN" << endl;
     LOG_FAIL("replacement for throw call");

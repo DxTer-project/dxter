@@ -31,6 +31,12 @@ using namespace std;
 typedef double Size;
 typedef double Cost;
 
+
+inline bool IsValidCost(Cost cost)
+{
+  return cost >= 0;
+}
+
 class SizesCache;
 
 
@@ -64,7 +70,6 @@ class SizesIter
   double m_coeff;
   int m_repeatNum;
   int m_repeats;
-  static SizesCache m_cache;
 
  SizesIter() : m_currPos(-1) {}
   SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int repeats);
@@ -117,21 +122,27 @@ typedef EntryVec::const_iterator EntryVecConstIter;
 
 //This class keeps track of the sizes of all
 // matrices that flow on a wire
-class Sizes
+class SizeList
 {
  private:
   Size Update(Size size) const;
  public:
+  static SizesCache M_cache;
 
   double m_constVal;
   double m_coeff;
   EntryVec m_entries;
-  Sizes();
-  Sizes(double constVal);
-  Sizes(const Sizes &rhs);
-  virtual ~Sizes();
+  bool m_cached;
 
-  Sizes* PartitionedSize(int splitPoint);
+  SizeList();
+  SizeList(double constVal);
+  SizeList(const SizeList &rhs);
+  virtual ~SizeList();
+
+  inline void SetCached() { m_cached = true; }
+  inline bool IsCached() const { return m_cached; }
+
+  SizeList* PartitionedSize(int splitPoint);
 
   void Print() const;
   void Print(IndStream &out) const;
@@ -142,9 +153,9 @@ class Sizes
   void SetCoeff(double coeff);
   unsigned int NumSizes() const;
   Size operator[] (unsigned int n) const;
-  void operator= (const Sizes &rhs);
-  bool operator== (const Sizes &rhs) const;
-  bool operator!= (const Sizes &rhs) const;
+  void operator= (const SizeList &rhs);
+  bool operator== (const SizeList &rhs) const;
+  bool operator!= (const SizeList &rhs) const;
   bool operator== (const Size &rhs) const;
   bool operator!= (const Size &rhs) const;
   bool operator<= (const Size &rhs) const;
@@ -153,10 +164,10 @@ class Sizes
   Cost Sum() const;
   Cost SumSquares() const;
   Cost SumCubes() const;
-  Cost SumProds11(const Sizes &sizes) const;
-  Cost SumProds21(const Sizes &sizes) const;
-  Cost SumProds111(const Sizes &sizes1, const Sizes &sizes2) const;
-  void PairwiseSum(const Sizes &sizes1, const Sizes &sizes2);
+  Cost SumProds11(const SizeList &sizes) const;
+  Cost SumProds21(const SizeList &sizes) const;
+  Cost SumProds111(const SizeList &sizes1, const SizeList &sizes2) const;
+  void PairwiseSum(const SizeList &sizes1, const SizeList &sizes2);
   bool AllOnes() const;
   SizesIter GetIter(unsigned int sizeNum) const;
   bool IsZero(unsigned int n) const;
@@ -166,6 +177,16 @@ class Sizes
   Size OnlyEntry() const;
 };
 
-extern Sizes *ONES;
+extern SizeList *ONES;
 
-typedef Sizes *SizesArray;
+
+#include "sizesCache.h"
+
+const SizeList* GetConst(Size val);
+
+class DistType;
+class DistEntry;
+
+void GetLocalSizes(const DistType &dist, const SizesVec &sizes, SizesVec &localSizes);
+void GetLocalSizes(const DistType &dist, Dim dim, const SizeList* sizes, const SizeList** localSizes);
+inline const SizeList* GetLocalSizes(const SizeList *parent, DistEntry entry) {return SizeList::M_cache.GetCachedDistSize(parent, entry);}

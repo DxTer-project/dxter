@@ -36,8 +36,8 @@ class Partition : public DLANode
 
   Size m_partSplitPoint;
 
-  Sizes* m_startSizes;
-  Sizes* m_endSizes;
+  const SizeList* m_startSizes;
+  const SizeList* m_endSizes;
 
   DataTypeInfo* m_startInfo;
   DataTypeInfo* m_endInfo;
@@ -59,7 +59,7 @@ class Partition : public DLANode
 
   void BuildHorizontalSizes();
   void BuildVerticalSizes();
-  void BuildStartAndEndSizes(const Sizes* toSplit);
+  void BuildStartAndEndSizes(const SizeList* toSplit);
 
  public:
   Layer m_layer;
@@ -96,8 +96,8 @@ class Partition : public DLANode
 
   virtual void Prop();
 
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 };
 
 class PartitionLowerLayer : public SingleTrans

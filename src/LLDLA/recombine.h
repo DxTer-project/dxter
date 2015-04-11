@@ -61,8 +61,8 @@ class Recombine : public DLAOp<3, 1>
 
   virtual void Prop();
 
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 
   virtual const Type GetDataType() const;
 

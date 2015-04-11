@@ -30,12 +30,14 @@
 
 class CombineUnrolled;
 
+
 //LoopTunnel for spliting/indxing into a matrix
 class SplitUnrolled : public SplitBase
 {
  public:
   unsigned int m_unrollFactor;
   DataTypeInfo m_dataTypeInfo;
+
   SplitUnrolled();
 #if TWOD
   SplitUnrolled(PartDir dir, unsigned int unrollFactor, TunType type, bool isControl = false);
@@ -54,16 +56,16 @@ class SplitUnrolled : public SplitBase
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "splitUnrolled";}
 #if TWOD
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual const SizeList* LocalM(ConnNum num) const;
+  virtual const SizeList* LocalN(ConnNum num) const;
 #endif
 #else
   virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
 #endif
   virtual Name GetName(ConnNum num) const;
   virtual Name GetName(ConnNum num, LoopType type) const;
@@ -79,8 +81,6 @@ class SplitUnrolled : public SplitBase
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual unsigned int NumberOfLoopExecs() const;
-  virtual void StartFillingSizes();
-  virtual void ClearDataTypeCache();
   virtual void AppendSizes(unsigned int execNum, unsigned int numIters);
 #if DODM
   virtual void UpdateLocalSizes();
@@ -92,7 +92,7 @@ class SplitUnrolled : public SplitBase
   virtual void AddVariables(VarSet &set) const;
 
   virtual void PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const;
-  virtual void BuildSizes(bool buildCache, vector<int> *numIters,
-			  const Sizes *controlSizes, int stride);
-  virtual const Sizes* GetControlSizes() const;
+  virtual void BuildSizes(const SizeList *controlSizes, int stride);
+  virtual const SizeList* GetControlSizes() const;
 };
+

@@ -28,7 +28,6 @@
 #include "base.h"
 #include "realPSet.h"
 #include "linearization/graphIter.h"
-#include "sizesCache.h"
 
 
 typedef Node* (*ConstructorFunc)();

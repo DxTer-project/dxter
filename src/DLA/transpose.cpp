@@ -68,7 +68,7 @@ void Transpose::Unflatten(ifstream &in, SaveInfo &info)
 }
 
 
-const Sizes* Transpose::GetM(ConnNum num) const
+const SizeList* Transpose::GetM(ConnNum num) const
 {
   if (m_trans == NORMAL || m_trans == CONJ)
     return GetInputM(0);
@@ -76,7 +76,7 @@ const Sizes* Transpose::GetM(ConnNum num) const
     return GetInputN(0);
 }
 
-const Sizes* Transpose::GetN(ConnNum num) const
+const SizeList* Transpose::GetN(ConnNum num) const
 {
   if (m_trans == NORMAL || m_trans == CONJ)
     return GetInputN(0);
@@ -85,7 +85,7 @@ const Sizes* Transpose::GetN(ConnNum num) const
 }
 
 #if DODM
-const Sizes* Transpose::LocalM(ConnNum num) const
+const SizeList* Transpose::LocalM(ConnNum num) const
 {
   if (m_trans == NORMAL || m_trans == CONJ)
     return InputLocalM(0);
@@ -93,7 +93,7 @@ const Sizes* Transpose::LocalM(ConnNum num) const
     return InputLocalN(0);
 }
 
-const Sizes* Transpose::LocalN(ConnNum num) const
+const SizeList* Transpose::LocalN(ConnNum num) const
 {
   if (m_trans == NORMAL || m_trans == CONJ)
     return InputLocalN(0);

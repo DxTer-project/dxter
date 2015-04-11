@@ -51,18 +51,18 @@ class DLANode : public Node
   //BAMTODO: eventually use DataTypeInfo to pass around data sizes
 
 #if TWOD
-  virtual const Sizes* GetM(ConnNum num) const = 0;
-  virtual const Sizes* GetN(ConnNum num) const = 0;
+  virtual const SizeList* GetM(ConnNum num) const = 0;
+  virtual const SizeList* GetN(ConnNum num) const = 0;
   Size MaxNumberOfElements(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const = 0;
-  virtual const Sizes* LocalN(ConnNum num) const = 0;
+  virtual const SizeList* LocalM(ConnNum num) const = 0;
+  virtual const SizeList* LocalN(ConnNum num) const = 0;
 #endif
-  const Sizes* GetInputM(ConnNum num) const;
-  const Sizes* GetInputN(ConnNum num) const;
+  const SizeList* GetInputM(ConnNum num) const;
+  const SizeList* GetInputN(ConnNum num) const;
 #if DODM
-  const Sizes* InputLocalM(ConnNum num) const;
-  const Sizes* InputLocalN(ConnNum num) const;
+  const SizeList* InputLocalM(ConnNum num) const;
+  const SizeList* InputLocalN(ConnNum num) const;
 #endif
 
   bool IsInputRowVector(ConnNum num) const;
@@ -71,11 +71,11 @@ class DLANode : public Node
 
 #elif DOTENSORS
   virtual const Dim NumDims(ConnNum num) const = 0;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const = 0;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const = 0;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const = 0;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const = 0;
   virtual const Dim InputNumDims(ConnNum num) const;
-  const Sizes* InputLen(ConnNum num, Dim dim) const;
-  const Sizes* InputLocalLen(ConnNum num, Dim dim) const;
+  const SizeList* InputLen(ConnNum num, Dim dim) const;
+  const SizeList* InputLocalLen(ConnNum num, Dim dim) const;
   Size TotalNumberOfLocalElements(ConnNum num) const;
   Size TotalNumberOfInputLocalElements(ConnNum num) const;
   Size TotalNumberOfElements(ConnNum num) const;

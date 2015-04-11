@@ -32,7 +32,7 @@ TempVarNode::TempVarNode()
 #if DOELEM
 : m_info(D_LASTDIST), m_mlsize(NULL), m_nlsize(NULL)
 #elif DOTENSORS
-: m_info(), m_lsizes(NULL), m_sumLens(NULL)
+: m_info()
 #endif
 {
   
@@ -46,33 +46,20 @@ TempVarNode::TempVarNode(string name)
 #else
 : m_name(name)
 #endif
-#if DOELEM
-, m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-, m_lsizes(NULL), m_sumLens(NULL)
-#endif
 {}
 
 #if DODM
 TempVarNode::TempVarNode(DistType dist)
-: m_info(dist),
-#if TWOD
-m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-m_lsizes(NULL), m_sumLens(NULL)
-#endif
+: m_info(dist)
 {}
 #endif
 
 
 #if DODM
 TempVarNode::TempVarNode(DistType dist, string name)
-:  m_info(dist), m_name(name),
+:  m_info(dist), m_name(name)
 #if TWOD
-m_mlsize(NULL), m_nlsize(NULL)
-#elif DOTENSORS
-m_lsizes(NULL),
-m_sumLens(NULL)
+,m_mlsize(NULL), m_nlsize(NULL)
 #endif
 {}
 #endif
@@ -82,9 +69,7 @@ m_sumLens(NULL)
 
 #if DOTENSORS
 TempVarNode::TempVarNode(DistType dist, EntryList sumDims)
-: m_lsizes(NULL),
-m_sumLens(NULL),
-m_sumDims(sumDims)
+: m_sumDims(sumDims)
 {
   //update below, too
   Dim numSumDims = sumDims.size();
@@ -106,8 +91,6 @@ m_sumDims(sumDims)
 
 TempVarNode::TempVarNode(DistType dist, EntryList  sumDims, string name)
 :  m_name(name),
-m_lsizes(NULL),
-m_sumLens(NULL),
 m_sumDims(sumDims)
 {
   //update above, too
@@ -152,27 +135,6 @@ void TempVarNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_align = temp->m_align;
   m_alignModes = temp->m_alignModes;
   m_alignModesSrc = temp->m_alignModesSrc;  
-#endif
-}
-
-TempVarNode::~TempVarNode()
-{
-#if TWOD
-#if DODM
-  if (m_mlsize) {
-    delete m_mlsize;
-    m_mlsize = NULL;
-    delete m_nlsize;
-    m_nlsize = NULL;
-  }
-#endif
-#elif DOTENSORS
-  if (m_lsizes) {
-    delete [] m_lsizes;
-    m_lsizes = NULL;
-    delete [] m_sumLens;
-    m_sumLens = NULL;
-  }
 #endif
 }
 
@@ -247,14 +209,14 @@ const DataTypeInfo& TempVarNode::DataType(ConnNum num) const
 }
 
 #if TWOD
-const Sizes* TempVarNode::GetM(ConnNum num) const
+const SizeList* TempVarNode::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputM(0);
 }
 
-const Sizes* TempVarNode::GetN(ConnNum num) const
+const SizeList* TempVarNode::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -262,14 +224,14 @@ const Sizes* TempVarNode::GetN(ConnNum num) const
 }
 
 #if DODM
-const Sizes* TempVarNode::LocalM(ConnNum num) const
+const SizeList* TempVarNode::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return m_mlsize;
 }
 
-const Sizes* TempVarNode::LocalN(ConnNum num) const
+const SizeList* TempVarNode::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -283,7 +245,7 @@ const Dim TempVarNode::NumDims(ConnNum num) const
   return InputNumDims(0) + m_sumDims.size();
 }
 
-const Sizes* TempVarNode::Len(ConnNum num, Dim reqDim) const
+const SizeList* TempVarNode::Len(ConnNum num, Dim reqDim) const
 {
   if (num > 0)
     throw;
@@ -291,7 +253,7 @@ const Sizes* TempVarNode::Len(ConnNum num, Dim reqDim) const
   if (!m_sumDims.empty()) {
     Dim dims = m_info.GetDist().m_numDims-m_sumDims.size();
     if (dim >= dims)
-      return m_sumLens + (dim - dims);
+      return m_sumLens[dim - dims];
     else
       return InputLen(0, dim);
   }
@@ -299,7 +261,7 @@ const Sizes* TempVarNode::Len(ConnNum num, Dim reqDim) const
     return InputLen(0, dim);
 }
 
-const Sizes* TempVarNode::LocalLen(ConnNum num, Dim reqDim) const
+const SizeList* TempVarNode::LocalLen(ConnNum num, Dim reqDim) const
 {
   if (num > 0)
     throw;
@@ -307,12 +269,12 @@ const Sizes* TempVarNode::LocalLen(ConnNum num, Dim reqDim) const
   if (!m_sumDims.empty()) {
     Dim dims = m_info.GetDist().m_numDims-m_sumDims.size();
     if (dim >= dims)
-      return &m_ones;
+      return m_ones;
     else
-      return &(m_lsizes[dim]);
+      return m_lsizes[dim];
   }
   else
-    return &(m_lsizes[dim]);
+    return m_lsizes[dim];
 }
 #endif
 
@@ -363,21 +325,9 @@ void TempVarNode::UnflattenCore(ifstream &in, SaveInfo &info)
 
 void TempVarNode::ClearDataTypeCache()
 {
-#if TWOD&&DODM
-  if (!m_mlsize)
-    return;
-  delete m_mlsize;
-  m_mlsize = NULL;
-  delete m_nlsize;
-  m_nlsize = NULL;
-#elif DOTENSORS
-  if (!m_lsizes)
-    return;
-  delete [] m_lsizes;
-  m_lsizes = NULL;
-  m_ones.ClearSizes();
-  delete [] m_sumLens;
-  m_sumLens = NULL;
+#if DOTENSORS
+  m_lsizes.clear();
+  m_sumLens.clear();
 #endif
 }
 
@@ -391,19 +341,21 @@ void TempVarNode::BuildDataTypeCache()
   GetLocalSizes(m_info.m_dist, GetM(0), GetN(0), *m_mlsize, *m_nlsize);
 #elif DOTENSORS
   
-  if (m_lsizes)
+  if (!m_lsizes.empty())
     return;
   Dim numDims = m_info.GetDist().m_numDims-m_sumDims.size();
-  m_lsizes = new Sizes[numDims];
-  
   DistType type = m_info.GetEffectiveDist();
+
+  for (Dim dim = 0; dim < numDims; ++dim) {
+    const SizeList *size;
+    GetLocalSizes(type, dim, InputLen(0,dim), &size);
+    m_lsizes.push_back(size);
+  }
+
+  m_sumLens.clear();
   
-  for (Dim dim = 0; dim < numDims; ++dim)
-    GetLocalSizes(type, dim, InputLen(0,dim), m_lsizes+dim);
-  
-  
-  m_sumLens = new Sizes[m_sumDims.size()];
-  m_ones.AddRepeatedSizes(1, InputLen(0,0)->NumSizes());
+  unsigned int numSizes = InputLen(0,0)->NumSizes();
+  m_ones = SizeList::M_cache.GetCachedRepeatedSize(1, numSizes);
   EntryListIter iter = m_sumDims.begin();
   for(Dim dim = 0; iter != m_sumDims.end(); ++dim, ++iter) {
     DimVec vec = (*iter).DistEntryDims();
@@ -411,7 +363,7 @@ void TempVarNode::BuildDataTypeCache()
     DimVecIter iter2 = vec.begin();
     for(; iter2 != vec.end(); ++iter2)
       numProcs *= GridLens[*iter2];
-    m_sumLens[dim].AddRepeatedSizes(numProcs, InputLen(0,0)->NumSizes());
+    m_sumLens.push_back(SizeList::M_cache.GetCachedRepeatedSize(numProcs, numSizes));
   }
   
 #endif

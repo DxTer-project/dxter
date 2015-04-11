@@ -199,14 +199,6 @@ void RealLoop::UnflattenStatic(ifstream &in)
   READ(M_currLabel);
 }
 
-void RealLoop::StartFillingTunnels() {
-  for (auto in : m_inTuns) {
-    if (!in->IsLoopTunnel())
-      LOG_FAIL("replacement for throw call");
-    ((LoopTunnel*)in)->StartFillingSizes();
-  }
-}
-
 void RealLoop::ClearTunnelCaches() {
   for (auto tun : m_inTuns) {
     tun->ClearDataTypeCache();
@@ -219,51 +211,45 @@ void RealLoop::FillTunnelSizes()
   if (!control) {
     LOG_FAIL("replacement for throw call");
   }
+
   bool upToDate = true;
   TunVecIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter) {
-    LoopTunnel *tun = (LoopTunnel*)(*iter);
-#if TWOD
-    if (!tun->m_msizes)
-#else
-      if (!tun->m_sizes)
-#endif
+    if ((*iter)->GetNodeClass() == LoopTunnel::GetClass()) {
+      LoopTunnel *tun = (LoopTunnel*)(*iter);
+      if (tun->m_sizes.empty())
 	{
 	  upToDate = false;
 	  break;
 	}
+    }
+    else {
+      SplitSingleIter *tun = (SplitSingleIter*)(*iter);
+      if (!tun->m_sizes.empty()) {
+	  upToDate = false;
+	  break;
+	}
+      
+    }
   }
   if (upToDate)
     return;
-    
+       
   ClearTunnelCaches();
-  StartFillingTunnels();
 
-  const Sizes *controlSizes = control->GetControlSizes();
+  const SizeList *controlSizes = control->GetControlSizes();
   int stride = GetBS();
 
-  vector<int> numIters;
+  for (auto inTun : m_inTuns) {
 #if DOBLIS
-  this needs to be changed everywhere; sizes no longer have the par factor, so they need to be calculated
-  control->BuildSizes(true, numIters, NumGroupsInComm(m_comm));
+    ((LoopTunnel*)inTun)->BuildSizes()
 #else
-  control->BuildSizes(true, &numIters, controlSizes, stride);
-#endif
-#if DODM
-      ((LoopTunnel*)control)->UpdateLocalSizes();
+    ((LoopTunnel*)inTun)->BuildSizes(controlSizes, stride);
 #endif
 
-  for (auto inTun : m_inTuns) {
-    if (inTun != control) {
-#if DOBLIS
-      ((LoopTunnel*)inTun)->BuildSizes(false, numIters);
-#else
-      ((LoopTunnel*)inTun)->BuildSizes(false, &numIters, controlSizes, stride);
-#endif
 #if DODM
-      ((LoopTunnel*)inTun)->UpdateLocalSizes();
+    ((LoopTunnel*)inTun)->UpdateLocalSizes();
 #endif
-    }
   }
 }
 

@@ -22,6 +22,7 @@
 #pragma once
 
 #include "base.h"
+#include "costs.h"
 
 class LinElem;
 

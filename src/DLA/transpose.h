@@ -62,11 +62,11 @@ class Transpose : public DLAOp<1,1>
   virtual Name GetName(ConnNum num) const;
   virtual void Prop();
   virtual unsigned int NumOutputs() const {return 1;}
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual const SizeList* LocalM(ConnNum num) const;
+  virtual const SizeList* LocalN(ConnNum num) const;
 #endif
   virtual bool Overwrites(const Node *input, ConnNum num) const;
 #if DOLLDLA

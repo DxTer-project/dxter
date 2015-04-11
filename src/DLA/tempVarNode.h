@@ -26,6 +26,7 @@
 #include "DLANode.h"
 #include "DLAOp.h"
 #include "LLDLA.h"
+#include "sizes.h"
 
 class TempVarNode : public DLANode
 {
@@ -35,10 +36,10 @@ class TempVarNode : public DLANode
 #if DOELEM
   Sizes *m_mlsize, *m_nlsize;
 #elif DOTENSORS
-  SizesArray m_lsizes;
-  SizesArray m_sumLens;
+  SizesVec m_lsizes;
+  SizesVec m_sumLens;
   EntryList m_sumDims;
-  Sizes m_ones;
+  const SizeList *m_ones;
   string m_align;
   DimVec m_alignModes;
   DimVec m_alignModesSrc;
@@ -55,7 +56,6 @@ class TempVarNode : public DLANode
   TempVarNode(DistType dist, string name); 
 #endif
 
- ~TempVarNode();
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new TempVarNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -67,16 +67,16 @@ class TempVarNode : public DLANode
   static ClassType GetClass() {return "tempVar";}
   virtual const DataTypeInfo& DataType(ConnNum num) const;
 #if TWOD
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual const SizeList* LocalM(ConnNum num) const;
+  virtual const SizeList* LocalN(ConnNum num) const;
 #endif
 #else
   virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
 #endif
   virtual Name GetName(ConnNum num) const;
   virtual void FlattenCore(ofstream &out) const;

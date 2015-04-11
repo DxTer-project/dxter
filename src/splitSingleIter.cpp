@@ -51,31 +51,6 @@ SplitSingleIter::SplitSingleIter(unsigned int partDim, TunType type, bool isCont
 }
 #endif
 
-SplitSingleIter::~SplitSingleIter()
-{
-#if TWOD
-  if (m_msizes) {
-    delete [] m_msizes;
-    m_msizes = NULL;
-    delete [] m_nsizes;
-    m_nsizes = NULL;
-#if DODM
-    delete [] m_mlsizes;
-    m_mlsizes = NULL;
-    delete [] m_nlsizes;
-    m_nlsizes = NULL;
-#endif
-  }
-#else
-  if (m_sizes) {
-    delete [] m_sizes;
-    m_sizes = NULL;
-    delete [] m_lsizes;
-    m_lsizes = NULL;
-  }
-#endif
-}
-
 Node* SplitSingleIter::BlankInst() 
 { 
 #if TWOD
@@ -359,7 +334,7 @@ void SplitSingleIter::Prop()
 }
 
 #if TWOD
-const Sizes* SplitSingleIter::GetM(ConnNum num) const
+const SizeList* SplitSingleIter::GetM(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -373,18 +348,8 @@ const Sizes* SplitSingleIter::GetM(ConnNum num) const
       return GetInputM(0);
     case (POSSTUNIN):
       if (num < GetNumElems(m_dir)) {
-        const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_msizes) {
-	  cout << Input(0)->GetType() << endl;
-	  cout << GetMyLoop()->GetControl()->m_msizes << endl;
-	  cout << GetMyLoop()->GetControl()->m_nsizes << endl;
-	  cout << "loop " << m_pset << endl;
-	  cout << "loop " << input->m_pset << endl;
-	  
-          LOG_FAIL("replacement for throw call");
-	  throw;
-	}
-        return &(input->m_msizes[num]);
+        const SplitSingleIter *input = (SplitSingleIter*)Input(0);
+        return input->m_sizes[num];
       }
       else if (num == GetNumElems(m_dir)) {
         return GetInputM(0);
@@ -399,7 +364,7 @@ const Sizes* SplitSingleIter::GetM(ConnNum num) const
     }
 }
 
-const Sizes* SplitSingleIter::GetN(ConnNum num) const
+const SizeList* SplitSingleIter::GetN(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -413,13 +378,13 @@ const Sizes* SplitSingleIter::GetN(ConnNum num) const
       return GetInputN(0);
     case (POSSTUNIN):
       if (num < GetNumElems(m_dir)) {
-        const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_nsizes) {
+        const SplitSingleIter *input = (SplitSingleIter*)Input(0);
+        if (input->m_sizes.empty()) {
 	  cout << "Error: m_nsizes is null for POSSTUNIN" << endl;
           LOG_FAIL("replacement for throw call");
 	  throw;
 	}
-        return &(input->m_nsizes[num]);
+        return input->m_sizes[GetNumElems(m_dir)-1+num];
       }
       else if (num == GetNumElems(m_dir)) {
         return GetInputN(0);
@@ -435,7 +400,7 @@ const Sizes* SplitSingleIter::GetN(ConnNum num) const
 }
 
 #if DODM
-const Sizes* SplitSingleIter::LocalM(ConnNum num) const
+const SizeList* SplitSingleIter::LocalM(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -469,7 +434,7 @@ const Sizes* SplitSingleIter::LocalM(ConnNum num) const
     }
 }
 
-const Sizes* SplitSingleIter::LocalN(ConnNum num) const
+const SizeList* SplitSingleIter::LocalN(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -505,10 +470,10 @@ const Sizes* SplitSingleIter::LocalN(ConnNum num) const
 #endif
 
 
-void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
-		     Size bs,
-		     Size m, Size n,
-		     Sizes &ms, Sizes &ns)
+void SplitSingleIter::GetSizes(ConnNum num, 
+			       const SizeList *control, Size bs,
+			       const SizeList *m, const SizeList *n,
+			       const SizeList **ms, const SizeList **ns)
 {
   if (m_tunType != SETTUNIN) {
     LOG_FAIL("replacement for throw call");
@@ -523,20 +488,16 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
     {
     case (PARTDOWN):
       if (num == 0) {
-	ms.AddSizesWithLimit(0,bs,m);
-	ns.AddRepeatedSizes(n,numIters);
+	*ms = SizeList::M_cache.GetCachedRange(true, m, bs);
+	*ns = SizeList::M_cache.GetCachedRepeatedSize(n, control, bs);
       }
       else if (num ==1) {
-	if (ceil(m/bs) != numIters) {
-	  LOG_FAIL("replacement for throw call");
-	  throw;
-	}
-	ms.AddMidSizes(bs, m);
-	ns.AddRepeatedSizes(n,numIters);
+	*ms = SizeList::M_cache.GetCachedMidSize(m, bs);
+	*ns = SizeList::M_cache.GetCachedRepeatedSize(n, control, bs);
       }
       else if (num == 2) {
-	ms.AddSizesWithLimit(m,-1*bs,0);
-	ns.AddRepeatedSizes(n,numIters);
+	*ms = SizeList::M_cache.GetCachedRange(false, m, bs);
+	*ns = SizeList::M_cache.GetCachedRepeatedSize(n, control, bs);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -545,16 +506,16 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
       break;
     case (PARTUPWARD):
       if (num == 0) {
-	ms.AddSizesWithLimit(m, -1*bs, 0);
-	ns.AddRepeatedSizes(n,numIters);
+	*ms = SizeList::M_cache.GetCachedRange(false, m, bs);
+	*ns = SizeList::M_cache.GetCachedRepeatedSize(n, control, bs);
       }
       else if (num ==1) {
-	ms.AddMidSizes(bs,m);
-	ns.AddRepeatedSizes(n,numIters);
+	*ms = SizeList::M_cache.GetCachedMidSize(m, bs);
+	*ns = SizeList::M_cache.GetCachedRepeatedSize(n, control, bs);
       }
       else if (num == 2) {
-	ms.AddSizesWithLimit(0,bs,m);
-	ns.AddRepeatedSizes(n,numIters);
+	*ms = SizeList::M_cache.GetCachedRange(true, m, bs);
+	*ns = SizeList::M_cache.GetCachedRepeatedSize(n, control, bs);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -563,16 +524,16 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
       break;
     case (PARTRIGHT):
       if (num == 0) {
-	ms.AddRepeatedSizes(m,numIters);
-	ns.AddSizesWithLimit(0,bs,n);
+	*ms = SizeList::M_cache.GetCachedRepeatedSize(m, control, bs);
+	*ns = SizeList::M_cache.GetCachedRange(true, n, bs);
       }
       else if (num == 1) {
-	ms.AddRepeatedSizes(m,numIters);
-	ns.AddMidSizes(bs,n);
+	*ms = SizeList::M_cache.GetCachedRepeatedSize(m, control, bs);
+	*ns = SizeList::M_cache.GetCachedMidSize(n, bs);
       }
       else if (num == 2) {
-	ms.AddRepeatedSizes(m,numIters);
-	ns.AddSizesWithLimit(n,-1*bs,0);
+	*ms = SizeList::M_cache.GetCachedRepeatedSize(m, control, bs);
+	*ns = SizeList::M_cache.GetCachedRange(false, n, bs);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -581,16 +542,16 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
       break;
     case (PARTLEFT):
       if (num == 0) {
-	ms.AddRepeatedSizes(m,numIters);
-	ns.AddSizesWithLimit(n,-1*bs,0);
+	*ms = SizeList::M_cache.GetCachedRepeatedSize(m, control, bs);
+	*ns = SizeList::M_cache.GetCachedRange(false, n, bs);
       }
       else if (num == 1) {
-	ms.AddRepeatedSizes(m,numIters);
-	ns.AddMidSizes(bs,n);
+	*ms = SizeList::M_cache.GetCachedRepeatedSize(m, control, bs);
+	*ns = SizeList::M_cache.GetCachedMidSize(n, bs);
       }
       else if (num == 2) {
-	ms.AddRepeatedSizes(m,numIters);
-	ns.AddSizesWithLimit(0,bs,n);
+	*ms = SizeList::M_cache.GetCachedRepeatedSize(m, control, bs);
+	*ns = SizeList::M_cache.GetCachedRange(true, n, bs);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -600,42 +561,42 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
     case (PARTDIAG):
       //First column
       if (num == 0) {
-	ms.AddSizesWithLimit(0,bs,m);
-	ns.AddSizesWithLimit(0,bs,n);
+	*ms = SizeList::M_cache.GetCachedRange(true, m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(true, n, bs);
       }
       else if (num == 1) {
-	ms.AddMidSizes(bs,m);
-	ns.AddSizesWithLimit(0,bs,n);
+	*ms = SizeList::M_cache.GetCachedMidSize(m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(true, n, bs);
       }
       else if (num == 2) {
-	ms.AddSizesWithLimit(m,-1*bs,0);
-	ns.AddSizesWithLimit(0,bs,n);
+	*ms = SizeList::M_cache.GetCachedRange(false, m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(true, n, bs);
       }
       //Second column
       else if (num == 3) {
-	ms.AddSizesWithLimit(0,bs,m);
-	ns.AddMidSizes(bs,n);
+	*ms = SizeList::M_cache.GetCachedRange(false, m, bs);
+	*ns = SizeList::M_cache.GetCachedMidSize(n, bs);
       }
       else if (num == 4) {
-	ms.AddMidSizes(bs,m);
-	ns.AddMidSizes(bs,n);
+	*ms = SizeList::M_cache.GetCachedMidSize(m, bs);
+	*ns = SizeList::M_cache.GetCachedMidSize(n, bs);
       }
       else if (num == 5) {
-	ms.AddSizesWithLimit(m,-1*bs,0);
-	ns.AddMidSizes(bs,n);
+	*ms = SizeList::M_cache.GetCachedRange(false, m, bs);
+	*ns = SizeList::M_cache.GetCachedMidSize(n, bs);
       }
       //Third column
       else if (num == 6) {
-	ms.AddSizesWithLimit(0,bs,m);
-	ns.AddSizesWithLimit(n,-1*bs,0);
+	*ms = SizeList::M_cache.GetCachedRange(true, m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(false, n, bs);
       }
       else if (num == 7) {
-	ms.AddMidSizes(bs,m);
-	ns.AddSizesWithLimit(n,-1*bs,0);
+	*ms = SizeList::M_cache.GetCachedMidSize(m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(false, n, bs);
       }
       else if (num == 8) {
-	ms.AddSizesWithLimit(m,-1*bs,0);
-	ns.AddSizesWithLimit(n,-1*bs,0);
+	*ms = SizeList::M_cache.GetCachedRange(false, m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(false, n, bs);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -645,42 +606,42 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
     case (PARTDIAGBACK):
       //First column
       if (num == 0) {
-	ms.AddSizesWithLimit(m,-1*bs,0);
-	ns.AddSizesWithLimit(n,-1*bs,0);
+	*ms = SizeList::M_cache.GetCachedRange(false, m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(false, n, bs);
       }
       else if (num == 1) {
-	ms.AddMidSizes(bs,m);
-	ns.AddSizesWithLimit(n,-1*bs,0);
+	*ms = SizeList::M_cache.GetCachedMidSize(m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(false, n, bs);
       }
       else if (num == 2) {
-	ms.AddSizesWithLimit(0,bs,m);
-	ns.AddSizesWithLimit(n,-1*bs,0);
+	*ms = SizeList::M_cache.GetCachedRange(true, m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(false, n, bs);
       }
       //Second column
       else if (num == 3) {
-	ms.AddSizesWithLimit(m,-1*bs,0);
-	ns.AddMidSizes(bs,n);
+	*ms = SizeList::M_cache.GetCachedRange(false, m, bs);
+	*ns = SizeList::M_cache.GetCachedMidSize(n, bs);
       }
       else if (num == 4) {
-	ms.AddMidSizes(bs,m);
-	ns.AddMidSizes(bs,n);
+	*ms = SizeList::M_cache.GetCachedMidSize(m, bs);
+	*ns = SizeList::M_cache.GetCachedMidSize(n, bs);
       }
       else if (num == 5) {
-	ms.AddSizesWithLimit(0,bs,m);
-	ns.AddMidSizes(bs,n);
+	*ms = SizeList::M_cache.GetCachedRange(true, m, bs);
+	*ns = SizeList::M_cache.GetCachedMidSize(n, bs);
       }
       //Third column
       else if (num == 6) {
-	ms.AddSizesWithLimit(m,-1*bs,0);
-	ns.AddSizesWithLimit(0,bs,n);
+	*ms = SizeList::M_cache.GetCachedRange(false, m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(true, n, bs);
       }
       else if (num == 7) {
-	ms.AddMidSizes(bs,m);
-	ns.AddSizesWithLimit(0,bs,n);
+	*ms = SizeList::M_cache.GetCachedMidSize(m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(true, n, bs);
       }
       else if (num == 8) {
-	ms.AddSizesWithLimit(0,bs,m);
-	ns.AddSizesWithLimit(0,bs,n);
+	*ms = SizeList::M_cache.GetCachedRange(true, m, bs);
+	*ns = SizeList::M_cache.GetCachedRange(true, n, bs);
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -718,7 +679,7 @@ void SplitSingleIter::GetSizes(ConnNum num, unsigned int numIters,
     }
 }
 
-const Sizes* SplitSingleIter::Len(ConnNum num, Dim dim) const
+const SizeList* SplitSingleIter::Len(ConnNum num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -733,16 +694,16 @@ const Sizes* SplitSingleIter::Len(ConnNum num, Dim dim) const
     case (POSSTUNIN):
       if (num < 3) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_sizes) {
+        if (input->m_sizes.empty()) {
           LOG_FAIL("replacement for throw call");
 	  throw;
 	}
 	if (dim < m_partDim)
-	  return &(input->m_sizes[dim]);
+	  return input->m_sizes[dim];
 	else if (dim == m_partDim)
-	  return &(input->m_sizes[dim+num]);
+	  return input->m_sizes[dim+num];
 	else
-	  return &(input->m_sizes[dim+2]);
+	  return input->m_sizes[dim+2];
       }
       else if (num == 3) {
         return InputLen(0,dim);
@@ -757,7 +718,7 @@ const Sizes* SplitSingleIter::Len(ConnNum num, Dim dim) const
     }
 }
 
-const Sizes* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
+const SizeList* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -772,16 +733,16 @@ const Sizes* SplitSingleIter::LocalLen(ConnNum num, Dim dim) const
     case (POSSTUNIN):
       if (num < 3) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_lsizes) {
+        if (input->m_lsizes.empty()) {
           LOG_FAIL("replacement for throw call");
 	  throw;
 	}
 	if (dim < m_partDim)
-	  return &(input->m_lsizes[dim]);
+	  return input->m_lsizes[dim];
 	else if (dim == m_partDim)
-	  return &(input->m_lsizes[dim+num]);
+	  return input->m_lsizes[dim+num];
 	else
-	  return &(input->m_lsizes[dim+2]);
+	  return input->m_lsizes[dim+2];
       }
       else if (num == 3) {
         return InputLocalLen(0,dim);
@@ -1398,8 +1359,8 @@ unsigned int SplitSingleIter::NumIters(unsigned int iterNum) const
 {
   Size bs = GetMyLoop()->GetBS();
 
-  const Sizes *ms = GetInputM(0);
-  const Sizes *ns = GetInputN(0);
+  const SizeList *ms = GetInputM(0);
+  const SizeList *ns = GetInputN(0);
   if (!ms || !ns) {
     if (Input(0)->m_flags & NODEBUILDFLAG)
       cout << "has built\n";
@@ -1418,7 +1379,7 @@ unsigned int SplitSingleIter::NumIters(unsigned int iterNum) const
 unsigned int SplitSingleIter::NumIters(unsigned int iterNum) const
 {
   Size bs = GetMyLoop()->GetBS();
-  const Sizes *sizes = InputLen(0,m_partDim);
+  const SizeList *sizes = InputLen(0,m_partDim);
   if (!sizes) {
     if (Input(0)->m_flags & NODEBUILDFLAG)
       cout << "has built\n";
@@ -1461,86 +1422,6 @@ unsigned int SplitSingleIter::NumberOfLoopExecs() const
   return InputLen(0,0)->NumSizes();
 #endif
 }
-#if TWOD
-void SplitSingleIter::StartFillingSizes()
-{
-  if (m_msizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  if (m_tunType != SETTUNIN)
-    return;
-  if (m_pset && !m_pset->IsReal())
-    return;
-  unsigned int numElems = GetNumElems(m_dir);
-  m_msizes = new Sizes[numElems];
-  m_nsizes = new Sizes[numElems];
-#if DODM
-  m_mlsizes = new Sizes[numElems];
-  m_nlsizes = new Sizes[numElems];
-#endif
-  /*
-#if DOLLDLA
-  if (m_tunType == SETTUNIN) {
-    m_info = InputDataType(0);
-    switch (m_dir) {
-    case (PARTDOWN):
-      m_info.m_numRowsVar = "numRows" + GetLoopLevel();
-      break;
-    case (PARTRIGHT):
-      m_info.m_numColsVar = "numCols" + GetLoopLevel();
-      break;
-    default:
-      LOG_FAIL("replacement for throw call");
-    }
-  }
-#endif
-  */
-}
-#else
-void SplitSingleIter::StartFillingSizes()
-{
-  if (m_sizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  if (m_tunType != SETTUNIN)
-    return;
-  if (m_pset && !m_pset->IsReal())
-    return;
-  unsigned int numDims = InputNumDims(0);
-  //Num dims of sizes, but the m_partDim dimension has
-  // 3 outputs
-  m_sizes = new Sizes[numDims+2];
-  m_lsizes = new Sizes[numDims+2];
-}
-#endif
-
-void SplitSingleIter::ClearDataTypeCache()
-{
-#if TWOD
-  if (!m_msizes)
-    return;
-  delete [] m_msizes;
-  m_msizes = NULL;
-  delete [] m_nsizes;
-  m_nsizes = NULL;
-#if DODM
-  delete [] m_mlsizes;
-  m_mlsizes = NULL;
-  delete [] m_nlsizes;
-  m_nlsizes = NULL;
-#endif
-#else
-  if (!m_sizes)
-    return;
-  delete  [] m_sizes;
-  m_sizes = NULL;
-  delete [] m_lsizes;
-  m_lsizes = NULL;
-#endif
-}
-
 #if TWOD&&DODM
 void SplitSingleIter::UpdateLocalSizes()
 {
@@ -1566,18 +1447,20 @@ void SplitSingleIter::UpdateLocalSizes()
 {
   if (m_pset && !m_pset->IsReal())
     return;
+  if(!m_lsizes.empty())
+    throw;
   Dim numDims = InputNumDims(0);
   const DistType t = InputDataType(0).GetEffectiveDist();
   for (Dim dim = 0; dim < numDims; ++ dim) {
     if (dim < m_partDim)
-      GetLocalSizes(t, dim, m_sizes+dim, m_lsizes+dim);
+      m_lsizes.push_back(GetLocalSizes(m_sizes[dim], t.m_dists[dim]));
     else if (dim == m_partDim) {
-      GetLocalSizes(t, dim, m_sizes+dim, m_lsizes+dim);
-      GetLocalSizes(t, dim, m_sizes+dim+1, m_lsizes+dim+1);
-      GetLocalSizes(t, dim, m_sizes+dim+2, m_lsizes+dim+2);
+      m_lsizes.push_back(GetLocalSizes(m_sizes[dim], t.m_dists[dim]));
+      m_lsizes.push_back(GetLocalSizes(m_sizes[dim+1], t.m_dists[dim]));
+      m_lsizes.push_back(GetLocalSizes(m_sizes[dim+2], t.m_dists[dim]));
     }
     else 
-      GetLocalSizes(t, dim, m_sizes+dim+2, m_lsizes+dim+2);
+      m_lsizes.push_back(GetLocalSizes(m_sizes[dim+2], t.m_dists[dim]));
   }
 }
 #endif
@@ -1791,20 +1674,25 @@ string SplitSingleIter::LoopLevel() const
 }
 
 #if TWOD
-void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
-			  const Sizes *controlSizes, int stride)
+void SplitSingleIter::BuildSizes(const SizeList *controlSizes, int stride)
 {
   if (m_tunType != SETTUNIN)
     return;
   if (m_pset && !m_pset->IsReal())
     return;
-  if (!m_msizes) {
+  if (!m_sizes.empty()) {
     LOG_FAIL("replacement for throw call");
     throw;
   }
 
-  const Sizes *ms = GetInputM(0);
-  const Sizes *ns = GetInputN(0);
+  if (!m_isControlTun) {
+    if (*controlSizes != *GetControlSizes())
+      throw;
+  }
+    
+
+  const SizeList *ms = GetInputM(0);
+  const SizeList *ns = GetInputN(0);
 
   if (!ms || !ns) {
     LOG_FAIL("replacement for throw call");
@@ -1817,20 +1705,6 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
   if (length != length2)
       LOG_FAIL("replacement for throw call");
 
-  unsigned int numExecs;
-  if (buildCache) {
-    if (!m_isControlTun)
-      LOG_FAIL("replacement for throw call");
-    numExecs = length;
-    numItersVec->reserve(numExecs);
-  }
-  else {
-    if (m_isControlTun)
-      LOG_FAIL("replacement for throw call");
-    numExecs = numItersVec->size();
-    if (numExecs != length)
-      LOG_FAIL("replacement for throw call");
-  }
 
   const Size bs = GetMyLoop()->GetBS();
   const unsigned int numElems = GetNumElems(m_dir);
@@ -1852,33 +1726,15 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
 	if (childConn->m_num == subMat) {
 	  if (!(childConn->m_n->IsTunnel(POSSTUNOUT))) {
 	    found = true;
-	    for(unsigned int execNum = 0; execNum < numExecs; ++execNum) {
-	      const Size m = (*ms)[execNum];
-	      const Size n = (*ns)[execNum];
-	      
-	      unsigned int numIters;
-	      if (buildCache && !foundOne) {
-		numIters = NumIters(bs, m, n);
-		numItersVec->push_back(numIters);
-	      }
-	      else if (!foundOne) {
-		numIters = NumIters(bs, m, n);
-		if (numIters != (*numItersVec)[execNum])
-		  throw;
-	      }
-	      else {
-		numIters = (*numItersVec)[execNum];
-	      }
-	      
-	      if (numIters) {
-		GetSizes(subMat, numIters,
-			 bs, 
-			 m, n,
-			 m_msizes[subMat], m_nsizes[subMat]);
-	      }
-	    }
+	    const SizeList *msizes;
+	    const SizeList *nsizes;
+	    GetSizes(subMat, 
+		     controlSizes, bs, 
+		     ms, ns,
+		     &msizes, &nsizes);
+	    m_sizes[subMat] = msizes;
+	    m_sizes[numElems-1+subMat] = nsizes;
 	    foundOne = true;
-
 	  }
 	}
       }
@@ -1890,67 +1746,38 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
   }
 }
 #else
-void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
-			  const Sizes *controlSizes, int stride)
+void SplitSingleIter::BuildSizes(const SizeList *controlSizes, int stride)
 {
   if (m_tunType != SETTUNIN)
     return;
   if (m_pset && !m_pset->IsReal())
     return;
-  if (!m_sizes) {
+  if (!m_sizes.empty()) {
     LOG_FAIL("replacement for throw call");
     throw;
   }
-
-  const Size bs = GetMyLoop()->GetBS();
-  Dim numDims = InputNumDims(0);
-
   
-  unsigned int numExecs = InputLen(0,0)->NumSizes();
-
-  if (buildCache) {
-    numItersVec->reserve(numExecs);
-  }
-  else {
-    if (numExecs != numItersVec->size())
-      LOG_FAIL("replacement for throw call");
-  }
-
-
+  Dim numDims = InputNumDims(0);
+  
   for (Dim dim = 0; dim < numDims; ++dim) {
-    const Sizes *sizes = InputLen(0,dim);
-    unsigned int length = sizes->NumSizes();
-    if (length != numExecs) {
-      LOG_FAIL("replacement for throw call");
+    const SizeList *sizes = InputLen(0,dim);
+    if (dim < m_partDim) {
+      m_sizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(sizes,
+								 controlSizes,
+								stride));
     }
-    for(unsigned int execNum = 0; execNum < numExecs; ++execNum) {
-      unsigned int numIters;
-      if (buildCache && dim == 0) {
-	numIters = NumIters(execNum);
-	numItersVec->push_back(numIters);
-      }
-      else if (!buildCache || dim != 0) {
-	numIters = (*numItersVec)[execNum];
-      }
-      else {
-	numIters = NumIters(execNum);
-	if (numIters != (*numItersVec)[execNum])
-	  LOG_FAIL("replacement for throw call"); 
-      }
-      if (numIters) {
-	const Size len = (*sizes)[execNum];
-	if (dim < m_partDim) {
-	  m_sizes[dim].AddRepeatedSizes(len, numIters);
-	}
-	else if (dim == m_partDim) {
-	  m_sizes[dim].AddSizesWithLimit(0,bs,len);
-	  m_sizes[dim+1].AddMidSizes(bs, len);
-	  m_sizes[dim+2].AddSizesWithLimit(len,-1*bs,0);
-	}
-	else {
-	  m_sizes[dim+2].AddRepeatedSizes(len, numIters);
-	}
-      }
+    else if (dim == m_partDim) {
+      m_sizes.push_back(SizeList::M_cache.GetCachedRange(true, sizes,
+							 stride));
+      m_sizes.push_back(SizeList::M_cache.GetCachedMidSize(sizes,
+							    stride));
+      m_sizes.push_back(SizeList::M_cache.GetCachedRange(false, sizes,
+							 stride));
+    }
+    else {
+      m_sizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(sizes,
+								 controlSizes,
+								stride));
     }
   }
 }
@@ -1958,7 +1785,7 @@ void SplitSingleIter::BuildSizes(bool buildCache, vector<int> *numItersVec,
 
 
 #if TWOD
-const Sizes* SplitSingleIter::GetControlSizes() const
+const SizeList* SplitSingleIter::GetControlSizes() const
 {
   if (m_tunType != SETTUNIN)
     throw;
@@ -1979,7 +1806,7 @@ const Sizes* SplitSingleIter::GetControlSizes() const
       }
 }
 #else
-const Sizes* SplitSingleIter::GetControlSizes() const
+const SizeList* SplitSingleIter::GetControlSizes() const
 {
   if (m_tunType != SETTUNIN)
     throw;

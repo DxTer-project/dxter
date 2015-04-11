@@ -32,18 +32,16 @@ class LoopTunnel : public Tunnel
   UpStat 
     m_statTL, m_statTR,
     m_statBL, m_statBR;
-#if TWOD
-  Sizes *m_msizes, *m_nsizes;
-#if DODM
-  Sizes *m_mlsizes, *m_nlsizes;
-#endif
-#else
-  SizesArray m_sizes, m_lsizes;
-#endif
   bool m_indepIters;
 #if DOTENSORS
   bool m_justAdditive;
 #endif
+
+  SizesVec m_sizes;
+#if DODM
+  SizesVec m_lsizes;
+#endif //DODM
+
 
   LoopTunnel(TunType type);
   virtual ~LoopTunnel();
@@ -71,16 +69,16 @@ class LoopTunnel : public Tunnel
   virtual LoopTunnel* GetMatchingInTun() const;
   virtual const DataTypeInfo& DataType(ConnNum num) const;
 #if TWOD
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual const SizeList* LocalM(ConnNum num) const;
+  virtual const SizeList* LocalN(ConnNum num) const;
 #endif
 #else
   virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
 #endif
   virtual Name GetName(ConnNum num) const;
  Name GetOrigName() const;
@@ -91,7 +89,6 @@ class LoopTunnel : public Tunnel
   virtual void PrintVarDeclarations(BSSize bs, IndStream &out) const {LOG_FAIL("replacement for throw call");}
   LoopType GetLoopType() const;
 
-  virtual void StartFillingSizes();
 #if DODM
   virtual void UpdateLocalSizes();
 #endif
@@ -108,6 +105,5 @@ class LoopTunnel : public Tunnel
   void SetAdditive() {m_justAdditive = true;}
 #endif
 
-  virtual void BuildSizes(bool buildCache, vector<int> *numIters,
-			  const Sizes *controlSizes, int stride);
+  virtual void BuildSizes(const SizeList *controlSizes, int stride);
 };

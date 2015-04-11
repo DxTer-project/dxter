@@ -25,6 +25,7 @@
 #include <cmath>
 #include "LLDLA.h"
 
+
 SplitUnrolled::SplitUnrolled() 
   : SplitBase(),
     m_unrollFactor(0)
@@ -113,7 +114,7 @@ void SplitUnrolled::Prop()
 }
 
 #if TWOD
-const Sizes* SplitUnrolled::GetM(ConnNum num) const
+const SizeList* SplitUnrolled::GetM(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -128,12 +129,12 @@ const Sizes* SplitUnrolled::GetM(ConnNum num) const
       return GetRealTunnel()->GetInputM(0);
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
-        const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_msizes) {
+        const SplitUnrolled *input = (SplitUnrolled*)Input(0);
+        if (input->m_sizes.empty()) {
           LOG_FAIL("replacement for throw call");
 	  throw;
 	}
-        return input->m_msizes;
+        return input->m_sizes[0];
       }
       else if (num == m_unrollFactor) {
         return GetInputM(0);
@@ -148,7 +149,7 @@ const Sizes* SplitUnrolled::GetM(ConnNum num) const
     }
 }
 
-const Sizes* SplitUnrolled::GetN(ConnNum num) const
+const SizeList* SplitUnrolled::GetN(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -163,12 +164,12 @@ const Sizes* SplitUnrolled::GetN(ConnNum num) const
       return GetRealTunnel()->GetInputN(0);
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
-        const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_nsizes) {
+        const SplitUnrolled *input = (SplitUnrolled*)Input(0);
+        if (input->m_sizes.empty()) {
           LOG_FAIL("replacement for throw call");
 	  throw;
 	}
-        return input->m_nsizes+num;
+        return input->m_sizes[num+1];
       }
       else if (num == m_unrollFactor) {
         return GetInputN(0);
@@ -184,7 +185,7 @@ const Sizes* SplitUnrolled::GetN(ConnNum num) const
 }
 
 #if DODM
-const Sizes* SplitUnrolled::LocalM(ConnNum num) const
+const SizeList* SplitUnrolled::LocalM(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -200,11 +201,11 @@ const Sizes* SplitUnrolled::LocalM(ConnNum num) const
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_mlsizes) {
+        if (input->m_lsizes.empty()) {
           LOG_FAIL("replacement for throw call");
 	  throw;
 	}
-        return input->m_mlsizes;
+        return input->m_lsizes;
       }
       else if (num == m_unrollFactor) {
         return InputLocalM(0);
@@ -219,7 +220,7 @@ const Sizes* SplitUnrolled::LocalM(ConnNum num) const
     }
 }
 
-const Sizes* SplitUnrolled::LocalN(ConnNum num) const
+const SizeList* SplitUnrolled::LocalN(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -235,11 +236,11 @@ const Sizes* SplitUnrolled::LocalN(ConnNum num) const
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_nlsizes) {
+        if (input->m_lsizes.empty()) {
           LOG_FAIL("replacement for throw call");
 	  throw;
 	}
-        return input->m_nlsizes;
+        return input->m_lsizes[1]
       }
       else if (num == m_unrollFactor) {
         return InputLocalN(0);
@@ -283,7 +284,7 @@ const Sizes* SplitUnrolled::LocalN(ConnNum num) const
     }
 }
 
-const Sizes* SplitUnrolled::Len(ConnNum num, Dim dim) const
+const SizeList* SplitUnrolled::Len(ConnNum num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -299,11 +300,11 @@ const Sizes* SplitUnrolled::Len(ConnNum num, Dim dim) const
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_sizes) {
+        if (input->m_sizes.size() <= dim) {
           LOG_FAIL("replacement for throw call");
 	  throw;
 	}
-	return &(input->m_sizes[dim]);
+	return input->m_sizes[dim];
       }
       else if (num == m_unrollFactor) {
         return InputLen(0,dim);
@@ -319,7 +320,7 @@ const Sizes* SplitUnrolled::Len(ConnNum num, Dim dim) const
     }
 }
 
-const Sizes* SplitUnrolled::LocalLen(ConnNum num, Dim dim) const
+const SizeList* SplitUnrolled::LocalLen(ConnNum num, Dim dim) const
 {
   switch(m_tunType) 
     {
@@ -335,11 +336,11 @@ const Sizes* SplitUnrolled::LocalLen(ConnNum num, Dim dim) const
     case (POSSTUNIN):
       if (num < m_unrollFactor) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        if (!input->m_lsizes) {
+        if (input->m_lsizes.size() <= dim) {
           LOG_FAIL("replacement for throw call");
 	  throw;
 	}
-	return &(input->m_lsizes[dim]);
+	return input->m_lsizes[dim];
       }
       else if (num == m_unrollFactor) {
         return InputLocalLen(0,dim);
@@ -583,8 +584,8 @@ unsigned int SplitUnrolled::NumIters(unsigned int iterNum) const
 {
   Size bs = GetMyLoop()->GetBS();
 
-  const Sizes *ms = GetInputM(0);
-  const Sizes *ns = GetInputN(0);
+  const SizeList *ms = GetInputM(0);
+  const SizeList *ns = GetInputN(0);
   if (!ms || !ns) {
     if (Input(0)->m_flags & NODEBUILDFLAG)
       cout << "has built\n";
@@ -603,7 +604,7 @@ unsigned int SplitUnrolled::NumIters(unsigned int iterNum) const
 unsigned int SplitUnrolled::NumIters(unsigned int iterNum) const
 {
   Size bs = GetMyLoop()->GetBS();
-  const Sizes *sizes = InputLen(0,m_partDim);
+  const SizeList *sizes = InputLen(0,m_partDim);
   if (!sizes) {
     if (Input(0)->m_flags & NODEBUILDFLAG)
       cout << "has built\n";
@@ -653,71 +654,11 @@ unsigned int SplitUnrolled::NumberOfLoopExecs() const
 #endif
 }
 
-#if TWOD
-void SplitUnrolled::StartFillingSizes()
-{
-  if (m_msizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  if (m_tunType != SETTUNIN)
-    return;
-  if (!m_pset->IsReal())
-    return;
-  m_msizes = new Sizes;
-  m_nsizes = new Sizes;
-#if DODM
-  m_mlsizes = new Sizes;
-  m_nlsizes = new Sizes;
-#endif
-}
-#else
-void SplitUnrolled::StartFillingSizes()
-{
-  if (m_sizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  if (m_tunType != SETTUNIN)
-    return;
-  if (!m_pset->IsReal())
-    return;
-  unsigned int numDims = InputNumDims(0);
-  //Num dims of sizes, but the m_partDim dimension has
-  // m_unrollFactor outputs
-  m_sizes = new Sizes[numDims];
-  m_lsizes = new Sizes[numDims];
-}
-#endif
-
-void SplitUnrolled::ClearDataTypeCache()
-{
-#if TWOD
-  if (!m_msizes)
-    return;
-  delete m_msizes;
-  m_msizes = NULL;
-  delete m_nsizes;
-  m_nsizes = NULL;
-#if DODM
-  delete m_mlsizes;
-  m_mlsizes = NULL;
-  delete m_nlsizes;
-  m_nlsizes = NULL;
-#endif
-#else
-  if (!m_sizes)
-    return;
-  delete [] m_sizes;
-  m_sizes = NULL;
-  delete [] m_lsizes;
-  m_lsizes = NULL;
-#endif
-}
 
 #if TWOD
 void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters)
 {
+  /*
   if (m_tunType != SETTUNIN)
     return;
   if (!m_pset->IsReal())
@@ -765,10 +706,12 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters)
     throw;
   }
   m_msizes->AddRepeatedSizes(bs, numIters);
+  */
 }
 #else
 void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters)
 {
+  /*
   if (m_tunType != SETTUNIN)
     return;
   if (!m_pset->IsReal())
@@ -801,6 +744,7 @@ void SplitUnrolled::AppendSizes(unsigned int execNum, unsigned int numIters)
       m_sizes[dim].AddRepeatedSizes(len, numIters);
     }
   }
+  */
 }
 #endif
 
@@ -895,13 +839,13 @@ void SplitUnrolled::PrintIncrementAtEndOfLoop(BSSize bs, IndStream &out) const
 }
 
 
-void SplitUnrolled::BuildSizes(bool buildCache, vector<int> *numIters,
-			  const Sizes *controlSizes, int stride)
+void SplitUnrolled::BuildSizes(const SizeList *controlSizes, int stride)
 {
   throw;
 }
 
-const Sizes* SplitUnrolled::GetControlSizes() const
+const SizeList* SplitUnrolled::GetControlSizes() const
 {
   throw;
 }
+

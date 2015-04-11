@@ -24,12 +24,13 @@
 #include "sizes.h"
 #include <map>
 #include <vector>
+#include "base.h"
 
 using namespace std;
 
 template <typename T>
 struct SizesT {
-  const Sizes *parent;
+  const SizeList *parent;
   T size;
 };
 
@@ -48,10 +49,10 @@ struct SizesTCompare {
 };
 
 
-typedef map<SizesT<Size>, const Sizes*, SizesTCompare<Size>> SizesSizeMap;
+typedef map<SizesT<Size>, SizeList*, SizesTCompare<Size>> SizesSizeMap;
 typedef SizesSizeMap::iterator SizesSizeMapIter;
 
-typedef map<SizesT<int>, const Sizes*, SizesTCompare<int>> SizesIntMap;
+typedef map<SizesT<int>, SizeList*, SizesTCompare<int>> SizesIntMap;
 typedef SizesIntMap::iterator SizesIntMapIter;
 
 typedef vector<int> NumItersVec;
@@ -60,9 +61,9 @@ typedef map<SizesT<int>, const NumItersVec*, SizesTCompare<int>> SizesNumIterMap
 typedef SizesNumIterMap::iterator SizesNumIterMapIter;
 
 struct RepSizesData {
-  const Sizes *parent;
-  const Sizes *controlParent;
-  Size size;
+  const SizeList *parent;
+  const SizeList *controlParent;
+  int size;
 };
 
 struct RepSizesCompare {
@@ -82,34 +83,95 @@ struct RepSizesCompare {
   }
 };
 
-typedef map<RepSizesData, const Sizes*, RepSizesCompare> RepSizesMap;
+typedef map<RepSizesData, SizeList*, RepSizesCompare> RepSizesMap;
 typedef RepSizesMap::iterator RepSizesMapIter;
 
+typedef map<Size, SizeList*> SizeMap;
+typedef SizeMap::iterator SizeMapIter;
+
+typedef vector<const SizeList*> SizesVec;
+
+struct RepeatedData {
+  Size totSize;
+  int reps;
+};
+
+struct RepeatedCompare {
+  bool operator() (const RepeatedData& lhs, const RepeatedData& rhs) const{
+    if (lhs.totSize < rhs.totSize) {
+      return true;
+    }
+    else if (lhs.totSize == rhs.totSize) {
+      return lhs.reps < rhs.reps;
+    }
+    else
+      return false;
+  }
+};
+
+typedef map<RepeatedData, SizeList*, RepeatedCompare> RepeatedMap;
+typedef RepeatedMap::iterator RepeatedMapIter;
 
 
+#if DOTENSORS
+struct DistSizesData {
+  const SizeList *parent;
+  DistEntry entry;
+};
+
+struct DistSizesCompare {
+  bool operator() (const DistSizesData& lhs, const DistSizesData& rhs) const{
+    if (lhs.parent < rhs.parent) {
+      return true;
+    }
+    else if (lhs.parent == rhs.parent) {
+      return lhs.entry.m_val < rhs.entry.m_val;
+    }
+    else
+      return false;
+  }
+};
+
+typedef map<DistSizesData, SizeList*, DistSizesCompare> DistSizesMap;
+typedef DistSizesMap::iterator DistSizesMapIter;
+#endif
 
 class SizesCache
 {
  public:
-  SizesSizeMap m_midSizesMap;
-  SizesIntMap m_rangeStartMap;
-  SizesIntMap m_rangeEndMap;
-  RepSizesMap m_repSizesMap;
-  SizesNumIterMap m_numItersMap;
+  SizesSizeMap m_midSizesMap; //mid sizes
+  SizesIntMap m_rangeMap; //first or last partition in range
+  RepSizesMap m_repSizesMap; // repeated sizes based on other sizeList
+  SizesVec m_otherSizes; // catchall sizes created elsewhere and given to cache
+  DistSizesMap m_distSizesMap; // sizes with distribution coefficient
+  SizesNumIterMap m_numItersMap; // num iterations map for range
+  SizeMap m_constMap; // const sizes
+  RepeatedMap m_constRepMap; // repeated sizes
 
+
+#if DOTENSORS
+
+#endif
+  
   ~SizesCache();
 
-  const Sizes* GetCachedMidSize(const Sizes *parent,
-				Size size,
-				const NumItersVec *numIters);
-  const Sizes* GetCachedRepeatedSize(const Sizes *parent,
-				     const Sizes *controlParent,
-				     const Size size,
-				     const NumItersVec *numIters);
-  const Sizes* GetCachedRange(bool start,
-			      const Sizes *parent,
-			      int stride,
-			      const NumItersVec *numIters);
-  const NumItersVec* GetNumItersVec(const Sizes *controlParent,
-				    const Size size);
+  void TakeSize(SizeList *size);
+
+  const SizeList* GetCachedMidSize(const SizeList *parent,
+				   Size size);
+  const SizeList* GetCachedRepeatedSize(const SizeList *parent,
+					const SizeList *controlParent,
+					const int size);
+  const SizeList* GetCachedRepeatedSize(Size size,
+					unsigned int numRepeats);					
+  const SizeList* GetCachedRange(bool start,
+			      const SizeList *parent,
+				 int stride);
+  const NumItersVec* GetNumItersVec(const SizeList *controlParent,
+				    const int size);
+
+  const SizeList* GetCachedDistSize(const SizeList *parent,
+				    DistEntry entry);
+
+  const SizeList* GetConstSize(Size size);
 };

@@ -798,10 +798,6 @@ void PartiallyUnrollLoop::Apply(Node *node) const
 
 ViewMultipleIters::~ViewMultipleIters()
 {
-  if (m_sizes) {
-    delete m_sizes;
-    m_sizes = NULL;
-  }
 }
 
 void ViewMultipleIters::Prop()
@@ -826,30 +822,26 @@ void ViewMultipleIters::Duplicate(const Node *orig, bool shallow, bool possMergi
 
 void ViewMultipleIters::ClearDataTypeCache()
 {
-  if (m_sizes) {
-    delete m_sizes;
-    m_sizes = NULL;
-  }
+  m_sizes = NULL;
 }
 
 void ViewMultipleIters::BuildDataTypeCache()
 {
   if (m_sizes)
     return;
-  m_sizes = new Sizes;
 
   m_info = InputDataType(0);
   
   switch (m_partDir) {
   case (PARTDOWN):
     {
-      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputM(0)->NumSizes());
+      m_sizes = SizeList::M_cache.GetCachedRepeatedSize(m_bs.GetSize(), GetInputM(0)->NumSizes());
       m_info.m_numRowsVar = m_bs.VarName();
       break;
     }
   case (PARTRIGHT):
     {
-      m_sizes->AddRepeatedSizes(m_bs.GetSize(), GetInputN(0)->NumSizes());
+      m_sizes = SizeList::M_cache.GetCachedRepeatedSize(m_bs.GetSize(), GetInputN(0)->NumSizes());
       m_info.m_numColsVar = m_bs.VarName();
       break;
     }
@@ -858,7 +850,7 @@ void ViewMultipleIters::BuildDataTypeCache()
   }
 }
 
-const Sizes* ViewMultipleIters::GetM(ConnNum num) const
+const SizeList* ViewMultipleIters::GetM(ConnNum num) const
 {
   if (num > m_numIters) 
     LOG_FAIL("replacement for throw call");
@@ -878,7 +870,7 @@ const Sizes* ViewMultipleIters::GetM(ConnNum num) const
   }
 }
 
-const Sizes* ViewMultipleIters::GetN(ConnNum num) const
+const SizeList* ViewMultipleIters::GetN(ConnNum num) const
 {
   if (num > m_numIters)
     LOG_FAIL("replacement for throw call");
@@ -1071,14 +1063,14 @@ void CombineMultipleIters::Duplicate(const Node *orig, bool shallow, bool possMe
 }
 
 
-const Sizes* CombineMultipleIters::GetM(ConnNum num) const
+const SizeList* CombineMultipleIters::GetM(ConnNum num) const
 {
   if (num > 0) 
     LOG_FAIL("replacement for throw call");
   return GetInputM(m_numIters);
 }
 
-const Sizes* CombineMultipleIters::GetN(ConnNum num) const
+const SizeList* CombineMultipleIters::GetN(ConnNum num) const
 {
   if (num > 0) 
     LOG_FAIL("replacement for throw call");

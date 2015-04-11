@@ -19,25 +19,47 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "sizesCache.h"
+#include "sizes.h"
+#include "costs.h"
 
 SizesCache::~SizesCache()
 {
-  for(auto elem : m_midSizesMap)
+  for(auto& elem : m_midSizesMap) {
+    elem.second->m_cached = false;
     delete elem.second;
-  for(auto elem : m_rangeStartMap)
+  }
+  for(auto& elem : m_rangeMap) {
+    elem.second->m_cached = false;
     delete elem.second;
-  for(auto elem : m_rangeEndMap)
+  }
+
+  for(auto& elem : m_repSizesMap) {
+    elem.second->m_cached = false;
     delete elem.second;
-  for(auto elem : m_repSizesMap)
+  }
+
+  for(auto& elem : m_numItersMap) {
     delete elem.second;
-  for(auto elem : m_numItersMap)
+  }
+
+  for(auto& elem : m_constMap) {
+    elem.second->m_cached = false;
     delete elem.second;
+  }
+
+  for(auto& elem : m_otherSizes) {
+    delete elem;
+  }
 }
 
-const Sizes* SizesCache::GetCachedMidSize(const Sizes *parent,
-					  Size size,
-					  const NumItersVec *numIters)
+void SizesCache::TakeSize(SizeList *size)
+{
+  size->SetCached();
+  m_otherSizes.push_back(size);
+}
+
+const SizeList* SizesCache::GetCachedMidSize(const SizeList *parent,
+					     Size size)
 {
   SizesT<Size> val;
   val.parent = parent;
@@ -46,79 +68,59 @@ const Sizes* SizesCache::GetCachedMidSize(const Sizes *parent,
   if (find != m_midSizesMap.end())
     return find->second;
   else {
-    Sizes *sizes = new Sizes;
-    unsigned int numExecs = parent->NumSizes();
-    if (numIters && numExecs != numIters->size())
+    if (!parent->IsCached())
       throw;
+    SizeList *sizes = new SizeList;
+    unsigned int numExecs = parent->NumSizes();
+
     for(unsigned int i = 0; i < numExecs; ++i) {
       Size len = (*parent)[i];
-      unsigned int iters = sizes->AddMidSizes(size, len);
-      if (numIters && (*numIters)[i] != iters) {
-	throw;
-      }
+      sizes->AddMidSizes(size, len);
     }
+    sizes->SetCached();
     m_midSizesMap[val] = sizes;
     return sizes;
   }
 }
 
-const Sizes* SizesCache::GetCachedRange(bool start,
-					const Sizes *parent,
-					int stride,
-					const NumItersVec *numIters)
+const SizeList* SizesCache::GetCachedRange(bool start,
+					   const SizeList *parent,
+					   int stride)
 {
+  if (!start)
+    stride *= -1;
   SizesT<int> val;
   val.parent = parent;
   val.size = stride;
-  SizesIntMapIter find = (start ? 
-			  m_rangeStartMap.find(val) :
-			  m_rangeEndMap.find(val));
-  if (start && find != m_rangeStartMap.end())
-    return find->second;
-  else if (!start && find != m_rangeEndMap.end())
+  SizesIntMapIter find = m_rangeMap.find(val);
+  if (find != m_rangeMap.end())
     return find->second;
   else {
-    Sizes *sizes = new Sizes;
+    if (!parent->IsCached())
+      throw;
+
+    SizeList *sizes = new SizeList;
     unsigned int numExecs = parent->NumSizes();
 
-    NumItersVec *vec = NULL;
-    if (m_numItersMap.find(val) == m_numItersMap.end()) {
-      vec = new NumItersVec;
-      vec->reserve(numExecs);
-    }
-
-    if (numIters && numExecs != numIters->size())
-      throw;
     for(unsigned int i = 0; i < numExecs; ++i) {
       Size len = (*parent)[i];
-      unsigned int iters;
-      if (start) 
-	iters = sizes->AddSizesWithLimit(len,-1*stride,0);
+      if (start)
+	sizes->AddSizesWithLimit(0,stride,len);
       else
-	iters  = sizes->AddSizesWithLimit(0,stride,len);
-      if (vec)
-	vec->push_back(iters);
-      if (numIters && (*numIters)[i] != iters) {
-	throw;
-      }
+	sizes->AddSizesWithLimit(len,stride,0);
     }
 
-    if (vec)
-      m_numItersMap[val] = vec;
+    sizes->SetCached();
 
-    if (start)
-      m_rangeStartMap[val] = sizes;
-    else
-      m_rangeEndMap[val] = sizes;
+    m_rangeMap[val] = sizes;
 
     return sizes;
   }
 }
 
-const Sizes* SizesCache::GetCachedRepeatedSize(const Sizes *parent,
-					       const Sizes *controlParent,
-					       const Size size,
-					       const NumItersVec *numIters)
+const SizeList* SizesCache::GetCachedRepeatedSize(const SizeList *parent,
+						  const SizeList *controlParent,
+						  const int size)
 {
   RepSizesData val;
   val.parent = parent;
@@ -129,7 +131,13 @@ const Sizes* SizesCache::GetCachedRepeatedSize(const Sizes *parent,
   if (find != m_repSizesMap.end())
     return find->second;
   else {
-    Sizes *sizes = new Sizes;
+    if (!parent->IsCached())
+      throw;
+    if (!controlParent->IsCached())
+      throw;
+    SizeList *sizes = new SizeList;
+
+    const NumItersVec *numIters = GetNumItersVec(controlParent, size);
     
     unsigned int numExecs = parent->NumSizes();
     if (numExecs != numIters->size())
@@ -140,7 +148,93 @@ const Sizes* SizesCache::GetCachedRepeatedSize(const Sizes *parent,
       sizes->AddRepeatedSizes(len, (*numIters)[i]);
     }
     
+    sizes->SetCached();
     m_repSizesMap[val] = sizes;
     return sizes;
   }
+}
+
+const SizeList* SizesCache::GetConstSize(Size size)
+{
+  SizeMapIter find = m_constMap.find(size);
+  if (find != m_constMap.end())
+    return find->second;
+  else {
+    SizeList *sizes = new SizeList;
+    sizes->AddRepeatedSizes(size, 1);
+    sizes->SetCached();
+    m_constMap[size] = sizes;
+    return sizes;
+  }
+}
+
+
+const SizeList* SizesCache::GetCachedDistSize(const SizeList *parent,
+					      DistEntry entry)
+{
+  DistSizesData val;
+  val.parent = parent;
+  val.entry = entry;
+
+  DistSizesMapIter find = m_distSizesMap.find(val);
+  if (find != m_distSizesMap.end())
+    return find->second;
+  else {
+    SizeList *size = new SizeList;
+    *size = *parent;
+    if (!entry.IsStar()) {
+      DimVec vec = entry.DistEntryDims();
+      unsigned int coef = 1;
+      DimVecIter iter = vec.begin();
+      for(; iter != vec.end(); ++iter) {
+	coef *= GridLens[*iter];
+      }
+      size->SetCoeff(1.0 / coef);
+    }
+    m_distSizesMap[val] = size;
+    size->SetCached();
+    return size;
+  }
+}
+
+
+const NumItersVec* SizesCache::GetNumItersVec(const SizeList *controlParent,
+					      const int size)
+{
+  SizesT<int> val;
+  val.parent = controlParent;
+  val.size = size;
+  SizesNumIterMapIter iter = m_numItersMap.find(val);
+  if (iter != m_numItersMap.end())
+    return iter->second;
+  else {
+    NumItersVec *vec = new NumItersVec;
+    unsigned int numExecs = controlParent->NumSizes();
+    for(unsigned int i=0; i < numExecs; ++i) {
+      vec->push_back((unsigned int)ceil((*controlParent)[i] / (double)size));
+    }
+    m_numItersMap[val] = vec;
+    return vec;
+  }
+}
+
+
+const SizeList* SizesCache::GetCachedRepeatedSize(Size size,
+						  unsigned int numRepeats)
+{
+  RepeatedData val;
+  val.totSize = size;
+  val.reps = numRepeats;
+
+  RepeatedMapIter find = m_constRepMap.find(val);
+  if (find != m_constRepMap.end())
+    return find->second;
+  else {
+    SizeList *newSize = new SizeList;
+    newSize->AddRepeatedSizes(size, numRepeats);
+    newSize->SetCached();
+    m_constRepMap[val] = newSize;
+    return newSize;
+  }
+
 }

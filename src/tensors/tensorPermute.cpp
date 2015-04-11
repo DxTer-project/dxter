@@ -118,7 +118,7 @@ const Dim Permute::NumDims(ConnNum num) const
   return InputNumDims(0);
 }
 
-const Sizes* Permute::Len(ConnNum num, Dim dim) const
+const SizeList* Permute::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -127,7 +127,7 @@ const Sizes* Permute::Len(ConnNum num, Dim dim) const
   return InputLen(0,m_permutation.MapFinishToStart(dim));
 }
 
-const Sizes* Permute::LocalLen(ConnNum num, Dim dim) const
+const SizeList* Permute::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;

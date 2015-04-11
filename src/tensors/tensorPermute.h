@@ -49,8 +49,8 @@ class Permute : public DLANode
   static ClassType GetClass() {return "permute";}
   virtual void BuildDataTypeCache();
   virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
   virtual Name GetName(ConnNum num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);

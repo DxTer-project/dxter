@@ -2492,8 +2492,8 @@ bool RealPSet::SamePSetWRTFunctionality(const RealPSet *other) const
     if (numDims != in2->InputNumDims(0))
       return false;       
     for (int dim = 0; dim < (int)numDims; ++dim) {
-      const Sizes *sizes1 = in1->InputLen(0,dim);
-      const Sizes *sizes2 = in2->InputLen(0,dim);
+      const SizeList *sizes1 = in1->InputLen(0,dim);
+      const SizeList *sizes2 = in2->InputLen(0,dim);
       if (sizes1->m_entries.size() != sizes2->m_entries.size())
         return false;
       if (*sizes1 != *sizes2)

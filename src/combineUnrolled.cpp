@@ -81,7 +81,7 @@ const DataTypeInfo& CombineUnrolled::DataType(ConnNum num) const
 }
 
 #if TWOD
-const Sizes* CombineUnrolled::GetM(ConnNum num) const
+const SizeList* CombineUnrolled::GetM(ConnNum num) const
 {
   if (num > 0)
     LOG_FAIL("replacement for throw call");
@@ -96,7 +96,7 @@ const Sizes* CombineUnrolled::GetM(ConnNum num) const
   }
 }
 
-const Sizes* CombineUnrolled::GetN(ConnNum num) const
+const SizeList* CombineUnrolled::GetN(ConnNum num) const
 {
   if (num > 0)
     LOG_FAIL("replacement for throw call");
@@ -112,7 +112,7 @@ const Sizes* CombineUnrolled::GetN(ConnNum num) const
 }
 
 #if DODM
-const Sizes* CombineUnrolled::LocalM(ConnNum num) const
+const SizeList* CombineUnrolled::LocalM(ConnNum num) const
 {
   if (num > 0)
     LOG_FAIL("replacement for throw call");
@@ -130,7 +130,7 @@ const Sizes* CombineUnrolled::LocalM(ConnNum num) const
   }
 }
 
-const Sizes* CombineUnrolled::LocalN(ConnNum num) const
+const SizeList* CombineUnrolled::LocalN(ConnNum num) const
 {
   if (num > 0)
     LOG_FAIL("replacement for throw call");
@@ -164,7 +164,7 @@ const Dim CombineUnrolled::NumDims(ConnNum num) const
   }
 }
 
-const Sizes* CombineUnrolled::Len(ConnNum num, Dim dim) const
+const SizeList* CombineUnrolled::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     LOG_FAIL("replacement for throw call");
@@ -179,7 +179,7 @@ const Sizes* CombineUnrolled::Len(ConnNum num, Dim dim) const
   }
 }
 
-const Sizes* CombineUnrolled::LocalLen(ConnNum num, Dim dim) const
+const SizeList* CombineUnrolled::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     LOG_FAIL("replacement for throw call");

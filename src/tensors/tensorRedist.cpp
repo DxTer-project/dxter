@@ -62,14 +62,12 @@ bool GetPermPattern(const DistType &srcType,
 RedistNode::RedistNode()
 {
   m_info.SetToDefault(0);
-  m_lsizes = NULL;
 }
 
 RedistNode::RedistNode(const DistType &destType, const string &align,
                        const DimVec &alignModes, const DimVec &alignModesSrc)
 {
   m_info.SetDistAndClearPerm(destType);
-  m_lsizes = NULL;
   m_align = align;
   m_alignModes = alignModes;
   m_alignModesSrc = alignModesSrc;
@@ -79,7 +77,6 @@ RedistNode::RedistNode(const DistType &destType, const string &align,
 RedistNode::RedistNode(const DistType &destType)
 {
   m_info.SetDistAndClearPerm(destType);
-  m_lsizes = NULL;
   m_align = "NONE";
 }
 
@@ -88,17 +85,6 @@ RedistNode::RedistNode(const DistType &destType, const Permutation &perm, const 
 : RedistNode(destType, align, alignModes, alignModesSrc)
 {
   m_info.SetPerm(perm);
-}
-
-RedistNode::~RedistNode()
-{
-  if (m_lsizes) {
-    if (m_isArray)
-      delete [] m_lsizes;
-    else
-      delete m_lsizes;
-    m_lsizes = NULL;
-  }
 }
 
 void RedistNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -189,11 +175,11 @@ void RedistNode::Prop()
         numProcs *= GridLens[*gridModeIter];
       }
 
-      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      const unsigned int totNumIters = m_lsizes[0]->NumSizes();
       for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
         Cost temp = 1;
         for (Dim dim = 0; dim < numDims; ++dim) {
-          temp *= m_lsizes[dim][iteration];
+          temp *= (*(m_lsizes[dim]))[iteration];
         }
 
         m_cost += AllGather(temp, numProcs);
@@ -214,11 +200,11 @@ void RedistNode::Prop()
 		       &gridModesInvolved)) {
       Cost comm = 0;
       Cost mov = 0;
-      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      const unsigned int totNumIters = m_lsizes[0]->NumSizes();
       for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
         Cost tempOut = 1;
         for (Dim dim = 0; dim < numDims; ++dim) {
-          tempOut *= m_lsizes[dim][iteration];
+          tempOut *= (*(m_lsizes[dim]))[iteration];
         }
         comm += SendRecv(tempOut);
 	mov += (PSIR+PSIW)*(2*tempOut);
@@ -235,13 +221,13 @@ void RedistNode::Prop()
       for(; gridModeIter != gridModesInvolved.end(); ++gridModeIter) {
         numProcs *= GridLens[*gridModeIter];
       }
-      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      const unsigned int totNumIters = m_lsizes[0]->NumSizes();
       Cost comm = 0;
       Cost mov = 0;
       for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
         Cost tempOut = 1;
         for (Dim dim = 0; dim < numDims; ++dim) {
-          tempOut *= m_lsizes[dim][iteration];
+          tempOut *= (*(m_lsizes[dim]))[iteration];
         }
         comm += AllToAll(tempOut, numProcs);
 	mov += (PSIR+PSIW)*(2*tempOut);
@@ -268,7 +254,7 @@ void RedistNode::Prop()
       DimVec src = m_srcType.m_dists[dim].DistEntryDims();
       DimVec dest = m_info.GetDist().m_dists[dim].DistEntryDims();
       
-      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      const unsigned int totNumIters = m_lsizes[0]->NumSizes();
       unsigned int numProcs = 1;
       DimVecIter iter = src.begin();
       DimSet unionSet;
@@ -286,7 +272,7 @@ void RedistNode::Prop()
         Cost tempOut = 1;
 	Cost tempIn = 1;
         for (Dim dim = 0; dim < numDims; ++dim) {
-          tempOut *= m_lsizes[dim][iteration];
+          tempOut *= (*(m_lsizes[dim]))[iteration];
 	  tempIn *= (*InputLocalLen(0, dim))[iteration];
         }
         m_cost += AllToAll(tempOut, numProcs);
@@ -560,7 +546,7 @@ const Dim RedistNode::NumDims(ConnNum num) const
   return InputNumDims(0);
 }
 
-const Sizes* RedistNode::Len(ConnNum num, Dim dim) const
+const SizeList* RedistNode::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -572,7 +558,7 @@ const Sizes* RedistNode::Len(ConnNum num, Dim dim) const
     return InputLen(0,dim);
 }
 
-const Sizes* RedistNode::LocalLen(ConnNum num, Dim dim) const
+const SizeList* RedistNode::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -580,32 +566,24 @@ const Sizes* RedistNode::LocalLen(ConnNum num, Dim dim) const
   //  if (InputDataType(0).HasPerm())
   //    throw;
   if (!m_isArray) {
-    return m_lsizes;
+    return m_lsizes[0];
   }
   else {
     if (m_info.HasPerm())
-      return m_lsizes+m_info.GetPerm().MapFinishToStart(dim);
+      return m_lsizes[m_info.GetPerm().MapFinishToStart(dim)];
     else
-      return m_lsizes+dim;
+      return m_lsizes[dim];
   }
 }
 
 void RedistNode::ClearDataTypeCache()
 {
-  if (m_lsizes) {
-    if (!m_isArray) {
-      delete m_lsizes;
-    }
-    else {
-      delete [] m_lsizes;
-    }
-    m_lsizes = NULL;
-  }
+  m_lsizes.clear();
 }
 
 void RedistNode::BuildDataTypeCache()
 {
-  if (m_lsizes)
+  if (!m_lsizes.empty())
     return;
   
   //If the input has a permutation, 
@@ -619,20 +597,13 @@ void RedistNode::BuildDataTypeCache()
 
   if (numDims) {
     m_isArray = true;
-    m_lsizes = new Sizes[numDims];
     for (Dim dim = 0; dim < numDims; ++dim) {
-      GetLocalSizes(m_info.GetDist(), dim, 
-		    in->Len(num,perm.MapStartToFinish(dim)), m_lsizes+dim);
-      //      cout << "dim " << dim << ": ";
-      //      in->Len(num,dim)->Print();
-      //      cout << "*to*\n";
-      //      (m_lsizes+dim)->Print();
+      m_lsizes.push_back(GetLocalSizes(in->Len(num,perm.MapStartToFinish(dim)), m_info.GetDist().m_dists[dim]));
     }
   }
   else {
     m_isArray = false;
-    m_lsizes = new Sizes;
-    *m_lsizes = *(in->Len(num,0));
+    m_lsizes.push_back(in->Len(num,0));
   }
 }
 
@@ -724,11 +695,11 @@ void RedistNode::PrintCode(IndStream &out)
       *out << "numProcs " << numProcs << endl;
 
       Size size = 1;
-      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      const unsigned int totNumIters = m_lsizes[0]->NumSizes();
       for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
         Cost temp = 1;
         for (Dim dim = 0; dim < numDims; ++dim) {
-          size *= m_lsizes[dim][iteration];
+          size *= (*(m_lsizes[dim]))[iteration];
         }
       }
       *out << "on " << size << endl;
@@ -775,12 +746,12 @@ void RedistNode::PrintCode(IndStream &out)
     *out << "numProcs = " << numProcs << endl;
     Size size = 0;
     double cost = 0;
-      const unsigned int totNumIters = m_lsizes[0].NumSizes();
+      const unsigned int totNumIters = m_lsizes[0]->NumSizes();
       for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
         Cost tempOut = 1;
 	Cost tempIn = 1;
         for (Dim dim = 0; dim < numDims; ++dim) {
-          tempOut *= m_lsizes[dim][iteration];
+          tempOut *= (*(m_lsizes[dim]))[iteration];
 	  tempIn *= (*InputLocalLen(0, dim))[iteration];
         }
 	size += tempOut;

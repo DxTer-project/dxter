@@ -23,6 +23,7 @@
 #include "tunnel.h"
 #include "basePSet.h"
 #include "realPSet.h"
+#include "costs.h"
 
 Tunnel::Tunnel() 
  :m_tunType(LASTTUNNEL),
@@ -181,7 +182,7 @@ const DataTypeInfo& Tunnel::DataType(ConnNum num) const
 }
 
 #if TWOD
-const Sizes* Tunnel::GetM(ConnNum num) const
+const SizeList* Tunnel::GetM(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT) {
     if (m_pset->IsReal())
@@ -198,7 +199,7 @@ const Sizes* Tunnel::GetM(ConnNum num) const
   }
 }
 
-const Sizes* Tunnel::GetN(ConnNum num) const
+const SizeList* Tunnel::GetN(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT) {
     if (m_pset->IsReal())
@@ -216,7 +217,7 @@ const Sizes* Tunnel::GetN(ConnNum num) const
 }
 
 #if DODM
-const Sizes* Tunnel::LocalM(ConnNum num) const
+const SizeList* Tunnel::LocalM(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
     return GetRealTunnel()->LocalM(num);
@@ -229,7 +230,7 @@ const Sizes* Tunnel::LocalM(ConnNum num) const
   }
 }
 
-const Sizes* Tunnel::LocalN(ConnNum num) const
+const SizeList* Tunnel::LocalN(ConnNum num) const
 {
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
     return GetRealTunnel()->LocalN(num);
@@ -262,7 +263,7 @@ const Dim Tunnel::NumDims(ConnNum num) const
   }
 }
 
-const Sizes* Tunnel::Len(ConnNum num,Dim dim) const
+const SizeList* Tunnel::Len(ConnNum num,Dim dim) const
 {
 
   if (m_tunType == SETTUNOUT) {
@@ -280,7 +281,7 @@ const Sizes* Tunnel::Len(ConnNum num,Dim dim) const
   }
 }
 
-const Sizes* Tunnel::LocalLen(ConnNum num,Dim dim) const
+const SizeList* Tunnel::LocalLen(ConnNum num,Dim dim) const
 {
   if (m_tunType == SETTUNOUT && !m_pset->IsReal()) {
     return GetRealTunnel()->LocalLen(num,dim);

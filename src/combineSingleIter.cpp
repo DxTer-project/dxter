@@ -159,7 +159,7 @@ const DataTypeInfo& CombineSingleIter::DataType(ConnNum num) const
 }
 
 #if TWOD
-const Sizes* CombineSingleIter::GetM(ConnNum num) const
+const SizeList* CombineSingleIter::GetM(ConnNum num) const
 {
   if (num > 0) {
     LOG_FAIL("replacement for throw call");
@@ -176,7 +176,7 @@ const Sizes* CombineSingleIter::GetM(ConnNum num) const
   }
 }
 
-const Sizes* CombineSingleIter::GetN(ConnNum num) const
+const SizeList* CombineSingleIter::GetN(ConnNum num) const
 {
   if (num > 0) {
     LOG_FAIL("replacement for throw call");
@@ -194,7 +194,7 @@ const Sizes* CombineSingleIter::GetN(ConnNum num) const
 }
 
 #if DODM
-const Sizes* CombineSingleIter::LocalM(ConnNum num) const
+const SizeList* CombineSingleIter::LocalM(ConnNum num) const
 {
   if (num > 0) {
     LOG_FAIL("replacement for throw call");
@@ -214,7 +214,7 @@ const Sizes* CombineSingleIter::LocalM(ConnNum num) const
   }
 }
 
-const Sizes* CombineSingleIter::LocalN(ConnNum num) const
+const SizeList* CombineSingleIter::LocalN(ConnNum num) const
 {
   if (num > 0) {
     LOG_FAIL("replacement for throw call");
@@ -252,7 +252,7 @@ const Dim CombineSingleIter::NumDims(ConnNum num) const
   }
 }
 
-const Sizes* CombineSingleIter::Len(ConnNum num, Dim dim) const
+const SizeList* CombineSingleIter::Len(ConnNum num, Dim dim) const
 {
   if (num > 0) {
     LOG_FAIL("replacement for throw call");
@@ -269,7 +269,7 @@ const Sizes* CombineSingleIter::Len(ConnNum num, Dim dim) const
   }
 }
 
-const Sizes* CombineSingleIter::LocalLen(ConnNum num, Dim dim) const
+const SizeList* CombineSingleIter::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0) {
     LOG_FAIL("replacement for throw call");

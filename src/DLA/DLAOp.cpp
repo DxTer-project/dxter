@@ -33,7 +33,7 @@ const DataTypeInfo& DLAOp<numIn, numOut>::DataType(ConnNum num) const
 
 #if TWOD
 template<ConnNum numIn, ConnNum numOut>
-const Sizes* DLAOp<numIn, numOut>::GetM(ConnNum num) const
+const SizeList* DLAOp<numIn, numOut>::GetM(ConnNum num) const
 {
   if (num >= numOut)
     throw;
@@ -41,7 +41,7 @@ const Sizes* DLAOp<numIn, numOut>::GetM(ConnNum num) const
 }
 
 template<ConnNum numIn, ConnNum numOut>
-   const Sizes* DLAOp<numIn, numOut>::GetN(ConnNum num) const
+   const SizeList* DLAOp<numIn, numOut>::GetN(ConnNum num) const
 {
   if (num >= numOut)
     throw;
@@ -50,7 +50,7 @@ template<ConnNum numIn, ConnNum numOut>
 
 #if DODM
 template<ConnNum numIn, ConnNum numOut>
-   const Sizes* DLAOp<numIn, numOut>::LocalM(ConnNum num) const
+   const SizeList* DLAOp<numIn, numOut>::LocalM(ConnNum num) const
 {
   if (num >= numOut)
     throw;
@@ -58,7 +58,7 @@ template<ConnNum numIn, ConnNum numOut>
 }
 
 template<ConnNum numIn, ConnNum numOut>
-   const Sizes* DLAOp<numIn, numOut>::LocalN(ConnNum num) const
+   const SizeList* DLAOp<numIn, numOut>::LocalN(ConnNum num) const
 {
   if (num >= numOut)
     throw;
@@ -69,7 +69,7 @@ template<ConnNum numIn, ConnNum numOut>
 
 #else
 template<ConnNum numIn, ConnNum numOut>
-const Sizes* DLAOp<numIn, numOut>::Len(ConnNum num, Dim dim) const
+const SizeList* DLAOp<numIn, numOut>::Len(ConnNum num, Dim dim) const
 {
   if (num >= numOut)
     throw;
@@ -85,7 +85,7 @@ template<ConnNum numIn, ConnNum numOut>
 }
 
 template<ConnNum numIn, ConnNum numOut>
-const Sizes* DLAOp<numIn, numOut>::LocalLen(ConnNum num, Dim dim) const
+const SizeList* DLAOp<numIn, numOut>::LocalLen(ConnNum num, Dim dim) const
 {
   if (num >= numOut)
     throw;

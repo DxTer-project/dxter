@@ -638,7 +638,7 @@ void ResidualPartitionSVMul::Apply(Node* node) const
 
 Size ResidualPartitionSVMul::ResidualSplitPoint(const SVMul* svmul) const
 {
-  const Sizes* splittingDimSizes;
+  const SizeList* splittingDimSizes;
   if (m_vecType == ROWVECTOR) {
     splittingDimSizes = svmul->GetInputN(1);
   } else {
