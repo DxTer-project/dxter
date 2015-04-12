@@ -39,14 +39,14 @@ void Partition::PrintCode(IndStream &out) {
   string splitPoint;
   const SizeList *sizes = NULL;
   if (m_partType == HORIZONTAL) {
-    sizes = GetInputM(0);
+    sizes = GetInputN(0);
   }
   else {
-    sizes = GetInputN(0);
+    sizes = GetInputM(0);
   }
   if (sizes->IsConstant()) {
     Size size = (*sizes)[0];
-    splitPoint = std::to_string((long long int)(floor(size / m_splitSize) * m_splitSize));
+    splitPoint = std::to_string((long long int)(floor(size / (double)m_splitSize) * m_splitSize));
   }
   else
     LOG_FAIL("not handling non-constant partition print code yet");
