@@ -123,12 +123,13 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
   LOG_A("Starting runtime evaluation for " + problemInstance->GetName());
   cout << "Writing all implementations to runtime eval files\n";
   int minCycles = 100000000;
-  RuntimeTest rtest(problemInstance->GetType(), problemInstance->GetName(), uni->m_argNames, uni->m_declarationVectors, uni->m_constantDefines, minCycles);
+  RuntimeTest rtest(problemInstance, uni, minCycles);
+  //  RuntimeTest rtest(problemInstance->GetType(), problemInstance->GetName(), uni->m_argNames, uni->m_declarationVectors, uni->m_constantDefines, minCycles);
   string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
 
   cout << "About to evaluate\n";
-  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKALLBUFFERS, TWOPHASETIMING, rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
+  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKOUTPUTBUFFERS, TWOPHASETIMING, rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
   cout << "Done evaluating\n";
 
   vector<OneStageTimingResult*>* oneStageResults = reinterpret_cast<vector<OneStageTimingResult*>*>(timingResults);

@@ -42,12 +42,9 @@ bool HoistLoadToRegs::PossChildrenAreOnlyLoads(const LoopTunnel* possTunIn) cons
   for(auto tunChildConn : possTunIn->m_children) {
     if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
       if (tunChildConn->m_n->GetNodeClass() == LoadToRegs::GetClass()) {
-	//	cout << "Found load" << endl;
 	foundLoad = true;
       }
       else {
-	/*	cout << "Also found something else" << endl;
-		cout << tunChildConn->m_n->GetNodeClass() << endl;*/
 	foundSomethingElse = true;
       }
     }

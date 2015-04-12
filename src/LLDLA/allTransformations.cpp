@@ -13,6 +13,7 @@
 #include "eliminateRecombinePartition.h"
 #include "eliminateStore.h"
 #include "eliminateStoreLoad.h"
+#include "eliminateStoreLoadOut.h"
 #include "hoistDuplicateLoad.h"
 #include "hoistLoadToRegs.h"
 #include "LLDLATranspose.h"
@@ -279,6 +280,7 @@ void AddCopyTrans() {
 }
 
 void AddRTLOptimizations() {
+  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoadOut(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStore(ABSLAYER, ABSLAYER), SIMP);
 

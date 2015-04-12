@@ -45,6 +45,8 @@ void LLDLAUniverse::SetupFunctionArguments(RealPSet* seed) {
       m_constantDefines.push_back(inNode->RowStrideDefine());
       m_constantDefines.push_back(inNode->ColStrideDefine());
       m_argNames.push_back(inNode->GetName(0).str());
+    } else if (node->GetNodeClass() == OutputNode::GetClass()) {
+      m_outputNames.push_back(node->GetName(0).str());
     }
   }
 }

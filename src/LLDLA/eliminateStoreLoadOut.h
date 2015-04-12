@@ -19,36 +19,26 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LLDLA_UNIVERSE_H_
-#define LLDLA_UNIVERSE_H_
-
-#include "universe.h"
+#include "LLDLA.h"
 
 #if DOLLDLA
 
-class LLDLAUniverse : public Universe {
- private:
-  string m_sanityCheckImplStr;
-  Cost m_flopCost;
+#include "combineSingleIter.h"
+#include "transform.h"
+
+class EliminateStoreLoadOut : public SingleTrans {
+ protected:
+  bool HasNoOutputs(const CombineSingleIter* comb) const;
 
  public:
-  vector<string> m_declarationVectors;
-  vector<string> m_constantDefines;
-  vector<string> m_argNames;
-  vector<string> m_outputNames;
+  Layer m_fromLayer, m_toLayer;
 
-  LLDLAUniverse()
-    : Universe::Universe() {}
+  EliminateStoreLoadOut(Layer fromLayer, Layer toLayer)
+    : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
+  virtual string GetType() const { return "EliminateStoreLoadOut"; }
 
-  void Init(RealPSet* seed);
-  void SetupFunctionArguments(RealPSet* seed);
-
-  string GetSanityCheckImplStr() { return m_sanityCheckImplStr; }
-  Cost GetOperationFlopCost() { return m_flopCost; }
-
-  void SetUpOperation(RealPSet* startSet);
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
 };
 
 #endif // DOLLDLA
-
-#endif

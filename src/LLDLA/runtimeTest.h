@@ -26,17 +26,19 @@
 
 #if DOLLDLA
 
+#include "lldlaUniverse.h"
 #include "problemInstanceStats.h"
 
 using namespace std;
 
-enum SanityCheckSetting { CHECKALLBUFFERS, NONE };
+enum SanityCheckSetting { CHECKALLBUFFERS, CHECKOUTPUTBUFFERS, NONE };
 enum TimingSetting { ONEPHASETIMING, TWOPHASETIMING };
 
 class RuntimeTest {
  protected:
   vector<string> m_defines;
   vector<string> m_argNames;
+  vector<string> m_outputNames;
   vector<string> m_headers;
   string m_correctTestFileName;
   vector<string> m_operationArgs;
@@ -52,6 +54,9 @@ class RuntimeTest {
   string SetupFunction();
   string SetupFunctions();
   string MainFunction();
+  string SanityCheckBufferAllocation();
+  string OutputBufferCorrectnessCheck(unsigned int numImpls, string referenceImpName);
+  string OutputBufferSanityChecks(unsigned int numImpls, string referenceImpName);
   string AllBufferSanityChecks(unsigned int numImpls, string referenceImpName);
   string SanityChecks(SanityCheckSetting sanityCheckSetting, unsigned int numImpls, string referenceImpName);
   string OnePhaseTimingCode(unsigned int numImpls, string operationName);
@@ -60,11 +65,11 @@ class RuntimeTest {
   string HeadersAndDefines(unsigned int numImplementations);
   string MakeFunc(string funcName, string funcBody);
   string CorrectnessCheck(unsigned int numImpls, string referenceImpName);
-  string AllocateArgBuffers(string postfix);
-  string FillBuffersWithRandValues(string postfix);
+  string AllocateArgBuffers(const vector<string> args, string postfix);
+  string FillBuffersWithRandValues(const vector<string> argNames, string postfix);
   string CopyArgBuffersTo(string postfix);
   vector<string> ArgBuffers(string postfix);
-  string CheckArgBufferDiffs(string refPostfix, string testPostfix, string testName);
+  string CheckArgBufferDiffs(const vector<string> args, string refPostfix, string testPostfix, string testName);
   string TimingLoop(int i);
   string TimingLoops(unsigned int numImpls);
   string TwoPhaseTimingLoop(int i);
@@ -77,7 +82,7 @@ class RuntimeTest {
   string m_dataFileName;
   string m_operationName;
 
-  RuntimeTest(Type m_type, string operationName, vector<string> argNames, vector<string> argDeclarations, vector<string> defines, int numIterations);
+  RuntimeTest(ProblemInstance* prob, LLDLAUniverse* uni, unsigned int minCycles);
   string MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, ImplementationMap* imps, string referenceImp);
 };
 
