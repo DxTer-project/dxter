@@ -143,10 +143,15 @@ class SizesCache
   SizesIntMap m_rangeMap; //first or last partition in range
   RepSizesMap m_repSizesMap; // repeated sizes based on other sizeList
   SizesVec m_otherSizes; // catchall sizes created elsewhere and given to cache
-  DistSizesMap m_distSizesMap; // sizes with distribution coefficient
   SizesNumIterMap m_numItersMap; // num iterations map for range
   SizeMap m_constMap; // const sizes
   RepeatedMap m_constRepMap; // repeated sizes
+  SizesIntMap m_splitMapStart; //split sizes start
+  SizesIntMap m_splitMapEnd; // split sizes end
+
+#if DOTENSORS
+  DistSizesMap m_distSizesMap; // sizes with distribution coefficient
+#endif
 
 
 #if DOTENSORS
@@ -170,8 +175,14 @@ class SizesCache
   const NumItersVec* GetNumItersVec(const SizeList *controlParent,
 				    const int size);
 
+  const SizeList* GetCachedSplitSize(bool start,
+				     const SizeList *parent,
+				     int splitFactor);
+
+#if DOTENSORS
   const SizeList* GetCachedDistSize(const SizeList *parent,
 				    DistEntry entry);
+#endif
 
   const SizeList* GetConstSize(Size size);
 };

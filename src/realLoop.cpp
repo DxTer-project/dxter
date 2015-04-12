@@ -214,27 +214,17 @@ void RealLoop::FillTunnelSizes()
 
   bool upToDate = true;
   TunVecIter iter = m_inTuns.begin();
-  for(; iter != m_inTuns.end(); ++iter) {
-    if ((*iter)->GetNodeClass() == LoopTunnel::GetClass()) {
-      LoopTunnel *tun = (LoopTunnel*)(*iter);
-      if (tun->m_sizes.empty())
-	{
-	  upToDate = false;
-	  break;
-	}
-    }
-    else {
-      SplitSingleIter *tun = (SplitSingleIter*)(*iter);
-      if (!tun->m_sizes.empty()) {
-	  upToDate = false;
-	  break;
-	}
-      
-    }
+  for(; iter != m_inTuns.end() && upToDate; ++iter) {
+    LoopTunnel *tun = (LoopTunnel*)(*iter);
+    if (tun->m_sizes.empty())
+      {
+	upToDate = false;
+	break;
+      }
   }
   if (upToDate)
     return;
-       
+  
   ClearTunnelCaches();
 
   const SizeList *controlSizes = control->GetControlSizes();

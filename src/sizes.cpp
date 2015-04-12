@@ -1135,18 +1135,6 @@ bool SizeList::operator>(const Size &rhs) const
   return !(*this <= rhs);
 }
 
-bool SizeList::IsPartitionable(const Size partitionPoint) const
-{
-  if (*this <= partitionPoint) {
-    cout << "FAILED: partition point is outside size" << endl;
-    cout << (*this)[0] << endl;
-    cout << partitionPoint << endl;
-    return false;
-  }
-
-  return IsConstant();
-}
-
 bool SizeList::IsConstant() const {
 
   for (auto entry : this->m_entries) {

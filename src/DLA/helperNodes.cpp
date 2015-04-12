@@ -52,7 +52,7 @@ InputNode::InputNode(string name,
   string rowStrideVar = name + "RowStride";
   string colStrideVar = name + "ColStride";
   
-  m_dataTypeInfo = DataTypeInfo(m, n, rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
+  m_dataTypeInfo = DataTypeInfo(rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
   
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
@@ -70,7 +70,7 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
 :
 m_msize(NULL), m_nsize(NULL)
 {
-  m_dataTypeInfo = DataTypeInfo(m, n, rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
+  m_dataTypeInfo = DataTypeInfo(rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
   
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;

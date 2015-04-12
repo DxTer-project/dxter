@@ -73,8 +73,7 @@ class DataTypeInfo
   Type m_type;
 
   DataTypeInfo();
-  DataTypeInfo(Size numRows, Size numCols,
-	       Size rowStrideVal, Size colStrideVal,
+  DataTypeInfo(Size rowStrideVal, Size colStrideVal,
 	       string numRowsVar, string numColsVar,
 	       string rowStrideVar, string colStrideVar,
 	       Type type);

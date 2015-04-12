@@ -172,7 +172,6 @@ class SizeList
   SizesIter GetIter(unsigned int sizeNum) const;
   bool IsZero(unsigned int n) const;
 
-  bool IsPartitionable(const Size partitionPoint) const;
   bool IsConstant() const;
   Size OnlyEntry() const;
 };
@@ -184,9 +183,11 @@ extern SizeList *ONES;
 
 const SizeList* GetConst(Size val);
 
+#if DOTENSORS
 class DistType;
 class DistEntry;
 
 void GetLocalSizes(const DistType &dist, const SizesVec &sizes, SizesVec &localSizes);
 void GetLocalSizes(const DistType &dist, Dim dim, const SizeList* sizes, const SizeList** localSizes);
 inline const SizeList* GetLocalSizes(const SizeList *parent, DistEntry entry) {return SizeList::M_cache.GetCachedDistSize(parent, entry);}
+#endif

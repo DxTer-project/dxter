@@ -26,18 +26,32 @@
 
 #if DOLLDLA
 
-Partition::Partition(Layer layer, Dir partType, Size partSplitPoint) {
+Partition::Partition(Layer layer, Dir partType, Size splitSize) {
   m_layer = layer;
   m_partType = partType;
-  m_partSplitPoint = partSplitPoint;
+  m_splitSize = splitSize;
   return;
 }
 
 void Partition::PrintCode(IndStream &out) {
   out.Indent();
   *out << m_startName.m_name << " = " << GetInputName(0).m_name << ";\n";
+  string splitPoint;
+  const SizeList *sizes = NULL;
+  if (m_partType == HORIZONTAL) {
+    sizes = GetInputM(0);
+  }
+  else {
+    sizes = GetInputN(0);
+  }
+  if (sizes->IsConstant()) {
+    Size size = (*sizes)[0];
+    splitPoint = std::to_string((long long int)(floor(size / m_splitSize) * m_splitSize));
+  }
+  else
+    LOG_FAIL("not handling non-constant partition print code yet");
   out.Indent();
-  string splitPoint = std::to_string((long long int) m_partSplitPoint);
+
   if (m_partType == HORIZONTAL) {
     *out << m_endName.m_name << " = " << GetInputName(0).m_name << " + " << InputDataType(0).m_colStrideVar << " * " << splitPoint + ";\n";
 
@@ -158,37 +172,22 @@ void Partition::BuildVerticalDataTypeCache() {
 }
 
 void Partition::BuildHorizontalSizes() {
-  const Sizes* colSizes = GetInputN(0);
-  assert(colSizes->IsPartitionable(m_partSplitPoint));
+  const SizeList* colSizes = GetInputN(0);
   BuildStartAndEndSizes(colSizes);
 }
 
 void Partition::BuildVerticalSizes() {
-  const Sizes* rowSizes = GetInputM(0);
-  assert(rowSizes->IsPartitionable(m_partSplitPoint));
+  const SizeList* rowSizes = GetInputM(0);
   BuildStartAndEndSizes(rowSizes);
 }
 
-void Partition::BuildStartAndEndSizes(const Sizes* toSplit) {
-  m_startSizes = new Sizes();
-  m_endSizes = new Sizes();
-
-  for (auto entry : toSplit->m_entries) {
-    int numIterations = entry->NumSizesPerRepeat();
-    Size sizeOfEachIteration = entry->m_valA;
-    Size sizeOfEndIterations = sizeOfEachIteration - m_partSplitPoint;
-
-    auto startEnt = new SizeEntry();
-    startEnt->SetRepeatedSizes(m_partSplitPoint, numIterations);
-    startEnt->m_repeats = entry->m_repeats;
-    m_startSizes->m_entries.push_back(startEnt);
-
-    auto endEnt = new SizeEntry();
-    endEnt->SetRepeatedSizes(sizeOfEndIterations, numIterations);
-    endEnt->m_repeats = entry->m_repeats;
-    m_endSizes->m_entries.push_back(endEnt);
-  }
-  return;
+void Partition::BuildStartAndEndSizes(const SizeList* toSplit) {
+  m_startSizes = SizeList::M_cache.GetCachedSplitSize(true,
+						      toSplit,
+						      m_splitSize);
+  m_endSizes = SizeList::M_cache.GetCachedSplitSize(false,
+						    toSplit,
+						    m_splitSize);
 }
 
 void Partition::BuildHorizontalDataTypeInfo() {
@@ -196,16 +195,14 @@ void Partition::BuildHorizontalDataTypeInfo() {
 
   string startNumColsVar = inData.m_numColsVar;
   startNumColsVar = startNumColsVar + "_LEFT";
-  m_startInfo = new DataTypeInfo(GetInputNumRows(0), (int) m_partSplitPoint,
-				 GetInputRowStride(0), GetInputColStride(0),
+  m_startInfo = new DataTypeInfo(GetInputRowStride(0), GetInputColStride(0),
 				 inData.m_numRowsVar, startNumColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
 				 inData.m_type);
 
   string endNumColsVar = inData.m_numColsVar;
   endNumColsVar = endNumColsVar + "_RIGHT";
-  m_endInfo = new DataTypeInfo(GetInputNumRows(0), GetInputNumCols(0) - ((int) m_partSplitPoint),
-			       GetInputRowStride(0), GetInputColStride(0),
+  m_endInfo = new DataTypeInfo(GetInputRowStride(0), GetInputColStride(0),
 			       inData.m_numRowsVar, endNumColsVar,
 			       inData.m_rowStrideVar, inData.m_colStrideVar,
 			       inData.m_type);
@@ -216,16 +213,14 @@ void Partition::BuildVerticalDataTypeInfo() {
 
   string startNumRowsVar = inData.m_numRowsVar;
   startNumRowsVar = startNumRowsVar + "_TOP";
-  m_startInfo = new DataTypeInfo((int) m_partSplitPoint, GetInputNumCols(0),
-				 GetInputRowStride(0), GetInputColStride(0),
+  m_startInfo = new DataTypeInfo(GetInputRowStride(0), GetInputColStride(0),
 				 startNumRowsVar, inData.m_numColsVar,
 				 inData.m_rowStrideVar, inData.m_colStrideVar,
 				 inData.m_type);
 
   string endNumRowsVar = inData.m_numRowsVar;
   endNumRowsVar = endNumRowsVar + "_BOTTOM";
-  m_endInfo = new DataTypeInfo(GetInputNumRows(0) - ((int) m_partSplitPoint), GetInputNumCols(0),
-			       GetInputRowStride(0), GetInputColStride(0),
+  m_endInfo = new DataTypeInfo(GetInputRowStride(0), GetInputColStride(0),
 			       endNumRowsVar, inData.m_numColsVar,
 			       inData.m_rowStrideVar, inData.m_colStrideVar,
 			       inData.m_type);
@@ -262,7 +257,7 @@ void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging) {
   m_layer = part->m_layer;
 
   m_partType = part->m_partType;
-  m_partSplitPoint = part->m_partSplitPoint;
+  m_splitSize = part->m_splitSize;
 
   m_startSizes = part->m_startSizes;
   m_endSizes = part->m_endSizes;
@@ -274,7 +269,7 @@ void Partition::Duplicate(const Node* orig, bool shallow, bool possMerging) {
   m_endName = m_endName;
 }
 
-const Sizes* Partition::GetM(ConnNum num) const {
+const SizeList* Partition::GetM(ConnNum num) const {
   if (num > 1) {
     cout << "Bad connection number in Partition::GetM" << endl;
     LOG_FAIL("replacement for throw call");
@@ -292,7 +287,7 @@ const Sizes* Partition::GetM(ConnNum num) const {
   LOG_FAIL("replacement for throw call");
 }
 
-const Sizes* Partition::GetN(ConnNum num) const {
+const SizeList* Partition::GetN(ConnNum num) const {
   if (num > 1) {
     cout << "Bad connection number in partition::GetN" << endl;
     LOG_FAIL("replacement for throw call");

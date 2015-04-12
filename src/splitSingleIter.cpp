@@ -349,6 +349,11 @@ const SizeList* SplitSingleIter::GetM(ConnNum num) const
     case (POSSTUNIN):
       if (num < GetNumElems(m_dir)) {
         const SplitSingleIter *input = (SplitSingleIter*)Input(0);
+	if (input->m_sizes.size() <= num) {
+	  cout << input->m_sizes.size() << " <= " << num << endl;
+	  cout << " intput " << input << endl;
+	  throw;
+	}
         return input->m_sizes[num];
       }
       else if (num == GetNumElems(m_dir)) {
@@ -1703,11 +1708,13 @@ void SplitSingleIter::BuildSizes(const SizeList *controlSizes, int stride)
   unsigned int length2 = ns->NumSizes();
 
   if (length != length2)
-      LOG_FAIL("replacement for throw call");
+    LOG_FAIL("replacement for throw call");
 
 
   const Size bs = GetMyLoop()->GetBS();
   const unsigned int numElems = GetNumElems(m_dir);
+
+  m_sizes.resize(numElems*2);
   
   bool foundOne = false;
   for (unsigned int subMat = 0; subMat < numElems; ++subMat) {
@@ -1732,6 +1739,8 @@ void SplitSingleIter::BuildSizes(const SizeList *controlSizes, int stride)
 		     controlSizes, bs, 
 		     ms, ns,
 		     &msizes, &nsizes);
+	    if (!msizes || !nsizes)
+	      throw;
 	    m_sizes[subMat] = msizes;
 	    m_sizes[numElems-1+subMat] = nsizes;
 	    foundOne = true;

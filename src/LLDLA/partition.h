@@ -34,7 +34,7 @@ class Partition : public DLANode
  private:
   Dir m_partType;
 
-  Size m_partSplitPoint;
+  unsigned int m_splitSize;
 
   const SizeList* m_startSizes;
   const SizeList* m_endSizes;
@@ -64,7 +64,7 @@ class Partition : public DLANode
  public:
   Layer m_layer;
   
-  Partition(Layer layer, Dir partType, Size partSplitPoint);
+  Partition(Layer layer, Dir partType, Size splitSize);
 
   virtual void PrintCode(IndStream &out);
 
@@ -74,7 +74,7 @@ class Partition : public DLANode
   virtual bool IsReadOnly() const { return false; }
   virtual bool CanTrans() const { return false; }
 
-  virtual NodeType GetType() const { return "Partition" + std::to_string((long long int) m_partType); }
+  virtual NodeType GetType() const { return "Partition" + std::to_string((long long int) m_partType) + std::to_string(m_splitSize); }
   static ClassType GetClass() {return "partitionNode";}
   virtual ClassType GetNodeClass() const { return GetClass(); }
   virtual Name GetName(ConnNum num) const;

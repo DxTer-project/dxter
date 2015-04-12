@@ -99,5 +99,6 @@ Cost CopyCost(Size inner, Size outer, Size readLdim, Size writeLdim, bool cacheM
 typedef vector<Cost> CostVec;
 typedef CostVec::iterator CostVecIter;
 
-
+#if DOTENSORS
 Size GridModeLens(const DimVec &modes);
+#endif

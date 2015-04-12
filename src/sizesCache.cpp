@@ -169,6 +169,7 @@ const SizeList* SizesCache::GetConstSize(Size size)
 }
 
 
+#if DOTENSORS
 const SizeList* SizesCache::GetCachedDistSize(const SizeList *parent,
 					      DistEntry entry)
 {
@@ -196,6 +197,7 @@ const SizeList* SizesCache::GetCachedDistSize(const SizeList *parent,
     return size;
   }
 }
+#endif
 
 
 const NumItersVec* SizesCache::GetNumItersVec(const SizeList *controlParent,
@@ -237,4 +239,56 @@ const SizeList* SizesCache::GetCachedRepeatedSize(Size size,
     return newSize;
   }
 
+}
+
+
+const SizeList* SizesCache::GetCachedSplitSize(bool start,
+					       const SizeList *parent,
+					       int splitFactor)
+{
+  SizesT<int> val;
+  val.parent = parent;
+  val.size = splitFactor;
+  if (start) {
+    SizesIntMapIter find = m_splitMapStart.find(val);
+    if (find != m_splitMapStart.end())
+      return find->second;
+  }
+  else {
+    SizesIntMapIter find = m_splitMapEnd.find(val);
+    if (find != m_splitMapEnd.end())
+      return find->second;
+  }
+
+  SizeList *startSizes = new SizeList();
+  SizeList *endSizes = new SizeList();
+
+  for (auto entry : parent->m_entries) {
+    if (entry->m_type != REPEATEDSIZES)
+      LOG_FAIL("havne't implement other splitting code");
+    int numIterations = entry->NumSizesPerRepeat();
+    Size sizeOfEachIteration = entry->m_valA;
+    Size sizeOfStartIterations = floor(sizeOfEachIteration / (double)splitFactor) * splitFactor;
+    Size sizeOfEndIterations = sizeOfEachIteration - sizeOfStartIterations;
+
+    auto startEnt = new SizeEntry();
+    startEnt->SetRepeatedSizes(sizeOfStartIterations, numIterations);
+    startEnt->m_repeats = entry->m_repeats;
+    startSizes->m_entries.push_back(startEnt);
+
+    auto endEnt = new SizeEntry();
+    endEnt->SetRepeatedSizes(sizeOfEndIterations, numIterations);
+    endEnt->m_repeats = entry->m_repeats;
+    endSizes->m_entries.push_back(endEnt);
+  }
+
+  m_splitMapStart[val] = startSizes;
+  m_splitMapEnd[val] = endSizes;
+  startSizes->SetCached();
+  endSizes->SetCached();
+
+  if (start)
+    return startSizes;
+  else
+    return endSizes;
 }

@@ -724,8 +724,6 @@ void LoopTunnel::UpdateLocalSizes()
 
 void LoopTunnel::ClearDataTypeCache()
 {
-  if (m_sizes.empty())
-    return;
   m_sizes.clear();
 #if DODM
   m_lsizes.clear();
@@ -839,22 +837,22 @@ void LoopTunnel::BuildSizes(const SizeList *controlSizes, int stride)
     throw;
   }
 
-  m_sizes[0] = SizeList::M_cache.GetCachedRepeatedSize(ms,
+  m_sizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(ms,
 						    controlSizes,
-						       stride);
+							    stride));
   
-  m_sizes[1] = SizeList::M_cache.GetCachedRepeatedSize(ns,
+  m_sizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(ns,
 						    controlSizes,
-						       stride);
+							    stride));
   
 #if DODM
-  m_lsizes[0] = SizeList::M_cache.GetCachedRepeatedSize(lms,
+  m_lsizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(lms,
 							controlSizes,
-							stride);
+							stride));
 
-  m_lsizes[1] = SizeList::M_cache.GetCachedRepeatedSize(lns,
+  m_lsizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(lns,
 							controlSizes,
-							stride);
+							stride));
 #endif //DODM
 }
 #else
