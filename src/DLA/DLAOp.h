@@ -35,16 +35,16 @@ class DLAOp : public DLANode
  public:
 
 #if TWOD
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual const SizeList* LocalM(ConnNum num) const;
+  virtual const SizeList* LocalN(ConnNum num) const;
 #endif
 #else
   virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
 #endif
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual Name GetName(ConnNum num) const;

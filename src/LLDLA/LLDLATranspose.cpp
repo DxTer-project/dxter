@@ -124,7 +124,7 @@ void LLDLATranspose::BuildDataTypeCache()
   m_info.m_type = in.m_type;
 }
 
-const Sizes* LLDLATranspose::GetN(ConnNum num) const
+const SizeList* LLDLATranspose::GetN(ConnNum num) const
 {
   if (num > 0) {
     LOG_FAIL("Replacement for call to throw;");
@@ -132,7 +132,7 @@ const Sizes* LLDLATranspose::GetN(ConnNum num) const
   return GetInputM(0);
 }
 
-const Sizes* LLDLATranspose::GetM(ConnNum num) const
+const SizeList* LLDLATranspose::GetM(ConnNum num) const
 {
   if (num > 0) {
     LOG_FAIL("Replacement for call to throw;");

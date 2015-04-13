@@ -43,7 +43,7 @@ class RedistNode : public DLANode
 {
  public:
   DataTypeInfo m_info;
-  SizesArray m_lsizes;
+  SizesVec m_lsizes;
   bool m_isArray;
   string m_name;
   string m_align;
@@ -55,7 +55,6 @@ class RedistNode : public DLANode
   RedistNode(const DistType &destType, const string &align, const DimVec &alignModes, const DimVec &alignModesSrc);
   RedistNode(const DistType &destType, const Permutation &perm, const string &align, 
 	     const DimVec &alignModes, const DimVec &alignModesSrc);
-  virtual ~RedistNode();
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   static Node* BlankInst() { return  new RedistNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -69,8 +68,8 @@ class RedistNode : public DLANode
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
   virtual Name GetName(ConnNum num) const;
   virtual void FlattenCore(ofstream &out) const;
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);

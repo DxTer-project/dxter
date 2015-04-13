@@ -34,18 +34,20 @@ class InputNode : public DLANode
  protected:
   DataTypeInfo m_dataTypeInfo;
 #if TWOD
-  Sizes m_msize, m_nsize;
+  const SizeList *m_msize;
+  const SizeList *m_nsize;
 #if DODM
-  Sizes *m_mlsize, *m_nlsize;
+  const SizeList *m_mlsize, *m_nlsize;
 #endif
 #else
-  Dim m_numDims;
-  SizesArray m_sizes;
+  bool m_isScalar;
+  SizesVec m_sizes;
 #if DODM
-  SizesArray m_lsizes;
+  SizesVec m_lsizes;
 #endif//DODM
 #endif
   Name m_varName;
+
  public:
   InputNode();
 #if TWOD
@@ -76,10 +78,10 @@ class InputNode : public DLANode
   InputNode(NodeType type, Size m, Size n, string name, DistType dist);
 #endif
 #else
-  InputNode(NodeType type, const SizesArray sizes, string name, Dim numDims);
-  InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, Dim numDims);
+  InputNode(NodeType type, const SizesVec &sizes, string name);
+  InputNode(NodeType type, const SizesVec &sizes, const DistType &dist, string name);
+  InputNode(NodeType type, const SizeList *sizes, string name);
 #endif
-  virtual ~InputNode();
   virtual NodeType GetType() const {return m_type;}
 #if DOLLDLA
   virtual const Type GetDataType() const { return m_dataTypeInfo.m_type; }
@@ -93,16 +95,16 @@ class InputNode : public DLANode
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "inputNode";}
 #if TWOD
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual const SizeList* LocalM(ConnNum num) const;
+  virtual const SizeList* LocalN(ConnNum num) const;
 #endif
 #else
   virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
 #endif
   virtual Name GetName(ConnNum num) const;
   virtual void FlattenCore(ofstream &out) const;
@@ -124,16 +126,16 @@ class OutputNode : public DLANode
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "outputNode";}
 #if TWOD
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual const SizeList* LocalM(ConnNum num) const;
+  virtual const SizeList* LocalN(ConnNum num) const;
 #endif
 #else
   virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
 #endif
   virtual Name GetName(ConnNum num) const;
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
@@ -149,7 +151,7 @@ class ConstVal : public DLANode
 {
   Name m_varName;
   Coef m_val;
-  Sizes *m_sizes;
+  const SizeList *m_sizes;
  public:
   ConstVal(string name, Coef val);
   virtual NodeType GetType() const {return "const val";}
@@ -162,11 +164,11 @@ class ConstVal : public DLANode
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "const val";}
 #if TWOD
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const {return ONES;}
-  virtual const Sizes* LocalN(ConnNum num) const {return ONES;}
+  virtual const SizeList* LocalM(ConnNum num) const {return ONES;}
+  virtual const SizeList* LocalN(ConnNum num) const {return ONES;}
 #endif
 #else
 blah
@@ -273,9 +275,9 @@ class ViewPan : public DLANode
  public:
   bool m_isVert;
   string m_name;
-  Sizes *m_sizes;
+  SizeList *m_sizes;
 #if DODM
-  Sizes *m_lsizes;
+  SizeList *m_lsizes;
 #endif
  ViewPan(bool isVert, string name) 
    : m_isVert(isVert), m_name(name), m_sizes(NULL)
@@ -290,11 +292,11 @@ class ViewPan : public DLANode
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
 #if TWOD
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual const SizeList* LocalM(ConnNum num) const;
+  virtual const SizeList* LocalN(ConnNum num) const;
 #endif
 #else
 sdlkfj

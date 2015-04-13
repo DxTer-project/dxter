@@ -35,8 +35,6 @@ m_type("InputNode")
 #if DODM
 , m_mlsize(NULL), m_nlsize(NULL)
 #endif //DODM
-#else
-, m_numDims(0)
 #endif
 {
 }
@@ -48,19 +46,19 @@ InputNode::InputNode(string name,
 		     Size rowStrideVal, Size colStrideVal,
 		     Type dataType)
 :
-m_msize(NAN), m_nsize(NAN) {
+  m_msize(NULL), m_nsize(NULL) {
   string numRowsVar = name + "NumRows";
   string numColsVar = name + "NumCols";
   string rowStrideVar = name + "RowStride";
   string colStrideVar = name + "ColStride";
   
-  m_dataTypeInfo = DataTypeInfo(m, n, rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
+  m_dataTypeInfo = DataTypeInfo(rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
   
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
   
-  m_msize.AddRepeatedSizes(m, 1);
-  m_nsize.AddRepeatedSizes(n, 1);
+  m_msize = GetConst(m);
+  m_nsize = GetConst(n);
   m_varName.m_name = name;
 }
 
@@ -70,15 +68,15 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name,
                      string rowStrideVar, string colStrideVar,
                      Type dataType)
 :
-m_msize(NAN), m_nsize(NAN)
+m_msize(NULL), m_nsize(NULL)
 {
-  m_dataTypeInfo = DataTypeInfo(m, n, rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
+  m_dataTypeInfo = DataTypeInfo(rowStrideVal, colStrideVal, numRowsVar, numColsVar, rowStrideVar, colStrideVar, dataType);
   
   m_rowStrideVal = rowStrideVal;
   m_colStrideVal = colStrideVal;
   
-  m_msize.AddRepeatedSizes(m, 1);
-  m_nsize.AddRepeatedSizes(n, 1);
+  m_msize = GetConst(m);
+  m_nsize = GetConst(n);
   m_varName.m_name = name;
 }
 
@@ -106,18 +104,18 @@ string InputNode::ColStrideDefine()
 
 string InputNode::NumRowsDefine()
 {
-  return "#define " + m_dataTypeInfo.m_numRowsVar + " " +  std::to_string((long long int)m_msize[0]);
+  return "#define " + m_dataTypeInfo.m_numRowsVar + " " +  std::to_string((long long int)((*m_msize)[0]));
 }
 
 string InputNode::NumColsDefine()
 {
-  return "#define " + m_dataTypeInfo.m_numColsVar + " " +  std::to_string((long long int)m_nsize[0]);
+  return "#define " + m_dataTypeInfo.m_numColsVar + " " +  std::to_string((long long int)((*m_nsize)[0]));
 }
 
 bool InputNode::IsContiguous() {
   auto data = m_dataTypeInfo;
-  auto numRows = m_msize.OnlyEntry();
-  auto numCols = m_nsize.OnlyEntry();
+  auto numRows = m_msize->OnlyEntry();
+  auto numCols = m_nsize->OnlyEntry();
 
   if (data.m_rowStrideVal == 1 && data.m_colStrideVal == numRows) {
     return true;
@@ -148,13 +146,13 @@ InputNode::InputNode(NodeType type, Size m, Size n, string name)
 #if DODM
 m_type(type),
 #endif
-m_msize(NAN), m_nsize(NAN)
+m_msize(NULL), m_nsize(NULL)
 #if DODM
 , m_mlsize(NULL), m_nlsize(NULL)
 #endif
 {
-  m_msize.AddRepeatedSizes(m, 1, 1);
-  m_nsize.AddRepeatedSizes(n, 1, 1);
+  m_msize = GetConst(m);
+  m_nsize = GetConst(n);
   m_varName.m_name = name;
 #if DOELEM
   m_varName.m_type = D_MC_MR;
@@ -168,13 +166,13 @@ m_msize(NAN), m_nsize(NAN)
 InputNode::InputNode(NodeType type, Size m, Size n, string name, DistType dist)
 : m_type(type),
 m_dataTypeInfo(dist),
-m_msize(NAN), m_nsize(NAN)
+  m_msize(NULL), m_nsize(NULL)
 #if DODM
 , m_mlsize(NULL), m_nlsize(NULL)
 #endif
 {
-  m_msize.AddRepeatedSizes(m,1,1);
-  m_nsize.AddRepeatedSizes(n,1,1);
+  m_msize = GetConst(m);
+  m_nsize = GetConst(n);
   m_varName.m_name = name;
   m_varName.m_type = dist;
 }
@@ -182,73 +180,50 @@ m_msize(NAN), m_nsize(NAN)
 
 
 #if DOTENSORS
-InputNode::InputNode(NodeType type, const SizesArray sizes, string name, Dim numDims)
+InputNode::InputNode(NodeType type, const SizesVec &sizes, string name)
 :
-m_type(type), m_numDims(numDims), m_lsizes(NULL)
+m_type(type)
 {
-  if (m_numDims > NUM_GRID_DIMS) {
+  Dim numDims = sizes.size();
+  if (numDims > NUM_GRID_DIMS) {
     cout << "change NUM_GRID_DIMS in costs.h\n";
     throw;
   }
-  if (m_numDims) {
-    m_sizes = new Sizes[m_numDims];
-    for(Dim i = 0; i < m_numDims; ++i)
-      m_sizes[i] = sizes[i];
-  }
-  else {
-    m_sizes = new Sizes;
-    *m_sizes = sizes[0];
-  }
+  m_isScalar = false;
+  m_sizes = sizes;
   m_varName.m_name = name;
-  m_varName.m_type.SetToDefault(m_numDims);
-  m_dataTypeInfo.SetToDefault(m_numDims);
+  m_varName.m_type.SetToDefault(numDims);
+  m_dataTypeInfo.SetToDefault(m_sizes.size());
 }
 
-InputNode::InputNode(NodeType type, const SizesArray sizes, const DistType &dist, string name, Dim numDims)
+InputNode::InputNode(NodeType type, const SizesVec &sizes, const DistType &dist, string name)
 :
-m_type(type), m_numDims(numDims), m_lsizes(NULL)
+m_type(type)
 {
+  Dim numDims = sizes.size();
   if (dist.m_numDims != numDims)
     throw;
   if (dist.m_numDims > NUM_GRID_DIMS)
     throw;
-  if (m_numDims) {
-    m_sizes = new Sizes[dist.m_numDims];
-    for(Dim i = 0; i < m_numDims; ++i)
-      m_sizes[i] = sizes[i];
-  }
-  else {
-    m_sizes = new Sizes;
-    *m_sizes = sizes[0];
-  }
+  m_isScalar = false;
+  m_sizes = sizes;
   m_varName.m_name = name;
   m_varName.m_type = dist;
   m_dataTypeInfo.SetDistAndClearPerm(dist);
 }
-#endif
 
-InputNode::~InputNode()
+
+InputNode::InputNode(NodeType type, const SizeList *sizes, string name)
+:
+m_type(type)
 {
-#if TWOD
-#if DODM
-  if (m_mlsize) {
-    delete m_mlsize;
-    delete m_nlsize;
-  }
-#endif
-#else
-  if (m_numDims) {
-    delete [] m_sizes;
-    if (m_lsizes)
-      delete [] m_lsizes;
-  }
-  else {
-    delete m_sizes;
-    if (m_lsizes)
-      delete m_lsizes;
-  }
-#endif
+  m_sizes.push_back(sizes);
+  m_isScalar = true;
+  m_varName.m_name = name;
+  m_varName.m_type.SetToDefault(0);
+  m_dataTypeInfo.SetToDefault(0);
 }
+#endif
 
 const DataTypeInfo& InputNode::DataType(ConnNum num) const
 {
@@ -261,16 +236,20 @@ void InputNode::PrintCode(IndStream &out)
   out.Indent();
   *out << "//BEGININIT\n";
   out.Indent();
-  *out << "// " << m_type << " has " << m_numDims << " dims\n";
+  if (!m_isScalar)
+    *out << "// " << m_type << " has " << m_sizes.size() << " dims\n";
+  else
+    *out << "// " << m_type << " is scalar\n";
   out.Indent();
   *out << "//\tStarting distribution: " << m_varName.m_type.PrettyStr() << " or " << DistTypeToStr(m_varName.m_type) << endl;
 #if 1
   out.Indent();
   string name = GetNameStr(0) + "_tempShape";
-  *out << "ObjShape " << name << "( " << m_numDims << " );\n";
-  for(Dim dim = 0; dim < m_numDims; ++dim) {
+  Dim numDims = (m_isScalar ? 0 : m_sizes.size());
+  *out << "ObjShape " << name << "( " << numDims << " );\n";
+  for(Dim dim = 0; dim < numDims; ++dim) {
     out.Indent();
-    *out << name << "[ " << dim << " ] = " << (m_sizes[dim])[0] << ";\n";
+    *out << name << "[ " << dim << " ] = " << (*(m_sizes[dim]))[0] << ";\n";
   }
   out.Indent();
   *out << GetNameStr(0) << ".ResizeTo( " << name << " );\n";
@@ -302,25 +281,9 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_msize = node->m_msize;
   m_nsize = node->m_nsize;
 #else
-  m_numDims = node->m_numDims;
-  if (m_numDims) {
-    m_sizes = new Sizes[m_numDims];
-    for (Dim i = 0; i < m_numDims; ++i)
-      m_sizes[i] = node->m_sizes[i];
-    if(node->m_lsizes) {
-      m_lsizes = new Sizes[m_numDims];
-      for (Dim i = 0; i < m_numDims; ++i)
-        m_lsizes[i] = node->m_lsizes[i];
-    }
-  }
-  else {
-    m_sizes = new Sizes;
-    *m_sizes = *(node->m_sizes);
-    if (node->m_lsizes) {
-      m_lsizes = new Sizes;
-      *m_lsizes = *(node->m_lsizes);
-    }
-  }
+  m_isScalar = node->m_isScalar;
+  m_sizes = node->m_sizes;
+  m_lsizes = node->m_lsizes;
 #endif
   m_varName = node->m_varName;
 #if DOLLDLA
@@ -343,30 +306,30 @@ void InputNode::Prop()
 }
 
 #if TWOD
-const Sizes* InputNode::GetM(ConnNum num) const
+const SizeList* InputNode::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
-  return &m_msize;
+  return m_msize;
 }
 
-const Sizes* InputNode::GetN(ConnNum num) const
+const SizeList* InputNode::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
-  return &m_nsize;
+  return m_nsize;
 }
 
 
 #if DODM
-const Sizes* InputNode::LocalM(ConnNum num) const
+const SizeList* InputNode::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return m_mlsize;
 }
 
-const Sizes* InputNode::LocalN(ConnNum num) const
+const SizeList* InputNode::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -379,33 +342,40 @@ const Dim InputNode::NumDims(ConnNum num) const
 {
   if (num > 0)
     throw;
-  return m_numDims;
+  if (m_isScalar)
+    return 0;
+  else
+    return m_sizes.size();
 }
 
 
-const Sizes* InputNode::Len(ConnNum num,Dim dim) const
+const SizeList* InputNode::Len(ConnNum num,Dim dim) const
 {
   if (num > 0)
     throw;
-  if (!m_numDims)
-    return m_sizes;
-  if (dim >= m_numDims)
+  if (m_isScalar) {
+    if (dim != 0)
+      throw;
+    return m_sizes[0];
+  }
+  if (dim >= m_sizes.size())
     throw;
-  return m_sizes+dim;
+  return m_sizes[dim];
 }
 
 
-const Sizes* InputNode::LocalLen(ConnNum num,Dim dim) const
+const SizeList* InputNode::LocalLen(ConnNum num,Dim dim) const
 {
   if (num > 0)
     throw;
-  if (!m_numDims)
-    return m_lsizes;
-  if (dim >= m_numDims)
+  if (m_isScalar) {
+    if (dim > 0)
+      throw;
+    return m_lsizes[0];
+  }
+  if (dim >= m_lsizes.size())
     throw;
-  if (!m_lsizes)
-    throw;
-  return m_lsizes+dim;
+  return m_lsizes[dim];
 }
 #endif
 
@@ -416,35 +386,12 @@ Name InputNode::GetName(ConnNum num) const
   return m_varName;
 }
 
-#if TWOD
-
 void InputNode::ClearDataTypeCache()
 {
 #if DODM
-  if (!m_mlsize)
-    return;
-  delete m_mlsize;
-  m_mlsize = NULL;
-  delete m_nlsize;
-  m_nlsize = NULL;
+  m_lsizes.clear();
 #endif
 }
-#else
-
-void InputNode::ClearDataTypeCache()
-{
-  if (m_lsizes) {
-    if (m_numDims)
-      delete [] m_lsizes;
-    else {
-      delete m_sizes;
-      m_sizes = NULL;
-      delete m_lsizes;
-    }
-  }
-  m_lsizes = NULL;
-}
-#endif
 
 #if TWOD
 void InputNode::BuildDataTypeCache()
@@ -454,21 +401,19 @@ void InputNode::BuildDataTypeCache()
     return;
   m_mlsize = new Sizes;
   m_nlsize = new Sizes;
-  GetLocalSizes(m_varName.m_type, &m_msize, &m_nsize, *m_mlsize, *m_nlsize);
+  GetLocalSizes(m_varName.m_type, m_msize, m_nsize, *m_mlsize, *m_nlsize);
 #endif
 }
 #else
 void InputNode::BuildDataTypeCache()
 {
-  if (m_lsizes)
+  if (!m_lsizes.empty())
     return;
-  if (m_numDims) {
-    m_lsizes = new Sizes[m_numDims];
+  if (!m_isScalar) {
     GetLocalSizes(m_varName.m_type, m_sizes, m_lsizes);
   }
   else {
-    m_lsizes = new Sizes;
-    *m_lsizes = *m_sizes;
+    m_lsizes = m_sizes;
   }
 }
 #endif
@@ -480,9 +425,9 @@ void InputNode::FlattenCore(ofstream &out) const
   cout << "not flattening m_dataTypeInfo\n";
   throw;
 #if TWOD
-  Size size = m_msize[0];
+  Size size = (*m_msize)[0];
   WRITE(size);
-  size = m_nsize[0];
+  size = (*m_nsize)[0];
   WRITE(size);
   m_varName.Flatten(out);
 #else
@@ -500,9 +445,9 @@ void InputNode::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_type);
   Size size;
   READ(size);
-  m_msize.AddRepeatedSizes(size,1);
+  m_msize = GetConst(size);
   READ(size);
-  m_nsize.AddRepeatedSizes(size,1);
+  m_nsize = GetConst(size);
   m_varName.Unflatten(in);
 #else
   throw;
@@ -531,14 +476,14 @@ const DataTypeInfo& OutputNode::DataType(ConnNum num) const
 }
 
 #if TWOD
-const Sizes* OutputNode::GetM(ConnNum num) const
+const SizeList* OutputNode::GetM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return GetInputM(0);
 }
 
-const Sizes* OutputNode::GetN(ConnNum num) const
+const SizeList* OutputNode::GetN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -547,14 +492,14 @@ const Sizes* OutputNode::GetN(ConnNum num) const
 
 
 #if DODM
-const Sizes* OutputNode::LocalM(ConnNum num) const
+const SizeList* OutputNode::LocalM(ConnNum num) const
 {
   if (num > 0)
     throw;
   return InputLocalM(0);
 }
 
-const Sizes* OutputNode::LocalN(ConnNum num) const
+const SizeList* OutputNode::LocalN(ConnNum num) const
 {
   if (num > 0)
     throw;
@@ -573,7 +518,7 @@ const Dim OutputNode::NumDims(ConnNum num) const
     throw;
   return InputNumDims(0);
 }
-const Sizes* OutputNode::Len(ConnNum num, Dim dim) const
+const SizeList* OutputNode::Len(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -581,7 +526,7 @@ const Sizes* OutputNode::Len(ConnNum num, Dim dim) const
 }
 
 
-const Sizes* OutputNode::LocalLen(ConnNum num, Dim dim) const
+const SizeList* OutputNode::LocalLen(ConnNum num, Dim dim) const
 {
   if (num > 0)
     throw;
@@ -656,26 +601,21 @@ void ConstVal::FlattenCore(ofstream &out) const
 
 void ConstVal::ClearDataTypeCache()
 {
-  if (m_sizes){
-    delete m_sizes;
-    m_sizes = NULL;
-  }
 }
 
 void ConstVal::BuildDataTypeCache()
 {
-  const Sizes *sizes = GetInputM(0);
-  m_sizes = new Sizes;
-  m_sizes->AddRepeatedSizes(1, sizes->NumSizes());
+  if (!m_sizes)
+    m_sizes = SizeList::M_cache.GetCachedRepeatedSize(1, GetInputM(0)->NumSizes());
 }
 
 #if TWOD
-const Sizes* ConstVal::GetM(ConnNum num) const
+const SizeList* ConstVal::GetM(ConnNum num) const
 {
   return m_sizes;
 }
 
-const Sizes* ConstVal::GetN(ConnNum num) const
+const SizeList* ConstVal::GetN(ConnNum num) const
 {
   return m_sizes;
 }

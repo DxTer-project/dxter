@@ -29,6 +29,7 @@
 #include "realPSet.h"
 #include "linearization/graphIter.h"
 
+
 typedef Node* (*ConstructorFunc)();
 typedef std::map<GraphNum, string> ImplementationMap;
 typedef std::pair<GraphNum, string> NumImplementationPair;
@@ -52,7 +53,6 @@ class Universe
   RealPSet *m_pset;
   static unsigned int M_transCount[NUMPHASES+2];
   static ConsFuncMap M_consFuncMap;
-
 
   Universe();
   void Init(RealPSet *seed);

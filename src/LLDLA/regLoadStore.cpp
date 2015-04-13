@@ -106,14 +106,14 @@ void LoadToRegs::PrintCode(IndStream &out) {
   return;
 }
 
-const Sizes* LoadToRegs::GetM(ConnNum num) const {
+const SizeList* LoadToRegs::GetM(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
   return GetInputM(0);
 }
 
-const Sizes* LoadToRegs::GetN(ConnNum num) const {
+const SizeList* LoadToRegs::GetN(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
@@ -186,14 +186,14 @@ void PackedLoadToRegs::PrintCode(IndStream &out) {
   return;
 }
 
-const Sizes* PackedLoadToRegs::GetM(ConnNum num) const {
+const SizeList* PackedLoadToRegs::GetM(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
   return GetInputM(0);
 }
 
-const Sizes* PackedLoadToRegs::GetN(ConnNum num) const {
+const SizeList* PackedLoadToRegs::GetN(ConnNum num) const {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
@@ -367,36 +367,36 @@ void DuplicateRegLoad::PrintCode(IndStream &out)
 
 void DuplicateRegLoad::ClearDataTypeCache()
 {
-  m_mSizes.ClearSizes();
-  m_nSizes.ClearSizes();
+  m_mSizes = NULL;
+  m_nSizes = NULL;
 }
 
 void DuplicateRegLoad::BuildDataTypeCache()
 {
-  if (m_mSizes.m_entries.empty()) {
+  if (!m_mSizes) {
     m_info = InputDataType(0);
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "1";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(GetVecRegWidth(), num);
-    m_nSizes.AddRepeatedSizes(1, num);
+    m_mSizes = SizeList::M_cache.GetCachedRepeatedSize(GetVecRegWidth(), num);
+    m_nSizes = SizeList::M_cache.GetCachedRepeatedSize(1, num);
   }
 }
 
-const Sizes* DuplicateRegLoad::GetM(ConnNum num) const
+ const SizeList* DuplicateRegLoad::GetM(ConnNum num) const
+ {
+   if (num != 0) {
+     LOG_FAIL("replacement for throw call");
+   }
+   return m_mSizes;
+}
+
+const SizeList* DuplicateRegLoad::GetN(ConnNum num) const
 {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
-  return &m_mSizes;
-}
-
-const Sizes* DuplicateRegLoad::GetN(ConnNum num) const
-{
-  if (num != 0) {
-    LOG_FAIL("replacement for throw call");
-  }
-  return &m_nSizes;
+  return m_nSizes;
 }
 
 Name DuplicateRegLoad::GetName(ConnNum num) const
@@ -442,35 +442,35 @@ void TempVecReg::PrintCode(IndStream &out) {
 }
 
 void TempVecReg::ClearDataTypeCache() {
-  m_mSizes.ClearSizes();
-  m_nSizes.ClearSizes();
+  m_mSizes = NULL;
+  m_nSizes = NULL;
 }
 
 void TempVecReg::BuildDataTypeCache() {
-  if (m_mSizes.m_entries.empty()) {
+  if (!m_mSizes) {
     m_info = InputDataType(0);
     m_info.m_numRowsVar = "vector register size";
     m_info.m_numColsVar = "vector register size";
     unsigned int num = GetInputM(0)->NumSizes();
-    m_mSizes.AddRepeatedSizes(GetVecRegWidth(), num);
-    m_nSizes.AddRepeatedSizes(1, num);
+    m_mSizes = SizeList::M_cache.GetCachedRepeatedSize(GetVecRegWidth(), num);
+    m_nSizes = SizeList::M_cache.GetCachedRepeatedSize(1, num);
   }
 }
 
-const Sizes* TempVecReg::GetM(ConnNum num) const
+const SizeList* TempVecReg::GetM(ConnNum num) const
 {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
-  return &m_mSizes;
+  return m_mSizes;
 }
 
-const Sizes* TempVecReg::GetN(ConnNum num) const
+const SizeList* TempVecReg::GetN(ConnNum num) const
 {
   if (num != 0) {
     LOG_FAIL("replacement for throw call");
   }
-  return &m_nSizes;
+  return m_nSizes;
 }
 
 Name TempVecReg::GetName(ConnNum num) const

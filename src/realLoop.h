@@ -71,7 +71,6 @@ class RealLoop : public IntLoop<RealPSet>
 #endif
 
   void ClearTunnelCaches();
-  void StartFillingTunnels();
   void FillTunnelSizes();
   virtual void BuildDataTypeCache();
 

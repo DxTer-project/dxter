@@ -69,7 +69,7 @@ class Gemm : public DLAOp<3,1>
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   
-  static Cost GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3);
+  static Cost GetCost(Layer layer, const SizeList *localDim1, const SizeList *localDim2, const SizeList *localDim3);
 #if DOBLIS
   virtual void UpdateInnerPackingMultiple(PackSize size);
   virtual bool IsBLISParallelizable() const;

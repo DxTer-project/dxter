@@ -34,41 +34,41 @@
 
 InputNode *CreateInput2(string name, Size size1, Size size2)
 {
-    Sizes sizes[2];
-    sizes[0].AddRepeatedSizes(size1,1);
-    sizes[1].AddRepeatedSizes(size2,1);
-    return new InputNode(name, sizes, name, 2);
+  SizesVec sizes;
+  sizes.push_back(GetConst(size1));
+  sizes.push_back(GetConst(size2));
+  return new InputNode(name, sizes, name);
 }
 
 InputNode *CreateInput3(string name, Size size1, Size size2, Size size3)
 {
-    Sizes sizes[3];
-    sizes[0].AddRepeatedSizes(size1,1);
-    sizes[1].AddRepeatedSizes(size2,1);
-    sizes[2].AddRepeatedSizes(size3,1);
-    return new InputNode(name, sizes, name, 3);
+  SizesVec sizes;
+  sizes.push_back(GetConst(size1));
+  sizes.push_back(GetConst(size2));
+  sizes.push_back(GetConst(size3));
+  return new InputNode(name, sizes, name);
 }
 
 InputNode *CreateInput4(string name, Size size1, Size size2, Size size3, Size size4)
 {
-    Sizes sizes[4];
-    sizes[0].AddRepeatedSizes(size1,1);
-    sizes[1].AddRepeatedSizes(size2,1);
-    sizes[2].AddRepeatedSizes(size3,1);
-    sizes[3].AddRepeatedSizes(size4,1);
-    return new InputNode(name, sizes, name, 4);
+  SizesVec sizes;
+  sizes.push_back(GetConst(size1));
+  sizes.push_back(GetConst(size2));
+  sizes.push_back(GetConst(size3));
+  sizes.push_back(GetConst(size4));
+  return new InputNode(name, sizes, name);
 }
 
 InputNode *CreateInput6(string name, Size size1, Size size2, Size size3, Size size4, Size size5, Size size6)
 {
-    Sizes sizes[6];
-    sizes[0].AddRepeatedSizes(size1,1);
-    sizes[1].AddRepeatedSizes(size2,1);
-    sizes[2].AddRepeatedSizes(size3,1);
-    sizes[3].AddRepeatedSizes(size4,1);
-    sizes[4].AddRepeatedSizes(size5,1);
-    sizes[5].AddRepeatedSizes(size6,1);
-    return new InputNode(name, sizes, name, 6);
+  SizesVec sizes;
+  sizes.push_back(GetConst(size1));
+  sizes.push_back(GetConst(size2));
+  sizes.push_back(GetConst(size3));
+  sizes.push_back(GetConst(size4));
+  sizes.push_back(GetConst(size5));
+  sizes.push_back(GetConst(size6));
+  return new InputNode(name, sizes, name);
 }
 
 #if 1

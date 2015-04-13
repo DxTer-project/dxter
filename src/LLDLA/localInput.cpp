@@ -56,7 +56,7 @@ void LocalInput::PrintCode(IndStream& out) {
     typeName = "double";
   }
 
-  string size = std::to_string((long long int) m_msize.OnlyEntry()) + " * " + std::to_string((long long int) m_nsize.OnlyEntry());
+  string size = std::to_string((long long int) m_msize->OnlyEntry()) + " * " + std::to_string((long long int) m_nsize->OnlyEntry());
   out.Indent();
   *out << typeName << " " << varName << "[" << size << "*sizeof(" << typeName << ")] __attribute__((aligned(32))) = {0};" << endl;
 
@@ -91,9 +91,9 @@ void LocalInput::AddVariables(VarSet& set) const {
 
   string uint = "const unsigned int ";
   string nRowsVarName = uint + m_dataTypeInfo.m_numRowsVar + " = ";
-  nRowsVarName += std::to_string((long long int) m_msize.OnlyEntry()) + ";";
+  nRowsVarName += std::to_string((long long int) m_msize->OnlyEntry()) + ";";
   string nColsVarName = uint + m_dataTypeInfo.m_numColsVar + " = ";
-  nColsVarName += std::to_string((long long int) m_nsize.OnlyEntry()) + ";";
+  nColsVarName += std::to_string((long long int) m_nsize->OnlyEntry()) + ";";
   string rowStrideVarName = uint + m_dataTypeInfo.m_rowStrideVar + " = ";
   rowStrideVarName += std::to_string((long long int) m_dataTypeInfo.m_rowStrideVal) + ";";
   string colStrideVarName = uint + m_dataTypeInfo.m_colStrideVar + " = ";

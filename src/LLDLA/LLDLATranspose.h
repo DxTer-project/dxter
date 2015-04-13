@@ -47,8 +47,8 @@ class LLDLATranspose : public DLAOp<1, 1>
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
 
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 
   virtual NodeType GetType() const;
 };

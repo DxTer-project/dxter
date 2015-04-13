@@ -36,13 +36,16 @@
 
 #include "logging.h"
 #include "sizes.h"
+#include "sizesCache.h"
 
 using namespace std;
 
 #define COMBINESIZEENTRIES 1
 
-Sizes ONEVAL(1);
-Sizes *ONES = &ONEVAL;
+SizeList ONEVAL(1);
+SizeList *ONES = &ONEVAL;
+
+SizesCache SizeList::M_cache;
 
 SizesIter::SizesIter(Size valA, Size valB, int valC, SizesType type, double coeff, int repeats)
 :m_currPos(0),
@@ -512,28 +515,33 @@ SizeEntry SizeEntry::SumWith(const SizeEntry &rhs) const
   throw;
 }
 
-Sizes::Sizes()
+SizeList::SizeList()
 {
   m_constVal = NAN;
   m_coeff = 0;
+  m_cached = false;
 }
 
-Sizes::Sizes(double constVal)
+SizeList::SizeList(double constVal)
 {
   m_constVal = constVal;
   m_coeff = 0;
+  m_cached = false;
 }
 
-Sizes::Sizes(const Sizes &rhs)
+SizeList::SizeList(const SizeList &rhs)
 {
   m_constVal = NAN;
   m_coeff = 0;
   *this = rhs;
+  m_cached = false;
 }
 
 
-Sizes::~Sizes()
+SizeList::~SizeList()
 {
+  if (IsCached())
+    throw;
   EntryVecIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter)
     delete *iter;
@@ -541,7 +549,7 @@ Sizes::~Sizes()
 }
 
 
-void Sizes::Print() const
+void SizeList::Print() const
 {
   cout << m_entries.size() << " size entries\n";
   cout << NumSizes() << " sizes\n";
@@ -552,7 +560,7 @@ void Sizes::Print() const
   }
 }
 
-void Sizes::Print(IndStream &out) const
+void SizeList::Print(IndStream &out) const
 {
   *out << m_entries.size() << " size entries\n";
   *out << NumSizes() << " sizes\n";
@@ -562,8 +570,10 @@ void Sizes::Print(IndStream &out) const
   }
 }
 
-void Sizes::AddRepeatedSizes(Size size, int repeats)
+void SizeList::AddRepeatedSizes(Size size, int repeats)
 {
+  if (IsCached())
+    throw;
 #if COMBINESIZEENTRIES
   if (!m_entries.empty()) {
     SizeEntry *oldEntry = m_entries.back();
@@ -582,12 +592,14 @@ void Sizes::AddRepeatedSizes(Size size, int repeats)
   m_entries.push_back(entry);
 }
 
-void Sizes::AddMidSizes(Size size, Size totalSize)
+unsigned int SizeList::AddMidSizes(Size size, Size totalSize)
 {
+  if (IsCached())
+    throw;
 #if COMBINESIZEENTRIES
   if (!fmod(totalSize, size)){
     AddRepeatedSizes(size, totalSize / size);
-    return;
+    return totalSize / size;
   }
   if (!m_entries.empty()) {
     SizeEntry *oldEntry = m_entries.back();
@@ -595,7 +607,7 @@ void Sizes::AddMidSizes(Size size, Size totalSize)
       if (oldEntry->m_valA == size) {
 	if (oldEntry->m_valB == totalSize) {
 	  oldEntry->m_repeats++;
-	  return;
+	  return oldEntry->NumSizesPerRepeat();
 	}
       }
     }
@@ -604,10 +616,13 @@ void Sizes::AddMidSizes(Size size, Size totalSize)
   SizeEntry *entry = new SizeEntry;
   entry->SetMidSizes(size, totalSize);
   m_entries.push_back(entry);
+  return entry->NumSizesPerRepeat();
 }
 
-void Sizes::AddSizesWithLimit(Size start, int stride, Size end)
+unsigned int SizeList::AddSizesWithLimit(Size start, int stride, Size end)
 {
+  if (IsCached())
+    throw;
   if (stride == 0) {
     LOG_FAIL("replacement for throw call");
     throw;
@@ -628,9 +643,9 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end)
   }
   if (start == 0 && end == 0) {
     AddRepeatedSizes(0, 1);
+    return 1;
   }
   else {
-
 #if COMBINESIZEENTRIES
     if (!m_entries.empty()) {
       SizeEntry *oldEntry = m_entries.back();
@@ -639,7 +654,7 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end)
 	  if (oldEntry->m_valB == end) {
 	    if (oldEntry->m_valC == stride) {
 	      oldEntry->m_repeats++;
-	      return;
+	      return oldEntry->NumSizesPerRepeat();
 	    }
 	  }
 	}
@@ -649,11 +664,14 @@ void Sizes::AddSizesWithLimit(Size start, int stride, Size end)
     SizeEntry *entry = new SizeEntry;
     entry->SetSizeRange(start, stride, end);
     m_entries.push_back(entry);
+    return entry->NumSizesPerRepeat();
   }
 }
 
-void Sizes::SetCoeff(double coeff)
+void SizeList::SetCoeff(double coeff)
 {
+  if (IsCached())
+    throw;
   if (coeff == 0) {
     LOG_FAIL("replacement for throw call");
     throw;
@@ -663,15 +681,17 @@ void Sizes::SetCoeff(double coeff)
   m_coeff = coeff;
 }
 
-void Sizes::ClearSizes()
+void SizeList::ClearSizes()
 {
+  if (IsCached())
+    throw;
   EntryVecIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter)
     delete *iter;
   m_entries.clear();
 }
 
-Size Sizes::operator[] (unsigned int n) const
+Size SizeList::operator[] (unsigned int n) const
 {
   unsigned int currLoc = 0;
   EntryVecConstIter iter = m_entries.begin();
@@ -689,8 +709,11 @@ Size Sizes::operator[] (unsigned int n) const
 }
 
 
-void Sizes::operator=(const Sizes &rhs)
+void SizeList::operator=(const SizeList &rhs)
 {
+  if (IsCached())
+    throw;
+
   m_coeff = rhs.m_coeff;
   m_constVal = rhs.m_constVal;
   EntryVecIter iter2 = m_entries.begin();
@@ -706,7 +729,7 @@ void Sizes::operator=(const Sizes &rhs)
   }
 }
 
-bool Sizes::operator==(const Sizes &rhs) const
+bool SizeList::operator==(const SizeList &rhs) const
 {
   if ((!std::isnan((double)m_constVal) && std::isnan((double)(rhs.m_constVal)))
       || (std::isnan((double)m_constVal) && !std::isnan((double)(rhs.m_constVal)))) {
@@ -733,12 +756,12 @@ bool Sizes::operator==(const Sizes &rhs) const
   return true;
 }
 
-bool Sizes::operator!=(const Sizes &rhs) const
+bool SizeList::operator!=(const SizeList &rhs) const
 {
   return !(*this == rhs);
 }
 
-bool Sizes::operator==(const Size &rhs) const
+bool SizeList::operator==(const Size &rhs) const
 {
   if (!std::isnan((double)m_constVal) && (m_constVal != rhs))
     return false;
@@ -750,7 +773,7 @@ bool Sizes::operator==(const Size &rhs) const
   return true;
 }
 
-bool Sizes::EvenlyDivisibleBy(const Size &size) const
+bool SizeList::EvenlyDivisibleBy(const Size &size) const
 {
   if (!std::isnan((double)m_constVal))
     return !(fmod(m_constVal,size));
@@ -764,12 +787,12 @@ bool Sizes::EvenlyDivisibleBy(const Size &size) const
 }
 
 
-bool Sizes::operator!=(const Size &rhs) const
+bool SizeList::operator!=(const Size &rhs) const
 {
   return !(*this == rhs);
 }
 
-unsigned int Sizes::NumSizes() const
+unsigned int SizeList::NumSizes() const
 {
   unsigned int num = 0;
   EntryVecConstIter iter = m_entries.begin();
@@ -779,7 +802,7 @@ unsigned int Sizes::NumSizes() const
   return num;
 }
 
-Cost Sizes::Sum() const
+Cost SizeList::Sum() const
 {
   if (!std::isnan((double)m_constVal)) {
     LOG_FAIL("replacement for throw call");
@@ -813,12 +836,12 @@ Cost Sizes::Sum() const
   return cost;
 }
 
-bool Sizes::IsZero(unsigned int n) const
+bool SizeList::IsZero(unsigned int n) const
 {
   return m_entries[n]->IsZero();
 }
 
-Cost Sizes::SumSquares() const
+Cost SizeList::SumSquares() const
 {
   if (!std::isnan((double)m_constVal)) {
     LOG_FAIL("replacement for throw call");
@@ -851,7 +874,7 @@ Cost Sizes::SumSquares() const
   return cost;
 }
 
-Size Sizes::Update(Size size) const
+Size SizeList::Update(Size size) const
 {
   if (m_coeff)
     return ceil(size * m_coeff);
@@ -859,7 +882,7 @@ Size Sizes::Update(Size size) const
     return size;
 }
 
-Cost Sizes::SumCubes() const
+Cost SizeList::SumCubes() const
 {
   if (!std::isnan((double)m_constVal)) {
     LOG_FAIL("replacement for throw call");
@@ -894,7 +917,7 @@ Cost Sizes::SumCubes() const
   return cost;
 }
 
-Cost Sizes::SumProds11(const Sizes &sizes) const
+Cost SizeList::SumProds11(const SizeList &sizes) const
 {
   if (!std::isnan((double)m_constVal)) {
     return m_constVal * sizes.Sum();
@@ -924,7 +947,7 @@ Cost Sizes::SumProds11(const Sizes &sizes) const
   return cost;
 }
 
-Cost Sizes::SumProds21(const Sizes &sizes) const
+Cost SizeList::SumProds21(const SizeList &sizes) const
 {
   if (!std::isnan((double)m_constVal)) {
     return m_constVal * m_constVal * sizes.Sum();
@@ -957,7 +980,7 @@ Cost Sizes::SumProds21(const Sizes &sizes) const
   return cost;
 }
 
-Cost Sizes::SumProds111(const Sizes &sizes1, const Sizes &sizes2) const
+Cost SizeList::SumProds111(const SizeList &sizes1, const SizeList &sizes2) const
 {
   if (!std::isnan((double)m_constVal)) {
     return m_constVal * sizes1.SumProds11(sizes2);
@@ -1010,7 +1033,7 @@ Cost Sizes::SumProds111(const Sizes &sizes1, const Sizes &sizes2) const
   return cost;
 }
 
-bool Sizes::AllOnes() const
+bool SizeList::AllOnes() const
 {
   if (m_constVal == 1)
     return true;
@@ -1030,7 +1053,7 @@ bool Sizes::AllOnes() const
   return true;
 }
 
-SizesIter Sizes::GetIter(unsigned int sizeNum) const
+SizesIter SizeList::GetIter(unsigned int sizeNum) const
 {
   if (sizeNum >= m_entries.size()) {
     LOG_FAIL("replacement for throw call");
@@ -1040,7 +1063,7 @@ SizesIter Sizes::GetIter(unsigned int sizeNum) const
   return m_entries[sizeNum]->GetIter(m_coeff);
 }
 
-void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
+void SizeList::PairwiseSum(const SizeList &sizes1, const SizeList &sizes2)
 {
   if (sizes1.NumSizes() != sizes2.NumSizes()) {
     LOG_FAIL("replacement for throw call");
@@ -1097,7 +1120,7 @@ void Sizes::PairwiseSum(const Sizes &sizes1, const Sizes &sizes2)
   }
 }
 
-bool Sizes::operator<= (const Size &rhs) const
+bool SizeList::operator<= (const Size &rhs) const
 {
   EntryVecConstIter iter = m_entries.begin();
   for(; iter != m_entries.end(); ++iter) {
@@ -1107,24 +1130,12 @@ bool Sizes::operator<= (const Size &rhs) const
   return true;
 }
 
-bool Sizes::operator>(const Size &rhs) const
+bool SizeList::operator>(const Size &rhs) const
 {
   return !(*this <= rhs);
 }
 
-bool Sizes::IsPartitionable(const Size partitionPoint) const
-{
-  if (*this <= partitionPoint) {
-    cout << "FAILED: partition point is outside size" << endl;
-    cout << (*this)[0] << endl;
-    cout << partitionPoint << endl;
-    return false;
-  }
-
-  return IsConstant();
-}
-
-bool Sizes::IsConstant() const {
+bool SizeList::IsConstant() const {
 
   for (auto entry : this->m_entries) {
     SizesType entryType = entry->GetType();
@@ -1140,7 +1151,7 @@ bool Sizes::IsConstant() const {
   return true;
 }
 
-Size Sizes::OnlyEntry() const {
+Size SizeList::OnlyEntry() const {
   if (!IsConstant()) {
     cout << "ERROR: sizes not a constant" << endl;
     cout << "# entries = " << m_entries.size()  << endl;
@@ -1148,4 +1159,9 @@ Size Sizes::OnlyEntry() const {
     throw;
   }
   return (*this)[0];
+}
+
+const SizeList* GetConst(Size val)
+{
+  return SizeList::M_cache.GetConstSize(val);
 }

@@ -28,6 +28,7 @@
 #include "basePSet.h"
 #include "comm.h"
 #include "LLDLA.h"
+#include "costs.h"
 
 class LoopFusionStubTrans;
 extern LoopFusionStubTrans *LoopFusionStub;

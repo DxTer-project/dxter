@@ -70,7 +70,7 @@ class ViewMultipleIters : public DLANode
   PartDir m_partDir;
   BSSize m_bs;
   int m_numIters;
-  Sizes *m_sizes;
+  const SizeList *m_sizes;
   DataTypeInfo m_info;
  ViewMultipleIters(PartDir partDir, BSSize bs, int numIters)
    : m_partDir(partDir), m_bs(bs), m_numIters(numIters),
@@ -82,8 +82,8 @@ class ViewMultipleIters : public DLANode
   virtual unsigned int NumOutputs() const {return m_numIters+1;}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
   virtual Name GetName(ConnNum num) const;
   virtual void AddVariables(VarSet &set) const;
   virtual NodeType GetType() const {return "ViewMultipleIters";}
@@ -110,8 +110,8 @@ class CombineMultipleIters : public DLANode
   virtual void Prop();
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual unsigned int NumOutputs() const {return 1;}
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
   virtual Name GetName(ConnNum num) const;
   virtual NodeType GetType() const {return "CombineMultipleIters";}
   static Node* BlankInst() { return  new CombineMultipleIters(LASTPARTDIR, (BSSize)BADBSSIZE, -1); }

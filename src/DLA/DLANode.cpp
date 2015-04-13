@@ -80,7 +80,7 @@ void DLANode::CheckInputNum(ConnNum num) const {
   }
 }
 
-const Sizes* DLANode::GetInputM(ConnNum num) const
+const SizeList* DLANode::GetInputM(ConnNum num) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -92,7 +92,7 @@ const Sizes* DLANode::GetInputM(ConnNum num) const
   return in->GetM(inNum);
 }
 
-const Sizes* DLANode::GetInputN(ConnNum num) const 
+const SizeList* DLANode::GetInputN(ConnNum num) const 
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 4\n";
@@ -107,8 +107,8 @@ const Sizes* DLANode::GetInputN(ConnNum num) const
 Size DLANode::MaxNumberOfElements(ConnNum num) const
 {
   Size size = 0;
-  const Sizes *ms = GetM(num);  
-  const Sizes *ns = GetN(num);  
+  const SizeList *ms = GetM(num);  
+  const SizeList *ns = GetN(num);  
 
   const unsigned int totNumIters = ms->NumSizes();
   for (unsigned int iteration = 0; iteration < totNumIters; ++iteration) {
@@ -120,7 +120,7 @@ Size DLANode::MaxNumberOfElements(ConnNum num) const
 }
 
 #if DODM
-const Sizes* DLANode::InputLocalM(ConnNum num) const
+const SizeList* DLANode::InputLocalM(ConnNum num) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -132,7 +132,7 @@ const Sizes* DLANode::InputLocalM(ConnNum num) const
   return in->LocalM(inNum);
 }
 
-const Sizes* DLANode::InputLocalN(ConnNum num) const 
+const SizeList* DLANode::InputLocalN(ConnNum num) const 
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 4\n";
@@ -145,7 +145,7 @@ const Sizes* DLANode::InputLocalN(ConnNum num) const
 #endif //DODM
 
 #else
-const Sizes* DLANode::InputLen(ConnNum num, Dim dim) const
+const SizeList* DLANode::InputLen(ConnNum num, Dim dim) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";
@@ -158,7 +158,7 @@ const Sizes* DLANode::InputLen(ConnNum num, Dim dim) const
 }
 
 
-const Sizes* DLANode::InputLocalLen(ConnNum num, Dim dim) const
+const SizeList* DLANode::InputLocalLen(ConnNum num, Dim dim) const
 {
   if (num >= m_inputs.size()) {
     cout << "bad size 2\n";

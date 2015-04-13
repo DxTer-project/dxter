@@ -44,8 +44,8 @@ class LoadToRegs : public DLANode
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "LoadtoRegs";}
   virtual const DataTypeInfo& DataType(ConnNum num) const {return InputDataType(0);}
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 
   virtual Name GetName(ConnNum num) const;
 
@@ -77,8 +77,8 @@ class PackedLoadToRegs : public DLANode {
 
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 
   virtual Name GetName(ConnNum num) const;
 
@@ -88,8 +88,8 @@ class PackedLoadToRegs : public DLANode {
 class DuplicateRegLoad : public DLANode
 {
  public:
-  Sizes m_mSizes;
-  Sizes m_nSizes;
+  const SizeList *m_mSizes;
+  const SizeList *m_nSizes;
   DataTypeInfo m_info;
 
   virtual NodeType GetType() const { return "DuplicateRegLoad"; }
@@ -101,8 +101,8 @@ class DuplicateRegLoad : public DLANode
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "DuplicateVecReg";}
   virtual const DataTypeInfo& DataType(ConnNum num) const {return m_info;}
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 
   virtual Name GetName(ConnNum num) const;
 
@@ -118,8 +118,8 @@ class DuplicateRegLoad : public DLANode
 class TempVecReg : public DLANode
 {
  public:
-  Sizes m_mSizes;
-  Sizes m_nSizes;
+  const SizeList *m_mSizes;
+  const SizeList *m_nSizes;
 
   DataTypeInfo m_info;
   virtual NodeType GetType() const { return "TempVecReg"; }
@@ -131,8 +131,8 @@ class TempVecReg : public DLANode
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "TempVecReg";}
   virtual const DataTypeInfo& DataType(ConnNum num) const {return m_info;}
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 
   virtual Name GetName(ConnNum num) const;
 

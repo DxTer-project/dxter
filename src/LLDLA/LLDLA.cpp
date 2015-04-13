@@ -31,8 +31,7 @@ DataTypeInfo::DataTypeInfo()
   m_colStride = BADSTRIDE;
 }
 
-DataTypeInfo::DataTypeInfo(Size numRows, Size numCols,
-			   Size rowStrideVal, Size colStrideVal,
+DataTypeInfo::DataTypeInfo(Size rowStrideVal, Size colStrideVal,
 			   string numRowsVar, string numColsVar,
 			   string rowStrideVar, string colStrideVar,
 			   Type type)

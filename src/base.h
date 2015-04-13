@@ -25,7 +25,6 @@
 
 #include "layers.h"
 #include "logging.h"
-#include "sizes.h"
 #include <cstring>
 
 //Maximum number of refinement to use
@@ -49,10 +48,6 @@ extern char START;
 typedef unsigned int Phase;
 
 
-inline bool IsValidCost(Cost cost)
-{
-  return cost >= 0;
-}
 
 #include <stdio.h>
 #include <ostream>
@@ -62,7 +57,6 @@ inline bool IsValidCost(Cost cost)
 #include <string>
 #include <map>
 #include <list>
-#include "costs.h"
 #include <fstream>
 #include <cstdlib>
 #include "IndStream.h"
@@ -282,8 +276,6 @@ class DistType
   bool FindGridMode(Dim gridMode, Dim &tensorMode) const;
   bool IsDefault() const;
 };
-
-Size GridModeLens(const DimVec &modes);
 #endif
 
 #if DOELEM
@@ -312,8 +304,7 @@ void CheckThisSpot();
 #if TWOD
 void GetLocalSizes(DistType dist, const Sizes *m, const Sizes *n, Sizes &localM, Sizes &localN);
 #else
-void GetLocalSizes(const DistType &dist, const SizesArray sizes, SizesArray localSizes);
-void GetLocalSizes(const DistType &dist, Dim dim, const Sizes* sizes, Sizes* localSizes);
+
 #endif
 #endif
 
@@ -407,8 +398,6 @@ typedef map<void*,const void*> PtrMap;
 typedef PtrMap::iterator PtrMapIter;
 typedef PtrMap::const_iterator PtrMapConstIter;
 //typedef vector<Size> Sizes;
-typedef vector<Cost> CostVec;
-typedef CostVec::iterator CostVecIter;
 typedef vector<double> TimeVec;
 typedef TimeVec::iterator TimeVecIter;
 typedef TimeVec::const_iterator TimeVecConstIter;

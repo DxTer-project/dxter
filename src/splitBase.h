@@ -32,6 +32,8 @@
 class SplitBase : public LoopTunnel
 {
  public:
+
+
 #if TWOD
   PartDir m_dir;
 #else
@@ -61,4 +63,5 @@ class SplitBase : public LoopTunnel
 #if DOLLDLA
   virtual string LoopBound() = 0;
 #endif
+  virtual const SizeList* GetControlSizes() const = 0;
 };

@@ -27,6 +27,7 @@
 #include "var.h"
 #include <stdarg.h>
 #include "comm.h"
+#include "sizes.h"
 
 #define NODIST
 #define NOALGS

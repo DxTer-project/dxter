@@ -131,6 +131,9 @@ void Contraction::Prop()
     if(InputNumDims(0) != m_AIndices.size()) {
       cout << InputNumDims(0) << endl;
       cout << m_AIndices << endl;
+      cout << m_BIndices << endl;
+      cout << m_CIndices << endl;
+      cout << m_contIndices << endl;
       throw;
     }
 
@@ -163,7 +166,7 @@ void Contraction::Prop()
     //    cout << "improve Contraction::Prop code\n";
     //    cout << "reflect in DistContToLocalContStatC::RHSCostEstimate\n";
     DimVec dims = MapIndicesToDims(m_contIndices,m_AIndices);
-    const Sizes *sizes = InputLocalLen(2,0);
+    const SizeList *sizes = InputLocalLen(2,0);
     Dim numDims = InputNumDims(2);
     unsigned int totNumIters = sizes->NumSizes();
 

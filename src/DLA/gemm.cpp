@@ -190,7 +190,7 @@ bool Gemm::CanTransposeInputs() const
 }
 #endif
 
-Cost Gemm::GetCost(Layer layer, const Sizes *localDim1, const Sizes *localDim2, const Sizes *localDim3)
+Cost Gemm::GetCost(Layer layer, const SizeList *localDim1, const SizeList *localDim2, const SizeList *localDim3)
 {
 #if DOELEM
   if (layer == SMLAYER)
@@ -230,9 +230,9 @@ void Gemm::Prop()
         ConnNum num0 = InputConnNum(0);
         DLANode *in2 = (DLANode*)Input(2);
         ConnNum num2 = InputConnNum(2);
-        const Sizes *size1 = in0->LocalM(num0);
-        const Sizes *size2 = in0->LocalN(num0);
-        const Sizes *size3 = in2->LocalN(num2);
+        const SizeList *size1 = in0->LocalM(num0);
+        const SizeList *size2 = in0->LocalN(num0);
+        const SizeList *size3 = in2->LocalN(num2);
         m_cost = GetCost(SMLAYER, size1, size2, size3);
         break;
       }
@@ -245,9 +245,9 @@ void Gemm::Prop()
 	  ConnNum num0 = InputConnNum(0);
 	  DLANode *in2 = (DLANode*)Input(2);
 	  ConnNum num2 = InputConnNum(2);
-	  const Sizes *size1 = in0->GetM(num0);
-	  const Sizes *size2 = in0->GetN(num0);
-	  const Sizes *size3 = in2->GetN(num2);
+	  const SizeList *size1 = in0->GetM(num0);
+	  const SizeList *size2 = in0->GetN(num0);
+	  const SizeList *size3 = in2->GetN(num2);
 	  if (size1->NumSizes() != size2->NumSizes())
 	    throw;
 	  if (size2->NumSizes() != size3->NumSizes())

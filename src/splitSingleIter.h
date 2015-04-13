@@ -39,6 +39,7 @@ class SplitSingleIter : public SplitBase
   bool m_addDir;
   DataTypeInfo m_info;
 
+
 #if TWOD
   SplitSingleIter();
   SplitSingleIter(PartDir dir, TunType type, bool isControl = false);
@@ -46,7 +47,6 @@ class SplitSingleIter : public SplitBase
   SplitSingleIter(unsigned int partDim, TunType type, bool isControl = false);
 #endif
 
-  virtual ~SplitSingleIter();
   static Node* BlankInst();
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual Tunnel* GetSetTunnel();
@@ -60,24 +60,20 @@ class SplitSingleIter : public SplitBase
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "split";}
 #if TWOD
-  void SanityCheckExecNum(unsigned int execNum, unsigned int length, unsigned int length2);
-  void SanityCheckSizes(const Sizes* ms, const Sizes* ns);
-  void SanityCheckNumIters(Size bs, Size m, Size n, unsigned int numIters);
-
-  virtual const Sizes* GetM(ConnNum num) const;
-  virtual const Sizes* GetN(ConnNum num) const;
+  virtual const SizeList* GetM(ConnNum num) const;
+  virtual const SizeList* GetN(ConnNum num) const;
 #if DODM
-  virtual const Sizes* LocalM(ConnNum num) const;
-  virtual const Sizes* LocalN(ConnNum num) const;
+  virtual const SizeList* LocalM(ConnNum num) const;
+  virtual const SizeList* LocalN(ConnNum num) const;
 #endif
-  void GetSizes(ConnNum num, unsigned int numIters,
-		Size bs, 
-		   Size m, Size n,
-		   Sizes &ms, Sizes &ns);
+  void GetSizes(ConnNum num,
+		const SizeList *control, Size bs, 
+		const SizeList *m, const SizeList *n,
+		const SizeList **ms, const SizeList **ns);
 #else
   virtual const Dim NumDims(ConnNum num) const;
-  virtual const Sizes* Len(ConnNum num, Dim dim) const;
-  virtual const Sizes* LocalLen(ConnNum num, Dim dim) const;
+  virtual const SizeList* Len(ConnNum num, Dim dim) const;
+  virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
 #endif
   virtual Name GetName(ConnNum num) const;
   virtual Name GetName(ConnNum num, LoopType type) const;
@@ -94,8 +90,7 @@ class SplitSingleIter : public SplitBase
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual unsigned int NumberOfLoopExecs() const;
   void SetAddDir() {m_addDir = true;}
-  virtual void StartFillingSizes();
-  virtual void ClearDataTypeCache();
+
 #if DODM
   virtual void UpdateLocalSizes();
 #endif
@@ -120,6 +115,8 @@ class SplitSingleIter : public SplitBase
 
   string LoopLevel() const;
 
-  virtual void BuildSizes(bool buildCache, vector<int> &numIters);
+  virtual void BuildSizes(const SizeList *controlSizes, int stride);
+
+  virtual const SizeList* GetControlSizes() const;
 };
 

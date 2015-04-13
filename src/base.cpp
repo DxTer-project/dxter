@@ -548,37 +548,19 @@ bool IsPrefix(const DimVec &isPrefix, const DimVec &dims)
 }
 #endif
 
-void GetLocalSizes(const DistType &dist, const SizesArray sizes, SizesArray localSizes)
+void GetLocalSizes(const DistType &dist, const SizesVec &sizes, SizesVec &localSizes)
 {
+  localSizes.clear();
   const Dim numDims = dist.m_numDims;
   for (Dim dim = 0; dim < numDims; ++ dim) {
-    const DistEntry &entry = dist.m_dists[dim];
-    localSizes[dim] = sizes[dim];
-    if (!entry.IsStar()) {
-      DimVec vec = entry.DistEntryDims();
-      unsigned int coef = 1;
-      DimVecIter iter = vec.begin();
-      for(; iter != vec.end(); ++iter) {
-	coef *= GridLens[*iter];
-      }
-      localSizes[dim].SetCoeff(1.0 / coef);
-    }
+    localSizes.push_back(GetLocalSizes(sizes[dim], dist.m_dists[dim]));
   }
 }
 
-void GetLocalSizes(const DistType &dist, Dim dim, const Sizes* sizes, Sizes* localSizes)
+void GetLocalSizes(const DistType &dist, Dim dim, const SizeList* sizes, const SizeList** localSizes)
 {
   const DistEntry &entry = dist.m_dists[dim];
-  *localSizes = *sizes;
-  if (!entry.IsStar()) {
-    DimVec vec = entry.DistEntryDims();
-    unsigned int coef = 1;
-    DimVecIter iter = vec.begin();
-    for(; iter != vec.end(); ++iter) {
-      coef *= GridLens[*iter];
-    }
-    localSizes->SetCoeff(1.0 / coef);
-  }
+  *localSizes = GetLocalSizes(sizes, entry);
 }
 #endif
 

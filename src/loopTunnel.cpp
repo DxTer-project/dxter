@@ -27,6 +27,7 @@
 #include "helperNodes.h"
 #include "splitBase.h"
 #include "splitSingleIter.h"
+#include "sizesCache.h"
 
 
 LoopTunnel::LoopTunnel(TunType type)
@@ -36,17 +37,6 @@ LoopTunnel::LoopTunnel(TunType type)
   m_statTR = BADUP;
   m_statBL = BADUP;
   m_statBR = BADUP;
-#if TWOD
-  m_msizes = NULL;
-  m_nsizes = NULL;
-#if DODM
-  m_mlsizes = NULL;
-  m_nlsizes = NULL;
-#endif
-#else
-  m_sizes = NULL;
-  m_lsizes = NULL;
-#endif
   m_indepIters = false;
 #if DOTENSORS
   m_justAdditive = false;
@@ -55,27 +45,7 @@ LoopTunnel::LoopTunnel(TunType type)
 
 LoopTunnel::~LoopTunnel()
 {
-#if TWOD
-  if (m_msizes) {
-    delete m_msizes;
-    m_msizes = NULL;
-    delete m_nsizes;
-    m_nsizes = NULL;
-#if DODM
-    delete m_mlsizes;
-    m_mlsizes = NULL;
-    delete m_nlsizes;
-    m_nlsizes = NULL;
-#endif
-  }
-#else
-  if (m_sizes) {
-    delete [] m_sizes;
-    m_sizes = NULL;
-    delete [] m_lsizes;
-    m_lsizes = NULL;
-  }
-#endif
+
 }
 
 void LoopTunnel::SetUpStats( UpStat statTL, UpStat statTR,
@@ -202,7 +172,7 @@ const DataTypeInfo& LoopTunnel::DataType(ConnNum num) const
 }
 
 #if TWOD
-const Sizes* LoopTunnel::GetM(ConnNum num) const
+const SizeList* LoopTunnel::GetM(ConnNum num) const
 {
   switch(m_tunType) 
     {
@@ -221,7 +191,7 @@ const Sizes* LoopTunnel::GetM(ConnNum num) const
     case (POSSTUNIN):
       if (num == 0 || num == 1) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        return input->m_msizes;
+        return input->m_sizes[0];
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -233,7 +203,7 @@ const Sizes* LoopTunnel::GetM(ConnNum num) const
     }
 }
 
-const Sizes* LoopTunnel::GetN(ConnNum num) const
+const SizeList* LoopTunnel::GetN(ConnNum num) const
 {
   switch(m_tunType) 
   {
@@ -253,7 +223,7 @@ const Sizes* LoopTunnel::GetN(ConnNum num) const
     case (POSSTUNIN):
       if (num == 0 || num == 1) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        return input->m_nsizes;
+        return input->m_sizes[1];
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -266,7 +236,7 @@ const Sizes* LoopTunnel::GetN(ConnNum num) const
 }
 
 #if DODM
-const Sizes* LoopTunnel::LocalM(ConnNum num) const
+const SizeList* LoopTunnel::LocalM(ConnNum num) const
 {
   switch(m_tunType) 
   {
@@ -286,7 +256,7 @@ const Sizes* LoopTunnel::LocalM(ConnNum num) const
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        return input->m_mlsizes;
+        return input->m_lsizes[0]
       }
       else if (num == 1) {
         return InputLocalM(0);
@@ -301,7 +271,7 @@ const Sizes* LoopTunnel::LocalM(ConnNum num) const
   }
 }
 
-const Sizes* LoopTunnel::LocalN(ConnNum num) const
+const SizeList* LoopTunnel::LocalN(ConnNum num) const
 {
   switch(m_tunType) 
   {
@@ -321,7 +291,7 @@ const Sizes* LoopTunnel::LocalN(ConnNum num) const
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        return input->m_nlsizes;
+        return input->m_lsizes[1]
       }
       else if (num == 1) {
         return InputLocalN(0);
@@ -338,7 +308,7 @@ const Sizes* LoopTunnel::LocalN(ConnNum num) const
 #endif
 
 #else
-const Sizes* LoopTunnel::Len(ConnNum num,Dim dim) const
+const SizeList* LoopTunnel::Len(ConnNum num,Dim dim) const
 {
   switch(m_tunType) 
   {
@@ -358,7 +328,7 @@ const Sizes* LoopTunnel::Len(ConnNum num,Dim dim) const
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        return input->m_sizes+dim;
+        return input->m_sizes[dim];
       }
       else if (num == 1) {
         return InputLen(0,dim);
@@ -410,7 +380,7 @@ const Dim LoopTunnel::NumDims(ConnNum num) const
   }
 }
 
-const Sizes* LoopTunnel::LocalLen(ConnNum num,Dim dim) const
+const SizeList* LoopTunnel::LocalLen(ConnNum num,Dim dim) const
 {
   switch(m_tunType) 
   {
@@ -429,7 +399,7 @@ const Sizes* LoopTunnel::LocalLen(ConnNum num,Dim dim) const
     case (POSSTUNIN):
       if (num == 0) {
         const LoopTunnel *input = (LoopTunnel*)Input(0);
-        return input->m_lsizes+dim;
+        return input->m_lsizes[dim];
       }
       else {
         LOG_FAIL("replacement for throw call");
@@ -740,105 +710,26 @@ void LoopTunnel::UnflattenCore(ifstream &in, SaveInfo &info)
 #endif
 }
 
-void LoopTunnel::StartFillingSizes()
-{
-  if (m_tunType != SETTUNIN)
-    return;
-  if (!m_pset->IsReal())
-    return;
-#if TWOD
-  if (m_msizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  m_msizes = new Sizes;
-  m_nsizes = new Sizes;
-#if DODM
-  m_mlsizes = new Sizes;
-  m_nlsizes = new Sizes;
-#endif
-#else
-  if (m_sizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  Dim numDims = InputNumDims(0);
-  if (numDims) {
-    m_sizes = new Sizes[numDims]();
-    m_lsizes = new Sizes[numDims];
-  }
-  else {
-    //scalar
-    m_sizes = new Sizes[1]();
-    m_lsizes = new Sizes[1];
-  }
-#endif
-}
-
 #if DOELEM
 void LoopTunnel::UpdateLocalSizes()
 {
-  //already calculated in AppendSizes
+  //already calculated in BuildSizes
 }
 #elif DOTENSORS
 void LoopTunnel::UpdateLocalSizes()
 {
-  if (m_tunType != SETTUNIN)
-    return;
-  if (!m_pset->IsReal())
-    return;
-
-  if (!m_sizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-
-  const DLANode *input = (DLANode*)Input(0);
-  ConnNum num = InputConnNum(0);
-  Dim numDims = input->NumDims(num);
-  for (Dim i = 0; i < numDims; ++i) {
-    m_lsizes[i] = m_sizes[i];
-    double coeff = input->LocalLen(num,i)->m_coeff;
-    if (coeff)
-      m_lsizes[i].SetCoeff(coeff);
-  }
-  if (!numDims) {
-    //scalar
-    *m_lsizes = *m_sizes;
-    double coeff =input->LocalLen(num,0)->m_coeff;
-    if (coeff)
-      m_lsizes->SetCoeff(coeff);
-  }
+  //already calculated in BuildSizes
 }
 #endif
 
-#if TWOD
 void LoopTunnel::ClearDataTypeCache()
 {
-  if (!m_msizes) 
-    return;
-  delete m_msizes;
-  m_msizes = NULL;
-  delete m_nsizes;
-  m_nsizes = NULL;
+  m_sizes.clear();
 #if DODM
-  delete m_mlsizes;
-  m_mlsizes = NULL;
-  delete m_nlsizes;
-  m_nlsizes = NULL;
-#endif
+  m_lsizes.clear();
+#endif //DODM
 }
-#else
-void LoopTunnel::ClearDataTypeCache()
-{
-  if (!m_sizes) 
-    return;
-  delete [] m_sizes;
-  m_sizes = NULL;
-  delete [] m_lsizes;
-  m_lsizes = NULL;
-}
-#endif
+
 
 bool LoopTunnel::Overwrites(const Node *input, ConnNum num) const
 {
@@ -896,62 +787,38 @@ void LoopTunnel::MigrateFromOldTun(Tunnel *tunIn)
     LOG_FAIL("replacement for throw call");
     throw;
   }
-#if TWOD
-  if (m_msizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  m_msizes = tun->m_msizes;
-  tun->m_msizes = NULL;
-  m_nsizes = tun->m_nsizes;
-  tun->m_nsizes = NULL;
-#if DODM
-  m_mlsizes = tun->m_mlsizes;
-  tun->m_mlsizes = NULL;
-  m_nlsizes = tun->m_nlsizes;
-  tun->m_nlsizes = NULL;
-#endif
-#else
-  if (m_sizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
   m_sizes = tun->m_sizes;
-  tun->m_sizes = NULL;
+  tun->m_sizes.clear();
+#if DODM
   m_lsizes = tun->m_lsizes;
-  tun->m_lsizes = NULL;
+  tun->m_lsizes.clear();
 #endif
 }
 
 #if TWOD
-void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
+void LoopTunnel::BuildSizes(const SizeList *controlSizes, int stride)
 {
   if (m_tunType != SETTUNIN)
     return;
   if (!m_pset->IsReal())
     return;
-  if (!m_msizes) {
+  if (!m_sizes.empty()) {
     LOG_FAIL("replacement for throw call");
     throw;
   }
-  if (buildCache)
-    LOG_FAIL("replacement for throw call");
-
-  unsigned int numExecs = numItersVec.size();
-
+  
   const DLANode *input = (DLANode*)Input(0);
   ConnNum num = InputConnNum(0);
-  const Sizes *ms = input->GetM(num);
-  const Sizes *ns = input->GetN(num);
+  const SizeList *ms = input->GetM(num);
+  const SizeList *ns = input->GetN(num);
   if (!ms || !ns) {
     LOG_FAIL("replacement for throw call");
   }
 
 #if DODM
-  const Sizes *lms = input->LocalM(num);
-  const Sizes *lns = input->LocalN(num);
+  const SizeList *lms = input->LocalM(num);
+  const SizeList *lns = input->LocalN(num);
 #endif
-
 
   unsigned int length = ms->NumSizes();
 
@@ -960,81 +827,71 @@ void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
       || length != lms->NumSizes() 
       || length != lns->NumSizes() 
 #endif
-      || length != numExecs)
+      )
   {
+    cout << endl;
+    cout << length << endl;
+    cout << ns->NumSizes() << endl;
+    
     LOG_FAIL("replacement for throw call");
     throw;
   }
 
-  for(unsigned int execNum = 0; execNum < numExecs; ++execNum) {
-    unsigned int numIters = numItersVec[execNum];
-    if (numIters) {
-      const Size m = (*ms)[execNum];
-      const Size n = (*ns)[execNum];
+  m_sizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(ms,
+						    controlSizes,
+							    stride));
+  
+  m_sizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(ns,
+						    controlSizes,
+							    stride));
+  
 #if DODM
-      const Size lm = (*lms)[execNum];
-      const Size ln = (*lns)[execNum];
-#endif
-      m_msizes->AddRepeatedSizes(m, numIters);
-      m_nsizes->AddRepeatedSizes(n, numIters);
-#if DODM
-      m_mlsizes->AddRepeatedSizes(lm, numIters);
-      m_nlsizes->AddRepeatedSizes(ln, numIters);
-#endif
-    }
-  }
+  m_lsizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(lms,
+							controlSizes,
+							stride));
+
+  m_lsizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(lns,
+							controlSizes,
+							stride));
+#endif //DODM
 }
 #else
-void LoopTunnel::BuildSizes(bool buildCache, vector<int> &numItersVec)
+void LoopTunnel::BuildSizes(const SizeList *controlSizes, int stride)
 {
   if (m_tunType != SETTUNIN)
     return;
   if (!m_pset->IsReal())
     return;
-  if (!m_sizes) {
-    LOG_FAIL("replacement for throw call");
-    throw;
-  }
-  if (buildCache)
-    throw;
 
   const DLANode *input = (DLANode*)Input(0);
   ConnNum num = InputConnNum(0);
   Dim numDims = input->NumDims(num);
-  unsigned int numExecs = numItersVec.size();
+
+  if (!m_sizes.empty())
+    throw;
+
+  if (!numDims)
+    ++numDims;
 
   for (Dim dim = 0; dim < numDims; ++dim) {
-    const Sizes *sizes = input->Len(num,dim);
-    if (!sizes) {
+    const SizeList *sizes = input->Len(num,dim);
+    const SizeList *lsizes = input->LocalLen(num,dim);
+    if (!sizes || !lsizes) {
       cout << "!sizes\n";
       LOG_FAIL("replacement for throw call");
       throw;
     }
-    unsigned int length = sizes->NumSizes();
-    if (length != numExecs) 
-      {
-	cout << sizes->NumSizes() << endl;
-	LOG_FAIL("replacement for throw call");
-	throw;
-      }
 
-    for(unsigned int i = 0; i < numExecs; ++i) {
-      unsigned int numIters = numItersVec[i];
-      if (numIters) {
-	const Size size = (*sizes)[i];
-	m_sizes[dim].AddRepeatedSizes(size, numIters);
-      }
-    }
+    if (sizes->NumSizes() != lsizes->NumSizes())
+      throw;
+    
+    m_sizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(sizes,
+							      controlSizes,
+							      stride));
+		      
+    m_lsizes.push_back(SizeList::M_cache.GetCachedRepeatedSize(lsizes,
+							       controlSizes,
+							       stride));
   }
-
-  if (!numDims) {
-    for(unsigned int i = 0; i < numExecs; ++i) {
-      unsigned int numIters = numItersVec[i];
-      if (numIters) {
-	m_sizes[0].AddRepeatedSizes(1, numIters);
-      }
-    }
-  }
-
 }
 #endif
