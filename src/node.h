@@ -182,6 +182,9 @@ class Node
   virtual bool IsParallel() const {return false;}
   const BasePSet* FindClosestLoop() const;
 
+  virtual Node* ChildOfOutputWithClass(ConnNum num, string nodeClass) const;
+  virtual bool OutputHasChildOfClass(ConnNum num, string nodeClass) const;
+
 #if DOBLIS
   virtual Comm ParallelComm() const {LOG_FAIL("replacement for throw call");}
   virtual Comm WithinParallelism() const;
@@ -198,6 +201,9 @@ class Node
 
   void PrintChildren() const;
   void PrintInputs() const;
+
+  void PrintChildren(IndStream& out) const;
+  void PrintInputs(IndStream& out) const;
 
   void BuildDataTypeCacheRecursive();
 

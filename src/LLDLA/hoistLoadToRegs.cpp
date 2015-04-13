@@ -107,7 +107,6 @@ void HoistLoadToRegs::AddOneOuterLoad(LoopTunnel* setTunIn) const {
 }
 
 void HoistLoadToRegs::Apply(Node *node) const {
-  cout << "Applying HoistLoadToRegs" << endl;
   auto setTunIn = static_cast<LoopTunnel*>(node);
   if (!setTunIn->m_pset->IsReal()) {
     throw;
