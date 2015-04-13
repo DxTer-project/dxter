@@ -231,7 +231,7 @@ double diff_buffer(int size, double *buf1, double *buf2) {
   int i;
   double diff = 0.0;
   for (i = 0; i < size; i++) {
-    diff += abs(buf1[i] - buf2[i]);
+    diff += fabs(buf1[i] - buf2[i]);
   }
   return diff;
 }
@@ -240,7 +240,7 @@ float diff_buffer_float(int size, float *buf1, float *buf2) {
   int i;
   float diff = 0.0;
   for (i = 0; i < size; i++) {
-    diff += abs(buf1[i] - buf2[i]);
+    diff += fabs(buf1[i] - buf2[i]);
   }
   return diff;
 }
@@ -250,7 +250,7 @@ double diff_mats(int m, int n, double *a, int a_row_stride, int a_col_stride, do
 	double diff = 0.0;
 	for (i = 0; i < m; i++)	{
 		for (j = 0; j < n; j++)	{
-			diff += abs(A(i, j) - B(i, j));
+			diff += fabs(A(i, j) - B(i, j));
 		}
 	}
 	return diff;
