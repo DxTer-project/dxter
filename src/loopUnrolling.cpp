@@ -776,14 +776,14 @@ void PartiallyUnrollLoop::Apply(Node *node) const
   if (newInnerPoss->m_inTuns.size() != newInnerPossInTuns.size())
     LOG_FAIL("replacement for throw call");
 
-  /*
+
   newInnerPoss->m_inTuns.clear();
   newInnerPossInTuns.reserve(newInnerPoss->m_inTuns.size());
   for(auto tun : newInnerPossInTuns)
     newInnerPoss->m_inTuns.push_back(tun);
   newInnerPossInTuns.empty();
-  */
-   swap(newInnerPoss->m_inTuns, newInnerPossInTuns);
+
+//   swap(newInnerPoss->m_inTuns, newInnerPossInTuns);
 
   newOuter->AddPoss(newInnerPoss);
   outerPoss->AddPSet(newOuter, true, true);
