@@ -33,7 +33,7 @@ class EliminateStoreLoadOut : public SingleTrans {
  public:
   Layer m_fromLayer, m_toLayer;
 
-  EliminateStoreLoadOut(Layer fromLayer, Layer toLayer)
+ EliminateStoreLoadOut(Layer fromLayer, Layer toLayer)
     : m_fromLayer(fromLayer), m_toLayer(toLayer) {}
   virtual string GetType() const { return "EliminateStoreLoadOut"; }
 

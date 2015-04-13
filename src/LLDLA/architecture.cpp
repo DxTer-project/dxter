@@ -626,7 +626,7 @@ string Stampede::DZeroVar(string varName)
 
 string HaswellMacbook::CompileString(string executableName, string testFileName)
 {
-  string compileStr = "clang -O3 -mavx -march=native -mfma -finline-functions -funroll-loops -o ";
+  string compileStr = "clang -O3 -mavx -march=native -mfma -funroll-loops -o ";
   compileStr += executableName + " " + testFileName + " runtimeEvaluation/utils.c";
   return compileStr;
 }

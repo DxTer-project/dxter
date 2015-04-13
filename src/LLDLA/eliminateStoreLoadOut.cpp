@@ -27,31 +27,31 @@
 
 bool EliminateStoreLoadOut::HasNoOutputs(const CombineSingleIter* comb) const {
   if (comb->NumChildrenOfOutput(0) > 1) {
-    cout << "More than one child of combine" << endl;
     return false;
   } else {
-    cout << "One child of combine" << endl;
-    cout << "Child type is" << endl;
-    cout << comb->Child(0)->GetNodeClass() << endl;
-    cout << "Child of combine has children? ";
-    cout << (comb->Child(0)->m_children.empty() ? "NO" : "YES") << endl;
-    return (comb->Child(0)->GetNodeClass() == CombineSingleIter::GetClass()) &&
-      comb->Child(0)->m_children.empty();
+    Node* n = comb->Child(0);
+    while (!n->m_children.empty()) {
+      n = n->Child(0);
+      if (n->GetNodeClass() != CombineSingleIter::GetClass()) {
+	return false;
+      }
+      if (n->NumChildrenOfOutput(0) > 1) {
+	return false;
+      }
+    }
+    return true;
   }
 }
 
 bool EliminateStoreLoadOut::CanApply(const Node* node) const {
   if (node->GetNodeClass() == StoreFromRegs::GetClass()) {
-    //    cout << "store from regs found" << endl;
     if (node->NumChildrenOfOutput(0) == 2) {
-      //      cout << "with 2 children" << endl;
-      if (node->Child(1)->GetNodeClass() == LoadToRegs::GetClass()
-	  && node->Child(0)->GetNodeClass() == CombineSingleIter::GetClass()) {
-	auto comb = static_cast<const CombineSingleIter*>(node->Child(0));
+      if (node->OutputHasChildOfClass(0, LoadToRegs::GetClass()) &&
+	  node->OutputHasChildOfClass(0, CombineSingleIter::GetClass())) {
+	auto comb = static_cast<const CombineSingleIter*>(node->ChildOfOutputWithClass(0, CombineSingleIter::GetClass()));
 	return HasNoOutputs(comb);
-      } else {
-	return false;
       }
+      return false;
     }
     return false;
   }
@@ -59,8 +59,8 @@ bool EliminateStoreLoadOut::CanApply(const Node* node) const {
 }
 
 void EliminateStoreLoadOut::Apply(Node* node) const {
-  auto combine = node->Child(0);
-  auto load = node->Child(1);
+  auto combine = node->ChildOfOutputWithClass(0, CombineSingleIter::GetClass());
+  auto load = node->ChildOfOutputWithClass(0, LoadToRegs::GetClass());
 
   load->RedirectChildren(node->Input(0), node->InputConnNum(0));
   combine->ChangeInput2Way(combine->Input(1), combine->InputConnNum(1), node->Input(1), node->InputConnNum(1));

@@ -332,6 +332,7 @@ void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound
 void Node::Print(IndStream &out)
 {
   PrintCode(out);
+
 #ifdef PRINTCOSTS
   if (((DLANode*)this)->m_cost) {
     (*out).precision(10);
@@ -719,6 +720,28 @@ unsigned int Node::NumChildrenOfOutput(ConnNum num) const
   return count;
 }
 
+Node* Node::ChildOfOutputWithClass(ConnNum num, string nodeClass) const
+{
+  for (auto conn : m_children) {
+    if (conn->m_num == num &&
+	conn->m_n->GetNodeClass() == nodeClass) {
+      return conn->m_n;
+    }
+  }
+  cout << "Error: No child of node with class " << nodeClass << endl;
+  throw;
+}
+
+bool Node::OutputHasChildOfClass(ConnNum num, string nodeClass) const {
+  for (auto conn : m_children) {
+    if (conn->m_num == num &&
+	conn->m_n->GetNodeClass() == nodeClass) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool Node::InChildren(Node *node, ConnNum num) const
 {
   NodeConnVecConstIter iter = m_children.begin();
@@ -749,6 +772,23 @@ void Node::PrintInputs() const
   for (ConnNum i = 0; i < m_inputs.size(); ++i) {
     const Node *node = Input(i);
     cout << "Input " << i << " " << node->GetType() << " " << node << endl;
+  }
+}
+
+void Node::PrintChildren(IndStream& out) const
+{
+  for (unsigned int i = 0; i < m_children.size(); ++i) {
+    out.Indent();
+    *out << "Child " << i << " " << Child(i)->GetType() << " " << Child(i) << endl;
+  }
+}
+
+void Node::PrintInputs(IndStream& out) const
+{
+  for (ConnNum i = 0; i < m_inputs.size(); ++i) {
+    const Node *node = Input(i);
+    out.Indent();
+    *out << "Input " << i << " " << node->GetType() << " " << node << endl;
   }
 }
 
