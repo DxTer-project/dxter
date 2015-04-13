@@ -258,9 +258,9 @@ void Poss::ForcePrint()
 void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useShadows)
 {
   /**********
-   Any changes to this function should be reflected
-   in PSet::InlinePoss
-   **********/
+	     Any changes to this function should be reflected
+	     in PSet::InlinePoss
+  **********/
   Poss *poss = (Poss*)orig;
   m_parent = poss->m_num;
   //If this changes, update PSet::InlinePoss
@@ -301,10 +301,10 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
   for (auto set : m_sets) {
     set->PatchAfterDuplicate(map);
   }
-  NodeVecConstIter iter = poss->m_inTuns.begin();
+  TunVecConstIter iter = poss->m_inTuns.begin();
   for(; iter != poss->m_inTuns.end(); ++iter)  {
     //  for (auto tunnel : m_inTuns) {
-    Node *node = map[*iter];
+    Tunnel *node = (Tunnel*)(map[*iter]);
     if (!node) {
       cout << "!node in dup\n";
       LOG_FAIL("replacement for throw call");
@@ -318,7 +318,7 @@ void Poss::Duplicate(const Poss *orig, NodeMap &map, bool possMerging, bool useS
   iter = poss->m_outTuns.begin();
   for(; iter != poss->m_outTuns.end(); ++iter) {
     //  for (auto tunnel : m_outTuns) {
-    Node *node = map[*iter];
+    Tunnel *node = (Tunnel*)(map[*iter]);
     if (!(*iter)->m_poss) {
       cout << "!tunnel>m_poss\n";
       LOG_FAIL("replacement for throw call");
@@ -441,7 +441,8 @@ void Poss::DeleteNode(Node *node)
 {
   //update RemoveAndDeleteNodes
   InvalidateHash();
-  NodeVecIter iter;
+  {
+  TunVecIter iter;
   if (node->IsTunnel()) {
     iter = m_inTuns.begin();
     for(; iter != m_inTuns.end(); ++iter) {
@@ -458,7 +459,8 @@ void Poss::DeleteNode(Node *node)
       }
     }
   }
-  iter = m_possNodes.begin();
+}
+  NodeVecIter iter = m_possNodes.begin();
   unsigned int i = 0;
   for( ; iter != m_possNodes.end(); ++iter) {
     if (*iter == node) {
@@ -535,7 +537,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
       LOG_FAIL("replacement for throw call");
     }
     if (AddElemToVec(vec, node, false)) {
-      m_inTuns.push_back(node);
+      m_inTuns.push_back((Tunnel*)node);
       if (node->m_poss && node->m_poss != this) {
         if (disconnectFromOwner) {
           node->m_poss->RemoveFromGraphNodes(node);
@@ -593,7 +595,7 @@ void Poss::AddUp(NodeVec &vec, Node *node, bool start, bool disconnectFromOwner)
     }
     else {
       if (node->IsTunnel(POSSTUNOUT) && start) {
-        m_outTuns.push_back(node);
+        m_outTuns.push_back((Tunnel*)node);
       }
       if (node->m_poss && node->m_poss != this) {
         if (disconnectFromOwner) {
@@ -2894,7 +2896,7 @@ void Poss::SetFused(const BasePSet *left, const BasePSet *right)
 string Poss::GetFunctionalityString() const
 {
   string str;
-  NodeVecConstIter iter = m_outTuns.begin();
+  TunVecConstIter iter = m_outTuns.begin();
   for(; iter != m_outTuns.end(); ++iter) {
     const Node *node = *iter;
     str += node->GetFunctionalityString();
@@ -2983,7 +2985,7 @@ void Poss::Flatten(ofstream &out) const
   FullyFlatten(m_possNodes, out);
   size = m_inTuns.size();
   WRITE(size);
-  NodeVecConstIter iter = m_inTuns.begin();
+  TunVecConstIter iter = m_inTuns.begin();
   for(; iter != m_inTuns.end(); ++iter)
     WRITE(*iter);
   size = m_outTuns.size();
@@ -3054,14 +3056,14 @@ void Poss::Unflatten(ifstream &in, SaveInfo &info)
     Node *tun;
     READ(tun);
     Swap(&tun,info.nodeMap);
-    m_inTuns.push_back(tun);
+    m_inTuns.push_back((Tunnel*)tun);
   }
   READ(size);
   for(unsigned int i = 0; i < size; ++i) {
     Node *tun;
     READ(tun);
     Swap(&tun,info.nodeMap);
-    m_outTuns.push_back(tun);
+    m_outTuns.push_back((Tunnel*)tun);
   }
   PSetVecIter iter = m_sets.begin();
   for(; iter != m_sets.end(); ++iter) {

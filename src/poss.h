@@ -86,8 +86,8 @@ class Poss
   Flags m_flags;
   GraphNum m_parent;
   GraphNum m_num;
-  NodeVec m_inTuns;
-  NodeVec m_outTuns;
+  TunVec m_inTuns;
+  TunVec m_outTuns;
   RealPSet *m_pset;
   TransVec m_transVec;
   bool m_fullyExpanded;

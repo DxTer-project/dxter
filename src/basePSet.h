@@ -38,6 +38,7 @@ class ShadowPSet;
 #define SETCHECKEDFORDUP    (1L<<5)
 
 unsigned int FindInTunVec(const TunVec &vec, const Tunnel *node);
+bool FoundInTunVec(const TunVec &vec, const Tunnel *node);
 
 
 class BasePSet

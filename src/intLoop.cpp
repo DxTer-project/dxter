@@ -558,7 +558,7 @@ template<class PSetType>
 {
   PSetType::PrePrint(out, poss);
   BSSize size = GetBSSize();
-  NodeVecIter iter = poss->m_inTuns.begin();
+  TunVecIter iter = poss->m_inTuns.begin();
   for(; iter != poss->m_inTuns.end(); ++iter) {
     if (((LoopTunnel*)(*iter))->IsSplit()) {
       ((SplitBase*)(*iter))->PrintVarDeclarations(size, out);
@@ -839,7 +839,7 @@ template<class PSetType>
 {
   PSetType::PostPrint(out, poss);
 
-  NodeVecIter iter = poss->m_inTuns.begin();
+  TunVecIter iter = poss->m_inTuns.begin();
   for(; iter != poss->m_inTuns.end(); ++iter) {
     LoopTunnel *tun = (LoopTunnel*)(*iter);
     if (tun->IsSplit()) {

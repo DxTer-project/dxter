@@ -51,6 +51,19 @@ unsigned int FindInTunVec(const TunVec &vec, const Tunnel *node)
   throw;
 }
 
+
+bool FoundInTunVec(const TunVec &vec, const Tunnel *node)
+{
+  unsigned int i = 0;
+  TunVecConstIter iter = vec.begin();
+  for(; iter != vec.end(); ++iter,++i) {
+    if (*iter == node) {
+      return true;
+    }
+  }
+  return false;
+}
+
 BasePSet::BasePSet()
   : m_ownerPoss(NULL), m_flags(0)
 {

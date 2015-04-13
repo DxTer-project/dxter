@@ -120,14 +120,14 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 
     Tunnel *newTun = NULL;
 
-    NodeVec newOutTuns;
-    NodeVec outTuns;
+    TunVec newOutTuns;
+    TunVec outTuns;
 
     NodeConnVecIter childIter = possTunIn->m_children.begin();
     for(; childIter != possTunIn->m_children.end(); ++childIter) {
-      Node *child = (*childIter)->m_n;
+      Tunnel *child = (Tunnel*)((*childIter)->m_n);
       if (child->IsTunnel(POSSTUNOUT)
-	  && !FoundInNodeVec(outTuns, child)) {
+	  && !FoundInTunVec(outTuns, child)) {
 	outTuns.push_back(child);
       }
     }
@@ -143,7 +143,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
       bool allInputsAreTunnel = true;
       
       if (!outTuns.empty()) {
-	NodeVecIter outIter = outTuns.begin();
+	TunVecIter outIter = outTuns.begin();
 	for(; outIter != outTuns.end(); ++outIter) {
 	  Tunnel *outTun = (Tunnel*)(*outIter);
 	  if (!outTun->IsTunnel(POSSTUNOUT))
@@ -197,14 +197,14 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	if (prev) {
 	  if (outTuns.size() > 1)
 	    LOG_FAIL("replacement for throw call");
-	  Node *newOutTun = new Tunnel (POSSTUNOUT);
+	  Tunnel *newOutTun = new Tunnel (POSSTUNOUT);
 	  newOutTuns.push_back(newOutTun);
 	  newOutTun->AddInput(prev, inputNumToOutTuns[0]);
 	}
 	else {
-	  NodeVecIter outTunsIter = outTuns.begin();
+	  TunVecIter outTunsIter = outTuns.begin();
 	  for(; outTunsIter != outTuns.end(); ++outTunsIter) {
-	    Node *newOutTun = new Tunnel (POSSTUNOUT);
+	    Tunnel *newOutTun = new Tunnel (POSSTUNOUT);
 	    newOutTuns.push_back(newOutTun);
 	    newOutTun->AddInput(newTun, 0);
 	  }
@@ -305,7 +305,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	com->AddInput(view, numIters);
       }
 
-      Node *newOutTun = new Tunnel (POSSTUNOUT);
+      Tunnel *newOutTun = new Tunnel (POSSTUNOUT);
       newOutTuns.push_back(newOutTun);
       newOutTun->AddInput(com, 0);
     }
@@ -316,14 +316,14 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
     if (!newOutTuns.empty()) {
       if (newOutTuns.size() != outTuns.size())
 	LOG_FAIL("replacement for throw call");
-      NodeVecIter newOutIter = newOutTuns.begin();
-      NodeVecIter outIter = outTuns.begin();
+      TunVecIter newOutIter = newOutTuns.begin();
+      TunVecIter outIter = outTuns.begin();
       for(; outIter != outTuns.end(); ++outIter,++newOutIter) {
-	Node *newOutTun = *newOutIter;
-	Node *outTun = *outIter;
+	Tunnel *newOutTun = *newOutIter;
+	Tunnel *outTun = *outIter;
 	rootPoss->AddNode(newOutTun);
-	NodeVecIter outIter = rootPoss->m_outTuns.begin();
-	Node *mappedOutTun = (*(map[0]))[outTun];
+	TunVecIter outIter = rootPoss->m_outTuns.begin();
+	Tunnel *mappedOutTun = (Tunnel*)((*(map[0]))[outTun]);
 	if (!mappedOutTun)
 	  LOG_FAIL("replacement for throw call");
 	mappedOutTun->RemoveAllInputs2Way();
@@ -333,7 +333,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 	}
 	if (outIter == rootPoss->m_outTuns.end())
 	  LOG_FAIL("replacement for throw call");
-	NodeVecIter inserted = rootPoss->m_outTuns.insert(outIter, newOutTun);
+	TunVecIter inserted = rootPoss->m_outTuns.insert(outIter, newOutTun);
 	inserted++;
 	if (*inserted != mappedOutTun)
 	  LOG_FAIL("replacement for throw call");
@@ -389,9 +389,7 @@ Poss* UnrollPoss(Poss *poss, LoopInterface *loop, int numIters)
 
   
   //Just a sanity check
-  NodeVecIter outIter = rootPoss->m_outTuns.begin();
-  for(; outIter != rootPoss->m_outTuns.end(); ++outIter) {
-    Tunnel *outTun = (Tunnel*)(*outIter);
+  for (auto outTun : rootPoss->m_outTuns) {
     if (outTun->IsLoopTunnel()) {
       cout << "found outTun " << outTun << endl;
       cout << outTun->GetNodeClass() << endl;
@@ -776,14 +774,14 @@ void PartiallyUnrollLoop::Apply(Node *node) const
   if (newInnerPoss->m_inTuns.size() != newInnerPossInTuns.size())
     LOG_FAIL("replacement for throw call");
 
-
+  /*
   newInnerPoss->m_inTuns.clear();
   newInnerPossInTuns.reserve(newInnerPoss->m_inTuns.size());
   for(auto tun : newInnerPossInTuns)
     newInnerPoss->m_inTuns.push_back(tun);
   newInnerPossInTuns.empty();
-
-//   swap(newInnerPoss->m_inTuns, newInnerPossInTuns);
+  */
+   swap(newInnerPoss->m_inTuns, newInnerPossInTuns);
 
   newOuter->AddPoss(newInnerPoss);
   outerPoss->AddPSet(newOuter, true, true);

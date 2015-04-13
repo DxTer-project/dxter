@@ -2012,27 +2012,27 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
       newPoss->DeleteChildAndCleanUp(node,false,false,true);
     }
 
-    iter = inliningPoss->m_inTuns.begin();
-    for(; iter != inliningPoss->m_inTuns.end(); ++iter)  {
-      Node *node = map[*iter];
+    TunVecIter tunIter = inliningPoss->m_inTuns.begin();
+    for(; tunIter != inliningPoss->m_inTuns.end(); ++tunIter)  {
+      Tunnel *node = (Tunnel*)(map[*tunIter]);
       if (!node) {
         cout << "!node in dup\n";
         LOG_FAIL("replacement for throw call");
 	throw;
       }
       newPoss->m_inTuns.push_back(node);
-      if (!(*iter)->m_poss) {
-        cout << "!(*iter)->m_poss for " << *iter << endl;
+      if (!(*tunIter)->m_poss) {
+        cout << "!(*tunIter)->m_poss for " << *tunIter << endl;
         LOG_FAIL("replacement for throw call");
 	throw;
       }
     }
     
-    iter = inliningPoss->m_outTuns.begin();
-    for(; iter != inliningPoss->m_outTuns.end(); ++iter) {
-      Node *node = map[*iter];
-      if (!(*iter)->m_poss) {
-        cout << "!(*iter)->m_poss\n";
+    tunIter = inliningPoss->m_outTuns.begin();
+    for(; tunIter != inliningPoss->m_outTuns.end(); ++tunIter) {
+      Tunnel *node = (Tunnel*)(map[*tunIter]);
+      if (!(*tunIter)->m_poss) {
+        cout << "!(*tunIter)->m_poss\n";
         LOG_FAIL("replacement for throw call");
 	throw;
       }
@@ -2044,9 +2044,9 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
       newPoss->m_outTuns.push_back(node);
     }
 
-    iter = newPoss->m_outTuns.begin();
-    for(; iter != newPoss->m_outTuns.end(); ++iter) {
-      Node *node = *iter;
+    tunIter = newPoss->m_outTuns.begin();
+    for(; tunIter != newPoss->m_outTuns.end(); ++tunIter) {
+      Tunnel *node = *tunIter;
       for(unsigned int i = 0; i < node->m_inputs.size(); ++i) {
 	Node *in = node->Input(i);
 	if (tunnelNumMap.find(in) != tunnelNumMap.end()) {
@@ -2059,7 +2059,7 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
       }
     }
 
-    iter = newPoss->m_possNodes.begin();
+    iter= newPoss->m_possNodes.begin();
     for(; iter != newPoss->m_possNodes.end(); ++iter) {
       Node *node = *iter;
       for(unsigned int i = 0; i < node->m_children.size(); ++i) {
