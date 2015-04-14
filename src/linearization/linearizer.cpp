@@ -116,7 +116,7 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
     if (!m_shallow) {
 #if DOTENSORS
       m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfLocalElements(node->InputConnNum(0));
-#else
+#elif TWOD
       m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfElements(node->InputConnNum(0));
 #endif
     }

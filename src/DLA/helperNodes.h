@@ -77,7 +77,7 @@ class InputNode : public DLANode
 #if DODM
   InputNode(NodeType type, Size m, Size n, string name, DistType dist);
 #endif
-#else
+#elif DOTENSORS
   InputNode(NodeType type, const SizesVec &sizes, string name);
   InputNode(NodeType type, const SizesVec &sizes, const DistType &dist, string name);
   InputNode(NodeType type, const SizeList *sizes, string name);
@@ -101,7 +101,7 @@ class InputNode : public DLANode
   virtual const SizeList* LocalM(ConnNum num) const;
   virtual const SizeList* LocalN(ConnNum num) const;
 #endif
-#else
+#elif DOTENSORS
   virtual const Dim NumDims(ConnNum num) const;
   virtual const SizeList* Len(ConnNum num, Dim dim) const;
   virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
@@ -132,7 +132,7 @@ class OutputNode : public DLANode
   virtual const SizeList* LocalM(ConnNum num) const;
   virtual const SizeList* LocalN(ConnNum num) const;
 #endif
-#else
+#elif DOTENSORS
   virtual const Dim NumDims(ConnNum num) const;
   virtual const SizeList* Len(ConnNum num, Dim dim) const;
   virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;

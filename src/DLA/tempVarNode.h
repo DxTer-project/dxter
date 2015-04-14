@@ -73,7 +73,7 @@ class TempVarNode : public DLANode
   virtual const SizeList* LocalM(ConnNum num) const;
   virtual const SizeList* LocalN(ConnNum num) const;
 #endif
-#else
+#elif DOLOOPS
   virtual const Dim NumDims(ConnNum num) const;
   virtual const SizeList* Len(ConnNum num, Dim dim) const;
   virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;

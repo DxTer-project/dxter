@@ -26,6 +26,8 @@
 #include "elemRedist.h"
 #include <cmath>
 
+#if DOLOOPS
+
 #if TWOD
 CombineSingleIter::CombineSingleIter() 
   :CombineBase()
@@ -482,3 +484,4 @@ LoopTunnel* CombineSingleIter::GetMatchingInTun() const
     throw;
   }
 }
+#endif //DOLOOPS

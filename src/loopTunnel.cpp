@@ -29,6 +29,8 @@
 #include "splitSingleIter.h"
 #include "sizesCache.h"
 
+#if DOLOOPS
+
 
 LoopTunnel::LoopTunnel(TunType type)
 : Tunnel(type)
@@ -895,3 +897,4 @@ void LoopTunnel::BuildSizes(const SizeList *controlSizes, int stride)
   }
 }
 #endif
+#endif //DOLOOPS

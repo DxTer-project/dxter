@@ -29,6 +29,7 @@
 #include "splitBase.h"
 #include "LLDLA.h"
 
+#if DOLOOPS
 
 class CombineSingleIter;
 
@@ -120,3 +121,4 @@ class SplitSingleIter : public SplitBase
   virtual const SizeList* GetControlSizes() const;
 };
 
+#endif //DOLOOPS

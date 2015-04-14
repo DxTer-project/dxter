@@ -497,11 +497,13 @@ void Poss::DeleteChildAndCleanUp(Node *output,
         cout << "calling DeleteChildAndCleanUp on Tunnel!\n";
         LOG_FAIL("replacement for throw call");
       }
+#if DOLOOPS
       else if (output->GetNodeClass() == LoopTunnel::GetClass()){
         if (!((LoopTunnel*)output)->m_pset->IsReal())
           LOG_FAIL("replacement for throw call");
         ((RealLoop*)((LoopTunnel*)output)->m_pset)->TryToDeleteLoopTunnelSetAndCleanUp((LoopTunnel*)output);
       }
+#endif
       else
         LOG_FAIL("replacement for throw call");
     }
@@ -890,6 +892,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
     if (pset->IsReal())
       didMerge |= ((RealPSet*)pset)->MergePosses(simplifiers, cullFunc);
   }
+#if DOLOOPS
   if (!didMerge) {
     //Didn't make any changes in the recursion
     //First see if there are any loops to fuse
@@ -951,6 +954,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
       }
     }
   }
+#endif //DOLOOPS
   
   if (!didMerge) {
     if (m_sets.size() >= 2) {
@@ -2387,6 +2391,7 @@ void Poss::FormSets(unsigned int phase)
 #endif
 }
 
+#if DOLOOPS
 void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc)
 {
   BasePSet *leftSet;
@@ -2689,6 +2694,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   newSet->BuildDataTypeCache();
   BuildDataTypeCache();
 }
+#endif //DOLOOPS
 
 void Poss::ClearBeforeProp()
 {
@@ -2868,6 +2874,7 @@ string GetFusedString(const IntSet *set)
 
 bool Poss::HasFused(const BasePSet *left, const BasePSet *right) const
 {
+#if DOLOOPS
   //Only mantain list for loops
   if (!left->IsLoop() || !right->IsLoop())
     LOG_FAIL("replacement for throw call");
@@ -2877,10 +2884,15 @@ bool Poss::HasFused(const BasePSet *left, const BasePSet *right) const
   fusedSet.insert(label2.begin(), label2.end());
   string str = GetFusedString(&fusedSet);
   return M_fusedSets.find(str) != M_fusedSets.end();
+#else
+  throw;
+#endif
 }
+
 
 void Poss::SetFused(const BasePSet *left, const BasePSet *right)
 {
+#if DOLOOPS
   if (!left->IsLoop() || !right->IsLoop())
     LOG_FAIL("replacement for throw call");
   const IntSet &label1 = (dynamic_cast<const LoopInterface*>(left))->GetLabel();
@@ -2889,6 +2901,9 @@ void Poss::SetFused(const BasePSet *left, const BasePSet *right)
   fusedSet.insert(label2.begin(), label2.end());
   string str = GetFusedString(&fusedSet);
   M_fusedSets.insert(str);
+#else
+  throw;
+#endif
 }
 
 
@@ -3034,10 +3049,14 @@ void Poss::Unflatten(ifstream &in, SaveInfo &info)
     READ(isReal);
     BasePSet *newSet;
     if (isLoop) {
+#if DOLOOPS
       if (isReal)
         newSet = new RealLoop;
       else
         newSet = new ShadowLoop;
+#else
+      throw;
+#endif
     }
     else {
       if (isReal)

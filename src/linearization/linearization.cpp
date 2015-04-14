@@ -283,7 +283,7 @@ bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const St
 	      what their actual max size is
 	    */
 	    throw;
-	    costDiff -=((DLANode*)output)->MaxNumberOfElements(0);
+	    //	    costDiff -=((DLANode*)output)->MaxNumberOfElements(0);
 #endif
 	  }
 	  
@@ -315,7 +315,7 @@ bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const St
 	      what their actual max size is
 	    */
 	    throw;
-	    costDiff += ((DLANode*)(input->Input(0)))->MaxNumberOfElements(input->InputConnNum(0));
+	    //	    costDiff += ((DLANode*)(input->Input(0)))->MaxNumberOfElements(input->InputConnNum(0));
 #endif
 	  }
       }
@@ -349,7 +349,7 @@ bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const St
 	      what their actual max size is
 	    */
 	    throw;
-	    costTempDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfElements(inputConn->m_num);
+	    //	    costTempDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfElements(inputConn->m_num);
 #endif
 	  }
       }
@@ -373,7 +373,7 @@ bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const St
 	    costDiff -= ((DLANode*)node)->MaxNumberOfLocalElements(i);
 #else
 	    throw;
-	    costDiff -= ((DLANode*)node)->MaxNumberOfElements(i);
+	    //	    costDiff -= ((DLANode*)node)->MaxNumberOfElements(i);
 #endif
 	  }
       }
@@ -397,7 +397,7 @@ bool Linearization::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const St
 	      what their actual max size is
 	    */
 	    throw;
-	    costDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfElements(inputConn->m_num);
+	    //	    costDiff += ((DLANode*)(inputConn->m_n))->MaxNumberOfElements(inputConn->m_num);
 #endif
 	  }
       }

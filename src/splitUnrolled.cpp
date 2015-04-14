@@ -26,6 +26,8 @@
 #include "LLDLA.h"
 
 
+#if DOLOOPS
+
 SplitUnrolled::SplitUnrolled() 
   : SplitBase(),
     m_unrollFactor(0)
@@ -849,3 +851,4 @@ const SizeList* SplitUnrolled::GetControlSizes() const
   throw;
 }
 
+#endif //DOLOOPS

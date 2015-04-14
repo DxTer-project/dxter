@@ -30,6 +30,8 @@
 
 #include "partition.h"
 
+#if DOLOOPS
+
 #if TWOD
 SplitSingleIter::SplitSingleIter() 
   : SplitBase()
@@ -1823,3 +1825,4 @@ const SizeList* SplitSingleIter::GetControlSizes() const
   return InputLen(0,m_partDim);
 }
 #endif
+#endif //DOLOOPS

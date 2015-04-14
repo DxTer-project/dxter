@@ -62,6 +62,13 @@ void SetLinElem::Print(IndStream &out, GraphIter *graphIter, Poss *poss)
 
   RealPSet *real = m_set->GetReal();
   
+#if !DOLOOPS
+    real->PrePrint(out,poss);
+    ++out;
+    graphIter->Print(out, m_set, m_live, m_cost);
+    --out;
+    real->PostPrint(out,poss);
+#else
   if (!real->IsLoop() ||
       !((RealLoop*)real)->IsUnrolled()) {
     real->PrePrint(out,poss);
@@ -86,6 +93,7 @@ void SetLinElem::Print(IndStream &out, GraphIter *graphIter, Poss *poss)
     }
     --out;
   }
+#endif
 
   out.Indent();
   *out << "//****\n";
@@ -153,8 +161,10 @@ VarCostMap SetLinElem::NewVarsAndCosts() const
       if (!alsoInput) {
 #if DOTENSORS
 	map[outName] = ((DLANode*)outTun)->MaxNumberOfLocalElements(0);
-#else
+#elif TWOD
 	map[outName] = ((DLANode*)outTun)->MaxNumberOfElements(0);
+#else
+	throw;
 #endif
       }
     }

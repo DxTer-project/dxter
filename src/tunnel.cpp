@@ -244,7 +244,7 @@ const SizeList* Tunnel::LocalN(ConnNum num) const
 }
 #endif
 
-#else
+#elif DOTENSORS
 const Dim Tunnel::NumDims(ConnNum num) const
 {
 

@@ -93,6 +93,8 @@ void RegAllLLDLANodes()
 {
 
 }
+#elif DOBOOL
+
 #else
 asdklfja
 #endif

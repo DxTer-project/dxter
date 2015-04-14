@@ -147,7 +147,9 @@ class Poss
   bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
   void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
   void FormSets(unsigned int phase);
+#if DOLOOPS
   void FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
+#endif
   virtual Cost Prop();
   virtual void Cull(Phase phase);
   void CullWorstPerformers(double percentToCull, int ignoreThreshold);

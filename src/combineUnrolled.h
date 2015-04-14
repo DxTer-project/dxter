@@ -28,6 +28,8 @@
 #include "loopTunnel.h"
 #include "combineBase.h"
 
+#if DOLOOPS
+
 class CombineUnrolled : public CombineBase
 {
  public:
@@ -67,3 +69,5 @@ class CombineUnrolled : public CombineBase
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool IsCombine() const {LOG_FAIL("replacement for throw call");return true;}
 };
+
+#endif // DOLOOPS

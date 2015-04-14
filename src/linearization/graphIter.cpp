@@ -131,6 +131,9 @@ void GraphIter::AddCurrPossVars(VarSet &set) const
     (*iter)->AddVariables(set);
   }
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
+#if !DOLOOPS
+    m_subIters[i]->AddCurrPossVars(set);
+#else
     BasePSet *base = m_poss->m_sets[i];
     RealPSet *real = base->GetReal();
     if (!real->IsLoop() ||
@@ -146,6 +149,7 @@ void GraphIter::AddCurrPossVars(VarSet &set) const
 	m_subIters[i]->AddCurrPossVars(set);
       }
     }
+#endif
   }
 }
 

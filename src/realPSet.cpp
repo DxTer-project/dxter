@@ -62,10 +62,12 @@ void RealPSet::Init(Poss *poss)
     LOG_FAIL("replacement for throw call");
     throw;
   }
+#if DOLOOPS
   if (IsLoop()) {
     //    Loop *loop = (Loop*)this;
     m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize().GetSize());
   }
+#endif
   /*
   //Make single tunnels with multiple inputs/outputs into individual tunnels
   //Poss mergin with multiple intput/output tunnels is very buggy
@@ -535,10 +537,12 @@ void RealPSet::AddPoss(Poss *poss)
       throw;
     } else {
       m_functionality = poss->GetFunctionalityString();
+#if DOLOOPS
       if (IsLoop()) {
 	//	Loop *loop = (Loop*)this;
 	m_functionality += (char)((dynamic_cast<const LoopInterface*>(this))->GetBSSize().GetSize());
       }
+#endif
       if (m_functionality.empty()) {
 	LOG_FAIL("replacement for throw call");
 	throw;
@@ -604,6 +608,7 @@ bool RealPSet::operator==(const BasePSet &rhs) const
     return false;
   }
   else {
+#if DOLOOPS
     if (IsLoop()) {
       if (!realRhs.IsLoop())
         return false;
@@ -659,6 +664,7 @@ bool RealPSet::operator==(const BasePSet &rhs) const
         }
       }
     }
+#endif //DOLOOPS
 #if DOBLIS
     else if (IsCritSect()) {
       if (!realRhs.IsCritSect())
@@ -1246,6 +1252,7 @@ void RealPSet::CombineAndRemoveTunnels()
           && setInput1->Input(0) == setInput2->Input(0)
           && setInput1->InputConnNum(0) == setInput2->InputConnNum(0))
 	{
+#if DOLOOPS
 	  if (setInput1->IsLoopTunnel() && setInput2->IsLoopTunnel()) {
 	    const LoopTunnel *tun1 = (LoopTunnel*)(setInput1);
 	    const LoopTunnel *tun2 = (LoopTunnel*)(setInput2);
@@ -1269,6 +1276,7 @@ void RealPSet::CombineAndRemoveTunnels()
 #endif
 	    }
 	  }
+#endif //DOLOOPS
 	  if (setInput1->m_children.size() != setInput2->m_children.size()) {
 	    cout << setInput1->m_children.size() << " vs. " << setInput2->m_children.size() << endl;
 	    cout << setInput1 << endl;
@@ -1370,13 +1378,16 @@ void RealPSet::CombineAndRemoveTunnels()
   
   for(unsigned int i = 0; i < m_outTuns.size(); ++i) {
     Node *tun = OutTun(i);
+#if DOLOOPS
     if (tun->IsLoopTunnel()) {
       if (!((LoopTunnel*)tun)->IsConst()) {
         continue;
       }
     }
+#endif
     if (tun->m_children.empty()) {
       bool skip = false;
+#if DOLOOPS
       Node *inTun = tun->Input(0);
       if (inTun->IsLoopTunnel()) {
         Node *source = inTun->Input(inTun->m_inputs.size()-1);
@@ -1391,6 +1402,7 @@ void RealPSet::CombineAndRemoveTunnels()
         if (!found)
           skip = true;
       }
+#endif //DOLOOPS
       if (!skip) {
         NodeConnVecIter iter = tun->m_inputs.begin();
         for( ; iter != tun->m_inputs.end(); ++iter) {
@@ -1424,55 +1436,6 @@ void RealPSet::CombineAndRemoveTunnels()
         continue;
       }
     }
-    /*
-    if (tun->IsLoopTunnel() && (((LoopTunnel*)tun)->IsCombine())) {
-      for(unsigned int j = i+1; j < m_outTuns.size(); ++j) {
-        Node *tun2 = OutTun(j);
-        if (tun2->GetNodeClass() == tun->GetNodeClass()) {
-          if (!((LoopTunnel*)tun)->IsConst()) {
-            continue;
-          }
-          Node *in1 = tun->Input(0);
-          Node *in2 = tun2->Input(0);
-          if (in1->Input(in1->m_inputs.size()-1) !=
-              in2->Input(in2->m_inputs.size()-1)) {
-            continue;
-          }
-          SplitBase *split1 = (SplitBase*)tun;
-          SplitBase *split2 = (SplitBase*)tun2;
-#if TWOD
-          if (split1->m_dir != split2->m_dir) {
-            continue;
-          }
-#else
-          if (split1->m_partDim != split2->m_partDim) {
-            continue;
-          }
-#endif
-	  if (split1->GetNodeClass() != split2->GetNodeClass())
-	    continue;
-	  if (split1->GetNodeClass() == SplitUnrolled::GetClass()) {
-	    if (((SplitUnrolled*)split1)->m_unrollFactor != ((SplitUnrolled*)split1)->m_unrollFactor)
-	      continue;
-	  }
-          split2->RedirectAllChildren(split1);
-          NodeConnVecIter iter = split2->m_inputs.begin();
-          for( ; iter != split2->m_inputs.end(); ++iter) {
-            Node *possOut = (*iter)->m_n;
-            delete possOut->m_children[0];
-            possOut->m_children.clear();
-            possOut->m_poss->DeleteChildAndCleanUp(possOut);
-            delete *iter;
-          }
-          split2->m_inputs.clear();
-          delete split2;
-          m_outTuns.erase(m_outTuns.begin()+j);
-          --j;
-          --i;
-        }
-      }
-    }
-    */
   }
 }
 
@@ -1723,10 +1686,13 @@ void RealPSet::InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPos
 
   RealPSet *pset = (RealPSet*)(inliningPoss->m_sets[num]);
 
+#if DOLOOPS
   if (pset->IsLoop() || !pset->IsTransparent()) {
     LOG_FAIL("replacement for throw call");
     throw;
   }
+#endif
+
   
   NodeIntMap tunnelNumMap;
   

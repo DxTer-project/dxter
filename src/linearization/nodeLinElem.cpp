@@ -76,7 +76,7 @@ VarCostMap NodeLinElem::NewVarsAndCosts() const
 	}
 #if DODM
 	map[m_node->GetNameStr(0)] = ((DLANode*)m_node)->MaxNumberOfLocalElements(0);
-#else
+#elif TWOD
 	map[m_node->GetNameStr(0)] = ((DLANode*)m_node)->MaxNumberOfElements(0);
 #endif
 	return map;

@@ -29,6 +29,8 @@
 #include "critSect.h"
 #include "blis.h"
 
+#if DOLOOPS
+
 int RealLoop::M_currLabel = 0;
 
 RealLoop::RealLoop()
@@ -539,3 +541,4 @@ Cost RealLoop::Prop()
   
   return IntLoop<RealPSet>::Prop();
 }
+#endif //DOLOOPS

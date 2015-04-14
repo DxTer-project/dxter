@@ -27,18 +27,19 @@
 #include "shadowLoop.h"
 #include "loopTunnel.h"
 
+#if DOLOOPS
 class CombineBase : public LoopTunnel
 {
  public:
 #if TWOD
   PartDir m_dir;
-#else
+#elif DOTENSORS
   Dim m_partDim;
 #endif
 #if TWOD
  CombineBase() :LoopTunnel(LASTTUNNEL),m_dir(LASTPARTDIR) {}
  CombineBase(PartDir dir, TunType type) : LoopTunnel(type), m_dir(dir) {}
-#else
+#elif DOTENSORS
  CombineBase() :LoopTunnel(LASTTUNNEL),m_partDim(99) {}
    CombineBase(Dim partDim, TunType type) : LoopTunnel(type), m_partDim(partDim) {}
 #endif
@@ -47,3 +48,4 @@ class CombineBase : public LoopTunnel
   virtual void UnflattenCore(ifstream &in, SaveInfo &info);
   virtual bool IsCombine() const {LOG_FAIL("replacement for throw call"); return true;}
 };
+#endif //DOLOOPS

@@ -31,6 +31,9 @@
 #include "intLoop.h"
 #include "realPSet.h"
 
+
+#if DOLOOPS
+
 class RealLoop : public IntLoop<RealPSet>
 {
  private:
@@ -89,3 +92,4 @@ class RealLoop : public IntLoop<RealPSet>
   inline bool IsUnrolled() const {return m_flags & SETLOOPISUNROLLED;}
   virtual Cost Prop();  
 };
+#endif //DOLOOPS

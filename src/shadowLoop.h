@@ -30,6 +30,8 @@
 #include "intLoop.h"
 #include "shadowPSet.h"
 
+#if DOLOOPS
+
 class ShadowLoop : public IntLoop<ShadowPSet>
 {
   virtual BasePSet* GetNewInst() {return (BasePSet*)(new ShadowLoop);}
@@ -48,3 +50,4 @@ class ShadowLoop : public IntLoop<ShadowPSet>
 
   virtual const IntSet& GetLabel() const;
 };
+#endif // DOLOOPS
