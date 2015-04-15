@@ -208,9 +208,9 @@ class Node
   void BuildDataTypeCacheRecursive();
 
   void Flatten(ofstream &out) const;
-  virtual void FlattenCore(ofstream &out) const = 0;
+  virtual void FlattenCore(ofstream &out) const {throw;}
   void Unflatten(ifstream &in, SaveInfo &info);
-  virtual void UnflattenCore(ifstream &in, SaveInfo &info) = 0;
+  virtual void UnflattenCore(ifstream &in, SaveInfo &info) {throw;}
   
   virtual const DataTypeInfo& DataType(ConnNum num) const = 0;
   virtual const DataTypeInfo& InputDataType(ConnNum num) const;

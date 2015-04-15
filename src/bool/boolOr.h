@@ -26,46 +26,29 @@
 
 #include "DLAOp.h"
 
-class True : public Node
+class Or : public Node
 {
+  Name m_name;
   static DataTypeInfo m_info;
-  static Name m_name;
-  static Node* BlankInst() { return new True; }
+
+  public:
+
+  Or();
+  string GetUniqueName();
+  static Node* BlankInst() { return new Or; }
   virtual Node* GetNewInst() { return BlankInst(); }
-  //  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "True";}
-  virtual Cost GetCost() {return 0;}
-  virtual Name GetName(ConnNum num) const {return m_name;}
+  static ClassType GetClass() {return "or";}
+  virtual Cost GetCost() {return 1;}
+  virtual Name GetName(ConnNum num) const;
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual const DataTypeInfo& DataType(ConnNum num) const { return m_info;}
-  virtual NodeType GetType() const {return "True";}
+  virtual NodeType GetType() const {return "or";}
   virtual Phase MaxPhase() const {return NUMPHASES;}
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
   //  virtual void AddVariables(VarSet &set) const;
 };
-
-
-class False : public Node
-{
-  static DataTypeInfo m_info;
-  static Name m_name;
-  static Node* BlankInst() { return new False; }
-  virtual Node* GetNewInst() { return BlankInst(); }
-  //  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-  virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "False";}
-  virtual Cost GetCost() {return 0;}
-  virtual Name GetName(ConnNum num) const {return m_name;}
-  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
-  virtual const DataTypeInfo& DataType(ConnNum num) const { return m_info;}
-  virtual NodeType GetType() const {return "False";}
-  virtual Phase MaxPhase() const {return NUMPHASES;}
-  virtual void Prop();
-  virtual void PrintCode(IndStream &out);
-  //  virtual void AddVariables(VarSet &set) const;
-};
-
 
 #endif //DOBOOL

@@ -144,8 +144,12 @@ int main(int argc, const char* argv[])
 
 RealPSet* Example1()
 {
-  True *val = new True;
-  Poss *poss = new Poss(1, val);
+  True *tVal = new True;
+  False *fVal = new False;
+  Or *orNode = new Or;
+  orNode->AddInputs0(2, tVal, fVal);
+  
+  Poss *poss = new Poss(1, orNode);
   RealPSet *pset = new RealPSet(poss);
   return pset;
 }

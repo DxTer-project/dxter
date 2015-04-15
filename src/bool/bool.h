@@ -19,37 +19,12 @@
  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+#pragma once
 
 #include "layers.h"
+#if DOBOOL
+
 #include "boolConsts.h"
+#include "boolOr.h"
 
-DataTypeInfo True::m_info;
-Name True::m_name("true");
-
-DataTypeInfo False::m_info;
-Name False::m_name("false");
-
-
-void True::Prop()
-{
-  if (!m_inputs.empty())
-    throw;
-}
-
-void True::PrintCode(IndStream &out)
-{
-}
-
-
-
-
-void False::Prop()
-{
-  if (!m_inputs.empty())
-    throw;
-}
-
-void False::PrintCode(IndStream &out)
-{
-}
+#endif //DOBOOL

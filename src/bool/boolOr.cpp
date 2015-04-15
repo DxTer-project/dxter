@@ -19,37 +19,49 @@
  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "boolOr.h"
 
+#if DOBOOL
 
-#include "layers.h"
-#include "boolConsts.h"
+DataTypeInfo Or::m_info;
 
-DataTypeInfo True::m_info;
-Name True::m_name("true");
-
-DataTypeInfo False::m_info;
-Name False::m_name("false");
-
-
-void True::Prop()
+string Or::GetUniqueName()
 {
-  if (!m_inputs.empty())
+  static int num = 0;
+  return (string)"or" + std::to_string(num++);
+}
+
+Or::Or()
+:m_name(GetUniqueName())
+{
+
+}
+
+void Or::Duplicate(const Node *orig, bool shallow, bool possMerging)
+{
+  Node::Duplicate(orig, shallow, possMerging);
+  const Or *orOrig = (Or*)orig;
+  m_name = orOrig->m_name;
+}
+
+Name Or::GetName(ConnNum num) const
+{
+  return m_name;
+}
+
+void Or::Prop()
+{
+  if (m_inputs.size() != 2)
     throw;
 }
 
-void True::PrintCode(IndStream &out)
+void Or::PrintCode(IndStream &out)
 {
+  out.Indent();
+  *out << m_name.str() << " = Or( " << GetInputNameStr(0)
+       << " , " << GetInputNameStr(1) << " );\n";
 }
 
 
 
-
-void False::Prop()
-{
-  if (!m_inputs.empty())
-    throw;
-}
-
-void False::PrintCode(IndStream &out)
-{
-}
+#endif // DOBOOL
