@@ -21,89 +21,19 @@
 
 #include "benchmarkMenu.h"
 #include "blasExamples.h"
-#include "costModel.h"
+#include "driverMenu.h"
+#include "driverSettings.h"
 #include "driverUtils.h"
 #include "miscellaneousExamples.h"
 #include "multiBLASExamples.h"
 #include "nodeTestExamples.h"
 #include "problemRunner.h"
 #include "singleOperationExamples.h"
-#include "uniqueNameSource.h"
 #include "testSuites.h"
 
 #if DOLLDLA
 
-#define DOEMPIRICALEVAL 1
-#define PRINTCOSTS 1
-
 Trans transA, transB;
-
-Architecture* arch;
-UniqueNameSource* localInputNames;
-CostModel* costModel;
-
-
-void Usage()
-{
-  cout <<"\n\nWelcome to DxTer LLDLA! Please choose an option below:\n\n";
-  cout << "./driver arg1 arg2 ...\n";
-  cout <<"\n";
-  cout <<"arg1 == 0   -> View benchmarks\n";
-  cout <<"\n";
-  cout <<"Single Operation Examples\n";
-  cout <<"         3  -> Dot prod F/D M\n";
-  cout <<"         4  -> Matrix add F/D M N\n";
-  cout <<"         5  -> Matrix vector multiply N/T F/D M N\n";
-  cout <<"         6  -> Scalar vector multiply C/R F/D M\n";
-  cout <<"         7  -> Vector matrix multiply F/D M N\n";
-  cout <<"         8  -> Scalar matrix multiply F/D M N\n";
-  cout <<"         9  -> Vector add C/R F/D M\n";
-  cout <<"        15  -> Gen Size Col Vector SVMul F/D M\n";
-  cout <<"\n";
-  cout <<"BLAS Examples\n";
-  cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
-  cout <<"        14  -> Gemv N/T F/D M N\n";
-  cout <<"        16  -> Axpy C/R F/D M\n";
-  cout <<"\n";
-  cout <<"Miscellaneous Examples\n";
-  cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";
-  cout <<"        10  -> Vector add twice F/D M\n";
-  cout <<"        11  -> Vector matrix vector multiply F/D M N\n";
-  cout <<"        12  -> Matrix add twice F/D M N\n";
-  cout <<"        13  -> Matrix vector multiply twice F/D M N P\n";
-  cout <<"        17  -> alpha*(A0 + A1)^T*B + beta*C F/D M N P\n";
-  cout <<"        18  -> alpha*A*x + beta*B*x F/D M N\n";
-  cout <<"        31  -> y = alpha*x + beta*(z + y) F/D M\n";
-  cout <<"        32  -> y = (A + B^T)*x F/D M N\n";
-  cout <<"\n";
-  cout <<"Node test examples\n";
-  cout <<"        19  -> Set to zero test (y <- Ax) F/D M N\n";
-  cout <<"        20  -> Pack test F/D M\n";
-  cout <<"        21  -> Copy test F/D M N\n";
-  cout <<"        22  -> Vertical partition recombine test F/D M\n";
-  cout <<"        23  -> Horizontal partition recombine test F/D M\n";
-  cout <<"        24  -> Vertical refined pack test F/D M\n";
-  cout <<"        25  -> Vertical pack unpack test F/D M\n";
-  cout <<"        26  -> 2D vertical pack unpack test F/D M N\n";
-  cout <<"        27  -> 2D vertical unpack test F/D M N\n";
-  cout <<"        28  -> 2D horizontal unpack test F/D M N\n";
-  cout <<"        29  -> 2D horizontal copy test F/D M N\n";
-  cout <<"\n";
-  cout <<"Automated tests\n";
-  cout <<"        30  -> Basic examples, no runtime evaluation\n";
-  cout <<"\n";
-}
-
-void SetUpGlobalState() {
-  LOG_START("LLDLA");
-  arch = new HaswellMacbook();
-  costModel = new BasicCostModel();
-  localInputNames = new UniqueNameSource("u_local_input_");
-}
-
-void TearDownGlobalState() {
-  LOG_END();
-}
 
 int main(int argc, const char* argv[])
 {
@@ -112,12 +42,12 @@ int main(int argc, const char* argv[])
   omp_set_nested(true);
 #endif
 
+  SetUpGlobalState();
+
   int m, n, p, k;
   Type precision;
   VecType vecType;
   ProblemInstance problemInstance;
-
-  SetUpGlobalState();
 
   RealPSet* algPSet;
   int algNum;
@@ -126,14 +56,14 @@ int main(int argc, const char* argv[])
   if (argc == 2 && *argv[1] == '0') {
     BenchmarkMenu();
   } else if(argc < 2) {
-    Usage();
+    PrintMainMenu();
     TearDownGlobalState(); return 0;
   } else {
     algNum = atoi(argv[1]);
     switch(algNum) {
     case(1):
       if (argc != 8) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_gemm";
@@ -150,7 +80,7 @@ int main(int argc, const char* argv[])
       break;
     case(2):
       if (argc != 9) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_double_gemm";
@@ -169,7 +99,7 @@ int main(int argc, const char* argv[])
       break;
     case(3):
       if (argc != 4) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_dot";
@@ -180,7 +110,7 @@ int main(int argc, const char* argv[])
       break;
     case(4):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_madd";
@@ -193,7 +123,7 @@ int main(int argc, const char* argv[])
       break;
     case(5):
       if (argc != 6) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_mvmul";
@@ -210,7 +140,7 @@ int main(int argc, const char* argv[])
       break;
     case(6):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_sv_mul";
@@ -222,7 +152,7 @@ int main(int argc, const char* argv[])
       break;
     case(7):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vmmul";
@@ -235,7 +165,7 @@ int main(int argc, const char* argv[])
       break;
     case(8):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_smmul";
@@ -248,7 +178,7 @@ int main(int argc, const char* argv[])
       break;
     case(9):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vadd";
@@ -260,7 +190,7 @@ int main(int argc, const char* argv[])
       break;
     case(10):
       if (argc != 4) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vadd2";
@@ -271,7 +201,7 @@ int main(int argc, const char* argv[])
       break;
     case(11):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vmvmul";
@@ -284,7 +214,7 @@ int main(int argc, const char* argv[])
       break;
     case(12):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_madd2";
@@ -297,7 +227,7 @@ int main(int argc, const char* argv[])
       break;
     case(13):
       if (argc != 6) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_mvmul2";
@@ -312,7 +242,7 @@ int main(int argc, const char* argv[])
       break;
     case(14):
       if (argc != 6) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_gemv";
@@ -329,7 +259,7 @@ int main(int argc, const char* argv[])
       break;
     case(15):
       if (argc != 4) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_sv_col_mul_gen";
@@ -340,7 +270,7 @@ int main(int argc, const char* argv[])
       break;
     case(16):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_saxpy";
@@ -352,7 +282,7 @@ int main(int argc, const char* argv[])
       break;
     case(17):
       if (argc != 6) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_sgemam";
@@ -367,7 +297,7 @@ int main(int argc, const char* argv[])
       break;
     case(18):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_sgemam";
@@ -380,7 +310,7 @@ int main(int argc, const char* argv[])
       break;
     case(19):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_zeroMVMul";
@@ -393,7 +323,7 @@ int main(int argc, const char* argv[])
       break;
     case(20):
       if (argc != 4) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_pack_test";
@@ -404,7 +334,7 @@ int main(int argc, const char* argv[])
       break;
     case(21):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_copy_test";
@@ -417,7 +347,7 @@ int main(int argc, const char* argv[])
       break;
     case(22):
       if (argc != 4) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_partition_recombine_test";
@@ -428,7 +358,7 @@ int main(int argc, const char* argv[])
       break;
     case(23):
       if (argc != 4) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_horizontal_partition_recombine_test";
@@ -439,7 +369,7 @@ int main(int argc, const char* argv[])
       break;
     case(24):
       if (argc != 4) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_refined_pack_test";
@@ -450,7 +380,7 @@ int main(int argc, const char* argv[])
       break;
     case(25):
       if (argc != 4) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_pack_unpack_test";
@@ -461,7 +391,7 @@ int main(int argc, const char* argv[])
       break;
     case(26):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_2D_pack_unpack_test";
@@ -474,7 +404,7 @@ int main(int argc, const char* argv[])
       break;
     case(27):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vertical_2D_unpack_test";
@@ -487,7 +417,7 @@ int main(int argc, const char* argv[])
       break;
     case(28):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_horizontal_2D_unpack_test";
@@ -500,7 +430,7 @@ int main(int argc, const char* argv[])
       break;
     case(29):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_horizontal_2D_copy_test";
@@ -513,14 +443,14 @@ int main(int argc, const char* argv[])
       break;
     case(30):
       if (argc != 2) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       BasicNoRuntimeEvalTests();
       TearDownGlobalState(); return 0;
     case(31):
       if (argc != 4) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "dxt_vmuladd_benchmark";
@@ -531,7 +461,7 @@ int main(int argc, const char* argv[])
       break;
     case(32):
       if (argc != 5) {
-	Usage();
+	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
       opName = "lgen_comparison_l2";
@@ -543,7 +473,7 @@ int main(int argc, const char* argv[])
       algPSet = LGenCompareL2(precision, m, n);
       break;
     default:
-      Usage();
+      PrintMainMenu();
       TearDownGlobalState();
       return 0;
     }
