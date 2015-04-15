@@ -24,6 +24,7 @@
 #include "layers.h"
 #if DOBOOL
 
+#include "helperNodes.h"
 #include "boolConsts.h"
 #include "boolOr.h"
 

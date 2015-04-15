@@ -148,8 +148,12 @@ RealPSet* Example1()
   False *fVal = new False;
   Or *orNode = new Or;
   orNode->AddInputs0(2, tVal, fVal);
+
+  InputNode *inNode = new InputNode("val1");
+  Or *orNode2 = new Or;
+  orNode2->AddInputs0(2, orNode, inNode);
   
-  Poss *poss = new Poss(1, orNode);
+  Poss *poss = new Poss(1, orNode2);
   RealPSet *pset = new RealPSet(poss);
   return pset;
 }

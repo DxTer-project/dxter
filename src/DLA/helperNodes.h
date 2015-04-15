@@ -50,6 +50,7 @@ class InputNode : public DLANode
 
  public:
   InputNode();
+  InputNode(string str);
 #if TWOD
 #if DOLLDLA
   Size m_rowStrideVal, m_colStrideVal;

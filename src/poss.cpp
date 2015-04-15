@@ -737,9 +737,26 @@ Cost Poss::Prop()
 #endif // DOTENSORS
 #endif // CHECKFORSETREUSE
   
-  //  NodeVecIter nodeIter = m_possNodes.begin();
-  //  for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
-  //    Node *node = *nodeIter;
+
+#if DOBOOL
+  Linearizer lin(this);
+  lin.FindAnyLinearization();
+  for (auto linElem : lin.m_lin.m_order) {
+    if (linElem->IsNode()) {
+      Node *node = ((NodeLinElem*)linElem)->m_node;
+      node->Prop();
+      m_cost += node->GetCost();      
+      if (node->m_poss != this)
+	throw;
+    }
+    else if (linElem->IsSet()) {
+      BasePSet *set = ((SetLinElem*)linElem)->m_set;
+      m_cost += set->Prop();
+      if (set->m_ownerPoss != this)
+	throw;
+    }
+  }
+#else
   for (auto node : m_possNodes) {
     node->Prop();
     m_cost += node->GetCost();
@@ -750,12 +767,11 @@ Cost Poss::Prop()
       LOG_FAIL("replacement for throw call");
     }
   }
-  //  PSetVecIter setIter = m_sets.begin();
-  //  for( ; setIter != m_sets.end(); ++setIter) {
-  //    BasePSet *set = *setIter;
+
   for (auto set : m_sets) {
     m_cost += set->Prop();
   }
+#endif
   
   if (m_inTuns.size() != m_pset->m_inTuns.size()) {
     cout << m_inTuns.size() << endl;

@@ -39,6 +39,20 @@ m_type("InputNode")
 {
 }
 
+
+
+InputNode::InputNode(string str)
+:
+  m_varName(str),
+  m_type(str)
+#if TWOD
+#if DODM
+, m_mlsize(NULL), m_nlsize(NULL)
+#endif //DODM
+#endif
+{
+}
+
 #if TWOD
 #if DOLLDLA
 InputNode::InputNode(string name,
@@ -415,6 +429,11 @@ void InputNode::BuildDataTypeCache()
   else {
     m_lsizes = m_sizes;
   }
+}
+#elif DOBOOL
+void InputNode::BuildDataTypeCache()
+{
+
 }
 #else
 void InputNode::BuildDataTypeCache()
