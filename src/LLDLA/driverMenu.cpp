@@ -56,6 +56,7 @@ void PrintMainMenu()
   cout <<"        18  -> alpha*A*x + beta*B*x F/D M N\n";
   cout <<"        31  -> y = alpha*x + beta*(z + y) F/D M\n";
   cout <<"        32  -> y = (A + B^T)*x F/D M N\n";
+  cout <<"        34  -> q = A*p; s = A^T*r F/D M N\n";
   cout <<"\n";
   cout <<"Node test examples\n";
   cout <<"        19  -> Set to zero test (y <- Ax) F/D M N\n";

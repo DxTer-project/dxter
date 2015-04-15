@@ -487,6 +487,19 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(p, "p");
       algPSet = MMMulTest(precision, m, n, p);
       break;
+    case(34):
+      if (argc != 5) {
+	PrintMainMenu();
+	TearDownGlobalState(); return 0;
+      }
+      opName = "dxt_basic_multi_assign";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      algPSet = BasicMultiAssign(precision, m, n);
+      break;
     default:
       PrintMainMenu();
       TearDownGlobalState();

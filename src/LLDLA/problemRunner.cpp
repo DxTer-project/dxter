@@ -115,6 +115,10 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
   cout.flush();
 
   uni->ClearTransformations();
+  cout << "Culling worst performers" << endl;
+  uni->CullWorstPerformers(0.70, 0);
+  cout << "Done culling worst performers" << endl;
+  cout << "//Done culling with " << uni->TotalCount() << " algorithms";
 
   return uni;
 }

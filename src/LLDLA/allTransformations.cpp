@@ -121,12 +121,8 @@ void AddVVDotTrans() {
   Universe::AddTrans(VVDot::GetClass(), new VVDotSplitToMainAndResidual(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VVDot::GetClass(), new VVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-  //  Universe::AddTrans(VVDot::GetClass(), new VVDotLoopRef(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
   Universe::AddTrans(VVDot::GetClass(), new ResidualVVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
   Universe::AddTrans(VVDot::GetClass(), new VRWVVDotToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
 
   return;
 }
@@ -147,10 +143,6 @@ void AddMVMulTrans() {
   Universe::AddTrans(MVMul::GetClass(), new MVMulToSVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(MVMul::GetClass(), new MVMulToVVDot(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  //Universe::AddTrans(MVMul::GetClass(), new MVMulToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
-
-  //  Universe::AddTrans(MVMul::GetClass(), new MVMulPackOutput(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
 }
@@ -323,7 +315,7 @@ void AddTransformations() {
   AddArchSpecificTrans();
 
   AddTransposeTrans();
-  AddUnrollingTrans();
+  //  AddUnrollingTrans();
   AddSetToZeroTrans();
 }
 
