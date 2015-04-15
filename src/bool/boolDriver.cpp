@@ -28,21 +28,14 @@
 #endif
 #include "transform.h"
 #include "logging.h"
-#include "loopSupport.h"
-#include "helperNodes.h"
 #include <time.h>
 #include <iomanip>
-#include "DLAReg.h"
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-#include "contraction.h"
-#include "tensorRedist.h"
-#include "tensorPermute.h"
 #include <chrono>
 
 
 #if DOBOOL
+
+#include "bool.h"
 
 RealPSet* Example1();
 
@@ -149,4 +142,15 @@ int main(int argc, const char* argv[])
   return 0;
 }
 
+RealPSet* Example1()
+{
+  True *val = new True;
+  Poss *poss = new Poss(1, val);
+  RealPSet *pset = new RealPSet(poss);
+  return pset;
+}
+
+
 #endif
+
+
