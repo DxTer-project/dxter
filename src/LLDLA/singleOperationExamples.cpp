@@ -1,6 +1,56 @@
+/*
+    This file is part of DxTer.
+    DxTer is a prototype using the Design by Transformation (DxT)
+    approach to program generation.
+
+    Copyright (C) 2015, The University of Texas and Bryan Marker
+
+    DxTer is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    DxTer is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "singleOperationExamples.h"
 
 #if DOLLDLA
+
+#include "exampleUtils.h"
+#include "mmul.h"
+
+RealPSet* MMMulTest(Type dataType, int m, int n, int k) {
+
+  auto Ain = InputTunnel("A",
+			 m, k,
+			 1, m,
+			 dataType);
+
+  auto Bin = InputTunnel("B",
+			 k, n,
+			 1, k,
+			 dataType);
+
+  auto Cin = InputTunnel("C",
+			 m, n,
+			 1, m,
+			 dataType);
+
+  auto mul = new MMul(dataType, ABSLAYER);
+  mul->AddInputs(6,
+		 Ain, 0,
+		 Bin, 0,
+		 Cin, 0);
+
+  return WrapInPSet(mul);
+}
 
 RealPSet* DotTest(Type dataType, int m)
 {

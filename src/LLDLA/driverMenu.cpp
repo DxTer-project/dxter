@@ -39,6 +39,7 @@ void PrintMainMenu()
   cout <<"         8  -> Scalar matrix multiply F/D M N\n";
   cout <<"         9  -> Vector add C/R F/D M\n";
   cout <<"        15  -> Gen Size Col Vector SVMul F/D M\n";
+  cout <<"        33  -> MMMul F/D M N P\n";
   cout <<"\n";
   cout <<"BLAS Examples\n";
   cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";

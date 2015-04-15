@@ -472,6 +472,21 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(n, "n");
       algPSet = LGenCompareL2(precision, m, n);
       break;
+    case(33):
+      if (argc != 6) {
+	PrintMainMenu();
+	TearDownGlobalState(); return 0;
+      }
+      opName = "dxt_mmul";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      p = atoi(argv[5]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      problemInstance.AddDimension(p, "p");
+      algPSet = MMMulTest(precision, m, n, p);
+      break;
     default:
       PrintMainMenu();
       TearDownGlobalState();

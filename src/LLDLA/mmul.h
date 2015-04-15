@@ -32,7 +32,7 @@ class MMul : public Gemm
   MMul(Type type, Layer layer);
   virtual void PrintCode(IndStream &out);
   virtual void Prop();
-  virtual Phase MaxPhase() const { return NUMPHASES; }
+  virtual Phase MaxPhase() const;
 
   static Node* BlankInst();
   virtual Node* GetNewInst() { return BlankInst(); }
