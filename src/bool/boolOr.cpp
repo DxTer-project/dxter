@@ -19,7 +19,7 @@
  along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "boolOr.h"
+#include "bool.h"
 
 #if DOBOOL
 
@@ -64,4 +64,54 @@ void Or::PrintCode(IndStream &out)
 
 
 
+bool OrTrue::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != Or::GetClass())
+    throw;
+  const Or *orNode = (Or*)node;
+  if (orNode->Input(0)->GetNodeClass() == True::GetClass())
+    return true;
+  else if (orNode->Input(1)->GetNodeClass() == True::GetClass())
+    return true;
+  else
+    return false;
+}
+
+void OrTrue::Apply(Node *node) const
+{
+  Or *orNode = (Or*)node;
+  if (orNode->Input(0)->GetNodeClass() == True::GetClass())
+    orNode->RedirectChildren(orNode->Input(0),orNode->InputConnNum(0));
+  else
+    orNode->RedirectChildren(orNode->Input(1),orNode->InputConnNum(1));
+  
+  orNode->m_poss->DeleteChildAndCleanUp(orNode);
+}
+
+
+bool OrFalse::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != Or::GetClass())
+    throw;
+  const Or *orNode = (Or*)node;
+  if (orNode->Input(0)->GetNodeClass() == False::GetClass())
+    return true;
+  else if (orNode->Input(1)->GetNodeClass() == False::GetClass())
+    return true;
+  else
+    return false;
+}
+
+void OrFalse::Apply(Node *node) const
+{
+  Or *orNode = (Or*)node;
+  if (orNode->Input(0)->GetNodeClass() == False::GetClass())
+    orNode->RedirectChildren(orNode->Input(1),orNode->InputConnNum(1));
+  else
+    orNode->RedirectChildren(orNode->Input(0),orNode->InputConnNum(0));
+  
+  orNode->m_poss->DeleteChildAndCleanUp(orNode);
+}
+
 #endif // DOBOOL
+

@@ -51,4 +51,20 @@ class Or : public Node
   //  virtual void AddVariables(VarSet &set) const;
 };
 
+class OrTrue : public SingleTrans
+{
+ public:
+  virtual string GetType() const {return "Or with True";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class OrFalse : public SingleTrans
+{
+ public:
+  virtual string GetType() const {return "Or with False";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 #endif //DOBOOL

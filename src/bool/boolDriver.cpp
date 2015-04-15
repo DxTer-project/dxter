@@ -54,6 +54,12 @@ void AddTrans()
   //  Universe::AddTrans(RedistNode::GetClass(), new CombineAllGathers, BOOLPHASE);
 }
 
+void AddSimplifiers()
+{ 
+   Universe::AddTrans(Or::GetClass(), new OrTrue, SIMP);
+   Universe::AddTrans(Or::GetClass(), new OrFalse, SIMP);
+}
+
 void Usage()
 {
   cout << "./driver \n";
@@ -91,6 +97,7 @@ int main(int argc, const char* argv[])
   }
 
   AddTrans();
+  AddSimplifiers();
 
   Universe uni;
   AccurateTime start, start2, end;

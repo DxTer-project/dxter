@@ -30,6 +30,7 @@ class True : public Node
 {
   static DataTypeInfo m_info;
   static Name m_name;
+ public:
   static Node* BlankInst() { return new True; }
   virtual Node* GetNewInst() { return BlankInst(); }
   //  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
@@ -51,6 +52,7 @@ class False : public Node
 {
   static DataTypeInfo m_info;
   static Name m_name;
+ public:
   static Node* BlankInst() { return new False; }
   virtual Node* GetNewInst() { return BlankInst(); }
   //  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
