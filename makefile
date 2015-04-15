@@ -1,6 +1,6 @@
 CC         := g++
 LINKER     := $(CC)
-CFLAGS	   := -O3 -g -Wall -std=c++11 -Isrc/ -Isrc/DLA/ -Isrc/tensors -Isrc/LLDLA -Isrc/bool
+CFLAGS	   := -O3 -g -Wall -std=c++11 -Isrc/ -Isrc/DLA/ -Isrc/tensors -Isrc/LLDLA -Isrc/bool -Isrc/linearization
 
 HEADERS :=  $(shell find src -type f -name '*.h')
 SOURCES :=  $(shell find src -type f -name '*.cpp')

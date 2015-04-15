@@ -69,8 +69,15 @@ Linearizer::Linearizer(const Poss *poss, bool shallow)
 
 Linearizer::~Linearizer()
 {
+  Clear();
+}
+
+void Linearizer::Clear()
+{
   for(auto elem : m_elems)
     delete elem;
+  m_elems.clear();
+  m_lin.Clear();
 }
 
 void Linearizer::Start(const Poss *poss)

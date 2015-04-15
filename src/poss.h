@@ -23,6 +23,8 @@
 
 #pragma once
 
+#define USELINEARIZER DOBOOL
+
 #include "base.h"
 #include "node.h"
 #include "DLANode.h"
@@ -32,6 +34,9 @@
 #include <unordered_set>
 //#include "realPSet.h"
 //#include "basePSet.h"
+#if USELINEARIZER
+#include "linearizer.h"
+#endif
 
 //using namespace __gnu_cxx;
 
@@ -40,6 +45,7 @@ class RealPSet;
 class BasePSet;
 
 #define POSSISSANEFLAG (1L<<1)
+
 
 typedef vector<NodeConn*> NodeConnVec;
 typedef NodeConnVec::iterator NodeConnVecIter;
@@ -80,6 +86,9 @@ class Poss
   static GraphNum M_count;
   size_t m_hash;
   bool m_hashValid;
+#if USELINEARIZER
+  Linearizer m_lin;
+#endif //USELINEARIZER
  public:
   NodeVec m_possNodes;
   PSetVec m_sets;
@@ -169,7 +178,7 @@ class Poss
   void FillClique(NodeSet &set);
   static size_t Hash(const string &str);
   size_t GetHash();
-  virtual void InvalidateHash() {m_hashValid=false;}
+  virtual void InvalidateHash();
 
   void BuildDataTypeCache();
   void ClearDataTypeCache();

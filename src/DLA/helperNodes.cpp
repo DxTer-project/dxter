@@ -43,8 +43,8 @@ m_type("InputNode")
 
 InputNode::InputNode(string str)
 :
-  m_varName(str),
-  m_type(str)
+  m_type(str),
+  m_varName(str)
 #if TWOD
 #if DODM
 , m_mlsize(NULL), m_nlsize(NULL)

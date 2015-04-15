@@ -37,6 +37,7 @@
 
 #define ALWAYSFUSE !DOLLDLA
 
+
 StrSet Poss::M_fusedSets;
 
 GraphNum Poss::M_count = 1;
@@ -738,10 +739,13 @@ Cost Poss::Prop()
 #endif // CHECKFORSETREUSE
   
 
-#if DOBOOL
-  Linearizer lin(this);
-  lin.FindAnyLinearization();
-  for (auto linElem : lin.m_lin.m_order) {
+#if USELINEARIZER
+  if (m_lin.m_elems.empty()) {
+    m_lin.Start(this);
+    m_lin.FindAnyLinearization();
+  }
+    
+  for (auto linElem : m_lin.m_lin.m_order) {
     if (linElem->IsNode()) {
       Node *node = ((NodeLinElem*)linElem)->m_node;
       node->Prop();
@@ -2954,6 +2958,14 @@ size_t Poss::GetHash()
     m_hashValid = true;
     return m_hash;
   }
+}
+
+void Poss::InvalidateHash() 
+{
+  m_hashValid=false;
+#if USELINEARIZER
+  m_lin.Clear();
+#endif
 }
 
 void Poss::RemoveFromGraphNodes(Node *node)
