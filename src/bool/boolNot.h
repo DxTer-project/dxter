@@ -67,4 +67,12 @@ class NotFalse : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+class NotNot : public SingleTrans
+{
+ public:
+  virtual string GetType() const {return "Not Not";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
 #endif //DOBOOL

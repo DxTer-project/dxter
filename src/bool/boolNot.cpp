@@ -102,5 +102,24 @@ void NotFalse::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
+
+bool NotNot::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != Not::GetClass())
+    throw;
+  const Not *notNode = (Not*)node;
+  if (notNode->Input(0)->GetNodeClass() == Not::GetClass())
+    return true;
+  else
+    return false;
+}
+
+void NotNot::Apply(Node *node) const
+{
+  Node *input = node->Input(0);
+  node->RedirectChildren(input->Input(0), input->InputConnNum(0));
+  node->m_poss->DeleteChildAndCleanUp(node);
+}
+
 #endif // DOBOOL
 
