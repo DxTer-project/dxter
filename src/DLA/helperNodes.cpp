@@ -40,7 +40,7 @@ m_type("InputNode")
 }
 
 
-
+#if DOBOOL
 InputNode::InputNode(string str)
 :
   m_type(str),
@@ -52,6 +52,7 @@ InputNode::InputNode(string str)
 #endif
 {
 }
+#endif
 
 #if TWOD
 #if DOLLDLA

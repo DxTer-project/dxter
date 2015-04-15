@@ -22,6 +22,8 @@
 
 
 #include "layers.h"
+
+#if DOBOOL
 #include "boolConsts.h"
 
 DataTypeInfo True::m_info;
@@ -53,3 +55,4 @@ void False::Prop()
 void False::PrintCode(IndStream &out)
 {
 }
+#endif //DOBOOL
