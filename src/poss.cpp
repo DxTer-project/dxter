@@ -744,7 +744,7 @@ Cost Poss::Prop()
     m_lin.Start(this);
     m_lin.FindAnyLinearization();
   }
-    
+  
   for (auto linElem : m_lin.m_lin.m_order) {
     if (linElem->IsNode()) {
       Node *node = ((NodeLinElem*)linElem)->m_node;
@@ -3136,22 +3136,28 @@ void Poss::UnflattenStatic(ifstream &in)
 void Poss::BuildDataTypeCache()
 {
   PSetVecIter setIter;
-#if DOTENSORS
-  Linearizer lin(this, true);
-  lin.FindAnyLinearization();
-  for (auto elem:lin.m_lin.m_order) {
+#if USELINEARIZER
+  if (m_lin.m_elems.empty()) {
+    m_lin.Start(this);
+    m_lin.FindAnyLinearization();
+  }
+  for (auto elem : m_lin.m_lin.m_order) {
     if(elem->IsNode()) {
       Node *node = ((NodeLinElem*)elem)->m_node;
       node->m_flags &= ~NODEBUILDFLAG;
     }
   }
-  for (auto elem:lin.m_lin.m_order) {
+  for (auto elem : m_lin.m_lin.m_order) {
     if(elem->IsNode()) {
       Node *node = ((NodeLinElem*)elem)->m_node;
       node->BuildDataTypeCacheRecursive();
     }
     else if (elem->IsSet()) {
       BasePSet *set = ((SetLinElem*)elem)->m_set;
+      for(auto inTun : set->m_inTuns) {
+	inTun->m_flags &= ~NODEBUILDFLAG;
+	inTun->BuildDataTypeCacheRecursive();
+      }
       set->BuildDataTypeCache();
     }
   }

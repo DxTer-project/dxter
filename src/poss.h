@@ -23,7 +23,7 @@
 
 #pragma once
 
-#define USELINEARIZER DOBOOL
+#define USELINEARIZER 1
 
 #include "base.h"
 #include "node.h"
