@@ -169,7 +169,7 @@ void AddUnrollingTrans() {
 
 #if DO16MUTRANSFORMATIONS
   Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new CompactlyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
+>		     new CompactlyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
 #endif // DO3MUTRANSFORMATIONS
 
 #if DOLARGEMUTRANSFORMATIONS
@@ -315,7 +315,7 @@ void AddTransformations() {
   AddArchSpecificTrans();
 
   AddTransposeTrans();
-  //  AddUnrollingTrans();
+  AddUnrollingTrans();
   AddSetToZeroTrans();
 }
 
