@@ -39,6 +39,7 @@ bool FoundInVec(const LinElem *elem, const LinElemVec &vec)
 
 Linearizer::Linearizer()
 {
+  m_shallow = true;
   m_alwaysLiveCost = 0;
 }
 
