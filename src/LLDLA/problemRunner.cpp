@@ -114,11 +114,11 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-  uni->ClearTransformations();
+  /*  uni->ClearTransformations();
   cout << "Culling worst performers" << endl;
   uni->CullWorstPerformers(0.70, 0);
   cout << "Done culling worst performers" << endl;
-  cout << "//Done culling with " << uni->TotalCount() << " algorithms";
+  cout << "//Done culling with " << uni->TotalCount() << " algorithms";*/
 
   return uni;
 }
