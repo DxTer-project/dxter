@@ -11,6 +11,7 @@
 
 #if DOLLDLA
 
+RealPSet* MMMulTest(Type dataType, int m, int n, int k);
 RealPSet* DotTest(Type dataType, int m);
 RealPSet* MVMulTest(Type dataType, bool transpose, int m, int n);
 RealPSet* MAddTest(Type dataType, int m, int n);

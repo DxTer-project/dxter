@@ -32,6 +32,21 @@ MMul::MMul(Type type, Layer layer)
   m_regWidth = arch->VecRegWidth(type);
 }
 
+Phase MMul::MaxPhase() const {
+  switch (m_layer)
+    { 
+    case(ABSLAYER):
+      return LLDLALOOPPHASE;
+    case(LLDLAMIDLAYER):
+      return LLDLAPRIMPHASE;
+    case (LLDLAPRIMITIVELAYER):
+      return NUMPHASES; 
+    default:
+      LOG_FAIL("replacement for throw call");
+      throw;
+    }
+}
+
 void MMul::PrintCode(IndStream &out)
 {
   if (m_layer == ABSLAYER) {
@@ -56,8 +71,9 @@ void MMul::PrintCode(IndStream &out)
 	InputDataType(2).m_colStrideVar << ");\n";
       return;
     }
-    else
+    else {
       LOG_FAIL("replacement for throw call");
+    }
   }
 
   if (m_layer != LLDLAPRIMITIVELAYER) {
@@ -136,10 +152,10 @@ void MMul::Prop()
   if (!IsValidCost(m_cost)) {
     Gemm::Prop();
 
-    if (m_layer != LLDLAPRIMITIVELAYER) {
+    /*    if (m_layer != LLDLAPRIMITIVELAYER) {
       cout << "ERROR: MMul appears in layer " <<  LayerNumToStr(m_layer) << "\n" ;
       LOG_FAIL("replacement for throw call");
-    }
+      }
     
     if (*GetInputM(0) != m_regWidth || *GetInputN(0) != m_regWidth) 
       cout << "ERROR1: MMul only operates on m_regWidth by m_regWidth inputs\n";
@@ -152,7 +168,7 @@ void MMul::Prop()
     }
 
     if (*GetInputM(2) != m_regWidth || *GetInputN(2) != m_regWidth) 
-      cout << "ERROR3: MMul only operates on m_regWidth by m_regWidth inputs\n";
+    cout << "ERROR3: MMul only operates on m_regWidth by m_regWidth inputs\n";*/
 
     switch(m_layer) {
     case (ABSLAYER):

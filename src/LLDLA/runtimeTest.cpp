@@ -51,7 +51,6 @@ void RuntimeTest::AddIncludes()
 
 void RuntimeTest::AddMiscellaneousDefines()
 {
-  cout << "\n\n\n\n\n\n\nAdding misc defines\n\n\n\n\n";
   m_defines.push_back("#define BUF_SIZE 1000000");
   m_defines.push_back("#define MIN_CYCLES " + std::to_string((long long int) m_minCycles));
   m_defines.push_back("#define min(a,b) ((a) < (b) ? (a) : (b))");

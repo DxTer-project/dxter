@@ -3,6 +3,7 @@
 
 #if DOLLDLA
 
+RealPSet* BasicMultiAssign(Type dataType, int m, int n);
 RealPSet* LGenCompareL2(Type dataType, int m, int n);
 RealPSet* VMulAddBenchmark(Type dataType, int m);
 RealPSet* PackTest(Type dataType, int m);

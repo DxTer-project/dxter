@@ -34,6 +34,69 @@
 #include "vadd.h"
 #include "vvdot.h"
 
+RealPSet* BasicMultiAssign(Type dataType, int m, int n) {
+  auto Ain = InputTunnel("A",
+			 m, n,
+			 1, m,
+			 dataType);
+
+  auto q = InputTunnel("q",
+		       m, 1,
+		       1, m,
+		       dataType);
+
+
+  auto p = InputTunnel("p",
+		       n, 1,
+		       1, n,
+		       dataType);
+
+  auto s = InputTunnel("s",
+		       n, 1,
+		       1, n,
+		       dataType);
+
+  auto r = InputTunnel("r",
+		       m, 1,
+		       1, m,
+		       dataType);
+
+  auto qZ = new SetToZero(ABSLAYER);
+  qZ->AddInput(q, 0);
+
+  auto sZ = new SetToZero(ABSLAYER);
+  sZ->AddInput(s, 0);
+
+  auto Aqz = new MVMul(ABSLAYER);
+  Aqz->AddInputs(6,
+		 Ain, 0,
+		 p, 0,
+		 qZ, 0);
+
+  auto AT = new LLDLATranspose(ABSLAYER);
+  AT->AddInput(Ain, 0);
+
+  auto ATrs = new MVMul(ABSLAYER);
+  ATrs->AddInputs(6,
+		  AT, 0,
+		  r, 0,
+		  sZ, 0);
+
+  Poss* innerPoss = new Poss(2, Aqz, ATrs, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode* out1 = new OutputNode;
+  out1->AddInput(innerSet->OutTun(0), 0);
+
+  OutputNode* out2 = new OutputNode;
+  out2->AddInput(innerSet->OutTun(1), 0);
+
+  Poss* outerPoss = new Poss(2, out1, out2, true);
+  RealPSet* outerSet = new RealPSet(outerPoss);
+
+  return outerSet;
+}
+
 RealPSet* LGenCompareL2(Type dataType, int m, int n) {
   auto x = InputTunnel("X",
 		       n, 1,

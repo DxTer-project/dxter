@@ -148,7 +148,6 @@ Poss::Poss(Node *node, bool goUp)
   }
 }
 
-
 Poss::Poss(int numArgs, ...)
 {
   m_pset = NULL;
@@ -168,7 +167,6 @@ Poss::Poss(const NodeVec &nodes, bool outTuns, bool disconnectFromOwner)
   m_cost = -1;
   InitHelper(nodes, outTuns, disconnectFromOwner);
 }
-
 
 void Poss::MarkInsane(bool wrongPhase)
 {
