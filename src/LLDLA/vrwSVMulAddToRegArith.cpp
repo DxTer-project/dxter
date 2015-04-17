@@ -73,7 +73,7 @@ void VRWSVMulAddToRegArith::Apply(Node* node) const {
   mul->AddInput(loadA, 0);
 
   auto loadB = new LoadToRegs();
-  loadB->AddInput(svmul->Input(2), svmul->InputConnNum(1));
+  loadB->AddInput(svmul->Input(2), svmul->InputConnNum(2));
 
   auto add = new Add();
   add->AddInputs(4,

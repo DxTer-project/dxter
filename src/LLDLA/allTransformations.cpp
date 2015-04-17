@@ -298,7 +298,7 @@ void AddTransformations() {
   AddArchSpecificTrans();
 
   AddTransposeTrans();
-  //AddUnrollingTrans();
+  AddUnrollingTrans();
   AddSetToZeroTrans();
 }
 
