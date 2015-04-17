@@ -284,12 +284,12 @@ void AddTransformations() {
   AddVMMulTrans();
   AddVAddTrans();
 
-  //  AddRTLOptimizations();
-  //  AddPrimPhaseConversions();
-  //  AddArchSpecificTrans();
+  AddRTLOptimizations();
+  AddPrimPhaseConversions();
+  AddArchSpecificTrans();
 
   AddTransposeTrans();
-  //  AddUnrollingTrans();
+  //AddUnrollingTrans();
   AddSetToZeroTrans();
 }
 
