@@ -69,6 +69,7 @@ void GraphIter::Init(Poss *poss)
     m_setIters[i] = m_poss->m_sets[i]->GetPosses().begin();
     m_subIters[i] = new GraphIter(m_setIters[i]->second);
   }
+  m_cost = -1;
 }
 
 GraphIter& GraphIter::operator=(const GraphIter &rhs)
@@ -87,11 +88,13 @@ GraphIter& GraphIter::operator=(const GraphIter &rhs)
     m_setIters[i] = rhs.m_setIters[i];
     m_subIters[i] = new GraphIter(*(rhs.m_subIters[i]));
   }
+  m_cost = rhs.m_cost;
   return *this;
 }
 
 bool GraphIter::Increment()
 {
+  m_cost = -1;
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
     bool ret = m_subIters[i]->Increment();
     if (!ret) 
@@ -192,6 +195,7 @@ void GraphIter::EvalRoot(IndStream &out, GraphNum &graphNum, GraphNum whichGraph
   }
 }
 
+//Update Eval()
 Cost GraphIter::Eval(TransConstVec &transList)
 {
   unsigned int numPSets = m_poss->m_sets.size();
@@ -202,7 +206,7 @@ Cost GraphIter::Eval(TransConstVec &transList)
   for(; iter2 != m_poss->m_transVec.end(); ++iter2) {
     transList.push_back(*iter2);
   }
-  
+
   NodeVecConstIter iter = m_poss->m_possNodes.begin();
   for( ; iter != m_poss->m_possNodes.end(); ++iter) {
     DLANode *node =  (DLANode*)(*iter);
@@ -213,6 +217,34 @@ Cost GraphIter::Eval(TransConstVec &transList)
   for(unsigned int i = 0; i < numPSets; ++i) {
     tot += m_subIters[i]->Eval(transList);
   }
+
+  m_cost = tot;
+  
+  return tot;
+}
+
+//Update Eval(TransConstVec &transList)
+Cost GraphIter::Eval()
+{
+  unsigned int numPSets = m_poss->m_sets.size();
+
+  if (m_cost != -1)
+    return m_cost;
+
+  Cost tot = 0;
+  
+  NodeVecConstIter iter = m_poss->m_possNodes.begin();
+  for( ; iter != m_poss->m_possNodes.end(); ++iter) {
+    DLANode *node =  (DLANode*)(*iter);
+    double cost = node->GetCost();
+    tot += cost;
+  }
+
+  for(unsigned int i = 0; i < numPSets; ++i) {
+    tot += m_subIters[i]->Eval();
+  }
+
+  m_cost = tot;
   
   return tot;
 }
@@ -247,6 +279,8 @@ Cost GraphIter::EvalAndSetBest()
     }
     tot += optCost;
   }
+
+  m_cost = tot;
   
   return tot;
 
@@ -264,6 +298,8 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
     if (currOnly || whichGraph == 0 || whichGraph == graphNum) {
       if (!currOnly)
 	*out << "/*** Algorithm " << graphNum << " ***" << endl;
+      else if (whichGraph != 0)
+	*out << "/*** Algorithm " << whichGraph << " ***" << endl;
       else
 	*out << "/***\n";
       *out << "\tUnique Num: " << m_poss->m_num << endl;
@@ -274,7 +310,7 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
       TransVecConstIter transIter = transVec.begin();
       for( ; transIter != transVec.end(); ++transIter)
 	*out << "\t" << (*transIter)->GetType() << endl;
-      *out << "\t\tCost = " << m_poss->m_cost << endl;
+      *out << "\t\tCost = " << Eval() << endl;
       *out << "*****************************************/" << endl;
       
       VarSet set;

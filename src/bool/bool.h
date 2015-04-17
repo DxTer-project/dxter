@@ -27,6 +27,7 @@
 #include "helperNodes.h"
 #include "boolConsts.h"
 #include "boolOr.h"
+#include "boolAnd.h"
 #include "boolNot.h"
 
 #endif //DOBOOL

@@ -80,7 +80,7 @@ class Universe
 
   void ClearTransformations();
 
-  unique_ptr<ImplementationMap> ImpStrMap();
+  unique_ptr<ImplementationMap> ImpStrMap(unsigned int numGraphs = 0);
 
   static void RegCons(ClassType type, ConstructorFunc func);
   static Node* GetBlankClassInst(ClassType type);

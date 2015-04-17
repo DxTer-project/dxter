@@ -56,6 +56,7 @@ void AddTrans()
 
 void AddSimplifiers()
 { 
+   Universe::AddTrans(And::GetClass(), new AndToOut, SIMP);
    Universe::AddTrans(Or::GetClass(), new OrTrue, SIMP);
    Universe::AddTrans(Or::GetClass(), new OrFalse, SIMP);
    Universe::AddTrans(Not::GetClass(), new NotTrue, SIMP);

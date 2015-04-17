@@ -566,6 +566,8 @@ void Universe::PrintBest()
 
 void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
 {
+  if (m_pset->m_posses.size() != 1)
+    throw;
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;
@@ -650,16 +652,43 @@ void Universe::PrintStats()
   cout << "\t" << M_transCount[NUMPHASES] << " simplifiers\n";
 }
 
-unique_ptr<ImplementationMap> Universe::ImpStrMap() {
-  std::unique_ptr<ImplementationMap> impMap(new ImplementationMap());
-  GraphNum i;
-  for (i = 1; i <= TotalCount(); i++) {
-    std::stringbuf sbuf;
-    std::ostream out(&sbuf);
-    IndStream istream = IndStream(&out, LLDLASTREAM);
-    Print(istream, i);
-    impMap->insert(NumImplementationPair(i, sbuf.str()));
+unique_ptr<ImplementationMap> Universe::ImpStrMap(unsigned int numGraphs) {
+  if (m_pset->m_posses.size() != 1)
+    throw;
+  Cost maxCost = -1;
+  if (numGraphs > 0 && TotalCount() > numGraphs) {
+    std::priority_queue<Cost> queue;
+    GraphIter iter((m_pset->m_posses.begin())->second);
+    Cost cost = iter.Eval();
+    Cost currMax = cost;
+    queue.push(cost);
+    while (!iter.Increment()) {
+      cost = iter.Eval();
+      if (cost <= currMax) {
+	queue.push(cost);
+	if (queue.size() > numGraphs) {
+	  queue.pop();
+	  currMax = queue.top();
+	}
+      }
+    }
+    maxCost = currMax;
+    if (queue.size() != numGraphs)
+      throw;
   }
+  std::unique_ptr<ImplementationMap> impMap(new ImplementationMap());
+  GraphNum i = 1;
+  GraphIter iter((m_pset->m_posses.begin())->second);
+  do {
+    if (maxCost == -1 || iter.Eval() <= maxCost) {
+      std::stringbuf sbuf;
+      std::ostream out(&sbuf);
+      IndStream istream = IndStream(&out, LLDLASTREAM);
+      iter.PrintRoot(istream, i, true, m_pset);
+      impMap->insert(NumImplementationPair(i, sbuf.str()));
+      ++i;
+    }
+  } while(!iter.Increment());
   return impMap;
 }
 

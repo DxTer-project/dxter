@@ -40,6 +40,7 @@ class GraphIter
   Poss *m_poss;
   PossMMapIter *m_setIters;
   GraphIterPtr *m_subIters;
+  Cost m_cost;
 
   GraphIter(Poss *poss);
   GraphIter(const GraphIter &iter);
@@ -53,6 +54,7 @@ class GraphIter
 
   void EvalRoot(IndStream &out, GraphNum &graphNum, GraphNum whichGraph, GraphNum &optGraph, Cost &optCost);
   Cost Eval(TransConstVec &transList);
+  Cost Eval();
   Cost EvalAndSetBest();
 
   void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, BasePSet *owner);
