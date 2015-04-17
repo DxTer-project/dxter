@@ -144,7 +144,7 @@ const SizeList* DLANode::InputLocalN(ConnNum num) const
 }
 #endif //DODM
 
-#else
+#elif DOTENSORS
 const SizeList* DLANode::InputLen(ConnNum num, Dim dim) const
 {
   if (num >= m_inputs.size()) {

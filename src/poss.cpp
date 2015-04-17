@@ -37,6 +37,7 @@
 
 #define ALWAYSFUSE !DOLLDLA
 
+
 StrSet Poss::M_fusedSets;
 
 GraphNum Poss::M_count = 1;
@@ -495,11 +496,13 @@ void Poss::DeleteChildAndCleanUp(Node *output,
         cout << "calling DeleteChildAndCleanUp on Tunnel!\n";
         LOG_FAIL("replacement for throw call");
       }
+#if DOLOOPS
       else if (output->GetNodeClass() == LoopTunnel::GetClass()){
         if (!((LoopTunnel*)output)->m_pset->IsReal())
           LOG_FAIL("replacement for throw call");
         ((RealLoop*)((LoopTunnel*)output)->m_pset)->TryToDeleteLoopTunnelSetAndCleanUp((LoopTunnel*)output);
       }
+#endif
       else
         LOG_FAIL("replacement for throw call");
     }
@@ -733,9 +736,29 @@ Cost Poss::Prop()
 #endif // DOTENSORS
 #endif // CHECKFORSETREUSE
   
-  //  NodeVecIter nodeIter = m_possNodes.begin();
-  //  for( ; nodeIter != m_possNodes.end(); ++nodeIter) {
-  //    Node *node = *nodeIter;
+
+#if USELINEARIZER
+  if (m_lin.m_elems.empty()) {
+    m_lin.Start(this);
+    m_lin.FindAnyLinearization();
+  }
+  
+  for (auto linElem : m_lin.m_lin.m_order) {
+    if (linElem->IsNode()) {
+      Node *node = ((NodeLinElem*)linElem)->m_node;
+      node->Prop();
+      m_cost += node->GetCost();      
+      if (node->m_poss != this)
+	throw;
+    }
+    else if (linElem->IsSet()) {
+      BasePSet *set = ((SetLinElem*)linElem)->m_set;
+      m_cost += set->Prop();
+      if (set->m_ownerPoss != this)
+	throw;
+    }
+  }
+#else
   for (auto node : m_possNodes) {
     node->Prop();
     m_cost += node->GetCost();
@@ -746,12 +769,11 @@ Cost Poss::Prop()
       LOG_FAIL("replacement for throw call");
     }
   }
-  //  PSetVecIter setIter = m_sets.begin();
-  //  for( ; setIter != m_sets.end(); ++setIter) {
-  //    BasePSet *set = *setIter;
+
   for (auto set : m_sets) {
     m_cost += set->Prop();
   }
+#endif
   
   if (m_inTuns.size() != m_pset->m_inTuns.size()) {
     cout << m_inTuns.size() << endl;
@@ -888,6 +910,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
     if (pset->IsReal())
       didMerge |= ((RealPSet*)pset)->MergePosses(simplifiers, cullFunc);
   }
+#if DOLOOPS
   if (!didMerge) {
     //Didn't make any changes in the recursion
     //First see if there are any loops to fuse
@@ -949,6 +972,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
       }
     }
   }
+#endif //DOLOOPS
   
   if (!didMerge) {
     if (m_sets.size() >= 2) {
@@ -2385,6 +2409,7 @@ void Poss::FormSets(unsigned int phase)
 #endif
 }
 
+#if DOLOOPS
 void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc)
 {
   BasePSet *leftSet;
@@ -2687,6 +2712,7 @@ void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simp
   newSet->BuildDataTypeCache();
   BuildDataTypeCache();
 }
+#endif //DOLOOPS
 
 void Poss::ClearBeforeProp()
 {
@@ -2866,6 +2892,7 @@ string GetFusedString(const IntSet *set)
 
 bool Poss::HasFused(const BasePSet *left, const BasePSet *right) const
 {
+#if DOLOOPS
   //Only mantain list for loops
   if (!left->IsLoop() || !right->IsLoop())
     LOG_FAIL("replacement for throw call");
@@ -2875,10 +2902,15 @@ bool Poss::HasFused(const BasePSet *left, const BasePSet *right) const
   fusedSet.insert(label2.begin(), label2.end());
   string str = GetFusedString(&fusedSet);
   return M_fusedSets.find(str) != M_fusedSets.end();
+#else
+  throw;
+#endif
 }
+
 
 void Poss::SetFused(const BasePSet *left, const BasePSet *right)
 {
+#if DOLOOPS
   if (!left->IsLoop() || !right->IsLoop())
     LOG_FAIL("replacement for throw call");
   const IntSet &label1 = (dynamic_cast<const LoopInterface*>(left))->GetLabel();
@@ -2887,6 +2919,9 @@ void Poss::SetFused(const BasePSet *left, const BasePSet *right)
   fusedSet.insert(label2.begin(), label2.end());
   string str = GetFusedString(&fusedSet);
   M_fusedSets.insert(str);
+#else
+  throw;
+#endif
 }
 
 
@@ -2921,6 +2956,14 @@ size_t Poss::GetHash()
     m_hashValid = true;
     return m_hash;
   }
+}
+
+void Poss::InvalidateHash() 
+{
+  m_hashValid=false;
+#if USELINEARIZER
+  m_lin.Clear();
+#endif
 }
 
 void Poss::RemoveFromGraphNodes(Node *node)
@@ -3032,10 +3075,14 @@ void Poss::Unflatten(ifstream &in, SaveInfo &info)
     READ(isReal);
     BasePSet *newSet;
     if (isLoop) {
+#if DOLOOPS
       if (isReal)
         newSet = new RealLoop;
       else
         newSet = new ShadowLoop;
+#else
+      throw;
+#endif
     }
     else {
       if (isReal)
@@ -3087,22 +3134,28 @@ void Poss::UnflattenStatic(ifstream &in)
 void Poss::BuildDataTypeCache()
 {
   PSetVecIter setIter;
-#if DOTENSORS
-  Linearizer lin(this, true);
-  lin.FindAnyLinearization();
-  for (auto elem:lin.m_lin.m_order) {
+#if USELINEARIZER
+  if (m_lin.m_elems.empty()) {
+    m_lin.Start(this);
+    m_lin.FindAnyLinearization();
+  }
+  for (auto elem : m_lin.m_lin.m_order) {
     if(elem->IsNode()) {
       Node *node = ((NodeLinElem*)elem)->m_node;
       node->m_flags &= ~NODEBUILDFLAG;
     }
   }
-  for (auto elem:lin.m_lin.m_order) {
+  for (auto elem : m_lin.m_lin.m_order) {
     if(elem->IsNode()) {
       Node *node = ((NodeLinElem*)elem)->m_node;
       node->BuildDataTypeCacheRecursive();
     }
     else if (elem->IsSet()) {
       BasePSet *set = ((SetLinElem*)elem)->m_set;
+      for(auto inTun : set->m_inTuns) {
+	inTun->m_flags &= ~NODEBUILDFLAG;
+	inTun->BuildDataTypeCacheRecursive();
+      }
       set->BuildDataTypeCache();
     }
   }

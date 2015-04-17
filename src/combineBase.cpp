@@ -26,6 +26,8 @@
 #include "elemRedist.h"
 #include <cmath>
 
+#if DOLOOPS
+
 void CombineBase::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   LoopTunnel::Duplicate(orig, shallow, possMerging);
@@ -55,3 +57,5 @@ void CombineBase::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_partDim);
 #endif
 }
+
+#endif //DOLOOPS

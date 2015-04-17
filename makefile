@@ -1,6 +1,6 @@
 CC         := g++
 LINKER     := $(CC)
-CFLAGS	   := -O3 -g -Wall -std=c++11 -Isrc/ -Isrc/DLA/ -Isrc/tensors -Isrc/LLDLA
+CFLAGS	   := -O3 -g -Wall -std=c++11 -Isrc/ -Isrc/DLA/ -Isrc/tensors -Isrc/LLDLA -Isrc/bool -Isrc/linearization
 
 HEADERS :=  $(shell find src -type f -name '*.h')
 SOURCES :=  $(shell find src -type f -name '*.cpp')
@@ -21,10 +21,12 @@ deps/%.dxt_deps: src/%.cpp
 	@mkdir -p deps/LLDLA
 	@mkdir -p deps/tensors
 	@mkdir -p deps/logging
+	@mkdir -p deps/bool
 	@mkdir -p obj
 	@mkdir -p obj/linearization
 	@mkdir -p obj/DLA
 	@mkdir -p obj/LLDLA
+	@mkdir -p obj/bool
 	@mkdir -p obj/tensors
 	bash dxt_depends.sh $*.cpp src obj > $@
 
@@ -36,7 +38,7 @@ clean:
 	find . -type f -name '#*' -delete
 
 open:
-	emacs -nw src/*cpp src/*h src/linearization/*cpp src/linearization/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h src/LLDLA/*cpp src/LLDLA/*h makefile	
+	emacs -nw src/*cpp src/*h src/linearization/*cpp src/linearization/*h src/DLA/*cpp src/DLA/*h src/tensors/*cpp src/tensors/*h src/LLDLA/*cpp src/LLDLA/*h src/bool/*cpp src/bool/*h makefile	
 
 opencpp:
 	emacs -nw src/*cpp src/linearization/*cpp src/DLA/*cpp src/tensors/*cpp src/LLDLA/*cpp

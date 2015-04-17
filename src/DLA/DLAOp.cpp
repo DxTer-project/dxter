@@ -67,7 +67,7 @@ template<ConnNum numIn, ConnNum numOut>
 #endif //DODM
 
 
-#else
+#elif DOTENSORS
 template<ConnNum numIn, ConnNum numOut>
 const SizeList* DLAOp<numIn, numOut>::Len(ConnNum num, Dim dim) const
 {

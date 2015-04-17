@@ -30,6 +30,8 @@
 #include "LLDLA.h"
 #include "costs.h"
 
+#if DOLOOPS
+
 class LoopFusionStubTrans;
 extern LoopFusionStubTrans *LoopFusionStub;
 
@@ -253,3 +255,4 @@ class LoopFusionStubTrans : public SingleTrans
   virtual bool CanApply(const Node *node) const {LOG_FAIL("replacement for throw call"); throw;}
   virtual void Apply(Node *node) const {LOG_FAIL("replacement for throw call"); throw;}
 };
+#endif //DOLOOPS

@@ -49,6 +49,7 @@ class Linearizer
   ~Linearizer();
 
   void Start(const Poss *poss);
+  void Clear();
 
   void ClearCurrLinearization();
   bool HasCurrLinearization() const;

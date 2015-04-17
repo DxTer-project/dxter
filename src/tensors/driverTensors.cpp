@@ -1584,14 +1584,13 @@ RealPSet* Z()
   OutputNode *outTau = new OutputNode;
   outTau->AddInput(Tau_efmn, 0);
 
-
   Poss *outerPoss = new Poss(13, outZ, outQ,
 			     outF, outG,
 			     outW, outX,
 			     outv, outy,
 			     outr, outP,
 			     outT, outt,
-			     outT);			     
+			     outTau);			     
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;

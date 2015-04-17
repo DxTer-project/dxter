@@ -28,6 +28,7 @@
 #include "shadowLoop.h"
 #include "loopTunnel.h"
 
+#if DOLOOPS
 //LoopTunnel for spliting/indxing into a matrix
 class SplitBase : public LoopTunnel
 {
@@ -65,3 +66,4 @@ class SplitBase : public LoopTunnel
 #endif
   virtual const SizeList* GetControlSizes() const = 0;
 };
+#endif //DOLOOPS

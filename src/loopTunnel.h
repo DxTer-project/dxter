@@ -26,6 +26,8 @@
 #include "realLoop.h"
 #include "shadowLoop.h"
 
+#if DOLOOPS
+
 class LoopTunnel : public Tunnel
 {
  public:
@@ -75,7 +77,7 @@ class LoopTunnel : public Tunnel
   virtual const SizeList* LocalM(ConnNum num) const;
   virtual const SizeList* LocalN(ConnNum num) const;
 #endif
-#else
+#elif DOTENSORS
   virtual const Dim NumDims(ConnNum num) const;
   virtual const SizeList* Len(ConnNum num, Dim dim) const;
   virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
@@ -107,3 +109,4 @@ class LoopTunnel : public Tunnel
 
   virtual void BuildSizes(const SizeList *controlSizes, int stride);
 };
+#endif //DOLOOPS

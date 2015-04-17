@@ -26,6 +26,8 @@
 #include "elemRedist.h"
 #include <cmath>
 
+#if DOLOOPS
+
 #if TWOD
 CombineUnrolled::CombineUnrolled() 
   : CombineBase (),
@@ -280,3 +282,5 @@ void CombineUnrolled::UnflattenCore(ifstream &in, SaveInfo &info)
   CombineBase::UnflattenCore(in,info);
   READ(m_unrollFactor);
 }
+
+#endif //DOLOOPS

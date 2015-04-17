@@ -29,6 +29,8 @@
 #include "critSect.h"
 #include "blis.h"
 
+#if DOLOOPS
+
 int ShadowLoop::GetBS() const
 {
   return GetBSSize().GetSize();
@@ -86,3 +88,4 @@ const IntSet& ShadowLoop::GetLabel() const
 {
   return ((RealLoop*)m_realPSet)->GetLabel();
 }
+#endif // DOLOOPS

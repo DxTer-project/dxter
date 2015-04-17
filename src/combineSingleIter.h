@@ -28,18 +28,20 @@
 #include "loopTunnel.h"
 #include "combineBase.h"
 
+#if DOLOOPS
+
 class CombineSingleIter : public CombineBase
 {
  public:
 #if TWOD
   CombineSingleIter();
   CombineSingleIter(PartDir dir, TunType type);
-#else
+#elif DOTENSORS
   CombineSingleIter();
   CombineSingleIter(Dim partDim, TunType type);
 #endif
   virtual void PrintCode(IndStream &out);
-  static Node* BlankInst() { return new CombineSingleIter(LASTPARTDIR,LASTTUNNEL);}
+  static Node* BlankInst() { return new CombineSingleIter; }
   virtual Node* GetNewInst() {return BlankInst(); }
   virtual NodeType GetType() const;
   virtual void Prop();
@@ -55,7 +57,7 @@ class CombineSingleIter : public CombineBase
   virtual const SizeList* LocalM(ConnNum num) const;
   virtual const SizeList* LocalN(ConnNum num) const;
 #endif
-#else
+#elif DOTENSORS
   virtual const Dim NumDims(ConnNum num) const;
   virtual const SizeList* Len(ConnNum num, Dim dim) const;
   virtual const SizeList* LocalLen(ConnNum num, Dim dim) const;
@@ -64,3 +66,4 @@ class CombineSingleIter : public CombineBase
   virtual bool IsCombine() const {return true;}
   virtual LoopTunnel* GetMatchingInTun() const;
 };
+#endif //DOLOOPS

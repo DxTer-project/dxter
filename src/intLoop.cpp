@@ -29,6 +29,7 @@
 #include "critSect.h"
 #include "blis.h"
 
+#if DOLOOPS
 LoopFusionStubTrans *LoopFusionStub = new LoopFusionStubTrans;
 
 
@@ -949,3 +950,4 @@ bool IntLoop<PSetType>::WorthFusing(BasePSet *pset)
 
 template class IntLoop<RealPSet>;
 template class IntLoop<ShadowPSet>;
+#endif //DOLOOPS

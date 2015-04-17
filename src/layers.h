@@ -26,12 +26,14 @@
 #define DOSM 0
 #define DOTENSORS 0
 #define DOLLDLA 1
+#define DOBOOL 0
 
 #define DOBLIS (DOSM||DOSQM)
 #define DODM (DOELEM||DOTENSORS)
 #define TWOD (DOBLIS||DOELEM||DOLLDLA)
+#define DOLOOPS !DOBOOL
 
-#if DOELEM + DOSQM + DOSM + DOTENSORS + DOLLDLA != 1
+#if DOELEM + DOSQM + DOSM + DOTENSORS + DOLLDLA +DOBOOL != 1
 bad layer setup!
 #endif
 
@@ -169,6 +171,22 @@ enum Layers {
   BADLAYER,
 };
 
+#elif DOBOOL
+
+enum BoolPhase { BOOLPHASE };
+
+#define FIRSTPHASE BOOLPHASE
+
+//Max phase for which to generate code
+#define MAXPHASE BOOLPHASE
+#define NUMPHASES (MAXPHASE+1)
+
+#define DOBOOLPHASE 1
+
+enum Layers {
+  ABSLAYER = 0,
+  BADLAYER
+};
 
 #else
 bad selection of layering

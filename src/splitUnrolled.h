@@ -28,6 +28,7 @@
 #include "loopTunnel.h"
 #include "splitBase.h"
 
+#if DOLOOPS
 class CombineUnrolled;
 
 
@@ -96,3 +97,4 @@ class SplitUnrolled : public SplitBase
   virtual const SizeList* GetControlSizes() const;
 };
 
+#endif //DOLOOPS

@@ -39,6 +39,7 @@ bool FoundInVec(const LinElem *elem, const LinElemVec &vec)
 
 Linearizer::Linearizer()
 {
+  m_shallow = true;
   m_alwaysLiveCost = 0;
 }
 
@@ -69,8 +70,15 @@ Linearizer::Linearizer(const Poss *poss, bool shallow)
 
 Linearizer::~Linearizer()
 {
+  Clear();
+}
+
+void Linearizer::Clear()
+{
   for(auto elem : m_elems)
     delete elem;
+  m_elems.clear();
+  m_lin.Clear();
 }
 
 void Linearizer::Start(const Poss *poss)
@@ -116,7 +124,7 @@ LinElem* Linearizer::FindOrAdd(Node *node, PtrToLinElemMap &map)
     if (!m_shallow) {
 #if DOTENSORS
       m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfLocalElements(node->InputConnNum(0));
-#else
+#elif TWOD
       m_alwaysLiveCost += ((DLANode*)(node->Input(0)))->MaxNumberOfElements(node->InputConnNum(0));
 #endif
     }

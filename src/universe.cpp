@@ -495,6 +495,8 @@ void Universe::PrintAll(int algNum, GraphNum optGraph)
     IndStream optOut(&cout,TENSORSTREAM);
 #elif DOLLDLA
     IndStream optOut(&cout,LLDLASTREAM);
+#elif DOBOOL
+    IndStream optOut(&cout,BOOLSTREAM);
 #endif
     Print(optOut, optGraph, false);
   }
@@ -555,6 +557,8 @@ void Universe::PrintBest()
     IndStream optOut(&cout,TENSORSTREAM);
 #elif DOLLDLA
     IndStream optOut(&cout,LLDLASTREAM);
+#elif DOBOOL
+    IndStream optOut(&cout,BOOLSTREAM);
 #endif
 
     iter.PrintRoot(optOut, 0, true, m_pset);
@@ -700,7 +704,9 @@ void Universe::Flatten(ofstream &out) const
   }
   WRITE(CurrPhase);
   Poss::FlattenStatic(out);
+#if DOLOOPS
   RealLoop::FlattenStatic(out);
+#endif
   WRITE(m_pset);
   bool isLoop = m_pset->IsLoop();
   WRITE(isLoop);
@@ -747,7 +753,9 @@ void Universe::Unflatten(ifstream &in)
   }
   READ(CurrPhase);
   Poss::UnflattenStatic(in);
+#if DOLOOPS
   RealLoop::UnflattenStatic(in);
+#endif
   PtrMap psetMap;
   BasePSet *oldPset;
   READ(oldPset);
@@ -755,8 +763,13 @@ void Universe::Unflatten(ifstream &in)
   READ(isLoop);  
   bool isCrit;
   READ(isCrit);
-  if (isLoop)
+  if (isLoop) {
+#if DOLOOPS
     m_pset = new RealLoop;
+#else
+    throw;
+#endif
+  }
   else
     m_pset = new RealPSet;
   psetMap[oldPset] = m_pset;

@@ -440,10 +440,12 @@ void BasePSet::FormSetAround()
   newPoss->m_sets.push_back(this);
   m_ownerPoss = newPoss;
   newSet->m_functionality = newPoss->GetFunctionalityString();
+#if DOLOOPS
   if (newSet->IsLoop()) {
     LoopInterface *loop = dynamic_cast<LoopInterface*>(newSet);
     newSet->m_functionality += (char)(loop->GetBSSize().GetSize());
   }
+#endif
 }
 
 void BasePSet::Flatten(ofstream &out) const

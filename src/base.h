@@ -456,6 +456,11 @@ class Name
   m_type(UNKNOWN), 
 #endif
     m_name("noname") {}
+
+#if DOBOOL
+ Name(string name) : m_name(name) {}
+#endif
+
   string str() const;
 #if DOTENSORS
   string PrettyStr() const;

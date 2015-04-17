@@ -25,6 +25,7 @@
 #include <cmath>
 #include "LLDLA.h"
 
+#if DOLOOPS
 SplitBase::SplitBase() : LoopTunnel(LASTTUNNEL), 
 #if TWOD
 m_dir(LASTPARTDIR)
@@ -87,3 +88,5 @@ void SplitBase::UnflattenCore(ifstream &in, SaveInfo &info)
   READ(m_isControlTun);
 
 }
+
+#endif //DOLOOPS

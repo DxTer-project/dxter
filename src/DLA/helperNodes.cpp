@@ -39,6 +39,21 @@ m_type("InputNode")
 {
 }
 
+
+#if DOBOOL
+InputNode::InputNode(string str)
+:
+  m_type(str),
+  m_varName(str)
+#if TWOD
+#if DODM
+, m_mlsize(NULL), m_nlsize(NULL)
+#endif //DODM
+#endif
+{
+}
+#endif
+
 #if TWOD
 #if DOLLDLA
 InputNode::InputNode(string name,
@@ -280,7 +295,7 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
 #if TWOD
   m_msize = node->m_msize;
   m_nsize = node->m_nsize;
-#else
+#elif DOTENSORS
   m_isScalar = node->m_isScalar;
   m_sizes = node->m_sizes;
   m_lsizes = node->m_lsizes;
@@ -336,7 +351,7 @@ const SizeList* InputNode::LocalN(ConnNum num) const
   return m_nlsize;
 }
 #endif //DODM
-#else
+#elif DOTENSORS
 
 const Dim InputNode::NumDims(ConnNum num) const
 {
@@ -404,7 +419,7 @@ void InputNode::BuildDataTypeCache()
   GetLocalSizes(m_varName.m_type, m_msize, m_nsize, *m_mlsize, *m_nlsize);
 #endif
 }
-#else
+#elif DOTENSORS
 void InputNode::BuildDataTypeCache()
 {
   if (!m_lsizes.empty())
@@ -415,6 +430,16 @@ void InputNode::BuildDataTypeCache()
   else {
     m_lsizes = m_sizes;
   }
+}
+#elif DOBOOL
+void InputNode::BuildDataTypeCache()
+{
+
+}
+#else
+void InputNode::BuildDataTypeCache()
+{
+  throw;
 }
 #endif
 
@@ -510,7 +535,7 @@ const SizeList* OutputNode::LocalN(ConnNum num) const
 
 
 
-#else
+#elif DOTENSORS
 
 const Dim OutputNode::NumDims(ConnNum num) const
 {
