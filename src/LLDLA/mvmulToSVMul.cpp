@@ -26,6 +26,7 @@
 #include "loopSupport.h"
 #include "mvmul.h"
 #include "svmul.h"
+#include "svmulAdd.h"
 #include "vadd.h"
 
 bool MVMulToSVMul::CanApply(const Node* node) const {
@@ -50,7 +51,7 @@ void MVMulToSVMul::Apply(Node* node) const {
   tunY->AddInput(node->Input(2), node->InputConnNum(2));
   tunY->SetAllStats(PARTUP);
 
-  auto svmul = new SVMul(m_toLayer);
+  /*  auto svmul = new SVMul(m_toLayer);
   svmul->AddInputs(4,
 		   splitX, 1,
 		   splitA, 1);
@@ -58,13 +59,20 @@ void MVMulToSVMul::Apply(Node* node) const {
   auto vadd = new VAdd(m_toLayer, COLVECTOR);
   vadd->AddInputs(4,
 		  svmul, 0,
-		  tunY, 0);
+		  tunY, 0);*/
+
+  auto svmulAdd = new SVMulAdd(m_toLayer, COLVECTOR);
+  svmulAdd->AddInputs(6,
+		      splitX, 0,
+		      splitA, 0,
+		      tunY, 0);
+		      
 
   auto comA = splitA->CreateMatchingCombine(0);
   auto comX = splitX->CreateMatchingCombine(0);
 
   auto outY = new LoopTunnel(POSSTUNOUT);
-  outY->AddInput(vadd, 0);
+  outY->AddInput(svmulAdd, 0);
   outY->AddInput(tunY, 1);
   outY->CopyTunnelInfo(tunY);
 

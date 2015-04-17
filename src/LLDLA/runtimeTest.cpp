@@ -42,7 +42,6 @@ RuntimeTest::RuntimeTest(ProblemInstance* prob, LLDLAUniverse* uni, unsigned int
 void RuntimeTest::AddIncludes()
 {
   m_headers.push_back("#include <immintrin.h>");
-  m_headers.push_back("#include \"rdtsc.h\"");
   m_headers.push_back("#include <string.h>");
   m_headers.push_back("#include \"utils.h\"");
   m_headers.push_back("#include <unistd.h>");

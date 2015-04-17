@@ -23,21 +23,22 @@
 
 #if DOLLDLA
 
+#include "loopSupport.h"
 #include "transform.h"
 
-class VAddPackResidualToVRW : public SingleTrans {
- private:
-  Layer m_fromLayer, m_toLayer;
-  VecType m_vecType;
-
+class SVMulAddLoopRef : public SingleTrans
+{
  public:
- VAddPackResidualToVRW(Layer fromLayer, Layer toLayer, VecType vecType)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vecType(vecType) {}
-  virtual string GetType() const { return "HorizontalPackToMultipleOfVecRegWidth " + std::to_string((long long int) m_vecType); }
-  virtual bool IsRef() const { return true; }
+  Layer m_fromLayer, m_toLayer;
+  VecType m_vtype;
+  BSSize m_bs;
 
-  virtual bool CanApply(const Node* node) const;
-  virtual void Apply(Node* node) const;
+  SVMulAddLoopRef(Layer fromLayer, Layer toLayer, VecType vType);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+  virtual bool IsRef() const { return true; }
 };
+
 
 #endif // DOLLDLA

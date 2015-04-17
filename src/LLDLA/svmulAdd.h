@@ -23,21 +23,30 @@
 
 #if DOLLDLA
 
-#include "transform.h"
+#include "DLAOp.h"
 
-class VAddPackResidualToVRW : public SingleTrans {
+class SVMulAdd : public DLAOp<3, 1>
+{
  private:
-  Layer m_fromLayer, m_toLayer;
   VecType m_vecType;
 
  public:
- VAddPackResidualToVRW(Layer fromLayer, Layer toLayer, VecType vecType)
-   : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vecType(vecType) {}
-  virtual string GetType() const { return "HorizontalPackToMultipleOfVecRegWidth " + std::to_string((long long int) m_vecType); }
-  virtual bool IsRef() const { return true; }
+  SVMulAdd(Layer layer, VecType vecType);
 
-  virtual bool CanApply(const Node* node) const;
-  virtual void Apply(Node* node) const;
+  virtual void PrintCode(IndStream &out) { throw; }
+  virtual void Prop();
+  virtual Phase MaxPhase() const;
+
+  static Node* BlankInst();
+  virtual Node* GetNewInst();
+  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+
+  static ClassType GetClass() { return "LLDLASVMulAdd"; }
+  virtual ClassType GetNodeClass() const { return GetClass(); }
+
+  virtual NodeType GetType() const;
+  virtual VecType GetVecType() const;
+
 };
 
 #endif // DOLLDLA

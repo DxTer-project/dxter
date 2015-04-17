@@ -8,17 +8,6 @@
 #include <time.h>
 #include <string.h>
 
-#define VEC_PD_LOAD(ptr) _mm_load_pd((ptr))									// Load array of 2 doubles to vector register
-#define VEC_DUP_LOAD(ptr) _mm_loaddup_pd((ptr))								// Load one double into upper and lower halves of vector register
-#define VEC_D_LOAD(ptr1, ptr2) _mm_loadh_pd(_mm_load_sd((ptr1)), (ptr2));	// Load 2 doubles at different memory locations into the 2 halves of a vector register
-
-#define VEC_PD_STORE(ptr, vec_reg) _mm_store_pd((ptr), (vec_reg))			// Store vector register contents in array of 2 doubles
-
-typedef union	{
-	__m128d v;
-	double d[2];
-} v2df_t;
-
 void* alloc(size_t size);
 
 void* alloc_aligned_16(size_t size);
@@ -116,5 +105,7 @@ void print_mat(int m, int n, double* a, int a_row_stride, int a_col_stride);
 void print_mat_float(int m, int n, float* a, int a_row_stride, int a_col_stride);
 
 void reset_values(int size, double* a, double* b, double* c, double* c_copy);
+
+unsigned long long rdtsc();
 
 #endif

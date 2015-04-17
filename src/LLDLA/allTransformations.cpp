@@ -38,6 +38,8 @@
 #include "setToZeroRowLoopRef.h"
 #include "smmul.h"
 #include "svmul.h"
+#include "svmulAdd.h"
+#include "svmulAddLoopRef.h"
 #include "svmulPackResidualToVRW.h"
 #include "svmulSplitToMainAndResidual.h"
 #include "unpack.h"
@@ -194,13 +196,17 @@ void AddVAddTrans() {
   Universe::AddTrans(VAdd::GetClass(), new VAddLoopRef(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new VAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
-Universe::AddTrans(VAdd::GetClass(), new ResidualVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+  Universe::AddTrans(VAdd::GetClass(), new ResidualVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(VAdd::GetClass(), new VRWVAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   return;
+}
+
+void AddSVMulAddTrans() {
+  Universe::AddTrans(SVMulAdd::GetClass(), new SVMulAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
 }
 
 void AddTransposeTrans() {
@@ -283,13 +289,14 @@ void AddTransformations() {
   AddSVMulTrans();
   AddVMMulTrans();
   AddVAddTrans();
+  AddSVMulAddTrans();
 
-  //  AddRTLOptimizations();
-  //  AddPrimPhaseConversions();
-  //  AddArchSpecificTrans();
+  AddRTLOptimizations();
+  AddPrimPhaseConversions();
+  AddArchSpecificTrans();
 
   AddTransposeTrans();
-  //  AddUnrollingTrans();
+  //AddUnrollingTrans();
   AddSetToZeroTrans();
 }
 
