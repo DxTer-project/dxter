@@ -671,9 +671,15 @@ unique_ptr<ImplementationMap> Universe::ImpStrMap(unsigned int numGraphs) {
 	  currMax = queue.top();
 	}
       }
+      else if (queue.size() < numGraphs) {
+	queue.push(cost);
+	currMax = cost;
+      }
     }
     maxCost = currMax;
     if (queue.size() != numGraphs) {
+      cout << queue.size() << endl;
+      cout << numGraphs << endl;
       throw;
     }
   }
