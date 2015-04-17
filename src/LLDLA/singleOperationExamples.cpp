@@ -43,7 +43,7 @@ RealPSet* MMMulTest(Type dataType, int m, int n, int k) {
 			 1, m,
 			 dataType);
 
-  auto mul = new MMul(dataType, ABSLAYER);
+  auto mul = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
   mul->AddInputs(6,
 		 Ain, 0,
 		 Bin, 0,
