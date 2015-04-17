@@ -39,18 +39,12 @@ bool VRWSVMulAddToRegArith::IsExactSizeSVMulAdd(const SVMulAdd* svmul) const {
   if (svmul->InputIsVRW(1)) {
     return true;
   } else {
-    cout << "Input 1 to SVMulAdd is not VRW" << endl;
-    cout << "Num rows: " << svmul->GetInputNumRows(1) << endl;
-    cout << "Num cols: " << svmul->GetInputNumCols(1) << endl;
-    svmul->GetInputM(1)->Print();
-    svmul->GetInputN(1)->Print();
     return false;
   }
 }
 
 bool VRWSVMulAddToRegArith::CanApply(const Node* node) const {
   if (node->GetNodeClass() == SVMulAdd::GetClass()) {
-    cout << "Checking SVMulAdd VRW conversion" << endl;
     const SVMulAdd* svmul = static_cast<const SVMulAdd*>(node);
     return IsExactSizeSVMulAdd(svmul);
   }
@@ -59,7 +53,6 @@ bool VRWSVMulAddToRegArith::CanApply(const Node* node) const {
 }
 
 void VRWSVMulAddToRegArith::Apply(Node* node) const {
-  cout << "Applying VRWSVMulAddToRegArith" << endl;
   auto svmul = static_cast<SVMulAdd*>(node);
 
   auto dup = new DuplicateRegLoad();

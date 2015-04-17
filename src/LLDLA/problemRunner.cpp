@@ -114,13 +114,6 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
-  unsigned int numToEvaluate = 100;
-  cout << "Culling all but " << numToEvaluate << " implementations" << endl;
-  uni->InlineAllSets();
-  uni->InlineAllSets();
-  uni->CullAllBut(numToEvaluate);
-  cout << "//Done culling with " << uni->TotalCount() << " algorithms" << endl;
-
   return uni;
 }
 
@@ -133,7 +126,7 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
 
   cout << "About to evaluate\n";
-  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKOUTPUTBUFFERS, TWOPHASETIMING, rtest, uni->ImpStrMap().get(), uni->GetSanityCheckImplStr());
+  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKOUTPUTBUFFERS, TWOPHASETIMING, rtest, uni->ImpStrMap(100).get(), uni->GetSanityCheckImplStr());
   cout << "Done evaluating\n";
 
   vector<OneStageTimingResult*>* oneStageResults = reinterpret_cast<vector<OneStageTimingResult*>*>(timingResults);

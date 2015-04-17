@@ -673,8 +673,9 @@ unique_ptr<ImplementationMap> Universe::ImpStrMap(unsigned int numGraphs) {
       }
     }
     maxCost = currMax;
-    if (queue.size() != numGraphs)
+    if (queue.size() != numGraphs) {
       throw;
+    }
   }
   std::unique_ptr<ImplementationMap> impMap(new ImplementationMap());
   GraphNum i = 1;
