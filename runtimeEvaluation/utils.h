@@ -117,4 +117,6 @@ void print_mat_float(int m, int n, float* a, int a_row_stride, int a_col_stride)
 
 void reset_values(int size, double* a, double* b, double* c, double* c_copy);
 
+unsigned long long rdtsc();
+
 #endif

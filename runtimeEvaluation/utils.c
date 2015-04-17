@@ -331,3 +331,13 @@ void print_mat_float(int m, int n, float* a, int a_row_stride, int a_col_stride)
 }
 
 void reset_values(int size, double *a, double *b, double *c, double *c_copy)	{	rand_doubles(size, a);	rand_doubles(size, b);	rand_doubles(size, c);	copy_buffer(size, c, c_copy);}
+
+unsigned long long rdtsc()
+{
+   unsigned long long int x;
+   unsigned a, d;
+
+   __asm__ volatile("rdtsc" : "=a" (a), "=d" (d));
+
+   return ((unsigned long long)a) | (((unsigned long long)d) << 32);
+}
