@@ -67,7 +67,6 @@
 do you really want to do compact unrolling and partial unrolling?
 #endif
 
-
 void AddGemmTrans() {
   // Convert gemm into loop over mvmul
   Universe::AddTrans(Gemm::GetClass(), new MMulToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
@@ -155,36 +154,11 @@ void AddSMMulTrans() {
 }
 
 void AddUnrollingTrans() {
-
-#if DOCOMPACTLOOPUNROLLING
-#if DO2MUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(),
-		     new CompactlyUnrollLoop(2), LLDLALOOPUNROLLPHASE);
-#endif // DO2MUTRANSFORMATIONS
-
-#if DO3MUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new CompactlyUnrollLoop(3), LLDLALOOPUNROLLPHASE);
-#endif // DO3MUTRANSFORMATIONS
-
-#if DO16MUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(), 
->		     new CompactlyUnrollLoop(16), LLDLALOOPUNROLLPHASE);
-#endif // DO3MUTRANSFORMATIONS
-
-#if DOLARGEMUTRANSFORMATIONS
-  Universe::AddTrans(SplitSingleIter::GetClass(), 
-		     new CompactlyUnrollLoop(bigSize / LLDLA_MU), LLDLALOOPUNROLLPHASE);
-#endif // DOLARGEMUTRANSFORMATIONS
-
-#endif // DOCOMPACTLOOPUNROLLING
-
-#if DOPARTIALLOOPUNROLLING
-  for (unsigned int mult = PARTIALUNROLLINGSTARTCOEF; mult <= PARTIALUNROLLINGENDCOEF; mult += 2) {
-    Universe::AddTrans(SplitSingleIter::GetClass(), new PartiallyUnrollLoop(mult), LLDLALOOPUNROLLPHASE);
+  if (DOPARTIALLOOPUNROLLING) {
+    for (unsigned int mult = PARTIALUNROLLINGSTARTCOEF; mult <= PARTIALUNROLLINGENDCOEF; mult += 2) {
+      Universe::AddTrans(SplitSingleIter::GetClass(), new PartiallyUnrollLoop(mult), LLDLALOOPUNROLLPHASE);
+    }
   }
-#endif // DOPARTIALLOOPUNROLLING
-
 }
 
 void AddSVMulTrans() {
@@ -310,12 +284,12 @@ void AddTransformations() {
   AddVMMulTrans();
   AddVAddTrans();
 
-  AddRTLOptimizations();
-  AddPrimPhaseConversions();
-  AddArchSpecificTrans();
+  //  AddRTLOptimizations();
+  //  AddPrimPhaseConversions();
+  //  AddArchSpecificTrans();
 
   AddTransposeTrans();
-  AddUnrollingTrans();
+  //  AddUnrollingTrans();
   AddSetToZeroTrans();
 }
 

@@ -19,10 +19,10 @@ typedef union	{
 	double d[2];
 } v2df_t;
 
-void *alloc(size_t size);
+void* alloc(size_t size);
 
-void *alloc_aligned_16(size_t size);
-void *alloc_aligned_32(size_t size);
+void* alloc_aligned_16(size_t size);
+void* alloc_aligned_32(size_t size);
 
 void pack_double(double* a, double* b,
 		 int a_rows, int a_cols,
@@ -54,22 +54,22 @@ void set_to_zero_float(float* a,
 		       int m, int n,
 		       int a_row_stride, int a_col_stride);
 
-void rand_doubles(int size, double *rands);
+void rand_doubles(int size, double* rands);
 
 void rand_floats(int size, float *rands);
 
 void simple_add(int m, int n,
-	double *a, int a_row_stride, int a_col_stride,
-	double *b, int b_row_stride, int b_col_stride);
+	double* a, int a_row_stride, int a_col_stride,
+	double* b, int b_row_stride, int b_col_stride);
 
 void simple_mmul(int m, int n, int k,
-	double *a, int a_row_stride, int a_col_stride,
-	double *b, int b_row_stride, int b_col_stride,
-	double *c, int c_row_stride, int c_col_stride);
+	double* a, int a_row_stride, int a_col_stride,
+	double* b, int b_row_stride, int b_col_stride,
+	double* c, int c_row_stride, int c_col_stride);
 
 void simple_smul(int m, int n,
-	double *scalar,
-	double *a, int a_row_stride, int a_col_stride);
+	double* scalar,
+	double* a, int a_row_stride, int a_col_stride);
 
 void simple_add_float(int m, int n,
 	float *a, int a_row_stride, int a_col_stride,
@@ -96,24 +96,25 @@ void copy_float(int m, int n,
 		 float* b,
 		 int b_row_stride, int b_col_stride);
 
-double diff_buffer(int size, double *buf1, double *buf2);
+double diff_buffer(int size, double* buf1, double* buf2);
 
 float diff_buffer_float(int size, float *buf1, float *buf2);
 
-void copy_buffer(int size, double *src, double *dest);
+void copy_buffer(int size, double* src, double* dest);
 
 void copy_buffer_float(int size, float *src, float *dest);
 
-void print_buffer(int size, double *buf);
+void print_buffer(int size, double* buf);
 
-void test_buffer_diff(int size, double *a, double *b, char *test_name);
+void test_buffer_diff(int size, double* a, double* b, char *test_name);
 
 void test_buffer_diff_float(int size, float *a, float *b, char *test_name);
 
-void test_mats_diff(int m, int n, double *a, int a_row_stride, int a_col_stride, double *b, int b_row_stride, int b_col_stride, char *test_name);
+void test_mats_diff(int m, int n, double* a, int a_row_stride, int a_col_stride, double* b, int b_row_stride, int b_col_stride, char *test_name);
 
-void print_mat(int m, int n, double *a, int a_row_stride, int a_col_stride);
+void print_mat(int m, int n, double* a, int a_row_stride, int a_col_stride);
+void print_mat_float(int m, int n, float* a, int a_row_stride, int a_col_stride);
 
-void reset_values(int size, double *a, double *b, double *c, double *c_copy);
+void reset_values(int size, double* a, double* b, double* c, double* c_copy);
 
 #endif
