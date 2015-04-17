@@ -33,7 +33,7 @@ class VAddPackResidualToVRW : public SingleTrans {
  public:
  VAddPackResidualToVRW(Layer fromLayer, Layer toLayer, VecType vecType)
    : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vecType(vecType) {}
-  virtual string GetType() const { return "HorizontalPackToMultipleOfVecRegWidth " + std::to_string(m_vecType); }
+  virtual string GetType() const { return "HorizontalPackToMultipleOfVecRegWidth " + std::to_string((long long int) m_vecType); }
   virtual bool IsRef() const { return true; }
 
   virtual bool CanApply(const Node* node) const;
