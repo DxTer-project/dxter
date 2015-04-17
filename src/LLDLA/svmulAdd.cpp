@@ -31,17 +31,17 @@ string SVecTypeToString(VecType vType) {
   }
 }
 
-void SVMulAdd::Prop() {
-  if (!IsValidCost(m_cost)) {
-    
-    m_cost = 0;
-  }
-}
-
 SVMulAdd::SVMulAdd(Layer layer, VecType vecType)
 {
   m_layer = layer;
   m_vecType = vecType;
+}
+
+void SVMulAdd::Prop() {
+  if (!IsValidCost(m_cost)) {
+    DLAOp<3, 1>::Prop();
+    m_cost = ZERO;
+  }
 }
 
 Node* SVMulAdd::BlankInst()

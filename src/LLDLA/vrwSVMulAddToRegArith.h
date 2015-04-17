@@ -19,39 +19,25 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SVMUL_ADD_H
-#define SVMUL_ADD_H
-
 #include "LLDLA.h"
 
 #if DOLLDLA
 
-#include "DLAOp.h"
+#include "svmulAdd.h"
+#include "transform.h"
 
-class SVMulAdd : public DLAOp<3, 1>
-{
+class VRWSVMulAddToRegArith : public SingleTrans {
  private:
-  VecType m_vecType;
+  bool IsExactSizeSVMulAdd(const SVMulAdd* svmul) const;
 
  public:
-  SVMulAdd(Layer layer, VecType vecType);
+  Layer m_fromLayer, m_toLayer;
 
-  virtual void PrintCode(IndStream &out) { throw; }
-  virtual void Prop();
-  virtual Phase MaxPhase() const;
-
-  static Node* BlankInst();
-  virtual Node* GetNewInst();
-  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
-
-  static ClassType GetClass() { return "LLDLASVMulAdd"; }
-  virtual ClassType GetNodeClass() const { return GetClass(); }
-
-  virtual NodeType GetType() const;
-  virtual VecType GetVecType() const;
-
+  VRWSVMulAddToRegArith(Layer fromLayer, Layer toLayer);
+  virtual string GetType() const;
+  virtual bool CanApply(const Node* node) const;
+  virtual void Apply(Node* node) const;
+  virtual bool IsRef() const { return true; }
 };
 
 #endif // DOLLDLA
-
-#endif

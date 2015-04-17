@@ -98,7 +98,7 @@ void SVMulAddLoopRef::Apply(Node *node) const {
   splitB->SetIndepIters();
 
   auto scalarTun = new LoopTunnel(POSSTUNIN);
-  scalarTun->AddInput(svmulAdd->Input(0),svmulAdd->InputConnNum(0));
+  scalarTun->AddInput(svmulAdd->Input(0), svmulAdd->InputConnNum(0));
   scalarTun->SetAllStats(FULLUP);
   scalarTun->SetIndepIters();
 
@@ -111,13 +111,11 @@ void SVMulAddLoopRef::Apply(Node *node) const {
 
   auto scalarTunOut = new LoopTunnel(POSSTUNOUT);
   scalarTunOut->AddInput(scalarTun, 0);
-  scalarTunOut->AddInput(scalarTun, 1);
+  scalarTunOut->AddInput(scalarTun, 0);
   scalarTunOut->CopyTunnelInfo(scalarTun);
 
   auto comA = splitA->CreateMatchingCombine(0);
-
-  auto comB = splitB->CreateMatchingCombine(1, 
-					    1, newMul, 0);
+  auto comB = splitB->CreateMatchingCombine(1, 1, newMul, 0);
 
   auto loopPoss = new Poss(3, scalarTunOut, comA, comB);
 

@@ -63,8 +63,8 @@ void MVMulToSVMul::Apply(Node* node) const {
 
   auto svmulAdd = new SVMulAdd(m_toLayer, COLVECTOR);
   svmulAdd->AddInputs(6,
-		      splitX, 0,
-		      splitA, 0,
+		      splitX, 1,
+		      splitA, 1,
 		      tunY, 0);
 		      
 

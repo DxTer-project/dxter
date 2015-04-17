@@ -48,6 +48,7 @@
 #include "vadd.h"
 #include "vaddPackResidualToVRW.h"
 #include "vaddSplitToMainAndResidual.h"
+#include "vrwSVMulAddToRegArith.h"
 #include "vrwSVMulToRegArith.h"
 #include "vrwVAddToRegArith.h"
 #include "vrwVVDotToRegArith.h"
@@ -207,6 +208,7 @@ void AddVAddTrans() {
 
 void AddSVMulAddTrans() {
   Universe::AddTrans(SVMulAdd::GetClass(), new SVMulAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMulAdd::GetClass(), new VRWSVMulAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 }
 
 void AddTransposeTrans() {
