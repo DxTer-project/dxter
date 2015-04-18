@@ -40,6 +40,8 @@
 #include "svmul.h"
 #include "svmulAdd.h"
 #include "svmulAddLoopRef.h"
+#include "svmulAddSplitToMainAndResidual.h"
+#include "residualSVMulAddToRegArith.h"
 #include "svmulPackResidualToVRW.h"
 #include "svmulSplitToMainAndResidual.h"
 #include "unpack.h"
@@ -209,6 +211,12 @@ void AddVAddTrans() {
 void AddSVMulAddTrans() {
   Universe::AddTrans(SVMulAdd::GetClass(), new SVMulAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(SVMulAdd::GetClass(), new VRWSVMulAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMulAdd::GetClass(), new ResidualSVMulAddToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMulAdd::GetClass(), new ResidualSVMulAddToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+
+  Universe::AddTrans(SVMulAdd::GetClass(), new SVMulAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMulAdd::GetClass(), new SVMulAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 }
 
 void AddTransposeTrans() {
@@ -298,7 +306,7 @@ void AddTransformations() {
   AddArchSpecificTrans();
 
   AddTransposeTrans();
-  AddUnrollingTrans();
+  //AddUnrollingTrans();
   AddSetToZeroTrans();
 }
 
