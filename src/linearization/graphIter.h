@@ -33,6 +33,14 @@ typedef GraphIter* GraphIterPtr;
 //typedef vector<GraphIter*> GraphIterVec;
 //typedef GraphIterVec::iterator GraphIterVecIter;
 
+class TransTreeNode
+{
+ public:
+  TransVec m_vec;
+  vector<TransTreeNode*> m_children;
+  ~TransTreeNode();
+};
+
 
 class GraphIter
 {
@@ -50,6 +58,7 @@ class GraphIter
   GraphIter& operator=(const GraphIter &rhs);
 
   void GetCurrTransVec(TransVec &transVec);
+  void PrintCurrTransformationTree(IndStream &out, unsigned int level, string set);
   void AddCurrPossVars(VarSet &set) const;
 
   void EvalRoot(IndStream &out, GraphNum &graphNum, GraphNum whichGraph, GraphNum &optGraph, Cost &optCost);
