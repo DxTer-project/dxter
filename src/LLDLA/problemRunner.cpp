@@ -126,9 +126,9 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
 
   cout << "About to evaluate\n";
-  unsigned int numberOfImplementationsToEvaluate = 100;
+  unsigned int numberOfImplementationsToEvaluate = 1000;
   auto impMap = uni->ImpStrMap(numberOfImplementationsToEvaluate);
-  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKOUTPUTBUFFERS, TWOPHASETIMING, rtest, impMap.get(), uni->GetSanityCheckImplStr());
+  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKALLBUFFERS, TWOPHASETIMING, rtest, impMap.get(), uni->GetSanityCheckImplStr());
   cout << "Done evaluating\n";
 
   vector<OneStageTimingResult*>* oneStageResults = reinterpret_cast<vector<OneStageTimingResult*>*>(timingResults);
