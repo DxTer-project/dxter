@@ -142,7 +142,7 @@ void GraphIter::PrintCurrTransformationTree(IndStream &out, unsigned int level, 
     *out << "set " << set << ", level " << level << ", " << trans->GetType() << endl;
   }
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
-    string currSet = set + "." + std::to_string(i);
+    string currSet = set + "." + std::to_string((unsigned long long)i);
     m_subIters[i]->PrintCurrTransformationTree(out, level+1, currSet);
   }
   --out;
