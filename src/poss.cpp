@@ -947,12 +947,12 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
                   nodeMap[*tunIter] = *tunIter;
                 }
                 Poss *newPoss = new Poss;
-                newPoss->m_transVec.push_back(LoopFusionStub);
 #if USESHADOWS
                 newPoss->Duplicate(this,nodeMap,true,true);
 #else
                 newPoss->Duplicate(this,nodeMap,true,false);
 #endif
+                newPoss->m_transVec.push_back(LoopFusionStub);
                 newPoss->PatchAfterDuplicate(nodeMap);
                 newPoss->BuildDataTypeCache();
                 newPoss->FuseLoops(left,right,simplifiers,cullFunc);
