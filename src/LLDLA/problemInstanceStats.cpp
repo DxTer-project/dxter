@@ -26,7 +26,7 @@
 void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
   double bestAvgFlopsPerCycle = 0.0;
   double bestFlopsPerCycle = 0.0;
-  double worstFlopsPerCycle = arch->FlopsPerCycle(m_type);
+  double worstFlopsPerCycle = -1; 
   for (const auto& impl : m_implementationStats) {
     if (impl->GetAvgFlopsPerCycle() > bestAvgFlopsPerCycle) {
       bestAvgFlopsPerCycle = impl->GetAvgFlopsPerCycle();
@@ -38,7 +38,7 @@ void ProblemInstanceStats::ComputeBestAndWorstImplementations(Type type) {
       m_bestFlopsPerCycleImpl = impl.get();
     }
 
-    if (impl->GetWorstFlopsPerCycle() < worstFlopsPerCycle) {
+    if (impl->GetWorstFlopsPerCycle() < worstFlopsPerCycle || worstFlopsPerCycle < 0) {
       worstFlopsPerCycle = impl->GetWorstFlopsPerCycle();
       m_worstFlopsPerCycleImpl = impl.get();
     }
