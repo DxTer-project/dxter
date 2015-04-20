@@ -151,17 +151,17 @@ RealPSet* VMulAddBenchmark(Type dataType, int m) {
 
   auto x = InputTunnel("X",
 			 m, 1,
-			 1, m,
+			 1, 1,
 			 dataType);
 
   auto y = InputTunnel("Y",
 			 m, 1,
-			 1, m,
+			 1, 1,
 			 dataType);
 
   auto z = InputTunnel("Z",
 			 m, 1,
-			 1, m,
+			 1, 1,
 			 dataType);
 
   auto zPlusY = new VAdd(ABSLAYER, COLVECTOR);

@@ -129,7 +129,7 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
   cout << "About to evaluate\n";
   unsigned int numberOfImplementationsToEvaluate = 1000;
   auto impMap = uni->ImpStrMap(numberOfImplementationsToEvaluate);
-  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKALLBUFFERS, TWOPHASETIMING, rtest, impMap.get(), uni->GetSanityCheckImplStr());
+  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKOUTPUTBUFFERS, TWOPHASETIMING, rtest, impMap.get(), uni->GetSanityCheckImplStr());
   cout << "Done evaluating\n";
 
   vector<OneStageTimingResult*>* oneStageResults = reinterpret_cast<vector<OneStageTimingResult*>*>(timingResults);
@@ -140,7 +140,6 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
   cout << "Best Avg. flops/cycle = " << pStats->GetBestAvgFlopsPerCycle() << endl;
 
   cout << impMap.get()->find(best)->second << endl;
-  //  uni->PrintAll(algNum, best);
 
   LOG_A("Done with runtime evaluation of " + problemInstance->GetName());
 

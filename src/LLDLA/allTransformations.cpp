@@ -7,6 +7,7 @@
 #include "copyColLoopRef.h"
 #include "copyRowLoopRef.h"
 #include "copyToContigCopy.h"
+#include "distributeMVMulOverMAdd.h"
 #include "eliminatePackedStore.h"
 #include "eliminatePackedStoreLoad.h"
 #include "eliminateRecombine.h"
@@ -139,6 +140,8 @@ void AddMAddTrans() {
 }
 
 void AddMVMulTrans() {
+  Universe::AddTrans(MVMul::GetClass(), new DistributeMVMulOverMAdd(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuDouble), LLDLALOOPPHASE);
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMN, LLDLAMuDouble), LLDLALOOPPHASE);
   Universe::AddTrans(MVMul::GetClass(), new MVMulLoopRef(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle), LLDLALOOPPHASE);
