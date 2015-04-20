@@ -798,7 +798,8 @@ template<class PSetType>
     }
   }
   else {
-    if (((RealLoop*)this)->GetCurrIter() == 0) {
+    //if (((RealLoop*)this)->GetCurrIter() == 0) {
+    {
       for (unsigned int i = 0; i < PSetType::m_inTuns.size(); ++i) { 
 	Tunnel *tun = (Tunnel*)PSetType::InTun(i);
 	if (tun->GetNodeClass() == SplitSingleIter::GetClass()) {
