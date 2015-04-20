@@ -28,6 +28,13 @@
 #include "realLoop.h"
 #include "splitSingleIter.h"
 
+TransTreeNode::~TransTreeNode()
+{
+  for(auto child : m_children)
+    delete child;
+  m_children.clear();
+}
+
 
 GraphIter::GraphIter(Poss *poss)
 {
@@ -125,6 +132,20 @@ void GraphIter::GetCurrTransVec(TransVec &transVec)
   for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
     m_subIters[i]->GetCurrTransVec(transVec);
   }
+}
+
+void GraphIter::PrintCurrTransformationTree(IndStream &out, unsigned int level, string set)
+{
+  ++out;
+  for (auto trans : m_poss->m_transVec) {
+    out.Indent();
+    *out << "set " << set << ", level " << level << ", " << trans->GetType() << endl;
+  }
+  for (unsigned int i = 0; i < m_poss->m_sets.size(); ++i) {
+    string currSet = set + "." + std::to_string(i);
+    m_subIters[i]->PrintCurrTransformationTree(out, level+1, currSet);
+  }
+  --out;
 }
 
 void GraphIter::AddCurrPossVars(VarSet &set) const
@@ -305,6 +326,8 @@ void GraphIter::PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, Ba
       *out << "\tUnique Num: " << m_poss->m_num << endl;
       *out << "\tChild of: " << m_poss->m_parent << endl;
       *out << "\tResult of transformations:" << endl;
+      PrintCurrTransformationTree(out, 0, "0");
+      *out << "\n\tListed:\n";
       TransVec transVec;
       GetCurrTransVec(transVec);
       TransVecConstIter transIter = transVec.begin();
