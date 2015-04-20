@@ -48,6 +48,7 @@ std::string LLDLAPhaseString(LLDLAPhase phase) {
     return "LLDLA RTL phase";
   }
   LOG_FAIL("replacement for throw call");
+  throw;
 }
 
 void RunPhase(Universe* uni, int numIters, LLDLAPhase phase) {
