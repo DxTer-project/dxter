@@ -301,12 +301,13 @@ void AddTransformations() {
   AddVAddTrans();
   AddSVMulAddTrans();
 
-  AddRTLOptimizations();
+
   AddPrimPhaseConversions();
   AddArchSpecificTrans();
+  AddRTLOptimizations();
 
   AddTransposeTrans();
-  //AddUnrollingTrans();
+  AddUnrollingTrans();
   AddSetToZeroTrans();
 }
 

@@ -77,7 +77,16 @@ void HoistDuplicateLoad::RemoveLoadsFromPosses(LoopTunnel* setTunIn) const {
     auto poss = possTunIn->m_poss;
     if (PossChildrenAreOnlyLoads(possTunIn)) {
       for(auto tunChildConn : possTunIn->m_children) {
-	if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
+	if (tunChildConn == NULL) {
+	  cout << "tunChildConn is null" << endl;
+	  throw;
+	}
+	if (tunChildConn->m_n == NULL) {
+	  cout << "tunChildConn->m_n is null" << endl;
+	  throw;
+	}
+	auto tunChildConnNode = tunChildConn->m_n;
+	if (!tunChildConnNode->IsTunnel(POSSTUNOUT)) {
 	  auto oldLoad = static_cast<DuplicateRegLoad*>(tunChildConn->m_n);
 	  oldLoad->RedirectChildren(possTunIn, 0);
 	  poss->DeleteChildAndCleanUp(oldLoad);
