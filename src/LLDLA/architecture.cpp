@@ -440,7 +440,7 @@ string AMDEngSample::DZeroVar(string varName)
 
 string Stampede::CompileString(string executableName, string testFileName)
 {
-  string compileStr = "icc -O3 -xhost -fargument-noalias-global -o ";
+  string compileStr = "icc -O3 -xhost -ip -ipo -fargument-noalias-global -o ";
   compileStr += executableName + " " + testFileName + " runtimeEvaluation/utils.c";
   return compileStr;
 }
