@@ -47,7 +47,6 @@ bool DistributeMVMulOverMAdd::CanApply(const Node* node) const {
 }
 
 void DistributeMVMulOverMAdd::Apply(Node* node) const {
-  cout << "Applying DistributeMVMulOverMAdd" << endl;
   auto madd = static_cast<MAdd*>(node->Input(0));
 
   auto newMVMul1 = new MVMul(m_toLayer);

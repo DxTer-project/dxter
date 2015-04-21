@@ -29,8 +29,6 @@
 bool PackedLoadToMaskedLoad::CanApply(const Node* node) const {
   if (node->GetNodeClass() == PackedLoadToRegs::GetClass()) {
     auto load = static_cast<const LoadToRegs*>(node);
-    auto rs = load->InputDataType(0).m_rowStride;
-    auto cs = load->InputDataType(0).m_colStride;
     return load->InputIsContiguous(0);
   }
   throw;
