@@ -27,6 +27,9 @@
 
 void MaskedLoad::SanityCheckInputDimensions() {
   if (!(IsInputRowVector(0) || IsInputColVector(0)) || !InputIsContiguous(0)) {
+    cout << "Number of rows: " << GetInputNumRows(0) << endl;
+    cout << "Number of cols: " << GetInputNumCols(0) << endl;
+    cout << "Contiguous?: " << InputIsContiguous(0) << endl;
     throw;
   }
   if (GetInputNumRows(0) >= Input(0)->GetVecRegWidth() ||

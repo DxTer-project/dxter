@@ -35,11 +35,33 @@ unsigned int GetBenchmarkNumber() {
   cout << "     4 -> MAdd benchmark" << endl;
   cout << "     5 -> Column VAdd benchmark" << endl;
   cout << "     6 -> SVMul benchmark" << endl;
-  cout << "     7 -> SVMulAdd benchmark" << endl;
+  cout << "     7 -> y := alpha*x + beta*(y + z)" << endl;
+  cout << "     8 -> y := (A + B^T)*x" << endl;
   cout << "select one of the options listed above: ";
   unsigned int benchmarkOption;
   cin >> benchmarkOption;
   return benchmarkOption;
+}
+
+void LGenLevel2ComparisonMenu() {
+  Type type;
+  int m, n, mInc, nInc, iters;
+
+  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
+  char typeChar;
+  cin >> typeChar;
+  type = CharToType(typeChar);
+  cout << "Starting M value: ";
+  cin >> m;
+  cout << "M increment: ";
+  cin >> mInc;
+  cout << "Starting N value: ";
+  cin >> n;
+  cout << "N increment: ";
+  cin >> nInc;
+  cout << "Number of iterations: ";
+  cin >> iters;
+  LGenCompareL2Benchmark(type, m, mInc, n, nInc, iters);
 }
 
 void SVMulAddBenchmarkMenu() {
@@ -160,6 +182,9 @@ void RunBenchmarkNumber(unsigned int num) {
     break;
   case(7):
     SVMulAddBenchmarkMenu();
+    break;
+  case(8):
+    LGenLevel2ComparisonMenu();
     break;
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;

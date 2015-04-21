@@ -31,8 +31,7 @@ bool PackedLoadToMaskedLoad::CanApply(const Node* node) const {
     auto load = static_cast<const LoadToRegs*>(node);
     auto rs = load->InputDataType(0).m_rowStride;
     auto cs = load->InputDataType(0).m_colStride;
-    return (load->IsInputColVector(0) && IsUnitStride(rs)) ||
-      (load->IsInputRowVector(0) && IsUnitStride(cs));
+    return load->InputIsContiguous(0);
   }
   throw;
 }

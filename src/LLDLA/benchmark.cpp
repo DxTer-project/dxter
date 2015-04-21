@@ -180,6 +180,29 @@ void MAddBenchmark(Type type, int mBase, int mInc, int nBase, int nInc, int numI
   cout << "\n------------------- madd benchmark ---------------------------\n";
 }
 
+void LGenCompareL2Benchmark(Type type, int mBase, int mInc, int nBase, int nInc, int numIters) {
+  cout << "--------------------- LGen comparison level 2 benchmark -----------------------------\n\n";
+  int m = mBase;
+  int n = nBase;
+  string benchmarkName = TypeToStr(type) + "_lgenCompL2";
+  BenchmarkStats benchStats(benchmarkName);
+  for (int i = 0; i < numIters; i++) {
+    RealPSet* test = LGenCompareL2(type, m, n);
+    ProblemInstance lgenCompL2;
+    lgenCompL2.SetName("lgenCompL2");
+    lgenCompL2.SetType(type);
+    lgenCompL2.AddDimension(m, "m");
+    lgenCompL2.AddDimension(n, "n");
+    auto pStats = RunProblemWithRTE(1, test, &lgenCompL2);
+    benchStats.AddProblemInstanceStats(pStats);
+    m += mInc;
+    n += nInc;
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- LGen comparison level 2 benchmark ---------------------------\n";
+}
+
 void RunDotProdBenchmarks() {
   DotProductBenchmark(REAL_SINGLE, 128, 128, 10);
   DotProductBenchmark(REAL_DOUBLE, 128, 128, 10);
