@@ -29,10 +29,7 @@
 bool UnpackStoreToMaskedStore::CanApply(const Node* node) const {
   if (node->GetNodeClass() == UnpackStoreFromRegs::GetClass()) {
     auto store = static_cast<const UnpackStoreFromRegs*>(node);
-    auto rs = store->InputDataType(1).m_rowStride;
-    auto cs = store->InputDataType(1).m_colStride;
-    return (store->IsInputColVector(1) && IsUnitStride(rs)) ||
-      (store->IsInputRowVector(1) && IsUnitStride(cs));
+    return store->InputIsContiguous(1);
   }
   throw;
 }
