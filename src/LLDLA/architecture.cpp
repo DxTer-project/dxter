@@ -237,7 +237,7 @@ double Architecture::FlopsPerCycle(Type type)
 }
 
 string Architecture::SPackedLoad(string memPtr, string receivingLoc, string stride, int residual) {
-  string loadCode = DZeroVar(receivingLoc);
+  string loadCode = SZeroVar(receivingLoc);
   for (int i = 0; i < residual; i++) {
     string indStr = std::to_string((long long int) i);
     loadCode += receivingLoc + ".f[" + indStr + "] = *(" + memPtr + " + " + indStr + " * " + stride + "); ";
