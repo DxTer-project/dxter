@@ -34,11 +34,6 @@ bool EliminatePackedStoreLoad::CanApply(const Node* node) const {
 	  && node->Child(1)->GetNodeClass() == UnpackStoreFromRegs::GetClass()) {
 	return true;
       } else {
-	/*	cout << node->Child(0)->GetNodeClass() << endl;
-	cout << node->Child(0)->Child(0)->GetNodeClass() << endl;
-	cout << node->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
-	cout << node->Child(0)->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;
-	cout << node->Child(0)->Child(0)->Child(0)->Child(0)->Child(0)->GetNodeClass() << endl;*/
 	return false;
       }
     }

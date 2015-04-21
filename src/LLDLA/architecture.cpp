@@ -506,7 +506,7 @@ string Stampede::SAccumCode(string memPtr, string startingLoc)
 
 string Stampede::SContiguousLoad(string memPtr, string receivingLoc)
 {
-  return receivingLoc + ".v = _mm256_load_ps( " + memPtr + " );\n";
+  return receivingLoc + ".v = _mm256_loadu_ps( " + memPtr + " );\n";
 }
 
 string Stampede::SDuplicateLoad(string memPtr, string receivingLoc)
@@ -528,7 +528,7 @@ string Stampede::SStridedLoad(string memPtr, string receivingLoc, string stride)
 
 string Stampede::SContiguousStore(string memPtr, string startingLoc)
 {
-  return "_mm256_store_ps( " + memPtr + ", " + startingLoc + ".v );\n";
+  return "_mm256_storeu_ps( " + memPtr + ", " + startingLoc + ".v );\n";
 }
 
 string Stampede::SStridedStore(string memPtr, string startingLoc, string stride)
@@ -590,7 +590,7 @@ string Stampede::DAccumCode(string memPtr, string startingLoc)
 
 string Stampede::DContiguousLoad(string memPtr, string receivingLoc)
 {
-  return receivingLoc + ".v = _mm256_load_pd( " + memPtr + " );\n";
+  return receivingLoc + ".v = _mm256_loadu_pd( " + memPtr + " );\n";
 }
 
 string Stampede::DStridedLoad(string memPtr, string receivingLoc, string stride)
@@ -608,7 +608,7 @@ string Stampede::DDuplicateLoad(string memPtr, string receivingLoc)
 
 string Stampede::DContiguousStore(string memPtr, string startingLoc)
 {
-  return "_mm256_store_pd( " + memPtr + ", " + startingLoc + ".v );\n";
+  return "_mm256_storeu_pd( " + memPtr + ", " + startingLoc + ".v );\n";
 }
 
 string Stampede::DStridedStore(string memPtr, string startingLoc, string stride)

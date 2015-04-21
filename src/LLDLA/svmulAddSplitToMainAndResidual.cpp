@@ -53,7 +53,6 @@ bool SVMulAddSplitToMainAndResidual::CanApply(const Node* node) const {
 }
 
 void SVMulAddSplitToMainAndResidual::Apply(Node* node) const {
-  cout << "Applying SVMulAddSplitToMainAndResidual" << endl;
   auto svmulAdd = static_cast<SVMulAdd*>(node);
   DimName splitDim = m_vecType == ROWVECTOR ? DIMN : DIMM;
   Dir partDir = splitDim == DIMN ? HORIZONTAL : VERTICAL;
