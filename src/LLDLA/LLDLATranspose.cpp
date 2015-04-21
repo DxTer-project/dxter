@@ -121,6 +121,10 @@ void LLDLATranspose::BuildDataTypeCache()
   m_info.m_numColsVar = in.m_numRowsVar;
   m_info.m_rowStrideVar = in.m_colStrideVar;
   m_info.m_colStrideVar = in.m_rowStrideVar;
+
+  m_info.m_rowStrideVal = in.m_rowStrideVal;
+  m_info.m_colStrideVal = in.m_colStrideVal;
+
   m_info.m_type = in.m_type;
 }
 
