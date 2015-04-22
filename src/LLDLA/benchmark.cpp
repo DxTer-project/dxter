@@ -39,7 +39,7 @@ void SVMulAddBenchmark(Type type, int m, int mInc, int numIters) {
   for (int i = 0; i < numIters; i++) {
     RealPSet* test = VMulAddBenchmark(type, m);
     ProblemInstance dotProd;
-    dotProd.SetName("dotProd");
+    dotProd.SetName("svmulAdd");
     dotProd.SetType(type);
     dotProd.AddDimension(m, "m");
     auto pStats = RunProblemWithRTE(1, test, &dotProd);

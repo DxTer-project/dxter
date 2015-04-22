@@ -115,6 +115,8 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
   cout.flush();
 
+  uni->ClearTransformations();
+
   return uni;
 }
 
