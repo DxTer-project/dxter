@@ -428,5 +428,13 @@ void GraphIter::Print(IndStream &out, BasePSet *owner, StrSet liveSet, Cost curr
 }
 
 
+void GraphIter::SetCurrAsKeeper()
+{
+  unsigned int numPSets = m_poss->m_sets.size();
 
+  m_poss->SetKeeper();
 
+  for(unsigned int i = 0; i < numPSets; ++i) {
+    m_subIters[i]->SetCurrAsKeeper();
+  }
+}

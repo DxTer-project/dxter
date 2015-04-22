@@ -68,4 +68,5 @@ class GraphIter
 
   void PrintRoot(IndStream &out, GraphNum whichGraph, bool currOnly, BasePSet *owner);
   void Print(IndStream &out, BasePSet *owner, StrSet liveSet, Cost currCost);
+  void SetCurrAsKeeper();
 };
