@@ -202,7 +202,7 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
 
 #if DOLLDLA
   if (!M_simplifiers.empty()) {
-    if (CurrPhase == LLDLAPRIMPHASE) {
+    if (CurrPhase == LLDLAPRIMPHASE || CurrPhase == LLDLARTLPHASE) {
       m_pset->Simplify(this, CurrPhase, true);
     }
   }
