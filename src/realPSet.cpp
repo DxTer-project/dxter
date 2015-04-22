@@ -1108,8 +1108,7 @@ void RealPSet::ClearBeforeProp()
 }
 
 
-bool RealPSet::TakeIter(const TransMap &transMap,
-                    const TransMap &simplifiers)
+bool RealPSet::TakeIter(const Universe *uni, int phase)
 {
   bool newOne = false;
   PossMMap actuallyAdded;
@@ -1142,7 +1141,7 @@ bool RealPSet::TakeIter(const TransMap &transMap,
       if (!poss->m_fullyExpanded) {
 	bool didSomething;
 	PossMMap newPosses;
-	didSomething = poss->TakeIter(transMap, simplifiers, newPosses);
+	didSomething = poss->TakeIter(uni, phase, newPosses);
 	if (didSomething && (!newOne || newPosses.size() > 0)) {
 #ifdef _OPENMP
 	  omp_set_lock(&lock);
@@ -1183,7 +1182,7 @@ bool RealPSet::TakeIter(const TransMap &transMap,
     for(; added != actuallyAdded.end(); ++added) {
       (*added).second->BuildDataTypeCache();
 #if FORMSETSEARLY
-      if (CurrPhase == DPTENSORPHASE)
+      if (phase == DPTENSORPHASE)
        	(*added).second->FormSets(SUMSCATTERTENSORPHASE);
 #endif
     }
@@ -1439,7 +1438,7 @@ void RealPSet::CombineAndRemoveTunnels()
   }
 }
 
-void RealPSet::Simplify(const TransMap &simplifiers, bool recursive)
+void RealPSet::Simplify(const Universe *uni, int phase, bool recursive)
 {
   //BAM par
   PossMMapIter iter;
@@ -1456,7 +1455,7 @@ void RealPSet::Simplify(const TransMap &simplifiers, bool recursive)
 	++j;
       }
       Poss *poss = (*iter).second;
-      poss->Simplify(simplifiers, recursive);
+      poss->Simplify(uni, phase, recursive);
     }
   }
   iter = m_posses.begin();
@@ -1498,7 +1497,7 @@ void RealPSet::ClearFullyExpanded()
 }
 
 
-bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
+bool RealPSet::MergePosses(const Universe *uni, int phase, CullFunction cullFunc)
 {
   /*
     Here's the idea:
@@ -1540,7 +1539,7 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
 	}
 	Poss *poss = (*iter).second;
         PossMMap newPosses;
-	if (poss->MergePosses(newPosses, simplifiers, cullFunc)) {
+	if (poss->MergePosses(newPosses, uni, phase, cullFunc)) {
 #ifdef _OPENMP
 #pragma omp atomic write
 #endif
@@ -1572,7 +1571,7 @@ bool RealPSet::MergePosses(const TransMap &simplifiers, CullFunction cullFunc)
     for(; iter != m_posses.end() && !didMerge; ++iter) {
       PossMMap newPosses;
       Poss *poss = (*iter).second;
-      if (poss->MergePosses(newPosses, simplifiers, cullFunc)) {
+      if (poss->MergePosses(newPosses, uni, phase, cullFunc)) {
 	didMerge = true;
         PossMMapIter mmapIter = newPosses.begin();
         for(; mmapIter != newPosses.end(); ++mmapIter)

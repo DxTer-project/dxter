@@ -36,6 +36,7 @@ typedef std::pair<GraphNum, string> NumImplementationPair;
 typedef map<ClassType,ConstructorFunc> ConsFuncMap;
 typedef ConsFuncMap::iterator ConsFuncMapIter;
 typedef ConsFuncMap::const_iterator ConsFuncMapConstIter;
+typedef std::map<const Transformation*, int> SimpPhaseMap;
 
 extern unsigned int CurrPhase;
 
@@ -47,6 +48,7 @@ class Universe
  public:
   static TransMap M_trans[NUMPHASES];
   static TransMap M_simplifiers;
+  static SimpPhaseMap M_simpPhaseMap;
   static TransPtrMap M_transNames;
   static TransNameMap M_transPtrs;
   bool TakeIter(unsigned int phase);
@@ -67,6 +69,7 @@ class Universe
   GraphIter EvalCostsAndSetBest(Cost &best);
   void Print(IndStream &out, GraphNum &graphNum, bool currOnly = false);
   static void AddTrans(const ClassType &classType, Transformation *trans, int phase);
+  static void AddSimp(const ClassType &classType, Transformation *trans, int phase);
   static void AddToMaps(Transformation *trans);
   void Cull();
   void Prop();

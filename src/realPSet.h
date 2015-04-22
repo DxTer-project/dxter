@@ -135,7 +135,7 @@ class RealPSet : public BasePSet
   virtual GraphNum NumPosses() const {return m_posses.size();}
   bool operator==(const BasePSet &rhs) const;
   virtual Cost Prop();
-  virtual bool TakeIter(const TransMap &trans, const TransMap &simplifiers);
+  virtual bool TakeIter(const Universe *uni, int phase);
   virtual void ClearBeforeProp();
   virtual void Duplicate(const BasePSet *orig, NodeMap &map, bool possMerging, bool useShadows);
   void Migrate();
@@ -146,14 +146,14 @@ class RealPSet : public BasePSet
   virtual void PatchAfterDuplicate(NodeMap &map);
   void CombineAndRemoveTunnels();
   void RemoveAndDeletePoss(Poss *poss, bool removeFromMyList);
-  void Simplify(const TransMap &simplifiers, bool recursive = false);
+  void Simplify(const Universe *uni, int phase, bool recursive = false);
   void ClearFullyExpanded();
   virtual bool IsTransparent() const {return true;}
   void Cull(Phase phase);
   void Cull(CullFunction cullFunc);
   void CullWorstPerformers(double percentToCull, int ignoreThreshold);
   void CullAllBut(int num);
-  bool MergePosses(const TransMap &simplifiers, CullFunction cullFunc);
+  bool MergePosses(const Universe *uni, int phase, CullFunction cullFunc);
   void FormSets(unsigned int phase);
   virtual GraphNum TotalCount() const;
   virtual void InlinePoss(Poss *inliningPoss, unsigned int num, PossMMap &newPosses);

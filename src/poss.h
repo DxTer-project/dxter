@@ -80,6 +80,7 @@ typedef map<NodeConnAndNum,vector<int>,NodeConnAndNumComp> NodeConnAndNumIntMap;
 typedef NodeConnAndNumIntMap::iterator NodeConnAndNumIntMapIter;
 
 
+class Universe;
 
 class Poss
 {
@@ -129,7 +130,7 @@ class Poss
   bool ContainsNonLoopCode() const;
   bool ContainsLoops() const;
   bool RemoveLoops(bool *doneSomething);
-  bool Simplify(const TransMap &simplifiers, bool recursive = false);
+  bool Simplify(const Universe *uni, int phase, bool recursive = false);
   void PrintTransVec();
   void PrintTransVecUp();
   void RemoveConnectionToSet();
@@ -153,11 +154,11 @@ class Poss
 		  unsigned int numLeftInTuns, unsigned int numRightInTuns,
 		  unsigned int numLeftOutTuns, unsigned int numRightOutTuns,
 		  NodeConnAndNumIntMap &inMap, NodeConnAndNumIntMap &outMap);
-  bool MergePosses(PossMMap &newPosses, const TransMap &simplifiers, CullFunction cullFunc);
-  void MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
+  bool MergePosses(PossMMap &newPosses, const Universe *uni, int phase, CullFunction cullFunc);
+  void MergePosses(unsigned int left, unsigned int right, const Universe *uni, int phase, CullFunction cullFunc);
   void FormSets(unsigned int phase);
 #if DOLOOPS
-  void FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc);
+  void FuseLoops(unsigned int left, unsigned int right, const Universe *uni, int phase, CullFunction cullFunc);
 #endif
   virtual Cost Prop();
   virtual void Cull(Phase phase);
@@ -167,7 +168,7 @@ class Poss
   void ClearFullyExpanded();
   string GetFunctionalityString() const;
   GraphNum TotalCount() const;
-  bool TakeIter(const TransMap &transMap, const TransMap &simplifiers, 
+  bool TakeIter(const Universe *uni, int phase,
 		PossMMap &newPosses);
   bool HasFused(const BasePSet *left, const BasePSet *right) const;
   void SetFused(const BasePSet *left, const BasePSet *right);

@@ -26,12 +26,12 @@
 
 class ResidualSVMulAddToRegArith : public SingleTrans {
  private:
-  Layer m_fromLayer, m_toLayer;
+  Layer m_fromLayer;
   VecType m_vecType;
 
  public:
- ResidualSVMulAddToRegArith(Layer fromLayer, Layer toLayer, VecType vecType)
-  : m_fromLayer(fromLayer), m_toLayer(toLayer), m_vecType(vecType) {}
+ ResidualSVMulAddToRegArith(Layer fromLayer, VecType vecType)
+  : m_fromLayer(fromLayer), m_vecType(vecType) {}
 
   virtual string GetType() const;
   virtual bool IsRef() const { return true; }

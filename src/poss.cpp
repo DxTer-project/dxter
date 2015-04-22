@@ -622,34 +622,37 @@ void Poss::AddPSet(BasePSet *pset)
   }
 }
 
-bool Poss::Simplify(const TransMap &simplifiers, bool recursive)
+bool Poss::Simplify(const Universe *uni, int phase, bool recursive)
 {
   bool didSomething = false;
   if (recursive) {
     PSetVecIter iter = m_sets.begin();
     for(; iter != m_sets.end(); ++iter) {
       if ((*iter)->IsReal())
-        ((RealPSet*)(*iter))->Simplify(simplifiers, recursive);
+        ((RealPSet*)(*iter))->Simplify(uni, phase, recursive);
     }
   }
   for(int nodeIdx = 0; nodeIdx < (int)m_possNodes.size(); ++nodeIdx) {
     Node *node = m_possNodes[nodeIdx];
-    TransMapConstIter iter = simplifiers.find(node->GetNodeClass());
-    if (iter != simplifiers.end()) {
+    TransMapConstIter iter = uni->M_simplifiers.find(node->GetNodeClass());
+    if (iter != uni->M_simplifiers.end()) {
       TransVecConstIter transIter = (*iter).second->begin();
       for(; transIter != (*iter).second->end(); ++transIter) {
         const Transformation *trans = *transIter;
         if (!trans->IsSingle())
           LOG_FAIL("replacement for throw call");
         if (((SingleTrans*)trans)->CanApply(node)) {
-          didSomething = true;
-          InvalidateHash();
-          //BuildDataTypeCache();
-          ((SingleTrans*)trans)->Apply(node);
-          m_transVec.push_back(const_cast<Transformation*>(trans));
-          nodeIdx = -1;
-          BuildDataTypeCache();
-          break;
+	  SimpPhaseMap::const_iterator find = uni->M_simpPhaseMap.find(trans);
+	  if (find == uni->M_simpPhaseMap.end() || find->second == phase) {
+	    didSomething = true;
+	    InvalidateHash();
+	    //BuildDataTypeCache();
+	    ((SingleTrans*)trans)->Apply(node);
+	    m_transVec.push_back(const_cast<Transformation*>(trans));
+	    nodeIdx = -1;
+	    BuildDataTypeCache();
+	    break;
+	  }
         }
       }
     }
@@ -890,7 +893,7 @@ void Poss::RemoveConnectionToSet()
  }
  */
 
-bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunction cullFunc)
+bool Poss::MergePosses(PossMMap &newPosses, const Universe *uni, int phase, CullFunction cullFunc)
 {
   /*
    First, recurse through my PSet's then check if
@@ -908,7 +911,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
       LOG_FAIL("replacement for throw call");
     }
     if (pset->IsReal())
-      didMerge |= ((RealPSet*)pset)->MergePosses(simplifiers, cullFunc);
+      didMerge |= ((RealPSet*)pset)->MergePosses(uni, phase, cullFunc);
   }
 #if DOLOOPS
   if (!didMerge) {
@@ -955,7 +958,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
                 newPoss->m_transVec.push_back(LoopFusionStub);
                 newPoss->PatchAfterDuplicate(nodeMap);
                 newPoss->BuildDataTypeCache();
-                newPoss->FuseLoops(left,right,simplifiers,cullFunc);
+                newPoss->FuseLoops(left,right,uni, phase,cullFunc);
                 SetFused(leftSet,rightSet);
                 if (AddPossToMMap(newPosses,newPoss,newPoss->GetHash()))
                   didMerge = true;
@@ -988,7 +991,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
                 cout << "merging non-loops " << m_sets[left] << " and " << m_sets[right] << endl;
 #endif
                 
-                MergePosses(left,right,simplifiers,cullFunc);
+                MergePosses(left,right,uni, phase,cullFunc);
                 didMerge = true;
                 break;
               }
@@ -1003,7 +1006,7 @@ bool Poss::MergePosses(PossMMap &newPosses,const TransMap &simplifiers, CullFunc
   if (didMerge) {
     //Merging can enable some simplifiers to run like
     // moving TempVarNodes into loops
-    Simplify(simplifiers, true);
+    Simplify(uni, phase, true);
   }
   
   return didMerge;
@@ -1679,7 +1682,7 @@ void Poss::MergePart7(RealPSet *newSet,
   }
 }
 
-void Poss::MergePosses(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc)
+void Poss::MergePosses(unsigned int left, unsigned int right, const Universe *uni, int phase, CullFunction cullFunc)
 {
   BasePSet *leftSet;
   BasePSet *rightSet;
@@ -2410,7 +2413,7 @@ void Poss::FormSets(unsigned int phase)
 }
 
 #if DOLOOPS
-void Poss::FuseLoops(unsigned int left, unsigned int right, const TransMap &simplifiers, CullFunction cullFunc)
+void Poss::FuseLoops(unsigned int left, unsigned int right, const Universe *uni, int phase, CullFunction cullFunc)
 {
   BasePSet *leftSet;
   BasePSet *rightSet;
@@ -2745,15 +2748,15 @@ GraphNum Poss::TotalCount() const
     tot *= (*iter)->TotalCount();
   return tot;
 }
-
-bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
-                    PossMMap &newPosses)
+ 
+ bool Poss::TakeIter(const Universe *uni, int phase, 
+		     PossMMap &newPosses)
 {
   bool didSomething = false;
   PSetVecIter iter = m_sets.begin();
   for (; iter != m_sets.end(); ++iter) {
     if ((*iter)->IsReal())
-      didSomething |= ((RealPSet*)(*iter))->TakeIter(transMap, simplifiers);
+      didSomething |= ((RealPSet*)(*iter))->TakeIter(uni, phase);
   }
   
   if (!didSomething) {
@@ -2772,8 +2775,8 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
     
     for(unsigned int nodeIdx = 0; nodeIdx < m_possNodes.size(); ++nodeIdx) {
       Node *node = m_possNodes[nodeIdx];
-      TransMapConstIter transMapIter = transMap.find(node->GetNodeClass());
-      if (transMapIter != transMap.end()) {
+      TransMapConstIter transMapIter = uni->M_trans[phase].find(node->GetNodeClass());
+      if (transMapIter != uni->M_trans[phase].end()) {
         TransVecConstIter transIter = transMapIter->second->begin();
         for(; transIter != transMapIter->second->end(); ++transIter) {
           const Transformation *trans = *transIter;
@@ -2805,7 +2808,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
               single->Apply(newNode);
               newPoss->m_transVec.push_back(const_cast<Transformation*>(trans));
               newPoss->BuildDataTypeCache();
-              newPoss->Simplify(simplifiers);
+              newPoss->Simplify(uni, phase);
               newPoss->BuildDataTypeCache();
               if(!AddPossToMMap(newPosses,newPoss,newPoss->GetHash())) {
                 delete newPoss;
@@ -2847,7 +2850,7 @@ bool Poss::TakeIter(const TransMap &transMap, const TransMap &simplifiers,
                 var->Apply(i, newNode, &cache);
                 newPoss->m_transVec.push_back(const_cast<Transformation*>(marking));
                 newPoss->BuildDataTypeCache();
-                newPoss->Simplify(simplifiers);
+                newPoss->Simplify(uni, phase);
                 newPoss->BuildDataTypeCache();
                 if(!AddPossToMMap(newPosses,newPoss,newPoss->GetHash())) {
                   delete newPoss;
