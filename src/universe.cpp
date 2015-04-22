@@ -209,7 +209,7 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
 #elif DOFINALOPTPHASE
   if (!M_simplifiers.empty()) {
     if (CurrPhase == FINALOPTPHASE) {
-      m_pset->Simplify(M_simplifiers, true);
+      m_pset->Simplify(this, CurrPhase, true);
     }
   }
 #endif

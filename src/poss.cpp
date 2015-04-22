@@ -937,7 +937,7 @@ bool Poss::MergePosses(PossMMap &newPosses, const Universe *uni, int phase, Cull
               if (leftSet->CanMerge(rightSet)) {
 #if ALWAYSFUSE
                 m_transVec.push_back(LoopFusionStub);
-                FuseLoops(left,right,simplifiers,cullFunc);
+                FuseLoops(left,right,uni,phase,cullFunc);
                 didMerge = true;
 #else
                 NodeMap nodeMap;
