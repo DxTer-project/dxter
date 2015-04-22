@@ -240,7 +240,7 @@ void AddRTLOptimizations() {
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombinePartition(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombine(ABSLAYER, ABSLAYER), SIMP);
 
-  Universe::AddSimp(LoopTunnel::GetClass(), new HoistDuplicateLoad(), LLDLARTLPHASE);
+  Universe::AddTrans(LoopTunnel::GetClass(), new HoistDuplicateLoad(), SIMP);
   Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoadToRegs(), SIMP);
 
   Universe::AddTrans(Mul::GetClass(), new AddMulToFMA(ABSLAYER, ABSLAYER), SIMP);
