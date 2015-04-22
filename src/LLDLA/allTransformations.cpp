@@ -180,8 +180,8 @@ void AddSVMulAddTrans() {
   Universe::AddTrans(SVMulAdd::GetClass(), new SVMulAddLoopRef(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(SVMulAdd::GetClass(), new VRWSVMulAddToRegArith(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
-  Universe::AddTrans(SVMulAdd::GetClass(), new ResidualSVMulAddToRegArith(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
-  Universe::AddTrans(SVMulAdd::GetClass(), new ResidualSVMulAddToRegArith(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMulAdd::GetClass(), new ResidualSVMulAddToRegArith(ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
+  Universe::AddTrans(SVMulAdd::GetClass(), new ResidualSVMulAddToRegArith(ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);
 
   Universe::AddTrans(SVMulAdd::GetClass(), new SVMulAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, COLVECTOR), LLDLALOOPPHASE);
   Universe::AddTrans(SVMulAdd::GetClass(), new SVMulAddSplitToMainAndResidual(ABSLAYER, ABSLAYER, ROWVECTOR), LLDLALOOPPHASE);

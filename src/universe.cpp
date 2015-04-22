@@ -54,6 +54,7 @@ TransPtrMap Universe::M_transNames;
 TransNameMap Universe::M_transPtrs;
 unsigned int Universe::M_transCount[NUMPHASES+2];
 ConsFuncMap Universe::M_consFuncMap;
+SimpPhaseMap Universe::M_simpPhaseMap;
 
 Universe::Universe() {
   m_pset = NULL;
@@ -61,7 +62,7 @@ Universe::Universe() {
 
 void Universe::Simplify()
 {
-  m_pset->Simplify(M_simplifiers, true);
+  m_pset->Simplify(this, CurrPhase, true);
 }
 
 void Universe::ClearTransformations() {
@@ -83,7 +84,7 @@ void Universe::Init(RealPSet *seed)
   m_pset = seed;
   m_pset->m_flags |= SETTOPLEVELFLAG;
   CurrPhase = FIRSTPHASE;
-  m_pset->Simplify(M_simplifiers);
+  m_pset->Simplify(this, CurrPhase);
   m_pset->BuildDataTypeCache();
 
 #if DOTENSORS
@@ -166,7 +167,7 @@ bool Universe::TakeIter(unsigned int phase)
 
   m_pset->BuildDataTypeCache();
   
-  newOne = m_pset->TakeIter(M_trans[phase], M_simplifiers);
+  newOne = m_pset->TakeIter(this, phase);
 
   cout << "\tFinishing iteration\n";
   cout.flush();
@@ -202,7 +203,7 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
 #if DOLLDLA
   if (!M_simplifiers.empty()) {
     if (CurrPhase == LLDLAPRIMPHASE) {
-      m_pset->Simplify(M_simplifiers, true);
+      m_pset->Simplify(this, CurrPhase, true);
     }
   }
 #elif DOFINALOPTPHASE
@@ -269,7 +270,7 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
 #endif
 	  //	  cout << "\tDone prop'ing before; now merging\n";
 
-	  foundNew = m_pset->MergePosses(M_simplifiers, cullFunc);
+	  foundNew = m_pset->MergePosses(this, CurrPhase, cullFunc);
 
 #if DOSUMSCATTERTENSORPHASE
 	}
@@ -372,6 +373,12 @@ void Universe::AddTrans(const ClassType &classType, Transformation *trans, int p
       M_trans[phase][classType] = vec;
     }
   }
+}
+
+ void Universe::AddSimp(const ClassType &classType, Transformation *trans, int phase)
+ {
+   AddTrans(classType, trans, SIMP);
+   M_simpPhaseMap[trans] = phase;
 }
 
 void Universe::Prop()
