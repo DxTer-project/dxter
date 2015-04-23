@@ -30,6 +30,13 @@
 #include "oneStageTimingResult.h"
 #include "runtimeEvaluation.h"
 
+static string evalDirName = "runtimeEvaluation";
+static SanityCheckSetting sanityCheckSetting = CHECKOUTPUTBUFFERS;
+static TimingSetting timingSetting = TWOPHASETIMING;
+static unsigned int numberOfImplementationsToEvaluate = 1000;
+static int minCycles = 100000000;
+
+
 ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   auto uni = RunProblem(algNum, algPSet, problemInstance);
   auto pStats = RuntimeEvaluation(algNum, uni, problemInstance);
@@ -107,6 +114,10 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
     RunPhase(uni, numIters, LLDLAPRIMPHASE);
   }
 
+#if TIMEANDCULLBEFOREUNROLLING
+  FirstPhaseTimingAndCulling(uni, problemInstance, .9);
+#endif
+
   if ((CurrPhase == LLDLALOOPUNROLLPHASE) && DOLLDLALOOPUNROLLPHASE) {
     RunPhase(uni, numIters, LLDLALOOPUNROLLPHASE);
   }
@@ -123,15 +134,12 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
 ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemInstance* problemInstance) {
   LOG_A("Starting runtime evaluation for " + problemInstance->GetName());
   cout << "Writing all implementations to runtime eval files\n";
-  int minCycles = 100000000;
   RuntimeTest rtest(problemInstance, uni, minCycles);
-  string evalDirName = "runtimeEvaluation";
   RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
 
   cout << "About to evaluate\n";
-  unsigned int numberOfImplementationsToEvaluate = 1000;
-  auto impMap = uni->ImpStrMap(numberOfImplementationsToEvaluate);
-  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(CHECKOUTPUTBUFFERS, TWOPHASETIMING, rtest, impMap.get(), uni->GetSanityCheckImplStr());
+  auto impMap = uni->ImpStrMap(false, numberOfImplementationsToEvaluate);
+  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(sanityCheckSetting, timingSetting, rtest, impMap.get(), uni->GetSanityCheckImplStr());
   cout << "Done evaluating\n";
 
   vector<OneStageTimingResult*>* oneStageResults = reinterpret_cast<vector<OneStageTimingResult*>*>(timingResults);
@@ -147,5 +155,42 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
 
   return pStats;
 }
+
+#if TIMEANDCULLBEFOREUNROLLING
+void FirstPhaseTimingAndCulling(LLDLAUniverse* uni, ProblemInstance* problemInstance, double percentToCull)
+{
+  LOG_A("Starting first-phase runtime evaluation for " + problemInstance->GetName());
+  cout << "Writing all implementations to runtime eval files\n";
+  RuntimeTest rtest(problemInstance, uni, minCycles);
+  RuntimeEvaluator evaler = RuntimeEvaluator(evalDirName);
+
+  cout << "About to evaluate\n";
+
+  auto impMap = uni->ImpStrMap(true, numberOfImplementationsToEvaluate);
+  vector<TimingResult*>* timingResults = evaler.EvaluateImplementations(sanityCheckSetting, timingSetting, rtest, impMap.get(), uni->GetSanityCheckImplStr());
+  cout << "Done evaluating\n";
+
+  vector<OneStageTimingResult*>* oneStageResults = reinterpret_cast<vector<OneStageTimingResult*>*>(timingResults);
+  auto pStats = new ProblemInstanceStats(problemInstance, oneStageResults);
+  pStats->PrettyPrintPerformanceStats();
+
+  vector<GraphNum> keepers;
+  pStats->GetNBest(keepers,ceil(impMap->size()*percentToCull));
+
+  uni->m_pset->ClearKeeperFromAll();
+
+  for(auto num : keepers) {
+    (*impMap)[num].iter->SetCurrAsKeeper();
+  }
+
+  uni->m_pset->DeleteNonKeepers();
+
+  for (auto &info : *impMap) {
+    delete info.second.iter;
+  }
+  
+  LOG_A("Done with first-phase runtime evaluation of " + problemInstance->GetName());
+}
+#endif //TIMEANDCULLBEFOREUNROLLING
 
 #endif // DOLLDLA

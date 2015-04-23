@@ -65,6 +65,8 @@ class ProblemInstanceStats {
   void PrettyPrintPerformanceStats();
   string CSVLine();
   void WriteImplementationCSV(string impCSVPath);
+
+  void GetNBest(vector<GraphNum> &keepers, int numToKeep);
 };
 
 #endif // DOLLDLA

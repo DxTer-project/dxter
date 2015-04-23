@@ -143,4 +143,30 @@ void ProblemInstanceStats::WriteImplementationCSV(string impCSVPath) {
   implementationCSV.close();
 }
 
+void ProblemInstanceStats::GetNBest(vector<GraphNum> &keepers, int numToKeep)
+{
+  priority_queue<double> queue;
+  double currBest = 0;
+  for (const auto& implStat : m_implementationStats) {
+    double curr = -1*implStat->GetAvgFlopsPerCycle();
+    if (curr <= currBest) {
+      queue.push(curr);
+      if (queue.size() > numToKeep) {
+	queue.pop();
+	currBest = queue.top();
+      }
+    }
+    else if (queue.size() < numToKeep) {
+      queue.push(curr);
+      currBest = curr;
+    }
+  }
+  for (const auto& implStat : m_implementationStats) {
+    double curr = -1*implStat->GetAvgFlopsPerCycle();
+    if (curr <= currBest) {
+      keepers.push_back(implStat->GetNum());
+    }
+  }
+}
+
 #endif // DOLLDLA
