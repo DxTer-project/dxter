@@ -702,7 +702,7 @@ unique_ptr<ImplementationMap> Universe::ImpStrMap(bool includeIters, unsigned in
       ImplInfo info;
       info.str = sbuf.str();
       if (includeIters)
-	throw;
+	info.iter = new GraphIter(iter);
       else
 	info.iter = NULL;
       impMap->insert(NumImplementationPair(i, info));

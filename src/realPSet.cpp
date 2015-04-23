@@ -2592,8 +2592,16 @@ void RealPSet::DeleteNonKeepers()
     Poss *poss = possEntry.second;
     if (!poss->IsKeeper())
       vec.push_back(poss);
+    else {
+      for (auto pset : poss->m_sets) {
+	if (pset->IsReal()) {
+	  ((RealPSet*)pset)->DeleteNonKeepers();
+	}
+      }
+    }
   }
   for(auto poss : vec) {
     RemoveAndDeletePoss(poss, true);
   }
+  
 }

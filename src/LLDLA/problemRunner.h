@@ -25,16 +25,11 @@
 
 #include "lldlaUniverse.h"
 
-#define TIMEANDCULLBEFOREUNROLLING 1
-
 ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance);
 
 LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* problemInstance);
 
 ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemInstance* problemInstance);
 
-#if TIMEANDCULLBEFOREUNROLLING
-void FirstPhaseTimingAndCulling(LLDLAUniverse* uni, ProblemInstance* problemInstance, double percentToCull);
-#endif
 
 #endif // DOLLDLA

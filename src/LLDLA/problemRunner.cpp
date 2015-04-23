@@ -30,11 +30,18 @@
 #include "oneStageTimingResult.h"
 #include "runtimeEvaluation.h"
 
+#define TIMEANDCULLBEFOREUNROLLING 0
+
 static string evalDirName = "runtimeEvaluation";
 static SanityCheckSetting sanityCheckSetting = CHECKOUTPUTBUFFERS;
 static TimingSetting timingSetting = TWOPHASETIMING;
 static unsigned int numberOfImplementationsToEvaluate = 1000;
 static int minCycles = 100000000;
+
+#if TIMEANDCULLBEFOREUNROLLING
+static double percentToKeep = .5;
+void FirstPhaseTimingAndCulling(LLDLAUniverse* uni, ProblemInstance* problemInstance, double percentToCull);
+#endif
 
 
 ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
@@ -115,7 +122,9 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
   }
 
 #if TIMEANDCULLBEFOREUNROLLING
-  FirstPhaseTimingAndCulling(uni, problemInstance, .9);
+  GraphNum num = uni->TotalCount();
+  FirstPhaseTimingAndCulling(uni, problemInstance, percentToKeep);
+  cout << "Aftering first timing phase, " << num << " -> " << uni->TotalCount() << " graphs left\n";
 #endif
 
   if ((CurrPhase == LLDLALOOPUNROLLPHASE) && DOLLDLALOOPUNROLLPHASE) {
@@ -172,22 +181,26 @@ void FirstPhaseTimingAndCulling(LLDLAUniverse* uni, ProblemInstance* problemInst
 
   vector<OneStageTimingResult*>* oneStageResults = reinterpret_cast<vector<OneStageTimingResult*>*>(timingResults);
   auto pStats = new ProblemInstanceStats(problemInstance, oneStageResults);
-  pStats->PrettyPrintPerformanceStats();
 
   vector<GraphNum> keepers;
   pStats->GetNBest(keepers,ceil(impMap->size()*percentToCull));
 
   uni->m_pset->ClearKeeperFromAll();
 
+  cout << "should have " << ceil(impMap->size()*percentToCull) << endl;
+  cout << "keepers size " << keepers.size() << endl;
+
   for(auto num : keepers) {
     (*impMap)[num].iter->SetCurrAsKeeper();
   }
 
-  uni->m_pset->DeleteNonKeepers();
-
   for (auto &info : *impMap) {
     delete info.second.iter;
   }
+
+  uni->m_pset->DeleteNonKeepers();
+
+
   
   LOG_A("Done with first-phase runtime evaluation of " + problemInstance->GetName());
 }
