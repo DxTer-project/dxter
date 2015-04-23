@@ -23,18 +23,6 @@
 
 #if DOLLDLA
 
-unique_ptr<ImplementationMap> ImpStrMap(Universe* uni) {
-  std::unique_ptr<ImplementationMap> impMap(new ImplementationMap());
-  GraphNum i;
-  for (i = 1; i <= uni->TotalCount(); i++) {
-    std::stringbuf sbuf;
-    std::ostream out(&sbuf);
-    IndStream istream = IndStream(&out, LLDLASTREAM);
-    uni->Print(istream, i);
-    impMap->insert(NumImplementationPair(i, sbuf.str()));
-  }
-  return impMap;
-}
 
 string TypeToStr(Type type) {
   switch(type) {

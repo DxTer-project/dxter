@@ -390,7 +390,7 @@ string RuntimeTest::MakeImpFuncs(ImplementationMap* imps) {
   ImplementationMap::iterator impIt;
   for (impIt = imps->begin(); impIt != imps->end(); ++impIt) {
     string funcName = m_operationName + "_" + std::to_string((long long int) impIt->first);
-    string funcBody = impIt->second;
+    string funcBody = impIt->second.str;
     string funcDec = MakeFunc(funcName, funcBody);
     allImplementationFuncs = allImplementationFuncs + funcDec;
   }

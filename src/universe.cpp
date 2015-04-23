@@ -659,7 +659,7 @@ void Universe::PrintStats()
   cout << "\t" << M_transCount[NUMPHASES] << " simplifiers\n";
 }
 
-unique_ptr<ImplementationMap> Universe::ImpStrMap(unsigned int numGraphs) {
+unique_ptr<ImplementationMap> Universe::ImpStrMap(bool includeIters, unsigned int numGraphs) {
   if (m_pset->m_posses.size() != 1)
     throw;
   Cost maxCost = -1;
@@ -699,7 +699,13 @@ unique_ptr<ImplementationMap> Universe::ImpStrMap(unsigned int numGraphs) {
       std::ostream out(&sbuf);
       IndStream istream = IndStream(&out, LLDLASTREAM);
       iter.PrintRoot(istream, i, true, m_pset);
-      impMap->insert(NumImplementationPair(i, sbuf.str()));
+      ImplInfo info;
+      info.str = sbuf.str();
+      if (includeIters)
+	throw;
+      else
+	info.iter = NULL;
+      impMap->insert(NumImplementationPair(i, info));
       ++i;
     }
   } while(!iter.Increment());

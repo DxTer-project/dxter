@@ -29,10 +29,14 @@
 #include "realPSet.h"
 #include "linearization/graphIter.h"
 
+struct ImplInfo {
+  string str;
+  GraphIter *iter;
+};
 
 typedef Node* (*ConstructorFunc)();
-typedef std::map<GraphNum, string> ImplementationMap;
-typedef std::pair<GraphNum, string> NumImplementationPair;
+typedef std::map<GraphNum, ImplInfo> ImplementationMap;
+typedef std::pair<GraphNum, ImplInfo> NumImplementationPair;
 typedef map<ClassType,ConstructorFunc> ConsFuncMap;
 typedef ConsFuncMap::iterator ConsFuncMapIter;
 typedef ConsFuncMap::const_iterator ConsFuncMapConstIter;
@@ -83,7 +87,7 @@ class Universe
 
   void ClearTransformations();
 
-  unique_ptr<ImplementationMap> ImpStrMap(unsigned int numGraphs = 0);
+  unique_ptr<ImplementationMap> ImpStrMap(bool includeIters, unsigned int numGraphs = 0);
 
   static void RegCons(ClassType type, ConstructorFunc func);
   static Node* GetBlankClassInst(ClassType type);
