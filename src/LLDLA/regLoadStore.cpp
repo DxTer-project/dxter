@@ -130,7 +130,7 @@ Name LoadToRegs::GetName(ConnNum num) const {
 }
 
 void LoadToRegs::AddVariables(VarSet &set) const {
-  string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regs;\n";
+  string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regs;";
   Var var(DirectVarDeclType, varDecl, GetDataType());
   set.insert(var);
 }
@@ -210,7 +210,7 @@ Name PackedLoadToRegs::GetName(ConnNum num) const {
 }
 
 void PackedLoadToRegs::AddVariables(VarSet &set) const {
-  string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regs_packed;\n";
+  string varDecl = arch->TypeName(GetDataType()) + " " + GetInputNameStr(0)+ "_regs_packed;";
   Var var(DirectVarDeclType, varDecl, GetDataType());
   set.insert(var);
 }

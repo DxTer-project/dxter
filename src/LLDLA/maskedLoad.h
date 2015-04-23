@@ -27,9 +27,11 @@
 
 class MaskedLoad : public LoadToRegs {
  protected:
+  string m_maskVarName;
   void SanityCheckInputDimensions();
 
  public:
+  MaskedLoad();
   virtual NodeType GetType() const { return "MaskedLoadToRegs"; }
   static Node* BlankInst() { return new MaskedLoad(); }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -39,6 +41,8 @@ class MaskedLoad : public LoadToRegs {
 
   void Prop();
   void PrintCode(IndStream& out);
+
+  void AddVariables(VarSet& set) const;
 };
 
 #endif // DOLLDLA

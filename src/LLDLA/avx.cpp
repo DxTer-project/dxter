@@ -35,59 +35,43 @@ AVX::AVX() {
   m_archTrans.push_back(*maskedLoad);
   auto maskedStore = new pair<string, SingleTrans*>(UnpackStoreFromRegs::GetClass(), new UnpackStoreToMaskedStore());
   m_archTrans.push_back(*maskedStore);
-auto maskedSLE = new pair<string, SingleTrans*>(MaskedStore::GetClass(), new EliminateMaskedStoreLoad());
-m_archTrans.push_back(*maskedSLE);
+  auto maskedSLE = new pair<string, SingleTrans*>(MaskedStore::GetClass(), new EliminateMaskedStoreLoad());
+  m_archTrans.push_back(*maskedSLE);
 }
-string AVX::GlobalDeclarations() {
-  
-  string decls = "\n//--------------- AVX Declarations ----------------\n";
-  decls += "typedef union { __m256i v; int i[8]; } intvec_reg;\n";
-  decls += "typedef union { __m256i v; long int i[4]; } lintvec_reg;\n";
-  decls += "\n";
-  decls += "#define SLI 0xff00000000000000\n";
-  decls += "#define SI 0xff000000\n";
-  decls += "\n";
-  decls += "intvec_reg lsm00;\n";
-  decls += "intvec_reg lsm01;\n";
-  decls += "intvec_reg lsm02;\n";
-  decls += "intvec_reg lsm03;\n";
-  decls += "intvec_reg lsm04;\n";
-  decls += "intvec_reg lsm05;\n";
-  decls += "intvec_reg lsm06;\n";
-  decls += "intvec_reg lsm07;\n";
-  decls += "\n";
-  decls += "lintvec_reg llsm00;\n";
-  decls += "lintvec_reg llsm01;\n";
-  decls += "lintvec_reg llsm02;\n";
-  decls += "lintvec_reg llsm03;\n";
 
-  decls += "//--------------- End AVX Declarations ----------------\n";
-  return decls;
+string AVX::MaskRegisterDeclaration(Type dataType, string varName, unsigned int residualSize) {
+  string varDecl = "__m256i " + varName + " = ";
+  int numEnts = arch->VecRegWidth(dataType);
+  string opName;
+
+  if (dataType == REAL_SINGLE) {
+    opName = "_mm256_set_epi32(";
+  } else if (dataType == REAL_DOUBLE) {
+    opName = "_mm256_set_epi64x(";
+  } else {
+    throw;
+  }
+  varDecl += opName;
+  for (int i = numEnts; i > 0; i--) {
+    if (i <= residualSize) {
+      varDecl += "-1";
+    } else {
+      varDecl += "0";
+    }
+    if (i > 1) {
+      varDecl += ", ";
+    }
+  }
+  varDecl += ");";
+  return varDecl;
+}
+
+string AVX::GlobalDeclarations() {  
+  return "";
 }
 
 string AVX::SetupFunc() {
-  string func = "void " + SetupFuncName() + "() {\n";
-  for (int i = 0; i < 8; i++) {
-    string ind = std::to_string((long long int) i);
-    string rName = "lsm0" + ind;
-    func += "\t" + rName + ".v = _mm256_setzero_si256();\n";
-    for (int j = 0; j <= i; j++) {
-      ind = std::to_string((long long int) j);
-      func += "\t" + rName + ".i[" + ind + "] = SI;\n";
-    }
-  }
-  func += "\n";
-  for (int i = 0; i < 4; i++) {
-    string ind = std::to_string((long long int) i);
-    string rName = "llsm0" + ind;
-    func += "\t" + rName + ".v = _mm256_setzero_si256();\n";
-    for (int j = 0; j <= i; j++) {
-      ind = std::to_string((long long int) j);
-      func += "\t" + rName + ".i[" + ind + "] = SLI;\n";
-    }
-  }
-  func += "}\n";
-  return func;
+  return "void AVX_setup() {}";
 }
 
 #endif // DOLLDLA

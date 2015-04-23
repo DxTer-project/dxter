@@ -28,8 +28,9 @@
 
 class AVX : public ISAExtension {
  public:
-AVX();
+  AVX();
 
+  static string MaskRegisterDeclaration(Type dataType, string varName, unsigned int residualSize);
   virtual string SetupFunc();
   virtual string GlobalDeclarations();
 };

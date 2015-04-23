@@ -27,9 +27,11 @@
 
 class MaskedStore : public StoreFromRegs {
  protected:
+  string m_maskVarName;
   void SanityCheckInputDimensions();
 
  public:
+  MaskedStore();
   virtual NodeType GetType() const { return "MaskedStoreToRegs"; }
   static Node* BlankInst() { return new MaskedStore(); }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -39,6 +41,8 @@ class MaskedStore : public StoreFromRegs {
 
   void Prop();
   void PrintCode(IndStream& out);
+
+  void AddVariables(VarSet& set) const;
 };
 
 #endif // DOLLDLA

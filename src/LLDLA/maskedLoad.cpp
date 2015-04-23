@@ -24,6 +24,11 @@
 #if DOLLDLA
 
 #include "costModel.h"
+#include "uniqueNameSource.h"
+
+MaskedLoad::MaskedLoad() {
+  m_maskVarName = localInputNames->Next("mask");
+}
 
 void MaskedLoad::SanityCheckInputDimensions() {
   if (!(IsInputRowVector(0) || IsInputColVector(0)) || !InputIsContiguous(0)) {
@@ -49,8 +54,22 @@ void MaskedLoad::Prop() {
 void MaskedLoad::PrintCode(IndStream& out) {
   string toLoadName = GetInputNameStr(0);
   string loadStr = GetNameStr(0);
-  string assignOpName, maskName;
+  string assignOpName;
 
+  if (GetDataType() == REAL_SINGLE) {
+    assignOpName = "_mm256_maskload_ps";
+  } else if (GetDataType() == REAL_DOUBLE) {
+    assignOpName = "_mm256_maskload_pd";
+  } else {
+    throw;
+  }
+
+  out.Indent();
+  *out << loadStr << ". v = " + assignOpName + "( " + toLoadName + " , " + m_maskVarName + " );" << endl;
+}
+
+void MaskedLoad::AddVariables(VarSet& set) const {
+  LoadToRegs::AddVariables(set);
   unsigned int residualSize;
   if (GetInputNumRows(0) == 1) {
     residualSize = GetInputNumCols(0);
@@ -58,19 +77,9 @@ void MaskedLoad::PrintCode(IndStream& out) {
     residualSize = GetInputNumRows(0);
   }
 
-  string residualInd = std::to_string((long long int) (residualSize - 1));
-
-  if (GetDataType() == REAL_SINGLE) {
-    assignOpName = "_mm256_maskload_ps";
-    maskName = "lsm0" + residualInd;
-  } else if (GetDataType() == REAL_DOUBLE) {
-    assignOpName = "_mm256_maskload_pd";
-    maskName = "llsm0" + residualInd;
-  } else {
-    throw;
-  }
-  out.Indent();
-  *out << loadStr << ". v = " + assignOpName + "( " + toLoadName + " , " + maskName + ".v );" << endl;
+  string varDecl = AVX::MaskRegisterDeclaration(GetDataType(), m_maskVarName, residualSize);
+  Var var(DirectVarDeclType, varDecl, GetDataType());
+  set.insert(var);
 }
 
 #endif // DOLLDLA
