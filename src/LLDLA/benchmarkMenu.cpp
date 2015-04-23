@@ -23,8 +23,93 @@
 
 #if DOLLDLA
 
+#include "assert.h"
 #include "benchmark.h"
 #include "driverUtils.h"
+
+int PromptUserForInt(string valName) {
+  cout << valName << ": ";
+  int val;
+  cin >> val;
+  return val;
+}
+
+Type PromptUserForType() {
+  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
+  char typeChar;
+  cin >> typeChar;
+  auto type = CharToType(typeChar);
+  return type;
+}
+
+vector<int> FixedIncrementDimension(int start, int end, int inc) {
+  vector<int> dim;
+  for (int i = start; i <= end; i += inc) {
+    dim.push_back(i);
+  }
+  return dim;
+}
+
+vector<int> FixedIncrementCeiling(vector<int> fixedIncs, int divFactor) {
+  assert(divFactor != 0);
+  vector<int> dim;
+  for (auto d : fixedIncs) {
+    int res = d / divFactor;
+    if (res == 0) {
+      dim.push_back(1);
+    } else {
+      dim.push_back(res);
+    }
+  }
+  return dim;
+}
+
+vector<int> FixedValueDimension(int val, int numRepeats) {
+  vector<int> fixedDim;
+  for (int i = 0; i < numRepeats; i++) {
+    fixedDim.push_back(val);
+  }
+  return fixedDim;
+}
+
+vector<int> PromptUserForFixedValueDimension() {
+  int val = PromptUserForInt("Constant value");
+  int numRepeats = PromptUserForInt("Repeated how many times");
+  return FixedValueDimension(val, numRepeats);
+}
+
+vector<int> PromptUserForFixedIncrementDimension() {
+  int start = PromptUserForInt("Starting value");
+  int end = PromptUserForInt("Ending value");
+  int inc = PromptUserForInt("Increment");
+  return FixedIncrementDimension(start, end, inc);
+}
+
+vector<int> PromptUserForFixedIncrementCeiling() {
+  auto divFactor = PromptUserForInt("Factor to divide by");
+  auto fixedVals = PromptUserForFixedIncrementDimension();
+  return FixedIncrementCeiling(fixedVals, divFactor);
+}
+
+vector<int> PromptUserForDimension(string dimName) {
+  cout << "What kind of values should dimension " << dimName << " have? " << endl;
+  cout << "\t0 -> Fixed values i.e. [10, 10, 10, 10]" << endl;
+  cout << "\t1 -> Values at fixed increments i.e. [1, 6, 11, 16]" << endl;
+  cout << "\t2 -> ceiling of fixed increments divided by a factor" << endl;
+  int dimType;
+  cin >> dimType;
+  switch(dimType) {
+  case(0):
+    return PromptUserForFixedValueDimension();
+  case(1):
+    return PromptUserForFixedIncrementDimension();
+  case(2):
+    return PromptUserForFixedIncrementCeiling();
+  default:
+    cout << dimType << " is not a valid dimension type" << endl;
+    throw;
+  }
+}
 
 unsigned int GetBenchmarkNumber() {
   cout << "---------------------- BENCHMARKS --------------------------" << endl;
@@ -37,20 +122,26 @@ unsigned int GetBenchmarkNumber() {
   cout << "     6 -> SVMul benchmark" << endl;
   cout << "     7 -> y := alpha*x + beta*(y + z)" << endl;
   cout << "     8 -> y := (A + B^T)*x" << endl;
+  cout << "     9 -> LGen level 1 comparison (y := alpha*x + beta*(y + z))" << endl;
   cout << "select one of the options listed above: ";
   unsigned int benchmarkOption;
   cin >> benchmarkOption;
   return benchmarkOption;
 }
 
+void LGenLevel1ComparisonMenu() {
+  Type type;
+  vector<int> ms;
+  type = PromptUserForType();
+  ms = PromptUserForDimension("M");
+  LGenLevel1Comparison(type, ms);
+}
+
 void LGenLevel2ComparisonMenu() {
   Type type;
   int m, n, mInc, nInc, iters;
 
-  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
-  char typeChar;
-  cin >> typeChar;
-  type = CharToType(typeChar);
+  type = PromptUserForType();
   cout << "Starting M value: ";
   cin >> m;
   cout << "M increment: ";
@@ -68,10 +159,7 @@ void SVMulAddBenchmarkMenu() {
  Type type;
   int m, inc, iters;
 
-  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
-  char typeChar;
-  cin >> typeChar;
-  type = CharToType(typeChar);
+  type = PromptUserForType();
   cout << "Starting M value: ";
   cin >> m;
   cout << "M increment: ";
@@ -85,10 +173,7 @@ void DotProductBenchmarkMenu() {
   Type type;
   int m, inc, iters;
 
-  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
-  char typeChar;
-  cin >> typeChar;
-  type = CharToType(typeChar);
+  type = PromptUserForType();
   cout << "Starting M value: ";
   cin >> m;
   cout << "M increment: ";
@@ -102,10 +187,7 @@ void MAddBenchmarkMenu() {
   Type type;
   int m, n, mInc, nInc, iters;
 
-  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
-  char typeChar;
-  cin >> typeChar;
-  type = CharToType(typeChar);
+  type = PromptUserForType();
   cout << "Starting M value: ";
   cin >> m;
   cout << "M increment: ";
@@ -123,10 +205,7 @@ void ColVAddBenchmarkMenu() {
   Type type;
   int m, inc, iters;
 
-  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
-  char typeChar;
-  cin >> typeChar;
-  type = CharToType(typeChar);
+  type = PromptUserForType();
   cout << "Starting M value: ";
   cin >> m;
   cout << "M increment: ";
@@ -145,10 +224,8 @@ void SVMulBenchmarkMenu() {
   char vecTypeChar;
   cin >> vecTypeChar;
   vecType = CharToVecType(vecTypeChar);
-  cout << "Enter datatype (F = single precision float) (D = double precision float): ";
-  char typeChar;
-  cin >> typeChar;
-  type = CharToType(typeChar);
+
+  type = PromptUserForType();
   cout << "Starting M value: ";
   cin >> m;
   cout << "M increment: ";
@@ -185,6 +262,9 @@ void RunBenchmarkNumber(unsigned int num) {
     break;
   case(8):
     LGenLevel2ComparisonMenu();
+    break;
+  case(9):
+    LGenLevel1ComparisonMenu();
     break;
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;

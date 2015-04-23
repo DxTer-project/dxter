@@ -116,7 +116,6 @@ void HoistDuplicateLoad::AddOneOuterLoad(LoopTunnel* setTunIn) const {
 }
 
 void HoistDuplicateLoad::Apply(Node *node) const {
-  cout << "APPLYING HoistDuplicateLoad" << endl;
   auto setTunIn = static_cast<LoopTunnel*>(node);
   if (!setTunIn->m_pset->IsReal()) {
     throw;

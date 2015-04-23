@@ -230,18 +230,18 @@ void AddCopyTrans() {
 }
 
 void AddRTLOptimizations() {
-  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoadOut(ABSLAYER, ABSLAYER), SIMP);
-  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), SIMP);
-  Universe::AddTrans(StoreFromRegs::GetClass(), new EliminateStore(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddSimp(StoreFromRegs::GetClass(), new EliminateStoreLoadOut(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
+  Universe::AddSimp(StoreFromRegs::GetClass(), new EliminateStoreLoad(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
+  Universe::AddSimp(StoreFromRegs::GetClass(), new EliminateStore(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
 
-  Universe::AddTrans(UnpackStoreFromRegs::GetClass(), new EliminatePackedStoreLoad(ABSLAYER, ABSLAYER), SIMP);
-  Universe::AddTrans(UnpackStoreFromRegs::GetClass(), new EliminatePackedStore(ABSLAYER, ABSLAYER), SIMP);
+  Universe::AddSimp(UnpackStoreFromRegs::GetClass(), new EliminatePackedStoreLoad(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
+  Universe::AddSimp(UnpackStoreFromRegs::GetClass(), new EliminatePackedStore(ABSLAYER, ABSLAYER), LLDLARTLPHASE);
 
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombinePartition(ABSLAYER, ABSLAYER), SIMP);
   Universe::AddTrans(Recombine::GetClass(), new EliminateRecombine(ABSLAYER, ABSLAYER), SIMP);
 
-  Universe::AddTrans(LoopTunnel::GetClass(), new HoistDuplicateLoad(), SIMP);
-  Universe::AddTrans(LoopTunnel::GetClass(), new HoistLoadToRegs(), SIMP);
+  Universe::AddSimp(LoopTunnel::GetClass(), new HoistDuplicateLoad(), LLDLARTLPHASE);
+  Universe::AddSimp(LoopTunnel::GetClass(), new HoistLoadToRegs(), LLDLARTLPHASE);
 
   Universe::AddTrans(Mul::GetClass(), new AddMulToFMA(ABSLAYER, ABSLAYER), SIMP);
 }
@@ -253,7 +253,7 @@ void AddPrimPhaseConversions() {
 void AddArchSpecificTrans() {
   for (auto ext : *arch->SupportedExtensions()) {
     for (auto simp : ext->GetArchTrans()) {
-      Universe::AddTrans(simp.first, simp.second, SIMP);
+      Universe::AddSimp(simp.first, simp.second, LLDLAPRIMPHASE);
     }
   }
 }

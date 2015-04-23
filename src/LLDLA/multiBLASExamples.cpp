@@ -141,6 +141,10 @@ RealPSet* Gemam(Type dataType, int m, int n, int p)
   Tunnel* tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(CIn, 0);
 
+  LLDLATranspose* transC = new LLDLATranspose(ABSLAYER);
+  transC->AddInput(tunC, 0);
+
+
   Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
   tunAlpha->AddInput(alphaIn, 0);
 
@@ -160,16 +164,16 @@ RealPSet* Gemam(Type dataType, int m, int n, int p)
 		    tunAlpha, 0,
 		    trans, 0);
 
-  SMMul* betaC = new SMMul(ABSLAYER);
-  betaC->AddInputs(4,
+  SMMul* betaTransC = new SMMul(ABSLAYER);
+  betaTransC->AddInputs(4,
 		   tunBeta, 0,
-		   tunC, 0);
+		   transC, 0);
 
   Gemm* gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
   gemm->AddInputs(6,
 		  alphaA, 0,
 		  tunB, 0,
-		  betaC, 0);
+		  betaTransC, 0);
 
   Poss* innerPoss = new Poss(gemm, true);
   RealPSet* innerSet = new RealPSet(innerPoss);

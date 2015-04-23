@@ -25,6 +25,8 @@
 
 #if DOLLDLA
 
+#include <assert.h>
+
 #include "benchmarkStats.h"
 #include "miscellaneousExamples.h"
 #include "problemInstance.h"
@@ -32,6 +34,59 @@
 #include "singleOperationExamples.h"
 
 using namespace std;
+
+void LGenLevel1ComparisonM(Type type, int m) {
+  vector<int> ms;
+  for (int i = 1; i <= m; i++) {
+    ms.push_back(i);
+  }
+  LGenLevel1Comparison(type, ms);
+}
+
+void LGenLevel1Comparison(Type type, vector<int> ms) {
+  cout << "--------------------- LGen Level 1 Comparison -----------------------------\n\n";
+  BenchmarkStats benchStats(TypeToStr(type) + "_lgen_level1_comparison");
+  for (auto m : ms) {
+    RealPSet* test = VMulAddBenchmark(type, m);
+    ProblemInstance l1;
+    l1.SetName("lgenLevelOneComparison");
+    l1.SetType(type);
+    l1.AddDimension(m, "m");
+    auto pStats = RunProblemWithRTE(1, test, &l1);
+    benchStats.AddProblemInstanceStats(pStats);
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- LGen Level 1 Comparison ---------------------------\n";
+}
+
+void LGenLevel2Comparison(Type type, vector<int> ms, vector<int> ns) {
+  assert(ms.size() == ns.size());
+
+  cout << "\n------------------- LGen Level 2 Comparison ---------------------------\n";
+  int m, n;
+  string benchmarkName = TypeToStr(type) + "_lgenCompL2";
+  BenchmarkStats benchStats(benchmarkName);
+  for (int i = 0; i < ms.size(); i++) {
+    m = ms[i];
+    n = ns[i];
+    RealPSet* test = LGenCompareL2(type, m, n);
+    ProblemInstance lgenCompL2;
+    lgenCompL2.SetName("lgenCompL2");
+    lgenCompL2.SetType(type);
+    lgenCompL2.AddDimension(m, "m");
+    lgenCompL2.AddDimension(n, "n");
+    auto pStats = RunProblemWithRTE(1, test, &lgenCompL2);
+    benchStats.AddProblemInstanceStats(pStats);
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- LGen Level 2 Comparison ---------------------------\n";
+}
+
+void LGenLevel3Comparison(Type type, vector<int> ms, vector<int> ns, vector<int> ps) {
+
+}
 
 void SVMulAddBenchmark(Type type, int m, int mInc, int numIters) {
   cout << "--------------------- svmul add benchmark -----------------------------\n\n";
