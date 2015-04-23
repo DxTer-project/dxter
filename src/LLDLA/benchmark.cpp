@@ -29,19 +29,12 @@
 
 #include "benchmarkStats.h"
 #include "miscellaneousExamples.h"
+#include "multiBLASExamples.h"
 #include "problemInstance.h"
 #include "problemRunner.h"
 #include "singleOperationExamples.h"
 
 using namespace std;
-
-void LGenLevel1ComparisonM(Type type, int m) {
-  vector<int> ms;
-  for (int i = 1; i <= m; i++) {
-    ms.push_back(i);
-  }
-  LGenLevel1Comparison(type, ms);
-}
 
 void LGenLevel1Comparison(Type type, vector<int> ms) {
   cout << "--------------------- LGen Level 1 Comparison -----------------------------\n\n";
@@ -85,6 +78,30 @@ void LGenLevel2Comparison(Type type, vector<int> ms, vector<int> ns) {
 }
 
 void LGenLevel3Comparison(Type type, vector<int> ms, vector<int> ns, vector<int> ps) {
+  assert(ms.size() == ns.size());
+  assert(ns.size() == ps.size());
+
+  cout << "\n------------------- LGen Level 3 Comparison ---------------------------\n";
+  int m, n, p;
+  string benchmarkName = TypeToStr(type) + "_lgenCompL3";
+  BenchmarkStats benchStats(benchmarkName);
+  for (int i = 0; i < ms.size(); i++) {
+    m = ms[i];
+    n = ns[i];
+    p = ps[i];
+    RealPSet* test = LGenCompareL3(type, m, n, p);
+    ProblemInstance lgenCompL3;
+    lgenCompL3.SetName("lgenCompL3");
+    lgenCompL3.SetType(type);
+    lgenCompL3.AddDimension(m, "m");
+    lgenCompL3.AddDimension(n, "n");
+    lgenCompL3.AddDimension(p, "p");
+    auto pStats = RunProblemWithRTE(1, test, &lgenCompL3);
+    benchStats.AddProblemInstanceStats(pStats);
+  }
+  benchStats.PrettyPrintStats();
+  benchStats.WriteToFiles("benchmarks");
+  cout << "\n------------------- LGen Level 3 Comparison ---------------------------\n";
 
 }
 

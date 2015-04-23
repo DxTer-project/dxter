@@ -123,6 +123,8 @@ unsigned int GetBenchmarkNumber() {
   cout << "     7 -> y := alpha*x + beta*(y + z)" << endl;
   cout << "     8 -> y := (A + B^T)*x" << endl;
   cout << "     9 -> LGen level 1 comparison (y := alpha*x + beta*(y + z))" << endl;
+  cout << "    10 -> LGen level 2 comparison (y := (A + B^T)*x)" << endl;
+  cout << "    11 -> LGen level 3 comparison (C := alpha*(A0 + A1)^T*B + beta*C)" << endl;
   cout << "select one of the options listed above: ";
   unsigned int benchmarkOption;
   cin >> benchmarkOption;
@@ -139,20 +141,11 @@ void LGenLevel1ComparisonMenu() {
 
 void LGenLevel2ComparisonMenu() {
   Type type;
-  int m, n, mInc, nInc, iters;
-
+  vector<int> ms, ns;
   type = PromptUserForType();
-  cout << "Starting M value: ";
-  cin >> m;
-  cout << "M increment: ";
-  cin >> mInc;
-  cout << "Starting N value: ";
-  cin >> n;
-  cout << "N increment: ";
-  cin >> nInc;
-  cout << "Number of iterations: ";
-  cin >> iters;
-  LGenCompareL2Benchmark(type, m, mInc, n, nInc, iters);
+  ms = PromptUserForDimension("M");
+  ns = PromptUserForDimension("N");
+  LGenLevel2Comparison(type, ms, ns);
 }
 
 void SVMulAddBenchmarkMenu() {
@@ -265,6 +258,12 @@ void RunBenchmarkNumber(unsigned int num) {
     break;
   case(9):
     LGenLevel1ComparisonMenu();
+    break;
+  case(10):
+    LGenLevel2ComparisonMenu();
+    break;
+  case(11):
+    LGenLevel2ComparisonMenu();
     break;
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;
