@@ -45,6 +45,7 @@ class RealPSet;
 class BasePSet;
 
 #define POSSISSANEFLAG (1L<<1)
+#define POSSISAKEEPER (1L<<2)
 
 
 typedef vector<NodeConn*> NodeConnVec;
@@ -203,6 +204,10 @@ class Poss
   void GetDistTypeSet(StrSet &set) const;
   bool HasRedist() const;
 #endif // DOTENSORS
+
+  inline void ClearKeeper() { m_flags &= ~POSSISAKEEPER; }
+  inline void SetKeeper() { m_flags |= POSSISAKEEPER; }
+  inline bool IsKeeper() { return m_flags & POSSISAKEEPER; }
 };
 
 void AddUsersOfLiveOutput(Node *node, ConnNum connNum, NodeSet &set);

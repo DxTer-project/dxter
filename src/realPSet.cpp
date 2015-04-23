@@ -2572,3 +2572,28 @@ bool RealPSet::EnforceMemConstraint(Cost costGoingIn, Cost maxMem, const StrSet 
   delete [] rem;
   return false;
 }
+  
+void RealPSet::ClearKeeperFromAll()
+{
+  for(auto possEntry : m_posses) {
+    Poss *poss = possEntry.second;
+    poss->ClearKeeper();
+    for(auto pset : poss->m_sets) {
+      if (pset->IsReal()) 
+	((RealPSet*)pset)->ClearKeeperFromAll();
+    }
+  }
+}
+ 
+void RealPSet::DeleteNonKeepers()
+{
+  PossVec vec;
+  for(auto possEntry : m_posses) {
+    Poss *poss = possEntry.second;
+    if (!poss->IsKeeper())
+      vec.push_back(poss);
+  }
+  for(auto poss : vec) {
+    RemoveAndDeletePoss(poss, true);
+  }
+}

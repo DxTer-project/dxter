@@ -343,6 +343,7 @@ typedef PSetSet::const_iterator PSetSetConstIter;
 //typedef vector<Symb> SymbVec;
 //typedef SymbVec::iterator SymbVecIter;
 //typedef SymbVec::const_iterator SymbVecConstIter;
+typedef vector<Poss*> PossVec;
 typedef multimap<size_t,Poss*> PossMMap;
 typedef PossMMap::iterator PossMMapIter;
 typedef PossMMap::const_iterator PossMMapConstIter;
