@@ -26,6 +26,7 @@
 
 class TimingResult {
  public:
+  virtual ~TimingResult() {}
   virtual GraphNum GetNum() {
     LOG_FAIL("TimingResult::GetNum() cannot be called");
     throw;

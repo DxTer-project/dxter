@@ -508,7 +508,8 @@ int main(int argc, const char* argv[])
 
     problemInstance.SetType(precision);
     problemInstance.SetName(opName);
-    RunProblemWithRTE(algNum, algPSet, &problemInstance);
+    ProblemInstanceStats *stats = RunProblemWithRTE(algNum, algPSet, &problemInstance);
+    delete stats;
   }
 
   TearDownGlobalState();

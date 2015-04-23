@@ -26,9 +26,7 @@
 
 OneStageTimingResult::OneStageTimingResult(GraphNum implNum, TimeVec* runtimes) {
   m_implNum = implNum;
-  for (auto time : *runtimes) {
-    m_runtimes.push_back(time);
-  }
+  m_runtimes = *runtimes;
 }
 
 #endif // DOLLDLA

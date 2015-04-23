@@ -32,6 +32,7 @@ class OneStageTimingResult : public TimingResult {
   vector<double> m_runtimes;
 
  public:
+  virtual ~OneStageTimingResult() {}
   OneStageTimingResult(GraphNum implNum, TimeVec* runtimes);
 
   virtual GraphNum GetNum() { return m_implNum; }
