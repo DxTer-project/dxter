@@ -26,6 +26,9 @@
 
 #if DOLLDLA
 
+void LGenLevel1Comparison(Type type, vector<int> ms);
+void LGenLevel2Comparison(Type type, vector<int> ms, vector<int> ns);
+
 void LGenCompareL2Benchmark(Type type, int mBase, int mInc, int nBase, int nInc, int numIters);
 void SVMulAddBenchmark(Type type, int m, int mInc, int numIters);
 void SVMulBenchmark(Type type, VecType vecType, int m, int mInc, int iters);
