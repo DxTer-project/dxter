@@ -30,7 +30,7 @@
 #include "oneStageTimingResult.h"
 #include "runtimeEvaluation.h"
 
-#define TIMEANDCULLBEFOREUNROLLING 0
+#define TIMEANDCULLBEFOREUNROLLING 1
 
 static string evalDirName = "runtimeEvaluation";
 static SanityCheckSetting sanityCheckSetting = CHECKOUTPUTBUFFERS;
@@ -122,11 +122,11 @@ LLDLAUniverse* RunProblem(int algNum, RealPSet* startSet, ProblemInstance* probl
     RunPhase(uni, numIters, LLDLAPRIMPHASE);
   }
 
-#if TIMEANDCULLBEFOREUNROLLING
-  GraphNum num = uni->TotalCount();
-  FirstPhaseTimingAndCulling(uni, problemInstance, percentToKeep);
-  cout << "Aftering first timing phase, " << num << " -> " << uni->TotalCount() << " graphs left\n";
-#endif
+  if (TIMEANDCULLBEFOREUNROLLING) {
+    GraphNum num = uni->TotalCount();
+    FirstPhaseTimingAndCulling(uni, problemInstance, percentToKeep);
+    cout << "Aftering first timing phase, " << num << " -> " << uni->TotalCount() << " graphs left\n";
+  }
 
   if ((CurrPhase == LLDLALOOPUNROLLPHASE) && DOLLDLALOOPUNROLLPHASE) {
     RunPhase(uni, numIters, LLDLALOOPUNROLLPHASE);
