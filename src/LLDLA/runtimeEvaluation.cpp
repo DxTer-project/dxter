@@ -96,7 +96,7 @@ bool RuntimeEvaluator::IsImplementationSeparator(string token) {
   return false;
 }
 
-vector<TimingResult*>* RuntimeEvaluator::ReadTimeDataFromFile(TimingSetting timingSetting, string fileName, int numImpls) {
+vector<string> RuntimeEvaluator::GetFileTokens(string fileName) {
   std::ifstream dataStream(fileName);
   std::stringstream buffer;
   buffer << dataStream.rdbuf();
@@ -104,13 +104,18 @@ vector<TimingResult*>* RuntimeEvaluator::ReadTimeDataFromFile(TimingSetting timi
   string timeData = buffer.str();
   std::vector<string> runtimeStrings;
   Tokenize(timeData, runtimeStrings, "\n");
-  cout << "Num impls " << std::to_string((long long int) numImpls) << endl;
-  cout << "Number of tokens " << std::to_string((long long int) runtimeStrings.size()) << endl;
+  return runtimeStrings;
+}
+
+vector<TimingResult*>* RuntimeEvaluator::ReadTimeDataFromFile(TimingSetting timingSetting, string fileName, int numImpls) {
+  vector<string> runtimeStrings = GetFileTokens(fileName);
   vector<TimingResult*>* timingResults = new vector<TimingResult*>();
   int i = 1;
   TimeVec* impTimes = new TimeVec();
+  bool atEndOfImplTimeData = false;
   for (auto token : runtimeStrings) {
     if (IsImplementationSeparator(token)) {
+      atEndOfImplTimeData = true;
       timingResults->push_back(new OneStageTimingResult(i, impTimes));
       i++;
       impTimes = new TimeVec();

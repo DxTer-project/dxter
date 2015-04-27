@@ -44,6 +44,7 @@ class RuntimeEvaluator
   vector<TimingResult*>* ReadTimingData(TimingSetting timingSetting, string dataFileName, int numImpls);
   void WriteTestCodeToFile(string testFileName, string testCode);
   void WriteTestCodeToFile(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, string executableName, string testFileName);
+  vector<string> GetFileTokens(string fileName);
 
  public:
   string m_evalDirName;

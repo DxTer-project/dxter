@@ -100,22 +100,22 @@ RealPSet* BasicMultiAssign(Type dataType, int m, int n) {
 RealPSet* LGenCompareL2(Type dataType, int m, int n) {
   auto x = InputTunnel("X",
 		       n, 1,
-		       1, n,
+		       1, 1,
 		       dataType);
 
   auto a = InputTunnel("A",
 		       m, n,
-		       1, m,
+		       1, 1,
 		       dataType);
 
   auto b = InputTunnel("B",
 		       n, m,
-		       1, n,
+		       m, 1,
 		       dataType);
 
   auto y = InputTunnel("Y",
 		       m, 1,
-		       1, m,
+		       1, 1,
 		       dataType);
 
   auto bTrans = new LLDLATranspose(ABSLAYER);
@@ -194,7 +194,6 @@ RealPSet* VMulAddBenchmark(Type dataType, int m) {
   RealPSet *outerSet = new RealPSet(outerPoss);
 
   return outerSet;
-  //  return WrapInPSet(finalY);
 }
 
 RealPSet* GenSizeColSVMul(Type dataType, int m)
