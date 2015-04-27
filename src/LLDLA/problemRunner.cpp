@@ -47,6 +47,7 @@ void FirstPhaseTimingAndCulling(LLDLAUniverse* uni, ProblemInstance* problemInst
 ProblemInstanceStats* RunProblemWithRTE(int algNum, RealPSet* algPSet, ProblemInstance* problemInstance) {
   auto uni = RunProblem(algNum, algPSet, problemInstance);
   auto pStats = RuntimeEvaluation(algNum, uni, problemInstance);
+  delete uni;
   return pStats;
 }
 
@@ -162,6 +163,10 @@ ProblemInstanceStats* RuntimeEvaluation(int algNum, LLDLAUniverse* uni, ProblemI
 
   LOG_A("Done with runtime evaluation of " + problemInstance->GetName());
 
+  for (auto elem : *timingResults)
+    delete elem;
+  delete timingResults;
+
   return pStats;
 }
 
@@ -197,6 +202,12 @@ void FirstPhaseTimingAndCulling(LLDLAUniverse* uni, ProblemInstance* problemInst
   for (auto &info : *impMap) {
     delete info.second.iter;
   }
+
+
+  for (auto elem : *timingResults)
+    delete elem;
+  delete timingResults;
+
 
   uni->m_pset->DeleteNonKeepers();
 

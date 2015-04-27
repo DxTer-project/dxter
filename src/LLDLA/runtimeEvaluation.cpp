@@ -118,6 +118,7 @@ vector<TimingResult*>* RuntimeEvaluator::ReadTimeDataFromFile(TimingSetting timi
       atEndOfImplTimeData = true;
       timingResults->push_back(new OneStageTimingResult(i, impTimes));
       i++;
+      delete impTimes;
       impTimes = new TimeVec();
     } else {
       impTimes->push_back(std::stod(token));

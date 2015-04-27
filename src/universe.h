@@ -41,6 +41,10 @@ typedef map<ClassType,ConstructorFunc> ConsFuncMap;
 typedef ConsFuncMap::iterator ConsFuncMapIter;
 typedef ConsFuncMap::const_iterator ConsFuncMapConstIter;
 typedef std::map<const Transformation*, int> SimpPhaseMap;
+typedef map<ClassType,TransVec*> TransMap;
+typedef TransMap::iterator TransMapIter;
+typedef TransMap::const_iterator TransMapConstIter;
+
 
 extern unsigned int CurrPhase;
 

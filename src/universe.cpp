@@ -106,14 +106,20 @@ Universe::~Universe()
     delete iter2->first;
   }
   M_transNames.clear();
-  TransMapIter iter3 = M_simplifiers.begin();
-  for(; iter3 != M_simplifiers.end(); ++iter3)
-    delete iter3->second;
+  for (auto vec : M_simplifiers) {
+    for (auto trans : *(vec.second)) {
+      delete trans;
+    }
+    delete vec.second;
+  }
   M_simplifiers.clear();
   for(int i = 0; i < NUMPHASES; ++i) {
-    iter3 = M_trans[i].begin();
-    for(; iter3 != M_trans[i].end(); ++iter3)
-      delete iter3->second;
+    for (auto vec : M_trans[i]) {
+      for (auto trans : *(vec.second)) {
+	delete trans;
+      }
+      delete vec.second;
+    }
     M_trans[i].clear();
   }
   if (m_pset != NULL) {
