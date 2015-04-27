@@ -283,7 +283,7 @@ string RuntimeTest::TimingLoop(int i) {
   loopBody += "\t\tsize_t trash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
   loopBody += "\t}\n";
   loopBody += "\tfprintf(" + m_dataFileName + ", \"#\\n\");\n";
-  //  loopBody += "\tfprintf(" + m_dataFileName + ", \"%d\\n\", " + std::to_string((long long int) i) + ");\n";
+  loopBody += "\tfprintf(" + m_dataFileName + ", \"%d\\n\", " + std::to_string((long long int) i) + ");\n";
   loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";
   return loopBody;
 }
@@ -332,7 +332,7 @@ string RuntimeTest::TwoPhaseTimingLoop(int i) {
   loopBody += "\t\ttrash = fprintf(" + m_dataFileName + ", \"%s\", exec_time_str);\n";
   loopBody += "\t}\n";
   loopBody += "\tfprintf(" + m_dataFileName + ", \"#\\n\");\n";
-  //  loopBody += "\tfprintf(" + m_dataFileName + ", \"%d\\n\", " + std::to_string((long long int) i) + ");\n";
+  loopBody += "\tfprintf(" + m_dataFileName + ", \"%d\\n\", " + std::to_string((long long int) i) + ");\n";
   loopBody += "\tprintf(\"Done evaluating " + opName + "\\n\");\n";
   return loopBody;
 }

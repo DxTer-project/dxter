@@ -27,6 +27,8 @@
 
 #if DOLLDLA
 
+#include <assert.h>
+
 #include "oneStageTimingResult.h"
 
 RuntimeEvaluator::RuntimeEvaluator(string evalDirName) {
@@ -114,9 +116,15 @@ vector<TimingResult*>* RuntimeEvaluator::ReadTimeDataFromFile(TimingSetting timi
   TimeVec* impTimes = new TimeVec();
   bool atEndOfImplTimeData = false;
   for (auto token : runtimeStrings) {
+    assert(!(atEndOfImplTimeData && IsImplementationSeparator(token)));
+
     if (IsImplementationSeparator(token)) {
       atEndOfImplTimeData = true;
-      timingResults->push_back(new OneStageTimingResult(i, impTimes));
+    } else if (atEndOfImplTimeData) {
+      atEndOfImplTimeData = false;
+      int implNum = stoi(token);
+      assert(implNum >= 0);
+      timingResults->push_back(new OneStageTimingResult(implNum, impTimes));
       i++;
       delete impTimes;
       impTimes = new TimeVec();

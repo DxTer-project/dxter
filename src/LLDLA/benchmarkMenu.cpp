@@ -263,7 +263,8 @@ void RunBenchmarkNumber(unsigned int num) {
     LGenLevel2ComparisonMenu();
     break;
   case(11):
-    LGenLevel2ComparisonMenu();
+    //    LGenLevel3ComparisonMenu();
+    throw;
     break;
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;
