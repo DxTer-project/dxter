@@ -77,8 +77,18 @@ void HoistLoadToRegs::RemoveLoadsFromPosses(LoopTunnel* setTunIn) const {
     auto possTunIn = static_cast<LoopTunnel*>(setTunIn->Child(possNum));
     auto poss = possTunIn->m_poss;
     if (PossChildrenAreOnlyLoads(possTunIn)) {
-      for(auto tunChildConn : possTunIn->m_children) {
-	if (!tunChildConn->m_n->IsTunnel(POSSTUNOUT)) {
+      NodeConnVec tmp = possTunIn->m_children;
+      for(auto tunChildConn : tmp) {
+        if (tunChildConn == NULL) {
+          cout << "tunChildConn is null" << endl;
+          throw;
+        }
+        if (tunChildConn->m_n == NULL) {
+          cout << "tunChildConn->m_n is null" << endl;
+          throw;
+        }
+        auto tunChildConnNode = tunChildConn->m_n;
+	if (!tunChildConnNode->IsTunnel(POSSTUNOUT)) {
 	  auto oldLoad = static_cast<LoadToRegs*>(tunChildConn->m_n);
 	  oldLoad->RedirectChildren(possTunIn, 0);
 	  poss->DeleteChildAndCleanUp(oldLoad);
