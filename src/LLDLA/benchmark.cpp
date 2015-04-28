@@ -40,7 +40,7 @@ void LGenLevel1Comparison(Type type, vector<int> ms) {
   cout << "--------------------- LGen Level 1 Comparison -----------------------------\n\n";
   BenchmarkStats benchStats(TypeToStr(type) + "_lgen_level1_comparison");
   for (auto m : ms) {
-    RealPSet* test = VMulAddBenchmark(type, m);
+    RealPSet* test = LGenCompareL1(type, m);
     ProblemInstance l1;
     l1.SetName("lgenLevelOneComparison");
     l1.SetType(type);
@@ -109,7 +109,7 @@ void SVMulAddBenchmark(Type type, int m, int mInc, int numIters) {
   cout << "--------------------- svmul add benchmark -----------------------------\n\n";
   BenchmarkStats benchStats(TypeToStr(type) + "_svmul_add");
   for (int i = 0; i < numIters; i++) {
-    RealPSet* test = VMulAddBenchmark(type, m);
+    RealPSet* test = LGenCompareL1(type, m);
     ProblemInstance dotProd;
     dotProd.SetName("svmulAdd");
     dotProd.SetType(type);

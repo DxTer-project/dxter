@@ -457,7 +457,7 @@ int main(int argc, const char* argv[])
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       problemInstance.AddDimension(m, "m");
-      algPSet = VMulAddBenchmark(precision, m);
+      algPSet = LGenCompareL1(precision, m);
       break;
     case(32):
       if (argc != 5) {

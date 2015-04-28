@@ -100,32 +100,32 @@ RealPSet* Gesummv(Type dataType, int m, int n)
 RealPSet* LGenCompareL3(Type dataType, int m, int n, int p) {
   InputNode* alphaIn = new InputNode("Alpha",
 				     1, 1,
-				     1, m,
+				     1, 1,
 				     dataType);
 
   InputNode* betaIn = new InputNode("Beta",
 				    1, 1,
-				    1, m,
+				    1, 1,
 				    dataType);
 
   InputNode* A0In = new InputNode("A0",
 				  m, n,
-				  1, m,
+				  n, 1,
 				  dataType);
 
   InputNode* A1In = new InputNode("A1",
 				  m, n,
-				  1, m,
+				  n, 1,
 				  dataType);
 
   InputNode* BIn = new InputNode("B",
 				 m, p,
-				 1, m,
+				 p, 1,
 				 dataType);
 
   InputNode* CIn = new InputNode("C",
 				 n, p,
-				 1, p,
+				 p, 1,
 				 dataType);
 
   Tunnel* tunA0 = new Tunnel(POSSTUNIN);
@@ -139,10 +139,6 @@ RealPSet* LGenCompareL3(Type dataType, int m, int n, int p) {
 
   Tunnel* tunC = new Tunnel(POSSTUNIN);
   tunC->AddInput(CIn, 0);
-
-  LLDLATranspose* transC = new LLDLATranspose(ABSLAYER);
-  transC->AddInput(tunC, 0);
-
 
   Tunnel* tunAlpha = new Tunnel(POSSTUNIN);
   tunAlpha->AddInput(alphaIn, 0);
@@ -163,16 +159,16 @@ RealPSet* LGenCompareL3(Type dataType, int m, int n, int p) {
 		    tunAlpha, 0,
 		    trans, 0);
 
-  SMMul* betaTransC = new SMMul(ABSLAYER);
-  betaTransC->AddInputs(4,
+  SMMul* betaC = new SMMul(ABSLAYER);
+  betaC->AddInputs(4,
 		   tunBeta, 0,
-		   transC, 0);
+		   CIn, 0);
 
   Gemm* gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
   gemm->AddInputs(6,
 		  alphaA, 0,
 		  tunB, 0,
-		  betaTransC, 0);
+		  betaC, 0);
 
   Poss* innerPoss = new Poss(gemm, true);
   RealPSet* innerSet = new RealPSet(innerPoss);

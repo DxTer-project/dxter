@@ -138,7 +138,7 @@ RealPSet* LGenCompareL2(Type dataType, int m, int n) {
   return WrapInPSet(result);
 }
 
-RealPSet* VMulAddBenchmark(Type dataType, int m) {
+RealPSet* LGenCompareL1(Type dataType, int m) {
   auto alpha = InputTunnel("alpha",
 			     1, 1,
 			     1, 1,
