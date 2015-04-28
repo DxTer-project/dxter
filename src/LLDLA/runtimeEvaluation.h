@@ -45,12 +45,14 @@ class RuntimeEvaluator
   void WriteTestCodeToFile(string testFileName, string testCode);
   void WriteTestCodeToFile(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, string executableName, string testFileName);
   vector<string> GetFileTokens(string fileName);
+  vector<vector<pair<GraphNum, ImplInfo>>*>* BreakIntoBatches(map<GraphNum, ImplInfo>* imps, unsigned int batchSize);
+  vector<TimingResult*>* EvaluateBatch(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, vector<pair<GraphNum, ImplInfo>>* impls, string referenceImp);
 
  public:
   string m_evalDirName;
 
   RuntimeEvaluator(string evalDirName);
-  vector<TimingResult*>* EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp);
+  vector<TimingResult*>* EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, map<GraphNum, ImplInfo>* imps, string referenceImp);
 
   vector<TimingResult*>* ReadTimeDataFromFile(TimingSetting timingSetting, string fileName, int numImpls);
   void Tokenize(const string& str, vector<string>& tokens, const string& delimiters);

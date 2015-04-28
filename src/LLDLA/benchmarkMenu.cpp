@@ -148,6 +148,16 @@ void LGenLevel2ComparisonMenu() {
   LGenLevel2Comparison(type, ms, ns);
 }
 
+void LGenLevel3ComparisonMenu() {
+  Type type;
+  vector<int> ms, ns, ps;
+  type = PromptUserForType();
+  ms = PromptUserForDimension("M");
+  ns = PromptUserForDimension("N");
+  ps = PromptUserForDimension("P");
+  LGenLevel3Comparison(type, ms, ns, ps);
+}
+
 void SVMulAddBenchmarkMenu() {
  Type type;
   int m, inc, iters;
@@ -263,8 +273,7 @@ void RunBenchmarkNumber(unsigned int num) {
     LGenLevel2ComparisonMenu();
     break;
   case(11):
-    //    LGenLevel3ComparisonMenu();
-    throw;
+    LGenLevel3ComparisonMenu();
     break;
   default:
     cout << "Error: " << num << " is not a valid benchmark number" << endl;

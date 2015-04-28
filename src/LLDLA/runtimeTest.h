@@ -49,8 +49,8 @@ class RuntimeTest {
 
   string ToCStatements(vector<string> lines);
   string CArgList(vector<string> args);
-  string MakeImpFuncs(ImplementationMap* imps);
-  string ImplementationFunctions(ImplementationMap* imps, string referenceImp);
+  string MakeImpFuncs(vector<pair<GraphNum, ImplInfo>>* imps);
+  string ImplementationFunctions(vector<pair<GraphNum, ImplInfo>>* imps, string referenceImp);
   string SetupFunction();
   string SetupFunctions();
   string MainFunction();
@@ -83,7 +83,7 @@ class RuntimeTest {
   string m_operationName;
 
   RuntimeTest(ProblemInstance* prob, LLDLAUniverse* uni, unsigned int minCycles);
-  string MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, ImplementationMap* imps, string referenceImp);
+  string MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, vector<pair<GraphNum, ImplInfo>>* imps, string referenceImp);
 };
 
 #endif // DOLLDLA

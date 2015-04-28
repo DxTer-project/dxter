@@ -78,17 +78,52 @@ vector<TimingResult*>* RuntimeEvaluator::ReadTimingData(TimingSetting timingSett
   return timingResults;
 }
 
-vector<TimingResult*>* RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, ImplementationMap* imps, string referenceImp) {
+vector<TimingResult*>* RuntimeEvaluator::EvaluateBatch(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, vector<pair<GraphNum, ImplInfo>>* impls, string referenceImp) {
   string executableName = m_evalDirName + "/" + test.m_operationName;
-  string testCode = test.MakeTestCode(sanityCheckSetting, timingSetting, imps, referenceImp);
+  string testCode = test.MakeTestCode(sanityCheckSetting, timingSetting, impls, referenceImp);
 
   WriteTestCodeToFile(executableName, testCode);
   CompileTest(executableName);
   RunTest(executableName);
   CleanUpTest(executableName);
 
-  auto timeResults = ReadTimingData(timingSetting, test.m_dataFileName, imps->size());
+  auto timeResults = ReadTimingData(timingSetting, test.m_dataFileName, impls->size());
   return timeResults;
+}
+
+vector<vector<pair<GraphNum, ImplInfo>>*>* RuntimeEvaluator::BreakIntoBatches(map<GraphNum, ImplInfo>* imps, unsigned int batchSize) {
+  auto batches = new vector<vector<pair<GraphNum, ImplInfo>>*>();
+  auto currentBatch = new vector<pair<GraphNum, ImplInfo>>();
+  unsigned int i = 0;
+  for (auto impl : *imps) {
+    if (i == batchSize) {
+      batches->push_back(currentBatch);
+      currentBatch = new vector<pair<GraphNum, ImplInfo>>();
+      i = 0;
+    } else {
+      i++;
+    }
+    pair<GraphNum, ImplInfo> newPair(impl.first, impl.second);
+    currentBatch->push_back(newPair);
+  }
+  return batches;
+}
+
+vector<TimingResult*>* RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, map<GraphNum, ImplInfo>* imps, string referenceImp) {
+  auto batchVec = BreakIntoBatches(imps, 100000);
+  auto results = new vector<TimingResult*>();
+
+  for (auto batch : *batchVec) {
+    auto batchTimeResults = EvaluateBatch(sanityCheckSetting, timingSetting, test, batch, referenceImp);
+    results->insert(results->end(), batchTimeResults->begin(), batchTimeResults->end());
+  }
+
+  for (auto batch : *batchVec) {
+    delete batch;
+  }
+  delete batchVec;
+
+  return results;
 }
 
 bool RuntimeEvaluator::IsImplementationSeparator(string token) {

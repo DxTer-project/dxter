@@ -86,7 +86,7 @@ string RuntimeTest::HeadersAndDefines(unsigned int numImplementations) {
   return headersAndDefines;
 }
 
-string RuntimeTest::ImplementationFunctions(ImplementationMap* imps, string referenceImp) {
+string RuntimeTest::ImplementationFunctions(vector<pair<GraphNum, ImplInfo>>* imps, string referenceImp) {
   string refFuncName = m_operationName + "_test";
   string implementationFunctions = MakeImpFuncs(imps) + MakeFunc(refFuncName, referenceImp);
   return implementationFunctions;
@@ -199,7 +199,7 @@ string RuntimeTest::SetupFunctions() {
   }
   return setupFuncs;
 }
-string RuntimeTest::MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, ImplementationMap* imps, string referenceImp) {
+string RuntimeTest::MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, vector<pair<GraphNum, ImplInfo>>* imps, string referenceImp) {
   unsigned int numImpls = imps->size();
   string hds = HeadersAndDefines(numImpls);
   string extSetupFuncs = SetupFunctions();
@@ -386,13 +386,12 @@ string RuntimeTest::CArgList(vector<string> args) {
   return argList;
 }
 
-string RuntimeTest::MakeImpFuncs(ImplementationMap* imps) {
+string RuntimeTest::MakeImpFuncs(vector<pair<GraphNum, ImplInfo>>* imps) {
   string endOfFuncDec = "(" + CArgList(m_argDeclarations) + ")";
   string allImplementationFuncs = "";
-  ImplementationMap::iterator impIt;
-  for (impIt = imps->begin(); impIt != imps->end(); ++impIt) {
-    string funcName = m_operationName + "_" + std::to_string((long long int) impIt->first);
-    string funcBody = impIt->second.str;
+  for (auto impl : *imps) {
+    string funcName = m_operationName + "_" + std::to_string((long long int) impl.first);
+    string funcBody = impl.second.str;
     string funcDec = MakeFunc(funcName, funcBody);
     allImplementationFuncs = allImplementationFuncs + funcDec;
   }

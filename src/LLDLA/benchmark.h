@@ -28,6 +28,7 @@
 
 void LGenLevel1Comparison(Type type, vector<int> ms);
 void LGenLevel2Comparison(Type type, vector<int> ms, vector<int> ns);
+void LGenLevel3Comparison(Type type, vector<int> ms, vector<int> ns, vector<int> ps);
 
 void LGenCompareL2Benchmark(Type type, int mBase, int mInc, int nBase, int nInc, int numIters);
 void SVMulAddBenchmark(Type type, int m, int mInc, int numIters);
