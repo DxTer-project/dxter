@@ -47,6 +47,7 @@ class RuntimeEvaluator
   vector<string> GetFileTokens(string fileName);
   vector<vector<pair<GraphNum, ImplInfo>>*>* BreakIntoBatches(map<GraphNum, ImplInfo>* imps, unsigned int batchSize);
   vector<TimingResult*>* EvaluateBatch(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, vector<pair<GraphNum, ImplInfo>>* impls, string referenceImp);
+  vector<vector<pair<GraphNum, ImplInfo>>*>* OneBatch(map<GraphNum, ImplInfo>* imps);
 
  public:
   string m_evalDirName;

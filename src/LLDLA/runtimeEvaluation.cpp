@@ -91,7 +91,23 @@ vector<TimingResult*>* RuntimeEvaluator::EvaluateBatch(SanityCheckSetting sanity
   return timeResults;
 }
 
+vector<vector<pair<GraphNum, ImplInfo>>*>* RuntimeEvaluator::OneBatch(map<GraphNum, ImplInfo>* imps) {
+  auto currentBatch = new vector<pair<GraphNum, ImplInfo>>();
+  for (auto impl : *imps) {
+    pair<GraphNum, ImplInfo> newPair(impl.first, impl.second);
+    currentBatch->push_back(newPair);
+  }
+  auto batches = new vector<vector<pair<GraphNum, ImplInfo>>*>();
+  batches->push_back(currentBatch);
+  return batches;
+}
+
 vector<vector<pair<GraphNum, ImplInfo>>*>* RuntimeEvaluator::BreakIntoBatches(map<GraphNum, ImplInfo>* imps, unsigned int batchSize) {
+  cout << "Entering BreakIntoBatches" << endl;
+  cout << "Size of imps = " << std::to_string((long long int) imps->size()) << endl;
+  if (imps->size() <= batchSize) {
+    return OneBatch(imps);
+  }
   auto batches = new vector<vector<pair<GraphNum, ImplInfo>>*>();
   auto currentBatch = new vector<pair<GraphNum, ImplInfo>>();
   unsigned int i = 0;
@@ -105,15 +121,19 @@ vector<vector<pair<GraphNum, ImplInfo>>*>* RuntimeEvaluator::BreakIntoBatches(ma
     }
     pair<GraphNum, ImplInfo> newPair(impl.first, impl.second);
     currentBatch->push_back(newPair);
+    cout << "Size of current batch = " << std::to_string((long long int) currentBatch->size()) << endl;
   }
   return batches;
 }
 
 vector<TimingResult*>* RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, map<GraphNum, ImplInfo>* imps, string referenceImp) {
+  cout << "Entering EvaulateImplementations" << endl;
   auto batchVec = BreakIntoBatches(imps, 100000);
+  cout << "size of batchVec = " << std::to_string((long long int) batchVec->size()) << endl;
   auto results = new vector<TimingResult*>();
 
   for (auto batch : *batchVec) {
+    cout << "Evalutating batches" << endl;
     auto batchTimeResults = EvaluateBatch(sanityCheckSetting, timingSetting, test, batch, referenceImp);
     results->insert(results->end(), batchTimeResults->begin(), batchTimeResults->end());
   }
