@@ -127,7 +127,7 @@ vector<vector<pair<GraphNum, ImplInfo>>*>* RuntimeEvaluator::BreakIntoBatches(ma
 
 vector<TimingResult*>* RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, map<GraphNum, ImplInfo>* imps, string referenceImp) {
   cout << "Entering EvaulateImplementations" << endl;
-  auto batchVec = BreakIntoBatches(imps, 1);
+  auto batchVec = BreakIntoBatches(imps, 100);
   cout << "size of batchVec = " << std::to_string((long long int) batchVec->size()) << endl;
   auto results = new vector<TimingResult*>();
 
