@@ -34,7 +34,7 @@
 
 static string evalDirName = "runtimeEvaluation";
 static SanityCheckSetting sanityCheckSetting = CHECKOUTPUTBUFFERS;
-static TimingSetting timingSetting = TWOPHASETIMING;
+static TimingSetting timingSetting = ONEPHASETIMING;
 static unsigned int numberOfImplementationsToEvaluate = 1000;
 static int minCycles = 100000000;
 

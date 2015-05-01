@@ -112,23 +112,22 @@ vector<vector<pair<GraphNum, ImplInfo>>*>* RuntimeEvaluator::BreakIntoBatches(ma
   auto currentBatch = new vector<pair<GraphNum, ImplInfo>>();
   unsigned int i = 0;
   for (auto impl : *imps) {
+    pair<GraphNum, ImplInfo> newPair(impl.first, impl.second);
+    currentBatch->push_back(newPair);
+    i++;
+    cout << "Size of current batch = " << std::to_string((long long int) currentBatch->size()) << endl;
     if (i == batchSize) {
       batches->push_back(currentBatch);
       currentBatch = new vector<pair<GraphNum, ImplInfo>>();
       i = 0;
-    } else {
-      i++;
     }
-    pair<GraphNum, ImplInfo> newPair(impl.first, impl.second);
-    currentBatch->push_back(newPair);
-    cout << "Size of current batch = " << std::to_string((long long int) currentBatch->size()) << endl;
   }
   return batches;
 }
 
 vector<TimingResult*>* RuntimeEvaluator::EvaluateImplementations(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, RuntimeTest test, map<GraphNum, ImplInfo>* imps, string referenceImp) {
   cout << "Entering EvaulateImplementations" << endl;
-  auto batchVec = BreakIntoBatches(imps, 100000);
+  auto batchVec = BreakIntoBatches(imps, 1);
   cout << "size of batchVec = " << std::to_string((long long int) batchVec->size()) << endl;
   auto results = new vector<TimingResult*>();
 

@@ -102,11 +102,11 @@ string RuntimeTest::MainFunction() {
   return mainFunc;
 }
 
-string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, unsigned int numImpls, string referenceImpName) {
+string RuntimeTest::SanityChecks(SanityCheckSetting sanityCheckSetting, vector<pair<GraphNum, ImplInfo>>* imps, string referenceImpName) {
   if (sanityCheckSetting == CHECKALLBUFFERS) {
-    return AllBufferSanityChecks(numImpls, referenceImpName);
+    return AllBufferSanityChecks(imps, referenceImpName);
   } else if (sanityCheckSetting == CHECKOUTPUTBUFFERS) {
-    return OutputBufferSanityChecks(numImpls, referenceImpName);
+    return OutputBufferSanityChecks(imps, referenceImpName);
   } else {
     cout << "SanityCheckSetting NONE is not yet supported" << endl;
     LOG_FAIL("replacement for throw call");
@@ -125,31 +125,33 @@ string RuntimeTest::SanityCheckBufferAllocation() {
   return argBufferAllocation;
 }
 
-string RuntimeTest::OutputBufferSanityChecks(unsigned int numImpls, string referenceImpName) {
+string RuntimeTest::OutputBufferSanityChecks(vector<pair<GraphNum, ImplInfo>>* imps, string referenceImpName) {
   auto argBufferAllocation = SanityCheckBufferAllocation();
   string correctnessCheck = argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
-  correctnessCheck += OutputBufferCorrectnessCheck(numImpls, referenceImpName);
+  correctnessCheck += OutputBufferCorrectnessCheck(imps, referenceImpName);
   correctnessCheck += "}\n";
   return correctnessCheck;
 }
 
-string RuntimeTest::AllBufferSanityChecks(unsigned int numImpls, string referenceImpName) {
+string RuntimeTest::AllBufferSanityChecks(vector<pair<GraphNum, ImplInfo>>* imps, string referenceImpName) {
   auto argBufferAllocation = SanityCheckBufferAllocation();
   string correctnessCheck = argBufferAllocation + CopyArgBuffersTo("_ref") + "\n";
-  correctnessCheck += CorrectnessCheck(numImpls, referenceImpName);
+  correctnessCheck += CorrectnessCheck(imps, referenceImpName);
   correctnessCheck += "}\n";
   return correctnessCheck;
 }
 
-string RuntimeTest::TimingCode(TimingSetting timingSetting, unsigned int numImpls, string operationName) {
+string RuntimeTest::TimingCode(TimingSetting timingSetting, vector<pair<GraphNum, ImplInfo>>* imps, string operationName) {
+  unsigned int numImpls = imps->size();
   if (timingSetting == ONEPHASETIMING) {
-    return OnePhaseTimingCode(numImpls, operationName);
+    return OnePhaseTimingCode(imps, operationName);
   } else {
-    return TwoPhaseTimingCode(numImpls, operationName);
+    return TwoPhaseTimingCode(imps, operationName);
   }
 }
 
-string RuntimeTest::OnePhaseTimingCode(unsigned int numImpls, string operationName) {
+string RuntimeTest::OnePhaseTimingCode(vector<pair<GraphNum, ImplInfo>>* imps, string operationName) {
+  unsigned int numImpls = imps->size();
   string prototype = "void time_implementations() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
   argBufferAllocation += AllocateArgBuffers(m_argDeclarations, "") + "\n";
@@ -159,13 +161,13 @@ string RuntimeTest::OnePhaseTimingCode(unsigned int numImpls, string operationNa
 
   string timingSetup = "\tint i, j, k;\n\tlong long start_time, end_time, exec_time, total_cycles;\n";
   string timingFunc = prototype + argBufferAllocation + "\n" + timingSetup;
-  string timingLoop = TimingLoops(numImpls);
+  string timingLoop = TimingLoops(imps);
   timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
   timingFunc += "\n" + timingLoop + "\n}\n";
   return timingFunc;
 }
 
-string RuntimeTest::TwoPhaseTimingCode(unsigned int numImpls, string operationName) {
+string RuntimeTest::TwoPhaseTimingCode(vector<pair<GraphNum, ImplInfo>>* imps, string operationName) {
   string prototype = "void time_implementations() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
   argBufferAllocation += AllocateArgBuffers(m_argDeclarations, "") + "\n";
@@ -177,7 +179,7 @@ string RuntimeTest::TwoPhaseTimingCode(unsigned int numImpls, string operationNa
   timingSetup += "\tchar exec_time_str[100];\n";
   timingSetup += "\tsize_t trash;\n";
   string timingFunc = prototype + argBufferAllocation + "\n" + timingSetup;
-  string timingLoop = TwoPhaseTimingLoops(numImpls);
+  string timingLoop = TwoPhaseTimingLoops(imps);
   timingLoop += "\n\tfclose(" + m_dataFileName + ");\n";
   timingFunc += "\n" + timingLoop + "\n}\n";
   return timingFunc;
@@ -199,6 +201,7 @@ string RuntimeTest::SetupFunctions() {
   }
   return setupFuncs;
 }
+
 string RuntimeTest::MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSetting timingSetting, vector<pair<GraphNum, ImplInfo>>* imps, string referenceImp) {
   unsigned int numImpls = imps->size();
   string hds = HeadersAndDefines(numImpls);
@@ -206,41 +209,43 @@ string RuntimeTest::MakeTestCode(SanityCheckSetting sanityCheckSetting, TimingSe
   hds += "\n" + SetupFunctions();
   string impFuncs = ImplementationFunctions(imps, referenceImp);
   string setupFunc = SetupFunction();
-  string sanityCheckFunc = SanityChecks(sanityCheckSetting, numImpls, m_operationName + "_test");
-  string timingFunc = TimingCode(timingSetting, imps->size(), m_operationName + "_test");
+  string sanityCheckFunc = SanityChecks(sanityCheckSetting, imps, m_operationName + "_test");
+  string timingFunc = TimingCode(timingSetting, imps, m_operationName + "_test");
   string mainFunc = MainFunction();
   string testCode = hds + "\n" + setupFunc + "\n" + impFuncs + "\n" + sanityCheckFunc + "\n" + timingFunc + "\n" + mainFunc;
   return testCode;
 }
 
-string RuntimeTest::OutputBufferCorrectnessCheck(unsigned int numImpls, string referenceImpName)
+string RuntimeTest::OutputBufferCorrectnessCheck(vector<pair<GraphNum, ImplInfo>>* imps, string referenceImpName)
 {
   string correctnessCheck = "";
   vector<string> argBuffers = ArgBuffers("_ref");
   vector<string> testBuffers = ArgBuffers("_test");
   string callRefImp = "\t" + referenceImpName + "(" + CArgList(argBuffers) + ");\n\n";
   correctnessCheck += callRefImp;
-  unsigned int i;
-  for (i = 1; i <= numImpls; i++) {
+  //  unsigned int i;
+  //  for (i = 1; i <= numImpls; i++) {
+  for (auto imp : *imps) {
     correctnessCheck += CopyArgBuffersTo("_test") + "\n\t";
-    correctnessCheck += m_operationName + "_" + std::to_string((long long int) i) + "(" + CArgList(testBuffers) + ");\n";
-    correctnessCheck += CheckArgBufferDiffs(m_outputNames, "_ref", "_test",std::to_string((long long int) i)) + "\n";
+    correctnessCheck += m_operationName + "_" + std::to_string((long long int) imp.first) + "(" + CArgList(testBuffers) + ");\n";
+    correctnessCheck += CheckArgBufferDiffs(m_outputNames, "_ref", "_test",std::to_string((long long int) imp.first)) + "\n";
   }
   return correctnessCheck;
 }
 
-string RuntimeTest::CorrectnessCheck(unsigned int numImpls, string referenceImpName)
+string RuntimeTest::CorrectnessCheck(vector<pair<GraphNum, ImplInfo>>* imps, string referenceImpName)
 {
   string correctnessCheck = "";
   vector<string> argBuffers = ArgBuffers("_ref");
   vector<string> testBuffers = ArgBuffers("_test");
   string callRefImp = "\t" + referenceImpName + "(" + CArgList(argBuffers) + ");\n\n";
   correctnessCheck += callRefImp;
-  unsigned int i;
-  for (i = 1; i <= numImpls; i++) {
+  //  unsigned int i;
+  //  for (i = 1; i <= numImpls; i++) {
+  for (auto imp : *imps) {
     correctnessCheck += CopyArgBuffersTo("_test") + "\n\t";
-    correctnessCheck += m_operationName + "_" + std::to_string((long long int) i) + "(" + CArgList(testBuffers) + ");\n";
-    correctnessCheck += CheckArgBufferDiffs(m_argNames, "_ref", "_test",std::to_string((long long int) i)) + "\n";
+    correctnessCheck += m_operationName + "_" + std::to_string((long long int) imp.first) + "(" + CArgList(testBuffers) + ");\n";
+    correctnessCheck += CheckArgBufferDiffs(m_argNames, "_ref", "_test",std::to_string((long long int) imp.first)) + "\n";
   }
   return correctnessCheck;
 }
@@ -268,7 +273,7 @@ vector<string> RuntimeTest::ArgBuffers(string postfix) {
   return argBufs;
 }
 
-string RuntimeTest::TimingLoop(int i) {
+string RuntimeTest::TimingLoop(unsigned int i) {
   string loopBody = "";
   string opName = m_operationName + "_" + std::to_string((long long int) i);
   loopBody += "\ttotal_cycles = 0;\n";
@@ -288,25 +293,23 @@ string RuntimeTest::TimingLoop(int i) {
   return loopBody;
 }
 
-string RuntimeTest::TimingLoops(unsigned int numImpls) {
-  unsigned int i;
+string RuntimeTest::TimingLoops(vector<pair<GraphNum, ImplInfo>>* imps) {
   string loopBody = "";
-  for (i = 1; i <= numImpls; i++) {
-    loopBody += TimingLoop(i);
+  for (auto imp : *imps) {
+    loopBody += TimingLoop(imp.first);
   }
   return loopBody;
 }
 
-string RuntimeTest::TwoPhaseTimingLoops(unsigned int numImpls) {
-  unsigned int i;
+string RuntimeTest::TwoPhaseTimingLoops(vector<pair<GraphNum, ImplInfo>>* imps) {
   string loopBody = "";
-  for (i = 1; i <= numImpls; i++) {
-    loopBody += TwoPhaseTimingLoop(i);
+  for (auto imp : *imps) {
+    loopBody += TwoPhaseTimingLoop(imp.first);
   }
   return loopBody;
 }
 
-string RuntimeTest::TwoPhaseTimingLoop(int i) {
+string RuntimeTest::TwoPhaseTimingLoop(unsigned int i) {
   string loopBody = "";
   string opName = m_operationName + "_" + std::to_string((long long int) i);
   loopBody += "\ttotal_cycles = 0;\n";
