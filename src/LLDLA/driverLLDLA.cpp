@@ -508,7 +508,7 @@ int main(int argc, const char* argv[])
 
     problemInstance.SetType(precision);
     problemInstance.SetName(opName);
-    ProblemInstanceStats *stats = RunProblemWithRTE(algNum, algPSet, &problemInstance);
+    ProblemInstanceStats* stats = RunProblemWithRTE(algNum, algPSet, &problemInstance);
     delete stats;
   }
 

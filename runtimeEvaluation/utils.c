@@ -137,7 +137,7 @@ void copy_float(int m, int n,
 void rand_doubles(int size, double *rands) {
   int i;
   for (i = 0; i < size; i++) {
-    rands[i] = rand() % 10;
+    rands[i] = rand() % 10 + 1;
   }
 }
 
@@ -185,6 +185,20 @@ void simple_smul(int m, int n,
 			A(i, j) = A(i, j) * *scalar;
 		}
 	}
+}
+
+void simple_trsml(int m, int n,
+		  double* a, int a_row_stride, int a_col_stride,
+		  double* b, int b_row_stride, int b_col_stride) {
+  int i, j, p;
+  for (i = 0; i < m; i++) {
+    for (j = 0; j < n; j++) {
+      for (p = 0; p < i; p++) {
+	B(i, j) = B(i, j) - A(i, p) * B(p, j);
+      }
+      B(i, j) = B(i, j) / A(i, i);
+    }
+  }
 }
 
 void simple_add_float(int m, int n,
