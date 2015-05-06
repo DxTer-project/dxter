@@ -35,7 +35,7 @@ class MVMul : public DLAOp<3, 1>
  public:
   MVMul(Layer layer);
 
-  virtual void PrintCode(IndStream &out);
+  virtual void PrintCode(IndStream& out);
   virtual void Prop();
   virtual Phase MaxPhase() const;
 

@@ -1,14 +1,36 @@
 #include "blasExamples.h"
+
+
+#if DOLLDLA
+
 #include "DLAReg.h"
+#include "exampleUtils.h"
 #include "LLDLATranspose.h"
 #include "localInput.h"
 #include "mvmul.h"
 #include "smmul.h"
 #include "svmul.h"
+#include "trsml.h"
 #include "vadd.h"
 
+RealPSet* TRSMLTest(Type dataType, int m, int n) {
+  auto Ain = InputTunnel("A",
+			 m, m,
+			 1, m,
+			 dataType);
 
-#if DOLLDLA
+  auto Bin = InputTunnel("B",
+			 m, n,
+			 1, m,
+			 dataType);
+
+  auto trsml = new TRSML(ABSLAYER);
+  trsml->AddInputs(4,
+		   Ain, 0,
+		   Bin, 0);
+
+  return WrapInPSet(trsml);
+}
 
 RealPSet* GemmTest(Type dataType, Trans transA, Trans transB, int m, int n, int p)
 {
