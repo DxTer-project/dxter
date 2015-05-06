@@ -45,6 +45,7 @@ void PrintMainMenu()
   cout <<"         1  -> Gemm  N/T N/T F/D M N P\n";
   cout <<"        14  -> Gemv N/T F/D M N\n";
   cout <<"        16  -> Axpy C/R F/D M\n";
+  cout <<"        35  -> TRSML F/D M N\n";
   cout <<"\n";
   cout <<"Miscellaneous Examples\n";
   cout <<"         2  -> Double Gemm  N/T N/T F/D M N P K\n";

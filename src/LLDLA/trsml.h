@@ -29,6 +29,8 @@ class TRSML : public DLAOp<2, 1> {
  protected:
   Layer m_layer;
 
+  void SanityCheckInputDimensions();
+
  public:
  TRSML(Layer layer) :
   m_layer(layer) {}

@@ -24,15 +24,54 @@
 #if DOLLDLA
 
 void TRSML::PrintCode(IndStream& out) {
-  throw;
+  out.Indent();
+  if (GetDataType() == REAL_DOUBLE) {
+    *out << "simple_trsml(";
+  } else {
+    throw;
+  }
+  *out << InputDataType(0).m_numRowsVar << ", " <<
+    InputDataType(0).m_numColsVar << ", " <<
+    GetInputName(0).str() << ", " <<
+    InputDataType(0).m_rowStrideVar << ", " <<
+    InputDataType(0).m_colStrideVar << ", " <<
+    GetInputName(1).str() << ", " <<
+    InputDataType(1).m_rowStrideVar << ", " <<
+    InputDataType(1).m_colStrideVar << ");\n";
+  return;
+}
+
+void TRSML::SanityCheckInputDimensions() {
+  if (GetInputNumRows(0) != GetInputNumCols(0)) {
+    LOG_FAIL("Bad dimensions in TRSML");
+    throw;
+  }
+  if (GetInputNumRows(0) != GetInputNumRows(1)) {
+    LOG_FAIL("Bad dimensions in TRSML");
+    throw;
+  }
 }
 
 void TRSML::Prop() {
-  throw;
+  if (!IsValidCost(m_cost)) {
+    SanityCheckInputDimensions();
+    m_cost = ZERO;
+  }
 }
 
 Phase TRSML::MaxPhase() const {
-  throw;
+  switch (m_layer)
+    { 
+    case(ABSLAYER):
+      return LLDLALOOPPHASE;
+    case(LLDLAMIDLAYER):
+      return LLDLAPRIMPHASE;
+    case (LLDLAPRIMITIVELAYER):
+      return NUMPHASES; 
+    default:
+      LOG_FAIL("replacement for throw call");
+      throw;
+    }
 }
 
 Node* TRSML::BlankInst() {

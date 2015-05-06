@@ -500,6 +500,19 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(n, "n");
       algPSet = BasicMultiAssign(precision, m, n);
       break;
+    case(35):
+      if (argc != 5) {
+	PrintMainMenu();
+	TearDownGlobalState(); return 0;
+      }
+      opName = "dxt_trsml";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      n = atoi(argv[4]);
+      problemInstance.AddDimension(m, "m");
+      problemInstance.AddDimension(n, "n");
+      algPSet = TRSMLTest(precision, m, n);
+      break;
     default:
       PrintMainMenu();
       TearDownGlobalState();

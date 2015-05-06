@@ -24,7 +24,7 @@ RealPSet* TRSMLTest(Type dataType, int m, int n) {
 			 1, m,
 			 dataType);
 
-  auto trsml = new TRSML(ABSLAYER);
+  auto trsml = new TRSML(LLDLAPRIMITIVELAYER);
   trsml->AddInputs(4,
 		   Ain, 0,
 		   Bin, 0);
