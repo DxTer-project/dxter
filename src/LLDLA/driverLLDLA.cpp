@@ -293,7 +293,7 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(m, "m");
       problemInstance.AddDimension(n, "n");
       problemInstance.AddDimension(p, "p");
-      algPSet = Gemam(precision, m, n, p);
+      algPSet = LGenCompareL3(precision, m, n, p);
       break;
     case(18):
       if (argc != 5) {

@@ -162,7 +162,7 @@ RealPSet* LGenCompareL3(Type dataType, int m, int n, int p) {
   SMMul* betaC = new SMMul(ABSLAYER);
   betaC->AddInputs(4,
 		   tunBeta, 0,
-		   CIn, 0);
+		   tunC, 0);
 
   Gemm* gemm = new Gemm(ABSLAYER, NORMAL, NORMAL, COEFONE, COEFONE, dataType);
   gemm->AddInputs(6,
