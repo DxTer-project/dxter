@@ -300,7 +300,7 @@ int main(int argc, const char* argv[])
 	PrintMainMenu();
 	TearDownGlobalState(); return 0;
       }
-      opName = "dxt_sgemam";
+      opName = "dxt_Gesummv";
       precision = CharToType(*argv[2]);
       m = atoi(argv[3]);
       n = atoi(argv[4]);
