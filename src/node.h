@@ -38,7 +38,6 @@
 void PrintSetOrNodeChildren(Node *node);
 void PrintSetOrNodeInputs(Node *node);
 
-//#define TRACKORIG
 
 typedef unsigned int ConnNum;
 
@@ -77,23 +76,19 @@ class Node
   NodeConnVec m_children;
   Poss *m_poss;
 
-#ifdef TRACKORIG
-  const Node *m_orig;
-#endif
-
   //Implement at least these in sub-classes
   /*****************/
   //Get a new instance of the node's class 
-  // (with default values or whatever since Duplicate will be called)
+  // (with default or random values)
   virtual Node* GetNewInst() = 0;
   //Propagate data type information, calculate node costs, and check for
   // error conditions
+  //Should super message
   virtual void Prop() = 0;
   //The maximum phase in which this node should be found
-  // Going from that phase to the next, a Poss; with this node
+  // Going from that phase to the next; a Poss with this node
   // should be culled (but HasRefined will be checked
   // and an exception will be thrown if the node hasn't refined)
-  //Should super message
   virtual Phase MaxPhase() const {return NUMPHASES;}
   //Print code
   virtual void PrintCode(IndStream &out) = 0;
@@ -102,18 +97,29 @@ class Node
   //Should super message
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   //Get the node type used for comparing two nodes for equality
+  // This should include enough information to compare two nodes
+  // of the same class that have different parameters like
+  // coefficients or transposition
   virtual NodeType GetType() const;
   //Number of outputs expected
   virtual unsigned int NumOutputs() const {return 1;}
   //Cost of the node (guaranteed to be called after Prop is called
   virtual Cost GetCost() = 0;
-  //Get the node's class so you know its type
+  //Get the node's class so you know its type and can cast it
+  // correctly from Node* to the most specific class
   virtual ClassType GetNodeClass() const = 0;
   //Static class type
+  //Enables a comparison like 
+  //  if (node->GetNodeClass() == FooClass::GetClass()) {
+  //     FooClass *foo = (FooClass*)node;
+  //     ...  do foo stuff  ...
+  //  }
   static ClassType GetClass() {return "node";}
   //Get the name of the output variable
   virtual Name GetName(ConnNum num) const = 0;
   //Returns true if the node overwrites the variable passed in by Node input
+  //This enables a dataflow graph, which shouldn't overwrite inputs,
+  // to be efficiently output in code by reusing memory of inputs
   virtual bool Overwrites(const Node *input, ConnNum num) const = 0;
   //Add any variable declarations for this node (e.g., new
   // variables that are used as temporaries)

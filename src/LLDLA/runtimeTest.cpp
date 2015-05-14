@@ -142,7 +142,7 @@ string RuntimeTest::AllBufferSanityChecks(vector<pair<GraphNum, ImplInfo>>* imps
 }
 
 string RuntimeTest::TimingCode(TimingSetting timingSetting, vector<pair<GraphNum, ImplInfo>>* imps, string operationName) {
-  unsigned int numImpls = imps->size();
+  //  unsigned int numImpls = imps->size();
   if (timingSetting == ONEPHASETIMING) {
     return OnePhaseTimingCode(imps, operationName);
   } else {
@@ -151,7 +151,7 @@ string RuntimeTest::TimingCode(TimingSetting timingSetting, vector<pair<GraphNum
 }
 
 string RuntimeTest::OnePhaseTimingCode(vector<pair<GraphNum, ImplInfo>>* imps, string operationName) {
-  unsigned int numImpls = imps->size();
+  //  unsigned int numImpls = imps->size();
   string prototype = "void time_implementations() {\n";
   string argBufferAllocation = "\tprintf(\"Starting buffer allocation\\n\");\n";
   argBufferAllocation += AllocateArgBuffers(m_argDeclarations, "") + "\n";

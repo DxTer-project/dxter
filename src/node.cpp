@@ -38,9 +38,6 @@
 Node::Node()
   :m_flags(0), m_poss(NULL) 
 {
-#ifdef TRACKORIG
-  m_orig = NULL;
-#endif
 }
 
 #include "helperNodes.h"
@@ -242,17 +239,10 @@ bool Node::operator==(const Node &rhs) const
   return true;
 }
 
+//duplicate the node's basics as part of a poss duplication
+// PatchAfterDuplicate will be called later to update the inputs and children
 void Node::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  //  cout << "duplicated " << orig << endl;
-  
-#ifdef TRACKORIG
-  if (orig->m_orig)
-    m_orig = orig->m_orig;
-  else
-    m_orig = orig;
-#endif
-  
   if (!shallow)
     m_poss = orig->m_poss;
   if (possMerging)
@@ -275,6 +265,13 @@ void Node::Duplicate(const Node *orig, bool shallow, bool possMerging)
   }
 }
 
+//After duplicating a poss, the new nodes point to nodes on
+// the old graph, so use the map of (old pointer) -> (new pointer) to patch
+// the nodes up for the new graph.
+//The map is populated as new instances of each node are created
+//An error in here likely means that the graph that was duplicated
+// had an error such that some input / child connection pointed to a node
+// on a different graph
 void Node::PatchAfterDuplicate(NodeMap &map, bool deleteSetTunConnsIfMapNotFound)
 {
   for(int i = 0; i < (int)(m_inputs.size()); ++i) {
@@ -511,6 +508,8 @@ bool Node::Applied(const Transformation *trans)
   return true;
 }
 
+//basic sanity check on bi-directional relationships (e.g., inputs to a node
+// all include that node as a child)
 void Node::CheckConnections()
 {
   NodeConnVecIter iter1 = m_inputs.begin();
