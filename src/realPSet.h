@@ -118,7 +118,10 @@ class RealPSet : public BasePSet
   string m_functionality;
   PSetVec m_shadows;
   RealPSet();
+
+  //Create a PSet around this poss, creating in and out tuns as needed
   RealPSet(Poss *poss);
+
   void Init(Poss *poss);
   PSetMap m_mergeMap;
   RealPSet *m_mergeLeft, *m_mergeRight;

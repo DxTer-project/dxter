@@ -50,6 +50,7 @@ class DLANode : public Node
 
   //BAMTODO: eventually use DataTypeInfo to pass around data sizes
 
+  //Implement these datatype queries in sub-classes
 #if TWOD
   virtual const SizeList* GetM(ConnNum num) const = 0;
   virtual const SizeList* GetN(ConnNum num) const = 0;
