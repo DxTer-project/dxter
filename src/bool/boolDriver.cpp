@@ -43,15 +43,12 @@ typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
 
 double difftime(AccurateTime &end, AccurateTime &start)
 {
-  ///  std::chrono::duration<double> elapsed_seconds = end-start;
   return (std::chrono::duration_cast<std::chrono::milliseconds>(end-start)).count()/1000.0;
 }
 
 
 void AddTrans()
 {
-
-  //  Universe::AddTrans(RedistNode::GetClass(), new CombineAllGathers, BOOLPHASE);
 }
 
 void AddSimplifiers()
@@ -136,7 +133,6 @@ int main(int argc, const char* argv[])
     cout << "Propagation took " << difftime(end,start2) << " seconds\n";
   }
 #endif
-
 
   end = std::chrono::system_clock::now();
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
