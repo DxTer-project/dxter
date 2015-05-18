@@ -814,14 +814,11 @@ void DistTrsmToSpecialLocalTrsm::Apply(Node *node) const
   node->m_poss->DeleteChildAndCleanUp(node);
 }
 
-
-
 LocalTrmmAcc::LocalTrmmAcc(Side side, Tri tri, Diag diag, Trans trans, Coef coeff, Type type)
 : m_side(side), m_tri(tri), m_diag(diag), m_trans(trans), m_coeff(coeff), m_type(type)
 {
   
 }
-
 
 void LocalTrmmAcc::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
@@ -902,7 +899,6 @@ void LocalTrmmAcc::FlattenCore(ofstream &out) const
   WRITE(m_coeff);
   WRITE(m_type);
 }
-
 
 void LocalTrmmAcc::UnflattenCore(ifstream &in, SaveInfo &info)
 {
@@ -1059,7 +1055,6 @@ void DistTrmmToLocalTrmmStatA::Apply(Node *node) const
   else
     throw;
 }
-
 
 Cost DistTrmmToLocalTrmmStatA::RHSCostEstimate(const Node *node) const
 {
