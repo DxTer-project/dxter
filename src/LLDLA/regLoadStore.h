@@ -33,6 +33,10 @@
 
 class LoadToRegs : public DLANode
 {
+ protected:
+  void SetCost();
+  void SanityCheckInputDims();
+
  public:
 
   virtual NodeType GetType() const { return "LoadToRegs"; }

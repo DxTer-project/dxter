@@ -19,13 +19,13 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+#include <assert.h>
+#include <sstream>
 
 #include "DLANode.h"
 #include "LLDLA.h"
 #include "poss.h"
 #include "elemRedist.h"
-#include <sstream>
 
 DLANode::DLANode()
 {
@@ -554,13 +554,17 @@ bool DLANode::InputDimsAreOneRepeatedSizeEach(ConnNum num) const {
 int DLANode::GetInputNumCols(ConnNum num) const {
   CheckInputNum(num);
   auto size = GetInputN(num);
-  return size->OnlyEntry();
+  auto numCols = size->OnlyEntry();
+  assert(*GetInputN(num) == numCols);
+  return numCols;
 }
 
 int DLANode::GetInputNumRows(ConnNum num) const {
   CheckInputNum(num);
   auto size = GetInputM(num);
-  return size->OnlyEntry();
+  auto numRows = size->OnlyEntry();
+  assert(*GetInputM(num) == numRows);
+  return numRows;
 }
 
 int DLANode::GetInputRowStride(ConnNum num) const {

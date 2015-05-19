@@ -25,6 +25,51 @@
 
 #include "costModel.h"
 
+void LoadToRegs::SanityCheckInputDims()
+{
+  if (*(GetInputM(0)) != GetVecRegWidth()) {
+    // this isn't 1 x GetVecRegWidth()
+    if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != GetVecRegWidth()) {
+      cout << "Error: Incorrect dimensions for register load\n";
+      cout << "Input name: " << GetInputName(0).str() << endl;
+      GetInputN(0)->Print();
+      cout << "GetVecRegWidth() = " << std::to_string((long long int) GetVecRegWidth()) << endl;
+      cout << "GetDataType() == REAL_DOUBLE ? " << std::to_string((long long int) (GetDataType() == REAL_DOUBLE)) << endl;
+      cout << "*GetInputM(0) != 1 ? " << std::to_string((long long int) (*GetInputM(0) != 1)) << endl;
+      cout << "*GetInputN(0) != GetVecRegWidth() ? ";
+      cout << std::to_string((long long int) (*GetInputN(0) != GetVecRegWidth())) << endl;
+      cout << "Num rows: " << std::to_string((long long int) GetInputNumRows(0)) << endl;
+      cout << "Num cols: " << std::to_string((long long int) GetInputNumCols(0)) << endl;
+      cout << "GetInputN(0) == NumCols(0): " << std::to_string((long long int) (*GetInputN(0) == GetInputNumCols(0))) << endl;
+      LOG_FAIL("incorrect dimensions for register load");
+      throw;
+    }
+  } else if (*(GetInputN(0)) != 1) {
+    GetInputN(0)->Print();
+    LOG_FAIL("GetVecRegWidth() rows but not 1 column");
+  }
+  return;
+}
+
+void LoadToRegs::SetCost()
+{
+  Input(0)->Prop();
+  if (IsInputColVector(0)) {
+    if (IsUnitStride(InputDataType(0).m_rowStride)) {
+      m_cost = costModel->ContigVecLoadCost();
+    } else {
+      m_cost = GetVecRegWidth() * costModel->ContigVecLoadCost();
+    }
+  } else {
+    if (IsUnitStride(InputDataType(0).m_colStride)) {
+      m_cost = costModel->ContigVecLoadCost();
+    } else {
+      m_cost = GetVecRegWidth() * costModel->ContigVecLoadCost();
+    }
+  }
+  return;
+}
+
 void LoadToRegs::Prop()
 {
   if (!IsValidCost(m_cost)) {
@@ -34,38 +79,8 @@ void LoadToRegs::Prop()
       throw;
     }
 
-    if (*(GetInputM(0)) != GetVecRegWidth()) {
-      // this isn't 1 x GetVecRegWidth()
-      if (*(GetInputM(0)) != 1 || *(GetInputN(0)) != GetVecRegWidth()) {
-	cout << "Error: Incorrect dimensions for register load\n";
-	cout << "Input name: " << GetInputName(0).str() << endl;
-	GetInputN(0)->Print();
-	cout << "GetVecRegWidth() = " << std::to_string((long long int) GetVecRegWidth()) << endl;
-	cout << "GetDataType() == REAL_DOUBLE ? " << std::to_string((long long int) (GetDataType() == REAL_DOUBLE)) << endl;
-	cout << "*GetInputM(0) != 1 ? " << std::to_string((long long int) (*GetInputM(0) != 1)) << endl;
-	cout << "*GetInputN(0) != GetVecRegWidth() ? " << std::to_string((long long int) (*GetInputN(0) != GetVecRegWidth())) << endl;
-	LOG_FAIL("replacement for throw call");
-      }
-    } else if (*(GetInputN(0)) != 1) {
-      GetInputN(0)->Print();
-      // GetVecRegWidth() rows but not 1 column
-      LOG_FAIL("replacement for throw call");
-    }
-
-    Input(0)->Prop();
-    if (IsInputColVector(0)) {
-      if (IsUnitStride(InputDataType(0).m_rowStride)) {
-	m_cost = costModel->ContigVecLoadCost();
-      } else {
-	m_cost = GetVecRegWidth() * costModel->ContigVecLoadCost();
-      }
-    } else {
-      if (IsUnitStride(InputDataType(0).m_colStride)) {
-	m_cost = costModel->ContigVecLoadCost();
-      } else {
-	m_cost = GetVecRegWidth() * costModel->ContigVecLoadCost();
-      }
-    }
+    SanityCheckInputDims();
+    SetCost();
   }
 }
 
