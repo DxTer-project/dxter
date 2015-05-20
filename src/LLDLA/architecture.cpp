@@ -335,7 +335,7 @@ string AMDEngSample::SAccumCode(string memPtr, string startingLoc)
 
 string AMDEngSample::SContiguousLoad(string memPtr, string receivingLoc)
 {
-  return receivingLoc + ".v = _mm_load_ps( " + memPtr + " );\n";
+  return receivingLoc + ".v = _mm_loadu_ps( " + memPtr + " );\n";
 }
 
 string AMDEngSample::SDuplicateLoad(string memPtr, string receivingLoc)
@@ -353,7 +353,7 @@ string AMDEngSample::SStridedLoad(string memPtr, string receivingLoc, string str
 
 string AMDEngSample::SContiguousStore(string memPtr, string startingLoc)
 {
-  return "_mm_store_ps( " + memPtr + ", " + startingLoc + ".v );\n";
+  return "_mm_storeu_ps( " + memPtr + ", " + startingLoc + ".v );\n";
 }
 
 string AMDEngSample::SStridedStore(string memPtr, string startingLoc, string stride)
@@ -408,7 +408,7 @@ string AMDEngSample::DAccumCode(string memPtr, string startingLoc)
 
 string AMDEngSample::DContiguousLoad(string memPtr, string receivingLoc)
 {
-  return receivingLoc + ".v = _mm_load_pd( " + memPtr + " );\n";
+  return receivingLoc + ".v = _mm_loadu_pd( " + memPtr + " );\n";
 }
 
 string AMDEngSample::DStridedLoad(string memPtr, string receivingLoc, string stride)
@@ -424,7 +424,7 @@ string AMDEngSample::DDuplicateLoad(string memPtr, string receivingLoc)
 
 string AMDEngSample::DContiguousStore(string memPtr, string startingLoc)
 {
-  return "_mm_store_pd( " + memPtr + ", " + startingLoc + ".v );\n";
+  return "_mm_storeu_pd( " + memPtr + ", " + startingLoc + ".v );\n";
 }
 
 string AMDEngSample::DStridedStore(string memPtr, string startingLoc, string stride)

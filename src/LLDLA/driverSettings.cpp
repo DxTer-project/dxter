@@ -32,7 +32,7 @@ CostModel* costModel;
 
 void SetUpGlobalState() {
   LOG_START("LLDLA");
-  arch = new HaswellMacbook();
+  arch = new AMDEngSample();
   costModel = new BasicCostModel();
   localInputNames = new UniqueNameSource("u_local_input_");
 }
