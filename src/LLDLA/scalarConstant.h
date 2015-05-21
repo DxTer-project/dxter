@@ -19,30 +19,29 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "helperNodes.h"
+#include "localInput.h"
 
 #if DOLLDLA
 
-class LocalInput : public InputNode
+class ScalarConstant : public LocalInput
 {
+ protected:
+  double m_value;
+
  public:
-  LocalInput(string name, Size m, Size n,
-	     Size rowStrideVal, Size colStrideVal,
-	     Type dataType);
-
-  LocalInput();
-
+  ScalarConstant(string name, Type dataType, double value);
   virtual void Prop();
   virtual void PrintCode(IndStream& out);
 
-  virtual ClassType GetNodeClass() const { return GetClass(); }
-  static ClassType GetClass() { return "localInputNode"; }
-  static Node* BlankInst() { return  new LocalInput(); }
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "scalarConstant";}
+  static Node* BlankInst() { return new ScalarConstant("", REAL_SINGLE, 0); }
   virtual Node* GetNewInst() { return BlankInst(); }
 
   virtual NodeType GetType() const;
 
   virtual void AddVariables(VarSet& set) const;
+
 };
 
 #endif // DOLLDLA
