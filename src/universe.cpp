@@ -36,7 +36,7 @@
 #if DOLLDLA
 #define PRINTCODE
 #endif
-//#define PRINTCODE
+#define PRINTCODE
 
 #define OUTPUTCODEATEACHITER 0
 
@@ -105,10 +105,11 @@ Universe::~Universe()
   for(; iter2 != M_transNames.end(); ++iter2) {
     delete iter2->first;
   }
+  /*
   M_transNames.clear();
   for (auto vec : M_simplifiers) {
     for (auto trans : *(vec.second)) {
-      delete trans;
+        delete trans;
     }
     delete vec.second;
   }
@@ -116,12 +117,13 @@ Universe::~Universe()
   for(int i = 0; i < NUMPHASES; ++i) {
     for (auto vec : M_trans[i]) {
       for (auto trans : *(vec.second)) {
-	delete trans;
+         delete trans;
       }
       delete vec.second;
     }
     M_trans[i].clear();
   }
+  */
   if (m_pset != NULL) {
     TunVec in = m_pset->m_inTuns;
     TunVec out = m_pset->m_outTuns;
