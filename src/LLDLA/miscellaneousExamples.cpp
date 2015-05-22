@@ -28,6 +28,7 @@
 #include "mvmul.h"
 #include "partition.h"
 #include "recombine.h"
+#include "scalarConstant.h"
 #include "setToZero.h"
 #include "svmul.h"
 #include "LLDLATranspose.h"
@@ -360,6 +361,38 @@ RealPSet* MAdd2(Type dataType, int m, int n)
   RealPSet *outerSet = new RealPSet(outerPoss);
   
   return outerSet;
+}
+
+RealPSet* NegateVector(Type dataType, int m) {
+  auto x = new InputNode("X",
+		     m, 1,
+		     1, 1,
+		     dataType);
+
+  auto neg1 = new ScalarConstant("negativeOne", dataType, -1);
+
+  auto tunX = new Tunnel(POSSTUNIN);
+  tunX->AddInput(x, 0);
+
+  auto tunNeg1 = new Tunnel(POSSTUNIN);
+  tunNeg1->AddInput(neg1, 0);
+
+  auto svmul = new SVMul(ABSLAYER);
+  svmul->AddInputs(4,
+		   tunNeg1, 0,
+		   tunX, 0);
+
+  Poss* innerPoss = new Poss(svmul, true);
+  RealPSet* innerSet = new RealPSet(innerPoss);
+
+  OutputNode *Cout = new OutputNode;
+  Cout->AddInput(innerSet->OutTun(0), 0);
+
+  Poss *outerPoss = new Poss(Cout, true);
+  RealPSet *outerSet = new RealPSet(outerPoss);
+  
+  return outerSet;
+  
 }
 
 RealPSet* VAdd2(Type dataType, int m)

@@ -513,6 +513,17 @@ int main(int argc, const char* argv[])
       problemInstance.AddDimension(n, "n");
       algPSet = TRSMLTest(precision, m, n);
       break;
+    case(36):
+      if (argc != 4) {
+	PrintMainMenu();
+	TearDownGlobalState(); return 0;
+      }
+      opName = "scal_neg";
+      precision = CharToType(*argv[2]);
+      m = atoi(argv[3]);
+      problemInstance.AddDimension(m, "m");
+      algPSet = NegateVector(precision, m);
+      break;
     default:
       PrintMainMenu();
       TearDownGlobalState();

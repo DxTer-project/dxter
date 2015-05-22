@@ -71,6 +71,7 @@ void PrintMainMenu()
   cout <<"        27  -> 2D vertical unpack test F/D M N\n";
   cout <<"        28  -> 2D horizontal unpack test F/D M N\n";
   cout <<"        29  -> 2D horizontal copy test F/D M N\n";
+  cout <<"        36  -> Negate vector F/D M\n";
   cout <<"\n";
   cout <<"Automated tests\n";
   cout <<"        30  -> Basic examples, no runtime evaluation\n";

@@ -13,6 +13,7 @@ RealPSet* TransMVMul(Type dataType, int m, int n);
 RealPSet* MVMul2(Type dataType, int m, int n, int p);
 RealPSet* MAdd2(Type dataType, int m, int n);
 RealPSet* VAdd2(Type dataType, int m);
+RealPSet* NegateVector(Type dataType, int m);
 RealPSet* DoubleGemm(Type dataType, Trans transA, Trans transB, int m, int n, int p, int k);
 
 #endif // DOLLDLA
