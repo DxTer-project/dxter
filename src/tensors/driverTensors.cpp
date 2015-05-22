@@ -310,6 +310,7 @@ void AddTrans()
     Universe::AddTrans(YAxpPx::GetClass(), new YAxpPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
     Universe::AddTrans(ZAxpBypPx::GetClass(), new ZAxpBypPxLoopExp(DM1LAYER,DM2LAYER,dim), DPTENSORPHASE);
 #endif
+    Universe::AddTrans(RedistNode::GetClass(), new CombineMovingModes(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SplitRedistribs(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new SingleIndexAllToAll(dim), ROTENSORPHASE);
     Universe::AddTrans(RedistNode::GetClass(), new DoubleIndexAllToAll(dim), ROTENSORPHASE);

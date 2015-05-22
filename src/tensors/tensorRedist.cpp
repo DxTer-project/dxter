@@ -1491,7 +1491,7 @@ bool DoubleIndexAllToAll::CanApply(const Node *node) const
             intType.m_dists[dim].DimsToDistEntry(int2);
           }
           
-          if (srcType != intType) {
+          if (srcType != intType && intType != destType) {
             return true;
           }
         }
@@ -3013,5 +3013,119 @@ string GetAlignmentSource(Node *node, ConnNum inNum)
 }
 #endif
 
+bool CombineMovingModes::CanApply(const Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+  const RedistNode *redist = (RedistNode*)node;
 
+  const DistType &srcType = redist->InputDataType(0).GetDist();
+  const DistType &destType = redist->m_info.GetDist();
+
+  if (srcType.m_numDims <= m_dim)
+    return false;
+
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
+  
+  if (srcEntry == destEntry)
+    return false;
+
+  DimVec srcDims = srcEntry.DistEntryDims();
+
+  DimVec start;
+  DimVec end;
+
+  DistType intType = srcType;
+
+  for (auto distDim : srcDims) {
+    if (!destEntry.ContainsDim(distDim)) {
+      bool found = false;
+      for (Dim dim2 = 0; dim2 < destType.m_numDims; ++dim2) {
+	if (dim2 != m_dim) {
+	  if (destType.m_dists[dim2].ContainsDim(distDim)) {
+	    intType.m_dists[dim2].AppendDim(distDim);
+	    found = true;
+	    break;
+	  }
+	}
+      }
+      if (!found)
+	start.push_back(distDim);
+    }
+    else
+      start.push_back(distDim);
+  }
+
+  intType.m_dists[m_dim].DimsToDistEntry(start);
+
+
+  if (intType != srcType && intType != destType)
+    return true;
+  else
+    return false;
+}
+
+void CombineMovingModes::Apply(Node *node) const
+{
+  if (node->GetNodeClass() != RedistNode::GetClass())
+    throw;
+   RedistNode *redist = (RedistNode*)node;
+
+  const DistType &srcType = redist->InputDataType(0).GetDist();
+  const DistType &destType = redist->m_info.GetDist();
+
+  if (srcType.m_numDims <= m_dim)
+    throw;
+
+  DistEntry srcEntry = srcType.m_dists[m_dim];
+  DistEntry destEntry = destType.m_dists[m_dim];
+  
+  if (srcEntry == destEntry)
+    throw;
+
+  DimVec srcDims = srcEntry.DistEntryDims();
+
+  DimVec start;
+  DimVec end;
+
+  DistType intType = srcType;
+
+  for (auto distDim : srcDims) {
+    if (!destEntry.ContainsDim(distDim)) {
+      bool found = false;
+      for (Dim dim2 = 0; dim2 < destType.m_numDims; ++dim2) {
+	if (dim2 != m_dim) {
+	  if (destType.m_dists[dim2].ContainsDim(distDim)) {
+	    intType.m_dists[dim2].AppendDim(distDim);
+	    found = true;
+	    break;
+	  }
+	}
+      }
+      if (!found)
+	start.push_back(distDim);
+    }
+    else
+      start.push_back(distDim);
+  }
+
+  intType.m_dists[m_dim].DimsToDistEntry(start);
+
+
+  RedistNode *intRedist = new RedistNode(intType);
+  intRedist->AddInput(redist->Input(0), redist->InputConnNum(0));
+  
+  RedistNode *finalRedist = new RedistNode(destType, redist->m_info.GetPerm(),
+                                           redist->m_align, redist->m_alignModes, redist->m_alignModesSrc);
+  finalRedist->AddInput(intRedist, 0);
+  
+  redist->RedirectAllChildren(finalRedist);
+  
+  redist->m_poss->AddNode(intRedist);
+  redist->m_poss->AddNode(finalRedist);
+  
+  redist->m_poss->DeleteChildAndCleanUp(redist);
+
+}
 

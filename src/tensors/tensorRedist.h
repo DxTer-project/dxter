@@ -289,4 +289,15 @@ class CombineAllGathers : public SingleTrans
 };
 #endif //ALLMULTIMODEALLGATHER
 
+class CombineMovingModes : public SingleTrans
+{
+ public:
+  Dim m_dim;
+ CombineMovingModes(Dim dim) : m_dim(dim) {}
+  virtual string GetType() const { return (string)"CombineMovingModes" + (char)(m_dim+48); }
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+
 #endif
