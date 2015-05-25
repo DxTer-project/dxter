@@ -3011,7 +3011,6 @@ string GetAlignmentSource(Node *node, ConnNum inNum)
   }
   return in->GetNameStr(node->InputConnNum(inNum));
 }
-#endif
 
 bool CombineMovingModes::CanApply(const Node *node) const
 {
@@ -3129,3 +3128,4 @@ void CombineMovingModes::Apply(Node *node) const
 
 }
 
+#endif
