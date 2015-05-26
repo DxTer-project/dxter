@@ -33,7 +33,7 @@
 #define TIMEANDCULLBEFOREUNROLLING 1
 
 static string evalDirName = "runtimeEvaluation";
-static SanityCheckSetting sanityCheckSetting = CHECKOUTPUTBUFFERS;
+static SanityCheckSetting sanityCheckSetting = CHECKALLBUFFERS;
 static TimingSetting timingSetting = ONEPHASETIMING;
 static unsigned int numberOfImplementationsToEvaluate = 1000;
 static int minCycles = 100000000;
