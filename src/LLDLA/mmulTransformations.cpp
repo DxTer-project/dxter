@@ -42,9 +42,15 @@ string MMulLoopExp::GetType() const
   
 bool MMulLoopExp::CanApply(const Node *node) const
 {
-  if (!GemmLoopExp::CanApply(node))
+  if (!GemmLoopExp::CanApply(node)) {
     return false;
+  }
+
   const Gemm *gemm = static_cast<const Gemm*>(node);
+
+  if (gemm->GetDataType() != m_type) {
+    return false;
+  }
 
   const BasePSet *loop = gemm->FindClosestLoop();
   if (loop) {
