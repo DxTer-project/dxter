@@ -60,18 +60,6 @@ void LocalInput::PrintCode(IndStream& out) {
   out.Indent();
   *out << typeName << " " << varName << "[" << size << "*sizeof(" << typeName << ")] __attribute__((aligned(32))) = {0};" << endl;
 
-  /*  string arrName = m_varName.m_name + "_char_array";
-  string arrPtrName = arrName + "_array_ptr";
-  out.Indent();
-  *out << typeName << " " << arrName << "[" << size << "*sizeof(" << typeName << ") + 32" << "] = {0};" << endl;
-  out.Indent();
-  *out << "unsigned char* " << arrPtrName << " = (unsigned char*)" << arrName << ";" << endl;
-  string shiftStr = "32 - (((unsigned int) " + arrPtrName + ") % 32)";
-  out.Indent();
-  *out << arrPtrName << " = " << arrPtrName << " + " << shiftStr << ";" << endl;
-  out.Indent();
-  *out << m_varName.m_name << " = (" << typeName << "*)" << arrPtrName << ";" << endl;*/
-  //  *out << m_varName.m_name << " = alloc_aligned_32(sizeof(" + typeName + ")*" + size + ");";
 }
 
 NodeType LocalInput::GetType() const {
@@ -79,16 +67,6 @@ NodeType LocalInput::GetType() const {
 }
 
 void LocalInput::AddVariables(VarSet& set) const {
-  /*  string typeName;
-  if (GetDataType() == REAL_SINGLE) {
-    typeName = "float* ";
-  } else if (GetDataType() == REAL_DOUBLE) {
-    typeName = "double* ";
-  } else {
-    cout << "Unsupported datatype: " << GetDataType() << endl;
-    }*/
-  //  string inputVarDecl = typeName + m_varName.m_name + ";";
-
   string uint = "const unsigned int ";
   string nRowsVarName = uint + m_dataTypeInfo.m_numRowsVar + " = ";
   nRowsVarName += std::to_string((long long int) m_msize->OnlyEntry()) + ";";
@@ -99,13 +77,11 @@ void LocalInput::AddVariables(VarSet& set) const {
   string colStrideVarName = uint + m_dataTypeInfo.m_colStrideVar + " = ";
   colStrideVarName += std::to_string((long long int) m_dataTypeInfo.m_colStrideVal) + ";";
 
-  //  Var inputNameVar(DirectVarDeclType, inputVarDecl, GetDataType());
   Var nRowsVar(DirectVarDeclType, nRowsVarName, GetDataType());
   Var nColsVar(DirectVarDeclType, nColsVarName, GetDataType());
   Var rowStrideVar(DirectVarDeclType, rowStrideVarName, GetDataType());
   Var colStrideVar(DirectVarDeclType, colStrideVarName, GetDataType());
 
-  //  set.insert(inputNameVar);
   set.insert(nRowsVar);
   set.insert(nColsVar);
   set.insert(rowStrideVar);
