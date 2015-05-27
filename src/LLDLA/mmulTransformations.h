@@ -30,6 +30,9 @@
 
 class MMulLoopExp : public GemmLoopExp
 {
+ protected:
+  bool CheckGemmLoop(const Node* node) const;
+
  public:
   Type m_type;
   MMulLoopExp(Layer fromLayer, Layer toLayer, DimName dim, BSSize bsSize, Type type);

@@ -39,9 +39,8 @@ string MMulLoopExp::GetType() const
 {
   return "LLDLA " + GemmLoopExp::GetType() + ", " + std::to_string((long long int) m_type);
 }
-  
-bool MMulLoopExp::CanApply(const Node *node) const
-{
+
+bool MMulLoopExp::CheckGemmLoop(const Node* node) const {
   if (!GemmLoopExp::CanApply(node)) {
     return false;
   }
@@ -58,6 +57,16 @@ bool MMulLoopExp::CanApply(const Node *node) const
       return false;
   }
 
+  return true;
+}
+  
+bool MMulLoopExp::CanApply(const Node* node) const
+{
+  if (!CheckGemmLoop(node)) {
+    return false;
+  }
+
+  const Gemm *gemm = static_cast<const Gemm*>(node);
   BSSize mu, mu2, mu3;
   if (m_type == REAL_SINGLE) {
     mu = LLDLAMuSingle;
@@ -72,6 +81,9 @@ bool MMulLoopExp::CanApply(const Node *node) const
   switch (m_dim) {
   case (0):
     {
+      if (!gemm->GetInputM(2)->EvenlyDivisibleBy(m_bsSize.GetSize())) {
+	return false;
+      }
       //DIMM
       if (m_bsSize == mu2) {
 	if (*(gemm->GetInputM(2)) <= mu3.GetSize())
@@ -96,6 +108,10 @@ bool MMulLoopExp::CanApply(const Node *node) const
   case (1):
     {
       //DIMK
+      if (!gemm->GetInputN(0)->EvenlyDivisibleBy(m_bsSize.GetSize())) {
+	return false;
+      }
+
       if (gemm->m_transA == NORMAL) {
 	if (m_bsSize == mu2) {
 	  if (*(gemm->GetInputN(0)) <= mu3.GetSize())
@@ -128,6 +144,10 @@ bool MMulLoopExp::CanApply(const Node *node) const
   case (2):
     {
       //DIMN
+      if (!gemm->GetInputN(2)->EvenlyDivisibleBy(m_bsSize.GetSize())) {
+	return false;
+      }
+
       if (m_bsSize == mu2) {
 	if (*(gemm->GetInputN(2)) <= mu3.GetSize())
 	  return false;
