@@ -20,6 +20,7 @@
 #include "LLDLATranspose.h"
 #include "loadToContigLoad.h"
 #include "mmul.h"
+#include "mmulSplitAlongP.h"
 #include "mmulTransformations.h"
 #include "madd.h"
 #include "mvmul.h"
@@ -77,6 +78,8 @@ void AddGemmTrans() {
   Universe::AddTrans(Gemm::GetClass(), new MMulToMVMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   //Universe::AddTrans(Gemm::GetClass(), new MMulToVMMul(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
+
+  Universe::AddTrans(Gemm::GetClass(), new MMulSplitAlongP(ABSLAYER, ABSLAYER), LLDLALOOPPHASE);
 
   Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMM, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
   Universe::AddTrans(Gemm::GetClass(), new MMulLoopExp(ABSLAYER, ABSLAYER, DIMN, LLDLAMuSingle, REAL_SINGLE), LLDLALOOPPHASE);
