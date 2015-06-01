@@ -31,7 +31,8 @@ bool MMulSplitAlongM::CanApply(const Node* node) const {
     if (gemm->GetLayer() != m_fromLayer) {
       return false;
     }
-    return !(gemm->GetInputM(0)->EvenlyDivisibleBy(gemm->GetVecRegWidth()));
+    return !(gemm->GetInputM(0)->EvenlyDivisibleBy(gemm->GetVecRegWidth()))
+      && *(gemm->GetInputM(0)) > gemm->GetVecRegWidth();
   }
   return false;
 }

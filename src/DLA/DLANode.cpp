@@ -574,6 +574,7 @@ int DLANode::GetInputNumRows(ConnNum num) const {
     GetInputM(num)->Print();
     cout << endl;
     cout << "numRows == " << to_string((long long int) numRows) << endl;
+    this->m_poss->PrintTransVecUp();
   }
   //  assert(*GetInputM(num) == numRows);
   return numRows;
