@@ -555,6 +555,12 @@ int DLANode::GetInputNumCols(ConnNum num) const {
   CheckInputNum(num);
   auto size = GetInputN(num);
   auto numCols = size->OnlyEntry();
+  /*  if (!(*GetInputN(num) == numCols)) {
+    cout << "GetInputN(num) == ";
+    GetInputN(num)->Print();
+    cout << endl;
+    cout << "numCols == " << to_string((long long int) numCols) << endl;
+    }*/
   assert(*GetInputN(num) == numCols);
   return numCols;
 }
@@ -563,7 +569,13 @@ int DLANode::GetInputNumRows(ConnNum num) const {
   CheckInputNum(num);
   auto size = GetInputM(num);
   auto numRows = size->OnlyEntry();
-  assert(*GetInputM(num) == numRows);
+  if (!(*GetInputM(num) == numRows)) {
+    cout << "GetInputM(num) == ";
+    GetInputM(num)->Print();
+    cout << endl;
+    cout << "numRows == " << to_string((long long int) numRows) << endl;
+  }
+  //  assert(*GetInputM(num) == numRows);
   return numRows;
 }
 
