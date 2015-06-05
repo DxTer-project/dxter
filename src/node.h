@@ -76,19 +76,19 @@ class Node
   NodeConnVec m_children;
   Poss *m_poss;
 
-  //Implement at least these in sub-classes
+  //Implement at least these in subclasses
   /*****************/
   //Get a new instance of the node's class 
-  // (with default or random values)
+  // (with uninitialized values)
   virtual Node* GetNewInst() = 0;
   //Propagate data type information, calculate node costs, and check for
   // error conditions
   //Should super message
   virtual void Prop() = 0;
   //The maximum phase in which this node should be found
-  // Going from that phase to the next; a Poss with this node
+  // Going from that phase to the next, a Poss with this node
   // should be culled (but HasRefined will be checked
-  // and an exception will be thrown if the node hasn't refined)
+  // and an exception will be thrown if the node hasn't been refined)
   virtual Phase MaxPhase() const {return NUMPHASES;}
   //Print code
   virtual void PrintCode(IndStream &out) = 0;
@@ -103,7 +103,7 @@ class Node
   virtual NodeType GetType() const;
   //Number of outputs expected
   virtual unsigned int NumOutputs() const {return 1;}
-  //Cost of the node (guaranteed to be called after Prop is called
+  //Cost of the node (guaranteed to be called after Prop and BuildDataTypeCache is called
   virtual Cost GetCost() = 0;
   //Get the node's class so you know its type and can cast it
   // correctly from Node* to the most specific class

@@ -36,6 +36,7 @@ enum IndStreamType
     TENSORSTREAM,
     LLDLASTREAM,
     BOOLSTREAM,
+    RQOSTREAM,
     OTHERSTREAM };
 
 // Class to output code with indentations
