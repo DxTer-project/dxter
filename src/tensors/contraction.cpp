@@ -312,7 +312,7 @@ void Contraction::CheckInputTypesAlign() const
 	  throw;
 	}
 	if (m_contIndices.find(index) == string::npos &&
-	    *InputLocalLen(2,dim) != *InputLocalLen(1,bFind)) 
+	    !(InputLocalLen(2,dim)->EffectivelyEqual(*InputLocalLen(1,bFind))))
 	  {
 	    
 	    InputLocalLen(2,dim)->Print();
@@ -353,7 +353,7 @@ void Contraction::CheckInputTypesAlign() const
         throw;
       }
       if (m_contIndices.find(index) == string::npos && 
-	  *InputLocalLen(2,dim) != *InputLocalLen(0,aFind)) {
+	  !InputLocalLen(2,dim)->EffectivelyEqual(*InputLocalLen(0,aFind))) {
 	cout << "C and A sizes don't align\n";
 	cout << "C:\n";
 	InputLocalLen(2,dim)->Print();
@@ -382,7 +382,7 @@ void Contraction::CheckInputTypesAlign() const
     const char index = *strIter;
     size_t aFind = m_AIndices.find(index);
     size_t bFind = m_BIndices.find(index);
-    if (*InputLocalLen(0,aFind) != *InputLocalLen(1,bFind)) {
+    if (!InputLocalLen(0,aFind)->EffectivelyEqual(*InputLocalLen(1,bFind))) {
       cout << "A and B contraction sizes don't align\n";
     }
     if (AType.m_dists[aFind] != BType.m_dists[bFind]) {

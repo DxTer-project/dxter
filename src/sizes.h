@@ -155,6 +155,7 @@ class SizeList
   Size operator[] (unsigned int n) const;
   void operator= (const SizeList &rhs);
   bool operator== (const SizeList &rhs) const;
+  bool EffectivelyEqual(const SizeList &rhs) const;
   bool operator!= (const SizeList &rhs) const;
   bool operator== (const Size &rhs) const;
   bool operator!= (const Size &rhs) const;

@@ -756,6 +756,47 @@ bool SizeList::operator==(const SizeList &rhs) const
   return true;
 }
 
+
+bool SizeList::EffectivelyEqual(const SizeList &rhs) const
+{
+  if ((!std::isnan((double)m_constVal) && std::isnan((double)(rhs.m_constVal)))
+      || (std::isnan((double)m_constVal) && !std::isnan((double)(rhs.m_constVal)))) {
+    LOG_FAIL("replacement for throw call");
+    throw;
+  }
+  if (!std::isnan((double)m_constVal) && (m_constVal != rhs.m_constVal))
+    return false;
+  if (m_entries.size() != rhs.m_entries.size()) {
+    cout << m_entries.size() << endl;
+    cout << rhs.m_entries.size() << endl;
+    Print();
+    cout << "****\n";
+    rhs.Print();
+    LOG_FAIL("replacement for throw call");
+    throw;
+  }
+  EntryVecConstIter iter1 = m_entries.begin();
+  EntryVecConstIter iter2 = rhs.m_entries.begin();
+  for(; iter1 != m_entries.end(); ++iter1,++iter2) {
+    const SizeEntry *lhsEntry = *iter1;
+    const SizeEntry *rhsEntry = *iter2;
+    if (*lhsEntry != *rhsEntry) {
+      unsigned int numEntries = lhsEntry->NumSizes();
+      if (numEntries != rhsEntry->NumSizes())
+	return false;
+      SizesIter iterLeft = lhsEntry->GetIter(m_coeff);
+      SizesIter iterRight = rhsEntry->GetIter(rhs.m_coeff);
+      while (!iterLeft.AtEnd()) {
+	if (*iterLeft != *iterRight)
+	  return false;
+	++iterLeft;
+	++iterRight;
+      }
+    }
+  }
+  return true;
+}
+
 bool SizeList::operator!=(const SizeList &rhs) const
 {
   return !(*this == rhs);
