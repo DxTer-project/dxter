@@ -1793,7 +1793,7 @@ RealPSet* CCSDInlined()
   OutputNode *outq = new OutputNode;
   outq->AddInput(q_mnij, 0);
 
-  Poss *outerPoss = new Poss(11, outz, outZ,
+  Poss *outerPoss = new Poss(12, outz, outZ,
 			     outT, outt,
 			     outTau, outv,
 			     outy, outr,
