@@ -512,6 +512,8 @@ void Universe::PrintAll(int algNum, GraphNum optGraph)
     IndStream optOut(&cout,LLDLASTREAM);
 #elif DOBOOL
     IndStream optOut(&cout,BOOLSTREAM);
+#elif DORQO
+    IndStream optOut(&cout,RQOSTREAM);
 #endif
     Print(optOut, optGraph, false);
   }
@@ -531,6 +533,8 @@ void Universe::PrintAll(int algNum, GraphNum optGraph)
     IndStream codeOut(&out,TENSORSTREAM);
 #elif DOLLDLA
     IndStream codeOut(&out,LLDLASTREAM);
+#elif DORQO
+    IndStream codeOut(&out,RQOSTREAM);
 #endif
     optGraph = 0;
     time(&start);
@@ -574,6 +578,8 @@ void Universe::PrintBest()
     IndStream optOut(&cout,LLDLASTREAM);
 #elif DOBOOL
     IndStream optOut(&cout,BOOLSTREAM);
+#elif DORQO
+    IndStream optOut(&cout,RQOSTREAM);
 #endif
 
     iter.PrintRoot(optOut, 0, true, m_pset);

@@ -94,7 +94,7 @@ void RegAllLLDLANodes()
 
 }
 #elif DOBOOL
-
+#elif DORQO
 #else
 asdklfja
 #endif
