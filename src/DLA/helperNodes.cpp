@@ -28,6 +28,8 @@
 
 #define THROWWHENCANTMOVETEMPVARNODE 0
 
+#if DODLA
+
 InputNode::InputNode()
 :
 m_type("InputNode")
@@ -1368,3 +1370,5 @@ void ViewTLCombine::Prop()
 }
 #endif //DOELEM||DOBLIS
 #endif
+
+#endif //DODLA

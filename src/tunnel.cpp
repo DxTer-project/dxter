@@ -28,12 +28,18 @@
 Tunnel::Tunnel() 
  :m_tunType(LASTTUNNEL),
   m_pset(NULL)
+#if !DODLA
+ ,m_cost(-1)
+#endif
 {
 }
 
 Tunnel::Tunnel(TunType type) 
  :m_tunType(type),
   m_pset(NULL)
+#if !DODLA
+ ,m_cost(-1)
+#endif
 {
 }
 
@@ -100,7 +106,9 @@ Tunnel* Tunnel::GetSetTunnel()
 void Tunnel::Prop()
 {
   if (!IsValidCost(m_cost)) {
+#if DODLA
     DLANode::Prop();
+#endif //DODLA
 
     if ((m_tunType == SETTUNIN || m_tunType == SETTUNOUT) && !m_pset) {
       LOG_FAIL("replacement for throw call");
@@ -342,7 +350,7 @@ unsigned int Tunnel::NumOutputs() const
 
 void Tunnel::Duplicate(const Node *node, bool shallow, bool possMerging)
 {
-  DLANode::Duplicate(node, shallow, possMerging);
+  TunnelSuper::Duplicate(node, shallow, possMerging);
   m_tunType = ((Tunnel*)node)->m_tunType;
 }
 
@@ -367,7 +375,7 @@ string TunTypeToStr(TunType type)
 
 void Tunnel::FlattenCore(ofstream &out) const
 {
-  DLANode::FlattenCore(out);
+  TunnelSuper::FlattenCore(out);
   WRITE(m_tunType);
   WRITE(m_pset);
 }
@@ -376,7 +384,7 @@ void Tunnel::FlattenCore(ofstream &out) const
 
 void Tunnel::UnflattenCore(ifstream &in, SaveInfo &info) 
 {
-  DLANode::UnflattenCore(in, info);
+  TunnelSuper::UnflattenCore(in, info);
   READ(m_tunType);
   READ(m_pset);
   Swap(&m_pset,info.psetMap);

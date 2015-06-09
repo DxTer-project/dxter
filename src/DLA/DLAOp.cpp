@@ -23,6 +23,8 @@
 
 #include "DLAOp.h"
 
+#if DODLA
+
 template<ConnNum numIn, ConnNum numOut>
 const DataTypeInfo& DLAOp<numIn, numOut>::DataType(ConnNum num) const
 {
@@ -158,3 +160,5 @@ template class DLAOp<5,1>;
 template class DLAOp<5,2>;
 template class DLAOp<5,3>;
 template class DLAOp<7,7>;
+
+#endif //DODLA

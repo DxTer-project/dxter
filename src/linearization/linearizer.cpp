@@ -26,6 +26,7 @@
 #include "basePSet.h"
 #include "node.h"
 #include "helperNodes.h"
+#include "rqoHelperNodes.h"
 
 #define ADDUP 1
 

@@ -26,6 +26,8 @@
 #include <cmath>
 #include "loopSupport.h"
 
+#if DODLA
+
 #define THROWWHENCANTMOVETEMPVARNODE 0
 
 TempVarNode::TempVarNode()
@@ -819,3 +821,5 @@ void TempVarFromTempVar::Apply(Node *node) const
 
 #endif //DOTENSORS
  
+
+#endif //DODLA

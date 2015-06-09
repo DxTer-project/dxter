@@ -29,6 +29,8 @@
 #include "transform.h"
 #include "DLANode.h"
 
+#if DODLA
+
 template<ConnNum numIn, ConnNum numOut>
 class DLAOp : public DLANode
 {
@@ -55,3 +57,5 @@ class DLAOp : public DLANode
   virtual bool CreatesNewVars() const {return false;}
 #endif
 };
+
+#endif //DODLA

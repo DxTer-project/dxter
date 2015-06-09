@@ -455,7 +455,7 @@ class Name
 #endif
     m_name("noname") {}
 
-#if DOBOOL
+#if DOBOOL||DORQO
  Name(string name) : m_name(name) {}
 #endif
 

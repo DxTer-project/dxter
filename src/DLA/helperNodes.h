@@ -28,6 +28,8 @@
 #include "LLDLA.h"
 #include "tempVarNode.h"
 
+#if DODLA
+
 class InputNode : public DLANode
 {
   NodeType m_type;
@@ -451,3 +453,5 @@ class ViewTLCombine : public DLANode
 };
 #endif //DOBLIS||DOELEM
 #endif
+
+#endif //DODLA

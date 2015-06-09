@@ -31,6 +31,7 @@
 #include <time.h>
 #include <iomanip>
 #include <chrono>
+#include "rqoHelperNodes.h"
 
 
 #if DORQO
@@ -144,7 +145,9 @@ int main(int argc, const char* argv[])
 
 RealPSet* Example1()
 {
-  Poss *poss = new Poss(1, orNode2);
+  InputNode *in = new InputNode("inStream");
+  
+  Poss *poss = new Poss(1, in);
   RealPSet *pset = new RealPSet(poss);
   return pset;
 }

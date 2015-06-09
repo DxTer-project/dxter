@@ -95,6 +95,7 @@ void Node::Cull(Phase phase)
       }
 
 #endif
+#if DODLA
       for (ConnNum i = 0; i < m_inputs.size(); ++i) {
         DLANode *in = (DLANode*)Input(i);
         cout << "Input " << i 
@@ -112,6 +113,7 @@ void Node::Cull(Phase phase)
         }
 #endif
       }
+#endif //DODLA
       cout << GetNameStr(0) << endl;
       
       m_poss->PrintTransVec();

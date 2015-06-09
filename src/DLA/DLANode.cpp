@@ -27,6 +27,8 @@
 #include "poss.h"
 #include "elemRedist.h"
 
+#if DODLA
+
 DLANode::DLANode()
 {
   m_cost = -1;
@@ -655,3 +657,5 @@ bool DLANode::InputMIsMultipleOf(ConnNum num, Size s) const {
 }
 
 #endif // DOLLDLA
+
+#endif //DODLA

@@ -230,7 +230,7 @@ Cost GraphIter::Eval(TransConstVec &transList)
 
   NodeVecConstIter iter = m_poss->m_possNodes.begin();
   for( ; iter != m_poss->m_possNodes.end(); ++iter) {
-    DLANode *node =  (DLANode*)(*iter);
+    Node *node =  (Node*)(*iter);
     double cost = node->GetCost();
     tot += cost;
   }
@@ -256,7 +256,7 @@ Cost GraphIter::Eval()
   
   NodeVecConstIter iter = m_poss->m_possNodes.begin();
   for( ; iter != m_poss->m_possNodes.end(); ++iter) {
-    DLANode *node =  (DLANode*)(*iter);
+    Node *node =  (Node*)(*iter);
     double cost = node->GetCost();
     tot += cost;
   }
@@ -277,7 +277,7 @@ Cost GraphIter::EvalAndSetBest()
   
   NodeVecConstIter iter = m_poss->m_possNodes.begin();
   for( ; iter != m_poss->m_possNodes.end(); ++iter) {
-    DLANode *node =  (DLANode*)(*iter);
+    Node *node =  (Node*)(*iter);
     double cost = node->GetCost();
     tot += cost;
   }

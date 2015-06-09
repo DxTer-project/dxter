@@ -26,6 +26,8 @@
 #include "comm.h"
 #include "layers.h"
 
+#if DODLA
+
 //Ancestor class for all DLA nodes
 class DLANode : public Node
 {
@@ -205,3 +207,5 @@ class DataTypeInfo
 };
 
 #endif
+
+#endif //DODLA

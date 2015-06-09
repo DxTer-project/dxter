@@ -24,6 +24,7 @@
 #include "nodeLinElem.h"
 #include "tempVarNode.h"
 #include "tensorPermute.h"
+#include "rqoHelperNodes.h"
 
 LinElem::LinElem() 
   : m_succ(NULL),

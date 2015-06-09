@@ -23,6 +23,7 @@
 #include "node.h"
 #include "DLANode.h"
 #include "helperNodes.h"
+#include "rqoHelperNodes.h"
 #include "contraction.h"
 #include "tensorRedist.h"
 #include "tensorSumScatter.h"

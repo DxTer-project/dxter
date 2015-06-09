@@ -28,6 +28,8 @@
 #include "LLDLA.h"
 #include "sizes.h"
 
+#if DODLA
+
 class TempVarNode : public DLANode
 {
  public:
@@ -115,3 +117,5 @@ class TempVarFromTempVar : public SingleTrans
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };
+
+#endif //DODLA

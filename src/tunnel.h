@@ -28,11 +28,20 @@
 
 class BasePSet;
 
+#if DODLA
+#define TunnelSuper DLANode
 class Tunnel : public DLANode
+#else
+#define TunnelSuper Node
+class Tunnel : public Node
+#endif
 {
  public:
   TunType m_tunType;
   BasePSet *m_pset;
+#if !DODLA
+  Cost m_cost;
+#endif
   Tunnel();
   Tunnel(TunType type);
   void SetPSet(BasePSet *set);
@@ -49,6 +58,7 @@ class Tunnel : public DLANode
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "Tunnel";}
   virtual const DataTypeInfo& DataType(ConnNum num) const;
+  virtual Cost GetCost() {return 0;}
 #if TWOD
   virtual const SizeList* GetM(ConnNum num) const;
   virtual const SizeList* GetN(ConnNum num) const;
