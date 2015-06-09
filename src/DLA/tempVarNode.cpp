@@ -344,10 +344,12 @@ void TempVarNode::BuildDataTypeCache()
   if (!m_lsizes.empty())
     return;
   Dim numDims = m_info.GetDist().m_numDims-m_sumDims.size();
-  DistType type = m_info.GetEffectiveDist();
+  const DistType &type = m_info.GetDist();//GetEffectiveDist();
+  const Permutation &perm = m_info.GetPerm();
 
   for (Dim dim = 0; dim < numDims; ++dim) {
     const SizeList *size;
+    //   GetLocalSizes(type, dim, InputLen(0,perm.MapFinishToStart(dim)), &size);
     GetLocalSizes(type, dim, InputLen(0,dim), &size);
     m_lsizes.push_back(size);
   }
