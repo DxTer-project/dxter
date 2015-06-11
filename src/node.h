@@ -132,6 +132,9 @@ class Node
   virtual void ClearDataTypeCache() {}
   //Build the size cache
   virtual void BuildDataTypeCache() {}
+
+  virtual const DataTypeInfo& DataType(ConnNum num) const = 0;
+
   /*****************/
 
   Node();
@@ -218,7 +221,6 @@ class Node
   void Unflatten(ifstream &in, SaveInfo &info);
   virtual void UnflattenCore(ifstream &in, SaveInfo &info) {throw;}
   
-  virtual const DataTypeInfo& DataType(ConnNum num) const = 0;
   virtual const DataTypeInfo& InputDataType(ConnNum num) const;
 
 #if DOLLDLA

@@ -32,6 +32,7 @@
 #include <iomanip>
 #include <chrono>
 #include "rqoHelperNodes.h"
+#include "rqoJoin.h"
 
 
 #if DORQO
@@ -145,9 +146,49 @@ int main(int argc, const char* argv[])
 
 RealPSet* Example1()
 {
-  InputNode *in = new InputNode("inStream");
-  
-  Poss *poss = new Poss(1, in);
+  set<string> AFields;
+  AFields.insert("x");
+  AFields.insert("y");
+  AFields.insert("z");
+
+  set<string> BFields;
+  BFields.insert("u");
+  BFields.insert("v");
+  BFields.insert("w");
+
+  set<string> CFields;
+  CFields.insert("a");
+  CFields.insert("b");
+  CFields.insert("c");
+
+  InputNode *inA = new InputNode("A", "x", AFields);
+  InputNode *inB = new InputNode("B", "u", BFields);
+  InputNode *inC = new InputNode("C", "a", CFields);
+
+  vector<string> joinFields0;
+  joinFields0.push_back("x");
+
+  vector<string> joinFields1;
+  joinFields1.push_back("u");
+
+  Join *join = new Join("u", joinFields0, joinFields1);
+
+  join->AddInput(inA, 0);
+  join->AddInput(inB, 0);
+
+
+  vector<string> joinFields2;
+  joinFields2.push_back("y");
+
+  vector<string> joinFields3;
+  joinFields3.push_back("c");
+
+  Join *join2 = new Join("b", joinFields2, joinFields3);
+
+  join2->AddInput(join, 0);
+  join2->AddInput(inC, 0);
+
+  Poss *poss = new Poss(1, join2);
   RealPSet *pset = new RealPSet(poss);
   return pset;
 }

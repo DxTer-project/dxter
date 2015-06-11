@@ -25,26 +25,22 @@
 
 #include "layers.h"
 #include "node.h"
+#include "rqoBasis.h"
 
 #if DORQO
-
-class DataTypeInfo
-{
- public:
-  DataTypeInfo& operator=(const DataTypeInfo &rhs) {return *this;}
-};
 
 
 class InputNode : public Node
 {
   NodeType m_type;
+
  protected:
   DataTypeInfo m_dataTypeInfo;
   Name m_varName;
 
  public:
   InputNode();
-  InputNode(string str);
+  InputNode(string str, string sortBy, set<string> fields);
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new InputNode; }
   virtual Node* GetNewInst() { return BlankInst(); }

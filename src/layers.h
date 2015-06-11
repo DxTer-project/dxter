@@ -25,9 +25,9 @@
 #define DOSQM 0
 #define DOSM 0
 #define DOTENSORS 0
-#define DOLLDLA 1
+#define DOLLDLA 0
 #define DOBOOL 0
-#define DORQO 0
+#define DORQO 1
 
 #define DOBLIS (DOSM||DOSQM)
 #define DODM (DOELEM||DOTENSORS)

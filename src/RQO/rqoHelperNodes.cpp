@@ -33,11 +33,13 @@ m_type("InputNode")
 }
 
 
-InputNode::InputNode(string str)
+InputNode::InputNode(string str, string sortBy, set<string> fields)
 :
   m_type(str),
   m_varName(str)
 {
+  m_dataTypeInfo.m_sortedBy = sortBy;
+  m_dataTypeInfo.m_fields = fields;
 }
 
 void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
@@ -56,8 +58,12 @@ const DataTypeInfo& InputNode::DataType(ConnNum num) const
 
 void InputNode::Prop()
 {
-  
+  if (!m_inputs.empty())
+    throw;
   if (m_type.empty() || m_varName.m_name.empty())
+    throw;
+  if (m_dataTypeInfo.m_fields.find(m_dataTypeInfo.m_sortedBy)
+      == m_dataTypeInfo.m_fields.end())
     throw;
 }
 
@@ -81,6 +87,8 @@ const DataTypeInfo& OutputNode::DataType(ConnNum num) const
 void OutputNode::Prop()
 {
   if (m_inputs.empty())
+    throw;
+  if (!m_children.empty())
     throw;
 }
 
