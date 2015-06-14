@@ -22,6 +22,9 @@
 
 #include "rqoJoin.h"
 
+
+#if DORQO
+
 Join::Join(string sortBy, 
 	   vector<string> &in0Fields, 
 	   vector<string> &in1Fields)
@@ -131,3 +134,5 @@ Name Join::GetName(ConnNum num) const
   Name name(m_name);
   return name;
 }
+
+#endif
