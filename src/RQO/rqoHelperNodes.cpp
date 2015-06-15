@@ -21,7 +21,7 @@
 
 
 
-#include "rqohelperNodes.h"
+#include "rqoHelperNodes.h"
 
 #if DORQO
 
