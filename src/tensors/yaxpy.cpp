@@ -95,7 +95,7 @@ void Yaxpy::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
 
-    if (m_layer == ABSLAYER)
+    if (m_layer == ABSLAYER || CurrPhase < ROTENSORPHASE)
       m_cost = 2 * TotalNumberOfElements(0);
     else if (m_layer == DM1LAYER || m_layer == DM2LAYER)
       m_cost = 2 * TotalNumberOfElements(0);

@@ -198,7 +198,10 @@ void TempVarNode::Prop()
     }
     Input(0)->Prop();
 #if DOTENSORS
-    m_cost = MaxNumberOfLocalElements(0);
+    if (CurrPhase < ROTENSORPHASE) 
+      m_cost = ZERO;
+    else
+      m_cost = MaxNumberOfLocalElements(0);
 #else
     m_cost = ZERO;
 #endif

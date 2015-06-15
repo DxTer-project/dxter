@@ -74,19 +74,12 @@ void Yxpy::Prop()
   if (!IsValidCost(m_cost)) {
     DLAOp<2,1>::Prop();
 
-    if (m_layer == ABSLAYER)
+    if (CurrPhase < ROTENSORPHASE)
       m_cost = TotalNumberOfElements(0);
-    else if (m_layer == DM1LAYER || m_layer == DM2LAYER)
-      m_cost = TotalNumberOfElements(0);
-    else if (m_layer == SMLAYER) {
+    else {
       m_cost = TotalNumberOfLocalElements(0);
       if (InputDataType(0).GetEffectiveDist() != InputDataType(1).GetEffectiveDist())
 	throw;
-
-    }
-    else {
-      cout << LayerNumToStr(m_layer) << endl;
-      throw;
     }
   }
 }
