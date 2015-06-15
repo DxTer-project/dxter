@@ -750,7 +750,9 @@ Cost Poss::Prop()
     if (linElem->IsNode()) {
       Node *node = ((NodeLinElem*)linElem)->m_node;
       node->Prop();
-      m_cost += node->GetCost();      
+      Cost cost = node->GetCost();
+      if (cost > 0)
+	m_cost += cost;
       if (node->m_poss != this)
 	throw;
     }
@@ -764,7 +766,9 @@ Cost Poss::Prop()
 #else
   for (auto node : m_possNodes) {
     node->Prop();
-    m_cost += node->GetCost();
+    Cost cost = node->GetCost();
+    if (cost > 0)
+      m_cost += cost;
     if (node->m_poss != this) {
       cout << node->GetType() << endl;
       cout << node->GetNameStr(0) << endl;

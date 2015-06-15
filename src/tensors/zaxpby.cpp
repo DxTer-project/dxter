@@ -133,7 +133,10 @@ void ZAxpBy::Prop()
       }
     }
     else if (m_layer == SMLAYER) {
-      m_cost = 4 * TotalNumberOfLocalElements(0);
+      if (CurrPhase < ROTENSORPHASE) 
+	m_cost = 4 * TotalNumberOfElements(0);
+      else
+	m_cost = 4 * TotalNumberOfLocalElements(0);
       Dim numDims = InputNumDims(0);
       if (InputNumDims(1) != numDims || InputNumDims(2) != numDims)
 	throw;
