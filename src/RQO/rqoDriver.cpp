@@ -40,6 +40,7 @@
 
 RealPSet* Example1();
 RealPSet* Example2();
+RealPSet* Example3();
 
 typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
 
@@ -51,11 +52,12 @@ double difftime(AccurateTime &end, AccurateTime &start)
 
 void AddTrans()
 {
+  //  Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, RQOPHASE);
 }
 
 void AddSimplifiers()
 { 
-  //   Universe::AddTrans(And::GetClass(), new AndToOut, SIMP);
+  Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, SIMP);
 }
 
 void Usage()
@@ -64,6 +66,7 @@ void Usage()
   //  cout <<" arg1 == 0  -> Load from file arg1\n";
   cout <<"         1  -> example1\n";
   cout <<"         2  -> example2\n";
+  cout <<"         3  -> example3\n";
 }
 
 int main(int argc, const char* argv[])
@@ -92,6 +95,9 @@ int main(int argc, const char* argv[])
     case(2):
       algFunc = Example2;
       break;
+    case(3):
+      algFunc = Example3;
+      break;
     default:
       Usage();
       return 0;
@@ -119,7 +125,8 @@ int main(int argc, const char* argv[])
   }
 
 
-#if RQOPHASE
+#if DORQOPHASE
+  if (CurrPhase == RQOPHASE) {
     start2 = std::chrono::system_clock::now();
     cout << "Expanding phase 1\n";
     uni.Expand(-1, RQOPHASE, NULL);
@@ -137,6 +144,7 @@ int main(int argc, const char* argv[])
 
   end = std::chrono::system_clock::now();
   cout << "Full expansion took " << difftime(end,start) << " seconds\n";
+cout << "Left with " << uni.TotalCount() << " algorithms\n";
   cout.flush();
   
 #if 0
@@ -257,12 +265,36 @@ RealPSet* Example2()
   return pset;
 }
 
-/*RealPSet* Example3()
+RealPSet* Example3()
 {
-  Poss *poss = new Poss(1, proj);
+  set<string> AFields;
+  AFields.insert("x");
+  AFields.insert("y");
+  AFields.insert("z");
+
+  InputNode *inA = new InputNode("A", "x", AFields);
+
+  set<string> projFields1;
+  projFields1.insert("x");  
+  projFields1.insert("y");
+ 
+
+  set<string> projFields2;
+  projFields2.insert("x");
+
+
+  Projection *proj1 = new Projection("x", projFields1);
+
+  Projection *proj2 = new Projection("x", projFields2);
+
+  proj1->AddInput(inA, 0);
+
+  proj2->AddInput(proj1, 0);
+
+  Poss *poss = new Poss(1, proj2);
   RealPSet *pset = new RealPSet(poss);
   return pset;
-}*/
+}
 
 
 #endif

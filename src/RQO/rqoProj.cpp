@@ -26,8 +26,8 @@
 
 Projection::Projection(string sortBy,
     set<string> &inFields)
-    : m_sortBy(sortBy),
-      m_inFields(inFields)
+  : m_inFields(inFields),
+    m_sortBy(sortBy)
 {
     static int num = 1;
     m_name = "projection" + std::to_string(num);
@@ -113,6 +113,29 @@ Name Projection::GetName(ConnNum num) const
     throw;
   Name name(m_name);
   return name;
+}
+
+
+bool RemoveExtraProjection::CanApply(const Node *node) const
+{
+  if (node->m_inputs.size() != 1)
+    throw;
+  const Node *input = node->Input(0);
+  if (input->GetNodeClass() == Projection::GetClass()) {
+    return true;
+  }
+  else
+    return false;
+}
+
+void RemoveExtraProjection::Apply(Node *node) const
+{
+  Node *input = node->Input(0);
+  node->ChangeInput2Way(input, node->InputConnNum(0),
+			input->Input(0), input->InputConnNum(0));
+  if (input->m_children.empty()) {
+    input->m_poss->DeleteChildAndCleanUp(input);
+  }
 }
 
 #endif

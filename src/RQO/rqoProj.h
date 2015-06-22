@@ -26,6 +26,7 @@
 #include "layers.h"
 #include "node.h"
 #include "rqoBasis.h"
+#include "transform.h"
 
 #if DORQO
 
@@ -58,6 +59,13 @@ class Projection : public Node
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+};
+
+class RemoveExtraProjection : public SingleTrans
+{
+  virtual string GetType() const {return "Remove Extra Projection";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #endif
