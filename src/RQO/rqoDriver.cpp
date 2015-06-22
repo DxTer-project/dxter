@@ -33,11 +33,13 @@
 #include <chrono>
 #include "rqoHelperNodes.h"
 #include "rqoJoin.h"
+#include "rqoProj.h"
 
 
 #if DORQO
 
 RealPSet* Example1();
+RealPSet* Example2();
 
 typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
 
@@ -61,6 +63,7 @@ void Usage()
   cout << "./driver \n";
   //  cout <<" arg1 == 0  -> Load from file arg1\n";
   cout <<"         1  -> example1\n";
+  cout <<"         2  -> example2\n";
 }
 
 int main(int argc, const char* argv[])
@@ -85,6 +88,9 @@ int main(int argc, const char* argv[])
     switch(algNum) {
     case(1):
       algFunc = Example1;
+      break;
+    case(2):
+      algFunc = Example2;
       break;
     default:
       Usage();
@@ -188,10 +194,75 @@ RealPSet* Example1()
   join2->AddInput(join, 0);
   join2->AddInput(inC, 0);
 
-  Poss *poss = new Poss(1, join2);
+  set<string> projFields;
+  projFields.insert("x");
+  projFields.insert("u");
+  projFields.insert("b");
+
+  Projection *proj = new Projection("x", projFields);
+
+  proj->AddInput(join2, 0);
+
+  Poss *poss = new Poss(1, proj);
   RealPSet *pset = new RealPSet(poss);
   return pset;
 }
+
+RealPSet* Example2()
+{
+  set<string> AFields;
+  AFields.insert("x");
+  AFields.insert("y");
+  AFields.insert("z");
+
+  set<string> CFields;
+  CFields.insert("a");
+  CFields.insert("b");
+  CFields.insert("c");
+
+  InputNode *inA = new InputNode("A", "x", AFields);
+  InputNode *inC = new InputNode("C", "a", CFields);
+
+  set<string> projFields1;
+  projFields1.insert("x");  
+  projFields1.insert("y");
+ 
+
+  set<string> projFields2;
+  projFields2.insert("b");
+  projFields2.insert("a");
+
+  Projection *proj1 = new Projection("x", projFields1);
+
+  Projection *proj2 = new Projection("b", projFields2);
+
+  proj1->AddInput(inA, 0);
+  proj2->AddInput(inC, 0);
+
+  vector<string> joinFields0;
+  joinFields0.push_back("x");
+  joinFields0.push_back("y");
+
+  vector<string> joinFields1;
+  joinFields1.push_back("a");
+  joinFields1.push_back("b");
+
+  Join *join = new Join("x", joinFields0, joinFields1);
+
+  join->AddInput(proj1, 0);
+  join->AddInput(proj2, 0);
+
+  Poss *poss = new Poss(1, join);
+  RealPSet *pset = new RealPSet(poss);
+  return pset;
+}
+
+/*RealPSet* Example3()
+{
+  Poss *poss = new Poss(1, proj);
+  RealPSet *pset = new RealPSet(poss);
+  return pset;
+}*/
 
 
 #endif

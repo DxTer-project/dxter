@@ -39,7 +39,7 @@ Join::Join(string sortBy,
 
 NodeType Join::GetType() const
 {
-  string ret = m_sortBy + "," + m_name;
+  string ret = m_sortBy;
   if (m_in0Fields.size() != m_in1Fields.size())
     throw;
   vector<string>::const_iterator iter0 = m_in0Fields.begin();
@@ -88,14 +88,18 @@ void Join::Prop()
     throw;
   if (m_sortBy.empty())
     throw;
+  if (m_name.empty())
+    throw;
 
   const DataTypeInfo &in0 = InputDataType(0);
   const DataTypeInfo &in1 = InputDataType(1);
 
 
   for (auto str : m_in0Fields) {
-    if (in0.m_fields.find(str) == in0.m_fields.end())
+    if (in0.m_fields.find(str) == in0.m_fields.end()) {
+      cout << "input A does not include field over which we are joining\n";
       throw;
+    }
   }
 
   for (auto str : m_in1Fields) {
