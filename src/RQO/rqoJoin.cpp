@@ -86,8 +86,6 @@ void Join::Prop()
     throw;
   if (m_in0Fields.empty())
     throw;
-  if (m_sortBy.empty())
-    throw;
   if (m_name.empty())
     throw;
 
@@ -107,12 +105,16 @@ void Join::Prop()
       throw;
   }
 
-  if (in0.m_fields.find(m_sortBy) == in0.m_fields.end()
+  if(!m_sortBy.empty())
+  {
+    if (in0.m_fields.find(m_sortBy) == in0.m_fields.end()
       && in1.m_fields.find(m_sortBy) == in1.m_fields.end())
     {
       cout << "sort by is not in either input\n";
       throw;
     }
+  }
+  
 }
 
 void Join::PrintCode(IndStream &out)

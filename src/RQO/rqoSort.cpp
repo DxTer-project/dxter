@@ -19,95 +19,79 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rqoProj.h"
+
+#include "rqoSort.h"
 
 
 #if DORQO
 
-Projection::Projection(string sortBy,
-    set<string> &inFields)
-  : m_inFields(inFields),
-    m_sortBy(sortBy)
+Sort::Sort(string sortBy)
+  : m_sortBy(sortBy)
 {
     static int num = 1;
-    m_name = "projection" + std::to_string(num);
+    m_name = "sort" + std::to_string(num);
     ++num;
 }
 
-NodeType Projection::GetType() const
+NodeType Sort::GetType() const
 {
-  string ret = m_sortBy;
-  set<string>::const_iterator iter = m_inFields.begin();
-  for(; iter != m_inFields.end(); ++iter) {
-    ret += "," + *iter;
-  }
-  return ret;
+  return m_sortBy;
 }
 
-void Projection::Duplicate(const Node *orig, bool shallow, bool possMerging)
+void Sort::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  const Projection *proj = (Projection*)orig;
+  const Sort *proj = (Sort*)orig;
   m_name = proj->m_name;
   m_sortBy = proj->m_sortBy;
-  m_inFields = proj->m_inFields;
   Node::Duplicate(orig, shallow, possMerging);
 }
 
-const DataTypeInfo& Projection::DataType(ConnNum num) const
+const DataTypeInfo& Sort::DataType(ConnNum num) const
 {
   return m_dataTypeInfo;
 }
 
-void Projection::ClearDataTypeCache()
+void Sort::ClearDataTypeCache()
 {
   
 }
 
-void Projection::BuildDataTypeCache()
+void Sort::BuildDataTypeCache()
 {
+  m_dataTypeInfo = InputDataType(0);
   m_dataTypeInfo.m_sortedBy = m_sortBy;
-  m_dataTypeInfo.m_fields = m_inFields;
 }
 
-void Projection::Prop()
+void Sort::Prop()
 {
   if (m_inputs.size() != 1)
-    throw;
-  if (m_inFields.empty())
     throw;
   if (m_name.empty())
     throw;
 
   const DataTypeInfo &in = InputDataType(0);
 
+  if(m_sortBy.empty()) {
+    cout << "No sort field for sort\n";
+    throw;
+  }  
 
-  for (auto str : m_inFields) {
-    if (in.m_fields.find(str) == in.m_fields.end())
+  if (in.m_fields.find(m_sortBy) == in.m_fields.end())
+    {
+      cout << "sort by is not in input\n";
       throw;
-  }
-
-  if (!m_sortBy.empty()) {
-    if (m_inFields.find(m_sortBy) == m_inFields.end())
-      {
-	cout << "sort by is not in input\n";
-	throw;
-      }
-  }
+    }
 }
 
-void Projection::PrintCode(IndStream &out)
+void Sort::PrintCode(IndStream &out)
 {
   out.Indent();
   string in = GetInputNameStr(0);
-  *out << m_name << " = Projection( " << m_sortBy << ", " << in;
-  set<string>::iterator iter = m_inFields.begin();
-  for(; iter != m_inFields.end(); ++iter) {
-    *out << ", " << in << "." << *iter;
-  }
+  *out << m_name << " = Sort( " << m_sortBy << ", " << in;
   *out << " );\n";
 }
 
-Name Projection::GetName(ConnNum num) const
+Name Sort::GetName(ConnNum num) const
 {
   if (num != 0)
     throw;
@@ -115,27 +99,44 @@ Name Projection::GetName(ConnNum num) const
   return name;
 }
 
-
-bool RemoveExtraProjection::CanApply(const Node *node) const
+bool RemoveExtraSort::CanApply(const Node *node) const
 {
   if (node->m_inputs.size() != 1)
     throw;
   const Node *input = node->Input(0);
-  if (input->GetNodeClass() == Projection::GetClass()) {
+  if (input->GetNodeClass() == Sort::GetClass()) {
     return true;
   }
   else
     return false;
 }
 
-void RemoveExtraProjection::Apply(Node *node) const
+void RemoveExtraSort::Apply(Node *node) const
 {
   Node *input = node->Input(0);
   node->ChangeInput2Way(input, node->InputConnNum(0),
-			input->Input(0), input->InputConnNum(0));
+            input->Input(0), input->InputConnNum(0));
   if (input->m_children.empty()) {
     input->m_poss->DeleteChildAndCleanUp(input);
   }
+}
+
+bool RemoveRedundantSortBy::CanApply(const Node *node) const
+{
+  if (node->m_inputs.size() != 1)
+    throw;
+  const Node *input = node->Input(0);
+  if (!node->m_sortBy.empty() && !input->m_sortBy.empty()) {
+    return true;
+  }
+  else
+    return false;
+}
+
+void RemoveRedundantSortBy::Apply(Node *node) const
+{
+  Node *input = node->Input(0);
+  input->m_sortBy == "";
 }
 
 #endif
