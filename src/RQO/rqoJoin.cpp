@@ -25,10 +25,16 @@
 
 #if DORQO
 
+Join::Join()
+  : Sortable()
+{
+
+}
+
 Join::Join(string sortBy, 
 	   vector<string> &in0Fields, 
 	   vector<string> &in1Fields)
-  : m_sortBy(sortBy),
+  : Sortable(sortBy),
     m_in0Fields(in0Fields),
     m_in1Fields(in1Fields)
 {
@@ -80,6 +86,7 @@ void Join::BuildDataTypeCache()
 
 void Join::Prop()
 {
+  Sortable::Prop();
   if (m_inputs.size() != 2)
     throw;
   if (m_in0Fields.size() != m_in1Fields.size())
@@ -133,12 +140,12 @@ void Join::PrintCode(IndStream &out)
   *out << ", " << m_sortBy << " );\n";
 }
 
-Name Join::GetName(ConnNum num) const
+Join* Join::CreateCopyOfJoin() const
 {
-  if (num != 0)
-    throw;
-  Name name(m_name);
-  return name;
+  Join *newJoin = new Join(m_sortBy,
+			   m_in0Fields,
+			   m_in1Fields);
+  return newJoin;
 }
 
 #endif

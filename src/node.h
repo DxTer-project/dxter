@@ -191,6 +191,11 @@ class Node
   virtual bool IsParallel() const {return false;}
   const BasePSet* FindClosestLoop() const;
 
+#if DORQO
+  virtual bool IsSortable() const {return false;}
+  virtual bool IsJoin() const {return false;}
+#endif
+
   virtual Node* ChildOfOutputWithClass(ConnNum num, string nodeClass) const;
   virtual bool OutputHasChildOfClass(ConnNum num, string nodeClass) const;
 

@@ -24,26 +24,22 @@
 #pragma once
 
 #include "layers.h"
-#include "node.h"
+#include "sortable.h"
 #include "rqoBasis.h"
 
 #if DORQO
 
 
 
-class Join : public Node
+class Join : public Sortable
 {
-  string m_sortBy;
-  vector<string> m_in0Fields;
-  vector<string> m_in1Fields;
-  string m_name;
-
  protected:
   DataTypeInfo m_dataTypeInfo;
-
+  vector<string> m_in0Fields;
+  vector<string> m_in1Fields;
 
  public:
-  Join() {}
+  Join();
   Join(string sortBy, vector<string> &in0Fields, vector<string> &in1Fields);
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new Join; }
@@ -55,10 +51,11 @@ class Join : public Node
   virtual Cost GetCost() {return 0;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "join";}
-  virtual Name GetName(ConnNum num) const;
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+  virtual bool IsJoin() const {return true;}
+  virtual Join* CreateCopyOfJoin() const;
 };
 
 #endif

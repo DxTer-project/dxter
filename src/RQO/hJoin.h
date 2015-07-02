@@ -24,45 +24,34 @@
 #pragma once
 
 #include "layers.h"
-#include "sortable.h"
+#include "rqoJoin.h"
 #include "rqoBasis.h"
-#include "transform.h"
 
 #if DORQO
 
 
 
-class Projection : public Sortable
+class HJoin : public Join
 {
-  set<string> m_inFields;
-
  protected:
   DataTypeInfo m_dataTypeInfo;
 
 
  public:
-  Projection();
-  Projection(string sortBy, set<string> &inFields);
-  virtual NodeType GetType() const;
-  static Node* BlankInst() { return  new Projection; }
+  HJoin();
+  HJoin(string sortBy, vector<string> &in0Fields, vector<string> &in1Fields);
+  static Node* BlankInst() { return  new HJoin; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual const DataTypeInfo& DataType(ConnNum num) const;
-  virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual Cost GetCost() {return 0;}
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "projection";}
+  static ClassType GetClass() {return "hjoin";}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
-};
-
-class RemoveExtraProjection : public SingleTrans
-{
-  virtual string GetType() const {return "Remove Extra Projection";}
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
+  virtual Join* CreateCopyOfJoin() const;
 };
 
 #endif

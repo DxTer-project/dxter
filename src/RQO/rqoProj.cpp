@@ -24,10 +24,16 @@
 
 #if DORQO
 
+Projection::Projection()
+  : Sortable()
+  {
+    
+  }
+
 Projection::Projection(string sortBy,
     set<string> &inFields)
-  : m_inFields(inFields),
-    m_sortBy(sortBy)
+  : Sortable(sortBy),
+    m_inFields(inFields)
 {
     static int num = 1;
     m_name = "projection" + std::to_string(num);
@@ -86,13 +92,16 @@ void Projection::Prop()
       throw;
   }
 
-  if (!m_sortBy.empty()) {
+
+  if(!m_sortBy.empty())
+  {
     if (m_inFields.find(m_sortBy) == m_inFields.end())
-      {
-	cout << "sort by is not in input\n";
-	throw;
-      }
+    {
+      cout << "sort by is not in input\n";
+      throw;
+    }
   }
+
 }
 
 void Projection::PrintCode(IndStream &out)
@@ -107,13 +116,6 @@ void Projection::PrintCode(IndStream &out)
   *out << " );\n";
 }
 
-Name Projection::GetName(ConnNum num) const
-{
-  if (num != 0)
-    throw;
-  Name name(m_name);
-  return name;
-}
 
 
 bool RemoveExtraProjection::CanApply(const Node *node) const

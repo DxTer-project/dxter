@@ -24,23 +24,21 @@
 #pragma once
 
 #include "layers.h"
-#include "node.h"
+#include "sortable.h"
 #include "rqoBasis.h"
 #include "transform.h"
 
 #if DORQO
 
-class Sort : public Node
+class Sort : public Sortable
 {
-  string m_sortBy;
-  string m_name;
 
  protected:
   DataTypeInfo m_dataTypeInfo;
 
 
  public:
-  Sort() {}
+  Sort();
   Sort(string sortBy);
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new Sort; }
@@ -52,7 +50,6 @@ class Sort : public Node
   virtual Cost GetCost() {return 0;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "sort";}
-  virtual Name GetName(ConnNum num) const;
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
@@ -60,6 +57,7 @@ class Sort : public Node
 
 class RemoveExtraSort : public SingleTrans
 {
+ public:
   virtual string GetType() const {return "Remove Extra Sort Nodes";}
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
@@ -67,7 +65,27 @@ class RemoveExtraSort : public SingleTrans
 
 class RemoveRedundantSortBy : public SingleTrans
 {
+ public:
   virtual string GetType() const {return "Remove Redundant SortBy Fields";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class RemoveSortBeforeSortable : public SingleTrans
+{
+ public:
+  virtual string GetType() const {return "Remove A Node Before A SortBy";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+template <class T>
+class SwapNodes : public SingleTrans
+{
+ public:
+  unsigned int m_inNum;
+  SwapNodes(unsigned int inNum);
+  virtual string GetType() const {return "Switch two node's positions " + std::to_str(m_nNum);}
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };
