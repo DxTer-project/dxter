@@ -32,8 +32,8 @@ HJoin::HJoin()
 }
 
 HJoin::HJoin(string sortBy, 
-    vector<string> &in0Fields, 
-    vector<string> &in1Fields)
+    vector<string> in0Fields, 
+    vector<string> in1Fields)
     : Join(sortBy, in0Fields, in1Fields)
 {
     static int num = 1;
@@ -86,7 +86,7 @@ void HJoin::PrintCode(IndStream &out)
 }
 
 
-Join* Join::CreateCopyOfJoin() const
+Join* HJoin::CreateCopyOfJoin() const
 {
   Join *newJoin = new HJoin(m_sortBy,
 			   m_in0Fields,

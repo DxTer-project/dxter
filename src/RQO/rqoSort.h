@@ -79,15 +79,7 @@ class RemoveSortBeforeSortable : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
-template <class T>
-class SwapNodes : public SingleTrans
-{
- public:
-  unsigned int m_inNum;
-  SwapNodes(unsigned int inNum);
-  virtual string GetType() const {return "Switch two node's positions " + std::to_str(m_nNum);}
-  virtual bool CanApply(const Node *node) const;
-  virtual void Apply(Node *node) const;
-};
+
+
 
 #endif

@@ -32,8 +32,8 @@ Join::Join()
 }
 
 Join::Join(string sortBy, 
-	   vector<string> &in0Fields, 
-	   vector<string> &in1Fields)
+	   vector<string> in0Fields, 
+	   vector<string> in1Fields)
   : Sortable(sortBy),
     m_in0Fields(in0Fields),
     m_in1Fields(in1Fields)
@@ -86,7 +86,7 @@ void Join::BuildDataTypeCache()
 
 void Join::Prop()
 {
-  Sortable::Prop();
+  //Node::Prop();
   if (m_inputs.size() != 2)
     throw;
   if (m_in0Fields.size() != m_in1Fields.size())
@@ -108,8 +108,10 @@ void Join::Prop()
   }
 
   for (auto str : m_in1Fields) {
-    if (in1.m_fields.find(str) == in1.m_fields.end())
+    if (in1.m_fields.find(str) == in1.m_fields.end()){
+      cout << "input B does not include field over which we are joining\n";
       throw;
+    }
   }
 
   if(!m_sortBy.empty())
@@ -146,6 +148,99 @@ Join* Join::CreateCopyOfJoin() const
 			   m_in0Fields,
 			   m_in1Fields);
   return newJoin;
+}
+
+SwapNodes::SwapNodes(unsigned int inNum, ClassType type) 
+  : m_inNum(inNum),
+    m_type(type)
+{
+  if (inNum > 1)
+    throw;
+}
+
+bool SwapNodes::CanApply(const Node *node) const
+{
+  throw;
+  if (!node->IsJoin())
+    throw;
+
+  Join *join = (Join*)node;
+  std::vector<string>::iterator it;
+  Node *inNode = node->Input(m_inNum);
+  //inputs to both joins have to match up
+
+  if (inNode->IsJoin())
+  {
+    Join *inJoin = (Join*)inNode;
+    if(m_inNum == 0)
+    {
+      for (auto str : join->m_in0Fields) 
+      {
+        for(it = inJoin->m_in0Fields.begin(); it != inJoin->m_in0Fields.end(); ++it)
+        {
+          if(*it == str)
+          {
+            break;
+          }
+        }
+        if(it == inJoin->m_in0Fields.end())
+        {
+          return false;
+        }
+      }
+    }
+    else if(m_inNum == 1)
+    {
+      for (auto str : join->m_in1Fields) 
+      {
+        for(it = inJoin->m_in1Fields.begin(); it != inJoin->m_in1Fields.end(); ++it)
+        {
+          if(*it == str)
+          {
+            break;
+          }
+        }
+        if(it == inJoin->m_in1Fields.end())
+        {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  else
+    return false;
+}
+
+void SwapNodes::Apply(Node *node) const
+{
+  throw;
+  Join *inputJoin = (Join*)(node->Input(m_inNum));
+  Join *newInputJoin = inputJoin->CreateCopyOfJoin();
+
+  cout << "applying " << GetType() << " to poss with ";
+  node->m_poss->PrintTransVecUp();
+
+  node->m_poss->AddNode(newInputJoin);
+
+  node->RedirectChildren(newInputJoin);
+  if (m_inNum == 0)
+    newInputJoin->AddInput(node, 0);
+  else
+    newInputJoin->AddInput(inputJoin->Input(0), inputJoin->InputConnNum(0));
+
+  if (m_inNum == 1)
+    newInputJoin->AddInput(node, 0);
+  else
+    newInputJoin->AddInput(inputJoin->Input(1), inputJoin->InputConnNum(1));
+  
+  
+  node->ChangeInput2Way(inputJoin, 0,
+			inputJoin->Input(m_inNum), inputJoin->InputConnNum(m_inNum));
+  
+  if (inputJoin->m_children.empty()) {
+    inputJoin->m_poss->DeleteChildAndCleanUp(inputJoin);
+  }
 }
 
 #endif

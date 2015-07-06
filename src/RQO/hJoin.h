@@ -39,7 +39,7 @@ class HJoin : public Join
 
  public:
   HJoin();
-  HJoin(string sortBy, vector<string> &in0Fields, vector<string> &in1Fields);
+  HJoin(string sortBy, vector<string> in0Fields, vector<string> in1Fields);
   static Node* BlankInst() { return  new HJoin; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

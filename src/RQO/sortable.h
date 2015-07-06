@@ -33,7 +33,6 @@ class Sortable : public RQONode
 {
     public:
       string m_sortBy;
-
     
       Sortable() {};
       Sortable(string sortBy);

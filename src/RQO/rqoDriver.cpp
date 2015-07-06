@@ -34,6 +34,10 @@
 #include "rqoHelperNodes.h"
 #include "rqoJoin.h"
 #include "rqoProj.h"
+#include "rqoSort.h"
+#include "sortable.h"
+#include "hJoin.h"
+#include "rqoNode.h"
 
 
 #if DORQO
@@ -41,6 +45,8 @@
 RealPSet* Example1();
 RealPSet* Example2();
 RealPSet* Example3();
+RealPSet* Example4();
+RealPSet* Example5();
 
 typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
 
@@ -53,11 +59,16 @@ double difftime(AccurateTime &end, AccurateTime &start)
 void AddTrans()
 {
   //  Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new SwapNodes(0,Join::GetClass()), RQOPHASE);
+  Universe::AddTrans(HJoin::GetClass(), new SwapNodes(0,HJoin::GetClass()), RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
+  Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
 }
 
 void AddSimplifiers()
 { 
   Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, SIMP);
+  
 }
 
 void Usage()
@@ -67,6 +78,8 @@ void Usage()
   cout <<"         1  -> example1\n";
   cout <<"         2  -> example2\n";
   cout <<"         3  -> example3\n";
+  cout <<"         4  -> example4\n";
+  cout <<"         5  -> example5\n";
 }
 
 int main(int argc, const char* argv[])
@@ -97,6 +110,12 @@ int main(int argc, const char* argv[])
       break;
     case(3):
       algFunc = Example3;
+      break;
+    case(4):
+      algFunc = Example4;
+      break;
+    case(5):
+      algFunc = Example5;
       break;
     default:
       Usage();
@@ -292,6 +311,106 @@ RealPSet* Example3()
   proj2->AddInput(proj1, 0);
 
   Poss *poss = new Poss(1, proj2);
+  RealPSet *pset = new RealPSet(poss);
+  return pset;
+}
+
+RealPSet* Example4()
+{
+  set<string> AFields;
+  AFields.insert("x");
+  AFields.insert("y");
+  AFields.insert("z");
+
+  set<string> BFields;
+  BFields.insert("u");
+  BFields.insert("v");
+  BFields.insert("w");
+
+  set<string> CFields;
+  CFields.insert("a");
+  CFields.insert("b");
+  CFields.insert("c");
+
+  InputNode *inA = new InputNode("A", "x", AFields);
+  InputNode *inB = new InputNode("B", "u", BFields);
+  InputNode *inC = new InputNode("C", "a", CFields);
+
+  vector<string> joinFields0;
+  joinFields0.push_back("x");
+
+  vector<string> joinFields1;
+  joinFields1.push_back("u");
+
+  Join *join = new Join("u", joinFields0, joinFields1);
+
+  join->AddInput(inA, 0);
+  join->AddInput(inB, 0);
+
+
+  vector<string> joinFields2;
+  joinFields2.push_back("x");
+
+  vector<string> joinFields3;
+  joinFields3.push_back("a");
+
+  Join *join2 = new Join("a", joinFields2, joinFields3);
+
+  join2->AddInput(join, 0);
+  join2->AddInput(inC, 0);
+
+
+  Poss *poss = new Poss(1, join2);
+  RealPSet *pset = new RealPSet(poss);
+  return pset;
+}
+
+RealPSet* Example5()
+{
+  set<string> AFields;
+  AFields.insert("x");
+  AFields.insert("y");
+  AFields.insert("z");
+
+  set<string> BFields;
+  BFields.insert("u");
+  BFields.insert("v");
+  BFields.insert("w");
+
+  set<string> CFields;
+  CFields.insert("a");
+  CFields.insert("b");
+  CFields.insert("c");
+
+  InputNode *inA = new InputNode("A", "x", AFields);
+  InputNode *inB = new InputNode("B", "u", BFields);
+  InputNode *inC = new InputNode("C", "a", CFields);
+
+  vector<string> joinFields0;
+  joinFields0.push_back("x");
+
+  vector<string> joinFields1;
+  joinFields1.push_back("u");
+
+  Join *join = new Join("u", joinFields0, joinFields1);
+
+  join->AddInput(inA, 0);
+  join->AddInput(inB, 0);
+
+
+  vector<string> joinFields2;
+  joinFields2.push_back("y");
+
+  vector<string> joinFields3;
+  joinFields3.push_back("a");
+
+  Join *join2 = new Join("a", joinFields2, joinFields3);
+
+  join2->AddInput(join, 0);
+  join2->AddInput(inC, 0);
+
+
+  Poss *poss = new Poss(1, join2);
   RealPSet *pset = new RealPSet(poss);
   return pset;
 }

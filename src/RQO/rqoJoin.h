@@ -26,6 +26,7 @@
 #include "layers.h"
 #include "sortable.h"
 #include "rqoBasis.h"
+#include "transform.h"
 
 #if DORQO
 
@@ -35,12 +36,14 @@ class Join : public Sortable
 {
  protected:
   DataTypeInfo m_dataTypeInfo;
+  
+
+ public:
   vector<string> m_in0Fields;
   vector<string> m_in1Fields;
 
- public:
   Join();
-  Join(string sortBy, vector<string> &in0Fields, vector<string> &in1Fields);
+  Join(string sortBy, vector<string> in0Fields, vector<string> in1Fields);
   virtual NodeType GetType() const;
   static Node* BlankInst() { return  new Join; }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -56,6 +59,17 @@ class Join : public Sortable
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual bool IsJoin() const {return true;}
   virtual Join* CreateCopyOfJoin() const;
+};
+
+class SwapNodes : public SingleTrans
+{
+ public:
+  unsigned int m_inNum;
+  ClassType m_type;
+  SwapNodes(unsigned int inNum, ClassType type);
+  virtual string GetType() const {return "Switch two node's positions " + std::to_string(m_inNum) + " on " + m_type;}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #endif

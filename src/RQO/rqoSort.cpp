@@ -21,6 +21,8 @@
 
 
 #include "rqoSort.h"
+#include "rqoJoin.h"
+#include "hJoin.h"
 
 
 #if DORQO
@@ -177,53 +179,7 @@ void RemoveSortBeforeSortable::Apply(Node *node) const
 }
 
 
-template <class T>
-SwapNodes<T>::SwapNodes(unsigned int inNum) 
-  : m_inNum(inNum) 
-{
-  if (inNum > 1)
-    throw;
-}
 
-template <class T>
-bool SwapNodes<T>::CanApply(const Node *node) const
-{
-  if (!node->IsJoin())
-    throw;
-
-  throw; // Add additional checks
-
-  if (node->Input(m_inNum)->IsJoin())
-    return true;
-  else
-    return false;
-}
-
-template <class T>
-void SwapNodes<T>::Apply(Node *node) const
-{
-  Join *inputJoin = (Join*)(node->Input(m_inNum));
-  Join *newInputJoin = inputJoin->CreateCopyOfJoin();
-  node->RedirectChildren(newInputJoin);
-  if (m_inNum == 0)
-    newInputJoin->AddInput(node, 0);
-  else
-    newInputJoin->AddInput(inputJoin->Input(0), inputJoin->InputConnNum(0));
-
-  if (m_inNum == 1)
-    newInputJoin->AddInput(node, 0);
-  else
-    newInputJoin->AddInput(inputJoin->Input(1), inputJoin->InputConnNum(1));
-
-
-  throw; //check numbers  
-  node->ChangInput2Way(inputJoin, 0,
-			 inputJoin->Input(m_inNum), inputJoin->InputConnNum(m_inNum));
-
-  if (inputJoin->m_children.empty()) {
-    inputJoin->m_poss->DeleteChildAndCleanUp(inputJoin);
-  }
-}
 
 
 #endif
