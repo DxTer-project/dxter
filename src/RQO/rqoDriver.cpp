@@ -354,7 +354,7 @@ RealPSet* Example4()
   vector<string> joinFields3;
   joinFields3.push_back("a");
 
-  Join *join2 = new Join("a", joinFields2, joinFields3);
+  Join *join2 = new Join("x", joinFields2, joinFields3);
 
   join2->AddInput(join, 0);
   join2->AddInput(inC, 0);

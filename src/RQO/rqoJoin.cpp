@@ -160,7 +160,6 @@ SwapNodes::SwapNodes(unsigned int inNum, ClassType type)
 
 bool SwapNodes::CanApply(const Node *node) const
 {
-  throw;
   if (!node->IsJoin())
     throw;
 
@@ -168,75 +167,225 @@ bool SwapNodes::CanApply(const Node *node) const
   std::vector<string>::iterator it;
   Node *inNode = node->Input(m_inNum);
   //inputs to both joins have to match up
+  bool swappable = true;
+
 
   if (inNode->IsJoin())
   {
     Join *inJoin = (Join*)inNode;
+    const DataTypeInfo &in0 = inJoin->InputDataType(0);
+    const DataTypeInfo &in1 = inJoin->InputDataType(1);
+    //swapping on input 0
     if(m_inNum == 0)
     {
+      //we have to make sure that every field that was part of
+      // this join is coming from the same place, so first check in0 of input
       for (auto str : join->m_in0Fields) 
       {
-        for(it = inJoin->m_in0Fields.begin(); it != inJoin->m_in0Fields.end(); ++it)
+        if (in0.m_fields.find(str) == in0.m_fields.end()) {
+          swappable = false;
+          break;
+        }
+      }
+      if (!join->m_sortBy.empty() 
+	  && (in0.m_fields.find(join->m_sortBy) == in0.m_fields.end())
+	  && (join->InputDataType(1).m_fields.find(join->m_sortBy) == join->InputDataType(1).m_fields.end()))
+	{
+	  swappable = false;
+	}
+
+      //if swappable is false, we try the second input
+      //otherwise, tell the node what to swap with
+      if(!swappable)
+      {
+        swappable = true;
+        for(auto str : join->m_in0Fields)
         {
-          if(*it == str)
-          {
+          if (in1.m_fields.find(str) == in1.m_fields.end()) {
+            swappable = false;
             break;
           }
         }
-        if(it == inJoin->m_in0Fields.end())
-        {
-          return false;
-        }
+	if (!join->m_sortBy.empty() 
+	    && (in1.m_fields.find(join->m_sortBy) == in1.m_fields.end())
+	    && (join->InputDataType(1).m_fields.find(join->m_sortBy) == join->InputDataType(1).m_fields.end()) )
+	  {
+	    swappable = false;
+	  }
       }
+
+      return swappable;
     }
     else if(m_inNum == 1)
     {
       for (auto str : join->m_in1Fields) 
       {
-        for(it = inJoin->m_in1Fields.begin(); it != inJoin->m_in1Fields.end(); ++it)
+        if (in0.m_fields.find(str) == in0.m_fields.end()) {
+          swappable = false;
+          break;
+        }
+      }
+      
+      if (!join->m_sortBy.empty() 
+	  && (in0.m_fields.find(join->m_sortBy) == in0.m_fields.end())
+	  && (join->InputDataType(0).m_fields.find(join->m_sortBy) == join->InputDataType(0).m_fields.end()))
+	{
+	  swappable = false;
+	}
+
+      //if swappable is false, we try the second input
+      //otherwise, tell the node what to swap with
+      if(!swappable)
+      {
+        swappable = true;
+        for(auto str : join->m_in1Fields)
         {
-          if(*it == str)
-          {
+          if (in1.m_fields.find(str) == in1.m_fields.end()) {
+            swappable = false;
             break;
           }
         }
-        if(it == inJoin->m_in1Fields.end())
-        {
-          return false;
-        }
+
+	if (!join->m_sortBy.empty() 
+	    && (in1.m_fields.find(join->m_sortBy) == in1.m_fields.end())
+	    && (join->InputDataType(0).m_fields.find(join->m_sortBy) == join->InputDataType(0).m_fields.end()))
+	  {
+	    swappable = false;
+	  }
+
       }
+
+      return swappable;
     }
-    return true;
   }
-  else
-    return false;
+  return false;
 }
 
 void SwapNodes::Apply(Node *node) const
 {
-  throw;
   Join *inputJoin = (Join*)(node->Input(m_inNum));
   Join *newInputJoin = inputJoin->CreateCopyOfJoin();
 
-  cout << "applying " << GetType() << " to poss with ";
-  node->m_poss->PrintTransVecUp();
+  //cout << "applying " << GetType() << " to poss with ";
+  //node->m_poss->PrintTransVecUp();
 
   node->m_poss->AddNode(newInputJoin);
 
   node->RedirectChildren(newInputJoin);
-  if (m_inNum == 0)
-    newInputJoin->AddInput(node, 0);
-  else
-    newInputJoin->AddInput(inputJoin->Input(0), inputJoin->InputConnNum(0));
 
-  if (m_inNum == 1)
-    newInputJoin->AddInput(node, 0);
-  else
-    newInputJoin->AddInput(inputJoin->Input(1), inputJoin->InputConnNum(1));
+  //recalculate everything from can apply
+  Join *join = (Join*)node;
+  int inputToKeep;
+  bool swappable = true;
+  const DataTypeInfo &in0 = inputJoin->InputDataType(0);
+  const DataTypeInfo &in1 = inputJoin->InputDataType(1);
+  //swapping on input 0
+  if(m_inNum == 0)
+    {
+      //we have to make sure that every field that was part of
+      // this join is coming from the same place, so first check in0 of input
+      for (auto str : join->m_in0Fields) 
+	{
+	  if (in0.m_fields.find(str) == in0.m_fields.end()) {
+	    swappable = false;
+	    break;
+	  }
+	}
+      //if swappable is false, we try the second input
+      //otherwise, tell the node what to swap with
+      if(swappable)
+	{
+	  inputToKeep = 0;
+	}
+      else
+	{
+	  swappable = true;
+	  for(auto str : join->m_in0Fields)
+	    {
+	      if (in1.m_fields.find(str) == in1.m_fields.end()) {
+		swappable = false;
+		break;
+	      }
+	    }
+	  if(swappable)
+	    {
+	      inputToKeep = 1;
+	    }
+	  else
+	    throw;
+	}
+
+      if(inputToKeep == 0)
+	{
+	  newInputJoin->AddInput(node, 0);
+	  newInputJoin->AddInput(inputJoin->Input(1), inputJoin->InputConnNum(1));
+
+	  node->ChangeInput2Way(inputJoin, 0,
+				inputJoin->Input(inputToKeep), inputJoin->InputConnNum(inputToKeep));
+	}
+      else
+	{
+	  newInputJoin->AddInput(node, 0);
+	  newInputJoin->AddInput(inputJoin->Input(0), inputJoin->InputConnNum(0));
+
+
+	  node->ChangeInput2Way(inputJoin, 0,
+				inputJoin->Input(inputToKeep), inputJoin->InputConnNum(inputToKeep));
+	}
+    }
+  else if(m_inNum == 1)
+    {
+      for (auto str : join->m_in1Fields) 
+	{
+	  if (in0.m_fields.find(str) == in0.m_fields.end()) {
+	    swappable = false;
+	    break;
+	  }
+	}
+      //if swappable is false, we try the second input
+      //otherwise, tell the node what to swap with
+      if(swappable)
+	{
+	  inputToKeep = 0;
+	}
+      else
+	{
+	  swappable = true;
+	  for(auto str : join->m_in1Fields)
+	    {
+	      if (in1.m_fields.find(str) == in1.m_fields.end()) {
+		swappable = false;
+		break;
+	      }
+	    }
+	  if(swappable)
+	    {
+	      inputToKeep = 1;
+	    }
+	  else
+	    throw;
+	}
+
+
+      if(inputToKeep == 0)
+	{
+	  newInputJoin->AddInput(inputJoin->Input(1), inputJoin->InputConnNum(1));
+	  newInputJoin->AddInput(node, 0);
+
+	  node->ChangeInput2Way(inputJoin, 0,
+				inputJoin->Input(inputToKeep), inputJoin->InputConnNum(inputToKeep));
+	}
+      else
+	{
+	  newInputJoin->AddInput(inputJoin->Input(0), inputJoin->InputConnNum(0));
+	  newInputJoin->AddInput(node, 0);
+
+	  node->ChangeInput2Way(inputJoin, 0,
+				inputJoin->Input(inputToKeep), inputJoin->InputConnNum(inputToKeep));
+	}
+    }
   
-  
-  node->ChangeInput2Way(inputJoin, 0,
-			inputJoin->Input(m_inNum), inputJoin->InputConnNum(m_inNum));
+
   
   if (inputJoin->m_children.empty()) {
     inputJoin->m_poss->DeleteChildAndCleanUp(inputJoin);
