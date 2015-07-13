@@ -194,6 +194,7 @@ class Node
 #if DORQO
   virtual bool IsSortable() const {return false;}
   virtual bool IsJoin() const {return false;}
+  virtual bool IsProjection() const {return false;}
 #endif
 
   virtual Node* ChildOfOutputWithClass(ConnNum num, string nodeClass) const;
