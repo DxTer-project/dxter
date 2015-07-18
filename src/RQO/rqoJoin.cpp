@@ -131,15 +131,15 @@ void Join::PrintCode(IndStream &out)
   out.Indent();
   string in0 = GetInputNameStr(0);
   string in1 = GetInputNameStr(1);
-  *out << m_name << " = BaseJoin( " << in0
-       << ", " << in1;
+  *out << m_name << " = BaseJoin( " << m_sortBy << ", "
+    << in0 << ", " << in1;
   vector<string>::iterator iter0 = m_in0Fields.begin();
   vector<string>::iterator iter1 = m_in1Fields.begin();  
   for(; iter0 != m_in0Fields.end(); ++iter0, ++iter1) {
     *out << ", " << in0 << "." << *iter0 << " = "
-	 << in1 << "." << *iter1;
+   << in1 << "." << *iter1;
   }
-  *out << ", " << m_sortBy << " );\n";
+  *out << " );\n";
 }
 
 Join* Join::CreateCopyOfJoin() const
@@ -166,18 +166,24 @@ bool SwapNodes::CanApply(const Node *node) const
   Join *join = (Join*)node;
   std::vector<string>::iterator it;
   Node *inNode = node->Input(m_inNum);
-  //inputs to both joins have to match up
+  //we start with swappable as true, and will attempt to prove it wrong
   bool swappable = true;
 
 
   if (inNode->IsJoin())
   {
     Join *inJoin = (Join*)inNode;
+    //collect the inputs from the join we want to swap with
     const DataTypeInfo &in0 = inJoin->InputDataType(0);
     const DataTypeInfo &in1 = inJoin->InputDataType(1);
-    //swapping on input 0
+    //swapping on the root nodes first input. the contents of m_inNum == 1 is 
+    //identical to this one
     if(m_inNum == 0)
     {
+    	//The goal here is to find one of the inputs that matches everything
+    	//we need entirely. If the first one fails, we set swappable to false
+    	//and try the other one.
+
       //we have to make sure that every field that was part of
       // this join is coming from the same place, so first check in0 of input
       for (auto str : join->m_in0Fields) 
@@ -187,6 +193,8 @@ bool SwapNodes::CanApply(const Node *node) const
           break;
         }
       }
+      //this if makes sure that if the sortby doesnt exist where we're swapping
+      //we dont try it
       if (!join->m_sortBy.empty() 
 	  && (in0.m_fields.find(join->m_sortBy) == in0.m_fields.end())
 	  && (join->InputDataType(1).m_fields.find(join->m_sortBy) == join->InputDataType(1).m_fields.end()))
@@ -273,17 +281,19 @@ void SwapNodes::Apply(Node *node) const
 
   node->RedirectChildren(newInputJoin);
 
-  //recalculate everything from can apply
+  //recalculate everything from canapply
   Join *join = (Join*)node;
+  //input to keep is the input that we want to keep going into root node when we're finished
   int inputToKeep;
   bool swappable = true;
   const DataTypeInfo &in0 = inputJoin->InputDataType(0);
   const DataTypeInfo &in1 = inputJoin->InputDataType(1);
   //swapping on input 0
+  //everything in these if statements are doing everythign we did from can apply, 
+  //but this time with the goal of saving which input we want to keep
+  //Once again, everything in m_inNum == 1 is identical to this just for the other input
   if(m_inNum == 0)
     {
-      //we have to make sure that every field that was part of
-      // this join is coming from the same place, so first check in0 of input
       for (auto str : join->m_in0Fields) 
 	{
 	  if (in0.m_fields.find(str) == in0.m_fields.end()) {
@@ -291,8 +301,6 @@ void SwapNodes::Apply(Node *node) const
 	    break;
 	  }
 	}
-      //if swappable is false, we try the second input
-      //otherwise, tell the node what to swap with
       if(swappable)
 	{
 	  inputToKeep = 0;
@@ -314,7 +322,7 @@ void SwapNodes::Apply(Node *node) const
 	  else
 	    throw;
 	}
-
+	//This code is where we put in new inputs to each of the nodes we are swapping
       if(inputToKeep == 0)
 	{
 	  newInputJoin->AddInput(node, 0);

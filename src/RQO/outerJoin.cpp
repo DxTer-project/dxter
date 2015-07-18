@@ -20,61 +20,60 @@
 */
 
 
-#include "hJoin.h"
+#include "outerJoin.h"
 
 
 #if DORQO
 
-HJoin::HJoin()
+OuterJoin::OuterJoin()
     : Join()
 {
 
 }
 
-HJoin::HJoin(string sortBy, 
+OuterJoin::OuterJoin(string sortBy, 
     vector<string> in0Fields, 
     vector<string> in1Fields)
     : Join(sortBy, in0Fields, in1Fields)
 {
     static int num = 1;
-    m_name = "hjoin" + std::to_string(num);
+    m_name = "outerjoin" + std::to_string(num);
     ++num;
 }
 
-void HJoin::Duplicate(const Node *orig, bool shallow, bool possMerging)
+void OuterJoin::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  const HJoin *hjoin = (HJoin*)orig;
-  m_name = hjoin->m_name;
-  m_sortBy = hjoin->m_sortBy;
-  m_in0Fields = hjoin->m_in0Fields;
-  m_in1Fields = hjoin->m_in1Fields;
+  const OuterJoin *outerJoin = (OuterJoin*)orig;
+  m_name = outerJoin->m_name;
+  m_sortBy = outerJoin->m_sortBy;
+  m_in0Fields = outerJoin->m_in0Fields;
+  m_in1Fields = outerJoin->m_in1Fields;
   Node::Duplicate(orig, shallow, possMerging);
 }
 
-const DataTypeInfo& HJoin::DataType(ConnNum num) const
+const DataTypeInfo& OuterJoin::DataType(ConnNum num) const
 {
   return m_dataTypeInfo;
 }
 
-//These will need to be changed once we figure out changes with hjoin type
-void HJoin::ClearDataTypeCache()
+void OuterJoin::ClearDataTypeCache()
 {
   
 }
 
-void HJoin::BuildDataTypeCache()
+void OuterJoin::BuildDataTypeCache()
 {
   m_dataTypeInfo.m_sortedBy = m_sortBy;
   m_dataTypeInfo.m_fields = InputDataType(0).m_fields;
   m_dataTypeInfo.m_fields.insert(InputDataType(1).m_fields.begin(),
 				 InputDataType(1).m_fields.end());
 }
-void HJoin::PrintCode(IndStream &out)
+void OuterJoin::PrintCode(IndStream &out)
 {
   out.Indent();
   string in0 = GetInputNameStr(0);
   string in1 = GetInputNameStr(1);
-  *out << m_name << " = HashJoin( " << m_sortBy << ", "
+  *out << m_name << " = FullOuterJoin( " << m_sortBy << ", "
     << in0 << ", " << in1;
   vector<string>::iterator iter0 = m_in0Fields.begin();
   vector<string>::iterator iter1 = m_in1Fields.begin();  
@@ -86,9 +85,9 @@ void HJoin::PrintCode(IndStream &out)
 }
 
 
-Join* HJoin::CreateCopyOfJoin() const
+Join* OuterJoin::CreateCopyOfJoin() const
 {
-  Join *newJoin = new HJoin(m_sortBy,
+  Join *newJoin = new OuterJoin(m_sortBy,
 			   m_in0Fields,
 			   m_in1Fields);
   return newJoin;
