@@ -20,65 +20,65 @@
 */
 
 
-#include "outerJoin.h"
+#include "lOuterJoin.h"
 
 
 #if DORQO
 
-OuterJoin::OuterJoin()
+LeftOuterJoin::LeftOuterJoin()
     : Join()
 {
 
 }
 
-OuterJoin::OuterJoin(string sortBy, 
+LeftOuterJoin::LeftOuterJoin(string sortBy, 
     vector<string> in0Fields, 
     vector<string> in1Fields)
     : Join(sortBy, in0Fields, in1Fields)
 {
     static int num = 1;
-    m_name = "outerjoin" + std::to_string(num);
+    m_name = "leftouterjoin" + std::to_string(num);
     ++num;
 }
 
-void OuterJoin::Duplicate(const Node *orig, bool shallow, bool possMerging)
+void LeftOuterJoin::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  const OuterJoin *outerJoin = (OuterJoin*)orig;
-  m_name = outerJoin->m_name;
-  m_sortBy = outerJoin->m_sortBy;
-  m_in0Fields = outerJoin->m_in0Fields;
-  m_in1Fields = outerJoin->m_in1Fields;
+  const LeftOuterJoin *louterJoin = (LeftOuterJoin*)orig;
+  m_name = louterJoin->m_name;
+  m_sortBy = louterJoin->m_sortBy;
+  m_in0Fields = louterJoin->m_in0Fields;
+  m_in1Fields = louterJoin->m_in1Fields;
   Node::Duplicate(orig, shallow, possMerging);
 }
 
-const DataTypeInfo& OuterJoin::DataType(ConnNum num) const
+const DataTypeInfo& LeftOuterJoin::DataType(ConnNum num) const
 {
   return m_dataTypeInfo;
 }
 
-void OuterJoin::ClearDataTypeCache()
-{
-  
-}
-
-void OuterJoin::Prop()
+void LeftOuterJoin::Prop()
 {
   Join::Prop();
 }
 
-void OuterJoin::BuildDataTypeCache()
+void LeftOuterJoin::ClearDataTypeCache()
+{
+  
+}
+
+void LeftOuterJoin::BuildDataTypeCache()
 {
   m_dataTypeInfo.m_sortedBy = m_sortBy;
   m_dataTypeInfo.m_fields = InputDataType(0).m_fields;
   m_dataTypeInfo.m_fields.insert(InputDataType(1).m_fields.begin(),
 				 InputDataType(1).m_fields.end());
 }
-void OuterJoin::PrintCode(IndStream &out)
+void LeftOuterJoin::PrintCode(IndStream &out)
 {
   out.Indent();
   string in0 = GetInputNameStr(0);
   string in1 = GetInputNameStr(1);
-  *out << m_name << " = FullOuterJoin( " << m_sortBy << ", "
+  *out << m_name << " = LeftOuterJoin( " << m_sortBy << ", "
     << in0 << ", " << in1;
   vector<string>::iterator iter0 = m_in0Fields.begin();
   vector<string>::iterator iter1 = m_in1Fields.begin();  
@@ -90,9 +90,9 @@ void OuterJoin::PrintCode(IndStream &out)
 }
 
 
-Join* OuterJoin::CreateCopyOfJoin() const
+Join* LeftOuterJoin::CreateCopyOfJoin() const
 {
-  Join *newJoin = new OuterJoin(m_sortBy,
+  Join *newJoin = new LeftOuterJoin(m_sortBy,
 			   m_in0Fields,
 			   m_in1Fields);
   return newJoin;
