@@ -32,18 +32,19 @@
 
 
 
-class CrossProduct : public Sortable
+class Union : public Sortable
 {
  protected:
   DataTypeInfo m_dataTypeInfo;
   
 
  public:
+  vector<string> m_fields;
 
-  CrossProduct();
-  CrossProduct(string sortBy);
+  Union();
+  Union(string sortBy, vector<string> inFields);
   virtual NodeType GetType() const;
-  static Node* BlankInst() { return  new CrossProduct; }
+  static Node* BlankInst() { return  new Union; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual const DataTypeInfo& DataType(ConnNum num) const;
@@ -51,10 +52,11 @@ class CrossProduct : public Sortable
   virtual void PrintCode(IndStream &out);
   virtual Cost GetCost() {return 0;}
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "crossproduct";}
+  static ClassType GetClass() {return "union";}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
+
 
 #endif

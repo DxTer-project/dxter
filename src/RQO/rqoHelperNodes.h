@@ -32,15 +32,20 @@
 
 class InputNode : public Node
 {
-  NodeType m_type;
+  
 
  protected:
   DataTypeInfo m_dataTypeInfo;
-  Name m_varName;
+  
 
  public:
+  NodeType m_type;
+  string m_varName;
+  string m_fileName;
+  string m_query;
+
   InputNode();
-  InputNode(string str, string sortBy, set<string> fields);
+  InputNode(string name, string sortBy, set<string> fields, string fileName, string query);
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new InputNode; }
   virtual Node* GetNewInst() { return BlankInst(); }

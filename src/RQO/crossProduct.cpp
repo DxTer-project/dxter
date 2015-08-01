@@ -26,7 +26,15 @@
 #if DORQO
 
 CrossProduct::CrossProduct()
-    : RQONode()
+    : Sortable()
+    {
+        static int num = 1;
+        m_name = "crossproduct" + std::to_string(num);
+        ++num;
+    }
+
+CrossProduct::CrossProduct(string sortBy)
+    : Sortable(sortBy)
     {
         static int num = 1;
         m_name = "crossproduct" + std::to_string(num);

@@ -24,26 +24,23 @@
 #pragma once
 
 #include "layers.h"
-#include "sortable.h"
+#include "rqoHelperNodes.h"
 #include "rqoBasis.h"
-#include "transform.h"
 
 #if DORQO
 
 
-
-class CrossProduct : public Sortable
+class Scan : public InputNode
 {
+
  protected:
   DataTypeInfo m_dataTypeInfo;
-  
 
  public:
-
-  CrossProduct();
-  CrossProduct(string sortBy);
-  virtual NodeType GetType() const;
-  static Node* BlankInst() { return  new CrossProduct; }
+  Scan();
+  Scan(string name, string sortBy, set<string> fields, string fileName, string query);
+  virtual NodeType GetType() const {return m_type;}
+  static Node* BlankInst() { return  new Scan; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual const DataTypeInfo& DataType(ConnNum num) const;
@@ -51,9 +48,10 @@ class CrossProduct : public Sortable
   virtual void PrintCode(IndStream &out);
   virtual Cost GetCost() {return 0;}
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "crossproduct";}
-  virtual void ClearDataTypeCache();
-  virtual void BuildDataTypeCache();
+  static ClassType GetClass() {return "scan";}
+  virtual Name GetName(ConnNum num) const;
+  virtual void ClearDataTypeCache() {}
+  virtual void BuildDataTypeCache() {}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
 

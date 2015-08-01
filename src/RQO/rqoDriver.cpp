@@ -194,9 +194,9 @@ RealPSet* Example1()
   CFields.insert("b");
   CFields.insert("c");
 
-  InputNode *inA = new InputNode("A", "x", AFields);
-  InputNode *inB = new InputNode("B", "u", BFields);
-  InputNode *inC = new InputNode("C", "a", CFields);
+  InputNode *inA = new InputNode("A", "x", AFields, "fileName", "query");
+  InputNode *inB = new InputNode("B", "u", BFields, "fileName", "query");
+  InputNode *inC = new InputNode("C", "a", CFields, "fileName", "query");
 
   vector<string> joinFields0;
   joinFields0.push_back("x");
@@ -247,8 +247,8 @@ RealPSet* Example2()
   CFields.insert("b");
   CFields.insert("c");
 
-  InputNode *inA = new InputNode("A", "x", AFields);
-  InputNode *inC = new InputNode("C", "a", CFields);
+  InputNode *inA = new InputNode("A", "x", AFields, "fileName", "query");
+  InputNode *inC = new InputNode("C", "a", CFields, "fileName", "query");
 
   set<string> projFields1;
   projFields1.insert("x");  
@@ -291,7 +291,7 @@ RealPSet* Example3()
   AFields.insert("y");
   AFields.insert("z");
 
-  InputNode *inA = new InputNode("A", "x", AFields);
+  InputNode *inA = new InputNode("A", "x", AFields, "fileName", "query");
 
   set<string> projFields1;
   projFields1.insert("x");  
@@ -332,9 +332,9 @@ RealPSet* Example4()
   CFields.insert("b");
   CFields.insert("c");
 
-  InputNode *inA = new InputNode("A", "x", AFields);
-  InputNode *inB = new InputNode("B", "u", BFields);
-  InputNode *inC = new InputNode("C", "a", CFields);
+  InputNode *inA = new InputNode("A", "x", AFields, "fileName", "query");
+  InputNode *inB = new InputNode("B", "u", BFields, "fileName", "query");
+  InputNode *inC = new InputNode("C", "a", CFields, "fileName", "query");
 
   vector<string> joinFields0;
   joinFields0.push_back("x");
@@ -382,9 +382,9 @@ RealPSet* Example5()
   CFields.insert("b");
   CFields.insert("c");
 
-  InputNode *inA = new InputNode("A", "x", AFields);
-  InputNode *inB = new InputNode("B", "u", BFields);
-  InputNode *inC = new InputNode("C", "a", CFields);
+  InputNode *inA = new InputNode("A", "x", AFields, "fileName", "query");
+  InputNode *inB = new InputNode("B", "u", BFields, "fileName", "query");
+  InputNode *inC = new InputNode("C", "a", CFields, "fileName", "query");
 
   vector<string> joinFields0;
   joinFields0.push_back("x");

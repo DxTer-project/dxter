@@ -33,10 +33,12 @@ m_type("InputNode")
 }
 
 
-InputNode::InputNode(string str, string sortBy, set<string> fields)
+InputNode::InputNode(string name, string sortBy, set<string> fields, string fileName, string query)
 :
-  m_type(str),
-  m_varName(str)
+  m_type(name),
+  m_varName(name),
+  m_fileName(fileName),
+  m_query(query)
 {
   m_dataTypeInfo.m_sortedBy = sortBy;
   m_dataTypeInfo.m_fields = fields;
@@ -49,6 +51,8 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_type = node->m_type;
   m_dataTypeInfo = node->m_dataTypeInfo;
   m_varName = node->m_varName;
+  m_fileName = node->m_fileName;
+  m_query = node->m_query;
 }
 
 const DataTypeInfo& InputNode::DataType(ConnNum num) const
@@ -60,11 +64,14 @@ void InputNode::Prop()
 {
   if (!m_inputs.empty())
     throw;
-  if (m_type.empty() || m_varName.m_name.empty())
+  if (m_type.empty() || m_varName.empty())
     throw;
   if (m_dataTypeInfo.m_fields.find(m_dataTypeInfo.m_sortedBy)
       == m_dataTypeInfo.m_fields.end())
     throw;
+  if(m_fileName.empty() || m_query.empty())
+    throw;
+  //add something to check for valid queries or valid files
 }
 
 void InputNode::PrintCode(IndStream &out)
