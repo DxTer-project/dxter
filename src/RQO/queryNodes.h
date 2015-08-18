@@ -20,26 +20,51 @@
 */
 
 
-#include "clauseNode.h"
+
+#pragma once
+
+#include "layers.h"
+#include "rqoBasis.h"
 
 #if DORQO
 
-ClauseNode::ClauseNode(QueryType type, QueryNode *parent, QueryNode *child)
-    : QueryNode(type, parent, child)
-    {
-
-    }
-
-bool ClauseNode::validate()
+namespace queryNodes
 {
-    if(m_type != CLAUSE)
-        throw;
+    class AndNode;
+    class ClauseNode;
 
-    if(m_parent->getType() != AND)
-        throw;
+    class OrNode
+    {
+        vector<queryNodes::AndNode> children;
 
-    if(m_child)
-        throw;
+      public:
+        OrNode() {};
+        virtual void addAnd(AndNode* child) {children.push_back(*child);}
+        virtual AndNode* deleteAnd(AndNode* child);
+        virtual bool evaluate();
+    };
+
+    class AndNode : public OrNode
+    {
+        vector<queryNodes::ClauseNode> children;
+
+      public:
+        AndNode() {};
+        virtual void addClause(ClauseNode* child) {children.push_back(*child);}
+        virtual ClauseNode* deleteClause(ClauseNode* child);
+        virtual bool evaluate();
+    };
+
+    class ClauseNode : public AndNode
+    {
+    public:
+        ClauseNode() {};
+        virtual bool evaluate();
+    };
 }
+
+
+
+
 
 #endif

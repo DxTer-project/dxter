@@ -20,28 +20,33 @@
 */
 
 
+#include "queryNodes.h"
 
-#pragma once
-
-#include "layers.h"
-#include "rqoBasis.h"
-#include "queryNode.h"
 
 #if DORQO
 
+using namespace queryNodes;
 
-class AndNode : public QueryNode
+bool OrNode::evaluate()
 {
-  public:
+    bool ret = false;
+    vector<AndNode>::iterator iter = children.begin();
+    for(; iter != children.end(); iter++)
+    {
+        ret = ret || (*iter).evaluate();
+    }
+    return ret;
+}
 
-    AndNode() {};
-    AndNode( QueryType type, QueryNode *parent, QueryNode *child );
-    virtual QueryNode* getParent() { return m_parent; }
-    virtual QueryNode* getChild() { return m_child; }
-    virtual QueryType getType() { return m_type; }
-    virtual bool validate();
-};
-
-
+bool AndNode::evaluate()
+{
+    bool ret = false;
+    vector<ClauseNode>::iterator iter = children.begin();
+    for(; iter != children.end(); iter++)
+    {
+        ret = ret || (*iter).evaluate();
+    }
+    return ret;
+}
 
 #endif
