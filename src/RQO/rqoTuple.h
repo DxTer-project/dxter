@@ -20,40 +20,24 @@
 */
 
 
-#include "queryNodes.h"
 
+#pragma once
+
+#include "layers.h"
+#include "rqoBasis.h"
 
 #if DORQO
 
-using namespace queryNodes;
 
-bool OrNode::evaluate(Tuple tuple, Predicate pred)
-{
-    bool ret = false;
-    vector<AndNode>::iterator iter = children.begin();
-    for(; iter != children.end(); iter++)
-    {
-        ret = ret || (*iter).evaluate(tuple, pred);
-    }
-    return ret;
-}
 
-bool AndNode::evaluate(Tuple tuple, Predicate pred)
+class Tuple
 {
-    bool ret = false;
-    vector<ClauseNode>::iterator iter = children.begin();
-    for(; iter != children.end(); iter++)
-    {
-        ret = ret || (*iter).evaluate(tuple, pred);
-    }
-    return ret;
-}
+public:
+    vector<string> fields;
 
-bool ClauseNode::evaluate(Tuple tuple, Predicate pred)
-{
-    bool ret = false;
-    //ret = pred.testPred(tuple);
-    return ret;
-}
+    //figure out how to make an arbitrary length constructor
+    Tuple() {};
+};
+
 
 #endif

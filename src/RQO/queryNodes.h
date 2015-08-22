@@ -25,6 +25,8 @@
 
 #include "layers.h"
 #include "rqoBasis.h"
+#include "rqoTuple.h"
+#include "rqoPredicate.h"
 
 #if DORQO
 
@@ -40,8 +42,8 @@ namespace queryNodes
       public:
         OrNode() {};
         virtual void addAnd(AndNode* child) {children.push_back(*child);}
-        virtual AndNode* deleteAnd(AndNode* child);
-        virtual bool evaluate();
+        //virtual AndNode* deleteAnd(AndNode* child);
+        virtual bool evaluate(Tuple tuple, Predicate pred);
     };
 
     class AndNode : public OrNode
@@ -51,15 +53,15 @@ namespace queryNodes
       public:
         AndNode() {};
         virtual void addClause(ClauseNode* child) {children.push_back(*child);}
-        virtual ClauseNode* deleteClause(ClauseNode* child);
-        virtual bool evaluate();
+        //virtual ClauseNode* deleteClause(ClauseNode* child);
+        virtual bool evaluate(Tuple tuple, Predicate pred);
     };
 
     class ClauseNode : public AndNode
     {
     public:
         ClauseNode() {};
-        virtual bool evaluate();
+        virtual bool evaluate(Tuple tuple, Predicate pred);
     };
 }
 
