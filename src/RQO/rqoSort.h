@@ -55,6 +55,7 @@ class Sort : public Sortable
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
 
+//This transformation removes a sort node that is before a sort node.
 class RemoveExtraSort : public SingleTrans
 {
  public:
@@ -63,6 +64,8 @@ class RemoveExtraSort : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+//This transformation deletes a sortby in front of the node it is checking, since
+//it would be redundant.
 class RemoveRedundantSortBy : public SingleTrans
 {
  public:
@@ -71,6 +74,8 @@ class RemoveRedundantSortBy : public SingleTrans
   virtual void Apply(Node *node) const;
 };
 
+//This removes a node that is a sort before a sortable node. This is not
+//superfluous since we allow sortable nodes to have null sortby fields.
 class RemoveSortBeforeSortable : public SingleTrans
 {
  public:

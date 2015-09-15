@@ -58,6 +58,7 @@ class Projection : public Sortable
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
 };
 
+//Two projections in a row is redundant
 class RemoveExtraProjection : public SingleTrans
 {
   virtual string GetType() const {return "Remove Extra Projection";}

@@ -35,8 +35,8 @@ class Tuple
 public:
     vector<string> fields;
 
-    //figure out how to make an arbitrary length constructor
     Tuple() {};
+    virtual void addField(string field) {fields.push_back(field);}
 };
 
 

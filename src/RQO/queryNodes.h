@@ -30,38 +30,72 @@
 
 #if DORQO
 
+//The hierarchy of these nodes enforces correctness in queries. 
 namespace queryNodes
 {
     class AndNode;
     class ClauseNode;
 
+
     class OrNode
     {
+        string m_id;
         vector<queryNodes::AndNode> children;
 
       public:
-        OrNode() {};
+        OrNode();
+        //This adds a child node to the vector children.
         virtual void addAnd(AndNode* child) {children.push_back(*child);}
-        //virtual AndNode* deleteAnd(AndNode* child);
-        virtual bool evaluate(Tuple tuple, Predicate pred);
+        //This Deletes a specified child node in children
+        virtual void deleteAnd(AndNode* child);
+        //Evaluate surveys the query and makes sure it is possible. All of the evaluates
+        virtual bool evaluate(Tuple tuple);
+        //Return the id of the node
+        virtual string getId() {return m_id;}
     };
 
     class AndNode : public OrNode
     {
+        string m_id;
         vector<queryNodes::ClauseNode> children;
 
       public:
-        AndNode() {};
+        AndNode();
+        //Adds a clause node to children.
         virtual void addClause(ClauseNode* child) {children.push_back(*child);}
-        //virtual ClauseNode* deleteClause(ClauseNode* child);
-        virtual bool evaluate(Tuple tuple, Predicate pred);
+        //Deletes a specified node from children.
+        virtual void deleteClause(ClauseNode* child);
+        virtual bool evaluate(Tuple tuple);
     };
 
     class ClauseNode : public AndNode
     {
+        
     public:
-        ClauseNode() {};
-        virtual bool evaluate(Tuple tuple, Predicate pred);
+        string m_id;
+
+        ClauseNode();
+    };
+
+    class FieldValue : public ClauseNode
+    {
+    public:
+        FieldValue();
+        virtual bool evaluate(Tuple tuple);
+    };
+
+    class FieldField : public ClauseNode
+    {
+    public:
+        FieldField();
+        virtual bool evaluate(Tuple tuple);
+    };
+
+    class FieldSet : public ClauseNode
+    {
+    public:
+        FieldSet();
+        virtual bool evaluate(Tuple tuple);
     };
 }
 

@@ -24,21 +24,21 @@
 #pragma once
 
 #include "layers.h"
-#include "node.h"
 #include "rqoBasis.h"
+#include "rqoAttribute.h"
 
 #if DORQO
 
-//This class represents the starting point of every node in RQO. 
-class RQONode : public Node
-{
-    public:
-        string m_name;
 
-    
-      RQONode();
-      virtual ~RQONode();
-      virtual Name GetName(ConnNum num) const;
+
+class Relation
+{
+public:
+    vector<Attribute> attributes;
+    string m_name;
+
+    Relation(string name) {m_name = name;}
+    virtual void addAttribute(Attribute attri) {attributes.push_back(attri);}
 };
 
 

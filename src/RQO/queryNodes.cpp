@@ -27,32 +27,116 @@
 
 using namespace queryNodes;
 
-bool OrNode::evaluate(Tuple tuple, Predicate pred)
+OrNode::OrNode()
+{
+    static int num = 1;
+    m_id = "orNode" + std::to_string(num);
+    ++num;
+}
+
+bool OrNode::evaluate(Tuple tuple)
 {
     bool ret = false;
     vector<AndNode>::iterator iter = children.begin();
     for(; iter != children.end(); iter++)
     {
-        ret = ret || (*iter).evaluate(tuple, pred);
+        ret = ret || (*iter).evaluate(tuple);
     }
     return ret;
 }
 
-bool AndNode::evaluate(Tuple tuple, Predicate pred)
+
+void OrNode::deleteAnd(AndNode* child)
+{
+    vector<AndNode>::iterator iter = children.begin();
+    int index = 0;
+    for(; iter != children.end(); iter++)
+    {
+        if((*iter).getId() == child->getId())
+        {
+            children.erase(children.begin() + index);
+            break;
+        }
+        index++;
+    }
+}
+
+AndNode::AndNode()
+{
+    static int num = 1;
+    m_id = "andNode" + std::to_string(num);
+    ++num;
+}
+
+void AndNode::deleteClause(ClauseNode* child)
+{
+    vector<ClauseNode>::iterator iter = children.begin();
+    int index = 0;
+    for(; iter != children.end(); iter++)
+    {
+        if((*iter).getId() == child->getId())
+        {
+            children.erase(children.begin() + index);
+            break;
+        }
+        index++;
+    }
+}
+
+bool AndNode::evaluate(Tuple tuple)
 {
     bool ret = false;
     vector<ClauseNode>::iterator iter = children.begin();
     for(; iter != children.end(); iter++)
     {
-        ret = ret || (*iter).evaluate(tuple, pred);
+        ret = ret || (*iter).evaluate(tuple);
     }
     return ret;
 }
 
-bool ClauseNode::evaluate(Tuple tuple, Predicate pred)
+ClauseNode::ClauseNode()
+{
+    static int num = 1;
+    m_id = "clauseNode" + std::to_string(num);
+    ++num;
+}
+
+FieldValue::FieldValue()
+{
+    static int num = 1;
+    m_id = "fieldValue" + std::to_string(num);
+    ++num;
+}
+
+FieldField::FieldField()
+{
+    static int num = 1;
+    m_id = "fieldField" + std::to_string(num);
+    ++num;
+}
+
+FieldSet::FieldSet()
+{
+    static int num = 1;
+    m_id = "fieldSet" + std::to_string(num);
+    ++num;
+}
+
+bool FieldValue::evaluate(Tuple tuple)
 {
     bool ret = false;
-    //ret = pred.testPred(tuple);
+    return ret;
+}
+
+bool FieldField::evaluate(Tuple tuple)
+{
+    bool ret = false;
+    return ret;
+}
+
+bool FieldSet::evaluate(Tuple tuple)
+{
+    bool ret = false;
     return ret;
 }
 

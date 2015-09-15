@@ -29,6 +29,7 @@
 
 #if DORQO
 
+//This class defines what it means to be able to be sorted.
 class Sortable : public RQONode
 {
     public:

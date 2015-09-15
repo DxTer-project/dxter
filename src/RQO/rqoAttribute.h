@@ -24,21 +24,21 @@
 #pragma once
 
 #include "layers.h"
-#include "node.h"
 #include "rqoBasis.h"
+
 
 #if DORQO
 
-//This class represents the starting point of every node in RQO. 
-class RQONode : public Node
-{
-    public:
-        string m_name;
 
-    
-      RQONode();
-      virtual ~RQONode();
-      virtual Name GetName(ConnNum num) const;
+
+class Attribute
+{
+public:
+    string m_name;
+    string m_type;
+    bool m_indexed;
+
+    Attribute(string name, string type, bool indexed); 
 };
 
 
