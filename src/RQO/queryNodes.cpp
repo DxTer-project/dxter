@@ -94,28 +94,35 @@ bool AndNode::evaluate(Tuple tuple)
     return ret;
 }
 
-ClauseNode::ClauseNode()
+ClauseNode::ClauseNode(string relation)
+    : m_relation(relation)
 {
     static int num = 1;
     m_id = "clauseNode" + std::to_string(num);
     ++num;
 }
 
-FieldValue::FieldValue()
+FieldValue::FieldValue(string relation, double value)
+    : ClauseNode(relation),
+    m_value(value)
 {
     static int num = 1;
     m_id = "fieldValue" + std::to_string(num);
     ++num;
 }
 
-FieldField::FieldField()
+FieldField::FieldField(string relation, FieldValuePair field)
+    : ClauseNode(relation),
+    m_field(field)
 {
     static int num = 1;
     m_id = "fieldField" + std::to_string(num);
     ++num;
 }
 
-FieldSet::FieldSet()
+FieldSet::FieldSet(string relation, set<string> *set)
+    : ClauseNode(relation),
+    m_set(set)
 {
     static int num = 1;
     m_id = "fieldSet" + std::to_string(num);
@@ -124,19 +131,126 @@ FieldSet::FieldSet()
 
 bool FieldValue::evaluate(Tuple tuple)
 {
-    bool ret = false;
+    bool ret = true;
+    vector<FieldValuePair> *fields = tuple.getFields();
+
+    vector<FieldValuePair>::iterator iter = fields->begin();
+    for(; iter != fields->end(); iter++)
+    {
+        double temp = (*iter).getValue();
+        if(m_relation == "=")
+        {
+            ret = (m_value == temp) ? true : false;
+        }
+        else if(m_relation == "!=")
+        {
+            ret = (m_value != temp) ? true : false;
+        }
+        else if(m_relation == ">")
+        {
+            ret = (m_value > temp) ? true : false;
+        }
+        else if(m_relation == ">=")
+        {
+            ret = (m_value >= temp) ? true : false;
+        }
+        else if(m_relation == "<")
+        {
+            ret = (m_value < temp) ? true : false;
+        }
+        else if(m_relation == "<=")
+        {
+            ret = (m_value <= temp) ? true : false;
+        }
+        else
+        {
+            throw;
+        }
+        if(ret == false)
+        {
+            break;
+        }
+    }
+
     return ret;
 }
 
 bool FieldField::evaluate(Tuple tuple)
 {
-    bool ret = false;
+    bool ret = true;
+    double value = m_field.getValue();
+
+    vector<FieldValuePair> *fields = tuple.getFields();
+
+    vector<FieldValuePair>::iterator iter = fields->begin();
+    for(; iter != fields->end(); iter++)
+    {
+        double temp = (*iter).getValue();
+        if(m_relation == "=")
+        {
+            ret = (value == temp) ? true : false;
+        }
+        else if(m_relation == "!=")
+        {
+            ret = (value != temp) ? true : false;
+        }
+        else if(m_relation == ">")
+        {
+            ret = (value > temp) ? true : false;
+        }
+        else if(m_relation == ">=")
+        {
+            ret = (value >= temp) ? true : false;
+        }
+        else if(m_relation == "<")
+        {
+            ret = (value < temp) ? true : false;
+        }
+        else if(m_relation == "<=")
+        {
+            ret = (value <= temp) ? true : false;
+        }
+        else
+        {
+            throw;
+        }
+        if(ret == false)
+        {
+            break;
+        }
+    }
+
     return ret;
 }
 
 bool FieldSet::evaluate(Tuple tuple)
 {
-    bool ret = false;
+    bool ret = true;
+
+    vector<FieldValuePair> *fields = tuple.getFields();
+
+    vector<FieldValuePair>::iterator iter = fields->begin();
+    for(; iter != fields->end(); iter++)
+    {
+        string temp = (*iter).getField();
+        if(m_relation == "in")
+        {
+            ret = (m_set->find(temp) != m_set->end());
+        }
+        else if(m_relation =="not in")
+        {
+            ret = (m_set->find(temp) == m_set->end());
+        }
+        else
+        {
+            throw;
+        }
+        if(ret == false)
+        {
+            break;
+        }
+    }
+
     return ret;
 }
 

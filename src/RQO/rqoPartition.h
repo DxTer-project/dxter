@@ -25,20 +25,20 @@
 
 #include "layers.h"
 #include "rqoBasis.h"
-#include "rqoFieldValuePair.h"
+#include "queryNodes.h"
 
 #if DORQO
 
+using namespace queryNodes;
 
-
-class Tuple
+class Partition
 {
 public:
-    vector<FieldValuePair> fields;
+    ClauseNode *m_clause;
+    AndNode *m_residual;
 
-    Tuple() {};
-    virtual void addField(FieldValuePair field) {fields.push_back(field);}
-    virtual vector<FieldValuePair>* getFields() {return &fields;}
+    Partition(AndNode *query, ClauseNode *clause);
+    virtual AndNode* conjoin();
 };
 
 

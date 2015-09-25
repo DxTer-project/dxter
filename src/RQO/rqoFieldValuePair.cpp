@@ -21,25 +21,17 @@
 
 
 
-#pragma once
-
-#include "layers.h"
-#include "rqoBasis.h"
 #include "rqoFieldValuePair.h"
 
 #if DORQO
 
+FieldValuePair::FieldValuePair(string field, double value)
+    : m_field(field),
+    m_value(value)
+    {
+        
+    }
 
-
-class Tuple
-{
-public:
-    vector<FieldValuePair> fields;
-
-    Tuple() {};
-    virtual void addField(FieldValuePair field) {fields.push_back(field);}
-    virtual vector<FieldValuePair>* getFields() {return &fields;}
-};
 
 
 #endif

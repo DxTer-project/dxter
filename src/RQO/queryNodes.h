@@ -27,6 +27,7 @@
 #include "rqoBasis.h"
 #include "rqoTuple.h"
 #include "rqoPredicate.h"
+#include <set>
 
 #if DORQO
 
@@ -73,28 +74,35 @@ namespace queryNodes
         
     public:
         string m_id;
+        string m_relation;
 
-        ClauseNode();
+        ClauseNode(string relation);
     };
 
     class FieldValue : public ClauseNode
     {
     public:
-        FieldValue();
+        double m_value;
+
+        FieldValue(string relation, double value);
         virtual bool evaluate(Tuple tuple);
     };
 
     class FieldField : public ClauseNode
     {
     public:
-        FieldField();
+        FieldValuePair m_field;
+
+        FieldField(string relation, FieldValuePair field);
         virtual bool evaluate(Tuple tuple);
     };
 
     class FieldSet : public ClauseNode
     {
     public:
-        FieldSet();
+        set<string> *m_set;
+
+        FieldSet(string relation, set<string> *set);
         virtual bool evaluate(Tuple tuple);
     };
 }

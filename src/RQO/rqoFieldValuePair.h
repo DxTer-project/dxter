@@ -25,20 +25,20 @@
 
 #include "layers.h"
 #include "rqoBasis.h"
-#include "rqoFieldValuePair.h"
 
 #if DORQO
 
 
 
-class Tuple
+class FieldValuePair
 {
 public:
-    vector<FieldValuePair> fields;
+    string m_field;
+    double m_value;
 
-    Tuple() {};
-    virtual void addField(FieldValuePair field) {fields.push_back(field);}
-    virtual vector<FieldValuePair>* getFields() {return &fields;}
+    FieldValuePair(string field, double value);
+    virtual string getField() {return m_field;}
+    virtual double getValue() {return m_value;}
 };
 
 

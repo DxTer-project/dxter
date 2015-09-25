@@ -20,26 +20,26 @@
 */
 
 
+#include "rqoPartition.h"
+#include "queryNodes.h"
 
-#pragma once
-
-#include "layers.h"
-#include "rqoBasis.h"
-#include "rqoFieldValuePair.h"
 
 #if DORQO
 
+using namespace queryNodes;
 
-
-class Tuple
+Partition::Partition(AndNode *query, ClauseNode *clause)
+    : m_residual(query),
+    m_clause(clause)
 {
-public:
-    vector<FieldValuePair> fields;
 
-    Tuple() {};
-    virtual void addField(FieldValuePair field) {fields.push_back(field);}
-    virtual vector<FieldValuePair>* getFields() {return &fields;}
-};
+}
+
+AndNode* Partition::conjoin()
+{
+    m_residual->addClause(m_clause);
+    return m_residual;
+}
 
 
 #endif
