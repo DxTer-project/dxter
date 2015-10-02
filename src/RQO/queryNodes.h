@@ -82,9 +82,9 @@ namespace queryNodes
     class FieldValue : public ClauseNode
     {
     public:
-        double m_value;
+        string m_value;
 
-        FieldValue(string relation, double value);
+        FieldValue(string relation, string value);
         virtual bool evaluate(Tuple tuple);
     };
 

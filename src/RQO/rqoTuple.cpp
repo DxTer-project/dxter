@@ -20,28 +20,35 @@
 */
 
 
-
-#pragma once
-
-#include "layers.h"
-#include "rqoBasis.h"
-#include "rqoFieldValuePair.h"
+#include "rqoTuple.h"
 
 #if DORQO
 
-
-
-class Tuple
+bool Tuple::compareTo(Tuple comparator, int key)
 {
-public:
-    vector<FieldValuePair> fields;
+    return (fields.at(key).getValue() < comparator.getFields().at(key).getValue());
+}
 
-    Tuple() {};
-    virtual void addField(FieldValuePair field) {fields.push_back(field);}
-    virtual bool compareTo(Tuple comparator, int key);
-    virtual bool equals(Tuple comparator);
-    virtual vector<FieldValuePair> getFields() {return fields;}
-};
-
+bool Tuple::equals(Tuple comparator)
+{
+    vector<FieldValuePair>::iterator iter0 = fields.begin();
+    vector<FieldValuePair>::iterator iter1 = comparator.getFields().begin();  
+    for(; iter0 != fields.end() && iter1 != comparator.getFields().end(); ++iter0, ++iter1) 
+    {
+        if((*iter0).getField() != (*iter1).getField())
+        {
+            return false;
+        }
+        if((*iter0).getValue() != (*iter1).getValue())
+        {
+            return false;
+        }
+    }
+    if(iter0 != fields.end() || iter1 != comparator.getFields().end())
+    {
+        return false;
+    }
+    return true;
+}
 
 #endif

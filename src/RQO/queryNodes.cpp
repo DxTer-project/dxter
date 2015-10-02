@@ -102,7 +102,7 @@ ClauseNode::ClauseNode(string relation)
     ++num;
 }
 
-FieldValue::FieldValue(string relation, double value)
+FieldValue::FieldValue(string relation, string value)
     : ClauseNode(relation),
     m_value(value)
 {
@@ -132,12 +132,12 @@ FieldSet::FieldSet(string relation, set<string> *set)
 bool FieldValue::evaluate(Tuple tuple)
 {
     bool ret = true;
-    vector<FieldValuePair> *fields = tuple.getFields();
+    vector<FieldValuePair> fields = tuple.getFields();
 
-    vector<FieldValuePair>::iterator iter = fields->begin();
-    for(; iter != fields->end(); iter++)
+    vector<FieldValuePair>::iterator iter = fields.begin();
+    for(; iter != fields.end(); iter++)
     {
-        double temp = (*iter).getValue();
+        string temp = (*iter).getValue();
         if(m_relation == "=")
         {
             ret = (m_value == temp) ? true : false;
@@ -178,14 +178,14 @@ bool FieldValue::evaluate(Tuple tuple)
 bool FieldField::evaluate(Tuple tuple)
 {
     bool ret = true;
-    double value = m_field.getValue();
+    string value = m_field.getValue();
 
-    vector<FieldValuePair> *fields = tuple.getFields();
+    vector<FieldValuePair> fields = tuple.getFields();
 
-    vector<FieldValuePair>::iterator iter = fields->begin();
-    for(; iter != fields->end(); iter++)
+    vector<FieldValuePair>::iterator iter = fields.begin();
+    for(; iter != fields.end(); iter++)
     {
-        double temp = (*iter).getValue();
+        string temp = (*iter).getValue();
         if(m_relation == "=")
         {
             ret = (value == temp) ? true : false;
@@ -227,10 +227,10 @@ bool FieldSet::evaluate(Tuple tuple)
 {
     bool ret = true;
 
-    vector<FieldValuePair> *fields = tuple.getFields();
+    vector<FieldValuePair> fields = tuple.getFields();
 
-    vector<FieldValuePair>::iterator iter = fields->begin();
-    for(; iter != fields->end(); iter++)
+    vector<FieldValuePair>::iterator iter = fields.begin();
+    for(; iter != fields.end(); iter++)
     {
         string temp = (*iter).getField();
         if(m_relation == "in")
