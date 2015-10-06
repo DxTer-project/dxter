@@ -38,9 +38,11 @@ public:
 
     Tuple() {};
     virtual void addField(FieldValuePair field) {fields.push_back(field);}
-    virtual bool compareTo(Tuple comparator, int key);
+    virtual bool compareTo(Tuple comparator, int key1, int key2);
     virtual bool equals(Tuple comparator);
     virtual vector<FieldValuePair> getFields() {return fields;}
+    virtual string getFieldAt(int key);
+    virtual string getValueAt(int key);
 };
 
 

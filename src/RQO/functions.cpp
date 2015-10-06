@@ -27,13 +27,13 @@
 #include "rqoBasis.h"
 #include <unordered_map>
 #include <iostream>
+#include <algorithm>
 
 #if DORQO
 
 bool satisfiesJoin(Tuple tuple1, Tuple tuple2, int key1, int key2)
 {
-    if(tuple1.getFields().at(key1).getValue() == 
-        tuple2.getFields().at(key2).getValue())
+    if(tuple1.getValueAt(key1) == tuple2.getValueAt(key2))
     {
         return true;
     }
@@ -49,7 +49,7 @@ Tuple joinTuples(Tuple one, Tuple two, int key)
     }
     for(FieldValuePair fvPair : two.getFields())
     {
-        if(fvPair.getValue() != two.getFields().at(key).getValue())
+        if(fvPair.getValue() != two.getValueAt(key))
         {
             newTuple.addField(fvPair);
         }
@@ -87,11 +87,11 @@ vector<Tuple> hashJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int k
     for(auto tup1 : list1)
     {
         hash.insert(pair<string, Tuple>(
-            tup1.getFields().at(key1).getValue(), tup1));
+            tup1.getValueAt(key1), tup1));
     }
     for(auto tup2 : list2)
     {
-        iter = hash.find(tup2.getFields().at(key2).getValue());
+        iter = hash.find(tup2.getValueAt(key2));
         if(iter != hash.end())
         {
             Tuple toAdd = joinTuples(iter->second, tup2, key2);
@@ -108,14 +108,98 @@ vector<Tuple> mergeJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int 
     return output;
 }
 
+vector<Tuple> leftOuterJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2)
+{
+    vector<Tuple> output;
 
-vector<Tuple> mergeFunc(vector<Tuple> left, vector<Tuple> right)
+    for(auto tup1 : list1)
+    {
+        bool hadPair = false;
+        for(auto tup2 : list2)
+        {
+            if(satisfiesJoin(tup1, tup2, key1, key2))
+            {
+                hadPair = true;
+                Tuple toAdd = joinTuples(tup1, tup2, key2);
+                output.push_back(toAdd);
+            }
+        }
+        if(hadPair == false)
+        {
+            Tuple temp = list2.at(0);
+            Tuple blank;
+            for(auto fvPair : temp.getFields())
+            {
+                if(fvPair.getValue() == temp.getValueAt(key2))
+                {
+                    blank.addField(fvPair);
+                }
+                else
+                {
+                    FieldValuePair tempPair("", "");
+                    blank.addField(tempPair);
+                }
+            }
+            Tuple toAdd = joinTuples(tup1, blank, key2);
+            output.push_back(toAdd);
+        }
+        hadPair = false;
+    }
+
+    return output;
+}
+
+vector<Tuple> rightOuterJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2)
+{
+    vector<Tuple> output;
+
+    for(auto tup1 : list2)
+    {
+        bool hadPair = false;
+        for(auto tup2 : list1)
+        {
+            if(satisfiesJoin(tup1, tup2, key1, key2))
+            {
+                hadPair = true;
+                Tuple toAdd = joinTuples(tup1, tup2, key2);
+                output.push_back(toAdd);
+            }
+        }
+        if(hadPair == false)
+        {
+            Tuple temp = list1.at(0);
+            Tuple blank;
+            for(auto fvPair : temp.getFields())
+            {
+                if(fvPair.getValue() == temp.getValueAt(key1))
+                {
+                    blank.addField(fvPair);
+                }
+                else
+                {
+                    FieldValuePair tempPair("", "");
+                    blank.addField(tempPair);
+                }
+            }
+            Tuple toAdd = joinTuples(tup1, blank, key1);
+            output.push_back(toAdd);
+        }
+        hadPair = false;
+    }
+
+    return output;
+}
+
+
+
+
+vector<Tuple> mergeFunc(vector<Tuple> left, vector<Tuple> right, int key1, int key2)
 {
     vector<Tuple> output;
 
     while(left.size() != 0 && right.size() != 0)
     {
-        if((*left.begin()).compareTo((*right.begin()), 0))
+        if((*left.begin()).compareTo((*right.begin()), key1, key2))
         {
             output.push_back((*left.begin()));
             left.erase(left.begin());
@@ -140,7 +224,7 @@ vector<Tuple> mergeFunc(vector<Tuple> left, vector<Tuple> right)
     return output;
 }
 
-vector<Tuple> sortFunc(vector<Tuple> list)
+vector<Tuple> sortFunc(vector<Tuple> list, int key)
 {
     if(list.size() <= 1)
     {
@@ -152,17 +236,17 @@ vector<Tuple> sortFunc(vector<Tuple> list)
     vector<Tuple> left(list.begin(), iter);
     vector<Tuple> right(++iter, list.end());
 
-    left = sortFunc(left);
-    right = sortFunc(right);
+    left = sortFunc(left, key);
+    right = sortFunc(right, key);
 
-    return mergeFunc(left, right);
+    return mergeFunc(left, right, key, key);
 
 }
 
-vector<Tuple> unionFunc(vector<Tuple> list1, vector<Tuple> list2)
+vector<Tuple> unionFunc(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2)
 {
-    list1 = sortFunc(list1);
-    list2 = sortFunc(list2);
+    list1 = sortFunc(list1, key1);
+    list2 = sortFunc(list2, key2);
 
     vector<Tuple> output;
 
@@ -174,7 +258,7 @@ vector<Tuple> unionFunc(vector<Tuple> list1, vector<Tuple> list2)
             list1.erase(list1.begin());
             list2.erase(list2.begin());
         }
-        else if((*list1.begin()).compareTo((*list2.begin()), 0))
+        else if((*list1.begin()).compareTo((*list2.begin()), key1, key2))
         {
             output.push_back((*list1.begin()));
             list1.erase(list1.begin());
@@ -199,5 +283,59 @@ vector<Tuple> unionFunc(vector<Tuple> list1, vector<Tuple> list2)
     return output;
 }
 
+vector<Tuple> crossProduct(vector<Tuple> list1, vector<Tuple> list2)
+{
+    vector<Tuple> output;
+
+    for(auto tup1 : list1)
+    {
+        for(auto tup2 : list2)
+        {
+            Tuple toAdd;
+            for(auto fvPair : tup1.getFields())
+            {
+                toAdd.addField(fvPair);
+            }
+            for(auto fvPair : tup2.getFields())
+            {
+                toAdd.addField(fvPair);
+            }
+            output.push_back(toAdd);
+        }
+    }
+
+    return output;
+}
+
+vector<Tuple> projection(vector<Tuple> list, vector<string> values, int key)
+{
+    vector<Tuple> output;
+
+    for(auto tuple : list)
+    {
+        vector<string>::iterator iter;
+        iter = find(values.begin(), values.end(), tuple.getFieldAt(key));
+        if(iter != values.end())
+        {
+            output.push_back(tuple);
+        }
+    }
+
+    return output;
+}
+
+vector<Tuple> fullOuterJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2)
+{
+    vector<Tuple> output;
+
+    vector<Tuple> left = leftOuterJoin(list1, list2, key1, key2);
+    vector<Tuple> right = rightOuterJoin(list1, list2, key1, key2);
+    left = sortFunc(left, key1);
+    right = sortFunc(right, key2);
+
+    output = unionFunc(left, right, key1, key2);
+
+    return output;
+}
 
 #endif

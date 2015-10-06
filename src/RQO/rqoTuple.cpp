@@ -24,9 +24,9 @@
 
 #if DORQO
 
-bool Tuple::compareTo(Tuple comparator, int key)
+bool Tuple::compareTo(Tuple comparator, int key1, int key2)
 {
-    return (fields.at(key).getValue() < comparator.getFields().at(key).getValue());
+    return (fields.at(key1).getValue() < comparator.getFields().at(key2).getValue());
 }
 
 bool Tuple::equals(Tuple comparator)
@@ -49,6 +49,16 @@ bool Tuple::equals(Tuple comparator)
         return false;
     }
     return true;
+}
+
+string Tuple::getValueAt(int key)
+{
+    return fields.at(key).getValue();
+}
+
+string Tuple::getFieldAt(int key)
+{
+    return fields.at(key).getField();
 }
 
 #endif
