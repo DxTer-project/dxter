@@ -20,60 +20,60 @@
 */
 
 
-#include "pJoin.h"
+#include "nJoin.h"
 
 
 #if DORQO
 
-PJoin::PJoin()
+NJoin::NJoin()
     : Join()
 {
 
 }
 
-PJoin::PJoin(string sortBy, 
+NJoin::NJoin(string sortBy, 
     vector<string> in0Fields, 
     vector<string> in1Fields)
     : Join(sortBy, in0Fields, in1Fields)
 {
     static int num = 1;
-    m_name = "pjoin" + std::to_string(num);
+    m_name = "nJoin" + std::to_string(num);
     ++num;
 }
 
-void PJoin::Duplicate(const Node *orig, bool shallow, bool possMerging)
+void NJoin::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  const PJoin *pJoin = (PJoin*)orig;
-  m_name = pJoin->m_name;
-  m_sortBy = pJoin->m_sortBy;
-  m_in0Fields = pJoin->m_in0Fields;
-  m_in1Fields = pJoin->m_in1Fields;
+  const NJoin *nJoin = (NJoin*)orig;
+  m_name = nJoin->m_name;
+  m_sortBy = nJoin->m_sortBy;
+  m_in0Fields = nJoin->m_in0Fields;
+  m_in1Fields = nJoin->m_in1Fields;
   Node::Duplicate(orig, shallow, possMerging);
 }
 
-const DataTypeInfo& PJoin::DataType(ConnNum num) const
+const DataTypeInfo& NJoin::DataType(ConnNum num) const
 {
   return m_dataTypeInfo;
 }
 
-void PJoin::ClearDataTypeCache()
+void NJoin::ClearDataTypeCache()
 {
   
 }
 
-void PJoin::BuildDataTypeCache()
+void NJoin::BuildDataTypeCache()
 {
   m_dataTypeInfo.m_sortedBy = m_sortBy;
   m_dataTypeInfo.m_fields = InputDataType(0).m_fields;
   m_dataTypeInfo.m_fields.insert(InputDataType(1).m_fields.begin(),
 				 InputDataType(1).m_fields.end());
 }
-void PJoin::PrintCode(IndStream &out)
+void NJoin::PrintCode(IndStream &out)
 {
   out.Indent();
   string in0 = GetInputNameStr(0);
   string in1 = GetInputNameStr(1);
-  *out << m_name << " = ParallelJoin( " << m_sortBy << ", "
+  *out << m_name << " = nestedJoin( " << m_sortBy << ", "
     << in0 << ", " << in1;
   vector<string>::iterator iter0 = m_in0Fields.begin();
   vector<string>::iterator iter1 = m_in1Fields.begin();  
@@ -85,9 +85,9 @@ void PJoin::PrintCode(IndStream &out)
 }
 
 
-Join* PJoin::CreateCopyOfJoin() const
+Join* NJoin::CreateCopyOfJoin() const
 {
-  Join *newJoin = new PJoin(m_sortBy,
+  Join *newJoin = new NJoin(m_sortBy,
 			   m_in0Fields,
 			   m_in1Fields);
   return newJoin;

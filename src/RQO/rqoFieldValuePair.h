@@ -34,11 +34,11 @@ class FieldValuePair
 {
 public:
     string m_field;
-    double m_value;
+    string m_value;
 
-    FieldValuePair(string field, double value);
+    FieldValuePair(string field, string value);
     virtual string getField() {return m_field;}
-    virtual double getValue() {return m_value;}
+    virtual string getValue() {return m_value;}
 };
 
 

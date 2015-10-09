@@ -108,7 +108,7 @@ void Projection::PrintCode(IndStream &out)
 {
   out.Indent();
   string in = GetInputNameStr(0);
-  *out << m_name << " = Projection( " << m_sortBy << ", " << in;
+  *out << m_name << " = projection( " << m_sortBy << ", " << in;
   set<string>::iterator iter = m_inFields.begin();
   for(; iter != m_inFields.end(); ++iter) {
     *out << ", " << in << "." << *iter;

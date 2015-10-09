@@ -98,7 +98,7 @@ void Sort::PrintCode(IndStream &out)
 {
   out.Indent();
   string in = GetInputNameStr(0);
-  *out << m_name << " = Sort( " << m_sortBy << ", " << in;
+  *out << m_name << " = sortFunc( " << m_sortBy << ", " << in;
   *out << " );\n";
 }
 

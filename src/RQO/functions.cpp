@@ -21,13 +21,7 @@
 
 
 
-#include "layers.h"
-#include "rqoTuple.h"
-#include "rqoFieldValuePair.h"
-#include "rqoBasis.h"
-#include <unordered_map>
-#include <iostream>
-#include <algorithm>
+#include "functions.h"
 
 #if DORQO
 
@@ -307,15 +301,32 @@ vector<Tuple> crossProduct(vector<Tuple> list1, vector<Tuple> list2)
     return output;
 }
 
-vector<Tuple> projection(vector<Tuple> list, vector<string> values, int key)
+vector<Tuple> projection(vector<Tuple> list, vector<string> values)
 {
     vector<Tuple> output;
+    bool success = false;
 
     for(auto tuple : list)
     {
-        vector<string>::iterator iter;
-        iter = find(values.begin(), values.end(), tuple.getFieldAt(key));
-        if(iter != values.end())
+        for(auto string : values)
+        {
+            success = false;
+            vector<FieldValuePair> search = tuple.getFields();
+            for(auto fvPair : search)
+            {
+                if(string == fvPair.getField())
+                {
+                    success = true;
+                    break;
+                }
+            }
+            if(success != true)
+            {
+                break;
+            }
+        }
+        
+        if(success)
         {
             output.push_back(tuple);
         }
@@ -336,6 +347,15 @@ vector<Tuple> fullOuterJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, 
     output = unionFunc(left, right, key1, key2);
 
     return output;
+}
+
+void printTuples(vector<Tuple> list)
+{
+    for(auto tuple : list)
+    {
+        tuple.printTuple();
+
+    }
 }
 
 #endif

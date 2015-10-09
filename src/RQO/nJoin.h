@@ -31,23 +31,23 @@
 
 
 
-class PJoin : public Join
+class NJoin : public Join
 {
  protected:
   DataTypeInfo m_dataTypeInfo;
 
 
  public:
-  PJoin();
-  PJoin(string sortBy, vector<string> in0Fields, vector<string> in1Fields);
-  static Node* BlankInst() { return  new PJoin; }
+  NJoin();
+  NJoin(string sortBy, vector<string> in0Fields, vector<string> in1Fields);
+  static Node* BlankInst() { return  new NJoin; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void PrintCode(IndStream &out);
   virtual Cost GetCost() {return 0;}
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "pjoin";}
+  static ClassType GetClass() {return "njoin";}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}

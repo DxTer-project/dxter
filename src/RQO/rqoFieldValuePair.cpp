@@ -25,7 +25,7 @@
 
 #if DORQO
 
-FieldValuePair::FieldValuePair(string field, double value)
+FieldValuePair::FieldValuePair(string field, string value)
     : m_field(field),
     m_value(value)
     {

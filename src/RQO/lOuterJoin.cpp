@@ -78,7 +78,7 @@ void LeftOuterJoin::PrintCode(IndStream &out)
   out.Indent();
   string in0 = GetInputNameStr(0);
   string in1 = GetInputNameStr(1);
-  *out << m_name << " = LeftOuterJoin( " << m_sortBy << ", "
+  *out << m_name << " = leftOuterJoin( " << m_sortBy << ", "
     << in0 << ", " << in1;
   vector<string>::iterator iter0 = m_in0Fields.begin();
   vector<string>::iterator iter1 = m_in1Fields.begin();  

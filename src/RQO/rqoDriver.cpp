@@ -38,6 +38,7 @@
 #include "sortable.h"
 #include "hJoin.h"
 #include "rqoNode.h"
+#include "functions.h"
 
 
 #if DORQO
@@ -47,6 +48,7 @@ RealPSet* Example2();
 RealPSet* Example3();
 RealPSet* Example4();
 RealPSet* Example5();
+void Example1Run();
 
 typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
 
@@ -59,15 +61,15 @@ double difftime(AccurateTime &end, AccurateTime &start)
 void AddTrans()
 {
   //  Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, RQOPHASE);
-  Universe::AddTrans(Join::GetClass(), new SwapNodes(0,Join::GetClass()), RQOPHASE);
-  Universe::AddTrans(HJoin::GetClass(), new SwapNodes(0,HJoin::GetClass()), RQOPHASE);
-  Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
-  Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
+ // Universe::AddTrans(Join::GetClass(), new SwapNodes(0,Join::GetClass()), RQOPHASE);
+ // Universe::AddTrans(HJoin::GetClass(), new SwapNodes(0,HJoin::GetClass()), RQOPHASE);
+  //Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
+  //Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
 }
 
 void AddSimplifiers()
 { 
-  Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, SIMP);
+  //Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, SIMP);
   
 }
 
@@ -174,6 +176,8 @@ cout << "Left with " << uni.TotalCount() << " algorithms\n";
 
 
   LOG_END();
+
+  Example1Run();
   return 0;
 }
 
@@ -204,7 +208,7 @@ RealPSet* Example1()
   vector<string> joinFields1;
   joinFields1.push_back("u");
 
-  Join *join = new Join("u", joinFields0, joinFields1);
+  HJoin *join = new HJoin("u", joinFields0, joinFields1);
 
   join->AddInput(inA, 0);
   join->AddInput(inB, 0);
@@ -216,7 +220,7 @@ RealPSet* Example1()
   vector<string> joinFields3;
   joinFields3.push_back("c");
 
-  Join *join2 = new Join("b", joinFields2, joinFields3);
+  HJoin *join2 = new HJoin("b", joinFields2, joinFields3);
 
   join2->AddInput(join, 0);
   join2->AddInput(inC, 0);
@@ -232,7 +236,111 @@ RealPSet* Example1()
 
   Poss *poss = new Poss(1, proj);
   RealPSet *pset = new RealPSet(poss);
+
+  Example1Run();
   return pset;
+}
+
+void Example1Run()
+{
+  cout << "Beginning Functions\n\n";
+
+  //create tuples
+  vector<Tuple> inA;
+  vector<Tuple> inB;
+  vector<Tuple> inC;
+
+//name, bank, SSN
+    FieldValuePair aTemp11("x", "Jonathon");
+    FieldValuePair aTemp12("y", "Wells Fargo");
+    FieldValuePair aTemp13("z", "XXX-XX-XXXX");
+    Tuple atemp1;
+    atemp1.addField(aTemp11);
+    atemp1.addField(aTemp12);
+    atemp1.addField(aTemp13);
+    inA.push_back(atemp1);
+    FieldValuePair aTemp21("x", "Mary");
+    FieldValuePair aTemp22("y", "Wells Fargo");
+    FieldValuePair aTemp23("z", "XXX-XX-XXXX");
+    Tuple atemp2;
+    atemp2.addField(aTemp21);
+    atemp2.addField(aTemp22);
+    atemp2.addField(aTemp23);
+    inA.push_back(atemp2);
+    FieldValuePair aTemp31("x", "Alfred");
+    FieldValuePair aTemp32("y", "Bank of America");
+    FieldValuePair aTemp33("z", "XXX-XX-XXXX");
+    Tuple atemp3;
+    atemp3.addField(aTemp31);
+    atemp3.addField(aTemp32);
+    atemp3.addField(aTemp33);
+    inA.push_back(atemp3);
+
+//name, age, classification
+    FieldValuePair bTemp11("u", "Jonathon");
+    FieldValuePair bTemp12("v", "22");
+    FieldValuePair bTemp13("w", "Junior Member");
+    Tuple btemp1;
+    btemp1.addField(bTemp11);
+    btemp1.addField(bTemp12);
+    btemp1.addField(bTemp13);
+    inB.push_back(btemp1);
+    FieldValuePair bTemp21("u", "Alfred");
+    FieldValuePair bTemp22("v", "65");
+    FieldValuePair bTemp23("w", "Senior Member");
+    Tuple btemp2;
+    btemp2.addField(bTemp21);
+    btemp2.addField(bTemp22);
+    btemp2.addField(bTemp23);
+    inB.push_back(btemp2);
+    FieldValuePair bTemp31("u", "Jorge");
+    FieldValuePair bTemp32("v", "18");
+    FieldValuePair bTemp33("w", "Junior Member");
+    Tuple btemp3;
+    btemp3.addField(bTemp31);
+    btemp3.addField(bTemp32);
+    btemp3.addField(bTemp33);
+    inB.push_back(btemp3);
+
+//state, city, bank
+    FieldValuePair cTemp11("a", "Colorado");
+    FieldValuePair cTemp12("b", "Denver");
+    FieldValuePair cTemp13("c", "Wells Fargo");
+    Tuple ctemp1;
+    ctemp1.addField(cTemp11);
+    ctemp1.addField(cTemp12);
+    ctemp1.addField(cTemp13);
+    inC.push_back(ctemp1);
+    FieldValuePair cTemp21("a", "Tennessee");
+    FieldValuePair cTemp22("b", "Memphis");
+    FieldValuePair cTemp23("c", "Bank of America");
+    Tuple ctemp2;
+    ctemp2.addField(cTemp21);
+    ctemp2.addField(cTemp22);
+    ctemp2.addField(cTemp23);
+    inC.push_back(ctemp2);
+   
+
+  //call functions
+
+  vector<Tuple> fromJoin1 = hashJoin(inA, inB, 0, 0);
+
+  cout << "hJoin1 output : " << endl;
+  printTuples(fromJoin1);
+  vector<Tuple> fromJoin2 = hashJoin(fromJoin1, inC, 1, 2);
+  cout << "hjoin2 output : " << endl;
+  printTuples(fromJoin2);
+
+  vector<string> projValues;
+  projValues.push_back("b");
+  projValues.push_back("y");
+  projValues.push_back("x");
+
+  vector<Tuple> output = projection(fromJoin2, projValues);
+
+  //show results
+  cout << "after projection : " << endl;
+  printTuples(fromJoin2);
 }
 
 RealPSet* Example2()

@@ -61,4 +61,18 @@ string Tuple::getFieldAt(int key)
     return fields.at(key).getField();
 }
 
+void Tuple::printTuple()
+{
+    vector<FieldValuePair>::iterator iter = fields.begin();
+
+    cout << "(";
+
+    for(; iter != fields.end(); ++iter)
+    {
+        cout << " " << (*iter).getField() << " = " << (*iter).getValue()<< " ";
+    }
+
+    cout << ")" << endl;
+}
+
 #endif

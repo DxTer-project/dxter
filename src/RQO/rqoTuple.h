@@ -43,6 +43,7 @@ public:
     virtual vector<FieldValuePair> getFields() {return fields;}
     virtual string getFieldAt(int key);
     virtual string getValueAt(int key);
+    virtual void printTuple();
 };
 
 
