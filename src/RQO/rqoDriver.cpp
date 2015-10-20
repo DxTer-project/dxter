@@ -39,9 +39,19 @@
 #include "hJoin.h"
 #include "rqoNode.h"
 #include "functions.h"
+#include "rqoRelation.h"
+#include "rqoAttribute.h"
 
 
 #if DORQO
+
+//Database tables
+Relation zipcodes("zipcodes");
+Relation employees("employees");
+Relation parts("parts");
+Relation customers("customers");
+Relation orders("orders");
+Relation odetails("odetails");
 
 RealPSet* Example1();
 RealPSet* Example2();
@@ -49,6 +59,7 @@ RealPSet* Example3();
 RealPSet* Example4();
 RealPSet* Example5();
 void Example1Run();
+void buildDatabases();
 
 typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
 
@@ -177,9 +188,18 @@ cout << "Left with " << uni.TotalCount() << " algorithms\n";
 
   LOG_END();
 
-  Example1Run();
+  buildDatabases();
+  zipcodes.printTable();
+  employees.printTable();
+  parts.printTable();
+  customers.printTable();
+  orders.printTable();
+  odetails.printTable();
+  //Example1Run();
   return 0;
 }
+
+//void runGraphCode()
 
 RealPSet* Example1()
 {
@@ -227,7 +247,7 @@ RealPSet* Example1()
 
   set<string> projFields;
   projFields.insert("x");
-  projFields.insert("u");
+  projFields.insert("y");
   projFields.insert("b");
 
   Projection *proj = new Projection("x", projFields);
@@ -322,6 +342,10 @@ void Example1Run()
    
 
   //call functions
+  cout << "Input : " << endl;
+  printTuples(inA);
+  printTuples(inB);
+  printTuples(inC);
 
   vector<Tuple> fromJoin1 = hashJoin(inA, inB, 0, 0);
 
@@ -521,6 +545,268 @@ RealPSet* Example5()
   Poss *poss = new Poss(1, join2);
   RealPSet *pset = new RealPSet(poss);
   return pset;
+}
+
+//This method will create and populate relation tables for the program to use
+void buildDatabases()
+{
+  //For zipcodes
+  zipcodes.addAttribute(Attribute("zip", "number", true));
+  zipcodes.addAttribute(Attribute("city", "string", false));
+
+  Tuple zip1;
+  zip1.addField(FieldValuePair("zip", "67226"));
+  zip1.addField(FieldValuePair("city", "Wichita"));
+  zipcodes.addTuple(zip1);
+  Tuple zip2;
+  zip2.addField(FieldValuePair("zip", "60606"));
+  zip2.addField(FieldValuePair("city", "Fort Dodge"));
+  zipcodes.addTuple(zip2);
+  Tuple zip3;
+  zip3.addField(FieldValuePair("zip", "50302"));
+  zip3.addField(FieldValuePair("city", "Kansas City"));
+  zipcodes.addTuple(zip3);
+  Tuple zip4;
+  zip4.addField(FieldValuePair("zip", "54444"));
+  zip4.addField(FieldValuePair("city", "Columbia"));
+  zipcodes.addTuple(zip4);
+  Tuple zip5;
+  zip5.addField(FieldValuePair("zip", "66002"));
+  zip5.addField(FieldValuePair("city", "Liberal"));
+  zipcodes.addTuple(zip5);
+  Tuple zip6;
+  zip6.addField(FieldValuePair("zip", "61111"));
+  zip6.addField(FieldValuePair("city", "Fort Hays"));
+  zipcodes.addTuple(zip6);
+
+  //For employees
+  employees.addAttribute(Attribute("eno", "number", true));
+  employees.addAttribute(Attribute("ename", "string", false));
+  employees.addAttribute(Attribute("zip", "number", true));
+  employees.addAttribute(Attribute("hdate", "string", false));
+
+  Tuple emp1;
+  emp1.addField(FieldValuePair("eno", "1000"));
+  emp1.addField(FieldValuePair("ename", "Jones"));
+  emp1.addField(FieldValuePair("zip", "67226"));
+  emp1.addField(FieldValuePair("hdate", "12-DEC-95"));
+  employees.addTuple(emp1);
+
+  Tuple emp2;
+  emp2.addField(FieldValuePair("eno", "1002"));
+  emp2.addField(FieldValuePair("ename", "Smith"));
+  emp2.addField(FieldValuePair("zip", "60606"));
+  emp2.addField(FieldValuePair("hdate", "01-JAN-92"));
+  employees.addTuple(emp2);
+
+  Tuple emp3;
+  emp3.addField(FieldValuePair("eno", "1002"));
+  emp3.addField(FieldValuePair("ename", "Brown"));
+  emp3.addField(FieldValuePair("zip", "50302"));
+  emp3.addField(FieldValuePair("hdate", "01-SEP-94"));
+  employees.addTuple(emp3);
+
+  //For Parts
+  parts.addAttribute(Attribute("pno", "number", true));
+  parts.addAttribute(Attribute("pname", "string", false));
+  parts.addAttribute(Attribute("qoh", "number", false));
+  parts.addAttribute(Attribute("price", "number", false));
+  parts.addAttribute(Attribute("olevel", "number", false));
+
+  Tuple part1;
+  part1.addField(FieldValuePair("pno", "10506"));
+  part1.addField(FieldValuePair("pname", "Land Before Time I"));
+  part1.addField(FieldValuePair("qoh", "200"));
+  part1.addField(FieldValuePair("price", "19.99"));
+  part1.addField(FieldValuePair("olevel", "20"));
+  parts.addTuple(part1);
+
+  Tuple part2;
+  part2.addField(FieldValuePair("pno", "10507"));
+  part2.addField(FieldValuePair("pname", "Land Before Time II"));
+  part2.addField(FieldValuePair("qoh", "156"));
+  part2.addField(FieldValuePair("price", "19.99"));
+  part2.addField(FieldValuePair("olevel", "20"));
+  parts.addTuple(part2);
+
+  Tuple part3;
+  part3.addField(FieldValuePair("pno", "10508"));
+  part3.addField(FieldValuePair("pname", "Land Before Time III"));
+  part3.addField(FieldValuePair("qoh", "190"));
+  part3.addField(FieldValuePair("price", "19.99"));
+  part3.addField(FieldValuePair("olevel", "20"));
+  parts.addTuple(part3);
+
+  Tuple part4;
+  part4.addField(FieldValuePair("pno", "10509"));
+  part4.addField(FieldValuePair("pname", "Land Before Time IV"));
+  part4.addField(FieldValuePair("qoh", "60"));
+  part4.addField(FieldValuePair("price", "19.99"));
+  part4.addField(FieldValuePair("olevel", "20"));
+  parts.addTuple(part4);
+
+  Tuple part5;
+  part5.addField(FieldValuePair("pno", "10601"));
+  part5.addField(FieldValuePair("pname", "Sleeping Beauty"));
+  part5.addField(FieldValuePair("qoh", "300"));
+  part5.addField(FieldValuePair("price", "24.99"));
+  part5.addField(FieldValuePair("olevel", "20"));
+  parts.addTuple(part5);
+
+  Tuple part6;
+  part6.addField(FieldValuePair("pno", "10701"));
+  part6.addField(FieldValuePair("pname", "When Harry Met Sally"));
+  part6.addField(FieldValuePair("qoh", "120"));
+  part6.addField(FieldValuePair("price", "19.99"));
+  part6.addField(FieldValuePair("olevel", "30"));
+  parts.addTuple(part6);
+
+  Tuple part7;
+  part7.addField(FieldValuePair("pno", "10800"));
+  part7.addField(FieldValuePair("pname", "Dirty Harry"));
+  part7.addField(FieldValuePair("qoh", "140"));
+  part7.addField(FieldValuePair("price", "14.99"));
+  part7.addField(FieldValuePair("olevel", "30"));
+  parts.addTuple(part7);
+
+  Tuple part8;
+  part8.addField(FieldValuePair("pno", "10900"));
+  part8.addField(FieldValuePair("pname", "Dr. Zhivago"));
+  part8.addField(FieldValuePair("qoh", "100"));
+  part8.addField(FieldValuePair("price", "24.99"));
+  part8.addField(FieldValuePair("olevel", "30"));
+  parts.addTuple(part8);
+
+
+  //for Customers
+  customers.addAttribute(Attribute("cno", "number", true));
+  customers.addAttribute(Attribute("cname", "string", false));
+  customers.addAttribute(Attribute("street", "string", false));
+  customers.addAttribute(Attribute("zip", "number", true));
+  customers.addAttribute(Attribute("phone", "string", false));
+
+  Tuple cust1;
+  cust1.addField(FieldValuePair("cno", "1111"));
+  cust1.addField(FieldValuePair("cname", "Charles"));
+  cust1.addField(FieldValuePair("street", "123 Main St."));
+  cust1.addField(FieldValuePair("zip", "67226"));
+  cust1.addField(FieldValuePair("phone", "316-636-5555"));
+  customers.addTuple(cust1);
+
+  Tuple cust2;
+  cust2.addField(FieldValuePair("cno", "2222"));
+  cust2.addField(FieldValuePair("cname", "Bertram"));
+  cust2.addField(FieldValuePair("street", "237 Ash Avenue"));
+  cust2.addField(FieldValuePair("zip", "67226"));
+  cust2.addField(FieldValuePair("phone", "316-689-5555"));
+  customers.addTuple(cust2);
+
+  Tuple cust3;
+  cust3.addField(FieldValuePair("cno", "3333"));
+  cust3.addField(FieldValuePair("cname", "Barbara"));
+  cust3.addField(FieldValuePair("street", "111 Inwood St."));
+  cust3.addField(FieldValuePair("zip", "60606"));
+  cust3.addField(FieldValuePair("phone", "316-111-1234"));
+  customers.addTuple(cust3);
+
+  //for orders
+  orders.addAttribute(Attribute("ono", "number", true));
+  orders.addAttribute(Attribute("cno", "number", true));
+  orders.addAttribute(Attribute("eno", "number", true));
+  orders.addAttribute(Attribute("shipped date", "string", false));
+  orders.addAttribute(Attribute("received date", "string", false));
+
+  Tuple order1;
+  order1.addField(FieldValuePair("ono", "1020"));
+  order1.addField(FieldValuePair("cno", "1111"));
+  order1.addField(FieldValuePair("eno", "1000"));
+  order1.addField(FieldValuePair("shipped date", "10-DEC-94"));
+  order1.addField(FieldValuePair("received date", "12-DEC-94"));
+  orders.addTuple(order1);
+
+  Tuple order2;
+  order2.addField(FieldValuePair("ono", "1021"));
+  order2.addField(FieldValuePair("cno", "1111"));
+  order2.addField(FieldValuePair("eno", "1000"));
+  order2.addField(FieldValuePair("shipped date", "12-JAN-95"));
+  order2.addField(FieldValuePair("received date", "15-JAN-95"));
+  orders.addTuple(order2);
+
+  Tuple order3;
+  order3.addField(FieldValuePair("ono", "1022"));
+  order3.addField(FieldValuePair("cno", "2222"));
+  order3.addField(FieldValuePair("eno", "1001"));
+  order3.addField(FieldValuePair("shipped date", "13-FEB-95"));
+  order3.addField(FieldValuePair("received date", "20-FEB-95"));
+  orders.addTuple(order3);
+
+  Tuple order4;
+  order4.addField(FieldValuePair("ono", "1023"));
+  order4.addField(FieldValuePair("cno", "3333"));
+  order4.addField(FieldValuePair("eno", "1000"));
+  order4.addField(FieldValuePair("shipped date", "20-JUN-97"));
+  order4.addField(FieldValuePair("received date", ""));
+  orders.addTuple(order4);
+
+  //for odetails
+  odetails.addAttribute(Attribute("ono", "number", true));
+  odetails.addAttribute(Attribute("pno", "number", true));
+  odetails.addAttribute(Attribute("qty", "number", false));
+
+  Tuple otail1;
+  otail1.addField(FieldValuePair("ono", "1020"));
+  otail1.addField(FieldValuePair("pno", "10506"));
+  otail1.addField(FieldValuePair("qty", "1"));
+  odetails.addTuple(otail1);
+
+  Tuple otail2;
+  otail2.addField(FieldValuePair("ono", "1020"));
+  otail2.addField(FieldValuePair("pno", "10507"));
+  otail2.addField(FieldValuePair("qty", "1"));
+  odetails.addTuple(otail2);
+
+  Tuple otail3;
+  otail3.addField(FieldValuePair("ono", "1020"));
+  otail3.addField(FieldValuePair("pno", "10508"));
+  otail3.addField(FieldValuePair("qty", "2"));
+  odetails.addTuple(otail3);
+
+  Tuple otail4;
+  otail4.addField(FieldValuePair("ono", "1020"));
+  otail4.addField(FieldValuePair("pno", "10509"));
+  otail4.addField(FieldValuePair("qty", "3"));
+  odetails.addTuple(otail4);
+
+  Tuple otail5;
+  otail5.addField(FieldValuePair("ono", "1021"));
+  otail5.addField(FieldValuePair("pno", "10601"));
+  otail5.addField(FieldValuePair("qty", "4"));
+  odetails.addTuple(otail5);
+
+  Tuple otail6;
+  otail6.addField(FieldValuePair("ono", "1022"));
+  otail6.addField(FieldValuePair("pno", "10601"));
+  otail6.addField(FieldValuePair("qty", "1"));
+  odetails.addTuple(otail6);
+
+  Tuple otail7;
+  otail7.addField(FieldValuePair("ono", "1022"));
+  otail7.addField(FieldValuePair("pno", "10701"));
+  otail7.addField(FieldValuePair("qty", "1"));
+  odetails.addTuple(otail7);
+
+  Tuple otail8;
+  otail8.addField(FieldValuePair("ono", "1023"));
+  otail8.addField(FieldValuePair("pno", "10800"));
+  otail8.addField(FieldValuePair("qty", "1"));
+  odetails.addTuple(otail8);
+
+  Tuple otail9;
+  otail9.addField(FieldValuePair("ono", "1023"));
+  otail9.addField(FieldValuePair("pno", "10900"));
+  otail9.addField(FieldValuePair("qty", "1"));
+  odetails.addTuple(otail9);
+
 }
 
 

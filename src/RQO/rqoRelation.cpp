@@ -21,29 +21,21 @@
 
 
 
-#pragma once
-
-#include "layers.h"
-#include "rqoBasis.h"
-#include "rqoAttribute.h"
-#include "rqoTuple.h"
+#include "rqoRelation.h"
 
 #if DORQO
 
-
-
-class Relation
+void Relation::printTable()
 {
-public:
-    vector<Attribute> attributes;
-    vector<Tuple> tuples;
-    string m_name;
-
-    Relation(string name) {m_name = name;}
-    virtual void addAttribute(Attribute attri) {attributes.push_back(attri);}
-    virtual void addTuple(Tuple tuple) {tuples.push_back(tuple);}
-    virtual void printTable();
-};
-
+    cout << m_name << " contains the following attributes:" << endl;
+    for(auto attri : attributes)
+    {
+        cout << attri.m_name << " of type " << attri.m_type << endl;
+    }
+    for(auto tuple : tuples)
+    {
+        tuple.printTuple();
+    }
+}
 
 #endif
