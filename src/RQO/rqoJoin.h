@@ -19,14 +19,13 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #pragma once
 
 #include "layers.h"
 #include "sortable.h"
 #include "rqoBasis.h"
 #include "transform.h"
+
 
 #if DORQO
 
@@ -51,7 +50,7 @@ class Join : public Sortable
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return 0;}
+  virtual Cost GetCost() {return 1;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "join";}
   virtual void ClearDataTypeCache();
@@ -68,6 +67,30 @@ class SwapNodes : public SingleTrans
   ClassType m_type;
   SwapNodes(unsigned int inNum, ClassType type);
   virtual string GetType() const {return "Switch two node's positions " + std::to_string(m_inNum) + " on " + m_type;}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class JoinToHash : public SingleTrans
+{
+public:
+  virtual string GetType() const {return "Turn Join to HashJoin";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class JoinToNested : public SingleTrans
+{
+public:
+  virtual string GetType() const {return "Turn Join to NestedJoin";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class JoinToMerge : public SingleTrans
+{
+public:
+  virtual string GetType() const {return "Turn Join to MergeJoin";}
   virtual bool CanApply(const Node *node) const;
   virtual void Apply(Node *node) const;
 };

@@ -21,6 +21,9 @@
 
 
 #include "rqoJoin.h"
+#include "hJoin.h"
+#include "nJoin.h"
+#include "mJoin.h"
 
 
 #if DORQO
@@ -123,6 +126,7 @@ void Join::Prop()
       throw;
     }
   }
+
   
 }
 
@@ -397,6 +401,79 @@ void SwapNodes::Apply(Node *node) const
   
   if (inputJoin->m_children.empty()) {
     inputJoin->m_poss->DeleteChildAndCleanUp(inputJoin);
+  }
+}
+
+
+bool JoinToHash::CanApply(const Node *node) const
+{
+  if(node->GetNodeClass() != "join")
+  {
+    cout << "Throwing in JoinToHash CanApply since : " << node->GetClass() << endl;
+    throw;
+  }
+
+  return true;
+}
+
+void JoinToHash::Apply(Node *node) const
+{
+  Join *orig = (Join*) node;
+  HJoin *newJoin = new HJoin(orig->m_sortBy, orig->m_in0Fields, orig->m_in1Fields);
+
+  orig->m_poss->AddNode(newJoin);
+  orig->RedirectChildren(newJoin);
+  newJoin->AddInput(orig->Input(0), orig->InputConnNum(0));
+  newJoin->AddInput(orig->Input(1), orig->InputConnNum(1));
+  if(orig->m_children.empty())
+  {
+    orig->m_poss->DeleteChildAndCleanUp(orig);
+  }
+}
+
+bool JoinToNested::CanApply(const Node *node) const
+{
+  if(node->GetNodeClass() != "join")
+    throw;
+
+  return true;
+}
+
+void JoinToNested::Apply(Node *node) const
+{
+  Join *orig = (Join*) node;
+  NJoin *newJoin = new NJoin(orig->m_sortBy, orig->m_in0Fields, orig->m_in1Fields);
+
+  orig->m_poss->AddNode(newJoin);
+  orig->RedirectChildren(newJoin);
+  newJoin->AddInput(orig->Input(0), orig->InputConnNum(0));
+  newJoin->AddInput(orig->Input(1), orig->InputConnNum(1));
+  if(orig->m_children.empty())
+  {
+    orig->m_poss->DeleteChildAndCleanUp(orig);
+  }
+}
+
+bool JoinToMerge::CanApply(const Node *node) const
+{
+  if(node->GetNodeClass() != "join")
+    throw;
+
+  return true;
+}
+
+void JoinToMerge::Apply(Node *node) const
+{
+  Join *orig = (Join*) node;
+  MJoin *newJoin = new MJoin(orig->m_sortBy, orig->m_in0Fields, orig->m_in1Fields);
+
+  orig->m_poss->AddNode(newJoin);
+  orig->RedirectChildren(newJoin);
+  newJoin->AddInput(orig->Input(0), orig->InputConnNum(0));
+  newJoin->AddInput(orig->Input(1), orig->InputConnNum(1));
+  if(orig->m_children.empty())
+  {
+    orig->m_poss->DeleteChildAndCleanUp(orig);
   }
 }
 

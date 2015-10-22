@@ -21,8 +21,6 @@
 
 
 #include "rqoSort.h"
-#include "rqoJoin.h"
-#include "hJoin.h"
 
 
 #if DORQO

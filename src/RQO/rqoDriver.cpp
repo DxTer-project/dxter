@@ -80,6 +80,9 @@ void AddTrans()
  // Universe::AddTrans(HJoin::GetClass(), new SwapNodes(0,HJoin::GetClass()), RQOPHASE);
   //Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
   //Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
 }
 
 void AddSimplifiers()
@@ -200,7 +203,7 @@ cout << "Left with " << uni.TotalCount() << " algorithms\n";
   orders.printTable();
   odetails.printTable();*/
   //Example1Run();
-  parseCode();
+  //parseCode();
   return 0;
 }
 
@@ -254,7 +257,7 @@ RealPSet* Example1()
   vector<string> joinFields1;
   joinFields1.push_back("u");
 
-  HJoin *join = new HJoin("u", joinFields0, joinFields1);
+  Join *join = new Join("u", joinFields0, joinFields1);
 
   join->AddInput(inA, 0);
   join->AddInput(inB, 0);
@@ -266,7 +269,7 @@ RealPSet* Example1()
   vector<string> joinFields3;
   joinFields3.push_back("c");
 
-  HJoin *join2 = new HJoin("b", joinFields2, joinFields3);
+  Join *join2 = new Join("b", joinFields2, joinFields3);
 
   join2->AddInput(join, 0);
   join2->AddInput(inC, 0);
