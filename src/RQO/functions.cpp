@@ -25,6 +25,21 @@
 
 #if DORQO
 
+vector<Tuple> scanFunc(Relation table, OrNode query)
+{
+	vector<Tuple> output;
+
+	for(auto tuple : table.getTuples())
+	{
+		if(query.evaluate(tuple))
+		{
+			output.push_back(tuple);
+		}
+	}
+
+	return output;
+}
+
 bool satisfiesJoin(Tuple tuple1, Tuple tuple2, int key1, int key2)
 {
     if(tuple1.getValueAt(key1) == tuple2.getValueAt(key2))
@@ -98,6 +113,30 @@ vector<Tuple> hashJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int k
 vector<Tuple> mergeJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2)
 {
     vector<Tuple> output;
+    sortFunc(list1, key1);
+    sortFunc(list2, key2);
+
+    vector<Tuple>::iterator iter1 = list1.begin();
+    vector<Tuple>::iterator iter2 = list2.begin();
+
+    while(iter1 != list1.end() && iter2 != list2.end())
+    {
+        if(satisfiesJoin((*iter1), (*iter2), key1, key2))
+        {
+            Tuple toAdd = joinTuples((*iter1), (*iter2), key2);
+            output.push_back(toAdd);
+            ++iter1;
+            ++iter2;
+        }
+        else if((*iter1).compareTo((*iter2), key1, key2))
+        {
+            ++iter1;
+        }
+        else
+        {
+            ++iter2;
+        }
+    }
 
     return output;
 }

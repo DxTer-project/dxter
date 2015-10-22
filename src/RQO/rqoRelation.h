@@ -43,6 +43,7 @@ public:
     virtual void addAttribute(Attribute attri) {attributes.push_back(attri);}
     virtual void addTuple(Tuple tuple) {tuples.push_back(tuple);}
     virtual void printTable();
+    virtual vector<Tuple> getTuples() {return tuples;}
 };
 
 

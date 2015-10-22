@@ -25,12 +25,17 @@
 #include "rqoTuple.h"
 #include "rqoFieldValuePair.h"
 #include "rqoBasis.h"
+#include "queryNodes.h"
+#include "rqoRelation.h"
 #include <unordered_map>
 #include <iostream>
 #include <algorithm>
 
+using namespace queryNodes;
+
 #if DORQO
 
+vector<Tuple> scanFunc(Relation table, OrNode query);
 bool satisfiesJoin(Tuple tuple1, Tuple tuple2, int key1, int key2);
 Tuple joinTuples(Tuple one, Tuple two, int key);
 vector<Tuple> nestedJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2);

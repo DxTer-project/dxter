@@ -1,0 +1,8 @@
+Pseudo Code:
+While(nextLine)
+{
+	switch(before parenthesis)
+		case nodetype
+			do that operation
+			outputs go into map
+}

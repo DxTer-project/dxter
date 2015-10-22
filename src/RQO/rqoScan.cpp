@@ -63,7 +63,7 @@ void Scan::Prop()
 void Scan::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << m_varName << " = Scan( " << m_fileName << ");\n";
+  *out << m_varName << " = Scan( " << m_fileName << ", " << m_query << ");\n";
 }
 
 Name Scan::GetName(ConnNum num) const

@@ -29,6 +29,8 @@
 #include "transform.h"
 #include "logging.h"
 #include <time.h>
+#include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <chrono>
 #include "rqoHelperNodes.h"
@@ -41,6 +43,7 @@
 #include "functions.h"
 #include "rqoRelation.h"
 #include "rqoAttribute.h"
+#include "rqoScan.h"
 
 
 #if DORQO
@@ -60,6 +63,7 @@ RealPSet* Example4();
 RealPSet* Example5();
 void Example1Run();
 void buildDatabases();
+void parseCode();
 
 typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
 
@@ -182,21 +186,43 @@ cout << "Left with " << uni.TotalCount() << " algorithms\n";
 #if 0
   uni.PrintAll(algNum);
 #else
-  uni.PrintBest();
+  uni.PrintAll(algNum);
 #endif
 
 
   LOG_END();
 
   buildDatabases();
-  zipcodes.printTable();
+ /* zipcodes.printTable();
   employees.printTable();
   parts.printTable();
   customers.printTable();
   orders.printTable();
-  odetails.printTable();
+  odetails.printTable();*/
   //Example1Run();
+  parseCode();
   return 0;
+}
+
+
+void parseCode()
+{
+  string line = "";
+  ifstream infile;
+  infile.open ("../../codeOutput.txt");
+  if(!infile)
+  {
+    cout << "Parser Test" << endl;
+  }
+  //while(!infile.eof())
+  //{
+    getline(infile, line, '#');
+    cout << line << endl;
+    getline(infile, line, '#');
+    cout << line << endl;
+ // }
+  infile.close();
+
 }
 
 //void runGraphCode()
@@ -257,7 +283,7 @@ RealPSet* Example1()
   Poss *poss = new Poss(1, proj);
   RealPSet *pset = new RealPSet(poss);
 
-  Example1Run();
+  //Example1Run();
   return pset;
 }
 
