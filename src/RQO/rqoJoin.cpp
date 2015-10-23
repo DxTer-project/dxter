@@ -48,7 +48,7 @@ Join::Join(string sortBy,
 
 NodeType Join::GetType() const
 {
-  string ret = m_sortBy;
+  string ret = GetClass() + " " + m_sortBy;
   if (m_in0Fields.size() != m_in1Fields.size())
     throw;
   vector<string>::const_iterator iter0 = m_in0Fields.begin();
@@ -89,7 +89,6 @@ void Join::BuildDataTypeCache()
 
 void Join::Prop()
 {
-  //Node::Prop();
   if (m_inputs.size() != 2)
     throw;
   if (m_in0Fields.size() != m_in1Fields.size())
@@ -126,7 +125,6 @@ void Join::Prop()
       throw;
     }
   }
-
   
 }
 

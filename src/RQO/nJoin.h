@@ -40,6 +40,7 @@ class NJoin : public Join
  public:
   NJoin();
   NJoin(string sortBy, vector<string> in0Fields, vector<string> in1Fields);
+  virtual NodeType GetType() const;
   static Node* BlankInst() { return  new NJoin; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);

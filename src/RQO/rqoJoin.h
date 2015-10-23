@@ -50,7 +50,7 @@ class Join : public Sortable
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return 1;}
+  virtual Cost GetCost() {return 0;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "join";}
   virtual void ClearDataTypeCache();

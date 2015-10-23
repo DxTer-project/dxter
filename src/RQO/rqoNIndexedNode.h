@@ -24,35 +24,37 @@
 #pragma once
 
 #include "layers.h"
-#include "rqoJoin.h"
+#include "rqoHelperNodes.h"
 #include "rqoBasis.h"
 
 #if DORQO
 
 
-
-class MJoin : public Join
+class NIndexedNode : public InputNode
 {
+
  protected:
   DataTypeInfo m_dataTypeInfo;
 
-
  public:
-  MJoin();
-  MJoin(string sortBy, vector<string> in0Fields, vector<string> in1Fields);
-  virtual NodeType GetType() const;
-  static Node* BlankInst() { return  new MJoin; }
+  set<int> m_indeces;
+
+  NIndexedNode();
+  NIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, set<int> indeces);
+  virtual NodeType GetType() const {return m_type;}
+  static Node* BlankInst() { return  new NIndexedNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual const DataTypeInfo& DataType(ConnNum num) const;
+  virtual void Prop();
   virtual void PrintCode(IndStream &out);
   virtual Cost GetCost() {return 0;}
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "mjoin";}
-  virtual void ClearDataTypeCache();
-  virtual void BuildDataTypeCache();
+  static ClassType GetClass() {return "nindexednode";}
+  virtual Name GetName(ConnNum num) const;
+  virtual void ClearDataTypeCache() {}
+  virtual void BuildDataTypeCache() {}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
-  virtual Join* CreateCopyOfJoin() const;
 };
 
 #endif

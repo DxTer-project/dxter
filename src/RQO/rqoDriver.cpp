@@ -80,9 +80,9 @@ void AddTrans()
  // Universe::AddTrans(HJoin::GetClass(), new SwapNodes(0,HJoin::GetClass()), RQOPHASE);
   //Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
   //Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
-  Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
-  Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
-  Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
+  //Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
+  //Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
+  //Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
 }
 
 void AddSimplifiers()
@@ -191,9 +191,10 @@ cout << "Left with " << uni.TotalCount() << " algorithms\n";
 #else
   uni.PrintAll(algNum);
 #endif
-
+  //cout << "right before log" << endl;
 
   LOG_END();
+  //cout << "after log" << endl;
 
   buildDatabases();
  /* zipcodes.printTable();

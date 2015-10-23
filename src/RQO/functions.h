@@ -36,6 +36,9 @@ using namespace queryNodes;
 #if DORQO
 
 vector<Tuple> scanFunc(Relation table, OrNode query);
+vector<Tuple> indexFunc(Relation table, OrNode query, int index);
+vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces);
+vector<Tuple> orderedindexFunc(Relation table, OrNode query, int index);
 bool satisfiesJoin(Tuple tuple1, Tuple tuple2, int key1, int key2);
 Tuple joinTuples(Tuple one, Tuple two, int key);
 vector<Tuple> nestedJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2);

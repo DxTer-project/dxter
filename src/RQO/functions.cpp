@@ -31,13 +31,75 @@ vector<Tuple> scanFunc(Relation table, OrNode query)
 
 	for(auto tuple : table.getTuples())
 	{
-		if(query.evaluate(tuple))
+		if(query.evaluate(tuple, NULL))
 		{
 			output.push_back(tuple);
 		}
 	}
 
 	return output;
+}
+
+vector<Tuple> indexFunc(Relation table, OrNode query, int index)
+{
+    vector<Tuple> output;
+
+    for(auto tuple : table.getTuples())
+    {
+        if(query.evaluate(tuple, index))
+        {
+            output.push_back(tuple);
+        }
+    }
+
+    return output;
+}
+
+vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces)
+{
+    vector<Tuple> output;
+
+    set<int>::iterator iter = indeces.begin();
+
+    for(auto tuple : table.getTuples())
+    {
+        if(query.evaluate(tuple, (*iter)))
+        {
+            output.push_back(tuple);
+        }
+    }
+
+    ++iter;
+    for(; iter != indeces.end(); ++iter)
+    {
+        int i;
+        for(i = 0; i < output.size(); i++)
+        {
+            if(!query.evaluate(output.at(i), (*iter)))
+            {
+                output.erase(output.begin() + i);
+            }
+        }
+    }
+
+    return output;
+}
+
+vector<Tuple> orderedindexFunc(Relation table, OrNode query, int index)
+{
+    vector<Tuple> output;
+    vector<Tuple> values = table.getTuples();
+    values = sortFunc(values, index);
+
+    for(auto tuple : values)
+    {
+        if(query.evaluate(tuple, index))
+        {
+            output.push_back(tuple);
+        }
+    }
+
+    return output;
 }
 
 bool satisfiesJoin(Tuple tuple1, Tuple tuple2, int key1, int key2)
@@ -113,8 +175,8 @@ vector<Tuple> hashJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int k
 vector<Tuple> mergeJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2)
 {
     vector<Tuple> output;
-    sortFunc(list1, key1);
-    sortFunc(list2, key2);
+    list1 = sortFunc(list1, key1);
+    list2 = sortFunc(list2, key2);
 
     vector<Tuple>::iterator iter1 = list1.begin();
     vector<Tuple>::iterator iter2 = list2.begin();

@@ -50,7 +50,7 @@ namespace queryNodes
         //This Deletes a specified child node in children
         virtual void deleteAnd(AndNode* child);
         //Evaluate surveys the query and makes sure it is possible. All of the evaluates
-        virtual bool evaluate(Tuple tuple);
+        virtual bool evaluate(Tuple tuple, int index);
         //Return the id of the node
         virtual string getId() {return m_id;}
     };
@@ -66,7 +66,7 @@ namespace queryNodes
         virtual void addClause(ClauseNode* child) {children.push_back(*child);}
         //Deletes a specified node from children.
         virtual void deleteClause(ClauseNode* child);
-        virtual bool evaluate(Tuple tuple);
+        virtual bool evaluate(Tuple tuple, int index);
     };
 
     class ClauseNode : public AndNode
@@ -85,7 +85,7 @@ namespace queryNodes
         string m_value;
 
         FieldValue(string relation, string value);
-        virtual bool evaluate(Tuple tuple);
+        virtual bool evaluate(Tuple tuple, int index);
     };
 
     class FieldField : public ClauseNode
@@ -94,7 +94,7 @@ namespace queryNodes
         FieldValuePair m_field;
 
         FieldField(string relation, FieldValuePair field);
-        virtual bool evaluate(Tuple tuple);
+        virtual bool evaluate(Tuple tuple, int index);
     };
 
     class FieldSet : public ClauseNode
@@ -103,7 +103,7 @@ namespace queryNodes
         set<string> *m_set;
 
         FieldSet(string relation, set<string> *set);
-        virtual bool evaluate(Tuple tuple);
+        virtual bool evaluate(Tuple tuple, int index);
     };
 }
 

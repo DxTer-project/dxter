@@ -41,6 +41,19 @@ MJoin::MJoin(string sortBy,
     ++num;
 }
 
+NodeType MJoin::GetType() const
+{
+  string ret = GetClass() + " " + m_sortBy;
+  if (m_in0Fields.size() != m_in1Fields.size())
+    throw;
+  vector<string>::const_iterator iter0 = m_in0Fields.begin();
+  vector<string>::const_iterator iter1 = m_in1Fields.begin();  
+  for(; iter0 != m_in0Fields.end(); ++iter0, ++iter1) {
+    ret += "," + *iter0 + *iter1;
+  }
+  return ret;
+}
+
 void MJoin::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
   const MJoin *mjoin = (MJoin*)orig;
