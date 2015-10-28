@@ -33,11 +33,12 @@ NIndexedNode::NIndexedNode()
 }
 
 
-NIndexedNode::NIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, set<int> indeces)
+NIndexedNode::NIndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, set<int> indeces)
 :
-  InputNode(name, sortBy, fields, fileName, query),
   m_indeces(indeces)
 {
+  InputNode(name, sortBy, fields, fileName->getName(), query);
+  m_relation = fileName;
 }
 
 void NIndexedNode::Duplicate(const Node *orig, bool shallow, bool possMerging)

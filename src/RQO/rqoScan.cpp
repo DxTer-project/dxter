@@ -33,10 +33,10 @@ Scan::Scan()
 }
 
 
-Scan::Scan(string name, string sortBy, set<string> fields, string fileName, string query)
-:
-  InputNode(name, sortBy, fields, fileName, query)
+Scan::Scan(string name, string sortBy, set<string> fields, Relation *fileName, string query)
 {
+  InputNode(name, sortBy, fields, fileName->getName(), query);
+  m_relation = fileName;
 }
 
 void Scan::Duplicate(const Node *orig, bool shallow, bool possMerging)

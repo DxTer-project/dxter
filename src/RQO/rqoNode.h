@@ -39,6 +39,7 @@ class RQONode : public Node
       RQONode();
       virtual ~RQONode();
       virtual Name GetName(ConnNum num) const;
+      virtual int Outputs() {return 0;}
 };
 
 

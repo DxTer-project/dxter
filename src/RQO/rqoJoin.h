@@ -50,7 +50,7 @@ class Join : public Sortable
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return 0;}
+  virtual Cost GetCost() {return Input(0)->Outputs() * Input(1)->Outputs();}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "join";}
   virtual void ClearDataTypeCache();
@@ -58,6 +58,7 @@ class Join : public Sortable
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual bool IsJoin() const {return true;}
   virtual Join* CreateCopyOfJoin() const;
+  virtual int Outputs() {return (Input(0)->Outputs() > Input(1)->Outputs()) ? Input(0)-> Outputs() : Input(1)->Outputs();}
 };
 
 class SwapNodes : public SingleTrans

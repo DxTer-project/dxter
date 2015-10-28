@@ -27,6 +27,7 @@
 #include "rqoBasis.h"
 #include "rqoAttribute.h"
 #include "rqoTuple.h"
+#include <unordered_map>
 
 #if DORQO
 
@@ -44,6 +45,9 @@ public:
     virtual void addTuple(Tuple tuple) {tuples.push_back(tuple);}
     virtual void printTable();
     virtual vector<Tuple> getTuples() {return tuples;}
+    virtual string getName() {return m_name;}
+    virtual int getSize() {return tuples.size();}
+    virtual double getSelectivity(int key);
 };
 
 

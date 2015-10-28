@@ -80,6 +80,7 @@ class Tunnel : public Node
   Tunnel* GetRealTunnel();
   const Tunnel* GetRealTunnel() const;
   virtual void MigrateFromOldTun(Tunnel *tun) {}
+  virtual int Outputs() {return 0;}
 };
 
 typedef vector<Tunnel*> TunVec;

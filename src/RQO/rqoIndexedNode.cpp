@@ -33,11 +33,12 @@ IndexedNode::IndexedNode()
 }
 
 
-IndexedNode::IndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, int index)
+IndexedNode::IndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, int index)
 :
-  InputNode(name, sortBy, fields, fileName, query),
   m_index(index)
 {
+  InputNode(name, sortBy, fields, fileName->getName(), query);
+  m_relation = fileName;
 }
 
 void IndexedNode::Duplicate(const Node *orig, bool shallow, bool possMerging)

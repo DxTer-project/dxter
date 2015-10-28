@@ -26,6 +26,7 @@
 #include "layers.h"
 #include "rqoHelperNodes.h"
 #include "rqoBasis.h"
+#include "rqoRelation.h"
 
 #if DORQO
 
@@ -38,9 +39,10 @@ class NIndexedNode : public InputNode
 
  public:
   set<int> m_indeces;
+  Relation *m_relation;
 
   NIndexedNode();
-  NIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, set<int> indeces);
+  NIndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, set<int> indeces);
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new NIndexedNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -48,13 +50,14 @@ class NIndexedNode : public InputNode
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return 0;}
+  virtual Cost GetCost() {return m_relation->getSize() * m_indeces.size();}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "nindexednode";}
   virtual Name GetName(ConnNum num) const;
   virtual void ClearDataTypeCache() {}
   virtual void BuildDataTypeCache() {}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+  virtual int Outputs() {return m_relation->getSize();}
 };
 
 #endif

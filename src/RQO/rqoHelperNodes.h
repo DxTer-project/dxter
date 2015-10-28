@@ -60,6 +60,7 @@ class InputNode : public Node
   virtual void ClearDataTypeCache() {}
   virtual void BuildDataTypeCache() {}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+  virtual int Outputs() {return 0;}
 };
 
 class OutputNode : public Node
@@ -78,6 +79,7 @@ class OutputNode : public Node
   virtual Cost GetCost() {return 0;}
   virtual void ClearDataTypeCache() {}
   virtual void BuildDataTypeCache() {}
+  virtual int Outputs() {throw;}
 };
 
 class TempVarNode : public Node
@@ -106,6 +108,7 @@ class TempVarNode : public Node
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual bool IsDataDependencyOfInput() const {return false;}
   virtual Cost GetCost() {return 0;}
+  virtual int Outputs() {return 0;}
 };
 
 #endif //DORQO

@@ -515,12 +515,14 @@ void Universe::PrintAll(int algNum, GraphNum optGraph)
 #elif DORQO
     IndStream optOut(&cout,RQOSTREAM);
 #endif
+    //cout << "Print Function" << endl;
     Print(optOut, optGraph, false);
   }
   else {
     cout << "optGraph = " << optGraph << endl;
   }
 
+//cout << "going into printcode" << endl;
 #ifdef PRINTCODE
   cout << "Printing codeOutput.txt\n";
   cout.flush();
@@ -556,6 +558,8 @@ void Universe::PrintAll(int algNum, GraphNum optGraph)
     cout << "\tTook " << difftime(end,start) << " seconds\n";
   }
 #endif
+
+ // cout << "End of PrintAll" << endl;
 }
 
 void Universe::PrintBest()
@@ -587,8 +591,12 @@ void Universe::PrintBest()
 
 void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
 {
+  /*cout << "Inside Print" << endl;
   if (m_pset->m_posses.size() != 1)
+  {
+    cout << "failing m_pset->m_posses.size() != 1" << endl;
     throw;
+  }*/
   PossMMapIter iter = m_pset->m_posses.begin();
   for(; iter != m_pset->m_posses.end(); ++iter) {
     Poss *poss = (*iter).second;

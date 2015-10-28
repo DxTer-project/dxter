@@ -132,6 +132,8 @@ class Node
   virtual void ClearDataTypeCache() {}
   //Build the size cache
   virtual void BuildDataTypeCache() {}
+  //Size of the output
+  virtual int Outputs() = 0;
 
   virtual const DataTypeInfo& DataType(ConnNum num) const = 0;
 

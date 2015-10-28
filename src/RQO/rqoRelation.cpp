@@ -38,4 +38,22 @@ void Relation::printTable()
     }
 }
 
+double Relation::getSelectivity(int key)
+{
+    unordered_map<string, Tuple> hash;
+    unordered_map<string, Tuple>::const_iterator iter = hash.begin();
+
+    for(auto tup : tuples)
+    {
+        iter = hash.find(tup.getValueAt(key));
+        if(iter == hash.end())
+        {
+            hash.insert(pair<string, Tuple>(
+            tup.getValueAt(key), tup));
+        }
+    }
+
+    return 1/hash.size();
+}
+
 #endif

@@ -50,12 +50,13 @@ class Projection : public Sortable
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return 0;}
+  virtual Cost GetCost() {return Input(0)->Outputs();}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "projection";}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+  virtual int Outputs() {return Input(0)->Outputs();}
 };
 
 //Two projections in a row is redundant

@@ -80,7 +80,7 @@ void AddTrans()
  // Universe::AddTrans(HJoin::GetClass(), new SwapNodes(0,HJoin::GetClass()), RQOPHASE);
   //Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
   //Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
-  //Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
   //Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
   //Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
 }
@@ -114,6 +114,7 @@ int main(int argc, const char* argv[])
   //  GraphNum whichGraph = 0;
   int algNum;
   string fileName;
+  buildDatabases();
 
   if(argc < 2) {
     Usage();
@@ -196,7 +197,7 @@ cout << "Left with " << uni.TotalCount() << " algorithms\n";
   LOG_END();
   //cout << "after log" << endl;
 
-  buildDatabases();
+  
  /* zipcodes.printTable();
   employees.printTable();
   parts.printTable();

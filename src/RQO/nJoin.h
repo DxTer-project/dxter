@@ -46,13 +46,15 @@ class NJoin : public Join
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return 0;}
+  virtual Cost GetCost() {return Input(0)->Outputs() * Input(1)->Outputs();}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "njoin";}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual Join* CreateCopyOfJoin() const;
+  virtual int Outputs() {return (Input(0)->Outputs() > Input(1)->Outputs()) ? Input(0)-> Outputs() : Input(1)->Outputs();}
+
 };
 
 #endif

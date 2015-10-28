@@ -38,6 +38,7 @@ class Sortable : public RQONode
       Sortable() {};
       Sortable(string sortBy);
       virtual bool IsSortable() const {return true;}
+      virtual int Outputs() {return 0;}
 };
 
 #endif

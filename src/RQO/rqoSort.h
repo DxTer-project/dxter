@@ -27,6 +27,7 @@
 #include "sortable.h"
 #include "rqoBasis.h"
 #include "transform.h"
+#include <math.h>
 
 #if DORQO
 
@@ -47,12 +48,13 @@ class Sort : public Sortable
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return 0;}
+  virtual Cost GetCost() {return Input(0)->Outputs() * log(Input(0)->Outputs());}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "sort";}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+  virtual int Outputs() {return Input(0)->Outputs();}
 };
 
 //This transformation removes a sort node that is before a sort node.
