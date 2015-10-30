@@ -25,13 +25,13 @@
 
 #if DORQO
 
-vector<Tuple> scanFunc(Relation table, OrNode query)
+vector<Tuple> scanFunc(Relation table, FieldValue query)
 {
 	vector<Tuple> output;
 
 	for(auto tuple : table.getTuples())
 	{
-		if(query.evaluate(tuple, NULL))
+		if(query.evaluate(tuple, 0))
 		{
 			output.push_back(tuple);
 		}

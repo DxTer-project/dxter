@@ -81,7 +81,7 @@ class Universe
   static void AddToMaps(Transformation *trans);
   void Cull();
   void Prop();
-  void PrintAll(int algNum, GraphNum optGraph = 0);
+  int PrintAll(int algNum, GraphNum optGraph = 0);
   void PrintBest();
   void PrintCosts(const ImplementationRuntimeMap &impTimes);
   GraphNum TotalCount() const;

@@ -77,7 +77,7 @@ void InputNode::Prop()
 void InputNode::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << m_varName << " = Scan( " << m_fileName << ", " << m_query << ");\n";
+  *out << m_varName << " = scanFunc(" << m_fileName << "," << m_query << ");\n";
 }
 
 Name InputNode::GetName(ConnNum num) const

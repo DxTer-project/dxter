@@ -40,6 +40,7 @@ bool OrNode::evaluate(Tuple tuple, int index)
     vector<AndNode>::iterator iter = children.begin();
     for(; iter != children.end(); iter++)
     {
+
         ret = ret || (*iter).evaluate(tuple, index);
     }
     return ret;
@@ -138,29 +139,30 @@ bool FieldValue::evaluate(Tuple tuple, int index)
     if(index != NULL)
     {
         string temp = fields.at(index).getValue();
+        cout << temp << endl;
         if(m_relation == "=")
         {
-            ret = (m_value == temp) ? true : false;
+            ret = (temp == m_value) ? true : false;
         }
         else if(m_relation == "!=")
         {
-            ret = (m_value != temp) ? true : false;
+            ret = (temp != m_value) ? true : false;
         }
         else if(m_relation == ">")
         {
-            ret = (m_value > temp) ? true : false;
+            ret = (temp > m_value) ? true : false;
         }
         else if(m_relation == ">=")
         {
-            ret = (m_value >= temp) ? true : false;
+            ret = (temp >= m_value) ? true : false;
         }
         else if(m_relation == "<")
         {
-            ret = (m_value < temp) ? true : false;
+            ret = (temp < m_value) ? true : false;
         }
         else if(m_relation == "<=")
         {
-            ret = (m_value <= temp) ? true : false;
+            ret = (temp <= m_value) ? true : false;
         }
         else
         {
@@ -174,33 +176,33 @@ bool FieldValue::evaluate(Tuple tuple, int index)
             string temp = (*iter).getValue();
             if(m_relation == "=")
             {
-                ret = (m_value == temp) ? true : false;
+                ret = (temp == m_value) ? true : false;
             }
             else if(m_relation == "!=")
             {
-                ret = (m_value != temp) ? true : false;
+                ret = (temp != m_value) ? true : false;
             }
             else if(m_relation == ">")
             {
-                ret = (m_value > temp) ? true : false;
+                ret = (temp > m_value) ? true : false;
             }
             else if(m_relation == ">=")
             {
-                ret = (m_value >= temp) ? true : false;
+                ret = (temp >= m_value) ? true : false;
             }
             else if(m_relation == "<")
             {
-                ret = (m_value < temp) ? true : false;
+                ret = (temp < m_value) ? true : false;
             }
             else if(m_relation == "<=")
             {
-                ret = (m_value <= temp) ? true : false;
+                ret = (temp <= m_value) ? true : false;
             }
             else
             {
                 throw;
             }
-            if(ret == false)
+            if(ret == true)
             {
                 break;
             }
@@ -225,27 +227,27 @@ bool FieldField::evaluate(Tuple tuple, int index)
         string temp = fields.at(index).getValue();
         if(m_relation == "=")
         {
-            ret = (value == temp) ? true : false;
+            ret = (temp == value) ? true : false;
         }
         else if(m_relation == "!=")
         {
-            ret = (value != temp) ? true : false;
+            ret = (temp != value) ? true : false;
         }
         else if(m_relation == ">")
         {
-            ret = (value > temp) ? true : false;
+            ret = (temp > value) ? true : false;
         }
         else if(m_relation == ">=")
         {
-            ret = (value >= temp) ? true : false;
+            ret = (temp >= value) ? true : false;
         }
         else if(m_relation == "<")
         {
-            ret = (value < temp) ? true : false;
+            ret = (temp < value) ? true : false;
         }
         else if(m_relation == "<=")
         {
-            ret = (value <= temp) ? true : false;
+            ret = (temp <= value) ? true : false;
         }
         else
         {
@@ -259,33 +261,33 @@ bool FieldField::evaluate(Tuple tuple, int index)
             string temp = (*iter).getValue();
             if(m_relation == "=")
             {
-                ret = (value == temp) ? true : false;
+                ret = (temp == value) ? true : false;
             }
             else if(m_relation == "!=")
             {
-                ret = (value != temp) ? true : false;
+                ret = (temp != value) ? true : false;
             }
             else if(m_relation == ">")
             {
-                ret = (value > temp) ? true : false;
+                ret = (temp > value) ? true : false;
             }
             else if(m_relation == ">=")
             {
-                ret = (value >= temp) ? true : false;
+                ret = (temp >= value) ? true : false;
             }
             else if(m_relation == "<")
             {
-                ret = (value < temp) ? true : false;
+                ret = (temp < value) ? true : false;
             }
             else if(m_relation == "<=")
             {
-                ret = (value <= temp) ? true : false;
+                ret = (temp <= value) ? true : false;
             }
             else
             {
                 throw;
             }
-            if(ret == false)
+            if(ret == true)
             {
                 break;
             }

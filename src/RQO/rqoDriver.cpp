@@ -44,7 +44,8 @@
 #include "rqoRelation.h"
 #include "rqoAttribute.h"
 #include "rqoScan.h"
-
+#include <sstream>
+#include <unordered_map>
 
 #if DORQO
 
@@ -56,6 +57,8 @@ Relation customers("customers");
 Relation orders("orders");
 Relation odetails("odetails");
 
+unordered_map<string, vector<Tuple>> tuples;
+
 RealPSet* Example1();
 RealPSet* Example2();
 RealPSet* Example3();
@@ -63,7 +66,10 @@ RealPSet* Example4();
 RealPSet* Example5();
 void Example1Run();
 void buildDatabases();
-void parseCode();
+void parseCode(int bestAlg);
+Relation* getRelation(string name);
+FieldValue createQuery(string query);
+int getKey(vector<Tuple> list, string fieldName);
 
 typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
 
@@ -81,8 +87,8 @@ void AddTrans()
   //Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
   //Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
   Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
-  //Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
-  //Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
 }
 
 void AddSimplifiers()
@@ -187,15 +193,16 @@ int main(int argc, const char* argv[])
 cout << "Left with " << uni.TotalCount() << " algorithms\n";
   cout.flush();
   
-#if 0
-  uni.PrintAll(algNum);
-#else
-  uni.PrintAll(algNum);
-#endif
-  //cout << "right before log" << endl;
+int best = 0;
 
+#if 1
+  best = uni.PrintAll(algNum);
+#else
+  uni.PrintBest();
+#endif
+  //cout << algNum << endl;
+  //cout << best << endl;
   LOG_END();
-  //cout << "after log" << endl;
 
   
  /* zipcodes.printTable();
@@ -205,29 +212,203 @@ cout << "Left with " << uni.TotalCount() << " algorithms\n";
   orders.printTable();
   odetails.printTable();*/
   //Example1Run();
-  //parseCode();
+  parseCode(best);
   return 0;
 }
 
 
-void parseCode()
+void parseCode(int bestAlg)
 {
-  string line = "";
+  unordered_map<string, vector<Tuple>>::iterator iter;
+  string line;
   ifstream infile;
-  infile.open ("../../codeOutput.txt");
+  bool uniqueFound = false;
+  infile.open ("codeOutput.txt");
   if(!infile)
   {
-    cout << "Parser Test" << endl;
+    cout << "Failed to find code file." << endl;
+    infile.close();
+    return;
   }
-  //while(!infile.eof())
-  //{
-    getline(infile, line, '#');
-    cout << line << endl;
-    getline(infile, line, '#');
-    cout << line << endl;
- // }
-  infile.close();
+  stringstream test;
+  test << "\tUnique Num: " << bestAlg;
 
+//get to algorithm we need
+  while(!uniqueFound)
+  {
+    getline(infile, line);
+    
+    if(line == test.str())
+    {
+      break;
+    }
+    else if(infile.eof())
+    {
+      break;
+    }
+  }
+  while(line != "//------------------------------------//")
+  {
+    getline(infile, line);
+  }
+  getline(infile, line);
+  string last;
+  while(line != "//------------------------------------//")
+  {
+    getline(infile, line);
+    //begin the parsing
+    if(line == "//------------------------------------//")
+    {
+      //done
+      break;
+    }
+    else if(line != "")
+    {
+      cout << line << endl;
+      int i = 0;
+      int j = 0;
+      //get name of variable created
+      i = line.find(" ");
+      string returnName = line.substr(j, i);
+      last = returnName;
+      //cout << returnName << endl;
+      i += 3;
+      j = i;
+      //get name of function we're using
+      i = line.find("(");
+      string funcName = line.substr(j, i - j);
+      //cout << funcName << endl;
+      j = i + 1;
+      //if scan
+      if(funcName == "scanFunc")
+      {
+        i = line.find(",");
+        string relationName = line.substr(j, i - j);
+        j = i + 1;
+        i = line.find(")");
+        string query = line.substr(j, i - j);
+        Relation *tempRel = getRelation(relationName);
+        FieldValue tempOr = createQuery(query);
+        vector<Tuple> tempTup = scanFunc((*tempRel), tempOr);
+        //save output
+        tuples.insert(pair<string, vector<Tuple>>(
+            returnName, tempTup));
+      }
+      else if(funcName == "nestedJoin")
+      {
+        i = line.find(",") + 1;
+        j = i;
+        i = line.find(",", j);
+        string set1 = line.substr(j, i - j);
+        j = i + 1;
+        i = line.find(",", j);
+        string set2 = line.substr(j, i - j);
+
+        iter = tuples.find(set1);
+        vector<Tuple> left = iter->second;
+        iter = tuples.find(set2);
+        vector<Tuple> right = iter->second;
+
+        j = line.find(".", i) + 1;
+        i = line.find(",", j);
+        string field1 = line.substr(j, i - j);
+        j = line.find(".", i) + 1;
+        i = line.find(")");
+        string field2 = line.substr(j, i - j);
+
+        int key1 = getKey(left, field1);
+        int key2 = getKey(right, field2);
+
+        vector<Tuple> tempTup = nestedJoin(left, right, key1, key2);
+
+        tuples.insert(pair<string, vector<Tuple>>(
+            returnName, tempTup));
+
+      }
+
+    }
+
+    
+    iter = tuples.find(last);
+    if(iter != tuples.end())
+    {
+      vector<Tuple> final = iter->second;
+      for(auto t : final)
+      {
+        t.printTuple();
+      }
+    }
+    
+  }
+    
+  infile.close();
+}
+
+int getKey(vector<Tuple> list, string fieldName)
+{
+  vector<FieldValuePair> temp = list.at(1).fields;
+
+  int i = 0;
+  for(auto fvPair : temp)
+  {
+    if(fvPair.getField() == fieldName)
+    {
+      break;
+    }
+    i++;
+  }
+  return i;
+}
+
+Relation* getRelation(string name)
+{
+  Relation *match;
+
+
+  if(name == zipcodes.getName())
+  {
+    match = &zipcodes;
+  }
+  else if(name == "employees")
+  {
+    match = &employees;
+  }
+  else if(name == "parts")
+  {
+    match = &parts;
+  }
+  else if(name == "customers")
+  {
+    match = &customers;
+  }
+  else if(name == "orders")
+  {
+    match = &orders;
+  }
+  else if(name == "odetails")
+  {
+    match = &odetails;
+  }
+  return match;
+}
+
+FieldValue createQuery(string query)
+{
+  string relation;
+  int i = 0;
+  int j = 0;
+  i = query.find(" ");
+  ++i;
+  j = query.find(" ", i);
+  relation = query.substr(i, j - i);
+  ++j;
+  string value = query.substr(j);
+  FieldValue ret (relation, value);
+  //OrNode blah;
+ // AndNode yep;
+  //yep.addClause(&ret);
+  //blah.addAnd(&yep);
+  return ret;
 }
 
 //void runGraphCode()
@@ -235,57 +416,32 @@ void parseCode()
 RealPSet* Example1()
 {
   set<string> AFields;
-  AFields.insert("x");
-  AFields.insert("y");
-  AFields.insert("z");
+  AFields.insert("ono");
+  AFields.insert("cno");
+  AFields.insert("eno");
 
   set<string> BFields;
-  BFields.insert("u");
-  BFields.insert("v");
-  BFields.insert("w");
+  BFields.insert("ono");
+  BFields.insert("pno");
+  BFields.insert("qty");
 
-  set<string> CFields;
-  CFields.insert("a");
-  CFields.insert("b");
-  CFields.insert("c");
 
-  InputNode *inA = new InputNode("A", "x", AFields, "fileName", "query");
-  InputNode *inB = new InputNode("B", "u", BFields, "fileName", "query");
-  InputNode *inC = new InputNode("C", "a", CFields, "fileName", "query");
+  InputNode *inA = new InputNode("orders", "ono", AFields, "orders", "ono > 1000");
+  InputNode *inB = new InputNode("odetails", "ono", BFields, "odetails", "ono > 1000");
 
   vector<string> joinFields0;
-  joinFields0.push_back("x");
+  joinFields0.push_back("ono");
 
   vector<string> joinFields1;
-  joinFields1.push_back("u");
+  joinFields1.push_back("ono");
 
-  Join *join = new Join("u", joinFields0, joinFields1);
+  Join *join = new Join("ono", joinFields0, joinFields1);
 
   join->AddInput(inA, 0);
   join->AddInput(inB, 0);
 
 
-  vector<string> joinFields2;
-  joinFields2.push_back("y");
-
-  vector<string> joinFields3;
-  joinFields3.push_back("c");
-
-  Join *join2 = new Join("b", joinFields2, joinFields3);
-
-  join2->AddInput(join, 0);
-  join2->AddInput(inC, 0);
-
-  set<string> projFields;
-  projFields.insert("x");
-  projFields.insert("y");
-  projFields.insert("b");
-
-  Projection *proj = new Projection("x", projFields);
-
-  proj->AddInput(join2, 0);
-
-  Poss *poss = new Poss(1, proj);
+  Poss *poss = new Poss(1, join);
   RealPSet *pset = new RealPSet(poss);
 
   //Example1Run();

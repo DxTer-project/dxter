@@ -471,10 +471,11 @@ void Universe::PrintCosts(const ImplementationRuntimeMap &impTimes)
     cout.flush();
 }
 
-void Universe::PrintAll(int algNum, GraphNum optGraph)
+int Universe::PrintAll(int algNum, GraphNum optGraph)
 {
   time_t start,end;
   ofstream out;
+  int best;
 
   //  cout << "Printing costOutput.txt\n";
   //  out.open("costOutput.txt");
@@ -522,6 +523,7 @@ void Universe::PrintAll(int algNum, GraphNum optGraph)
     cout << "optGraph = " << optGraph << endl;
   }
 
+  best = optGraph;
 //cout << "going into printcode" << endl;
 #ifdef PRINTCODE
   cout << "Printing codeOutput.txt\n";
@@ -560,11 +562,13 @@ void Universe::PrintAll(int algNum, GraphNum optGraph)
 #endif
 
  // cout << "End of PrintAll" << endl;
+  return best;
 }
 
 void Universe::PrintBest()
 {
   time_t start,end;
+  ofstream out;
 
   time(&start);
   Cost trash;
@@ -587,6 +591,29 @@ void Universe::PrintBest()
 #endif
 
     iter.PrintRoot(optOut, 0, true, m_pset);
+#ifdef PRINTCODE
+  cout << "Printing codeOutput.txt\n";
+  cout.flush();
+  out.open("codeOutput.txt");
+#if DOELEM
+    IndStream codeOut(&out,ELEMSTREAM);
+#elif DOSQM || DOSM
+    IndStream codeOut(&out,BLISSTREAM);
+#elif DOTENSORS
+    IndStream codeOut(&out,TENSORSTREAM);
+#elif DOLLDLA
+    IndStream codeOut(&out,LLDLASTREAM);
+#elif DORQO
+    IndStream codeOut(&out,RQOSTREAM);
+#endif
+    GraphNum optGraph = 0;
+    time(&start);
+    Print(codeOut, optGraph);
+    out.close();
+    time(&end);
+    cout << "\tTook " << difftime(end,start) << " seconds\n";
+#endif
+    
 }
 
 void Universe::Print(IndStream &out, GraphNum &whichGraph, bool currOnly)
