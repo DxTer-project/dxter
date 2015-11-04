@@ -39,10 +39,10 @@ class OrderedIndexedNode : public InputNode
   Relation *m_relation;
 
  public:
-  int m_index;
+  string m_index;
 
   OrderedIndexedNode();
-  OrderedIndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, int index);
+  OrderedIndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, string index);
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new OrderedIndexedNode; }
   virtual Node* GetNewInst() { return BlankInst(); }

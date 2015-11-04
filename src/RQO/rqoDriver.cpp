@@ -294,7 +294,64 @@ void parseCode(int bestAlg)
         tuples.insert(pair<string, vector<Tuple>>(
             returnName, tempTup));
       }
-      else if(funcName == "nestedJoin")
+      else if(funcName == "indexFunc" || funcName == "orderedindexFunc")
+      {
+        i = line.find(",");
+        string relationName = line.substr(j, i - j);
+        j = i + 1;
+        i = line.find(",", j);
+        string query = line.substr(j, i - j);
+        j = i + 1;
+        i = line.find(")", j);
+        string index = line.substr(j, i - j);
+        Relation *tempRel = getRelation(relationName);
+        FieldValue tempOr = createQuery(query);
+        int key = getKey(tempRel->getTuples(), index);
+        vector<Tuple> tempTup;
+        if(funcName == "indexFunc")
+        {
+          tempTup = indexFunc((*tempRel), tempOr, key);
+        }
+        else
+        {
+          tempTup = orderedindexFunc((*tempRel), tempOr, key);
+        }
+        //save output
+        tuples.insert(pair<string, vector<Tuple>>(
+            returnName, tempTup));
+      }
+      else if(funcName == "nindexFunc")
+      {
+        i = line.find(",");
+        string relationName = line.substr(j, i - j);
+        j = i + 1;
+        i = line.find(",", j);
+        string query = line.substr(j, i - j);
+        j = i + 2;
+
+        Relation *tempRel = getRelation(relationName);
+        FieldValue tempOr = createQuery(query);
+        set<int> indeces;
+        while(line.find("]") != j)
+        {
+          i = line.find(",", j);
+          string index = line.substr(j, i - j);
+          int key = getKey(tempRel->getTuples(), index);
+          indeces.insert(key);
+          j = i + 1;
+        }
+        
+        
+        vector<Tuple> tempTup;
+        tempTup = nindexFunc((*tempRel), tempOr, indeces);
+
+
+        tuples.insert(pair<string, vector<Tuple>>(
+            returnName, tempTup));
+      }
+      else if(funcName == "nestedJoin" 
+        || funcName == "mergeJoin" 
+        || funcName == "hashJoin")
       {
         i = line.find(",") + 1;
         j = i;
@@ -318,13 +375,27 @@ void parseCode(int bestAlg)
 
         int key1 = getKey(left, field1);
         int key2 = getKey(right, field2);
+        vector<Tuple> tempTup;
 
-        vector<Tuple> tempTup = nestedJoin(left, right, key1, key2);
+        if(funcName == "nestedJoin")
+        {
+          tempTup = nestedJoin(left, right, key1, key2);
+        }
+        else if(funcName == "mergeJoin")
+        {
+          tempTup = mergeJoin(left, right, key1, key2);
+        }
+        else
+        {
+          tempTup = hashJoin(left, right, key1, key2);
+        }
+        
 
         tuples.insert(pair<string, vector<Tuple>>(
             returnName, tempTup));
 
       }
+      //else if()
 
     }
 

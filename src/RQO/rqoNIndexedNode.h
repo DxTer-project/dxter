@@ -38,11 +38,11 @@ class NIndexedNode : public InputNode
   DataTypeInfo m_dataTypeInfo;
 
  public:
-  set<int> m_indeces;
+  set<string> m_indeces;
   Relation *m_relation;
 
   NIndexedNode();
-  NIndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, set<int> indeces);
+  NIndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, set<string> indeces);
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new NIndexedNode; }
   virtual Node* GetNewInst() { return BlankInst(); }

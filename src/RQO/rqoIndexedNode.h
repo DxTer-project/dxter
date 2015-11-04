@@ -39,11 +39,11 @@ class IndexedNode : public InputNode
   Relation *m_relation;
 
  public:
-  int m_index;
+  string m_index;
 
 
   IndexedNode();
-  IndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, int index);
+  IndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, string index);
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new IndexedNode; }
   virtual Node* GetNewInst() { return BlankInst(); }

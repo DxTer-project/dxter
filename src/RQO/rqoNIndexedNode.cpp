@@ -33,7 +33,7 @@ NIndexedNode::NIndexedNode()
 }
 
 
-NIndexedNode::NIndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, set<int> indeces)
+NIndexedNode::NIndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, set<string> indeces)
 :
   m_indeces(indeces)
 {
@@ -65,16 +65,16 @@ void NIndexedNode::Prop()
 void NIndexedNode::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << m_varName << " = nindexFunc( " << m_fileName << ", " << m_query << ", [";
+  *out << m_varName << " = nindexFunc(" << m_fileName << "," << m_query << ",[";
 
-  set<int>::iterator iter = m_indeces.begin();
+  set<string>::iterator iter = m_indeces.begin();
   for(; iter != m_indeces.end(); ++iter)
   {
-    *out << (*iter) << ", ";
+    *out << (*iter) << ",";
   }
 
 
-  *out << "] );\n";
+  *out << "]);\n";
 }
 
 Name NIndexedNode::GetName(ConnNum num) const

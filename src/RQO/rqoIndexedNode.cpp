@@ -33,7 +33,7 @@ IndexedNode::IndexedNode()
 }
 
 
-IndexedNode::IndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, int index)
+IndexedNode::IndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, string index)
 :
   m_index(index)
 {
@@ -65,7 +65,7 @@ void IndexedNode::Prop()
 void IndexedNode::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << m_varName << " = indexFunc( " << m_fileName << ", " << m_query << ", " << m_index << ");\n";
+  *out << m_varName << " = indexFunc(" << m_fileName << "," << m_query << "," << m_index << ");\n";
 }
 
 Name IndexedNode::GetName(ConnNum num) const
