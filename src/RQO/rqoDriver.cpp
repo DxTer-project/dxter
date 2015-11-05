@@ -335,6 +335,10 @@ void parseCode(int bestAlg)
         while(line.find("]") != j)
         {
           i = line.find(",", j);
+          if(i == string::npos)
+          {
+            i = line.find("]");
+          }
           string index = line.substr(j, i - j);
           int key = getKey(tempRel->getTuples(), index);
           indeces.insert(key);
@@ -395,7 +399,101 @@ void parseCode(int bestAlg)
             returnName, tempTup));
 
       }
-      //else if()
+      else if(funcName == "sortFunc")
+      {
+        i = line.find(",", j);
+        string set = line.substr(j, i - j);
+        j = i + 1;
+        i = line.find(")", j);
+        string sortBy = line.substr(j, i - j);
+
+        iter = tuples.find(set);
+        vector<Tuple> list = iter->second;
+        int key = getKey(list, sortBy);
+
+        vector<Tuple> tempTup = sortFunc(list, key);
+
+        tuples.insert(pair<string, vector<Tuple>>(
+            returnName, tempTup));
+      }
+      else if(funcName == "unionFunc")
+      {
+        i = line.find(",") + 1;
+        j = i;
+        i = line.find(",", j);
+        string set1 = line.substr(j, i - j);
+        j = i + 1;
+        i = line.find(",", j);
+        string set2 = line.substr(j, i - j);
+
+        iter = tuples.find(set1);
+        vector<Tuple> left = iter->second;
+        iter = tuples.find(set2);
+        vector<Tuple> right = iter->second;
+
+        j = line.find(".", i) + 1;
+        i = line.find(",", j);
+        string field1 = line.substr(j, i - j);
+        j = line.find(".", i) + 1;
+        i = line.find(")");
+        string field2 = line.substr(j, i - j);
+
+        int key1 = getKey(left, field1);
+        int key2 = getKey(right, field2);
+        vector<Tuple> tempTup = unionFunc(left, right, key1, key2);
+
+        tuples.insert(pair<string, vector<Tuple>>(
+            returnName, tempTup));
+      }
+      else if(funcName == "crossProduct")
+      {
+        i = line.find(",", j);
+        string set1 = line.substr(j, i - j);
+        j = i + 1;
+        i = line.find(",", j);
+        string set2 = line.substr(j, i - j);
+
+        iter = tuples.find(set1);
+        vector<Tuple> left = iter->second;
+        iter = tuples.find(set2);
+        vector<Tuple> right = iter->second;
+
+        vector<Tuple> tempTup = crossProduct(left, right);
+
+        tuples.insert(pair<string, vector<Tuple>>(
+            returnName, tempTup));
+      }
+      else if(funcName == "projection")
+      {
+        i = line.find(",") + 1;
+        j = i;
+        i = line.find(",", j);
+        string set = line.substr(j, i - j);
+
+        iter = tuples.find(set);
+        vector<Tuple> left = iter->second;
+
+        j = i + 1;
+        vector<string> values;
+        while(line.find(")") != j)
+        {
+          j = line.find(".", i) + 1;
+          i = line.find(",", j);
+          string tempVal = line.substr(j, i - j);
+          values.push_back(tempVal);
+          j = i + 1;
+        }
+
+        vector<Tuple> tempTup = projection(left, values);
+
+        tuples.insert(pair<string, vector<Tuple>>(
+            returnName, tempTup));
+      }
+      else
+      {
+        cout << "invalid function call" << endl;
+        throw;
+      }
 
     }
 

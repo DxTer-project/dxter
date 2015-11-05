@@ -119,13 +119,13 @@ void Union::PrintCode(IndStream &out)
   out.Indent();
   string in0 = GetInputNameStr(0);
   string in1 = GetInputNameStr(1);
-  *out << m_name << " = unionFunc( " << m_sortBy << ", "
-    << in0 << ", " << in1;
+  *out << m_name << " = unionFunc(" << m_sortBy << ","
+    << in0 << "," << in1;
   vector<string>::iterator iter = m_fields.begin(); 
   for(; iter != m_fields.end(); ++iter) {
-    *out << ", " << *iter;
+    *out << "," << *iter;
   }
-  *out << " );\n";
+  *out << ");\n";
 }
 
 
