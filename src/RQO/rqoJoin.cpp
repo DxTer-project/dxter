@@ -89,6 +89,7 @@ void Join::BuildDataTypeCache()
 
 void Join::Prop()
 {
+  //cout << "in join prop" << endl;
   if (m_inputs.size() != 2)
     throw;
   if (m_in0Fields.size() != m_in1Fields.size())
@@ -100,7 +101,6 @@ void Join::Prop()
 
   const DataTypeInfo &in0 = InputDataType(0);
   const DataTypeInfo &in1 = InputDataType(1);
-
 
   for (auto str : m_in0Fields) {
     if (in0.m_fields.find(str) == in0.m_fields.end()) {
@@ -141,7 +141,7 @@ void Join::PrintCode(IndStream &out)
     *out << "," << in0 << "." << *iter0 << ","
    << in1 << "." << *iter1;
   }
-  *out << " );\n";
+  *out << ");\n";
 }
 
 Join* Join::CreateCopyOfJoin() const

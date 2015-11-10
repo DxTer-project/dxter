@@ -86,9 +86,9 @@ void AddTrans()
  // Universe::AddTrans(HJoin::GetClass(), new SwapNodes(0,HJoin::GetClass()), RQOPHASE);
   //Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
   //Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
-  Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
-  Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
-  Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
+  //Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
+  //Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
+  //Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
 }
 
 void AddSimplifiers()
@@ -231,7 +231,7 @@ void parseCode(int bestAlg)
     return;
   }
   stringstream test;
-  test << "\tUnique Num: " << bestAlg;
+  //test << "\tUnique Num: " << bestAlg;
 
 //get to algorithm we need
   while(!uniqueFound)
@@ -264,7 +264,7 @@ void parseCode(int bestAlg)
     }
     else if(line != "")
     {
-      cout << line << endl;
+      //cout << line << endl;
       int i = 0;
       int j = 0;
       //get name of variable created
@@ -498,7 +498,9 @@ void parseCode(int bestAlg)
     }
 
     
-    iter = tuples.find(last);
+  }
+
+  iter = tuples.find(last);
     if(iter != tuples.end())
     {
       vector<Tuple> final = iter->second;
@@ -507,8 +509,6 @@ void parseCode(int bestAlg)
         t.printTuple();
       }
     }
-    
-  }
     
   infile.close();
 }
@@ -595,8 +595,12 @@ RealPSet* Example1()
   BFields.insert("qty");
 
 
-  InputNode *inA = new InputNode("orders", "ono", AFields, "orders", "ono > 1000");
-  InputNode *inB = new InputNode("odetails", "ono", BFields, "odetails", "ono > 1000");
+  Scan *inA = new Scan("orders", "ono", AFields, orders.getName(), "ono > 1000");
+  Scan *inB = new Scan("odetails", "ono", BFields, odetails.getName(), "ono > 1000");
+  //cout << inA->GetCost();
+  inA->SetRelation(&orders);
+  inB->SetRelation(&odetails);
+  //cout << "printing inputA name : " << inA->m_varName << endl;
 
   vector<string> joinFields0;
   joinFields0.push_back("ono");

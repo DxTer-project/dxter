@@ -33,11 +33,16 @@ Scan::Scan()
 }
 
 
-Scan::Scan(string name, string sortBy, set<string> fields, Relation *fileName, string query)
+Scan::Scan(string name, string sortBy, set<string> fields, string fileName, string query)
 {
-  InputNode(name, sortBy, fields, fileName->getName(), query);
-  m_relation = fileName;
+  InputNode(name, sortBy, fields, fileName, query);
+  m_varName = name;
+  m_query = query;
+  m_fileName = fileName;
+  m_dataTypeInfo.m_sortedBy = sortBy;
+  m_dataTypeInfo.m_fields = fields;
 }
+
 
 void Scan::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
@@ -57,7 +62,8 @@ const DataTypeInfo& Scan::DataType(ConnNum num) const
 
 void Scan::Prop()
 {
-  InputNode::Prop();
+  //cout << "in scan prop" << endl;
+  //InputNode::Prop();
 }
 
 void Scan::PrintCode(IndStream &out)

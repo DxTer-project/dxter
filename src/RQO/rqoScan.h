@@ -39,9 +39,14 @@ class Scan : public InputNode
   DataTypeInfo m_dataTypeInfo;
   Relation *m_relation;
 
+
  public:
+  string m_varName;
+  string m_fileName;
+  string m_query;
+  
   Scan();
-  Scan(string name, string sortBy, set<string> fields, Relation *fileName, string query);
+  Scan(string name, string sortBy, set<string> fields, string fileName, string query);
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new Scan; }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -57,6 +62,7 @@ class Scan : public InputNode
   virtual void BuildDataTypeCache() {}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual int Outputs() {return m_relation->getSize();}
+  virtual void SetRelation(Relation *relation) {m_relation = relation;}
 };
 
 #endif

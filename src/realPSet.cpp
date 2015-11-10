@@ -677,15 +677,16 @@ bool RealPSet::operator==(const BasePSet &rhs) const
 
 Cost RealPSet::Prop()
 {
+  //cout << "prop started in pset" << endl;
   if(m_flags & SETHASPROPEDFLAG)
     return m_cost;
-
+  //cout << "about to test posses" << endl;
   if (m_posses.empty()) {
     cout << "I'm empty\n";
     LOG_FAIL("replacement for throw call");
     throw;
   }
-
+  //cout << "about to test functionality" << endl;
   if (m_functionality.empty()) {
     cout << m_posses.size() << endl;
     (*(m_posses.begin())).second->PrintSetConnections();
@@ -701,6 +702,7 @@ Cost RealPSet::Prop()
     LOG_FAIL("replacement for throw call");
     throw;
   }
+  //cout << "mergeleft" << endl;
   if (m_mergeLeft) {
     if (m_leftInMap.empty()
 	|| m_rightInMap.empty()
@@ -759,7 +761,7 @@ Cost RealPSet::Prop()
       }
   }
 
-
+  //cout << "past merge" << endl;
   //BAM Par + check for > 1
   for (unsigned int i = 0; i < m_inTuns.size(); ++i) {
     Node *in = InTun(i);
@@ -798,7 +800,7 @@ Cost RealPSet::Prop()
       throw;
     }
   }
-  
+  //cout << "is top level?" << endl;
   if (!IsTopLevel() && !m_ownerPoss) {
     cout << "no owner\n";
     LOG_FAIL("replacement for throw call");
@@ -809,21 +811,25 @@ Cost RealPSet::Prop()
   for(unsigned int i = 0; i < m_inTuns.size(); ++i) {
     InTun(i)->Prop();
   }
+  //cout << "past intun" << endl;
   PossMMapIter iter;
   int j = 0;
 #if !USESHADOWS
 #pragma omp parallel private(j,iter)
 #endif
   {
+    //cout << "is it mposses?" << endl;
     iter = m_posses.begin();
+    //cout << "no" << endl;
     j = 0;
     int size = m_posses.size();
+    //cout << "size " << size << endl;
 #if !USESHADOWS
 #pragma omp for schedule(static) 
 #endif
     for (int i = 0; i < size; ++i) {
       if (j > i) {
-	cout << "uhoh\n";
+	//cout << "uhoh\n";
 	LOG_FAIL("replacement for throw call");
 	throw;
       }
@@ -831,12 +837,13 @@ Cost RealPSet::Prop()
 	++iter;
 	++j;
       }
-      
+      //cout << "probalby here and shit" << endl;
       (*iter).second->Prop();
+      //cout << "cause" << endl;
     }
   }
 
-
+  //cout << "mposses begins" << endl;
   iter = m_posses.begin();
   while (iter != m_posses.end()) {
     Poss *poss = (*iter).second;
