@@ -54,7 +54,7 @@ class Scan : public InputNode
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return m_relation->getSize()* m_relation->getSize();}
+  virtual Cost GetCost() {return m_relation->getSize() * m_relation->getSize();}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "scan";}
   virtual Name GetName(ConnNum num) const;

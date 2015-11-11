@@ -60,6 +60,7 @@ void HJoin::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_name = hjoin->m_name;
   m_sortBy = hjoin->m_sortBy;
   m_in0Fields = hjoin->m_in0Fields;
+  //cout << "copied fields " << m_in0Fields.size() << endl;
   m_in1Fields = hjoin->m_in1Fields;
   Node::Duplicate(orig, shallow, possMerging);
 }

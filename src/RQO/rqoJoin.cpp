@@ -125,7 +125,7 @@ void Join::Prop()
       throw;
     }
   }
-  
+  //cout << "out of join prop" << endl;
 }
 
 void Join::PrintCode(IndStream &out)
