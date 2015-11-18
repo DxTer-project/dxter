@@ -33,12 +33,16 @@ OrderedIndexedNode::OrderedIndexedNode()
 }
 
 
-OrderedIndexedNode::OrderedIndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, string index)
+OrderedIndexedNode::OrderedIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, string index)
 :
   m_index(index)
 {
-  InputNode(name, sortBy, fields, fileName->getName(), query);
-  m_relation = fileName;
+  InputNode(name, sortBy, fields, fileName, query);
+  m_varName = name;
+  m_query = query;
+  m_fileName = fileName;
+  m_dataTypeInfo.m_sortedBy = sortBy;
+  m_dataTypeInfo.m_fields = fields;
 }
 
 void OrderedIndexedNode::Duplicate(const Node *orig, bool shallow, bool possMerging)

@@ -46,6 +46,7 @@
 #include "rqoScan.h"
 #include <sstream>
 #include <unordered_map>
+#include "userInput.h"
 
 #if DORQO
 
@@ -58,6 +59,8 @@ Relation orders("orders");
 Relation odetails("odetails");
 
 unordered_map<string, vector<Tuple>> tuples;
+
+UserInput user;
 
 RealPSet* Example1();
 RealPSet* Example2();
@@ -144,12 +147,14 @@ int main(int argc, const char* argv[])
     case(5):
       algFunc = Example5;
       break;
+    /*case(6):
+      algFunc = user.ExampleFunc;
+      break;*/
     default:
       Usage();
       return 0;
     }
   }
-
   AddTrans();
   AddSimplifiers();
 
@@ -588,6 +593,8 @@ RealPSet* Example1()
   AFields.insert("ono");
   AFields.insert("cno");
   AFields.insert("eno");
+  AFields.insert("received");
+  AFields.insert("shipped");
 
   set<string> BFields;
   BFields.insert("ono");
@@ -597,10 +604,8 @@ RealPSet* Example1()
 
   Scan *inA = new Scan("orders", "ono", AFields, orders.getName(), "ono > 1000");
   Scan *inB = new Scan("odetails", "ono", BFields, odetails.getName(), "ono > 1000");
-  //cout << inA->GetCost();
   inA->SetRelation(&orders);
   inB->SetRelation(&odetails);
-  //cout << "printing inputA name : " << inA->m_varName << endl;
 
   vector<string> joinFields0;
   joinFields0.push_back("ono");
@@ -617,7 +622,6 @@ RealPSet* Example1()
   Poss *poss = new Poss(1, join);
   RealPSet *pset = new RealPSet(poss);
 
-  //Example1Run();
   return pset;
 }
 

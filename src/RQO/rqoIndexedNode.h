@@ -40,10 +40,13 @@ class IndexedNode : public InputNode
 
  public:
   string m_index;
+  string m_varName;
+  string m_fileName;
+  string m_query;
 
 
   IndexedNode();
-  IndexedNode(string name, string sortBy, set<string> fields, Relation *fileName, string query, string index);
+  IndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, string index);
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new IndexedNode; }
   virtual Node* GetNewInst() { return BlankInst(); }
@@ -59,6 +62,7 @@ class IndexedNode : public InputNode
   virtual void BuildDataTypeCache() {}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual int Outputs() {return m_relation->getSize();}
+  virtual void SetRelation(Relation *relation) {m_relation = relation;}
 };
 
 #endif
