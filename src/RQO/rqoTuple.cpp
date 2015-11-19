@@ -24,6 +24,12 @@
 
 #if DORQO
 
+void Tuple::addField(string name, string value)
+{
+	FieldValuePair temp(name, value);
+	fields.push_back(temp);
+}
+
 bool Tuple::compareTo(Tuple comparator, int key1, int key2)
 {
     return (fields.at(key1).getValue() < comparator.getFields().at(key2).getValue());

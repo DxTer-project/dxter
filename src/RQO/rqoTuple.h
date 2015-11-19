@@ -37,7 +37,7 @@ public:
     vector<FieldValuePair> fields;
 
     Tuple() {};
-    virtual void addField(FieldValuePair field) {fields.push_back(field);}
+    virtual void addField(string name, string value);
     virtual bool compareTo(Tuple comparator, int key1, int key2);
     virtual bool equals(Tuple comparator);
     virtual vector<FieldValuePair> getFields() {return fields;}

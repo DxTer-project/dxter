@@ -41,7 +41,7 @@ public:
     string m_name;
 
     Relation(string name) {m_name = name;}
-    virtual void addAttribute(Attribute attri) {attributes.push_back(attri);}
+    virtual void addAttribute(string name, string type, bool indexable);
     virtual void addTuple(Tuple tuple) {tuples.push_back(tuple);}
     virtual void printTable();
     virtual vector<Tuple> getTuples() {return tuples;}

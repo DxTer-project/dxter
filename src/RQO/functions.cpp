@@ -116,13 +116,13 @@ Tuple joinTuples(Tuple one, Tuple two, int key)
     Tuple newTuple;
     for(FieldValuePair fvPair : one.getFields())
     {
-        newTuple.addField(fvPair);
+        newTuple.addField(fvPair.getField(), fvPair.getValue());
     }
     for(FieldValuePair fvPair : two.getFields())
     {
         if(fvPair.getValue() != two.getValueAt(key))
         {
-            newTuple.addField(fvPair);
+            newTuple.addField(fvPair.getField(), fvPair.getValue());
         }
     }
     return newTuple;
@@ -227,12 +227,11 @@ vector<Tuple> leftOuterJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, 
             {
                 if(fvPair.getValue() == temp.getValueAt(key2))
                 {
-                    blank.addField(fvPair);
+                    blank.addField(fvPair.getField(), fvPair.getValue());
                 }
                 else
                 {
-                    FieldValuePair tempPair("", "");
-                    blank.addField(tempPair);
+                    blank.addField("", "");
                 }
             }
             Tuple toAdd = joinTuples(tup1, blank, key2);
@@ -268,12 +267,11 @@ vector<Tuple> rightOuterJoin(vector<Tuple> list1, vector<Tuple> list2, int key1,
             {
                 if(fvPair.getValue() == temp.getValueAt(key1))
                 {
-                    blank.addField(fvPair);
+                    blank.addField(fvPair.getField(), fvPair.getValue());
                 }
                 else
                 {
-                    FieldValuePair tempPair("", "");
-                    blank.addField(tempPair);
+                    blank.addField("", "");
                 }
             }
             Tuple toAdd = joinTuples(tup1, blank, key1);
@@ -389,11 +387,11 @@ vector<Tuple> crossProduct(vector<Tuple> list1, vector<Tuple> list2)
             Tuple toAdd;
             for(auto fvPair : tup1.getFields())
             {
-                toAdd.addField(fvPair);
+                toAdd.addField(fvPair.getField(), fvPair.getValue());
             }
             for(auto fvPair : tup2.getFields())
             {
-                toAdd.addField(fvPair);
+                toAdd.addField(fvPair.getField(), fvPair.getValue());
             }
             output.push_back(toAdd);
         }

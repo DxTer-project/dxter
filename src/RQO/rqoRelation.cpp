@@ -25,6 +25,12 @@
 
 #if DORQO
 
+void Relation::addAttribute(string name, string type, bool indexable)
+{
+    Attribute temp(name, type, indexable);
+    attributes.push_back(temp);
+}
+
 void Relation::printTable()
 {
     cout << m_name << " contains the following attributes:" << endl;
