@@ -103,9 +103,10 @@ ClauseNode::ClauseNode(string relation)
     ++num;
 }
 
-FieldValue::FieldValue(string relation, string value)
+FieldValue::FieldValue(string relation, string value, string field)
     : ClauseNode(relation),
-    m_value(value)
+    m_value(value),
+    m_field(field)
 {
     static int num = 1;
     m_id = "fieldValue" + std::to_string(num);

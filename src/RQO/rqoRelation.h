@@ -39,6 +39,7 @@ public:
     vector<Attribute> attributes;
     vector<Tuple> tuples;
     string m_name;
+    set<int> indeces;
 
     Relation(string name) {m_name = name;}
     virtual void addAttribute(string name, string type, bool indexable);

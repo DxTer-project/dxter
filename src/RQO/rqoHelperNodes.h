@@ -26,6 +26,9 @@
 #include "layers.h"
 #include "node.h"
 #include "rqoBasis.h"
+#include "rqoRelation.h"
+#include "transform.h"
+#include <climits>
 
 #if DORQO
 
@@ -40,9 +43,12 @@ class InputNode : public Node
 
  public:
   NodeType m_type;
+  set<string> m_fields;
+  string m_sortBy;
   string m_varName;
   string m_fileName;
   string m_query;
+  Relation *m_relation;
 
   InputNode();
   InputNode(string name, string sortBy, set<string> fields, string fileName, string query);
@@ -53,7 +59,7 @@ class InputNode : public Node
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return 0;}
+  virtual Cost GetCost() {return INT_MAX;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "inputNode";}
   virtual Name GetName(ConnNum num) const;
@@ -61,6 +67,7 @@ class InputNode : public Node
   virtual void BuildDataTypeCache() {}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
   virtual int Outputs() {return 0;}
+  virtual void SetRelation(Relation *relation) {m_relation = relation;}
 };
 
 class OutputNode : public Node
@@ -109,6 +116,39 @@ class TempVarNode : public Node
   virtual bool IsDataDependencyOfInput() const {return false;}
   virtual Cost GetCost() {return 0;}
   virtual int Outputs() {return 0;}
+};
+
+
+class InputToScan : public SingleTrans
+{
+public:
+  virtual string GetType() const {return "Turn Input to Scan";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class InputToIndex : public SingleTrans
+{
+public:
+  virtual string GetType() const {return "Turn Input to Index";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class InputToNIndex : public SingleTrans
+{
+public:
+  virtual string GetType() const {return "Turn Input to NIndex";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
+};
+
+class InputToOrdered : public SingleTrans
+{
+public:
+  virtual string GetType() const {return "Turn Input to Ordered";}
+  virtual bool CanApply(const Node *node) const;
+  virtual void Apply(Node *node) const;
 };
 
 #endif //DORQO

@@ -22,6 +22,10 @@
 
 
 #include "rqoHelperNodes.h"
+#include "rqoScan.h"
+#include "rqoIndexedNode.h"
+#include "rqoNIndexedNode.h"
+#include "rqoOrderedIndexNode.h"
 
 #if DORQO
 
@@ -38,7 +42,9 @@ InputNode::InputNode(string name, string sortBy, set<string> fields, string file
   m_type(name),
   m_varName(name),
   m_fileName(fileName),
-  m_query(query)
+  m_query(query),
+  m_fields(fields),
+  m_sortBy(sortBy)
 {
   m_dataTypeInfo.m_sortedBy = sortBy;
   m_dataTypeInfo.m_fields = fields;
@@ -104,5 +110,132 @@ void OutputNode::PrintCode(IndStream &out)
 {
 
 }
+
+
+bool InputToScan::CanApply(const Node *node) const
+{
+  if(node->GetNodeClass() != "inputNode")
+  {
+    cout << "Throwing in InputToScan CanApply since : " << node->GetClass() << endl;
+    throw;
+  }
+
+  return true;
+}
+
+void InputToScan::Apply(Node *node) const
+{
+  InputNode *orig = (InputNode*) node;
+  Scan *newScan = new Scan(orig->m_varName, orig->m_sortBy, orig->m_fields, 
+    orig->m_fileName, orig->m_query);
+  newScan->SetRelation(orig->m_relation);
+
+  orig->m_poss->AddNode(newScan);
+  orig->RedirectChildren(newScan);
+  if(orig->m_children.empty())
+  {
+    orig->m_poss->DeleteChildAndCleanUp(orig);
+  }
+}
+
+bool InputToIndex::CanApply(const Node *node) const
+{
+  if(node->GetNodeClass() != "inputNode")
+  {
+    cout << "Throwing in InputToIndex CanApply since : " << node->GetClass() << endl;
+    throw;
+  }
+
+  InputNode *newNode = (InputNode*)node;
+  if(newNode->m_relation->indeces.size() != 1)
+  {
+    throw;
+  }
+
+  return true;
+}
+
+void InputToIndex::Apply(Node *node) const
+{
+  InputNode *orig = (InputNode*) node;
+  set<int>::iterator iter = orig->m_relation->indeces.begin();
+  IndexedNode *newIndex = new IndexedNode(orig->m_varName, orig->m_sortBy, orig->m_fields, 
+    orig->m_fileName, orig->m_query, (*iter));
+  newIndex->SetRelation(orig->m_relation);
+
+  orig->m_poss->AddNode(newIndex);
+  orig->RedirectChildren(newIndex);
+  if(orig->m_children.empty())
+  {
+    orig->m_poss->DeleteChildAndCleanUp(orig);
+  }
+}
+
+bool InputToNIndex::CanApply(const Node *node) const
+{
+  if(node->GetNodeClass() != "inputNode")
+  {
+    cout << "Throwing in InputToNIndex CanApply since : " << node->GetClass() << endl;
+    throw;
+  }
+
+  InputNode *newNode = (InputNode*)node;
+  if(newNode->m_relation->indeces.size() <= 1)
+  {
+    throw;
+  }
+
+  return true;
+}
+
+void InputToNIndex::Apply(Node *node) const
+{
+  InputNode *orig = (InputNode*) node;
+  NIndexedNode *newIndex = new NIndexedNode(orig->m_varName, orig->m_sortBy, orig->m_fields, 
+    orig->m_fileName, orig->m_query, orig->m_relation->indeces);
+  newIndex->SetRelation(orig->m_relation);
+
+  orig->m_poss->AddNode(newIndex);
+  orig->RedirectChildren(newIndex);
+  if(orig->m_children.empty())
+  {
+    orig->m_poss->DeleteChildAndCleanUp(orig);
+  }
+}
+
+bool InputToOrdered::CanApply(const Node *node) const
+{
+  if(node->GetNodeClass() != "inputNode")
+  {
+    cout << "Throwing in InputToOrdered CanApply since : " << node->GetClass() << endl;
+    throw;
+  }
+
+  InputNode *newNode = (InputNode*)node;
+  if(newNode->m_relation->indeces.size() != 1)
+  {
+    throw;
+  }
+
+  return true;
+}
+
+void InputToOrdered::Apply(Node *node) const
+{
+  InputNode *orig = (InputNode*) node;
+  set<int>::iterator iter = orig->m_relation->indeces.begin();
+  OrderedIndexedNode *newIndex = new OrderedIndexedNode(orig->m_varName, orig->m_sortBy, orig->m_fields, 
+    orig->m_fileName, orig->m_query, (*iter));
+  newIndex->SetRelation(orig->m_relation);
+
+  orig->m_poss->AddNode(newIndex);
+  orig->RedirectChildren(newIndex);
+  if(orig->m_children.empty())
+  {
+    orig->m_poss->DeleteChildAndCleanUp(orig);
+  }
+}
+
+
 #endif //DORQO
 

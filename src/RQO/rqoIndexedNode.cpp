@@ -33,7 +33,7 @@ IndexedNode::IndexedNode()
 }
 
 
-IndexedNode::IndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, string index)
+IndexedNode::IndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, int index)
 :
   m_index(index)
 {

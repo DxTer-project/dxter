@@ -39,13 +39,13 @@ class OrderedIndexedNode : public InputNode
   Relation *m_relation;
 
  public:
-  string m_index;
+  int m_index;
   string m_varName;
   string m_fileName;
   string m_query;
 
   OrderedIndexedNode();
-  OrderedIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, string index);
+  OrderedIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, int index);
   virtual NodeType GetType() const {return m_type;}
   static Node* BlankInst() { return  new OrderedIndexedNode; }
   virtual Node* GetNewInst() { return BlankInst(); }

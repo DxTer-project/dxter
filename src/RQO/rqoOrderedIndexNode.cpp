@@ -33,7 +33,7 @@ OrderedIndexedNode::OrderedIndexedNode()
 }
 
 
-OrderedIndexedNode::OrderedIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, string index)
+OrderedIndexedNode::OrderedIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, int index)
 :
   m_index(index)
 {

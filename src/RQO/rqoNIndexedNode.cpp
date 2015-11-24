@@ -33,7 +33,7 @@ NIndexedNode::NIndexedNode()
 }
 
 
-NIndexedNode::NIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, set<string> indeces)
+NIndexedNode::NIndexedNode(string name, string sortBy, set<string> fields, string fileName, string query, set<int> indeces)
 :
   m_indeces(indeces)
 {
@@ -71,7 +71,7 @@ void NIndexedNode::PrintCode(IndStream &out)
   out.Indent();
   *out << m_varName << " = nindexFunc(" << m_fileName << "," << m_query << ",[";
 
-  set<string>::iterator iter = m_indeces.begin();
+  set<int>::iterator iter = m_indeces.begin();
   for(; iter != m_indeces.end(); ++iter)
   {
     *out << (*iter) << ",";

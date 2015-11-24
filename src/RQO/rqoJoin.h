@@ -25,7 +25,7 @@
 #include "sortable.h"
 #include "rqoBasis.h"
 #include "transform.h"
-
+#include <climits>
 
 #if DORQO
 
@@ -50,7 +50,7 @@ class Join : public Sortable
   virtual const DataTypeInfo& DataType(ConnNum num) const;
   virtual void Prop();
   virtual void PrintCode(IndStream &out);
-  virtual Cost GetCost() {return Input(0)->Outputs() * Input(1)->Outputs();}
+  virtual Cost GetCost() {return INT_MAX;}
   virtual ClassType GetNodeClass() const {return GetClass();}
   static ClassType GetClass() {return "join";}
   virtual void ClearDataTypeCache();

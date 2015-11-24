@@ -92,6 +92,10 @@ void AddTrans()
   Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
   Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
   Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
+  Universe::AddTrans(InputNode::GetClass(), new InputToScan, RQOPHASE);
+  Universe::AddTrans(InputNode::GetClass(), new InputToIndex, RQOPHASE);
+  Universe::AddTrans(InputNode::GetClass(), new InputToNIndex, RQOPHASE);
+  Universe::AddTrans(InputNode::GetClass(), new InputToOrdered, RQOPHASE);
 }
 
 void AddSimplifiers()
@@ -308,10 +312,11 @@ void parseCode(int bestAlg)
         string query = line.substr(j, i - j);
         j = i + 1;
         i = line.find(")", j);
-        string index = line.substr(j, i - j);
+        string ind = line.substr(j, i - j);
+        int index = atoi(ind.c_str());
         Relation *tempRel = getRelation(relationName);
         FieldValue tempOr = createQuery(query);
-        int key = getKey(tempRel->getTuples(), index);
+        int key = index;
         vector<Tuple> tempTup;
         if(funcName == "indexFunc")
         {
@@ -345,7 +350,7 @@ void parseCode(int bestAlg)
             i = line.find("]");
           }
           string index = line.substr(j, i - j);
-          int key = getKey(tempRel->getTuples(), index);
+          int key = atoi(index.c_str());
           indeces.insert(key);
           j = i + 1;
         }
@@ -572,12 +577,13 @@ FieldValue createQuery(string query)
   int i = 0;
   int j = 0;
   i = query.find(" ");
+  string field = query.substr(j, i - j);
   ++i;
   j = query.find(" ", i);
   relation = query.substr(i, j - i);
   ++j;
   string value = query.substr(j);
-  FieldValue ret (relation, value);
+  FieldValue ret (relation, value, field);
   //OrNode blah;
  // AndNode yep;
   //yep.addClause(&ret);
@@ -602,8 +608,8 @@ RealPSet* Example1()
   BFields.insert("qty");
 
 
-  Scan *inA = new Scan("orders", "ono", AFields, orders.getName(), "ono > 1000");
-  Scan *inB = new Scan("odetails", "ono", BFields, odetails.getName(), "ono > 1000");
+  InputNode *inA = new InputNode("orders", "ono", AFields, orders.getName(), "ono > 1000");
+  InputNode *inB = new InputNode("odetails", "ono", BFields, odetails.getName(), "ono > 1000");
   inA->SetRelation(&orders);
   inB->SetRelation(&odetails);
 

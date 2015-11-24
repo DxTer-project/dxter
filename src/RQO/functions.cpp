@@ -28,9 +28,18 @@
 vector<Tuple> scanFunc(Relation table, FieldValue query)
 {
 	vector<Tuple> output;
+    
 
 	for(auto tuple : table.getTuples())
 	{
+        int index;
+        for(int i = 0; i < tuple.getFields().size(); i++)
+        {
+            if(tuple.getFields().at(i).getField() == query.m_field)
+            {
+                index = i;
+            }
+        }
 		if(query.evaluate(tuple, 0))
 		{
 			output.push_back(tuple);
