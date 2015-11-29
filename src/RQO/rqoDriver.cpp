@@ -93,9 +93,9 @@ void AddTrans()
   Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
   Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
   Universe::AddTrans(InputNode::GetClass(), new InputToScan, RQOPHASE);
-  Universe::AddTrans(InputNode::GetClass(), new InputToIndex, RQOPHASE);
-  Universe::AddTrans(InputNode::GetClass(), new InputToNIndex, RQOPHASE);
-  Universe::AddTrans(InputNode::GetClass(), new InputToOrdered, RQOPHASE);
+  //Universe::AddTrans(InputNode::GetClass(), new InputToIndex, RQOPHASE);
+  //Universe::AddTrans(InputNode::GetClass(), new InputToNIndex, RQOPHASE);
+  //Universe::AddTrans(InputNode::GetClass(), new InputToOrdered, RQOPHASE);
 }
 
 void AddSimplifiers()
@@ -294,10 +294,14 @@ void parseCode(int bestAlg)
         i = line.find(",");
         string relationName = line.substr(j, i - j);
         j = i + 1;
+        i = line.find(",", j);
+        string sortBy = line.substr(j, i - j);
+        j = i + 1;
         i = line.find(")");
         string query = line.substr(j, i - j);
         Relation *tempRel = getRelation(relationName);
         FieldValue tempOr = createQuery(query);
+        int sortOn = getKey(tempRel->getTuples(), sortBy);
         vector<Tuple> tempTup = scanFunc((*tempRel), tempOr);
         //save output
         tuples.insert(pair<string, vector<Tuple>>(
@@ -390,6 +394,7 @@ void parseCode(int bestAlg)
         int key1 = getKey(left, field1);
         int key2 = getKey(right, field2);
         vector<Tuple> tempTup;
+        
 
         if(funcName == "nestedJoin")
         {
@@ -403,7 +408,6 @@ void parseCode(int bestAlg)
         {
           tempTup = hashJoin(left, right, key1, key2);
         }
-        
 
         tuples.insert(pair<string, vector<Tuple>>(
             returnName, tempTup));
@@ -624,8 +628,11 @@ RealPSet* Example1()
   join->AddInput(inA, 0);
   join->AddInput(inB, 0);
 
+  Sort *sort = new Sort("ono");
+  sort->AddInput(join);
 
-  Poss *poss = new Poss(1, join);
+
+  Poss *poss = new Poss(1, sort);
   RealPSet *pset = new RealPSet(poss);
 
   return pset;

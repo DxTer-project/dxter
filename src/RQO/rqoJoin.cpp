@@ -104,7 +104,8 @@ void Join::Prop()
 
   for (auto str : m_in0Fields) {
     if (in0.m_fields.find(str) == in0.m_fields.end()) {
-      cout << "input A does not include field over which we are joining\n";
+      cout << "input A does not include field over which we are joining:" << str << endl;
+      cout << "m_fields.size() = " << in0.m_fields.size() << endl;
       throw;
     }
   }

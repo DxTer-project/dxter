@@ -40,11 +40,13 @@ vector<Tuple> scanFunc(Relation table, FieldValue query)
                 index = i;
             }
         }
-		if(query.evaluate(tuple, 0))
+		if(query.evaluate(tuple, index))
 		{
 			output.push_back(tuple);
 		}
 	}
+
+	//output = sortFunc(output, sort);
 
 	return output;
 }
@@ -196,12 +198,19 @@ vector<Tuple> mergeJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int 
         {
             Tuple toAdd = joinTuples((*iter1), (*iter2), key2);
             output.push_back(toAdd);
-            ++iter1;
             ++iter2;
         }
         else if((*iter1).compareTo((*iter2), key1, key2))
         {
-            ++iter1;
+        	if((*iter1).getFields().at(key1).getValue() == (*iter2).getFields().at(key2).getValue())
+        	{
+        		++iter2;
+        	}
+        	else
+        	{
+        		++iter1;
+        	}
+            
         }
         else
         {
@@ -336,10 +345,11 @@ vector<Tuple> sortFunc(vector<Tuple> list, int key)
     int mid = list.size() / 2;
     vector<Tuple>::iterator iter = list.begin() + mid;
     vector<Tuple> left(list.begin(), iter);
-    vector<Tuple> right(++iter, list.end());
+    vector<Tuple> right(iter, list.end());
 
     left = sortFunc(left, key);
     right = sortFunc(right, key);
+
 
     return mergeFunc(left, right, key, key);
 

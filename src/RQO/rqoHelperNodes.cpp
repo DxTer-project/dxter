@@ -59,6 +59,9 @@ void InputNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_varName = node->m_varName;
   m_fileName = node->m_fileName;
   m_query = node->m_query;
+  m_relation = node->m_relation;
+  m_fields = node->m_fields;
+  m_sortBy = node->m_sortBy;
 }
 
 const DataTypeInfo& InputNode::DataType(ConnNum num) const
@@ -83,7 +86,7 @@ void InputNode::Prop()
 void InputNode::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << m_varName << " = scanFunc(" << m_fileName << "," << m_query << ");\n";
+  *out << m_varName << " = scanFunc(" << m_fileName << "," << m_sortBy << "," << m_query << ");\n";
 }
 
 Name InputNode::GetName(ConnNum num) const
