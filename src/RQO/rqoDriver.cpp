@@ -40,27 +40,20 @@
 #include "sortable.h"
 #include "hJoin.h"
 #include "rqoNode.h"
+#include "userInput.h"
 #include "functions.h"
 #include "rqoRelation.h"
 #include "rqoAttribute.h"
 #include "rqoScan.h"
 #include <sstream>
 #include <unordered_map>
-#include "userInput.h"
+
 
 #if DORQO
 
-//Database tables
-Relation zipcodes("zipcodes");
-Relation employees("employees");
-Relation parts("parts");
-Relation customers("customers");
-Relation orders("orders");
-Relation odetails("odetails");
+vector<Relation> userRelations;
 
 unordered_map<string, vector<Tuple>> tuples;
-
-UserInput user;
 
 RealPSet* Example1();
 RealPSet* Example2();
@@ -127,7 +120,9 @@ int main(int argc, const char* argv[])
   //  GraphNum whichGraph = 0;
   int algNum;
   string fileName;
-  buildDatabases();
+  cout << "gonna build the tables" << endl;
+  BuildExampleTables();
+  cout << "built" << endl;
 
   if(argc < 2) {
     Usage();
@@ -151,9 +146,6 @@ int main(int argc, const char* argv[])
     case(5):
       algFunc = Example5;
       break;
-    /*case(6):
-      algFunc = user.ExampleFunc;
-      break;*/
     default:
       Usage();
       return 0;
@@ -165,12 +157,13 @@ int main(int argc, const char* argv[])
   Universe uni;
   AccurateTime start, start2, end;
   uni.PrintStats();
-
+  cout << "test algnum" << endl;
   if (algNum==0) {
     throw;
   }
   else {
     RealPSet *startSet = algFunc();
+    cout << "made it" << endl;
     uni.Init(startSet);
     uni.Prop();
     GraphIter graphIter(startSet->m_posses.begin()->second);
@@ -179,7 +172,7 @@ int main(int argc, const char* argv[])
     start = std::chrono::system_clock::now();
   }
 
-
+cout << "doRQOphase" << endl;
 #if DORQOPHASE
   if (CurrPhase == RQOPHASE) {
     start2 = std::chrono::system_clock::now();
@@ -214,13 +207,7 @@ int best = 0;
   LOG_END();
 
   
- /* zipcodes.printTable();
-  employees.printTable();
-  parts.printTable();
-  customers.printTable();
-  orders.printTable();
-  odetails.printTable();*/
-  //Example1Run();
+  cout << "got to parser" << endl;
   parseCode(best);
   return 0;
 }
@@ -547,32 +534,16 @@ Relation* getRelation(string name)
 {
   Relation *match;
 
-
-  if(name == zipcodes.getName())
+  for(auto rel : getUserRelations())
   {
-    match = &zipcodes;
-  }
-  else if(name == "employees")
-  {
-    match = &employees;
-  }
-  else if(name == "parts")
-  {
-    match = &parts;
-  }
-  else if(name == "customers")
-  {
-    match = &customers;
-  }
-  else if(name == "orders")
-  {
-    match = &orders;
-  }
-  else if(name == "odetails")
-  {
-    match = &odetails;
+    if(name == rel.getName())
+    {
+      match = &rel;
+      break;
+    }
   }
   return match;
+
 }
 
 FieldValue createQuery(string query)
@@ -599,7 +570,7 @@ FieldValue createQuery(string query)
 
 RealPSet* Example1()
 {
-  set<string> AFields;
+ /* set<string> AFields;
   AFields.insert("ono");
   AFields.insert("cno");
   AFields.insert("eno");
@@ -631,7 +602,8 @@ RealPSet* Example1()
   Sort *sort = new Sort("ono");
   sort->AddInput(join);
 
-
+*/
+  Sort *sort = new Sort("ono");
   Poss *poss = new Poss(1, sort);
   RealPSet *pset = new RealPSet(poss);
 
@@ -876,56 +848,11 @@ RealPSet* Example4()
 
 RealPSet* Example5()
 {
-  set<string> AFields;
-  AFields.insert("x");
-  AFields.insert("y");
-  AFields.insert("z");
-
-  set<string> BFields;
-  BFields.insert("u");
-  BFields.insert("v");
-  BFields.insert("w");
-
-  set<string> CFields;
-  CFields.insert("a");
-  CFields.insert("b");
-  CFields.insert("c");
-
-  InputNode *inA = new InputNode("A", "x", AFields, "fileName", "query");
-  InputNode *inB = new InputNode("B", "u", BFields, "fileName", "query");
-  InputNode *inC = new InputNode("C", "a", CFields, "fileName", "query");
-
-  vector<string> joinFields0;
-  joinFields0.push_back("x");
-
-  vector<string> joinFields1;
-  joinFields1.push_back("u");
-
-  Join *join = new Join("u", joinFields0, joinFields1);
-
-  join->AddInput(inA, 0);
-  join->AddInput(inB, 0);
-
-
-  vector<string> joinFields2;
-  joinFields2.push_back("y");
-
-  vector<string> joinFields3;
-  joinFields3.push_back("a");
-
-  Join *join2 = new Join("a", joinFields2, joinFields3);
-
-  join2->AddInput(join, 0);
-  join2->AddInput(inC, 0);
-
-
-  Poss *poss = new Poss(1, join2);
-  RealPSet *pset = new RealPSet(poss);
-  return pset;
+  return ExampleFunc();
 }
 
 //This method will create and populate relation tables for the program to use
-void buildDatabases()
+/*void buildDatabases()
 {
   //For zipcodes
   zipcodes.addAttribute("zip", "number", true);
@@ -1184,7 +1111,7 @@ void buildDatabases()
   otail9.addField("qty", "1");
   odetails.addTuple(otail9);
 
-}
+}*/
 
 
 #endif

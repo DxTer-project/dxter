@@ -23,17 +23,34 @@
 
 #pragma once
 
+#include "layers.h"
+#include "rqoRelation.h"
+#include "rqoTuple.h"
+#include "base.h"
+#include "rqoJoin.h"
+#include "rqoProj.h"
+#include "rqoSort.h"
+#include "sortable.h"
+#include "hJoin.h"
+#include "rqoNode.h"
+#include "rqoHelperNodes.h"
+#include "rqoScan.h"
+
 
 #if DORQO
 
-class UserInput
-{
 
-  RealPSet* ExampleFunc();
-
-};
+	/*Instantiate Your Relation Tables Here*/
 
 
+	/*Example Relation Tables*/
+	extern vector<Relation> userRelations;
+
+	/*Example Functions*/
+	void BuildExampleTables();
+	RealPSet* ExampleFunc();
+	vector<Relation> getUserRelations();
+	Relation getRelationByName(string name);
 
 
 
