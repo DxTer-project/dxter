@@ -47,6 +47,7 @@
 	extern vector<Relation*> userRelations;
 
 	/*Example Functions*/
+	void BuildUserTables();
 	void BuildExampleTables();
 	RealPSet* ExampleFunc();
 	RealPSet* UserFunction();

@@ -24,6 +24,11 @@
 
 #if DORQO
 
+void BuildUserTables()
+{
+	
+}
+
 RealPSet* UserFunction()
 {
 	set<string> AFields;
