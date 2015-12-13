@@ -44,13 +44,14 @@
 
 
 	/*Example Relation Tables*/
-	extern vector<Relation> userRelations;
+	extern vector<Relation*> userRelations;
 
 	/*Example Functions*/
 	void BuildExampleTables();
 	RealPSet* ExampleFunc();
-	vector<Relation> getUserRelations();
-	Relation getRelationByName(string name);
+	RealPSet* UserFunction();
+	vector<Relation*> getUserRelations();
+	Relation* getRelationByName(string name);
 
 
 

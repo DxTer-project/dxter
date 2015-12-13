@@ -80,7 +80,6 @@ void InputNode::Prop()
     throw;
   if(m_fileName.empty() || m_query.empty())
     throw;
-  //add something to check for valid queries or valid files
 }
 
 void InputNode::PrintCode(IndStream &out)

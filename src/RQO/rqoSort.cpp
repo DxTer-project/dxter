@@ -41,7 +41,7 @@ Sort::Sort(string sortBy)
 
 NodeType Sort::GetType() const
 {
-  return m_sortBy;
+  return GetClass() + " " + m_sortBy;
 }
 
 void Sort::Duplicate(const Node *orig, bool shallow, bool possMerging)

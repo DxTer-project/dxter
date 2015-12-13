@@ -66,7 +66,7 @@ class InputNode : public Node
   virtual void ClearDataTypeCache() {}
   virtual void BuildDataTypeCache() {}
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
-  virtual int Outputs() {return 0;}
+  virtual int Outputs() {return m_relation->getSize();}
   virtual void SetRelation(Relation *relation) {m_relation = relation;}
 };
 
