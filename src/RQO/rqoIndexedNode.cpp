@@ -54,6 +54,8 @@ void IndexedNode::Duplicate(const Node *orig, bool shallow, bool possMerging)
   m_varName = node->m_varName;
   m_fileName = node->m_fileName;
   m_query = node->m_query;
+  m_relation = node->m_relation;
+  m_index = node->m_index;
 }
 
 const DataTypeInfo& IndexedNode::DataType(ConnNum num) const

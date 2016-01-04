@@ -29,8 +29,12 @@ void Relation::addAttribute(string name, string type, bool indexable)
 {
     Attribute temp(name, type, indexable);
     attributes.push_back(temp);
-    int ind = attributes.size() - 1;
-    indeces.insert(ind);
+    if(indexable)
+    {
+        int ind = attributes.size() - 1;
+        indeces.insert(ind);
+    }
+    
 }
 
 void Relation::printTable()

@@ -151,7 +151,7 @@ bool InputToIndex::CanApply(const Node *node) const
   InputNode *newNode = (InputNode*)node;
   if(newNode->m_relation->indeces.size() != 1)
   {
-    throw;
+    return false;
   }
 
   return true;
@@ -184,7 +184,7 @@ bool InputToNIndex::CanApply(const Node *node) const
   InputNode *newNode = (InputNode*)node;
   if(newNode->m_relation->indeces.size() <= 1)
   {
-    throw;
+    return false;
   }
 
   return true;
@@ -216,7 +216,7 @@ bool InputToOrdered::CanApply(const Node *node) const
   InputNode *newNode = (InputNode*)node;
   if(newNode->m_relation->indeces.size() != 1)
   {
-    throw;
+    return false;
   }
 
   return true;

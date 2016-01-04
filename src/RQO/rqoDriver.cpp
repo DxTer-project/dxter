@@ -87,9 +87,9 @@ void AddTrans()
   Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
   Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
   Universe::AddTrans(InputNode::GetClass(), new InputToScan, RQOPHASE);
-  //Universe::AddTrans(InputNode::GetClass(), new InputToIndex, RQOPHASE);
-  //Universe::AddTrans(InputNode::GetClass(), new InputToNIndex, RQOPHASE);
-  //Universe::AddTrans(InputNode::GetClass(), new InputToOrdered, RQOPHASE);
+  Universe::AddTrans(InputNode::GetClass(), new InputToIndex, RQOPHASE);
+  Universe::AddTrans(InputNode::GetClass(), new InputToNIndex, RQOPHASE);
+  Universe::AddTrans(InputNode::GetClass(), new InputToOrdered, RQOPHASE);
 }
 
 void AddSimplifiers()

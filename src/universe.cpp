@@ -174,7 +174,7 @@ bool Universe::TakeIter(unsigned int phase)
   cout.flush();
 
   m_pset->BuildDataTypeCache();
-  
+
   newOne = m_pset->TakeIter(this, phase);
 
   cout << "\tFinishing iteration\n";
@@ -203,7 +203,6 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
   }
   
 #endif
-
   CurrPhase = phase;
   
   ClearFullyExpanded();
@@ -221,7 +220,6 @@ GraphNum Universe::Expand(unsigned int numIters, unsigned int phase, CullFunctio
     }
   }
 #endif
-
   GraphNum count = 0;
   GraphNum prevAlgs = TotalCount();
   bool foundNew = true;
