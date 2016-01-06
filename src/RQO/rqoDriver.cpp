@@ -45,6 +45,7 @@
 #include "rqoRelation.h"
 #include "rqoAttribute.h"
 #include "rqoScan.h"
+#include "rqoFilter.h"
 #include <sstream>
 #include <unordered_map>
 
@@ -108,6 +109,8 @@ void Usage()
 
 int main(int argc, const char* argv[])
 {
+  try
+  {
 #ifdef _OPENMP
   omp_set_nested(true);
   omp_init_lock(&RealPSet::m_lock);
@@ -118,7 +121,6 @@ int main(int argc, const char* argv[])
   //  GraphNum whichGraph = 0;
   int algNum;
   string fileName;
-  BuildExampleTables();
 
   if(argc < 2) {
     Usage();
@@ -129,9 +131,11 @@ int main(int argc, const char* argv[])
     switch(algNum) {
     case(1):
       algFunc = UserFunc;
+      BuildUserTables();
       break;
     case(2):
       algFunc = Example2;
+      BuildExampleTables();
       break;
     default:
       Usage();
@@ -185,13 +189,17 @@ int best = 0;
 #else
   uni.PrintBest();
 #endif
-  //cout << algNum << endl;
-  //cout << best << endl;
   LOG_END();
 
   
   parseCode(best);
-  return 0;
+}
+catch(...)
+{
+  cout << "An Error occured. Please check to make sure you have not made any typos"
+    << " and that all of your code statements follow proper syntax." << endl;
+}
+return 0;
 }
 
 
@@ -446,7 +454,7 @@ void parseCode(int bestAlg)
         tuples.insert(pair<string, vector<Tuple>>(
             returnName, tempTup));
       }
-      else if(funcName == "projection")
+      else if(funcName == "projection" || funcName == "filter")
       {
         i = line.find(",") + 1;
         j = i;
@@ -467,7 +475,16 @@ void parseCode(int bestAlg)
           j = i + 1;
         }
 
-        vector<Tuple> tempTup = projection(left, values);
+        vector<Tuple> tempTup;
+        if(funcName == "projection")
+        {
+          tempTup = projection(left, values);
+        }
+        else
+        {
+          tempTup = filter(left, values);
+        }
+        
 
         tuples.insert(pair<string, vector<Tuple>>(
             returnName, tempTup));

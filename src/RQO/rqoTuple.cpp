@@ -30,6 +30,18 @@ void Tuple::addField(string name, string value)
 	fields.push_back(temp);
 }
 
+void Tuple::removeField(string name)
+{
+    for(int i = 0; i < fields.size() ; i++)
+    {
+        if(fields.at(i).getField() == name)
+        {
+            fields.erase(fields.begin() + i);
+            break;
+        }
+    }
+}
+
 bool Tuple::compareTo(Tuple comparator, int key1, int key2)
 {
     return (fields.at(key1).getValue() < comparator.getFields().at(key2).getValue());

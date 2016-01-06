@@ -35,6 +35,7 @@
 #include "rqoNode.h"
 #include "rqoHelperNodes.h"
 #include "rqoScan.h"
+#include "rqoFilter.h"
 
 
 #if DORQO

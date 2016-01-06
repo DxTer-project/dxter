@@ -51,6 +51,7 @@ vector<Tuple> sortFunc(vector<Tuple> list, int key);
 vector<Tuple> unionFunc(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2);
 vector<Tuple> crossProduct(vector<Tuple> list1, vector<Tuple> list2);
 vector<Tuple> projection(vector<Tuple> list, vector<string> values);
+vector<Tuple> filter(vector<Tuple> list, vector<string> values);
 vector<Tuple> fullOuterJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2);
 void printTuples(vector<Tuple> list);
 

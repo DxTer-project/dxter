@@ -453,6 +453,22 @@ vector<Tuple> projection(vector<Tuple> list, vector<string> values)
     return output;
 }
 
+vector<Tuple> filter(vector<Tuple> list, vector<string> values)
+{
+    vector<Tuple> output;
+    cout << "in filter" << endl;
+    for(auto tuple : list)
+    {
+        for(auto string : values)
+        {
+            tuple.removeField(string);
+        }
+        output.push_back(tuple);
+    }
+
+    return output;
+}
+
 vector<Tuple> fullOuterJoin(vector<Tuple> list1, vector<Tuple> list2, int key1, int key2)
 {
     vector<Tuple> output;

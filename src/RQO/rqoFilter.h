@@ -24,28 +24,38 @@
 #pragma once
 
 #include "layers.h"
+#include "sortable.h"
 #include "rqoBasis.h"
-#include "rqoFieldValuePair.h"
 
 #if DORQO
 
 
 
-class Tuple
+class Filter : public Sortable
 {
-public:
-    vector<FieldValuePair> fields;
+  set<string> m_inFields;
 
-    Tuple() {};
-    virtual void addField(string name, string value);
-    virtual void removeField(string name);
-    virtual bool compareTo(Tuple comparator, int key1, int key2);
-    virtual bool equals(Tuple comparator);
-    virtual vector<FieldValuePair> getFields() {return fields;}
-    virtual string getFieldAt(int key);
-    virtual string getValueAt(int key);
-    virtual void printTuple();
+ protected:
+  DataTypeInfo m_dataTypeInfo;
+
+
+ public:
+  Filter();
+  Filter(string sortBy, set<string> &inFields);
+  virtual NodeType GetType() const;
+  static Node* BlankInst() { return  new Filter; }
+  virtual Node* GetNewInst() { return BlankInst(); }
+  virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
+  virtual const DataTypeInfo& DataType(ConnNum num) const;
+  virtual void Prop();
+  virtual void PrintCode(IndStream &out);
+  virtual Cost GetCost() {return Input(0)->Outputs();}
+  virtual ClassType GetNodeClass() const {return GetClass();}
+  static ClassType GetClass() {return "filter";}
+  virtual void ClearDataTypeCache();
+  virtual void BuildDataTypeCache();
+  virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}
+  virtual int Outputs() {return Input(0)->Outputs();}
 };
-
 
 #endif

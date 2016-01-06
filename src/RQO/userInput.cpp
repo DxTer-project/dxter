@@ -381,8 +381,14 @@ RealPSet* ExampleFunc()
   join->AddInput(inA, 0);
   join->AddInput(inB, 0);
 
+  set<string> FilFields;
+  FilFields.insert("cno");
 
-  Poss *poss = new Poss(1, join);
+  Filter *fil = new Filter("ono", FilFields);
+  fil->AddInput(join, 0);
+
+
+  Poss *poss = new Poss(1, fil);
   RealPSet *pset = new RealPSet(poss);
 
   return pset;
