@@ -45,7 +45,7 @@
 #include "rqoRelation.h"
 #include "rqoAttribute.h"
 #include "rqoScan.h"
-#include "rqoFilter.h"
+#include "rqoTrim.h"
 #include <sstream>
 #include <unordered_map>
 
@@ -191,7 +191,6 @@ int best = 0;
 #endif
   LOG_END();
 
-  
   parseCode(best);
 }
 catch(...)
@@ -454,7 +453,7 @@ void parseCode(int bestAlg)
         tuples.insert(pair<string, vector<Tuple>>(
             returnName, tempTup));
       }
-      else if(funcName == "projection" || funcName == "filter")
+      else if(funcName == "projection" || funcName == "trim")
       {
         i = line.find(",") + 1;
         j = i;
@@ -466,10 +465,14 @@ void parseCode(int bestAlg)
 
         j = i + 1;
         vector<string> values;
-        while(line.find(")") != j)
+        while(line.find(")") > j)
         {
           j = line.find(".", i) + 1;
           i = line.find(",", j);
+          if(i == -1)
+          {
+            i = line.find(")", j);
+          }
           string tempVal = line.substr(j, i - j);
           values.push_back(tempVal);
           j = i + 1;
@@ -482,7 +485,7 @@ void parseCode(int bestAlg)
         }
         else
         {
-          tempTup = filter(left, values);
+          tempTup = trim(left, values);
         }
         
 

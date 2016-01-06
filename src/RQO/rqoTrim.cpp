@@ -19,28 +19,28 @@
     along with DxTer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rqoFilter.h"
+#include "rqoTrim.h"
 
 
 #if DORQO
 
-Filter::Filter()
+Trim::Trim()
   : Sortable()
   {
     
   }
 
-Filter::Filter(string sortBy,
+Trim::Trim(string sortBy,
     set<string> &inFields)
   : Sortable(sortBy),
     m_inFields(inFields)
 {
     static int num = 1;
-    m_name = "filter" + std::to_string(num);
+    m_name = "trim" + std::to_string(num);
     ++num;
 }
 
-NodeType Filter::GetType() const
+NodeType Trim::GetType() const
 {
   string ret = m_sortBy;
   set<string>::const_iterator iter = m_inFields.begin();
@@ -50,32 +50,32 @@ NodeType Filter::GetType() const
   return ret;
 }
 
-void Filter::Duplicate(const Node *orig, bool shallow, bool possMerging)
+void Trim::Duplicate(const Node *orig, bool shallow, bool possMerging)
 {
-  const Filter *fil = (Filter*)orig;
-  m_name = fil->m_name;
-  m_sortBy = fil->m_sortBy;
-  m_inFields = fil->m_inFields;
+  const Trim *trim = (Trim*)orig;
+  m_name = trim->m_name;
+  m_sortBy = trim->m_sortBy;
+  m_inFields = trim->m_inFields;
   Node::Duplicate(orig, shallow, possMerging);
 }
 
-const DataTypeInfo& Filter::DataType(ConnNum num) const
+const DataTypeInfo& Trim::DataType(ConnNum num) const
 {
   return m_dataTypeInfo;
 }
 
-void Filter::ClearDataTypeCache()
+void Trim::ClearDataTypeCache()
 {
   
 }
 
-void Filter::BuildDataTypeCache()
+void Trim::BuildDataTypeCache()
 {
   m_dataTypeInfo.m_sortedBy = m_sortBy;
   m_dataTypeInfo.m_fields = m_inFields;
 }
 
-void Filter::Prop()
+void Trim::Prop()
 {
   if (m_inputs.size() != 1)
     throw;
@@ -95,11 +95,11 @@ void Filter::Prop()
 
 }
 
-void Filter::PrintCode(IndStream &out)
+void Trim::PrintCode(IndStream &out)
 {
   out.Indent();
   string in = GetInputNameStr(0);
-  *out << m_name << " = filter(" << m_sortBy << "," << in;
+  *out << m_name << " = trim(" << m_sortBy << "," << in;
   set<string>::iterator iter = m_inFields.begin();
   for(; iter != m_inFields.end(); ++iter) {
     *out << "," << in << "." << *iter;

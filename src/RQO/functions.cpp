@@ -453,10 +453,9 @@ vector<Tuple> projection(vector<Tuple> list, vector<string> values)
     return output;
 }
 
-vector<Tuple> filter(vector<Tuple> list, vector<string> values)
+vector<Tuple> trim(vector<Tuple> list, vector<string> values)
 {
     vector<Tuple> output;
-    cout << "in filter" << endl;
     for(auto tuple : list)
     {
         for(auto string : values)

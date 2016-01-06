@@ -31,7 +31,7 @@
 
 
 
-class Filter : public Sortable
+class Trim : public Sortable
 {
   set<string> m_inFields;
 
@@ -40,10 +40,10 @@ class Filter : public Sortable
 
 
  public:
-  Filter();
-  Filter(string sortBy, set<string> &inFields);
+  Trim();
+  Trim(string sortBy, set<string> &inFields);
   virtual NodeType GetType() const;
-  static Node* BlankInst() { return  new Filter; }
+  static Node* BlankInst() { return  new Trim; }
   virtual Node* GetNewInst() { return BlankInst(); }
   virtual void Duplicate(const Node *orig, bool shallow, bool possMerging);
   virtual const DataTypeInfo& DataType(ConnNum num) const;
@@ -51,7 +51,7 @@ class Filter : public Sortable
   virtual void PrintCode(IndStream &out);
   virtual Cost GetCost() {return Input(0)->Outputs();}
   virtual ClassType GetNodeClass() const {return GetClass();}
-  static ClassType GetClass() {return "filter";}
+  static ClassType GetClass() {return "trim";}
   virtual void ClearDataTypeCache();
   virtual void BuildDataTypeCache();
   virtual bool Overwrites(const Node *input, ConnNum num) const {return false;}

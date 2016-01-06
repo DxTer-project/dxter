@@ -384,11 +384,11 @@ RealPSet* ExampleFunc()
   set<string> FilFields;
   FilFields.insert("cno");
 
-  Filter *fil = new Filter("ono", FilFields);
-  fil->AddInput(join, 0);
+  Trim *trim = new Trim("ono", FilFields);
+  trim->AddInput(join, 0);
 
 
-  Poss *poss = new Poss(1, fil);
+  Poss *poss = new Poss(1, trim);
   RealPSet *pset = new RealPSet(poss);
 
   return pset;
