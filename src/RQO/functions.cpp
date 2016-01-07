@@ -25,7 +25,7 @@
 
 #if DORQO
 
-vector<Tuple> scanFunc(Relation table, FieldValue query)
+vector<Tuple> scanFunc(Relation table, FieldValue query, vector<string> values)
 {
 	vector<Tuple> output;
     
@@ -46,12 +46,29 @@ vector<Tuple> scanFunc(Relation table, FieldValue query)
 		}
 	}
 
-	//output = sortFunc(output, sort);
+    //set up newvalues
+    vector<string> newValues;
+    for(auto fvPair : output.at(0).getFields())
+    {
+        newValues.push_back(fvPair.getField());
+    }
+    vector<string>::iterator it = newValues.begin();
+	for(auto string : values)
+    {
+        it = find(newValues.begin(), newValues.end(), string);
+        if(it != newValues.end())
+        {
+            newValues.erase(it);
+        }
+        
+    }
+
+    output = trim(output, newValues);
 
 	return output;
 }
 
-vector<Tuple> indexFunc(Relation table, OrNode query, int index)
+vector<Tuple> indexFunc(Relation table, OrNode query, int index, vector<string> values)
 {
     vector<Tuple> output;
 
@@ -63,10 +80,29 @@ vector<Tuple> indexFunc(Relation table, OrNode query, int index)
         }
     }
 
+    //set up newvalues
+    vector<string> newValues;
+    for(auto fvPair : output.at(0).getFields())
+    {
+        newValues.push_back(fvPair.getField());
+    }
+    vector<string>::iterator it = newValues.begin();
+    for(auto string : values)
+    {
+        it = find(newValues.begin(), newValues.end(), string);
+        if(it != newValues.end())
+        {
+            newValues.erase(it);
+        }
+        
+    }
+
+    output = trim(output, newValues);
+
     return output;
 }
 
-vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces)
+vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces, vector<string> values)
 {
     vector<Tuple> output;
 
@@ -93,22 +129,60 @@ vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces)
         }
     }
 
+    //set up newvalues
+    vector<string> newValues;
+    for(auto fvPair : output.at(0).getFields())
+    {
+        newValues.push_back(fvPair.getField());
+    }
+    vector<string>::iterator it = newValues.begin();
+    for(auto string : values)
+    {
+        it = find(newValues.begin(), newValues.end(), string);
+        if(it != newValues.end())
+        {
+            newValues.erase(it);
+        }
+        
+    }
+
+    output = trim(output, newValues);
+
     return output;
 }
 
-vector<Tuple> orderedindexFunc(Relation table, OrNode query, int index)
+vector<Tuple> orderedindexFunc(Relation table, OrNode query, int index, vector<string> values)
 {
     vector<Tuple> output;
-    vector<Tuple> values = table.getTuples();
-    values = sortFunc(values, index);
+    vector<Tuple> tablevalues = table.getTuples();
+    tablevalues = sortFunc(tablevalues, index);
 
-    for(auto tuple : values)
+    for(auto tuple : tablevalues)
     {
         if(query.evaluate(tuple, index))
         {
             output.push_back(tuple);
         }
     }
+
+    //set up newvalues
+    vector<string> newValues;
+    for(auto fvPair : output.at(0).getFields())
+    {
+        newValues.push_back(fvPair.getField());
+    }
+    vector<string>::iterator it = newValues.begin();
+    for(auto string : values)
+    {
+        it = find(newValues.begin(), newValues.end(), string);
+        if(it != newValues.end())
+        {
+            newValues.erase(it);
+        }
+        
+    }
+
+    output = trim(output, newValues);
 
     return output;
 }

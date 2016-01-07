@@ -30,8 +30,6 @@
 
 #if DORQO
 
-//A scan node is the beginning of the graph, and most times will transform into
-//an optimization
 class Scan : public InputNode
 {
 

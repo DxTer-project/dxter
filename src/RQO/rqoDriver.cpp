@@ -273,12 +273,28 @@ void parseCode(int bestAlg)
         i = line.find(",", j);
         string sortBy = line.substr(j, i - j);
         j = i + 1;
-        i = line.find(")");
+        i = line.find(",", j);
         string query = line.substr(j, i - j);
+
+        j = i + 1;
+        vector<string> values;
+        while(line.find(")") > j)
+        {
+          i = line.find(",", j);
+          if(i == -1)
+          {
+            i = line.find(")", j);
+          }
+          string tempVal = line.substr(j, i - j);
+          values.push_back(tempVal);
+          j = i + 1;
+        }
+
+
         Relation *tempRel = getRelation(relationName);
         FieldValue tempOr = createQuery(query);
         int sortOn = getKey(tempRel->getTuples(), sortBy);
-        vector<Tuple> tempTup = scanFunc((*tempRel), tempOr);
+        vector<Tuple> tempTup = scanFunc((*tempRel), tempOr, values);
         //save output
         tuples.insert(pair<string, vector<Tuple>>(
             returnName, tempTup));
@@ -291,20 +307,35 @@ void parseCode(int bestAlg)
         i = line.find(",", j);
         string query = line.substr(j, i - j);
         j = i + 1;
-        i = line.find(")", j);
+        i = line.find(",", j);
         string ind = line.substr(j, i - j);
         int index = atoi(ind.c_str());
+
+        j = i + 1;
+        vector<string> values;
+        while(line.find(")") > j)
+        {
+          i = line.find(",", j);
+          if(i == -1)
+          {
+            i = line.find(")", j);
+          }
+          string tempVal = line.substr(j, i - j);
+          values.push_back(tempVal);
+          j = i + 1;
+        }
+
         Relation *tempRel = getRelation(relationName);
         FieldValue tempOr = createQuery(query);
         int key = index;
         vector<Tuple> tempTup;
         if(funcName == "indexFunc")
         {
-          tempTup = indexFunc((*tempRel), tempOr, key);
+          tempTup = indexFunc((*tempRel), tempOr, key, values);
         }
         else
         {
-          tempTup = orderedindexFunc((*tempRel), tempOr, key);
+          tempTup = orderedindexFunc((*tempRel), tempOr, key, values);
         }
         //save output
         tuples.insert(pair<string, vector<Tuple>>(
@@ -325,7 +356,7 @@ void parseCode(int bestAlg)
         while(line.find("]") != j)
         {
           i = line.find(",", j);
-          if(i == string::npos)
+          if(i > line.find("]"))
           {
             i = line.find("]");
           }
@@ -335,9 +366,21 @@ void parseCode(int bestAlg)
           j = i + 1;
         }
         
+        vector<string> values;
+        while(line.find(")") > j)
+        {
+          i = line.find(",", j);
+          if(i == -1)
+          {
+            i = line.find(")", j);
+          }
+          string tempVal = line.substr(j, i - j);
+          values.push_back(tempVal);
+          j = i + 1;
+        }
         
         vector<Tuple> tempTup;
-        tempTup = nindexFunc((*tempRel), tempOr, indeces);
+        tempTup = nindexFunc((*tempRel), tempOr, indeces, values);
 
 
         tuples.insert(pair<string, vector<Tuple>>(

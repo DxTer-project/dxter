@@ -71,7 +71,13 @@ void OrderedIndexedNode::Prop()
 void OrderedIndexedNode::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << m_varName << " = orderedindexFunc( " << m_fileName << ", " << m_query << ", " << m_index << ");\n";
+  *out << m_varName << " = orderedindexFunc( " << m_fileName << ", " << m_query << ", " << m_index;
+  for(auto string : m_dataTypeInfo.m_fields)
+  {
+    *out << "," << string;
+  }
+
+  *out << ");\n";
 }
 
 Name OrderedIndexedNode::GetName(ConnNum num) const

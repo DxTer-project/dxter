@@ -80,7 +80,13 @@ void NIndexedNode::PrintCode(IndStream &out)
   }
 
 
-  *out << "]);\n";
+  *out << "],";
+  for(auto string : m_dataTypeInfo.m_fields)
+  {
+    *out << "," << string;
+  }
+
+  *out << ");\n";
 }
 
 Name NIndexedNode::GetName(ConnNum num) const

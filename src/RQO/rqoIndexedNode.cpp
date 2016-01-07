@@ -71,7 +71,13 @@ void IndexedNode::Prop()
 void IndexedNode::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << m_varName << " = indexFunc(" << m_fileName << "," << m_query << "," << m_index << ");\n";
+  *out << m_varName << " = indexFunc(" << m_fileName << "," << m_query << "," << m_index;
+  for(auto string : m_dataTypeInfo.m_fields)
+  {
+    *out << "," << string;
+  }
+
+  *out << ");\n";
 }
 
 Name IndexedNode::GetName(ConnNum num) const

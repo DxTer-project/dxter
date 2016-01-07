@@ -70,7 +70,14 @@ void Scan::Prop()
 void Scan::PrintCode(IndStream &out)
 {
   out.Indent();
-  *out << m_varName << " = scanFunc(" << m_fileName << "," << m_sortBy << "," << m_query << ");\n";
+  *out << m_varName << " = scanFunc(" << m_fileName << "," << m_sortBy << "," << m_query;
+    for(auto string : m_dataTypeInfo.m_fields)
+    {
+      *out << "," << string;
+    }
+
+
+  *out << ");\n";
 }
 
 Name Scan::GetName(ConnNum num) const

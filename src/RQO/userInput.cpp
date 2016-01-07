@@ -354,8 +354,7 @@ RealPSet* ExampleFunc()
   AFields.insert("ono");
   AFields.insert("cno");
   AFields.insert("eno");
-  AFields.insert("received");
-  AFields.insert("shipped");
+
 
   set<string> BFields;
   BFields.insert("ono");
@@ -381,14 +380,8 @@ RealPSet* ExampleFunc()
   join->AddInput(inA, 0);
   join->AddInput(inB, 0);
 
-  set<string> FilFields;
-  FilFields.insert("cno");
 
-  Trim *trim = new Trim("ono", FilFields);
-  trim->AddInput(join, 0);
-
-
-  Poss *poss = new Poss(1, trim);
+  Poss *poss = new Poss(1, join);
   RealPSet *pset = new RealPSet(poss);
 
   return pset;
