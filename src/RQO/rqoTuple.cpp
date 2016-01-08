@@ -26,8 +26,8 @@
 
 void Tuple::addField(string name, string value)
 {
-	FieldValuePair temp(name, value);
-	fields.push_back(temp);
+	FieldValuePair *temp =  new FieldValuePair(name, value);
+	fields.push_back((*temp));
 }
 
 void Tuple::removeField(string name)

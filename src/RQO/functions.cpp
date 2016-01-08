@@ -25,23 +25,17 @@
 
 #if DORQO
 
-vector<Tuple> scanFunc(Relation table, FieldValue query, vector<string> values)
+vector<Tuple> scanFunc(Relation table, OrNode query, vector<string> values)
 {
 	vector<Tuple> output;
-    
+    cout << "in scan" << endl;
 
 	for(auto tuple : table.getTuples())
 	{
-        int index;
-        for(int i = 0; i < tuple.getFields().size(); i++)
-        {
-            if(tuple.getFields().at(i).getField() == query.m_field)
-            {
-                index = i;
-            }
-        }
-		if(query.evaluate(tuple, index))
+        cout << "gonna evaluate" << endl;
+		if(query.evaluate(tuple, -1))
 		{
+            cout << "evaluate success?" << endl;
 			output.push_back(tuple);
 		}
 	}

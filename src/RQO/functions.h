@@ -35,7 +35,7 @@ using namespace queryNodes;
 
 #if DORQO
 
-vector<Tuple> scanFunc(Relation table, FieldValue query, vector<string> values);
+vector<Tuple> scanFunc(Relation table, OrNode query, vector<string> values);
 vector<Tuple> indexFunc(Relation table, OrNode query, int index, vector<string> values);
 vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces, vector<string> values);
 vector<Tuple> orderedindexFunc(Relation table, OrNode query, int index, vector<string> values);

@@ -36,8 +36,10 @@ OrNode::OrNode()
 
 bool OrNode::evaluate(Tuple tuple, int index)
 {
+    cout << "or node evaluate" << endl;
     bool ret = false;
     vector<AndNode>::iterator iter = children.begin();
+    cout << children.size() << endl;
     for(; iter != children.end(); iter++)
     {
 
@@ -86,6 +88,7 @@ void AndNode::deleteClause(ClauseNode* child)
 
 bool AndNode::evaluate(Tuple tuple, int index)
 {
+    cout << "and node evaluate" << endl;
     bool ret = false;
     vector<ClauseNode>::iterator iter = children.begin();
     for(; iter != children.end(); iter++)
@@ -135,6 +138,18 @@ bool FieldValue::evaluate(Tuple tuple, int index)
 {
     bool ret = true;
     vector<FieldValuePair> fields = tuple.getFields();
+
+    if(index == -1)
+    {
+        for(int i = 0; i < fields.size(); i++)
+        {
+            if(m_field == fields.at(i).getField())
+            {
+                index = i;
+                break;
+            }
+        }
+    }
 
     vector<FieldValuePair>::iterator iter = fields.begin();
     if(index != NULL)

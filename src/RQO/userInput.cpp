@@ -74,7 +74,7 @@ RealPSet* UserFunction()
 void BuildExampleTables()
 {
 	//For zipcodes
-  Relation *zipcodes = new Relation("zipcodes");
+ /* Relation *zipcodes = new Relation("zipcodes");
   zipcodes->addAttribute("zip", "number", true);
   zipcodes->addAttribute("city", "string", false);
 
@@ -133,7 +133,7 @@ void BuildExampleTables()
   emp3.addField("hdate", "01-SEP-94");
   employees->addTuple(emp3);
 
-  userRelations.push_back(employees);
+  userRelations.push_back(employees);*/
 
   //For Parts
   Relation *parts = new Relation("parts");
@@ -209,7 +209,7 @@ void BuildExampleTables()
 
   userRelations.push_back(parts);
 
-  //for Customers
+  /*//for Customers
   Relation *customers = new Relation("cumstomers");
   customers->addAttribute("cno", "number", true);
   customers->addAttribute("cname", "string", false);
@@ -241,7 +241,7 @@ void BuildExampleTables()
   cust3.addField("phone", "316-111-1234");
   customers->addTuple(cust3);
 
-  userRelations.push_back(customers);
+  userRelations.push_back(customers);*/
 
   //for orders
   Relation *orders = new Relation("orders");
