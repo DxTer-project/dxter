@@ -36,13 +36,10 @@ OrNode::OrNode()
 
 bool OrNode::evaluate(Tuple tuple, int index)
 {
-    cout << "or node evaluate" << endl;
     bool ret = false;
     vector<AndNode>::iterator iter = children.begin();
-    cout << children.size() << endl;
     for(; iter != children.end(); iter++)
     {
-
         ret = ret || (*iter).evaluate(tuple, index);
     }
     return ret;
@@ -71,9 +68,9 @@ AndNode::AndNode()
     ++num;
 }
 
-void AndNode::deleteClause(ClauseNode* child)
+void AndNode::deleteClause(FieldValue* child)
 {
-    vector<ClauseNode>::iterator iter = children.begin();
+    vector<FieldValue>::iterator iter = children.begin();
     int index = 0;
     for(; iter != children.end(); iter++)
     {
@@ -88,12 +85,11 @@ void AndNode::deleteClause(ClauseNode* child)
 
 bool AndNode::evaluate(Tuple tuple, int index)
 {
-    cout << "and node evaluate" << endl;
-    bool ret = false;
-    vector<ClauseNode>::iterator iter = children.begin();
+    bool ret = true;
+    vector<FieldValue>::iterator iter = children.begin();
     for(; iter != children.end(); iter++)
     {
-        ret = ret || (*iter).evaluate(tuple, index);
+        ret = ret && (*iter).evaluate(tuple, index);
     }
     return ret;
 }
@@ -107,7 +103,7 @@ ClauseNode::ClauseNode(string relation)
 }
 
 FieldValue::FieldValue(string relation, string value, string field)
-    : ClauseNode(relation),
+    : m_relation(relation),
     m_value(value),
     m_field(field)
 {
@@ -150,12 +146,12 @@ bool FieldValue::evaluate(Tuple tuple, int index)
             }
         }
     }
+    
 
     vector<FieldValuePair>::iterator iter = fields.begin();
-    if(index != NULL)
+    if(index != -1)
     {
         string temp = fields.at(index).getValue();
-        cout << temp << endl;
         if(m_relation == "=")
         {
             ret = (temp == m_value) ? true : false;

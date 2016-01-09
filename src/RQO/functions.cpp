@@ -25,17 +25,14 @@
 
 #if DORQO
 
-vector<Tuple> scanFunc(Relation table, OrNode query, vector<string> values)
+vector<Tuple> scanFunc(Relation table, OrNode *query, vector<string> values)
 {
 	vector<Tuple> output;
-    cout << "in scan" << endl;
 
 	for(auto tuple : table.getTuples())
 	{
-        cout << "gonna evaluate" << endl;
-		if(query.evaluate(tuple, -1))
+		if(query->evaluate(tuple, -1))
 		{
-            cout << "evaluate success?" << endl;
 			output.push_back(tuple);
 		}
 	}
@@ -62,13 +59,13 @@ vector<Tuple> scanFunc(Relation table, OrNode query, vector<string> values)
 	return output;
 }
 
-vector<Tuple> indexFunc(Relation table, OrNode query, int index, vector<string> values)
+vector<Tuple> indexFunc(Relation table, OrNode *query, int index, vector<string> values)
 {
     vector<Tuple> output;
 
     for(auto tuple : table.getTuples())
     {
-        if(query.evaluate(tuple, index))
+        if(query->evaluate(tuple, index))
         {
             output.push_back(tuple);
         }
@@ -96,7 +93,7 @@ vector<Tuple> indexFunc(Relation table, OrNode query, int index, vector<string> 
     return output;
 }
 
-vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces, vector<string> values)
+vector<Tuple> nindexFunc(Relation table, OrNode *query, set<int> indeces, vector<string> values)
 {
     vector<Tuple> output;
 
@@ -104,7 +101,7 @@ vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces, vector<
 
     for(auto tuple : table.getTuples())
     {
-        if(query.evaluate(tuple, (*iter)))
+        if(query->evaluate(tuple, (*iter)))
         {
             output.push_back(tuple);
         }
@@ -116,7 +113,7 @@ vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces, vector<
         int i;
         for(i = 0; i < output.size(); i++)
         {
-            if(!query.evaluate(output.at(i), (*iter)))
+            if(!query->evaluate(output.at(i), (*iter)))
             {
                 output.erase(output.begin() + i);
             }
@@ -145,7 +142,7 @@ vector<Tuple> nindexFunc(Relation table, OrNode query, set<int> indeces, vector<
     return output;
 }
 
-vector<Tuple> orderedindexFunc(Relation table, OrNode query, int index, vector<string> values)
+vector<Tuple> orderedindexFunc(Relation table, OrNode *query, int index, vector<string> values)
 {
     vector<Tuple> output;
     vector<Tuple> tablevalues = table.getTuples();
@@ -153,7 +150,7 @@ vector<Tuple> orderedindexFunc(Relation table, OrNode query, int index, vector<s
 
     for(auto tuple : tablevalues)
     {
-        if(query.evaluate(tuple, index))
+        if(query->evaluate(tuple, index))
         {
             output.push_back(tuple);
         }

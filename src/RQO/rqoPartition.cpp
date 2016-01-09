@@ -28,7 +28,7 @@
 
 using namespace queryNodes;
 
-Partition::Partition(AndNode *query, ClauseNode *clause)
+Partition::Partition(AndNode *query, FieldValue *clause)
     : m_residual(query),
     m_clause(clause)
 {

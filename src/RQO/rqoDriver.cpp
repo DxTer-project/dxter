@@ -63,7 +63,7 @@ int getRelationSpot(string name);
 Relation* getRelation(string name);
 OrNode* createQuery(string query);
 AndNode* findAnd(string chunk);
-ClauseNode* findClause(string query);
+FieldValue* findClause(string query);
 int getKey(vector<Tuple> list, string fieldName);
 
 typedef std::chrono::time_point<std::chrono::system_clock> AccurateTime;
@@ -291,7 +291,7 @@ void parseCode(int bestAlg)
         Relation *tempRel = getRelation(relationName);
         OrNode *tempOr = createQuery(query);
         int sortOn = getKey(tempRel->getTuples(), sortBy);
-        vector<Tuple> tempTup = scanFunc((*tempRel), (*tempOr), values);
+        vector<Tuple> tempTup = scanFunc((*tempRel), tempOr, values);
         //save output
         tuples.insert(pair<string, vector<Tuple>>(
             returnName, tempTup));
@@ -328,11 +328,11 @@ void parseCode(int bestAlg)
         vector<Tuple> tempTup;
         if(funcName == "indexFunc")
         {
-          tempTup = indexFunc((*tempRel), (*tempOr), key, values);
+          tempTup = indexFunc((*tempRel), tempOr, key, values);
         }
         else
         {
-          tempTup = orderedindexFunc((*tempRel), (*tempOr), key, values);
+          tempTup = orderedindexFunc((*tempRel), tempOr, key, values);
         }
         //save output
         tuples.insert(pair<string, vector<Tuple>>(
@@ -377,7 +377,7 @@ void parseCode(int bestAlg)
         }
         
         vector<Tuple> tempTup;
-        tempTup = nindexFunc((*tempRel), (*tempOr), indeces, values);
+        tempTup = nindexFunc((*tempRel), tempOr, indeces, values);
 
 
         tuples.insert(pair<string, vector<Tuple>>(
@@ -596,47 +596,45 @@ Relation* getRelation(string name)
 
 OrNode* createQuery(string query)
 {
-  cout << query << endl;
-  OrNode *ret;
-  if(query.find("OR") != -1)
+  OrNode *ret = new OrNode();
+  int i = 0;
+  int j = 0;
+  i = query.find("OR");
+  while(i != -1)
   {
-    int k = query.find("OR");
-    string left = query.substr(0, k);
-    k += 3;
-    string right = query.substr(k);
-    ret->addAnd(findAnd(left));
-    ret->addAnd(findAnd(right));
+    string str = query.substr(j, i - j);
+    ret->addAnd(findAnd(str));
+    i += 3;
+    j = i;
+    i = query.find("OR", j);
   }
-  else
-  {
-    ret->addAnd(findAnd(query));
-  }
+  string end = query.substr(j);
+  ret->addAnd(findAnd(end));
   return ret;
 }
 
-AndNode* findAnd(string chunk)
+AndNode* findAnd(string query)
 {
-  cout << chunk << endl;
-  AndNode *ret;
-  if(chunk.find("AND") != -1)
+  AndNode *ret = new AndNode();
+  int i = 0;
+  int j = 0;
+  i = query.find("AND");
+
+  while(i != -1)
   {
-    int k = chunk.find("AND");
-    string left = chunk.substr(0, k);
-    k += 4;
-    string right = chunk.substr(k);
-    ret->addClause(findClause(left));
-    ret->addClause(findClause(right));
+    string str = query.substr(j, i - j);
+    ret->addClause(findClause(str));
+    i += 4;
+    j = i;
+    i = query.find("AND", j);
   }
-  else
-  {
-    ret->addClause(findClause(chunk));
-  }
+  string end = query.substr(j);
+  ret->addClause(findClause(end));
   return ret;
 }
 
-ClauseNode* findClause(string query)
+FieldValue* findClause(string query)
 {
-  cout << "enter findclause" << endl;
   string relation;
   int i = 0;
   int j = 0;

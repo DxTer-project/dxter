@@ -36,7 +36,7 @@ namespace queryNodes
 {
     class AndNode;
     class ClauseNode;
-
+    class FieldValue;
 
     class OrNode
     {
@@ -58,14 +58,14 @@ namespace queryNodes
     class AndNode : public OrNode
     {
         string m_id;
-        vector<queryNodes::ClauseNode> children;
+        vector<queryNodes::FieldValue> children;
 
       public:
         AndNode();
         //Adds a clause node to children.
-        virtual void addClause(ClauseNode* child) {children.push_back(*child);}
+        virtual void addClause(FieldValue* child) {children.push_back(*child);}
         //Deletes a specified node from children.
-        virtual void deleteClause(ClauseNode* child);
+        virtual void deleteClause(FieldValue* child);
         virtual bool evaluate(Tuple tuple, int index);
     };
 
@@ -79,9 +79,11 @@ namespace queryNodes
         ClauseNode(string relation);
     };
 
-    class FieldValue : public ClauseNode
+    class FieldValue : public AndNode
     {
     public:
+        string m_id;
+        string m_relation;
         string m_field;
         string m_value;
 

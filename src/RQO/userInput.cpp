@@ -364,7 +364,7 @@ RealPSet* ExampleFunc()
   Relation *orders = getRelationByName("orders");
   Relation *odetails = getRelationByName("odetails");
 
-  InputNode *inA = new InputNode("orders", "ono", AFields, orders->getName(), "ono > 1000");
+  InputNode *inA = new InputNode("orders", "ono", AFields, orders->getName(), "ono > 1000 AND ono < 1023");
   InputNode *inB = new InputNode("odetails", "ono", BFields, odetails->getName(), "ono > 1000");
   inA->SetRelation(orders);
   inB->SetRelation(odetails);

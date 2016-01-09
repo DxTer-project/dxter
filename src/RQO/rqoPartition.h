@@ -34,10 +34,10 @@ using namespace queryNodes;
 class Partition
 {
 public:
-    ClauseNode *m_clause;
+    FieldValue *m_clause;
     AndNode *m_residual;
 
-    Partition(AndNode *query, ClauseNode *clause);
+    Partition(AndNode *query, FieldValue *clause);
     virtual AndNode* conjoin();
 };
 
