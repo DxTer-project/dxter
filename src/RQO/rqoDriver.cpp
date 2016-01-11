@@ -52,7 +52,7 @@
 
 #if DORQO
 
-vector<Relation*> userRelations;
+vector<Relation*> userRDB;
 
 unordered_map<string, vector<Tuple>> tuples;
 
@@ -76,11 +76,10 @@ double difftime(AccurateTime &end, AccurateTime &start)
 
 void AddTrans()
 {
-  //  Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, RQOPHASE);
- // Universe::AddTrans(Join::GetClass(), new SwapNodes(0,Join::GetClass()), RQOPHASE);
- // Universe::AddTrans(HJoin::GetClass(), new SwapNodes(0,HJoin::GetClass()), RQOPHASE);
-  //Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
-  //Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new SwapNodes(0,Join::GetClass()), RQOPHASE);
+  Universe::AddTrans(HJoin::GetClass(), new SwapNodes(0,HJoin::GetClass()), RQOPHASE);
+  Universe::AddTrans(Join::GetClass(), new SwapNodes(1,Join::GetClass()), RQOPHASE);
+  Universe::AddTrans(HJoin::GetClass(), new SwapNodes(1,HJoin::GetClass()), RQOPHASE);
   Universe::AddTrans(Join::GetClass(), new JoinToHash, RQOPHASE);
   Universe::AddTrans(Join::GetClass(), new JoinToNested, RQOPHASE);
   Universe::AddTrans(Join::GetClass(), new JoinToMerge, RQOPHASE);
@@ -92,8 +91,8 @@ void AddTrans()
 
 void AddSimplifiers()
 { 
-  //Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, SIMP);
-  
+  Universe::AddTrans(Projection::GetClass(), new RemoveExtraProjection, SIMP);
+  Universe::AddTrans(Sort::GetClass(), new RemoveExtraSort, SIMP);
 }
 
 void Usage()
@@ -576,9 +575,9 @@ int getRelationSpot(string name)
 {
   int spot;
 
-  for(int i = 0; i < userRelations.size(); i++)
+  for(int i = 0; i < userRDB.size(); i++)
   {
-    if(name == userRelations.at(i)->getName())
+    if(name == userRDB.at(i)->getName())
     {
       spot = i;
       break;
@@ -591,7 +590,7 @@ int getRelationSpot(string name)
 Relation* getRelation(string name)
 {
 
-  return userRelations.at(getRelationSpot(name));
+  return userRDB.at(getRelationSpot(name));
 }
 
 OrNode* createQuery(string query)

@@ -41,11 +41,8 @@
 #if DORQO
 
 
-	/*Instantiate Your Relation Tables Here*/
-
-
 	/*Example Relation Tables*/
-	extern vector<Relation*> userRelations;
+	extern vector<Relation*> userRDB;
 
 	/*Example Functions*/
 	void BuildUserTables();

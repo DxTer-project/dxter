@@ -24,49 +24,16 @@
 
 #if DORQO
 
+//Build user relations in this function
 void BuildUserTables()
 {
 	
 }
 
+//Write User Code in this function
 RealPSet* UserFunction()
 {
-	set<string> AFields;
-  AFields.insert("ono");
-  AFields.insert("cno");
-  AFields.insert("eno");
-  AFields.insert("received");
-  AFields.insert("shipped");
 
-  set<string> BFields;
-  BFields.insert("ono");
-  BFields.insert("pno");
-  BFields.insert("qty");
-
-  Relation *orders = getRelationByName("orders");
-  Relation *odetails = getRelationByName("odetails");
-
-  InputNode *inA = new InputNode("orders", "ono", AFields, orders->getName(), "ono > 1000");
-  InputNode *inB = new InputNode("odetails", "ono", BFields, odetails->getName(), "ono > 1000");
-  inA->SetRelation(orders);
-  inB->SetRelation(odetails);
-
-  vector<string> joinFields0;
-  joinFields0.push_back("ono");
-
-  vector<string> joinFields1;
-  joinFields1.push_back("ono");
-
-  Join *join = new Join("ono", joinFields0, joinFields1);
-
-  join->AddInput(inA, 0);
-  join->AddInput(inB, 0);
-
-
-  Poss *poss = new Poss(1, join);
-  RealPSet *pset = new RealPSet(poss);
-
-  return pset;
 }
 
 
@@ -74,7 +41,7 @@ RealPSet* UserFunction()
 void BuildExampleTables()
 {
 	//For zipcodes
- /* Relation *zipcodes = new Relation("zipcodes");
+  Relation *zipcodes = new Relation("zipcodes");
   zipcodes->addAttribute("zip", "number", true);
   zipcodes->addAttribute("city", "string", false);
 
@@ -103,37 +70,7 @@ void BuildExampleTables()
   zip6.addField("city", "Fort Hays");
   zipcodes->addTuple(zip6);
 
-  userRelations.push_back(zipcodes);
-
-  //For employees
-  Relation *employees = new Relation("employees");
-  employees->addAttribute("eno", "number", true);
-  employees->addAttribute("ename", "string", false);
-  employees->addAttribute("zip", "number", true);
-  employees->addAttribute("hdate", "string", false);
-
-  Tuple emp1;
-  emp1.addField("eno", "1000");
-  emp1.addField("ename", "Jones");
-  emp1.addField("zip", "67226");
-  emp1.addField("hdate", "12-DEC-95");
-  employees->addTuple(emp1);
-
-  Tuple emp2;
-  emp2.addField("eno", "1002");
-  emp2.addField("ename", "Smith");
-  emp2.addField("zip", "60606");
-  emp2.addField("hdate", "01-JAN-92");
-  employees->addTuple(emp2);
-
-  Tuple emp3;
-  emp3.addField("eno", "1002");
-  emp3.addField("ename", "Brown");
-  emp3.addField("zip", "50302");
-  emp3.addField("hdate", "01-SEP-94");
-  employees->addTuple(emp3);
-
-  userRelations.push_back(employees);*/
+  userRDB.push_back(zipcodes);
 
   //For Parts
   Relation *parts = new Relation("parts");
@@ -207,41 +144,7 @@ void BuildExampleTables()
   part8.addField("olevel", "30");
   parts->addTuple(part8);
 
-  userRelations.push_back(parts);
-
-  /*//for Customers
-  Relation *customers = new Relation("cumstomers");
-  customers->addAttribute("cno", "number", true);
-  customers->addAttribute("cname", "string", false);
-  customers->addAttribute("street", "string", false);
-  customers->addAttribute("zip", "number", true);
-  customers->addAttribute("phone", "string", false);
-
-  Tuple cust1;
-  cust1.addField("cno", "1111");
-  cust1.addField("cname", "Charles");
-  cust1.addField("street", "123 Main St.");
-  cust1.addField("zip", "67226");
-  cust1.addField("phone", "316-636-5555");
-  customers->addTuple(cust1);
-
-  Tuple cust2;
-  cust2.addField("cno", "2222");
-  cust2.addField("cname", "Bertram");
-  cust2.addField("street", "237 Ash Avenue");
-  cust2.addField("zip", "67226");
-  cust2.addField("phone", "316-689-5555");
-  customers->addTuple(cust2);
-
-  Tuple cust3;
-  cust3.addField("cno", "3333");
-  cust3.addField("cname", "Barbara");
-  cust3.addField("street", "111 Inwood St.");
-  cust3.addField("zip", "60606");
-  cust3.addField("phone", "316-111-1234");
-  customers->addTuple(cust3);
-
-  userRelations.push_back(customers);*/
+  userRDB.push_back(parts);
 
   //for orders
   Relation *orders = new Relation("orders");
@@ -283,7 +186,7 @@ void BuildExampleTables()
   order4.addField("received date", "");
   orders->addTuple(order4);
 
-  userRelations.push_back(orders);
+  userRDB.push_back(orders);
 
   //for odetails
   Relation *odetails = new Relation("odetails");
@@ -345,7 +248,7 @@ void BuildExampleTables()
   otail9.addField("qty", "1");
   odetails->addTuple(otail9);
 
-  userRelations.push_back(odetails);
+  userRDB.push_back(odetails);
 }
 
 RealPSet* ExampleFunc()
@@ -387,22 +290,22 @@ RealPSet* ExampleFunc()
   return pset;
 }
 
-vector<Relation*> getUserRelations()
+vector<Relation*> getuserRelations()
 {
-	return userRelations;
+	return userRDB;
 }
 
 Relation* getRelationByName(string name)
 {
 
-  for(auto rel : getUserRelations())
+  for(auto rel : getuserRelations())
   {
     if(name == rel->getName())
     {
       return rel;
     }
   }
-  return getUserRelations().at(0);
+  return getuserRelations().at(0);
 }
 
 
