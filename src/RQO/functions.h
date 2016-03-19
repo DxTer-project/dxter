@@ -31,9 +31,11 @@
 #include <iostream>
 #include <algorithm>
 
+#if DORQO
+
 using namespace queryNodes;
 
-#if DORQO
+
 
 vector<Tuple> scanFunc(Relation table, OrNode *query, vector<string> values);
 vector<Tuple> indexFunc(Relation table, OrNode *query, int index, vector<string> values);
